@@ -16,5 +16,8 @@ that, just run `make`. Commands:
 
 ```
 $ source setup.sh
+...
 $ make
+...
+$ bin/packer --version
 ```
