@@ -1,9 +1,0 @@
-{
-    "name": "ubuntu-12.04.2-server-amd64",
-
-    "builders": [
-        "virtualbox": {
-            "os_type": "Ubuntu_64",
-        }
-    ]
-}
