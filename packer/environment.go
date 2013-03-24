@@ -14,6 +14,13 @@ import (
 //
 // The mapping of command names to command interfaces is in the
 // Environment struct.
+//
+// Run should run the actual command with the given environmet and
+// command-line arguments. It should return the exit status when it is
+// finished.
+//
+// Synopsis should return a one-line, short synopsis of the command.
+// This should be less than 50 characters ideally.
 type Command interface {
 	Run(env *Environment, args []string) int
 	Synopsis() string
@@ -43,7 +50,7 @@ func NewEnvironment() *Environment {
 // Executes a command as if it was typed on the command-line interface.
 // The return value is the exit code of the command.
 func (e *Environment) Cli(args []string) int {
-	if len(args) == 0 {
+	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
 		e.PrintHelp()
 		return 1
 	}

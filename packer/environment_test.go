@@ -14,6 +14,16 @@ func TestEnvironment_DefaultCli_Empty(t *testing.T) {
 	assert.Equal(defaultEnv.Cli([]string{}), 1, "CLI with no args")
 }
 
+func TestEnvironment_DefaultCli_Help(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	defaultEnv := NewEnvironment()
+
+	// Test the basic version options
+	assert.Equal(defaultEnv.Cli([]string{"--help"}), 1, "--help should print")
+	assert.Equal(defaultEnv.Cli([]string{"-h"}), 1, "--help should print")
+}
+
 func TestEnvironment_DefaultCli_Version(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
