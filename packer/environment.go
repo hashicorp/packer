@@ -1,7 +1,12 @@
 // The packer package contains the core components of Packer.
 package packer
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+)
 
 // A command is a runnable sub-command of the `packer` application.
 // When `packer` is called with the proper subcommand, this will be
@@ -11,6 +16,7 @@ import "os"
 // Environment struct.
 type Command interface {
 	Run(env *Environment, args []string) int
+	Synopsis() string
 }
 
 // The environment struct contains all the state necessary for a single
@@ -71,5 +77,32 @@ func (e *Environment) Ui() Ui {
 
 // Prints the CLI help to the UI.
 func (e *Environment) PrintHelp() {
-	e.ui.Say("Bad.\n")
+	// Created a sorted slice of the map keys and record the longest
+	// command name so we can better format the output later.
+	commandKeys := make([]string, len(e.command))
+	i := 0
+	maxKeyLen := 0
+	for key, _ := range e.command {
+		commandKeys[i] = key
+		if len(key) > maxKeyLen {
+			maxKeyLen = len(key)
+		}
+
+		i++
+	}
+
+	// Sort the keys
+	sort.Strings(commandKeys)
+
+	e.ui.Say("usage: packer [--version] [--help] <command> [<args>]\n\n")
+	e.ui.Say("Available commands are:\n")
+	for _, key := range commandKeys {
+		command := e.command[key]
+
+		// Pad the key with spaces so that they're all the same width
+		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen - len(key)))
+
+		// Output the command and the synopsis
+		e.ui.Say("    %v     %v\n", key, command.Synopsis())
+	}
 }

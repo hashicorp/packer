@@ -10,3 +10,7 @@ func (versionCommand) Run(env *Environment, args []string) int {
 	env.Ui().Say("Packer v%v\n", Version)
 	return 0
 }
+
+func (versionCommand) Synopsis() string {
+	return "print Packer version"
+}

@@ -43,3 +43,8 @@ func TestEnvironment_DefaultUi(t *testing.T) {
 	assert.Equal(rwUi.Writer, os.Stdout, "default UI should go to stdout")
 	assert.Equal(rwUi.Reader, os.Stdin, "default UI should read from stdin")
 }
+
+func TestEnvironment_PrintHelp(t *testing.T) {
+	// Just call the function and verify that no panics occur
+	NewEnvironment().PrintHelp()
+}
