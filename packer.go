@@ -1,44 +1,40 @@
 // This is the main package for the `packer` application.
 package main
 
-import "github.com/mitchellh/packer/builder/amazon"
+import "github.com/mitchellh/packer/packer"
+import "os"
 
-// A command is a runnable sub-command of the `packer` application.
-// When `packer` is called with the proper subcommand, this will be
-// called.
-//
-// The mapping of command names to command interfaces is in the
-// Environment struct.
-type Command interface {
-	Run(args []string)
-}
-
-// The environment struct contains all the state necessary for a single
-// instance of Packer.
-//
-// It is *not* a singleton, but generally a single environment is created
-// when Packer starts running to represent that Packer run. Technically,
-// if you're building a custom Packer binary, you could instantiate multiple
-// environments and run them in parallel.
-type Environment struct {
-	commands map[string]Command
-}
-
-type Template struct {
+type RawTemplate struct {
 	Name         string
-	Builders     map[string]interface{} `toml:"builder"`
-	Provisioners map[string]interface{} `toml:"provision"`
-	Outputs      map[string]interface{} `toml:"output"`
+	Builders     []map[string]interface{}
+	Provisioners []map[string]interface{}
+	Outputs      []map[string]interface{}
 }
 
 type Builder interface {
+	ConfigInterface() interface{}
 	Prepare()
 	Build()
-	Destroy()
+}
+
+type Build interface {
+	Hook(name string)
 }
 
 func main() {
-	var builder Builder
-	builder = &amazon.Builder{}
-	builder.Build()
+	env := packer.NewEnvironment()
+	os.Exit(env.Cli(os.Args[1:]))
+	/*
+		file, _ := ioutil.ReadFile("example.json")
+
+		var tpl RawTemplate
+		json.Unmarshal(file, &tpl)
+		fmt.Printf("%#v\n", tpl)
+
+		builderType, ok := tpl.Builders[0]["type"].(Build)
+		if !ok {
+			panic("OH NOES")
+		}
+		fmt.Printf("TYPE: %v\n", builderType)
+	*/
 }

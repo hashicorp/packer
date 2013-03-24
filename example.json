@@ -1,0 +1,24 @@
+{
+    "name": "my-custom-image",
+
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "region": "us-east-1",
+            "source": "ami-de0d9eb7"
+        }
+    ],
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "path": "script.sh"
+        }
+    ],
+
+    "outputs": [
+        {
+            "type": "vagrant"
+        }
+    ]
+}

@@ -11,11 +11,12 @@ type Builder struct {
 	config config
 }
 
+func (b *Builder) ConfigInterface() interface{} {
+	return &b.config
+}
+
 func (*Builder) Prepare() {
 }
 
-func (*Builder) Build() {
-}
-
-func (*Builder) Destroy() {
+func (b *Builder) Build() {
 }
