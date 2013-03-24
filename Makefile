@@ -3,4 +3,7 @@ all:
 	go get -d
 	go build -a -o bin/packer
 
-.PHONY: all
+test:
+	go test ./...
+
+.PHONY: all test
