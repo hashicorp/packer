@@ -1,6 +1,6 @@
 all:
 	@mkdir -p bin/
-	go get
-	go build -o bin/packer
+	go get -a
+	go build -a -o bin/packer
 
 .PHONY: all

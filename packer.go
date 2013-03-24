@@ -1,6 +1,8 @@
 // This is the main package for the `packer` application.
 package main
 
+import "github.com/mitchellh/packer/builder/amazon"
+
 // A command is a runnable sub-command of the `packer` application.
 // When `packer` is called with the proper subcommand, this will be
 // called.
@@ -22,10 +24,21 @@ type Environment struct {
 	commands map[string]Command
 }
 
+type Template struct {
+	Name         string
+	Builders     map[string]interface{} `toml:"builder"`
+	Provisioners map[string]interface{} `toml:"provision"`
+	Outputs      map[string]interface{} `toml:"output"`
+}
+
+type Builder interface {
+	Prepare()
+	Build()
+	Destroy()
+}
+
 func main() {
-	env := Environment {
-		commands: map[string]Command {
-			""
-		},
-	}
+	var builder Builder
+	builder = &amazon.Builder{}
+	builder.Build()
 }
