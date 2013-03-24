@@ -2,12 +2,12 @@ package packer
 
 import (
 	"bytes"
-	"testing"
 	"cgl.tideland.biz/asserts"
+	"testing"
 )
 
 // Our test Ui that just writes to bytes.Buffers.
-var bufferUi = &ReaderWriterUi{ new(bytes.Buffer), new(bytes.Buffer) }
+var bufferUi = &ReaderWriterUi{new(bytes.Buffer), new(bytes.Buffer)}
 
 func TestReaderWriterUi_Say(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)

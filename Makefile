@@ -3,6 +3,9 @@ all:
 	go get -d ./...
 	go build -a -o bin/packer
 
+format:
+	go fmt ./...
+
 test:
 	go test ./...
 
