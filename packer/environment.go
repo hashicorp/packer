@@ -76,12 +76,6 @@ func (e *Environment) Cli(args []string) int {
 	return command.Run(e, args)
 }
 
-// Returns the UI for the environment. The UI is the interface that should
-// be used for all communication with the outside world.
-func (e *Environment) Ui() Ui {
-	return e.ui
-}
-
 // Prints the CLI help to the UI.
 func (e *Environment) PrintHelp() {
 	// Created a sorted slice of the map keys and record the longest
@@ -112,4 +106,10 @@ func (e *Environment) PrintHelp() {
 		// Output the command and the synopsis
 		e.ui.Say("    %v     %v\n", key, command.Synopsis())
 	}
+}
+
+// Returns the UI for the environment. The UI is the interface that should
+// be used for all communication with the outside world.
+func (e *Environment) Ui() Ui {
+	return e.ui
 }
