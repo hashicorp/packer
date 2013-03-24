@@ -107,7 +107,7 @@ func (e *Environment) PrintHelp() {
 		command := e.command[key]
 
 		// Pad the key with spaces so that they're all the same width
-		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen - len(key)))
+		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))
 
 		// Output the command and the synopsis
 		e.ui.Say("    %v     %v\n", key, command.Synopsis())
