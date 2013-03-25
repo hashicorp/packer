@@ -1,12 +1,15 @@
 all:
 	@mkdir -p bin/
-	go get -d ./...
-	go build -a -o bin/packer
+	go get -d -v ./...
+	go build -v -o bin/packer
 
 format:
 	go fmt ./...
 
 test:
+	@go list -f '{{range .TestImports}}{{.}}\
+		{{end}}' ./... | xargs -n1 go get -d
+	@go test -i ./...
 	go test ./...
 
-.PHONY: all test
+.PHONY: all format test
