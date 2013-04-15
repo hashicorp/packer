@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func testEnvironment() *Environment {
+	return NewEnvironment()
+}
+
+func TestEnvironment_Cli_CallsRun(t *testing.T) {
+	//_ := asserts.NewTestingAsserts(t, true)
+
+	// TODO: Test that the call to `Run` is done with
+	// proper arguments and such.
+}
+
 func TestEnvironment_DefaultCli_Empty(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

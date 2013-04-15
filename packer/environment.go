@@ -74,7 +74,7 @@ func (e *Environment) Cli(args []string) int {
 		}
 	}
 
-	return command.Run(e, args)
+	return command.Run(e, args[1:])
 }
 
 // Prints the CLI help to the UI.
