@@ -1,6 +1,5 @@
 all:
 	@mkdir -p bin/
-	@rm -r ${GOPATH}/pkg
 	go get -d -v ./...
 	go build -v -o bin/packer
 
