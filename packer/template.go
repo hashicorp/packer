@@ -27,12 +27,16 @@ type rawBuilderConfig struct {
 	rawConfig   interface{}
 }
 
-func parseTemplate(data []byte) error {
+func ParseTemplate(data []byte) (t *Template, err error) {
 	var rawTpl rawTemplate
-	err := json.Unmarshal(data, &rawTpl)
+	err = json.Unmarshal(data, &rawTpl)
 	if err != nil {
-		return err
+		return
 	}
 
-	return nil
+	t = &Template{
+		Name: rawTpl.Name,
+	}
+
+	return
 }
