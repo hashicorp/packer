@@ -42,6 +42,7 @@ type Environment struct {
 func NewEnvironment() *Environment {
 	env := &Environment{}
 	env.command = make(map[string]Command)
+	env.command["build"] = new(buildCommand)
 	env.command["version"] = new(versionCommand)
 	env.ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return env
