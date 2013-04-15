@@ -9,7 +9,6 @@ format:
 test:
 	@go list -f '{{range .TestImports}}{{.}}\
 		{{end}}' ./... | xargs -n1 go get -d
-	@go test -i ./...
-	go test ./...
+	go test ./... 2>/dev/null
 
 .PHONY: all format test
