@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	env := packer.NewEnvironment()
+	env := packer.NewEnvironment(nil)
 	os.Exit(env.Cli(os.Args[1:]))
 }

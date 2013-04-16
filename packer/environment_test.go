@@ -1,13 +1,20 @@
 package packer
 
 import (
+	"bytes"
 	"cgl.tideland.biz/asserts"
 	"os"
 	"testing"
 )
 
 func testEnvironment() *Environment {
-	return NewEnvironment()
+	config := &EnvironmentConfig{}
+	config.ui = &ReaderWriterUi{
+		new(bytes.Buffer),
+		new(bytes.Buffer),
+	}
+
+	return NewEnvironment(config)
 }
 
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
@@ -20,7 +27,7 @@ func TestEnvironment_Cli_CallsRun(t *testing.T) {
 func TestEnvironment_DefaultCli_Empty(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	defaultEnv := NewEnvironment()
+	defaultEnv := testEnvironment()
 
 	assert.Equal(defaultEnv.Cli([]string{}), 1, "CLI with no args")
 }
@@ -28,7 +35,7 @@ func TestEnvironment_DefaultCli_Empty(t *testing.T) {
 func TestEnvironment_DefaultCli_Help(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	defaultEnv := NewEnvironment()
+	defaultEnv := testEnvironment()
 
 	// Test the basic version options
 	assert.Equal(defaultEnv.Cli([]string{"--help"}), 1, "--help should print")
@@ -38,7 +45,7 @@ func TestEnvironment_DefaultCli_Help(t *testing.T) {
 func TestEnvironment_DefaultCli_Version(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	defaultEnv := NewEnvironment()
+	defaultEnv := testEnvironment()
 
 	// Test the basic version options
 	assert.Equal(defaultEnv.Cli([]string{"version"}), 0, "version should work")
@@ -56,7 +63,7 @@ func TestEnvironment_DefaultCli_Version(t *testing.T) {
 func TestEnvironment_DefaultUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	defaultEnv := NewEnvironment()
+	defaultEnv := NewEnvironment(nil)
 	assert.NotNil(defaultEnv.Ui(), "default UI should not be nil")
 
 	rwUi, ok := defaultEnv.Ui().(*ReaderWriterUi)
@@ -67,5 +74,18 @@ func TestEnvironment_DefaultUi(t *testing.T) {
 
 func TestEnvironment_PrintHelp(t *testing.T) {
 	// Just call the function and verify that no panics occur
-	NewEnvironment().PrintHelp()
+	testEnvironment().PrintHelp()
+}
+
+func TestEnvironment_SettingUi(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	ui := &ReaderWriterUi{new(bytes.Buffer), new(bytes.Buffer)}
+
+	config := &EnvironmentConfig{}
+	config.ui = ui
+
+	env := NewEnvironment(config)
+
+	assert.Equal(env.Ui(), ui, "UIs should be equal")
 }

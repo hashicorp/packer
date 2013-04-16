@@ -39,14 +39,43 @@ type Environment struct {
 	ui      Ui
 }
 
+// This struct configures new environments.
+type EnvironmentConfig struct {
+	builder map[string]Builder
+	command map[string]Command
+	ui      Ui
+}
+
 // This creates a new environment
-func NewEnvironment() *Environment {
+func NewEnvironment(config *EnvironmentConfig) *Environment {
 	env := &Environment{}
 	env.builder = make(map[string]Builder)
 	env.command = make(map[string]Command)
-	env.command["build"] = new(buildCommand)
-	env.command["version"] = new(versionCommand)
-	env.ui = &ReaderWriterUi{os.Stdin, os.Stdout}
+
+	if config != nil {
+		for k, v := range config.builder {
+			env.builder[k] = v
+		}
+
+		for k, v := range config.command {
+			env.command[k] = v
+		}
+
+		env.ui = config.ui
+	}
+
+	if _, ok := env.command["build"]; !ok {
+		env.command["build"] = new(buildCommand)
+	}
+
+	if _, ok := env.command["version"]; !ok {
+		env.command["version"] = new(versionCommand)
+	}
+
+	if env.ui == nil {
+		env.ui = &ReaderWriterUi{os.Stdin, os.Stdout}
+	}
+
 	return env
 }
 
