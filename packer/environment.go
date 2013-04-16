@@ -34,6 +34,7 @@ type Command interface {
 // if you're building a custom Packer binary, you could instantiate multiple
 // environments and run them in parallel.
 type Environment struct {
+	builder map[string]Builder
 	command map[string]Command
 	ui      Ui
 }
@@ -41,11 +42,18 @@ type Environment struct {
 // This creates a new environment
 func NewEnvironment() *Environment {
 	env := &Environment{}
+	env.builder = make(map[string]Builder)
 	env.command = make(map[string]Command)
 	env.command["build"] = new(buildCommand)
 	env.command["version"] = new(versionCommand)
 	env.ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return env
+}
+
+// Looks up a builder with the given name and returns an interface
+// to access it.
+func (e *Environment) Builder(name string) Builder {
+	return e.builder[name]
 }
 
 // Executes a command as if it was typed on the command-line interface.
