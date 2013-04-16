@@ -26,6 +26,14 @@ func (buildCommand) Run(env *Environment, args []string) int {
 		return 1
 	}
 
+	// Go through each builder and compile the builds that we care about
+	//builds := make([]Build, 0, len(tpl.Builders))
+	//for name, rawConfig := range tpl.Builders {
+		//builder := env.Builder(name, rawConfig)
+		//build := env.Build(name, builder)
+		//builds = append(builds, build)
+	//}
+
 	return 0
 }
 

@@ -34,8 +34,38 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		return
 	}
 
-	t = &Template{
-		Name: rawTpl.Name,
+	t = &Template{}
+	t.Name = rawTpl.Name
+	t.Builders = make(map[string]rawBuilderConfig)
+
+	for _, v := range rawTpl.Builders {
+		rawType, ok := v["type"]
+		if !ok {
+			// TODO: Missing type error
+			return
+		}
+
+		// Attempt to get the name of the builder. If the "name" key
+		// missing, use the "type" field, which is guaranteed to exist
+		// at this point.
+		rawName, ok := v["name"]
+		if !ok {
+			rawName = v["type"]
+		}
+
+		// TODO: Error checking if we can't convert
+		name := rawName.(string)
+		typeName := rawType.(string)
+
+		// Check if we already have a builder with this name and record
+		// an error.
+		_, ok = t.Builders[name]
+		if ok {
+			// TODO: We already have a builder with this name
+			return
+		}
+
+		t.Builders[name] = rawBuilderConfig{typeName, v}
 	}
 
 	return
