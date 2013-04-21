@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	env, err := packer.NewEnvironment(nil)
+	env, err := packer.NewEnvironment(packer.DefaultEnvironmentConfig())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Packer initialization error: \n\n%s\n", err)
 		os.Exit(1)
