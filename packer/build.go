@@ -7,6 +7,7 @@ package packer
 type Build struct {
 	name    string
 	builder Builder
+	rawConfig interface{}
 
 	prepareCalled bool
 }
@@ -43,9 +44,9 @@ func (NilBuilderFactory) CreateBuilder(name string) Builder {
 
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
-func (b *Build) Prepare(config interface{}) {
+func (b *Build) Prepare() {
 	b.prepareCalled = true
-	b.builder.Prepare(config)
+	b.builder.Prepare(b.rawConfig)
 }
 
 // Runs the actual build. Prepare must be called prior to running this.

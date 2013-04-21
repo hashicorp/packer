@@ -1,6 +1,9 @@
 package packer
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // The rawTemplate struct represents the structure of a template read
 // directly from a file. The builders and other components map just to
@@ -70,6 +73,45 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		}
 
 		t.Builders[name] = rawBuilderConfig{typeName, v}
+	}
+
+	return
+}
+
+// BuildNames returns a slice of the available names of builds that
+// this template represents.
+func (t *Template) BuildNames() []string {
+	names := make([]string, len(t.Builders))
+	i := 0
+	for name, _ := range t.Builders {
+		names[i] = name
+		i++
+	}
+
+	return names
+}
+
+// Build returns a Build for the given name.
+//
+// If the build does not exist as part of this template, an error is
+// returned.
+func (t *Template) Build(name string, bf BuilderFactory) (b *Build, err error) {
+	builderConfig, ok := t.Builders[name]
+	if !ok {
+		err = fmt.Errorf("No such build found in template: %s", name)
+		return
+	}
+
+	builder := bf.CreateBuilder(builderConfig.builderName)
+	if builder == nil {
+		err = fmt.Errorf("Builder could not be found: %s", builderConfig.builderName)
+		return
+	}
+
+	b = &Build{
+		name: name,
+		builder: builder,
+		rawConfig: builderConfig.rawConfig,
 	}
 
 	return
