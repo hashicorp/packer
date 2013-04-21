@@ -20,7 +20,7 @@ type Build struct {
 // Run is where the actual build should take place. It takes a Build and a Ui.
 type Builder interface {
 	Prepare(config interface{})
-	Run(build Build, ui Ui)
+	Run(build *Build, ui Ui)
 }
 
 // This factory is responsible for returning Builders for the given name.
@@ -37,4 +37,15 @@ type NilBuilderFactory byte
 
 func (NilBuilderFactory) CreateBuilder(name string) Builder {
 	return nil
+}
+
+// Prepare prepares the build by doing some initialization for the builder
+// and any hooks. This _must_ be called prior to Run.
+func (b *Build) Prepare(config interface{}) {
+	b.builder.Prepare(config)
+}
+
+// Runs the actual build. Prepare must be called prior to running this.
+func (b *Build) Run(ui Ui) {
+	b.builder.Run(b, ui)
 }

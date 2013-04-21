@@ -6,11 +6,17 @@ import (
 	"testing"
 )
 
-// Our test Ui that just writes to bytes.Buffers.
-var bufferUi = &ReaderWriterUi{new(bytes.Buffer), new(bytes.Buffer)}
+func testUi() *ReaderWriterUi {
+	return &ReaderWriterUi{
+		new(bytes.Buffer),
+		new(bytes.Buffer),
+	}
+}
 
 func TestReaderWriterUi_Say(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
+
+	bufferUi := testUi()
 
 	bufferUi.Say("foo")
 	assert.Equal(readWriter(bufferUi), "foo", "basic output")
