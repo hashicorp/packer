@@ -13,6 +13,8 @@ type rawTemplate struct {
 	Outputs      []map[string]interface{}
 }
 
+// The Template struct represents a parsed template, parsed into the most
+// completed form it can be without additional processing by the caller.
 type Template struct {
 	Name     string
 	Builders map[string]rawBuilderConfig
@@ -27,6 +29,8 @@ type rawBuilderConfig struct {
 	rawConfig   interface{}
 }
 
+// ParseTemplate takes a byte slice and parses a Template from it, returning
+// the template and possibly errors while loading the template.
 func ParseTemplate(data []byte) (t *Template, err error) {
 	var rawTpl rawTemplate
 	err = json.Unmarshal(data, &rawTpl)
