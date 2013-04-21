@@ -80,6 +80,11 @@ func NewEnvironment(config *EnvironmentConfig) (env *Environment, err error) {
 	return
 }
 
+// Returns the BuilderFactory associated with this Environment.
+func (e *Environment) BuilderFactory() BuilderFactory {
+	return e.builderFactory
+}
+
 // Executes a command as if it was typed on the command-line interface.
 // The return value is the exit code of the command.
 func (e *Environment) Cli(args []string) int {

@@ -60,6 +60,15 @@ func TestNewEnvironment_NoConfig(t *testing.T) {
 	assert.NotNil(err, "should be an error")
 }
 
+func TestEnvironment_GetBuilderFactory(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	env, _ := NewEnvironment(config)
+
+	assert.Equal(env.BuilderFactory(), config.BuilderFactory, "should match factories")
+}
+
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
