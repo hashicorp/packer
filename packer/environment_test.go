@@ -83,7 +83,7 @@ func TestEnvironment_SettingUi(t *testing.T) {
 	ui := &ReaderWriterUi{new(bytes.Buffer), new(bytes.Buffer)}
 
 	config := &EnvironmentConfig{}
-	config.ui = ui
+	config.Ui = ui
 
 	env := NewEnvironment(config)
 
