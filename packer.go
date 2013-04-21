@@ -3,10 +3,16 @@ package main
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"fmt"
 	"os"
 )
 
 func main() {
-	env := packer.NewEnvironment(nil)
+	env, err := packer.NewEnvironment(nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Packer initialization error: \n\n%s\n", err)
+		os.Exit(1)
+	}
+
 	os.Exit(env.Cli(os.Args[1:]))
 }

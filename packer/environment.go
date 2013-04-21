@@ -2,6 +2,7 @@
 package packer
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -46,33 +47,36 @@ type EnvironmentConfig struct {
 	Ui      Ui
 }
 
+// DefaultEnvironmentConfig returns a default EnvironmentConfig that can
+// be used to create a new enviroment with NewEnvironment with sane defaults.
+func DefaultEnvironmentConfig() *EnvironmentConfig {
+	config := &EnvironmentConfig{}
+	config.Ui = &ReaderWriterUi{os.Stdin, os.Stdout}
+	return config
+}
+
 // This creates a new environment
-func NewEnvironment(config *EnvironmentConfig) *Environment {
-	env := &Environment{}
+func NewEnvironment(config *EnvironmentConfig) (env *Environment, err error) {
+	if config == nil {
+		err = errors.New("config must be given to initialize environment")
+		return
+	}
+
+	env = &Environment{}
+	env.builderFactory = config.BuilderFactory
 	env.command = make(map[string]Command)
+	env.ui = config.Ui
 
-	if config != nil {
-		for k, v := range config.Command {
-			env.command[k] = v
-		}
-
-		env.builderFactory = config.BuilderFactory
-		env.ui = config.Ui
+	for k, v := range config.Command {
+		env.command[k] = v
 	}
 
-	if _, ok := env.command["build"]; !ok {
-		env.command["build"] = new(buildCommand)
-	}
-
+	// TODO: Should "version" be allowed to be overriden?
 	if _, ok := env.command["version"]; !ok {
 		env.command["version"] = new(versionCommand)
 	}
 
-	if env.ui == nil {
-		env.ui = &ReaderWriterUi{os.Stdin, os.Stdout}
-	}
-
-	return env
+	return
 }
 
 // Executes a command as if it was typed on the command-line interface.

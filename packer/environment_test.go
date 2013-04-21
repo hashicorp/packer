@@ -32,7 +32,32 @@ func testEnvironment() *Environment {
 		new(bytes.Buffer),
 	}
 
-	return NewEnvironment(config)
+	env, err := NewEnvironment(config)
+	if err != nil {
+		panic(err)
+	}
+
+	return env
+}
+
+func TestEnvironment_DefaultConfig_Ui(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	assert.NotNil(config.Ui, "default UI should not be nil")
+
+	rwUi, ok := config.Ui.(*ReaderWriterUi)
+	assert.True(ok, "default UI should be ReaderWriterUi")
+	assert.Equal(rwUi.Writer, os.Stdout, "default UI should go to stdout")
+	assert.Equal(rwUi.Reader, os.Stdin, "default UI should read from stdin")
+}
+
+func TestNewEnvironment_NoConfig(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	env, err := NewEnvironment(nil)
+	assert.Nil(env, "env should be nil")
+	assert.NotNil(err, "should be an error")
 }
 
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
@@ -44,7 +69,7 @@ func TestEnvironment_Cli_CallsRun(t *testing.T) {
 	config.Command = make(map[string]Command)
 	config.Command["foo"] = command
 
-	env := NewEnvironment(config)
+	env, _ := NewEnvironment(config)
 	assert.Equal(env.Cli([]string{"foo", "bar", "baz"}), 0, "runs foo command")
 	assert.True(command.runCalled, "run should've been called")
 	assert.Equal(command.runEnv, env, "should've ran with env")
@@ -99,18 +124,6 @@ func TestEnvironment_DefaultCli_Version(t *testing.T) {
 	assert.Equal(defaultEnv.Cli([]string{"bad", "version"}), 1, "version should NOT work anywhere")
 }
 
-func TestEnvironment_DefaultUi(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	defaultEnv := NewEnvironment(nil)
-	assert.NotNil(defaultEnv.Ui(), "default UI should not be nil")
-
-	rwUi, ok := defaultEnv.Ui().(*ReaderWriterUi)
-	assert.True(ok, "default UI should be ReaderWriterUi")
-	assert.Equal(rwUi.Writer, os.Stdout, "default UI should go to stdout")
-	assert.Equal(rwUi.Reader, os.Stdin, "default UI should read from stdin")
-}
-
 func TestEnvironment_PrintHelp(t *testing.T) {
 	// Just call the function and verify that no panics occur
 	testEnvironment().PrintHelp()
@@ -124,7 +137,7 @@ func TestEnvironment_SettingUi(t *testing.T) {
 	config := &EnvironmentConfig{}
 	config.Ui = ui
 
-	env := NewEnvironment(config)
+	env, _ := NewEnvironment(config)
 
 	assert.Equal(env.Ui(), ui, "UIs should be equal")
 }
