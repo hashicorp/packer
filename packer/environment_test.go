@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cgl.tideland.biz/asserts"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -63,9 +64,21 @@ func TestEnvironment_DefaultCli_Help(t *testing.T) {
 
 	defaultEnv := testEnvironment()
 
-	// Test the basic version options
+	// A little lambda to help us test the output actually contains help
+	testOutput := func() {
+		buffer := defaultEnv.Ui().(*ReaderWriterUi).Writer.(*bytes.Buffer)
+		output := buffer.String()
+		buffer.Reset()
+		assert.True(strings.Contains(output, "usage: packer"), "should print help")
+	}
+
+	// Test "--help"
 	assert.Equal(defaultEnv.Cli([]string{"--help"}), 1, "--help should print")
+	testOutput()
+
+	// Test "-h"
 	assert.Equal(defaultEnv.Cli([]string{"-h"}), 1, "--help should print")
+	testOutput()
 }
 
 func TestEnvironment_DefaultCli_Version(t *testing.T) {
