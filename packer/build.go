@@ -7,6 +7,8 @@ package packer
 type Build struct {
 	name    string
 	builder Builder
+
+	prepareCalled bool
 }
 
 // Implementers of Builder are responsible for actually building images
@@ -42,10 +44,15 @@ func (NilBuilderFactory) CreateBuilder(name string) Builder {
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
 func (b *Build) Prepare(config interface{}) {
+	b.prepareCalled = true
 	b.builder.Prepare(config)
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
 func (b *Build) Run(ui Ui) {
+	if !b.prepareCalled {
+		panic("Prepare must be called first")
+	}
+
 	b.builder.Run(b, ui)
 }

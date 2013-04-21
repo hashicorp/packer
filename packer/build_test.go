@@ -49,6 +49,7 @@ func TestBuild_Run(t *testing.T) {
 	ui := testUi()
 
 	build := testBuild()
+	build.Prepare(nil)
 	build.Run(ui)
 
 	builder := build.builder.(*TestBuilder)
@@ -56,4 +57,16 @@ func TestBuild_Run(t *testing.T) {
 	assert.True(builder.runCalled, "run should be called")
 	assert.Equal(builder.runBuild, build, "run should be called with build")
 	assert.Equal(builder.runUi, ui, "run should be called with ui")
+}
+
+func TestBuild_RunBeforePrepare(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	defer func() {
+		p := recover()
+		assert.NotNil(p, "should panic")
+		assert.Equal(p.(string), "Prepare must be called first", "right panic")
+	}()
+
+	testBuild().Run(testUi())
 }
