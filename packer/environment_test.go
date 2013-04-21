@@ -8,11 +8,15 @@ import (
 )
 
 type TestCommand struct {
+	runArgs []string
 	runCalled bool
+	runEnv *Environment
 }
 
 func (tc *TestCommand) Run(env *Environment, args []string) int {
 	tc.runCalled = true
+	tc.runArgs = args
+	tc.runEnv = env
 	return 0
 }
 
@@ -40,8 +44,10 @@ func TestEnvironment_Cli_CallsRun(t *testing.T) {
 	config.Command["foo"] = command
 
 	env := NewEnvironment(config)
-	assert.Equal(env.Cli([]string{"foo"}), 0, "runs foo command")
+	assert.Equal(env.Cli([]string{"foo", "bar", "baz"}), 0, "runs foo command")
 	assert.True(command.runCalled, "run should've been called")
+	assert.Equal(command.runEnv, env, "should've ran with env")
+	assert.Equal(command.runArgs, []string{"bar", "baz"}, "should have right args")
 }
 
 func TestEnvironment_DefaultCli_Empty(t *testing.T) {
