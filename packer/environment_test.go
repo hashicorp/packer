@@ -7,6 +7,19 @@ import (
 	"testing"
 )
 
+type TestCommand struct {
+	runCalled bool
+}
+
+func (tc *TestCommand) Run(env *Environment, args []string) int {
+	tc.runCalled = true
+	return 0
+}
+
+func (tc *TestCommand) Synopsis() string {
+	return ""
+}
+
 func testEnvironment() *Environment {
 	config := &EnvironmentConfig{}
 	config.Ui = &ReaderWriterUi{
@@ -18,10 +31,17 @@ func testEnvironment() *Environment {
 }
 
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
-	//_ := asserts.NewTestingAsserts(t, true)
+	assert := asserts.NewTestingAsserts(t, true)
 
-	// TODO: Test that the call to `Run` is done with
-	// proper arguments and such.
+	command := &TestCommand{}
+
+	config := &EnvironmentConfig{}
+	config.Command = make(map[string]Command)
+	config.Command["foo"] = command
+
+	env := NewEnvironment(config)
+	assert.Equal(env.Cli([]string{"foo"}), 0, "runs foo command")
+	assert.True(command.runCalled, "run should've been called")
 }
 
 func TestEnvironment_DefaultCli_Empty(t *testing.T) {
