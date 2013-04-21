@@ -9,7 +9,7 @@ import (
 
 func testEnvironment() *Environment {
 	config := &EnvironmentConfig{}
-	config.ui = &ReaderWriterUi{
+	config.Ui = &ReaderWriterUi{
 		new(bytes.Buffer),
 		new(bytes.Buffer),
 	}
