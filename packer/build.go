@@ -31,3 +31,10 @@ type Builder interface {
 type BuilderFactory interface {
 	CreateBuilder(name string) Builder
 }
+
+// This implements BuilderFactory to return nil for every builder.
+type NilBuilderFactory byte
+
+func (NilBuilderFactory) CreateBuilder(name string) Builder {
+	return nil
+}

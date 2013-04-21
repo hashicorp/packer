@@ -51,6 +51,7 @@ type EnvironmentConfig struct {
 // be used to create a new enviroment with NewEnvironment with sane defaults.
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
+	config.BuilderFactory = new(NilBuilderFactory)
 	config.Ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return config
 }
