@@ -34,6 +34,7 @@ type EnvironmentConfig struct {
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
 	config.BuilderFactory = new(NilBuilderFactory)
+	config.Command = make(map[string]Command)
 	config.Ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return config
 }

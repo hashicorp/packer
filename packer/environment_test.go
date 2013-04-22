@@ -40,6 +40,13 @@ func testEnvironment() *Environment {
 	return env
 }
 
+func TestEnvironment_DefaultConfig_Command(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	assert.NotNil(config.Command, "default Command should not be nil")
+}
+
 func TestEnvironment_DefaultConfig_Ui(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
