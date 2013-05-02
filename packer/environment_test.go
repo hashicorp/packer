@@ -3,6 +3,7 @@ package packer
 import (
 	"bytes"
 	"cgl.tideland.biz/asserts"
+	"encoding/gob"
 	"os"
 	"strings"
 	"testing"
@@ -21,6 +22,20 @@ func testEnvironment() Environment {
 	}
 
 	return env
+}
+
+// This is just a sanity test to prove that our coreEnvironment can't
+// encode or decode using gobs. That is fine, and expected, but I just like
+// to be sure.
+func TestEnvironment_CoreEnvironmentCantEncode(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	env := testEnvironment()
+
+	b := new(bytes.Buffer)
+	e := gob.NewEncoder(b)
+	err := e.Encode(env)
+	assert.NotNil(err, "encoding should fail")
 }
 
 func TestEnvironment_DefaultConfig_Command(t *testing.T) {
