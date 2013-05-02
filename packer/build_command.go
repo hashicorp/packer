@@ -6,7 +6,7 @@ import (
 
 type buildCommand byte
 
-func (buildCommand) Run(env *Environment, args []string) int {
+func (buildCommand) Run(env Environment, args []string) int {
 	if len(args) != 1 {
 		// TODO: Error message
 		return 1

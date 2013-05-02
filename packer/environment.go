@@ -9,14 +9,20 @@ import (
 	"strings"
 )
 
-// The environment struct contains all the state necessary for a single
-// instance of Packer.
+// The environment interface provides access to the configuration and
+// state of a single Packer run.
 //
-// It is *not* a singleton, but generally a single environment is created
-// when Packer starts running to represent that Packer run. Technically,
-// if you're building a custom Packer binary, you could instantiate multiple
-// environments and run them in parallel.
-type Environment struct {
+// It allows for things such as executing CLI commands, getting the
+// list of available builders, and more.
+type Environment interface {
+	BuilderFactory() BuilderFactory
+	Cli(args []string) int
+	Ui() Ui
+}
+
+// An implementation of an Environment that represents the Packer core
+// environment.
+type coreEnvironment struct {
 	builderFactory BuilderFactory
 	command map[string]Command
 	ui      Ui
@@ -40,13 +46,13 @@ func DefaultEnvironmentConfig() *EnvironmentConfig {
 }
 
 // This creates a new environment
-func NewEnvironment(config *EnvironmentConfig) (env *Environment, err error) {
+func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error) {
 	if config == nil {
 		err = errors.New("config must be given to initialize environment")
 		return
 	}
 
-	env = &Environment{}
+	env := &coreEnvironment{}
 	env.builderFactory = config.BuilderFactory
 	env.command = make(map[string]Command)
 	env.ui = config.Ui
@@ -60,19 +66,20 @@ func NewEnvironment(config *EnvironmentConfig) (env *Environment, err error) {
 		env.command["version"] = new(versionCommand)
 	}
 
+	resultEnv = env
 	return
 }
 
 // Returns the BuilderFactory associated with this Environment.
-func (e *Environment) BuilderFactory() BuilderFactory {
+func (e *coreEnvironment) BuilderFactory() BuilderFactory {
 	return e.builderFactory
 }
 
 // Executes a command as if it was typed on the command-line interface.
 // The return value is the exit code of the command.
-func (e *Environment) Cli(args []string) int {
+func (e *coreEnvironment) Cli(args []string) int {
 	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
-		e.PrintHelp()
+		e.printHelp()
 		return 1
 	}
 
@@ -89,7 +96,7 @@ func (e *Environment) Cli(args []string) int {
 
 		// If we still don't have a command, show the help.
 		if command == nil {
-			e.PrintHelp()
+			e.printHelp()
 			return 1
 		}
 	}
@@ -98,7 +105,7 @@ func (e *Environment) Cli(args []string) int {
 }
 
 // Prints the CLI help to the UI.
-func (e *Environment) PrintHelp() {
+func (e *coreEnvironment) printHelp() {
 	// Created a sorted slice of the map keys and record the longest
 	// command name so we can better format the output later.
 	commandKeys := make([]string, len(e.command))
@@ -131,6 +138,6 @@ func (e *Environment) PrintHelp() {
 
 // Returns the UI for the environment. The UI is the interface that should
 // be used for all communication with the outside world.
-func (e *Environment) Ui() Ui {
+func (e *coreEnvironment) Ui() Ui {
 	return e.ui
 }

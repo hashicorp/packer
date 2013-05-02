@@ -11,10 +11,10 @@ import (
 type TestCommand struct {
 	runArgs []string
 	runCalled bool
-	runEnv *Environment
+	runEnv Environment
 }
 
-func (tc *TestCommand) Run(env *Environment, args []string) int {
+func (tc *TestCommand) Run(env Environment, args []string) int {
 	tc.runCalled = true
 	tc.runArgs = args
 	tc.runEnv = env
@@ -25,7 +25,7 @@ func (tc *TestCommand) Synopsis() string {
 	return ""
 }
 
-func testEnvironment() *Environment {
+func testEnvironment() Environment {
 	config := &EnvironmentConfig{}
 	config.Ui = &ReaderWriterUi{
 		new(bytes.Buffer),
@@ -138,11 +138,6 @@ func TestEnvironment_DefaultCli_Version(t *testing.T) {
 
 	// Test that "version" can't appear anywhere
 	assert.Equal(defaultEnv.Cli([]string{"bad", "version"}), 1, "version should NOT work anywhere")
-}
-
-func TestEnvironment_PrintHelp(t *testing.T) {
-	// Just call the function and verify that no panics occur
-	testEnvironment().PrintHelp()
 }
 
 func TestEnvironment_SettingUi(t *testing.T) {

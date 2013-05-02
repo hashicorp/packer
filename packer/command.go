@@ -1,5 +1,7 @@
 package packer
 
+import "net/rpc"
+
 // A command is a runnable sub-command of the `packer` application.
 // When `packer` is called with the proper subcommand, this will be
 // called.
@@ -14,7 +16,12 @@ package packer
 // Synopsis should return a one-line, short synopsis of the command.
 // This should be less than 50 characters ideally.
 type Command interface {
-	Run(env *Environment, args []string) int
+	Run(env Environment, args []string) int
 	Synopsis() string
 }
 
+// An RPCCommand is an implementation of the Command interface where the
+// command is actually executed over an RPC connection.
+type RPCCommand struct {
+	client *rpc.Client
+}
