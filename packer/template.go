@@ -95,7 +95,7 @@ func (t *Template) BuildNames() []string {
 //
 // If the build does not exist as part of this template, an error is
 // returned.
-func (t *Template) Build(name string, bf BuilderFactory) (b *Build, err error) {
+func (t *Template) Build(name string, bf BuilderFactory) (b Build, err error) {
 	builderConfig, ok := t.Builders[name]
 	if !ok {
 		err = fmt.Errorf("No such build found in template: %s", name)
@@ -108,7 +108,7 @@ func (t *Template) Build(name string, bf BuilderFactory) (b *Build, err error) {
 		return
 	}
 
-	b = &Build{
+	b = &coreBuild{
 		name: name,
 		builder: builder,
 		rawConfig: builderConfig.rawConfig,

@@ -17,7 +17,7 @@ type TestBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
 	runCalled bool
-	runBuild *Build
+	runBuild Build
 	runUi Ui
 }
 
@@ -26,14 +26,14 @@ func (tb *TestBuilder) Prepare(config interface{}) {
 	tb.prepareConfig = config
 }
 
-func (tb *TestBuilder) Run(b *Build, ui Ui) {
+func (tb *TestBuilder) Run(b Build, ui Ui) {
 	tb.runCalled = true
 	tb.runBuild = b
 	tb.runUi = ui
 }
 
-func testBuild() *Build {
-	return &Build{
+func testBuild() Build {
+	return &coreBuild{
 		name: "test",
 		builder: &TestBuilder{},
 		rawConfig: 42,
@@ -52,7 +52,7 @@ func TestBuild_Prepare(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	build := testBuild()
-	builder := build.builder.(*TestBuilder)
+	builder := build.(*coreBuild).builder.(*TestBuilder)
 
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
@@ -68,7 +68,7 @@ func TestBuild_Run(t *testing.T) {
 	build.Prepare()
 	build.Run(ui)
 
-	builder := build.builder.(*TestBuilder)
+	builder := build.(*coreBuild).builder.(*TestBuilder)
 
 	assert.True(builder.runCalled, "run should be called")
 	assert.Equal(builder.runBuild, build, "run should be called with build")
