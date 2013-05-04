@@ -46,6 +46,21 @@ func (s *Server) RegisterUi(ui packer.Ui) {
 }
 
 func (s *Server) Start() error {
+	return s.start(false)
+}
+
+func (s *Server) StartSingle() error {
+	return s.start(true)
+}
+
+func (s *Server) Stop() {
+	if s.listener != nil {
+		s.listener.Close()
+		s.listener = nil
+	}
+}
+
+func (s *Server) start(singleConn bool) error {
 	if s.listener != nil {
 		return errors.New("Server already started.")
 	}
@@ -66,15 +81,15 @@ func (s *Server) Start() error {
 			}
 
 			go s.server.ServeConn(conn)
+
+			// If we're only accepting a single connection then
+			// stop.
+			if singleConn {
+				s.Stop()
+				break
+			}
 		}
 	}(s.listener)
 
 	return nil
-}
-
-func (s *Server) Stop() {
-	if s.listener != nil {
-		s.listener.Close()
-		s.listener = nil
-	}
 }

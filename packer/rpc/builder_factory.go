@@ -3,7 +3,6 @@ package rpc
 import (
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
-	"time"
 )
 
 // An implementation of packer.BuilderFactory where the factory is actually
@@ -39,13 +38,7 @@ func (b *BuilderFactoryServer) CreateBuilder(args *BuilderFactoryCreateArgs, rep
 	// Now we wrap that back up into a server, and send it on backwards.
 	server := NewServer()
 	server.RegisterBuilder(builder)
-	server.Start()
-
-	// Start a timer where we'll quit the server after some number of seconds.
-	go func() {
-		time.Sleep(30 * time.Second)
-		server.Stop()
-	}()
+	server.StartSingle()
 
 	// Set the reply to the address of the sever
 	*reply = server.Address()
