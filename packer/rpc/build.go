@@ -29,6 +29,7 @@ func (b *Build) Prepare() {
 
 func (b *Build) Run(ui packer.Ui) {
 	// Create and start the server for the UI
+	// TODO: Error handling
 	server := NewServer()
 	server.RegisterUi(ui)
 	server.Start()
