@@ -41,6 +41,10 @@ func (s *Server) RegisterBuilderFactory(b packer.BuilderFactory) {
 	s.server.RegisterName("BuilderFactory", &BuilderFactoryServer{b})
 }
 
+func (s *Server) RegisterEnvironment(e packer.Environment) {
+	s.server.RegisterName("Environment", &EnvironmentServer{e})
+}
+
 func (s *Server) RegisterUi(ui packer.Ui) {
 	s.server.RegisterName("Ui", &UiServer{ui})
 }

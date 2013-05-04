@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"bytes"
 	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"net"
@@ -24,21 +23,6 @@ func (tc *TestCommand) Run(env packer.Environment, args []string) int {
 
 func (tc *TestCommand) Synopsis() string {
 	return "foo"
-}
-
-func testEnvironment() packer.Environment {
-	config := &packer.EnvironmentConfig{}
-	config.Ui = &packer.ReaderWriterUi{
-		new(bytes.Buffer),
-		new(bytes.Buffer),
-	}
-
-	env, err := packer.NewEnvironment(config)
-	if err != nil {
-		panic(err)
-	}
-
-	return env
 }
 
 // This starts a RPC server for the given command listening on the
@@ -102,7 +86,7 @@ func TestRPCCommand(t *testing.T) {
 
 	clientComm := &ClientCommand{client}
 	runArgs := []string{"foo", "bar"}
-	testEnv := testEnvironment()
+	testEnv := &testEnvironment{}
 	exitCode := clientComm.Run(testEnv, runArgs)
 	synopsis := clientComm.Synopsis()
 
