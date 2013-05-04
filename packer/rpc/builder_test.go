@@ -48,6 +48,21 @@ func TestBuilderRPC(t *testing.T) {
 	bClient.Prepare(config)
 	assert.True(b.prepareCalled, "prepare should be called")
 	assert.Equal(b.prepareConfig, 42, "prepare should be called with right arg")
+
+	// Test Run
+	build := &testBuild{}
+	ui := &testUi{}
+	bClient.Run(build, ui)
+	assert.True(b.runCalled, "runs hould be called")
+
+	if b.runCalled {
+		b.runBuild.Prepare()
+		assert.True(build.prepareCalled, "prepare should be called")
+
+		b.runUi.Say("format")
+		assert.True(ui.sayCalled, "say should be called")
+		assert.Equal(ui.sayFormat, "format", "format should be correct")
+	}
 }
 
 func TestBuilder_ImplementsBuild(t *testing.T) {
