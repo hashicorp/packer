@@ -37,3 +37,24 @@ func TestServer_Start(t *testing.T) {
 	_, err = rpc.Dial("tcp", addr)
 	assert.NotNil(err, "should NOT be able to connect to RPC")
 }
+
+func TestServer_RegisterUi(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	ui := &testUi{}
+
+	// Start the server with a UI
+	s := NewServer()
+	s.RegisterUi(ui)
+	assert.Nil(s.Start(), "should start properly")
+	defer s.Stop()
+
+	// Verify it works
+	client, err := rpc.Dial("tcp", s.Address())
+	assert.Nil(err, "should connect via RPC")
+
+	uiClient := &Ui{client}
+	uiClient.Say("format")
+
+	assert.Equal(ui.sayFormat, "format", "format should be correct")
+}
