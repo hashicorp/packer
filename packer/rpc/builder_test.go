@@ -1,0 +1,60 @@
+package rpc
+
+import (
+	"cgl.tideland.biz/asserts"
+	"github.com/mitchellh/packer/packer"
+	"net/rpc"
+	"testing"
+)
+
+type testBuilder struct {
+	prepareCalled bool
+	prepareConfig interface{}
+	runCalled bool
+	runBuild packer.Build
+	runUi packer.Ui
+}
+
+func (b *testBuilder) Prepare(config interface{}) {
+	b.prepareCalled = true
+	b.prepareConfig = config
+}
+
+func (b *testBuilder) Run(build packer.Build, ui packer.Ui) {
+	b.runCalled = true
+	b.runBuild = build
+	b.runUi = ui
+}
+
+func TestBuilderRPC(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	// Create the interface to test
+	b := new(testBuilder)
+
+	// Start the server
+	server := NewServer()
+	server.RegisterBuilder(b)
+	server.Start()
+	defer server.Stop()
+
+	// Create the client over RPC and run some methods to verify it works
+	client, err := rpc.Dial("tcp", server.Address())
+	assert.Nil(err, "should be able to connect")
+
+	// Test Prepare
+	config := 42
+	bClient := &Builder{client}
+	bClient.Prepare(config)
+	assert.True(b.prepareCalled, "prepare should be called")
+	assert.Equal(b.prepareConfig, 42, "prepare should be called with right arg")
+}
+
+func TestBuilder_ImplementsBuild(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	var realBuilder packer.Builder
+	b := &Builder{nil}
+
+	assert.Implementor(b, &realBuilder, "should be a Builder")
+}

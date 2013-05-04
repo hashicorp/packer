@@ -29,6 +29,14 @@ func (s *Server) Address() string {
 	return s.listener.Addr().String()
 }
 
+func (s *Server) RegisterBuild(b packer.Build) {
+	s.server.RegisterName("Build", &BuildServer{b})
+}
+
+func (s *Server) RegisterBuilder(b packer.Builder) {
+	s.server.RegisterName("Builder", &BuilderServer{b})
+}
+
 func (s *Server) RegisterUi(ui packer.Ui) {
 	s.server.RegisterName("Ui", &UiServer{ui})
 }
