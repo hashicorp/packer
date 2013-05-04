@@ -46,16 +46,16 @@ func (s *Server) Start() error {
 	}
 
 	// Start accepting connections
-	go func() {
+	go func(l net.Listener) {
 		for {
-			conn, err := s.listener.Accept()
+			conn, err := l.Accept()
 			if err != nil {
 				break
 			}
 
 			go s.server.ServeConn(conn)
 		}
-	}()
+	}(s.listener)
 
 	return nil
 }
