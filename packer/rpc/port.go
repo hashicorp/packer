@@ -5,8 +5,8 @@ import (
 	"net"
 )
 
-var portRangeMin int = 0
-var portRangeMax int = 0
+var portRangeMin int = 10000
+var portRangeMax int = 11000
 
 // This sets the port range that the RPC stuff will use when creating
 // new temporary servers. Some RPC calls require the creation of temporary
