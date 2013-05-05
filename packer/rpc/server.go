@@ -37,10 +37,6 @@ func (s *Server) RegisterBuilder(b packer.Builder) {
 	s.server.RegisterName("Builder", &BuilderServer{b})
 }
 
-func (s *Server) RegisterBuilderFactory(b packer.BuilderFactory) {
-	s.server.RegisterName("BuilderFactory", &BuilderFactoryServer{b})
-}
-
 func (s *Server) RegisterCommand(c packer.Command) {
 	s.server.RegisterName("Command", &ServerCommand{c})
 }

@@ -21,15 +21,6 @@ type EnvironmentCliArgs struct {
 	Args []string
 }
 
-func (e *Environment) BuilderFactory() packer.BuilderFactory {
-	var reply string
-	e.client.Call("Environment.BuilderFactory", new(interface{}), &reply)
-
-	// TODO: error handling
-	client, _ := rpc.Dial("tcp", reply)
-	return &BuilderFactory{client}
-}
-
 func (e *Environment) Cli(args []string) (result int) {
 	rpcArgs := &EnvironmentCliArgs{args}
 	e.client.Call("Environment.Cli", rpcArgs, &result)
@@ -43,18 +34,6 @@ func (e *Environment) Ui() packer.Ui {
 	// TODO: error handling
 	client, _ := rpc.Dial("tcp", reply)
 	return &Ui{client}
-}
-
-func (e *EnvironmentServer) BuilderFactory(args *interface{}, reply *string) error {
-	bf := e.env.BuilderFactory()
-
-	// Wrap that up into a server, and server a single connection back
-	server := NewServer()
-	server.RegisterBuilderFactory(bf)
-	server.StartSingle()
-
-	*reply = server.Address()
-	return nil
 }
 
 func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) error {

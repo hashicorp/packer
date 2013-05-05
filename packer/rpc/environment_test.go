@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-var testEnvBF = &testBuilderFactory{}
 var testEnvUi = &testUi{}
 
 type testEnvironment struct {
@@ -15,11 +14,6 @@ type testEnvironment struct {
 	cliCalled bool
 	cliArgs []string
 	uiCalled bool
-}
-
-func (e *testEnvironment) BuilderFactory() packer.BuilderFactory {
-	e.bfCalled = true
-	return testEnvBF
 }
 
 func (e *testEnvironment) Cli(args []string) int {
@@ -48,15 +42,7 @@ func TestEnvironmentRPC(t *testing.T) {
 	// Create the client over RPC and run some methods to verify it works
 	client, err := rpc.Dial("tcp", server.Address())
 	assert.Nil(err, "should be able to connect")
-
-	// Test BuilderFactory
 	eClient := &Environment{client}
-	bf := eClient.BuilderFactory()
-	assert.True(e.bfCalled, "BuilderFactory should be called")
-
-	// Test calls on the factory
-	_ = bf.CreateBuilder("foo")
-	assert.True(testEnvBF.createCalled, "create should be called on BF")
 
 	// Test Cli
 	cliArgs := []string{"foo", "bar"}
