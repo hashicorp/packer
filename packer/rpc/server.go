@@ -7,6 +7,10 @@ import (
 	"net/rpc"
 )
 
+func RegisterCommand(s *rpc.Server, c packer.Command) {
+	s.RegisterName("Command", &ServerCommand{c})
+}
+
 // A Server is a Golang RPC server that has helper methods for automatically
 // setting up the endpoints for Packer interfaces.
 type Server struct {

@@ -10,19 +10,10 @@ import (
 	"time"
 )
 
-type processCommand struct {
-	cmd *exec.Cmd
-}
-
-func (c *processCommand) Run(e packer.Environment, args []string) int {
-	return 0
-}
-
-func (c *processCommand) Synopsis() string {
+func Command(cmd *exec.Cmd) packer.Command {
 	out := new(bytes.Buffer)
-	c.cmd.Stdout = out
-	c.cmd.Start()
-	defer c.cmd.Process.Kill()
+	cmd.Stdout = out
+	cmd.Start()
 
 	// TODO: timeout
 	// TODO: check that command is even running
@@ -37,13 +28,10 @@ func (c *processCommand) Synopsis() string {
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	client, _ := rpc.Dial("tcp", address)
-	defer client.Close()
+	client, err := rpc.Dial("tcp", address)
+	if err != nil {
+		panic(err)
+	}
 
-	realCommand := packrpc.Command(client)
-	return realCommand.Synopsis()
-}
-
-func Command(cmd *exec.Cmd) packer.Command {
-	return &processCommand{cmd}
+	return packrpc.Command(client)
 }

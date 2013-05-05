@@ -6,26 +6,42 @@ package plugin
 import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"net"
+	"net/rpc"
 	"os"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 )
 
-// This serves the plugin by starting the RPC server and serving requests.
-// This function never returns.
-func serve(server *packrpc.Server) {
-	// Start up the server
-	server.Start()
+// This serves a single RPC connection on the given RPC server on
+// a random port.
+func serve(server *rpc.Server) (err error) {
+	listener, err := net.Listen("tcp", ":2345")
+	if err != nil {
+		return
+	}
+	defer listener.Close()
 
 	// Output the address to stdout
-	fmt.Println(server.Address())
+	fmt.Println(":2345")
 	os.Stdout.Sync()
 
-	// Never return, wait on a channel that never gets a message
-	<-make(chan bool)
+	// Accept a connection
+	conn, err := listener.Accept()
+	if err != nil {
+		return
+	}
+
+	// Serve a single connection
+	server.ServeConn(conn)
+	return
 }
 
+// Serves a command from a plugin.
 func ServeCommand(command packer.Command) {
-	server := packrpc.NewServer()
-	server.RegisterCommand(command)
-	serve(server)
+	server := rpc.NewServer()
+	packrpc.RegisterCommand(server, command)
+
+	if err := serve(server); err != nil {
+		panic(err)
+	}
 }

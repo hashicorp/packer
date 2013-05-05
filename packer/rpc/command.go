@@ -31,12 +31,20 @@ func Command(client *rpc.Client) *ClientCommand {
 func (c *ClientCommand) Run(env packer.Environment, args []string) (result int) {
 	// TODO: Environment
 	rpcArgs := &CommandRunArgs{nil, args}
-	c.client.Call("Command.Run", rpcArgs, &result)
+	err := c.client.Call("Command.Run", rpcArgs, &result)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
 
 func (c *ClientCommand) Synopsis() (result string) {
-	c.client.Call("Command.Synopsis", CommandSynopsisArgs(0), &result)
+	err := c.client.Call("Command.Synopsis", CommandSynopsisArgs(0), &result)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
 
