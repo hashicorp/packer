@@ -9,13 +9,16 @@ import (
 	"strings"
 )
 
+type BuilderFunc func(name string) Builder
+
+type CommandFunc func(name string) Command
+
 // The environment interface provides access to the configuration and
 // state of a single Packer run.
 //
 // It allows for things such as executing CLI commands, getting the
 // list of available builders, and more.
 type Environment interface {
-	BuilderFactory() BuilderFactory
 	Cli(args []string) int
 	Ui() Ui
 }
@@ -23,15 +26,17 @@ type Environment interface {
 // An implementation of an Environment that represents the Packer core
 // environment.
 type coreEnvironment struct {
-	builderFactory BuilderFactory
-	command map[string]Command
+	builderFunc BuilderFunc
+	commands []string
+	commandFunc CommandFunc
 	ui      Ui
 }
 
 // This struct configures new environments.
 type EnvironmentConfig struct {
-	BuilderFactory BuilderFactory
-	Command map[string]Command
+	BuilderFunc BuilderFunc
+	CommandFunc CommandFunc
+	Commands []string
 	Ui      Ui
 }
 
@@ -39,8 +44,9 @@ type EnvironmentConfig struct {
 // be used to create a new enviroment with NewEnvironment with sane defaults.
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
-	config.BuilderFactory = new(NilBuilderFactory)
-	config.Command = make(map[string]Command)
+	config.BuilderFunc = func(string) Builder { return nil }
+	config.CommandFunc = func(string) Command { return nil }
+	config.Commands = make([]string, 0)
 	config.Ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return config
 }
@@ -53,26 +59,13 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 	}
 
 	env := &coreEnvironment{}
-	env.builderFactory = config.BuilderFactory
-	env.command = make(map[string]Command)
+	env.builderFunc = config.BuilderFunc
+	env.commandFunc = config.CommandFunc
+	env.commands = config.Commands
 	env.ui = config.Ui
-
-	for k, v := range config.Command {
-		env.command[k] = v
-	}
-
-	// TODO: Should "version" be allowed to be overriden?
-	if _, ok := env.command["version"]; !ok {
-		env.command["version"] = new(versionCommand)
-	}
 
 	resultEnv = env
 	return
-}
-
-// Returns the BuilderFactory associated with this Environment.
-func (e *coreEnvironment) BuilderFactory() BuilderFactory {
-	return e.builderFactory
 }
 
 // Executes a command as if it was typed on the command-line interface.
@@ -83,16 +76,23 @@ func (e *coreEnvironment) Cli(args []string) int {
 		return 1
 	}
 
-	command, ok := e.command[args[0]]
-	if !ok {
-		// The command was not found. In this case, let's go through
-		// the arguments and see if the user is requesting the version.
+	version := args[0] == "version"
+	if !version {
 		for _, arg := range args {
 			if arg == "--version" || arg == "-v" {
-				command = e.command["version"]
+				version = true
 				break
 			}
 		}
+	}
+
+	var command Command
+	if version {
+		command = new(versionCommand)
+	}
+
+	if command == nil {
+		command = e.commandFunc(args[0])
 
 		// If we still don't have a command, show the help.
 		if command == nil {
@@ -108,25 +108,23 @@ func (e *coreEnvironment) Cli(args []string) int {
 func (e *coreEnvironment) printHelp() {
 	// Created a sorted slice of the map keys and record the longest
 	// command name so we can better format the output later.
-	commandKeys := make([]string, len(e.command))
 	i := 0
 	maxKeyLen := 0
-	for key, _ := range e.command {
-		commandKeys[i] = key
-		if len(key) > maxKeyLen {
-			maxKeyLen = len(key)
+	for _, command := range e.commands {
+		if len(command) > maxKeyLen {
+			maxKeyLen = len(command)
 		}
 
 		i++
 	}
 
 	// Sort the keys
-	sort.Strings(commandKeys)
+	sort.Strings(e.commands)
 
 	e.ui.Say("usage: packer [--version] [--help] <command> [<args>]\n\n")
 	e.ui.Say("Available commands are:\n")
-	for _, key := range commandKeys {
-		command := e.command[key]
+	for _, key := range e.commands {
+		command := e.commandFunc(key)
 
 		// Pad the key with spaces so that they're all the same width
 		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))

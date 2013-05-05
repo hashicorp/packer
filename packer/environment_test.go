@@ -3,14 +3,13 @@ package packer
 import (
 	"bytes"
 	"cgl.tideland.biz/asserts"
-	"encoding/gob"
 	"os"
 	"strings"
 	"testing"
 )
 
 func testEnvironment() Environment {
-	config := &EnvironmentConfig{}
+	config := DefaultEnvironmentConfig()
 	config.Ui = &ReaderWriterUi{
 		new(bytes.Buffer),
 		new(bytes.Buffer),
@@ -24,25 +23,11 @@ func testEnvironment() Environment {
 	return env
 }
 
-// This is just a sanity test to prove that our coreEnvironment can't
-// encode or decode using gobs. That is fine, and expected, but I just like
-// to be sure.
-func TestEnvironment_CoreEnvironmentCantEncode(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	env := testEnvironment()
-
-	b := new(bytes.Buffer)
-	e := gob.NewEncoder(b)
-	err := e.Encode(env)
-	assert.NotNil(err, "encoding should fail")
-}
-
-func TestEnvironment_DefaultConfig_Command(t *testing.T) {
+func TestEnvironment_DefaultConfig_Commands(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	config := DefaultEnvironmentConfig()
-	assert.NotNil(config.Command, "default Command should not be nil")
+	assert.Empty(config.Commands, "should have no commands")
 }
 
 func TestEnvironment_DefaultConfig_Ui(t *testing.T) {
@@ -65,23 +50,16 @@ func TestNewEnvironment_NoConfig(t *testing.T) {
 	assert.NotNil(err, "should be an error")
 }
 
-func TestEnvironment_GetBuilderFactory(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	config := DefaultEnvironmentConfig()
-	env, _ := NewEnvironment(config)
-
-	assert.Equal(env.BuilderFactory(), config.BuilderFactory, "should match factories")
-}
-
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	command := &TestCommand{}
+	commands := make(map[string]Command)
+	commands["foo"] = command
 
 	config := &EnvironmentConfig{}
-	config.Command = make(map[string]Command)
-	config.Command["foo"] = command
+	config.Commands = []string{"foo"}
+	config.CommandFunc = func(n string) Command { return commands[n] }
 
 	env, _ := NewEnvironment(config)
 	assert.Equal(env.Cli([]string{"foo", "bar", "baz"}), 0, "runs foo command")

@@ -33,22 +33,6 @@ type Builder interface {
 	Run(build Build, ui Ui)
 }
 
-// This factory is responsible for returning Builders for the given name.
-//
-// CreateBuilder is called with the string name of a builder and should
-// return a Builder implementation by that name or nil if no builder can be
-// found.
-type BuilderFactory interface {
-	CreateBuilder(name string) Builder
-}
-
-// This implements BuilderFactory to return nil for every builder.
-type NilBuilderFactory byte
-
-func (NilBuilderFactory) CreateBuilder(name string) Builder {
-	return nil
-}
-
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
 func (b *coreBuild) Prepare() {

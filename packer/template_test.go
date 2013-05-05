@@ -157,7 +157,7 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 	template, err := ParseTemplate([]byte(data))
 	assert.Nil(err, "should not error")
 
-	builderFactory := testBuildFactory(map[string]Builder{})
+	builderFactory := func(string) Builder { return nil }
 	build, err := template.Build("test1", builderFactory)
 	assert.Nil(build, "build should be nil")
 	assert.NotNil(err, "should have error")
@@ -191,7 +191,7 @@ func TestTemplate_Build(t *testing.T) {
 		"test-builder": builder,
 	}
 
-	builderFactory := testBuildFactory(builderMap)
+	builderFactory := func(n string) Builder { return builderMap[n] }
 
 	// Get the build, verifying we can get it without issue, but also
 	// that the proper builder was looked up and used for the build.

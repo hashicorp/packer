@@ -5,14 +5,6 @@ import (
 	"testing"
 )
 
-type hashBuilderFactory struct {
-	builderMap map[string]Builder
-}
-
-func (bf *hashBuilderFactory) CreateBuilder(name string) Builder {
-	return bf.builderMap[name]
-}
-
 type TestBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
@@ -42,10 +34,6 @@ func testBuild() Build {
 
 func testBuilder() *TestBuilder {
 	return &TestBuilder{}
-}
-
-func testBuildFactory(builderMap map[string]Builder) BuilderFactory {
-	return &hashBuilderFactory{builderMap}
 }
 
 func TestBuild_Prepare(t *testing.T) {
