@@ -24,6 +24,10 @@ type CommandRunArgs struct {
 
 type CommandSynopsisArgs byte
 
+func Command(client *rpc.Client) *ClientCommand {
+	return &ClientCommand{client}
+}
+
 func (c *ClientCommand) Run(env packer.Environment, args []string) (result int) {
 	// TODO: Environment
 	rpcArgs := &CommandRunArgs{nil, args}
