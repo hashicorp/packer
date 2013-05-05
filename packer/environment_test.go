@@ -50,6 +50,20 @@ func TestNewEnvironment_NoConfig(t *testing.T) {
 	assert.NotNil(err, "should be an error")
 }
 
+func TestEnvironment_Builder(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	builder := &TestBuilder{}
+	builders := make(map[string]Builder)
+	builders["foo"] = builder
+
+	config := DefaultEnvironmentConfig()
+	config.BuilderFunc = func(n string) Builder { return builders[n] }
+
+	env, _ := NewEnvironment(config)
+	assert.Equal(env.Builder("foo"), builder, "should return correct builder")
+}
+
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

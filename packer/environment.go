@@ -19,6 +19,7 @@ type CommandFunc func(name string) Command
 // It allows for things such as executing CLI commands, getting the
 // list of available builders, and more.
 type Environment interface {
+	Builder(name string) Builder
 	Cli(args []string) int
 	Ui() Ui
 }
@@ -66,6 +67,12 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 
 	resultEnv = env
 	return
+}
+
+// Returns a builder of the given name that is registered with this
+// environment.
+func (e *coreEnvironment) Builder(name string) Builder {
+	return e.builderFunc(name)
 }
 
 // Executes a command as if it was typed on the command-line interface.

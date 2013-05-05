@@ -7,13 +7,21 @@ import (
 	"testing"
 )
 
+var testEnvBuilder = &testBuilder{}
 var testEnvUi = &testUi{}
 
 type testEnvironment struct {
-	bfCalled bool
+	builderCalled bool
+	builderName string
 	cliCalled bool
 	cliArgs []string
 	uiCalled bool
+}
+
+func (e *testEnvironment) Builder(name string) packer.Builder {
+	e.builderCalled = true
+	e.builderName = name
+	return testEnvBuilder
 }
 
 func (e *testEnvironment) Cli(args []string) int {
@@ -43,6 +51,14 @@ func TestEnvironmentRPC(t *testing.T) {
 	client, err := rpc.Dial("tcp", server.Address())
 	assert.Nil(err, "should be able to connect")
 	eClient := &Environment{client}
+
+	// Test Builder
+	builder := eClient.Builder("foo")
+	assert.True(e.builderCalled, "Builder should be called")
+	assert.Equal(e.builderName, "foo", "Correct name for Builder")
+
+	builder.Prepare(nil)
+	assert.True(testEnvBuilder.prepareCalled, "Prepare should be called")
 
 	// Test Cli
 	cliArgs := []string{"foo", "bar"}
