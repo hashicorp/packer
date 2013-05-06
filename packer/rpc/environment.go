@@ -49,11 +49,10 @@ func (e *EnvironmentServer) Builder(name *string, reply *string) error {
 	builder := e.env.Builder(*name)
 
 	// Wrap it
-	server := NewServer()
-	server.RegisterBuilder(builder)
-	server.StartSingle()
+	server := rpc.NewServer()
+	RegisterBuilder(server, builder)
 
-	*reply = server.Address()
+	*reply = serveSingleConn(server)
 	return nil
 }
 
@@ -66,10 +65,9 @@ func (e *EnvironmentServer) Ui(args *interface{}, reply *string) error {
 	ui := e.env.Ui()
 
 	// Wrap it
-	server := NewServer()
-	server.RegisterUi(ui)
-	server.StartSingle()
+	server := rpc.NewServer()
+	RegisterUi(server, ui)
 
-	*reply = server.Address()
+	*reply = serveSingleConn(server)
 	return nil
 }

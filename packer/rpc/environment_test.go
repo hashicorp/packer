@@ -42,13 +42,12 @@ func TestEnvironmentRPC(t *testing.T) {
 	e := &testEnvironment{}
 
 	// Start the server
-	server := NewServer()
-	server.RegisterEnvironment(e)
-	server.Start()
-	defer server.Stop()
+	server := rpc.NewServer()
+	RegisterEnvironment(server, e)
+	address := serveSingleConn(server)
 
 	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", server.Address())
+	client, err := rpc.Dial("tcp", address)
 	assert.Nil(err, "should be able to connect")
 	eClient := &Environment{client}
 

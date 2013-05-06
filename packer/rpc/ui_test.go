@@ -25,13 +25,12 @@ func TestUiRPC(t *testing.T) {
 	ui := new(testUi)
 
 	// Start the RPC server
-	server := NewServer()
-	server.RegisterUi(ui)
-	server.Start()
-	defer server.Stop()
+	server := rpc.NewServer()
+	RegisterUi(server, ui)
+	address := serveSingleConn(server)
 
 	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", server.Address())
+	client, err := rpc.Dial("tcp", address)
 	if err != nil {
 		panic(err)
 	}

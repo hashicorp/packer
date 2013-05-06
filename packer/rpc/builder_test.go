@@ -33,13 +33,12 @@ func TestBuilderRPC(t *testing.T) {
 	b := new(testBuilder)
 
 	// Start the server
-	server := NewServer()
-	server.RegisterBuilder(b)
-	server.Start()
-	defer server.Stop()
+	server := rpc.NewServer()
+	RegisterBuilder(server, b)
+	address := serveSingleConn(server)
 
 	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", server.Address())
+	client, err := rpc.Dial("tcp", address)
 	assert.Nil(err, "should be able to connect")
 
 	// Test Prepare

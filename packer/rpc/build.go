@@ -30,12 +30,9 @@ func (b *Build) Prepare() {
 func (b *Build) Run(ui packer.Ui) {
 	// Create and start the server for the UI
 	// TODO: Error handling
-	server := NewServer()
-	server.RegisterUi(ui)
-	server.Start()
-	defer server.Stop()
-
-	args := &BuildRunArgs{server.Address()}
+	server := rpc.NewServer()
+	RegisterUi(server, ui)
+	args := &BuildRunArgs{serveSingleConn(server)}
 	b.client.Call("Build.Run", args, new(interface{}))
 }
 

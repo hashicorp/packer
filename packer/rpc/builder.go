@@ -32,13 +32,11 @@ func (b *Builder) Prepare(config interface{}) {
 func (b *Builder) Run(build packer.Build, ui packer.Ui) {
 	// Create and start the server for the Build and UI
 	// TODO: Error handling
-	server := NewServer()
-	server.RegisterBuild(build)
-	server.RegisterUi(ui)
-	server.Start()
-	defer server.Stop()
+	server := rpc.NewServer()
+	RegisterBuild(server, build)
+	RegisterUi(server, ui)
 
-	args := &BuilderRunArgs{server.Address()}
+	args := &BuilderRunArgs{serveSingleConn(server)}
 	b.client.Call("Builder.Run", args, new(interface{}))
 }
 
