@@ -10,19 +10,38 @@ import (
 	"net/rpc"
 	"os"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
+	"strconv"
 )
 
 // This serves a single RPC connection on the given RPC server on
 // a random port.
 func serve(server *rpc.Server) (err error) {
-	listener, err := net.Listen("tcp", ":2345")
+	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
 	if err != nil {
 		return
 	}
+
+	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
+	if err != nil {
+		return
+	}
+
+	var address string
+	var listener net.Listener
+	for port := minPort; port <= maxPort; port++ {
+		address = fmt.Sprintf(":%d", port)
+		listener, err = net.Listen("tcp", address)
+		if err != nil {
+			return
+		}
+
+		break
+	}
+
 	defer listener.Close()
 
 	// Output the address to stdout
-	fmt.Println(":2345")
+	fmt.Println(address)
 	os.Stdout.Sync()
 
 	// Accept a connection

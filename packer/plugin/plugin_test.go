@@ -21,8 +21,14 @@ func (helperCommand) Synopsis() string {
 func helperProcess(s... string) *exec.Cmd {
 	cs := []string{"-test.run=TestHelperProcess", "--"}
 	cs = append(cs, s...)
+	env := []string{
+		"GO_WANT_HELPER_PROCESS=1",
+		"PACKER_PLUGIN_MIN_PORT=10000",
+		"PACKER_PLUGIN_MAX_PORT=25000",
+	}
+
 	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = append([]string{"GO_WANT_HELPER_PROCESS=1"}, os.Environ()...)
+	cmd.Env = append(env, os.Environ()...)
 	return cmd
 }
 
