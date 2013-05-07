@@ -1,12 +1,11 @@
-package build
+package main
 
-import "fmt"
 import "github.com/mitchellh/packer/packer"
 
-type Command byte
+type buildCommand byte
 
-func (Command) Run(env *packer.Environment, arg []string) int {
-	fmt.Println("HI!")
+func (Command) Run(env packer.Environment, arg []string) int {
+	env.Ui().Say("BUILDING!")
 	return 0
 }
 
