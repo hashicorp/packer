@@ -10,10 +10,24 @@ import (
 )
 
 func main() {
+	commands := map[string]string {
+		"build": "packer-build",
+	}
+
+	commandKeys := make([]string, 0, len(commands))
+	for k, _ := range commands {
+		commandKeys = append(commandKeys, k)
+	}
+
 	envConfig := packer.DefaultEnvironmentConfig()
-	envConfig.Commands = []string{"build"}
+	envConfig.Commands = commandKeys
 	envConfig.CommandFunc = func(n string) packer.Command {
-		return plugin.Command(exec.Command("bin/packer-build"))
+		commandBin, ok := commands[n]
+		if !ok {
+			return nil
+		}
+
+		return plugin.Command(exec.Command(commandBin))
 	}
 
 	env, err := packer.NewEnvironment(envConfig)
