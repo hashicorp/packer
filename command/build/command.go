@@ -1,8 +1,8 @@
-package main
+package build
 
 import "github.com/mitchellh/packer/packer"
 
-type buildCommand byte
+type Command byte
 
 func (Command) Run(env packer.Environment, arg []string) int {
 	env.Ui().Say("BUILDING!")
