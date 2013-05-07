@@ -11,7 +11,13 @@ import (
 )
 
 func Command(cmd *exec.Cmd) packer.Command {
+	env := []string{
+		"PACKER_PLUGIN_MIN_PORT=10000",
+		"PACKER_PLUGIN_MAX_PORT=25000",
+	}
+
 	out := new(bytes.Buffer)
+	cmd.Env = append(cmd.Env, env...)
 	cmd.Stdout = out
 	cmd.Start()
 

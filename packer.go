@@ -3,12 +3,18 @@ package main
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/packer/plugin"
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 func main() {
 	envConfig := packer.DefaultEnvironmentConfig()
+	envConfig.Commands = []string{"build"}
+	envConfig.CommandFunc = func(n string) packer.Command {
+		return plugin.Command(exec.Command("bin/packer-build"))
+	}
 
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {
