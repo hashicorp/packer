@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"os"
 	"os/exec"
@@ -30,15 +29,6 @@ func helperProcess(s... string) *exec.Cmd {
 	cmd := exec.Command(os.Args[0], cs...)
 	cmd.Env = append(env, os.Environ()...)
 	return cmd
-}
-
-func TestClient(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	command := Command(helperProcess("command"))
-	result := command.Synopsis()
-
-	assert.Equal(result, "1", "should return result")
 }
 
 // This is not a real test. This is just a helper process kicked off by

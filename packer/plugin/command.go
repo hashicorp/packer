@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func Command(cmd *exec.Cmd) packer.Command {
+func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 	env := []string{
 		"PACKER_PLUGIN_MIN_PORT=10000",
 		"PACKER_PLUGIN_MAX_PORT=25000",
@@ -19,7 +19,10 @@ func Command(cmd *exec.Cmd) packer.Command {
 	out := new(bytes.Buffer)
 	cmd.Env = append(cmd.Env, env...)
 	cmd.Stdout = out
-	cmd.Start()
+	err = cmd.Start()
+	if err != nil {
+		return
+	}
 
 	// TODO: timeout
 	// TODO: check that command is even running
@@ -39,5 +42,6 @@ func Command(cmd *exec.Cmd) packer.Command {
 		panic(err)
 	}
 
-	return packrpc.Command(client)
+	result = packrpc.Command(client)
+	return
 }
