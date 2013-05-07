@@ -3,14 +3,12 @@ package main
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/command/build"
 	"fmt"
 	"os"
 )
 
 func main() {
 	envConfig := packer.DefaultEnvironmentConfig()
-	envConfig.Command["build"] = new(build.Command)
 
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {
