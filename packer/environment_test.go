@@ -3,6 +3,7 @@ package packer
 import (
 	"bytes"
 	"cgl.tideland.biz/asserts"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -65,6 +66,31 @@ func TestEnvironment_Builder(t *testing.T) {
 	returnedBuilder, err := env.Builder("foo")
 	assert.Nil(err, "should be no error")
 	assert.Equal(returnedBuilder, builder, "should return correct builder")
+}
+
+func TestEnvironment_Builder_NilError(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.BuilderFunc = func(n string) (Builder, error) { return nil, nil }
+
+	env, _ := NewEnvironment(config)
+	returnedBuilder, err := env.Builder("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Nil(returnedBuilder, "should be no builder")
+}
+
+func TestEnvironment_Builder_Error(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.BuilderFunc = func(n string) (Builder, error) { return nil, errors.New("foo") }
+
+	env, _ := NewEnvironment(config)
+	returnedBuilder, err := env.Builder("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Equal(err.Error(), "foo", "should be correct error")
+	assert.Nil(returnedBuilder, "should be no builder")
 }
 
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
