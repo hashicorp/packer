@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"github.com/mitchellh/packer/packer"
@@ -11,6 +12,44 @@ import (
 	"strings"
 	"time"
 )
+
+type cmdCommand struct {
+	command packer.Command
+	exited <-chan bool
+}
+
+func (c *cmdCommand) Run(e packer.Environment, args []string) (exitCode int) {
+	defer func() {
+		r := recover()
+		c.checkExit(r, func() { exitCode = 1 })
+	}()
+
+	exitCode = c.command.Run(e, args)
+	return
+}
+
+func (c *cmdCommand) Synopsis() (result string) {
+	defer func() {
+		r := recover()
+		c.checkExit(r, func() {
+			result = ""
+		})
+	}()
+
+	result = c.command.Synopsis()
+	return
+}
+
+func (c *cmdCommand) checkExit(p interface{}, cb func()) {
+	select {
+	case <-c.exited:
+		cb()
+	default:
+		if p != nil {
+			log.Panic(p)
+		}
+	}
+}
 
 // Returns a valid packer.Command where the command is executed via RPC
 // to a plugin that is within a subprocess.
@@ -40,9 +79,6 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		// Make sure the command is properly killed in the case of an error
 		if err != nil {
 			cmd.Process.Kill()
-
-			// Log the stderr, which should include any logs from the subprocess
-			log.Print(stderr.String())
 		}
 	}()
 
@@ -51,6 +87,33 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 	go func() {
 		cmd.Wait()
 		cmdExited <- true
+	}()
+
+	// Goroutine to log out the output from the command
+	// TODO: All sorts of things wrong with this. First, we're reading from
+	// a channel that can get consumed elsewhere. Second, the app can end
+	// without properly flushing all the log data. BLah.
+	go func() {
+		buf := bufio.NewReader(stderr)
+
+		for done := false; !done; {
+			select {
+			case <-cmdExited:
+				done = true
+			default:
+			}
+
+			var err error
+			for err == nil {
+				var line string
+				line, err = buf.ReadString('\n')
+				if line != "" {
+					log.Print(line)
+				}
+			}
+
+			time.Sleep(10 * time.Millisecond)
+		}
 	}()
 
 	// Timer for a timeout
@@ -62,7 +125,7 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		case <-cmdExited:
 			err = errors.New("plugin exited before we could connect")
 			done = true
-		case <- cmdTimeout:
+		case <-cmdTimeout:
 			err = errors.New("timeout while waiting for plugin to start")
 			done = true
 		default:
@@ -90,6 +153,10 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		return
 	}
 
-	result = packrpc.Command(client)
+	result = &cmdCommand{
+		packrpc.Command(client),
+		cmdExited,
+	}
+
 	return
 }
