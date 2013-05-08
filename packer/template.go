@@ -102,9 +102,13 @@ func (t *Template) Build(name string, bf BuilderFunc) (b Build, err error) {
 		return
 	}
 
-	builder := bf(builderConfig.builderName)
+	builder, err := bf(builderConfig.builderName)
+	if err != nil {
+		return
+	}
+
 	if builder == nil {
-		err = fmt.Errorf("Builder could not be found: %s", builderConfig.builderName)
+		err = fmt.Errorf("Builder not found: %s", name)
 		return
 	}
 

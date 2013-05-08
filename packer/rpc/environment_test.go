@@ -18,16 +18,16 @@ type testEnvironment struct {
 	uiCalled bool
 }
 
-func (e *testEnvironment) Builder(name string) packer.Builder {
+func (e *testEnvironment) Builder(name string) (packer.Builder, error) {
 	e.builderCalled = true
 	e.builderName = name
-	return testEnvBuilder
+	return testEnvBuilder, nil
 }
 
-func (e *testEnvironment) Cli(args []string) int {
+func (e *testEnvironment) Cli(args []string) (int, error) {
 	e.cliCalled = true
 	e.cliArgs = args
-	return 42
+	return 42, nil
 }
 
 func (e *testEnvironment) Ui() packer.Ui {
@@ -52,7 +52,7 @@ func TestEnvironmentRPC(t *testing.T) {
 	eClient := &Environment{client}
 
 	// Test Builder
-	builder := eClient.Builder("foo")
+	builder, _ := eClient.Builder("foo")
 	assert.True(e.builderCalled, "Builder should be called")
 	assert.Equal(e.builderName, "foo", "Correct name for Builder")
 
@@ -61,7 +61,7 @@ func TestEnvironmentRPC(t *testing.T) {
 
 	// Test Cli
 	cliArgs := []string{"foo", "bar"}
-	result := eClient.Cli(cliArgs)
+	result, _ := eClient.Cli(cliArgs)
 	assert.True(e.cliCalled, "CLI should be called")
 	assert.Equal(e.cliArgs, cliArgs, "args should match")
 	assert.Equal(result, 42, "result shuld be 42")

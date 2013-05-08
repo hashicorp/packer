@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-type BuilderFunc func(name string) Builder
+type BuilderFunc func(name string) (Builder, error)
 
-type CommandFunc func(name string) Command
+type CommandFunc func(name string) (Command, error)
 
 // The environment interface provides access to the configuration and
 // state of a single Packer run.
@@ -19,8 +19,8 @@ type CommandFunc func(name string) Command
 // It allows for things such as executing CLI commands, getting the
 // list of available builders, and more.
 type Environment interface {
-	Builder(name string) Builder
-	Cli(args []string) int
+	Builder(name string) (Builder, error)
+	Cli(args []string) (int, error)
 	Ui() Ui
 }
 
@@ -45,8 +45,8 @@ type EnvironmentConfig struct {
 // be used to create a new enviroment with NewEnvironment with sane defaults.
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
-	config.BuilderFunc = func(string) Builder { return nil }
-	config.CommandFunc = func(string) Command { return nil }
+	config.BuilderFunc = func(string) (Builder, error) { return nil, nil }
+	config.CommandFunc = func(string) (Command, error) { return nil, nil }
 	config.Commands = make([]string, 0)
 	config.Ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return config
@@ -71,16 +71,25 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 
 // Returns a builder of the given name that is registered with this
 // environment.
-func (e *coreEnvironment) Builder(name string) Builder {
-	return e.builderFunc(name)
+func (e *coreEnvironment) Builder(name string) (b Builder, err error) {
+	b, err = e.builderFunc(name)
+	if err != nil {
+		return
+	}
+
+	if b == nil {
+		err = fmt.Errorf("No builder returned for name: %s", name)
+	}
+
+	return
 }
 
 // Executes a command as if it was typed on the command-line interface.
 // The return value is the exit code of the command.
-func (e *coreEnvironment) Cli(args []string) int {
+func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
 		e.printHelp()
-		return 1
+		return 1, nil
 	}
 
 	version := args[0] == "version"
@@ -99,16 +108,19 @@ func (e *coreEnvironment) Cli(args []string) int {
 	}
 
 	if command == nil {
-		command = e.commandFunc(args[0])
+		command, err = e.commandFunc(args[0])
+		if err != nil {
+			return
+		}
 
 		// If we still don't have a command, show the help.
 		if command == nil {
 			e.printHelp()
-			return 1
+			return 1, nil
 		}
 	}
 
-	return command.Run(e, args[1:])
+	return command.Run(e, args[1:]), nil
 }
 
 // Prints the CLI help to the UI.
@@ -131,13 +143,20 @@ func (e *coreEnvironment) printHelp() {
 	e.ui.Say("usage: packer [--version] [--help] <command> [<args>]\n\n")
 	e.ui.Say("Available commands are:\n")
 	for _, key := range e.commands {
-		command := e.commandFunc(key)
+		var synopsis string
+
+		command, err := e.commandFunc(key)
+		if err != nil {
+			synopsis = fmt.Sprintf("Error loading command: %s", err.Error())
+		} else {
+			synopsis = command.Synopsis()
+		}
 
 		// Pad the key with spaces so that they're all the same width
 		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))
 
 		// Output the command and the synopsis
-		e.ui.Say("    %v     %v\n", key, command.Synopsis())
+		e.ui.Say("    %v     %v\n", key, synopsis)
 	}
 }
 

@@ -21,18 +21,25 @@ type EnvironmentCliArgs struct {
 	Args []string
 }
 
-func (e *Environment) Builder(name string) packer.Builder {
+func (e *Environment) Builder(name string) (b packer.Builder, err error) {
 	var reply string
-	e.client.Call("Environment.Builder", name, &reply)
+	err = e.client.Call("Environment.Builder", name, &reply)
+	if err != nil {
+		return
+	}
 
-	// TODO: error handling
-	client, _ := rpc.Dial("tcp", reply)
-	return &Builder{client}
+	client, err := rpc.Dial("tcp", reply)
+	if err != nil {
+		return
+	}
+
+	b = &Builder{client}
+	return
 }
 
-func (e *Environment) Cli(args []string) (result int) {
+func (e *Environment) Cli(args []string) (result int, err error) {
 	rpcArgs := &EnvironmentCliArgs{args}
-	e.client.Call("Environment.Cli", rpcArgs, &result)
+	err = e.client.Call("Environment.Cli", rpcArgs, &result)
 	return
 }
 
@@ -46,7 +53,10 @@ func (e *Environment) Ui() packer.Ui {
 }
 
 func (e *EnvironmentServer) Builder(name *string, reply *string) error {
-	builder := e.env.Builder(*name)
+	builder, err := e.env.Builder(*name)
+	if err != nil {
+		return err
+	}
 
 	// Wrap it
 	server := rpc.NewServer()
@@ -56,9 +66,9 @@ func (e *EnvironmentServer) Builder(name *string, reply *string) error {
 	return nil
 }
 
-func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) error {
-	*reply = e.env.Cli(args.Args)
-	return nil
+func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) (err error) {
+	*reply, err = e.env.Cli(args.Args)
+	return
 }
 
 func (e *EnvironmentServer) Ui(args *interface{}, reply *string) error {
