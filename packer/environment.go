@@ -4,6 +4,7 @@ package packer
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -87,6 +88,8 @@ func (e *coreEnvironment) Builder(name string) (b Builder, err error) {
 // Executes a command as if it was typed on the command-line interface.
 // The return value is the exit code of the command.
 func (e *coreEnvironment) Cli(args []string) (result int, err error) {
+	log.Printf("Environment.Cli: %#v\n", args)
+
 	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
 		e.printHelp()
 		return 1, nil
@@ -115,6 +118,7 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 
 		// If we still don't have a command, show the help.
 		if command == nil {
+			log.Printf("Environment.CLI: command not found: %s\n", args[0])
 			e.printHelp()
 			return 1, nil
 		}

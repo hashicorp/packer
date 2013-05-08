@@ -5,12 +5,21 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 )
 
 func main() {
+	if os.Getenv("PACKER_LOG") == "" {
+		// If we don't have logging explicitly enabled, then disable it
+		log.SetOutput(ioutil.Discard)
+	} else {
+		// Logging is enabled, make sure it goes to stderr
+		log.SetOutput(os.Stderr)
+	}
+
 	defer plugin.CleanupClients()
 
 	commands := map[string]string {
