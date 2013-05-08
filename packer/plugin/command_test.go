@@ -22,3 +22,10 @@ func TestCommand_Good(t *testing.T) {
 	result := command.Synopsis()
 	assert.Equal(result, "1", "should return result")
 }
+
+func TestCommand_CommandExited(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	_, err := Command(helperProcess("im-a-command-that-doesnt-work"))
+	assert.NotNil(err, "should have an error")
+}

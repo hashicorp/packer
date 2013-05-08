@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+	"errors"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
 	"os/exec"
@@ -24,17 +25,27 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		return
 	}
 
-	// TODO: timeout
-	// TODO: check that command is even running
-	address := ""
-	for {
-		line, err := out.ReadBytes('\n')
-		if err == nil {
-			address = strings.TrimSpace(string(line))
-			break
-		}
+	cmdExited := make(chan bool)
+	go func() {
+		cmd.Wait()
+		cmdExited <- true
+	}()
 
-		time.Sleep(10 * time.Millisecond)
+	var address string
+	for done := false; !done; {
+		select {
+		case <-cmdExited:
+			err = errors.New("plugin exited before we could connect")
+			return
+		case <-time.After(10 * time.Millisecond):
+			if line, err := out.ReadBytes('\n'); err == nil {
+				address = strings.TrimSpace(string(line))
+				done = true
+			}
+
+			// Make sure to reset err to nil
+			err = nil
+		}
 	}
 
 	client, err := rpc.Dial("tcp", address)

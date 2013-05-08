@@ -1,10 +1,12 @@
 package plugin
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 )
 
 type helperCommand byte
@@ -38,5 +40,30 @@ func TestHelperProcess(*testing.T) {
 		return
 	}
 
-	ServeCommand(new(helperCommand))
+	args := os.Args
+	for len(args) > 0 {
+		if args[0] == "--" {
+			args = args[1:]
+			break
+		}
+
+		args = args[1:]
+	}
+
+	if len(args) == 0 {
+		fmt.Fprintf(os.Stderr, "No command\n")
+		os.Exit(2)
+	}
+
+	cmd, args := args[0], args[1:]
+	switch cmd {
+	case "command":
+		ServeCommand(new(helperCommand))
+	case "start-timeout":
+		time.Sleep(1 * time.Minute)
+		os.Exit(1)
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %q\n", cmd)
+		os.Exit(2)
+	}
 }
