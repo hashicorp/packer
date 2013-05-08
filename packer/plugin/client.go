@@ -136,6 +136,10 @@ func (c *client) Start() (address string, err error) {
 }
 
 func (c *client) Kill() {
+	if c.cmd.Process == nil {
+		return
+	}
+
 	c.cmd.Process.Kill()
 
 	// Wait for the client to finish logging so we have a complete log
