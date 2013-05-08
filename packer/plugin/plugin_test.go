@@ -40,6 +40,8 @@ func TestHelperProcess(*testing.T) {
 		return
 	}
 
+	defer os.Exit(0)
+
 	args := os.Args
 	for len(args) > 0 {
 		if args[0] == "--" {
@@ -59,6 +61,8 @@ func TestHelperProcess(*testing.T) {
 	switch cmd {
 	case "command":
 		ServeCommand(new(helperCommand))
+	case "invalid-rpc-address":
+		fmt.Println("lolinvalid")
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)

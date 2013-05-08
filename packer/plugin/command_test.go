@@ -28,4 +28,13 @@ func TestCommand_CommandExited(t *testing.T) {
 
 	_, err := Command(helperProcess("im-a-command-that-doesnt-work"))
 	assert.NotNil(err, "should have an error")
+	assert.Equal(err.Error(), "plugin exited before we could connect", "be correct error")
+}
+
+func TestCommand_BadRPC(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	_, err := Command(helperProcess("invalid-rpc-address"))
+	assert.NotNil(err, "should have an error")
+	assert.Equal(err.Error(), "missing port in address lolinvalid", "be correct error")
 }
