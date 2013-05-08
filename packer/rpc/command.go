@@ -18,7 +18,7 @@ type ServerCommand struct {
 }
 
 type CommandRunArgs struct {
-	Env packer.Environment
+	RPCAddress string
 	Args []string
 }
 
@@ -29,8 +29,11 @@ func Command(client *rpc.Client) *ClientCommand {
 }
 
 func (c *ClientCommand) Run(env packer.Environment, args []string) (result int) {
-	// TODO: Environment
-	rpcArgs := &CommandRunArgs{nil, args}
+	// Create and start the server for the Environment
+	server := rpc.NewServer()
+	RegisterEnvironment(server, env)
+
+	rpcArgs := &CommandRunArgs{serveSingleConn(server), args}
 	err := c.client.Call("Command.Run", rpcArgs, &result)
 	if err != nil {
 		panic(err)
@@ -49,7 +52,14 @@ func (c *ClientCommand) Synopsis() (result string) {
 }
 
 func (c *ServerCommand) Run(args *CommandRunArgs, reply *int) error {
-	*reply = c.command.Run(args.Env, args.Args)
+	client, err := rpc.Dial("tcp", args.RPCAddress)
+	if err != nil {
+		return err
+	}
+
+	env := &Environment{client}
+
+	*reply = c.command.Run(env, args.Args)
 	return nil
 }
 

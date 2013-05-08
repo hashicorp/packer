@@ -85,12 +85,21 @@ func TestRPCCommand(t *testing.T) {
 	}
 
 	clientComm := &ClientCommand{client}
+
+	// Test run
 	runArgs := []string{"foo", "bar"}
 	testEnv := &testEnvironment{}
 	exitCode := clientComm.Run(testEnv, runArgs)
-	synopsis := clientComm.Synopsis()
-
 	assert.Equal(command.runArgs, runArgs, "Correct args should be sent")
 	assert.Equal(exitCode, 0, "Exit code should be correct")
+
+	assert.NotNil(command.runEnv, "should have an env")
+	if command.runEnv != nil {
+		command.runEnv.Ui()
+		assert.True(testEnv.uiCalled, "UI should be called on env")
+	}
+
+	// Test Synopsis
+	synopsis := clientComm.Synopsis()
 	assert.Equal(synopsis, "foo", "Synopsis should be correct")
 }
