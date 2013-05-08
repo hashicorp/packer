@@ -16,14 +16,14 @@ func (Command) Run(env packer.Environment, args []string) int {
 	// Read the file into a byte array so that we can parse the template
 	tplData, err := ioutil.ReadFile(args[0])
 	if err != nil {
-		// TODO: Error message
+		env.Ui().Error("Failed to read template file: %s\n", err.Error())
 		return 1
 	}
 
 	// Parse the template into a machine-usable format
 	_, err = packer.ParseTemplate(tplData)
 	if err != nil {
-		// TODO: error message
+		env.Ui().Error("Failed to parse template: %s\n", err.Error())
 		return 1
 	}
 
