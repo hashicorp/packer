@@ -93,6 +93,18 @@ func TestEnvironment_Builder_Error(t *testing.T) {
 	assert.Nil(returnedBuilder, "should be no builder")
 }
 
+func TestEnvironment_Cli_Error(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.CommandFunc = func(n string) (Command, error) { return nil, errors.New("foo") }
+
+	env, _ := NewEnvironment(config)
+	_, err := env.Cli([]string{"foo"})
+	assert.NotNil(err, "should be an error")
+	assert.Equal(err.Error(), "foo", "should be correct error")
+}
+
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
