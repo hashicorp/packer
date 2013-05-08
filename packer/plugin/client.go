@@ -38,6 +38,7 @@ func CleanupClients() {
 		}()
 	}
 
+	log.Println("waiting for all plugin processes to complete...")
 	wg.Wait()
 }
 
@@ -91,6 +92,7 @@ func (c *client) Start() (address string, err error) {
 	// Start goroutine to wait for process to exit
 	go func() {
 		c.cmd.Wait()
+		log.Println("plugin process exited")
 		c.exited = true
 	}()
 
@@ -159,7 +161,7 @@ func (c *client) logStderr(r io.Reader) {
 		}
 
 		var err error
-		for err == nil {
+		for err != io.EOF {
 			var line string
 			line, err = buf.ReadString('\n')
 			if line != "" {

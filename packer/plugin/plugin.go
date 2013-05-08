@@ -77,6 +77,4 @@ func ServeCommand(command packer.Command) {
 	if err := serve(server); err != nil {
 		log.Panic(err)
 	}
-
-	log.Println("Command successfully served. Exiting.")
 }
