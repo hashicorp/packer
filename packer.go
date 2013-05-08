@@ -21,10 +21,10 @@ func main() {
 
 	envConfig := packer.DefaultEnvironmentConfig()
 	envConfig.Commands = commandKeys
-	envConfig.CommandFunc = func(n string) packer.Command {
+	envConfig.CommandFunc = func(n string) (packer.Command, error) {
 		commandBin, ok := commands[n]
 		if !ok {
-			return nil
+			return nil, nil
 		}
 
 		return plugin.Command(exec.Command(commandBin))
@@ -36,5 +36,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	os.Exit(env.Cli(os.Args[1:]))
+	exitCode, _ := env.Cli(os.Args[1:])
+	os.Exit(exitCode)
 }
