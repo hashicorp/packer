@@ -20,16 +20,6 @@ import (
 //
 // This function guarantees the subprocess will end in a timely manner.
 func Command(cmd *exec.Cmd) (result packer.Command, err error) {
-	// Make sure the command is properly cleaned up in the case of
-	// an error.
-	defer func() {
-		if err != nil {
-			if cmd.Process != nil {
-				cmd.Process.Kill()
-			}
-		}
-	}()
-
 	env := []string{
 		"PACKER_PLUGIN_MIN_PORT=10000",
 		"PACKER_PLUGIN_MAX_PORT=25000",
@@ -42,6 +32,14 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 	if err != nil {
 		return
 	}
+
+	// Make sure the command is properly cleaned up in the case of
+	// an error.
+	defer func() {
+		if err != nil {
+			cmd.Process.Kill()
+		}
+	}()
 
 	// Goroutine + channel to signal that the process exited
 	cmdExited := make(chan bool)
