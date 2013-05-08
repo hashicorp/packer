@@ -32,7 +32,7 @@ func serve(server *rpc.Server) (err error) {
 	}
 
 	log.Printf("Plugin minimum port: %d\n", minPort)
-	log.Printf("Plugin maximum port: %d\n", minPort)
+	log.Printf("Plugin maximum port: %d\n", maxPort)
 
 	var address string
 	var listener net.Listener
