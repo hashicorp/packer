@@ -11,7 +11,25 @@ import (
 	"time"
 )
 
+// Returns a valid packer.Command where the command is executed via RPC
+// to a plugin that is within a subprocess.
+//
+// This method will start the given exec.Cmd, which should point to
+// the plugin binary to execute. Some configuration will be done to
+// the command, such as overriding Stdout and some environmental variables.
+//
+// This function guarantees the subprocess will end in a timely manner.
 func Command(cmd *exec.Cmd) (result packer.Command, err error) {
+	// Make sure the command is properly cleaned up in the case of
+	// an error.
+	defer func() {
+		if err != nil {
+			if cmd.Process != nil {
+				cmd.Process.Kill()
+			}
+		}
+	}()
+
 	env := []string{
 		"PACKER_PLUGIN_MIN_PORT=10000",
 		"PACKER_PLUGIN_MAX_PORT=25000",

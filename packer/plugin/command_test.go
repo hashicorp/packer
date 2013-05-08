@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// TODO: Test command cleanup functionality
 // TODO: Test timeout functionality
 
 func TestCommand_NoExist(t *testing.T) {
