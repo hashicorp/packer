@@ -20,7 +20,7 @@ func RegisterBuilder(s *rpc.Server, b packer.Builder) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Command.
 func RegisterCommand(s *rpc.Server, c packer.Command) {
-	s.RegisterName("Command", &ServerCommand{c})
+	s.RegisterName("Command", &CommandServer{c})
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
