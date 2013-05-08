@@ -3,6 +3,7 @@ package build
 import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
+	"log"
 )
 
 type Command byte
@@ -14,6 +15,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Read the file into a byte array so that we can parse the template
+	log.Printf("Reading template: %s\n", args[0])
 	tplData, err := ioutil.ReadFile(args[0])
 	if err != nil {
 		env.Ui().Error("Failed to read template file: %s\n", err.Error())
@@ -21,20 +23,28 @@ func (Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Parse the template into a machine-usable format
-	_, err = packer.ParseTemplate(tplData)
+	log.Println("Parsing template...")
+	tpl, err := packer.ParseTemplate(tplData)
 	if err != nil {
 		env.Ui().Error("Failed to parse template: %s\n", err.Error())
 		return 1
 	}
 
 	// Go through each builder and compile the builds that we care about
-	//builds := make([]Build, 0, len(tpl.Builders))
-	//for name, rawConfig := range tpl.Builders {
-		//builder := env.Builder(name, rawConfig)
-		//build := env.Build(name, builder)
-		//builds = append(builds, build)
-	//}
+	buildNames := tpl.BuildNames()
+	builds := make([]packer.Build, 0, len(buildNames))
+	for _, buildName := range buildNames {
+		log.Printf("Creating build: %s\n", buildName)
+		build, err := tpl.Build(buildName, env.Builder)
+		if err != nil {
+			env.Ui().Error("Failed to create build '%s': \n\n%s\n", buildName, err)
+			return 1
+		}
 
+		builds = append(builds, build)
+	}
+
+	env.Ui().Say("YAY!\n")
 	return 0
 }
 

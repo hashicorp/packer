@@ -124,6 +124,7 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 		}
 	}
 
+	log.Printf("Executing command: %s\n", args[0])
 	return command.Run(e, args[1:]), nil
 }
 
