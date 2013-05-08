@@ -1,6 +1,10 @@
-// The packer/plugin package provides the functionality required for writing
-// Packer plugins in the form of static binaries that are then executed and
-// run. It also contains the functions necessary to run these external plugins.
+// The plugin package provides the functionality to both expose a Packer
+// plugin binary and to connect to an existing Packer plugin binary.
+//
+// Packer supports plugins in the form of self-contained external static
+// Go binaries. These binaries behave in a certain way (enforced by this
+// package) and are connected to in a certain way (also enforced by this
+// package).
 package plugin
 
 import (
