@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	defer plugin.CleanupClients()
+
 	commands := map[string]string {
 		"build": "packer-build",
 	}
