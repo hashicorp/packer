@@ -14,11 +14,13 @@ import (
 type client struct {
 	cmd *exec.Cmd
 	exited bool
+	doneLogging bool
 }
 
 func NewClient(cmd *exec.Cmd) *client {
 	return &client{
 		cmd,
+		false,
 		false,
 	}
 }
@@ -104,6 +106,18 @@ func (c *client) Start() (address string, err error) {
 
 func (c *client) Kill() {
 	c.cmd.Process.Kill()
+
+	// Wait for the client to finish logging so we have a complete log
+	done := make(chan bool)
+	go func() {
+		for !c.doneLogging {
+			time.Sleep(10 * time.Millisecond)
+		}
+
+		done <- true
+	}()
+
+	<-done
 }
 
 func (c *client) logStderr(r io.Reader) {
@@ -125,4 +139,7 @@ func (c *client) logStderr(r io.Reader) {
 
 		time.Sleep(10 * time.Millisecond)
 	}
+
+	// Flag that we've completed logging for others
+	c.doneLogging = true
 }
