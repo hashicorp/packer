@@ -22,9 +22,21 @@ type UiSayArgs struct {
 	Vars []interface{}
 }
 
+func (u *Ui) Error(format string, a ...interface{}) {
+	args := &UiSayArgs{format, a}
+	u.client.Call("Ui.Error", args, new(interface{}))
+}
+
 func (u *Ui) Say(format string, a ...interface{}) {
 	args := &UiSayArgs{format, a}
 	u.client.Call("Ui.Say", args, new(interface{}))
+}
+
+func (u *UiServer) Error(args *UiSayArgs, reply *interface{}) error {
+	u.ui.Error(args.Format, args.Vars...)
+
+	*reply = nil
+	return nil
 }
 
 func (u *UiServer) Say(args *UiSayArgs, reply *interface{}) error {

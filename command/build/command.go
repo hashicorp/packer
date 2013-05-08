@@ -9,7 +9,7 @@ type Command byte
 
 func (Command) Run(env packer.Environment, args []string) int {
 	if len(args) != 1 {
-		// TODO: Error message
+		env.Ui().Error("A single template argument is required.\n")
 		return 1
 	}
 

@@ -13,6 +13,18 @@ func testUi() *ReaderWriterUi {
 	}
 }
 
+func TestReaderWriterUi_Error(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	bufferUi := testUi()
+
+	bufferUi.Error("foo")
+	assert.Equal(readWriter(bufferUi), "foo", "basic output")
+
+	bufferUi.Error("%d", 5)
+	assert.Equal(readWriter(bufferUi), "5", "formatting")
+}
+
 func TestReaderWriterUi_Say(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

@@ -8,6 +8,7 @@ import "io"
 // is formatted and various levels of output.
 type Ui interface {
 	Say(format string, a ...interface{})
+	Error(format string, a...interface{})
 }
 
 // The ReaderWriterUi is a UI that writes and reads from standard Go
@@ -18,5 +19,9 @@ type ReaderWriterUi struct {
 }
 
 func (rw *ReaderWriterUi) Say(format string, a ...interface{}) {
+	fmt.Fprintf(rw.Writer, format, a...)
+}
+
+func (rw *ReaderWriterUi) Error(format string, a ...interface{}) {
 	fmt.Fprintf(rw.Writer, format, a...)
 }

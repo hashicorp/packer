@@ -7,9 +7,18 @@ import (
 )
 
 type testUi struct {
+	errorCalled bool
+	errorFormat string
+	errorVars []interface{}
 	sayCalled bool
 	sayFormat string
 	sayVars []interface{}
+}
+
+func (u *testUi) Error(format string, a ...interface{}) {
+	u.errorCalled = true
+	u.errorFormat = format
+	u.errorVars = a
 }
 
 func (u *testUi) Say(format string, a ...interface{}) {
@@ -36,7 +45,10 @@ func TestUiRPC(t *testing.T) {
 	}
 
 	uiClient := &Ui{client}
-	uiClient.Say("format", "arg0", 42)
 
+	uiClient.Error("format", "arg0", 42)
+	assert.Equal(ui.errorFormat, "format", "format should be correct")
+
+	uiClient.Say("format", "arg0", 42)
 	assert.Equal(ui.sayFormat, "format", "format should be correct")
 }
