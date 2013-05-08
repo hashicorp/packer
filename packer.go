@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
-
 	commands := map[string]string {
 		"build": "packer-build",
 	}

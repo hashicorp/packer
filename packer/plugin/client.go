@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"io"
@@ -152,9 +151,7 @@ func (c *client) Kill() {
 	<-done
 }
 
-func (c *client) logStderr(r io.Reader) {
-	buf := bufio.NewReader(r)
-
+func (c *client) logStderr(buf *bytes.Buffer) {
 	for done := false; !done; {
 		if c.Exited() {
 			done = true
