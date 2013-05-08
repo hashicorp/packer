@@ -10,6 +10,7 @@ package plugin
 import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"net"
 	"net/rpc"
 	"os"
@@ -30,6 +31,9 @@ func serve(server *rpc.Server) (err error) {
 		return
 	}
 
+	log.Printf("Plugin minimum port: %d\n", minPort)
+	log.Printf("Plugin maximum port: %d\n", minPort)
+
 	var address string
 	var listener net.Listener
 	for port := minPort; port <= maxPort; port++ {
@@ -45,26 +49,34 @@ func serve(server *rpc.Server) (err error) {
 	defer listener.Close()
 
 	// Output the address to stdout
+	log.Printf("Plugin address: %s\n", address)
 	fmt.Println(address)
 	os.Stdout.Sync()
 
 	// Accept a connection
+	log.Println("Waiting for connection...")
 	conn, err := listener.Accept()
 	if err != nil {
+		log.Printf("Error accepting connection: %s\n", err.Error())
 		return
 	}
 
 	// Serve a single connection
+	log.Println("Serving a plugin connection...")
 	server.ServeConn(conn)
 	return
 }
 
 // Serves a command from a plugin.
 func ServeCommand(command packer.Command) {
+	log.Println("Preparing to serve a command plugin...")
+
 	server := rpc.NewServer()
 	packrpc.RegisterCommand(server, command)
 
 	if err := serve(server); err != nil {
-		panic(err)
+		log.Panic(err)
 	}
+
+	log.Println("Command successfully served. Exiting.")
 }

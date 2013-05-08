@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -22,8 +23,10 @@ func main() {
 	envConfig := packer.DefaultEnvironmentConfig()
 	envConfig.Commands = commandKeys
 	envConfig.CommandFunc = func(n string) (packer.Command, error) {
+		log.Printf("Loading command: %s\n", n)
 		commandBin, ok := commands[n]
 		if !ok {
+			log.Printf("Command not found: %s\n", n)
 			return nil, nil
 		}
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"net/rpc"
 	"os/exec"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
@@ -25,19 +26,23 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		"PACKER_PLUGIN_MAX_PORT=25000",
 	}
 
-	out := new(bytes.Buffer)
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
 	cmd.Env = append(cmd.Env, env...)
-	cmd.Stdout = out
+	cmd.Stderr = stderr
+	cmd.Stdout = stdout
 	err = cmd.Start()
 	if err != nil {
 		return
 	}
 
-	// Make sure the command is properly cleaned up in the case of
-	// an error.
 	defer func() {
+		// Make sure the command is properly killed in the case of an error
 		if err != nil {
 			cmd.Process.Kill()
+
+			// Log the stderr, which should include any logs from the subprocess
+			log.Print(stderr.String())
 		}
 	}()
 
@@ -63,7 +68,7 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		default:
 		}
 
-		if line, lerr := out.ReadBytes('\n'); lerr == nil {
+		if line, lerr := stdout.ReadBytes('\n'); lerr == nil {
 			// Trim the address and reset the err since we were able
 			// to read some sort of address.
 			address = strings.TrimSpace(string(line))
