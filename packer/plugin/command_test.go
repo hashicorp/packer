@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// TODO: Test timeout functionality
+
 func TestCommand_NoExist(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

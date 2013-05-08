@@ -25,17 +25,24 @@ func Command(cmd *exec.Cmd) (result packer.Command, err error) {
 		return
 	}
 
+	// Goroutine + channel to signal that the process exited
 	cmdExited := make(chan bool)
 	go func() {
 		cmd.Wait()
 		cmdExited <- true
 	}()
 
+	// Timer for a timeout
+	cmdTimeout := time.After(1 * time.Minute)
+
 	var address string
 	for done := false; !done; {
 		select {
 		case <-cmdExited:
 			err = errors.New("plugin exited before we could connect")
+			done = true
+		case <- cmdTimeout:
+			err = errors.New("timeout while waiting for plugin to start")
 			done = true
 		default:
 		}
