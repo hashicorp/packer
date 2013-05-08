@@ -8,13 +8,37 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 )
+
+// This is a slice of the "managed" clients which are cleaned up when
+// calling Cleanup
+var managedClients = make([]*client, 0, 5)
 
 type client struct {
 	cmd *exec.Cmd
 	exited bool
 	doneLogging bool
+}
+
+// This makes sure all the managed subprocesses are killed and properly
+// logged. This should be called before the parent process running the
+// plugins exits.
+func CleanupClients() {
+	// Kill all the managed clients in parallel and use a WaitGroup
+	// to wait for them all to finish up.
+	var wg sync.WaitGroup
+	for _, client := range managedClients {
+		wg.Add(1)
+
+		go func() {
+			client.Kill()
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
 }
 
 func NewClient(cmd *exec.Cmd) *client {
@@ -23,6 +47,12 @@ func NewClient(cmd *exec.Cmd) *client {
 		false,
 		false,
 	}
+}
+
+func NewManagedClient(cmd *exec.Cmd) (result *client) {
+	result = NewClient(cmd)
+	managedClients = append(managedClients, result)
+	return
 }
 
 func (c *client) Exited() bool {

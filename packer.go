@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"time"
 )
 
 func main() {
@@ -41,6 +40,6 @@ func main() {
 	}
 
 	exitCode, _ := env.Cli(os.Args[1:])
-	time.Sleep(1 * time.Second)
+	plugin.CleanupClients()
 	os.Exit(exitCode)
 }
