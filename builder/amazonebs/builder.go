@@ -18,6 +18,10 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
+	// Marshal and unmarshal the raw configuration as a way to get it
+	// into our "config" struct.
+	// TODO: Use the reflection package and provide this as an API for
+	// better error messages
 	jsonBytes, err := json.Marshal(raw)
 	if err != nil {
 		return
