@@ -81,11 +81,9 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 // BuildNames returns a slice of the available names of builds that
 // this template represents.
 func (t *Template) BuildNames() []string {
-	names := make([]string, len(t.Builders))
-	i := 0
+	names := make([]string, 0, len(t.Builders))
 	for name, _ := range t.Builders {
-		names[i] = name
-		i++
+		names = append(names, name)
 	}
 
 	return names
