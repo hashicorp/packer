@@ -37,7 +37,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 		log.Printf("Creating build: %s\n", buildName)
 		build, err := tpl.Build(buildName, env.Builder)
 		if err != nil {
-			env.Ui().Error("Failed to create build '%s': \n\n%s\n", buildName, err)
+			env.Ui().Error("Failed to create build '%s': \n\n%s\n", buildName, err.Error())
 			return 1
 		}
 
