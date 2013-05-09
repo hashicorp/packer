@@ -1,3 +1,8 @@
+// The amazonebs package contains a packer.Builder implementation that
+// builds AMIs for Amazon EC2.
+//
+// In general, there are two types of AMIs that can be created: ebs-backed or
+// instance-store. This builder _only_ builds ebs-backed images.
 package amazonebs
 
 import (
