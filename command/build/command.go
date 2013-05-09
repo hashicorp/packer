@@ -44,6 +44,12 @@ func (Command) Run(env packer.Environment, args []string) int {
 		builds = append(builds, build)
 	}
 
+	// Prepare all the builds
+	for _, b := range builds {
+		log.Printf("Preparing build: %s\n", b.Name())
+		b.Prepare()
+	}
+
 	env.Ui().Say("YAY!\n")
 	return 0
 }

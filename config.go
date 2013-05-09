@@ -11,6 +11,9 @@ import (
 // This is the default, built-in configuration that ships with
 // Packer.
 const defaultConfig = `
+[builders]
+amazon-ebs = "packer-builder-amazon-ebs"
+
 [commands]
 build = "packer-command-build"
 `

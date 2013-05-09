@@ -65,7 +65,7 @@ func TestBuilderRPC(t *testing.T) {
 	}
 }
 
-func TestBuilder_ImplementsBuild(t *testing.T) {
+func TestBuilder_ImplementsBuilder(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	var realBuilder packer.Builder

@@ -3,6 +3,7 @@ package packer
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
+	Name() string
 	Prepare() error
 	Run(ui Ui)
 }
@@ -31,6 +32,11 @@ type coreBuild struct {
 type Builder interface {
 	Prepare(config interface{}) error
 	Run(build Build, ui Ui)
+}
+
+// Returns the name of the build.
+func (b *coreBuild) Name() string {
+	return b.name
 }
 
 // Prepare prepares the build by doing some initialization for the builder

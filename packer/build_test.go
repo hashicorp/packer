@@ -37,6 +37,13 @@ func testBuilder() *TestBuilder {
 	return &TestBuilder{}
 }
 
+func TestBuild_Name(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	build := testBuild()
+	assert.Equal(build.Name(), "test", "should have a name")
+}
+
 func TestBuild_Prepare(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
