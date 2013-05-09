@@ -24,6 +24,8 @@ type client struct {
 // This makes sure all the managed subprocesses are killed and properly
 // logged. This should be called before the parent process running the
 // plugins exits.
+//
+// This must only be called _once_.
 func CleanupClients() {
 	// Kill all the managed clients in parallel and use a WaitGroup
 	// to wait for them all to finish up.
@@ -41,6 +43,13 @@ func CleanupClients() {
 	wg.Wait()
 }
 
+// Creates a new plugin client which manages the lifecycle of an external
+// plugin and gets the address for the RPC connection.
+//
+// The client must be cleaned up at some point by calling Kill(). If
+// the client is a managed client (created with NewManagedClient) you
+// can just call CleanupClients at the end of your program and they will
+// be properly cleaned.
 func NewClient(cmd *exec.Cmd) *client {
 	return &client{
 		cmd,
@@ -49,17 +58,31 @@ func NewClient(cmd *exec.Cmd) *client {
 	}
 }
 
+// Creates a new client that is managed, meaning it'll automatically be
+// cleaned up when CleanupClients() is called at some point. Please see
+// the documentation for CleanupClients() for more information on how
+// managed clients work.
 func NewManagedClient(cmd *exec.Cmd) (result *client) {
 	result = NewClient(cmd)
 	managedClients = append(managedClients, result)
 	return
 }
 
+// Tells whether or not the underlying process has exited.
 func (c *client) Exited() bool {
 	return c.exited
 }
 
+// Starts the underlying subprocess, communicating with it to negotiate
+// a port for RPC connections, and returning the address to connect via RPC.
+//
+// This method is safe to call multiple times. Subsequent calls have no effect.
+// Once a client has been started once, it cannot be started again, even if
+// it was killed.
 func (c *client) Start() (address string, err error) {
+	// TODO: Make only run once
+	// TODO: Mutex
+
 	env := []string{
 		"PACKER_PLUGIN_MIN_PORT=10000",
 		"PACKER_PLUGIN_MAX_PORT=25000",
@@ -135,6 +158,12 @@ func (c *client) Start() (address string, err error) {
 	return
 }
 
+// End the executing subprocess (if it is running) and perform any cleanup
+// tasks necessary such as capturing any remaining logs and so on.
+//
+// This method blocks until the process successfully exits.
+//
+// This method can safely be called multiple times.
 func (c *client) Kill() {
 	if c.cmd.Process == nil {
 		return
