@@ -2,7 +2,6 @@ package amazonebs
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -19,12 +18,6 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
-	_, ok := raw.(map[string]interface{})
-	if !ok {
-		err = errors.New("configuration isn't a valid map")
-		return
-	}
-
 	jsonBytes, err := json.Marshal(raw)
 	if err != nil {
 		return

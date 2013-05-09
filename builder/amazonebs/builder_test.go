@@ -13,15 +13,6 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 	assert.Implementor(&Builder{}, &actual, "should be a Builder")
 }
 
-func TestBuilder_Prepare_NotMap(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	b := &Builder{}
-	err := b.Prepare(42)
-	assert.NotNil(err, "should have an error")
-	assert.Equal(err.Error(), "configuration isn't a valid map", "config is not a map")
-}
-
 func TestBuilder_Prepare_BadType(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

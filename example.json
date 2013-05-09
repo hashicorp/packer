@@ -5,7 +5,7 @@
         {
             "type": "amazon-ebs",
             "region": "us-east-1",
-            "source": "ami-de0d9eb7"
+            "source_ami": "ami-de0d9eb7"
         }
     ],
 
