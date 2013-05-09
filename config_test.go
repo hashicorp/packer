@@ -17,6 +17,13 @@ func TestConfig_ParseConfig_Bad(t *testing.T) {
 	assert.NotNil(err, "should have an error")
 }
 
+func TestConfig_ParseConfig_DefaultConfig(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	_, err := parseConfig(defaultConfig)
+	assert.Nil(err, "should be able to parse the default config")
+}
+
 func TestConfig_ParseConfig_Good(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
