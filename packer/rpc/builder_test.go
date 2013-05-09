@@ -43,7 +43,7 @@ func TestBuilderRPC(t *testing.T) {
 
 	// Test Prepare
 	config := 42
-	bClient := &Builder{client}
+	bClient := Builder(client)
 	bClient.Prepare(config)
 	assert.True(b.prepareCalled, "prepare should be called")
 	assert.Equal(b.prepareConfig, 42, "prepare should be called with right arg")
@@ -68,7 +68,7 @@ func TestBuilder_ImplementsBuild(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	var realBuilder packer.Builder
-	b := &Builder{nil}
+	b := Builder(nil)
 
 	assert.Implementor(b, &realBuilder, "should be a Builder")
 }

@@ -2,22 +2,11 @@ package plugin
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
 )
-
-type helperCommand byte
-
-func (helperCommand) Run(packer.Environment, []string) int {
-	return 42
-}
-
-func (helperCommand) Synopsis() string {
-	return "1"
-}
 
 func helperProcess(s... string) *exec.Cmd {
 	cs := []string{"-test.run=TestHelperProcess", "--"}
@@ -59,6 +48,8 @@ func TestHelperProcess(*testing.T) {
 
 	cmd, args := args[0], args[1:]
 	switch cmd {
+	case "builder":
+		ServeBuilder(new(helperBuilder))
 	case "command":
 		ServeCommand(new(helperCommand))
 	case "invalid-rpc-address":

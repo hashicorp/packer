@@ -16,6 +16,7 @@ import (
 	"os"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"strconv"
+	"strings"
 )
 
 // This serves a single RPC connection on the given RPC server on
@@ -40,7 +41,14 @@ func serve(server *rpc.Server) (err error) {
 		address = fmt.Sprintf(":%d", port)
 		listener, err = net.Listen("tcp", address)
 		if err != nil {
-			return
+			if !strings.Contains(err.Error(), "address already in use") {
+				// Not an address already in use error, return.
+				return
+			} else {
+				// Address is in use, just try another
+				err = nil
+				continue
+			}
 		}
 
 		break
@@ -65,6 +73,18 @@ func serve(server *rpc.Server) (err error) {
 	log.Println("Serving a plugin connection...")
 	server.ServeConn(conn)
 	return
+}
+
+// Serves a builder from a plugin.
+func ServeBuilder(builder packer.Builder) {
+	log.Println("Preparing to serve a builder plugin...")
+
+	server := rpc.NewServer()
+	packrpc.RegisterBuilder(server, builder)
+
+	if err := serve(server); err != nil {
+		log.Panic(err)
+	}
 }
 
 // Serves a command from a plugin.

@@ -2,12 +2,23 @@ package plugin
 
 import (
 	"cgl.tideland.biz/asserts"
+	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"testing"
 )
 
 // TODO: Test command cleanup functionality
 // TODO: Test timeout functionality
+
+type helperCommand byte
+
+func (helperCommand) Run(packer.Environment, []string) int {
+	return 42
+}
+
+func (helperCommand) Synopsis() string {
+	return "1"
+}
 
 func TestCommand_NoExist(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
@@ -22,8 +33,11 @@ func TestCommand_Good(t *testing.T) {
 	command, err := Command(helperProcess("command"))
 	assert.Nil(err, "should start command properly")
 
-	result := command.Synopsis()
-	assert.Equal(result, "1", "should return result")
+	assert.NotNil(command, "should have a command")
+	if command != nil {
+		result := command.Synopsis()
+		assert.Equal(result, "1", "should return result")
+	}
 }
 
 func TestCommand_CommandExited(t *testing.T) {
