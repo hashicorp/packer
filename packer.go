@@ -84,6 +84,7 @@ func main() {
 	}
 
 	envConfig := packer.DefaultEnvironmentConfig()
+	envConfig.BuilderFunc = config.LoadBuilder
 	envConfig.Commands = config.CommandNames()
 	envConfig.CommandFunc = config.LoadCommand
 

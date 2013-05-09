@@ -64,6 +64,17 @@ func (c *config) CommandNames() (result []string) {
 	return
 }
 
+func (c *config) LoadBuilder(name string) (packer.Builder, error) {
+	log.Printf("Loading builder: %s\n", name)
+	bin, ok := c.Builders[name]
+	if !ok {
+		log.Printf("Builder not found: %s\n", name)
+		return nil, nil
+	}
+
+	return plugin.Builder(exec.Command(bin))
+}
+
 // This is a proper packer.CommandFunc that can be used to load packer.Command
 // implementations from the defined plugins.
 func (c *config) LoadCommand(name string) (packer.Command, error) {

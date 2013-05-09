@@ -33,7 +33,7 @@ func (e *Environment) Builder(name string) (b packer.Builder, err error) {
 		return
 	}
 
-	b = &Builder{client}
+	b = Builder(client)
 	return
 }
 

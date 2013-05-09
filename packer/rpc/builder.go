@@ -7,7 +7,7 @@ import (
 
 // An implementation of packer.Builder where the builder is actually executed
 // over an RPC connection.
-type Builder struct {
+type builder struct {
 	client *rpc.Client
 }
 
@@ -25,11 +25,15 @@ type BuilderRunArgs struct {
 	RPCAddress string
 }
 
-func (b *Builder) Prepare(config interface{}) {
+func Builder(client *rpc.Client) *builder {
+	return &builder{client}
+}
+
+func (b *builder) Prepare(config interface{}) {
 	b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, new(interface{}))
 }
 
-func (b *Builder) Run(build packer.Build, ui packer.Ui) {
+func (b *builder) Run(build packer.Build, ui packer.Ui) {
 	// Create and start the server for the Build and UI
 	// TODO: Error handling
 	server := rpc.NewServer()
