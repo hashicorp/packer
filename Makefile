@@ -10,6 +10,8 @@ all:
 	go get -d -v ./...
 	@echo "$(OK_COLOR)--> Compiling Packer...$(NO_COLOR)"
 	go build -v -o bin/packer
+	@echo "$(OK_COLOR)--> Compiling Builder: Amazon EBS...$(NO_COLOR)"
+	$(MAKE) -C plugin/builder-amazon-ebs
 	@echo "$(OK_COLOR)--> Compiling Command: Build...$(NO_COLOR)"
 	$(MAKE) -C plugin/command-build
 
