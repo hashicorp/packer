@@ -166,7 +166,7 @@ func (c *client) logStderr(buf *bytes.Buffer) {
 			var line string
 			line, err = buf.ReadString('\n')
 			if line != "" {
-				log.Print(line)
+				log.Printf("%s: %s", c.cmd.Path, line)
 			}
 		}
 
