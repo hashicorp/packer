@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
 type config struct {
@@ -34,6 +35,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		return
 	}
 
+	log.Printf("Config: %+v\n", b.config)
 	return
 }
 

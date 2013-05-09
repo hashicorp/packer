@@ -1,5 +1,7 @@
 package packer
 
+import "log"
+
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
@@ -41,9 +43,14 @@ func (b *coreBuild) Name() string {
 
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
-func (b *coreBuild) Prepare() error {
+func (b *coreBuild) Prepare() (err error) {
 	b.prepareCalled = true
-	return b.builder.Prepare(b.rawConfig)
+	err = b.builder.Prepare(b.rawConfig)
+	if err != nil {
+		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
+	}
+
+	return
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
