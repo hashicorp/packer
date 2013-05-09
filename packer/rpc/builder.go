@@ -30,7 +30,11 @@ func Builder(client *rpc.Client) *builder {
 }
 
 func (b *builder) Prepare(config interface{}) (err error) {
-	b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &err)
+	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &err)
+	if cerr != nil {
+		err = cerr
+	}
+
 	return
 }
 
@@ -46,7 +50,11 @@ func (b *builder) Run(build packer.Build, ui packer.Ui) {
 }
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
-	*reply = b.builder.Prepare(args.Config)
+	err := b.builder.Prepare(args.Config)
+	if err != nil {
+		*reply = NewBasicError(err)
+	}
+
 	return nil
 }
 

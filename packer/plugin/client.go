@@ -91,7 +91,7 @@ func (c *client) Start() (address string, err error) {
 	// Start goroutine to wait for process to exit
 	go func() {
 		c.cmd.Wait()
-		log.Println("plugin process exited")
+		log.Printf("%s: plugin process exited\n", c.cmd.Path)
 		c.exited = true
 	}()
 
