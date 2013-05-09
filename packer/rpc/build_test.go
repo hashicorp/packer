@@ -13,8 +13,9 @@ type testBuild struct {
 	runUi packer.Ui
 }
 
-func (b *testBuild) Prepare() {
+func (b *testBuild) Prepare() error {
 	b.prepareCalled = true
+	return nil
 }
 
 func (b *testBuild) Run(ui packer.Ui) {

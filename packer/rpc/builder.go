@@ -29,8 +29,9 @@ func Builder(client *rpc.Client) *builder {
 	return &builder{client}
 }
 
-func (b *builder) Prepare(config interface{}) {
-	b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, new(interface{}))
+func (b *builder) Prepare(config interface{}) (err error) {
+	b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &err)
+	return
 }
 
 func (b *builder) Run(build packer.Build, ui packer.Ui) {
@@ -44,9 +45,8 @@ func (b *builder) Run(build packer.Build, ui packer.Ui) {
 	b.client.Call("Builder.Run", args, new(interface{}))
 }
 
-func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *interface{}) error {
-	b.builder.Prepare(args.Config)
-	*reply = nil
+func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
+	*reply = b.builder.Prepare(args.Config)
 	return nil
 }
 

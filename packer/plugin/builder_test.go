@@ -9,7 +9,9 @@ import (
 
 type helperBuilder byte
 
-func (helperBuilder) Prepare(interface{}) {}
+func (helperBuilder) Prepare(interface{}) error {
+	return nil
+}
 
 func (helperBuilder) Run(packer.Build, packer.Ui) {}
 

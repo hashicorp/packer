@@ -15,6 +15,8 @@ type Builder struct {
 	config config
 }
 
-func (*Builder) Prepare(interface{}) {}
+func (*Builder) Prepare(interface{}) error {
+	return nil
+}
 
 func (*Builder) Run(packer.Build, packer.Ui) {}

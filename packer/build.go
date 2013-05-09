@@ -3,7 +3,7 @@ package packer
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
-	Prepare()
+	Prepare() error
 	Run(ui Ui)
 }
 
@@ -29,15 +29,15 @@ type coreBuild struct {
 //
 // Run is where the actual build should take place. It takes a Build and a Ui.
 type Builder interface {
-	Prepare(config interface{})
+	Prepare(config interface{}) error
 	Run(build Build, ui Ui)
 }
 
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
-func (b *coreBuild) Prepare() {
+func (b *coreBuild) Prepare() error {
 	b.prepareCalled = true
-	b.builder.Prepare(b.rawConfig)
+	return b.builder.Prepare(b.rawConfig)
 }
 
 // Runs the actual build. Prepare must be called prior to running this.

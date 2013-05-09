@@ -13,9 +13,10 @@ type TestBuilder struct {
 	runUi Ui
 }
 
-func (tb *TestBuilder) Prepare(config interface{}) {
+func (tb *TestBuilder) Prepare(config interface{}) error {
 	tb.prepareCalled = true
 	tb.prepareConfig = config
+	return nil
 }
 
 func (tb *TestBuilder) Run(b Build, ui Ui) {

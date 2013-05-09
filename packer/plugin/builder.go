@@ -13,13 +13,13 @@ type cmdBuilder struct {
 	client *client
 }
 
-func (b *cmdBuilder) Prepare(config interface{}) {
+func (b *cmdBuilder) Prepare(config interface{}) error {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)
 	}()
 
-	b.builder.Prepare(config)
+	return b.builder.Prepare(config)
 }
 
 func (b *cmdBuilder) Run(build packer.Build, ui packer.Ui) {

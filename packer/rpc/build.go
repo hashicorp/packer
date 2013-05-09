@@ -23,8 +23,9 @@ type BuildRunArgs struct {
 	UiRPCAddress string
 }
 
-func (b *Build) Prepare() {
-	b.client.Call("Build.Prepare", new(interface{}), new(interface{}))
+func (b *Build) Prepare() (err error) {
+	b.client.Call("Build.Prepare", new(interface{}), &err)
+	return
 }
 
 func (b *Build) Run(ui packer.Ui) {
@@ -36,10 +37,8 @@ func (b *Build) Run(ui packer.Ui) {
 	b.client.Call("Build.Run", args, new(interface{}))
 }
 
-func (b *BuildServer) Prepare(args *BuildPrepareArgs, reply *interface{}) error {
-	b.build.Prepare()
-
-	*reply = nil
+func (b *BuildServer) Prepare(args *BuildPrepareArgs, reply *error) error {
+	*reply = b.build.Prepare()
 	return nil
 }
 

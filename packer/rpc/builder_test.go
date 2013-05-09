@@ -15,9 +15,10 @@ type testBuilder struct {
 	runUi packer.Ui
 }
 
-func (b *testBuilder) Prepare(config interface{}) {
+func (b *testBuilder) Prepare(config interface{}) error {
 	b.prepareCalled = true
 	b.prepareConfig = config
+	return nil
 }
 
 func (b *testBuilder) Run(build packer.Build, ui packer.Ui) {
