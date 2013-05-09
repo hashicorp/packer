@@ -20,6 +20,33 @@ type config struct {
 	Commands map[string]string
 }
 
+// Merge the configurations. Anything in the "new" configuration takes
+// precedence over the "old" configuration.
+func mergeConfig(a, b *config) *config {
+	configs := []*config{a, b}
+	result := newConfig()
+
+	for _, config := range configs {
+		for k, v := range config.Builders {
+			result.Builders[k] = v
+		}
+
+		for k, v := range config.Commands {
+			result.Commands[k] = v
+		}
+	}
+
+	return result
+}
+
+// Creates and initializes a new config struct.
+func newConfig() *config {
+	result := new(config)
+	result.Builders = make(map[string]string)
+	result.Commands = make(map[string]string)
+	return result
+}
+
 // Parses a configuration file and returns a proper configuration
 // struct.
 func parseConfig(data string) (result *config, err error) {

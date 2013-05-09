@@ -5,6 +5,31 @@ import (
 	"testing"
 )
 
+func TestConfig_MergeConfig(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	aString := `
+	[commands]
+	a = "1"
+	b = "1"
+	`
+
+	bString := `
+	[commands]
+	a = "1"
+	b = "2"
+	c = "3"
+	`
+
+	a, _ := parseConfig(aString)
+	b, _ := parseConfig(bString)
+	result := mergeConfig(a, b)
+
+	assert.Equal(result.Commands["a"], "1", "a should be 1")
+	assert.Equal(result.Commands["b"], "2", "a should be 2")
+	assert.Equal(result.Commands["c"], "3", "a should be 3")
+}
+
 func TestConfig_ParseConfig_Bad(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
