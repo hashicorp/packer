@@ -8,8 +8,47 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
+	"path"
 	"runtime"
 )
+
+func loadGlobalConfig() (result *config, err error) {
+	mustExist := true
+	p := os.Getenv("PACKER_CONFIG")
+	if p == "" {
+		var u *user.User
+		u, err = user.Current()
+		if err != nil {
+			return
+		}
+
+		p = path.Join(u.HomeDir, ".packerrc")
+		mustExist = false
+	}
+
+	log.Printf("Loading packer config: %s\n", p)
+	contents, err := ioutil.ReadFile(p)
+	if err != nil && !mustExist {
+		// Don't report an error if it is okay if the file is missing
+		perr, ok := err.(*os.PathError)
+		if ok && perr.Op == "open" {
+			log.Printf("Packer config didn't exist. Ignoring: %s\n", p)
+			err = nil
+		}
+	}
+
+	if err != nil {
+		return
+	}
+
+	result, err = parseConfig(string(contents))
+	if err != nil {
+		return
+	}
+
+	return
+}
 
 func main() {
 	if os.Getenv("PACKER_LOG") == "" {
@@ -27,10 +66,21 @@ func main() {
 
 	defer plugin.CleanupClients()
 
-	config, err := parseConfig(defaultConfig)
+	homeConfig, err := loadGlobalConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading global Packer configuration: \n\n%s\n", err)
 		os.Exit(1)
+	}
+
+	config, err := parseConfig(defaultConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing global Packer configuration: \n\n%s\n", err)
+		os.Exit(1)
+	}
+
+	if homeConfig != nil {
+		log.Println("Merging default config with home config...")
+		config = mergeConfig(config, homeConfig)
 	}
 
 	envConfig := packer.DefaultEnvironmentConfig()
