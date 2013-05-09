@@ -21,9 +21,14 @@ func main() {
 
 	defer plugin.CleanupClients()
 
-	config := defaultConfig()
+	config, err := parseConfig(defaultConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading global Packer configuration: \n\n%s\n", err)
+		os.Exit(1)
+	}
+
 	envConfig := packer.DefaultEnvironmentConfig()
-	envConfig.Commands = config.Commands()
+	envConfig.Commands = config.CommandNames()
 	envConfig.CommandFunc = config.LoadCommand
 
 	env, err := packer.NewEnvironment(envConfig)

@@ -1,43 +1,47 @@
 package main
 
 import (
-	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"log"
 	"os/exec"
 )
 
+// This is the default, built-in configuration that ships with
+// Packer.
+const defaultConfig = `
+[commands]
+build = "packer-command-build"
+`
+
 type config struct {
-	builds map[string]string
-	commands map[string]string
+	Builders map[string]string
+	Commands map[string]string
 }
 
-func defaultConfig() (result *config) {
-	commands := []string{"build"}
-
+// Parses a configuration file and returns a proper configuration
+// struct.
+func parseConfig(data string) (result *config, err error) {
 	result = new(config)
-	result.builds = make(map[string]string)
-	result.commands = make(map[string]string)
-
-	for _, name := range commands {
-		result.commands[name] = fmt.Sprintf("packer-command-%s", name)
-	}
-
+	_, err = toml.Decode(data, &result)
 	return
 }
 
-func (c *config) Commands() (result []string) {
-	result = make([]string, 0, len(c.commands))
-	for name, _ := range c.commands {
+// Returns an array of defined command names.
+func (c *config) CommandNames() (result []string) {
+	result = make([]string, 0, len(c.Commands))
+	for name, _ := range c.Commands {
 		result = append(result, name)
 	}
 	return
 }
 
+// This is a proper packer.CommandFunc that can be used to load packer.Command
+// implementations from the defined plugins.
 func (c *config) LoadCommand(name string) (packer.Command, error) {
 	log.Printf("Loading command: %s\n", name)
-	commandBin, ok := c.commands[name]
+	commandBin, ok := c.Commands[name]
 	if !ok {
 		log.Printf("Command not found: %s\n", name)
 		return nil, nil
