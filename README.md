@@ -15,7 +15,7 @@ your operating system or [downloading and compiling Packer yourself](#developing
 After Packer is installed, build your first machine image.
 
 ```
-$ packer build quick-start.toml
+$ packer build quick-start.json
 ...
 ```
 
@@ -73,10 +73,15 @@ Templates are comprised of three parts:
 ## Developing Packer
 
 If you wish to work on Packer itself, you'll first need [Go](http://golang.org)
-installed. Next, clone this repository then just type `make`.
+installed (version 1.1+ is _required_). Next, clone this repository then just type `make`.
+In a few moments, you'll have a working `packer` executable:
 
 ```
 $ make
 ...
-$ bin/packer --version
+$ bin/packer
+...
 ```
+
+You can run tests by typing `make test`. This will run tests for Packer core
+along with all the core builders and commands and such that come with Packer.
