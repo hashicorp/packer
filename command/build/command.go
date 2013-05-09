@@ -49,5 +49,5 @@ func (Command) Run(env packer.Environment, args []string) int {
 }
 
 func (Command) Synopsis() string {
-	return "build image(s) from tempate"
+	return "build image(s) from template"
 }

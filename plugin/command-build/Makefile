@@ -1,6 +1,6 @@
 plugin:
 	go get -d -v ./...
-	go build -v -o $(ROOTDIR)/bin/packer-build
+	go build -v -o $(ROOTDIR)/bin/packer-command-build
 
 format:
 	go fmt ./...

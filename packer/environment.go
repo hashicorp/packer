@@ -153,6 +153,8 @@ func (e *coreEnvironment) printHelp() {
 		command, err := e.commandFunc(key)
 		if err != nil {
 			synopsis = fmt.Sprintf("Error loading command: %s", err.Error())
+		} else if command == nil {
+			continue
 		} else {
 			synopsis = command.Synopsis()
 		}
