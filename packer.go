@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 )
 
 func main() {
@@ -17,6 +18,11 @@ func main() {
 	} else {
 		// Logging is enabled, make sure it goes to stderr
 		log.SetOutput(os.Stderr)
+	}
+
+	// If there is no explicit number of Go threads to use, then set it
+	if os.Getenv("GOMAXPROCS") == "" {
+		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
 	defer plugin.CleanupClients()
