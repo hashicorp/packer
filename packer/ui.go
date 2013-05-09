@@ -19,9 +19,15 @@ type ReaderWriterUi struct {
 }
 
 func (rw *ReaderWriterUi) Say(format string, a ...interface{}) {
-	fmt.Fprintf(rw.Writer, format, a...)
+	_, err := fmt.Fprintf(rw.Writer, format, a...)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (rw *ReaderWriterUi) Error(format string, a ...interface{}) {
-	fmt.Fprintf(rw.Writer, format, a...)
+	_, err := fmt.Fprintf(rw.Writer, format, a...)
+	if err != nil {
+		panic(err)
+	}
 }
