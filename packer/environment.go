@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
+// The function type used to lookup Builder implementations.
 type BuilderFunc func(name string) (Builder, error)
 
+// The function type used to lookup Command implementations.
 type CommandFunc func(name string) (Command, error)
 
 // The environment interface provides access to the configuration and
