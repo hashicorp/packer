@@ -38,7 +38,11 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	}
 
 	log.Printf("Config: %+v\n", b.config)
+
+	// TODO: Validate the configuration
 	return
 }
 
-func (*Builder) Run(packer.Build, packer.Ui) {}
+func (*Builder) Run(b packer.Build, ui packer.Ui) {
+	ui.Say("Building an AWS image...\n")
+}

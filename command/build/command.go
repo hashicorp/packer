@@ -4,6 +4,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
+	"sync"
 )
 
 type Command byte
@@ -53,6 +54,23 @@ func (Command) Run(env packer.Environment, args []string) int {
 			return 1
 		}
 	}
+
+	// Run all the builds in parallel and wait for them to complete
+	var wg sync.WaitGroup
+	for _, b := range builds {
+		log.Printf("Starting build run: %s\n", b.Name())
+
+		// Increment the waitgroup so we wait for this item to finish properly
+		wg.Add(1)
+
+		// Run the build in a goroutine
+		go func() {
+			defer wg.Done()
+			b.Run(env.Ui())
+		}()
+	}
+
+	wg.Wait()
 
 	env.Ui().Say("YAY!\n")
 	return 0
