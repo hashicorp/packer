@@ -17,6 +17,7 @@ import (
 
 type config struct {
 	AccessKey string `json:"access_key"`
+	AMIName   string `json:"ami_name"`
 	Region    string
 	SecretKey string `json:"secret_key"`
 	SourceAmi string `json:"source_ami"`
@@ -96,7 +97,7 @@ func (b *Builder) Run(build packer.Build, ui packer.Ui) {
 	ui.Say("Creating the AMI...\n")
 	createOpts := &ec2.CreateImage{
 		InstanceId: instance.InstanceId,
-		Name: "ZIMAGINE",
+		Name: b.config.AMIName,
 	}
 
 	createResp, err := ec2conn.CreateImage(createOpts)
@@ -106,6 +107,20 @@ func (b *Builder) Run(build packer.Build, ui packer.Ui) {
 	}
 
 	ui.Say("AMI: %s\n", createResp.ImageId)
+
+	// Wait for the image to become ready
+	ui.Say("Waiting for AMI to become ready...\n")
+	for {
+		imageResp, err := ec2conn.Images([]string{createResp.ImageId}, ec2.NewFilter())
+		if err != nil {
+			ui.Error("%s\n", err.Error())
+			return
+		}
+
+		if imageResp.Images[0].State == "available" {
+			break
+		}
+	}
 
 	// Make sure we clean up the instance by terminating it, no matter what
 	defer func() {
