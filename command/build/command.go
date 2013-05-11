@@ -31,12 +31,18 @@ func (Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
+	// The component finder for our builds
+	components := &packer.ComponentFinder{
+		Builder: env.Builder,
+		Hook: env.Hook,
+	}
+
 	// Go through each builder and compile the builds that we care about
 	buildNames := tpl.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
 		log.Printf("Creating build: %s\n", buildName)
-		build, err := tpl.Build(buildName, env.Builder)
+		build, err := tpl.Build(buildName, components)
 		if err != nil {
 			env.Ui().Error("Failed to create build '%s': \n\n%s\n", buildName, err.Error())
 			return 1

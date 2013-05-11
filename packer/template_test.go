@@ -181,7 +181,8 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 	assert.Nil(err, "should not error")
 
 	builderFactory := func(string) (Builder, error) { return nil, nil }
-	build, err := template.Build("test1", builderFactory)
+	components := &ComponentFinder{Builder: builderFactory}
+	build, err := template.Build("test1", components)
 	assert.Nil(build, "build should be nil")
 	assert.NotNil(err, "should have error")
 }
@@ -215,10 +216,11 @@ func TestTemplate_Build(t *testing.T) {
 	}
 
 	builderFactory := func(n string) (Builder, error) { return builderMap[n], nil }
+	components := &ComponentFinder{Builder: builderFactory}
 
 	// Get the build, verifying we can get it without issue, but also
 	// that the proper builder was looked up and used for the build.
-	build, err := template.Build("test1", builderFactory)
+	build, err := template.Build("test1", components)
 	assert.Nil(err, "should not error")
 
 	build.Prepare()
