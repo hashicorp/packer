@@ -6,7 +6,8 @@ package packer
 // Run is called when the hook is called, with the name of the hook and
 // arbitrary data associated with it. To know what format the data is in,
 // you must reference the documentation for the specific hook you're interested
-// in.
+// in. In addition to that, the Hook is given access to a UI so that it can
+// output things to the user.
 type Hook interface {
-	Run(string, interface{})
+	Run(string, interface{}, Ui)
 }

@@ -15,6 +15,8 @@ type testEnvironment struct {
 	builderName   string
 	cliCalled     bool
 	cliArgs       []string
+	hookCalled    bool
+	hookName      string
 	uiCalled      bool
 }
 
@@ -28,6 +30,12 @@ func (e *testEnvironment) Cli(args []string) (int, error) {
 	e.cliCalled = true
 	e.cliArgs = args
 	return 42, nil
+}
+
+func (e *testEnvironment) Hook(name string) (packer.Hook, error) {
+	e.hookCalled = true
+	e.hookName = name
+	return nil, nil
 }
 
 func (e *testEnvironment) Ui() packer.Ui {

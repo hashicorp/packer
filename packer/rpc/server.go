@@ -30,6 +30,12 @@ func RegisterEnvironment(s *rpc.Server, e packer.Environment) {
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
+// Hook.
+func RegisterHook(s *rpc.Server, hook packer.Hook) {
+	s.RegisterName("Hook", &HookServer{hook})
+}
+
+// Registers the appropriate endpoint on an RPC server to serve a
 // Packer UI
 func RegisterUi(s *rpc.Server, ui packer.Ui) {
 	s.RegisterName("Ui", &UiServer{ui})

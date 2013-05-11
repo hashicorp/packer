@@ -43,6 +43,23 @@ func (e *Environment) Cli(args []string) (result int, err error) {
 	return
 }
 
+func (e *Environment) Hook(name string) (h packer.Hook, err error) {
+	var reply string
+	err = e.client.Call("Environment.Hook", name, &reply)
+	if err != nil {
+		return
+	}
+
+	_, err = rpc.Dial("tcp", reply)
+	if err != nil {
+		return
+	}
+
+	// TODO: Hook
+	h = nil
+	return
+}
+
 func (e *Environment) Ui() packer.Ui {
 	var reply string
 	e.client.Call("Environment.Ui", new(interface{}), &reply)
@@ -69,6 +86,20 @@ func (e *EnvironmentServer) Builder(name *string, reply *string) error {
 func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) (err error) {
 	*reply, err = e.env.Cli(args.Args)
 	return
+}
+
+func (e *EnvironmentServer) Hook(name *string, reply *string) error {
+	_, err := e.env.Hook(*name)
+	if err != nil {
+		return err
+	}
+
+	// Wrap it
+	// TODO: Register hook
+	server := rpc.NewServer()
+
+	*reply = serveSingleConn(server)
+	return nil
 }
 
 func (e *EnvironmentServer) Ui(args *interface{}, reply *string) error {
