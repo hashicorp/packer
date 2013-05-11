@@ -9,7 +9,7 @@ type TestBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
 	runCalled     bool
-	runBuild      Build
+	runHook       Hook
 	runUi         Ui
 }
 
@@ -19,9 +19,9 @@ func (tb *TestBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (tb *TestBuilder) Run(b Build, ui Ui) {
+func (tb *TestBuilder) Run(ui Ui, h Hook) {
 	tb.runCalled = true
-	tb.runBuild = b
+	tb.runHook = h
 	tb.runUi = ui
 }
 
@@ -67,7 +67,6 @@ func TestBuild_Run(t *testing.T) {
 	builder := build.(*coreBuild).builder.(*TestBuilder)
 
 	assert.True(builder.runCalled, "run should be called")
-	assert.Equal(builder.runBuild, build, "run should be called with build")
 	assert.Equal(builder.runUi, ui, "run should be called with ui")
 }
 

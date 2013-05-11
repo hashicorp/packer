@@ -7,7 +7,7 @@ import "log"
 type Build interface {
 	Name() string
 	Prepare() error
-	Run(ui Ui)
+	Run(Ui)
 }
 
 // A build struct represents a single build job, the result of which should
@@ -46,5 +46,6 @@ func (b *coreBuild) Run(ui Ui) {
 		panic("Prepare must be called first")
 	}
 
-	b.builder.Run(b, ui)
+	hook := &DispatchHook{b.hooks}
+	b.builder.Run(ui, hook)
 }

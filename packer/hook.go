@@ -11,3 +11,23 @@ package packer
 type Hook interface {
 	Run(string, interface{}, Ui)
 }
+
+// A Hook implementation that dispatches based on an internal mapping.
+type DispatchHook struct {
+	Mapping map[string][]Hook
+}
+
+// Runs the hook with the given name by dispatching it to the proper
+// hooks if a mapping exists. If a mapping doesn't exist, then nothing
+// happens.
+func (h *DispatchHook) Run(name string, data interface{}, ui Ui) {
+	hooks, ok := h.Mapping[name]
+	if !ok {
+		// No hooks for that name. No problem.
+		return
+	}
+
+	for _, hook := range hooks {
+		hook.Run(name, data, ui)
+	}
+}

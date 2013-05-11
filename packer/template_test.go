@@ -229,5 +229,4 @@ func TestTemplate_Build(t *testing.T) {
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, expectedConfig, "prepare config should be correct")
 	assert.True(builder.runCalled, "run should be called")
-	assert.Equal(builder.runBuild, build, "run should be called with build")
 }
