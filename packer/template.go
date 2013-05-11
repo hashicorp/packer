@@ -113,9 +113,32 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
+	hooks := make(map[string][]Hook)
+	for tplEvent, tplHooks := range t.Hooks {
+		curHooks := make([]Hook, 0, len(tplHooks))
+
+		for _, hookName := range tplHooks {
+			var hook Hook
+			hook, err = components.Hook(hookName)
+			if err != nil {
+				return
+			}
+
+			if hook == nil {
+				err = fmt.Errorf("Hook not found: %s", hookName)
+				return
+			}
+
+			curHooks = append(curHooks, hook)
+		}
+
+		hooks[tplEvent] = curHooks
+	}
+
 	b = &coreBuild{
 		name:      name,
 		builder:   builder,
+		hooks:     hooks,
 		rawConfig: builderConfig.rawConfig,
 	}
 

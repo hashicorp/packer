@@ -17,7 +17,7 @@ type Build interface {
 type coreBuild struct {
 	name      string
 	builder   Builder
-	hooks     map[string]Hook
+	hooks     map[string][]Hook
 	rawConfig interface{}
 
 	prepareCalled bool
