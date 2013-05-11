@@ -84,9 +84,9 @@ func main() {
 	}
 
 	envConfig := packer.DefaultEnvironmentConfig()
-	envConfig.BuilderFunc = config.LoadBuilder
 	envConfig.Commands = config.CommandNames()
-	envConfig.CommandFunc = config.LoadCommand
+	envConfig.Components.Builder = config.LoadBuilder
+	envConfig.Components.Command = config.LoadCommand
 
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {

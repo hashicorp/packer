@@ -16,31 +16,42 @@ type BuilderFunc func(name string) (Builder, error)
 // The function type used to lookup Command implementations.
 type CommandFunc func(name string) (Command, error)
 
+// The function type used to lookup Hook implementations.
+type HookFunc func(name string) (Hook, error)
+
+// ComponentFinder is a struct that contains the various function
+// pointers necessary to look up components of Packer such as builders,
+// commands, etc.
+type ComponentFinder struct {
+	Builder BuilderFunc
+	Command CommandFunc
+	Hook    HookFunc
+}
+
 // The environment interface provides access to the configuration and
 // state of a single Packer run.
 //
 // It allows for things such as executing CLI commands, getting the
 // list of available builders, and more.
 type Environment interface {
-	Builder(name string) (Builder, error)
-	Cli(args []string) (int, error)
+	Builder(string) (Builder, error)
+	Cli([]string) (int, error)
+	Hook(string) (Hook, error)
 	Ui() Ui
 }
 
 // An implementation of an Environment that represents the Packer core
 // environment.
 type coreEnvironment struct {
-	builderFunc BuilderFunc
 	commands    []string
-	commandFunc CommandFunc
+	components  ComponentFinder
 	ui          Ui
 }
 
 // This struct configures new environments.
 type EnvironmentConfig struct {
-	BuilderFunc BuilderFunc
-	CommandFunc CommandFunc
 	Commands    []string
+	Components  ComponentFinder
 	Ui          Ui
 }
 
@@ -48,8 +59,6 @@ type EnvironmentConfig struct {
 // be used to create a new enviroment with NewEnvironment with sane defaults.
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
-	config.BuilderFunc = func(string) (Builder, error) { return nil, nil }
-	config.CommandFunc = func(string) (Command, error) { return nil, nil }
 	config.Commands = make([]string, 0)
 	config.Ui = &ReaderWriterUi{os.Stdin, os.Stdout}
 	return config
@@ -63,10 +72,24 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 	}
 
 	env := &coreEnvironment{}
-	env.builderFunc = config.BuilderFunc
-	env.commandFunc = config.CommandFunc
 	env.commands = config.Commands
+	env.components = config.Components
 	env.ui = config.Ui
+
+	// We want to make sure the components have valid function pointers.
+	// If a function pointer was not given, we assume that the function
+	// will just return a nil component.
+	if env.components.Builder == nil {
+		env.components.Builder = func(string) (Builder, error) { return nil, nil }
+	}
+
+	if env.components.Command == nil {
+		env.components.Command = func(string) (Command, error) { return nil, nil }
+	}
+
+	if env.components.Hook == nil {
+		env.components.Hook = func(string) (Hook, error) { return nil, nil }
+	}
 
 	resultEnv = env
 	return
@@ -75,13 +98,28 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 // Returns a builder of the given name that is registered with this
 // environment.
 func (e *coreEnvironment) Builder(name string) (b Builder, err error) {
-	b, err = e.builderFunc(name)
+	b, err = e.components.Builder(name)
 	if err != nil {
 		return
 	}
 
 	if b == nil {
 		err = fmt.Errorf("No builder returned for name: %s", name)
+	}
+
+	return
+}
+
+// Returns a hook of the given name that is registered with this
+// environment.
+func (e *coreEnvironment) Hook(name string) (h Hook, err error) {
+	h, err = e.components.Hook(name)
+	if err != nil {
+		return
+	}
+
+	if h == nil {
+		err = fmt.Errorf("No hook returned for name: %s", name)
 	}
 
 	return
@@ -113,7 +151,7 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 	}
 
 	if command == nil {
-		command, err = e.commandFunc(args[0])
+		command, err = e.components.Command(args[0])
 		if err != nil {
 			return
 		}
@@ -152,7 +190,7 @@ func (e *coreEnvironment) printHelp() {
 	for _, key := range e.commands {
 		var synopsis string
 
-		command, err := e.commandFunc(key)
+		command, err := e.components.Command(key)
 		if err != nil {
 			synopsis = fmt.Sprintf("Error loading command: %s", err.Error())
 		} else if command == nil {

@@ -52,6 +52,23 @@ func TestNewEnvironment_NoConfig(t *testing.T) {
 	assert.NotNil(err, "should be an error")
 }
 
+func TestEnvironment_NilComponents(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components = *new(ComponentFinder)
+
+	env, err := NewEnvironment(config)
+	assert.Nil(err, "should not have an error")
+
+	// All of these should not cause panics... so we don't assert
+	// anything but if there is a panic in the test then yeah, something
+	// went wrong.
+	env.Builder("foo")
+	env.Cli([]string{"foo"})
+	env.Hook("foo")
+}
+
 func TestEnvironment_Builder(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
@@ -60,7 +77,7 @@ func TestEnvironment_Builder(t *testing.T) {
 	builders["foo"] = builder
 
 	config := DefaultEnvironmentConfig()
-	config.BuilderFunc = func(n string) (Builder, error) { return builders[n], nil }
+	config.Components.Builder = func(n string) (Builder, error) { return builders[n], nil }
 
 	env, _ := NewEnvironment(config)
 	returnedBuilder, err := env.Builder("foo")
@@ -72,7 +89,7 @@ func TestEnvironment_Builder_NilError(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	config := DefaultEnvironmentConfig()
-	config.BuilderFunc = func(n string) (Builder, error) { return nil, nil }
+	config.Components.Builder = func(n string) (Builder, error) { return nil, nil }
 
 	env, _ := NewEnvironment(config)
 	returnedBuilder, err := env.Builder("foo")
@@ -84,7 +101,7 @@ func TestEnvironment_Builder_Error(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	config := DefaultEnvironmentConfig()
-	config.BuilderFunc = func(n string) (Builder, error) { return nil, errors.New("foo") }
+	config.Components.Builder = func(n string) (Builder, error) { return nil, errors.New("foo") }
 
 	env, _ := NewEnvironment(config)
 	returnedBuilder, err := env.Builder("foo")
@@ -97,7 +114,7 @@ func TestEnvironment_Cli_Error(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	config := DefaultEnvironmentConfig()
-	config.CommandFunc = func(n string) (Command, error) { return nil, errors.New("foo") }
+	config.Components.Command = func(n string) (Command, error) { return nil, errors.New("foo") }
 
 	env, _ := NewEnvironment(config)
 	_, err := env.Cli([]string{"foo"})
@@ -114,7 +131,7 @@ func TestEnvironment_Cli_CallsRun(t *testing.T) {
 
 	config := &EnvironmentConfig{}
 	config.Commands = []string{"foo"}
-	config.CommandFunc = func(n string) (Command, error) { return commands[n], nil }
+	config.Components.Command = func(n string) (Command, error) { return commands[n], nil }
 
 	env, _ := NewEnvironment(config)
 	exitCode, err := env.Cli([]string{"foo", "bar", "baz"})
@@ -177,6 +194,47 @@ func TestEnvironment_DefaultCli_Version(t *testing.T) {
 			assert.Equal(exitCode, 1, fmt.Sprintf("%s should NOT work anywhere", command))
 		}
 	}
+}
+
+func TestEnvironment_Hook(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	hook := &TestHook{}
+	hooks := make(map[string]Hook)
+	hooks["foo"] = hook
+
+	config := DefaultEnvironmentConfig()
+	config.Components.Hook = func(n string) (Hook, error) { return hooks[n], nil }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.Hook("foo")
+	assert.Nil(err, "should be no error")
+	assert.Equal(returned, hook, "should return correct hook")
+}
+
+func TestEnvironment_Hook_NilError(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components.Hook = func(n string) (Hook, error) { return nil, nil }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.Hook("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Nil(returned, "should be no hook")
+}
+
+func TestEnvironment_Hook_Error(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components.Hook = func(n string) (Hook, error) { return nil, errors.New("foo") }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.Hook("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Equal(err.Error(), "foo", "should be correct error")
+	assert.Nil(returned, "should be no hook")
 }
 
 func TestEnvironment_SettingUi(t *testing.T) {
