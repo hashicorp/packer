@@ -89,6 +89,29 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 	assert.Equal(builder.builderName, "amazon-ebs", "builder should be amazon-ebs")
 }
 
+func TestParseTemplate_Hooks(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+
+		"hooks": {
+			"event": ["foo", "bar"]
+		}
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	assert.Nil(err, "should not error")
+	assert.NotNil(result, "template should not be nil")
+	assert.Length(result.Hooks, 1, "should have one hook")
+
+	hooks, ok := result.Hooks["event"]
+	assert.True(ok, "should have hook")
+	assert.Equal(hooks, []string{"foo", "bar"}, "hooks should be correct")
+}
+
 func TestTemplate_BuildNames(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

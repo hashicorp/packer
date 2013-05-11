@@ -12,6 +12,7 @@ import (
 type rawTemplate struct {
 	Name         string
 	Builders     []map[string]interface{}
+	Hooks        map[string][]string
 	Provisioners []map[string]interface{}
 	Outputs      []map[string]interface{}
 }
@@ -21,6 +22,7 @@ type rawTemplate struct {
 type Template struct {
 	Name     string
 	Builders map[string]rawBuilderConfig
+	Hooks    map[string][]string
 }
 
 // The rawBuilderConfig struct represents a raw, unprocessed builder
@@ -44,6 +46,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t = &Template{}
 	t.Name = rawTpl.Name
 	t.Builders = make(map[string]rawBuilderConfig)
+	t.Hooks = rawTpl.Hooks
 
 	for _, v := range rawTpl.Builders {
 		rawType, ok := v["type"]
