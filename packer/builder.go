@@ -13,4 +13,3 @@ type Builder interface {
 	Prepare(config interface{}) error
 	Run(build Build, ui Ui)
 }
-

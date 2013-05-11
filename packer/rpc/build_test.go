@@ -8,10 +8,10 @@ import (
 )
 
 type testBuild struct {
-	nameCalled bool
+	nameCalled    bool
 	prepareCalled bool
-	runCalled bool
-	runUi packer.Ui
+	runCalled     bool
+	runUi         packer.Ui
 }
 
 func (b *testBuild) Name() string {

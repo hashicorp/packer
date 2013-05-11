@@ -19,7 +19,7 @@ type UiServer struct {
 
 type UiSayArgs struct {
 	Format string
-	Vars []interface{}
+	Vars   []interface{}
 }
 
 func (u *Ui) Error(format string, a ...interface{}) {

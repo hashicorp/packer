@@ -10,11 +10,11 @@ package plugin
 import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"log"
 	"net"
 	"net/rpc"
 	"os"
-	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"strconv"
 	"strings"
 )

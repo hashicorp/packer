@@ -1,6 +1,5 @@
 package build
 
-
 import (
 	"bytes"
 	"cgl.tideland.biz/asserts"

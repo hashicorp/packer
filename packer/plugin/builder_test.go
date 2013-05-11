@@ -28,4 +28,3 @@ func TestBuilder_Good(t *testing.T) {
 	_, err := Builder(helperProcess("builder"))
 	assert.Nil(err, "should start builder properly")
 }
-

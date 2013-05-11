@@ -1,9 +1,9 @@
 package packer
 
 type TestCommand struct {
-	runArgs []string
+	runArgs   []string
 	runCalled bool
-	runEnv Environment
+	runEnv    Environment
 }
 
 func (tc *TestCommand) Run(env Environment, args []string) int {

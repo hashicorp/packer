@@ -8,9 +8,9 @@ import (
 )
 
 type TestCommand struct {
-	runArgs []string
+	runArgs   []string
 	runCalled bool
-	runEnv packer.Environment
+	runEnv    packer.Environment
 }
 
 func (tc *TestCommand) Run(env packer.Environment, args []string) int {

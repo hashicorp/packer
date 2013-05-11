@@ -178,7 +178,7 @@ func TestTemplate_Build(t *testing.T) {
 	}
 	`
 
-	expectedConfig := map[string]interface{} {
+	expectedConfig := map[string]interface{}{
 		"name": "test1",
 		"type": "test-builder",
 	}
@@ -187,7 +187,7 @@ func TestTemplate_Build(t *testing.T) {
 	assert.Nil(err, "should not error")
 
 	builder := testBuilder()
-	builderMap := map[string]Builder {
+	builderMap := map[string]Builder{
 		"test-builder": builder,
 	}
 

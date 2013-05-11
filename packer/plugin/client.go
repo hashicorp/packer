@@ -16,8 +16,8 @@ import (
 var managedClients = make([]*client, 0, 5)
 
 type client struct {
-	cmd *exec.Cmd
-	exited bool
+	cmd         *exec.Cmd
+	exited      bool
 	doneLogging bool
 }
 

@@ -17,7 +17,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	b := &Builder{}
-	c := map[string]interface{} {
+	c := map[string]interface{}{
 		"access_key": []string{},
 	}
 
@@ -29,7 +29,7 @@ func TestBuilder_Prepare_Good(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	b := &Builder{}
-	c := map[string]interface{} {
+	c := map[string]interface{}{
 		"access_key": "foo",
 		"secret_key": "bar",
 		"source_ami": "123456",

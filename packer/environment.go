@@ -31,17 +31,17 @@ type Environment interface {
 // environment.
 type coreEnvironment struct {
 	builderFunc BuilderFunc
-	commands []string
+	commands    []string
 	commandFunc CommandFunc
-	ui      Ui
+	ui          Ui
 }
 
 // This struct configures new environments.
 type EnvironmentConfig struct {
 	BuilderFunc BuilderFunc
 	CommandFunc CommandFunc
-	Commands []string
-	Ui      Ui
+	Commands    []string
+	Ui          Ui
 }
 
 // DefaultEnvironmentConfig returns a default EnvironmentConfig that can

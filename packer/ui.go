@@ -8,7 +8,7 @@ import "io"
 // is formatted and various levels of output.
 type Ui interface {
 	Say(format string, a ...interface{})
-	Error(format string, a...interface{})
+	Error(format string, a ...interface{})
 }
 
 // The ReaderWriterUi is a UI that writes and reads from standard Go

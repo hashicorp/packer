@@ -10,9 +10,9 @@ import (
 type testBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
-	runCalled bool
-	runBuild packer.Build
-	runUi packer.Ui
+	runCalled     bool
+	runBuild      packer.Build
+	runUi         packer.Ui
 }
 
 func (b *testBuilder) Prepare(config interface{}) error {

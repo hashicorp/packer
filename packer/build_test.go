@@ -8,9 +8,9 @@ import (
 type TestBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
-	runCalled bool
-	runBuild Build
-	runUi Ui
+	runCalled     bool
+	runBuild      Build
+	runUi         Ui
 }
 
 func (tb *TestBuilder) Prepare(config interface{}) error {
@@ -27,8 +27,8 @@ func (tb *TestBuilder) Run(b Build, ui Ui) {
 
 func testBuild() Build {
 	return &coreBuild{
-		name: "test",
-		builder: &TestBuilder{},
+		name:      "test",
+		builder:   &TestBuilder{},
 		rawConfig: 42,
 	}
 }

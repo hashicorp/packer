@@ -15,8 +15,8 @@ type Build interface {
 // multiple files, of course, but it should be for only a single provider
 // (such as VirtualBox, EC2, etc.).
 type coreBuild struct {
-	name    string
-	builder Builder
+	name      string
+	builder   Builder
 	rawConfig interface{}
 
 	prepareCalled bool

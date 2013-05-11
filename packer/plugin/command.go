@@ -2,15 +2,15 @@ package plugin
 
 import (
 	"github.com/mitchellh/packer/packer"
+	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"log"
 	"net/rpc"
 	"os/exec"
-	packrpc "github.com/mitchellh/packer/packer/rpc"
 )
 
 type cmdCommand struct {
 	command packer.Command
-	client *client
+	client  *client
 }
 
 func (c *cmdCommand) Run(e packer.Environment, args []string) (exitCode int) {

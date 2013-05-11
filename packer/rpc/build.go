@@ -42,7 +42,7 @@ func (b *Build) Run(ui packer.Ui) {
 	b.client.Call("Build.Run", args, new(interface{}))
 }
 
-func (b *BuildServer) Name(args *interface{}, reply*string) error {
+func (b *BuildServer) Name(args *interface{}, reply *string) error {
 	*reply = b.build.Name()
 	return nil
 }

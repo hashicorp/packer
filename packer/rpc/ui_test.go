@@ -9,10 +9,10 @@ import (
 type testUi struct {
 	errorCalled bool
 	errorFormat string
-	errorVars []interface{}
-	sayCalled bool
-	sayFormat string
-	sayVars []interface{}
+	errorVars   []interface{}
+	sayCalled   bool
+	sayFormat   string
+	sayVars     []interface{}
 }
 
 func (u *testUi) Error(format string, a ...interface{}) {

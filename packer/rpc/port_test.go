@@ -9,7 +9,7 @@ import (
 
 func addrPort(address net.Addr) string {
 	parts := strings.Split(address.String(), ":")
-	return parts[len(parts) - 1]
+	return parts[len(parts)-1]
 }
 
 func Test_netListenerInRange(t *testing.T) {

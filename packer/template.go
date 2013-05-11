@@ -111,8 +111,8 @@ func (t *Template) Build(name string, bf BuilderFunc) (b Build, err error) {
 	}
 
 	b = &coreBuild{
-		name: name,
-		builder: builder,
+		name:      name,
+		builder:   builder,
 		rawConfig: builderConfig.rawConfig,
 	}
 

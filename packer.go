@@ -2,9 +2,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"

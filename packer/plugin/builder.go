@@ -2,15 +2,15 @@ package plugin
 
 import (
 	"github.com/mitchellh/packer/packer"
+	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"log"
 	"net/rpc"
 	"os/exec"
-	packrpc "github.com/mitchellh/packer/packer/rpc"
 )
 
 type cmdBuilder struct {
 	builder packer.Builder
-	client *client
+	client  *client
 }
 
 func (b *cmdBuilder) Prepare(config interface{}) error {
@@ -38,7 +38,6 @@ func (c *cmdBuilder) checkExit(p interface{}, cb func()) {
 		log.Panic(p)
 	}
 }
-
 
 // Returns a valid packer.Builder where the builder is executed via RPC
 // to a plugin that is within a subprocess.

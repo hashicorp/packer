@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func helperProcess(s... string) *exec.Cmd {
+func helperProcess(s ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestHelperProcess", "--"}
 	cs = append(cs, s...)
 	env := []string{

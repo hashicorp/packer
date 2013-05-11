@@ -19,7 +19,7 @@ type CommandServer struct {
 
 type CommandRunArgs struct {
 	RPCAddress string
-	Args []string
+	Args       []string
 }
 
 type CommandSynopsisArgs byte

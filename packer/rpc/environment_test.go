@@ -12,10 +12,10 @@ var testEnvUi = &testUi{}
 
 type testEnvironment struct {
 	builderCalled bool
-	builderName string
-	cliCalled bool
-	cliArgs []string
-	uiCalled bool
+	builderName   string
+	cliCalled     bool
+	cliArgs       []string
+	uiCalled      bool
 }
 
 func (e *testEnvironment) Builder(name string) (packer.Builder, error) {

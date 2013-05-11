@@ -54,10 +54,10 @@ func (b *Builder) Run(build packer.Build, ui packer.Ui) {
 	ec2conn := ec2.New(auth, region)
 
 	runOpts := &ec2.RunInstances{
-		ImageId: b.config.SourceAmi,
+		ImageId:      b.config.SourceAmi,
 		InstanceType: "m1.small",
-		MinCount: 0,
-		MaxCount: 0,
+		MinCount:     0,
+		MaxCount:     0,
 	}
 
 	ui.Say("Launching a source AWS instance...\n")
@@ -97,7 +97,7 @@ func (b *Builder) Run(build packer.Build, ui packer.Ui) {
 	ui.Say("Creating the AMI...\n")
 	createOpts := &ec2.CreateImage{
 		InstanceId: instance.InstanceId,
-		Name: b.config.AMIName,
+		Name:       b.config.AMIName,
 	}
 
 	createResp, err := ec2conn.CreateImage(createOpts)
