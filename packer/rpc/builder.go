@@ -38,12 +38,12 @@ func (b *builder) Prepare(config interface{}) (err error) {
 	return
 }
 
-func (b *builder) Run(build packer.Build, ui packer.Ui) {
+func (b *builder) Run(ui packer.Ui, hook packer.Hook) {
 	// Create and start the server for the Build and UI
 	// TODO: Error handling
 	server := rpc.NewServer()
-	RegisterBuild(server, build)
 	RegisterUi(server, ui)
+	RegisterHook(server, hook)
 
 	args := &BuilderRunArgs{serveSingleConn(server)}
 	b.client.Call("Builder.Run", args, new(interface{}))
@@ -64,9 +64,9 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 		return err
 	}
 
-	build := &Build{client}
+	hook := Hook(client)
 	ui := &Ui{client}
-	b.builder.Run(build, ui)
+	b.builder.Run(ui, hook)
 
 	*reply = nil
 	return nil

@@ -13,7 +13,7 @@ func (helperBuilder) Prepare(interface{}) error {
 	return nil
 }
 
-func (helperBuilder) Run(packer.Build, packer.Ui) {}
+func (helperBuilder) Run(packer.Ui, packer.Hook) {}
 
 func TestBuilder_NoExist(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)

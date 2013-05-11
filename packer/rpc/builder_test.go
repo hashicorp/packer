@@ -11,7 +11,7 @@ type testBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
 	runCalled     bool
-	runBuild      packer.Build
+	runHook       packer.Hook
 	runUi         packer.Ui
 }
 
@@ -21,9 +21,9 @@ func (b *testBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (b *testBuilder) Run(build packer.Build, ui packer.Ui) {
+func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) {
 	b.runCalled = true
-	b.runBuild = build
+	b.runHook = hook
 	b.runUi = ui
 }
 
@@ -50,14 +50,14 @@ func TestBuilderRPC(t *testing.T) {
 	assert.Equal(b.prepareConfig, 42, "prepare should be called with right arg")
 
 	// Test Run
-	build := &testBuild{}
+	hook := &testHook{}
 	ui := &testUi{}
-	bClient.Run(build, ui)
+	bClient.Run(ui, hook)
 	assert.True(b.runCalled, "runs hould be called")
 
 	if b.runCalled {
-		b.runBuild.Prepare()
-		assert.True(build.prepareCalled, "prepare should be called")
+		b.runHook.Run("foo", nil, nil)
+		assert.True(hook.runCalled, "run should be called")
 
 		b.runUi.Say("format")
 		assert.True(ui.sayCalled, "say should be called")

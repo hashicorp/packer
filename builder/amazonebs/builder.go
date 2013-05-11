@@ -48,7 +48,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	return
 }
 
-func (b *Builder) Run(build packer.Build, ui packer.Ui) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	auth := aws.Auth{b.config.AccessKey, b.config.SecretKey}
 	region := aws.Regions[b.config.Region]
 	ec2conn := ec2.New(auth, region)
