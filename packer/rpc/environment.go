@@ -50,13 +50,12 @@ func (e *Environment) Hook(name string) (h packer.Hook, err error) {
 		return
 	}
 
-	_, err = rpc.Dial("tcp", reply)
+	client, err := rpc.Dial("tcp", reply)
 	if err != nil {
 		return
 	}
 
-	// TODO: Hook
-	h = nil
+	h = Hook(client)
 	return
 }
 
@@ -89,14 +88,14 @@ func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) (err error
 }
 
 func (e *EnvironmentServer) Hook(name *string, reply *string) error {
-	_, err := e.env.Hook(*name)
+	hook, err := e.env.Hook(*name)
 	if err != nil {
 		return err
 	}
 
 	// Wrap it
-	// TODO: Register hook
 	server := rpc.NewServer()
+	RegisterHook(server, hook)
 
 	*reply = serveSingleConn(server)
 	return nil

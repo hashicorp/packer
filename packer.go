@@ -87,6 +87,7 @@ func main() {
 	envConfig.Commands = config.CommandNames()
 	envConfig.Components.Builder = config.LoadBuilder
 	envConfig.Components.Command = config.LoadCommand
+	envConfig.Components.Hook = config.LoadHook
 
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {

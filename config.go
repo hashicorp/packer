@@ -90,3 +90,8 @@ func (c *config) LoadCommand(name string) (packer.Command, error) {
 
 	return plugin.Command(exec.Command(commandBin))
 }
+
+func (c *config) LoadHook(name string) (packer.Hook, error) {
+	log.Printf("Loading hook: %s\n", name)
+	return plugin.Hook(exec.Command(name))
+}
