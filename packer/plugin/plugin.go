@@ -98,3 +98,15 @@ func ServeCommand(command packer.Command) {
 		log.Panic(err)
 	}
 }
+
+// Serves a hook from a plugin.
+func ServeHook(hook packer.Hook) {
+	log.Println("Preparing to serve a hook plugin...")
+
+	server := rpc.NewServer()
+	packrpc.RegisterHook(server, hook)
+
+	if err := serve(server); err != nil {
+		log.Panic(err)
+	}
+}

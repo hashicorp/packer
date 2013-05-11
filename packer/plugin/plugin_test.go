@@ -52,6 +52,8 @@ func TestHelperProcess(*testing.T) {
 		ServeBuilder(new(helperBuilder))
 	case "command":
 		ServeCommand(new(helperCommand))
+	case "hook":
+		ServeHook(new(helperHook))
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
 	case "start-timeout":
