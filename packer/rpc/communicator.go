@@ -34,6 +34,11 @@ type CommunicatorStartResponse struct {
 	RemoteCommandAddress string
 }
 
+type CommunicatorUploadArgs struct {
+	Path string
+	ReaderAddress string
+}
+
 func Communicator(client *rpc.Client) *communicator {
 	return &communicator{client}
 }
@@ -87,8 +92,30 @@ func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
 	return
 }
 
-func (c *communicator) Upload(string, io.Reader) error {
-	return nil
+func (c *communicator) Upload(path string, r io.Reader) (err error) {
+	readerL := netListenerInRange(portRangeMin, portRangeMax)
+	if readerL == nil {
+		err = errors.New("couldn't allocate listener for upload reader")
+		return
+	}
+
+	// Make sure at the end of this call, we close the listener
+	defer readerL.Close()
+
+	// Pipe the reader through to the connection
+	go serveSingleCopy("uploadReader", readerL, nil, r)
+
+	args := CommunicatorUploadArgs{
+		path,
+		readerL.Addr().String(),
+	}
+
+	cerr := c.client.Call("Communicator.Upload", &args, &err)
+	if cerr != nil {
+		err = cerr
+	}
+
+	return
 }
 
 func (c *communicator) Download(string, io.Writer) error {
@@ -130,6 +157,18 @@ func (c *CommunicatorServer) Start(cmd *string, reply *CommunicatorStartResponse
 		serveSingleConn(server),
 	}
 
+	return
+}
+
+func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interface{}) (err error) {
+	readerC, err := net.Dial("tcp", args.ReaderAddress)
+	if err != nil {
+		return
+	}
+
+	defer readerC.Close()
+
+	err = c.c.Upload(args.Path, readerC)
 	return
 }
 

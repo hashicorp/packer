@@ -18,6 +18,10 @@ type testCommunicator struct {
 	startErr *io.PipeWriter
 	startExited *bool
 	startExitStatus *int
+
+	uploadCalled bool
+	uploadPath string
+	uploadReader io.Reader
 }
 
 func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
@@ -45,7 +49,11 @@ func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
 	return rc, nil
 }
 
-func (t *testCommunicator) Upload(string, io.Reader) error {
+func (t *testCommunicator) Upload(path string, reader io.Reader) error {
+	t.uploadCalled = true
+	t.uploadPath = path
+	t.uploadReader = reader
+
 	return nil
 }
 
@@ -99,6 +107,21 @@ func TestCommunicatorRPC(t *testing.T) {
 	*c.startExited = true
 	rc.Wait()
 	assert.Equal(rc.ExitStatus, 42, "should have proper exit status")
+
+	// Test that we can upload things
+	uploadR, uploadW := io.Pipe()
+	err = remote.Upload("foo", uploadR)
+	assert.Nil(err, "should not error")
+	assert.True(c.uploadCalled, "should be called")
+	assert.Equal(c.uploadPath, "foo", "should be correct path")
+	return
+
+	// Test the upload reader
+	uploadW.Write([]byte("uploadfoo\n"))
+	bufUpR := bufio.NewReader(c.uploadReader)
+	data, err = bufUpR.ReadString('\n')
+	assert.Nil(err, "should not error")
+	assert.Equal(data, "uploadfoo\n", "should have the proper data")
 }
 
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {
