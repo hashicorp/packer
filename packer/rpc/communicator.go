@@ -87,6 +87,10 @@ func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
 	return
 }
 
+func (c *communicator) Upload(string, io.Reader) {}
+
+func (c *communicator) Download(string, io.Writer) {}
+
 func (c *CommunicatorServer) Start(cmd *string, reply *CommunicatorStartResponse) (err error) {
 	// Start executing the command.
 	command, err := c.c.Start(*cmd)

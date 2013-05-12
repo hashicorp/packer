@@ -98,10 +98,10 @@ func TestCommunicatorRPC(t *testing.T) {
 }
 
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {
-	//assert := asserts.NewTestingAsserts(t, true)
+	assert := asserts.NewTestingAsserts(t, true)
 
-	//var r packer.Communicator
-	//c := Communicator(nil)
+	var r packer.Communicator
+	c := Communicator(nil)
 
-	//assert.Implementor(c, &r, "should be a Communicator")
+	assert.Implementor(c, &r, "should be a Communicator")
 }
