@@ -31,7 +31,7 @@ type CommunicatorStartResponse struct {
 	StdinAddress string
 	StdoutAddress string
 	StderrAddress string
-	ExitStatusAddress string
+	RemoteCommandAddress string
 }
 
 func Communicator(client *rpc.Client) *communicator {
@@ -62,13 +62,27 @@ func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
 		return
 	}
 
+	// Connect to the RPC server for the remote command
+	client, err := rpc.Dial("tcp", response.RemoteCommandAddress)
+	if err != nil {
+		return
+	}
+
 	// Build the response object using the streams we created
 	rc = &packer.RemoteCommand{
 		stdinC,
 		stdoutC,
 		stderrC,
-		0,
+		false,
+		-1,
 	}
+
+	// In a goroutine, we wait for the process to exit, then we set
+	// that it has exited.
+	go func() {
+		client.Call("RemoteCommand.Wait", new(interface{}), &rc.ExitStatus)
+		rc.Exited = true
+	}()
 
 	return
 }
@@ -99,7 +113,7 @@ func (c *CommunicatorServer) Start(cmd *string, reply *CommunicatorStartResponse
 	// For the exit status, we use a simple RPC Server that serves
 	// some of the RemoteComand methods.
 	server := rpc.NewServer()
-	//server.RegisterName("RemoteCommand", &RemoteCommandServer{command})
+	server.RegisterName("RemoteCommand", &RemoteCommandServer{command})
 
 	*reply = CommunicatorStartResponse{
 		stdinL.Addr().String(),
@@ -109,6 +123,12 @@ func (c *CommunicatorServer) Start(cmd *string, reply *CommunicatorStartResponse
 	}
 
 	return
+}
+
+func (rc *RemoteCommandServer) Wait(args *interface{}, reply *int) error {
+	rc.rc.Wait()
+	*reply = rc.rc.ExitStatus
+	return nil
 }
 
 func serveSingleCopy(name string, l net.Listener, dst io.Writer, src io.Reader) {

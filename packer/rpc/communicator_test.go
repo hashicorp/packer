@@ -16,6 +16,8 @@ type testCommunicator struct {
 	startIn *io.PipeReader
 	startOut *io.PipeWriter
 	startErr *io.PipeWriter
+	startExited *bool
+	startExitStatus *int
 }
 
 func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
@@ -33,8 +35,12 @@ func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
 		stdin,
 		stdout,
 		stderr,
+		false,
 		0,
 	}
+
+	t.startExited = &rc.Exited
+	t.startExitStatus = &rc.ExitStatus
 
 	return rc, nil
 }
@@ -83,6 +89,12 @@ func TestCommunicatorRPC(t *testing.T) {
 	data, err = bufIn.ReadString('\n')
 	assert.Nil(err, "should have no problem reading stdin")
 	assert.Equal(data, "infoo\n", "should be correct stdin")
+
+	// Test that we can get the exit status properly
+	*c.startExitStatus = 42
+	*c.startExited = true
+	rc.Wait()
+	assert.Equal(rc.ExitStatus, 42, "should have proper exit status")
 }
 
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {
