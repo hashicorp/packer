@@ -45,9 +45,13 @@ func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
 	return rc, nil
 }
 
-func (t *testCommunicator) Upload(string, io.Reader) {}
+func (t *testCommunicator) Upload(string, io.Reader) error {
+	return nil
+}
 
-func (t *testCommunicator) Download(string, io.Writer) {}
+func (t *testCommunicator) Download(string, io.Writer) error {
+	return nil
+}
 
 func TestCommunicatorRPC(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)

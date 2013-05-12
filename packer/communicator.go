@@ -13,8 +13,8 @@ import (
 // Start or any other method may be called at the same time.
 type Communicator interface {
 	Start(string) (*RemoteCommand, error)
-	Upload(string, io.Reader)
-	Download(string, io.Writer)
+	Upload(string, io.Reader) error
+	Download(string, io.Writer) error
 }
 
 // This struct contains some information about the remote command being
