@@ -24,6 +24,12 @@ func RegisterCommand(s *rpc.Server, c packer.Command) {
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
+// Packer Communicator.
+func RegisterCommunicator(s *rpc.Server, c packer.Communicator) {
+	s.RegisterName("Communicator", &CommunicatorServer{c})
+}
+
+// Registers the appropriate endpoint on an RPC server to serve a
 // Packer Environment
 func RegisterEnvironment(s *rpc.Server, e packer.Environment) {
 	s.RegisterName("Environment", &EnvironmentServer{e})

@@ -60,9 +60,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 		MaxCount:     0,
 	}
 
-	hook.Run(HookPreLaunch, nil, ui)
-	return
-
 	ui.Say("Launching a source AWS instance...\n")
 	runResp, err := ec2conn.RunInstances(runOpts)
 	if err != nil {
