@@ -34,6 +34,11 @@ type CommunicatorStartResponse struct {
 	RemoteCommandAddress string
 }
 
+type CommunicatorDownloadArgs struct {
+	Path string
+	WriterAddress string
+}
+
 type CommunicatorUploadArgs struct {
 	Path string
 	ReaderAddress string
@@ -93,6 +98,8 @@ func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
 }
 
 func (c *communicator) Upload(path string, r io.Reader) (err error) {
+	// We need to create a server that can proxy the reader data
+	// over because we can't simply gob encode an io.Reader
 	readerL := netListenerInRange(portRangeMin, portRangeMax)
 	if readerL == nil {
 		err = errors.New("couldn't allocate listener for upload reader")
@@ -110,16 +117,32 @@ func (c *communicator) Upload(path string, r io.Reader) (err error) {
 		readerL.Addr().String(),
 	}
 
-	cerr := c.client.Call("Communicator.Upload", &args, &err)
-	if cerr != nil {
-		err = cerr
-	}
-
+	err = c.client.Call("Communicator.Upload", &args, new(interface{}))
 	return
 }
 
-func (c *communicator) Download(string, io.Writer) error {
-	return nil
+func (c *communicator) Download(path string, w io.Writer) (err error) {
+	// We need to create a server that can proxy that data downloaded
+	// into the writer because we can't gob encode a writer directly.
+	writerL := netListenerInRange(portRangeMin, portRangeMax)
+	if writerL == nil {
+		err = errors.New("couldn't allocate listener for download writer")
+		return
+	}
+
+	// Make sure we close the listener once we're done because we'll be done
+	defer writerL.Close()
+
+	// Serve a single connection and a single copy
+	go serveSingleCopy("downloadWriter", writerL, w, nil)
+
+	args := CommunicatorDownloadArgs{
+		path,
+		writerL.Addr().String(),
+	}
+
+	err = c.client.Call("Communicator.Download", &args, new(interface{}))
+	return
 }
 
 func (c *CommunicatorServer) Start(cmd *string, reply *CommunicatorStartResponse) (err error) {
@@ -169,6 +192,18 @@ func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interfa
 	defer readerC.Close()
 
 	err = c.c.Upload(args.Path, readerC)
+	return
+}
+
+func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *interface{}) (err error) {
+	writerC, err := net.Dial("tcp", args.WriterAddress)
+	if err != nil {
+		return
+	}
+
+	defer writerC.Close()
+
+	err = c.c.Download(args.Path, writerC)
 	return
 }
 

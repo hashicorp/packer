@@ -21,7 +21,10 @@ type testCommunicator struct {
 
 	uploadCalled bool
 	uploadPath string
-	uploadReader io.Reader
+	uploadData string
+
+	downloadCalled bool
+	downloadPath string
 }
 
 func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
@@ -49,15 +52,18 @@ func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
 	return rc, nil
 }
 
-func (t *testCommunicator) Upload(path string, reader io.Reader) error {
+func (t *testCommunicator) Upload(path string, reader io.Reader) (err error) {
 	t.uploadCalled = true
 	t.uploadPath = path
-	t.uploadReader = reader
-
-	return nil
+	t.uploadData, err = bufio.NewReader(reader).ReadString('\n')
+	return
 }
 
-func (t *testCommunicator) Download(string, io.Writer) error {
+func (t *testCommunicator) Download(path string, writer io.Writer) error {
+	t.downloadCalled = true
+	t.downloadPath = path
+	writer.Write([]byte("download\n"))
+
 	return nil
 }
 
@@ -110,18 +116,33 @@ func TestCommunicatorRPC(t *testing.T) {
 
 	// Test that we can upload things
 	uploadR, uploadW := io.Pipe()
+	go uploadW.Write([]byte("uploadfoo\n"))
 	err = remote.Upload("foo", uploadR)
 	assert.Nil(err, "should not error")
 	assert.True(c.uploadCalled, "should be called")
 	assert.Equal(c.uploadPath, "foo", "should be correct path")
-	return
+	assert.Equal(c.uploadData, "uploadfoo\n", "should have the proper data")
 
-	// Test the upload reader
-	uploadW.Write([]byte("uploadfoo\n"))
-	bufUpR := bufio.NewReader(c.uploadReader)
-	data, err = bufUpR.ReadString('\n')
+	// Test that we can download things
+	downloadR, downloadW := io.Pipe()
+	downloadDone := make(chan bool)
+	var downloadData string
+	var downloadErr error
+
+	go func() {
+		bufDownR := bufio.NewReader(downloadR)
+		downloadData, downloadErr = bufDownR.ReadString('\n')
+		downloadDone <- true
+	}()
+
+	err = remote.Download("bar", downloadW)
 	assert.Nil(err, "should not error")
-	assert.Equal(data, "uploadfoo\n", "should have the proper data")
+	assert.True(c.downloadCalled, "should have called download")
+	assert.Equal(c.downloadPath, "bar", "should have correct download path")
+
+	<-downloadDone
+	assert.Nil(downloadErr, "should not error reading download data")
+	assert.Equal(downloadData, "download\n", "should have the proper data")
 }
 
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {
