@@ -19,6 +19,15 @@ func (t *TestHook) Run(name string, data interface{}, ui Ui) {
 	t.runUi = ui
 }
 
+func TestDispatchHook_Implements(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	var r Hook
+	c := &DispatchHook{nil}
+
+	assert.Implementor(c, &r, "should be a Hook")
+}
+
 func TestDispatchHook_Run_NoHooks(t *testing.T) {
 	// Just make sure nothing blows up
 	dh := &DispatchHook{make(map[string][]Hook)}
