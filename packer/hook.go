@@ -9,7 +9,7 @@ package packer
 // in. In addition to that, the Hook is given access to a UI so that it can
 // output things to the user.
 type Hook interface {
-	Run(string, interface{}, Ui)
+	Run(string, Ui, Communicator, interface{})
 }
 
 // A Hook implementation that dispatches based on an internal mapping.
@@ -20,7 +20,7 @@ type DispatchHook struct {
 // Runs the hook with the given name by dispatching it to the proper
 // hooks if a mapping exists. If a mapping doesn't exist, then nothing
 // happens.
-func (h *DispatchHook) Run(name string, data interface{}, ui Ui) {
+func (h *DispatchHook) Run(name string, ui Ui, comm Communicator, data interface{}) {
 	hooks, ok := h.Mapping[name]
 	if !ok {
 		// No hooks for that name. No problem.
@@ -28,6 +28,6 @@ func (h *DispatchHook) Run(name string, data interface{}, ui Ui) {
 	}
 
 	for _, hook := range hooks {
-		hook.Run(name, data, ui)
+		hook.Run(name, ui, comm, data)
 	}
 }

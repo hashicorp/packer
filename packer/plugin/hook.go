@@ -13,13 +13,13 @@ type cmdHook struct {
 	client  *client
 }
 
-func (c *cmdHook) Run(name string, data interface{}, ui packer.Ui) {
+func (c *cmdHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
 	}()
 
-	c.hook.Run(name, data, ui)
+	c.hook.Run(name, ui, comm, data)
 }
 
 func (c *cmdHook) checkExit(p interface{}, cb func()) {

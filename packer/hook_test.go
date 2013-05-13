@@ -7,13 +7,15 @@ import (
 
 type TestHook struct {
 	runCalled bool
+	runComm Communicator
 	runData interface{}
 	runName string
 	runUi Ui
 }
 
-func (t *TestHook) Run(name string, data interface{}, ui Ui) {
+func (t *TestHook) Run(name string, ui Ui, comm Communicator, data interface{}) {
 	t.runCalled = true
+	t.runComm = comm
 	t.runData = data
 	t.runName = name
 	t.runUi = ui
@@ -31,7 +33,7 @@ func TestDispatchHook_Implements(t *testing.T) {
 func TestDispatchHook_Run_NoHooks(t *testing.T) {
 	// Just make sure nothing blows up
 	dh := &DispatchHook{make(map[string][]Hook)}
-	dh.Run("foo", nil, nil)
+	dh.Run("foo", nil, nil, nil)
 }
 
 func TestDispatchHook_Run(t *testing.T) {
@@ -42,7 +44,7 @@ func TestDispatchHook_Run(t *testing.T) {
 	mapping := make(map[string][]Hook)
 	mapping["foo"] = []Hook{hook}
 	dh := &DispatchHook{mapping}
-	dh.Run("foo", 42, nil)
+	dh.Run("foo", nil, nil, 42)
 
 	assert.True(hook.runCalled, "run should be called")
 	assert.Equal(hook.runName, "foo", "should be proper event")

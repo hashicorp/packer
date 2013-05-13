@@ -56,7 +56,7 @@ func TestBuilderRPC(t *testing.T) {
 	assert.True(b.runCalled, "runs hould be called")
 
 	if b.runCalled {
-		b.runHook.Run("foo", nil, nil)
+		b.runHook.Run("foo", nil, nil, nil)
 		assert.True(hook.runCalled, "run should be called")
 
 		b.runUi.Say("format")

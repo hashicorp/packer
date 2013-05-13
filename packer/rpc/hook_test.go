@@ -12,7 +12,7 @@ type testHook struct {
 	runUi         packer.Ui
 }
 
-func (h *testHook) Run(name string, data interface{}, ui packer.Ui) {
+func (h *testHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) {
 	h.runCalled = true
 }
 
@@ -35,7 +35,7 @@ func TestHookRPC(t *testing.T) {
 
 	// Test Run
 	ui := &testUi{}
-	hClient.Run("foo", 42, ui)
+	hClient.Run("foo", ui, nil, 42)
 	assert.True(h.runCalled, "run should be called")
 }
 

@@ -9,7 +9,7 @@ import (
 
 type helperHook byte
 
-func (helperHook) Run(string, interface{}, packer.Ui) {}
+func (helperHook) Run(string, packer.Ui, packer.Communicator, interface{}) {}
 
 func TestHook_NoExist(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
