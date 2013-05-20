@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"code.google.com/p/go.crypto/ssh"
 	"github.com/mitchellh/packer/packer"
+	"io"
 	"log"
 	"net"
 )
@@ -69,4 +70,12 @@ func (c *comm) Start(cmd string) (remote *packer.RemoteCommand, err error) {
 	}()
 
 	return
+}
+
+func (c *comm) Upload(string, io.Reader) error {
+	return nil
+}
+
+func (c *comm) Download(string, io.Writer) error {
+	return nil
 }

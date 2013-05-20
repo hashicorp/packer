@@ -3,6 +3,7 @@ package ssh
 import (
 	"bytes"
 	"code.google.com/p/go.crypto/ssh"
+	"github.com/mitchellh/packer/packer"
 	"fmt"
 	"net"
 	"strings"
@@ -130,6 +131,14 @@ func newMockLineServer(t *testing.T) string {
 		}
 	}()
 	return l.Addr().String()
+}
+
+func TestCommIsCommunicator(t *testing.T) {
+	var raw interface{}
+	raw = &comm{}
+	if _, ok := raw.(packer.Communicator); !ok {
+		t.Fatalf("comm must be a communicator")
+	}
 }
 
 func TestNew_Invalid(t *testing.T) {
