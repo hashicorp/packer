@@ -58,31 +58,6 @@ func init() {
 	}
 }
 
-func newMockAuthServer(t *testing.T) string {
-	l, err := ssh.Listen("tcp", "127.0.0.1:0", serverConfig)
-	if err != nil {
-		t.Fatalf("unable to newMockAuthServer: %s", err)
-	}
-	go func() {
-		defer l.Close()
-		c, err := l.Accept()
-		if err != nil {
-			t.Errorf("Unable to accept incoming connection: %v", err)
-			return
-		}
-
-		if err := c.Handshake(); err != nil {
-			// not Errorf because this is expected to
-			// fail for some tests.
-			t.Logf("Handshaking error: %v", err)
-			return
-		}
-
-		defer c.Close()
-	}()
-	return l.Addr().String()
-}
-
 func newMockLineServer(t *testing.T) string {
 	l, err := ssh.Listen("tcp", "127.0.0.1:0", serverConfig)
 	if err != nil {
@@ -165,7 +140,7 @@ func TestNew_Invalid(t *testing.T) {
 		},
 	}
 
-	conn, err := net.Dial("tcp", newMockAuthServer(t))
+	conn, err := net.Dial("tcp", newMockLineServer(t))
 	if err != nil {
 		t.Fatalf("unable to dial to remote side: %s", err)
 	}
