@@ -14,15 +14,15 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 }
 
 func TestBuilder_Prepare_BadType(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	b := &Builder{}
 	c := map[string]interface{}{
 		"access_key": []string{},
 	}
 
 	err := b.Prepare(c)
-	assert.NotNil(err, "should have an error")
+	if err == nil {
+		t.Fatalf("prepare should fail")
+	}
 }
 
 func TestBuilder_Prepare_Good(t *testing.T) {

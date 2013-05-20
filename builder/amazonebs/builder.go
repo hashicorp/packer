@@ -6,21 +6,21 @@
 package amazonebs
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
 )
 
 type config struct {
-	AccessKey string `json:"access_key"`
-	AMIName   string `json:"ami_name"`
+	AccessKey string `mapstructure:"access_key"`
+	AMIName   string `mapstructure:"ami_name"`
 	Region    string
-	SecretKey string `json:"secret_key"`
-	SourceAmi string `json:"source_ami"`
+	SecretKey string `mapstructure:"secret_key"`
+	SourceAmi string `mapstructure:"source_ami"`
 }
 
 type Builder struct {
@@ -28,16 +28,7 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
-	// Marshal and unmarshal the raw configuration as a way to get it
-	// into our "config" struct.
-	// TODO: Use the reflection package and provide this as an API for
-	// better error messages
-	jsonBytes, err := json.Marshal(raw)
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal(jsonBytes, &b.config)
+	err = mapstructure.Decode(raw, &b.config)
 	if err != nil {
 		return
 	}
