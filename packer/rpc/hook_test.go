@@ -8,8 +8,8 @@ import (
 )
 
 type testHook struct {
-	runCalled     bool
-	runUi         packer.Ui
+	runCalled bool
+	runUi     packer.Ui
 }
 
 func (h *testHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) {

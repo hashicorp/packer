@@ -28,19 +28,19 @@ type RemoteCommandServer struct {
 }
 
 type CommunicatorStartResponse struct {
-	StdinAddress string
-	StdoutAddress string
-	StderrAddress string
+	StdinAddress         string
+	StdoutAddress        string
+	StderrAddress        string
 	RemoteCommandAddress string
 }
 
 type CommunicatorDownloadArgs struct {
-	Path string
+	Path          string
 	WriterAddress string
 }
 
 type CommunicatorUploadArgs struct {
-	Path string
+	Path          string
 	ReaderAddress string
 }
 

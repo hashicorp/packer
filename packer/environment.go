@@ -43,16 +43,16 @@ type Environment interface {
 // An implementation of an Environment that represents the Packer core
 // environment.
 type coreEnvironment struct {
-	commands    []string
-	components  ComponentFinder
-	ui          Ui
+	commands   []string
+	components ComponentFinder
+	ui         Ui
 }
 
 // This struct configures new environments.
 type EnvironmentConfig struct {
-	Commands    []string
-	Components  ComponentFinder
-	Ui          Ui
+	Commands   []string
+	Components ComponentFinder
+	Ui         Ui
 }
 
 // DefaultEnvironmentConfig returns a default EnvironmentConfig that can

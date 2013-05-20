@@ -3,8 +3,8 @@ package ssh
 import (
 	"bytes"
 	"code.google.com/p/go.crypto/ssh"
-	"github.com/mitchellh/packer/packer"
 	"fmt"
+	"github.com/mitchellh/packer/packer"
 	"net"
 	"strings"
 	"testing"

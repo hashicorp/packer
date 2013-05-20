@@ -9,8 +9,8 @@ import (
 )
 
 type cmdHook struct {
-	hook packer.Hook
-	client  *client
+	hook   packer.Hook
+	client *client
 }
 
 func (c *cmdHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) {

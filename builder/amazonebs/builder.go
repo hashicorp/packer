@@ -16,11 +16,18 @@ import (
 )
 
 type config struct {
+	// Access information
 	AccessKey string `mapstructure:"access_key"`
-	AMIName   string `mapstructure:"ami_name"`
-	Region    string
 	SecretKey string `mapstructure:"secret_key"`
-	SourceAmi string `mapstructure:"source_ami"`
+
+	// Information for the source AMI
+	Region      string
+	SourceAmi   string `mapstructure:"source_ami"`
+	SSHUsername string `mapstructure:"ssh_username"`
+	SSHKeyPath  string `mapstructure:"ssh_private_key_path"`
+
+	// Configuration of the resulting AMI
+	AMIName string `mapstructure:"ami_name"`
 }
 
 type Builder struct {

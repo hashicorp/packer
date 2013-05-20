@@ -29,10 +29,10 @@ type Communicator interface {
 // ExitStatus is the exit code of the remote process. It is only available
 // once Wait is called.
 type RemoteCommand struct {
-	Stdin  io.Writer
-	Stdout io.Reader
-	Stderr io.Reader
-	Exited bool
+	Stdin      io.Writer
+	Stdout     io.Reader
+	Stderr     io.Reader
+	Exited     bool
 	ExitStatus int
 }
 

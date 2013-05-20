@@ -7,10 +7,10 @@ import (
 
 type TestHook struct {
 	runCalled bool
-	runComm Communicator
-	runData interface{}
-	runName string
-	runUi Ui
+	runComm   Communicator
+	runData   interface{}
+	runName   string
+	runUi     Ui
 }
 
 func (t *TestHook) Run(name string, ui Ui, comm Communicator, data interface{}) {

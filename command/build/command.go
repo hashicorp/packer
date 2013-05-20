@@ -34,7 +34,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	// The component finder for our builds
 	components := &packer.ComponentFinder{
 		Builder: env.Builder,
-		Hook: env.Hook,
+		Hook:    env.Hook,
 	}
 
 	// Go through each builder and compile the builds that we care about

@@ -11,20 +11,20 @@ import (
 
 type testCommunicator struct {
 	startCalled bool
-	startCmd string
+	startCmd    string
 
-	startIn *io.PipeReader
-	startOut *io.PipeWriter
-	startErr *io.PipeWriter
-	startExited *bool
+	startIn         *io.PipeReader
+	startOut        *io.PipeWriter
+	startErr        *io.PipeWriter
+	startExited     *bool
 	startExitStatus *int
 
 	uploadCalled bool
-	uploadPath string
-	uploadData string
+	uploadPath   string
+	uploadData   string
 
 	downloadCalled bool
-	downloadPath string
+	downloadPath   string
 }
 
 func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {

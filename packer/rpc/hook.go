@@ -18,8 +18,8 @@ type HookServer struct {
 }
 
 type HookRunArgs struct {
-	Name string
-	Data interface{}
+	Name       string
+	Data       interface{}
 	RPCAddress string
 }
 
