@@ -1,6 +1,7 @@
 package build
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -49,6 +50,15 @@ func (Command) Run(env packer.Environment, args []string) int {
 		}
 
 		builds = append(builds, build)
+	}
+
+	// Compile all the UIs for the builds
+	buildUis := make(map[string]packer.Ui)
+	for _, b := range builds {
+		buildUis[b.Name()] = &packer.PrefixedUi{
+			fmt.Sprintf("==> %s", b.Name()),
+			env.Ui(),
+		}
 	}
 
 	// Prepare all the builds
