@@ -23,13 +23,32 @@ type UiSayArgs struct {
 }
 
 func (u *Ui) Error(format string, a ...interface{}) {
+	u.processArgs(a)
+
 	args := &UiSayArgs{format, a}
-	u.client.Call("Ui.Error", args, new(interface{}))
+	if err := u.client.Call("Ui.Error", args, new(interface{})); err != nil {
+		panic(err)
+	}
 }
 
 func (u *Ui) Say(format string, a ...interface{}) {
+	u.processArgs(a)
+
 	args := &UiSayArgs{format, a}
-	u.client.Call("Ui.Say", args, new(interface{}))
+	if err := u.client.Call("Ui.Say", args, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
+func (u *Ui) processArgs(a []interface{}) {
+	// We do some processing to turn certain types into more gob-friendly
+	// types so that some things that users expect to do just work.
+	for i, v := range a {
+		// Turn errors into strings
+		if err, ok := v.(error); ok {
+			a[i] = err.Error()
+		}
+	}
 }
 
 func (u *UiServer) Error(args *UiSayArgs, reply *interface{}) error {

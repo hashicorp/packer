@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"cgl.tideland.biz/asserts"
+	"errors"
 	"net/rpc"
 	"testing"
 )
@@ -46,9 +47,14 @@ func TestUiRPC(t *testing.T) {
 
 	uiClient := &Ui{client}
 
+	// Basic error and say tests
 	uiClient.Error("format", "arg0", 42)
 	assert.Equal(ui.errorFormat, "format", "format should be correct")
 
 	uiClient.Say("format", "arg0", 42)
 	assert.Equal(ui.sayFormat, "format", "format should be correct")
+
+	// Test that errors are properly converted to strings
+	uiClient.Say("format", errors.New("foo"))
+	assert.Equal(ui.sayVars, []interface{}{"foo"}, "should have correct vars")
 }
