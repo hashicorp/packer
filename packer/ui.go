@@ -3,6 +3,7 @@ package packer
 import (
 	"fmt"
 	"io"
+	"log"
 )
 
 // The Ui interface handles all communication for Packer with the outside
@@ -21,14 +22,18 @@ type ReaderWriterUi struct {
 }
 
 func (rw *ReaderWriterUi) Say(format string, a ...interface{}) {
-	_, err := fmt.Fprintf(rw.Writer, format+"\n", a...)
+	output := fmt.Sprintf(format, a...)
+	log.Printf("ui: %s", output)
+	_, err := fmt.Fprint(rw.Writer, output+"\n")
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (rw *ReaderWriterUi) Error(format string, a ...interface{}) {
-	_, err := fmt.Fprintf(rw.Writer, format+"\n", a...)
+	output := fmt.Sprintf(format, a...)
+	log.Printf("ui error: %s", output)
+	_, err := fmt.Fprint(rw.Writer, output+"\n")
 	if err != nil {
 		panic(err)
 	}

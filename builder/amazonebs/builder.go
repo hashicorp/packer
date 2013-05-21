@@ -23,7 +23,7 @@ type config struct {
 	SourceAmi    string `mapstructure:"source_ami"`
 	InstanceType string `mapstructure:"instance_type"`
 	SSHUsername  string `mapstructure:"ssh_username"`
-	SSHPort      int `mapstructure:"ssh_port"`
+	SSHPort      int    `mapstructure:"ssh_port"`
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
