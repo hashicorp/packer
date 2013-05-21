@@ -1,6 +1,9 @@
 package ssh
 
-import "testing"
+import (
+	"code.google.com/p/go.crypto/ssh"
+	"testing"
+)
 
 const testPrivateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIBOwIBAAJBALdGZxkXDAjsYk10ihwU6Id2KeILz1TAJuoq4tOgDWxEEGeTrcld
@@ -17,5 +20,13 @@ func TestAddPEMKey(t *testing.T) {
 	err := k.AddPEMKey(testPrivateKey)
 	if err != nil {
 		t.Fatalf("error while adding key: %s", err)
+	}
+}
+
+func TestSimpleKeyChain_ImplementsClientkeyring(t *testing.T) {
+	var raw interface{}
+	raw = &SimpleKeychain{}
+	if _, ok := raw.(ssh.ClientKeyring); !ok {
+		t.Fatal("SimpleKeychain is not a valid ssh.ClientKeyring")
 	}
 }
