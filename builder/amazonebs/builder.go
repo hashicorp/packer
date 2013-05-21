@@ -6,6 +6,8 @@
 package amazonebs
 
 import (
+	"cgl.tideland.biz/identifier"
+	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
@@ -20,11 +22,10 @@ type config struct {
 	AccessKey string `mapstructure:"access_key"`
 	SecretKey string `mapstructure:"secret_key"`
 
-	// Information for the source AMI
-	Region      string
-	SourceAmi   string `mapstructure:"source_ami"`
-	SSHUsername string `mapstructure:"ssh_username"`
-	SSHKeyPath  string `mapstructure:"ssh_private_key_path"`
+	// Information for the source instance
+	Region       string
+	SourceAmi    string `mapstructure:"source_ami"`
+	InstanceType string `mapstructure:"instance_type"`
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
@@ -51,9 +52,30 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	region := aws.Regions[b.config.Region]
 	ec2conn := ec2.New(auth, region)
 
+	// Create a new keypair that we'll use to access the instance.
+	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
+	ui.Say("Creating temporary keypair for this instance...\n")
+	log.Printf("temporary keypair name: %s\n", keyName)
+	_, err := ec2conn.CreateKeyPair(keyName)
+	if err != nil {
+		ui.Error("%s\n", err.Error())
+		return
+	}
+
+	// Make sure the keypair is properly deleted when we exit
+	defer func() {
+		ui.Say("Deleting temporary keypair...\n")
+		_, err := ec2conn.DeleteKeyPair(keyName)
+		if err != nil {
+			ui.Error(
+				"Error cleaning up keypair. Please delete the key manually: %s", keyName)
+		}
+	}()
+
 	runOpts := &ec2.RunInstances{
+		KeyName:      keyName,
 		ImageId:      b.config.SourceAmi,
-		InstanceType: "m1.small",
+		InstanceType: b.config.InstanceType,
 		MinCount:     0,
 		MaxCount:     0,
 	}
