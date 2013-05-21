@@ -82,7 +82,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 		// Run the build in a goroutine
 		go func() {
 			defer wg.Done()
-			b.Run(env.Ui())
+			b.Run(buildUis[b.Name()])
 		}()
 	}
 
