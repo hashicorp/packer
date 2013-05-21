@@ -45,7 +45,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		return
 	}
 
-	log.Printf("Config: %+v\n", b.config)
+	log.Printf("Config: %+v", b.config)
 
 	// TODO: Validate the configuration
 	return
@@ -58,17 +58,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 
 	// Create a new keypair that we'll use to access the instance.
 	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
-	ui.Say("Creating temporary keypair for this instance...\n")
-	log.Printf("temporary keypair name: %s\n", keyName)
+	ui.Say("Creating temporary keypair for this instance...")
+	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
-		ui.Error("%s\n", err.Error())
+		ui.Error(err.Error())
 		return
 	}
 
 	// Make sure the keypair is properly deleted when we exit
 	defer func() {
-		ui.Say("Deleting temporary keypair...\n")
+		ui.Say("Deleting temporary keypair...")
 		_, err := ec2conn.DeleteKeyPair(keyName)
 		if err != nil {
 			ui.Error(
@@ -84,27 +84,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 		MaxCount:     0,
 	}
 
-	ui.Say("Launching a source AWS instance...\n")
+	ui.Say("Launching a source AWS instance...")
 	runResp, err := ec2conn.RunInstances(runOpts)
 	if err != nil {
-		ui.Error("%s\n", err.Error())
+		ui.Error(err.Error())
 		return
 	}
 
 	instance := &runResp.Instances[0]
-	log.Printf("instance id: %s\n", instance.InstanceId)
+	log.Printf("instance id: %s", instance.InstanceId)
 
 	// Make sure we clean up the instance by terminating it, no matter what
 	defer func() {
 		// TODO: error handling
-		ui.Say("Terminating the source AWS instance...\n")
+		ui.Say("Terminating the source AWS instance...")
 		ec2conn.TerminateInstances([]string{instance.InstanceId})
 	}()
 
-	ui.Say("Waiting for instance to become ready...\n")
+	ui.Say("Waiting for instance to become ready...")
 	instance, err = waitForState(ec2conn, instance, "running")
 	if err != nil {
-		ui.Error("%s\n", err.Error())
+		ui.Error(err.Error())
 		return
 	}
 
@@ -112,7 +112,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	keyring := &ssh.SimpleKeychain{}
 	err = keyring.AddPEMKey(keyResp.KeyMaterial)
 	if err != nil {
-		ui.Say("Error setting up SSH config: %s\n", err.Error())
+		ui.Say("Error setting up SSH config: %s", err.Error())
 		return
 	}
 
@@ -144,7 +144,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	}
 
 	if err != nil {
-		ui.Error("Error connecting to SSH: %s\n", err.Error())
+		ui.Error("Error connecting to SSH: %s", err.Error())
 		return
 	}
 
@@ -159,27 +159,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 
 	bufr := bufio.NewReader(remote.Stdout)
 	line, _ := bufr.ReadString('\n')
-	ui.Say("%s\n", line)
+	ui.Say(line)
 
 	// Stop the instance so we can create an AMI from it
 	_, err = ec2conn.StopInstances(instance.InstanceId)
 	if err != nil {
-		ui.Error("%s\n", err.Error())
+		ui.Error(err.Error())
 		return
 	}
 
 	// Wait for the instance to actual stop
 	// TODO: Handle diff source states, i.e. this force state sucks
-	ui.Say("Waiting for the instance to stop...\n")
+	ui.Say("Waiting for the instance to stop...")
 	instance.State.Name = "stopping"
 	instance, err = waitForState(ec2conn, instance, "stopped")
 	if err != nil {
-		ui.Error("%s\n", err.Error())
+		ui.Error(err.Error())
 		return
 	}
 
 	// Create the image
-	ui.Say("Creating the AMI...\n")
+	ui.Say("Creating the AMI...")
 	createOpts := &ec2.CreateImage{
 		InstanceId: instance.InstanceId,
 		Name:       b.config.AMIName,
@@ -187,18 +187,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 
 	createResp, err := ec2conn.CreateImage(createOpts)
 	if err != nil {
-		ui.Error("%s\n", err.Error())
+		ui.Error(err.Error())
 		return
 	}
 
-	ui.Say("AMI: %s\n", createResp.ImageId)
+	ui.Say("AMI: %s", createResp.ImageId)
 
 	// Wait for the image to become ready
-	ui.Say("Waiting for AMI to become ready...\n")
+	ui.Say("Waiting for AMI to become ready...")
 	for {
 		imageResp, err := ec2conn.Images([]string{createResp.ImageId}, ec2.NewFilter())
 		if err != nil {
-			ui.Error("%s\n", err.Error())
+			ui.Error(err.Error())
 			return
 		}
 
@@ -209,7 +209,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 }
 
 func waitForState(ec2conn *ec2.EC2, originalInstance *ec2.Instance, target string) (i *ec2.Instance, err error) {
-	log.Printf("Waiting for instance state to become: %s\n", target)
+	log.Printf("Waiting for instance state to become: %s", target)
 
 	i = originalInstance
 	original := i.State.Name

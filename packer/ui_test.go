@@ -19,10 +19,10 @@ func TestReaderWriterUi_Error(t *testing.T) {
 	bufferUi := testUi()
 
 	bufferUi.Error("foo")
-	assert.Equal(readWriter(bufferUi), "foo", "basic output")
+	assert.Equal(readWriter(bufferUi), "foo\n", "basic output")
 
 	bufferUi.Error("%d", 5)
-	assert.Equal(readWriter(bufferUi), "5", "formatting")
+	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
 func TestReaderWriterUi_Say(t *testing.T) {
@@ -31,10 +31,10 @@ func TestReaderWriterUi_Say(t *testing.T) {
 	bufferUi := testUi()
 
 	bufferUi.Say("foo")
-	assert.Equal(readWriter(bufferUi), "foo", "basic output")
+	assert.Equal(readWriter(bufferUi), "foo\n", "basic output")
 
 	bufferUi.Say("%d", 5)
-	assert.Equal(readWriter(bufferUi), "5", "formatting")
+	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
 // This reads the output from the bytes.Buffer in our test object

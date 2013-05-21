@@ -1,7 +1,9 @@
 package packer
 
-import "fmt"
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 // The Ui interface handles all communication for Packer with the outside
 // world. This sort of control allows us to strictly control how output
@@ -19,14 +21,14 @@ type ReaderWriterUi struct {
 }
 
 func (rw *ReaderWriterUi) Say(format string, a ...interface{}) {
-	_, err := fmt.Fprintf(rw.Writer, format, a...)
+	_, err := fmt.Fprintf(rw.Writer, format + "\n", a...)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (rw *ReaderWriterUi) Error(format string, a ...interface{}) {
-	_, err := fmt.Fprintf(rw.Writer, format, a...)
+	_, err := fmt.Fprintf(rw.Writer, format + "\n", a...)
 	if err != nil {
 		panic(err)
 	}
