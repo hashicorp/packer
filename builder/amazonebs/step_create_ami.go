@@ -5,7 +5,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepCreateAMI struct {}
+type stepCreateAMI struct{}
 
 func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
 	config := state["config"].(config)

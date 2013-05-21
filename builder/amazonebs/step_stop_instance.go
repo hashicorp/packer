@@ -5,7 +5,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepStopInstance struct {}
+type stepStopInstance struct{}
 
 func (s *stepStopInstance) Run(state map[string]interface{}) StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)

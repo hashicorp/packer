@@ -1,8 +1,8 @@
 package amazonebs
 
 import (
-	"fmt"
 	gossh "code.google.com/p/go.crypto/ssh"
+	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
