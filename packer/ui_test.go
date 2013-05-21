@@ -13,6 +13,35 @@ func testUi() *ReaderWriterUi {
 	}
 }
 
+func TestPrefixedUi(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	bufferUi := testUi()
+	prefixUi := &PrefixedUi{"mitchell", bufferUi}
+
+	prefixUi.Say("foo")
+	assert.Equal(readWriter(bufferUi), "mitchell: foo\n", "should have prefix")
+
+	prefixUi.Error("bar")
+	assert.Equal(readWriter(bufferUi), "mitchell: bar\n", "should have prefix")
+}
+
+func TestPrefixedUi_ImplUi(t *testing.T) {
+	var raw interface{}
+	raw = &PrefixedUi{}
+	if _, ok := raw.(Ui); !ok {
+		t.Fatalf("PrefixedUi must implement Ui")
+	}
+}
+
+func TestReaderWriterUi_ImplUi(t *testing.T) {
+	var raw interface{}
+	raw = &ReaderWriterUi{}
+	if _, ok := raw.(Ui); !ok {
+		t.Fatalf("ReaderWriterUi must implement Ui")
+	}
+}
+
 func TestReaderWriterUi_Error(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
