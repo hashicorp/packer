@@ -16,6 +16,7 @@ type stepConnectSSH struct {
 }
 
 func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
+	config := state["config"].(config)
 	instance := state["instance"].(*ec2.Instance)
 	privateKey := state["privateKey"].(string)
 	ui := state["ui"].(packer.Ui)
@@ -31,7 +32,7 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
 
 	// Build the actual SSH client configuration
 	sshConfig := &gossh.ClientConfig{
-		User: "ubuntu",
+		User: config.SSHUsername,
 		Auth: []gossh.ClientAuth{
 			gossh.ClientAuthKeyring(keyring),
 		},
@@ -43,9 +44,9 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
 		time.Sleep(time.Duration(i) * time.Second)
 
 		log.Printf(
-			"Opening TCP conn for SSH to %s:22 (attempt %d)",
-			instance.DNSName, i+1)
-		s.conn, err = net.Dial("tcp", fmt.Sprintf("%s:22", instance.DNSName))
+			"Opening TCP conn for SSH to %s:%d (attempt %d)",
+			instance.DNSName, config.SSHPort, i+1)
+		s.conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
 		if err != nil {
 			continue
 		}
