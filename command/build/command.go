@@ -87,8 +87,6 @@ func (Command) Run(env packer.Environment, args []string) int {
 	}
 
 	wg.Wait()
-
-	env.Ui().Say("YAY!\n")
 	return 0
 }
 
