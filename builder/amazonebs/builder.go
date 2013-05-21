@@ -6,19 +6,11 @@
 package amazonebs
 
 import (
-	"bufio"
-	"cgl.tideland.biz/identifier"
-	gossh "code.google.com/p/go.crypto/ssh"
-	"encoding/hex"
-	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"net"
-	"time"
 )
 
 type config struct {
@@ -56,179 +48,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	region := aws.Regions[b.config.Region]
 	ec2conn := ec2.New(auth, region)
 
-	// Create a new keypair that we'll use to access the instance.
-	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
-	ui.Say("Creating temporary keypair for this instance...")
-	log.Printf("temporary keypair name: %s", keyName)
-	keyResp, err := ec2conn.CreateKeyPair(keyName)
-	if err != nil {
-		ui.Error(err.Error())
-		return
+	// Setup the state bag and initial state for the steps
+	state := make(map[string]interface{})
+	state["config"] = b.config
+	state["ec2"] = ec2conn
+	state["hook"] = hook
+	state["ui"] = ui
+
+	// Build the steps
+	steps := []Step{
+		&stepKeyPair{},
+		&stepRunSourceInstance{},
+		&stepStopInstance{},
+		&stepCreateAMI{},
 	}
 
-	// Make sure the keypair is properly deleted when we exit
-	defer func() {
-		ui.Say("Deleting temporary keypair...")
-		_, err := ec2conn.DeleteKeyPair(keyName)
-		if err != nil {
-			ui.Error(
-				"Error cleaning up keypair. Please delete the key manually: %s", keyName)
-		}
-	}()
-
-	runOpts := &ec2.RunInstances{
-		KeyName:      keyName,
-		ImageId:      b.config.SourceAmi,
-		InstanceType: b.config.InstanceType,
-		MinCount:     0,
-		MaxCount:     0,
-	}
-
-	ui.Say("Launching a source AWS instance...")
-	runResp, err := ec2conn.RunInstances(runOpts)
-	if err != nil {
-		ui.Error(err.Error())
-		return
-	}
-
-	instance := &runResp.Instances[0]
-	log.Printf("instance id: %s", instance.InstanceId)
-
-	// Make sure we clean up the instance by terminating it, no matter what
-	defer func() {
-		// TODO: error handling
-		ui.Say("Terminating the source AWS instance...")
-		ec2conn.TerminateInstances([]string{instance.InstanceId})
-	}()
-
-	ui.Say("Waiting for instance to become ready...")
-	instance, err = waitForState(ec2conn, instance, "running")
-	if err != nil {
-		ui.Error(err.Error())
-		return
-	}
-
-	// Build the SSH configuration
-	keyring := &ssh.SimpleKeychain{}
-	err = keyring.AddPEMKey(keyResp.KeyMaterial)
-	if err != nil {
-		ui.Say("Error setting up SSH config: %s", err.Error())
-		return
-	}
-
-	sshConfig := &gossh.ClientConfig{
-		User: "ubuntu",
-		Auth: []gossh.ClientAuth{
-			gossh.ClientAuthKeyring(keyring),
-		},
-	}
-
-	// Try to connect for SSH a few times
-	var conn net.Conn
-	for i := 0; i < 5; i++ {
-		time.Sleep(time.Duration(i) * time.Second)
-
-		log.Printf(
-			"Opening TCP conn for SSH to %s:22 (attempt %d)",
-			instance.DNSName, i+1)
-		conn, err = net.Dial("tcp", fmt.Sprintf("%s:22", instance.DNSName))
-		if err != nil {
-			continue
-		}
-		defer conn.Close()
-	}
-
-	var comm packer.Communicator
-	if err == nil {
-		comm, err = ssh.New(conn, sshConfig)
-	}
-
-	if err != nil {
-		ui.Error("Error connecting to SSH: %s", err.Error())
-		return
-	}
-
-	// XXX: TEST
-	remote, err := comm.Start("echo foo")
-	if err != nil {
-		ui.Error("Error: %s", err.Error())
-		return
-	}
-
-	remote.Wait()
-
-	bufr := bufio.NewReader(remote.Stdout)
-	line, _ := bufr.ReadString('\n')
-	ui.Say(line)
-
-	// Stop the instance so we can create an AMI from it
-	_, err = ec2conn.StopInstances(instance.InstanceId)
-	if err != nil {
-		ui.Error(err.Error())
-		return
-	}
-
-	// Wait for the instance to actual stop
-	// TODO: Handle diff source states, i.e. this force state sucks
-	ui.Say("Waiting for the instance to stop...")
-	instance.State.Name = "stopping"
-	instance, err = waitForState(ec2conn, instance, "stopped")
-	if err != nil {
-		ui.Error(err.Error())
-		return
-	}
-
-	// Create the image
-	ui.Say("Creating the AMI...")
-	createOpts := &ec2.CreateImage{
-		InstanceId: instance.InstanceId,
-		Name:       b.config.AMIName,
-	}
-
-	createResp, err := ec2conn.CreateImage(createOpts)
-	if err != nil {
-		ui.Error(err.Error())
-		return
-	}
-
-	ui.Say("AMI: %s", createResp.ImageId)
-
-	// Wait for the image to become ready
-	ui.Say("Waiting for AMI to become ready...")
-	for {
-		imageResp, err := ec2conn.Images([]string{createResp.ImageId}, ec2.NewFilter())
-		if err != nil {
-			ui.Error(err.Error())
-			return
-		}
-
-		if imageResp.Images[0].State == "available" {
-			break
-		}
-	}
-}
-
-func waitForState(ec2conn *ec2.EC2, originalInstance *ec2.Instance, target string) (i *ec2.Instance, err error) {
-	log.Printf("Waiting for instance state to become: %s", target)
-
-	i = originalInstance
-	original := i.State.Name
-	for i.State.Name == original {
-		var resp *ec2.InstancesResp
-		resp, err = ec2conn.Instances([]string{i.InstanceId}, ec2.NewFilter())
-		if err != nil {
-			return
-		}
-
-		i = &resp.Reservations[0].Instances[0]
-
-		time.Sleep(2 * time.Second)
-	}
-
-	if i.State.Name != target {
-		err = fmt.Errorf("unexpected target state '%s', wanted '%s'", i.State.Name, target)
-		return
-	}
-
-	return
+	// Run!
+	RunSteps(state, steps)
 }
