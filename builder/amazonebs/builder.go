@@ -6,14 +6,18 @@
 package amazonebs
 
 import (
+	"bufio"
 	"cgl.tideland.biz/identifier"
+	gossh "code.google.com/p/go.crypto/ssh"
 	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"net"
 	"time"
 )
 
@@ -56,7 +60,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
 	ui.Say("Creating temporary keypair for this instance...\n")
 	log.Printf("temporary keypair name: %s\n", keyName)
-	_, err := ec2conn.CreateKeyPair(keyName)
+	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
 		ui.Error("%s\n", err.Error())
 		return
@@ -89,12 +93,73 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 
 	instance := &runResp.Instances[0]
 	log.Printf("instance id: %s\n", instance.InstanceId)
+
+	// Make sure we clean up the instance by terminating it, no matter what
+	defer func() {
+		// TODO: error handling
+		ui.Say("Terminating the source AWS instance...\n")
+		ec2conn.TerminateInstances([]string{instance.InstanceId})
+	}()
+
 	ui.Say("Waiting for instance to become ready...\n")
-	err = waitForState(ec2conn, instance, "running")
+	instance, err = waitForState(ec2conn, instance, "running")
 	if err != nil {
 		ui.Error("%s\n", err.Error())
 		return
 	}
+
+	// Build the SSH configuration
+	keyring := &ssh.SimpleKeychain{}
+	err = keyring.AddPEMKey(keyResp.KeyMaterial)
+	if err != nil {
+		ui.Say("Error setting up SSH config: %s\n", err.Error())
+		return
+	}
+
+	sshConfig := &gossh.ClientConfig{
+		User: "ubuntu",
+		Auth: []gossh.ClientAuth{
+			gossh.ClientAuthKeyring(keyring),
+		},
+	}
+
+	// Try to connect for SSH a few times
+	var conn net.Conn
+	for i := 0; i < 5; i++ {
+		time.Sleep(time.Duration(i) * time.Second)
+
+		log.Printf(
+			"Opening TCP conn for SSH to %s:22 (attempt %d)",
+			instance.DNSName, i+1)
+		conn, err = net.Dial("tcp", fmt.Sprintf("%s:22", instance.DNSName))
+		if err != nil {
+			continue
+		}
+		defer conn.Close()
+	}
+
+	var comm packer.Communicator
+	if err == nil {
+		comm, err = ssh.New(conn, sshConfig)
+	}
+
+	if err != nil {
+		ui.Error("Error connecting to SSH: %s\n", err.Error())
+		return
+	}
+
+	// XXX: TEST
+	remote, err := comm.Start("echo foo")
+	if err != nil {
+		ui.Error("Error: %s", err.Error())
+		return
+	}
+
+	remote.Wait()
+
+	bufr := bufio.NewReader(remote.Stdout)
+	line, _ := bufr.ReadString('\n')
+	ui.Say("%s\n", line)
 
 	// Stop the instance so we can create an AMI from it
 	_, err = ec2conn.StopInstances(instance.InstanceId)
@@ -107,7 +172,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 	// TODO: Handle diff source states, i.e. this force state sucks
 	ui.Say("Waiting for the instance to stop...\n")
 	instance.State.Name = "stopping"
-	err = waitForState(ec2conn, instance, "stopped")
+	instance, err = waitForState(ec2conn, instance, "stopped")
 	if err != nil {
 		ui.Error("%s\n", err.Error())
 		return
@@ -141,18 +206,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 			break
 		}
 	}
-
-	// Make sure we clean up the instance by terminating it, no matter what
-	defer func() {
-		// TODO: error handling
-		ui.Say("Terminating the source AWS instance...\n")
-		ec2conn.TerminateInstances([]string{instance.InstanceId})
-	}()
 }
 
-func waitForState(ec2conn *ec2.EC2, i *ec2.Instance, target string) (err error) {
+func waitForState(ec2conn *ec2.EC2, originalInstance *ec2.Instance, target string) (i *ec2.Instance, err error) {
 	log.Printf("Waiting for instance state to become: %s\n", target)
 
+	i = originalInstance
 	original := i.State.Name
 	for i.State.Name == original {
 		var resp *ec2.InstancesResp
@@ -167,7 +226,8 @@ func waitForState(ec2conn *ec2.EC2, i *ec2.Instance, target string) (err error) 
 	}
 
 	if i.State.Name != target {
-		return fmt.Errorf("unexpected target state '%s', wanted '%s'", i.State.Name, target)
+		err = fmt.Errorf("unexpected target state '%s', wanted '%s'", i.State.Name, target)
+		return
 	}
 
 	return
