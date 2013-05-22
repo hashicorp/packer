@@ -73,6 +73,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 
 	// Run all the builds in parallel and wait for them to complete
 	var wg sync.WaitGroup
+	artifacts := make(map[string]packer.Artifact)
 	for _, b := range builds {
 		log.Printf("Starting build run: %s\n", b.Name())
 
@@ -82,11 +83,19 @@ func (Command) Run(env packer.Environment, args []string) int {
 		// Run the build in a goroutine
 		go func() {
 			defer wg.Done()
-			b.Run(buildUis[b.Name()])
+			artifacts[b.Name()] = b.Run(buildUis[b.Name()])
 		}()
 	}
 
 	wg.Wait()
+
+	// Output all the artifacts
+	env.Ui().Say("==> The build completed! The artifacts created were:")
+	for name, artifact := range artifacts {
+		env.Ui().Say("--> %s:", name)
+		env.Ui().Say(artifact.String())
+	}
+
 	return 0
 }
 
