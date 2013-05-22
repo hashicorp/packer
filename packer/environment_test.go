@@ -67,6 +67,7 @@ func TestEnvironment_NilComponents(t *testing.T) {
 	env.Builder("foo")
 	env.Cli([]string{"foo"})
 	env.Hook("foo")
+	env.Provisioner("foo")
 }
 
 func TestEnvironment_Builder(t *testing.T) {
@@ -235,6 +236,49 @@ func TestEnvironment_Hook_Error(t *testing.T) {
 	assert.NotNil(err, "should be an error")
 	assert.Equal(err.Error(), "foo", "should be correct error")
 	assert.Nil(returned, "should be no hook")
+}
+
+func TestEnvironmentProvisioner(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	p := &TestProvisioner{}
+	ps := make(map[string]Provisioner)
+	ps["foo"] = p
+
+	config := DefaultEnvironmentConfig()
+	config.Components.Provisioner = func(n string) (Provisioner, error) { return ps[n], nil }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.Provisioner("foo")
+	assert.Nil(err, "should be no error")
+	assert.Equal(returned, p, "should return correct provisioner")
+}
+
+func TestEnvironmentProvisioner_NilError(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components.Provisioner = func(n string) (Provisioner, error) { return nil, nil }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.Provisioner("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Nil(returned, "should be no provisioner")
+}
+
+func TestEnvironmentProvisioner_Error(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components.Provisioner = func(n string) (Provisioner, error) {
+		return nil, errors.New("foo")
+	}
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.Provisioner("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Equal(err.Error(), "foo", "should be correct error")
+	assert.Nil(returned, "should be no provisioner")
 }
 
 func TestEnvironment_SettingUi(t *testing.T) {

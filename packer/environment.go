@@ -19,13 +19,17 @@ type CommandFunc func(name string) (Command, error)
 // The function type used to lookup Hook implementations.
 type HookFunc func(name string) (Hook, error)
 
+// The function type used to lookup Provisioner implementations.
+type ProvisionerFunc func(name string) (Provisioner, error)
+
 // ComponentFinder is a struct that contains the various function
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
 type ComponentFinder struct {
-	Builder BuilderFunc
-	Command CommandFunc
-	Hook    HookFunc
+	Builder     BuilderFunc
+	Command     CommandFunc
+	Hook        HookFunc
+	Provisioner ProvisionerFunc
 }
 
 // The environment interface provides access to the configuration and
@@ -37,6 +41,7 @@ type Environment interface {
 	Builder(string) (Builder, error)
 	Cli([]string) (int, error)
 	Hook(string) (Hook, error)
+	Provisioner(string) (Provisioner, error)
 	Ui() Ui
 }
 
@@ -91,6 +96,10 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 		env.components.Hook = func(string) (Hook, error) { return nil, nil }
 	}
 
+	if env.components.Provisioner == nil {
+		env.components.Provisioner = func(string) (Provisioner, error) { return nil, nil }
+	}
+
 	resultEnv = env
 	return
 }
@@ -120,6 +129,21 @@ func (e *coreEnvironment) Hook(name string) (h Hook, err error) {
 
 	if h == nil {
 		err = fmt.Errorf("No hook returned for name: %s", name)
+	}
+
+	return
+}
+
+// Returns a provisioner for the given name that is registered with this
+// environment.
+func (e *coreEnvironment) Provisioner(name string) (p Provisioner, err error) {
+	p, err = e.components.Provisioner(name)
+	if err != nil {
+		return
+	}
+
+	if p == nil {
+		err = fmt.Errorf("No provisioner returned for name: %s", name)
 	}
 
 	return
