@@ -54,6 +54,22 @@ func TestParseTemplate_BuilderWithoutType(t *testing.T) {
 	assert.NotNil(err, "should have error")
 }
 
+func TestParseTemplate_BuilderWithNonStringType(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"builders": [{
+			"type": 42
+		}]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	assert.NotNil(err, "should have error")
+}
+
 func TestParseTemplate_BuilderWithoutName(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
