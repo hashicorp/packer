@@ -31,6 +31,9 @@ func testBuild() Build {
 		name:          "test",
 		builder:       &TestBuilder{},
 		builderConfig: 42,
+		provisioners: []coreBuildProvisioner{
+			coreBuildProvisioner{&TestProvisioner{}, 42},
+		},
 	}
 }
 
@@ -65,10 +68,19 @@ func TestBuild_Run(t *testing.T) {
 	build.Prepare(ui)
 	build.Run(ui)
 
-	builder := build.(*coreBuild).builder.(*TestBuilder)
+	coreB := build.(*coreBuild)
 
+	// Verify builder was prepared
+	builder := coreB.builder.(*TestBuilder)
 	assert.True(builder.runCalled, "run should be called")
 	assert.Equal(builder.runUi, ui, "run should be called with ui")
+
+	// Verify provisioners were prepared
+	coreProv := coreB.provisioners[0]
+	prov := coreProv.provisioner.(*TestProvisioner)
+	assert.True(prov.prepCalled, "prepare should be called")
+	assert.Equal(prov.prepConfig, 42, "prepare should be called with proper config")
+	assert.Equal(prov.prepUi, ui, "prepare should be called with proper ui")
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {

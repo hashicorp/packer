@@ -39,10 +39,19 @@ func (b *coreBuild) Name() string {
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
 func (b *coreBuild) Prepare(ui Ui) (err error) {
+	// TODO: lock
 	b.prepareCalled = true
+
+	// Prepare the builder
 	err = b.builder.Prepare(b.builderConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
+	}
+
+	// Prepare the provisioners
+	// TODO: error handling
+	for _, coreProv := range b.provisioners {
+		coreProv.provisioner.Prepare(coreProv.config, ui)
 	}
 
 	return

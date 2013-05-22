@@ -12,7 +12,7 @@ var testBuildArtifact = &testArtifact{}
 type testBuild struct {
 	nameCalled    bool
 	prepareCalled bool
-	prepareUi packer.Ui
+	prepareUi     packer.Ui
 	runCalled     bool
 	runUi         packer.Ui
 }
