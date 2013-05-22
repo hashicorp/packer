@@ -17,6 +17,8 @@ type testEnvironment struct {
 	cliArgs       []string
 	hookCalled    bool
 	hookName      string
+	provCalled    bool
+	provName      string
 	uiCalled      bool
 }
 
@@ -35,6 +37,12 @@ func (e *testEnvironment) Cli(args []string) (int, error) {
 func (e *testEnvironment) Hook(name string) (packer.Hook, error) {
 	e.hookCalled = true
 	e.hookName = name
+	return nil, nil
+}
+
+func (e *testEnvironment) Provisioner(name string) (packer.Provisioner, error) {
+	e.provCalled = true
+	e.provName = name
 	return nil, nil
 }
 
@@ -73,6 +81,11 @@ func TestEnvironmentRPC(t *testing.T) {
 	assert.True(e.cliCalled, "CLI should be called")
 	assert.Equal(e.cliArgs, cliArgs, "args should match")
 	assert.Equal(result, 42, "result shuld be 42")
+
+	// Test Provisioner
+	_, _ = eClient.Provisioner("foo")
+	assert.True(e.provCalled, "provisioner should be called")
+	assert.Equal(e.provName, "foo", "should have proper name")
 
 	// Test Ui
 	ui := eClient.Ui()

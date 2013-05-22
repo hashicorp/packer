@@ -59,6 +59,22 @@ func (e *Environment) Hook(name string) (h packer.Hook, err error) {
 	return
 }
 
+func (e *Environment) Provisioner(name string) (p packer.Provisioner, err error) {
+	var reply string
+	err = e.client.Call("Environment.Provisioner", name, &reply)
+	if err != nil {
+		return
+	}
+
+	client, err := rpc.Dial("tcp", reply)
+	if err != nil {
+		return
+	}
+
+	p = Provisioner(client)
+	return
+}
+
 func (e *Environment) Ui() packer.Ui {
 	var reply string
 	e.client.Call("Environment.Ui", new(interface{}), &reply)
@@ -96,6 +112,19 @@ func (e *EnvironmentServer) Hook(name *string, reply *string) error {
 	// Wrap it
 	server := rpc.NewServer()
 	RegisterHook(server, hook)
+
+	*reply = serveSingleConn(server)
+	return nil
+}
+
+func (e *EnvironmentServer) Provisioner(name *string, reply *string) error {
+	prov, err := e.env.Provisioner(*name)
+	if err != nil {
+		return err
+	}
+
+	server := rpc.NewServer()
+	RegisterProvisioner(server, prov)
 
 	*reply = serveSingleConn(server)
 	return nil
