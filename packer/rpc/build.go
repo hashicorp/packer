@@ -17,7 +17,9 @@ type BuildServer struct {
 	build packer.Build
 }
 
-type BuildPrepareArgs interface{}
+type BuildPrepareArgs struct {
+	RPCAddress string
+}
 
 type BuildRunArgs struct {
 	UiRPCAddress string
@@ -32,8 +34,17 @@ func (b *build) Name() (result string) {
 	return
 }
 
-func (b *build) Prepare() (err error) {
-	b.client.Call("Build.Prepare", new(interface{}), &err)
+func (b *build) Prepare(ui packer.Ui) (err error) {
+	// Create and start the server for the UI
+	// TODO: Error handling
+	server := rpc.NewServer()
+	RegisterUi(server, ui)
+	args := &BuildPrepareArgs{serveSingleConn(server)}
+
+	if err := b.client.Call("Build.Prepare", args, &err); err != nil {
+		panic(err)
+	}
+
 	return
 }
 
@@ -63,7 +74,12 @@ func (b *BuildServer) Name(args *interface{}, reply *string) error {
 }
 
 func (b *BuildServer) Prepare(args *BuildPrepareArgs, reply *error) error {
-	*reply = b.build.Prepare()
+	client, err := rpc.Dial("tcp", args.RPCAddress)
+	if err != nil {
+		return err
+	}
+
+	*reply = b.build.Prepare(&Ui{client})
 	return nil
 }
 

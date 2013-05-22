@@ -51,7 +51,7 @@ func TestBuild_Prepare(t *testing.T) {
 	build := testBuild()
 	builder := build.(*coreBuild).builder.(*TestBuilder)
 
-	build.Prepare()
+	build.Prepare(nil)
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, 42, "prepare config should be 42")
 }
@@ -62,7 +62,7 @@ func TestBuild_Run(t *testing.T) {
 	ui := testUi()
 
 	build := testBuild()
-	build.Prepare()
+	build.Prepare(ui)
 	build.Run(ui)
 
 	builder := build.(*coreBuild).builder.(*TestBuilder)

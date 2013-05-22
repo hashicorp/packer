@@ -64,7 +64,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	// Prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		err := b.Prepare()
+		err := b.Prepare(buildUis[b.Name()])
 		if err != nil {
 			env.Ui().Error(err.Error())
 			return 1
