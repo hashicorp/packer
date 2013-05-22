@@ -20,9 +20,10 @@ type rawTemplate struct {
 // The Template struct represents a parsed template, parsed into the most
 // completed form it can be without additional processing by the caller.
 type Template struct {
-	Name     string
-	Builders map[string]rawBuilderConfig
-	Hooks    map[string][]string
+	Name         string
+	Builders     map[string]rawBuilderConfig
+	Hooks        map[string][]string
+	Provisioners []rawProvisionerConfig
 }
 
 // The rawBuilderConfig struct represents a raw, unprocessed builder
@@ -32,6 +33,14 @@ type Template struct {
 type rawBuilderConfig struct {
 	builderType string
 	rawConfig   interface{}
+}
+
+// rawProvisionerConfig represents a raw, unprocessed provisioner configuration.
+// It contains the type of the provisioner as well as the raw configuration
+// that is handed to the provisioner for it to process.
+type rawProvisionerConfig struct {
+	pType     string
+	rawConfig interface{}
 }
 
 // ParseTemplate takes a byte slice and parses a Template from it, returning
@@ -50,6 +59,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t.Name = rawTpl.Name
 	t.Builders = make(map[string]rawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
+	t.Provisioners = make([]rawProvisionerConfig, len(rawTpl.Provisioners))
 
 	errors := make([]error, 0)
 
@@ -89,6 +99,26 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		}
 
 		t.Builders[name] = rawBuilderConfig{
+			typeName,
+			v,
+		}
+	}
+
+	// Gather all the provisioners
+	for i, v := range rawTpl.Provisioners {
+		rawType, ok := v["type"]
+		if !ok {
+			errors = append(errors, fmt.Errorf("provisioner %d: missing 'type'", i+1))
+			continue
+		}
+
+		typeName, ok := rawType.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("provisioner %d: type must be a string", i+1))
+			continue
+		}
+
+		t.Provisioners[i] = rawProvisionerConfig{
 			typeName,
 			v,
 		}

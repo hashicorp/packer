@@ -165,6 +165,57 @@ func TestParseTemplate_Hooks(t *testing.T) {
 	assert.Equal(hooks, []string{"foo", "bar"}, "hooks should be correct")
 }
 
+func TestParseTemplate_ProvisionerWithoutType(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"provisioners": [{}]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	assert.NotNil(err, "should have error")
+}
+
+func TestParseTemplate_ProvisionerWithNonStringType(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"provisioners": [{
+			"type": 42
+		}]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	assert.NotNil(err, "should have error")
+}
+
+func TestParseTemplate_Provisioners(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"provisioners": [
+			{
+				"type": "shell"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	assert.Nil(err, "should not error")
+	assert.NotNil(result, "template should not be nil")
+	assert.Length(result.Provisioners, 1, "should have one provisioner")
+	assert.Equal(result.Provisioners[0].pType, "shell", "provisioner should be shell")
+}
+
 func TestTemplate_BuildNames(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
