@@ -28,9 +28,9 @@ func (tb *TestBuilder) Run(ui Ui, h Hook) Artifact {
 
 func testBuild() Build {
 	return &coreBuild{
-		name:      "test",
-		builder:   &TestBuilder{},
-		rawConfig: 42,
+		name:          "test",
+		builder:       &TestBuilder{},
+		builderConfig: 42,
 	}
 }
 

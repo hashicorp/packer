@@ -149,6 +149,7 @@ func (t *Template) BuildNames() []string {
 // If the build does not exist as part of this template, an error is
 // returned.
 func (t *Template) Build(name string, components *ComponentFinder) (b Build, err error) {
+	// Setup the Builder
 	builderConfig, ok := t.Builders[name]
 	if !ok {
 		err = fmt.Errorf("No such build found in template: %s", name)
@@ -165,6 +166,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
+	// Gather the Hooks
 	hooks := make(map[string][]Hook)
 	for tplEvent, tplHooks := range t.Hooks {
 		curHooks := make([]Hook, 0, len(tplHooks))
@@ -187,11 +189,30 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		hooks[tplEvent] = curHooks
 	}
 
+	// Prepare the provisioners
+	provisioners := make([]coreBuildProvisioner, 0, len(t.Provisioners))
+	for _, rawProvisioner := range t.Provisioners {
+		var provisioner Provisioner
+		provisioner, err = components.Provisioner(rawProvisioner.pType)
+		if err != nil {
+			return
+		}
+
+		if provisioner == nil {
+			err = fmt.Errorf("Provisioner type not found: %s", rawProvisioner.pType)
+			return
+		}
+
+		coreProv := coreBuildProvisioner{provisioner, rawProvisioner.rawConfig}
+		provisioners = append(provisioners, coreProv)
+	}
+
 	b = &coreBuild{
-		name:      name,
-		builder:   builder,
-		hooks:     hooks,
-		rawConfig: builderConfig.rawConfig,
+		name:          name,
+		builder:       builder,
+		builderConfig: builderConfig.rawConfig,
+		hooks:         hooks,
+		provisioners:  provisioners,
 	}
 
 	return

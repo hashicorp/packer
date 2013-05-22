@@ -15,12 +15,20 @@ type Build interface {
 // multiple files, of course, but it should be for only a single provider
 // (such as VirtualBox, EC2, etc.).
 type coreBuild struct {
-	name      string
-	builder   Builder
-	hooks     map[string][]Hook
-	rawConfig interface{}
+	name          string
+	builder       Builder
+	builderConfig interface{}
+	hooks         map[string][]Hook
+	provisioners  []coreBuildProvisioner
 
 	prepareCalled bool
+}
+
+// Keeps track of the provisioner and the configuration of the provisioner
+// within the build.
+type coreBuildProvisioner struct {
+	provisioner Provisioner
+	config      interface{}
 }
 
 // Returns the name of the build.
@@ -32,7 +40,7 @@ func (b *coreBuild) Name() string {
 // and any hooks. This _must_ be called prior to Run.
 func (b *coreBuild) Prepare() (err error) {
 	b.prepareCalled = true
-	err = b.builder.Prepare(b.rawConfig)
+	err = b.builder.Prepare(b.builderConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
 	}

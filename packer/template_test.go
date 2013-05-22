@@ -302,6 +302,12 @@ func TestTemplate_Build(t *testing.T) {
 				"name": "test1",
 				"type": "test-builder"
 			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov"
+			}
 		]
 	}
 	`
@@ -319,18 +325,26 @@ func TestTemplate_Build(t *testing.T) {
 		"test-builder": builder,
 	}
 
+	provisioner := &TestProvisioner{}
+	provisionerMap := map[string]Provisioner{
+		"test-prov": provisioner,
+	}
+
 	builderFactory := func(n string) (Builder, error) { return builderMap[n], nil }
-	components := &ComponentFinder{Builder: builderFactory}
+	provFactory := func(n string) (Provisioner, error) { return provisionerMap[n], nil }
+	components := &ComponentFinder{
+		Builder:     builderFactory,
+		Provisioner: provFactory,
+	}
 
 	// Get the build, verifying we can get it without issue, but also
 	// that the proper builder was looked up and used for the build.
 	build, err := template.Build("test1", components)
 	assert.Nil(err, "should not error")
 
-	build.Prepare()
-	build.Run(testUi())
-
-	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, expectedConfig, "prepare config should be correct")
-	assert.True(builder.runCalled, "run should be called")
+	coreBuild, ok := build.(*coreBuild)
+	assert.True(ok, "should be a core build")
+	assert.Equal(coreBuild.builder, builder, "should have the same builder")
+	assert.Equal(coreBuild.builderConfig, expectedConfig, "should have proper config")
+	assert.Equal(len(coreBuild.provisioners), 1, "should have one provisioner")
 }
