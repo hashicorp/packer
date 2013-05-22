@@ -12,15 +12,15 @@ type Command byte
 
 func (Command) Run(env packer.Environment, args []string) int {
 	if len(args) != 1 {
-		env.Ui().Error("A single template argument is required.\n")
+		env.Ui().Error("A single template argument is required.")
 		return 1
 	}
 
 	// Read the file into a byte array so that we can parse the template
-	log.Printf("Reading template: %s\n", args[0])
+	log.Printf("Reading template: %s", args[0])
 	tplData, err := ioutil.ReadFile(args[0])
 	if err != nil {
-		env.Ui().Error("Failed to read template file: %s\n", err.Error())
+		env.Ui().Error("Failed to read template file: %s", err.Error())
 		return 1
 	}
 
@@ -28,7 +28,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	log.Println("Parsing template...")
 	tpl, err := packer.ParseTemplate(tplData)
 	if err != nil {
-		env.Ui().Error("Failed to parse template: %s\n", err.Error())
+		env.Ui().Error("Failed to parse template: %s", err.Error())
 		return 1
 	}
 
@@ -42,10 +42,10 @@ func (Command) Run(env packer.Environment, args []string) int {
 	buildNames := tpl.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
-		log.Printf("Creating build: %s\n", buildName)
+		log.Printf("Creating build: %s", buildName)
 		build, err := tpl.Build(buildName, components)
 		if err != nil {
-			env.Ui().Error("Failed to create build '%s': \n\n%s\n", buildName, err.Error())
+			env.Ui().Error("Failed to create build '%s': \n\n%s", buildName, err.Error())
 			return 1
 		}
 
@@ -63,10 +63,10 @@ func (Command) Run(env packer.Environment, args []string) int {
 
 	// Prepare all the builds
 	for _, b := range builds {
-		log.Printf("Preparing build: %s\n", b.Name())
+		log.Printf("Preparing build: %s", b.Name())
 		err := b.Prepare()
 		if err != nil {
-			env.Ui().Error("%s\n", err)
+			env.Ui().Error(err.Error())
 			return 1
 		}
 	}
@@ -75,7 +75,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	var wg sync.WaitGroup
 	artifacts := make(map[string]packer.Artifact)
 	for _, b := range builds {
-		log.Printf("Starting build run: %s\n", b.Name())
+		log.Printf("Starting build run: %s", b.Name())
 
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
