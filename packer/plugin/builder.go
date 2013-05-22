@@ -22,13 +22,13 @@ func (b *cmdBuilder) Prepare(config interface{}) error {
 	return b.builder.Prepare(config)
 }
 
-func (b *cmdBuilder) Run(ui packer.Ui, hook packer.Hook) {
+func (b *cmdBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)
 	}()
 
-	b.builder.Run(ui, hook)
+	return b.builder.Run(ui, hook)
 }
 
 func (c *cmdBuilder) checkExit(p interface{}, cb func()) {
