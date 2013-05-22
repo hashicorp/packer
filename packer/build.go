@@ -63,6 +63,13 @@ func (b *coreBuild) Run(ui Ui) Artifact {
 		panic("Prepare must be called first")
 	}
 
-	hook := &DispatchHook{b.hooks}
+	// Copy the hooks
+	hooks := make(map[string][]Hook)
+	for hookName, hookList := range b.hooks {
+		hooks[hookName] = make([]Hook, len(hookList))
+		copy(hooks[hookName], hookList)
+	}
+
+	hook := &DispatchHook{hooks}
 	return b.builder.Run(ui, hook)
 }

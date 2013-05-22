@@ -5,32 +5,14 @@ import (
 	"testing"
 )
 
-type TestBuilder struct {
-	prepareCalled bool
-	prepareConfig interface{}
-	runCalled     bool
-	runHook       Hook
-	runUi         Ui
-}
-
-func (tb *TestBuilder) Prepare(config interface{}) error {
-	tb.prepareCalled = true
-	tb.prepareConfig = config
-	return nil
-}
-
-func (tb *TestBuilder) Run(ui Ui, h Hook) Artifact {
-	tb.runCalled = true
-	tb.runHook = h
-	tb.runUi = ui
-	return nil
-}
-
 func testBuild() Build {
 	return &coreBuild{
 		name:          "test",
 		builder:       &TestBuilder{},
 		builderConfig: 42,
+		hooks: map[string][]Hook{
+			"foo": []Hook{&TestHook{}},
+		},
 		provisioners: []coreBuildProvisioner{
 			coreBuildProvisioner{&TestProvisioner{}, 42},
 		},
@@ -52,11 +34,21 @@ func TestBuild_Prepare(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	build := testBuild()
-	builder := build.(*coreBuild).builder.(*TestBuilder)
+	ui := testUi()
 
-	build.Prepare(nil)
+	coreB := build.(*coreBuild)
+	builder := coreB.builder.(*TestBuilder)
+
+	build.Prepare(ui)
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, 42, "prepare config should be 42")
+
+	// Verify provisioners were prepared
+	coreProv := coreB.provisioners[0]
+	prov := coreProv.provisioner.(*TestProvisioner)
+	assert.True(prov.prepCalled, "prepare should be called")
+	assert.Equal(prov.prepConfig, 42, "prepare should be called with proper config")
+	assert.Equal(prov.prepUi, ui, "prepare should be called with proper ui")
 }
 
 func TestBuild_Run(t *testing.T) {
@@ -70,17 +62,18 @@ func TestBuild_Run(t *testing.T) {
 
 	coreB := build.(*coreBuild)
 
-	// Verify builder was prepared
+	// Verify builder was run
 	builder := coreB.builder.(*TestBuilder)
 	assert.True(builder.runCalled, "run should be called")
 	assert.Equal(builder.runUi, ui, "run should be called with ui")
 
-	// Verify provisioners were prepared
-	coreProv := coreB.provisioners[0]
-	prov := coreProv.provisioner.(*TestProvisioner)
-	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfig, 42, "prepare should be called with proper config")
-	assert.Equal(prov.prepUi, ui, "prepare should be called with proper ui")
+	// Verify hooks are disapatchable
+	dispatchHook := builder.runHook
+	dispatchHook.Run("foo", nil, nil, 42)
+
+	hook := coreB.hooks["foo"][0].(*TestHook)
+	assert.True(hook.runCalled, "run should be called")
+	assert.Equal(hook.runData, 42, "should have correct data")
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {
