@@ -48,11 +48,12 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t.Builders = make(map[string]rawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
 
-	for _, v := range rawTpl.Builders {
+	errors := make([]error, 0)
+	for i, v := range rawTpl.Builders {
 		rawType, ok := v["type"]
 		if !ok {
-			// TODO: Missing type error
-			return
+			errors = append(errors, fmt.Errorf("missing 'type' for builder %d", i + 1))
+			continue
 		}
 
 		// Attempt to get the name of the builder. If the "name" key
@@ -67,15 +68,18 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		name := rawName.(string)
 		typeName := rawType.(string)
 
-		// Check if we already have a builder with this name and record
-		// an error.
-		_, ok = t.Builders[name]
-		if ok {
-			// TODO: We already have a builder with this name
-			return
+		// Check if we already have a builder with this name and error if so
+		if _, ok := t.Builders[name]; ok {
+			errors = append(errors, fmt.Errorf("builder with name '%s' already exists", name))
+			continue
 		}
 
 		t.Builders[name] = rawBuilderConfig{typeName, v}
+	}
+
+	if len(errors) > 0 {
+		err = &MultiError{errors}
+		return
 	}
 
 	return

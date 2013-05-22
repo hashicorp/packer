@@ -40,6 +40,20 @@ func TestParseTemplate_Invalid(t *testing.T) {
 	assert.Nil(result, "should have no result")
 }
 
+func TestParseTemplate_BuilderWithoutType(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"builders": [{}]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	assert.NotNil(err, "should have error")
+}
+
 func TestParseTemplate_BuilderWithoutName(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
@@ -87,6 +101,29 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 	builder, ok := result.Builders["bob"]
 	assert.True(ok, "should have bob builder")
 	assert.Equal(builder.builderName, "amazon-ebs", "builder should be amazon-ebs")
+}
+
+func TestParseTemplate_BuilderWithConflictingName(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"builders": [
+			{
+				"name": "bob",
+				"type": "amazon-ebs"
+			},
+			{
+				"name": "bob",
+				"type": "foo",
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	assert.NotNil(err, "should have error")
 }
 
 func TestParseTemplate_Hooks(t *testing.T) {
