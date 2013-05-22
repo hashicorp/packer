@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+var testBuilderArtifact = &testArtifact{}
+
 type testBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
@@ -25,7 +27,7 @@ func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	b.runCalled = true
 	b.runHook = hook
 	b.runUi = ui
-	return nil
+	return testBuilderArtifact
 }
 
 func TestBuilderRPC(t *testing.T) {
@@ -53,7 +55,7 @@ func TestBuilderRPC(t *testing.T) {
 	// Test Run
 	hook := &testHook{}
 	ui := &testUi{}
-	bClient.Run(ui, hook)
+	artifact := bClient.Run(ui, hook)
 	assert.True(b.runCalled, "runs hould be called")
 
 	if b.runCalled {
@@ -63,6 +65,8 @@ func TestBuilderRPC(t *testing.T) {
 		b.runUi.Say("format")
 		assert.True(ui.sayCalled, "say should be called")
 		assert.Equal(ui.sayFormat, "format", "format should be correct")
+
+		assert.Equal(artifact.Id(), testBuilderArtifact.Id(), "should have artifact Id")
 	}
 }
 

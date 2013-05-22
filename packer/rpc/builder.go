@@ -46,10 +46,18 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	RegisterHook(server, hook)
 
 	args := &BuilderRunArgs{serveSingleConn(server)}
-	b.client.Call("Builder.Run", args, new(interface{}))
 
-	// TODO: artifact
-	return nil
+	var reply string
+	if err := b.client.Call("Builder.Run", args, &reply); err != nil {
+		panic(err)
+	}
+
+	client, err := rpc.Dial("tcp", reply)
+	if err != nil {
+		panic(err)
+	}
+
+	return Artifact(client)
 }
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
@@ -61,7 +69,7 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
 	return nil
 }
 
-func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
+func (b *BuilderServer) Run(args *BuilderRunArgs, reply *string) error {
 	client, err := rpc.Dial("tcp", args.RPCAddress)
 	if err != nil {
 		return err
@@ -69,8 +77,12 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 
 	hook := Hook(client)
 	ui := &Ui{client}
-	b.builder.Run(ui, hook)
+	artifact := b.builder.Run(ui, hook)
 
-	*reply = nil
+	// Wrap the artifact
+	server := rpc.NewServer()
+	RegisterArtifact(server, artifact)
+
+	*reply = serveSingleConn(server)
 	return nil
 }
