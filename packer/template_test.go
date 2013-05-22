@@ -91,7 +91,7 @@ func TestParseTemplate_BuilderWithoutName(t *testing.T) {
 
 	builder, ok := result.Builders["amazon-ebs"]
 	assert.True(ok, "should have amazon-ebs builder")
-	assert.Equal(builder.builderName, "amazon-ebs", "builder should be amazon-ebs")
+	assert.Equal(builder.builderType, "amazon-ebs", "builder should be amazon-ebs")
 }
 
 func TestParseTemplate_BuilderWithName(t *testing.T) {
@@ -116,7 +116,7 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 
 	builder, ok := result.Builders["bob"]
 	assert.True(ok, "should have bob builder")
-	assert.Equal(builder.builderName, "amazon-ebs", "builder should be amazon-ebs")
+	assert.Equal(builder.builderType, "amazon-ebs", "builder should be amazon-ebs")
 }
 
 func TestParseTemplate_BuilderWithConflictingName(t *testing.T) {

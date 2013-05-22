@@ -30,7 +30,7 @@ type Template struct {
 // raw configuration. If requested, this is used to compile into a full
 // builder configuration at some point.
 type rawBuilderConfig struct {
-	builderName string
+	builderType string
 	rawConfig   interface{}
 }
 
@@ -88,7 +88,10 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
-		t.Builders[name] = rawBuilderConfig{typeName, v}
+		t.Builders[name] = rawBuilderConfig{
+			typeName,
+			v,
+		}
 	}
 
 	// If there were errors, we put it into a MultiError and return
@@ -122,13 +125,13 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
-	builder, err := components.Builder(builderConfig.builderName)
+	builder, err := components.Builder(builderConfig.builderType)
 	if err != nil {
 		return
 	}
 
 	if builder == nil {
-		err = fmt.Errorf("Builder not found: %s", name)
+		err = fmt.Errorf("Builder type not found: %s", builderConfig.builderType)
 		return
 	}
 
