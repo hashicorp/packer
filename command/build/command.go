@@ -90,7 +90,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	wg.Wait()
 
 	// Output all the artifacts
-	env.Ui().Say("==> The build completed! The artifacts created were:")
+	env.Ui().Say("\n==> The build completed! The artifacts created were:")
 	for name, artifact := range artifacts {
 		env.Ui().Say("--> %s:", name)
 		env.Ui().Say(artifact.String())
