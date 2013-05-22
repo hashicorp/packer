@@ -19,10 +19,11 @@ func (tb *TestBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (tb *TestBuilder) Run(ui Ui, h Hook) {
+func (tb *TestBuilder) Run(ui Ui, h Hook) Artifact {
 	tb.runCalled = true
 	tb.runHook = h
 	tb.runUi = ui
+	return nil
 }
 
 func testBuild() Build {

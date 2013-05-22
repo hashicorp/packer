@@ -21,10 +21,11 @@ func (b *testBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) {
+func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	b.runCalled = true
 	b.runHook = hook
 	b.runUi = ui
+	return nil
 }
 
 func TestBuilderRPC(t *testing.T) {

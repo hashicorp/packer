@@ -5,6 +5,12 @@ import (
 	"net/rpc"
 )
 
+// Registers the appropriate endpoint on an RPC server to serve an
+// Artifact.
+func RegisterArtifact(s *rpc.Server, a packer.Artifact) {
+	s.RegisterName("Artifact", &ArtifactServer{a})
+}
+
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Build.
 func RegisterBuild(s *rpc.Server, b packer.Build) {

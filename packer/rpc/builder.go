@@ -38,7 +38,7 @@ func (b *builder) Prepare(config interface{}) (err error) {
 	return
 }
 
-func (b *builder) Run(ui packer.Ui, hook packer.Hook) {
+func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	// Create and start the server for the Build and UI
 	// TODO: Error handling
 	server := rpc.NewServer()
@@ -47,6 +47,9 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) {
 
 	args := &BuilderRunArgs{serveSingleConn(server)}
 	b.client.Call("Builder.Run", args, new(interface{}))
+
+	// TODO: artifact
+	return nil
 }
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {

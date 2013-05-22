@@ -11,5 +11,5 @@ package packer
 // Run is where the actual build should take place. It takes a Build and a Ui.
 type Builder interface {
 	Prepare(config interface{}) error
-	Run(ui Ui, hook Hook)
+	Run(ui Ui, hook Hook) Artifact
 }
