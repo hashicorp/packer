@@ -44,7 +44,15 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	log.Printf("Config: %+v", b.config)
 
-	// TODO: Validate the configuration
+	// TODO: config validation and asking for fields:
+	// * access key
+	// * secret key
+	// * region
+	// * source ami
+	// * instance type
+	// * SSH username
+	// * SSH port? (or default to 22?)
+
 	return
 }
 

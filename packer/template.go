@@ -35,7 +35,10 @@ type rawBuilderConfig struct {
 }
 
 // ParseTemplate takes a byte slice and parses a Template from it, returning
-// the template and possibly errors while loading the template.
+// the template and possibly errors while loading the template. The error
+// could potentially be a MultiError, representing multiple errors. Knowing
+// and checking for this can be useful, if you wish to format it in a certain
+// way.
 func ParseTemplate(data []byte) (t *Template, err error) {
 	var rawTpl rawTemplate
 	err = json.Unmarshal(data, &rawTpl)
@@ -49,6 +52,8 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t.Hooks = rawTpl.Hooks
 
 	errors := make([]error, 0)
+
+	// Gather all the builders
 	for i, v := range rawTpl.Builders {
 		rawType, ok := v["type"]
 		if !ok {
@@ -86,6 +91,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		t.Builders[name] = rawBuilderConfig{typeName, v}
 	}
 
+	// If there were errors, we put it into a MultiError and return
 	if len(errors) > 0 {
 		err = &MultiError{errors}
 		return
