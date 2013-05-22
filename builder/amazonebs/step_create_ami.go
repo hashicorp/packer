@@ -26,7 +26,11 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
 		return StepHalt
 	}
 
+	// Set the AMI ID in the state
 	ui.Say("AMI: %s", createResp.ImageId)
+	amis := make(map[string]string)
+	amis[config.Region] = createResp.ImageId
+	state["amis"] = amis
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")

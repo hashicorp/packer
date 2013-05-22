@@ -13,6 +13,9 @@ import (
 	"log"
 )
 
+// The unique ID for this builder
+const BuilderId = "mitchellh.amazonebs"
+
 type config struct {
 	// Access information
 	AccessKey string `mapstructure:"access_key"`
@@ -45,7 +48,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	return
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	auth := aws.Auth{b.config.AccessKey, b.config.SecretKey}
 	region := aws.Regions[b.config.Region]
 	ec2conn := ec2.New(auth, region)
@@ -67,4 +70,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) {
 
 	// Run!
 	RunSteps(state, steps)
+
+	// Build the artifact and return it
+	return &artifact{state["amis"].(map[string]string)}
 }
