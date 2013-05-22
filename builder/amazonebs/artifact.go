@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type artifact struct{
+type artifact struct {
 	// A map of regions to AMI IDs.
 	amis map[string]string
 }

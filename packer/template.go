@@ -57,7 +57,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	for i, v := range rawTpl.Builders {
 		rawType, ok := v["type"]
 		if !ok {
-			errors = append(errors, fmt.Errorf("builder %d: missing 'type'", i + 1))
+			errors = append(errors, fmt.Errorf("builder %d: missing 'type'", i+1))
 			continue
 		}
 
@@ -72,13 +72,13 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		// Attempt to convert the name/type to strings, but error if we can't
 		name, ok := rawName.(string)
 		if !ok {
-			errors = append(errors, fmt.Errorf("builder %d: name must be a string", i + 1))
+			errors = append(errors, fmt.Errorf("builder %d: name must be a string", i+1))
 			continue
 		}
 
 		typeName, ok := rawType.(string)
 		if !ok {
-			errors = append(errors, fmt.Errorf("builder %d: type must be a string", i + 1))
+			errors = append(errors, fmt.Errorf("builder %d: type must be a string", i+1))
 			continue
 		}
 
