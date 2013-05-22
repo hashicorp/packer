@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+var testBuildArtifact = &testArtifact{}
+
 type testBuild struct {
 	nameCalled    bool
 	prepareCalled bool
@@ -24,32 +26,27 @@ func (b *testBuild) Prepare() error {
 	return nil
 }
 
-func (b *testBuild) Run(ui packer.Ui) {
+func (b *testBuild) Run(ui packer.Ui) packer.Artifact {
 	b.runCalled = true
 	b.runUi = ui
+	return testBuildArtifact
 }
 
 func TestBuildRPC(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	// Create the UI to test
+	// Create the interface to test
 	b := new(testBuild)
-	bServer := &BuildServer{b}
 
-	// Start the RPC server
-	readyChan := make(chan int)
-	stopChan := make(chan int)
-	defer func() { stopChan <- 1 }()
-	go testRPCServer(":1234", "Build", bServer, readyChan, stopChan)
-	<-readyChan
+	// Start the server
+	server := rpc.NewServer()
+	RegisterBuild(server, b)
+	address := serveSingleConn(server)
 
 	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", ":1234")
-	if err != nil {
-		panic(err)
-	}
-
-	bClient := &Build{client}
+	client, err := rpc.Dial("tcp", address)
+	assert.Nil(err, "should be able to connect")
+	bClient := Build(client)
 
 	// Test Name
 	bClient.Name()
@@ -76,7 +73,7 @@ func TestBuild_ImplementsBuild(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	var realBuild packer.Build
-	b := &Build{nil}
+	b := Build(nil)
 
 	assert.Implementor(b, &realBuild, "should be a Build")
 }
