@@ -156,6 +156,12 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
+	// We panic if there is no builder function because this is really
+	// an internal bug that always needs to be fixed, not an error.
+	if components.Builder == nil {
+		panic("no builder function")
+	}
+
 	builder, err := components.Builder(builderConfig.builderType)
 	if err != nil {
 		return

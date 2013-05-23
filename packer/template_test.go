@@ -291,6 +291,42 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 	assert.NotNil(err, "should have error")
 }
 
+func TestTemplate_Build_NilBuilderFunc(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"name": "my-image",
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov"
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	assert.Nil(err, "should not error")
+
+	defer func() {
+		p := recover()
+		assert.NotNil(p, "should panic")
+
+		if p != nil {
+			assert.Equal(p.(string), "no builder function", "right panic")
+		}
+	}()
+
+	template.Build("test1", &ComponentFinder{})
+}
+
 func TestTemplate_Build(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
