@@ -162,6 +162,10 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		panic("no builder function")
 	}
 
+	if len(t.Provisioners) > 0 && components.Provisioner == nil {
+		panic("no provisioner function")
+	}
+
 	builder, err := components.Builder(builderConfig.builderType)
 	if err != nil {
 		return
