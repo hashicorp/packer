@@ -162,6 +162,8 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		panic("no builder function")
 	}
 
+	// Panic if there are provisioners on the template but no provisioner
+	// component finder. This is always an internal error, so we panic.
 	if len(t.Provisioners) > 0 && components.Provisioner == nil {
 		panic("no provisioner function")
 	}
