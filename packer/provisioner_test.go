@@ -46,3 +46,5 @@ func TestProvisionHook(t *testing.T) {
 		t.Error("provision should be called on pB")
 	}
 }
+
+// TODO(mitchellh): Test that they're run in the proper order
