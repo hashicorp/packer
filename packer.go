@@ -88,6 +88,7 @@ func main() {
 	envConfig.Components.Builder = config.LoadBuilder
 	envConfig.Components.Command = config.LoadCommand
 	envConfig.Components.Hook = config.LoadHook
+	envConfig.Components.Provisioner = config.LoadProvisioner
 
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {
