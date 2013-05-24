@@ -72,6 +72,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	steps := []Step{
 		&stepKeyPair{},
 		&stepRunSourceInstance{},
+		&stepConnectSSH{},
+		&stepProvision{},
 		&stepStopInstance{},
 		&stepCreateAMI{},
 	}
