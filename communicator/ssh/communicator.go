@@ -88,6 +88,12 @@ func (c *comm) Upload(path string, input io.Reader) error {
 		return err
 	}
 
+	// Set stderr/stdout to a bytes buffer
+	stderr := new(bytes.Buffer)
+	stdout := new(bytes.Buffer)
+	session.Stderr = stderr
+	session.Stdout = stdout
+
 	// We only want to close once, so we nil w after we close it,
 	// and only close in the defer if it hasn't been closed already.
 	defer func() {
@@ -103,7 +109,7 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	// Start the sink mode on the other side
 	// TODO(mitchellh): There are probably issues with shell escaping the path
 	log.Println("Starting remote scp process in sink mode")
-	if err = session.Start("scp -t " + target_dir); err != nil {
+	if err = session.Start("scp -vt " + target_dir); err != nil {
 		return err
 	}
 
@@ -119,6 +125,7 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	// Start the protocol
 	fmt.Fprintln(w, "C0644", input_memory.Len(), target_file)
 	io.Copy(w, input_memory)
+	fmt.Fprint(w, "\x00") // XXX(mitchellh): WHY?
 
 	// Close the stdin, which sends an EOF, and then set w to nil so that
 	// our defer func doesn't close it again since that is unsafe with
@@ -128,9 +135,23 @@ func (c *comm) Upload(path string, input io.Reader) error {
 
 	// Wait for the SCP connection to close, meaning it has consumed all
 	// our data and has completed. Or has errored.
-	session.Wait()
+	err = session.Wait()
+	if err != nil {
+		exitErr, ok := err.(*ssh.ExitError)
+		if !ok {
+			// This wasn't an exit error, so something fatal happened
+			return err
+		}
+
+		// Otherwise, we have an ExitErorr, meaning we can just read
+		// the exit status
+		log.Printf("exit status: %d", exitErr.ExitStatus())
+	}
+
 
 	// TODO(mitchellh): Check for return data (expect a 0 or error)
+	log.Printf("scp stdout: %s", stdout.String())
+	log.Printf("scp stderr: %s", stderr.String())
 
 	return nil
 }
