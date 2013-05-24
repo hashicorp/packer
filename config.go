@@ -16,6 +16,9 @@ amazon-ebs = "packer-builder-amazon-ebs"
 
 [commands]
 build = "packer-command-build"
+
+[provisioners]
+shell = "packer-provisioner-shell"
 `
 
 type config struct {
