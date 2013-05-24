@@ -14,3 +14,17 @@ type Provisioner interface {
 	// can be done.
 	Provision(Ui, Communicator)
 }
+
+// A Hook implementation that runs the given provisioners.
+type ProvisionHook struct {
+	// The provisioners to run as part of the hook. These should already
+	// be prepared (by calling Prepare) at some earlier stage.
+	Provisioners []Provisioner
+}
+
+// Runs the provisioners in order.
+func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interface{}) {
+	for _, p := range h.Provisioners {
+		p.Provision(ui, comm)
+	}
+}
