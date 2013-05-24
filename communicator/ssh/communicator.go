@@ -125,7 +125,10 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	// Start the protocol
 	fmt.Fprintln(w, "C0644", input_memory.Len(), target_file)
 	io.Copy(w, input_memory)
-	fmt.Fprint(w, "\x00") // XXX(mitchellh): WHY?
+	fmt.Fprint(w, "\x00")
+
+	// TODO(mitchellh): Each step above results in a 0/1/2 being sent by
+	// the remote side to confirm. We should check for those confirmations.
 
 	// Close the stdin, which sends an EOF, and then set w to nil so that
 	// our defer func doesn't close it again since that is unsafe with
@@ -147,9 +150,8 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	}
 
 
-	// TODO(mitchellh): Check for return data (expect a 0 or error)
-	log.Printf("scp stdout: %s", stdout.String())
-	log.Printf("scp stderr: %s", stderr.String())
+	log.Printf("scp stdout (length %d): %#v", stdout.Len(), stdout.Bytes())
+	log.Printf("scp stderr (length %d): %s", stderr.Len(), stderr.String())
 
 	return nil
 }
