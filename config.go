@@ -19,8 +19,8 @@ build = "packer-command-build"
 `
 
 type config struct {
-	Builders map[string]string
-	Commands map[string]string
+	Builders     map[string]string
+	Commands     map[string]string
 	Provisioners map[string]string
 }
 

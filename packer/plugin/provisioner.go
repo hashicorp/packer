@@ -9,7 +9,7 @@ import (
 )
 
 type cmdProvisioner struct {
-	p   packer.Provisioner
+	p      packer.Provisioner
 	client *client
 }
 
