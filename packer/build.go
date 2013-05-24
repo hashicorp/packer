@@ -70,6 +70,20 @@ func (b *coreBuild) Run(ui Ui) Artifact {
 		copy(hooks[hookName], hookList)
 	}
 
+	// Add a hook for the provisioners if we have provisioners
+	if len(b.provisioners) > 0 {
+		provisioners := make([]Provisioner, len(b.provisioners))
+		for i, p := range b.provisioners {
+			provisioners[i] = p.provisioner
+		}
+
+		if _, ok := hooks[HookProvision]; !ok {
+			hooks[HookProvision] = make([]Hook, 0, 1)
+		}
+
+		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{provisioners})
+	}
+
 	hook := &DispatchHook{hooks}
 	return b.builder.Run(ui, hook)
 }

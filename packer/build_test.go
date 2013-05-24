@@ -74,6 +74,11 @@ func TestBuild_Run(t *testing.T) {
 	hook := coreB.hooks["foo"][0].(*TestHook)
 	assert.True(hook.runCalled, "run should be called")
 	assert.Equal(hook.runData, 42, "should have correct data")
+
+	// Verify provisioners run
+	dispatchHook.Run(HookProvision, nil, nil, 42)
+	prov := coreB.provisioners[0].provisioner.(*TestProvisioner)
+	assert.True(prov.provCalled, "provision should be called")
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {
