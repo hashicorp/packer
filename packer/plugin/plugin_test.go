@@ -56,6 +56,8 @@ func TestHelperProcess(*testing.T) {
 		ServeHook(new(helperHook))
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
+	case "provisioner":
+		ServeProvisioner(new(helperProvisioner))
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)

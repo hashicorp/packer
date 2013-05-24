@@ -110,3 +110,15 @@ func ServeHook(hook packer.Hook) {
 		log.Panic(err)
 	}
 }
+
+// Serves a provisioner from a plugin.
+func ServeProvisioner(p packer.Provisioner) {
+	log.Println("Preparing to serve a provisioner plugin...")
+
+	server := rpc.NewServer()
+	packrpc.RegisterProvisioner(server, p)
+
+	if err := serve(server); err != nil {
+		log.Panic(err)
+	}
+}
