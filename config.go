@@ -21,6 +21,7 @@ build = "packer-command-build"
 type config struct {
 	Builders map[string]string
 	Commands map[string]string
+	Provisioners map[string]string
 }
 
 // Merge the configurations. Anything in the "new" configuration takes
@@ -37,6 +38,10 @@ func mergeConfig(a, b *config) *config {
 		for k, v := range config.Commands {
 			result.Commands[k] = v
 		}
+
+		for k, v := range config.Provisioners {
+			result.Provisioners[k] = v
+		}
 	}
 
 	return result
@@ -47,6 +52,7 @@ func newConfig() *config {
 	result := new(config)
 	result.Builders = make(map[string]string)
 	result.Commands = make(map[string]string)
+	result.Provisioners = make(map[string]string)
 	return result
 }
 
@@ -94,4 +100,15 @@ func (c *config) LoadCommand(name string) (packer.Command, error) {
 func (c *config) LoadHook(name string) (packer.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
 	return plugin.Hook(exec.Command(name))
+}
+
+func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
+	log.Printf("Loading provisioner: %s\n", name)
+	provBin, ok := c.Provisioners[name]
+	if !ok {
+		log.Printf("Provisioner not found: %s\n", name)
+		return nil, nil
+	}
+
+	return plugin.Provisioner(exec.Command(provBin))
 }
