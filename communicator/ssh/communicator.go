@@ -137,15 +137,13 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	// our data and has completed. Or has errored.
 	err = session.Wait()
 	if err != nil {
-		exitErr, ok := err.(*ssh.ExitError)
-		if !ok {
-			// This wasn't an exit error, so something fatal happened
-			return err
+		if exitErr, ok := err.(*ssh.ExitError); ok {
+			// Otherwise, we have an ExitErorr, meaning we can just read
+			// the exit status
+			log.Printf("non-zero exit status: %d", exitErr.ExitStatus())
 		}
 
-		// Otherwise, we have an ExitErorr, meaning we can just read
-		// the exit status
-		log.Printf("exit status: %d", exitErr.ExitStatus())
+		return err
 	}
 
 
