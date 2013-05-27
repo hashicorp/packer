@@ -13,3 +13,13 @@ func TestProvisioner_Impl(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_Defaults(t *testing.T) {
+	raw := map[string]interface{} {}
+
+	p := &Provisioner{}
+	p.Prepare(raw, nil)
+
+	if p.config.RemotePath != DefaultRemotePath {
+		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
+	}
+}
