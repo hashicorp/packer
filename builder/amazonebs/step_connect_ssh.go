@@ -26,7 +26,7 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
 	keyring := &ssh.SimpleKeychain{}
 	err := keyring.AddPEMKey(privateKey)
 	if err != nil {
-		ui.Say("Error setting up SSH config: %s", err.Error())
+		ui.Say(fmt.Sprintf("Error setting up SSH config: %s", err))
 		return StepHalt
 	}
 
@@ -58,7 +58,7 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
 	}
 
 	if err != nil {
-		ui.Error("Error connecting to SSH: %s", err.Error())
+		ui.Error(fmt.Sprintf("Error connecting to SSH: %s", err))
 		return StepHalt
 	}
 

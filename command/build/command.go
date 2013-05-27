@@ -20,7 +20,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	log.Printf("Reading template: %s", args[0])
 	tplData, err := ioutil.ReadFile(args[0])
 	if err != nil {
-		env.Ui().Error("Failed to read template file: %s", err.Error())
+		env.Ui().Error(fmt.Sprintf("Failed to read template file: %s", err))
 		return 1
 	}
 
@@ -28,7 +28,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	log.Println("Parsing template...")
 	tpl, err := packer.ParseTemplate(tplData)
 	if err != nil {
-		env.Ui().Error("Failed to parse template: %s", err.Error())
+		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
 	}
 
@@ -46,7 +46,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 		log.Printf("Creating build: %s", buildName)
 		build, err := tpl.Build(buildName, components)
 		if err != nil {
-			env.Ui().Error("Failed to create build '%s': \n\n%s", buildName, err.Error())
+			env.Ui().Error(fmt.Sprintf("Failed to create build '%s': \n\n%s", buildName, err))
 			return 1
 		}
 
@@ -93,7 +93,7 @@ func (Command) Run(env packer.Environment, args []string) int {
 	// Output all the artifacts
 	env.Ui().Say("\n==> The build completed! The artifacts created were:")
 	for name, artifact := range artifacts {
-		env.Ui().Say("--> %s:", name)
+		env.Ui().Say(fmt.Sprintf("--> %s:", name))
 		env.Ui().Say(artifact.String())
 	}
 

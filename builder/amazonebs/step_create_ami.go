@@ -1,6 +1,7 @@
 package amazonebs
 
 import (
+	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/packer/packer"
 )
@@ -27,7 +28,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
 	}
 
 	// Set the AMI ID in the state
-	ui.Say("AMI: %s", createResp.ImageId)
+	ui.Say(fmt.Sprintf("AMI: %s", createResp.ImageId))
 	amis := make(map[string]string)
 	amis[config.Region] = createResp.ImageId
 	state["amis"] = amis

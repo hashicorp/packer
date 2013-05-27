@@ -48,7 +48,7 @@ func (s *stepKeyPair) Cleanup(state map[string]interface{}) {
 	ui.Say("Deleting temporary keypair...")
 	_, err := ec2conn.DeleteKeyPair(s.keyName)
 	if err != nil {
-		ui.Error(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName)
+		ui.Error(fmt.Sprintf(
+			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
 	}
 }
