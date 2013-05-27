@@ -68,7 +68,7 @@ func TestBuildRPC(t *testing.T) {
 	if b.runCalled {
 		b.runUi.Say("format")
 		assert.True(ui.sayCalled, "say should be called")
-		assert.Equal(ui.sayFormat, "format", "format should be correct")
+		assert.Equal(ui.sayMessage, "format", "message should be correct")
 	}
 }
 

@@ -64,7 +64,7 @@ func TestBuilderRPC(t *testing.T) {
 
 		b.runUi.Say("format")
 		assert.True(ui.sayCalled, "say should be called")
-		assert.Equal(ui.sayFormat, "format", "format should be correct")
+		assert.Equal(ui.sayMessage, "format", "message should be correct")
 
 		assert.Equal(artifact.Id(), testBuilderArtifact.Id(), "should have artifact Id")
 	}

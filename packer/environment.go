@@ -227,7 +227,7 @@ func (e *coreEnvironment) printHelp() {
 		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))
 
 		// Output the command and the synopsis
-		e.ui.Say("    %v     %v\n", key, synopsis)
+		e.ui.Say(fmt.Sprintf("    %v     %v\n", key, synopsis))
 	}
 }
 

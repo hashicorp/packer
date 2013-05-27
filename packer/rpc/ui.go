@@ -17,49 +17,27 @@ type UiServer struct {
 	ui packer.Ui
 }
 
-type UiSayArgs struct {
-	Format string
-	Vars   []interface{}
-}
-
-func (u *Ui) Error(format string, a ...interface{}) {
-	u.processArgs(a)
-
-	args := &UiSayArgs{format, a}
-	if err := u.client.Call("Ui.Error", args, new(interface{})); err != nil {
+func (u *Ui) Error(message string) {
+	if err := u.client.Call("Ui.Error", message, new(interface{})); err != nil {
 		panic(err)
 	}
 }
 
-func (u *Ui) Say(format string, a ...interface{}) {
-	u.processArgs(a)
-
-	args := &UiSayArgs{format, a}
-	if err := u.client.Call("Ui.Say", args, new(interface{})); err != nil {
+func (u *Ui) Say(message string) {
+	if err := u.client.Call("Ui.Say", message, new(interface{})); err != nil {
 		panic(err)
 	}
 }
 
-func (u *Ui) processArgs(a []interface{}) {
-	// We do some processing to turn certain types into more gob-friendly
-	// types so that some things that users expect to do just work.
-	for i, v := range a {
-		// Turn errors into strings
-		if err, ok := v.(error); ok {
-			a[i] = err.Error()
-		}
-	}
-}
-
-func (u *UiServer) Error(args *UiSayArgs, reply *interface{}) error {
-	u.ui.Error(args.Format, args.Vars...)
+func (u *UiServer) Error(message *string, reply *interface{}) error {
+	u.ui.Error(*message)
 
 	*reply = nil
 	return nil
 }
 
-func (u *UiServer) Say(args *UiSayArgs, reply *interface{}) error {
-	u.ui.Say(args.Format, args.Vars...)
+func (u *UiServer) Say(message *string, reply *interface{}) error {
+	u.ui.Say(*message)
 
 	*reply = nil
 	return nil

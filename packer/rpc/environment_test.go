@@ -94,7 +94,7 @@ func TestEnvironmentRPC(t *testing.T) {
 	// Test calls on the Ui
 	ui.Say("format")
 	assert.True(testEnvUi.sayCalled, "Say should be called")
-	assert.Equal(testEnvUi.sayFormat, "format", "format should match")
+	assert.Equal(testEnvUi.sayMessage, "format", "message should match")
 }
 
 func TestEnvironment_ImplementsEnvironment(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 // world. This sort of control allows us to strictly control how output
 // is formatted and various levels of output.
 type Ui interface {
-	Say(format string, a ...interface{})
-	Error(format string, a ...interface{})
+	Say(string)
+	Error(string)
 }
 
 // PrefixedUi is a UI that wraps another UI implementation and adds a
@@ -28,27 +28,25 @@ type ReaderWriterUi struct {
 	Writer io.Writer
 }
 
-func (u *PrefixedUi) Say(format string, a ...interface{}) {
-	u.Ui.Say(fmt.Sprintf("%s: %s", u.Prefix, format), a...)
+func (u *PrefixedUi) Say(message string) {
+	u.Ui.Say(fmt.Sprintf("%s: %s", u.Prefix, message))
 }
 
-func (u *PrefixedUi) Error(format string, a ...interface{}) {
-	u.Ui.Error(fmt.Sprintf("%s: %s", u.Prefix, format), a...)
+func (u *PrefixedUi) Error(message string) {
+	u.Ui.Error(fmt.Sprintf("%s: %s", u.Prefix, message))
 }
 
-func (rw *ReaderWriterUi) Say(format string, a ...interface{}) {
-	output := fmt.Sprintf(format, a...)
-	log.Printf("ui: %s", output)
-	_, err := fmt.Fprint(rw.Writer, output+"\n")
+func (rw *ReaderWriterUi) Say(message string) {
+	log.Printf("ui: %s", message)
+	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (rw *ReaderWriterUi) Error(format string, a ...interface{}) {
-	output := fmt.Sprintf(format, a...)
-	log.Printf("ui error: %s", output)
-	_, err := fmt.Fprint(rw.Writer, output+"\n")
+func (rw *ReaderWriterUi) Error(message string) {
+	log.Printf("ui error: %s", message)
+	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
 		panic(err)
 	}

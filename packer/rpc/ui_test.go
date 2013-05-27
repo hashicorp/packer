@@ -2,30 +2,25 @@ package rpc
 
 import (
 	"cgl.tideland.biz/asserts"
-	"errors"
 	"net/rpc"
 	"testing"
 )
 
 type testUi struct {
 	errorCalled bool
-	errorFormat string
-	errorVars   []interface{}
+	errorMessage string
 	sayCalled   bool
-	sayFormat   string
-	sayVars     []interface{}
+	sayMessage   string
 }
 
-func (u *testUi) Error(format string, a ...interface{}) {
+func (u *testUi) Error(message string) {
 	u.errorCalled = true
-	u.errorFormat = format
-	u.errorVars = a
+	u.errorMessage = message
 }
 
-func (u *testUi) Say(format string, a ...interface{}) {
+func (u *testUi) Say(message string) {
 	u.sayCalled = true
-	u.sayFormat = format
-	u.sayVars = a
+	u.sayMessage = message
 }
 
 func TestUiRPC(t *testing.T) {
@@ -48,13 +43,9 @@ func TestUiRPC(t *testing.T) {
 	uiClient := &Ui{client}
 
 	// Basic error and say tests
-	uiClient.Error("format", "arg0", 42)
-	assert.Equal(ui.errorFormat, "format", "format should be correct")
+	uiClient.Error("message")
+	assert.Equal(ui.errorMessage, "message", "message should be correct")
 
-	uiClient.Say("format", "arg0", 42)
-	assert.Equal(ui.sayFormat, "format", "format should be correct")
-
-	// Test that errors are properly converted to strings
-	uiClient.Say("format", errors.New("foo"))
-	assert.Equal(ui.sayVars, []interface{}{"foo"}, "should have correct vars")
+	uiClient.Say("message")
+	assert.Equal(ui.sayMessage, "message", "message should be correct")
 }

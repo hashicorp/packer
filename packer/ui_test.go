@@ -50,7 +50,7 @@ func TestReaderWriterUi_Error(t *testing.T) {
 	bufferUi.Error("foo")
 	assert.Equal(readWriter(bufferUi), "foo\n", "basic output")
 
-	bufferUi.Error("%d", 5)
+	bufferUi.Error("5")
 	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
@@ -62,7 +62,7 @@ func TestReaderWriterUi_Say(t *testing.T) {
 	bufferUi.Say("foo")
 	assert.Equal(readWriter(bufferUi), "foo\n", "basic output")
 
-	bufferUi.Say("%d", 5)
+	bufferUi.Say("5")
 	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
