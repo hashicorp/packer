@@ -75,6 +75,7 @@ func (c *comm) Start(cmd string) (remote *packer.RemoteCommand, err error) {
 }
 
 func (c *comm) Upload(path string, input io.Reader) error {
+	log.Println("Opening new SSH session")
 	session, err := c.client.NewSession()
 	if err != nil {
 		return err
@@ -123,6 +124,7 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	}
 
 	// Start the protocol
+	log.Println("Beginning file upload...")
 	fmt.Fprintln(w, "C0644", input_memory.Len(), target_file)
 	io.Copy(w, input_memory)
 	fmt.Fprint(w, "\x00")
@@ -133,11 +135,13 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	// Close the stdin, which sends an EOF, and then set w to nil so that
 	// our defer func doesn't close it again since that is unsafe with
 	// the Go SSH package.
+	log.Println("Upload complete, closing stdin pipe")
 	w.Close()
 	w = nil
 
 	// Wait for the SCP connection to close, meaning it has consumed all
 	// our data and has completed. Or has errored.
+	log.Println("Waiting for SSH session to complete")
 	err = session.Wait()
 	if err != nil {
 		if exitErr, ok := err.(*ssh.ExitError); ok {
