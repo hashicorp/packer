@@ -218,6 +218,7 @@ func serveSingleCopy(name string, l net.Listener, dst io.Writer, src io.Reader) 
 
 	conn, err := l.Accept()
 	if err != nil {
+		log.Printf("'%s' accept error: %s", name, err)
 		return
 	}
 
@@ -231,6 +232,6 @@ func serveSingleCopy(name string, l net.Listener, dst io.Writer, src io.Reader) 
 	written, err := io.Copy(dst, src)
 	log.Printf("%d bytes written for '%s'", written, name)
 	if err != nil {
-		log.Printf("'%s' copy error: %s", name, err.Error())
+		log.Printf("'%s' copy error: %s", name, err)
 	}
 }
