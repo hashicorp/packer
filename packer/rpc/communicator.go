@@ -222,6 +222,10 @@ func serveSingleCopy(name string, l net.Listener, dst io.Writer, src io.Reader) 
 		return
 	}
 
+	// Be sure to close the connection after we're done copying so
+	// that an EOF will successfully be sent to the remote side
+	defer conn.Close()
+
 	// The connection is the destination/source that is nil
 	if dst == nil {
 		dst = conn
