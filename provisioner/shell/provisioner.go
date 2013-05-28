@@ -3,8 +3,11 @@
 package shell
 
 import (
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
+	"log"
+	"os"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
@@ -33,5 +36,29 @@ func (p *Provisioner) Prepare(raw interface{}, ui packer.Ui) {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
-	ui.Say("PROVISIONING SOME STUFF")
+	log.Printf("Opening %s for reading", p.config.Path)
+	f, err := os.Open(p.config.Path)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error opening shell script: %s", err))
+		return
+	}
+
+	log.Printf("Uploading %s => %s", p.config.Path, p.config.RemotePath)
+	err = comm.Upload(p.config.RemotePath, f)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error uploading shell script: %s", err))
+		return
+	}
+
+	command := fmt.Sprintf("chmod +x %s && %s", p.config.RemotePath, p.config.RemotePath)
+	log.Printf("Executing command: %s", command)
+	cmd, err := comm.Start(command)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Failed executing command: %s", err))
+		return
+	}
+
+	ui.Say("Waiting for remote command to finish...")
+	cmd.Wait()
+	ui.Say("Command run!")
 }

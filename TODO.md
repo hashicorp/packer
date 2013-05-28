@@ -6,5 +6,6 @@
 * packer: Communicator should have Close() method
 * packer: Ui input
 * packer/plugin: Better error messages/detection if plugin crashes
+* packer/plugin: Testing of client struct/methods
 * provisioner/shell: Upload file
 * provisioner/shell: Arguments
