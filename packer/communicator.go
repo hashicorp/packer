@@ -36,6 +36,32 @@ type RemoteCommand struct {
 	ExitStatus int
 }
 
+// StdoutStream returns a channel that will be sent all the output
+// of stdout as it comes. The output isn't guaranteed to be a full line.
+// When the channel is closed, the process is exited.
+func (r *RemoteCommand) StdoutChan() (<-chan string) {
+	return nil
+}
+
+// ExitChan returns a channel that will be sent the exit status once
+// the process exits. This can be used in cases such a select statement
+// waiting on the process to end.
+func (r *RemoteCommand) ExitChan() (<-chan int) {
+	// TODO(mitchellh): lock
+	// TODO(mitchellh): Something more efficient than multiple Wait() calls
+
+	// Make a single buffered channel so that the send doesn't block.
+	exitChan := make(chan int, 1)
+
+	go func() {
+		defer close(exitChan)
+		r.Wait()
+		exitChan <- r.ExitStatus
+	}()
+
+	return exitChan
+}
+
 // Wait waits for the command to exit.
 func (r *RemoteCommand) Wait() {
 	// Busy wait on being exited. We put a sleep to be kind to the

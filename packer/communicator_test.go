@@ -5,6 +5,31 @@ import (
 	"time"
 )
 
+func TestRemoteCommand_ExitChan(t *testing.T) {
+	t.Parallel()
+
+	rc := &RemoteCommand{}
+	exitChan := rc.ExitChan()
+
+	// Set the exit data so that it is sent
+	rc.ExitStatus = 42
+	rc.Exited = true
+
+	select {
+	case exitCode := <-exitChan:
+		if exitCode != 42 {
+			t.Fatal("invalid exit code")
+		}
+
+		_, ok := <-exitChan
+		if ok {
+			t.Fatal("exit channel should be closed")
+		}
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("exit channel never sent")
+	}
+}
+
 func TestRemoteCommand_WaitBlocks(t *testing.T) {
 	t.Parallel()
 
