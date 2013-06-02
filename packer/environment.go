@@ -154,7 +154,8 @@ func (e *coreEnvironment) Provisioner(name string) (p Provisioner, err error) {
 func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 	log.Printf("Environment.Cli: %#v\n", args)
 
-	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
+	// If we have no arguments, just short-circuit here and print the help
+	if len(args) == 0 {
 		e.printHelp()
 		return 1, nil
 	}
@@ -185,6 +186,15 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 			log.Printf("Environment.CLI: command not found: %s\n", args[0])
 			e.printHelp()
 			return 1, nil
+		}
+	}
+
+	// If we're supposed to print help, then print the help of the
+	// command rather than running it.
+	for _, arg := range args {
+		if arg == "--help" || arg == "-h" {
+			e.ui.Say(command.Help())
+			return 0, nil
 		}
 	}
 
