@@ -16,6 +16,8 @@ import (
 var managedClients = make([]*client, 0, 5)
 
 type client struct {
+	StartTimeout time.Duration
+
 	cmd         *exec.Cmd
 	exited      bool
 	doneLogging bool
@@ -52,6 +54,7 @@ func CleanupClients() {
 // be properly cleaned.
 func NewClient(cmd *exec.Cmd) *client {
 	return &client{
+		1 * time.Minute,
 		cmd,
 		false,
 		false,
@@ -122,7 +125,7 @@ func (c *client) Start() (address string, err error) {
 	go c.logStderr(stderr)
 
 	// Some channels for the next step
-	timeout := time.After(1 * time.Minute)
+	timeout := time.After(c.StartTimeout)
 
 	// Start looking for the address
 	for done := false; !done; {

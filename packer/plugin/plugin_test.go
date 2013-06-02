@@ -56,6 +56,9 @@ func TestHelperProcess(*testing.T) {
 		ServeHook(new(helperHook))
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
+	case "mock":
+		fmt.Println(":1234")
+		<-make(chan int)
 	case "provisioner":
 		ServeProvisioner(new(helperProvisioner))
 	case "start-timeout":
