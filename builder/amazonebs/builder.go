@@ -47,7 +47,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	// TODO: config validation and asking for fields:
 	// * access key
 	// * secret key
-	// * region
+	// * region (exists and valid)
 	// * source ami
 	// * instance type
 	// * SSH username
@@ -57,8 +57,26 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
+	// Basic sanity checks. These are panics now because the Prepare
+	// method should verify these exist and such.
+	if b.config.AccessKey == "" {
+		panic("access key not filled in")
+	}
+
+	if b.config.SecretKey == "" {
+		panic("secret key not filled in")
+	}
+
+	if b.config.Region == "" {
+		panic("region not filled in")
+	}
+
+	region, ok := aws.Regions[b.config.Region]
+	if !ok {
+		panic("region not found")
+	}
+
 	auth := aws.Auth{b.config.AccessKey, b.config.SecretKey}
-	region := aws.Regions[b.config.Region]
 	ec2conn := ec2.New(auth, region)
 
 	// Setup the state bag and initial state for the steps
