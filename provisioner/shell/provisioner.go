@@ -36,6 +36,8 @@ func (p *Provisioner) Prepare(raw interface{}, ui packer.Ui) {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
+	ui.Say(fmt.Sprintf("Provisioning with shell script: %s", p.config.Path))
+
 	log.Printf("Opening %s for reading", p.config.Path)
 	f, err := os.Open(p.config.Path)
 	if err != nil {
@@ -58,7 +60,29 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		return
 	}
 
-	ui.Say("Waiting for remote command to finish...")
-	cmd.Wait()
-	ui.Say("Command run!")
+	exit := cmd.ExitChan()
+	stderr := cmd.StderrChan()
+	stdout := cmd.StdoutChan()
+
+	for {
+		select {
+		case output := <-stderr:
+			ui.Say(output)
+		case output := <-stdout:
+			ui.Say(output)
+		case exitStatus := <-exit:
+			log.Printf("shell provisioner exited with status %d", exitStatus)
+			break
+		}
+	}
+
+	// Make sure we finish off stdout/stderr because we may have gotten
+	// a message from the exit channel first.
+	for output := range stdout {
+		ui.Say(output)
+	}
+
+	for output := range stderr {
+		ui.Say(output)
+	}
 }
