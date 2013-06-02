@@ -7,9 +7,9 @@ import (
 )
 
 type testUi struct {
-	errorCalled bool
+	errorCalled  bool
 	errorMessage string
-	sayCalled   bool
+	sayCalled    bool
 	sayMessage   string
 }
 

@@ -41,10 +41,10 @@ func (c *comm) Start(cmd string) (remote *packer.RemoteCommand, err error) {
 
 	// Setup the remote command
 	remote = &packer.RemoteCommand{
-		Stdin: stdin,
-		Stdout: stdout,
-		Stderr: stderr,
-		Exited: false,
+		Stdin:      stdin,
+		Stdout:     stdout,
+		Stderr:     stderr,
+		Exited:     false,
 		ExitStatus: -1,
 	}
 
@@ -152,7 +152,6 @@ func (c *comm) Upload(path string, input io.Reader) error {
 
 		return err
 	}
-
 
 	log.Printf("scp stdout (length %d): %#v", stdout.Len(), stdout.Bytes())
 	log.Printf("scp stderr (length %d): %s", stderr.Len(), stderr.String())

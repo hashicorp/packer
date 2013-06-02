@@ -39,10 +39,10 @@ func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
 	stderr, t.startErr = io.Pipe()
 
 	rc := &packer.RemoteCommand{
-		Stdin: stdin,
-		Stdout: stdout,
-		Stderr: stderr,
-		Exited: false,
+		Stdin:      stdin,
+		Stdout:     stdout,
+		Stderr:     stderr,
+		Exited:     false,
 		ExitStatus: 0,
 	}
 

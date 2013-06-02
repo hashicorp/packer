@@ -14,7 +14,7 @@ func TestProvisioner_Impl(t *testing.T) {
 }
 
 func TestProvisionerPrepare_Defaults(t *testing.T) {
-	raw := map[string]interface{} {}
+	raw := map[string]interface{}{}
 
 	p := &Provisioner{}
 	p.Prepare(raw, nil)

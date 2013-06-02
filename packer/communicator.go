@@ -2,6 +2,7 @@ package packer
 
 import (
 	"io"
+	"log"
 	"sync"
 	"time"
 )
@@ -36,34 +37,55 @@ type RemoteCommand struct {
 	Exited     bool
 	ExitStatus int
 
+	exitChans    []chan<- int
 	exitChanLock sync.Mutex
 }
 
 // StdoutStream returns a channel that will be sent all the output
 // of stdout as it comes. The output isn't guaranteed to be a full line.
 // When the channel is closed, the process is exited.
-func (r *RemoteCommand) StdoutChan() (<-chan string) {
+func (r *RemoteCommand) StdoutChan() <-chan string {
 	return nil
 }
 
 // ExitChan returns a channel that will be sent the exit status once
 // the process exits. This can be used in cases such a select statement
 // waiting on the process to end.
-func (r *RemoteCommand) ExitChan() (<-chan int) {
-	// TODO(mitchellh): Something more efficient than multiple Wait() calls
-
+func (r *RemoteCommand) ExitChan() <-chan int {
 	r.exitChanLock.Lock()
 	defer r.exitChanLock.Unlock()
 
-	// Make a single buffered channel so that the send doesn't block.
+	// If we haven't made any channels yet, make that slice
+	if r.exitChans == nil {
+		r.exitChans = make([]chan<- int, 0, 5)
+
+		go func() {
+			// Wait for the command to finish
+			r.Wait()
+
+			// Grab the exit chan lock so we can iterate over it and
+			// message to each channel.
+			r.exitChanLock.Lock()
+			defer r.exitChanLock.Unlock()
+
+			for _, ch := range r.exitChans {
+				// Use a select so the send never blocks
+				select {
+				case ch <- r.ExitStatus:
+				default:
+					log.Println("remote command exit channel wouldn't blocked. Weird.")
+				}
+
+				close(ch)
+			}
+
+			r.exitChans = nil
+		}()
+	}
+
+	// Append our new channel onto it and return it
 	exitChan := make(chan int, 1)
-
-	go func() {
-		defer close(exitChan)
-		r.Wait()
-		exitChan <- r.ExitStatus
-	}()
-
+	r.exitChans = append(r.exitChans, exitChan)
 	return exitChan
 }
 

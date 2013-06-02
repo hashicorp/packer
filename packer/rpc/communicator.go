@@ -80,10 +80,10 @@ func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
 
 	// Build the response object using the streams we created
 	rc = &packer.RemoteCommand{
-		Stdin: stdinC,
-		Stdout: stdoutC,
-		Stderr: stderrC,
-		Exited: false,
+		Stdin:      stdinC,
+		Stdout:     stdoutC,
+		Stderr:     stderrC,
+		Exited:     false,
 		ExitStatus: -1,
 	}
 
