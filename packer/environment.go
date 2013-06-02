@@ -209,8 +209,8 @@ func (e *coreEnvironment) printHelp() {
 	// Sort the keys
 	sort.Strings(e.commands)
 
-	e.ui.Say("usage: packer [--version] [--help] <command> [<args>]\n\n")
-	e.ui.Say("Available commands are:\n")
+	e.ui.Say("usage: packer [--version] [--help] <command> [<args>]\n")
+	e.ui.Say("Available commands are:")
 	for _, key := range e.commands {
 		var synopsis string
 
@@ -227,7 +227,7 @@ func (e *coreEnvironment) printHelp() {
 		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))
 
 		// Output the command and the synopsis
-		e.ui.Say(fmt.Sprintf("    %v     %v\n", key, synopsis))
+		e.ui.Say(fmt.Sprintf("    %v     %v", key, synopsis))
 	}
 }
 
