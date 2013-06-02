@@ -160,6 +160,26 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 		return 1, nil
 	}
 
+	// This variable will track whether or not we're supposed to print
+	// the help or not.
+	isHelp := false
+	for _, arg := range args {
+		if arg == "-h" || arg == "--help" {
+			isHelp = true
+			break
+		}
+	}
+
+	// Trim up to the command name
+	for i, v := range args {
+		if v[0] != '-' {
+			args = args[i:]
+			break
+		}
+	}
+
+	log.Printf("command + args: %#v", args)
+
 	version := args[0] == "version"
 	if !version {
 		for _, arg := range args {
@@ -191,11 +211,9 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 
 	// If we're supposed to print help, then print the help of the
 	// command rather than running it.
-	for _, arg := range args {
-		if arg == "--help" || arg == "-h" {
-			e.ui.Say(command.Help())
-			return 0, nil
-		}
+	if isHelp {
+		e.ui.Say(command.Help())
+		return 0, nil
 	}
 
 	log.Printf("Executing command: %s\n", args[0])
