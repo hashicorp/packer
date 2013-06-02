@@ -80,11 +80,11 @@ func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
 
 	// Build the response object using the streams we created
 	rc = &packer.RemoteCommand{
-		stdinC,
-		stdoutC,
-		stderrC,
-		false,
-		-1,
+		Stdin: stdinC,
+		Stdout: stdoutC,
+		Stderr: stderrC,
+		Exited: false,
+		ExitStatus: -1,
 	}
 
 	// In a goroutine, we wait for the process to exit, then we set

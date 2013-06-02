@@ -41,11 +41,11 @@ func (c *comm) Start(cmd string) (remote *packer.RemoteCommand, err error) {
 
 	// Setup the remote command
 	remote = &packer.RemoteCommand{
-		stdin,
-		stdout,
-		stderr,
-		false,
-		-1,
+		Stdin: stdin,
+		Stdout: stdout,
+		Stderr: stderr,
+		Exited: false,
+		ExitStatus: -1,
 	}
 
 	log.Printf("starting remote command: %s", cmd)
