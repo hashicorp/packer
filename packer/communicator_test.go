@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"bytes"
 	"testing"
 	"time"
 )
@@ -27,6 +28,29 @@ func TestRemoteCommand_ExitChan(t *testing.T) {
 		}
 	case <-time.After(500 * time.Millisecond):
 		t.Fatal("exit channel never sent")
+	}
+}
+
+func TestRemoteCommand_StdoutChan(t *testing.T) {
+	expected := "DATA!!!"
+
+	stdoutBuf := new(bytes.Buffer)
+	stdoutBuf.WriteString(expected)
+
+	rc := &RemoteCommand{}
+	rc.Stdout = stdoutBuf
+
+	outChan := rc.StdoutChan()
+
+	results := new(bytes.Buffer)
+	for data := range outChan {
+		results.WriteString(data)
+	}
+
+	if results.String() != expected {
+		t.Fatalf(
+			"outputs didn't match:\ngot:\n%s\nexpected:\n%s",
+			results.String(), stdoutBuf.String())
 	}
 }
 

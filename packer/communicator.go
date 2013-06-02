@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"bufio"
 	"io"
 	"log"
 	"sync"
@@ -39,13 +40,56 @@ type RemoteCommand struct {
 
 	exitChans    []chan<- int
 	exitChanLock sync.Mutex
+	outChans     []chan<- string
+	outChanLock  sync.Mutex
 }
 
 // StdoutStream returns a channel that will be sent all the output
 // of stdout as it comes. The output isn't guaranteed to be a full line.
 // When the channel is closed, the process is exited.
 func (r *RemoteCommand) StdoutChan() <-chan string {
-	return nil
+	r.outChanLock.Lock()
+	defer r.outChanLock.Unlock()
+
+	// If no output channels have been made yet, then make that slice
+	// and start the goroutine to read and send to them.
+	if r.outChans == nil {
+		r.outChans = make([]chan<- string, 0, 5)
+
+		go func() {
+			buf := bufio.NewReader(r.Stdout)
+
+			var err error
+			for err != io.EOF {
+				var data []byte
+				data, err = buf.ReadSlice('\n')
+
+				if len(data) > 0 {
+					for _, ch := range r.outChans {
+						// Note: this blocks if the channel is full (they
+						// are buffered by default). What to do?
+						ch <- string(data)
+					}
+				}
+			}
+
+			// Clean up the channels by closing them and setting the
+			// list to nil.
+			r.outChanLock.Lock()
+			defer r.outChanLock.Unlock()
+
+			for _, ch := range r.outChans {
+				close(ch)
+			}
+
+			r.outChans = nil
+		}()
+	}
+
+	// Create the channel, append it to the channels we care about
+	outChan := make(chan string, 10)
+	r.outChans = append(r.outChans, outChan)
+	return outChan
 }
 
 // ExitChan returns a channel that will be sent the exit status once
