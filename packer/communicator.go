@@ -2,6 +2,7 @@ package packer
 
 import (
 	"io"
+	"sync"
 	"time"
 )
 
@@ -34,6 +35,8 @@ type RemoteCommand struct {
 	Stderr     io.Reader
 	Exited     bool
 	ExitStatus int
+
+	exitChanLock sync.Mutex
 }
 
 // StdoutStream returns a channel that will be sent all the output
@@ -47,8 +50,10 @@ func (r *RemoteCommand) StdoutChan() (<-chan string) {
 // the process exits. This can be used in cases such a select statement
 // waiting on the process to end.
 func (r *RemoteCommand) ExitChan() (<-chan int) {
-	// TODO(mitchellh): lock
 	// TODO(mitchellh): Something more efficient than multiple Wait() calls
+
+	r.exitChanLock.Lock()
+	defer r.exitChanLock.Unlock()
 
 	// Make a single buffered channel so that the send doesn't block.
 	exitChan := make(chan int, 1)
