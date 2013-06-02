@@ -55,35 +55,7 @@ func (r *RemoteCommand) StdoutChan() <-chan string {
 	// and start the goroutine to read and send to them.
 	if r.outChans == nil {
 		r.outChans = make([]chan<- string, 0, 5)
-
-		go func() {
-			buf := bufio.NewReader(r.Stdout)
-
-			var err error
-			for err != io.EOF {
-				var data []byte
-				data, err = buf.ReadSlice('\n')
-
-				if len(data) > 0 {
-					for _, ch := range r.outChans {
-						// Note: this blocks if the channel is full (they
-						// are buffered by default). What to do?
-						ch <- string(data)
-					}
-				}
-			}
-
-			// Clean up the channels by closing them and setting the
-			// list to nil.
-			r.outChanLock.Lock()
-			defer r.outChanLock.Unlock()
-
-			for _, ch := range r.outChans {
-				close(ch)
-			}
-
-			r.outChans = nil
-		}()
+		go r.channelReader(r.Stdout, &r.outChans, &r.outChanLock)
 	}
 
 	// Create the channel, append it to the channels we care about
@@ -140,4 +112,37 @@ func (r *RemoteCommand) Wait() {
 	for !r.Exited {
 		time.Sleep(10 * time.Millisecond)
 	}
+}
+
+// Takes an io.Reader and then writes its data to a slice of channels.
+// The channel slice is expected to be protected by the given mutex, and
+// after the io.Reader is over, all channels will be closed and the slice
+// set to nil.
+func (*RemoteCommand) channelReader(r io.Reader, chans *[]chan<- string, chanLock *sync.Mutex) {
+	buf := bufio.NewReader(r)
+
+	var err error
+	for err != io.EOF {
+		var data []byte
+		data, err = buf.ReadSlice('\n')
+
+		if len(data) > 0 {
+			for _, ch := range *chans {
+				// Note: this blocks if the channel is full (they
+				// are buffered by default). What to do?
+				ch <- string(data)
+			}
+		}
+	}
+
+	// Clean up the channels by closing them and setting the
+	// list to nil.
+	chanLock.Lock()
+	defer chanLock.Unlock()
+
+	for _, ch := range *chans {
+		close(ch)
+	}
+
+	*chans = nil
 }
