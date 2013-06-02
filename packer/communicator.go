@@ -40,8 +40,28 @@ type RemoteCommand struct {
 
 	exitChans    []chan<- int
 	exitChanLock sync.Mutex
+	errChans     []chan<- string
+	errChanLock  sync.Mutex
 	outChans     []chan<- string
 	outChanLock  sync.Mutex
+}
+
+// StderrStream returns a channel that will be sent all the
+func (r *RemoteCommand) StderrChan() <-chan string {
+	r.errChanLock.Lock()
+	defer r.errChanLock.Unlock()
+
+	// If no channels have been made, make that slice and start
+	// the goroutine to read and send to them
+	if r.errChans == nil {
+		r.errChans = make([]chan<- string, 0, 5)
+		go r.channelReader(r.Stderr, &r.errChans, &r.errChanLock)
+	}
+
+	// Create the channel, append it to the channels we care about
+	errChan := make(chan string, 10)
+	r.errChans = append(r.errChans, errChan)
+	return errChan
 }
 
 // StdoutStream returns a channel that will be sent all the output

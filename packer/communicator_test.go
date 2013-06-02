@@ -31,6 +31,29 @@ func TestRemoteCommand_ExitChan(t *testing.T) {
 	}
 }
 
+func TestRemoteCommand_StderrChan(t *testing.T) {
+	expected := "DATA!!!"
+
+	stderrBuf := new(bytes.Buffer)
+	stderrBuf.WriteString(expected)
+
+	rc := &RemoteCommand{}
+	rc.Stderr = stderrBuf
+
+	errChan := rc.StderrChan()
+
+	results := new(bytes.Buffer)
+	for data := range errChan {
+		results.WriteString(data)
+	}
+
+	if results.String() != expected {
+		t.Fatalf(
+			"outputs didn't match:\ngot:\n%s\nexpected:\n%s",
+			results.String(), stderrBuf.String())
+	}
+}
+
 func TestRemoteCommand_StdoutChan(t *testing.T) {
 	expected := "DATA!!!"
 
