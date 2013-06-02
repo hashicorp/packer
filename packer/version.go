@@ -15,7 +15,7 @@ command-line flags for this command.`
 }
 
 func (versionCommand) Run(env Environment, args []string) int {
-	env.Ui().Say(fmt.Sprintf("Packer v%v\n", Version))
+	env.Ui().Say(fmt.Sprintf("Packer v%v", Version))
 	return 0
 }
 
