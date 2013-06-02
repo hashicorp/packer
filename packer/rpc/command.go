@@ -28,6 +28,15 @@ func Command(client *rpc.Client) *command {
 	return &command{client}
 }
 
+func (c *command) Help() (result string) {
+	err := c.client.Call("Command.Help", new(interface{}), &result)
+	if err != nil {
+		panic(err)
+	}
+
+	return
+}
+
 func (c *command) Run(env packer.Environment, args []string) (result int) {
 	// Create and start the server for the Environment
 	server := rpc.NewServer()
@@ -49,6 +58,11 @@ func (c *command) Synopsis() (result string) {
 	}
 
 	return
+}
+
+func (c *CommandServer) Help(args *interface{}, reply *string) error {
+	*reply = c.command.Help()
+	return nil
 }
 
 func (c *CommandServer) Run(args *CommandRunArgs, reply *int) error {

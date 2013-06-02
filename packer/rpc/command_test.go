@@ -13,6 +13,10 @@ type TestCommand struct {
 	runEnv    packer.Environment
 }
 
+func (tc *TestCommand) Help() string {
+	return "bar"
+}
+
 func (tc *TestCommand) Run(env packer.Environment, args []string) int {
 	tc.runCalled = true
 	tc.runArgs = args
@@ -42,6 +46,10 @@ func TestRPCCommand(t *testing.T) {
 
 	clientComm := Command(client)
 
+	//Test Help
+	help := clientComm.Help()
+	assert.Equal(help, "bar", "helps hould be correct")
+
 	// Test run
 	runArgs := []string{"foo", "bar"}
 	testEnv := &testEnvironment{}
@@ -58,4 +66,13 @@ func TestRPCCommand(t *testing.T) {
 	// Test Synopsis
 	synopsis := clientComm.Synopsis()
 	assert.Equal(synopsis, "foo", "Synopsis should be correct")
+}
+
+func TestCommand_Implements(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	var r packer.Command
+	c := Command(nil)
+
+	assert.Implementor(c, &r, "should be a Builder")
 }

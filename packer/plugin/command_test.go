@@ -7,10 +7,11 @@ import (
 	"testing"
 )
 
-// TODO: Test command cleanup functionality
-// TODO: Test timeout functionality
-
 type helperCommand byte
+
+func (helperCommand) Help() string {
+	return "2"
+}
 
 func (helperCommand) Run(packer.Environment, []string) int {
 	return 42
@@ -37,6 +38,9 @@ func TestCommand_Good(t *testing.T) {
 	if command != nil {
 		result := command.Synopsis()
 		assert.Equal(result, "1", "should return result")
+
+		result = command.Help()
+		assert.Equal(result, "2", "should return result")
 	}
 }
 

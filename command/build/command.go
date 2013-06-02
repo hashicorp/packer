@@ -10,6 +10,10 @@ import (
 
 type Command byte
 
+func (Command) Help() string {
+	return "help"
+}
+
 func (Command) Run(env packer.Environment, args []string) int {
 	if len(args) != 1 {
 		env.Ui().Error("A single template argument is required.")

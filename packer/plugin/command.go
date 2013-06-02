@@ -13,6 +13,16 @@ type cmdCommand struct {
 	client  *client
 }
 
+func (c *cmdCommand) Help() (result string) {
+	defer func() {
+		r := recover()
+		c.checkExit(r, func() { result = "" })
+	}()
+
+	result = c.command.Help()
+	return
+}
+
 func (c *cmdCommand) Run(e packer.Environment, args []string) (exitCode int) {
 	defer func() {
 		r := recover()

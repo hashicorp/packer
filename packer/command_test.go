@@ -6,6 +6,10 @@ type TestCommand struct {
 	runEnv    Environment
 }
 
+func (tc *TestCommand) Help() string {
+	return "bar"
+}
+
 func (tc *TestCommand) Run(env Environment, args []string) int {
 	tc.runCalled = true
 	tc.runArgs = args

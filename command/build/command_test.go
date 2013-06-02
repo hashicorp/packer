@@ -22,6 +22,13 @@ func testEnvironment() packer.Environment {
 	return env
 }
 
+func TestCommand_Implements(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	var actual packer.Command
+	assert.Implementor(new(Command), &actual, "should be a Command")
+}
+
 func TestCommand_Run_NoArgs(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 	command := new(Command)
