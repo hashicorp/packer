@@ -5,6 +5,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
 	"sync"
 )
@@ -111,6 +113,29 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			artifacts[b.Name()] = b.Run(buildUis[b.Name()])
 		}()
 	}
+
+	// Handle signals
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+
+	go func() {
+		<-sigCh
+		log.Println("Interrupted! Cancelling builds...")
+
+		var wg sync.WaitGroup
+		for _, b := range builds {
+			wg.Add(1)
+
+			go func() {
+				defer wg.Done()
+
+				log.Printf("Stopping build: %s", b.Name())
+				b.Cancel()
+			}()
+		}
+
+		wg.Wait()
+	}()
 
 	wg.Wait()
 
