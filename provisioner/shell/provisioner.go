@@ -64,25 +64,38 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 	stderr := cmd.StderrChan()
 	stdout := cmd.StdoutChan()
 
+OutputLoop:
 	for {
 		select {
-		case output := <-stderr:
-			ui.Say(output)
-		case output := <-stdout:
-			ui.Say(output)
+		case output, ok := <-stderr:
+			if !ok {
+				stderr = nil
+			} else {
+				ui.Say(output)
+			}
+		case output, ok := <-stdout:
+			if !ok {
+				stdout = nil
+			} else {
+				ui.Say(output)
+			}
 		case exitStatus := <-exit:
 			log.Printf("shell provisioner exited with status %d", exitStatus)
-			break
+			break OutputLoop
 		}
 	}
 
 	// Make sure we finish off stdout/stderr because we may have gotten
 	// a message from the exit channel first.
-	for output := range stdout {
-		ui.Say(output)
+	if stdout != nil {
+		for output := range stdout {
+			ui.Say(output)
+		}
 	}
 
-	for output := range stderr {
-		ui.Say(output)
+	if stderr != nil {
+		for output := range stderr {
+			ui.Say(output)
+		}
 	}
 }
