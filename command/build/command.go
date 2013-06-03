@@ -73,13 +73,13 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 		ui = &packer.ColoredUi{
 			colors[i%len(colors)],
-			ui,
+			env.Ui(),
 		}
 
 		ui = &packer.PrefixedUi{
 			fmt.Sprintf("==> %s", b.Name()),
 			fmt.Sprintf("    %s", b.Name()),
-			env.Ui(),
+			ui,
 		}
 
 		buildUis[b.Name()] = ui

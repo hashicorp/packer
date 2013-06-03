@@ -73,7 +73,7 @@ func (u *PrefixedUi) Say(message string) {
 }
 
 func (u *PrefixedUi) Message(message string) {
-	u.Ui.Say(fmt.Sprintf("%s: %s", u.MessagePrefix, message))
+	u.Ui.Message(fmt.Sprintf("%s: %s", u.MessagePrefix, message))
 }
 
 func (u *PrefixedUi) Error(message string) {
