@@ -71,15 +71,15 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	for i, b := range builds {
 		var ui packer.Ui
 
+		ui = &packer.ColoredUi{
+			colors[i%len(colors)],
+			ui,
+		}
+
 		ui = &packer.PrefixedUi{
 			fmt.Sprintf("==> %s", b.Name()),
 			fmt.Sprintf("    %s", b.Name()),
 			env.Ui(),
-		}
-
-		ui = &packer.ColoredUi{
-			colors[i % len(colors)],
-			ui,
 		}
 
 		buildUis[b.Name()] = ui
