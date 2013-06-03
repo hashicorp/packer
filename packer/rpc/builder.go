@@ -1,7 +1,10 @@
 package rpc
 
 import (
+	"encoding/gob"
 	"github.com/mitchellh/packer/packer"
+	"log"
+	"net"
 	"net/rpc"
 )
 
@@ -22,6 +25,11 @@ type BuilderPrepareArgs struct {
 }
 
 type BuilderRunArgs struct {
+	RPCAddress      string
+	ResponseAddress string
+}
+
+type BuilderRunResponse struct {
 	RPCAddress string
 }
 
@@ -45,14 +53,38 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	RegisterUi(server, ui)
 	RegisterHook(server, hook)
 
-	args := &BuilderRunArgs{serveSingleConn(server)}
+	// Create a server for the response
+	responseL := netListenerInRange(portRangeMin, portRangeMax)
+	artifactAddress := make(chan string)
+	go func() {
+		defer responseL.Close()
 
-	var reply string
-	if err := b.client.Call("Builder.Run", args, &reply); err != nil {
+		conn, err := responseL.Accept()
+		if err != nil {
+			log.Panic(err)
+		}
+		defer conn.Close()
+
+		decoder := gob.NewDecoder(conn)
+
+		var response BuilderRunResponse
+		if err := decoder.Decode(&response); err != nil {
+			log.Panic(err)
+		}
+
+		artifactAddress <- response.RPCAddress
+	}()
+
+	args := &BuilderRunArgs{
+		serveSingleConn(server),
+		responseL.Addr().String(),
+	}
+
+	if err := b.client.Call("Builder.Run", args, new(interface{})); err != nil {
 		panic(err)
 	}
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpc.Dial("tcp", <-artifactAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -73,20 +105,33 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
 	return nil
 }
 
-func (b *BuilderServer) Run(args *BuilderRunArgs, reply *string) error {
+func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 	client, err := rpc.Dial("tcp", args.RPCAddress)
 	if err != nil {
 		return err
 	}
 
-	hook := Hook(client)
-	ui := &Ui{client}
-	artifact := b.builder.Run(ui, hook)
+	responseC, err := net.Dial("tcp", args.ResponseAddress)
+	if err != nil {
+		return err
+	}
 
-	// Wrap the artifact
-	server := rpc.NewServer()
-	RegisterArtifact(server, artifact)
+	responseWriter := gob.NewEncoder(responseC)
 
-	*reply = serveSingleConn(server)
+	// Run the build in a goroutine so we don't block the RPC connection
+	go func () {
+		defer responseC.Close()
+
+		hook := Hook(client)
+		ui := &Ui{client}
+		artifact := b.builder.Run(ui, hook)
+
+		// Wrap the artifact
+		server := rpc.NewServer()
+		RegisterArtifact(server, artifact)
+
+		responseWriter.Encode(&BuilderRunResponse{serveSingleConn(server)})
+	}()
+
 	return nil
 }
