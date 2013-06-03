@@ -6,6 +6,7 @@ type TestBuilder struct {
 	runCalled     bool
 	runHook       Hook
 	runUi         Ui
+	cancelCalled  bool
 }
 
 func (tb *TestBuilder) Prepare(config interface{}) error {
@@ -19,4 +20,8 @@ func (tb *TestBuilder) Run(ui Ui, h Hook) Artifact {
 	tb.runHook = h
 	tb.runUi = ui
 	return nil
+}
+
+func (tb *TestBuilder) Cancel() {
+	tb.cancelCalled = true
 }

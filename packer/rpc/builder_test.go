@@ -15,6 +15,7 @@ type testBuilder struct {
 	runCalled     bool
 	runHook       packer.Hook
 	runUi         packer.Ui
+	cancelCalled  bool
 }
 
 func (b *testBuilder) Prepare(config interface{}) error {
@@ -28,6 +29,10 @@ func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	b.runHook = hook
 	b.runUi = ui
 	return testBuilderArtifact
+}
+
+func (b *testBuilder) Cancel() {
+	b.cancelCalled = true
 }
 
 func TestBuilderRPC(t *testing.T) {

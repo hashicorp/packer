@@ -20,7 +20,7 @@ func TestColoredUi(t *testing.T) {
 	ui := &ColoredUi{UiColorRed, bufferUi}
 
 	ui.Say("foo")
-	assert.Equal(readWriter(bufferUi), "\033[0;31;40mfoo\033[0m\n", "should have color")
+	assert.Equal(readWriter(bufferUi), "\033[1;31;40mfoo\033[0m\n", "should have color")
 }
 
 func TestPrefixedUi(t *testing.T) {

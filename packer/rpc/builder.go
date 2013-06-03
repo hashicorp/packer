@@ -60,6 +60,10 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	return Artifact(client)
 }
 
+func (b *builder) Cancel() {
+
+}
+
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
 	err := b.builder.Prepare(args.Config)
 	if err != nil {

@@ -31,6 +31,9 @@ func (b *cmdBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	return b.builder.Run(ui, hook)
 }
 
+func (b *cmdBuilder) Cancel() {
+}
+
 func (c *cmdBuilder) checkExit(p interface{}, cb func()) {
 	if c.client.Exited() && cb != nil {
 		cb()

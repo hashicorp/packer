@@ -102,3 +102,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	// Build the artifact and return it
 	return &artifact{state["amis"].(map[string]string)}
 }
+
+func (b *Builder) Cancel() {
+}

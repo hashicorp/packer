@@ -17,6 +17,8 @@ func (helperBuilder) Run(packer.Ui, packer.Hook) packer.Artifact {
 	return nil
 }
 
+func (helperBuilder) Cancel() {}
+
 func TestBuilder_NoExist(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
