@@ -13,6 +13,16 @@ func testUi() *ReaderWriterUi {
 	}
 }
 
+func TestColoredUi(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	bufferUi := testUi()
+	ui := &ColoredUi{UiColorRed, bufferUi}
+
+	ui.Say("foo")
+	assert.Equal(readWriter(bufferUi), "\033[0;31;40mfoo\033[0m\n", "should have color")
+}
+
 func TestPrefixedUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
@@ -27,6 +37,14 @@ func TestPrefixedUi(t *testing.T) {
 
 	prefixUi.Error("bar")
 	assert.Equal(readWriter(bufferUi), "mitchell: bar\n", "should have prefix")
+}
+
+func TestColoredUi_ImplUi(t *testing.T) {
+	var raw interface{}
+	raw = &ColoredUi{}
+	if _, ok := raw.(Ui); !ok {
+		t.Fatalf("ColoredUi must implement Ui")
+	}
 }
 
 func TestPrefixedUi_ImplUi(t *testing.T) {

@@ -6,6 +6,17 @@ import (
 	"log"
 )
 
+type UiColor uint
+
+const (
+	UiColorRed     UiColor = 31
+	UiColorGreen           = 32
+	UiColorYellow          = 33
+	UiColorBlue            = 34
+	UiColorMagenta         = 35
+	UiColorCyan            = 36
+)
+
 // The Ui interface handles all communication for Packer with the outside
 // world. This sort of control allows us to strictly control how output
 // is formatted and various levels of output.
@@ -13,6 +24,12 @@ type Ui interface {
 	Say(string)
 	Message(string)
 	Error(string)
+}
+
+// ColoredUi is a UI that is colored using terminal colors.
+type ColoredUi struct {
+	Color UiColor
+	Ui    Ui
 }
 
 // PrefixedUi is a UI that wraps another UI implementation and adds a
@@ -28,6 +45,22 @@ type PrefixedUi struct {
 type ReaderWriterUi struct {
 	Reader io.Reader
 	Writer io.Writer
+}
+
+func (u *ColoredUi) Say(message string) {
+	u.Ui.Say(u.colorize(message))
+}
+
+func (u *ColoredUi) Message(message string) {
+	u.Ui.Message(u.colorize(message))
+}
+
+func (u *ColoredUi) Error(message string) {
+	u.Ui.Error(u.colorize(message))
+}
+
+func (u *ColoredUi) colorize(message string) string {
+	return fmt.Sprintf("\033[0;%d;40m%s\033[0m", u.Color, message)
 }
 
 func (u *PrefixedUi) Say(message string) {
