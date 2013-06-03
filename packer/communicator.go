@@ -2,6 +2,7 @@ package packer
 
 import (
 	"io"
+	"time"
 )
 
 // RemoteCmd represents a remote command being prepared or run.
@@ -41,4 +42,11 @@ type Communicator interface {
 	Start(*RemoteCmd) error
 	Upload(string, io.Reader) error
 	Download(string, io.Writer) error
+}
+
+// Wait waits for the remote command to complete.
+func (r *RemoteCmd) Wait() {
+	for !r.Exited {
+		time.Sleep(50 * time.Millisecond)
+	}
 }
