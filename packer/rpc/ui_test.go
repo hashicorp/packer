@@ -7,15 +7,22 @@ import (
 )
 
 type testUi struct {
-	errorCalled  bool
-	errorMessage string
-	sayCalled    bool
-	sayMessage   string
+	errorCalled    bool
+	errorMessage   string
+	messageCalled  bool
+	messageMessage string
+	sayCalled      bool
+	sayMessage     string
 }
 
 func (u *testUi) Error(message string) {
 	u.errorCalled = true
 	u.errorMessage = message
+}
+
+func (u *testUi) Message(message string) {
+	u.messageCalled = true
+	u.messageMessage = message
 }
 
 func (u *testUi) Say(message string) {
@@ -45,6 +52,9 @@ func TestUiRPC(t *testing.T) {
 	// Basic error and say tests
 	uiClient.Error("message")
 	assert.Equal(ui.errorMessage, "message", "message should be correct")
+
+	uiClient.Message("message")
+	assert.Equal(ui.messageMessage, "message", "message should be correct")
 
 	uiClient.Say("message")
 	assert.Equal(ui.sayMessage, "message", "message should be correct")

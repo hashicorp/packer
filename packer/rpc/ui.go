@@ -23,6 +23,12 @@ func (u *Ui) Error(message string) {
 	}
 }
 
+func (u *Ui) Message(message string) {
+	if err := u.client.Call("Ui.Message", message, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
 func (u *Ui) Say(message string) {
 	if err := u.client.Call("Ui.Say", message, new(interface{})); err != nil {
 		panic(err)
@@ -32,6 +38,12 @@ func (u *Ui) Say(message string) {
 func (u *UiServer) Error(message *string, reply *interface{}) error {
 	u.ui.Error(*message)
 
+	*reply = nil
+	return nil
+}
+
+func (u *UiServer) Message(message *string, reply *interface{}) error {
+	u.ui.Message(*message)
 	*reply = nil
 	return nil
 }

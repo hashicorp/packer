@@ -11,14 +11,16 @@ import (
 // is formatted and various levels of output.
 type Ui interface {
 	Say(string)
+	Message(string)
 	Error(string)
 }
 
 // PrefixedUi is a UI that wraps another UI implementation and adds a
 // prefix to all the messages going out.
 type PrefixedUi struct {
-	Prefix string
-	Ui     Ui
+	SayPrefix     string
+	MessagePrefix string
+	Ui            Ui
 }
 
 // The ReaderWriterUi is a UI that writes and reads from standard Go
@@ -29,16 +31,28 @@ type ReaderWriterUi struct {
 }
 
 func (u *PrefixedUi) Say(message string) {
-	u.Ui.Say(fmt.Sprintf("%s: %s", u.Prefix, message))
+	u.Ui.Say(fmt.Sprintf("%s: %s", u.SayPrefix, message))
+}
+
+func (u *PrefixedUi) Message(message string) {
+	u.Ui.Say(fmt.Sprintf("%s: %s", u.MessagePrefix, message))
 }
 
 func (u *PrefixedUi) Error(message string) {
-	u.Ui.Error(fmt.Sprintf("%s: %s", u.Prefix, message))
+	u.Ui.Error(fmt.Sprintf("%s: %s", u.SayPrefix, message))
 }
 
 func (rw *ReaderWriterUi) Say(message string) {
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (rw *ReaderWriterUi) Message(message string) {
+	log.Printf("ui: %s", message)
+	_, err := fmt.Fprintf(rw.Writer, message+"\n")
 	if err != nil {
 		panic(err)
 	}

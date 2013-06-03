@@ -17,10 +17,13 @@ func TestPrefixedUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
-	prefixUi := &PrefixedUi{"mitchell", bufferUi}
+	prefixUi := &PrefixedUi{"mitchell", "bar", bufferUi}
 
 	prefixUi.Say("foo")
 	assert.Equal(readWriter(bufferUi), "mitchell: foo\n", "should have prefix")
+
+	prefixUi.Message("foo")
+	assert.Equal(readWriter(bufferUi), "bar: foo\n", "should have prefix")
 
 	prefixUi.Error("bar")
 	assert.Equal(readWriter(bufferUi), "mitchell: bar\n", "should have prefix")
