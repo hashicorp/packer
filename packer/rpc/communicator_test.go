@@ -11,13 +11,7 @@ import (
 
 type testCommunicator struct {
 	startCalled bool
-	startCmd    string
-
-	startIn         *io.PipeReader
-	startOut        *io.PipeWriter
-	startErr        *io.PipeWriter
-	startExited     *bool
-	startExitStatus *int
+	startCmd    *packer.RemoteCmd
 
 	uploadCalled bool
 	uploadPath   string
@@ -27,29 +21,10 @@ type testCommunicator struct {
 	downloadPath   string
 }
 
-func (t *testCommunicator) Start(cmd string) (*packer.RemoteCommand, error) {
+func (t *testCommunicator) Start(cmd *packer.RemoteCmd) error {
 	t.startCalled = true
 	t.startCmd = cmd
-
-	var stdin *io.PipeWriter
-	var stdout, stderr *io.PipeReader
-
-	t.startIn, stdin = io.Pipe()
-	stdout, t.startOut = io.Pipe()
-	stderr, t.startErr = io.Pipe()
-
-	rc := &packer.RemoteCommand{
-		Stdin:      stdin,
-		Stdout:     stdout,
-		Stderr:     stderr,
-		Exited:     false,
-		ExitStatus: 0,
-	}
-
-	t.startExited = &rc.Exited
-	t.startExitStatus = &rc.ExitStatus
-
-	return rc, nil
+	return nil
 }
 
 func (t *testCommunicator) Upload(path string, reader io.Reader) (err error) {
@@ -81,38 +56,46 @@ func TestCommunicatorRPC(t *testing.T) {
 	// Create the client over RPC and run some methods to verify it works
 	client, err := rpc.Dial("tcp", address)
 	assert.Nil(err, "should be able to connect")
+	remote := Communicator(client)
+
+	// The remote command we'll use
+	stdin_r, stdin_w := io.Pipe()
+	stdout_r, stdout_w := io.Pipe()
+	stderr_r, stderr_w := io.Pipe()
+
+	var cmd packer.RemoteCmd
+	cmd.Command = "foo"
+	cmd.Stdin = stdin_r
+	cmd.Stdout = stdout_w
+	cmd.Stderr = stderr_w
 
 	// Test Start
-	remote := Communicator(client)
-	rc, err := remote.Start("foo")
+	err = remote.Start(&cmd)
 	assert.Nil(err, "should not have an error")
 
 	// Test that we can read from stdout
-	bufOut := bufio.NewReader(rc.Stdout)
-	c.startOut.Write([]byte("outfoo\n"))
+	c.startCmd.Stdout.Write([]byte("outfoo\n"))
+	bufOut := bufio.NewReader(stdout_r)
 	data, err := bufOut.ReadString('\n')
 	assert.Nil(err, "should have no problem reading stdout")
 	assert.Equal(data, "outfoo\n", "should be correct stdout")
 
 	// Test that we can read from stderr
-	bufErr := bufio.NewReader(rc.Stderr)
-	c.startErr.Write([]byte("errfoo\n"))
+	c.startCmd.Stderr.Write([]byte("errfoo\n"))
+	bufErr := bufio.NewReader(stderr_r)
 	data, err = bufErr.ReadString('\n')
-	assert.Nil(err, "should have no problem reading stdout")
-	assert.Equal(data, "errfoo\n", "should be correct stdout")
+	assert.Nil(err, "should have no problem reading stderr")
+	assert.Equal(data, "errfoo\n", "should be correct stderr")
 
 	// Test that we can write to stdin
-	bufIn := bufio.NewReader(c.startIn)
-	rc.Stdin.Write([]byte("infoo\n"))
+	stdin_w.Write([]byte("infoo\n"))
+	bufIn := bufio.NewReader(c.startCmd.Stdin)
 	data, err = bufIn.ReadString('\n')
 	assert.Nil(err, "should have no problem reading stdin")
 	assert.Equal(data, "infoo\n", "should be correct stdin")
 
 	// Test that we can get the exit status properly
-	*c.startExitStatus = 42
-	*c.startExited = true
-	rc.Wait()
-	assert.Equal(rc.ExitStatus, 42, "should have proper exit status")
+	// TODO
 
 	// Test that we can upload things
 	uploadR, uploadW := io.Pipe()

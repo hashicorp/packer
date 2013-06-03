@@ -21,17 +21,11 @@ type CommunicatorServer struct {
 	c packer.Communicator
 }
 
-// RemoteCommandServer wraps a packer.RemoteCommand struct and makes it
-// exportable as part of a Golang RPC server.
-type RemoteCommandServer struct {
-	rc *packer.RemoteCommand
-}
-
-type CommunicatorStartResponse struct {
-	StdinAddress         string
-	StdoutAddress        string
-	StderrAddress        string
-	RemoteCommandAddress string
+type CommunicatorStartArgs struct {
+	Command       string
+	StdinAddress string
+	StdoutAddress string
+	StderrAddress string
 }
 
 type CommunicatorDownloadArgs struct {
@@ -48,52 +42,29 @@ func Communicator(client *rpc.Client) *communicator {
 	return &communicator{client}
 }
 
-func (c *communicator) Start(cmd string) (rc *packer.RemoteCommand, err error) {
-	var response CommunicatorStartResponse
-	err = c.client.Call("Communicator.Start", &cmd, &response)
-	if err != nil {
-		return
+func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
+	var args CommunicatorStartArgs
+	args.Command = cmd.Command
+
+	if cmd.Stdin != nil {
+		stdinL := netListenerInRange(portRangeMin, portRangeMax)
+		args.StdinAddress = stdinL.Addr().String()
+		go serveSingleCopy("stdin", stdinL, nil, cmd.Stdin)
 	}
 
-	// Connect to the three streams that will handle stdin, stdout,
-	// and stderr and get net.Conns for them.
-	stdinC, err := net.Dial("tcp", response.StdinAddress)
-	if err != nil {
-		return
+	if cmd.Stdout != nil {
+		stdoutL := netListenerInRange(portRangeMin, portRangeMax)
+		args.StdoutAddress = stdoutL.Addr().String()
+		go serveSingleCopy("stdout", stdoutL, cmd.Stdout, nil)
 	}
 
-	stdoutC, err := net.Dial("tcp", response.StdoutAddress)
-	if err != nil {
-		return
+	if cmd.Stderr != nil {
+		stderrL := netListenerInRange(portRangeMin, portRangeMax)
+		args.StderrAddress = stderrL.Addr().String()
+		go serveSingleCopy("stderr", stderrL, cmd.Stderr, nil)
 	}
 
-	stderrC, err := net.Dial("tcp", response.StderrAddress)
-	if err != nil {
-		return
-	}
-
-	// Connect to the RPC server for the remote command
-	client, err := rpc.Dial("tcp", response.RemoteCommandAddress)
-	if err != nil {
-		return
-	}
-
-	// Build the response object using the streams we created
-	rc = &packer.RemoteCommand{
-		Stdin:      stdinC,
-		Stdout:     stdoutC,
-		Stderr:     stderrC,
-		Exited:     false,
-		ExitStatus: -1,
-	}
-
-	// In a goroutine, we wait for the process to exit, then we set
-	// that it has exited.
-	go func() {
-		client.Call("RemoteCommand.Wait", new(interface{}), &rc.ExitStatus)
-		rc.Exited = true
-	}()
-
+	err = c.client.Call("Communicator.Start", &args, new(interface{}))
 	return
 }
 
@@ -145,41 +116,41 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	return
 }
 
-func (c *CommunicatorServer) Start(cmd *string, reply *CommunicatorStartResponse) (err error) {
-	// Start executing the command.
-	command, err := c.c.Start(*cmd)
-	if err != nil {
-		return
+func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface{}) (err error) {
+	// Build the RemoteCmd on this side so that it all pipes over
+	// to the remote side.
+	var cmd packer.RemoteCmd
+	cmd.Command = args.Command
+
+	if args.StdinAddress != "" {
+		stdinC, err := net.Dial("tcp", args.StdinAddress)
+		if err != nil {
+			return err
+		}
+
+		cmd.Stdin = stdinC
 	}
 
-	// If we didn't get a proper command... that's not right.
-	if command == nil {
-		return errors.New("communicator returned nil remote command")
+	if args.StdoutAddress != "" {
+		stdoutC, err := net.Dial("tcp", args.StdoutAddress)
+		if err != nil {
+			return err
+		}
+
+		cmd.Stdout = stdoutC
 	}
 
-	// Next, we need to take the stdin/stdout and start a listener
-	// for each because the client will connect to us via TCP and use
-	// that connection as the io.Reader or io.Writer. These exist for
-	// only a single connection that is persistent.
-	stdinL := netListenerInRange(portRangeMin, portRangeMax)
-	stdoutL := netListenerInRange(portRangeMin, portRangeMax)
-	stderrL := netListenerInRange(portRangeMin, portRangeMax)
-	go serveSingleCopy("stdin", stdinL, command.Stdin, nil)
-	go serveSingleCopy("stdout", stdoutL, nil, command.Stdout)
-	go serveSingleCopy("stderr", stderrL, nil, command.Stderr)
+	if args.StderrAddress != "" {
+		stderrC, err := net.Dial("tcp", args.StderrAddress)
+		if err != nil {
+			return err
+		}
 
-	// For the exit status, we use a simple RPC Server that serves
-	// some of the RemoteComand methods.
-	server := rpc.NewServer()
-	server.RegisterName("RemoteCommand", &RemoteCommandServer{command})
-
-	*reply = CommunicatorStartResponse{
-		stdinL.Addr().String(),
-		stdoutL.Addr().String(),
-		stderrL.Addr().String(),
-		serveSingleConn(server),
+		cmd.Stderr = stderrC
 	}
 
+	// Start the actual command
+	err = c.c.Start(&cmd)
 	return
 }
 
@@ -205,12 +176,6 @@ func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *int
 
 	err = c.c.Download(args.Path, writerC)
 	return
-}
-
-func (rc *RemoteCommandServer) Wait(args *interface{}, reply *int) error {
-	rc.rc.Wait()
-	*reply = rc.rc.ExitStatus
-	return nil
 }
 
 func serveSingleCopy(name string, l net.Listener, dst io.Writer, src io.Reader) {
