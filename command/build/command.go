@@ -63,7 +63,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	for _, b := range builds {
 		buildUis[b.Name()] = &packer.PrefixedUi{
 			fmt.Sprintf("==> %s", b.Name()),
-			fmt.Sprintf("--> %s", b.Name()),
+			fmt.Sprintf("    %s", b.Name()),
 			env.Ui(),
 		}
 	}

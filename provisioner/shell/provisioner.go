@@ -87,9 +87,9 @@ OutputLoop:
 	for {
 		select {
 		case output := <-stderrChan:
-			ui.Say(strings.TrimSpace(output))
+			ui.Message(strings.TrimSpace(output))
 		case output := <-stdoutChan:
-			ui.Say(strings.TrimSpace(output))
+			ui.Message(strings.TrimSpace(output))
 		case exitStatus := <-exitChan:
 			log.Printf("shell provisioner exited with status %d", exitStatus)
 			break OutputLoop
@@ -99,10 +99,10 @@ OutputLoop:
 	// Make sure we finish off stdout/stderr because we may have gotten
 	// a message from the exit channel first.
 	for output := range stdoutChan {
-		ui.Say(output)
+		ui.Message(output)
 	}
 
 	for output := range stderrChan {
-		ui.Say(output)
+		ui.Message(output)
 	}
 }
