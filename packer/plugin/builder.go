@@ -32,6 +32,12 @@ func (b *cmdBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 }
 
 func (b *cmdBuilder) Cancel() {
+	defer func() {
+		r := recover()
+		b.checkExit(r, nil)
+	}()
+
+	b.builder.Cancel()
 }
 
 func (c *cmdBuilder) checkExit(p interface{}, cb func()) {
