@@ -23,33 +23,19 @@ func New(c net.Conn, config *ssh.ClientConfig) (result *comm, err error) {
 	return
 }
 
-func (c *comm) Start(cmd string) (remote *packer.RemoteCommand, err error) {
+func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	session, err := c.client.NewSession()
 	if err != nil {
 		return
 	}
 
-	// Create the buffers to store our stdin/stdout/stderr
-	stdin := new(bytes.Buffer)
-	stdout := new(bytes.Buffer)
-	stderr := new(bytes.Buffer)
-
 	// Setup our session
-	session.Stdin = stdin
-	session.Stdout = stdout
-	session.Stderr = stderr
+	session.Stdin = cmd.Stdin
+	session.Stdout = cmd.Stdout
+	session.Stderr = cmd.Stderr
 
-	// Setup the remote command
-	remote = &packer.RemoteCommand{
-		Stdin:      stdin,
-		Stdout:     stdout,
-		Stderr:     stderr,
-		Exited:     false,
-		ExitStatus: -1,
-	}
-
-	log.Printf("starting remote command: %s", cmd)
-	err = session.Start(cmd + "\n")
+	log.Printf("starting remote command: %s", cmd.Command)
+	err = session.Start(cmd.Command + "\n")
 	if err != nil {
 		return
 	}
@@ -60,15 +46,15 @@ func (c *comm) Start(cmd string) (remote *packer.RemoteCommand, err error) {
 		defer session.Close()
 
 		err := session.Wait()
-		remote.ExitStatus = 0
+		cmd.ExitStatus = 0
 		if err != nil {
 			exitErr, ok := err.(*ssh.ExitError)
 			if ok {
-				remote.ExitStatus = exitErr.ExitStatus()
+				cmd.ExitStatus = exitErr.ExitStatus()
 			}
 		}
 
-		remote.Exited = true
+		cmd.Exited = true
 	}()
 
 	return

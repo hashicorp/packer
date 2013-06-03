@@ -8,6 +8,7 @@ import (
 	"net"
 	"strings"
 	"testing"
+	"time"
 )
 
 // private key for mock server
@@ -178,19 +179,24 @@ func TestStart(t *testing.T) {
 		t.Fatalf("error connecting to SSH: %s", err)
 	}
 
-	remote, err := client.Start("echo foo")
+	var cmd packer.RemoteCmd
+	stdout := new(bytes.Buffer)
+	cmd.Command = "echo foo"
+	cmd.Stdout = stdout
+
+	err = client.Start(&cmd)
 	if err != nil {
 		t.Fatalf("error executing command: %s", err)
 	}
 
 	// Wait for it to complete
 	t.Log("Waiting for command to complete")
-	remote.Wait()
+	for !cmd.Exited {
+		time.Sleep(50 * time.Millisecond)
+	}
 
 	// Should have the correct output
-	output := remote.Stdout.(*bytes.Buffer).String()
-
-	if output != "ack: echo foo" {
-		t.Fatalf("unknown output: %#v", output)
+	if stdout.String() != "ack: echo foo" {
+		t.Fatalf("unknown output: %#v", stdout.String())
 	}
 }
