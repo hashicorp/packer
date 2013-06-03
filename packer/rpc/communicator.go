@@ -28,10 +28,10 @@ type CommandFinished struct {
 }
 
 type CommunicatorStartArgs struct {
-	Command       string
-	StdinAddress string
-	StdoutAddress string
-	StderrAddress string
+	Command         string
+	StdinAddress    string
+	StdoutAddress   string
+	StderrAddress   string
 	ResponseAddress string
 }
 
