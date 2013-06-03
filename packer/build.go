@@ -91,4 +91,5 @@ func (b *coreBuild) Run(ui Ui) Artifact {
 
 // Cancels the build if it is running.
 func (b *coreBuild) Cancel() {
+	b.builder.Cancel()
 }

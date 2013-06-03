@@ -92,3 +92,15 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 
 	testBuild().Run(testUi())
 }
+
+func TestBuild_Cancel(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	build := testBuild()
+	build.Cancel()
+
+	coreB := build.(*coreBuild)
+
+	builder := coreB.builder.(*TestBuilder)
+	assert.True(builder.cancelCalled, "cancel should be called")
+}
