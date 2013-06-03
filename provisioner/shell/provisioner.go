@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -90,9 +91,9 @@ OutputLoop:
 	for {
 		select {
 		case output := <-stderrChan:
-			ui.Say(output)
+			ui.Say(strings.TrimSpace(output))
 		case output := <-stdoutChan:
-			ui.Say(output)
+			ui.Say(strings.TrimSpace(output))
 		case exitStatus := <-exitChan:
 			log.Printf("shell provisioner exited with status %d", exitStatus)
 			break OutputLoop
