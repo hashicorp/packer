@@ -4,10 +4,13 @@ package shell
 
 import (
 	"fmt"
+	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
+	"io"
 	"log"
 	"os"
+	"time"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
@@ -52,34 +55,45 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		return
 	}
 
-	command := fmt.Sprintf("chmod +x %s && %s", p.config.RemotePath, p.config.RemotePath)
-	log.Printf("Executing command: %s", command)
-	cmd, err := comm.Start(command)
+	// Setup the remote command
+	stdout_r, stdout_w := io.Pipe()
+	stderr_r, stderr_w := io.Pipe()
+
+	var cmd packer.RemoteCmd
+	cmd.Command = fmt.Sprintf("chmod +x %s && %s", p.config.RemotePath, p.config.RemotePath)
+	cmd.Stdout = stdout_w
+	cmd.Stderr = stderr_w
+
+	log.Printf("Executing command: %s", cmd.Command)
+	err = comm.Start(&cmd)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Failed executing command: %s", err))
 		return
 	}
 
-	exit := cmd.ExitChan()
-	stderr := cmd.StderrChan()
-	stdout := cmd.StdoutChan()
+	exitChan := make(chan int, 1)
+	stdoutChan := iochan.DelimReader(stdout_r, '\n')
+	stderrChan := iochan.DelimReader(stderr_r, '\n')
+
+	go func() {
+		defer stdout_w.Close()
+		defer stderr_w.Close()
+
+		for !cmd.Exited {
+			time.Sleep(50 * time.Millisecond)
+		}
+
+		exitChan <- cmd.ExitStatus
+	}()
 
 OutputLoop:
 	for {
 		select {
-		case output, ok := <-stderr:
-			if !ok {
-				stderr = nil
-			} else {
-				ui.Say(output)
-			}
-		case output, ok := <-stdout:
-			if !ok {
-				stdout = nil
-			} else {
-				ui.Say(output)
-			}
-		case exitStatus := <-exit:
+		case output := <-stderrChan:
+			ui.Say(output)
+		case output := <-stdoutChan:
+			ui.Say(output)
+		case exitStatus := <-exitChan:
 			log.Printf("shell provisioner exited with status %d", exitStatus)
 			break OutputLoop
 		}
@@ -87,15 +101,11 @@ OutputLoop:
 
 	// Make sure we finish off stdout/stderr because we may have gotten
 	// a message from the exit channel first.
-	if stdout != nil {
-		for output := range stdout {
-			ui.Say(output)
-		}
+	for output := range stdoutChan {
+		ui.Say(output)
 	}
 
-	if stderr != nil {
-		for output := range stderr {
-			ui.Say(output)
-		}
+	for output := range stderrChan {
+		ui.Say(output)
 	}
 }
