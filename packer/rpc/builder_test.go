@@ -73,6 +73,10 @@ func TestBuilderRPC(t *testing.T) {
 
 		assert.Equal(artifact.Id(), testBuilderArtifact.Id(), "should have artifact Id")
 	}
+
+	// Test Cancel
+	bClient.Cancel()
+	assert.True(b.cancelCalled, "cancel should be called")
 }
 
 func TestBuilder_ImplementsBuilder(t *testing.T) {

@@ -66,7 +66,7 @@ func serveSingleConn(s *rpc.Server) string {
 		defer l.Close()
 		conn, err := l.Accept()
 		if err != nil {
-			return
+			panic(err)
 		}
 
 		s.ServeConn(conn)

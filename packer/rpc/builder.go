@@ -93,7 +93,9 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 }
 
 func (b *builder) Cancel() {
-
+	if err := b.client.Call("Builder.Cancel", new(interface{}), new(interface{})); err != nil {
+		panic(err)
+	}
 }
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
@@ -133,5 +135,10 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 		responseWriter.Encode(&BuilderRunResponse{serveSingleConn(server)})
 	}()
 
+	return nil
+}
+
+func (b *BuilderServer) Cancel(args *interface{}, reply*interface{}) error {
+	b.builder.Cancel()
 	return nil
 }
