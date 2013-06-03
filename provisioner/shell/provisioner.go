@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
@@ -80,10 +79,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		defer stdout_w.Close()
 		defer stderr_w.Close()
 
-		for !cmd.Exited {
-			time.Sleep(50 * time.Millisecond)
-		}
-
+		cmd.Wait()
 		exitChan <- cmd.ExitStatus
 	}()
 
