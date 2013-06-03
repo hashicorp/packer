@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/rpc"
 	"testing"
+	"time"
 )
 
 type testCommunicator struct {
@@ -95,7 +96,19 @@ func TestCommunicatorRPC(t *testing.T) {
 	assert.Equal(data, "infoo\n", "should be correct stdin")
 
 	// Test that we can get the exit status properly
-	// TODO
+	c.startCmd.ExitStatus = 42
+	c.startCmd.Exited = true
+
+	for i := 0; i < 5; i++ {
+		if cmd.Exited {
+			assert.Equal(cmd.ExitStatus, 42, "should have proper exit status")
+			break
+		}
+
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	assert.True(cmd.Exited, "should have exited")
 
 	// Test that we can upload things
 	uploadR, uploadW := io.Pipe()

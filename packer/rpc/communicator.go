@@ -1,12 +1,14 @@
 package rpc
 
 import (
+	"encoding/gob"
 	"errors"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net"
 	"net/rpc"
+	"time"
 )
 
 // An implementation of packer.Communicator where the communicator is actually
@@ -21,11 +23,16 @@ type CommunicatorServer struct {
 	c packer.Communicator
 }
 
+type CommandFinished struct {
+	ExitStatus int
+}
+
 type CommunicatorStartArgs struct {
 	Command       string
 	StdinAddress string
 	StdoutAddress string
 	StderrAddress string
+	ResponseAddress string
 }
 
 type CommunicatorDownloadArgs struct {
@@ -63,6 +70,30 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 		args.StderrAddress = stderrL.Addr().String()
 		go serveSingleCopy("stderr", stderrL, cmd.Stderr, nil)
 	}
+
+	responseL := netListenerInRange(portRangeMin, portRangeMax)
+	args.ResponseAddress = responseL.Addr().String()
+
+	go func() {
+		defer responseL.Close()
+
+		conn, err := responseL.Accept()
+		if err != nil {
+			log.Panic(err)
+		}
+
+		defer conn.Close()
+
+		decoder := gob.NewDecoder(conn)
+
+		var finished CommandFinished
+		if err := decoder.Decode(&finished); err != nil {
+			log.Panic(err)
+		}
+
+		cmd.ExitStatus = finished.ExitStatus
+		cmd.Exited = true
+	}()
 
 	err = c.client.Call("Communicator.Start", &args, new(interface{}))
 	return
@@ -149,8 +180,30 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		cmd.Stderr = stderrC
 	}
 
+	// Connect to the response address so we can write our result to it
+	// when ready.
+	responseC, err := net.Dial("tcp", args.ResponseAddress)
+	if err != nil {
+		return err
+	}
+
+	responseWriter := gob.NewEncoder(responseC)
+
 	// Start the actual command
 	err = c.c.Start(&cmd)
+
+	// Start a goroutine to spin and wait for the process to actual
+	// exit. When it does, report it back to caller...
+	go func() {
+		defer responseC.Close()
+
+		for !cmd.Exited {
+			time.Sleep(50 * time.Millisecond)
+		}
+
+		responseWriter.Encode(&CommandFinished{cmd.ExitStatus})
+	}()
+
 	return
 }
 
