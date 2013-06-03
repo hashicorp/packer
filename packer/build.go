@@ -8,6 +8,7 @@ type Build interface {
 	Name() string
 	Prepare(Ui) error
 	Run(Ui) Artifact
+	Cancel()
 }
 
 // A build struct represents a single build job, the result of which should
@@ -86,4 +87,8 @@ func (b *coreBuild) Run(ui Ui) Artifact {
 
 	hook := &DispatchHook{hooks}
 	return b.builder.Run(ui, hook)
+}
+
+// Cancels the build if it is running.
+func (b *coreBuild) Cancel() {
 }

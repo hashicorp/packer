@@ -15,6 +15,7 @@ type testBuild struct {
 	prepareUi     packer.Ui
 	runCalled     bool
 	runUi         packer.Ui
+	cancelCalled  bool
 }
 
 func (b *testBuild) Name() string {
@@ -32,6 +33,10 @@ func (b *testBuild) Run(ui packer.Ui) packer.Artifact {
 	b.runCalled = true
 	b.runUi = ui
 	return testBuildArtifact
+}
+
+func (b *testBuild) Cancel() {
+	b.cancelCalled = true
 }
 
 func TestBuildRPC(t *testing.T) {
@@ -70,6 +75,10 @@ func TestBuildRPC(t *testing.T) {
 		assert.True(ui.sayCalled, "say should be called")
 		assert.Equal(ui.sayMessage, "format", "message should be correct")
 	}
+
+	// Test Cancel
+	bClient.Cancel()
+	assert.True(b.cancelCalled, "cancel should be called")
 }
 
 func TestBuild_ImplementsBuild(t *testing.T) {

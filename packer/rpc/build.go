@@ -68,6 +68,12 @@ func (b *build) Run(ui packer.Ui) packer.Artifact {
 	return Artifact(client)
 }
 
+func (b *build) Cancel() {
+	if err := b.client.Call("Build.Cancel", new(interface{}), new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
 func (b *BuildServer) Name(args *interface{}, reply *string) error {
 	*reply = b.build.Name()
 	return nil
@@ -96,5 +102,10 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *string) error {
 	RegisterArtifact(server, artifact)
 
 	*reply = serveSingleConn(server)
+	return nil
+}
+
+func (b *BuildServer) Cancel(args *interface{}, reply *interface{}) error {
+	b.build.Cancel()
 	return nil
 }
