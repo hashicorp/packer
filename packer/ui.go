@@ -48,19 +48,24 @@ type ReaderWriterUi struct {
 }
 
 func (u *ColoredUi) Say(message string) {
-	u.Ui.Say(u.colorize(message))
+	u.Ui.Say(u.colorize(message, true))
 }
 
 func (u *ColoredUi) Message(message string) {
-	u.Ui.Message(u.colorize(message))
+	u.Ui.Message(u.colorize(message, false))
 }
 
 func (u *ColoredUi) Error(message string) {
-	u.Ui.Error(u.colorize(message))
+	u.Ui.Error(u.colorize(message, false))
 }
 
-func (u *ColoredUi) colorize(message string) string {
-	return fmt.Sprintf("\033[0;%d;40m%s\033[0m", u.Color, message)
+func (u *ColoredUi) colorize(message string, bold bool) string {
+	attr := 0
+	if bold {
+		attr = 1
+	}
+
+	return fmt.Sprintf("\033[%d;%d;40m%s\033[0m", attr, u.Color, message)
 }
 
 func (u *PrefixedUi) Say(message string) {
