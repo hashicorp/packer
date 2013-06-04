@@ -36,7 +36,7 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	log.Printf("instance id: %s", s.instance.InstanceId)
 
 	ui.Say("Waiting for instance to become ready...")
-	s.instance, err = waitForState(ec2conn, s.instance, "running")
+	s.instance, err = waitForState(ec2conn, s.instance, []string{"pending"}, "running")
 	if err != nil {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
