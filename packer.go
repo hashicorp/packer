@@ -96,6 +96,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	setupSignalHandlers(env)
+
 	exitCode, err := env.Cli(os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err.Error())
