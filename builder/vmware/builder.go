@@ -13,10 +13,20 @@ type Builder struct {
 }
 
 type config struct {
+	DiskName  string `mapstructure:"vmdk_name"`
+	VMName    string `mapstructure:"vm_name"`
 	OutputDir string `mapstructure:"output_directory"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
+	if b.config.DiskName == "" {
+		b.config.DiskName = "disk"
+	}
+
+	if b.config.VMName == "" {
+		b.config.VMName = "packer"
+	}
+
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = "vmware"
 	}
@@ -28,6 +38,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	steps := []multistep.Step{
 		&stepPrepareOutputDir{},
 		&stepCreateDisk{},
+		&stepCreateVMX{},
 	}
 
 	// Setup the state bag

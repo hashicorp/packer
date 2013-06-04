@@ -18,7 +18,7 @@ func (stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
 	ui := state["ui"].(packer.Ui)
 
 	vdisk_manager := "/Applications/VMware Fusion.app/Contents/Library/vmware-vdiskmanager"
-	output := filepath.Join(config.OutputDir, "disk.vmdk")
+	output := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
 
 	ui.Say("Creating virtual machine disk")
 	cmd := exec.Command(vdisk_manager, "-c", "-s", "40000M", "-a", "lsilogic", "-t", "1", output)
