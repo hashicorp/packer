@@ -102,12 +102,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	b.runner = &multistep.BasicRunner{Steps: steps}
 	b.runner.Run(state)
 
-	// If we were cancelled, then return no artifacts
-	if raw, ok := state["cancelled"]; ok {
-		cancelled := raw.(bool)
-		if cancelled {
-			return nil
-		}
+	// If there are no AMIs, then jsut return
+	if _, ok := state["amis"]; !ok {
+		return nil
 	}
 
 	// Build the artifact and return it
