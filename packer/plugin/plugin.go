@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 )
@@ -75,6 +76,19 @@ func serve(server *rpc.Server) (err error) {
 	return
 }
 
+// Registers a signal handler to "swallow" interrupts so that the
+// plugin isn't killed. The main host Packer process is responsible
+// for killing the plugins when interrupted.
+func swallowInterrupts() {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt)
+
+	go func() {
+		<-ch
+		log.Println("Received interrupt signal. Ignoring.")
+	}()
+}
+
 // Serves a builder from a plugin.
 func ServeBuilder(builder packer.Builder) {
 	log.Println("Preparing to serve a builder plugin...")
@@ -82,6 +96,7 @@ func ServeBuilder(builder packer.Builder) {
 	server := rpc.NewServer()
 	packrpc.RegisterBuilder(server, builder)
 
+	swallowInterrupts()
 	if err := serve(server); err != nil {
 		log.Panic(err)
 	}
@@ -94,6 +109,7 @@ func ServeCommand(command packer.Command) {
 	server := rpc.NewServer()
 	packrpc.RegisterCommand(server, command)
 
+	swallowInterrupts()
 	if err := serve(server); err != nil {
 		log.Panic(err)
 	}
@@ -106,6 +122,7 @@ func ServeHook(hook packer.Hook) {
 	server := rpc.NewServer()
 	packrpc.RegisterHook(server, hook)
 
+	swallowInterrupts()
 	if err := serve(server); err != nil {
 		log.Panic(err)
 	}
@@ -118,6 +135,7 @@ func ServeProvisioner(p packer.Provisioner) {
 	server := rpc.NewServer()
 	packrpc.RegisterProvisioner(server, p)
 
+	swallowInterrupts()
 	if err := serve(server); err != nil {
 		log.Panic(err)
 	}
