@@ -35,6 +35,7 @@ type config struct {
 
 type Builder struct {
 	config config
+	runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
@@ -98,12 +99,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	}
 
 	// Run!
-	runner := &multistep.BasicRunner{Steps: steps}
-	runner.Run(state)
+	b.runner = &multistep.BasicRunner{Steps: steps}
+	b.runner.Run(state)
 
 	// Build the artifact and return it
 	return &artifact{state["amis"].(map[string]string)}
 }
 
 func (b *Builder) Cancel() {
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
 }
