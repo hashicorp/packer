@@ -1,6 +1,7 @@
 package build
 
 import (
+	"flag"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
@@ -18,8 +19,18 @@ func (Command) Help() string {
 }
 
 func (c Command) Run(env packer.Environment, args []string) int {
+	var cfgOnly []string
+
+	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
+	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
+	cmdFlags.Var((*stringSliceValue)(&cfgOnly), "only", "only build the given builds by name")
+	if err := cmdFlags.Parse(args); err != nil {
+		return 1
+	}
+
+	args = cmdFlags.Args()
 	if len(args) != 1 {
-		env.Ui().Say(c.Help())
+		cmdFlags.Usage()
 		return 1
 	}
 
@@ -50,6 +61,21 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	buildNames := tpl.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
+		if len(cfgOnly) > 0 {
+			found := false
+			for _, only := range cfgOnly {
+				if buildName == only {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				log.Printf("Skipping build '%s' because not specified by -only.", buildName)
+				continue
+			}
+		}
+
 		log.Printf("Creating build: %s", buildName)
 		build, err := tpl.Build(buildName, components)
 		if err != nil {
