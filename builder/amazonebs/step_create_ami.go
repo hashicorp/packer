@@ -3,12 +3,13 @@ package amazonebs
 import (
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
 type stepCreateAMI struct{}
 
-func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
+func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(config)
 	ec2conn := state["ec2"].(*ec2.EC2)
 	instance := state["instance"].(*ec2.Instance)
@@ -24,7 +25,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
 	createResp, err := ec2conn.CreateImage(createOpts)
 	if err != nil {
 		ui.Error(err.Error())
-		return StepHalt
+		return multistep.ActionHalt
 	}
 
 	// Set the AMI ID in the state
@@ -39,7 +40,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
 		imageResp, err := ec2conn.Images([]string{createResp.ImageId}, ec2.NewFilter())
 		if err != nil {
 			ui.Error(err.Error())
-			return StepHalt
+			return multistep.ActionHalt
 		}
 
 		if imageResp.Images[0].State == "available" {
@@ -47,7 +48,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) StepAction {
 		}
 	}
 
-	return StepContinue
+	return multistep.ActionContinue
 }
 
 func (s *stepCreateAMI) Cleanup(map[string]interface{}) {

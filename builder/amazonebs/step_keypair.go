@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -13,7 +14,7 @@ type stepKeyPair struct {
 	keyName string
 }
 
-func (s *stepKeyPair) Run(state map[string]interface{}) StepAction {
+func (s *stepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	ui := state["ui"].(packer.Ui)
 
@@ -23,7 +24,7 @@ func (s *stepKeyPair) Run(state map[string]interface{}) StepAction {
 	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
 		ui.Error(err.Error())
-		return StepHalt
+		return multistep.ActionHalt
 	}
 
 	// Set the keyname so we know to delete it later
@@ -33,7 +34,7 @@ func (s *stepKeyPair) Run(state map[string]interface{}) StepAction {
 	state["keyPair"] = keyName
 	state["privateKey"] = keyResp.KeyMaterial
 
-	return StepContinue
+	return multistep.ActionContinue
 }
 
 func (s *stepKeyPair) Cleanup(state map[string]interface{}) {

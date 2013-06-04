@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -87,7 +88,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	state["ui"] = ui
 
 	// Build the steps
-	steps := []Step{
+	steps := []multistep.Step{
 		&stepKeyPair{},
 		&stepRunSourceInstance{},
 		&stepConnectSSH{},
@@ -97,7 +98,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	}
 
 	// Run!
-	RunSteps(state, steps)
+	runner := &multistep.BasicRunner{Steps: steps}
+	runner.Run(state)
 
 	// Build the artifact and return it
 	return &artifact{state["amis"].(map[string]string)}

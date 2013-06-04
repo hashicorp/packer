@@ -4,6 +4,7 @@ import (
 	gossh "code.google.com/p/go.crypto/ssh"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -15,7 +16,7 @@ type stepConnectSSH struct {
 	conn net.Conn
 }
 
-func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
+func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(config)
 	instance := state["instance"].(*ec2.Instance)
 	privateKey := state["privateKey"].(string)
@@ -27,7 +28,7 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
 	err := keyring.AddPEMKey(privateKey)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Error setting up SSH config: %s", err))
-		return StepHalt
+		return multistep.ActionHalt
 	}
 
 	// Build the actual SSH client configuration
@@ -59,13 +60,13 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) StepAction {
 
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error connecting to SSH: %s", err))
-		return StepHalt
+		return multistep.ActionHalt
 	}
 
 	// Set the communicator on the state bag so it can be used later
 	state["communicator"] = comm
 
-	return StepContinue
+	return multistep.ActionContinue
 }
 
 func (s *stepConnectSSH) Cleanup(map[string]interface{}) {

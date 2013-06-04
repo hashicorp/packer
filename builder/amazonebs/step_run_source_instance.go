@@ -2,6 +2,7 @@ package amazonebs
 
 import (
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -10,7 +11,7 @@ type stepRunSourceInstance struct {
 	instance *ec2.Instance
 }
 
-func (s *stepRunSourceInstance) Run(state map[string]interface{}) StepAction {
+func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(config)
 	ec2conn := state["ec2"].(*ec2.EC2)
 	keyName := state["keyPair"].(string)
@@ -28,7 +29,7 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) StepAction {
 	runResp, err := ec2conn.RunInstances(runOpts)
 	if err != nil {
 		ui.Error(err.Error())
-		return StepHalt
+		return multistep.ActionHalt
 	}
 
 	s.instance = &runResp.Instances[0]
@@ -38,12 +39,12 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) StepAction {
 	s.instance, err = waitForState(ec2conn, s.instance, "running")
 	if err != nil {
 		ui.Error(err.Error())
-		return StepHalt
+		return multistep.ActionHalt
 	}
 
 	state["instance"] = s.instance
 
-	return StepContinue
+	return multistep.ActionContinue
 }
 
 func (s *stepRunSourceInstance) Cleanup(state map[string]interface{}) {
