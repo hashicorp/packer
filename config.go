@@ -13,6 +13,7 @@ import (
 const defaultConfig = `
 [builders]
 amazon-ebs = "packer-builder-amazon-ebs"
+vmware = "packer-builder-vmware"
 
 [commands]
 build = "packer-command-build"
