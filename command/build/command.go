@@ -115,11 +115,17 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Handle signals
+	var interruptWg sync.WaitGroup
+	interrupted := false
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 
 	go func() {
 		<-sigCh
+		interruptWg.Add(1)
+		defer interruptWg.Done()
+		interrupted = true
+
 		log.Println("Interrupted! Cancelling builds...")
 
 		var wg sync.WaitGroup
@@ -137,7 +143,15 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		wg.Wait()
 	}()
 
+	// Wait for both the builds to complete and the interrupt handler,
+	// if it is interrupted.
 	wg.Wait()
+	interruptWg.Wait()
+
+	if interrupted {
+		env.Ui().Say("Cleanly cancelled builds after being interrupted.")
+		return 1
+	}
 
 	// Output all the artifacts
 	env.Ui().Say("\n==> The build completed! The artifacts created were:")
