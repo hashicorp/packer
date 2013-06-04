@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"strconv"
 	"text/template"
 	"time"
 )
@@ -25,7 +26,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	// Parse the name of the AMI
 	amiNameBuf := new(bytes.Buffer)
 	tData := amiNameData{
-		time.Now().UTC().String(),
+		strconv.FormatInt(time.Now().UTC().Unix(), 10),
 	}
 
 	t := template.Must(template.New("ami").Parse(config.AMIName))
