@@ -121,7 +121,7 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 	responseWriter := gob.NewEncoder(responseC)
 
 	// Run the build in a goroutine so we don't block the RPC connection
-	go func () {
+	go func() {
 		defer responseC.Close()
 
 		hook := Hook(client)
@@ -138,7 +138,7 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 	return nil
 }
 
-func (b *BuilderServer) Cancel(args *interface{}, reply*interface{}) error {
+func (b *BuilderServer) Cancel(args *interface{}, reply *interface{}) error {
 	b.builder.Cancel()
 	return nil
 }
