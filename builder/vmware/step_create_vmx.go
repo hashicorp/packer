@@ -13,6 +13,7 @@ type vmxTemplateData struct {
 	Name     string
 	GuestOS  string
 	DiskName string
+	ISOPath  string
 }
 
 type stepCreateVMX struct{}
@@ -32,6 +33,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		config.VMName,
 		"ubuntu-64",
 		config.DiskName,
+		config.ISOUrl,
 	}
 
 	t := template.Must(template.New("vmx").Parse(DefaultVMXTemplate))
@@ -71,6 +73,9 @@ gui.fullScreenAtPowerOn = "FALSE"
 gui.viewModeAtPowerOn = "windowed"
 hgfs.linkRootShare = "TRUE"
 hgfs.mapRootShare = "TRUE"
+ide1:0.present = "TRUE"
+ide1:0.fileName = "{{ .ISOPath }}"
+ide1:0.deviceType = "cdrom-image"
 isolation.tools.hgfs.disable = "FALSE"
 memsize = "512"
 nvram = "{{ .Name }}.nvram"

@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -14,11 +15,17 @@ type Builder struct {
 
 type config struct {
 	DiskName  string `mapstructure:"vmdk_name"`
+	ISOUrl    string `mapstructure:"iso_url"`
 	VMName    string `mapstructure:"vm_name"`
 	OutputDir string `mapstructure:"output_directory"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
+	err = mapstructure.Decode(raw, &b.config)
+	if err != nil {
+		return
+	}
+
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
 	}
