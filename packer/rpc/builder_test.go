@@ -16,6 +16,8 @@ type testBuilder struct {
 	runHook       packer.Hook
 	runUi         packer.Ui
 	cancelCalled  bool
+
+	nilRunResult bool
 }
 
 func (b *testBuilder) Prepare(config interface{}) error {
@@ -28,7 +30,12 @@ func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	b.runCalled = true
 	b.runHook = hook
 	b.runUi = ui
-	return testBuilderArtifact
+
+	if !b.nilRunResult {
+		return testBuilderArtifact
+	} else {
+		return nil
+	}
 }
 
 func (b *testBuilder) Cancel() {
@@ -73,6 +80,11 @@ func TestBuilderRPC(t *testing.T) {
 
 		assert.Equal(artifact.Id(), testBuilderArtifact.Id(), "should have artifact Id")
 	}
+
+	// Test run with nil result
+	b.nilRunResult = true
+	artifact = bClient.Run(ui, hook)
+	assert.Nil(artifact, "should be nil")
 
 	// Test Cancel
 	bClient.Cancel()

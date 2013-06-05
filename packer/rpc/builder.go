@@ -84,7 +84,12 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		panic(err)
 	}
 
-	client, err := rpc.Dial("tcp", <-artifactAddress)
+	address := <-artifactAddress
+	if address == "" {
+		return nil
+	}
+
+	client, err := rpc.Dial("tcp", address)
 	if err != nil {
 		panic(err)
 	}
@@ -127,12 +132,16 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 		hook := Hook(client)
 		ui := &Ui{client}
 		artifact := b.builder.Run(ui, hook)
+		responseAddress := ""
 
-		// Wrap the artifact
-		server := rpc.NewServer()
-		RegisterArtifact(server, artifact)
+		if artifact != nil {
+			// Wrap the artifact
+			server := rpc.NewServer()
+			RegisterArtifact(server, artifact)
+			responseAddress = serveSingleConn(server)
+		}
 
-		responseWriter.Encode(&BuilderRunResponse{serveSingleConn(server)})
+		responseWriter.Encode(&BuilderRunResponse{responseAddress})
 	}()
 
 	return nil
