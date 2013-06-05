@@ -46,7 +46,7 @@ func (s *stepRun) Cleanup(state map[string]interface{}) {
 	// If we started the machine... stop it.
 	if s.vmxPath != "" {
 		ui.Say("Stopping virtual machine...")
-		cmd := exec.Command(vmrun_path, "-T", "fusion", "start", s.vmxPath, "gui")
+		cmd := exec.Command(vmrun_path, "-T", "fusion", "stop", s.vmxPath, "hard")
 		if err := cmd.Run(); err != nil {
 			ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
 		}
