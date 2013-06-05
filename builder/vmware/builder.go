@@ -49,6 +49,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepCreateDisk{},
 		&stepCreateVMX{},
 		&stepHTTPServer{},
+		&stepRun{},
 	}
 
 	// Setup the state bag
