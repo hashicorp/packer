@@ -17,7 +17,7 @@ import (
 //
 // Produces:
 //   http_port int - The port the HTTP server started on.
-type stepHTTPServer struct{
+type stepHTTPServer struct {
 	l net.Listener
 }
 

@@ -14,12 +14,13 @@ type Builder struct {
 }
 
 type config struct {
-	DiskName  string `mapstructure:"vmdk_name"`
-	ISOUrl    string `mapstructure:"iso_url"`
-	VMName    string `mapstructure:"vm_name"`
-	OutputDir string `mapstructure:"output_directory"`
-	HTTPDir   string `mapstructure:"http_directory"`
+	DiskName    string   `mapstructure:"vmdk_name"`
+	ISOUrl      string   `mapstructure:"iso_url"`
+	VMName      string   `mapstructure:"vm_name"`
+	OutputDir   string   `mapstructure:"output_directory"`
+	HTTPDir     string   `mapstructure:"http_directory"`
 	BootCommand []string `mapstructure:"boot_command"`
+	BootWait    uint     `mapstructure:"boot_wait"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {

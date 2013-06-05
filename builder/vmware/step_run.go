@@ -5,21 +5,24 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
+	"time"
 )
 
 // This step runs the created virtual machine.
 //
 // Uses:
+//   config *config
 //   ui     packer.Ui
 //   vmx_path string
 //
 // Produces:
 //   <nothing>
-type stepRun struct{
+type stepRun struct {
 	vmxPath string
 }
 
 func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
+	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
 	vmxPath := state["vmx_path"].(string)
 
@@ -34,6 +37,12 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 
 	// Set the VMX path so that we know we started the machine
 	s.vmxPath = vmxPath
+
+	// Wait the wait amount
+	if config.BootWait > 0 {
+		ui.Say(fmt.Sprintf("Waiting %d seconds for boot...", config.BootWait))
+		time.Sleep(config.BootWait * time.Second)
+	}
 
 	return multistep.ActionContinue
 }
