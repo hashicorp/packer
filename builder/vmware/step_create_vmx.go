@@ -17,6 +17,14 @@ type vmxTemplateData struct {
 	VNCPort  uint
 }
 
+// This step creates the VMX file for the VM.
+//
+// Uses:
+//   config *config
+//   ui     packer.Ui
+//
+// Produces:
+//   vnc_port uint - The port the VM is configured to listen on for VNC.
 type stepCreateVMX struct{}
 
 func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {

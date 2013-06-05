@@ -19,6 +19,7 @@ type config struct {
 	VMName    string `mapstructure:"vm_name"`
 	OutputDir string `mapstructure:"output_directory"`
 	HTTPDir   string `mapstructure:"http_directory"`
+	BootCommand []string `mapstructure:"boot_command"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
