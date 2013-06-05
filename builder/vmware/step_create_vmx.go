@@ -24,6 +24,7 @@ type vmxTemplateData struct {
 //   ui     packer.Ui
 //
 // Produces:
+//   vmx_path string - The path to the VMX file.
 //   vnc_port uint - The port the VM is configured to listen on for VNC.
 type stepCreateVMX struct{}
 
@@ -51,6 +52,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	t := template.Must(template.New("vmx").Parse(DefaultVMXTemplate))
 	t.Execute(f, tplData)
 
+	state["vmx_path"] = vmx_path
 	state["vnc_port"] = vncPort
 
 	return multistep.ActionContinue

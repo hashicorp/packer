@@ -8,6 +8,14 @@ import (
 	"path/filepath"
 )
 
+// This step creates the virtual disks for the VM.
+//
+// Uses:
+//   config *config
+//   ui     packer.Ui
+//
+// Produces:
+//   <nothing>
 type stepCreateDisk struct{}
 
 func (stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
