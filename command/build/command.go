@@ -183,7 +183,12 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	env.Ui().Say("\n==> The build completed! The artifacts created were:")
 	for name, artifact := range artifacts {
 		env.Ui().Say(fmt.Sprintf("--> %s:", name))
-		env.Ui().Say(artifact.String())
+
+		if artifact != nil {
+			env.Ui().Say(artifact.String())
+		} else {
+			env.Ui().Say("<nothing>")
+		}
 	}
 
 	return 0
