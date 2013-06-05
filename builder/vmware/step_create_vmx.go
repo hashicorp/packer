@@ -14,6 +14,7 @@ type vmxTemplateData struct {
 	GuestOS  string
 	DiskName string
 	ISOPath  string
+	VNCPort  uint
 }
 
 type stepCreateVMX struct{}
@@ -29,15 +30,20 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	var vncPort uint = 5900
+
 	tplData := &vmxTemplateData{
 		config.VMName,
 		"ubuntu-64",
 		config.DiskName,
 		config.ISOUrl,
+		vncPort,
 	}
 
 	t := template.Must(template.New("vmx").Parse(DefaultVMXTemplate))
 	t.Execute(f, tplData)
+
+	state["vnc_port"] = vncPort
 
 	return multistep.ActionContinue
 }
@@ -104,6 +110,8 @@ powerType.suspend = "soft"
 proxyApps.publishToHost = "FALSE"
 replay.filename = ""
 replay.supported = "FALSE"
+RemoteDisplay.vnc.enabled = "TRUE"
+RemoteDisplay.vnc.port = "{{ .VNCPort }}"
 scsi0.pciSlotNumber = "16"
 scsi0.present = "TRUE"
 scsi0.virtualDev = "lsilogic"
