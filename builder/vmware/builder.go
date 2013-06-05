@@ -18,6 +18,7 @@ type config struct {
 	ISOUrl    string `mapstructure:"iso_url"`
 	VMName    string `mapstructure:"vm_name"`
 	OutputDir string `mapstructure:"output_directory"`
+	HTTPDir   string `mapstructure:"http_directory"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
@@ -46,6 +47,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepPrepareOutputDir{},
 		&stepCreateDisk{},
 		&stepCreateVMX{},
+		&stepHTTPServer{},
 	}
 
 	// Setup the state bag
