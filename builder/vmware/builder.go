@@ -22,6 +22,8 @@ type config struct {
 	HTTPDir     string   `mapstructure:"http_directory"`
 	BootCommand []string `mapstructure:"boot_command"`
 	BootWait    uint     `mapstructure:"boot_wait"`
+	SSHUser     string   `mapstructure:"ssh_user"`
+	SSHPassword string   `mapstructure:"ssh_password"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
@@ -53,6 +55,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepHTTPServer{},
 		&stepRun{},
 		&stepTypeBootCommand{},
+		&stepWaitForIP{},
 	}
 
 	// Setup the state bag
