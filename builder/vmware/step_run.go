@@ -41,9 +41,9 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	}
 
 	// Wait the wait amount
-	if config.BootWait > 0 {
-		ui.Say(fmt.Sprintf("Waiting %d seconds for boot...", config.BootWait))
-		time.Sleep(time.Duration(config.BootWait) * time.Second)
+	if int64(config.BootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait.String()))
+		time.Sleep(config.BootWait)
 	}
 
 	return multistep.ActionContinue

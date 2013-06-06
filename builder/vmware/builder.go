@@ -22,11 +22,12 @@ type config struct {
 	OutputDir      string   `mapstructure:"output_directory"`
 	HTTPDir        string   `mapstructure:"http_directory"`
 	BootCommand    []string `mapstructure:"boot_command"`
-	BootWait       uint     `mapstructure:"boot_wait"`
-	SSHUser        string   `mapstructure:"ssh_user"`
-	SSHPassword    string   `mapstructure:"ssh_password"`
+	BootWait       time.Duration
+	SSHUser        string `mapstructure:"ssh_user"`
+	SSHPassword    string `mapstructure:"ssh_password"`
 	SSHWaitTimeout time.Duration
 
+	RawBootWait       string `mapstructure:"boot_wait"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
 }
 
@@ -46,6 +47,13 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = "vmware"
+	}
+
+	if b.config.RawBootWait != "" {
+		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
+		if err != nil {
+			return
+		}
 	}
 
 	if b.config.RawSSHWaitTimeout == "" {
