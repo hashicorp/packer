@@ -21,16 +21,17 @@ type Builder struct {
 }
 
 type config struct {
-	DiskName       string   `mapstructure:"vmdk_name"`
-	ISOUrl         string   `mapstructure:"iso_url"`
-	VMName         string   `mapstructure:"vm_name"`
-	OutputDir      string   `mapstructure:"output_directory"`
-	HTTPDir        string   `mapstructure:"http_directory"`
-	BootCommand    []string `mapstructure:"boot_command"`
-	BootWait       time.Duration
-	SSHUser        string `mapstructure:"ssh_username"`
-	SSHPassword    string `mapstructure:"ssh_password"`
-	SSHWaitTimeout time.Duration
+	DiskName        string   `mapstructure:"vmdk_name"`
+	ISOUrl          string   `mapstructure:"iso_url"`
+	VMName          string   `mapstructure:"vm_name"`
+	OutputDir       string   `mapstructure:"output_directory"`
+	HTTPDir         string   `mapstructure:"http_directory"`
+	BootCommand     []string `mapstructure:"boot_command"`
+	BootWait        time.Duration
+	ShutdownCommand string `mapstructure:"shutdown_command"`
+	SSHUser         string `mapstructure:"ssh_username"`
+	SSHPassword     string `mapstructure:"ssh_password"`
+	SSHWaitTimeout  time.Duration
 
 	RawBootWait       string `mapstructure:"boot_wait"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`

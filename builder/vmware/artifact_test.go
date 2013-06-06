@@ -1,8 +1,8 @@
 package vmware
 
 import (
-	"testing"
 	"github.com/mitchellh/packer/packer"
+	"testing"
 )
 
 func TestArtifact_Impl(t *testing.T) {

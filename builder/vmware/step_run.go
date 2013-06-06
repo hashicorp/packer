@@ -62,9 +62,13 @@ func (s *stepRun) Cleanup(state map[string]interface{}) {
 			time.Sleep(sleepTime)
 		}
 
-		ui.Say("Stopping virtual machine...")
-		if err := driver.Stop(s.vmxPath); err != nil {
-			ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
+		// See if it is running
+		running, _ := driver.IsRunning(s.vmxPath)
+		if running {
+			ui.Say("Stopping virtual machine...")
+			if err := driver.Stop(s.vmxPath); err != nil {
+				ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
+			}
 		}
 	}
 }
