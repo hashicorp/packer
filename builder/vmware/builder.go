@@ -12,6 +12,7 @@ const BuilderId = "mitchellh.vmware"
 
 type Builder struct {
 	config config
+	driver Driver
 	runner multistep.Runner
 }
 
@@ -65,6 +66,11 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		return
 	}
 
+	b.driver, err = b.newDriver()
+	if err != nil {
+		return
+	}
+
 	return nil
 }
 
@@ -83,6 +89,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	// Setup the state bag
 	state := make(map[string]interface{})
 	state["config"] = &b.config
+	state["driver"] = b.driver
 	state["hook"] = hook
 	state["ui"] = ui
 
@@ -98,4 +105,9 @@ func (b *Builder) Cancel() {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
 	}
+}
+
+func (b *Builder) newDriver() (Driver, error) {
+	fusionAppPath := "/Applications/VMware Fusion.app"
+	return &Fusion5Driver{fusionAppPath}, nil
 }

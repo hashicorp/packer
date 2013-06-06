@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -12,6 +11,7 @@ import (
 //
 // Uses:
 //   config *config
+//   driver Driver
 //   ui     packer.Ui
 //
 // Produces:
@@ -23,14 +23,12 @@ func (stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
 	// TODO(mitchellh): Capture error output in case things go wrong to report it
 
 	config := state["config"].(*config)
+	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
 
-	vdisk_manager := "/Applications/VMware Fusion.app/Contents/Library/vmware-vdiskmanager"
-	output := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
-
 	ui.Say("Creating virtual machine disk")
-	cmd := exec.Command(vdisk_manager, "-c", "-s", "40000M", "-a", "lsilogic", "-t", "1", output)
-	if err := cmd.Run(); err != nil {
+	output := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
+	if err := driver.CreateDisk(output, "40000M"); err != nil {
 		ui.Error(fmt.Sprintf("Error creating VMware disk: %s", err))
 		return multistep.ActionHalt
 	}
