@@ -24,64 +24,47 @@ import (
 //
 // Produces:
 //   communicator packer.Communicator
-type stepWaitForSSH struct{}
+type stepWaitForSSH struct {
+	cancel bool
+	conn   net.Conn
+}
 
 func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
-	vmxPath := state["vmx_path"].(string)
 
-	ui.Say("Waiting for SSH to become available...")
 	var comm packer.Communicator
-	for {
-		time.Sleep(5 * time.Second)
+	var err error
 
-		// First we wait for the IP to become available...
-		log.Println("Lookup up IP information...")
-		ipLookup, err := s.dhcpLeaseLookup(vmxPath)
+	waitDone := make(chan bool, 1)
+	go func() {
+		comm, err = s.waitForSSH(state)
+		waitDone <- true
+	}()
+
+	select {
+	case <-waitDone:
 		if err != nil {
-			log.Printf("Can't lookup via DHCP lease: %s", err)
-		}
-
-		ip, err := ipLookup.GuestIP()
-		if err != nil {
-			log.Printf("IP lookup failed: %s", err)
-			continue
-		}
-
-		log.Printf("Detected IP: %s", ip)
-
-		// Attempt to connect to SSH port
-		nc, err := net.Dial("tcp", fmt.Sprintf("%s:22", ip))
-		if err != nil {
-			log.Printf("TCP connection to SSH ip/port failed: %s", err)
-			continue
-		}
-
-		// Then we attempt to connect via SSH
-		sshConfig := &gossh.ClientConfig{
-			User: config.SSHUser,
-			Auth: []gossh.ClientAuth{
-				gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),
-			},
-		}
-
-		comm, err = ssh.New(nc, sshConfig)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error connecting via SSH: %s", err))
+			ui.Error(fmt.Sprintf("Error waiting for SSH: %s", err))
 			return multistep.ActionHalt
 		}
 
-		ui.Say("Connected via SSH!")
-		break
+		state["communicator"] = comm
+	case <-time.After(config.SSHWaitTimeout):
+		ui.Error("Timeout waiting for SSH.")
+		s.cancel = true
+		return multistep.ActionHalt
 	}
-
-	state["communicator"] = comm
 
 	return multistep.ActionContinue
 }
 
-func (s *stepWaitForSSH) Cleanup(map[string]interface{}) {}
+func (s *stepWaitForSSH) Cleanup(map[string]interface{}) {
+	if s.conn != nil {
+		s.conn.Close()
+		s.conn = nil
+	}
+}
 
 // Reads the network information for lookup via DHCP.
 func (s *stepWaitForSSH) dhcpLeaseLookup(vmxPath string) (GuestIPFinder, error) {
@@ -107,4 +90,70 @@ func (s *stepWaitForSSH) dhcpLeaseLookup(vmxPath string) (GuestIPFinder, error) 
 	}
 
 	return &DHCPLeaseGuestLookup{"vmnet8", macAddress}, nil
+}
+
+// This blocks until SSH becomes available, and sends the communicator
+// on the given channel.
+func (s *stepWaitForSSH) waitForSSH(state map[string]interface{}) (packer.Communicator, error) {
+	config := state["config"].(*config)
+	ui := state["ui"].(packer.Ui)
+	vmxPath := state["vmx_path"].(string)
+
+	ui.Say("Waiting for SSH to become available...")
+	var comm packer.Communicator
+	var nc net.Conn
+	for {
+		if nc != nil {
+			nc.Close()
+		}
+
+		time.Sleep(5 * time.Second)
+
+		if s.cancel {
+			log.Println("SSH wait cancelled. Exiting loop.")
+			return nil, errors.New("SSH wait cancelled")
+		}
+
+		// First we wait for the IP to become available...
+		log.Println("Lookup up IP information...")
+		ipLookup, err := s.dhcpLeaseLookup(vmxPath)
+		if err != nil {
+			log.Printf("Can't lookup via DHCP lease: %s", err)
+		}
+
+		ip, err := ipLookup.GuestIP()
+		if err != nil {
+			log.Printf("IP lookup failed: %s", err)
+			continue
+		}
+
+		log.Printf("Detected IP: %s", ip)
+
+		// Attempt to connect to SSH port
+		nc, err = net.Dial("tcp", fmt.Sprintf("%s:22", ip))
+		if err != nil {
+			log.Printf("TCP connection to SSH ip/port failed: %s", err)
+			continue
+		}
+
+		// Then we attempt to connect via SSH
+		sshConfig := &gossh.ClientConfig{
+			User: config.SSHUser,
+			Auth: []gossh.ClientAuth{
+				gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),
+			},
+		}
+
+		comm, err = ssh.New(nc, sshConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		ui.Say("Connected via SSH!")
+		break
+	}
+
+	// Store the connection so we can close it later
+	s.conn = nc
+	return comm, nil
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"time"
 )
 
 const BuilderId = "mitchellh.vmware"
@@ -15,15 +16,18 @@ type Builder struct {
 }
 
 type config struct {
-	DiskName    string   `mapstructure:"vmdk_name"`
-	ISOUrl      string   `mapstructure:"iso_url"`
-	VMName      string   `mapstructure:"vm_name"`
-	OutputDir   string   `mapstructure:"output_directory"`
-	HTTPDir     string   `mapstructure:"http_directory"`
-	BootCommand []string `mapstructure:"boot_command"`
-	BootWait    uint     `mapstructure:"boot_wait"`
-	SSHUser     string   `mapstructure:"ssh_user"`
-	SSHPassword string   `mapstructure:"ssh_password"`
+	DiskName       string   `mapstructure:"vmdk_name"`
+	ISOUrl         string   `mapstructure:"iso_url"`
+	VMName         string   `mapstructure:"vm_name"`
+	OutputDir      string   `mapstructure:"output_directory"`
+	HTTPDir        string   `mapstructure:"http_directory"`
+	BootCommand    []string `mapstructure:"boot_command"`
+	BootWait       uint     `mapstructure:"boot_wait"`
+	SSHUser        string   `mapstructure:"ssh_user"`
+	SSHPassword    string   `mapstructure:"ssh_password"`
+	SSHWaitTimeout time.Duration
+
+	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
@@ -42,6 +46,15 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = "vmware"
+	}
+
+	if b.config.RawSSHWaitTimeout == "" {
+		b.config.RawSSHWaitTimeout = "20m"
+	}
+
+	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
+	if err != nil {
+		return
 	}
 
 	return nil
