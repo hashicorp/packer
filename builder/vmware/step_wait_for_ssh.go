@@ -1,11 +1,15 @@
 package vmware
 
 import (
+	gossh "code.google.com/p/go.crypto/ssh"
 	"errors"
+	"fmt"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"time"
 )
@@ -19,19 +23,21 @@ import (
 //   vmx_path string
 //
 // Produces:
-//   <nothing>
+//   communicator packer.Communicator
 type stepWaitForSSH struct{}
 
 func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction {
+	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
 	vmxPath := state["vmx_path"].(string)
 
 	ui.Say("Waiting for SSH to become available...")
+	var comm packer.Communicator
 	for {
 		time.Sleep(5 * time.Second)
 
-		log.Println("Lookup up IP information...")
 		// First we wait for the IP to become available...
+		log.Println("Lookup up IP information...")
 		ipLookup, err := s.dhcpLeaseLookup(vmxPath)
 		if err != nil {
 			log.Printf("Can't lookup via DHCP lease: %s", err)
@@ -44,7 +50,33 @@ func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction 
 		}
 
 		log.Printf("Detected IP: %s", ip)
+
+		// Attempt to connect to SSH port
+		nc, err := net.Dial("tcp", fmt.Sprintf("%s:22", ip))
+		if err != nil {
+			log.Printf("TCP connection to SSH ip/port failed: %s", err)
+			continue
+		}
+
+		// Then we attempt to connect via SSH
+		sshConfig := &gossh.ClientConfig{
+			User: config.SSHUser,
+			Auth: []gossh.ClientAuth{
+				gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),
+			},
+		}
+
+		comm, err = ssh.New(nc, sshConfig)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error connecting via SSH: %s", err))
+			return multistep.ActionHalt
+		}
+
+		ui.Say("Connected via SSH!")
+		break
 	}
+
+	state["communicator"] = comm
 
 	return multistep.ActionContinue
 }
