@@ -4,6 +4,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
 const BuilderId = "mitchellh.vmware"
@@ -68,4 +69,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 }
 
 func (b *Builder) Cancel() {
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
 }
