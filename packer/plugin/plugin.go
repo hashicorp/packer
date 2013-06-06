@@ -16,6 +16,7 @@ import (
 	"net/rpc"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -23,6 +24,11 @@ import (
 // This serves a single RPC connection on the given RPC server on
 // a random port.
 func serve(server *rpc.Server) (err error) {
+	// If there is no explicit number of Go threads to use, then set it
+	if os.Getenv("GOMAXPROCS") == "" {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
+
 	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
 	if err != nil {
 		return
