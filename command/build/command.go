@@ -128,16 +128,16 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	var wg sync.WaitGroup
 	artifacts := make(map[string]packer.Artifact)
 	for _, b := range builds {
-		log.Printf("Starting build run: %s", b.Name())
-
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
 
 		// Run the build in a goroutine
-		go func() {
+		go func(b packer.Build) {
 			defer wg.Done()
+
+			log.Printf("Starting build run: %s", b.Name())
 			artifacts[b.Name()] = b.Run(buildUis[b.Name()])
-		}()
+		}(b)
 	}
 
 	// Handle signals
