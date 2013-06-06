@@ -41,6 +41,7 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	ui := state["ui"].(packer.Ui)
 	vncPort := state["vnc_port"].(uint)
 
+	// Connect to VNC
 	ui.Say("Connecting to VM via VNC")
 	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", vncPort))
 	if err != nil {
@@ -58,8 +59,16 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
+	// Determine the host IP
+	ipFinder := &IfconfigIPFinder{"vmnet8"}
+	hostIp, err := ipFinder.HostIP()
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error detecting host IP: %s", err))
+		return multistep.ActionHalt
+	}
+
 	tplData := &bootCommandTemplateData{
-		"127.0.0.1",
+		hostIp,
 		httpPort,
 		config.VMName,
 	}

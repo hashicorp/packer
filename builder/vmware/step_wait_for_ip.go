@@ -19,7 +19,7 @@ func (stepWaitForIP) Run(state map[string]interface{}) multistep.StepAction {
 	ui := state["ui"].(packer.Ui)
 
 	ui.Say("Waiting for SSH to become available...")
-	select{}
+	select {}
 
 	return multistep.ActionContinue
 }
