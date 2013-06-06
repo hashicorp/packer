@@ -51,6 +51,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepCreateVMX{},
 		&stepHTTPServer{},
 		&stepRun{},
+		&stepTypeBootCommand{},
 	}
 
 	// Setup the state bag
