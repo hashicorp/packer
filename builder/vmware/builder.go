@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -50,10 +51,11 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		b.config.OutputDir = "vmware"
 	}
 
+	errors := make([]error, 0)
 	if b.config.RawBootWait != "" {
 		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
 		if err != nil {
-			return
+			errors = append(errors, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
 	}
 
@@ -63,12 +65,16 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
 	if err != nil {
-		return
+		errors = append(errors, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
 	b.driver, err = b.newDriver()
 	if err != nil {
-		return
+		errors = append(errors, fmt.Errorf("Failed creating VMware driver: %s", err))
+	}
+
+	if len(errors) > 0 {
+		return &packer.MultiError{errors}
 	}
 
 	return nil
