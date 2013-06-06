@@ -8,6 +8,8 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
+		"iso_url":      "foo",
+		"ssh_username": "foo",
 	}
 }
 
@@ -60,6 +62,41 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 
 	if b.config.VMName != "packer" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
+	}
+}
+
+func TestBuilderPrepare_ISOUrl(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test iso_url
+	config["iso_url"] = ""
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	config["iso_url"] = "exists"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_SSHUser(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["ssh_username"] = ""
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	config["ssh_username"] = "exists"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 }
 

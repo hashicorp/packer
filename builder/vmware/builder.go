@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
@@ -25,7 +26,7 @@ type config struct {
 	HTTPDir        string   `mapstructure:"http_directory"`
 	BootCommand    []string `mapstructure:"boot_command"`
 	BootWait       time.Duration
-	SSHUser        string `mapstructure:"ssh_user"`
+	SSHUser        string `mapstructure:"ssh_username"`
 	SSHPassword    string `mapstructure:"ssh_password"`
 	SSHWaitTimeout time.Duration
 
@@ -51,11 +52,21 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		b.config.OutputDir = "vmware"
 	}
 
-	errors := make([]error, 0)
+	// Accumulate any errors
+	errs := make([]error, 0)
+
+	if b.config.ISOUrl == "" {
+		errs = append(errs, errors.New("An iso_url must be specified."))
+	}
+
+	if b.config.SSHUser == "" {
+		errs = append(errs, errors.New("An ssh_username must be specified."))
+	}
+
 	if b.config.RawBootWait != "" {
 		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("Failed parsing boot_wait: %s", err))
+			errs = append(errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
 	}
 
@@ -65,16 +76,16 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
 	if err != nil {
-		errors = append(errors, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
+		errs = append(errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
 	b.driver, err = b.newDriver()
 	if err != nil {
-		errors = append(errors, fmt.Errorf("Failed creating VMware driver: %s", err))
+		errs = append(errs, fmt.Errorf("Failed creating VMware driver: %s", err))
 	}
 
-	if len(errors) > 0 {
-		return &packer.MultiError{errors}
+	if len(errs) > 0 {
+		return &packer.MultiError{errs}
 	}
 
 	return nil
