@@ -42,6 +42,8 @@ func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction 
 		waitDone <- true
 	}()
 
+	log.Printf("Waiting for SSH, up to timeout: %s", config.SSHWaitTimeout.String())
+
 	select {
 	case <-waitDone:
 		if err != nil {
