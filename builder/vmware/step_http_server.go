@@ -25,23 +25,26 @@ func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction 
 	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
 
-	httpPort := 8080
-	httpAddr := fmt.Sprintf(":%d", httpPort)
+	httpPort := 0
+	if config.HTTPDir != "" {
+		httpPort = 8080
+		httpAddr := fmt.Sprintf(":%d", httpPort)
 
-	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", httpPort))
+		ui.Say(fmt.Sprintf("Starting HTTP server on port %d", httpPort))
 
-	// Start the TCP listener
-	var err error
-	s.l, err = net.Listen("tcp", httpAddr)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error starting HTTP server: %s", err))
-		return multistep.ActionHalt
+		// Start the TCP listener
+		var err error
+		s.l, err = net.Listen("tcp", httpAddr)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error starting HTTP server: %s", err))
+			return multistep.ActionHalt
+		}
+
+		// Start the HTTP server and run it in the background
+		fileServer := http.FileServer(http.Dir(config.HTTPDir))
+		server := &http.Server{Addr: httpAddr, Handler: fileServer}
+		go server.Serve(s.l)
 	}
-
-	// Start the HTTP server and run it in the background
-	fileServer := http.FileServer(http.Dir(config.HTTPDir))
-	server := &http.Server{Addr: httpAddr, Handler: fileServer}
-	go server.Serve(s.l)
 
 	// Save the address into the state so it can be accessed in the future
 	state["http_port"] = httpPort
