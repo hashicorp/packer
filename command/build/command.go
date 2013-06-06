@@ -137,6 +137,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 			log.Printf("Starting build run: %s", b.Name())
 			artifacts[b.Name()] = b.Run(buildUis[b.Name()])
+			log.Printf("Build finished: %s", b.Name())
 		}(b)
 	}
 
@@ -163,6 +164,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 				log.Printf("Stopping build: %s", b.Name())
 				b.Cancel()
+				log.Printf("Build cancelled: %s", b.Name())
 			}(b)
 		}
 
@@ -171,8 +173,12 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	// Wait for both the builds to complete and the interrupt handler,
 	// if it is interrupted.
+	log.Printf("Waiting on builds to complete...")
 	wg.Wait()
+
+	log.Printf("Builds completed. Waiting on interrupt barrier...")
 	interruptWg.Wait()
+	log.Printf("Interrupt barrier passed.")
 
 	if interrupted {
 		env.Ui().Say("Cleanly cancelled builds after being interrupted.")
