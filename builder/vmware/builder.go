@@ -29,12 +29,14 @@ type config struct {
 	BootCommand     []string `mapstructure:"boot_command"`
 	BootWait        time.Duration
 	ShutdownCommand string `mapstructure:"shutdown_command"`
+	ShutdownTimeout time.Duration
 	SSHUser         string `mapstructure:"ssh_username"`
 	SSHPassword     string `mapstructure:"ssh_password"`
 	SSHWaitTimeout  time.Duration
 
-	RawBootWait       string `mapstructure:"boot_wait"`
-	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
+	RawBootWait        string `mapstructure:"boot_wait"`
+	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
+	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 }
 
 func (b *Builder) Prepare(raw interface{}) (err error) {
@@ -73,6 +75,15 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		}
 	}
 
+	if b.config.RawShutdownTimeout == "" {
+		b.config.RawShutdownTimeout = "5m"
+	}
+
+	b.config.ShutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
+	}
+
 	if b.config.RawSSHWaitTimeout == "" {
 		b.config.RawSSHWaitTimeout = "20m"
 	}
@@ -104,6 +115,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepTypeBootCommand{},
 		&stepWaitForSSH{},
 		&stepProvision{},
+		&stepShutdown{},
 	}
 
 	// Setup the state bag
