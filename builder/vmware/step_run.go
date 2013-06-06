@@ -18,7 +18,8 @@ import (
 // Produces:
 //   <nothing>
 type stepRun struct {
-	vmxPath string
+	bootTime time.Time
+	vmxPath  string
 }
 
 func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
@@ -28,15 +29,16 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 
 	vmrun_path := "/Applications/VMware Fusion.app/Contents/Library/vmrun"
 
+	// Set the VMX path so that we know we started the machine
+	s.bootTime = time.Now()
+	s.vmxPath = vmxPath
+
 	ui.Say("Starting virtual machine...")
-	cmd := exec.Command(vmrun_path, "-T", "fusion", "start", vmxPath, "gui")
+	cmd := exec.Command(vmrun_path, "-T", "fusion", "start", s.vmxPath, "gui")
 	if err := cmd.Run(); err != nil {
 		ui.Error(fmt.Sprintf("Error starting VM: %s", err))
 		return multistep.ActionHalt
 	}
-
-	// Set the VMX path so that we know we started the machine
-	s.vmxPath = vmxPath
 
 	// Wait the wait amount
 	if config.BootWait > 0 {
@@ -54,6 +56,13 @@ func (s *stepRun) Cleanup(state map[string]interface{}) {
 
 	// If we started the machine... stop it.
 	if s.vmxPath != "" {
+		// If we started it less than 5 seconds ago... wait.
+		sinceBootTime := time.Since(s.bootTime)
+		waitBootTime := 5 * time.Second
+		if sinceBootTime < waitBootTime {
+			time.Sleep(waitBootTime - sinceBootTime)
+		}
+
 		ui.Say("Stopping virtual machine...")
 		cmd := exec.Command(vmrun_path, "-T", "fusion", "stop", s.vmxPath, "hard")
 		if err := cmd.Run(); err != nil {
