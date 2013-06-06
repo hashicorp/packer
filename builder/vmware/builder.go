@@ -7,6 +7,8 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -114,7 +116,28 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	b.runner = &multistep.BasicRunner{Steps: steps}
 	b.runner.Run(state)
 
-	return nil
+	// If we were interrupted or cancelled, then just exit.
+	if _, ok := state[multistep.StateCancelled]; ok {
+		return nil
+	}
+
+	if _, ok := state[multistep.StateHalted]; ok {
+		return nil
+	}
+
+	// Compile the artifact list
+	files := make([]string, 0, 10)
+	visit := func(path string, info os.FileInfo, err error) error {
+		files = append(files, path)
+		return err
+	}
+
+	if err := filepath.Walk(b.config.OutputDir, visit); err != nil {
+		ui.Error(fmt.Sprintf("Error collecting result files: %s", err))
+		return nil
+	}
+
+	return &Artifact{b.config.OutputDir, files}
 }
 
 func (b *Builder) Cancel() {
