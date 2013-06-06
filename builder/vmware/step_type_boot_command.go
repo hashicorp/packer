@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/go-vnc"
 	"github.com/mitchellh/multistep"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"text/template"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -15,10 +17,17 @@ import (
 
 const KeyLeftShift uint32 = 0xFFE1
 
+type bootCommandTemplateData struct {
+	HTTPIP   string
+	HTTPPort int
+	Name     string
+}
+
 // This step "types" the boot command into the VM over VNC.
 //
 // Uses:
 //   config *config
+//   http_port int
 //   ui     packer.Ui
 //   vnc_port uint
 //
@@ -28,6 +37,7 @@ type stepTypeBootCommand struct{}
 
 func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
+	httpPort := state["http_port"].(int)
 	ui := state["ui"].(packer.Ui)
 	vncPort := state["vnc_port"].(uint)
 
@@ -46,10 +56,21 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	}
 	defer c.Close()
 
-	log.Printf("Connecting to VNC desktop: %s", c.DesktopName)
+	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
+
+	tplData := &bootCommandTemplateData{
+		"127.0.0.1",
+		httpPort,
+		config.VMName,
+	}
+
 	ui.Say("Typing the boot command over VNC...")
 	for _, command := range config.BootCommand {
-		vncSendString(c, command)
+		var buf bytes.Buffer
+		t := template.Must(template.New("boot").Parse(command))
+		t.Execute(&buf, tplData)
+
+		vncSendString(c, buf.String())
 	}
 
 	return multistep.ActionContinue
@@ -63,10 +84,19 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	special["<return>"] = 0xFF0D
 	special["<esc>"] = 0xFF1B
 
+	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
+
 	// TODO(mitchellh): Ripe for optimizations of some point, perhaps.
 	for len(original) > 0 {
 		var keyCode uint32
 		keyShift := false
+
+		if strings.HasPrefix(original, "<wait>") {
+			log.Printf("Special code '<wait>' found, sleeping one second")
+			time.Sleep(1 * time.Second)
+			original = original[len("<wait>"):]
+			continue
+		}
 
 		for specialCode, specialValue := range special {
 			if strings.HasPrefix(original, specialCode) {
@@ -81,7 +111,7 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			r, size := utf8.DecodeRuneInString(original)
 			original = original[size:]
 			keyCode = uint32(r)
-			keyShift = unicode.IsUpper(r)
+			keyShift = unicode.IsUpper(r) || strings.ContainsRune(shiftedChars, r)
 
 			log.Printf("Sending char '%c', code %d, shift %v", r, keyCode, keyShift)
 		}
