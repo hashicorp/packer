@@ -158,12 +158,12 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		for _, b := range builds {
 			wg.Add(1)
 
-			go func() {
+			go func(b packer.Build) {
 				defer wg.Done()
 
 				log.Printf("Stopping build: %s", b.Name())
 				b.Cancel()
-			}()
+			}(b)
 		}
 
 		wg.Wait()
