@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -93,6 +94,7 @@ func (c *client) Start() (address string, err error) {
 
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
+	c.cmd.Env = append(c.cmd.Env, os.Environ()...)
 	c.cmd.Env = append(c.cmd.Env, env...)
 	c.cmd.Stderr = stderr
 	c.cmd.Stdout = stdout
