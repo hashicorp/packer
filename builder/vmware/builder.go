@@ -55,7 +55,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepHTTPServer{},
 		&stepRun{},
 		&stepTypeBootCommand{},
-		&stepWaitForIP{},
+		&stepWaitForSSH{},
 	}
 
 	// Setup the state bag
