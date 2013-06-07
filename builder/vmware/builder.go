@@ -26,6 +26,8 @@ type config struct {
 	VMName          string   `mapstructure:"vm_name"`
 	OutputDir       string   `mapstructure:"output_directory"`
 	HTTPDir         string   `mapstructure:"http_directory"`
+	HTTPPortMin     uint     `mapstructure:"http_port_min"`
+	HTTPPortMax     uint     `mapstructure:"http_port_max"`
 	BootCommand     []string `mapstructure:"boot_command"`
 	BootWait        time.Duration
 	ShutdownCommand string `mapstructure:"shutdown_command"`
@@ -55,6 +57,14 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		b.config.VMName = "packer"
 	}
 
+	if b.config.HTTPPortMin == 0 {
+		b.config.HTTPPortMin = 8000
+	}
+
+	if b.config.HTTPPortMax == 0 {
+		b.config.HTTPPortMax = 9000
+	}
+
 	if b.config.VNCPortMin == 0 {
 		b.config.VNCPortMin = 5900
 	}
@@ -69,6 +79,10 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	// Accumulate any errors
 	errs := make([]error, 0)
+
+	if b.config.HTTPPortMin > b.config.HTTPPortMax {
+		errs = append(errs, errors.New("http_port_min must be less than http_port_max"))
+	}
 
 	if b.config.ISOUrl == "" {
 		errs = append(errs, errors.New("An iso_url must be specified."))

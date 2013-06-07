@@ -19,7 +19,7 @@ const KeyLeftShift uint32 = 0xFFE1
 
 type bootCommandTemplateData struct {
 	HTTPIP   string
-	HTTPPort int
+	HTTPPort uint
 	Name     string
 }
 
@@ -37,7 +37,7 @@ type stepTypeBootCommand struct{}
 
 func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
-	httpPort := state["http_port"].(int)
+	httpPort := state["http_port"].(uint)
 	ui := state["ui"].(packer.Ui)
 	vncPort := state["vnc_port"].(uint)
 
