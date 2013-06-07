@@ -30,6 +30,7 @@ func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction 
 	var httpPort uint = 0
 	if config.HTTPDir == "" {
 		state["http_port"] = httpPort
+		return multistep.ActionContinue
 	}
 
 	// Find an available TCP port for our HTTP server
