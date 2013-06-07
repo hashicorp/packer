@@ -46,7 +46,7 @@ func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
 	var vncPort uint
 	portRange := int(config.VNCPortMax - config.VNCPortMin)
 	for {
-		vncPort = uint(rand.Intn(portRange) + portRange)
+		vncPort = uint(rand.Intn(portRange)) + config.VNCPortMin
 		log.Printf("Trying port: %d", vncPort)
 		l, err := net.Listen("tcp", fmt.Sprintf(":%d", vncPort))
 		if err == nil {
