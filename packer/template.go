@@ -3,6 +3,7 @@ package packer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 )
 
 // The rawTemplate struct represents the structure of a template read
@@ -31,15 +32,19 @@ type Template struct {
 // raw configuration. If requested, this is used to compile into a full
 // builder configuration at some point.
 type rawBuilderConfig struct {
-	builderType string
-	rawConfig   interface{}
+	Name string
+	Type string
+
+	rawConfig interface{}
 }
 
 // rawProvisionerConfig represents a raw, unprocessed provisioner configuration.
 // It contains the type of the provisioner as well as the raw configuration
 // that is handed to the provisioner for it to process.
 type rawProvisionerConfig struct {
-	pType     string
+	Type     string
+	Override map[string]interface{}
+
 	rawConfig interface{}
 }
 
@@ -65,8 +70,20 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 
 	// Gather all the builders
 	for i, v := range rawTpl.Builders {
-		rawType, ok := v["type"]
-		if !ok {
+		var raw rawBuilderConfig
+		if err := mapstructure.Decode(v, &raw); err != nil {
+			if merr, ok := err.(*mapstructure.Error); ok {
+				for _, err := range merr.Errors {
+					errors = append(errors, fmt.Errorf("builder %d: %s", i+1, err))
+				}
+			} else {
+				errors = append(errors, fmt.Errorf("builder %d: %s", i+1, err))
+			}
+
+			continue
+		}
+
+		if raw.Type == "" {
 			errors = append(errors, fmt.Errorf("builder %d: missing 'type'", i+1))
 			continue
 		}
@@ -74,54 +91,42 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		// Attempt to get the name of the builder. If the "name" key
 		// missing, use the "type" field, which is guaranteed to exist
 		// at this point.
-		rawName, ok := v["name"]
-		if !ok {
-			rawName = v["type"]
-		}
-
-		// Attempt to convert the name/type to strings, but error if we can't
-		name, ok := rawName.(string)
-		if !ok {
-			errors = append(errors, fmt.Errorf("builder %d: name must be a string", i+1))
-			continue
-		}
-
-		typeName, ok := rawType.(string)
-		if !ok {
-			errors = append(errors, fmt.Errorf("builder %d: type must be a string", i+1))
-			continue
+		if raw.Name == "" {
+			raw.Name = raw.Type
 		}
 
 		// Check if we already have a builder with this name and error if so
-		if _, ok := t.Builders[name]; ok {
-			errors = append(errors, fmt.Errorf("builder with name '%s' already exists", name))
+		if _, ok := t.Builders[raw.Name]; ok {
+			errors = append(errors, fmt.Errorf("builder with name '%s' already exists", raw.Name))
 			continue
 		}
 
-		t.Builders[name] = rawBuilderConfig{
-			typeName,
-			v,
-		}
+		raw.rawConfig = v
+
+		t.Builders[raw.Name] = raw
 	}
 
 	// Gather all the provisioners
 	for i, v := range rawTpl.Provisioners {
-		rawType, ok := v["type"]
-		if !ok {
+		raw := &t.Provisioners[i]
+		if err := mapstructure.Decode(v, raw); err != nil {
+			if merr, ok := err.(*mapstructure.Error); ok {
+				for _, err := range merr.Errors {
+					errors = append(errors, fmt.Errorf("provisioner %d: %s", i+1, err))
+				}
+			} else {
+				errors = append(errors, fmt.Errorf("provisioner %d: %s", i+1, err))
+			}
+
+			continue
+		}
+
+		if raw.Type == "" {
 			errors = append(errors, fmt.Errorf("provisioner %d: missing 'type'", i+1))
 			continue
 		}
 
-		typeName, ok := rawType.(string)
-		if !ok {
-			errors = append(errors, fmt.Errorf("provisioner %d: type must be a string", i+1))
-			continue
-		}
-
-		t.Provisioners[i] = rawProvisionerConfig{
-			typeName,
-			v,
-		}
+		raw.rawConfig = v
 	}
 
 	// If there were errors, we put it into a MultiError and return
@@ -168,13 +173,13 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		panic("no provisioner function")
 	}
 
-	builder, err := components.Builder(builderConfig.builderType)
+	builder, err := components.Builder(builderConfig.Type)
 	if err != nil {
 		return
 	}
 
 	if builder == nil {
-		err = fmt.Errorf("Builder type not found: %s", builderConfig.builderType)
+		err = fmt.Errorf("Builder type not found: %s", builderConfig.Type)
 		return
 	}
 
@@ -205,13 +210,13 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	provisioners := make([]coreBuildProvisioner, 0, len(t.Provisioners))
 	for _, rawProvisioner := range t.Provisioners {
 		var provisioner Provisioner
-		provisioner, err = components.Provisioner(rawProvisioner.pType)
+		provisioner, err = components.Provisioner(rawProvisioner.Type)
 		if err != nil {
 			return
 		}
 
 		if provisioner == nil {
-			err = fmt.Errorf("Provisioner type not found: %s", rawProvisioner.pType)
+			err = fmt.Errorf("Provisioner type not found: %s", rawProvisioner.Type)
 			return
 		}
 
