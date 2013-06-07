@@ -33,6 +33,8 @@ type config struct {
 	SSHUser         string `mapstructure:"ssh_username"`
 	SSHPassword     string `mapstructure:"ssh_password"`
 	SSHWaitTimeout  time.Duration
+	VNCPortMin      uint `mapstructure:"vnc_port_min"`
+	VNCPortMax      uint `mapstructure:"vnc_port_max"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -51,6 +53,14 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.VMName == "" {
 		b.config.VMName = "packer"
+	}
+
+	if b.config.VNCPortMin == 0 {
+		b.config.VNCPortMin = 5900
+	}
+
+	if b.config.VNCPortMax == 0 {
+		b.config.VNCPortMax = 6000
 	}
 
 	if b.config.OutputDir == "" {
@@ -93,6 +103,10 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
+	if b.config.VNCPortMin > b.config.VNCPortMax {
+		errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+	}
+
 	b.driver, err = b.newDriver()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed creating VMware driver: %s", err))
@@ -111,6 +125,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 		&stepCreateDisk{},
 		&stepCreateVMX{},
 		&stepHTTPServer{},
+		&stepConfigureVNC{},
 		&stepRun{},
 		&stepTypeBootCommand{},
 		&stepWaitForSSH{},

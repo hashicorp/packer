@@ -21,3 +21,19 @@ config.version = "8"
 		t.Errorf("invalid config.version: %s", results["config.version"])
 	}
 }
+
+func TestEncodeVMX(t *testing.T) {
+	contents := map[string]string{
+		".encoding":      "UTF-8",
+		"config.version": "8",
+	}
+
+	expected := `.encoding = "UTF-8"
+config.version = "8"
+`
+
+	result := EncodeVMX(contents)
+	if result != expected {
+		t.Errorf("invalid results: %s", result)
+	}
+}
