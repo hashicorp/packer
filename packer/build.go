@@ -50,9 +50,10 @@ func (b *coreBuild) Prepare(ui Ui) (err error) {
 	}
 
 	// Prepare the provisioners
-	// TODO: error handling
 	for _, coreProv := range b.provisioners {
-		coreProv.provisioner.Prepare(coreProv.config)
+		if err = coreProv.provisioner.Prepare(coreProv.config); err != nil {
+			return
+		}
 	}
 
 	return
