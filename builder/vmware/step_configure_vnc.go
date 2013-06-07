@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"io/ioutil"
 	"math/rand"
 	"net"
@@ -41,16 +42,20 @@ func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
 	// Find an open VNC port. Note that this can still fail later on
 	// because we have to release the port at some point. But this does its
 	// best.
+	log.Printf("Looking for available port between %d and %d", config.VNCPortMin, config.VNCPortMax)
 	var vncPort uint
 	portRange := int(config.VNCPortMax - config.VNCPortMin)
 	for {
 		vncPort = uint(rand.Intn(portRange) + portRange)
+		log.Printf("Trying port: %d", vncPort)
 		l, err := net.Listen("tcp", fmt.Sprintf(":%d", vncPort))
 		if err == nil {
 			defer l.Close()
 			break
 		}
 	}
+
+	log.Printf("Found available VNC port: %d", vncPort)
 
 	vmxData := ParseVMX(string(vmxBytes))
 	vmxData["RemoteDisplay.vnc.enabled"] = "TRUE"
