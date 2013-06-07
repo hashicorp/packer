@@ -9,7 +9,7 @@ import (
 
 type helperProvisioner byte
 
-func (helperProvisioner) Prepare(interface{}, packer.Ui) {}
+func (helperProvisioner) Prepare(...interface{}) {}
 
 func (helperProvisioner) Provision(packer.Ui, packer.Communicator) {}
 

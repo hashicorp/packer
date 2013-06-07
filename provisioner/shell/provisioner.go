@@ -29,9 +29,11 @@ type Provisioner struct {
 	config config
 }
 
-func (p *Provisioner) Prepare(raw interface{}, ui packer.Ui) {
+func (p *Provisioner) Prepare(raws ...interface{}) {
 	// TODO: errors
-	_ = mapstructure.Decode(raw, &p.config)
+	for _, raw := range raws {
+		_ = mapstructure.Decode(raw, &p.config)
+	}
 
 	if p.config.RemotePath == "" {
 		p.config.RemotePath = DefaultRemotePath

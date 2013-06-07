@@ -18,8 +18,7 @@ type ProvisionerServer struct {
 }
 
 type ProvisionerPrepareArgs struct {
-	Config     interface{}
-	RPCAddress string
+	Configs     []interface{}
 }
 
 type ProvisionerProvisionArgs struct {
@@ -29,12 +28,8 @@ type ProvisionerProvisionArgs struct {
 func Provisioner(client *rpc.Client) *provisioner {
 	return &provisioner{client}
 }
-func (p *provisioner) Prepare(config interface{}, ui packer.Ui) {
-	// TODO: Error handling
-	server := rpc.NewServer()
-	RegisterUi(server, ui)
-
-	args := &ProvisionerPrepareArgs{config, serveSingleConn(server)}
+func (p *provisioner) Prepare(configs ...interface{}) {
+	args := &ProvisionerPrepareArgs{configs}
 	p.client.Call("Provisioner.Prepare", args, new(interface{}))
 }
 
@@ -49,14 +44,7 @@ func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 }
 
 func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *interface{}) error {
-	client, err := rpc.Dial("tcp", args.RPCAddress)
-	if err != nil {
-		return err
-	}
-
-	ui := &Ui{client}
-
-	p.p.Prepare(args.Config, ui)
+	p.p.Prepare(args.Configs...)
 	return nil
 }
 

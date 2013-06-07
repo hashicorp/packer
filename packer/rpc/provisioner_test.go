@@ -9,17 +9,15 @@ import (
 
 type testProvisioner struct {
 	prepareCalled bool
-	prepareConfig interface{}
-	prepareUi     packer.Ui
+	prepareConfigs []interface{}
 	provCalled    bool
 	provComm      packer.Communicator
 	provUi        packer.Ui
 }
 
-func (p *testProvisioner) Prepare(config interface{}, ui packer.Ui) {
+func (p *testProvisioner) Prepare(configs ...interface{}) {
 	p.prepareCalled = true
-	p.prepareConfig = config
-	p.prepareUi = ui
+	p.prepareConfigs = configs
 }
 
 func (p *testProvisioner) Provision(ui packer.Ui, comm packer.Communicator) {
@@ -45,17 +43,13 @@ func TestProvisionerRPC(t *testing.T) {
 
 	// Test Prepare
 	config := 42
-	ui := &testUi{}
 	pClient := Provisioner(client)
-	pClient.Prepare(config, ui)
+	pClient.Prepare(config)
 	assert.True(p.prepareCalled, "prepare should be called")
-	assert.Equal(p.prepareConfig, 42, "prepare should be called with right arg")
-
-	p.prepareUi.Say("foo")
-	assert.True(ui.sayCalled, "say should be called")
+	assert.Equal(p.prepareConfigs, []interface{}{42}, "prepare should be called with right arg")
 
 	// Test Provision
-	ui = &testUi{}
+	ui := &testUi{}
 	comm := &testCommunicator{}
 	pClient.Provision(ui, comm)
 	assert.True(p.provCalled, "provision should be called")

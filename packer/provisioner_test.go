@@ -4,15 +4,13 @@ import "testing"
 
 type TestProvisioner struct {
 	prepCalled bool
-	prepConfig interface{}
-	prepUi     Ui
+	prepConfigs []interface{}
 	provCalled bool
 }
 
-func (t *TestProvisioner) Prepare(config interface{}, ui Ui) {
+func (t *TestProvisioner) Prepare(configs ...interface{}) {
 	t.prepCalled = true
-	t.prepConfig = config
-	t.prepUi = ui
+	t.prepConfigs = configs
 }
 
 func (t *TestProvisioner) Provision(Ui, Communicator) {

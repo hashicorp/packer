@@ -13,13 +13,13 @@ type cmdProvisioner struct {
 	client *client
 }
 
-func (c *cmdProvisioner) Prepare(config interface{}, ui packer.Ui) {
+func (c *cmdProvisioner) Prepare(configs ...interface{}) {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
 	}()
 
-	c.p.Prepare(config, ui)
+	c.p.Prepare(configs...)
 }
 
 func (c *cmdProvisioner) Provision(ui packer.Ui, comm packer.Communicator) {

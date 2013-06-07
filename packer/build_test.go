@@ -47,8 +47,7 @@ func TestBuild_Prepare(t *testing.T) {
 	coreProv := coreB.provisioners[0]
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfig, 42, "prepare should be called with proper config")
-	assert.Equal(prov.prepUi, ui, "prepare should be called with proper ui")
+	assert.Equal(prov.prepConfigs, []interface{}{42}, "prepare should be called with proper config")
 }
 
 func TestBuild_Run(t *testing.T) {
