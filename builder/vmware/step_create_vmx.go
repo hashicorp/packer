@@ -1,10 +1,11 @@
 package vmware
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"os"
+	"log"
 	"path/filepath"
 	"text/template"
 )
@@ -30,12 +31,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
 
-	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
-	f, err := os.Create(vmxPath)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error creating VMX: %s", err))
-		return multistep.ActionHalt
-	}
+	ui.Say("Building and writing VMX file")
 
 	tplData := &vmxTemplateData{
 		config.VMName,
@@ -44,8 +40,24 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		config.ISOUrl,
 	}
 
+	var buf bytes.Buffer
 	t := template.Must(template.New("vmx").Parse(DefaultVMXTemplate))
-	t.Execute(f, tplData)
+	t.Execute(&buf, tplData)
+
+	vmxData := ParseVMX(buf.String())
+	if config.VMXData != nil {
+		log.Println("Setting custom VMX data...")
+		for k, v := range config.VMXData {
+			log.Printf("Setting VMX: '%s' = '%s'", k, v)
+			vmxData[k] = v
+		}
+	}
+
+	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
+	if err := WriteVMX(vmxPath, vmxData); err != nil {
+		ui.Error(fmt.Sprintf("Error creating VMX: %s", err))
+		return multistep.ActionHalt
+	}
 
 	state["vmx_path"] = vmxPath
 

@@ -21,22 +21,23 @@ type Builder struct {
 }
 
 type config struct {
-	DiskName        string   `mapstructure:"vmdk_name"`
-	ISOUrl          string   `mapstructure:"iso_url"`
-	VMName          string   `mapstructure:"vm_name"`
-	OutputDir       string   `mapstructure:"output_directory"`
-	HTTPDir         string   `mapstructure:"http_directory"`
-	HTTPPortMin     uint     `mapstructure:"http_port_min"`
-	HTTPPortMax     uint     `mapstructure:"http_port_max"`
-	BootCommand     []string `mapstructure:"boot_command"`
-	BootWait        time.Duration
-	ShutdownCommand string `mapstructure:"shutdown_command"`
-	ShutdownTimeout time.Duration
-	SSHUser         string `mapstructure:"ssh_username"`
-	SSHPassword     string `mapstructure:"ssh_password"`
-	SSHWaitTimeout  time.Duration
-	VNCPortMin      uint `mapstructure:"vnc_port_min"`
-	VNCPortMax      uint `mapstructure:"vnc_port_max"`
+	DiskName        string            `mapstructure:"vmdk_name"`
+	ISOUrl          string            `mapstructure:"iso_url"`
+	VMName          string            `mapstructure:"vm_name"`
+	OutputDir       string            `mapstructure:"output_directory"`
+	HTTPDir         string            `mapstructure:"http_directory"`
+	HTTPPortMin     uint              `mapstructure:"http_port_min"`
+	HTTPPortMax     uint              `mapstructure:"http_port_max"`
+	BootCommand     []string          `mapstructure:"boot_command"`
+	BootWait        time.Duration     ``
+	ShutdownCommand string            `mapstructure:"shutdown_command"`
+	ShutdownTimeout time.Duration     ``
+	SSHUser         string            `mapstructure:"ssh_username"`
+	SSHPassword     string            `mapstructure:"ssh_password"`
+	SSHWaitTimeout  time.Duration     ``
+	VMXData         map[string]string `mapstructure:"vmx_data"`
+	VNCPortMin      uint              `mapstructure:"vnc_port_min"`
+	VNCPortMax      uint              `mapstructure:"vnc_port_max"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
