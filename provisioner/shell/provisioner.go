@@ -30,7 +30,6 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// TODO: errors
 	for _, raw := range raws {
 		if err := mapstructure.Decode(raw, &p.config); err != nil {
 			return err
