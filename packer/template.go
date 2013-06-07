@@ -220,7 +220,16 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 			return
 		}
 
-		coreProv := coreBuildProvisioner{provisioner, rawProvisioner.rawConfig}
+		configs := make([]interface{}, 1, 2)
+		configs[0] = rawProvisioner.rawConfig
+
+		if rawProvisioner.Override != nil {
+			if override, ok := rawProvisioner.Override[name]; ok {
+				configs = append(configs, override)
+			}
+		}
+
+		coreProv := coreBuildProvisioner{provisioner, configs}
 		provisioners = append(provisioners, coreProv)
 	}
 

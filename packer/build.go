@@ -29,7 +29,7 @@ type coreBuild struct {
 // within the build.
 type coreBuildProvisioner struct {
 	provisioner Provisioner
-	config      interface{}
+	config      []interface{}
 }
 
 // Returns the name of the build.
@@ -51,7 +51,7 @@ func (b *coreBuild) Prepare(ui Ui) (err error) {
 
 	// Prepare the provisioners
 	for _, coreProv := range b.provisioners {
-		if err = coreProv.provisioner.Prepare(coreProv.config); err != nil {
+		if err = coreProv.provisioner.Prepare(coreProv.config...); err != nil {
 			return
 		}
 	}

@@ -14,7 +14,7 @@ func testBuild() Build {
 			"foo": []Hook{&TestHook{}},
 		},
 		provisioners: []coreBuildProvisioner{
-			coreBuildProvisioner{&TestProvisioner{}, 42},
+			coreBuildProvisioner{&TestProvisioner{}, []interface{}{42}},
 		},
 	}
 }
