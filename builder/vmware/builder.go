@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
@@ -135,6 +136,9 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	steps := []multistep.Step{
 		&stepPrepareOutputDir{},
 		&stepCreateDisk{},
