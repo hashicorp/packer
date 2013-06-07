@@ -18,7 +18,7 @@ type ProvisionerServer struct {
 }
 
 type ProvisionerPrepareArgs struct {
-	Configs     []interface{}
+	Configs []interface{}
 }
 
 type ProvisionerProvisionArgs struct {

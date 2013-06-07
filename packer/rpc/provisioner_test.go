@@ -8,11 +8,11 @@ import (
 )
 
 type testProvisioner struct {
-	prepareCalled bool
+	prepareCalled  bool
 	prepareConfigs []interface{}
-	provCalled    bool
-	provComm      packer.Communicator
-	provUi        packer.Ui
+	provCalled     bool
+	provComm       packer.Communicator
+	provUi         packer.Ui
 }
 
 func (p *testProvisioner) Prepare(configs ...interface{}) error {

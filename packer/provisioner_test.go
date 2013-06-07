@@ -3,9 +3,9 @@ package packer
 import "testing"
 
 type TestProvisioner struct {
-	prepCalled bool
+	prepCalled  bool
 	prepConfigs []interface{}
-	provCalled bool
+	provCalled  bool
 }
 
 func (t *TestProvisioner) Prepare(configs ...interface{}) error {

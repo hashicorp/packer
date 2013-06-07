@@ -3,6 +3,7 @@
 package shell
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
@@ -11,22 +12,30 @@ import (
 	"log"
 	"os"
 	"strings"
+	"text/template"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
 
-// TODO(mitchellh): config
 type config struct {
 	// The local path of the shell script to upload and execute.
 	Path string
 
 	// The remote path where the local shell script will be uploaded to.
 	// This should be set to a writable file that is in a pre-existing directory.
-	RemotePath string
+	RemotePath string `mapstructure:"remote_path"`
+
+	// The command used to execute the script. The '{{ .Path }}' variable
+	// should be used to specify where the script goes.
+	ExecuteCommand string `mapstructure:"execute_command"`
 }
 
 type Provisioner struct {
 	config config
+}
+
+type ExecuteCommandTemplate struct {
+	Path string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -34,6 +43,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if err := mapstructure.Decode(raw, &p.config); err != nil {
 			return err
 		}
+	}
+
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = "chmod +x {{.Path}} && {{.Path}}"
 	}
 
 	if p.config.RemotePath == "" {
@@ -60,12 +73,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		return
 	}
 
+	// Compile the command
+	var command bytes.Buffer
+	t := template.Must(template.New("command").Parse(p.config.ExecuteCommand))
+	t.Execute(&command, &ExecuteCommandTemplate{p.config.RemotePath})
+
 	// Setup the remote command
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
 
 	var cmd packer.RemoteCmd
-	cmd.Command = fmt.Sprintf("chmod +x %s && %s", p.config.RemotePath, p.config.RemotePath)
+	cmd.Command = command.String()
 	cmd.Stdout = stdout_w
 	cmd.Stderr = stderr_w
 
