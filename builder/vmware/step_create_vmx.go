@@ -14,7 +14,6 @@ type vmxTemplateData struct {
 	GuestOS  string
 	DiskName string
 	ISOPath  string
-	VNCPort  uint
 }
 
 // This step creates the VMX file for the VM.
@@ -25,35 +24,30 @@ type vmxTemplateData struct {
 //
 // Produces:
 //   vmx_path string - The path to the VMX file.
-//   vnc_port uint - The port the VM is configured to listen on for VNC.
 type stepCreateVMX struct{}
 
 func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
 
-	vmx_path := filepath.Join(config.OutputDir, config.VMName+".vmx")
-	f, err := os.Create(vmx_path)
+	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
+	f, err := os.Create(vmxPath)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error creating VMX: %s", err))
 		return multistep.ActionHalt
 	}
-
-	var vncPort uint = 5900
 
 	tplData := &vmxTemplateData{
 		config.VMName,
 		"ubuntu-64",
 		config.DiskName,
 		config.ISOUrl,
-		vncPort,
 	}
 
 	t := template.Must(template.New("vmx").Parse(DefaultVMXTemplate))
 	t.Execute(f, tplData)
 
-	state["vmx_path"] = vmx_path
-	state["vnc_port"] = vncPort
+	state["vmx_path"] = vmxPath
 
 	return multistep.ActionContinue
 }
@@ -120,8 +114,6 @@ powerType.suspend = "soft"
 proxyApps.publishToHost = "FALSE"
 replay.filename = ""
 replay.supported = "FALSE"
-RemoteDisplay.vnc.enabled = "TRUE"
-RemoteDisplay.vnc.port = "{{ .VNCPort }}"
 scsi0.pciSlotNumber = "16"
 scsi0.present = "TRUE"
 scsi0.virtualDev = "lsilogic"
