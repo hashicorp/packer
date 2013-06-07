@@ -3,9 +3,9 @@ package packer
 // A provisioner is responsible for installing and configuring software
 // on a machine prior to building the actual image.
 type Provisioner interface {
-	// Prepare is called with the raw configuration and a UI element in
-	// order to setup the internal state of the provisioner and perform
-	// any validation necessary for the provisioner.
+	// Prepare is called with a set of configurations to setup the
+	// internal state of the provisioner. The multiple configurations
+	// should be merged in some sane way.
 	Prepare(...interface{})
 
 	// Provision is called to actually provision the machine. A UI is
