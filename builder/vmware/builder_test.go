@@ -137,3 +137,31 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
+
+func TestBuilderPrepare_VNCPort(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Bad
+	config["vnc_port_min"] = 1000
+	config["vnc_port_max"] = 500
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Bad
+	config["vnc_port_min"] = -500
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good
+	config["vnc_port_min"] = 500
+	config["vnc_port_max"] = 1000
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
