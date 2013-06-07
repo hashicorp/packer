@@ -1,7 +1,5 @@
 * builder/amazonebs: Copy AMI to multiple regions
-* builder/amazonebs: Add unique ID to AMI name so multiple can be made
 * builder/vmware: Downloading the ISO
-* builder/vmware: Find open port for HTTP
 * builder/vmware: VMX templates
 * builder/vmware: VMX key/values
 * communicator/ssh: Ability to re-establish connection
