@@ -15,9 +15,10 @@ type testProvisioner struct {
 	provUi        packer.Ui
 }
 
-func (p *testProvisioner) Prepare(configs ...interface{}) {
+func (p *testProvisioner) Prepare(configs ...interface{}) error {
 	p.prepareCalled = true
 	p.prepareConfigs = configs
+	return nil
 }
 
 func (p *testProvisioner) Provision(ui packer.Ui, comm packer.Communicator) {

@@ -29,15 +29,19 @@ type Provisioner struct {
 	config config
 }
 
-func (p *Provisioner) Prepare(raws ...interface{}) {
+func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// TODO: errors
 	for _, raw := range raws {
-		_ = mapstructure.Decode(raw, &p.config)
+		if err := mapstructure.Decode(raw, &p.config); err != nil {
+			return err
+		}
 	}
 
 	if p.config.RemotePath == "" {
 		p.config.RemotePath = DefaultRemotePath
 	}
+
+	return nil
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {

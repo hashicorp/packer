@@ -6,7 +6,7 @@ type Provisioner interface {
 	// Prepare is called with a set of configurations to setup the
 	// internal state of the provisioner. The multiple configurations
 	// should be merged in some sane way.
-	Prepare(...interface{})
+	Prepare(...interface{}) error
 
 	// Provision is called to actually provision the machine. A UI is
 	// given to communicate with the user, and a communicator is given that

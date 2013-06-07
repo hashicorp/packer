@@ -8,9 +8,10 @@ type TestProvisioner struct {
 	provCalled bool
 }
 
-func (t *TestProvisioner) Prepare(configs ...interface{}) {
+func (t *TestProvisioner) Prepare(configs ...interface{}) error {
 	t.prepCalled = true
 	t.prepConfigs = configs
+	return nil
 }
 
 func (t *TestProvisioner) Provision(Ui, Communicator) {

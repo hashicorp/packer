@@ -9,7 +9,9 @@ import (
 
 type helperProvisioner byte
 
-func (helperProvisioner) Prepare(...interface{}) {}
+func (helperProvisioner) Prepare(...interface{}) error {
+	return nil
+}
 
 func (helperProvisioner) Provision(packer.Ui, packer.Communicator) {}
 

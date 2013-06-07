@@ -28,9 +28,13 @@ type ProvisionerProvisionArgs struct {
 func Provisioner(client *rpc.Client) *provisioner {
 	return &provisioner{client}
 }
-func (p *provisioner) Prepare(configs ...interface{}) {
+func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 	args := &ProvisionerPrepareArgs{configs}
-	p.client.Call("Provisioner.Prepare", args, new(interface{}))
+	if cerr := p.client.Call("Provisioner.Prepare", args, &err); cerr != nil {
+		err = cerr
+	}
+
+	return
 }
 
 func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
@@ -43,8 +47,8 @@ func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 	p.client.Call("Provisioner.Provision", args, new(interface{}))
 }
 
-func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *interface{}) error {
-	p.p.Prepare(args.Configs...)
+func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) error {
+	*reply = p.p.Prepare(args.Configs...)
 	return nil
 }
 
