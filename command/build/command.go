@@ -1,6 +1,7 @@
 package build
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
@@ -189,13 +190,16 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Output all the artifacts
 	env.Ui().Say("\n==> The build completed! The artifacts created were:")
 	for name, artifact := range artifacts {
-		env.Ui().Say(fmt.Sprintf("--> %s:", name))
+		var message bytes.Buffer
+		fmt.Fprintf(&message, "--> %s: ", name)
 
 		if artifact != nil {
-			env.Ui().Say(artifact.String())
+			fmt.Fprintf(&message, artifact.String())
 		} else {
-			env.Ui().Say("<nothing>")
+			fmt.Print("<nothing>")
 		}
+
+		env.Ui().Say(message.String())
 	}
 
 	return 0
