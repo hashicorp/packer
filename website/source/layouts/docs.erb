@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Packer</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<!-- Le styles -->
+		<%= stylesheet_link_tag "bootstrap.min" %>
+		<style type="text/css">
+			body {
+				padding-top: 20px;
+				padding-bottom: 40px;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div class="container">
+			<div class="row">
+				<div class="span3">
+					<div class="well sidebar-nav" style="padding: 8px 0;">
+						<ul class="nav nav-list">
+							<li class="nav-header">Sidebar</li>
+							<li class="active"><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li class="nav-header">Sidebar</li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li class="nav-header">Sidebar</li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Link</a></li>
+						</ul>
+					</div><!--/.well -->
+				</div><!--/span-->
+				<div class="span9">
+					<%= yield %>
+				</div><!--/span-->
+			</div><!--/row-->
+
+			<hr>
+
+			<footer>
+			<p>&copy; Mitchell Hashimoto 2013</p>
+			</footer>
+		</div><!--/.fluid-container-->
+	</body>
+</html>
+
