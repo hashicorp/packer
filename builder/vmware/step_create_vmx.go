@@ -35,7 +35,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 
 	tplData := &vmxTemplateData{
 		config.VMName,
-		"ubuntu-64",
+		config.GuestOSType,
 		config.DiskName,
 		config.ISOUrl,
 	}

@@ -23,6 +23,7 @@ type Builder struct {
 
 type config struct {
 	DiskName        string            `mapstructure:"vmdk_name"`
+	GuestOSType     string            `mapstructure:"guest_os_type"`
 	ISOUrl          string            `mapstructure:"iso_url"`
 	VMName          string            `mapstructure:"vm_name"`
 	OutputDir       string            `mapstructure:"output_directory"`
@@ -53,6 +54,10 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
+	}
+
+	if b.config.GuestOSType == "" {
+		b.config.GuestOSType = "other"
 	}
 
 	if b.config.VMName == "" {
