@@ -7,7 +7,9 @@ layout: "docs"
 Packer is a tool for creating identical machine images for multiple platforms
 from a single source configuration. Packer is lightweight, runs on every major
 operating system, and is highly performant, creating machine images for
-multiple platforms in parallel.
+multiple platforms in parallel. Packer does not replace configuration management
+like Chef or Puppet. In fact, when building images, Packer is able to use tools
+like Chef or Puppet to install software onto the image.
 
 A _machine image_ is a single static unit that contains a pre-configured operating
 system and installed software which is used to quickly create new running machines.
@@ -18,7 +20,8 @@ VMDK/VMX files for VMware, OVF exports for VirtualBox, etc.
 Historically, creating
 these images has been a predominantly manual process. Any existing automated tools were able to
 create only one type of image. Packer, on the other hand, is able to automatically
-create any type of image, all from a single source configuration.
+create any type of image, all from a single source configuration. This unlocks
+untapped potential in developing, testing, and deploying applications.
 
 Pre-baked machine images have a lot of advantages, but we've been unable to
 benefit from them because they have been too tedious to create and manage.
@@ -45,3 +48,7 @@ they'll be caught early, rather than several minutes after a machine is launched
 can be quickly launched and smoke tested to verify that things appear to be
 working. If they are, you can be confident that any other machines launched
 from that image will function properly.
+
+Packer makes it extremely easy to take advantage of all these benefits.
+
+What are you waiting for? Let's get started!
