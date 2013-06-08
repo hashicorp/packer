@@ -136,8 +136,9 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			defer wg.Done()
 
 			log.Printf("Starting build run: %s", b.Name())
-			artifacts[b.Name()] = b.Run(buildUis[b.Name()])
-			log.Printf("Build finished: %s", b.Name())
+			ui := buildUis[b.Name()]
+			artifacts[b.Name()] = b.Run(ui)
+			ui.Say("Build finished.")
 		}(b)
 	}
 
