@@ -2,6 +2,8 @@ package vmware
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -20,6 +22,12 @@ type Driver interface {
 
 	// Stop stops a VM specified by the path to the VMX given.
 	Stop(string) error
+
+	// Verify checks to make sure that this driver should function
+	// properly. This should check that all the files it will use
+	// appear to exist and so on. If everything is okay, this doesn't
+	// return an error. Otherwise, this returns an error.
+	Verify() error
 }
 
 // Fusion5Driver is a driver that can run VMWare Fusion 5.
@@ -29,8 +37,7 @@ type Fusion5Driver struct {
 }
 
 func (d *Fusion5Driver) CreateDisk(output string, size string) error {
-	vdiskPath := filepath.Join(d.AppPath, "Contents", "Library", "vmware-vdiskmanager")
-	cmd := exec.Command(vdiskPath, "-c", "-s", size, "-a", "lsilogic", "-t", "1", output)
+	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", "lsilogic", "-t", "1", output)
 	if err := cmd.Run(); err != nil {
 		return err
 	}
@@ -71,6 +78,38 @@ func (d *Fusion5Driver) Stop(vmxPath string) error {
 	}
 
 	return nil
+}
+
+func (d *Fusion5Driver) Verify() error {
+	if _, err := os.Stat(d.AppPath); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("Fusion application not found at path: %s", d.AppPath)
+		}
+
+		return err
+	}
+
+	if _, err := os.Stat(d.vmrunPath()); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("Critical application 'vmrun' not found at path: %s", d.vmrunPath())
+		}
+
+		return err
+	}
+
+	if _, err := os.Stat(d.vdiskManagerPath()); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("Critical application vdisk manager not found at path: %s", d.vdiskManagerPath())
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (d *Fusion5Driver) vdiskManagerPath() string {
+	return filepath.Join(d.AppPath, "Contents", "Library", "vmware-vdiskmanager")
 }
 
 func (d *Fusion5Driver) vmrunPath() string {

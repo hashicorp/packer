@@ -196,5 +196,10 @@ func (b *Builder) Cancel() {
 
 func (b *Builder) newDriver() (Driver, error) {
 	fusionAppPath := "/Applications/VMware Fusion.app"
-	return &Fusion5Driver{fusionAppPath}, nil
+	driver := &Fusion5Driver{fusionAppPath}
+	if err := driver.Verify(); err != nil {
+		return nil, err
+	}
+
+	return driver, nil
 }
