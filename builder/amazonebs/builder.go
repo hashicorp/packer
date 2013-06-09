@@ -60,15 +60,24 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		errs = append(errs, errors.New("A secret_key must be specified"))
 	}
 
+	if b.config.SourceAmi == "" {
+		errs = append(errs, errors.New("A source_ami must be specified"))
+	}
+
+	if b.config.InstanceType == "" {
+		errs = append(errs, errors.New("An instance_type must be specified"))
+	}
+
+	if b.config.SSHUsername == "" {
+		errs = append(errs, errors.New("An ssh_username must be specified"))
+	}
+
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
 	}
 
 	// TODO: config validation and asking for fields:
 	// * region (exists and valid)
-	// * source ami
-	// * instance type
-	// * SSH username
 
 	log.Printf("Config: %+v", b.config)
 	return
