@@ -1,18 +1,41 @@
 # Packer
 
-Packer is a tool for building identical machine images across multiple clouds.
+Packer is a tool for building identical machine images for multiple platforms
+from a single source configuration.
 
-Packer provides a framework and configuration format for creating identical
-machine images to launch into any environment, such as VirtualBox, VMware,
-Amazon EC2, etc. Because this build process is automated, you can develop in
-VirtualBox, then deploy to EC2 with an identical image.
+Packer is lightweight, runs on every major operating system, and is highly
+performant, creating machine images for multiple platforms in parallel.
+Packer comes out of the box with support for creating AMIs (EC2), VMware
+images, and VirtualBox images. Support for more platforms can be added via
+plugins.
 
 ## Quick Start
 
 First, get Packer by either downloading a pre-built Packer binary for
 your operating system or [downloading and compiling Packer yourself](#developing-packer).
 
-After Packer is installed, build your first machine image.
+After Packer is installed, create your first template, which tells Packer
+what platforms to build images for and how you want to build them. In our
+case, we'll create a simple AMI that has Redis pre-installed. Save this
+file as `quick-start.json`. Be sure to replace any credentials with your
+own.
+
+```json
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "YOUR KEY HERE",
+    "secret_key": "YOUR SECRET KEY HERE",
+    "region": "us-east-1",
+    "source_ami": "ami-de0d9eb7",
+    "instance_type": "m1.small",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-quick-start {{.CreateTime}}"
+  }]
+}
+```
+
+Next, tell Packer to build the image:
 
 ```
 $ packer build quick-start.json
@@ -25,50 +48,11 @@ delete it using the [AWS console](https://console.aws.amazon.com/). Packer
 builds your images, it does not manage their lifecycle. Where they go, how
 they're run, etc. is up to you.
 
-## Templates
+## Documentation
 
-Templates are static configurations that describe what machine images
-you want to create, how to create them, and what format you finally want
-them to be in.
+Full, comprehensive documentation is viewable on the Packer website:
 
-Packer reads a template and builds all the requested machine images
-in parallel.
-
-Templates are written in [TOML](https://github.com/mojombo/toml). TOML is
-a fantastic configuration language that you can learn in minutes, and is
-very human-readable as well.
-
-First, a complete template is shown below. Then, the details and
-structure of a template are discussed:
-
-```toml
-name = "my-custom-image"
-
-[builder.amazon-ebs]
-source = "ami-de0d9eb7"
-
-[provision]
-
-  [provison.shell]
-  type = "shell"
-  path = "script.sh"
-
-[output]
-
-  [output.vagrant]
-```
-
-Templates are comprised of three parts:
-
-* **builders** (1 or more) specify how the initial running system is
-  built.
-
-* **provisioners** (0 or more) specify how to install and configure
-  software from within the base running system.
-
-* **outputs** (0 or more) specify what to do with the completed system.
-  For example, these can output [Vagrant](http://www.vagrantup.com)-compatible
-  boxes, gzipped files, etc.
+http://www.packer.io/docs
 
 ## Developing Packer
 
