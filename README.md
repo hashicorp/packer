@@ -1,5 +1,9 @@
 # Packer
 
+* Website: http://www.packer.io
+* IRC: `#packer-tool` on Freenode
+* Mailing list: [Google Groups](http://groups.google.com/group/packer-tool)
+
 Packer is a tool for building identical machine images for multiple platforms
 from a single source configuration.
 
