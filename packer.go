@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
@@ -9,46 +10,9 @@ import (
 	"log"
 	"os"
 	"os/user"
-	"path"
+	"path/filepath"
 	"runtime"
 )
-
-func loadGlobalConfig() (result *config, err error) {
-	mustExist := true
-	p := os.Getenv("PACKER_CONFIG")
-	if p == "" {
-		var u *user.User
-		u, err = user.Current()
-		if err != nil {
-			return
-		}
-
-		p = path.Join(u.HomeDir, ".packerrc")
-		mustExist = false
-	}
-
-	log.Printf("Loading packer config: %s\n", p)
-	contents, err := ioutil.ReadFile(p)
-	if err != nil && !mustExist {
-		// Don't report an error if it is okay if the file is missing
-		perr, ok := err.(*os.PathError)
-		if ok && perr.Op == "open" {
-			log.Printf("Packer config didn't exist. Ignoring: %s\n", p)
-			err = nil
-		}
-	}
-
-	if err != nil {
-		return
-	}
-
-	result, err = parseConfig(string(contents))
-	if err != nil {
-		return
-	}
-
-	return
-}
 
 func main() {
 	if os.Getenv("PACKER_LOG") == "" {
@@ -64,24 +28,15 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
+		os.Exit(1)
+	}
+
+	log.Printf("Packer config: %+v", config)
+
 	defer plugin.CleanupClients()
-
-	homeConfig, err := loadGlobalConfig()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading global Packer configuration: \n\n%s\n", err)
-		os.Exit(1)
-	}
-
-	config, err := parseConfig(defaultConfig)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing global Packer configuration: \n\n%s\n", err)
-		os.Exit(1)
-	}
-
-	if homeConfig != nil {
-		log.Println("Merging default config with home config...")
-		config = mergeConfig(config, homeConfig)
-	}
 
 	envConfig := packer.DefaultEnvironmentConfig()
 	envConfig.Commands = config.CommandNames()
@@ -106,4 +61,45 @@ func main() {
 
 	plugin.CleanupClients()
 	os.Exit(exitCode)
+}
+
+func loadConfig() (*config, error) {
+	var config config
+	if err := decodeConfig(bytes.NewBufferString(defaultConfig), &config); err != nil {
+		return nil, err
+	}
+
+	mustExist := true
+	configFile := os.Getenv("PACKER_CONFIG")
+	if configFile == "" {
+		u, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+
+		configFile = filepath.Join(u.HomeDir, ".packerrc")
+		mustExist = false
+	}
+
+	log.Printf("Attempting to open config file: %s", configFile)
+	f, err := os.Open(configFile)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+
+		if mustExist {
+			return nil, err
+		}
+
+		log.Println("File doesn't exist, but doesn't need to. Ignoring.")
+		return &config, nil
+	}
+	defer f.Close()
+
+	if err := decodeConfig(f, &config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }

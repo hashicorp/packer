@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/BurntSushi/toml"
+	"encoding/json"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
+	"io"
 	"log"
 	"os/exec"
 )
@@ -11,15 +12,20 @@ import (
 // This is the default, built-in configuration that ships with
 // Packer.
 const defaultConfig = `
-[builders]
-amazon-ebs = "packer-builder-amazon-ebs"
-vmware = "packer-builder-vmware"
+{
+	"builders": {
+		"amazon-ebs": "packer-builder-amazon-ebs",
+		"vmware": "packer-builder-vmware"
+	},
 
-[commands]
-build = "packer-command-build"
+	"commands": {
+		"build": "packer-command-build"
+	},
 
-[provisioners]
-shell = "packer-provisioner-shell"
+	"provisioners": {
+		"shell": "packer-provisioner-shell"
+	}
+}
 `
 
 type config struct {
@@ -28,44 +34,11 @@ type config struct {
 	Provisioners map[string]string
 }
 
-// Merge the configurations. Anything in the "new" configuration takes
-// precedence over the "old" configuration.
-func mergeConfig(a, b *config) *config {
-	configs := []*config{a, b}
-	result := newConfig()
-
-	for _, config := range configs {
-		for k, v := range config.Builders {
-			result.Builders[k] = v
-		}
-
-		for k, v := range config.Commands {
-			result.Commands[k] = v
-		}
-
-		for k, v := range config.Provisioners {
-			result.Provisioners[k] = v
-		}
-	}
-
-	return result
-}
-
-// Creates and initializes a new config struct.
-func newConfig() *config {
-	result := new(config)
-	result.Builders = make(map[string]string)
-	result.Commands = make(map[string]string)
-	result.Provisioners = make(map[string]string)
-	return result
-}
-
-// Parses a configuration file and returns a proper configuration
-// struct.
-func parseConfig(data string) (result *config, err error) {
-	result = new(config)
-	_, err = toml.Decode(data, &result)
-	return
+// Decodes configuration in JSON format from the given io.Reader into
+// the config object pointed to.
+func decodeConfig(r io.Reader, c *config) error {
+	decoder := json.NewDecoder(r)
+	return decoder.Decode(c)
 }
 
 // Returns an array of defined command names.
@@ -77,6 +50,8 @@ func (c *config) CommandNames() (result []string) {
 	return
 }
 
+// This is a proper packer.BuilderFunc that can be used to load packer.Builder
+// implementations from the defined plugins.
 func (c *config) LoadBuilder(name string) (packer.Builder, error) {
 	log.Printf("Loading builder: %s\n", name)
 	bin, ok := c.Builders[name]
@@ -101,11 +76,15 @@ func (c *config) LoadCommand(name string) (packer.Command, error) {
 	return plugin.Command(exec.Command(commandBin))
 }
 
+// This is a proper implementation of packer.HookFunc that can be used
+// to load packer.Hook implementations from the defined plugins.
 func (c *config) LoadHook(name string) (packer.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
 	return plugin.Hook(exec.Command(name))
 }
 
+// This is a proper packer.ProvisionerFunc that can be used to load
+// packer.Provisioner implementations from defined plugins.
 func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
 	log.Printf("Loading provisioner: %s\n", name)
 	provBin, ok := c.Provisioners[name]
