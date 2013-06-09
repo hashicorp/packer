@@ -45,6 +45,7 @@ func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction 
 	log.Printf("Waiting for SSH, up to timeout: %s", config.SSHWaitTimeout.String())
 
 	timeout := time.After(config.SSHWaitTimeout)
+WaitLoop:
 	for {
 		// Wait for either SSH to become available, a timeout to occur,
 		// or an interrupt to come through.
@@ -56,7 +57,7 @@ func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction 
 			}
 
 			state["communicator"] = comm
-			break
+			break WaitLoop
 		case <-timeout:
 			ui.Error("Timeout waiting for SSH.")
 			s.cancel = true

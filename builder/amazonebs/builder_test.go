@@ -7,12 +7,12 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"access_key": "foo",
-		"secret_key": "bar",
-		"source_ami": "foo",
+		"access_key":    "foo",
+		"secret_key":    "bar",
+		"source_ami":    "foo",
 		"instance_type": "foo",
-		"region": "us-east-1",
-		"ssh_username": "root",
+		"region":        "us-east-1",
+		"ssh_username":  "root",
 	}
 }
 
