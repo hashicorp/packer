@@ -68,6 +68,10 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		errs = append(errs, errors.New("An instance_type must be specified"))
 	}
 
+	if b.config.Region == "" {
+		errs = append(errs, errors.New("A region must be specified"))
+	}
+
 	if b.config.SSHUsername == "" {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
 	}
@@ -75,9 +79,6 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
 	}
-
-	// TODO: config validation and asking for fields:
-	// * region (exists and valid)
 
 	log.Printf("Config: %+v", b.config)
 	return
