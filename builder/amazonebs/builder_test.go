@@ -11,7 +11,7 @@ func testConfig() map[string]interface{} {
 		"secret_key": "bar",
 		"source_ami": "foo",
 		"instance_type": "foo",
-		"region": "foo",
+		"region": "us-east-1",
 		"ssh_username": "root",
 	}
 }
@@ -89,18 +89,26 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	config := testConfig()
 
 	// Test good
-	config["region"] = "foo"
+	config["region"] = "us-east-1"
 	err := b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.Region != "foo" {
+	if b.config.Region != "us-east-1" {
 		t.Errorf("invalid: %s", b.config.Region)
 	}
 
 	// Test bad
 	delete(config, "region")
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test invalid
+	config["region"] = "i-am-not-real"
 	b = Builder{}
 	err = b.Prepare(config)
 	if err == nil {

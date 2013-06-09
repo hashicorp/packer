@@ -7,6 +7,7 @@ package amazonebs
 
 import (
 	"errors"
+	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/mapstructure"
@@ -70,6 +71,8 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.Region == "" {
 		errs = append(errs, errors.New("A region must be specified"))
+	} else if _, ok := aws.Regions[b.config.Region]; !ok {
+		errs = append(errs, fmt.Errorf("Unknown region: %s", b.config.Region))
 	}
 
 	if b.config.SSHUsername == "" {
