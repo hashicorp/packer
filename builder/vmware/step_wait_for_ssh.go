@@ -44,18 +44,29 @@ func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction 
 
 	log.Printf("Waiting for SSH, up to timeout: %s", config.SSHWaitTimeout.String())
 
-	select {
-	case <-waitDone:
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error waiting for SSH: %s", err))
-			return multistep.ActionHalt
-		}
+	timeout := time.After(config.SSHWaitTimeout)
+	for {
+		// Wait for either SSH to become available, a timeout to occur,
+		// or an interrupt to come through.
+		select {
+		case <-waitDone:
+			if err != nil {
+				ui.Error(fmt.Sprintf("Error waiting for SSH: %s", err))
+				return multistep.ActionHalt
+			}
 
-		state["communicator"] = comm
-	case <-time.After(config.SSHWaitTimeout):
-		ui.Error("Timeout waiting for SSH.")
-		s.cancel = true
-		return multistep.ActionHalt
+			state["communicator"] = comm
+			break
+		case <-timeout:
+			ui.Error("Timeout waiting for SSH.")
+			s.cancel = true
+			return multistep.ActionHalt
+		case <-time.After(1 * time.Second):
+			if _, ok := state[multistep.StateCancelled]; ok {
+				log.Println("Interrupt detected, quitting waiting for SSH.")
+				return multistep.ActionHalt
+			}
+		}
 	}
 
 	return multistep.ActionContinue
