@@ -46,6 +46,11 @@ func (d *Fusion5Driver) CreateDisk(output string, size string) error {
 }
 
 func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
+	vmxPath, err := filepath.Abs(vmxPath)
+	if err != nil {
+		return false, err
+	}
+
 	stdout := new(bytes.Buffer)
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "list")
 	cmd.Stdout = stdout
