@@ -1,16 +1,23 @@
 package amazonebs
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"testing"
 )
 
-func TestBuilder_ImplementsBuilder(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+func testConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"access_key": "foo",
+		"secret_key": "bar",
+	}
+}
 
-	var actual packer.Builder
-	assert.Implementor(&Builder{}, &actual, "should be a Builder")
+func TestBuilder_ImplementsBuilder(t *testing.T) {
+	var raw interface{}
+	raw = &Builder{}
+	if _, ok := raw.(packer.Builder); !ok {
+		t.Fatalf("Builder should be a builder")
+	}
 }
 
 func TestBuilder_Prepare_BadType(t *testing.T) {
@@ -25,19 +32,77 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 	}
 }
 
-func TestBuilder_Prepare_Good(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+func TestBuilderPrepare_AccessKey(t *testing.T) {
+	var b Builder
+	config := testConfig()
 
-	b := &Builder{}
-	c := map[string]interface{}{
-		"access_key": "foo",
-		"secret_key": "bar",
-		"source_ami": "123456",
+	// Test good
+	config["access_key"] = "foo"
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 
-	err := b.Prepare(c)
-	assert.Nil(err, "should not have an error")
-	assert.Equal(b.config.AccessKey, "foo", "should be valid access key")
-	assert.Equal(b.config.SecretKey, "bar", "should be valid secret key")
-	assert.Equal(b.config.SourceAmi, "123456", "should have source AMI")
+	if b.config.AccessKey != "foo" {
+		t.Errorf("access key invalid: %s", b.config.AccessKey)
+	}
+
+	// Test bad
+	delete(config, "access_key")
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_SecretKey(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test good
+	config["secret_key"] = "foo"
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.SecretKey != "foo" {
+		t.Errorf("secret key invalid: %s", b.config.SecretKey)
+	}
+
+	// Test bad
+	delete(config, "secret_key")
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_SSHPort(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.SSHPort != 22 {
+		t.Errorf("invalid: %d", b.config.SSHPort)
+	}
+
+	// Test set
+	config["ssh_port"] = 35
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.SSHPort != 35 {
+		t.Errorf("invalid: %d", b.config.SSHPort)
+	}
 }

@@ -6,6 +6,7 @@
 package amazonebs
 
 import (
+	"errors"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/mapstructure"
@@ -44,17 +45,32 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		return
 	}
 
-	log.Printf("Config: %+v", b.config)
+	if b.config.SSHPort == 0 {
+		b.config.SSHPort = 22
+	}
+
+	// Accumulate any errors
+	errs := make([]error, 0)
+
+	if b.config.AccessKey == "" {
+		errs = append(errs, errors.New("An access_key must be specified"))
+	}
+
+	if b.config.SecretKey == "" {
+		errs = append(errs, errors.New("A secret_key must be specified"))
+	}
+
+	if len(errs) > 0 {
+		return &packer.MultiError{errs}
+	}
 
 	// TODO: config validation and asking for fields:
-	// * access key
-	// * secret key
 	// * region (exists and valid)
 	// * source ami
 	// * instance type
 	// * SSH username
-	// * SSH port? (or default to 22?)
 
+	log.Printf("Config: %+v", b.config)
 	return
 }
 
