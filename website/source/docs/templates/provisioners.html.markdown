@@ -28,6 +28,10 @@ Within a template, a section of provisioner definitions looks like this:
 }
 </pre>
 
+For each of the definitions, Packer will run the provisioner for each
+of the configured builds. The provisioners will be run in the order
+they are defined within the template.
+
 ## Provisioner Definition
 
 A provisioner definition is a JSON object that must contain at least
