@@ -8,6 +8,7 @@ import (
 )
 
 var testEnvBuilder = &testBuilder{}
+var testEnvCache = &testCache{}
 var testEnvUi = &testUi{}
 
 type testEnvironment struct {
@@ -26,6 +27,10 @@ func (e *testEnvironment) Builder(name string) (packer.Builder, error) {
 	e.builderCalled = true
 	e.builderName = name
 	return testEnvBuilder, nil
+}
+
+func (e *testEnvironment) Cache() packer.Cache {
+	return testEnvCache
 }
 
 func (e *testEnvironment) Cli(args []string) (int, error) {
@@ -74,6 +79,11 @@ func TestEnvironmentRPC(t *testing.T) {
 
 	builder.Prepare(nil)
 	assert.True(testEnvBuilder.prepareCalled, "Prepare should be called")
+
+	// Test Cache
+	cache := eClient.Cache()
+	cache.Lock("foo")
+	assert.True(testEnvCache.lockCalled, "lock should be called")
 
 	// Test Cli
 	cliArgs := []string{"foo", "bar"}

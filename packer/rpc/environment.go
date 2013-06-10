@@ -37,6 +37,20 @@ func (e *Environment) Builder(name string) (b packer.Builder, err error) {
 	return
 }
 
+func (e *Environment) Cache() packer.Cache {
+	var reply string
+	if err := e.client.Call("Environment.Cache", new(interface{}), &reply); err != nil{
+		panic(err)
+	}
+
+	client, err := rpc.Dial("tcp", reply)
+	if err != nil {
+		panic(err)
+	}
+
+	return Cache(client)
+}
+
 func (e *Environment) Cli(args []string) (result int, err error) {
 	rpcArgs := &EnvironmentCliArgs{args}
 	err = e.client.Call("Environment.Cli", rpcArgs, &result)
@@ -94,6 +108,15 @@ func (e *EnvironmentServer) Builder(name *string, reply *string) error {
 	server := rpc.NewServer()
 	RegisterBuilder(server, builder)
 
+	*reply = serveSingleConn(server)
+	return nil
+}
+
+func (e *EnvironmentServer) Cache(args *interface{}, reply *string) error {
+	cache := e.env.Cache()
+
+	server := rpc.NewServer()
+	RegisterCache(server, cache)
 	*reply = serveSingleConn(server)
 	return nil
 }

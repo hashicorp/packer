@@ -39,6 +39,7 @@ type ComponentFinder struct {
 // list of available builders, and more.
 type Environment interface {
 	Builder(string) (Builder, error)
+	Cache() Cache
 	Cli([]string) (int, error)
 	Hook(string) (Hook, error)
 	Provisioner(string) (Provisioner, error)
@@ -48,6 +49,7 @@ type Environment interface {
 // An implementation of an Environment that represents the Packer core
 // environment.
 type coreEnvironment struct {
+	cache      Cache
 	commands   []string
 	components ComponentFinder
 	ui         Ui
@@ -55,6 +57,7 @@ type coreEnvironment struct {
 
 // This struct configures new environments.
 type EnvironmentConfig struct {
+	Cache      Cache
 	Commands   []string
 	Components ComponentFinder
 	Ui         Ui
@@ -77,6 +80,7 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 	}
 
 	env := &coreEnvironment{}
+	env.cache = config.Cache
 	env.commands = config.Commands
 	env.components = config.Components
 	env.ui = config.Ui
@@ -117,6 +121,11 @@ func (e *coreEnvironment) Builder(name string) (b Builder, err error) {
 	}
 
 	return
+}
+
+// Returns the cache for this environment
+func (e *coreEnvironment) Cache() Cache {
+	return e.cache
 }
 
 // Returns a hook of the given name that is registered with this
