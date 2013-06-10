@@ -47,6 +47,7 @@ func (b *coreBuild) Prepare(ui Ui) (err error) {
 	err = b.builder.Prepare(b.builderConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
+		return
 	}
 
 	// Prepare the provisioners

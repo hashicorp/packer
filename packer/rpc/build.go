@@ -41,8 +41,8 @@ func (b *build) Prepare(ui packer.Ui) (err error) {
 	RegisterUi(server, ui)
 	args := &BuildPrepareArgs{serveSingleConn(server)}
 
-	if err := b.client.Call("Build.Prepare", args, &err); err != nil {
-		panic(err)
+	if cerr := b.client.Call("Build.Prepare", args, &err); cerr != nil {
+		panic(cerr)
 	}
 
 	return
