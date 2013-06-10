@@ -111,6 +111,14 @@ func TestEnvironment_Builder_Error(t *testing.T) {
 	assert.Nil(returnedBuilder, "should be no builder")
 }
 
+func TestEnvironment_Cache(t *testing.T) {
+	config := DefaultEnvironmentConfig()
+	env, _ := NewEnvironment(config)
+	if env.Cache() == nil {
+		t.Fatal("cache should not be nil")
+	}
+}
+
 func TestEnvironment_Cli_Error(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

@@ -104,6 +104,11 @@ func NewEnvironment(config *EnvironmentConfig) (resultEnv Environment, err error
 		env.components.Provisioner = func(string) (Provisioner, error) { return nil, nil }
 	}
 
+	// The default cache is just the system temporary directory
+	if env.cache == nil {
+		env.cache = &FileCache{CacheDir: os.TempDir()}
+	}
+
 	resultEnv = env
 	return
 }
