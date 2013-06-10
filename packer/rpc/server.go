@@ -24,6 +24,12 @@ func RegisterBuilder(s *rpc.Server, b packer.Builder) {
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
+// Packer Cache.
+func RegisterCache(s *rpc.Server, c packer.Cache) {
+	s.RegisterName("Cache", &CacheServer{c})
+}
+
+// Registers the appropriate endpoint on an RPC server to serve a
 // Packer Command.
 func RegisterCommand(s *rpc.Server, c packer.Command) {
 	s.RegisterName("Command", &CommandServer{c})

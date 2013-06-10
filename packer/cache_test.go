@@ -22,11 +22,7 @@ func TestFileCache(t *testing.T) {
 	defer os.RemoveAll(cacheDir)
 
 	cache := &FileCache{CacheDir: cacheDir}
-	path, err := cache.Lock("foo")
-	if err != nil {
-		t.Fatalf("error locking: %s", err)
-	}
-
+	path := cache.Lock("foo")
 	err = ioutil.WriteFile(path, []byte("data"), 0666)
 	if err != nil {
 		t.Fatalf("error writing: %s", err)

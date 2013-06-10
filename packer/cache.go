@@ -14,7 +14,7 @@ type Cache interface {
 	// the lock is held.
 	//
 	// The cache will block and wait for the lock.
-	Lock(string) (string, error)
+	Lock(string) string
 
 	// Unlock will unlock a certain cache key. Be very careful that this
 	// is only called once per lock obtained.
@@ -38,12 +38,12 @@ type FileCache struct {
 	rw       map[string]*sync.RWMutex
 }
 
-func (f *FileCache) Lock(key string) (string, error) {
+func (f *FileCache) Lock(key string) string {
 	hashKey := f.hashKey(key)
 	rw := f.rwLock(hashKey)
 	rw.Lock()
 
-	return filepath.Join(f.CacheDir, hashKey), nil
+	return filepath.Join(f.CacheDir, hashKey)
 }
 
 func (f *FileCache) Unlock(key string) {
