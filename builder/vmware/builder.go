@@ -125,6 +125,11 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 				}
 			}
 		}
+
+		if len(errs) == 0 {
+			// Put the URL back together since we may have modified it
+			b.config.ISOUrl = url.String()
+		}
 	}
 
 	if b.config.SSHUser == "" {
@@ -192,6 +197,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 
 	// Setup the state bag
 	state := make(map[string]interface{})
+	state["cache"] = cache
 	state["config"] = &b.config
 	state["driver"] = b.driver
 	state["hook"] = hook

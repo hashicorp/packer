@@ -2,6 +2,8 @@ package vmware
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 )
@@ -97,7 +99,6 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test iso_url
 	config["iso_url"] = ""
 	err := b.Prepare(config)
 	if err == nil {
@@ -120,6 +121,22 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	err = b.Prepare(config)
 	if err != nil {
 		t.Errorf("should not have error: %s", err)
+	}
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config["iso_url"] = tf.Name()
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.ISOUrl != "file://"+tf.Name() {
+		t.Fatalf("iso_url should be modified: %s", b.config.ISOUrl)
 	}
 }
 
