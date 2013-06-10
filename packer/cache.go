@@ -2,6 +2,7 @@ package packer
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"path/filepath"
 	"sync"
 )
@@ -69,7 +70,7 @@ func (f *FileCache) RUnlock(key string) {
 func (f *FileCache) hashKey(key string) string {
 	sha := sha256.New()
 	sha.Write([]byte(key))
-	return string(sha.Sum(nil))
+	return hex.EncodeToString(sha.Sum(nil))
 }
 
 func (f *FileCache) rwLock(hashKey string) *sync.RWMutex {
