@@ -39,7 +39,7 @@ func (e *Environment) Builder(name string) (b packer.Builder, err error) {
 
 func (e *Environment) Cache() packer.Cache {
 	var reply string
-	if err := e.client.Call("Environment.Cache", new(interface{}), &reply); err != nil{
+	if err := e.client.Call("Environment.Cache", new(interface{}), &reply); err != nil {
 		panic(err)
 	}
 
