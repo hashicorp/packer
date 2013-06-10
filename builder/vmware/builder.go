@@ -49,10 +49,9 @@ type config struct {
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 }
 
-func (b *Builder) Prepare(raw interface{}) (err error) {
-	err = mapstructure.Decode(raw, &b.config)
-	if err != nil {
-		return
+func (b *Builder) Prepare(raw interface{}) error {
+	if err := mapstructure.Decode(raw, &b.config); err != nil {
+		return err
 	}
 
 	if b.config.DiskName == "" {
@@ -88,6 +87,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	}
 
 	// Accumulate any errors
+	var err error
 	errs := make([]error, 0)
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
@@ -96,6 +96,8 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.ISOMD5 == "" {
 		errs = append(errs, errors.New("Due to large file sizes, an iso_md5 is required"))
+	} else {
+		b.config.ISOMD5 = strings.ToLower(b.config.ISOMD5)
 	}
 
 	if b.config.ISOUrl == "" {

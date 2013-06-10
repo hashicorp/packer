@@ -10,7 +10,7 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"iso_md5": "foo",
+		"iso_md5":      "foo",
 		"iso_url":      "http://www.packer.io",
 		"ssh_username": "foo",
 	}
@@ -108,10 +108,14 @@ func TestBuilderPrepare_ISOMD5(t *testing.T) {
 	}
 
 	// Test good
-	config["iso_md5"] = "foo"
+	config["iso_md5"] = "FOo"
 	err = b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.ISOMD5 != "foo" {
+		t.Fatalf("should've lowercased: %s", b.config.ISOMD5)
 	}
 }
 
