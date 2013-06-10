@@ -177,6 +177,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	steps := []multistep.Step{
+		&stepDownloadISO{},
 		&stepPrepareOutputDir{},
 		&stepCreateDisk{},
 		&stepCreateVMX{},

@@ -21,6 +21,7 @@ type vmxTemplateData struct {
 //
 // Uses:
 //   config *config
+//   iso_path string
 //   ui     packer.Ui
 //
 // Produces:
@@ -29,6 +30,7 @@ type stepCreateVMX struct{}
 
 func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
+	isoPath := state["iso_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
 	ui.Say("Building and writing VMX file")
@@ -37,7 +39,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		config.VMName,
 		config.GuestOSType,
 		config.DiskName,
-		config.ISOUrl,
+		isoPath,
 	}
 
 	var buf bytes.Buffer
