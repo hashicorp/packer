@@ -38,7 +38,19 @@ func main() {
 
 	defer plugin.CleanupClients()
 
+	var cache packer.Cache
+	if cacheDir := os.Getenv("PACKER_CACHE_DIR"); cacheDir != "" {
+		if err := os.MkdirAll(cacheDir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
+			os.Exit(1)
+		}
+
+		log.Printf("Setting cache directory: %s", cacheDir)
+		cache = &packer.FileCache{CacheDir: cacheDir}
+	}
+
 	envConfig := packer.DefaultEnvironmentConfig()
+	envConfig.Cache = cache
 	envConfig.Commands = config.CommandNames()
 	envConfig.Components.Builder = config.LoadBuilder
 	envConfig.Components.Command = config.LoadCommand
