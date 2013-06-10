@@ -2,6 +2,7 @@ package vmware
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -105,7 +106,7 @@ func (stepDownloadISO) checkMD5(path string, expected string) error {
 
 	hash := md5.New()
 	io.Copy(hash, f)
-	result := strings.ToLower(string(hash.Sum(nil)))
+	result := strings.ToLower(hex.EncodeToString(hash.Sum(nil)))
 	if result != expected {
 		return fmt.Errorf("result != expected: %s != %s", result, expected)
 	}
@@ -116,7 +117,7 @@ func (stepDownloadISO) checkMD5(path string, expected string) error {
 func (stepDownloadISO) downloadUrl(path string, url *url.URL, progress *uint) (string, error) {
 	if url.Scheme == "file" {
 		// If it is just a file URL, then we already have the ISO
-		return path, nil
+		return url.Path, nil
 	}
 
 	// Otherwise, it is an HTTP URL, and we must download it.
