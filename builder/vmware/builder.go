@@ -8,8 +8,10 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"math/rand"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -93,6 +95,36 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.ISOUrl == "" {
 		errs = append(errs, errors.New("An iso_url must be specified."))
+	} else {
+		url, err := url.Parse(b.config.ISOUrl)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("iso_url is not a valid URL: %s", err))
+		} else {
+			if url.Scheme == "" {
+				url.Scheme = "file"
+			}
+
+			if url.Scheme == "file" {
+				if _, err := os.Stat(b.config.ISOUrl); err != nil {
+					errs = append(errs, fmt.Errorf("iso_url points to bad file: %s", err))
+				}
+			} else {
+				supportedSchemes := []string{"file", "http", "https"}
+				scheme := strings.ToLower(url.Scheme)
+
+				found := false
+				for _, supported := range supportedSchemes {
+					if scheme == supported {
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					errs = append(errs, fmt.Errorf("Unsupported URL scheme in iso_url: %s", scheme))
+				}
+			}
+		}
 	}
 
 	if b.config.SSHUser == "" {
