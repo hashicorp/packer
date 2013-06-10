@@ -82,7 +82,8 @@ Here is a basic example. It is completely valid except for the access keys:
 ## AMI Name Variables
 
 The AMI name specified by the `ami_name` configuration variable is actually
-treated as a template. Packer provides a set of variables that it will replace
+treated as a [configuration template](/docs/templates/configuration-templates.html).
+Packer provides a set of variables that it will replace
 within the AMI name. This helps ensure the AMI name is unique, as AWS requires.
 
 The available variables are shown below:
