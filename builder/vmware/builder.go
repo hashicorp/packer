@@ -172,7 +172,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	return nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 

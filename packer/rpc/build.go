@@ -48,10 +48,10 @@ func (b *build) Prepare(ui packer.Ui) (err error) {
 	return
 }
 
-func (b *build) Run(ui packer.Ui) packer.Artifact {
+func (b *build) Run(ui packer.Ui, cache packer.Cache) packer.Artifact {
 	// Create and start the server for the UI
-	// TODO: Error handling
 	server := rpc.NewServer()
+	RegisterCache(server, cache)
 	RegisterUi(server, ui)
 	args := &BuildRunArgs{serveSingleConn(server)}
 
@@ -95,7 +95,7 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *string) error {
 		return err
 	}
 
-	artifact := b.build.Run(&Ui{client})
+	artifact := b.build.Run(&Ui{client}, Cache(client))
 
 	// Wrap the artifact
 	server := rpc.NewServer()

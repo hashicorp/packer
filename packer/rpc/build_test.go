@@ -14,6 +14,7 @@ type testBuild struct {
 	prepareCalled bool
 	prepareUi     packer.Ui
 	runCalled     bool
+	runCache      packer.Cache
 	runUi         packer.Ui
 	cancelCalled  bool
 }
@@ -29,8 +30,9 @@ func (b *testBuild) Prepare(ui packer.Ui) error {
 	return nil
 }
 
-func (b *testBuild) Run(ui packer.Ui) packer.Artifact {
+func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) packer.Artifact {
 	b.runCalled = true
+	b.runCache = cache
 	b.runUi = ui
 	return testBuildArtifact
 }
@@ -65,12 +67,16 @@ func TestBuildRPC(t *testing.T) {
 	assert.True(b.prepareCalled, "prepare should be called")
 
 	// Test Run
+	cache := new(testCache)
 	ui = new(testUi)
-	bClient.Run(ui)
+	bClient.Run(ui, cache)
 	assert.True(b.runCalled, "run should be called")
 
 	// Test the UI given to run, which should be fully functional
 	if b.runCalled {
+		b.runCache.Lock("foo")
+		assert.True(cache.lockCalled, "lock should be called")
+
 		b.runUi.Say("format")
 		assert.True(ui.sayCalled, "say should be called")
 		assert.Equal(ui.sayMessage, "format", "message should be correct")

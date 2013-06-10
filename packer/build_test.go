@@ -53,11 +53,12 @@ func TestBuild_Prepare(t *testing.T) {
 func TestBuild_Run(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
+	cache := &TestCache{}
 	ui := testUi()
 
 	build := testBuild()
 	build.Prepare(ui)
-	build.Run(ui)
+	build.Run(ui, cache)
 
 	coreB := build.(*coreBuild)
 
@@ -89,7 +90,7 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 		assert.Equal(p.(string), "Prepare must be called first", "right panic")
 	}()
 
-	testBuild().Run(testUi())
+	testBuild().Run(testUi(), &TestCache{})
 }
 
 func TestBuild_Cancel(t *testing.T) {

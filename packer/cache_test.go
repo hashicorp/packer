@@ -6,6 +6,20 @@ import (
 	"testing"
 )
 
+type TestCache struct{}
+
+func (TestCache) Lock(string) string {
+	return ""
+}
+
+func (TestCache) Unlock(string) {}
+
+func (TestCache) RLock(string) (string, bool) {
+	return "", false
+}
+
+func (TestCache) RUnlock(string) {}
+
 func TestFileCache_Implements(t *testing.T) {
 	var raw interface{}
 	raw = &FileCache{}

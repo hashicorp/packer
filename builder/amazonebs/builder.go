@@ -87,7 +87,7 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 	return
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
 	// Basic sanity checks. These are panics now because the Prepare
 	// method should verify these exist and such.
 	if b.config.AccessKey == "" {

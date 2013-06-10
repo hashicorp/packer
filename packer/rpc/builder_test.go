@@ -13,6 +13,7 @@ type testBuilder struct {
 	prepareCalled bool
 	prepareConfig interface{}
 	runCalled     bool
+	runCache      packer.Cache
 	runHook       packer.Hook
 	runUi         packer.Ui
 	cancelCalled  bool
@@ -26,7 +27,8 @@ func (b *testBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
+func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
+	b.runCache = cache
 	b.runCalled = true
 	b.runHook = hook
 	b.runUi = ui
@@ -65,12 +67,16 @@ func TestBuilderRPC(t *testing.T) {
 	assert.Equal(b.prepareConfig, 42, "prepare should be called with right arg")
 
 	// Test Run
+	cache := new(testCache)
 	hook := &testHook{}
 	ui := &testUi{}
-	artifact := bClient.Run(ui, hook)
+	artifact := bClient.Run(ui, hook, cache)
 	assert.True(b.runCalled, "runs hould be called")
 
 	if b.runCalled {
+		b.runCache.Lock("foo")
+		assert.True(cache.lockCalled, "lock should be called")
+
 		b.runHook.Run("foo", nil, nil, nil)
 		assert.True(hook.runCalled, "run should be called")
 
@@ -83,7 +89,7 @@ func TestBuilderRPC(t *testing.T) {
 
 	// Test run with nil result
 	b.nilRunResult = true
-	artifact = bClient.Run(ui, hook)
+	artifact = bClient.Run(ui, hook, cache)
 	assert.Nil(artifact, "should be nil")
 
 	// Test Cancel

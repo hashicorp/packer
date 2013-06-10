@@ -138,7 +138,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 			log.Printf("Starting build run: %s", b.Name())
 			ui := buildUis[b.Name()]
-			artifacts[b.Name()] = b.Run(ui)
+			artifacts[b.Name()] = b.Run(ui, env.Cache())
 			ui.Say("Build finished.")
 		}(b)
 	}

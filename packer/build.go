@@ -7,7 +7,7 @@ import "log"
 type Build interface {
 	Name() string
 	Prepare(Ui) error
-	Run(Ui) Artifact
+	Run(Ui, Cache) Artifact
 	Cancel()
 }
 
@@ -60,7 +60,7 @@ func (b *coreBuild) Prepare(ui Ui) (err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(ui Ui) Artifact {
+func (b *coreBuild) Run(ui Ui, cache Cache) Artifact {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -87,7 +87,7 @@ func (b *coreBuild) Run(ui Ui) Artifact {
 	}
 
 	hook := &DispatchHook{hooks}
-	return b.builder.Run(ui, hook)
+	return b.builder.Run(ui, hook, cache)
 }
 
 // Cancels the build if it is running.

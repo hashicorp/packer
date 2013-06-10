@@ -46,12 +46,12 @@ func (b *builder) Prepare(config interface{}) (err error) {
 	return
 }
 
-func (b *builder) Run(ui packer.Ui, hook packer.Hook) packer.Artifact {
+func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
 	// Create and start the server for the Build and UI
-	// TODO: Error handling
 	server := rpc.NewServer()
-	RegisterUi(server, ui)
+	RegisterCache(server, cache)
 	RegisterHook(server, hook)
+	RegisterUi(server, ui)
 
 	// Create a server for the response
 	responseL := netListenerInRange(portRangeMin, portRangeMax)
@@ -129,9 +129,10 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 	go func() {
 		defer responseC.Close()
 
+		cache := Cache(client)
 		hook := Hook(client)
 		ui := &Ui{client}
-		artifact := b.builder.Run(ui, hook)
+		artifact := b.builder.Run(ui, hook, cache)
 		responseAddress := ""
 
 		if artifact != nil {
