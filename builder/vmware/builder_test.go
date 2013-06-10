@@ -10,6 +10,7 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
+		"iso_md5": "foo",
 		"iso_url":      "http://www.packer.io",
 		"ssh_username": "foo",
 	}
@@ -89,6 +90,25 @@ func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	// Good
 	config["http_port_min"] = 500
 	config["http_port_max"] = 1000
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_ISOMD5(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test bad
+	config["iso_md5"] = ""
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test good
+	config["iso_md5"] = "foo"
 	err = b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)

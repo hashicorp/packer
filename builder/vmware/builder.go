@@ -26,6 +26,7 @@ type Builder struct {
 type config struct {
 	DiskName        string            `mapstructure:"vmdk_name"`
 	GuestOSType     string            `mapstructure:"guest_os_type"`
+	ISOMD5          string            `mapstructure:"iso_md5"`
 	ISOUrl          string            `mapstructure:"iso_url"`
 	VMName          string            `mapstructure:"vm_name"`
 	OutputDir       string            `mapstructure:"output_directory"`
@@ -91,6 +92,10 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
 		errs = append(errs, errors.New("http_port_min must be less than http_port_max"))
+	}
+
+	if b.config.ISOMD5 == "" {
+		errs = append(errs, errors.New("Due to large file sizes, an iso_md5 is required"))
 	}
 
 	if b.config.ISOUrl == "" {
