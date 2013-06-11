@@ -7,7 +7,7 @@ import (
 
 func TestClient(t *testing.T) {
 	process := helperProcess("mock")
-	c := NewClient(process)
+	c := NewClient(&ClientConfig{Cmd: process})
 	defer c.Kill()
 
 	// Test that it parses the proper address
@@ -34,11 +34,13 @@ func TestClient(t *testing.T) {
 }
 
 func TestClient_Start_Timeout(t *testing.T) {
-	c := NewClient(helperProcess("start-timeout"))
-	defer c.Kill()
+	config := &ClientConfig{
+		Cmd: helperProcess("start-timeout"),
+		StartTimeout: 50 * time.Millisecond,
+	}
 
-	// Set a shorter timeout
-	c.StartTimeout = 50 * time.Millisecond
+	c := NewClient(config)
+	defer c.Kill()
 
 	_, err := c.Start()
 	if err == nil {

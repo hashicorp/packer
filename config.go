@@ -13,6 +13,9 @@ import (
 // Packer.
 const defaultConfig = `
 {
+	"plugin_min_port": 10000,
+	"plugin_max_port": 25000,
+
 	"builders": {
 		"amazon-ebs": "packer-builder-amazon-ebs",
 		"vmware": "packer-builder-vmware"
@@ -29,6 +32,9 @@ const defaultConfig = `
 `
 
 type config struct {
+	PluginMinPort uint
+	PluginMaxPort uint
+
 	Builders     map[string]string
 	Commands     map[string]string
 	Provisioners map[string]string

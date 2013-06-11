@@ -3,6 +3,7 @@ package plugin
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -17,11 +18,33 @@ import (
 var managedClients = make([]*client, 0, 5)
 
 type client struct {
-	StartTimeout time.Duration
-
-	cmd         *exec.Cmd
+	config *ClientConfig
 	exited      bool
 	doneLogging bool
+}
+
+// ClientConfig is the configuration used to initialize a new
+// plugin client. After being used to initialize a plugin client,
+// that configuration must not be modified again.
+type ClientConfig struct {
+	// The unstarted subprocess for starting the plugin.
+	Cmd *exec.Cmd
+
+	// Managed represents if the client should be managed by the
+	// plugin package or not. If true, then by calling CleanupClients,
+	// it will automatically be cleaned up. Otherwise, the client
+	// user is fully responsible for making sure to Kill all plugin
+	// clients.
+	Managed bool
+
+	// The minimum and maximum port to use for communicating with
+	// the subprocess. If not set, this defaults to 10,000 and 25,000
+	// respectively.
+	MinPort, MaxPort uint
+
+	// StartTimeout is the timeout to wait for the plugin to say it
+	// has started successfully.
+	StartTimeout time.Duration
 }
 
 // This makes sure all the managed subprocesses are killed and properly
@@ -53,28 +76,60 @@ func CleanupClients() {
 // the client is a managed client (created with NewManagedClient) you
 // can just call CleanupClients at the end of your program and they will
 // be properly cleaned.
-func NewClient(cmd *exec.Cmd) *client {
-	return &client{
-		1 * time.Minute,
-		cmd,
+func NewClient(config *ClientConfig) (c *client) {
+	if config.MinPort == 0 && config.MaxPort == 0 {
+		config.MinPort = 10000
+		config.MaxPort = 25000
+	}
+
+	if config.StartTimeout == 0 {
+		config.StartTimeout = 1 * time.Minute
+	}
+
+	c = &client{
+		config,
 		false,
 		false,
 	}
-}
 
-// Creates a new client that is managed, meaning it'll automatically be
-// cleaned up when CleanupClients() is called at some point. Please see
-// the documentation for CleanupClients() for more information on how
-// managed clients work.
-func NewManagedClient(cmd *exec.Cmd) (result *client) {
-	result = NewClient(cmd)
-	managedClients = append(managedClients, result)
+	if config.Managed {
+		managedClients = append(managedClients, c)
+	}
+
 	return
 }
 
 // Tells whether or not the underlying process has exited.
 func (c *client) Exited() bool {
 	return c.exited
+}
+
+// End the executing subprocess (if it is running) and perform any cleanup
+// tasks necessary such as capturing any remaining logs and so on.
+//
+// This method blocks until the process successfully exits.
+//
+// This method can safely be called multiple times.
+func (c *client) Kill() {
+	cmd := c.config.Cmd
+
+	if cmd.Process == nil {
+		return
+	}
+
+	cmd.Process.Kill()
+
+	// Wait for the client to finish logging so we have a complete log
+	done := make(chan bool)
+	go func() {
+		for !c.doneLogging {
+			time.Sleep(10 * time.Millisecond)
+		}
+
+		done <- true
+	}()
+
+	<-done
 }
 
 // Starts the underlying subprocess, communicating with it to negotiate
@@ -88,17 +143,19 @@ func (c *client) Start() (address string, err error) {
 	// TODO: Mutex
 
 	env := []string{
-		"PACKER_PLUGIN_MIN_PORT=10000",
-		"PACKER_PLUGIN_MAX_PORT=25000",
+		fmt.Sprintf("PACKER_PLUGIN_MIN_PORT=%d", c.config.MinPort),
+		fmt.Sprintf("PACKER_PLUGIN_MAX_PORT=%d", c.config.MaxPort),
 	}
 
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
-	c.cmd.Env = append(c.cmd.Env, os.Environ()...)
-	c.cmd.Env = append(c.cmd.Env, env...)
-	c.cmd.Stderr = stderr
-	c.cmd.Stdout = stdout
-	err = c.cmd.Start()
+
+	cmd := c.config.Cmd
+	cmd.Env = append(cmd.Env, os.Environ()...)
+	cmd.Env = append(cmd.Env, env...)
+	cmd.Stderr = stderr
+	cmd.Stdout = stdout
+	err = cmd.Start()
 	if err != nil {
 		return
 	}
@@ -108,7 +165,7 @@ func (c *client) Start() (address string, err error) {
 		r := recover()
 
 		if err != nil || r != nil {
-			c.cmd.Process.Kill()
+			cmd.Process.Kill()
 		}
 
 		if r != nil {
@@ -118,8 +175,8 @@ func (c *client) Start() (address string, err error) {
 
 	// Start goroutine to wait for process to exit
 	go func() {
-		c.cmd.Wait()
-		log.Printf("%s: plugin process exited\n", c.cmd.Path)
+		cmd.Wait()
+		log.Printf("%s: plugin process exited\n", cmd.Path)
 		c.exited = true
 	}()
 
@@ -127,7 +184,7 @@ func (c *client) Start() (address string, err error) {
 	go c.logStderr(stderr)
 
 	// Some channels for the next step
-	timeout := time.After(c.StartTimeout)
+	timeout := time.After(c.config.StartTimeout)
 
 	// Start looking for the address
 	for done := false; !done; {
@@ -163,32 +220,6 @@ func (c *client) Start() (address string, err error) {
 	return
 }
 
-// End the executing subprocess (if it is running) and perform any cleanup
-// tasks necessary such as capturing any remaining logs and so on.
-//
-// This method blocks until the process successfully exits.
-//
-// This method can safely be called multiple times.
-func (c *client) Kill() {
-	if c.cmd.Process == nil {
-		return
-	}
-
-	c.cmd.Process.Kill()
-
-	// Wait for the client to finish logging so we have a complete log
-	done := make(chan bool)
-	go func() {
-		for !c.doneLogging {
-			time.Sleep(10 * time.Millisecond)
-		}
-
-		done <- true
-	}()
-
-	<-done
-}
-
 func (c *client) logStderr(buf *bytes.Buffer) {
 	for done := false; !done; {
 		if c.Exited() {
@@ -200,7 +231,7 @@ func (c *client) logStderr(buf *bytes.Buffer) {
 			var line string
 			line, err = buf.ReadString('\n')
 			if line != "" {
-				log.Printf("%s: %s", c.cmd.Path, line)
+				log.Printf("%s: %s", c.config.Cmd.Path, line)
 			}
 		}
 

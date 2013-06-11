@@ -62,7 +62,12 @@ func (c *cmdCommand) checkExit(p interface{}, cb func()) {
 //
 // This function guarantees the subprocess will end in a timely manner.
 func Command(cmd *exec.Cmd) (result packer.Command, err error) {
-	cmdClient := NewManagedClient(cmd)
+	config := &ClientConfig{
+		Cmd: cmd,
+		Managed: true,
+	}
+
+	cmdClient := NewClient(config)
 	address, err := cmdClient.Start()
 	if err != nil {
 		return
