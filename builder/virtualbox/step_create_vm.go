@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"time"
 )
 
 // This step creates the actual virtual machine.
@@ -42,7 +41,6 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 		}
 	}
 
-	time.Sleep(15 * time.Second)
 	return multistep.ActionContinue
 }
 

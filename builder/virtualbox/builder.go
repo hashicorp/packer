@@ -60,6 +60,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 		new(stepPrepareOutputDir),
 		new(stepSuppressMessages),
 		new(stepCreateVM),
+		new(stepCreateDisk),
 	}
 
 	// Setup the state bag
