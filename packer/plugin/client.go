@@ -67,10 +67,10 @@ func CleanupClients() {
 	for _, client := range managedClients {
 		wg.Add(1)
 
-		go func() {
+		go func(client *Client) {
 			client.Kill()
 			wg.Done()
-		}()
+		}(client)
 	}
 
 	log.Println("waiting for all plugin processes to complete...")
