@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os/exec"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -73,7 +74,11 @@ func (b *Builder) Cancel() {
 }
 
 func (b *Builder) newDriver() (Driver, error) {
-	vboxmanagePath := "VBoxManage"
+	vboxmanagePath, err := exec.LookPath("VBoxManage")
+	if err != nil {
+		return nil, err
+	}
+
 	driver := &VBox42Driver{vboxmanagePath}
 	if err := driver.Verify(); err != nil {
 		return nil, err
