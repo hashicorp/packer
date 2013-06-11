@@ -5,6 +5,7 @@ package shell
 import (
 	"bytes"
 	"fmt"
+	"errors"
 	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
@@ -18,6 +19,10 @@ import (
 const DefaultRemotePath = "/tmp/script.sh"
 
 type config struct {
+	// An inline script to execute. Multiple strings are all executed
+	// in the context of a single shell.
+	Inline []string
+
 	// The local path of the shell script to upload and execute.
 	Path string
 
@@ -49,8 +54,30 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.ExecuteCommand = "chmod +x {{.Path}} && {{.Path}}"
 	}
 
+	if p.config.Inline != nil && len(p.config.Inline) == 0 {
+		p.config.Inline = nil
+	}
+
 	if p.config.RemotePath == "" {
 		p.config.RemotePath = DefaultRemotePath
+	}
+
+	errs := make([]error, 0)
+
+	if p.config.Path == "" && p.config.Inline == nil {
+		errs = append(errs, errors.New("Either a path or inline script must be specified."))
+	} else if p.config.Path != "" && p.config.Inline != nil {
+		errs = append(errs, errors.New("Only a path or an inline script can be specified, not both."))
+	}
+
+	if p.config.Path != "" {
+		if _, err := os.Stat(p.config.Path); err != nil {
+			errs = append(errs, fmt.Errorf("Bad script path: %s", err))
+		}
+	}
+
+	if len(errs) > 0 {
+		return &packer.MultiError{errs}
 	}
 
 	return nil

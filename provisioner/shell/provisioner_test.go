@@ -2,8 +2,16 @@ package shell
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
+	"os"
 	"testing"
 )
+
+func testConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"inline": []interface{}{"foo", "bar"},
+	}
+}
 
 func TestProvisioner_Impl(t *testing.T) {
 	var raw interface{}
@@ -14,15 +22,66 @@ func TestProvisioner_Impl(t *testing.T) {
 }
 
 func TestProvisionerPrepare_Defaults(t *testing.T) {
-	raw := map[string]interface{}{}
+	var p Provisioner
+	config := testConfig()
 
-	p := &Provisioner{}
-	err := p.Prepare(raw)
+	err := p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	if p.config.RemotePath != DefaultRemotePath {
 		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
+	}
+}
+
+func TestProvisionerPrepare_Path(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+	delete(config, "inline")
+
+	config["path"] = "/this/should/not/exist"
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good one
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config["path"] = tf.Name()
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_PathAndInline(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	delete(config, "inline")
+	delete(config, "path")
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with both
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config["inline"] = []interface{}{"foo"}
+	config["path"] = tf.Name()
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
 	}
 }
