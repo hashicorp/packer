@@ -1,9 +1,11 @@
 package virtualbox
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -46,13 +48,18 @@ func (d *VBox42Driver) SuppressMessages() error {
 }
 
 func (d *VBox42Driver) VBoxManage(args ...string) error {
+	var stdout, stderr bytes.Buffer
+
 	log.Printf("Executing VBoxManage: %#v", args)
 	cmd := exec.Command(d.VBoxManagePath, args...)
-	if err := cmd.Run(); err != nil {
-		return err
-	}
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
 
-	return nil
+	log.Printf("stdout: %s", strings.TrimSpace(stdout.String()))
+	log.Printf("stderr: %s", strings.TrimSpace(stderr.String()))
+
+	return err
 }
 
 func (d *VBox42Driver) Verify() error {

@@ -27,7 +27,7 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 	command := []string{
 		"createhd",
 		"--filename", path,
-		"--size", "40",
+		"--size", "40000",
 		"--format", format,
 		"--variant", "Standard",
 	}
@@ -52,7 +52,7 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 
 	// Attach the disk to the controller
 	command = []string{
-		"storagectl", vmName,
+		"storageattach", vmName,
 		"--storagectl", controllerName,
 		"--port", "0",
 		"--device", "0",
