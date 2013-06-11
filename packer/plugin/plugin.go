@@ -42,6 +42,9 @@ func serve(server *rpc.Server) (err error) {
 	log.Printf("Plugin minimum port: %d\n", minPort)
 	log.Printf("Plugin maximum port: %d\n", maxPort)
 
+	// Set the RPC port range
+	packrpc.PortRange(int(minPort), int(maxPort))
+
 	var address string
 	var listener net.Listener
 	for port := minPort; port <= maxPort; port++ {
