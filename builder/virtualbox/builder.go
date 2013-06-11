@@ -18,6 +18,7 @@ type Builder struct {
 }
 
 type config struct {
+	GuestOSType string `mapstructure:"guest_os_type"`
 	OutputDir string `mapstructure:"output_directory"`
 }
 
@@ -25,6 +26,10 @@ func (b *Builder) Prepare(raw interface{}) error {
 	var err error
 	if err := mapstructure.Decode(raw, &b.config); err != nil {
 		return err
+	}
+
+	if b.config.GuestOSType == "" {
+		b.config.GuestOSType = "Other"
 	}
 
 	if b.config.OutputDir == "" {
