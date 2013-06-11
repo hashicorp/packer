@@ -33,22 +33,6 @@ func TestClient(t *testing.T) {
 	}
 }
 
-func TestClient_Start_Once(t *testing.T) {
-	process := helperProcess("mock")
-	c := NewClient(&ClientConfig{Cmd: process})
-	defer c.Kill()
-
-	defer func() {
-		p := recover()
-		if p == nil {
-			t.Fatal("should've paniced")
-		}
-	}()
-
-	c.Start()
-	c.Start()
-}
-
 func TestClient_Start_Timeout(t *testing.T) {
 	config := &ClientConfig{
 		Cmd: helperProcess("start-timeout"),

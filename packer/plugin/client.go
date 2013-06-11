@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/packer/packer"
+	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"io"
 	"log"
+	"net/rpc"
 	"os"
 	"os/exec"
 	"strings"
@@ -20,9 +23,9 @@ var managedClients = make([]*client, 0, 5)
 type client struct {
 	config *ClientConfig
 	exited      bool
-	started     bool
-	startL      sync.Mutex
 	doneLogging bool
+	l           sync.Mutex
+	address     string
 }
 
 // ClientConfig is the configuration used to initialize a new
@@ -101,6 +104,50 @@ func (c *client) Exited() bool {
 	return c.exited
 }
 
+// Returns a builder implementation that is communicating over this
+// client. If the client hasn't been started, this will start it.
+func (c *client) Builder() (packer.Builder, error) {
+	client, err := c.rpcClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &cmdBuilder{packrpc.Builder(client), c}, nil
+}
+
+// Returns a command implementation that is communicating over this
+// client. If the client hasn't been started, this will start it.
+func (c *client) Command() (packer.Command, error) {
+	client, err := c.rpcClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &cmdCommand{packrpc.Command(client), c}, nil
+}
+
+// Returns a hook implementation that is communicating over this
+// client. If the client hasn't been started, this will start it.
+func (c *client) Hook() (packer.Hook, error) {
+	client, err := c.rpcClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &cmdHook{packrpc.Hook(client), c}, nil
+}
+
+// Returns a provisioner implementation that is communicating over this
+// client. If the client hasn't been started, this will start it.
+func (c *client) Provisioner() (packer.Provisioner, error) {
+	client, err := c.rpcClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &cmdProvisioner{packrpc.Provisioner(client), c}, nil
+}
+
 // End the executing subprocess (if it is running) and perform any cleanup
 // tasks necessary such as capturing any remaining logs and so on.
 //
@@ -136,13 +183,12 @@ func (c *client) Kill() {
 // Once a client has been started once, it cannot be started again, even if
 // it was killed.
 func (c *client) Start() (address string, err error) {
-	c.startL.Lock()
-	defer c.startL.Unlock()
+	c.l.Lock()
+	defer c.l.Unlock()
 
-	if c.started {
-		panic("plugin client already started once")
+	if c.address != "" {
+		return c.address, nil
 	}
-	c.started = true
 
 	env := []string{
 		fmt.Sprintf("PACKER_PLUGIN_MIN_PORT=%d", c.config.MinPort),
@@ -205,7 +251,8 @@ func (c *client) Start() (address string, err error) {
 		if line, lerr := stdout.ReadBytes('\n'); lerr == nil {
 			// Trim the address and reset the err since we were able
 			// to read some sort of address.
-			address = strings.TrimSpace(string(line))
+			c.address = strings.TrimSpace(string(line))
+			address = c.address
 			err = nil
 			break
 		}
@@ -242,4 +289,18 @@ func (c *client) logStderr(buf *bytes.Buffer) {
 
 	// Flag that we've completed logging for others
 	c.doneLogging = true
+}
+
+func (c *client) rpcClient() (*rpc.Client, error) {
+	address, err := c.Start()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := rpc.Dial("tcp", address)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }

@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"testing"
@@ -22,40 +21,31 @@ func (helperCommand) Synopsis() string {
 }
 
 func TestCommand_NoExist(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
+	defer c.Kill()
 
-	_, err := Command(exec.Command("i-should-never-ever-ever-exist"))
-	assert.NotNil(err, "should have an error")
-}
-
-func TestCommand_Good(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	command, err := Command(helperProcess("command"))
-	assert.Nil(err, "should start command properly")
-
-	assert.NotNil(command, "should have a command")
-	if command != nil {
-		result := command.Synopsis()
-		assert.Equal(result, "1", "should return result")
-
-		result = command.Help()
-		assert.Equal(result, "2", "should return result")
+	_, err := c.Command()
+	if err == nil {
+		t.Fatal("should have error")
 	}
 }
 
-func TestCommand_CommandExited(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+func TestCommand_Good(t *testing.T) {
+	c := NewClient(&ClientConfig{Cmd: helperProcess("command")})
+	defer c.Kill()
 
-	_, err := Command(helperProcess("im-a-command-that-doesnt-work"))
-	assert.NotNil(err, "should have an error")
-	assert.Equal(err.Error(), "plugin exited before we could connect", "be correct error")
-}
+	command, err := c.Command()
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
 
-func TestCommand_BadRPC(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+	result := command.Synopsis()
+	if result != "1" {
+		t.Errorf("synopsis not correct: %s", result)
+	}
 
-	_, err := Command(helperProcess("invalid-rpc-address"))
-	assert.NotNil(err, "should have an error")
-	assert.Equal(err.Error(), "missing port in address lolinvalid", "be correct error")
+	result = command.Help()
+	if result != "2" {
+		t.Errorf("help not correct: %s", result)
+	}
 }

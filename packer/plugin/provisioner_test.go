@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"testing"
@@ -16,15 +15,21 @@ func (helperProvisioner) Prepare(...interface{}) error {
 func (helperProvisioner) Provision(packer.Ui, packer.Communicator) {}
 
 func TestProvisioner_NoExist(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
+	defer c.Kill()
 
-	_, err := Provisioner(exec.Command("i-should-never-ever-ever-exist"))
-	assert.NotNil(err, "should have an error")
+	_, err := c.Provisioner()
+	if err == nil {
+		t.Fatal("should have error")
+	}
 }
 
 func TestProvisioner_Good(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
+	c := NewClient(&ClientConfig{Cmd: helperProcess("provisioner")})
+	defer c.Kill()
 
-	_, err := Provisioner(helperProcess("provisioner"))
-	assert.Nil(err, "should start provisioner properly")
+	_, err := c.Provisioner()
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
 }
