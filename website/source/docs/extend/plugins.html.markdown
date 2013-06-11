@@ -35,7 +35,7 @@ applications running.
 
 ## Installing Plugins
 
-Plugins are installed by modifying the core Packer configuration. Within
+Plugins are installed by modifying the [core Packer configuration](/docs/other/core-configuration.html). Within
 the core configuration, each component has a key/value mapping of the
 plugin name to the actual plugin binary.
 
