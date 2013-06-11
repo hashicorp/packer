@@ -7,7 +7,7 @@ import (
 
 type cmdCommand struct {
 	command packer.Command
-	client  *client
+	client  *Client
 }
 
 func (c *cmdCommand) Help() (result string) {

@@ -7,7 +7,7 @@ import (
 
 type cmdProvisioner struct {
 	p      packer.Provisioner
-	client *client
+	client *Client
 }
 
 func (c *cmdProvisioner) Prepare(configs ...interface{}) error {

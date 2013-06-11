@@ -7,7 +7,7 @@ import (
 
 type cmdBuilder struct {
 	builder packer.Builder
-	client  *client
+	client  *Client
 }
 
 func (b *cmdBuilder) Prepare(config interface{}) error {

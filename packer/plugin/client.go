@@ -18,9 +18,12 @@ import (
 
 // This is a slice of the "managed" clients which are cleaned up when
 // calling Cleanup
-var managedClients = make([]*client, 0, 5)
+var managedClients = make([]*Client, 0, 5)
 
-type client struct {
+// Client handles the lifecycle of a plugin application, determining its
+// RPC address, and returning various types of packer interface implementations
+// across the multi-process communication layer.
+type Client struct {
 	config *ClientConfig
 	exited      bool
 	doneLogging bool
@@ -81,7 +84,7 @@ func CleanupClients() {
 // the client is a managed client (created with NewManagedClient) you
 // can just call CleanupClients at the end of your program and they will
 // be properly cleaned.
-func NewClient(config *ClientConfig) (c *client) {
+func NewClient(config *ClientConfig) (c *Client) {
 	if config.MinPort == 0 && config.MaxPort == 0 {
 		config.MinPort = 10000
 		config.MaxPort = 25000
@@ -91,7 +94,7 @@ func NewClient(config *ClientConfig) (c *client) {
 		config.StartTimeout = 1 * time.Minute
 	}
 
-	c = &client{config: config}
+	c = &Client{config: config}
 	if config.Managed {
 		managedClients = append(managedClients, c)
 	}
@@ -100,13 +103,13 @@ func NewClient(config *ClientConfig) (c *client) {
 }
 
 // Tells whether or not the underlying process has exited.
-func (c *client) Exited() bool {
+func (c *Client) Exited() bool {
 	return c.exited
 }
 
 // Returns a builder implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *client) Builder() (packer.Builder, error) {
+func (c *Client) Builder() (packer.Builder, error) {
 	client, err := c.rpcClient()
 	if err != nil {
 		return nil, err
@@ -117,7 +120,7 @@ func (c *client) Builder() (packer.Builder, error) {
 
 // Returns a command implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *client) Command() (packer.Command, error) {
+func (c *Client) Command() (packer.Command, error) {
 	client, err := c.rpcClient()
 	if err != nil {
 		return nil, err
@@ -128,7 +131,7 @@ func (c *client) Command() (packer.Command, error) {
 
 // Returns a hook implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *client) Hook() (packer.Hook, error) {
+func (c *Client) Hook() (packer.Hook, error) {
 	client, err := c.rpcClient()
 	if err != nil {
 		return nil, err
@@ -139,7 +142,7 @@ func (c *client) Hook() (packer.Hook, error) {
 
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *client) Provisioner() (packer.Provisioner, error) {
+func (c *Client) Provisioner() (packer.Provisioner, error) {
 	client, err := c.rpcClient()
 	if err != nil {
 		return nil, err
@@ -154,7 +157,7 @@ func (c *client) Provisioner() (packer.Provisioner, error) {
 // This method blocks until the process successfully exits.
 //
 // This method can safely be called multiple times.
-func (c *client) Kill() {
+func (c *Client) Kill() {
 	cmd := c.config.Cmd
 
 	if cmd.Process == nil {
@@ -182,7 +185,7 @@ func (c *client) Kill() {
 // This method is safe to call multiple times. Subsequent calls have no effect.
 // Once a client has been started once, it cannot be started again, even if
 // it was killed.
-func (c *client) Start() (address string, err error) {
+func (c *Client) Start() (address string, err error) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
@@ -269,7 +272,7 @@ func (c *client) Start() (address string, err error) {
 	return
 }
 
-func (c *client) logStderr(buf *bytes.Buffer) {
+func (c *Client) logStderr(buf *bytes.Buffer) {
 	for done := false; !done; {
 		if c.Exited() {
 			done = true
@@ -291,7 +294,7 @@ func (c *client) logStderr(buf *bytes.Buffer) {
 	c.doneLogging = true
 }
 
-func (c *client) rpcClient() (*rpc.Client, error) {
+func (c *Client) rpcClient() (*rpc.Client, error) {
 	address, err := c.Start()
 	if err != nil {
 		return nil, err
