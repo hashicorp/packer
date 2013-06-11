@@ -1,8 +1,10 @@
 package virtualbox
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
+	"time"
 )
 
 // A driver is able to talk to VirtualBox and perform certain
@@ -27,6 +29,8 @@ func (d *VBox42Driver) SuppressMessages() error {
 	extraData := map[string]string{
 		"GUI/RegistrationData": "triesLeft=0",
 		"GUI/SuppressMessages": "confirmInputCapture,remindAboutAutoCapture,remindAboutMouseIntegrationOff,remindAboutMouseIntegrationOn,remindAboutWrongColorDepth",
+		"GUI/UpdateDate": fmt.Sprintf("1 d, %d-01-01, stable", time.Now().Year()+1),
+		"GUI/UpdateCheckCount": "60",
 	}
 
 	for k, v := range extraData {

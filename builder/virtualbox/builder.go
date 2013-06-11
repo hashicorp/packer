@@ -79,6 +79,7 @@ func (b *Builder) newDriver() (Driver, error) {
 		return nil, err
 	}
 
+	log.Printf("VBoxManage path: %s", vboxmanagePath)
 	driver := &VBox42Driver{vboxmanagePath}
 	if err := driver.Verify(); err != nil {
 		return nil, err
