@@ -3,6 +3,7 @@
 package shell
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"errors"
@@ -10,6 +11,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -51,7 +53,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x {{.Path}} && {{.Path}}"
+		p.config.ExecuteCommand = "sh {{.Path}}"
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -84,16 +86,48 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
-	ui.Say(fmt.Sprintf("Provisioning with shell script: %s", p.config.Path))
+	path := p.config.Path
 
-	log.Printf("Opening %s for reading", p.config.Path)
-	f, err := os.Open(p.config.Path)
+	// If we have an inline script, then turn that into a temporary
+	// shell script and use that.
+	if p.config.Inline != nil {
+		tf, err := ioutil.TempFile("", "packer-shell")
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
+			return
+		}
+		defer os.Remove(tf.Name())
+
+		// Set the path to the temporary file
+		path = tf.Name()
+
+		// Write our contents to it
+		writer := bufio.NewWriter(tf)
+		for _, command := range p.config.Inline {
+			if _, err := writer.WriteString(command+"\n"); err != nil {
+				ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
+				return
+			}
+		}
+
+		if err := writer.Flush(); err != nil {
+			ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
+			return
+		}
+
+		tf.Close()
+	}
+
+	ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
+
+	log.Printf("Opening %s for reading", path)
+	f, err := os.Open(path)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error opening shell script: %s", err))
 		return
 	}
 
-	log.Printf("Uploading %s => %s", p.config.Path, p.config.RemotePath)
+	log.Printf("Uploading %s => %s", path, p.config.RemotePath)
 	err = comm.Upload(p.config.RemotePath, f)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error uploading shell script: %s", err))
