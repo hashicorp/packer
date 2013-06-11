@@ -1,6 +1,7 @@
 package amazonebs
 
 import (
+	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -55,7 +56,8 @@ func (s *stepRunSourceInstance) Cleanup(state map[string]interface{}) {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	ui := state["ui"].(packer.Ui)
 
-	// TODO(mitchellh): error handling
 	ui.Say("Terminating the source AWS instance...")
-	ec2conn.TerminateInstances([]string{s.instance.InstanceId})
+	if _, err := ec2conn.TerminateInstances([]string{s.instance.InstanceId}); err != nil {
+		ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
+	}
 }
