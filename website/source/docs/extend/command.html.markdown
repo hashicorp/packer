@@ -13,6 +13,12 @@ perform new functionality.
 Prior to reading this page, it is assumed you have read the page on
 [plugin development basics](/docs/extend/developing-plugins.html).
 
+Command plugins implement the `packer.Command` interface and are served
+using the `plugin.ServeCommand` function. Commands actually have no control
+over what keyword invokes the command with the `packer` binary. The keyword
+to invoke the command depends on how the plugin is installed and configured
+in the core Packer configuration.
+
 <div class="alert alert-block">
   <strong>Warning!</strong> This is an advanced topic. If you're new to Packer,
   we recommend getting a bit more comfortable before you dive into writing
