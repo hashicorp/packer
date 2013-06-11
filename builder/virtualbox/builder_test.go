@@ -32,4 +32,8 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	if b.config.OutputDir != "virtualbox" {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
+
+	if b.config.VMName != "packer" {
+		t.Errorf("bad vm name: %s", b.config.VMName)
+	}
 }

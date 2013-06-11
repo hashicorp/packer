@@ -14,6 +14,9 @@ type Driver interface {
 	// suppress any annoying popups from VirtualBox.
 	SuppressMessages() error
 
+	// VBoxManage executes the given VBoxManage command
+	VBoxManage(...string) error
+
 	// Verify checks to make sure that this driver should function
 	// properly. If there is any indication the driver can't function,
 	// this will return an error.
@@ -34,7 +37,7 @@ func (d *VBox42Driver) SuppressMessages() error {
 	}
 
 	for k, v := range extraData {
-		if err := d.vboxmanage("setextradata", "global", k, v); err != nil {
+		if err := d.VBoxManage("setextradata", "global", k, v); err != nil {
 			return err
 		}
 	}
@@ -42,16 +45,16 @@ func (d *VBox42Driver) SuppressMessages() error {
 	return nil
 }
 
-func (d *VBox42Driver) Verify() error {
-	return nil
-}
-
-func (d *VBox42Driver) vboxmanage(args ...string) error {
+func (d *VBox42Driver) VBoxManage(args ...string) error {
 	log.Printf("Executing VBoxManage: %#v", args)
 	cmd := exec.Command(d.VBoxManagePath, args...)
 	if err := cmd.Run(); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (d *VBox42Driver) Verify() error {
 	return nil
 }

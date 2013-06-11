@@ -20,6 +20,7 @@ type Builder struct {
 type config struct {
 	GuestOSType string `mapstructure:"guest_os_type"`
 	OutputDir string `mapstructure:"output_directory"`
+	VMName string `mapstructure:"vm_name"`
 }
 
 func (b *Builder) Prepare(raw interface{}) error {
@@ -34,6 +35,10 @@ func (b *Builder) Prepare(raw interface{}) error {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = "virtualbox"
+	}
+
+	if b.config.VMName == "" {
+		b.config.VMName = "packer"
 	}
 
 	errs := make([]error, 0)
@@ -54,6 +59,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 	steps := []multistep.Step{
 		new(stepPrepareOutputDir),
 		new(stepSuppressMessages),
+		new(stepCreateVM),
 	}
 
 	// Setup the state bag
