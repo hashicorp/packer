@@ -102,18 +102,62 @@ to respond to these cancellations and clean up after itself.
 
 ## Creating an Artifact
 
-TODO
+The `Run` method is expected to return an implementation of the
+`packer.Artifact` interface. Each builder must create their own
+implementation. The interface is very simple and the documentation on the
+interface is quite clear.
+
+The only part of an artifact that may be confusing is the `BuilderId`
+method. This method must return an absolutely unique ID for the builder.
+In general, I follow the practice of making the ID contain my GitHub username
+and then the platform it is building for. For example, the builder ID of
+the VMware builder is "mitchellh.vmware" or something similar.
+
+Post-processors use the builder ID value in order to make some assumptions
+about the artifact results, so it is important it never changes.
+
+Other than the builder ID, the rest should be self-explanatory by reading
+the [packer.Artifact interface documentation](#).
 
 ## Hooks
 
-TODO
+TODO: Hooks are still undergoing some thought...
 
 ## Provisioning
 
-TODO
+Packer has built-in support for provisioning, but the moment when provisioning
+runs must be invoked by the builder itself, since only the builder knows
+when the machine is running and ready for communication.
+
+When the machine is ready to be provisioned, run the `packer.HookProvision`
+hook, making sure the communicator is not nil, since this is required for
+provisioners. An example of calling the hook is shown below:
+
+<pre class="prettyprint">
+hook.Run(packer.HookProvision, ui, comm, nil)
+</pre>
+
+At this point, Packer will run the provisioners and no additional work
+is necessary.
 
 ## Caching Files
 
-TODO
+It is common for some builders to deal with very large files, or files that
+take a long time to generate. For example, the VMware builder has the capability
+to download the operating system ISO from the internet. This is timely process,
+so it would be convenient to cache the file. This sort of caching is a core
+part of Packer that is exposed to builders.
 
+The cache interface is `packer.Cache`. It behaves much like a Go
+[RWMutex](http://golang.org/pkg/sync/#RWMutex). The builder requests a "lock"
+on certain cache keys, and is given exclusive access to that key for the
+duration of the lock. This locking mechanism allows multiple builders to
+share cache data even though they're running in parallel.
 
+For example, both the VMware and VirtualBox support downloading an operating
+system ISO from the internet. Most of the time, this ISO is identical. The
+locking mechanisms of the cache allow one of the builders to download it
+only once, but allow both builders to share the downloaded file.
+
+The [documentation for packer.Cache](#) is
+very detailed in how it works.
