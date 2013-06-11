@@ -4,7 +4,7 @@ layout: "docs"
 
 # Packer Plugins
 
-Plugins allow Packer new functionality to be added to Packer without
+Plugins allow new functionality to be added to Packer without
 modifying the core source code. Packer plugins are able to add new
 commands, builders, provisioners, hooks, and more. In fact, much of Packer
 itself is implemented by writing plugins that are simply distributed with
@@ -14,7 +14,7 @@ to load with Packer.
 
 This page will cover how to install and use plugins. If you're interested
 in developing plugins, the documentation for that is available the
-[developing plugins](#) page.
+[developing plugins](/docs/extend/developing-plugins.html) page.
 
 Because Packer is so young, there is no official listing of available
 Packer plugins. Plugins are best found via Google. Typically, searching
@@ -65,13 +65,13 @@ from the core Packer configuration.
 In addition to builders, other types of plugins can be installed. The full
 list is below:
 
-* "builders" - A key/value pair of builder type to the builder plugin
+* `builders` - A key/value pair of builder type to the builder plugin
   application.
 
-* "commands" - A key/value pair of the command name to the command plugin
+* `commands` - A key/value pair of the command name to the command plugin
   application. The command name is what is executed on the command line, like
   `packer COMMAND`.
 
-* "provisioners" - A key/value pair of the provisioner type to the
+* `provisioners` - A key/value pair of the provisioner type to the
   provisioner plugin application. The provisioner type is the value of the
   "type" configuration used within templates.
