@@ -14,6 +14,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"time"
 )
 
 // The unique ID for this builder
@@ -30,9 +31,12 @@ type config struct {
 	InstanceType string `mapstructure:"instance_type"`
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      int    `mapstructure:"ssh_port"`
+	SSHTimeout   time.Duration
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
+
+	RawSSHTimeout string `mapstructure:"ssh_timeout"`
 }
 
 type Builder struct {
@@ -40,14 +44,18 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raw interface{}) (err error) {
-	err = mapstructure.Decode(raw, &b.config)
+func (b *Builder) Prepare(raw interface{}) error {
+	err := mapstructure.Decode(raw, &b.config)
 	if err != nil {
-		return
+		return err
 	}
 
 	if b.config.SSHPort == 0 {
 		b.config.SSHPort = 22
+	}
+
+	if b.config.RawSSHTimeout == "" {
+		b.config.RawSSHTimeout = "1m"
 	}
 
 	// Accumulate any errors
@@ -79,12 +87,17 @@ func (b *Builder) Prepare(raw interface{}) (err error) {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
 	}
 
+	b.config.SSHTimeout, err = time.ParseDuration(b.config.RawSSHTimeout)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
+	}
+
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
 	}
 
 	log.Printf("Config: %+v", b.config)
-	return
+	return nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {

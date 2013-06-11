@@ -39,17 +39,50 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 		},
 	}
 
-	// Try to connect for SSH a few times
-	ui.Say("Connecting to the instance via SSH...")
-	for i := 0; i < 5; i++ {
-		time.Sleep(time.Duration(i) * time.Second)
+	// Start trying to connect to SSH
+	connected := make(chan bool, 1)
+	connectQuit := make(chan bool, 1)
+	defer func() {
+		connectQuit <- true
+	}()
 
-		log.Printf(
-			"Opening TCP conn for SSH to %s:%d (attempt %d)",
-			instance.DNSName, config.SSHPort, i+1)
-		s.conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
-		if err != nil {
-			continue
+	go func() {
+		var err error
+
+		ui.Say("Connecting to the instance via SSH...")
+		attempts := 0
+		for {
+			select {
+			case <-connectQuit:
+				return
+			default:
+			}
+
+			attempts += 1
+			log.Printf(
+				"Opening TCP conn for SSH to %s:%d (attempt %d)",
+				instance.DNSName, config.SSHPort, attempts)
+			s.conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
+			if err == nil {
+				break
+			}
+		}
+
+		connected <- true
+	}()
+
+	log.Printf("Waiting up to %s for SSH connection", config.SSHTimeout)
+	timeout := time.After(config.SSHTimeout)
+
+	ConnectWaitLoop:
+	for {
+		select {
+		case <-connected:
+			// We connected. Just break the loop.
+			break ConnectWaitLoop
+		case <-timeout:
+			ui.Error("Timeout while waiting to connect to SSH.")
+			return multistep.ActionHalt
 		}
 	}
 
