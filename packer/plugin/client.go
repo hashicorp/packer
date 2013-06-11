@@ -24,7 +24,7 @@ var managedClients = make([]*Client, 0, 5)
 // RPC address, and returning various types of packer interface implementations
 // across the multi-process communication layer.
 type Client struct {
-	config *ClientConfig
+	config      *ClientConfig
 	exited      bool
 	doneLogging bool
 	l           sync.Mutex

@@ -5,8 +5,8 @@ package shell
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"errors"
+	"fmt"
 	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
@@ -104,7 +104,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
 		for _, command := range p.config.Inline {
-			if _, err := writer.WriteString(command+"\n"); err != nil {
+			if _, err := writer.WriteString(command + "\n"); err != nil {
 				ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
 				return
 			}

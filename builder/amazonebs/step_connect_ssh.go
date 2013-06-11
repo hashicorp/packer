@@ -74,7 +74,7 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 	log.Printf("Waiting up to %s for SSH connection", config.SSHTimeout)
 	timeout := time.After(config.SSHTimeout)
 
-	ConnectWaitLoop:
+ConnectWaitLoop:
 	for {
 		select {
 		case <-connected:

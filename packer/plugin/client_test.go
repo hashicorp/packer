@@ -35,7 +35,7 @@ func TestClient(t *testing.T) {
 
 func TestClient_Start_Timeout(t *testing.T) {
 	config := &ClientConfig{
-		Cmd: helperProcess("start-timeout"),
+		Cmd:          helperProcess("start-timeout"),
 		StartTimeout: 50 * time.Millisecond,
 	}
 
