@@ -16,14 +16,16 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	config := state["config"].(config)
 	ec2conn := state["ec2"].(*ec2.EC2)
 	keyName := state["keyPair"].(string)
+	securityGroupId := state["securityGroupId"].(string)
 	ui := state["ui"].(packer.Ui)
 
 	runOpts := &ec2.RunInstances{
-		KeyName:      keyName,
-		ImageId:      config.SourceAmi,
-		InstanceType: config.InstanceType,
-		MinCount:     0,
-		MaxCount:     0,
+		KeyName:        keyName,
+		ImageId:        config.SourceAmi,
+		InstanceType:   config.InstanceType,
+		MinCount:       0,
+		MaxCount:       0,
+		SecurityGroups: []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
 	}
 
 	ui.Say("Launching a source AWS instance...")

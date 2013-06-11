@@ -133,6 +133,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 	// Build the steps
 	steps := []multistep.Step{
 		&stepKeyPair{},
+		&stepSecurityGroup{},
 		&stepRunSourceInstance{},
 		&stepConnectSSH{},
 		&stepProvision{},
