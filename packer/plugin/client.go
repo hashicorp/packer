@@ -20,6 +20,8 @@ var managedClients = make([]*client, 0, 5)
 type client struct {
 	config *ClientConfig
 	exited      bool
+	started     bool
+	startL      sync.Mutex
 	doneLogging bool
 }
 
@@ -86,12 +88,7 @@ func NewClient(config *ClientConfig) (c *client) {
 		config.StartTimeout = 1 * time.Minute
 	}
 
-	c = &client{
-		config,
-		false,
-		false,
-	}
-
+	c = &client{config: config}
 	if config.Managed {
 		managedClients = append(managedClients, c)
 	}
@@ -139,8 +136,13 @@ func (c *client) Kill() {
 // Once a client has been started once, it cannot be started again, even if
 // it was killed.
 func (c *client) Start() (address string, err error) {
-	// TODO: Make only run once
-	// TODO: Mutex
+	c.startL.Lock()
+	defer c.startL.Unlock()
+
+	if c.started {
+		panic("plugin client already started once")
+	}
+	c.started = true
 
 	env := []string{
 		fmt.Sprintf("PACKER_PLUGIN_MIN_PORT=%d", c.config.MinPort),
