@@ -106,5 +106,7 @@ func (c *config) pluginClient(path string) *plugin.Client {
 	var config plugin.ClientConfig
 	config.Cmd = exec.Command(path)
 	config.Managed = true
+	config.MinPort = c.PluginMinPort
+	config.MaxPort = c.PluginMaxPort
 	return plugin.NewClient(&config)
 }
