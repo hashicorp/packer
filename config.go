@@ -18,6 +18,7 @@ const defaultConfig = `
 
 	"builders": {
 		"amazon-ebs": "packer-builder-amazon-ebs",
+		"virtualbox": "packer-builder-virtualbox",
 		"vmware": "packer-builder-vmware"
 	},
 
