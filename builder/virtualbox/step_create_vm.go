@@ -7,6 +7,9 @@ import (
 )
 
 // This step creates the actual virtual machine.
+//
+// Produces:
+//   vmName string - The name of the VM
 type stepCreateVM struct{
 	vmName string
 }
@@ -40,6 +43,9 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 			s.vmName = name
 		}
 	}
+
+	// Set the final name in the state bag so others can use it
+	state["vmName"] = s.vmName
 
 	return multistep.ActionContinue
 }

@@ -19,6 +19,7 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
+	vmName := state["vmName"].(string)
 
 	format := "VDI"
 	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName, strings.ToLower(format)))
@@ -40,6 +41,28 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 
 	// Set the path so that we can delete it later
 	s.diskPath = path
+
+	// Add the IDE controller so we can later attach the disk
+	controllerName := "IDE Controller"
+	err = driver.VBoxManage("storagectl", vmName, "--name", controllerName, "--add", "ide")
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error creating disk controller: %s", err))
+		return multistep.ActionHalt
+	}
+
+	// Attach the disk to the controller
+	command = []string{
+		"storagectl", vmName,
+		"--storagectl", controllerName,
+		"--port", "0",
+		"--device", "0",
+		"--type", "hdd",
+		"--medium", path,
+	}
+	if err := driver.VBoxManage(command...); err != nil {
+		ui.Error(fmt.Sprintf("Error attaching hard drive: %s", err))
+		return multistep.ActionHalt
+	}
 
 	time.Sleep(15 * time.Second)
 	return multistep.ActionContinue
