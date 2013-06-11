@@ -66,6 +66,10 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 			if err == nil {
 				break
 			}
+
+			// A brief sleep so we're not being overly zealous attempting
+			// to connect to the instance.
+			time.Sleep(500 * time.Millisecond)
 		}
 
 		connected <- true
