@@ -89,7 +89,7 @@ func loadConfig() (*config, error) {
 			return nil, err
 		}
 
-		configFile = filepath.Join(u.HomeDir, ".packerrc")
+		configFile = filepath.Join(u.HomeDir, ".packerconfig")
 		mustExist = false
 	}
 
