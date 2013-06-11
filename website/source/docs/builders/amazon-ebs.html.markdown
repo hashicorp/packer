@@ -62,6 +62,10 @@ Optional:
 * `ssh_port` (int) - The port that SSH will be available on. This defaults
   to port 22.
 
+* `ssh_timeout` (string) - The time to wait for SSH to become available
+  before timing out. The format of this value is a duration such as "5s"
+  or "5m". The default SSH timeout is "1m", or one minute.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
