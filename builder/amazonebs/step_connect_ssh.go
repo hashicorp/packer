@@ -83,6 +83,11 @@ ConnectWaitLoop:
 		case <-timeout:
 			ui.Error("Timeout while waiting to connect to SSH.")
 			return multistep.ActionHalt
+		case <-time.After(1 * time.Second):
+			if _, ok := state[multistep.StateCancelled]; ok {
+				log.Println("Interrupt detected, quitting waiting for SSH.")
+				return multistep.ActionHalt
+			}
 		}
 	}
 
