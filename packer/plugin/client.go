@@ -42,7 +42,7 @@ type ClientConfig struct {
 	// plugin package or not. If true, then by calling CleanupClients,
 	// it will automatically be cleaned up. Otherwise, the client
 	// user is fully responsible for making sure to Kill all plugin
-	// clients.
+	// clients. By default the client is _not_ managed.
 	Managed bool
 
 	// The minimum and maximum port to use for communicating with

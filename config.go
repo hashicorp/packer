@@ -66,38 +66,45 @@ func (c *config) LoadBuilder(name string) (packer.Builder, error) {
 		return nil, nil
 	}
 
-	return plugin.Builder(exec.Command(bin))
+	return c.pluginClient(bin).Builder()
 }
 
 // This is a proper packer.CommandFunc that can be used to load packer.Command
 // implementations from the defined plugins.
 func (c *config) LoadCommand(name string) (packer.Command, error) {
 	log.Printf("Loading command: %s\n", name)
-	commandBin, ok := c.Commands[name]
+	bin, ok := c.Commands[name]
 	if !ok {
 		log.Printf("Command not found: %s\n", name)
 		return nil, nil
 	}
 
-	return plugin.Command(exec.Command(commandBin))
+	return c.pluginClient(bin).Command()
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
 // to load packer.Hook implementations from the defined plugins.
 func (c *config) LoadHook(name string) (packer.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
-	return plugin.Hook(exec.Command(name))
+	return c.pluginClient(name).Hook()
 }
 
 // This is a proper packer.ProvisionerFunc that can be used to load
 // packer.Provisioner implementations from defined plugins.
 func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
 	log.Printf("Loading provisioner: %s\n", name)
-	provBin, ok := c.Provisioners[name]
+	bin, ok := c.Provisioners[name]
 	if !ok {
 		log.Printf("Provisioner not found: %s\n", name)
 		return nil, nil
 	}
 
-	return plugin.Provisioner(exec.Command(provBin))
+	return c.pluginClient(bin).Provisioner()
+}
+
+func (c *config) pluginClient(path string) *plugin.Client {
+	var config plugin.ClientConfig
+	config.Cmd = exec.Command(path)
+	config.Managed = true
+	return plugin.NewClient(&config)
 }
