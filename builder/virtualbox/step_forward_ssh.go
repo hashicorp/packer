@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net"
-	"time"
 )
 
 // This step adds a NAT port forwarding definition so that SSH is available
@@ -52,7 +51,6 @@ func (s *stepForwardSSH) Run(state map[string]interface{}) multistep.StepAction 
 	// Save the port we're using so that future steps can use it
 	state["sshHostPort"] = sshHostPort
 
-	time.Sleep(15 * time.Second)
 	return multistep.ActionContinue
 }
 
