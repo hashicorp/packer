@@ -42,7 +42,7 @@ func (b *build) Prepare(ui packer.Ui) (err error) {
 	args := &BuildPrepareArgs{serveSingleConn(server)}
 
 	if cerr := b.client.Call("Build.Prepare", args, &err); cerr != nil {
-		panic(cerr)
+		return cerr
 	}
 
 	return
