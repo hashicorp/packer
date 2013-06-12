@@ -9,8 +9,8 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"iso_md5": "foo",
-		"iso_url": "http://www.google.com/",
+		"iso_md5":      "foo",
+		"iso_url":      "http://www.google.com/",
 		"ssh_username": "foo",
 	}
 }

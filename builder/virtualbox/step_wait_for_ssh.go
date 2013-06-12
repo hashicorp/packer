@@ -115,10 +115,25 @@ func (s *stepWaitForSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 			},
 		}
 
-		comm, err = ssh.New(nc, sshConfig)
-		if err != nil {
-			log.Printf("SSH connection fail: %s", err)
-			nc.Close()
+		sshConnectSuccess := make(chan bool, 1)
+		go func() {
+			comm, err = ssh.New(nc, sshConfig)
+			if err != nil {
+				log.Printf("SSH connection fail: %s", err)
+				sshConnectSuccess <- false
+				return
+			}
+
+			sshConnectSuccess <- true
+		}()
+
+		select {
+		case success := <-sshConnectSuccess:
+			if !success {
+				continue
+			}
+		case <-time.After(5 * time.Second):
+			log.Printf("SSH handshake timeout. Trying again.")
 			continue
 		}
 
