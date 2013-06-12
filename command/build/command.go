@@ -139,10 +139,16 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		go func(b packer.Build) {
 			defer wg.Done()
 
+			var err error
 			log.Printf("Starting build run: %s", b.Name())
 			ui := buildUis[b.Name()]
-			artifacts[b.Name()] = b.Run(ui, env.Cache())
-			ui.Say("Build finished.")
+			artifacts[b.Name()], err = b.Run(ui, env.Cache())
+
+			if err != nil {
+				ui.Error(fmt.Sprintf("Build errored: %s", err))
+			} else {
+				ui.Say("Build finished.")
+			}
 		}(b)
 	}
 

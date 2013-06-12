@@ -169,7 +169,7 @@ func (b *Builder) Prepare(raw interface{}) error {
 	return nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	steps := []multistep.Step{
 		new(stepDownloadISO),
 		new(stepPrepareOutputDir),
@@ -197,7 +197,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 	b.runner = &multistep.BasicRunner{Steps: steps}
 	b.runner.Run(state)
 
-	return nil
+	return nil, nil
 }
 
 func (b *Builder) Cancel() {

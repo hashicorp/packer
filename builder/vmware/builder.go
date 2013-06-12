@@ -184,7 +184,7 @@ func (b *Builder) Prepare(raw interface{}) error {
 	return nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -216,11 +216,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 
 	// If we were interrupted or cancelled, then just exit.
 	if _, ok := state[multistep.StateCancelled]; ok {
-		return nil
+		return nil, nil
 	}
 
 	if _, ok := state[multistep.StateHalted]; ok {
-		return nil
+		return nil, nil
 	}
 
 	// Compile the artifact list
@@ -231,11 +231,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 	}
 
 	if err := filepath.Walk(b.config.OutputDir, visit); err != nil {
-		ui.Error(fmt.Sprintf("Error collecting result files: %s", err))
-		return nil
+		return nil, err
 	}
 
-	return &Artifact{b.config.OutputDir, files}
+	return &Artifact{b.config.OutputDir, files}, nil
 }
 
 func (b *Builder) Cancel() {

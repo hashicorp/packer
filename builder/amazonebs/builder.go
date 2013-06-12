@@ -100,21 +100,7 @@ func (b *Builder) Prepare(raw interface{}) error {
 	return nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
-	// Basic sanity checks. These are panics now because the Prepare
-	// method should verify these exist and such.
-	if b.config.AccessKey == "" {
-		panic("access key not filled in")
-	}
-
-	if b.config.SecretKey == "" {
-		panic("secret key not filled in")
-	}
-
-	if b.config.Region == "" {
-		panic("region not filled in")
-	}
-
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	region, ok := aws.Regions[b.config.Region]
 	if !ok {
 		panic("region not found")
@@ -147,11 +133,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 
 	// If there are no AMIs, then jsut return
 	if _, ok := state["amis"]; !ok {
-		return nil
+		return nil, nil
 	}
 
 	// Build the artifact and return it
-	return &artifact{state["amis"].(map[string]string)}
+	return &artifact{state["amis"].(map[string]string)}, nil
 }
 
 func (b *Builder) Cancel() {
