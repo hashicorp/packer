@@ -14,13 +14,26 @@ func testUi() *ReaderWriterUi {
 }
 
 func TestColoredUi(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	bufferUi := testUi()
-	ui := &ColoredUi{UiColorRed, bufferUi}
+	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi}
 
 	ui.Say("foo")
-	assert.Equal(readWriter(bufferUi), "\033[1;31;40mfoo\033[0m\n", "should have color")
+	result := readWriter(bufferUi)
+	if result != "\033[1;33;40mfoo\033[0m\n" {
+		t.Fatalf("invalid output: %s", result)
+	}
+
+	ui.Message("foo")
+	result = readWriter(bufferUi)
+	if result != "\033[0;33;40mfoo\033[0m\n" {
+		t.Fatalf("invalid output: %s", result)
+	}
+
+	ui.Error("foo")
+	result = readWriter(bufferUi)
+	if result != "\033[1;31;40mfoo\033[0m\n" {
+		t.Fatalf("invalid output: %s", result)
+	}
 }
 
 func TestPrefixedUi(t *testing.T) {

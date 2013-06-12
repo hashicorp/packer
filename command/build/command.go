@@ -101,8 +101,8 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		var ui packer.Ui
 
 		ui = &packer.ColoredUi{
-			colors[i%len(colors)],
-			env.Ui(),
+			Color: colors[i%len(colors)],
+			Ui: env.Ui(),
 		}
 
 		ui = &packer.PrefixedUi{

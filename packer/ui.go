@@ -28,8 +28,9 @@ type Ui interface {
 
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
-	Color UiColor
-	Ui    Ui
+	Color      UiColor
+	ErrorColor UiColor
+	Ui         Ui
 }
 
 // PrefixedUi is a UI that wraps another UI implementation and adds a
@@ -48,24 +49,29 @@ type ReaderWriterUi struct {
 }
 
 func (u *ColoredUi) Say(message string) {
-	u.Ui.Say(u.colorize(message, true))
+	u.Ui.Say(u.colorize(message, u.Color, true))
 }
 
 func (u *ColoredUi) Message(message string) {
-	u.Ui.Message(u.colorize(message, false))
+	u.Ui.Message(u.colorize(message, u.Color, false))
 }
 
 func (u *ColoredUi) Error(message string) {
-	u.Ui.Error(u.colorize(message, false))
+	color := u.ErrorColor
+	if color == 0 {
+		color = UiColorRed
+	}
+
+	u.Ui.Error(u.colorize(message, color, true))
 }
 
-func (u *ColoredUi) colorize(message string, bold bool) string {
+func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 	attr := 0
 	if bold {
 		attr = 1
 	}
 
-	return fmt.Sprintf("\033[%d;%d;40m%s\033[0m", attr, u.Color, message)
+	return fmt.Sprintf("\033[%d;%d;40m%s\033[0m", attr, color, message)
 }
 
 func (u *PrefixedUi) Say(message string) {
