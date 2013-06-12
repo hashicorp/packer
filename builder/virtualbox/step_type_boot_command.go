@@ -80,6 +80,7 @@ func scancodes(message string) []string {
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
+	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 	scancodeIndex := make(map[string]uint)
 	scancodeIndex["1234567890-="] = 0x02
 	scancodeIndex["!@#$%^&*()_+"] = 0x02
