@@ -49,6 +49,9 @@ func (s *stepForwardSSH) Run(state map[string]interface{}) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
+	// Save the port we're using so that future steps can use it
+	state["sshHostPort"] = sshHostPort
+
 	time.Sleep(15 * time.Second)
 	return multistep.ActionContinue
 }
