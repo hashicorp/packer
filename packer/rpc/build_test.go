@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"cgl.tideland.biz/asserts"
+	"errors"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
 	"testing"
@@ -17,6 +18,8 @@ type testBuild struct {
 	runCache      packer.Cache
 	runUi         packer.Ui
 	cancelCalled  bool
+
+	errRunResult bool
 }
 
 func (b *testBuild) Name() string {
@@ -34,7 +37,12 @@ func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, erro
 	b.runCalled = true
 	b.runCache = cache
 	b.runUi = ui
-	return testBuildArtifact, nil
+
+	if b.errRunResult {
+		return nil, errors.New("foo")
+	} else {
+		return testBuildArtifact, nil
+	}
 }
 
 func (b *testBuild) Cancel() {
@@ -69,8 +77,9 @@ func TestBuildRPC(t *testing.T) {
 	// Test Run
 	cache := new(testCache)
 	ui = new(testUi)
-	bClient.Run(ui, cache)
+	_, err = bClient.Run(ui, cache)
 	assert.True(b.runCalled, "run should be called")
+	assert.Nil(err, "should not error")
 
 	// Test the UI given to run, which should be fully functional
 	if b.runCalled {
@@ -81,6 +90,11 @@ func TestBuildRPC(t *testing.T) {
 		assert.True(ui.sayCalled, "say should be called")
 		assert.Equal(ui.sayMessage, "format", "message should be correct")
 	}
+
+	// Test run with an error
+	b.errRunResult = true
+	_, err = bClient.Run(ui, cache)
+	assert.NotNil(err, "should not nil")
 
 	// Test Cancel
 	bClient.Cancel()

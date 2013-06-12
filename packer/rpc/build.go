@@ -57,12 +57,12 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, error) {
 
 	var reply string
 	if err := b.client.Call("Build.Run", args, &reply); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	client, err := rpc.Dial("tcp", reply)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return Artifact(client), nil
@@ -97,7 +97,7 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *string) error {
 
 	artifact, err := b.build.Run(&Ui{client}, Cache(client))
 	if err != nil {
-		return err
+		return NewBasicError(err)
 	}
 
 	// Wrap the artifact
