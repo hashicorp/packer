@@ -30,6 +30,7 @@ type BuilderRunArgs struct {
 }
 
 type BuilderRunResponse struct {
+	Err        error
 	RPCAddress string
 }
 
@@ -46,7 +47,7 @@ func (b *builder) Prepare(config interface{}) (err error) {
 	return
 }
 
-func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
+func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Create and start the server for the Build and UI
 	server := rpc.NewServer()
 	RegisterCache(server, cache)
@@ -55,7 +56,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 
 	// Create a server for the response
 	responseL := netListenerInRange(portRangeMin, portRangeMax)
-	artifactAddress := make(chan string)
+	runResponseCh := make(chan *BuilderRunResponse)
 	go func() {
 		defer responseL.Close()
 
@@ -72,7 +73,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 			log.Panic(err)
 		}
 
-		artifactAddress <- response.RPCAddress
+		runResponseCh <- &response
 	}()
 
 	args := &BuilderRunArgs{
@@ -81,20 +82,24 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 	}
 
 	if err := b.client.Call("Builder.Run", args, new(interface{})); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	address := <-artifactAddress
-	if address == "" {
-		return nil
+	response := <-runResponseCh
+	if response.Err != nil {
+		return nil, response.Err
 	}
 
-	client, err := rpc.Dial("tcp", address)
+	if response.RPCAddress == "" {
+		return nil, nil
+	}
+
+	client, err := rpc.Dial("tcp", response.RPCAddress)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return Artifact(client)
+	return Artifact(client), nil
 }
 
 func (b *builder) Cancel() {
@@ -132,17 +137,24 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 		cache := Cache(client)
 		hook := Hook(client)
 		ui := &Ui{client}
-		artifact := b.builder.Run(ui, hook, cache)
+		artifact, responseErr := b.builder.Run(ui, hook, cache)
 		responseAddress := ""
 
-		if artifact != nil {
+		if responseErr == nil && artifact != nil {
 			// Wrap the artifact
 			server := rpc.NewServer()
 			RegisterArtifact(server, artifact)
 			responseAddress = serveSingleConn(server)
 		}
 
-		responseWriter.Encode(&BuilderRunResponse{responseAddress})
+		if responseErr != nil {
+			responseErr = NewBasicError(responseErr)
+		}
+
+		err := responseWriter.Encode(&BuilderRunResponse{responseErr, responseAddress})
+		if err != nil {
+			panic(err)
+		}
 	}()
 
 	return nil

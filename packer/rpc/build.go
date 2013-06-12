@@ -48,7 +48,7 @@ func (b *build) Prepare(ui packer.Ui) (err error) {
 	return
 }
 
-func (b *build) Run(ui packer.Ui, cache packer.Cache) packer.Artifact {
+func (b *build) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, error) {
 	// Create and start the server for the UI
 	server := rpc.NewServer()
 	RegisterCache(server, cache)
@@ -65,7 +65,7 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) packer.Artifact {
 		panic(err)
 	}
 
-	return Artifact(client)
+	return Artifact(client), nil
 }
 
 func (b *build) Cancel() {
@@ -95,7 +95,10 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *string) error {
 		return err
 	}
 
-	artifact := b.build.Run(&Ui{client}, Cache(client))
+	artifact, err := b.build.Run(&Ui{client}, Cache(client))
+	if err != nil {
+		return err
+	}
 
 	// Wrap the artifact
 	server := rpc.NewServer()

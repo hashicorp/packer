@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"cgl.tideland.biz/asserts"
+	"errors"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
 	"testing"
@@ -18,6 +19,7 @@ type testBuilder struct {
 	runUi         packer.Ui
 	cancelCalled  bool
 
+	errRunResult bool
 	nilRunResult bool
 }
 
@@ -27,16 +29,18 @@ func (b *testBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
+func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	b.runCache = cache
 	b.runCalled = true
 	b.runHook = hook
 	b.runUi = ui
 
-	if !b.nilRunResult {
-		return testBuilderArtifact
+	if b.errRunResult {
+		return nil, errors.New("foo")
+	} else if b.nilRunResult {
+		return nil, nil
 	} else {
-		return nil
+		return testBuilderArtifact, nil
 	}
 }
 
@@ -70,7 +74,8 @@ func TestBuilderRPC(t *testing.T) {
 	cache := new(testCache)
 	hook := &testHook{}
 	ui := &testUi{}
-	artifact := bClient.Run(ui, hook, cache)
+	artifact, err := bClient.Run(ui, hook, cache)
+	assert.Nil(err, "should have no error")
 	assert.True(b.runCalled, "runs hould be called")
 
 	if b.runCalled {
@@ -89,8 +94,16 @@ func TestBuilderRPC(t *testing.T) {
 
 	// Test run with nil result
 	b.nilRunResult = true
-	artifact = bClient.Run(ui, hook, cache)
+	artifact, err = bClient.Run(ui, hook, cache)
 	assert.Nil(artifact, "should be nil")
+	assert.Nil(err, "should have no error")
+
+	// Test with an error
+	b.errRunResult = true
+	b.nilRunResult = false
+	artifact, err = bClient.Run(ui, hook, cache)
+	assert.Nil(artifact, "should be nil")
+	assert.NotNil(err, "should have error")
 
 	// Test Cancel
 	bClient.Cancel()

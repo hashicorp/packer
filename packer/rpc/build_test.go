@@ -30,11 +30,11 @@ func (b *testBuild) Prepare(ui packer.Ui) error {
 	return nil
 }
 
-func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) packer.Artifact {
+func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, error) {
 	b.runCalled = true
 	b.runCache = cache
 	b.runUi = ui
-	return testBuildArtifact
+	return testBuildArtifact, nil
 }
 
 func (b *testBuild) Cancel() {

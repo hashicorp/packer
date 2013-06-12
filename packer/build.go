@@ -7,7 +7,7 @@ import "log"
 type Build interface {
 	Name() string
 	Prepare(Ui) error
-	Run(Ui, Cache) Artifact
+	Run(Ui, Cache) (Artifact, error)
 	Cancel()
 }
 
@@ -61,7 +61,7 @@ func (b *coreBuild) Prepare(ui Ui) (err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(ui Ui, cache Cache) Artifact {
+func (b *coreBuild) Run(ui Ui, cache Cache) (Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}

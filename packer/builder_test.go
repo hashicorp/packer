@@ -16,12 +16,12 @@ func (tb *TestBuilder) Prepare(config interface{}) error {
 	return nil
 }
 
-func (tb *TestBuilder) Run(ui Ui, h Hook, c Cache) Artifact {
+func (tb *TestBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	tb.runCalled = true
 	tb.runHook = h
 	tb.runUi = ui
 	tb.runCache = c
-	return nil
+	return nil, nil
 }
 
 func (tb *TestBuilder) Cancel() {
