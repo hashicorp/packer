@@ -55,6 +55,25 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_BootWait(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with a bad boot_wait
+	config["boot_wait"] = "this is not good"
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good one
+	config["boot_wait"] = "5s"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_ISOMD5(t *testing.T) {
 	var b Builder
 	config := testConfig()

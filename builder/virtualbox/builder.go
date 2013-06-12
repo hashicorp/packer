@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -22,6 +23,7 @@ type Builder struct {
 }
 
 type config struct {
+	BootWait time.Duration ``
 	GuestOSType    string `mapstructure:"guest_os_type"`
 	ISOMD5         string `mapstructure:"iso_md5"`
 	ISOUrl         string `mapstructure:"iso_url"`
@@ -30,6 +32,8 @@ type config struct {
 	SSHHostPortMax uint   `mapstructure:"ssh_host_port_max"`
 	SSHPort        uint   `mapstructure:"ssh_port"`
 	VMName         string `mapstructure:"vm_name"`
+
+	RawBootWait string `mapstructure:"boot_wait"`
 }
 
 func (b *Builder) Prepare(raw interface{}) error {
@@ -106,6 +110,13 @@ func (b *Builder) Prepare(raw interface{}) error {
 		if len(errs) == 0 {
 			// Put the URL back together since we may have modified it
 			b.config.ISOUrl = url.String()
+		}
+	}
+
+	if b.config.RawBootWait != "" {
+		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
 	}
 

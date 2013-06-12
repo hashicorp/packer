@@ -17,6 +17,7 @@ type stepRun struct{
 }
 
 func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
+	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
 	vmName := state["vmName"].(string)
@@ -30,7 +31,11 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 
 	s.vmName = vmName
 
-	time.Sleep(15 * time.Second)
+	if int64(config.BootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait))
+		time.Sleep(config.BootWait)
+	}
+
 	return multistep.ActionContinue
 }
 
