@@ -66,7 +66,6 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 		}
 	}
 
-	time.Sleep(15 * time.Second)
 	return multistep.ActionContinue
 }
 
@@ -103,7 +102,7 @@ func scancodes(message string) []string {
 		}
 	}
 
-	result := make([]string, 0, len(message) * 2)
+	result := make([]string, 0, len(message)*2)
 	for len(message) > 0 {
 		var scancode []string
 
@@ -141,7 +140,7 @@ func scancodes(message string) []string {
 				scancode = append(scancode, "aa")
 			}
 
-			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt + 0x80))
+			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt+0x80))
 			log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
 		}
 

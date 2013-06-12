@@ -34,10 +34,14 @@ type config struct {
 	OutputDir      string        `mapstructure:"output_directory"`
 	SSHHostPortMin uint          `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax uint          `mapstructure:"ssh_host_port_max"`
+	SSHPassword    string        `mapstructure:"ssh_password"`
 	SSHPort        uint          `mapstructure:"ssh_port"`
+	SSHUser        string        `mapstructure:"ssh_username"`
+	SSHWaitTimeout time.Duration ``
 	VMName         string        `mapstructure:"vm_name"`
 
-	RawBootWait string `mapstructure:"boot_wait"`
+	RawBootWait       string `mapstructure:"boot_wait"`
+	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
 }
 
 func (b *Builder) Prepare(raw interface{}) error {
@@ -140,6 +144,19 @@ func (b *Builder) Prepare(raw interface{}) error {
 		errs = append(errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
 
+	if b.config.SSHUser == "" {
+		errs = append(errs, errors.New("An ssh_username must be specified."))
+	}
+
+	if b.config.RawSSHWaitTimeout == "" {
+		b.config.RawSSHWaitTimeout = "20m"
+	}
+
+	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
+	}
+
 	b.driver, err = b.newDriver()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
@@ -164,6 +181,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 		new(stepForwardSSH),
 		new(stepRun),
 		new(stepTypeBootCommand),
+		new(stepWaitForSSH),
 	}
 
 	// Setup the state bag

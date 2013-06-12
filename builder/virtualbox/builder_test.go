@@ -11,6 +11,7 @@ func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"iso_md5": "foo",
 		"iso_url": "http://www.google.com/",
+		"ssh_username": "foo",
 	}
 }
 
@@ -192,6 +193,42 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	// Good
 	config["ssh_host_port_min"] = 500
 	config["ssh_host_port_max"] = 1000
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_SSHUser(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["ssh_username"] = ""
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	config["ssh_username"] = "exists"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with a bad value
+	config["ssh_wait_timeout"] = "this is not good"
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good one
+	config["ssh_wait_timeout"] = "5s"
 	err = b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
