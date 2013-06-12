@@ -59,6 +59,12 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 				continue
 			}
 
+			// Since typing is sometimes so slow, we check for an interrupt
+			// in between each character.
+			if _, ok := state[multistep.StateCancelled]; ok {
+				return multistep.ActionHalt
+			}
+
 			if err := driver.VBoxManage("controlvm", vmName, "keyboardputscancode", code); err != nil {
 				ui.Error(fmt.Sprintf("Error sending boot command: %s", err))
 				return multistep.ActionHalt
