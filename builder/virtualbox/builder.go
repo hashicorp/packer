@@ -109,6 +109,10 @@ func (b *Builder) Prepare(raw interface{}) error {
 		}
 	}
 
+	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
+		errs = append(errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
+	}
+
 	b.driver, err = b.newDriver()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
