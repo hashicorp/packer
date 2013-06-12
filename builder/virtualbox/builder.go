@@ -163,6 +163,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 		new(stepAttachISO),
 		new(stepForwardSSH),
 		new(stepRun),
+		new(stepTypeBootCommand),
 	}
 
 	// Setup the state bag
