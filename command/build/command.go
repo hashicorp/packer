@@ -90,10 +90,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Compile all the UIs for the builds
 	colors := [5]packer.UiColor{
 		packer.UiColorGreen,
+		packer.UiColorCyan,
+		packer.UiColorMagenta,
 		packer.UiColorYellow,
 		packer.UiColorBlue,
-		packer.UiColorMagenta,
-		packer.UiColorCyan,
 	}
 
 	buildUis := make(map[string]packer.Ui)
@@ -114,6 +114,9 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		buildUis[b.Name()] = ui
 		ui.Say(fmt.Sprintf("%s output will be in this color.", b.Name()))
 	}
+
+	// Add a newline between the color output and the actual output
+	env.Ui().Say("")
 
 	// Prepare all the builds
 	for _, b := range builds {
