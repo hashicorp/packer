@@ -1,12 +1,16 @@
 package virtualbox
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"net/url"
+	"os"
 	"os/exec"
+	"strings"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -19,6 +23,8 @@ type Builder struct {
 
 type config struct {
 	GuestOSType string `mapstructure:"guest_os_type"`
+	ISOMD5 string `mapstructure:"iso_md5"`
+	ISOUrl string `mapstructure:"iso_url"`
 	OutputDir string `mapstructure:"output_directory"`
 	VMName string `mapstructure:"vm_name"`
 }
@@ -43,6 +49,51 @@ func (b *Builder) Prepare(raw interface{}) error {
 
 	errs := make([]error, 0)
 
+	if b.config.ISOMD5 == "" {
+		errs = append(errs, errors.New("Due to large file sizes, an iso_md5 is required"))
+	} else {
+		b.config.ISOMD5 = strings.ToLower(b.config.ISOMD5)
+	}
+
+	if b.config.ISOUrl == "" {
+		errs = append(errs, errors.New("An iso_url must be specified."))
+	} else {
+		url, err := url.Parse(b.config.ISOUrl)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("iso_url is not a valid URL: %s", err))
+		} else {
+			if url.Scheme == "" {
+				url.Scheme = "file"
+			}
+
+			if url.Scheme == "file" {
+				if _, err := os.Stat(b.config.ISOUrl); err != nil {
+					errs = append(errs, fmt.Errorf("iso_url points to bad file: %s", err))
+				}
+			} else {
+				supportedSchemes := []string{"file", "http", "https"}
+				scheme := strings.ToLower(url.Scheme)
+
+				found := false
+				for _, supported := range supportedSchemes {
+					if scheme == supported {
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					errs = append(errs, fmt.Errorf("Unsupported URL scheme in iso_url: %s", scheme))
+				}
+			}
+		}
+
+		if len(errs) == 0 {
+			// Put the URL back together since we may have modified it
+			b.config.ISOUrl = url.String()
+		}
+	}
+
 	b.driver, err = b.newDriver()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
@@ -57,6 +108,7 @@ func (b *Builder) Prepare(raw interface{}) error {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer.Artifact {
 	steps := []multistep.Step{
+		new(stepDownloadISO),
 		new(stepPrepareOutputDir),
 		new(stepSuppressMessages),
 		new(stepCreateVM),
