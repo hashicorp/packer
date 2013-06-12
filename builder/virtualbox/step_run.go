@@ -12,7 +12,7 @@ import (
 // Uses:
 //
 // Produces:
-type stepRun struct{
+type stepRun struct {
 	vmName string
 }
 

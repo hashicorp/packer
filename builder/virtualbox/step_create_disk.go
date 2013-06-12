@@ -10,7 +10,7 @@ import (
 
 // This step creates the virtual disk that will be used as the
 // hard drive for the virtual machine.
-type stepCreateDisk struct {}
+type stepCreateDisk struct{}
 
 func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)

@@ -23,15 +23,16 @@ type Builder struct {
 }
 
 type config struct {
-	BootWait time.Duration ``
-	GuestOSType    string `mapstructure:"guest_os_type"`
-	ISOMD5         string `mapstructure:"iso_md5"`
-	ISOUrl         string `mapstructure:"iso_url"`
-	OutputDir      string `mapstructure:"output_directory"`
-	SSHHostPortMin uint   `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax uint   `mapstructure:"ssh_host_port_max"`
-	SSHPort        uint   `mapstructure:"ssh_port"`
-	VMName         string `mapstructure:"vm_name"`
+	BootCommand    []string      `mapstructure:"boot_command"`
+	BootWait       time.Duration ``
+	GuestOSType    string        `mapstructure:"guest_os_type"`
+	ISOMD5         string        `mapstructure:"iso_md5"`
+	ISOUrl         string        `mapstructure:"iso_url"`
+	OutputDir      string        `mapstructure:"output_directory"`
+	SSHHostPortMin uint          `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax uint          `mapstructure:"ssh_host_port_max"`
+	SSHPort        uint          `mapstructure:"ssh_port"`
+	VMName         string        `mapstructure:"vm_name"`
 
 	RawBootWait string `mapstructure:"boot_wait"`
 }

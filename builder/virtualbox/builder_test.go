@@ -169,4 +169,3 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
-
