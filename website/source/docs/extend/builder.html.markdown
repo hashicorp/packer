@@ -38,7 +38,7 @@ type Builder interface {
 	// Run is where the actual build should take place. It takes a Ui to
 	// send messages to the user, Hook to execute hooks, and Cache in order
 	// to save files across runs.
-	Run(Ui, Hook, Cache) Artifact
+	Run(Ui, Hook, Cache) (Artifact, error)
 
 	// Cancel cancels a possibly running Builder. This should block until
 	// the builder actually cancels and cleans up after itself.
@@ -87,7 +87,9 @@ how the built-in builders are all implemented.
 
 Finally, as a result of `Run`, an implementation of `packer.Artifact` should
 be returned. More details on creating a `packer.Artifact` are covered in the
-artifact section below.
+artifact section below. If something goes wrong during the build, an error
+can be returned, as well. Note that it is perfectly fine to produce no artifact
+and no error, although this is rare.
 
 ### The "Cancel" Method
 
