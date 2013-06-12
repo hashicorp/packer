@@ -22,11 +22,14 @@ type Builder struct {
 }
 
 type config struct {
-	GuestOSType string `mapstructure:"guest_os_type"`
-	ISOMD5      string `mapstructure:"iso_md5"`
-	ISOUrl      string `mapstructure:"iso_url"`
-	OutputDir   string `mapstructure:"output_directory"`
-	VMName      string `mapstructure:"vm_name"`
+	GuestOSType    string `mapstructure:"guest_os_type"`
+	ISOMD5         string `mapstructure:"iso_md5"`
+	ISOUrl         string `mapstructure:"iso_url"`
+	OutputDir      string `mapstructure:"output_directory"`
+	SSHHostPortMin uint   `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax uint   `mapstructure:"ssh_host_port_max"`
+	SSHPort        uint   `mapstructure:"ssh_port"`
+	VMName         string `mapstructure:"vm_name"`
 }
 
 func (b *Builder) Prepare(raw interface{}) error {
@@ -41,6 +44,18 @@ func (b *Builder) Prepare(raw interface{}) error {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = "virtualbox"
+	}
+
+	if b.config.SSHHostPortMin == 0 {
+		b.config.SSHHostPortMin = 2222
+	}
+
+	if b.config.SSHHostPortMax == 0 {
+		b.config.SSHHostPortMax = 4444
+	}
+
+	if b.config.SSHPort == 0 {
+		b.config.SSHPort = 22
 	}
 
 	if b.config.VMName == "" {
@@ -114,6 +129,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		new(stepAttachISO),
+		new(stepForwardSSH),
 	}
 
 	// Setup the state bag

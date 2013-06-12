@@ -38,6 +38,18 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
 
+	if b.config.SSHHostPortMin != 2222 {
+		t.Errorf("bad min ssh host port: %d", b.config.SSHHostPortMin)
+	}
+
+	if b.config.SSHHostPortMax != 4444 {
+		t.Errorf("bad max ssh host port: %d", b.config.SSHHostPortMax)
+	}
+
+	if b.config.SSHPort != 22 {
+		t.Errorf("bad ssh port: %d", b.config.SSHPort)
+	}
+
 	if b.config.VMName != "packer" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
 	}

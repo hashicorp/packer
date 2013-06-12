@@ -10,9 +10,7 @@ import (
 
 // This step creates the virtual disk that will be used as the
 // hard drive for the virtual machine.
-type stepCreateDisk struct {
-	diskPath string
-}
+type stepCreateDisk struct {}
 
 func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
@@ -37,9 +35,6 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 		ui.Error(fmt.Sprintf("Error creating hard drive: %s", err))
 		return multistep.ActionHalt
 	}
-
-	// Set the path so that we can delete it later
-	s.diskPath = path
 
 	// Add the IDE controller so we can later attach the disk
 	controllerName := "IDE Controller"
@@ -66,16 +61,4 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateDisk) Cleanup(state map[string]interface{}) {
-	if s.diskPath == "" {
-		return
-	}
-
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-
-	ui.Say("Unregistering and deleting hard disk...")
-	if err := driver.VBoxManage("closemedium", "disk", s.diskPath, "--delete"); err != nil {
-		ui.Error(fmt.Sprintf("Error deleting hard drive: %s", err))
-	}
-}
+func (s *stepCreateDisk) Cleanup(state map[string]interface{}) {}
