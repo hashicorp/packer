@@ -34,7 +34,7 @@ func (d *VBox42Driver) SuppressMessages() error {
 	extraData := map[string]string{
 		"GUI/RegistrationData": "triesLeft=0",
 		"GUI/SuppressMessages": "confirmInputCapture,remindAboutAutoCapture,remindAboutMouseIntegrationOff,remindAboutMouseIntegrationOn,remindAboutWrongColorDepth",
-		"GUI/UpdateDate": fmt.Sprintf("1 d, %d-01-01, stable", time.Now().Year()+1),
+		"GUI/UpdateDate":       fmt.Sprintf("1 d, %d-01-01, stable", time.Now().Year()+1),
 		"GUI/UpdateCheckCount": "60",
 	}
 

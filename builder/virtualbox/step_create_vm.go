@@ -10,7 +10,7 @@ import (
 //
 // Produces:
 //   vmName string - The name of the VM
-type stepCreateVM struct{
+type stepCreateVM struct {
 	vmName string
 }
 

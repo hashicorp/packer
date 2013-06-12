@@ -6,12 +6,11 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 // This step creates the virtual disk that will be used as the
 // hard drive for the virtual machine.
-type stepCreateDisk struct{
+type stepCreateDisk struct {
 	diskPath string
 }
 
@@ -64,7 +63,6 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	time.Sleep(15 * time.Second)
 	return multistep.ActionContinue
 }
 

@@ -23,10 +23,10 @@ type Builder struct {
 
 type config struct {
 	GuestOSType string `mapstructure:"guest_os_type"`
-	ISOMD5 string `mapstructure:"iso_md5"`
-	ISOUrl string `mapstructure:"iso_url"`
-	OutputDir string `mapstructure:"output_directory"`
-	VMName string `mapstructure:"vm_name"`
+	ISOMD5      string `mapstructure:"iso_md5"`
+	ISOUrl      string `mapstructure:"iso_url"`
+	OutputDir   string `mapstructure:"output_directory"`
+	VMName      string `mapstructure:"vm_name"`
 }
 
 func (b *Builder) Prepare(raw interface{}) error {
@@ -113,6 +113,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 		new(stepSuppressMessages),
 		new(stepCreateVM),
 		new(stepCreateDisk),
+		new(stepAttachISO),
 	}
 
 	// Setup the state bag
