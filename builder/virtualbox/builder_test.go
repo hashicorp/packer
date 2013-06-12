@@ -74,6 +74,34 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_HTTPPort(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Bad
+	config["http_port_min"] = 1000
+	config["http_port_max"] = 500
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Bad
+	config["http_port_min"] = -500
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good
+	config["http_port_min"] = 500
+	config["http_port_max"] = 1000
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_ISOMD5(t *testing.T) {
 	var b Builder
 	config := testConfig()

@@ -26,6 +26,9 @@ type config struct {
 	BootCommand    []string      `mapstructure:"boot_command"`
 	BootWait       time.Duration ``
 	GuestOSType    string        `mapstructure:"guest_os_type"`
+	HTTPDir        string        `mapstructure:"http_directory"`
+	HTTPPortMin    uint          `mapstructure:"http_port_min"`
+	HTTPPortMax    uint          `mapstructure:"http_port_max"`
 	ISOMD5         string        `mapstructure:"iso_md5"`
 	ISOUrl         string        `mapstructure:"iso_url"`
 	OutputDir      string        `mapstructure:"output_directory"`
@@ -45,6 +48,14 @@ func (b *Builder) Prepare(raw interface{}) error {
 
 	if b.config.GuestOSType == "" {
 		b.config.GuestOSType = "Other"
+	}
+
+	if b.config.HTTPPortMin == 0 {
+		b.config.HTTPPortMin = 8000
+	}
+
+	if b.config.HTTPPortMax == 0 {
+		b.config.HTTPPortMax = 9000
 	}
 
 	if b.config.OutputDir == "" {
@@ -68,6 +79,10 @@ func (b *Builder) Prepare(raw interface{}) error {
 	}
 
 	errs := make([]error, 0)
+
+	if b.config.HTTPPortMin > b.config.HTTPPortMax {
+		errs = append(errs, errors.New("http_port_min must be less than http_port_max"))
+	}
 
 	if b.config.ISOMD5 == "" {
 		errs = append(errs, errors.New("Due to large file sizes, an iso_md5 is required"))
@@ -141,6 +156,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) packer
 	steps := []multistep.Step{
 		new(stepDownloadISO),
 		new(stepPrepareOutputDir),
+		new(stepHTTPServer),
 		new(stepSuppressMessages),
 		new(stepCreateVM),
 		new(stepCreateDisk),
