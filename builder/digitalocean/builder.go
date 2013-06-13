@@ -4,6 +4,9 @@
 package digitalocean
 
 import (
+	"errors"
+	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -31,6 +34,7 @@ type config struct {
 	SnapshotName string `mapstructure:"snapshot_name"`
 
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
+	SSHTimeout    time.Duration
 }
 
 type Builder struct {
@@ -86,18 +90,18 @@ func (b *Builder) Prepare(raw interface{}) error {
 
 	// Required configurations that will display errors if not set
 	//
-	if b.config.ClientId == "" {
+	if b.config.ClientID == "" {
 		errs = append(errs, errors.New("a client_id must be specified"))
 	}
 
 	if b.config.APIKey == "" {
 		errs = append(errs, errors.New("an api_key must be specified"))
 	}
-
-	b.config.SSHTimeout, err = time.ParseDuration(b.config.RawSSHTimeout)
+	timeout, err := time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
+	b.config.SSHTimeout = timeout
 
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
@@ -108,5 +112,38 @@ func (b *Builder) Prepare(raw interface{}) error {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	// Initialize the DO API client
+	client := DigitalOceanClient{}.New(b.config.ClientID, b.config.APIKey)
 
+	// Set up the state
+	state := make(map[string]interface{})
+	state["config"] = b.config
+	state["client"] = client
+	state["hook"] = hook
+	state["ui"] = ui
+
+	// Build the steps
+	steps := []multistep.Step{
+		new(stepCreateSSHKey),
+		new(stepCreateDroplet),
+		new(stepConnectSSH),
+		new(stepProvision),
+		new(stepPowerOff),
+		new(stepSnapshot),
+		new(stepDestroyDroplet),
+		new(stepDestroySSHKey),
+	}
+
+	// Run the steps
+	b.runner = &multistep.BasicRunner{Steps: steps}
+	b.runner.Run(state)
+
+	return nil, nil
+}
+
+func (b *Builder) Cancel() {
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
 }

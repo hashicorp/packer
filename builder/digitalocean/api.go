@@ -16,7 +16,7 @@ const DIGITALOCEAN_API_URL = "https://api.digitalocean.com"
 
 type DigitalOceanClient struct {
 	// The http client for communicating
-	client *http.client
+	client *http.Client
 
 	// The base URL of the API
 	BaseURL string
@@ -27,7 +27,7 @@ type DigitalOceanClient struct {
 }
 
 // Creates a new client for communicating with DO
-func (d DigitalOceanClient) New(client string, key string) *Client {
+func (d DigitalOceanClient) New(client string, key string) *DigitalOceanClient {
 	c := &DigitalOceanClient{
 		client:   http.DefaultClient,
 		BaseURL:  DIGITALOCEAN_API_URL,
@@ -43,7 +43,7 @@ func (d DigitalOceanClient) CreateKey(name string, pub string) (uint, error) {
 
 	body, err := NewRequest(d, "ssh_keys/new", params)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// Read the SSH key's ID we just created
@@ -67,13 +67,13 @@ func (d DigitalOceanClient) CreateDroplet(name string, size uint, image uint, re
 
 	body, err := NewRequest(d, "droplets/new", params)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// Read the Droplets ID
 	droplet := body["droplet"].(map[string]interface{})
 	dropletId := droplet["id"].(float64)
-	return dropletId, err
+	return uint(dropletId), err
 }
 
 // Destroys a droplet
@@ -84,7 +84,7 @@ func (d DigitalOceanClient) DestroyDroplet(id uint) error {
 }
 
 // Powers off a droplet
-func (d DigitalOceanClient) PowerOffDroplet(name string, pub string) error {
+func (d DigitalOceanClient) PowerOffDroplet(id uint) error {
 	path := fmt.Sprintf("droplets/%s/power_off", id)
 
 	_, err := NewRequest(d, path, "")
@@ -108,7 +108,7 @@ func (d DigitalOceanClient) DropletStatus(id uint) (string, error) {
 
 	body, err := NewRequest(d, path, "")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// Read the droplet's "status"
@@ -125,37 +125,37 @@ func NewRequest(d DigitalOceanClient, path string, params string) (map[string]in
 	url := fmt.Sprintf("%s/%s?%s&client_id=%s&api_key=%s",
 		DIGITALOCEAN_API_URL, path, params, d.ClientID, d.APIKey)
 
+	var decodedResponse map[string]interface{}
+
 	resp, err := client.Get(url)
 	if err != nil {
-		return nil, err
+		return decodedResponse, err
 	}
 
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 
 	resp.Body.Close()
 	if err != nil {
-		return nil, err
+		return decodedResponse, err
 	}
 
 	// Catch all non-200 status and return an error
 	if resp.StatusCode != 200 {
-		err = errors.New("recieved non-200 status from digitalocean: %d", resp.StatusCode)
-		return nil, err
+		err = errors.New(fmt.Sprintf("recieved non-200 status from digitalocean: %d", resp.StatusCode))
+		return decodedResponse, err
 	}
-
-	var decodedResponse map[string]interface{}
 
 	err = json.Unmarshal(body, &decodedResponse)
 
 	if err != nil {
-		return nil, err
+		return decodedResponse, err
 	}
 
 	// Catch all non-OK statuses from DO and return an error
 	status := decodedResponse["status"]
 	if status != "OK" {
-		err = errors.New("recieved non-OK status from digitalocean: %d", status)
-		return nil, err
+		err = errors.New(fmt.Sprintf("recieved non-OK status from digitalocean: %d", status))
+		return decodedResponse, err
 	}
 
 	return decodedResponse, nil
