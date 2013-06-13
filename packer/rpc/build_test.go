@@ -13,7 +13,6 @@ var testBuildArtifact = &testArtifact{}
 type testBuild struct {
 	nameCalled    bool
 	prepareCalled bool
-	prepareUi     packer.Ui
 	runCalled     bool
 	runCache      packer.Cache
 	runUi         packer.Ui
@@ -27,9 +26,8 @@ func (b *testBuild) Name() string {
 	return "name"
 }
 
-func (b *testBuild) Prepare(ui packer.Ui) error {
+func (b *testBuild) Prepare() error {
 	b.prepareCalled = true
-	b.prepareUi = ui
 	return nil
 }
 
@@ -70,13 +68,12 @@ func TestBuildRPC(t *testing.T) {
 	assert.True(b.nameCalled, "name should be called")
 
 	// Test Prepare
-	ui := new(testUi)
-	bClient.Prepare(ui)
+	bClient.Prepare()
 	assert.True(b.prepareCalled, "prepare should be called")
 
 	// Test Run
 	cache := new(testCache)
-	ui = new(testUi)
+	ui := new(testUi)
 	_, err = bClient.Run(ui, cache)
 	assert.True(b.runCalled, "run should be called")
 	assert.Nil(err, "should not error")

@@ -6,7 +6,7 @@ import "log"
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
 	Name() string
-	Prepare(Ui) error
+	Prepare() error
 	Run(Ui, Cache) (Artifact, error)
 	Cancel()
 }
@@ -39,7 +39,7 @@ func (b *coreBuild) Name() string {
 
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
-func (b *coreBuild) Prepare(ui Ui) (err error) {
+func (b *coreBuild) Prepare() (err error) {
 	// TODO: lock
 	b.prepareCalled = true
 
