@@ -32,6 +32,8 @@ type config struct {
 	ISOMD5         string        `mapstructure:"iso_md5"`
 	ISOUrl         string        `mapstructure:"iso_url"`
 	OutputDir      string        `mapstructure:"output_directory"`
+	ShutdownCommand string            `mapstructure:"shutdown_command"`
+	ShutdownTimeout time.Duration     ``
 	SSHHostPortMin uint          `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax uint          `mapstructure:"ssh_host_port_max"`
 	SSHPassword    string        `mapstructure:"ssh_password"`
@@ -41,6 +43,7 @@ type config struct {
 	VMName         string        `mapstructure:"vm_name"`
 
 	RawBootWait       string `mapstructure:"boot_wait"`
+	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
 }
 
@@ -140,6 +143,15 @@ func (b *Builder) Prepare(raw interface{}) error {
 		}
 	}
 
+	if b.config.RawShutdownTimeout == "" {
+		b.config.RawShutdownTimeout = "5m"
+	}
+
+	b.config.ShutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
+	}
+
 	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
 		errs = append(errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
@@ -183,6 +195,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepTypeBootCommand),
 		new(stepWaitForSSH),
 		new(stepProvision),
+		new(stepShutdown),
 	}
 
 	// Setup the state bag

@@ -12,6 +12,12 @@ import (
 // A driver is able to talk to VirtualBox and perform certain
 // operations with it.
 type Driver interface {
+	// Checks if the VM with the given name is running.
+	IsRunning(string) (bool, error)
+
+	// Stop stops a running machine, forcefully.
+	Stop(string) error
+
 	// SuppressMessages should do what needs to be done in order to
 	// suppress any annoying popups from VirtualBox.
 	SuppressMessages() error
@@ -28,6 +34,32 @@ type Driver interface {
 type VBox42Driver struct {
 	// This is the path to the "VBoxManage" application.
 	VBoxManagePath string
+}
+
+func (d *VBox42Driver) IsRunning(name string) (bool, error) {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "showvminfo", name, "--machinereadable")
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return false, err
+	}
+
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		if line == `VMState="running"` {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (d *VBox42Driver) Stop(name string) error {
+	if err := d.VBoxManage("controlvm", name, "poweroff"); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *VBox42Driver) SuppressMessages() error {
