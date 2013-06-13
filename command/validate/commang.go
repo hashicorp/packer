@@ -63,14 +63,18 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	// Otherwise, get all the builds
 	buildNames := tpl.BuildNames()
-	builds := make([]packer.Build, len(buildNames))
+	builds := make([]packer.Build, 0, len(buildNames))
 	for i, buildName := range buildNames {
-		var err error
-		builds[i], err = tpl.Build(buildName, components)
+		build, err := tpl.Build(buildName, components)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Build '%s': %s", buildName, err))
+			continue
 		}
+
+		builds = append(builds, build)
 	}
+
+	// TODO(mitchellh): validate configuration
 
 	if len(errs) > 0 {
 		err = &packer.MultiError{errs}
