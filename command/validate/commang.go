@@ -87,7 +87,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		for i, err := range errs {
 			env.Ui().Error(err.Error())
 
-			if (i+1) < len(errs) {
+			if (i + 1) < len(errs) {
 				env.Ui().Error("")
 			}
 		}

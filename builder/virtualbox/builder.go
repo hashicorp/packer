@@ -23,28 +23,28 @@ type Builder struct {
 }
 
 type config struct {
-	BootCommand    []string      `mapstructure:"boot_command"`
-	BootWait       time.Duration ``
-	GuestOSType    string        `mapstructure:"guest_os_type"`
-	HTTPDir        string        `mapstructure:"http_directory"`
-	HTTPPortMin    uint          `mapstructure:"http_port_min"`
-	HTTPPortMax    uint          `mapstructure:"http_port_max"`
-	ISOMD5         string        `mapstructure:"iso_md5"`
-	ISOUrl         string        `mapstructure:"iso_url"`
-	OutputDir      string        `mapstructure:"output_directory"`
-	ShutdownCommand string            `mapstructure:"shutdown_command"`
-	ShutdownTimeout time.Duration     ``
-	SSHHostPortMin uint          `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax uint          `mapstructure:"ssh_host_port_max"`
-	SSHPassword    string        `mapstructure:"ssh_password"`
-	SSHPort        uint          `mapstructure:"ssh_port"`
-	SSHUser        string        `mapstructure:"ssh_username"`
-	SSHWaitTimeout time.Duration ``
-	VMName         string        `mapstructure:"vm_name"`
+	BootCommand     []string      `mapstructure:"boot_command"`
+	BootWait        time.Duration ``
+	GuestOSType     string        `mapstructure:"guest_os_type"`
+	HTTPDir         string        `mapstructure:"http_directory"`
+	HTTPPortMin     uint          `mapstructure:"http_port_min"`
+	HTTPPortMax     uint          `mapstructure:"http_port_max"`
+	ISOMD5          string        `mapstructure:"iso_md5"`
+	ISOUrl          string        `mapstructure:"iso_url"`
+	OutputDir       string        `mapstructure:"output_directory"`
+	ShutdownCommand string        `mapstructure:"shutdown_command"`
+	ShutdownTimeout time.Duration ``
+	SSHHostPortMin  uint          `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax  uint          `mapstructure:"ssh_host_port_max"`
+	SSHPassword     string        `mapstructure:"ssh_password"`
+	SSHPort         uint          `mapstructure:"ssh_port"`
+	SSHUser         string        `mapstructure:"ssh_username"`
+	SSHWaitTimeout  time.Duration ``
+	VMName          string        `mapstructure:"vm_name"`
 
-	RawBootWait       string `mapstructure:"boot_wait"`
+	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
+	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 }
 
 func (b *Builder) Prepare(raw interface{}) error {
