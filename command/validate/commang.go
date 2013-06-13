@@ -64,7 +64,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Otherwise, get all the builds
 	buildNames := tpl.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
-	for i, buildName := range buildNames {
+	for _, buildName := range buildNames {
 		build, err := tpl.Build(buildName, components)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Build '%s': %s", buildName, err))
@@ -74,11 +74,24 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		builds = append(builds, build)
 	}
 
-	// TODO(mitchellh): validate configuration
+	// Check the configuration of all builds
+	for _, b := range builds {
+		err := b.Prepare()
+		if err != nil {
+			errs = append(errs, fmt.Errorf("Errors validating build '%s'. %s", b.Name(), err))
+		}
+	}
 
 	if len(errs) > 0 {
-		err = &packer.MultiError{errs}
-		env.Ui().Error(fmt.Sprintf("Template validation failed. %s", err))
+		env.Ui().Error("Template validation failed. Errors are shown below.\n")
+		for i, err := range errs {
+			env.Ui().Error(err.Error())
+
+			if (i+1) < len(errs) {
+				env.Ui().Error("")
+			}
+		}
+
 		return 1
 	}
 
