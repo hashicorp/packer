@@ -20,10 +20,12 @@ func (Command) Help() string {
 }
 
 func (c Command) Run(env packer.Environment, args []string) int {
+	var cfgExcept []string
 	var cfgOnly []string
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
+	cmdFlags.Var((*stringSliceValue)(&cfgExcept), "except", "build all builds except these")
 	cmdFlags.Var((*stringSliceValue)(&cfgOnly), "only", "only build the given builds by name")
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
@@ -32,6 +34,12 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	args = cmdFlags.Args()
 	if len(args) != 1 {
 		cmdFlags.Usage()
+		return 1
+	}
+
+	if len(cfgOnly) > 0 && len(cfgExcept) > 0 {
+		env.Ui().Error("Only one of '-except' or '-only' may be specified.\n")
+		env.Ui().Error(c.Help())
 		return 1
 	}
 
@@ -62,6 +70,21 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	buildNames := tpl.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
+		if len(cfgExcept) > 0 {
+			found := false
+			for _, only := range cfgExcept {
+				if buildName == only {
+					found = true
+					break
+				}
+			}
+
+			if found {
+				log.Printf("Skipping build '%s' because specified by -except.", buildName)
+				continue
+			}
+		}
+
 		if len(cfgOnly) > 0 {
 			found := false
 			for _, only := range cfgOnly {

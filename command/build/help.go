@@ -8,5 +8,6 @@ Usage: packer build TEMPLATE
 
 Options:
 
+  -except=foo,bar,baz        Build all builds other than these
   -only=foo,bar,baz          Only build the given builds by name
 `
