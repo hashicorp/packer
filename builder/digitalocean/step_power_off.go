@@ -5,35 +5,33 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepDropletInfo struct{}
+type stepPowerOff struct{}
 
-func (s *stepDropletInfo) Run(state map[string]interface{}) multistep.StepAction {
+func (s *stepPowerOff) Run(state map[string]interface{}) multistep.StepAction {
 	client := state["client"].(*DigitalOceanClient)
 	ui := state["ui"].(packer.Ui)
 	dropletId := state["droplet_id"].(uint)
 
-	ui.Say("Waiting for droplet to become active...")
-
-	err := waitForDropletState("active", dropletId, client)
-
-	if err != nil {
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// Set the IP on the state for later
-	ip, _, err := client.DropletStatus(dropletId)
+	// Poweroff the droplet so it can be snapshot
+	err := client.PowerOffDroplet(dropletId)
 
 	if err != nil {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state["droplet_ip"] = ip
+	ui.Say("Waiting for droplet to power off...")
+
+	err = waitForDropletState("off", dropletId, client)
+
+	if err != nil {
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }
 
-func (s *stepDropletInfo) Cleanup(state map[string]interface{}) {
+func (s *stepPowerOff) Cleanup(state map[string]interface{}) {
 	// no cleanup
 }

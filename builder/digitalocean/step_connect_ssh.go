@@ -17,7 +17,6 @@ type stepConnectSSH struct {
 
 func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(config)
-	client := state["client"].(*DigitalOceanClient)
 	privateKey := state["privateKey"].(string)
 	ui := state["ui"].(packer.Ui)
 	ipAddress := state["droplet_ip"]
