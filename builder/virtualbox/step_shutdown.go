@@ -59,6 +59,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 			}
 		}
 	} else {
+		ui.Say("Halting the virtual machine...")
 		if err := driver.Stop(vmName); err != nil {
 			ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
 			return multistep.ActionHalt
