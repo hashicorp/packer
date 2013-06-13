@@ -196,6 +196,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepWaitForSSH),
 		new(stepProvision),
 		new(stepShutdown),
+		new(stepExport),
 	}
 
 	// Setup the state bag
