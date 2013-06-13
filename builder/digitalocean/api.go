@@ -103,19 +103,20 @@ func (d DigitalOceanClient) CreateSnapshot(id uint, name string) error {
 }
 
 // Returns DO's string representation of status "off" "new" "active" etc.
-func (d DigitalOceanClient) DropletStatus(id uint) (string, error) {
+func (d DigitalOceanClient) DropletStatus(id uint) (string, string, error) {
 	path := fmt.Sprintf("droplets/%s", id)
 
 	body, err := NewRequest(d, path, "")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// Read the droplet's "status"
 	droplet := body["droplet"].(map[string]interface{})
 	status := droplet["status"].(string)
+	ip := droplet["ip_address"].(string)
 
-	return status, err
+	return ip, status, err
 }
 
 // Sends an api request and returns a generic map[string]interface of

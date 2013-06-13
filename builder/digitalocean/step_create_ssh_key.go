@@ -65,7 +65,7 @@ func (s *stepCreateSSHKey) Run(state map[string]interface{}) multistep.StepActio
 	log.Printf("temporary ssh key name: %s", name)
 
 	// Remember some state for the future
-	state["keyId"] = keyId
+	state["ssh_key_id"] = keyId
 	state["privateKey"] = string(pem.EncodeToMemory(&priv_blk))
 
 	return multistep.ActionContinue

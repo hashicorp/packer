@@ -126,6 +126,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		new(stepCreateSSHKey),
 		new(stepCreateDroplet),
+		new(stepDropletInfo),
 		new(stepConnectSSH),
 		new(stepProvision),
 		new(stepPowerOff),
