@@ -112,6 +112,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		builds = append(builds, build)
 	}
 
+	if cfgDebug {
+		env.Ui().Say("Debug mode enabled. Builds will not be parallelized.")
+	}
+
 	// Compile all the UIs for the builds
 	colors := [5]packer.UiColor{
 		packer.UiColorGreen,
