@@ -49,9 +49,12 @@ type config struct {
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 }
 
-func (b *Builder) Prepare(raw interface{}) error {
-	if err := mapstructure.Decode(raw, &b.config); err != nil {
-		return err
+func (b *Builder) Prepare(raws ...interface{}) error {
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &b.config)
+		if err != nil {
+			return err
+		}
 	}
 
 	if b.config.DiskName == "" {

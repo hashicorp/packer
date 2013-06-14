@@ -44,10 +44,14 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raw interface{}) error {
-	err := mapstructure.Decode(raw, &b.config)
-	if err != nil {
-		return err
+func (b *Builder) Prepare(raws ...interface{}) error {
+	var err error
+
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &b.config)
+		if err != nil {
+			return err
+		}
 	}
 
 	if b.config.SSHPort == 0 {
