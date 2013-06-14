@@ -44,6 +44,8 @@ type config struct {
 	VNCPortMin      uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint              `mapstructure:"vnc_port_max"`
 
+	PackerDebug bool `mapstructure:"packer_debug"`
+
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
@@ -214,7 +216,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state["ui"] = ui
 
 	// Run!
-	b.runner = &multistep.BasicRunner{Steps: steps}
+	if b.config.PackerDebug {
+		b.runner = &multistep.DebugRunner{Steps: steps}
+	} else {
+		b.runner = &multistep.BasicRunner{Steps: steps}
+	}
 	b.runner.Run(state)
 
 	// If we were interrupted or cancelled, then just exit.

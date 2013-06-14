@@ -4,7 +4,7 @@ import "log"
 
 // This is the key in configurations that is set to "true" when Packer
 // debugging is enabled.
-const DebugConfigKey = "packer_config"
+const DebugConfigKey = "packer_debug"
 
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
