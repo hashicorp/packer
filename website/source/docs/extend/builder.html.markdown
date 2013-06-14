@@ -29,16 +29,21 @@ supposed to do.
 
 <pre class="prettyprint">
 type Builder interface {
-	// Prepare is responsible for reading in some configuration, in the raw form
-	// of map[string]interface{}, and storing that state for use later. Any setup
-	// should be done in this method. Note that NO side effects should really take
-	// place in prepare. It is meant as a state setup step only.
-	Prepare(config interface{}) error
+	// Prepare is responsible for configuring the builder and validating
+	// that configuration. Any setup should be done in this method. Note that
+	// NO side effects should take place in prepare, it is meant as a state
+	// setup only. Calling Prepare is not necessarilly followed by a Run.
+	//
+	// The parameters to Prepare are a set of interface{} values of the
+	// configuration. These are almost always `map[string]interface{}`
+	// parsed from a template, but no guarantee is made.
+	//
+	// Each of the configuration values should merge into the final
+	// configuration.
+	Prepare(...interface{}) error
 
-	// Run is where the actual build should take place. It takes a Ui to
-	// send messages to the user, Hook to execute hooks, and Cache in order
-	// to save files across runs.
-	Run(Ui, Hook, Cache) (Artifact, error)
+	// Run is where the actual build should take place. It takes a Build and a Ui.
+	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
 
 	// Cancel cancels a possibly running Builder. This should block until
 	// the builder actually cancels and cleans up after itself.
@@ -50,9 +55,13 @@ type Builder interface {
 
 The `Prepare` method for each builder is called prior to any runs with
 the configuration that was given in the template. This is passed in as
-an `interface{}` type, but is generally `map[string]interface{}`. The prepare
+an array of `interface{}` types, but is generally `map[string]interface{}`. The prepare
 method is responsible for translating this configuration into an internal
 structure, validating it, and returning any errors.
+
+For multiple parameters, they should be merged together into the final
+configuration, with later parameters overwriting any previous configuration.
+The exact semantics of the merge are left to the builder author.
 
 For decoding the `interface{}` into a meaningful structure, the
 [mapstructure](https://github.com/mitchellh/mapstructure) library is recommended.
@@ -64,6 +73,14 @@ While it is not actively enforced, **no side effects** should occur from
 running the `Prepare` method. Specifically, don't create files, don't launch
 virtual machines, etc. Prepare's purpose is solely to configure the builder
 and validate the configuration.
+
+In addition to normal configuration, Packer will inject a `map[string]interface{}`
+with a key of `packer.DebugConfigKey` set to boolean `true` if debug mode
+is enabled for the build. If this is set to true, then the builder
+should enable a debug mode which assists builder developers and advanced
+users to introspect what is going on during a build. During debug
+builds, parallelism is strictly disabled, so it is safe to request input
+from stdin and so on.
 
 ### The "Run" Method
 
