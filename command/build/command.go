@@ -20,11 +20,13 @@ func (Command) Help() string {
 }
 
 func (c Command) Run(env packer.Environment, args []string) int {
+	var cfgDebug bool
 	var cfgExcept []string
 	var cfgOnly []string
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
+	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
 	cmdFlags.Var((*stringSliceValue)(&cfgExcept), "except", "build all builds except these")
 	cmdFlags.Var((*stringSliceValue)(&cfgOnly), "only", "only build the given builds by name")
 	if err := cmdFlags.Parse(args); err != nil {
@@ -141,9 +143,12 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Add a newline between the color output and the actual output
 	env.Ui().Say("")
 
-	// Prepare all the builds
+	log.Printf("Build debug mode: %v", cfgDebug)
+
+	// Set the debug mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
+		b.SetDebug(cfgDebug)
 		err := b.Prepare()
 		if err != nil {
 			env.Ui().Error(err.Error())
@@ -173,6 +178,11 @@ func (c Command) Run(env packer.Environment, args []string) int {
 				ui.Say("Build finished.")
 			}
 		}(b)
+
+		if cfgDebug {
+			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
+			wg.Wait()
+		}
 	}
 
 	// Handle signals
