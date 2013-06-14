@@ -33,20 +33,40 @@ func TestBuild_Name(t *testing.T) {
 func TestBuild_Prepare(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	build := testBuild()
+	debugFalseConfig := map[string]interface{}{DebugConfigKey: false}
 
+	build := testBuild()
 	coreB := build.(*coreBuild)
 	builder := coreB.builder.(*TestBuilder)
 
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, []interface{}{42}, "prepare config should be 42")
+	assert.Equal(builder.prepareConfig, []interface{}{42, debugFalseConfig}, "prepare config should be 42")
 
-	// Verify provisioners were prepared
 	coreProv := coreB.provisioners[0]
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfigs, []interface{}{42}, "prepare should be called with proper config")
+	assert.Equal(prov.prepConfigs, []interface{}{42, debugFalseConfig}, "prepare should be called with proper config")
+}
+
+func TestBuild_Prepare_Debug(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	debugConfig := map[string]interface{}{DebugConfigKey: true}
+
+	build := testBuild()
+	coreB := build.(*coreBuild)
+	builder := coreB.builder.(*TestBuilder)
+
+	build.SetDebug(true)
+	build.Prepare()
+	assert.True(builder.prepareCalled, "prepare should be called")
+	assert.Equal(builder.prepareConfig, []interface{}{42, debugConfig}, "prepare config should be 42")
+
+	coreProv := coreB.provisioners[0]
+	prov := coreProv.provisioner.(*TestProvisioner)
+	assert.True(prov.prepCalled, "prepare should be called")
+	assert.Equal(prov.prepConfigs, []interface{}{42, debugConfig}, "prepare should be called with proper config")
 }
 
 func TestBuild_Run(t *testing.T) {

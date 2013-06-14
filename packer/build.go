@@ -2,6 +2,10 @@ package packer
 
 import "log"
 
+// This is the key in configurations that is set to "true" when Packer
+// debugging is enabled.
+const DebugConfigKey = "packer_config"
+
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
@@ -65,8 +69,12 @@ func (b *coreBuild) Prepare() (err error) {
 	// TODO: lock
 	b.prepareCalled = true
 
+	debugConfig := map[string]interface{}{
+		DebugConfigKey: b.debug,
+	}
+
 	// Prepare the builder
-	err = b.builder.Prepare(b.builderConfig)
+	err = b.builder.Prepare(b.builderConfig, debugConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
 		return
@@ -74,7 +82,11 @@ func (b *coreBuild) Prepare() (err error) {
 
 	// Prepare the provisioners
 	for _, coreProv := range b.provisioners {
-		if err = coreProv.provisioner.Prepare(coreProv.config...); err != nil {
+		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
+		copy(configs, coreProv.config)
+		configs = append(configs, debugConfig)
+
+		if err = coreProv.provisioner.Prepare(configs...); err != nil {
 			return
 		}
 	}
