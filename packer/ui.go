@@ -124,7 +124,7 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 		result <- line
 	}()
 
-	select{
+	select {
 	case line := <-result:
 		return line
 	case <-sigCh:
