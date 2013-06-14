@@ -58,6 +58,12 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, error) {
 	return Artifact(client), nil
 }
 
+func (b *build) SetDebug(val bool) {
+	if err := b.client.Call("Build.SetDebug", val, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
 func (b *build) Cancel() {
 	if err := b.client.Call("Build.Cancel", new(interface{}), new(interface{})); err != nil {
 		panic(err)
@@ -90,6 +96,11 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *string) error {
 	RegisterArtifact(server, artifact)
 
 	*reply = serveSingleConn(server)
+	return nil
+}
+
+func (b *BuildServer) SetDebug(val *bool, reply *interface{}) error {
+	b.build.SetDebug(*val)
 	return nil
 }
 

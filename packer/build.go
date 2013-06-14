@@ -21,6 +21,12 @@ type Build interface {
 	// Cancel will cancel a running build. This will block until the build
 	// is actually completely cancelled.
 	Cancel()
+
+	// SetDebug will enable/disable debug mode. Debug mode is always
+	// enabled by adding the additional key "packer_debug" to boolean
+	// true in the configuration of the various components. This must
+	// be called prior to Prepare.
+	SetDebug(bool)
 }
 
 // A build struct represents a single build job, the result of which should
@@ -34,6 +40,7 @@ type coreBuild struct {
 	hooks         map[string][]Hook
 	provisioners  []coreBuildProvisioner
 
+	debug         bool
 	prepareCalled bool
 }
 
@@ -101,6 +108,14 @@ func (b *coreBuild) Run(ui Ui, cache Cache) (Artifact, error) {
 
 	hook := &DispatchHook{hooks}
 	return b.builder.Run(ui, hook, cache)
+}
+
+func (b *coreBuild) SetDebug(val bool) {
+	if b.prepareCalled {
+		panic("prepare has already been called")
+	}
+
+	b.debug = val
 }
 
 // Cancels the build if it is running.

@@ -11,12 +11,13 @@ import (
 var testBuildArtifact = &testArtifact{}
 
 type testBuild struct {
-	nameCalled    bool
-	prepareCalled bool
-	runCalled     bool
-	runCache      packer.Cache
-	runUi         packer.Ui
-	cancelCalled  bool
+	nameCalled     bool
+	prepareCalled  bool
+	runCalled      bool
+	runCache       packer.Cache
+	runUi          packer.Ui
+	setDebugCalled bool
+	cancelCalled   bool
 
 	errRunResult bool
 }
@@ -41,6 +42,10 @@ func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, erro
 	} else {
 		return testBuildArtifact, nil
 	}
+}
+
+func (b *testBuild) SetDebug(bool) {
+	b.setDebugCalled = true
 }
 
 func (b *testBuild) Cancel() {
@@ -92,6 +97,10 @@ func TestBuildRPC(t *testing.T) {
 	b.errRunResult = true
 	_, err = bClient.Run(ui, cache)
 	assert.NotNil(err, "should not nil")
+
+	// Test SetDebug
+	bClient.SetDebug(true)
+	assert.True(b.setDebugCalled, "should be called")
 
 	// Test Cancel
 	bClient.Cancel()
