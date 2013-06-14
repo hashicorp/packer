@@ -8,8 +8,8 @@ import (
 
 func testUi() *ReaderWriterUi {
 	return &ReaderWriterUi{
-		new(bytes.Buffer),
-		new(bytes.Buffer),
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
 	}
 }
 

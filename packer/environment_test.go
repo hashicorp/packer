@@ -13,8 +13,8 @@ import (
 func testEnvironment() Environment {
 	config := DefaultEnvironmentConfig()
 	config.Ui = &ReaderWriterUi{
-		new(bytes.Buffer),
-		new(bytes.Buffer),
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
 	}
 
 	env, err := NewEnvironment(config)
@@ -292,7 +292,10 @@ func TestEnvironmentProvisioner_Error(t *testing.T) {
 func TestEnvironment_SettingUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	ui := &ReaderWriterUi{new(bytes.Buffer), new(bytes.Buffer)}
+	ui := &ReaderWriterUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
 
 	config := &EnvironmentConfig{}
 	config.Ui = ui

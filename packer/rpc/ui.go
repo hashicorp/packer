@@ -17,6 +17,15 @@ type UiServer struct {
 	ui packer.Ui
 }
 
+func (u *Ui) Ask(query string) string {
+	var result string
+	if err := u.client.Call("Ui.Ask", query, &result); err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
 func (u *Ui) Error(message string) {
 	if err := u.client.Call("Ui.Error", message, new(interface{})); err != nil {
 		panic(err)
@@ -33,6 +42,11 @@ func (u *Ui) Say(message string) {
 	if err := u.client.Call("Ui.Say", message, new(interface{})); err != nil {
 		panic(err)
 	}
+}
+
+func (u *UiServer) Ask(query string, reply *string) error {
+	*reply = u.ui.Ask(query)
+	return nil
 }
 
 func (u *UiServer) Error(message *string, reply *interface{}) error {

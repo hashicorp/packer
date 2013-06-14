@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
 )
 
 type UiColor uint
@@ -21,6 +22,7 @@ const (
 // world. This sort of control allows us to strictly control how output
 // is formatted and various levels of output.
 type Ui interface {
+	Ask(string) string
 	Say(string)
 	Message(string)
 	Error(string)
@@ -46,6 +48,11 @@ type PrefixedUi struct {
 type ReaderWriterUi struct {
 	Reader io.Reader
 	Writer io.Writer
+	l      sync.Mutex
+}
+
+func (u *ColoredUi) Ask(query string) string {
+	return u.Ui.Ask(u.colorize(query, u.Color, true))
 }
 
 func (u *ColoredUi) Say(message string) {
@@ -74,6 +81,10 @@ func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 	return fmt.Sprintf("\033[%d;%d;40m%s\033[0m", attr, color, message)
 }
 
+func (u *PrefixedUi) Ask(query string) string {
+	return u.Ui.Ask(fmt.Sprintf("%s: %s", u.SayPrefix, query))
+}
+
 func (u *PrefixedUi) Say(message string) {
 	u.Ui.Say(fmt.Sprintf("%s: %s", u.SayPrefix, message))
 }
@@ -86,7 +97,29 @@ func (u *PrefixedUi) Error(message string) {
 	u.Ui.Error(fmt.Sprintf("%s: %s", u.SayPrefix, message))
 }
 
+func (rw *ReaderWriterUi) Ask(query string) string {
+	rw.l.Lock()
+	defer rw.l.Unlock()
+
+	log.Printf("ui: ask: %s", query)
+	if query != "" {
+		if _, err := fmt.Fprint(rw.Writer, query+" "); err != nil {
+			panic(err)
+		}
+	}
+
+	var line string
+	if _, err := fmt.Fscanln(rw.Reader, &line); err != nil {
+		panic(err)
+	}
+
+	return line
+}
+
 func (rw *ReaderWriterUi) Say(message string) {
+	rw.l.Lock()
+	defer rw.l.Unlock()
+
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
@@ -95,6 +128,9 @@ func (rw *ReaderWriterUi) Say(message string) {
 }
 
 func (rw *ReaderWriterUi) Message(message string) {
+	rw.l.Lock()
+	defer rw.l.Unlock()
+
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprintf(rw.Writer, message+"\n")
 	if err != nil {
@@ -103,6 +139,9 @@ func (rw *ReaderWriterUi) Message(message string) {
 }
 
 func (rw *ReaderWriterUi) Error(message string) {
+	rw.l.Lock()
+	defer rw.l.Unlock()
+
 	log.Printf("ui error: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
