@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
+	"os/signal"
 	"sync"
 )
 
@@ -101,6 +103,10 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+	defer signal.Stop(sigCh)
+
 	log.Printf("ui: ask: %s", query)
 	if query != "" {
 		if _, err := fmt.Fprint(rw.Writer, query+" "); err != nil {
@@ -108,12 +114,24 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 		}
 	}
 
-	var line string
-	if _, err := fmt.Fscanln(rw.Reader, &line); err != nil {
-		log.Printf("ui: scan err: %s", err)
-	}
+	result := make(chan string, 1)
+	go func() {
+		var line string
+		if _, err := fmt.Fscanln(rw.Reader, &line); err != nil {
+			log.Printf("ui: scan err: %s", err)
+		}
 
-	return line
+		result <- line
+	}()
+
+	select{
+	case line := <-result:
+		return line
+	case <-sigCh:
+		log.Println("Interrupt during Ask call. Returning immediately.")
+		fmt.Fprintln(rw.Writer)
+		return ""
+	}
 }
 
 func (rw *ReaderWriterUi) Say(message string) {
