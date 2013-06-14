@@ -12,7 +12,7 @@ var testBuilderArtifact = &testArtifact{}
 
 type testBuilder struct {
 	prepareCalled bool
-	prepareConfig interface{}
+	prepareConfig []interface{}
 	runCalled     bool
 	runCache      packer.Cache
 	runHook       packer.Hook
@@ -23,7 +23,7 @@ type testBuilder struct {
 	nilRunResult bool
 }
 
-func (b *testBuilder) Prepare(config interface{}) error {
+func (b *testBuilder) Prepare(config ...interface{}) error {
 	b.prepareCalled = true
 	b.prepareConfig = config
 	return nil
@@ -68,7 +68,7 @@ func TestBuilderRPC(t *testing.T) {
 	bClient := Builder(client)
 	bClient.Prepare(config)
 	assert.True(b.prepareCalled, "prepare should be called")
-	assert.Equal(b.prepareConfig, 42, "prepare should be called with right arg")
+	assert.Equal(b.prepareConfig, []interface{}{42}, "prepare should be called with right arg")
 
 	// Test Run
 	cache := new(testCache)

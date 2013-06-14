@@ -8,7 +8,7 @@ import (
 
 type helperBuilder byte
 
-func (helperBuilder) Prepare(interface{}) error {
+func (helperBuilder) Prepare(...interface{}) error {
 	return nil
 }
 

@@ -2,7 +2,7 @@ package packer
 
 type TestBuilder struct {
 	prepareCalled bool
-	prepareConfig interface{}
+	prepareConfig []interface{}
 	runCalled     bool
 	runCache      Cache
 	runHook       Hook
@@ -10,7 +10,7 @@ type TestBuilder struct {
 	cancelCalled  bool
 }
 
-func (tb *TestBuilder) Prepare(config interface{}) error {
+func (tb *TestBuilder) Prepare(config ...interface{}) error {
 	tb.prepareCalled = true
 	tb.prepareConfig = config
 	return nil

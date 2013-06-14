@@ -21,7 +21,7 @@ type BuilderServer struct {
 }
 
 type BuilderPrepareArgs struct {
-	Config interface{}
+	Configs []interface{}
 }
 
 type BuilderRunArgs struct {
@@ -38,7 +38,7 @@ func Builder(client *rpc.Client) *builder {
 	return &builder{client}
 }
 
-func (b *builder) Prepare(config interface{}) (err error) {
+func (b *builder) Prepare(config ...interface{}) (err error) {
 	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &err)
 	if cerr != nil {
 		err = cerr
@@ -109,7 +109,7 @@ func (b *builder) Cancel() {
 }
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
-	err := b.builder.Prepare(args.Config)
+	err := b.builder.Prepare(args.Configs...)
 	if err != nil {
 		*reply = NewBasicError(err)
 	}

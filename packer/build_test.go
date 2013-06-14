@@ -40,7 +40,7 @@ func TestBuild_Prepare(t *testing.T) {
 
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, 42, "prepare config should be 42")
+	assert.Equal(builder.prepareConfig, []interface{}{42}, "prepare config should be 42")
 
 	// Verify provisioners were prepared
 	coreProv := coreB.provisioners[0]
