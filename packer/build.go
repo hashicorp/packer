@@ -5,9 +5,21 @@ import "log"
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
+	// Name is the name of the build. This is unique across a single template,
+	// but not absolutely unique. This is meant more to describe to the user
+	// what is being built rather than being a unique identifier.
 	Name() string
+
+	// Prepare configures the various components of this build and reports
+	// any errors in doing so (such as syntax errors, validation errors, etc.)
 	Prepare() error
+
+	// Run runs the actual builder, returning an artifact implementation
+	// of what is built. If anything goes wrong, an error is returned.
 	Run(Ui, Cache) (Artifact, error)
+
+	// Cancel will cancel a running build. This will block until the build
+	// is actually completely cancelled.
 	Cancel()
 }
 
