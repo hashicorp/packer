@@ -219,7 +219,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Run!
 	if b.config.PackerDebug {
 		b.runner = &multistep.DebugRunner{
-			Steps: steps,
+			Steps:   steps,
 			PauseFn: common.MultistepDebugFn(ui),
 		}
 	} else {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"time"
 )
 
 // MultistepDebugFn will return a proper multistep.DebugPauseFn to
@@ -21,10 +22,23 @@ func MultistepDebugFn(ui packer.Ui) multistep.DebugPauseFn {
 		}
 
 		message := fmt.Sprintf(
-			"Pausing %s step '%s'. Press any key to continue.\n",
+			"Pausing %s step '%s'. Press any key to continue.",
 			locationString, name)
 
-		ui.Say(message)
-		ui.Ask("")
+		result := make(chan string, 1)
+		go func() {
+			result <- ui.Ask(message)
+		}()
+
+		for {
+			select {
+			case <-result:
+				return
+			case <-time.After(100 * time.Millisecond):
+				if _, ok := state[multistep.StateCancelled]; ok {
+					return
+				}
+			}
+		}
 	}
 }

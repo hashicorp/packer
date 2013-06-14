@@ -110,7 +110,7 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 
 	var line string
 	if _, err := fmt.Fscanln(rw.Reader, &line); err != nil {
-		panic(err)
+		log.Printf("ui: scan err: %s", err)
 	}
 
 	return line

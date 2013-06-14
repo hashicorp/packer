@@ -7,8 +7,8 @@ import (
 )
 
 type testUi struct {
-	askCalled bool
-	askQuery string
+	askCalled      bool
+	askQuery       string
 	errorCalled    bool
 	errorMessage   string
 	messageCalled  bool
