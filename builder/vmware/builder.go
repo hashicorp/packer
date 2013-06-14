@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"math/rand"
@@ -217,7 +218,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run!
 	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{Steps: steps}
+		b.runner = &multistep.DebugRunner{
+			Steps: steps,
+			PauseFn: common.MultistepDebugFn(ui),
+		}
 	} else {
 		b.runner = &multistep.BasicRunner{Steps: steps}
 	}
