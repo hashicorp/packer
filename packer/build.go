@@ -26,6 +26,9 @@ type Build interface {
 	// enabled by adding the additional key "packer_debug" to boolean
 	// true in the configuration of the various components. This must
 	// be called prior to Prepare.
+	//
+	// When SetDebug is set to true, parallelism between builds is
+	// strictly prohibited.
 	SetDebug(bool)
 }
 
