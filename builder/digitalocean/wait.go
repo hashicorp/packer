@@ -14,10 +14,6 @@ func waitForDropletState(desiredState string, dropletId uint, client *DigitalOce
 	go func() {
 		attempts := 0
 		for {
-			select {
-			default:
-			}
-
 			attempts += 1
 
 			log.Printf("Checking droplet status... (attempt: %d)", attempts)
@@ -33,8 +29,8 @@ func waitForDropletState(desiredState string, dropletId uint, client *DigitalOce
 				break
 			}
 
-			// Wait a second in between
-			time.Sleep(1 * time.Second)
+			// Wait 3 seconds in between
+			time.Sleep(3 * time.Second)
 		}
 
 		active <- true
@@ -52,9 +48,6 @@ ActiveWaitLoop:
 			break ActiveWaitLoop
 		case <-timeout:
 			err := errors.New("Timeout while waiting to for droplet to become active")
-			return err
-		case <-time.After(1 * time.Second):
-			err := errors.New("Interrupt detected, quitting waiting for droplet")
 			return err
 		}
 	}

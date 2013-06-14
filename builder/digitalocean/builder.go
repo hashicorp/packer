@@ -60,8 +60,8 @@ func (b *Builder) Prepare(raw interface{}) error {
 	}
 
 	if b.config.ImageID == 0 {
-		// Default to base image "Ubuntu 12.04 x64 Server"
-		b.config.ImageID = 2676
+		// Default to base image "Ubuntu 12.04 x64 Server (id: 284203)"
+		b.config.ImageID = 284203
 	}
 
 	if b.config.SSHUsername == "" {
@@ -131,8 +131,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepProvision),
 		new(stepPowerOff),
 		new(stepSnapshot),
-		new(stepDestroyDroplet),
-		new(stepDestroySSHKey),
 	}
 
 	// Run the steps

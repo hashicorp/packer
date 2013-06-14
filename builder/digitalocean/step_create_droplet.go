@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"time"
 )
 
 type stepCreateDroplet struct {
@@ -51,10 +52,16 @@ func (s *stepCreateDroplet) Cleanup(state map[string]interface{}) {
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
+
+	// Sleep arbitrarily before sending destroy request
+	// Otherwise we get "pending event" errors, even though there isn't
+	// one.
+	time.Sleep(5 * time.Second)
+
 	err := client.DestroyDroplet(s.dropletId)
 
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error destroying droplet. Please destroy it manually: %s", s.dropletId))
+			"Error destroying droplet. Please destroy it manually: %v", s.dropletId))
 	}
 }
