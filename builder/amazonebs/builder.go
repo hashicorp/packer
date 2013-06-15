@@ -37,7 +37,7 @@ type config struct {
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
 
-	PackerDebug bool `mapstructure:"packer_debug"`
+	PackerDebug   bool   `mapstructure:"packer_debug"`
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
 }
 
