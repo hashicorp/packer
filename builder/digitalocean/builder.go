@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
@@ -20,21 +21,20 @@ const BuilderId = "pearkes.digitalocean"
 // to use while communicating with DO and describes the image
 // you are creating
 type config struct {
-	// Credentials
 	ClientID string `mapstructure:"client_id"`
 	APIKey   string `mapstructure:"api_key"`
+	RegionID uint   `mapstructure:"region_id"`
+	SizeID   uint   `mapstructure:"size_id"`
+	ImageID  uint   `mapstructure:"image_id"`
 
-	RegionID    uint   `mapstructure:"region_id"`
-	SizeID      uint   `mapstructure:"size_id"`
-	ImageID     uint   `mapstructure:"image_id"`
-	SSHUsername string `mapstructure:"ssh_username"`
-	SSHPort     uint   `mapstructure:"ssh_port"`
-
-	// Configuration for the image being built
 	SnapshotName string `mapstructure:"snapshot_name"`
+	SSHUsername  string `mapstructure:"ssh_username"`
+	SSHPort      uint   `mapstructure:"ssh_port"`
+	SSHTimeout   time.Duration
+
+	PackerDebug bool `mapstructure:"packer_debug"`
 
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
-	SSHTimeout    time.Duration
 }
 
 type Builder struct {
@@ -137,7 +137,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run the steps
-	b.runner = &multistep.BasicRunner{Steps: steps}
+	if b.config.PackerDebug {
+		b.runner = &multistep.DebugRunner{
+			Steps:   steps,
+			PauseFn: common.MultistepDebugFn(ui),
+		}
+	} else {
+		b.runner = &multistep.BasicRunner{Steps: steps}
+	}
+
 	b.runner.Run(state)
 
 	return nil, nil
