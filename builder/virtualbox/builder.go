@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"net/url"
@@ -41,6 +42,8 @@ type config struct {
 	SSHUser         string        `mapstructure:"ssh_username"`
 	SSHWaitTimeout  time.Duration ``
 	VMName          string        `mapstructure:"vm_name"`
+
+	PackerDebug bool `mapstructure:"packer_debug"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -212,7 +215,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state["ui"] = ui
 
 	// Run
-	b.runner = &multistep.BasicRunner{Steps: steps}
+	if b.config.PackerDebug {
+		b.runner = &multistep.DebugRunner{
+			Steps:   steps,
+			PauseFn: common.MultistepDebugFn(ui),
+		}
+	} else {
+		b.runner = &multistep.BasicRunner{Steps: steps}
+	}
+
 	b.runner.Run(state)
 
 	return nil, nil

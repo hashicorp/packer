@@ -12,6 +12,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
@@ -36,6 +37,7 @@ type config struct {
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
 
+	PackerDebug bool `mapstructure:"packer_debug"`
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
 }
 
@@ -132,7 +134,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run!
-	b.runner = &multistep.BasicRunner{Steps: steps}
+	if b.config.PackerDebug {
+		b.runner = &multistep.DebugRunner{
+			Steps:   steps,
+			PauseFn: common.MultistepDebugFn(ui),
+		}
+	} else {
+		b.runner = &multistep.BasicRunner{Steps: steps}
+	}
+
 	b.runner.Run(state)
 
 	// If there are no AMIs, then jsut return
