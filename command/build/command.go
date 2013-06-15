@@ -210,7 +210,6 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		}
 	}
 
-
 	// Wait for both the builds to complete and the interrupt handler,
 	// if it is interrupted.
 	log.Printf("Waiting on builds to complete...")

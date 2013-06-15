@@ -124,14 +124,18 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 		result <- line
 	}()
 
-	select {
-	case line := <-result:
-		return line
-	case <-sigCh:
-		log.Println("Interrupt during Ask call. Returning immediately.")
-		fmt.Fprintln(rw.Writer)
-		return ""
+	for {
+		select {
+		case line := <-result:
+			return line
+		case <-sigCh:
+			fmt.Fprint(
+				rw.Writer,
+				"\nInterrupts are blocked while waiting for input. Press enter.")
+		}
 	}
+
+	return ""
 }
 
 func (rw *ReaderWriterUi) Say(message string) {
