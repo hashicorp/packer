@@ -93,8 +93,11 @@ func (e *Environment) Ui() packer.Ui {
 	var reply string
 	e.client.Call("Environment.Ui", new(interface{}), &reply)
 
-	// TODO: error handling
-	client, _ := rpc.Dial("tcp", reply)
+	client, err := rpc.Dial("tcp", reply)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Ui{client}
 }
 
