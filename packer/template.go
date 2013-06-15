@@ -11,7 +11,6 @@ import (
 // "interface{}" pointers since we actually don't know what their contents
 // are until we read the "type" field.
 type rawTemplate struct {
-	Name         string
 	Builders     []map[string]interface{}
 	Hooks        map[string][]string
 	Provisioners []map[string]interface{}
@@ -21,7 +20,6 @@ type rawTemplate struct {
 // The Template struct represents a parsed template, parsed into the most
 // completed form it can be without additional processing by the caller.
 type Template struct {
-	Name         string
 	Builders     map[string]rawBuilderConfig
 	Hooks        map[string][]string
 	Provisioners []rawProvisionerConfig
@@ -61,7 +59,6 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	}
 
 	t = &Template{}
-	t.Name = rawTpl.Name
 	t.Builders = make(map[string]rawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
 	t.Provisioners = make([]rawProvisionerConfig, len(rawTpl.Provisioners))
