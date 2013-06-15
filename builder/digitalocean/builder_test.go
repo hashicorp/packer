@@ -144,7 +144,7 @@ func TestBuilderPrepare_ImageID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SizeID != 2676 {
+	if b.config.SizeID != 66 {
 		t.Errorf("invalid: %d", b.config.SizeID)
 	}
 
@@ -176,15 +176,15 @@ func TestBuilderPrepare_SSHUsername(t *testing.T) {
 	}
 
 	// Test set
-	config["ssh_username"] = ""
+	config["ssh_username"] = "foo"
 	b = Builder{}
 	err = b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SSHPort != 35 {
-		t.Errorf("invalid: %d", b.config.SSHPort)
+	if b.config.SSHUsername != "foo" {
+		t.Errorf("invalid: %s", b.config.SSHUsername)
 	}
 }
 
