@@ -161,11 +161,27 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Run all the builds in parallel and wait for them to complete
-	var wg sync.WaitGroup
+	var interruptWg, wg sync.WaitGroup
+	interrupted := false
 	artifacts := make(map[string]packer.Artifact)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
+
+		// Handle interrupts for this build
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, os.Interrupt)
+		defer signal.Stop(sigCh)
+		go func(b packer.Build) {
+			<-sigCh
+			interruptWg.Add(1)
+			defer interruptWg.Done()
+			interrupted = true
+
+			log.Printf("Stopping build: %s", b.Name())
+			b.Cancel()
+			log.Printf("Build cancelled: %s", b.Name())
+		}(b)
 
 		// Run the build in a goroutine
 		go func(b packer.Build) {
@@ -187,37 +203,13 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
+
+		if interrupted {
+			log.Println("Interrupted, not going to start any more builds.")
+			break
+		}
 	}
 
-	// Handle signals
-	var interruptWg sync.WaitGroup
-	interrupted := false
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt)
-
-	go func() {
-		<-sigCh
-		interruptWg.Add(1)
-		defer interruptWg.Done()
-		interrupted = true
-
-		log.Println("Interrupted! Cancelling builds...")
-
-		var wg sync.WaitGroup
-		for _, b := range builds {
-			wg.Add(1)
-
-			go func(b packer.Build) {
-				defer wg.Done()
-
-				log.Printf("Stopping build: %s", b.Name())
-				b.Cancel()
-				log.Printf("Build cancelled: %s", b.Name())
-			}(b)
-		}
-
-		wg.Wait()
-	}()
 
 	// Wait for both the builds to complete and the interrupt handler,
 	// if it is interrupted.
@@ -226,7 +218,6 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	log.Printf("Builds completed. Waiting on interrupt barrier...")
 	interruptWg.Wait()
-	log.Printf("Interrupt barrier passed.")
 
 	if interrupted {
 		env.Ui().Say("Cleanly cancelled builds after being interrupted.")
