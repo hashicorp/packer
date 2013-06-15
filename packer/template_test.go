@@ -11,7 +11,6 @@ func TestParseTemplate_Basic(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": []
 	}
 	`
@@ -19,7 +18,6 @@ func TestParseTemplate_Basic(t *testing.T) {
 	result, err := ParseTemplate([]byte(data))
 	assert.Nil(err, "should not error")
 	assert.NotNil(result, "template should not be nil")
-	assert.Equal(result.Name, "my-image", "name should be correct")
 	assert.Length(result.Builders, 0, "no builders")
 }
 
