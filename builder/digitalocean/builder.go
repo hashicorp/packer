@@ -42,9 +42,12 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raw interface{}) error {
-	if err := mapstructure.Decode(raw, &b.config); err != nil {
-		return err
+func (b *Builder) Prepare(raws ...interface{}) error {
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &b.config)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Optional configuration with defaults

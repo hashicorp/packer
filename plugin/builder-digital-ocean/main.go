@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/mitchellh/packer/packer/plugin"
-	"github.com/pearkes/packer/builder/digitalocean"
+	"github.com/mitchellh/packer/builder/digitalocean"
 )
 
 func main() {
