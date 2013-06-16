@@ -49,9 +49,10 @@ type PrefixedUi struct {
 // The ReaderWriterUi is a UI that writes and reads from standard Go
 // io.Reader and io.Writer.
 type ReaderWriterUi struct {
-	Reader io.Reader
-	Writer io.Writer
-	l      sync.Mutex
+	Reader      io.Reader
+	Writer      io.Writer
+	l           sync.Mutex
+	interrupted bool
 }
 
 func (u *ColoredUi) Ask(query string) (string, error) {
@@ -104,6 +105,10 @@ func (rw *ReaderWriterUi) Ask(query string) (string, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
+	if rw.interrupted {
+		return "", errors.New("interrupted")
+	}
+
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 	defer signal.Stop(sigCh)
@@ -129,6 +134,7 @@ func (rw *ReaderWriterUi) Ask(query string) (string, error) {
 	case line := <-result:
 		return line, nil
 	case <-sigCh:
+		rw.interrupted = true
 		return "", errors.New("interrupted")
 	}
 }
