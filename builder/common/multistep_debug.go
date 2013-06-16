@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"time"
 )
 
@@ -27,7 +28,12 @@ func MultistepDebugFn(ui packer.Ui) multistep.DebugPauseFn {
 
 		result := make(chan string, 1)
 		go func() {
-			result <- ui.Ask(message)
+			line, err := ui.Ask(message)
+			if err != nil {
+				log.Printf("Error asking for input: %s", err)
+			}
+
+			result <- line
 		}()
 
 		for {

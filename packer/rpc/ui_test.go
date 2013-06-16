@@ -17,10 +17,10 @@ type testUi struct {
 	sayMessage     string
 }
 
-func (u *testUi) Ask(query string) string {
+func (u *testUi) Ask(query string) (string, error) {
 	u.askCalled = true
 	u.askQuery = query
-	return "foo"
+	return "foo", nil
 }
 
 func (u *testUi) Error(message string) {
@@ -58,7 +58,8 @@ func TestUiRPC(t *testing.T) {
 	uiClient := &Ui{client}
 
 	// Basic error and say tests
-	result := uiClient.Ask("query")
+	result, err := uiClient.Ask("query")
+	assert.Nil(err, "should not error")
 	assert.True(ui.askCalled, "ask should be called")
 	assert.Equal(ui.askQuery, "query", "should be correct")
 	assert.Equal(result, "foo", "should have correct result")

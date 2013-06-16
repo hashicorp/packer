@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -24,7 +25,7 @@ const (
 // world. This sort of control allows us to strictly control how output
 // is formatted and various levels of output.
 type Ui interface {
-	Ask(string) string
+	Ask(string) (string, error)
 	Say(string)
 	Message(string)
 	Error(string)
@@ -53,7 +54,7 @@ type ReaderWriterUi struct {
 	l      sync.Mutex
 }
 
-func (u *ColoredUi) Ask(query string) string {
+func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
 }
 
@@ -83,7 +84,7 @@ func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 	return fmt.Sprintf("\033[%d;%d;40m%s\033[0m", attr, color, message)
 }
 
-func (u *PrefixedUi) Ask(query string) string {
+func (u *PrefixedUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(fmt.Sprintf("%s: %s", u.SayPrefix, query))
 }
 
@@ -99,7 +100,7 @@ func (u *PrefixedUi) Error(message string) {
 	u.Ui.Error(fmt.Sprintf("%s: %s", u.SayPrefix, message))
 }
 
-func (rw *ReaderWriterUi) Ask(query string) string {
+func (rw *ReaderWriterUi) Ask(query string) (string, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -110,7 +111,7 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 	log.Printf("ui: ask: %s", query)
 	if query != "" {
 		if _, err := fmt.Fprint(rw.Writer, query+" "); err != nil {
-			panic(err)
+			return "", err
 		}
 	}
 
@@ -124,18 +125,12 @@ func (rw *ReaderWriterUi) Ask(query string) string {
 		result <- line
 	}()
 
-	for {
-		select {
-		case line := <-result:
-			return line
-		case <-sigCh:
-			fmt.Fprint(
-				rw.Writer,
-				"\nInterrupts are blocked while waiting for input. Press enter.")
-		}
+	select {
+	case line := <-result:
+		return line, nil
+	case <-sigCh:
+		return "", errors.New("interrupted")
 	}
-
-	return ""
 }
 
 func (rw *ReaderWriterUi) Say(message string) {
