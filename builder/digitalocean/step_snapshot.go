@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -13,7 +14,7 @@ func (s *stepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	c := state["config"].(config)
 	dropletId := state["droplet_id"].(uint)
 
-	ui.Say("Creating snapshot...")
+	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
 
 	err := client.CreateSnapshot(dropletId, c.SnapshotName)
 
