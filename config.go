@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/mitchellh/osext"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"io"
 	"log"
 	"os/exec"
+	"path/filepath"
 )
 
 // This is the default, built-in configuration that ships with
@@ -106,6 +108,30 @@ func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
 }
 
 func (c *config) pluginClient(path string) *plugin.Client {
+	originalPath := path
+
+	// First attempt to find the executable by consulting the PATH.
+	path, err := exec.LookPath(path)
+	if err != nil {
+		// If that doesn't work, look for it in the same directory
+		// as the `packer` executable (us).
+		log.Printf("Plugin could not be found. Checking same directory as executable.")
+		exePath, err := osext.Executable()
+		if err != nil {
+			log.Printf("Couldn't get current exe path: %s", err)
+		} else {
+			log.Printf("Current exe path: %s", exePath)
+			path = filepath.Join(filepath.Dir(exePath), filepath.Base(originalPath))
+		}
+	}
+
+	// If everything failed, just use the original path and let the error
+	// bubble through.
+	if path == "" {
+		path = originalPath
+	}
+
+	log.Printf("Creating plugin client for path: %s", path)
 	var config plugin.ClientConfig
 	config.Cmd = exec.Command(path)
 	config.Managed = true
