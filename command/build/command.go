@@ -233,19 +233,20 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		}
 	}
 
-	// Output all the artifacts
-	env.Ui().Say("\n==> Builds finished. The artifacts of successful builds are:")
-	for name, artifact := range artifacts {
-		var message bytes.Buffer
-		fmt.Fprintf(&message, "--> %s: ", name)
+	if len(artifacts) > 0 {
+		env.Ui().Say("\n==> Builds finished. The artifacts of successful builds are:")
+		for name, artifact := range artifacts {
+			var message bytes.Buffer
+			fmt.Fprintf(&message, "--> %s: ", name)
 
-		if artifact != nil {
-			fmt.Fprintf(&message, artifact.String())
-		} else {
-			fmt.Print("<nothing>")
+			if artifact != nil {
+				fmt.Fprintf(&message, artifact.String())
+			} else {
+				fmt.Print("<nothing>")
+			}
+
+			env.Ui().Say(message.String())
 		}
-
-		env.Ui().Say(message.String())
 	}
 
 	return 0
