@@ -55,7 +55,7 @@ func decodeConfig(r io.Reader, c *config) error {
 // Returns an array of defined command names.
 func (c *config) CommandNames() (result []string) {
 	result = make([]string, 0, len(c.Commands))
-	for name, _ := range c.Commands {
+	for name := range c.Commands {
 		result = append(result, name)
 	}
 	return
