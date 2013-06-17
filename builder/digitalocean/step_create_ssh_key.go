@@ -71,12 +71,17 @@ func (s *stepCreateSSHKey) Cleanup(state map[string]interface{}) {
 
 	client := state["client"].(*DigitalOceanClient)
 	ui := state["ui"].(packer.Ui)
+	c := state["config"].(config)
 
 	ui.Say("Deleting temporary ssh key...")
 	err := client.DestroyKey(s.keyId)
+
+	curlstr := fmt.Sprintf("curl '%v/ssh_keys/%v/destroy?client_id=%v&api_key=%v'",
+		DIGITALOCEAN_API_URL, s.keyId, c.ClientID, c.APIKey)
+
 	if err != nil {
 		log.Printf("Error cleaning up ssh key: %v", err.Error())
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up ssh key. Please delete the key manually: %v", s.keyId))
+			"Error cleaning up ssh key. Please delete the key manually: %v", curlstr))
 	}
 }

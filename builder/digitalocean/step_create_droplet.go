@@ -63,8 +63,11 @@ func (s *stepCreateDroplet) Cleanup(state map[string]interface{}) {
 
 	err := client.DestroyDroplet(s.dropletId)
 
+	curlstr := fmt.Sprintf("curl '%v/droplets/%v/destroy?client_id=%v&api_key=%v'",
+		DIGITALOCEAN_API_URL, s.dropletId, c.ClientID, c.APIKey)
+
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error destroying droplet. Please destroy it manually: %v", s.dropletId))
+			"Error destroying droplet. Please destroy it manually: %v", curlstr))
 	}
 }
