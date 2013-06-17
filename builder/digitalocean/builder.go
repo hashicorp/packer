@@ -137,9 +137,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	t, err := template.New("snapshot").Parse(b.config.RawSnapshotName)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
+	} else {
+		t.Execute(snapNameBuf, tData)
+		b.config.SnapshotName = snapNameBuf.String()
 	}
-	t.Execute(snapNameBuf, tData)
-	b.config.SnapshotName = snapNameBuf.String()
 
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
