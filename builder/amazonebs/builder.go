@@ -15,6 +15,7 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"text/template"
 	"time"
 )
 
@@ -96,6 +97,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	b.config.SSHTimeout, err = time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
+	}
+
+	if b.config.AMIName == "" {
+		errs = append(errs, errors.New("ami_name must be specified"))
+	} else {
+		_, err = template.New("ami").Parse(b.config.AMIName)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("Failed parsing ami_name: %s", err))
+		}
 	}
 
 	if len(errs) > 0 {

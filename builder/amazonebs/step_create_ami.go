@@ -29,11 +29,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 		strconv.FormatInt(time.Now().UTC().Unix(), 10),
 	}
 
-	t, err := template.New("ami").Parse(config.AMIName)
-	if err != nil {
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+	t := template.Must(template.New("ami").Parse(config.AMIName))
 	t.Execute(amiNameBuf, tData)
 	amiName := amiNameBuf.String()
 
