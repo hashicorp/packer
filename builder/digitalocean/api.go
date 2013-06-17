@@ -154,14 +154,13 @@ func NewRequest(d DigitalOceanClient, path string, params string) (map[string]in
 
 	err = json.Unmarshal(body, &decodedResponse)
 
+	log.Printf("response from digitalocean: %v", decodedResponse)
+
 	// Catch all non-200 status and return an error
 	if resp.StatusCode != 200 {
-		err = errors.New(fmt.Sprintf("recieved non-200 status from digitalocean: %d", resp.StatusCode))
-		log.Printf("response from digital ocean: %v", decodedResponse)
+		err = errors.New(fmt.Sprintf("Received non-200 HTTP status from DigitalOcean: %v", resp.StatusCode))
 		return decodedResponse, err
 	}
-
-	log.Printf("response from digital ocean: %v", decodedResponse)
 
 	if err != nil {
 		return decodedResponse, err
@@ -170,8 +169,11 @@ func NewRequest(d DigitalOceanClient, path string, params string) (map[string]in
 	// Catch all non-OK statuses from DO and return an error
 	status := decodedResponse["status"]
 	if status != "OK" {
-		err = errors.New(fmt.Sprintf("recieved non-OK status from digitalocean: %d", status))
-		log.Printf("response from digital ocean: %v", decodedResponse)
+		// Get the actual error message if there is one
+		if status == "ERROR" {
+			status = decodedResponse["error_message"]
+		}
+		err = errors.New(fmt.Sprintf("Received bad status from DigitalOcean: %v", status))
 		return decodedResponse, err
 	}
 
