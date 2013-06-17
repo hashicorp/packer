@@ -14,7 +14,7 @@ type rawTemplate struct {
 	Builders     []map[string]interface{}
 	Hooks        map[string][]string
 	Provisioners []map[string]interface{}
-	Outputs      []map[string]interface{}
+	PostProcessors []map[string]interface{} `json:"post-processors"`
 }
 
 // The Template struct represents a parsed template, parsed into the most
