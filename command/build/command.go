@@ -164,6 +164,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	var interruptWg, wg sync.WaitGroup
 	interrupted := false
 	artifacts := make(map[string]packer.Artifact)
+	errors := make(map[string]error)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
@@ -187,15 +188,17 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		go func(b packer.Build) {
 			defer wg.Done()
 
-			var err error
-			log.Printf("Starting build run: %s", b.Name())
-			ui := buildUis[b.Name()]
-			artifacts[b.Name()], err = b.Run(ui, env.Cache())
+			name := b.Name()
+			log.Printf("Starting build run: %s", name)
+			ui := buildUis[name]
+			artifact, err := b.Run(ui, env.Cache())
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build errored: %s", err))
+				errors[name] = err
 			} else {
 				ui.Say("Build finished.")
+				artifacts[name] = artifact
 			}
 		}(b)
 
@@ -223,8 +226,15 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
+	if len(errors) > 0 {
+		env.Ui().Error("\n==> Some builds didn't complete successfully and had errors:")
+		for name, err := range errors {
+			env.Ui().Error(fmt.Sprintf("--> %s: %s", name, err))
+		}
+	}
+
 	// Output all the artifacts
-	env.Ui().Say("\n==> The build completed! The artifacts created were:")
+	env.Ui().Say("\n==> Builds finished. The artifacts of successful builds are:")
 	for name, artifact := range artifacts {
 		var message bytes.Buffer
 		fmt.Fprintf(&message, "--> %s: ", name)
