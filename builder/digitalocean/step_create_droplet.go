@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"time"
 )
 
@@ -49,6 +50,7 @@ func (s *stepCreateDroplet) Cleanup(state map[string]interface{}) {
 
 	client := state["client"].(*DigitalOceanClient)
 	ui := state["ui"].(packer.Ui)
+	c := state["config"].(config)
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
@@ -56,7 +58,8 @@ func (s *stepCreateDroplet) Cleanup(state map[string]interface{}) {
 	// Sleep arbitrarily before sending destroy request
 	// Otherwise we get "pending event" errors, even though there isn't
 	// one.
-	time.Sleep(5 * time.Second)
+	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
+	time.Sleep(c.EventDelay)
 
 	err := client.DestroyDroplet(s.dropletId)
 

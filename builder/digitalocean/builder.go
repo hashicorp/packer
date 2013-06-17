@@ -31,10 +31,12 @@ type config struct {
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
 	SSHTimeout   time.Duration
+	EventDelay   time.Duration
 
 	PackerDebug bool `mapstructure:"packer_debug"`
 
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
+	RawEventDelay string `mapstructure:"event_delay"`
 }
 
 type Builder struct {
@@ -88,6 +90,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawSSHTimeout = "1m"
 	}
 
+	if b.config.RawEventDelay == "" {
+		// Default to 5 second delays after creating events
+		// to allow DO to process
+		b.config.RawEventDelay = "5s"
+	}
+
 	// A list of errors on the configuration
 	errs := make([]error, 0)
 
@@ -100,11 +108,18 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.APIKey == "" {
 		errs = append(errs, errors.New("an api_key must be specified"))
 	}
+
 	timeout, err := time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
 	b.config.SSHTimeout = timeout
+
+	delay, err := time.ParseDuration(b.config.RawEventDelay)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing event_delay: %s", err))
+	}
+	b.config.EventDelay = delay
 
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
