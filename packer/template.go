@@ -11,9 +11,9 @@ import (
 // "interface{}" pointers since we actually don't know what their contents
 // are until we read the "type" field.
 type rawTemplate struct {
-	Builders     []map[string]interface{}
-	Hooks        map[string][]string
-	Provisioners []map[string]interface{}
+	Builders       []map[string]interface{}
+	Hooks          map[string][]string
+	Provisioners   []map[string]interface{}
 	PostProcessors []map[string]interface{} `json:"post-processors"`
 }
 
