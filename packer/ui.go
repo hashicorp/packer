@@ -134,7 +134,13 @@ func (rw *ReaderWriterUi) Ask(query string) (string, error) {
 	case line := <-result:
 		return line, nil
 	case <-sigCh:
+		// Print a newline so that any further output starts properly
+		// on a new line.
+		fmt.Fprintln(rw.Writer)
+
+		// Mark that we were interrupted so future Ask calls fail.
 		rw.interrupted = true
+
 		return "", errors.New("interrupted")
 	}
 }
