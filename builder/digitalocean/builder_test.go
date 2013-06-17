@@ -2,6 +2,7 @@ package digitalocean
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"strconv"
 	"testing"
 )
 
@@ -220,18 +221,71 @@ func TestBuilderPrepare_SSHTimeout(t *testing.T) {
 
 }
 
-func TestBuilderPrepare_SnapshotName(t *testing.T) {
+func TestBuilderPrepare_EventDelay(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test set
-	config["snapshot_name"] = "foo"
+	// Test default
 	err := b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SnapshotName != "foo" {
-		t.Errorf("invalid: %s", b.config.SnapshotName)
+	if b.config.RawEventDelay != "5s" {
+		t.Errorf("invalid: %d", b.config.RawEventDelay)
 	}
+
+	// Test set
+	config["event_delay"] = "10s"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test bad
+	config["event_delay"] = "tubes"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+}
+
+func TestBuilderPrepare_SnapshotName(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.RawSnapshotName != "packer-{{.CreateTime}}" {
+		t.Errorf("invalid: %d", b.config.RawSnapshotName)
+	}
+
+	// Test set
+	config["snapshot_name"] = "foobarbaz"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test set with template
+	config["snapshot_name"] = "{{.CreateTime}}"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	_, err = strconv.ParseInt(b.config.SnapshotName, 0, 0)
+	if err != nil {
+		t.Fatalf("failed to parse int in template: %s", err)
+	}
+
 }

@@ -4,6 +4,7 @@
 package digitalocean
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
@@ -11,11 +12,17 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"strconv"
+	"text/template"
 	"time"
 )
 
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
+
+type snapshotNameData struct {
+	CreateTime string
+}
 
 // Configuration tells the builder the credentials
 // to use while communicating with DO and describes the image
@@ -27,14 +34,17 @@ type config struct {
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
 
-	SnapshotName string `mapstructure:"snapshot_name"`
+	SnapshotName string
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
 	SSHTimeout   time.Duration
+	EventDelay   time.Duration
 
 	PackerDebug bool `mapstructure:"packer_debug"`
 
-	RawSSHTimeout string `mapstructure:"ssh_timeout"`
+	RawSnapshotName string `mapstructure:"snapshot_name"`
+	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
+	RawEventDelay   string `mapstructure:"event_delay"`
 }
 
 type Builder struct {
@@ -78,14 +88,20 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.SSHPort = 22
 	}
 
-	if b.config.SnapshotName == "" {
+	if b.config.RawSnapshotName == "" {
 		// Default to packer-{{ unix timestamp (utc) }}
-		b.config.SnapshotName = "packer-{{.CreateTime}}"
+		b.config.RawSnapshotName = "packer-{{.CreateTime}}"
 	}
 
 	if b.config.RawSSHTimeout == "" {
 		// Default to 1 minute timeouts
 		b.config.RawSSHTimeout = "1m"
+	}
+
+	if b.config.RawEventDelay == "" {
+		// Default to 5 second delays after creating events
+		// to allow DO to process
+		b.config.RawEventDelay = "5s"
 	}
 
 	// A list of errors on the configuration
@@ -100,11 +116,27 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.APIKey == "" {
 		errs = append(errs, errors.New("an api_key must be specified"))
 	}
+
 	timeout, err := time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
 	b.config.SSHTimeout = timeout
+
+	delay, err := time.ParseDuration(b.config.RawEventDelay)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing event_delay: %s", err))
+	}
+	b.config.EventDelay = delay
+
+	// Parse the name of the snapshot
+	snapNameBuf := new(bytes.Buffer)
+	tData := snapshotNameData{
+		strconv.FormatInt(time.Now().UTC().Unix(), 10),
+	}
+	t := template.Must(template.New("snapshot").Parse(b.config.RawSnapshotName))
+	t.Execute(snapNameBuf, tData)
+	b.config.SnapshotName = snapNameBuf.String()
 
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
@@ -148,7 +180,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
-	return nil, nil
+	return &Artifact{b.config.SnapshotName}, nil
 }
 
 func (b *Builder) Cancel() {
