@@ -147,5 +147,4 @@ func (c *comm) Upload(path string, input io.Reader) error {
 
 func (c *comm) Download(string, io.Writer) error {
 	panic("not implemented yet")
-	return nil
 }
