@@ -134,7 +134,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	tData := snapshotNameData{
 		strconv.FormatInt(time.Now().UTC().Unix(), 10),
 	}
-	t := template.Must(template.New("snapshot").Parse(b.config.RawSnapshotName))
+	t, err := template.New("snapshot").Parse(b.config.RawSnapshotName)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
+	}
 	t.Execute(snapNameBuf, tData)
 	b.config.SnapshotName = snapNameBuf.String()
 
