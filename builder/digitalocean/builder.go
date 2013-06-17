@@ -148,7 +148,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
-	return nil, nil
+	return &Artifact{b.config.SnapshotName}, nil
 }
 
 func (b *Builder) Cancel() {
