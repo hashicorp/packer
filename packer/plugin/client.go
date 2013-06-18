@@ -143,13 +143,12 @@ func (c *Client) Hook() (packer.Hook, error) {
 // Returns a post-processor implementation that is communicating over
 // this client. If the client hasn't been started, this will start it.
 func (c *Client) PostProcessor() (packer.PostProcessor, error) {
-	_, err := c.rpcClient()
+	client, err := c.rpcClient()
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO
-	return nil, nil
+	return &cmdPostProcessor{packrpc.PostProcessor(client), c}, nil
 }
 
 // Returns a provisioner implementation that is communicating over this
