@@ -443,6 +443,11 @@ func TestTemplate_Build(t *testing.T) {
 			{
 				"type": "test-prov"
 			}
+		],
+
+		"post-processors": [
+			"simple",
+			["simple", "simple"]
 		]
 	}
 	`
@@ -465,11 +470,18 @@ func TestTemplate_Build(t *testing.T) {
 		"test-prov": provisioner,
 	}
 
+	pp := new(TestPostProcessor)
+	ppMap := map[string]PostProcessor{
+		"simple": pp,
+	}
+
 	builderFactory := func(n string) (Builder, error) { return builderMap[n], nil }
+	ppFactory := func(n string) (PostProcessor, error) { return ppMap[n], nil }
 	provFactory := func(n string) (Provisioner, error) { return provisionerMap[n], nil }
 	components := &ComponentFinder{
-		Builder:     builderFactory,
-		Provisioner: provFactory,
+		Builder:       builderFactory,
+		PostProcessor: ppFactory,
+		Provisioner:   provFactory,
 	}
 
 	// Get the build, verifying we can get it without issue, but also
@@ -482,6 +494,9 @@ func TestTemplate_Build(t *testing.T) {
 	assert.Equal(coreBuild.builder, builder, "should have the same builder")
 	assert.Equal(coreBuild.builderConfig, expectedConfig, "should have proper config")
 	assert.Equal(len(coreBuild.provisioners), 1, "should have one provisioner")
+	assert.Equal(len(coreBuild.postProcessors), 2, "should have pps")
+	assert.Equal(len(coreBuild.postProcessors[0]), 1, "should have correct number")
+	assert.Equal(len(coreBuild.postProcessors[1]), 2, "should have correct number")
 }
 
 func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
