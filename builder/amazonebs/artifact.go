@@ -1,6 +1,7 @@
 package amazonebs
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -32,4 +33,8 @@ func (a *artifact) String() string {
 	}
 
 	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
+}
+
+func (a *artifact) Destroy() error {
+	return errors.New("not implemented yet")
 }

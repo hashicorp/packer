@@ -41,6 +41,15 @@ func (a *artifact) String() (result string) {
 	return
 }
 
+func (a *artifact) Destroy() error {
+	var result error
+	if err := a.client.Call("Artifact.Destroy", new(interface{}), &result); err != nil {
+		return err
+	}
+
+	return result
+}
+
 func (s *ArtifactServer) BuilderId(args *interface{}, reply *string) error {
 	*reply = s.artifact.BuilderId()
 	return nil
@@ -58,5 +67,15 @@ func (s *ArtifactServer) Id(args *interface{}, reply *string) error {
 
 func (s *ArtifactServer) String(args *interface{}, reply *string) error {
 	*reply = s.artifact.String()
+	return nil
+}
+
+func (s *ArtifactServer) Destroy(args *interface{}, reply *error) error {
+	err := s.artifact.Destroy()
+	if err != nil {
+		err = NewBasicError(err)
+	}
+
+	*reply = err
 	return nil
 }

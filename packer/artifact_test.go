@@ -17,3 +17,7 @@ func (*TestArtifact) Id() string {
 func (*TestArtifact) String() string {
 	return "string"
 }
+
+func (*TestArtifact) Destroy() error {
+	return nil
+}

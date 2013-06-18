@@ -25,6 +25,10 @@ func (testArtifact) String() string {
 	return "string"
 }
 
+func (testArtifact) Destroy() error {
+	return nil
+}
+
 func TestArtifactRPC(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 

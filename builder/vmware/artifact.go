@@ -1,6 +1,9 @@
 package vmware
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
@@ -23,4 +26,8 @@ func (*Artifact) Id() string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("VM files in directory: %s", a.dir)
+}
+
+func (a *Artifact) Destroy() error {
+	return os.RemoveAll(a.dir)
 }
