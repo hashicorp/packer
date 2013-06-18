@@ -16,6 +16,11 @@ func testBuild() Build {
 		provisioners: []coreBuildProvisioner{
 			coreBuildProvisioner{&TestProvisioner{}, []interface{}{42}},
 		},
+		postProcessors: [][]coreBuildPostProcessor{
+			[]coreBuildPostProcessor{
+				coreBuildPostProcessor{&TestPostProcessor{}, 42},
+			},
+		},
 	}
 }
 
@@ -47,6 +52,11 @@ func TestBuild_Prepare(t *testing.T) {
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
 	assert.Equal(prov.prepConfigs, []interface{}{42, debugFalseConfig}, "prepare should be called with proper config")
+
+	corePP := coreB.postProcessors[0][0]
+	pp := corePP.processor.(*TestPostProcessor)
+	assert.True(pp.configCalled, "config should be called")
+	assert.Equal(pp.configVal, 42, "config should have right value")
 }
 
 func TestBuild_Prepare_Twice(t *testing.T) {
