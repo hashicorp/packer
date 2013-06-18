@@ -53,7 +53,11 @@ func (a *artifact) Destroy() error {
 	}
 
 	if len(errors) > 0 {
-		return &packer.MultiError{errors}
+		if len(errors) == 1 {
+			return errors[0]
+		} else {
+			return &packer.MultiError{errors}
+		}
 	}
 
 	return nil
