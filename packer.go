@@ -9,8 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/user"
-	"path/filepath"
 	"runtime"
 )
 
@@ -82,19 +80,23 @@ func loadConfig() (*config, error) {
 	}
 
 	mustExist := true
-	configFile := os.Getenv("PACKER_CONFIG")
-	if configFile == "" {
-		u, err := user.Current()
-		if err != nil {
-			return nil, err
-		}
-
-		configFile = filepath.Join(u.HomeDir, ".packerconfig")
+	configFilePath := os.Getenv("PACKER_CONFIG")
+	if configFilePath == "" {
+		var err error
+		configFilePath, err = configFile()
 		mustExist = false
+
+		if err != nil {
+			log.Printf("Error detecing default config file path: %s", err)
+		}
 	}
 
-	log.Printf("Attempting to open config file: %s", configFile)
-	f, err := os.Open(configFile)
+	if configFilePath == "" {
+		return &config, nil
+	}
+
+	log.Printf("Attempting to open config file: %s", configFilePath)
+	f, err := os.Open(configFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
