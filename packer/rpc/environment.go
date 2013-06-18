@@ -73,6 +73,22 @@ func (e *Environment) Hook(name string) (h packer.Hook, err error) {
 	return
 }
 
+func (e *Environment) PostProcessor(name string) (p packer.PostProcessor, err error) {
+	var reply string
+	err = e.client.Call("Environment.PostProcessor", name, &reply)
+	if err != nil {
+		return
+	}
+
+	_, err = rpc.Dial("tcp", reply)
+	if err != nil {
+		return
+	}
+
+	p = nil
+	return
+}
+
 func (e *Environment) Provisioner(name string) (p packer.Provisioner, err error) {
 	var reply string
 	err = e.client.Call("Environment.Provisioner", name, &reply)
@@ -138,6 +154,18 @@ func (e *EnvironmentServer) Hook(name *string, reply *string) error {
 	// Wrap it
 	server := rpc.NewServer()
 	RegisterHook(server, hook)
+
+	*reply = serveSingleConn(server)
+	return nil
+}
+
+func (e *EnvironmentServer) PostProcessor(name *string, reply *string) error {
+	_, err := e.env.PostProcessor(*name)
+	if err != nil {
+		return err
+	}
+
+	server := rpc.NewServer()
 
 	*reply = serveSingleConn(server)
 	return nil
