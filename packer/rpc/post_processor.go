@@ -18,7 +18,7 @@ type PostProcessorServer struct {
 }
 
 type PostProcessorProcessResponse struct {
-	Err error
+	Err        error
 	RPCAddress string
 }
 
@@ -83,7 +83,7 @@ func (p *PostProcessorServer) PostProcess(address string, reply *PostProcessorPr
 	}
 
 	*reply = PostProcessorProcessResponse{
-		Err: err,
+		Err:        err,
 		RPCAddress: responseAddress,
 	}
 
