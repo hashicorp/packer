@@ -40,9 +40,10 @@ type config struct {
 	PluginMinPort uint
 	PluginMaxPort uint
 
-	Builders     map[string]string
-	Commands     map[string]string
-	Provisioners map[string]string
+	Builders       map[string]string
+	Commands       map[string]string
+	PostProcessors map[string]string `json:"post-processors"`
+	Provisioners   map[string]string
 }
 
 // Decodes configuration in JSON format from the given io.Reader into
@@ -92,6 +93,19 @@ func (c *config) LoadCommand(name string) (packer.Command, error) {
 func (c *config) LoadHook(name string) (packer.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
 	return c.pluginClient(name).Hook()
+}
+
+// This is a proper packer.PostProcessorFunc that can be used to load
+// packer.PostProcessor implementations from defined plugins.
+func (c *config) LoadPostProcessor(name string) (packer.PostProcessor, error) {
+	log.Printf("Loading post-processor: %s", name)
+	bin, ok := c.PostProcessors[name]
+	if !ok {
+		log.Printf("Post-processor not found: %s", name)
+		return nil, nil
+	}
+
+	return c.pluginClient(bin).PostProcessor()
 }
 
 // This is a proper packer.ProvisionerFunc that can be used to load
