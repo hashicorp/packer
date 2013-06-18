@@ -161,7 +161,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Build the artifact and return it
-	return &artifact{state["amis"].(map[string]string)}, nil
+	artifact := &artifact{
+		amis: state["amis"].(map[string]string),
+		conn: ec2conn,
+	}
+
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {

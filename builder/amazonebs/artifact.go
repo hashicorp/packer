@@ -1,14 +1,19 @@
 package amazonebs
 
 import (
-	"errors"
 	"fmt"
+	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/packer/packer"
+	"log"
 	"strings"
 )
 
 type artifact struct {
 	// A map of regions to AMI IDs.
 	amis map[string]string
+
+	// EC2 connection for performing API stuff.
+	conn *ec2.EC2
 }
 
 func (*artifact) BuilderId() string {
@@ -36,5 +41,20 @@ func (a *artifact) String() string {
 }
 
 func (a *artifact) Destroy() error {
-	return errors.New("not implemented yet")
+	errors := make([]error, 0)
+
+	for _, imageId := range a.amis {
+		log.Printf("Degistering image ID: %s", imageId)
+		if _, err := a.conn.DeregisterImage(imageId); err != nil {
+			errors = append(errors, err)
+		}
+
+		// TODO(mitchellh): Delete the snapshots associated with an AMI too
+	}
+
+	if len(errors) > 0 {
+		return &packer.MultiError{errors}
+	}
+
+	return nil
 }
