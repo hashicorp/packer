@@ -53,6 +53,12 @@ func RegisterHook(s *rpc.Server, hook packer.Hook) {
 	s.RegisterName("Hook", &HookServer{hook})
 }
 
+// Registers the appropriate endpoing on an RPC server to serve a
+// PostProcessor.
+func RegisterPostProcessor(s *rpc.Server, p packer.PostProcessor) {
+	s.RegisterName("PostProcessor", &PostProcessorServer{p})
+}
+
 // Registers the appropriate endpoint on an RPC server to serve a packer.Provisioner
 func RegisterProvisioner(s *rpc.Server, p packer.Provisioner) {
 	s.RegisterName("Provisioner", &ProvisionerServer{p})
