@@ -10,12 +10,15 @@ you generally don't have to worry about it until you want to tweak
 a configuration. If you're just getting started with Packer, don't worry
 about core configuration for now.
 
-By default, Packer looks for the core configuration to be in `~/.packerconfig`.
-This file is a JSON file. If it doesn't exist, then Packer ignores it
-and just uses the default configuration.
+The default location where Packer looks for this file depends on the
+platform. For all non-Windows platforms, Packer looks for `$HOME/.packerconfig`.
+For Windows, Packer looks for `%APPDATA%/packer.config`. If the file
+doesn't exist, then Packer ignores it and just uses the default configuration.
 
 The location of the core configuration file can be modified by setting
 the `PACKER_CONFIG` environmental variable to be the path to another file.
+
+The format of the configuration file is basic JSON.
 
 ## Configuration Reference
 
