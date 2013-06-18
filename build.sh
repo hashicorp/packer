@@ -12,7 +12,7 @@ echo "${OK_COLOR}--> Compiling Packer${NO_COLOR}"
 go build -v -o bin/packer .
 
 # Go over each plugin and build it
-for PLUGIN in $(find ./plugin -type d -mindepth 1 -maxdepth 1); do
+for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
     PLUGIN_NAME=$(basename ${PLUGIN})
     echo "${OK_COLOR}--> Compiling Plugin: ${PLUGIN_NAME}${NO_COLOR}"
     go build -v -o bin/packer-${PLUGIN_NAME} ${PLUGIN}
