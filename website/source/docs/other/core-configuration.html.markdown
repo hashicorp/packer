@@ -31,6 +31,6 @@ configuration file. None of these are required, since all have sane defaults.
   By default these are 10,000 and 25,000, respectively. Be sure to set a fairly
   wide range here, since Packer can easily use over 25 ports on a single run.
 
-* `builders`, `commands`, and `provisioners` are objects that are used to
+* `builders`, `commands`, `post-processors`, and `provisioners` are objects that are used to
   install plugins. The details of how exactly these are set is covered
   in more detail in the [installing plugins documentation page](/docs/extend/plugins.html).
