@@ -107,7 +107,9 @@ func TestBuild_Run(t *testing.T) {
 
 	build := testBuild()
 	build.Prepare()
-	build.Run(ui, cache)
+	artifacts, err := build.Run(ui, cache)
+	assert.Nil(err, "should not error")
+	assert.Equal(len(artifacts), 2, "should have two artifacts")
 
 	coreB := build.(*coreBuild)
 
@@ -128,6 +130,10 @@ func TestBuild_Run(t *testing.T) {
 	dispatchHook.Run(HookProvision, nil, nil, 42)
 	prov := coreB.provisioners[0].provisioner.(*TestProvisioner)
 	assert.True(prov.provCalled, "provision should be called")
+
+	// Verify post-processor was run
+	pp := coreB.postProcessors[0][0].processor.(*TestPostProcessor)
+	assert.True(pp.ppCalled, "post processor should be called")
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {

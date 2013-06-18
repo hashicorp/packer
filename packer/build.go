@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
@@ -151,9 +152,35 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	hook := &DispatchHook{hooks}
 	artifacts := make([]Artifact, 0, 1)
 
-	artifact, err := b.builder.Run(ui, hook, cache)
-	if artifact != nil {
-		artifacts = append(artifacts, artifact)
+	builderArtifact, err := b.builder.Run(ui, hook, cache)
+	if builderArtifact != nil {
+		artifacts = append(artifacts, builderArtifact)
+	}
+
+	if err != nil {
+		return artifacts, err
+	}
+
+	errors := make([]error, 0)
+
+	// Run the post-processors
+PostProcessorRunSeqLoop:
+	for _, ppSeq := range b.postProcessors {
+		artifact := builderArtifact
+		for _, corePP := range ppSeq {
+			var err error
+			artifact, err = corePP.processor.PostProcess(artifact)
+			if err != nil {
+				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
+				continue PostProcessorRunSeqLoop
+			}
+
+			artifacts = append(artifacts, artifact)
+		}
+	}
+
+	if len(errors) > 0 {
+		err = &MultiError{errors}
 	}
 
 	return artifacts, err
