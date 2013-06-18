@@ -67,6 +67,7 @@ func TestEnvironment_NilComponents(t *testing.T) {
 	env.Builder("foo")
 	env.Cli([]string{"foo"})
 	env.Hook("foo")
+	env.PostProcessor("foo")
 	env.Provisioner("foo")
 }
 
@@ -244,6 +245,47 @@ func TestEnvironment_Hook_Error(t *testing.T) {
 	assert.NotNil(err, "should be an error")
 	assert.Equal(err.Error(), "foo", "should be correct error")
 	assert.Nil(returned, "should be no hook")
+}
+
+func TestEnvironment_PostProcessor(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	pp := &TestPostProcessor{}
+	pps := make(map[string]PostProcessor)
+	pps["foo"] = pp
+
+	config := DefaultEnvironmentConfig()
+	config.Components.PostProcessor = func(n string) (PostProcessor, error) { return pps[n], nil }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.PostProcessor("foo")
+	assert.Nil(err, "should be no error")
+	assert.Equal(returned, pp, "should return correct pp")
+}
+
+func TestEnvironment_PostProcessor_NilError(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components.PostProcessor = func(n string) (PostProcessor, error) { return nil, nil }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.PostProcessor("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Nil(returned, "should be no pp")
+}
+
+func TestEnvironment_PostProcessor_Error(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	config := DefaultEnvironmentConfig()
+	config.Components.PostProcessor = func(n string) (PostProcessor, error) { return nil, errors.New("foo") }
+
+	env, _ := NewEnvironment(config)
+	returned, err := env.PostProcessor("foo")
+	assert.NotNil(err, "should be an error")
+	assert.Equal(err.Error(), "foo", "should be correct error")
+	assert.Nil(returned, "should be no pp")
 }
 
 func TestEnvironmentProvisioner(t *testing.T) {
