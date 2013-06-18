@@ -1,6 +1,9 @@
 package packer
 
-import "log"
+import (
+	"log"
+	"sync"
+)
 
 // This is the key in configurations that is set to "true" when Packer
 // debugging is enabled.
@@ -48,6 +51,7 @@ type coreBuild struct {
 	provisioners  []coreBuildProvisioner
 
 	debug         bool
+	l             sync.Mutex
 	prepareCalled bool
 }
 
@@ -66,7 +70,13 @@ func (b *coreBuild) Name() string {
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run.
 func (b *coreBuild) Prepare() (err error) {
-	// TODO: lock
+	b.l.Lock()
+	defer b.l.Unlock()
+
+	if b.prepareCalled {
+		panic("prepare already called")
+	}
+
 	b.prepareCalled = true
 
 	debugConfig := map[string]interface{}{

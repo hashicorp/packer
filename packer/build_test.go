@@ -49,6 +49,26 @@ func TestBuild_Prepare(t *testing.T) {
 	assert.Equal(prov.prepConfigs, []interface{}{42, debugFalseConfig}, "prepare should be called with proper config")
 }
 
+func TestBuild_Prepare_Twice(t *testing.T) {
+	build := testBuild()
+	if err := build.Prepare(); err != nil {
+		t.Fatalf("bad error: %s", err)
+	}
+
+	defer func() {
+		p := recover()
+		if p == nil {
+			t.Fatalf("should've paniced")
+		}
+
+		if p.(string) != "prepare already called" {
+			t.Fatalf("Invalid panic: %s", p)
+		}
+	}()
+
+	build.Prepare()
+}
+
 func TestBuild_Prepare_Debug(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
