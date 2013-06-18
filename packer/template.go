@@ -126,8 +126,8 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		t.PostProcessors[i] = make([]rawPostProcessorConfig, len(rawPP))
 		configs := t.PostProcessors[i]
 		for j, pp := range rawPP {
-			var config rawPostProcessorConfig
-			if err := mapstructure.Decode(pp, &config); err != nil {
+			config := &configs[j]
+			if err := mapstructure.Decode(pp, config); err != nil {
 				if merr, ok := err.(*mapstructure.Error); ok {
 					for _, err := range merr.Errors {
 						errors = append(errors, fmt.Errorf("Post-processor #%d.%d: %s", i+1, j+1, err))
@@ -145,8 +145,6 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			}
 
 			config.rawConfig = pp
-
-			configs[j] = config
 		}
 	}
 
