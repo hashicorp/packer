@@ -23,7 +23,7 @@ type Build interface {
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
-	Run(Ui, Cache) (Artifact, error)
+	Run(Ui, Cache) ([]Artifact, error)
 
 	// Cancel will cancel a running build. This will block until the build
 	// is actually completely cancelled.
@@ -113,7 +113,7 @@ func (b *coreBuild) Prepare() (err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(ui Ui, cache Cache) (Artifact, error) {
+func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -140,7 +140,14 @@ func (b *coreBuild) Run(ui Ui, cache Cache) (Artifact, error) {
 	}
 
 	hook := &DispatchHook{hooks}
-	return b.builder.Run(ui, hook, cache)
+	artifacts := make([]Artifact, 0, 1)
+
+	artifact, err := b.builder.Run(ui, hook, cache)
+	if artifact != nil {
+		artifacts = append(artifacts, artifact)
+	}
+
+	return artifacts, err
 }
 
 func (b *coreBuild) SetDebug(val bool) {

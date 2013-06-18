@@ -163,7 +163,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Run all the builds in parallel and wait for them to complete
 	var interruptWg, wg sync.WaitGroup
 	interrupted := false
-	artifacts := make(map[string]packer.Artifact)
+	artifacts := make(map[string][]packer.Artifact)
 	errors := make(map[string]error)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
@@ -191,14 +191,14 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			name := b.Name()
 			log.Printf("Starting build run: %s", name)
 			ui := buildUis[name]
-			artifact, err := b.Run(ui, env.Cache())
+			runArtifacts, err := b.Run(ui, env.Cache())
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build errored: %s", err))
 				errors[name] = err
 			} else {
 				ui.Say("Build finished.")
-				artifacts[name] = artifact
+				artifacts[name] = runArtifacts
 			}
 		}(b)
 
@@ -235,17 +235,19 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	if len(artifacts) > 0 {
 		env.Ui().Say("\n==> Builds finished. The artifacts of successful builds are:")
-		for name, artifact := range artifacts {
-			var message bytes.Buffer
-			fmt.Fprintf(&message, "--> %s: ", name)
+		for name, buildArtifacts := range artifacts {
+			for _, artifact := range buildArtifacts {
+				var message bytes.Buffer
+				fmt.Fprintf(&message, "--> %s: ", name)
 
-			if artifact != nil {
-				fmt.Fprintf(&message, artifact.String())
-			} else {
-				fmt.Print("<nothing>")
+				if artifact != nil {
+					fmt.Fprintf(&message, artifact.String())
+				} else {
+					fmt.Print("<nothing>")
+				}
+
+				env.Ui().Say(message.String())
 			}
-
-			env.Ui().Say(message.String())
 		}
 	}
 

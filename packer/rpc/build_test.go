@@ -32,7 +32,7 @@ func (b *testBuild) Prepare() error {
 	return nil
 }
 
-func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, error) {
+func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
 	b.runCalled = true
 	b.runCache = cache
 	b.runUi = ui
@@ -40,7 +40,7 @@ func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, erro
 	if b.errRunResult {
 		return nil, errors.New("foo")
 	} else {
-		return testBuildArtifact, nil
+		return []packer.Artifact{testBuildArtifact}, nil
 	}
 }
 
@@ -79,9 +79,11 @@ func TestBuildRPC(t *testing.T) {
 	// Test Run
 	cache := new(testCache)
 	ui := new(testUi)
-	_, err = bClient.Run(ui, cache)
+	artifacts, err := bClient.Run(ui, cache)
 	assert.True(b.runCalled, "run should be called")
 	assert.Nil(err, "should not error")
+	assert.Equal(len(artifacts), 1, "should have one artifact")
+	assert.Equal(artifacts[0].BuilderId(), "bid", "should have proper builder id")
 
 	// Test the UI given to run, which should be fully functional
 	if b.runCalled {
