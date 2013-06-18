@@ -18,6 +18,8 @@ type testEnvironment struct {
 	cliArgs       []string
 	hookCalled    bool
 	hookName      string
+	ppCalled      bool
+	ppName        string
 	provCalled    bool
 	provName      string
 	uiCalled      bool
@@ -42,6 +44,12 @@ func (e *testEnvironment) Cli(args []string) (int, error) {
 func (e *testEnvironment) Hook(name string) (packer.Hook, error) {
 	e.hookCalled = true
 	e.hookName = name
+	return nil, nil
+}
+
+func (e *testEnvironment) PostProcessor(name string) (packer.PostProcessor, error) {
+	e.ppCalled = true
+	e.ppName = name
 	return nil, nil
 }
 
