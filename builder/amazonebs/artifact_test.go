@@ -25,7 +25,7 @@ west: bar`
 	amis["east"] = "foo"
 	amis["west"] = "bar"
 
-	a := &artifact{amis}
+	a := &artifact{amis, nil}
 	result := a.String()
 	assert.Equal(result, expected, "should match output")
 }
