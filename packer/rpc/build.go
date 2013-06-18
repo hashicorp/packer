@@ -38,24 +38,29 @@ func (b *build) Prepare() (err error) {
 	return
 }
 
-func (b *build) Run(ui packer.Ui, cache packer.Cache) (packer.Artifact, error) {
+func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
 	// Create and start the server for the UI
 	server := rpc.NewServer()
 	RegisterCache(server, cache)
 	RegisterUi(server, ui)
 	args := &BuildRunArgs{serveSingleConn(server)}
 
-	var reply string
-	if err := b.client.Call("Build.Run", args, &reply); err != nil {
+	var result []string
+	if err := b.client.Call("Build.Run", args, &result); err != nil {
 		return nil, err
 	}
 
-	client, err := rpc.Dial("tcp", reply)
-	if err != nil {
-		return nil, err
+	artifacts := make([]packer.Artifact, len(result))
+	for i, addr := range result {
+		client, err := rpc.Dial("tcp", addr)
+		if err != nil {
+			return nil, err
+		}
+
+		artifacts[i] = Artifact(client)
 	}
 
-	return Artifact(client), nil
+	return artifacts, nil
 }
 
 func (b *build) SetDebug(val bool) {
@@ -80,22 +85,24 @@ func (b *BuildServer) Prepare(args interface{}, reply *error) error {
 	return nil
 }
 
-func (b *BuildServer) Run(args *BuildRunArgs, reply *string) error {
+func (b *BuildServer) Run(args *BuildRunArgs, reply *[]string) error {
 	client, err := rpc.Dial("tcp", args.UiRPCAddress)
 	if err != nil {
 		return err
 	}
 
-	artifact, err := b.build.Run(&Ui{client}, Cache(client))
+	artifacts, err := b.build.Run(&Ui{client}, Cache(client))
 	if err != nil {
 		return NewBasicError(err)
 	}
 
-	// Wrap the artifact
-	server := rpc.NewServer()
-	RegisterArtifact(server, artifact)
+	*reply = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		server := rpc.NewServer()
+		RegisterArtifact(server, artifact)
+		(*reply)[i] = serveSingleConn(server)
+	}
 
-	*reply = serveSingleConn(server)
 	return nil
 }
 
