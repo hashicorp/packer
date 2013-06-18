@@ -28,8 +28,7 @@ func TestParseTemplate_Invalid(t *testing.T) {
 	// syntax error in the JSON.
 	data := `
 	{
-		"name": "my-image",,
-		"builders": []
+		"builders": [],
 	}
 	`
 
@@ -43,7 +42,6 @@ func TestParseTemplate_BuilderWithoutType(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [{}]
 	}
 	`
@@ -57,7 +55,6 @@ func TestParseTemplate_BuilderWithNonStringType(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [{
 			"type": 42
 		}]
@@ -73,7 +70,6 @@ func TestParseTemplate_BuilderWithoutName(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"type": "amazon-ebs"
@@ -97,7 +93,6 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "bob",
@@ -122,7 +117,6 @@ func TestParseTemplate_BuilderWithConflictingName(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "bob",
@@ -145,7 +139,6 @@ func TestParseTemplate_Hooks(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 
 		"hooks": {
 			"event": ["foo", "bar"]
@@ -163,12 +156,65 @@ func TestParseTemplate_Hooks(t *testing.T) {
 	assert.Equal(hooks, []string{"foo", "bar"}, "hooks should be correct")
 }
 
+func TestParseTemplate_PostProcessors(t *testing.T) {
+	data := `
+	{
+		"post-processors": [
+			"simple",
+
+			{ "type": "detailed" },
+
+			[ "foo", { "type": "bar" } ]
+		]
+	}
+	`
+
+	tpl, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("error parsing: %s", err)
+	}
+
+	if len(tpl.PostProcessors) != 3 {
+		t.Fatalf("bad number of post-processors: %d", len(tpl.PostProcessors))
+	}
+
+	pp := tpl.PostProcessors[0]
+	if len(pp) != 1 {
+		t.Fatalf("wrong number of configs in simple: %d", len(pp))
+	}
+
+	if pp[0].Type != "simple" {
+		t.Fatalf("wrong type for simple: %s", pp[0].Type)
+	}
+
+	pp = tpl.PostProcessors[1]
+	if len(pp) != 1 {
+		t.Fatalf("wrong number of configs in detailed: %d", len(pp))
+	}
+
+	if pp[0].Type != "detailed" {
+		t.Fatalf("wrong type for detailed: %s", pp[0].Type)
+	}
+
+	pp = tpl.PostProcessors[2]
+	if len(pp) != 2 {
+		t.Fatalf("wrong number of configs for sequence: %d", len(pp))
+	}
+
+	if pp[0].Type != "foo" {
+		t.Fatalf("wrong type for sequence 0: %s", pp[0].Type)
+	}
+
+	if pp[1].Type != "bar" {
+		t.Fatalf("wrong type for sequence 1: %s", pp[1].Type)
+	}
+}
+
 func TestParseTemplate_ProvisionerWithoutType(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	data := `
 	{
-		"name": "my-image",
 		"provisioners": [{}]
 	}
 	`
@@ -182,7 +228,6 @@ func TestParseTemplate_ProvisionerWithNonStringType(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"provisioners": [{
 			"type": 42
 		}]
@@ -198,7 +243,6 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"provisioners": [
 			{
 				"type": "shell"
@@ -220,7 +264,6 @@ func TestTemplate_BuildNames(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "bob",
@@ -247,7 +290,6 @@ func TestTemplate_BuildUnknown(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
@@ -270,7 +312,6 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
@@ -295,7 +336,6 @@ func TestTemplate_Build_NilBuilderFunc(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
@@ -331,7 +371,6 @@ func TestTemplate_Build_NilProvisionerFunc(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
@@ -369,7 +408,6 @@ func TestTemplate_Build_NilProvisionerFunc_WithNoProvisioners(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
@@ -394,7 +432,6 @@ func TestTemplate_Build(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
@@ -452,7 +489,6 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 
 	data := `
 	{
-		"name": "my-image",
 		"builders": [
 			{
 				"name": "test1",
