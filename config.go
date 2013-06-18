@@ -20,7 +20,7 @@ const defaultConfig = `
 
 	"builders": {
 		"amazon-ebs": "packer-builder-amazon-ebs",
-		"digital-ocean": "packer-builder-digital-ocean",
+		"digitalocean": "packer-builder-digitalocean",
 		"virtualbox": "packer-builder-virtualbox",
 		"vmware": "packer-builder-vmware"
 	},
