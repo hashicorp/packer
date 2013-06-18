@@ -24,4 +24,9 @@ type Artifact interface {
 	// Returns human-readable output that describes the artifact created.
 	// This is used for UI output. It can be multiple lines.
 	String() string
+
+	// Destroy deletes the artifact. Packer calls this for various reasons,
+	// such as if a post-processor has processed this artifact and it is
+	// no longer needed.
+	Destroy() error
 }

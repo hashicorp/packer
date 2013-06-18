@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -24,4 +25,8 @@ func (a *Artifact) Id() string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("A snapshot was created: %v", a.snapshotName)
+}
+
+func (a *Artifact) Destroy() error {
+	return errors.New("not implemented yet")
 }
