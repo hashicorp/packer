@@ -14,15 +14,16 @@ type rawTemplate struct {
 	Builders       []map[string]interface{}
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
-	PostProcessors []map[string]interface{} `json:"post-processors"`
+	PostProcessors []interface{} `json:"post-processors"`
 }
 
 // The Template struct represents a parsed template, parsed into the most
 // completed form it can be without additional processing by the caller.
 type Template struct {
-	Builders     map[string]rawBuilderConfig
-	Hooks        map[string][]string
-	Provisioners []rawProvisionerConfig
+	Builders       map[string]rawBuilderConfig
+	Hooks          map[string][]string
+	PostProcessors [][]rawPostProcessorConfig
+	Provisioners   []rawProvisionerConfig
 }
 
 // The rawBuilderConfig struct represents a raw, unprocessed builder
@@ -33,6 +34,14 @@ type rawBuilderConfig struct {
 	Name string
 	Type string
 
+	rawConfig interface{}
+}
+
+// rawPostProcessorConfig represents a raw, unprocessed post-processor
+// configuration. It contains the type of the post processor as well as the
+// raw configuration that is handed to the post-processor for it to process.
+type rawPostProcessorConfig struct {
+	Type      string
 	rawConfig interface{}
 }
 
@@ -61,6 +70,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t = &Template{}
 	t.Builders = make(map[string]rawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
+	t.PostProcessors = make([][]rawPostProcessorConfig, len(rawTpl.PostProcessors))
 	t.Provisioners = make([]rawProvisionerConfig, len(rawTpl.Provisioners))
 
 	errors := make([]error, 0)
@@ -103,6 +113,43 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		t.Builders[raw.Name] = raw
 	}
 
+	// Gather all the post-processors. This is a complicated process since there
+	// are actually three different formats that the user can use to define
+	// a post-processor.
+	for i, rawV := range rawTpl.PostProcessors {
+		rawPP, err := parsePostProvisioner(i, rawV)
+		if err != nil {
+			errors = append(errors, err...)
+			continue
+		}
+
+		t.PostProcessors[i] = make([]rawPostProcessorConfig, len(rawPP))
+		configs := t.PostProcessors[i]
+		for j, pp := range rawPP {
+			var config rawPostProcessorConfig
+			if err := mapstructure.Decode(pp, &config); err != nil {
+				if merr, ok := err.(*mapstructure.Error); ok {
+					for _, err := range merr.Errors {
+						errors = append(errors, fmt.Errorf("Post-processor #%d.%d: %s", i+1, j+1, err))
+					}
+				} else {
+					errors = append(errors, fmt.Errorf("Post-processor %d.%d: %s", i+1, j+1, err))
+				}
+
+				continue
+			}
+
+			if config.Type == "" {
+				errors = append(errors, fmt.Errorf("Post-processor %d.%d: missing 'type'", i+1, j+1))
+				continue
+			}
+
+			config.rawConfig = pp
+
+			configs[j] = config
+		}
+	}
+
 	// Gather all the provisioners
 	for i, v := range rawTpl.Provisioners {
 		raw := &t.Provisioners[i]
@@ -130,6 +177,43 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	if len(errors) > 0 {
 		err = &MultiError{errors}
 		return
+	}
+
+	return
+}
+
+func parsePostProvisioner(i int, rawV interface{}) (result []map[string]interface{}, errors []error) {
+	switch v := rawV.(type) {
+	case string:
+		result = []map[string]interface{}{
+			{"type": v},
+		}
+	case map[string]interface{}:
+		result = []map[string]interface{}{v}
+	case []interface{}:
+		result = make([]map[string]interface{}, len(v))
+		errors = make([]error, 0)
+		for j, innerRawV := range v {
+			switch innerV := innerRawV.(type) {
+			case string:
+				result[j] = map[string]interface{}{"type": innerV}
+			case map[string]interface{}:
+				result[j] = innerV
+			case []interface{}:
+				errors = append(
+					errors,
+					fmt.Errorf("Post-processor %d.%d: sequences not allowed to be nested in sequences", i+1, j+1))
+			default:
+				errors = append(errors, fmt.Errorf("Post-processor %d.%d is in a bad format.", i+1, j+1))
+			}
+		}
+
+		if len(errors) == 0 {
+			errors = nil
+		}
+	default:
+		result = nil
+		errors = []error{fmt.Errorf("Post-processor %d is in a bad format.", i+1)}
 	}
 
 	return
