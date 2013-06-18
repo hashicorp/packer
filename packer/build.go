@@ -44,15 +44,23 @@ type Build interface {
 // multiple files, of course, but it should be for only a single provider
 // (such as VirtualBox, EC2, etc.).
 type coreBuild struct {
-	name          string
-	builder       Builder
-	builderConfig interface{}
-	hooks         map[string][]Hook
-	provisioners  []coreBuildProvisioner
+	name           string
+	builder        Builder
+	builderConfig  interface{}
+	hooks          map[string][]Hook
+	postProcessors [][]coreBuildPostProcessor
+	provisioners   []coreBuildProvisioner
 
 	debug         bool
 	l             sync.Mutex
 	prepareCalled bool
+}
+
+// Keeps track of the post-processor and the configuration of the
+// post-processor used within a build.
+type coreBuildPostProcessor struct {
+	processor PostProcessor
+	config    interface{}
 }
 
 // Keeps track of the provisioner and the configuration of the provisioner

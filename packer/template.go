@@ -285,6 +285,29 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		hooks[tplEvent] = curHooks
 	}
 
+	// Prepare the post-processors
+	postProcessors := make([][]coreBuildPostProcessor, 0, len(t.PostProcessors))
+	for _, rawPPs := range t.PostProcessors {
+		current := make([]coreBuildPostProcessor, len(rawPPs))
+		for i, rawPP := range rawPPs {
+			pp, err := components.PostProcessor(rawPP.Type)
+			if err != nil {
+				return nil, err
+			}
+
+			if pp == nil {
+				return nil, fmt.Errorf("PostProcessor type not found: %s", rawPP.Type)
+			}
+
+			current[i] = coreBuildPostProcessor{
+				processor: pp,
+				config:    rawPP.rawConfig,
+			}
+		}
+
+		postProcessors = append(postProcessors, current)
+	}
+
 	// Prepare the provisioners
 	provisioners := make([]coreBuildProvisioner, 0, len(t.Provisioners))
 	for _, rawProvisioner := range t.Provisioners {
@@ -313,11 +336,12 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	}
 
 	b = &coreBuild{
-		name:          name,
-		builder:       builder,
-		builderConfig: builderConfig.rawConfig,
-		hooks:         hooks,
-		provisioners:  provisioners,
+		name:           name,
+		builder:        builder,
+		builderConfig:  builderConfig.rawConfig,
+		hooks:          hooks,
+		postProcessors: postProcessors,
+		provisioners:   provisioners,
 	}
 
 	return
