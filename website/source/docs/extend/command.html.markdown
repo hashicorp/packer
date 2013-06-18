@@ -29,7 +29,7 @@ in the core Packer configuration.
 
 The interface that must be implemented for a command is the `packer.Command`
 interface. It is reproduced below for easy reference. The reference below
-also contains some basic documentatin of what each of the methods are
+also contains some basic documentation of what each of the methods are
 supposed to do.
 
 <pre class="prettyprint">
