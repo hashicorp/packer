@@ -21,7 +21,7 @@ func (tb *TestBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	tb.runHook = h
 	tb.runUi = ui
 	tb.runCache = c
-	return nil, nil
+	return new(TestArtifact), nil
 }
 
 func (tb *TestBuilder) Cancel() {
