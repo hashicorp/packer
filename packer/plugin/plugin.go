@@ -137,6 +137,19 @@ func ServeHook(hook packer.Hook) {
 	}
 }
 
+// Serves a post-processor from a plugin.
+func ServePostProcessor(p packer.PostProcessor) {
+	log.Println("Preparing to serve a post-processor plugin...")
+
+	server := rpc.NewServer()
+	packrpc.RegisterPostProcessor(server, p)
+
+	swallowInterrupts()
+	if err := serve(server); err != nil {
+		log.Panic(err)
+	}
+}
+
 // Serves a provisioner from a plugin.
 func ServeProvisioner(p packer.Provisioner) {
 	log.Println("Preparing to serve a provisioner plugin...")

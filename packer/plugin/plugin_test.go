@@ -59,6 +59,8 @@ func TestHelperProcess(*testing.T) {
 	case "mock":
 		fmt.Println(":1234")
 		<-make(chan int)
+	case "post-processor":
+		ServePostProcessor(new(helperPostProcessor))
 	case "provisioner":
 		ServeProvisioner(new(helperProvisioner))
 	case "start-timeout":
