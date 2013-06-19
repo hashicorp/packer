@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 const DIGITALOCEAN_API_URL = "https://api.digitalocean.com"
@@ -172,8 +173,8 @@ func NewRequest(d DigitalOceanClient, path string, params string) (map[string]in
 	var decodedResponse map[string]interface{}
 
 	// Do some basic scrubbing so sensitive information doesn't appear in logs
-	scrubbedUrl := strings.Replace(url, d.ClientID, "CLIENT_ID")
-	scrubbedUrl := strings.Replace(url, d.APIKey, "API_KEY")
+	scrubbedUrl := strings.Replace(url, d.ClientID, "CLIENT_ID", -1)
+	scrubbedUrl = strings.Replace(scrubbedUrl, d.APIKey, "API_KEY", -1)
 	log.Printf("sending new request to digitalocean: %s", scrubbedUrl)
 
 	resp, err := client.Get(url)
