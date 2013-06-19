@@ -2,13 +2,14 @@ package packer
 
 import (
 	"cgl.tideland.biz/asserts"
+	"reflect"
 	"testing"
 )
 
-func testBuild() Build {
+func testBuild() *coreBuild {
 	return &coreBuild{
 		name:          "test",
-		builder:       &TestBuilder{},
+		builder:       &TestBuilder{artifactId: "b"},
 		builderConfig: 42,
 		hooks: map[string][]Hook{
 			"foo": []Hook{&TestHook{}},
@@ -18,7 +19,7 @@ func testBuild() Build {
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			[]coreBuildPostProcessor{
-				coreBuildPostProcessor{&TestPostProcessor{}, 42},
+				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, 42, true},
 			},
 		},
 	}
@@ -41,19 +42,18 @@ func TestBuild_Prepare(t *testing.T) {
 	debugFalseConfig := map[string]interface{}{DebugConfigKey: false}
 
 	build := testBuild()
-	coreB := build.(*coreBuild)
-	builder := coreB.builder.(*TestBuilder)
+	builder := build.builder.(*TestBuilder)
 
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, []interface{}{42, debugFalseConfig}, "prepare config should be 42")
 
-	coreProv := coreB.provisioners[0]
+	coreProv := build.provisioners[0]
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
 	assert.Equal(prov.prepConfigs, []interface{}{42, debugFalseConfig}, "prepare should be called with proper config")
 
-	corePP := coreB.postProcessors[0][0]
+	corePP := build.postProcessors[0][0]
 	pp := corePP.processor.(*TestPostProcessor)
 	assert.True(pp.configCalled, "config should be called")
 	assert.Equal(pp.configVal, 42, "config should have right value")
@@ -85,15 +85,14 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	debugConfig := map[string]interface{}{DebugConfigKey: true}
 
 	build := testBuild()
-	coreB := build.(*coreBuild)
-	builder := coreB.builder.(*TestBuilder)
+	builder := build.builder.(*TestBuilder)
 
 	build.SetDebug(true)
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, []interface{}{42, debugConfig}, "prepare config should be 42")
 
-	coreProv := coreB.provisioners[0]
+	coreProv := build.provisioners[0]
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
 	assert.Equal(prov.prepConfigs, []interface{}{42, debugConfig}, "prepare should be called with proper config")
@@ -111,10 +110,8 @@ func TestBuild_Run(t *testing.T) {
 	assert.Nil(err, "should not error")
 	assert.Equal(len(artifacts), 2, "should have two artifacts")
 
-	coreB := build.(*coreBuild)
-
 	// Verify builder was run
-	builder := coreB.builder.(*TestBuilder)
+	builder := build.builder.(*TestBuilder)
 	assert.True(builder.runCalled, "run should be called")
 	assert.Equal(builder.runUi, ui, "run should be called with ui")
 
@@ -122,18 +119,127 @@ func TestBuild_Run(t *testing.T) {
 	dispatchHook := builder.runHook
 	dispatchHook.Run("foo", nil, nil, 42)
 
-	hook := coreB.hooks["foo"][0].(*TestHook)
+	hook := build.hooks["foo"][0].(*TestHook)
 	assert.True(hook.runCalled, "run should be called")
 	assert.Equal(hook.runData, 42, "should have correct data")
 
 	// Verify provisioners run
 	dispatchHook.Run(HookProvision, nil, nil, 42)
-	prov := coreB.provisioners[0].provisioner.(*TestProvisioner)
+	prov := build.provisioners[0].provisioner.(*TestProvisioner)
 	assert.True(prov.provCalled, "provision should be called")
 
 	// Verify post-processor was run
-	pp := coreB.postProcessors[0][0].processor.(*TestPostProcessor)
+	pp := build.postProcessors[0][0].processor.(*TestPostProcessor)
 	assert.True(pp.ppCalled, "post processor should be called")
+}
+
+func TestBuild_Run_Artifacts(t *testing.T) {
+	cache := &TestCache{}
+	ui := testUi()
+
+	// Test case: Test that with no post-processors, we only get the
+	// main build.
+	build := testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{}
+
+	build.Prepare()
+	artifacts, err := build.Run(ui, cache)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds := []string{"b"}
+	artifactIds := make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that doesn't keep
+	// inputs, only that post-processors results are returned.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		[]coreBuildPostProcessor{
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, 42, false},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(ui, cache)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with multiple post-processors, as long as one
+	// keeps the original, the original is kept.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		[]coreBuildPostProcessor{
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1"}, 42, false},
+		},
+		[]coreBuildPostProcessor{
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2"}, 42, true},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(ui, cache)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"b", "pp1", "pp2"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with sequences, intermediaries are kept if they
+	// want to be.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		[]coreBuildPostProcessor{
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1a"}, 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1b"}, 42, true},
+		},
+		[]coreBuildPostProcessor{
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2a"}, 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2b"}, 42, false},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(ui, cache)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"pp1a", "pp1b", "pp2b"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {
@@ -154,8 +260,6 @@ func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
 	build.Cancel()
 
-	coreB := build.(*coreBuild)
-
-	builder := coreB.builder.(*TestBuilder)
+	builder := build.builder.(*TestBuilder)
 	assert.True(builder.cancelCalled, "cancel should be called")
 }

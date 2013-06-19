@@ -1,6 +1,8 @@
 package packer
 
 type TestBuilder struct {
+	artifactId string
+
 	prepareCalled bool
 	prepareConfig []interface{}
 	runCalled     bool
@@ -21,7 +23,7 @@ func (tb *TestBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	tb.runHook = h
 	tb.runUi = ui
 	tb.runCache = c
-	return new(TestArtifact), nil
+	return &TestArtifact{id: tb.artifactId}, nil
 }
 
 func (tb *TestBuilder) Cancel() {

@@ -447,7 +447,10 @@ func TestTemplate_Build(t *testing.T) {
 
 		"post-processors": [
 			"simple",
-			["simple", "simple"]
+			[
+				"simple",
+				{ "type": "simple", "keep_input_artifact": true }
+			]
 		]
 	}
 	`
@@ -497,6 +500,8 @@ func TestTemplate_Build(t *testing.T) {
 	assert.Equal(len(coreBuild.postProcessors), 2, "should have pps")
 	assert.Equal(len(coreBuild.postProcessors[0]), 1, "should have correct number")
 	assert.Equal(len(coreBuild.postProcessors[1]), 2, "should have correct number")
+	assert.False(coreBuild.postProcessors[1][0].keepInputArtifact, "shoule be correct")
+	assert.True(coreBuild.postProcessors[1][1].keepInputArtifact, "shoule be correct")
 }
 
 func TestTemplate_Build_ProvisionerOverride(t *testing.T) {

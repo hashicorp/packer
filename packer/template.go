@@ -41,8 +41,9 @@ type rawBuilderConfig struct {
 // configuration. It contains the type of the post processor as well as the
 // raw configuration that is handed to the post-processor for it to process.
 type rawPostProcessorConfig struct {
-	Type      string
-	rawConfig interface{}
+	Type              string
+	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
+	rawConfig         interface{}
 }
 
 // rawProvisionerConfig represents a raw, unprocessed provisioner configuration.
@@ -300,8 +301,9 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 			}
 
 			current[i] = coreBuildPostProcessor{
-				processor: pp,
-				config:    rawPP.rawConfig,
+				processor:         pp,
+				config:            rawPP.rawConfig,
+				keepInputArtifact: rawPP.KeepInputArtifact,
 			}
 		}
 
