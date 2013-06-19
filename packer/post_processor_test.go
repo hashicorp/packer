@@ -5,6 +5,7 @@ type TestPostProcessor struct {
 	configVal    interface{}
 	ppCalled     bool
 	ppArtifact   Artifact
+	ppUi Ui
 }
 
 func (pp *TestPostProcessor) Configure(v interface{}) error {
@@ -13,8 +14,9 @@ func (pp *TestPostProcessor) Configure(v interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(a Artifact) (Artifact, error) {
+func (pp *TestPostProcessor) PostProcess(ui Ui, a Artifact) (Artifact, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
+	pp.ppUi = ui
 	return nil, nil
 }

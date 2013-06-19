@@ -169,7 +169,7 @@ PostProcessorRunSeqLoop:
 		artifact := builderArtifact
 		for _, corePP := range ppSeq {
 			var err error
-			artifact, err = corePP.processor.PostProcess(artifact)
+			artifact, err = corePP.processor.PostProcess(ui, artifact)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
 				continue PostProcessorRunSeqLoop
