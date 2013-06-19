@@ -66,6 +66,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	buildNames := tpl.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
+		log.Printf("Creating build from template for: %s", buildName)
 		build, err := tpl.Build(buildName, components)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Build '%s': %s", buildName, err))
@@ -77,6 +78,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	// Check the configuration of all builds
 	for _, b := range builds {
+		log.Printf("Preparing build: %s", b.Name())
 		err := b.Prepare()
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Errors validating build '%s'. %s", b.Name(), err))
