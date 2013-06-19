@@ -250,6 +250,8 @@ func (c Command) Run(env packer.Environment, args []string) int {
 				env.Ui().Say(message.String())
 			}
 		}
+	} else {
+		env.Ui().Say("\n==> Builds finished but no artifacts were created.")
 	}
 
 	return 0

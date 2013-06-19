@@ -155,7 +155,7 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 
 	builderArtifact, err := b.builder.Run(ui, hook, cache)
 	if err != nil {
-		return artifacts, err
+		return nil, err
 	}
 
 	errors := make([]error, 0)
