@@ -19,7 +19,7 @@ func testBuild() *coreBuild {
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			[]coreBuildPostProcessor{
-				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, 42, true},
+				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "testPP", 42, true},
 			},
 		},
 	}
@@ -163,7 +163,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "pp", 42, false},
 		},
 	}
 
@@ -188,10 +188,10 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1"}, 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1"}, "pp", 42, false},
 		},
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2"}, 42, true},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2"}, "pp", 42, true},
 		},
 	}
 
@@ -216,12 +216,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1a"}, 42, false},
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1b"}, 42, true},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1a"}, "pp", 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1b"}, "pp", 42, true},
 		},
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2a"}, 42, false},
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2b"}, 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2a"}, "pp", 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2b"}, "pp", 42, false},
 		},
 	}
 
