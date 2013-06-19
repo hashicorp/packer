@@ -61,6 +61,10 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 
 func (p *PostProcessorServer) Configure(raw *interface{}, reply *error) error {
 	*reply = p.p.Configure(*raw)
+	if *reply != nil {
+		*reply = NewBasicError(*reply)
+	}
+
 	return nil
 }
 
