@@ -30,6 +30,10 @@ const defaultConfig = `
 		"validate": "packer-command-validate"
 	},
 
+	"post-processors": {
+		"compress": "packer-post-processor-compress"
+	},
+
 	"provisioners": {
 		"shell": "packer-provisioner-shell"
 	}
