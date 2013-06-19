@@ -175,7 +175,9 @@ PostProcessorRunSeqLoop:
 				continue PostProcessorRunSeqLoop
 			}
 
-			artifacts = append(artifacts, artifact)
+			if artifact != nil {
+				artifacts = append(artifacts, artifact)
+			}
 		}
 	}
 
