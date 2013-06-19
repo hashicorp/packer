@@ -61,7 +61,10 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 			log.Printf(
 				"Opening TCP conn for SSH to %s:%d (attempt %d)",
 				ipAddress, config.SSHPort, attempts)
-			s.conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", ipAddress, config.SSHPort))
+			s.conn, err = net.DialTimeout(
+				"tcp",
+				fmt.Sprintf("%s:%d", ipAddress, config.SSHPort),
+				10*time.Second)
 			if err == nil {
 				break
 			}
