@@ -80,12 +80,12 @@ func (e *Environment) PostProcessor(name string) (p packer.PostProcessor, err er
 		return
 	}
 
-	_, err = rpc.Dial("tcp", reply)
+	client, err := rpc.Dial("tcp", reply)
 	if err != nil {
 		return
 	}
 
-	p = nil
+	p = PostProcessor(client)
 	return
 }
 
@@ -160,12 +160,13 @@ func (e *EnvironmentServer) Hook(name *string, reply *string) error {
 }
 
 func (e *EnvironmentServer) PostProcessor(name *string, reply *string) error {
-	_, err := e.env.PostProcessor(*name)
+	pp, err := e.env.PostProcessor(*name)
 	if err != nil {
 		return err
 	}
 
 	server := rpc.NewServer()
+	RegisterPostProcessor(server, pp)
 
 	*reply = serveSingleConn(server)
 	return nil
