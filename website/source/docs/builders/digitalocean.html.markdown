@@ -79,4 +79,24 @@ own access tokens:
 
 ## Snapshot Name Variables
 
-TODO
+The `snapshot_name` for a DigitalOcean image must be unique. The configuration
+variable is actually treated as a [configuration template](/docs/templates/configuration-templates.html) and has various variables available to help keep this unique. Read
+the prior linked page for information on syntax if you're unfamiliar with it.
+
+The available variables are shown below:
+
+* `CreateTime`- This will be replaced with the Unix timestamp of when the
+  image is created.
+
+## Finding Image, Region, and Size IDs
+
+Unfortunately, finding a list of available values for `image_id`, `region_id`,
+and `size_id` is not easy at the moment. Basically, it has to be done through
+the [DigitalOcean API](https://www.digitalocean.com/api_access) using the
+`/images`, `/regions`, and `/sizes` endpoints. You can use `curl` for this
+or request it in your browser.
+
+If you're comfortable installing RubyGems, [Tugboat](https://github.com/pearkes/tugboat)
+is a fantastic DigitalOcean command-line client that has commands to
+find the available images, regions, and sizes. For example, to see all the
+global images, you can run `tugboat images --global`.
