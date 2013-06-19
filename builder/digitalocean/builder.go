@@ -184,7 +184,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
-	return &Artifact{b.config.SnapshotName}, nil
+	if _, ok := state["snapshot_name"]; !ok {
+		log.Println("Failed to find snapshot_name in state. Bug?")
+		return nil, nil
+	}
+
+	artifact := &Artifact{
+		snapshotName: state["snapshot_name"].(string),
+		snapshotId: state["snapshot_image_id"].(uint),
+		client:       client,
+	}
+
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {

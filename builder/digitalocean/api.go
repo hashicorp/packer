@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,6 +16,16 @@ import (
 )
 
 const DIGITALOCEAN_API_URL = "https://api.digitalocean.com"
+
+type Image struct {
+	Id           uint
+	Name         string
+	Distribution string
+}
+
+type ImagesResp struct {
+	Images []Image
+}
 
 type DigitalOceanClient struct {
 	// The http client for communicating
@@ -104,6 +115,28 @@ func (d DigitalOceanClient) CreateSnapshot(id uint, name string) error {
 
 	_, err := NewRequest(d, path, params)
 
+	return err
+}
+
+// Returns all available images.
+func (d DigitalOceanClient) Images() ([]Image, error) {
+	resp, err := NewRequest(d, "images", "")
+	if err != nil {
+		return nil, err
+	}
+
+	var result ImagesResp
+	if err := mapstructure.Decode(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return result.Images, nil
+}
+
+// Destroys an image by its ID.
+func (d DigitalOceanClient) DestroyImage(id uint) error {
+	path := fmt.Sprintf("images/%d/destroy", id)
+	_, err := NewRequest(d, path, "")
 	return err
 }
 
