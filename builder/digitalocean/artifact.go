@@ -1,13 +1,19 @@
 package digitalocean
 
 import (
-	"errors"
 	"fmt"
+	"log"
 )
 
 type Artifact struct {
 	// The name of the snapshot
 	snapshotName string
+
+	// The ID of the image
+	snapshotId uint
+
+	// The client for making API calls
+	client *DigitalOceanClient
 }
 
 func (*Artifact) BuilderId() string {
@@ -28,5 +34,6 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) Destroy() error {
-	return errors.New("not implemented yet")
+	log.Printf("Destroying image: %d", a.snapshotId)
+	return a.client.DestroyImage(a.snapshotId)
 }
