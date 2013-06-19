@@ -5,10 +5,17 @@ import (
 	"cgl.tideland.biz/asserts"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"testing"
 )
+
+func init() {
+	// Disable log output for tests
+	log.SetOutput(ioutil.Discard)
+}
 
 func testEnvironment() Environment {
 	config := DefaultEnvironmentConfig()
