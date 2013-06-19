@@ -244,7 +244,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 				if artifact != nil {
 					fmt.Fprintf(&message, artifact.String())
 				} else {
-					fmt.Print("<nothing>")
+					fmt.Fprint(&message, "<nothing>")
 				}
 
 				env.Ui().Say(message.String())
