@@ -18,5 +18,5 @@ func (pp *TestPostProcessor) PostProcess(ui Ui, a Artifact) (Artifact, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppUi = ui
-	return nil, nil
+	return new(TestArtifact), nil
 }
