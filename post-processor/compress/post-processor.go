@@ -4,8 +4,8 @@ package compress
 
 import (
 	"errors"
-	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/packer"
 )
 
 type Config struct {

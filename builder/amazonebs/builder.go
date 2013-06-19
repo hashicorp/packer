@@ -155,7 +155,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
-	// If there are no AMIs, then jsut return
+	// If there are no AMIs, then just return
 	if _, ok := state["amis"]; !ok {
 		return nil, nil
 	}
