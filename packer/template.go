@@ -302,6 +302,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 
 			current[i] = coreBuildPostProcessor{
 				processor:         pp,
+				processorType:     rawPP.Type,
 				config:            rawPP.rawConfig,
 				keepInputArtifact: rawPP.KeepInputArtifact,
 			}
@@ -341,6 +342,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		name:           name,
 		builder:        builder,
 		builderConfig:  builderConfig.rawConfig,
+		builderType:    builderConfig.Type,
 		hooks:          hooks,
 		postProcessors: postProcessors,
 		provisioners:   provisioners,

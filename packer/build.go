@@ -48,6 +48,7 @@ type coreBuild struct {
 	name           string
 	builder        Builder
 	builderConfig  interface{}
+	builderType    string
 	hooks          map[string][]Hook
 	postProcessors [][]coreBuildPostProcessor
 	provisioners   []coreBuildProvisioner
@@ -61,6 +62,7 @@ type coreBuild struct {
 // post-processor used within a build.
 type coreBuildPostProcessor struct {
 	processor         PostProcessor
+	processorType     string
 	config            interface{}
 	keepInputArtifact bool
 }
@@ -153,6 +155,7 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	hook := &DispatchHook{hooks}
 	artifacts := make([]Artifact, 0, 1)
 
+	log.Printf("Running builder: %s", b.builderType)
 	builderArtifact, err := b.builder.Run(ui, hook, cache)
 	if err != nil {
 		return nil, err
@@ -166,6 +169,7 @@ PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
+			ui.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
 			artifact, err := corePP.processor.PostProcess(ui, priorArtifact)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
@@ -181,8 +185,11 @@ PostProcessorRunSeqLoop:
 				// This is the first post-processor. We handle deleting
 				// previous artifacts a bit different because multiple
 				// post-processors may be using the original and need it.
-				if !keepOriginalArtifact {
-					keepOriginalArtifact = corePP.keepInputArtifact
+				if !keepOriginalArtifact && corePP.keepInputArtifact {
+					log.Printf(
+						"Flagging to keep original artifact from post-processor '%s'",
+						corePP.processorType)
+					keepOriginalArtifact = true
 				}
 			} else {
 				// We have a prior artifact. If we want to keep it, we append
@@ -190,6 +197,7 @@ PostProcessorRunSeqLoop:
 				if corePP.keepInputArtifact {
 					artifacts = append(artifacts, priorArtifact)
 				} else {
+					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
 					if err := priorArtifact.Destroy(); err != nil {
 						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
 					}
