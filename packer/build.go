@@ -60,8 +60,9 @@ type coreBuild struct {
 // Keeps track of the post-processor and the configuration of the
 // post-processor used within a build.
 type coreBuildPostProcessor struct {
-	processor PostProcessor
-	config    interface{}
+	processor         PostProcessor
+	config            interface{}
+	keepInputArtifact bool
 }
 
 // Keeps track of the provisioner and the configuration of the provisioner
@@ -153,21 +154,44 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	artifacts := make([]Artifact, 0, 1)
 
 	builderArtifact, err := b.builder.Run(ui, hook, cache)
-	if builderArtifact != nil {
-		artifacts = append(artifacts, builderArtifact)
-	}
-
 	if err != nil {
 		return artifacts, err
 	}
 
 	errors := make([]error, 0)
+	keepOriginalArtifact := len(b.postProcessors) == 0
 
 	// Run the post-processors
 PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		artifact := builderArtifact
-		for _, corePP := range ppSeq {
+
+		var priorArtifact Artifact
+		for i, corePP := range ppSeq {
+			if i == 0 {
+				// This is the first post-processor. We handle deleting
+				// previous artifacts a bit different because multiple
+				// post-processors may be using the original and need it.
+				if !keepOriginalArtifact {
+					keepOriginalArtifact = corePP.keepInputArtifact
+				}
+			} else {
+				if priorArtifact == nil {
+					errors = append(errors, fmt.Errorf("Post-processor returned nil artifact mid-chain."))
+					continue PostProcessorRunSeqLoop
+				}
+
+				// We have a prior artifact. If we want to keep it, we append
+				// it to the results list. Otherwise, we destroy it.
+				if corePP.keepInputArtifact {
+					artifacts = append(artifacts, priorArtifact)
+				} else {
+					if err := priorArtifact.Destroy(); err != nil {
+						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
+					}
+				}
+			}
+
 			var err error
 			artifact, err = corePP.processor.PostProcess(ui, artifact)
 			if err != nil {
@@ -175,9 +199,23 @@ PostProcessorRunSeqLoop:
 				continue PostProcessorRunSeqLoop
 			}
 
-			if artifact != nil {
-				artifacts = append(artifacts, artifact)
-			}
+			priorArtifact = artifact
+		}
+
+		// Add on the last artifact to the results
+		if priorArtifact != nil {
+			artifacts = append(artifacts, priorArtifact)
+		}
+	}
+
+	if keepOriginalArtifact {
+		artifacts = append(artifacts, nil)
+		copy(artifacts[1:], artifacts)
+		artifacts[0] = builderArtifact
+	} else {
+		log.Printf("Deleting original artifact for build '%s'", b.name)
+		if err := builderArtifact.Destroy(); err != nil {
+			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
 		}
 	}
 

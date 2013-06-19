@@ -1,6 +1,9 @@
 package packer
 
-type TestArtifact struct{}
+type TestArtifact struct {
+	id            string
+	destroyCalled bool
+}
 
 func (*TestArtifact) BuilderId() string {
 	return "bid"
@@ -10,14 +13,20 @@ func (*TestArtifact) Files() []string {
 	return []string{"a", "b"}
 }
 
-func (*TestArtifact) Id() string {
-	return "id"
+func (a *TestArtifact) Id() string {
+	id := a.id
+	if id == "" {
+		id = "id"
+	}
+
+	return id
 }
 
 func (*TestArtifact) String() string {
 	return "string"
 }
 
-func (*TestArtifact) Destroy() error {
+func (a *TestArtifact) Destroy() error {
+	a.destroyCalled = true
 	return nil
 }
