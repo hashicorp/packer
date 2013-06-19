@@ -166,12 +166,15 @@ func (d DigitalOceanClient) DropletStatus(id uint) (string, string, error) {
 // the response.
 func NewRequest(d DigitalOceanClient, path string, params string) (map[string]interface{}, error) {
 	client := d.client
-	url := fmt.Sprintf("%v/%v?%v&client_id=%v&api_key=%v",
+	url := fmt.Sprintf("%s/%s?%s&client_id=%s&api_key=%s",
 		DIGITALOCEAN_API_URL, path, params, d.ClientID, d.APIKey)
 
 	var decodedResponse map[string]interface{}
 
-	log.Printf("sending new request to digitalocean: %v", url)
+	// Do some basic scrubbing so sensitive information doesn't appear in logs
+	scrubbedUrl := strings.Replace(url, d.ClientID, "CLIENT_ID")
+	scrubbedUrl := strings.Replace(url, d.APIKey, "API_KEY")
+	log.Printf("sending new request to digitalocean: %s", scrubbedUrl)
 
 	resp, err := client.Get(url)
 	if err != nil {
