@@ -164,10 +164,19 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	// Run the post-processors
 PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
-		artifact := builderArtifact
-
-		var priorArtifact Artifact
+		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
+			artifact, err := corePP.processor.PostProcess(ui, priorArtifact)
+			if err != nil {
+				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
+				continue PostProcessorRunSeqLoop
+			}
+
+			if artifact == nil {
+				log.Println("Nil artifact, halting post-processor chain.")
+				continue PostProcessorRunSeqLoop
+			}
+
 			if i == 0 {
 				// This is the first post-processor. We handle deleting
 				// previous artifacts a bit different because multiple
@@ -176,11 +185,6 @@ PostProcessorRunSeqLoop:
 					keepOriginalArtifact = corePP.keepInputArtifact
 				}
 			} else {
-				if priorArtifact == nil {
-					errors = append(errors, fmt.Errorf("Post-processor returned nil artifact mid-chain."))
-					continue PostProcessorRunSeqLoop
-				}
-
 				// We have a prior artifact. If we want to keep it, we append
 				// it to the results list. Otherwise, we destroy it.
 				if corePP.keepInputArtifact {
@@ -190,13 +194,6 @@ PostProcessorRunSeqLoop:
 						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
 					}
 				}
-			}
-
-			var err error
-			artifact, err = corePP.processor.PostProcess(ui, artifact)
-			if err != nil {
-				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
-				continue PostProcessorRunSeqLoop
 			}
 
 			priorArtifact = artifact
