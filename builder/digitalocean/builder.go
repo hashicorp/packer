@@ -191,7 +191,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	artifact := &Artifact{
 		snapshotName: state["snapshot_name"].(string),
-		snapshotId: state["snapshot_image_id"].(uint),
+		snapshotId:   state["snapshot_image_id"].(uint),
 		client:       client,
 	}
 
