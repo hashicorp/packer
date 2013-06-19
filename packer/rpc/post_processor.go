@@ -33,9 +33,10 @@ func (p *postProcessor) Configure(raw interface{}) (err error) {
 	return
 }
 
-func (p *postProcessor) PostProcess(a packer.Artifact) (packer.Artifact, error) {
+func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, error) {
 	server := rpc.NewServer()
 	RegisterArtifact(server, a)
+	RegisterUi(server, ui)
 
 	var response PostProcessorProcessResponse
 	if err := p.client.Call("PostProcessor.PostProcess", serveSingleConn(server), &response); err != nil {
@@ -71,7 +72,7 @@ func (p *PostProcessorServer) PostProcess(address string, reply *PostProcessorPr
 
 	responseAddress := ""
 
-	artifact, err := p.p.PostProcess(Artifact(client))
+	artifact, err := p.p.PostProcess(&Ui{client}, Artifact(client))
 	if err == nil && artifact != nil {
 		server := rpc.NewServer()
 		RegisterArtifact(server, artifact)

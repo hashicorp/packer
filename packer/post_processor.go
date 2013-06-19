@@ -13,5 +13,5 @@ type PostProcessor interface {
 
 	// PostProcess takes a previously created Artifact and produces another
 	// Artifact. If an error occurs, it should return that error.
-	PostProcess(Artifact) (Artifact, error)
+	PostProcess(Ui, Artifact) (Artifact, error)
 }

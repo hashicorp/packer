@@ -12,7 +12,7 @@ func (helperPostProcessor) Configure(interface{}) error {
 	return nil
 }
 
-func (helperPostProcessor) PostProcess(packer.Artifact) (packer.Artifact, error) {
+func (helperPostProcessor) PostProcess(packer.Ui, packer.Artifact) (packer.Artifact, error) {
 	return nil, nil
 }
 
