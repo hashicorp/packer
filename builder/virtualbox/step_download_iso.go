@@ -59,7 +59,7 @@ func (s stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction 
 	progressTicker := time.NewTicker(5 * time.Second)
 	defer progressTicker.Stop()
 
-	DownloadWaitLoop:
+DownloadWaitLoop:
 	for {
 		select {
 		case err := <-downloadCompleteCh:
