@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 )
 
@@ -34,11 +35,15 @@ func main() {
 
 	log.Printf("Packer config: %+v", config)
 
-	defer plugin.CleanupClients()
-
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {
 		cacheDir = "packer_cache"
+	}
+
+	cacheDir, err = filepath.Abs(cacheDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
+		os.Exit(1)
 	}
 
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
@@ -48,6 +53,8 @@ func main() {
 
 	log.Printf("Setting cache directory: %s", cacheDir)
 	cache := &packer.FileCache{CacheDir: cacheDir}
+
+	defer plugin.CleanupClients()
 
 	envConfig := packer.DefaultEnvironmentConfig()
 	envConfig.Cache = cache
