@@ -28,6 +28,9 @@ type config struct {
 	// The local path of the shell script to upload and execute.
 	Path string
 
+	// An array of multiple scripts to run.
+	Scripts []string
+
 	// The remote path where the local shell script will be uploaded to.
 	// This should be set to a writable file that is in a pre-existing directory.
 	RemotePath string `mapstructure:"remote_path"`
@@ -64,17 +67,29 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RemotePath = DefaultRemotePath
 	}
 
+	if p.config.Scripts == nil {
+		p.config.Scripts = make([]string, 0)
+	}
+
 	errs := make([]error, 0)
 
-	if p.config.Path == "" && p.config.Inline == nil {
-		errs = append(errs, errors.New("Either a path or inline script must be specified."))
-	} else if p.config.Path != "" && p.config.Inline != nil {
-		errs = append(errs, errors.New("Only a path or an inline script can be specified, not both."))
+	if p.config.Path != "" && len(p.config.Scripts) > 0 {
+		errs = append(errs, errors.New("Only one of path or scripts can be specified."))
 	}
 
 	if p.config.Path != "" {
-		if _, err := os.Stat(p.config.Path); err != nil {
-			errs = append(errs, fmt.Errorf("Bad script path: %s", err))
+		p.config.Scripts = []string{p.config.Path}
+	}
+
+	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
+		errs = append(errs, errors.New("Either a script file or inline script must be specified."))
+	} else if len(p.config.Scripts) > 0 && p.config.Inline != nil {
+		errs = append(errs, errors.New("Only a script file or an inline script can be specified, not both."))
+	}
+
+	for _, path := range p.config.Scripts {
+		if _, err := os.Stat(path); err != nil {
+			errs = append(errs, fmt.Errorf("Bad script '%s': %s", path, err))
 		}
 	}
 
@@ -86,7 +101,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
-	path := p.config.Path
+	scripts := make([]string, len(p.config.Scripts))
 
 	// If we have an inline script, then turn that into a temporary
 	// shell script and use that.
@@ -99,7 +114,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		defer os.Remove(tf.Name())
 
 		// Set the path to the temporary file
-		path = tf.Name()
+		scripts = append(scripts, tf.Name())
 
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
@@ -118,75 +133,77 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		tf.Close()
 	}
 
-	ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
+	for _, path := range scripts {
+		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
 
-	log.Printf("Opening %s for reading", path)
-	f, err := os.Open(path)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error opening shell script: %s", err))
-		return
-	}
-
-	log.Printf("Uploading %s => %s", path, p.config.RemotePath)
-	err = comm.Upload(p.config.RemotePath, f)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error uploading shell script: %s", err))
-		return
-	}
-
-	// Compile the command
-	var command bytes.Buffer
-	t := template.Must(template.New("command").Parse(p.config.ExecuteCommand))
-	t.Execute(&command, &ExecuteCommandTemplate{p.config.RemotePath})
-
-	// Setup the remote command
-	stdout_r, stdout_w := io.Pipe()
-	stderr_r, stderr_w := io.Pipe()
-
-	var cmd packer.RemoteCmd
-	cmd.Command = command.String()
-	cmd.Stdout = stdout_w
-	cmd.Stderr = stderr_w
-
-	log.Printf("Executing command: %s", cmd.Command)
-	err = comm.Start(&cmd)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Failed executing command: %s", err))
-		return
-	}
-
-	exitChan := make(chan int, 1)
-	stdoutChan := iochan.DelimReader(stdout_r, '\n')
-	stderrChan := iochan.DelimReader(stderr_r, '\n')
-
-	go func() {
-		defer stdout_w.Close()
-		defer stderr_w.Close()
-
-		cmd.Wait()
-		exitChan <- cmd.ExitStatus
-	}()
-
-OutputLoop:
-	for {
-		select {
-		case output := <-stderrChan:
-			ui.Message(strings.TrimSpace(output))
-		case output := <-stdoutChan:
-			ui.Message(strings.TrimSpace(output))
-		case exitStatus := <-exitChan:
-			log.Printf("shell provisioner exited with status %d", exitStatus)
-			break OutputLoop
+		log.Printf("Opening %s for reading", path)
+		f, err := os.Open(path)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error opening shell script: %s", err))
+			return
 		}
-	}
 
-	// Make sure we finish off stdout/stderr because we may have gotten
-	// a message from the exit channel first.
-	for output := range stdoutChan {
-		ui.Message(output)
-	}
+		log.Printf("Uploading %s => %s", path, p.config.RemotePath)
+		err = comm.Upload(p.config.RemotePath, f)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error uploading shell script: %s", err))
+			return
+		}
 
-	for output := range stderrChan {
-		ui.Message(output)
+		// Compile the command
+		var command bytes.Buffer
+		t := template.Must(template.New("command").Parse(p.config.ExecuteCommand))
+		t.Execute(&command, &ExecuteCommandTemplate{p.config.RemotePath})
+
+		// Setup the remote command
+		stdout_r, stdout_w := io.Pipe()
+		stderr_r, stderr_w := io.Pipe()
+
+		var cmd packer.RemoteCmd
+		cmd.Command = command.String()
+		cmd.Stdout = stdout_w
+		cmd.Stderr = stderr_w
+
+		log.Printf("Executing command: %s", cmd.Command)
+		err = comm.Start(&cmd)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Failed executing command: %s", err))
+			return
+		}
+
+		exitChan := make(chan int, 1)
+		stdoutChan := iochan.DelimReader(stdout_r, '\n')
+		stderrChan := iochan.DelimReader(stderr_r, '\n')
+
+		go func() {
+			defer stdout_w.Close()
+			defer stderr_w.Close()
+
+			cmd.Wait()
+			exitChan <- cmd.ExitStatus
+		}()
+
+	OutputLoop:
+		for {
+			select {
+			case output := <-stderrChan:
+				ui.Message(strings.TrimSpace(output))
+			case output := <-stdoutChan:
+				ui.Message(strings.TrimSpace(output))
+			case exitStatus := <-exitChan:
+				log.Printf("shell provisioner exited with status %d", exitStatus)
+				break OutputLoop
+			}
+		}
+
+		// Make sure we finish off stdout/stderr because we may have gotten
+		// a message from the exit channel first.
+		for output := range stdoutChan {
+			ui.Message(output)
+		}
+
+		for output := range stderrChan {
+			ui.Message(output)
+		}
 	}
 }
