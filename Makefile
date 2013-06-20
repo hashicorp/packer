@@ -8,7 +8,7 @@ all:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
 	@go get -d -v ./...
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
-	@./build.sh
+	@./scripts/build.sh
 
 format:
 	go fmt ./...
