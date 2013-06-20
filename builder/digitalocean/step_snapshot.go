@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -18,6 +19,8 @@ func (s *stepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
 	err := client.CreateSnapshot(dropletId, c.SnapshotName)
 	if err != nil {
+		err := fmt.Errorf("Error creating snapshot: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -25,6 +28,8 @@ func (s *stepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Waiting for snapshot to complete...")
 	err = waitForDropletState("active", dropletId, client)
 	if err != nil {
+		err := fmt.Errorf("Error waiting for snapshot to complete: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -32,6 +37,8 @@ func (s *stepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
 	images, err := client.Images()
 	if err != nil {
+		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -45,7 +52,9 @@ func (s *stepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	}
 
 	if imageId == 0 {
-		ui.Error("Couldn't find snapshot to get the image ID. Bug?")
+		err := errors.New("Couldn't find snapshot to get the image ID. Bug?")
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -15,16 +16,18 @@ func (s *stepDropletInfo) Run(state map[string]interface{}) multistep.StepAction
 	ui.Say("Waiting for droplet to become active...")
 
 	err := waitForDropletState("active", dropletId, client)
-
 	if err != nil {
+		err := fmt.Errorf("Error waiting for droplet to become active: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// Set the IP on the state for later
 	ip, _, err := client.DropletStatus(dropletId)
-
 	if err != nil {
+		err := fmt.Errorf("Error retrieving droplet ID: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}

@@ -2,6 +2,7 @@ package digitalocean
 
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
+	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
@@ -26,7 +27,9 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 	keyring := &ssh.SimpleKeychain{}
 	err := keyring.AddPEMKey(privateKey)
 	if err != nil {
-		ui.Say(fmt.Sprintf("Error setting up SSH config: %s", err))
+		err := fmt.Errorf("Error setting up SSH config: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -87,7 +90,9 @@ ConnectWaitLoop:
 			// We connected. Just break the loop.
 			break ConnectWaitLoop
 		case <-timeout:
-			ui.Error("Timeout while waiting to connect to SSH.")
+			err := errors.New("Timeout waiting for SSH to become available.")
+			state["error"] = err
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
 			if _, ok := state[multistep.StateCancelled]; ok {
@@ -103,7 +108,9 @@ ConnectWaitLoop:
 	}
 
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error connecting to SSH: %s", err))
+		err := fmt.Errorf("Error connecting to SSH: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

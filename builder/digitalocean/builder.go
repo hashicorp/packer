@@ -184,6 +184,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
+	// If there was an error, return that
+	if rawErr, ok := state["error"]; ok {
+		return nil, rawErr.(error)
+	}
+
 	if _, ok := state["snapshot_name"]; !ok {
 		log.Println("Failed to find snapshot_name in state. Bug?")
 		return nil, nil
