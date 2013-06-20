@@ -34,7 +34,9 @@ func (s *stepExport) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Exporting virtual machine...")
 	err := driver.VBoxManage(command...)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error exporting virtual machine: %s", err))
+		err := fmt.Errorf("Error exporting virtual machine: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

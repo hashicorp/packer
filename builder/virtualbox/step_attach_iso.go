@@ -31,7 +31,9 @@ func (s *stepAttachISO) Run(state map[string]interface{}) multistep.StepAction {
 		"--medium", isoPath,
 	}
 	if err := driver.VBoxManage(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error attaching hard drive: %s", err))
+		err := fmt.Errorf("Error attaching ISO: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

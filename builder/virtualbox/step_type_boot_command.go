@@ -66,7 +66,9 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 			}
 
 			if err := driver.VBoxManage("controlvm", vmName, "keyboardputscancode", code); err != nil {
-				ui.Error(fmt.Sprintf("Error sending boot command: %s", err))
+				err := fmt.Errorf("Error sending boot command: %s", err)
+				state["error"] = err
+				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
 		}

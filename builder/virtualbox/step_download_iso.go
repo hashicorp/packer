@@ -29,7 +29,9 @@ func (s stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction 
 
 	checksum, err := hex.DecodeString(config.ISOMD5)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error parsing checksum: %s", err))
+		err := fmt.Errorf("Error parsing checksum: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -57,12 +59,14 @@ func (s stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction 
 	progressTicker := time.NewTicker(5 * time.Second)
 	defer progressTicker.Stop()
 
-DownloadWaitLoop:
+	DownloadWaitLoop:
 	for {
 		select {
 		case err := <-downloadCompleteCh:
 			if err != nil {
-				ui.Error(fmt.Sprintf("Error downloading ISO: %s", err))
+				err := fmt.Errorf("Error downloading ISO: %s", err)
+				state["error"] = err
+				ui.Error(err.Error())
 			}
 
 			break DownloadWaitLoop

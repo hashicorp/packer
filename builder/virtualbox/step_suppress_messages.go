@@ -17,7 +17,9 @@ func (stepSuppressMessages) Run(state map[string]interface{}) multistep.StepActi
 
 	log.Println("Suppressing annoying messages in VirtualBox")
 	if err := driver.SuppressMessages(); err != nil {
-		ui.Error(fmt.Sprintf("Error configuring VirtualBox to suppress messages: %s", err))
+		err := fmt.Errorf("Error configuring VirtualBox to suppress messages: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

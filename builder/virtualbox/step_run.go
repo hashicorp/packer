@@ -25,7 +25,9 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Starting the virtual machine...")
 	command := []string{"startvm", vmName, "--type", "gui"}
 	if err := driver.VBoxManage(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error starting VM: %s", err))
+		err := fmt.Errorf("Error starting VM: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

@@ -44,7 +44,9 @@ func (s *stepForwardSSH) Run(state map[string]interface{}) multistep.StepAction 
 		fmt.Sprintf("packerssh,tcp,127.0.0.1,%d,,%d", sshHostPort, config.SSHPort),
 	}
 	if err := driver.VBoxManage(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error creating port forwarding rule: %s", err))
+		err := fmt.Errorf("Error creating port forwarding rule: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
