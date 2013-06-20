@@ -9,7 +9,7 @@ import (
 // of files associated with the resulting machine.
 type Artifact struct {
 	dir string
-	f []string
+	f   []string
 }
 
 func (*Artifact) BuilderId() string {
