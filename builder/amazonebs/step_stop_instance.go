@@ -25,9 +25,7 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	// Wait for the instance to actual stop
-	// TODO(mitchellh): Handle diff source states, i.e. this force state sucks
 	ui.Say("Waiting for the instance to stop...")
-	instance.State.Name = "stopping"
 	instance, err = waitForState(ec2conn, instance, []string{"running", "stopping"}, "stopped")
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
