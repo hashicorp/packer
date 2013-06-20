@@ -29,13 +29,17 @@ func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
 
 	f, err := os.Open(vmxPath)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error while reading VMX data: %s", err))
+		err := fmt.Errorf("Error reading VMX data: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	vmxBytes, err := ioutil.ReadAll(f)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error reading VMX data: %s", err))
+		err := fmt.Errorf("Error reading VMX data: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -62,7 +66,9 @@ func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
 	vmxData["RemoteDisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
-		ui.Error(fmt.Sprintf("Error writing VMX data: %s", err))
+		err := fmt.Errorf("Error writing VMX data: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

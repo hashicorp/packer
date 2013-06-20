@@ -29,7 +29,9 @@ func (stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Creating virtual machine disk")
 	output := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
 	if err := driver.CreateDisk(output, "40000M"); err != nil {
-		ui.Error(fmt.Sprintf("Error creating VMware disk: %s", err))
+		err := fmt.Errorf("Error creating disk: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
