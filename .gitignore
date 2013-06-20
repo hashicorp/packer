@@ -1,4 +1,5 @@
 /bin
 /local
+/pkg
 /website/build
 packerrc
