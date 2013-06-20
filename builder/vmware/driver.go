@@ -3,6 +3,7 @@ package vmware
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,7 +39,7 @@ type Fusion5Driver struct {
 
 func (d *Fusion5Driver) CreateDisk(output string, size string) error {
 	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", "lsilogic", "-t", "1", output)
-	if err := cmd.Run(); err != nil {
+	if _, _, err := d.runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -51,14 +52,13 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 		return false, err
 	}
 
-	stdout := new(bytes.Buffer)
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "list")
-	cmd.Stdout = stdout
-	if err := cmd.Run(); err != nil {
+	stdout, _, err := d.runAndLog(cmd)
+	if err != nil {
 		return false, err
 	}
 
-	for _, line := range strings.Split(stdout.String(), "\n") {
+	for _, line := range strings.Split(stdout, "\n") {
 		if line == vmxPath {
 			return true, nil
 		}
@@ -69,7 +69,7 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 
 func (d *Fusion5Driver) Start(vmxPath string) error {
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "start", vmxPath, "gui")
-	if err := cmd.Run(); err != nil {
+	if _, _, err := d.runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -78,7 +78,7 @@ func (d *Fusion5Driver) Start(vmxPath string) error {
 
 func (d *Fusion5Driver) Stop(vmxPath string) error {
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "stop", vmxPath, "hard")
-	if err := cmd.Run(); err != nil {
+	if _, _, err := d.runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -119,4 +119,18 @@ func (d *Fusion5Driver) vdiskManagerPath() string {
 
 func (d *Fusion5Driver) vmrunPath() string {
 	return filepath.Join(d.AppPath, "Contents", "Library", "vmrun")
+}
+
+func (d *Fusion5Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
+	var stdout, stderr bytes.Buffer
+
+	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	log.Printf("stdout: %s", strings.TrimSpace(stdout.String()))
+	log.Printf("stderr: %s", strings.TrimSpace(stderr.String()))
+
+	return stdout.String(), stderr.String(), err
 }
