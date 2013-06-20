@@ -30,14 +30,30 @@ xc() {
         xc
 }
 
+# Make sure that if we're killed, we kill all our subprocseses
+trap "kill 0" SIGINT SIGTERM EXIT
+
 # Build our root project
-xc
+xc &
 
 # Build all the plugins
 for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
     PLUGIN_NAME=$(basename ${PLUGIN})
+    (
     pushd ${PLUGIN}
     xc
     popd
     find ./pkg -type f -name ${PLUGIN_NAME} -execdir mv ${PLUGIN_NAME} packer-${PLUGIN_NAME} ';'
+    ) &
 done
+
+# Wait for all the background tasks to finish
+RESULT="0"
+for job in `jobs -p`; do
+    wait $job
+    if [ $? -ne 0 ]; then
+        RESULT="1"
+    fi
+done
+
+exit $RESULT
