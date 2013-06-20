@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -25,6 +26,8 @@ func (s *stepPowerOff) Run(state map[string]interface{}) multistep.StepAction {
 	err := client.PowerOffDroplet(dropletId)
 
 	if err != nil {
+		err := fmt.Errorf("Error powering off droplet: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -32,8 +35,9 @@ func (s *stepPowerOff) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Waiting for droplet to power off...")
 
 	err = waitForDropletState("off", dropletId, client)
-
 	if err != nil {
+		err := fmt.Errorf("Error waiting for droplet to become 'off': %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}

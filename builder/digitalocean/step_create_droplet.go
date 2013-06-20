@@ -27,8 +27,9 @@ func (s *stepCreateDroplet) Run(state map[string]interface{}) multistep.StepActi
 
 	// Create the droplet based on configuration
 	dropletId, err := client.CreateDroplet(name, c.SizeID, c.ImageID, c.RegionID, sshKeyId)
-
 	if err != nil {
+		err := fmt.Errorf("Error creating droplet: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}

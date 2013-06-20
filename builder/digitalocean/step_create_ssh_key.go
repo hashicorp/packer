@@ -46,8 +46,9 @@ func (s *stepCreateSSHKey) Run(state map[string]interface{}) multistep.StepActio
 
 	// Create the key!
 	keyId, err := client.CreateKey(name, pub_sshformat)
-
 	if err != nil {
+		err := fmt.Errorf("Error creating temporary SSH key: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
