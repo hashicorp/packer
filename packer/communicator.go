@@ -39,8 +39,21 @@ type RemoteCmd struct {
 // Communicators must be safe for concurrency, meaning multiple calls to
 // Start or any other method may be called at the same time.
 type Communicator interface {
+	// Start takes a RemoteCmd and starts it. The RemoteCmd must not be
+	// modified after being used with Start, and it must not be used with
+	// Start again. The Start method returns immediately once the command
+	// is started. It does not wait for the command to complete. The
+	// RemoteCmd.Exited field should be used for this.
 	Start(*RemoteCmd) error
+
+	// Upload uploads a file to the machine to the given path with the
+	// contents coming from the given reader. This method will block until
+	// it completes.
 	Upload(string, io.Reader) error
+
+	// Download downloads a file from the machine from the given remote path
+	// with the contents writing to the given writer. This method will
+	// block until it completes.
 	Download(string, io.Writer) error
 }
 
