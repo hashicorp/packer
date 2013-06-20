@@ -12,9 +12,11 @@ cd $DIR
 # Determine the version that we're building based on the contents
 # of packer/version.go.
 VERSION=$(grep "const Version " packer/version.go | sed -E 's/.*"(.+)"$/\1/')
+VERSIONDIR="${VERSION}"
 PREVERSION=$(grep "const VersionPrerelease " packer/version.go | sed -E 's/.*"(.+)"$/\1/')
 if [ ! -z $PREVERSION ]; then
     PREVERSION="${PREVERSION}.$(date -u +%s)"
+    VERSIONDIR="${VERSIONDIR}-${PREVERSION}"
 fi
 
 echo "Version: ${VERSION} ${PREVERSION}"
@@ -29,6 +31,21 @@ xc() {
         -pr="${PREVERSION}" \
         go-install \
         xc
+}
+
+# This function waits for all background tasks to complete
+waitAll() {
+    RESULT=0
+    for job in `jobs -p`; do
+        wait $job
+        if [ $? -ne 0 ]; then
+            RESULT=1
+        fi
+    done
+
+    if [ $RESULT -ne 0 ]; then
+        exit $RESULT
+    fi
 }
 
 # Make sure that if we're killed, we kill all our subprocseses
@@ -48,13 +65,25 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
     ) &
 done
 
-# Wait for all the background tasks to finish
-RESULT="0"
-for job in `jobs -p`; do
-    wait $job
-    if [ $? -ne 0 ]; then
-        RESULT="1"
+waitAll
+
+# Zip all the packages
+mkdir -p ./pkg/${VERSIONDIR}/dist
+for PLATFORM in $(find ./pkg/${VERSIONDIR} -mindepth 1 -maxdepth 1 -type d); do
+    PLATFORM_NAME=$(basename ${PLATFORM})
+    ARCHIVE_NAME="${VERSIONDIR}_${PLATFORM_NAME}"
+
+    if [ $PLATFORM_NAME = "dist" ]; then
+        continue
     fi
+
+    (
+    pushd ${PLATFORM}
+    zip ${DIR}/pkg/${VERSIONDIR}/dist/${ARCHIVE_NAME}.zip ./*
+    popd
+    ) &
 done
 
-exit $RESULT
+waitAll
+
+exit 0
