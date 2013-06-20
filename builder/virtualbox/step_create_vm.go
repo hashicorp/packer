@@ -34,7 +34,9 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 	for _, command := range commands {
 		err := driver.VBoxManage(command...)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Error creating VM: %s", err))
+			err := fmt.Errorf("Error creating VM: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 

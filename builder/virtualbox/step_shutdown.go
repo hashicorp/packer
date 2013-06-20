@@ -1,6 +1,7 @@
 package virtualbox
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -34,7 +35,9 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		log.Printf("Executing shutdown command: %s", config.ShutdownCommand)
 		cmd := &packer.RemoteCmd{Command: config.ShutdownCommand}
 		if err := comm.Start(cmd); err != nil {
-			ui.Error(fmt.Sprintf("Failed to send shutdown command: %s", err))
+			err := fmt.Errorf("Failed to send shutdown command: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
@@ -52,7 +55,9 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 
 			select {
 			case <-shutdownTimer:
-				ui.Error("Timeout while waiting for machine to shut down.")
+				err := errors.New("Timeout while waiting for machine to shut down.")
+				state["error"] = err
+				ui.Error(err.Error())
 				return multistep.ActionHalt
 			default:
 				time.Sleep(1 * time.Second)
@@ -61,7 +66,9 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 	} else {
 		ui.Say("Halting the virtual machine...")
 		if err := driver.Stop(vmName); err != nil {
-			ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
+			err := fmt.Errorf("Error stopping VM: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 	}

@@ -32,7 +32,9 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 	ui.Say("Creating hard drive...")
 	err := driver.VBoxManage(command...)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error creating hard drive: %s", err))
+		err := fmt.Errorf("Error creating hard drive: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -40,7 +42,9 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 	controllerName := "IDE Controller"
 	err = driver.VBoxManage("storagectl", vmName, "--name", controllerName, "--add", "ide")
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error creating disk controller: %s", err))
+		err := fmt.Errorf("Error creating disk controller: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -54,7 +58,9 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 		"--medium", path,
 	}
 	if err := driver.VBoxManage(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error attaching hard drive: %s", err))
+		err := fmt.Errorf("Error attaching hard drive: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
