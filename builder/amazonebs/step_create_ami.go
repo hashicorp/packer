@@ -42,6 +42,8 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 
 	createResp, err := ec2conn.CreateImage(createOpts)
 	if err != nil {
+		err := fmt.Errorf("Error creating AMI: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -57,6 +59,8 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	for {
 		imageResp, err := ec2conn.Images([]string{createResp.ImageId}, ec2.NewFilter())
 		if err != nil {
+			err := fmt.Errorf("Error querying images: %s", err)
+			state["error"] = err
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}

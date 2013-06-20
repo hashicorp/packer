@@ -23,6 +23,8 @@ func (s *stepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
+		err := fmt.Errorf("Error creating temporary keypair: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}

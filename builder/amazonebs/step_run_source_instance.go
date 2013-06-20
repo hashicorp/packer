@@ -31,6 +31,8 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	ui.Say("Launching a source AWS instance...")
 	runResp, err := ec2conn.RunInstances(runOpts)
 	if err != nil {
+		err := fmt.Errorf("Error launching source instance: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -41,6 +43,8 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	ui.Say("Waiting for instance to become ready...")
 	s.instance, err = waitForState(ec2conn, s.instance, []string{"pending"}, "running")
 	if err != nil {
+		err := fmt.Errorf("Error waiting for instance to become ready: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
