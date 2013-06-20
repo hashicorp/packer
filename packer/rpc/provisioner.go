@@ -49,6 +49,10 @@ func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 
 func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) error {
 	*reply = p.p.Prepare(args.Configs...)
+	if *reply != nil {
+		*reply = NewBasicError(*reply)
+	}
+
 	return nil
 }
 
