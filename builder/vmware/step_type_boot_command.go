@@ -45,14 +45,18 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	ui.Say("Connecting to VM via VNC")
 	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", vncPort))
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error connecting to VNC: %s", err))
+		err := fmt.Errorf("Error connecting to VNC: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 	defer nc.Close()
 
 	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: true})
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error handshaking with VNC: %s", err))
+		err := fmt.Errorf("Error handshaking with VNC: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 	defer c.Close()
@@ -63,7 +67,9 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	ipFinder := &IfconfigIPFinder{"vmnet8"}
 	hostIp, err := ipFinder.HostIP()
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error detecting host IP: %s", err))
+		err := fmt.Errorf("Error detecting host IP: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

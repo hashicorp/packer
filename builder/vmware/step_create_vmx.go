@@ -57,7 +57,9 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 
 	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
-		ui.Error(fmt.Sprintf("Error creating VMX: %s", err))
+		err := fmt.Errorf("Error creating VMX file: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
