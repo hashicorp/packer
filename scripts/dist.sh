@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 
-# Get the directory where this script is. This will also resolve
-# any symlinks in the directory/script, so it will be the fully
-# resolved path.
+# Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+
+# Change into that dir because we expect that
+cd $DIR
 
 # Determine the version that we're building based on the contents
 # of packer/version.go.

@@ -6,6 +6,13 @@ OK_COLOR="\x1b[32;01m"
 ERROR_COLOR="\x1b[31;01m"
 WARN_COLOR="\x1b[33;01m"
 
+# Get the parent directory of where this script is.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+
+# Change into that directory
+cd $DIR
 
 # Compile the main Packer app
 echo "${OK_COLOR}--> Compiling Packer${NO_COLOR}"
