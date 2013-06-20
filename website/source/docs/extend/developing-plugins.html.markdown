@@ -120,13 +120,17 @@ be in order for the logs to be helpful.
 Here are some tips for developing plugins, often answering common questions
 or concerns.
 
-First, it is standard practice to name the resulting plugin application
+### Naming Conventions
+
+It is standard practice to name the resulting plugin application
 in the format of `packer-TYPE-NAME`. For example, if you're building a
 new builder for CustomCloud, it would be standard practice to name the
 resulting plugin `packer-builder-custom-cloud`. This naming convention
 helps users identify the purpose of a plugin.
 
-Next, while developing plugins, you can configure your Packer configuration
+### Testing Plugins
+
+While developing plugins, you can configure your Packer configuration
 to point directly to the compiled plugin in order to test it. For example,
 building the CustomCloud plugin, I may configure packer like so:
 
@@ -142,7 +146,9 @@ This would configure Packer to have the "custom-cloud" plugin, and execute
 the binary that I am building during development. This is extremely useful
 during development.
 
-Additionally, it is recommended you use a tool like [goxc](https://github.com/laher/goxc)
+### Distributing Plugins
+
+It is recommended you use a tool like [goxc](https://github.com/laher/goxc)
 in order to cross-compile your plugin for every platform that Packer supports,
 since Go applications are platform-specific. goxc will allow you to build
 for every platform from your own computer.
