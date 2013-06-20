@@ -155,6 +155,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
+	// If there was an error, return that
+	if rawErr, ok := state["error"]; ok {
+		return nil, rawErr.(error)
+	}
+
 	// If there are no AMIs, then just return
 	if _, ok := state["amis"]; !ok {
 		return nil, nil

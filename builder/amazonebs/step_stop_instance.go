@@ -1,6 +1,7 @@
 package amazonebs
 
 import (
+	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -17,6 +18,8 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 	ui.Say("Stopping the source instance...")
 	_, err := ec2conn.StopInstances(instance.InstanceId)
 	if err != nil {
+		err := fmt.Errorf("Error stopping instance: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -27,6 +30,8 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 	instance.State.Name = "stopping"
 	instance, err = waitForState(ec2conn, instance, []string{"running", "stopping"}, "stopped")
 	if err != nil {
+		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}

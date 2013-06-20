@@ -44,6 +44,8 @@ func (s *stepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 
 	ui.Say("Authorizing SSH access on the temporary security group...")
 	if _, err := ec2conn.AuthorizeSecurityGroup(groupResp.SecurityGroup, perms); err != nil {
+		err := fmt.Errorf("Error creating temporary security group: %s", err)
+		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
