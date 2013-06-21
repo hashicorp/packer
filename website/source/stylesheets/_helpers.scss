@@ -68,8 +68,8 @@ $mono: 'Inconsolata', 'courier new', courier, mono-space;
 
 //color
 .dark-background {
-background-color: inherit;
-color: $white;
+    background-color: #000;
+    color: $white;
 
 	a {
 	color: inherit;
