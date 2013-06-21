@@ -22,7 +22,11 @@ $base-font-size: 16px;
 $base-line-height: 20px;
 $button-height: 60px;
 
-.padded-lg {padding: ($baseline * 4) 0;}
+.center {
+    margin: 0 auto;
+}
+
+.padded-lg {padding: ($baseline * 2) 0;}
 .padded {padding: ($baseline * 2) 0;}
 .padded-sm {padding: ($baseline) 0;}
 

@@ -1,58 +1,58 @@
 .hero {
-height: $hero-height;
-background: url(/images/hero_image.jpg) no-repeat center center;
-background-size: cover;
-@include respond-to(mobile) {
-margin-right: -20px;
-margin-left: -20px;
-background-size: cover;
-}
+    height: $hero-height;
+    background: #000000 url(/images/hero_image.jpg) no-repeat 75% -25px;
+    background-size: 1008px 490px;
+    @include respond-to(mobile) {
+        margin-right: -20px;
+        margin-left: -20px;
+        background-size: cover;
+    }
 
-	h2 {
-	margin-top: $baseline * 5.5;
-	@include respond-to(mobile) {
-	background-position: center bottom;
-	margin-top: $baseline * 4;
-	margin-left: 20px;
-	width: 80%;
-	font-size: 30px;
-	line-height: (35/30);
-	}
-	}
+    h2 {
+        margin-top: $baseline * 5.5;
+        @include respond-to(mobile) {
+            background-position: center bottom;
+            margin-top: $baseline * 4;
+            margin-left: 20px;
+            width: 80%;
+            font-size: 30px;
+            line-height: (35/30);
+        }
+    }
 }
 
 .belt {
-@include respond-to(mobile) {
-margin-right: -20px;
-margin-left: -20px;
-}
+    @include respond-to(mobile) {
+        margin-right: -20px;
+        margin-left: -20px;
+    }
 
-	&.download {
-	background-color: $white;
-	@extend .padded-sm;
-	}
+    &.download {
+        background-color: $white;
+        @extend .padded-sm;
+    }
 
-	.download-arrow {
-	margin: 5px 30px 0 0;
-	@include respond-to(mobile) {
-	margin-left: $baseline;
-	margin-top: -10px;
-	margin-right: $baseline;
-	}
-	}
+    .download-arrow {
+        margin: 5px 30px 0 0;
+        @include respond-to(mobile) {
+            margin-left: $baseline;
+            margin-top: -10px;
+            margin-right: $baseline;
+        }
+    }
 
-	h2 {
-	margin: 15px auto 0;
-	line-height: 1.0;
-	@include respond-to(mobile) {
-	font-size: 25px;
-	line-height: (30/25);
-	}
-	}
+    h2 {
+        margin: 15px auto 0;
+        line-height: 1.0;
+        @include respond-to(mobile) {
+            font-size: 25px;
+            line-height: (30/25);
+        }
+    }
 
-	span {
-	color: $gray-dark;
-	}
+    span {
+        color: $gray-dark;
+    }
 }
 
 
@@ -60,52 +60,52 @@ margin-left: -20px;
 
 .about {
 
-	hgroup {
-	display: table;
-	margin-bottom: $baseline * 2;
-	@include respond-to(mobile) {
-	display: block;
-	}
-	}
+    hgroup {
+        display: table;
+        margin-bottom: $baseline * 2;
+        @include respond-to(mobile) {
+            display: block;
+        }
+    }
 
-	h2.has-dividers {
-	@include respond-to(mobile) {
-	display: block;
-	}
-	}
+    h2.has-dividers {
+        @include respond-to(mobile) {
+            display: block;
+        }
+    }
 
-	.dividers {
+    .dividers {
 
-	}
+    }
 
 }
 
 .vendors {
 
-	.company-logos {
-	text-indent: -999999px;
-	margin-left: 50px;
-	@include respond-to(mobile) {
-	margin-left: 0;
-	}
+    .company-logos {
+        text-indent: -999999px;
+        margin-left: 50px;
+        @include respond-to(mobile) {
+            margin-left: 0;
+        }
 
-		li {
-		height: 100px;
-		@include respond-to(mobile) {
-		margin-bottom: $baseline * 2;
-		}
-		}
+        li {
+            height: 100px;
+            @include respond-to(mobile) {
+                margin-bottom: $baseline * 2;
+            }
+        }
 
-		.aws {
-		background: url(/images/works_with_aws.png) no-repeat center center;
-		}
-		.virtualbox {
-		background: url(/images/works_with_virtual.png) no-repeat center center;
-		}
-		.vmware {
-		background: url(/images/works_with_vmware.png) no-repeat center center;
-		}
-	}
+        .aws {
+            background: url(/images/works_with_aws.png) no-repeat center center;
+        }
+        .virtualbox {
+            background: url(/images/works_with_virtual.png) no-repeat center center;
+        }
+        .vmware {
+            background: url(/images/works_with_vmware.png) no-repeat center center;
+        }
+    }
 
 
 
@@ -114,152 +114,152 @@ margin-left: -20px;
 .users {
 
 
-	.company-logos {
-	text-indent: -999999px;
-	margin-left: 40px;
-	@include respond-to(mobile) {
-	margin-left: 0;
-	}
+    .company-logos {
+        text-indent: -999999px;
+        margin-left: 40px;
+        @include respond-to(mobile) {
+            margin-left: 0;
+        }
 
-		li {
-		height: 100px;
-		}
+        li {
+            height: 100px;
+        }
 
-		.expedia {
-		background: url(../../img/user_expedia.png) no-repeat center center;
-		}
-		.bbc {
-		background: url(../../img/user_bbc.png) no-repeat center center;
-		}
-		.disqus {
-		background: url(../../img/user_disqus.png) no-repeat center center;
-		}
-		.edgecast {
-		background: url(../../img/user_edgecast.png) no-repeat center center;
-		}
-	}
+        .expedia {
+            background: url(../../img/user_expedia.png) no-repeat center center;
+        }
+        .bbc {
+            background: url(../../img/user_bbc.png) no-repeat center center;
+        }
+        .disqus {
+            background: url(../../img/user_disqus.png) no-repeat center center;
+        }
+        .edgecast {
+            background: url(../../img/user_edgecast.png) no-repeat center center;
+        }
+    }
 }
 
 
 .docs-wrapper {
-clear: right;
-@include respond-to(mobile) {
-margin-right: -20px;
-margin-left: -20px;
-}
+    clear: right;
+    @include respond-to(mobile) {
+        margin-right: -20px;
+        margin-left: -20px;
+    }
 
-	.docs-body {
-	float: left;
-	width: 70%;
-	max-width: 760px;
-	display: block;
-	@extend .white-background;
-	@include respond-to(mobile) {
-	width: 100%;
-	}
+    .docs-body {
+        float: left;
+        width: 70%;
+        max-width: 760px;
+        display: block;
+        @extend .white-background;
+        @include respond-to(mobile) {
+            width: 100%;
+        }
 
-		.docs-content {
-		max-width: 600px;
-		padding: $docs-top-margin 80px;
-		display: block;
-		@include respond-to(mobile) {
-		padding: 0;
-		width: 91%;
-		margin-left: 5%;
-		}
-		}
+        .docs-content {
+            max-width: 600px;
+            padding: $docs-top-margin 80px;
+            display: block;
+            @include respond-to(mobile) {
+                padding: 0;
+                width: 91%;
+                margin-left: 5%;
+            }
+        }
 
-		section {
-		margin-top: $docs-top-margin;
-		}
+        section {
+            margin-top: $docs-top-margin;
+        }
 
-		h1,
-		h2,
-		h3,
-		p {
-		@include respond-to(mobile) {
-		-webkit-hyphens: auto;
-		-moz-hyphens: auto;
-		hyphens: auto;
-		}
-		}
+        h1,
+        h2,
+        h3,
+        p {
+            @include respond-to(mobile) {
+                -webkit-hyphens: auto;
+                -moz-hyphens: auto;
+                hyphens: auto;
+            }
+        }
 
-		h1 {
-		font-size: 40px;
-		line-height: (25/20);
-		text-transform: uppercase;
-		}
+        h1 {
+            font-size: 40px;
+            line-height: (25/20);
+            text-transform: uppercase;
+        }
 
-		h2 {
-		margin-top: $baseline * 2;
-		text-transform: capitalize;
-		}
+        h2 {
+            margin-top: $baseline * 2;
+            text-transform: capitalize;
+        }
 
-		h3 {
-		margin-top: $baseline;
-		text-transform: capitalize;
-		}
-	}
+        h3 {
+            margin-top: $baseline;
+            text-transform: capitalize;
+        }
+    }
 
-	pre {
-	@include respond-to(mobile) {
-	margin: $baseline 0 $baseline 0;
-	padding: $baseline 0 0 $baseline;
-	width: 80%;
-	background-color: transparent;
-	border: none;
-	color: $black;
-	}
-	}
+    pre {
+        @include respond-to(mobile) {
+            margin: $baseline 0 $baseline 0;
+            padding: $baseline 0 0 $baseline;
+            width: 80%;
+            background-color: transparent;
+            border: none;
+            color: $black;
+        }
+    }
 
 }
 
 .pagination {
-$border: 1px solid $gray-mid;
-height: $nav-height;
-border-top: $border;
-font-size: 20px;
-margin: 0px;
+    $border: 1px solid $gray-mid;
+    height: $nav-height;
+    border-top: $border;
+    font-size: 20px;
+    margin: 0px;
 
-	h4 {
-	display: inline-block;
-	margin-top: ($baseline * 1.7);
-	margin-left: $baseline;
+    h4 {
+        display: inline-block;
+        margin-top: ($baseline * 1.7);
+        margin-left: $baseline;
 
-	@include respond-to(mobile) {
-	margin-top: 10px;
-	}
-	}
+        @include respond-to(mobile) {
+            margin-top: 10px;
+        }
+    }
 
-	span {
+    span {
 
-	@include respond-to(mobile) {
-	display: block;
-	}
-	}
+        @include respond-to(mobile) {
+            display: block;
+        }
+    }
 
-	.previous-section,
-	.next-section {
-	height: $nav-height;
-	display: block;
+    .previous-section,
+    .next-section {
+        height: $nav-height;
+        display: block;
 
-		&:hover {
-		background-color: transparentize($gray-light, .7);
-		}
-	}
+        &:hover {
+            background-color: transparentize($gray-light, .7);
+        }
+    }
 
-	.previous-section {
-	width: $nav-height;
-	border-right: $border;
-	float: left;
-	background: $white url(/images/arrow-left.png) no-repeat center center;
-	@include respond-to(mobile) {
-	width: 50%;
-	background-position: left center;
-	}
-	}
+    .previous-section {
+        width: $nav-height;
+        border-right: $border;
+        float: left;
+        background: $white url(/images/arrow-left.png) no-repeat center center;
+        @include respond-to(mobile) {
+            width: 50%;
+            background-position: left center;
+        }
+    }
 
-	.next-section {
-	background: $white url(/images/arrow-right.png) no-repeat center right;
-	}
+    .next-section {
+        background: $white url(/images/arrow-right.png) no-repeat center right;
+    }
 }
