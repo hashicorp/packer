@@ -1,32 +1,14 @@
 .hero {
     height: $hero-height;
-    background: #000000 url(/images/hero_image.jpg) no-repeat 30px -5px;
+    background: #000000 url(/images/hero_image.jpg) no-repeat 35px -50px;
     background-size: 960px 467px;
-    @include respond-to(mobile) {
-        margin-right: -20px;
-        margin-left: -20px;
-        background-size: cover;
-    }
 
     h2 {
-        margin-top: $baseline * 5.5;
-        @include respond-to(mobile) {
-            background-position: center bottom;
-            margin-top: $baseline * 4;
-            margin-left: 20px;
-            width: 80%;
-            font-size: 28px;
-            line-height: (35/30);
-        }
+        margin-top: 60px;
     }
 }
 
 .belt {
-    @include respond-to(mobile) {
-        margin-right: -20px;
-        margin-left: -20px;
-    }
-
     &.download {
         background-color: $white;
         @extend .padded-sm;
