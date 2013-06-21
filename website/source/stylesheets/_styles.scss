@@ -126,31 +126,7 @@ ul,
 ol {
     margin: 0;
     padding: 0;
-}
-
-ul {
     list-style-type: none;
-}
-
-ol {
-    list-style-type: circle;
-    list-style-position: inside;
-    margin-top: $baseline * 2;
-
-    li {
-        font-family: $serif;
-        font-size: 17px;
-        line-height: (30/17) !important;
-        margin-bottom: $baseline;
-    }
-}
-
-li {
-
-}
-
-blockquote {
-
 }
 
 em {
