@@ -169,6 +169,16 @@
             }
         }
 
+        .docs-background {
+            @extend .white-background;
+            height: 100%;
+            width: 760px;
+            position: fixed;
+            top: 0;
+            left: $sidebar-width;
+            z-index: -9999;
+        }
+
         section {
             margin-top: $docs-top-margin;
         }

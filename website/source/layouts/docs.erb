@@ -1,83 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Packer</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="">
-		<meta name="author" content="">
+<% wrap_layout :layout do %>
+	<div class="docs-wrapper">
+		<div class="sidebar dark-background hidden-phone">
+			<h2>Docs</h2>
 
-		<!-- Le styles -->
-		<%= stylesheet_link_tag "bootstrap.min", "packer" %>
-		<style type="text/css">
-			body {
-				padding-top: 20px;
-				padding-bottom: 40px;
-			}
-		</style>
+			<ul>
+				<li><a href="/docs/what-is-packer.html">What is Packer?</a></li>
+				<li><a href="/docs/installation.html">Installation</a></li>
+				<li><a href="/docs/basics/terminology.html">Terminology</a></li>
+			</ul>
 
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
-	</head>
+			<ul>
+				<li><h4>Command-Line</h4></li>
+				<li><a href="/docs/command-line/introduction.html">Introduction</a></li>
+				<li><a href="/docs/command-line/build.html">Build</a></li>
+				<li><a href="/docs/command-line/validate.html">Validate</a></li>
+			</ul>
 
-	<body>
+			<ul>
+				<li><h4>Templates</h4></li>
+				<li><a href="/docs/templates/introduction.html">Introduction</a></li>
+				<li><a href="/docs/templates/builders.html">Builders</a></li>
+				<li><a href="/docs/templates/provisioners.html">Provisioners</a></li>
+				<li><a href="/docs/templates/post-processors.html">Post-Processors</a></li>
+				<li><a href="/docs/templates/configuration-templates.html">Configuration Templates</a></li>
+			</ul>
 
-		<div class="container">
-			<div class="row">
-				<div class="span3">
-					<div class="well sidebar-nav" style="padding: 8px 0;">
-						<ul class="nav nav-list">
-							<li><a href="/docs/what-is-packer.html">What is Packer?</a></li>
-							<li><a href="/docs/installation.html">Installation</a></li>
-							<li><a href="/docs/basics/terminology.html">Terminology</a></li>
+			<ul>
+				<li><h4>Builders</h4></li>
+				<li><a href="/docs/builders/digitalocean.html">DigitalOcean</a></li>
+				<li><a href="/docs/builders/amazon-ebs.html">EC2 (AMI)</a></li>
+				<li><a href="/docs/builders/virtualbox.html">VirtualBox</a></li>
+				<li><a href="/docs/builders/vmware.html">VMware</a></li>
+				<li><a href="/docs/builders/custom.html">Custom</a></li>
+			</ul>
 
-							<li class="nav-header">Command-Line</li>
-							<li><a href="/docs/command-line/introduction.html">Introduction</a></li>
-							<li><a href="/docs/command-line/build.html">Build</a></li>
-							<li><a href="/docs/command-line/validate.html">Validate</a></li>
+			<ul>
+				<li><h4>Provisioners</h4></li>
+				<li><a href="/docs/provisioners/shell.html">Shell Scripts</a></li>
+				<li><a href="/docs/provisioners/custom.html">Custom</a></li>
+			</ul>
 
-							<li class="nav-header">Templates</li>
-							<li><a href="/docs/templates/introduction.html">Introduction</a></li>
-							<li><a href="/docs/templates/builders.html">Builders</a></li>
-							<li><a href="/docs/templates/provisioners.html">Provisioners</a></li>
-							<li><a href="/docs/templates/post-processors.html">Post-Processors</a></li>
-							<li><a href="/docs/templates/configuration-templates.html">Configuration Templates</a></li>
+			<ul>
+				<li><h4>Other</h4></li>
+				<li><a href="/docs/other/core-configuration.html">Core Configuration</a></li>
+				<li><a href="/docs/other/debugging.html">Debugging</a></li>
+			</ul>
 
-							<li class="nav-header">Builders</li>
-							<li><a href="/docs/builders/digitalocean.html">DigitalOcean</a></li>
-							<li><a href="/docs/builders/amazon-ebs.html">EC2 (AMI)</a></li>
-							<li><a href="/docs/builders/virtualbox.html">VirtualBox</a></li>
-							<li><a href="/docs/builders/vmware.html">VMware</a></li>
-							<li><a href="/docs/builders/custom.html">Custom</a></li>
+			<ul>
+				<li><h4>Extend Packer</h4></li>
+				<li><a href="/docs/extend/plugins.html">Packer Plugins</a></li>
+				<li><a href="/docs/extend/developing-plugins.html">Developing Plugins</a></li>
+				<li><a href="/docs/extend/builder.html">Custom Builder</a></li>
+				<li><a href="/docs/extend/command.html">Custom Command</a></li>
+				<li><a href="/docs/extend/post-processor.html">Custom Post-Processor</a></li>
+				<li><a href="/docs/extend/provisioner.html">Custom Provisioner</a></li>
+			</ul>
 
-							<li class="nav-header">Provisioners</li>
-							<li><a href="/docs/provisioners/shell.html">Shell Scripts</a></li>
-							<li><a href="/docs/provisioners/custom.html">Custom</a></li>
+			<!-- trick it into having a full-height sidebar regardless of content height -->
+			<div class="sidebar-background"></div>
+		</div>
 
-							<li class="nav-header">Other</li>
-							<li><a href="/docs/other/core-configuration.html">Core Configuration</a></li>
-							<li><a href="/docs/other/debugging.html">Debugging</a></li>
+		<div class="docs-body">
+			<div class="docs-content">
+				<%= yield %>
+			</div>
 
-							<li class="nav-header">Extend Packer</li>
-							<li><a href="/docs/extend/plugins.html">Packer Plugins</a></li>
-							<li><a href="/docs/extend/developing-plugins.html">Developing Plugins</a></li>
-							<li><a href="/docs/extend/builder.html">Custom Builder</a></li>
-							<li><a href="/docs/extend/command.html">Custom Command</a></li>
-							<li><a href="/docs/extend/post-processor.html">Custom Post-Processor</a></li>
-							<li><a href="/docs/extend/provisioner.html">Custom Provisioner</a></li>
-						</ul>
-					</div><!--/.well -->
-				</div><!--/span-->
-				<div class="span9">
-					<%= yield %>
-				</div><!--/span-->
-			</div><!--/row-->
-
-			<hr>
-
-			<footer>
-			<p>&copy; Mitchell Hashimoto 2013</p>
-			</footer>
-		</div><!--/.fluid-container-->
-	</body>
-</html>
-
+			<div class="docs-background"></div>
+		</div>
+	</div>
+<% end %>
