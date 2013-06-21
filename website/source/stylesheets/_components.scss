@@ -137,6 +137,13 @@
             padding: $docs-top-margin 80px;
             display: block;
 
+            code {
+                background-color: #000;
+                border: 0;
+                color: #b1d631;
+                font-size: 14px;
+            }
+
             ul,
             ol {
                 list-style-type: circle;
