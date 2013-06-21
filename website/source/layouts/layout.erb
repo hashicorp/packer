@@ -17,9 +17,10 @@
 		<![endif]-->
 
 		<!-- css -->
-		<%= stylesheet_link_tag "bootstrap.min", "main" %>
+		<%= stylesheet_link_tag "bootstrap.min", "main", "prettify" %>
 
 		<!-- js -->
+		<%= javascript_include_tag "prettify" %>
 
 		<!-- fonts -->
 		<link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
@@ -63,5 +64,7 @@
 			</div>
 		</div>
 		</footer>
+
+		<script type="text/javascript">prettyPrint();</script>
 	</body>
 </html>
