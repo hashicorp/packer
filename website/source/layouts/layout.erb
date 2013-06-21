@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Packer</title>
+		<title><%= current_page.data.page_title ? "#{current_page.data.page_title} - " : "" %>Packer</title>
 		<meta name="description" content="Packer is a free and open source tool for creating golden images for multiple platforms from a single source configuration." />
 
 		<!-- HTML5 shiv -->
@@ -33,7 +33,7 @@
 					</a>
 					<a href="/" class="packer-logo pull-left">Packer</a>
 					<ul>
-						<li><a href="#">Intro</a></li>
+						<li><a href="/intro">Intro</a></li>
 						<li><a href="/docs">Documentation</a></li>
 						<li><a href="#">Community</a></li>
 					</ul>

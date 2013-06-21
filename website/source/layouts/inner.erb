@@ -1,0 +1,29 @@
+<% wrap_layout :layout do %>
+	<div class="docs-wrapper">
+		<div class="sidebar dark-background">
+			<%= yield_content :sidebar %>
+
+			<div class="sidebar-background"></div>
+		</div>
+
+		<div class="docs-body">
+			<div class="docs-content">
+				<%= yield %>
+			</div>
+
+			<% if current_page.data.next_url %>
+				<div class="pagination">
+					<a class="previous-section" href="<%= current_page.data.prev_url %>"></a>
+					<a class="next-section" href="<%= current_page.data.next_url %>">
+						<h4>
+							<span class="text-green uppercase">next</span>
+							<%= current_page.data.next_title %>
+						</h4>
+					</a>
+				</div>
+			<% end %>
+
+			<div class="docs-background"></div>
+		</div>
+	</div>
+<% end %>

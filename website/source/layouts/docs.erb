@@ -1,71 +1,59 @@
-<% wrap_layout :layout do %>
-	<div class="docs-wrapper">
-		<div class="sidebar dark-background hidden-phone">
-			<h2>Docs</h2>
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<h2>Docs</h2>
 
-			<ul>
-				<li><a href="/docs/index.html">What is Packer?</a></li>
-				<li><a href="/docs/installation.html">Installation</a></li>
-				<li><a href="/docs/basics/terminology.html">Terminology</a></li>
-			</ul>
+		<ul>
+			<li><a href="/docs/index.html">What is Packer?</a></li>
+			<li><a href="/docs/installation.html">Installation</a></li>
+			<li><a href="/docs/basics/terminology.html">Terminology</a></li>
+		</ul>
 
-			<ul>
-				<li><h4>Command-Line</h4></li>
-				<li><a href="/docs/command-line/introduction.html">Introduction</a></li>
-				<li><a href="/docs/command-line/build.html">Build</a></li>
-				<li><a href="/docs/command-line/validate.html">Validate</a></li>
-			</ul>
+		<ul>
+			<li><h4>Command-Line</h4></li>
+			<li><a href="/docs/command-line/introduction.html">Introduction</a></li>
+			<li><a href="/docs/command-line/build.html">Build</a></li>
+			<li><a href="/docs/command-line/validate.html">Validate</a></li>
+		</ul>
 
-			<ul>
-				<li><h4>Templates</h4></li>
-				<li><a href="/docs/templates/introduction.html">Introduction</a></li>
-				<li><a href="/docs/templates/builders.html">Builders</a></li>
-				<li><a href="/docs/templates/provisioners.html">Provisioners</a></li>
-				<li><a href="/docs/templates/post-processors.html">Post-Processors</a></li>
-				<li><a href="/docs/templates/configuration-templates.html">Configuration Templates</a></li>
-			</ul>
+		<ul>
+			<li><h4>Templates</h4></li>
+			<li><a href="/docs/templates/introduction.html">Introduction</a></li>
+			<li><a href="/docs/templates/builders.html">Builders</a></li>
+			<li><a href="/docs/templates/provisioners.html">Provisioners</a></li>
+			<li><a href="/docs/templates/post-processors.html">Post-Processors</a></li>
+			<li><a href="/docs/templates/configuration-templates.html">Configuration Templates</a></li>
+		</ul>
 
-			<ul>
-				<li><h4>Builders</h4></li>
-				<li><a href="/docs/builders/digitalocean.html">DigitalOcean</a></li>
-				<li><a href="/docs/builders/amazon-ebs.html">EC2 (AMI)</a></li>
-				<li><a href="/docs/builders/virtualbox.html">VirtualBox</a></li>
-				<li><a href="/docs/builders/vmware.html">VMware</a></li>
-				<li><a href="/docs/builders/custom.html">Custom</a></li>
-			</ul>
+		<ul>
+			<li><h4>Builders</h4></li>
+			<li><a href="/docs/builders/digitalocean.html">DigitalOcean</a></li>
+			<li><a href="/docs/builders/amazon-ebs.html">EC2 (AMI)</a></li>
+			<li><a href="/docs/builders/virtualbox.html">VirtualBox</a></li>
+			<li><a href="/docs/builders/vmware.html">VMware</a></li>
+			<li><a href="/docs/builders/custom.html">Custom</a></li>
+		</ul>
 
-			<ul>
-				<li><h4>Provisioners</h4></li>
-				<li><a href="/docs/provisioners/shell.html">Shell Scripts</a></li>
-				<li><a href="/docs/provisioners/custom.html">Custom</a></li>
-			</ul>
+		<ul>
+			<li><h4>Provisioners</h4></li>
+			<li><a href="/docs/provisioners/shell.html">Shell Scripts</a></li>
+			<li><a href="/docs/provisioners/custom.html">Custom</a></li>
+		</ul>
 
-			<ul>
-				<li><h4>Other</h4></li>
-				<li><a href="/docs/other/core-configuration.html">Core Configuration</a></li>
-				<li><a href="/docs/other/debugging.html">Debugging</a></li>
-			</ul>
+		<ul>
+			<li><h4>Other</h4></li>
+			<li><a href="/docs/other/core-configuration.html">Core Configuration</a></li>
+			<li><a href="/docs/other/debugging.html">Debugging</a></li>
+		</ul>
 
-			<ul>
-				<li><h4>Extend Packer</h4></li>
-				<li><a href="/docs/extend/plugins.html">Packer Plugins</a></li>
-				<li><a href="/docs/extend/developing-plugins.html">Developing Plugins</a></li>
-				<li><a href="/docs/extend/builder.html">Custom Builder</a></li>
-				<li><a href="/docs/extend/command.html">Custom Command</a></li>
-				<li><a href="/docs/extend/post-processor.html">Custom Post-Processor</a></li>
-				<li><a href="/docs/extend/provisioner.html">Custom Provisioner</a></li>
-			</ul>
-
-			<!-- trick it into having a full-height sidebar regardless of content height -->
-			<div class="sidebar-background"></div>
-		</div>
-
-		<div class="docs-body">
-			<div class="docs-content">
-				<%= yield %>
-			</div>
-
-			<div class="docs-background"></div>
-		</div>
-	</div>
+		<ul>
+			<li><h4>Extend Packer</h4></li>
+			<li><a href="/docs/extend/plugins.html">Packer Plugins</a></li>
+			<li><a href="/docs/extend/developing-plugins.html">Developing Plugins</a></li>
+			<li><a href="/docs/extend/builder.html">Custom Builder</a></li>
+			<li><a href="/docs/extend/command.html">Custom Command</a></li>
+			<li><a href="/docs/extend/post-processor.html">Custom Post-Processor</a></li>
+			<li><a href="/docs/extend/provisioner.html">Custom Provisioner</a></li>
+		</ul>
+	<% end %>
+	<%= yield %>
 <% end %>
