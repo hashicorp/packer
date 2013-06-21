@@ -1,0 +1,49 @@
+---
+layout: "intro"
+page_title: "Supported Platforms"
+prev_url: "/intro/use-cases.html"
+next_url: "/intro/getting-started/setup.html"
+next_title: "Getting Started: Install Packer"
+---
+
+# Supported Platforms
+
+Packer can creates machine images for any platform. Packer ships with
+support for a set of platforms, but can be [extend through plugins](/docs/extend/builder.html)
+to support any platform. This page documents the list of supported image
+types that Packer supports creating.
+
+If you were looking to see what platforms Packer is able to run on, see
+the page on [installing Packer](/intro/getting-started/setup.html).
+
+<div class="alert alert-info alert-block">
+<strong>Note:</strong> We're always looking to officially support more
+target platforms. If you're interested in adding support for another
+platform, please help by opening an issue or pull request within
+<a href="https://github.com/mitchellh/packer">GitHub</a> so we can discuss
+how to make it happen.
+</div>
+
+Packer supports creating images for the following platforms or targets.
+The format of the resulting image and any high-level information about the
+platform is noted. They are listed in alphabetical order. For more detailed
+information on supported configuration parameters and usage, please see
+the appropriate [documentation page within the documentation section](/docs).
+
+* ***Amazon EC2 (AMI)***. EBS-backed AMIs within EC2, optionally distributed
+  to multiple regions.
+
+* ***DigitalOcean***. Snapshots for [DigitalOcean](http://www.digitalocean.com)
+  that can be used to start a pre-configured DigitalOcean instance of any size.
+
+* ***VirtualBox (OVF)***. Exported virtual machines for VirtualBox, including
+  virtual machine metadata such as RAM, CPUs, etc. These virtual machines are
+  portable and can be started on any platform VirtualBox runs on.
+
+* ***VMware (VMX)***. Exported virtual machines for VMware that can be run
+  within any desktop products such as Fusion, Player, or Workstation, as well
+  as server products such as vSphere.
+
+As previously mentioned, these are just the target image types that Packer
+ships with out of the box. You can always [extend Packer through plugins](/docs/extend/builder.html)
+to support more.
