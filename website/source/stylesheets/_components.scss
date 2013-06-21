@@ -142,11 +142,15 @@
             padding: $docs-top-margin 80px;
             display: block;
 
+            p code {
+                font-size: 14px;
+            }
+
             code {
                 background-color: #000;
                 border: 0;
                 color: #b1d631;
-                font-size: 14px;
+                font-size: 12px;
             }
 
             a {
@@ -193,7 +197,7 @@
 
             pre {
                 border: 0;
-                font-size: 14px;
+                font-size: 12px;
                 margin-left: -80px;
                 margin-right: -80px;
                 padding-top: 40px;
