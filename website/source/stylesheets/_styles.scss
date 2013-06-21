@@ -1,24 +1,24 @@
 * {
-margin: 0;
+    margin: 0;
 }
 
 html,
 body {
-margin: 0;
-height: 100%;
+    margin: 0;
+    height: 100%;
 }
 
 html {
-	-webkit-tap-highlight-color: transparent;
-	-webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
 }
 
 body {
-background-color: $background;
-font-family: $sans;
-letter-spacing: 1px;
-font-size: $base-font-size;
-line-height: $base-line-height;
+    background-color: $background;
+    font-family: $sans;
+    letter-spacing: 1px;
+    font-size: $base-font-size;
+    line-height: $base-line-height;
 }
 
 h1,
@@ -27,122 +27,122 @@ h3,
 h4,
 h5,
 h6 {
-letter-spacing: 2px;
-font-weight: normal;
+    letter-spacing: 2px;
+    font-weight: normal;
 }
 
 h1 {
-font-family: $sans;
-font-size: 70px;
-line-height: (80/70);
-	@include respond-to(mobile) {
-	font-size: 50px;
-	line-height: (50/45);
-	}
+    font-family: $sans;
+    font-size: 70px;
+    line-height: (80/70);
+    @include respond-to(mobile) {
+        font-size: 50px;
+        line-height: (50/45);
+    }
 }
 
 h2 {
-font-family: $sans;
-font-size: 40px;
-line-height: (50/40);
+    font-family: $sans;
+    font-size: 40px;
+    line-height: (50/40);
 
-	&.has-dividers {
-	//overflow: auto !important;
-	display: table-cell;
-	text-align: center;
-	vertical-align: middle;
-	@include respond-to(mobile) {
-	display: block;
-	}
-	}
+    &.has-dividers {
+        //overflow: auto !important;
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+        @include respond-to(mobile) {
+            display: block;
+        }
+    }
 }
 
 h3 {
-font-family: $sans;
-font-size: 20px;
-line-height: (30/20);
+    font-family: $sans;
+    font-size: 20px;
+    line-height: (30/20);
 }
 
 h4 {
-font-family: $mono;
-font-size: 20px;
-line-height: (30/20);
+    font-family: $mono;
+    font-size: 20px;
+    line-height: (30/20);
 }
 
 h5 {
-font-family: $sans;
-font-size: 16px;
-line-height: (22/16);
+    font-family: $sans;
+    font-size: 16px;
+    line-height: (22/16);
 }
 
 h6 {
-font-family: $mono;
-font-size: 16px;
-line-height: (22/16);
+    font-family: $mono;
+    font-size: 16px;
+    line-height: (22/16);
 }
 
 p {
-font-family: $serif;
-font-size: 17px;
-line-height: (30/17);
-letter-spacing: 1px;
+    font-family: $serif;
+    font-size: 17px;
+    line-height: (30/17);
+    letter-spacing: 1px;
 
-	&.large-text {
-	font-size: 20px;
-	line-height: (35/20);
-	}
-	
-	a {
-	color: $green;
-		&:hover {
-		color: darken($green, 30%);
-		}
-		&:active {
-		color: darken($green, 50%);
-		}
-	}
+    &.large-text {
+        font-size: 20px;
+        line-height: (35/20);
+    }
+
+    a {
+        color: $green;
+        &:hover {
+            color: darken($green, 30%);
+        }
+        &:active {
+            color: darken($green, 50%);
+        }
+    }
 }
 
 a {
-color: inherit;
-text-decoration: none;
+    color: inherit;
+    text-decoration: none;
 
-	&:hover {
-	color: inherit;
-	text-decoration: none;
-	}
+    &:hover {
+        color: inherit;
+        text-decoration: none;
+    }
 
-	&:visited {
+    &:visited {
 
-	}
+    }
 
-	&:active {
+    &:active {
 
-	}
+    }
 
 }
 
 ul,
 ol {
-margin: 0;
-padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 ul {
-list-style-type: none;
+    list-style-type: none;
 }
 
 ol {
-list-style-type: circle;
-list-style-position: inside;
-margin-top: $baseline * 2;
+    list-style-type: circle;
+    list-style-position: inside;
+    margin-top: $baseline * 2;
 
-	li {
-	font-family: $serif;
-	font-size: 17px;
-	line-height: (30/17) !important;
-	margin-bottom: $baseline;
-	}
+    li {
+        font-family: $serif;
+        font-size: 17px;
+        line-height: (30/17) !important;
+        margin-bottom: $baseline;
+    }
 }
 
 li {
@@ -154,48 +154,53 @@ blockquote {
 }
 
 em {
-font-style: italic;
+    font-style: italic;
 }
 
 strong {
-font-weight: bold;
+    font-weight: bold;
 }
 
 small,
 .small {
-font-size: 13px;
+    font-size: 13px;
 }
 
 hr {
-margin: ($baseline * 2) 0;
-border-color: $gray-mid;
-border-bottom: 0;
+    margin: ($baseline * 2) 0;
+    border-color: $gray-mid;
+    border-bottom: 0;
 }
 
 pre {
-background-color: $black;
-color: $white;
-margin: ($baseline * 2) 0;
-padding-top: $baseline;
-padding-bottom: 0;
+    background-color: $black;
+    color: $white;
+    margin: ($baseline * 2) 0;
+    margin-left: -80px;
+    margin-right: -80px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    padding-left: 80px;
+    padding-right: 80px;
+    border-radius: 0;
 }
 
 table {
-font-family: $mono;
-margin: ($baseline * 2) 0;
-color: $gray-dark;
+    font-family: $mono;
+    margin: ($baseline * 2) 0;
+    color: $gray-dark;
 
-	th {
-	color: $black;
-	font-weight: normal !important;
-	}
+    th {
+        color: $black;
+        font-weight: normal !important;
+    }
 }
 
 ::selection {
-	background: #ffff00; /* Safari */
-	}
+    background: #ffff00; /* Safari */
+}
 ::-moz-selection {
-	background: #ffff00; /* Firefox */
+    background: #ffff00; /* Firefox */
 }
 
 input {
@@ -203,47 +208,47 @@ input {
 }
 
 button {
-height: $button-height;
-background-color: transparent;
-border-width: 2px;
-border-style: solid;
-padding: 0 30px;
-text-transform: uppercase;
-letter-spacing: 3px;
-@include rounded(5px);
+    height: $button-height;
+    background-color: transparent;
+    border-width: 2px;
+    border-style: solid;
+    padding: 0 30px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    @include rounded(5px);
 
-	&.primary {
-	color: $green;
-	border-color: $green;
-	
-		&:hover {
-		background-color: transparentize($green, .7);
-		}
-		
-		&:active {
-		background-color: transparentize($green, .5);
-		}
-	}
-	
-	&.secondary {
-	color: $black;
-	border-color: $black;
-	
-		&:hover {
-		background-color: transparentize($black, .9);
-		}
-		
-		&:active {
-		background-color: transparentize($black, .7);
-		}
-	}
-	
-	&.inline {
-	margin: auto $baseline;
-	@include respond-to(mobile) {
-	display: block;
-	width: 100%;
-	margin: $baseline 0;
-	}
-	}
+    &.primary {
+        color: $green;
+        border-color: $green;
+
+        &:hover {
+            background-color: transparentize($green, .7);
+        }
+
+        &:active {
+            background-color: transparentize($green, .5);
+        }
+    }
+
+    &.secondary {
+        color: $black;
+        border-color: $black;
+
+        &:hover {
+            background-color: transparentize($black, .9);
+        }
+
+        &:active {
+            background-color: transparentize($black, .7);
+        }
+    }
+
+    &.inline {
+        margin: auto $baseline;
+        @include respond-to(mobile) {
+            display: block;
+            width: 100%;
+            margin: $baseline 0;
+        }
+    }
 }
