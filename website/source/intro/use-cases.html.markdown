@@ -2,8 +2,8 @@
 layout: "intro"
 page_title: "Use Cases"
 prev_url: "/intro/why.html"
-next_url: "/intro/getting-started/setup.html"
-next_title: "Getting Started: Install Packer"
+next_url: "/intro/platforms.html"
+next_title: "Supported Platforms"
 ---
 
 # Use Cases

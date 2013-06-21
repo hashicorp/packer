@@ -177,6 +177,20 @@
                 }
             }
 
+            div.alert {
+                font-family: $serif;
+                font-size: 17px;
+                line-height: 1.5;
+                letter-spacing: 1px;
+                margin-left: -80px;
+                margin-right: -80px;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                padding-left: 80px;
+                padding-right: 80px;
+                border-radius: 0;
+            }
+
             pre {
                 border: 0;
                 font-size: 14px;
