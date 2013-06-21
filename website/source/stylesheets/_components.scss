@@ -1,10 +1,10 @@
 .hero {
     height: $hero-height;
-    background: #000000 url(/images/hero_image.jpg) no-repeat 35px -50px;
+    background: #000000 url(/images/hero_image.jpg) no-repeat 35px -40px;
     background-size: 960px 467px;
 
     h2 {
-        margin-top: 60px;
+        margin-top: 70px;
     }
 }
 
@@ -125,10 +125,6 @@
 
 .docs-wrapper {
     clear: right;
-    @include respond-to(mobile) {
-        margin-right: -20px;
-        margin-left: -20px;
-    }
 
     .docs-body {
         float: left;
@@ -136,25 +132,27 @@
         max-width: 760px;
         display: block;
         @extend .white-background;
-        @include respond-to(mobile) {
-            width: 100%;
-        }
 
         .docs-content {
-            max-width: 600px;
             padding: $docs-top-margin 80px;
             display: block;
-            @include respond-to(mobile) {
-                padding: 0;
-                width: 91%;
-                margin-left: 5%;
+
+            pre {
+                margin-left: -80px;
+                margin-right: -80px;
+                padding-top: 40px;
+                padding-bottom: 40px;
+                padding-left: 80px;
+                padding-right: 80px;
+                border-radius: 0;
             }
         }
 
         .docs-background {
             @extend .white-background;
             height: 100%;
-            width: 760px;
+            width: 70%;
+            max-width: 760px;
             position: fixed;
             top: 0;
             left: $sidebar-width;
@@ -163,17 +161,6 @@
 
         section {
             margin-top: $docs-top-margin;
-        }
-
-        h1,
-        h2,
-        h3,
-        p {
-            @include respond-to(mobile) {
-                -webkit-hyphens: auto;
-                -moz-hyphens: auto;
-                hyphens: auto;
-            }
         }
 
         h1 {
@@ -192,18 +179,6 @@
             text-transform: capitalize;
         }
     }
-
-    pre {
-        @include respond-to(mobile) {
-            margin: $baseline 0 $baseline 0;
-            padding: $baseline 0 0 $baseline;
-            width: 80%;
-            background-color: transparent;
-            border: none;
-            color: $black;
-        }
-    }
-
 }
 
 .pagination {
