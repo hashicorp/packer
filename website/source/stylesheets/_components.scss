@@ -137,6 +137,22 @@
             padding: $docs-top-margin 80px;
             display: block;
 
+            ul,
+            ol {
+                list-style-type: circle;
+                list-style-position: inside;
+                margin-top: $baseline;
+                margin-left: 20px;
+                margin-right: 20px;
+
+                li {
+                    font-family: $serif;
+                    font-size: 17px;
+                    line-height: (30/17) !important;
+                    margin-bottom: $baseline;
+                }
+            }
+
             pre {
                 border: 0;
                 font-size: 14px;
