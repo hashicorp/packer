@@ -149,6 +149,18 @@
                 font-size: 14px;
             }
 
+            a {
+                color: darken($green, 15%);
+
+                &:hover {
+                    color: darken($green, 30%);
+                }
+
+                &:active {
+                    color: darken($green, 50%);
+                }
+            }
+
             ul,
             ol {
                 list-style-type: circle;
