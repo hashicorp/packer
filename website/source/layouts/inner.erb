@@ -14,12 +14,16 @@
 			<% if current_page.data.next_url %>
 				<div class="pagination">
 					<a class="previous-section" href="<%= current_page.data.prev_url %>"></a>
+					<% if current_page.data.next_url == "" %>
+					<h4><span class="text-green uppercase">End</span></h4>
+					<% else %>
 					<a class="next-section" href="<%= current_page.data.next_url %>">
 						<h4>
 							<span class="text-green uppercase">next</span>
 							<%= current_page.data.next_title %>
 						</h4>
 					</a>
+					<% end %>
 				</div>
 			<% end %>
 
