@@ -2,8 +2,8 @@
 layout: "intro"
 page_title: "Parallel Builds"
 prev_url: "/intro/getting-started/provision.html"
-next_url: ""
-next_title: ""
+next_url: "/intro/getting-started/next.html"
+next_title: "Next Steps"
 ---
 
 # Parallel Builds
