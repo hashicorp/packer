@@ -290,3 +290,19 @@
         background: $white url(/images/arrow-right.png) no-repeat center right;
     }
 }
+
+.people {
+    margin-top: 30px;
+
+    .person {
+        margin-bottom: 30px;
+
+        h3 {
+            text-transform: none;
+        }
+
+        .bio {
+            padding-left: 150px;
+        }
+    }
+}
