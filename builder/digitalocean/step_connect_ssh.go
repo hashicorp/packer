@@ -42,17 +42,19 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 	}
 
 	// Start trying to connect to SSH
-	connected := make(chan bool, 1)
+	connected := make(chan error, 1)
 	connectQuit := make(chan bool, 1)
 	defer func() {
 		connectQuit <- true
 	}()
 
+	var comm packer.Communicator
 	go func() {
 		var err error
 
 		ui.Say("Connecting to the droplet via SSH...")
 		attempts := 0
+		handshakeAttempts := 0
 		for {
 			select {
 			case <-connectQuit:
@@ -69,7 +71,20 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 				fmt.Sprintf("%s:%d", ipAddress, config.SSHPort),
 				10*time.Second)
 			if err == nil {
-				break
+				log.Println("TCP connection made. Attempting SSH handshake.")
+				comm, err = ssh.New(s.conn, sshConfig)
+				if err == nil {
+					log.Println("Connected to SSH!")
+					break
+				}
+
+				handshakeAttempts += 1
+				log.Printf("SSH handshake error: %s", err)
+
+				if handshakeAttempts > 5 {
+					connected <- err
+					return
+				}
 			}
 
 			// A brief sleep so we're not being overly zealous attempting
@@ -77,7 +92,7 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 			time.Sleep(500 * time.Millisecond)
 		}
 
-		connected <- true
+		connected <- nil
 	}()
 
 	log.Printf("Waiting up to %s for SSH connection", config.SSHTimeout)
@@ -86,7 +101,14 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 ConnectWaitLoop:
 	for {
 		select {
-		case <-connected:
+		case err := <-connected:
+			if err != nil {
+				err := fmt.Errorf("Error connecting to SSH: %s", err)
+				state["error"] = err
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
 			// We connected. Just break the loop.
 			break ConnectWaitLoop
 		case <-timeout:
@@ -100,18 +122,6 @@ ConnectWaitLoop:
 				return multistep.ActionHalt
 			}
 		}
-	}
-
-	var comm packer.Communicator
-	if err == nil {
-		comm, err = ssh.New(s.conn, sshConfig)
-	}
-
-	if err != nil {
-		err := fmt.Errorf("Error connecting to SSH: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
-		return multistep.ActionHalt
 	}
 
 	// Set the communicator on the state bag so it can be used later
