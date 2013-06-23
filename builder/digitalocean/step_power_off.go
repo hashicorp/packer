@@ -34,7 +34,7 @@ func (s *stepPowerOff) Run(state map[string]interface{}) multistep.StepAction {
 
 	ui.Say("Waiting for droplet to power off...")
 
-	err = waitForDropletState("off", dropletId, client)
+	err = waitForDropletState("off", dropletId, client, c)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for droplet to become 'off': %s", err)
 		state["error"] = err
