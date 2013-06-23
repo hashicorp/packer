@@ -86,6 +86,8 @@ func (d *DownloadClient) Get() (string, error) {
 	if url.Scheme == "file" && !d.config.CopyFile {
 		finalPath = url.Path
 	} else {
+		finalPath = d.config.TargetPath
+
 		var ok bool
 		d.downloader, ok = d.config.DownloaderMap[url.Scheme]
 		if !ok {
@@ -93,7 +95,7 @@ func (d *DownloadClient) Get() (string, error) {
 		}
 
 		// Otherwise, download using the downloader.
-		f, err := os.Create(d.config.TargetPath)
+		f, err := os.Create(finalPath)
 		if err != nil {
 			return "", err
 		}
