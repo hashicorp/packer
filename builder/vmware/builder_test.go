@@ -200,6 +200,34 @@ func TestBuilderPrepare_SSHUser(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_SSHPort(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with a bad value
+	delete(config, "ssh_port")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	if b.config.SSHPort != 22 {
+		t.Fatalf("bad ssh port: %d", b.config.SSHPort)
+	}
+
+	// Test with a good one
+	config["ssh_port"] = 44
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.SSHPort != 44 {
+		t.Fatalf("bad ssh port: %d", b.config.SSHPort)
+	}
+}
+
 func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	var b Builder
 	config := testConfig()

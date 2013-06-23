@@ -40,6 +40,7 @@ type config struct {
 	ShutdownTimeout time.Duration     ``
 	SSHUser         string            `mapstructure:"ssh_username"`
 	SSHPassword     string            `mapstructure:"ssh_password"`
+	SSHPort         uint              `mapstructure:"ssh_port"`
 	SSHWaitTimeout  time.Duration     ``
 	VMXData         map[string]string `mapstructure:"vmx_data"`
 	VNCPortMin      uint              `mapstructure:"vnc_port_min"`
@@ -90,6 +91,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = "vmware"
+	}
+
+	if b.config.SSHPort == 0 {
+		b.config.SSHPort = 22
 	}
 
 	// Accumulate any errors
