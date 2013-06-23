@@ -105,6 +105,9 @@ Optional:
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
+* `ssh_port` (int) - The port that SSH will listen on within the virtual
+  machine. By default this is 22.
+
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as virtual machine is booted.
