@@ -64,6 +64,10 @@ Optional:
 * `ssh_username` (string) - The username to use in order to communicate
   over SSH to the running droplet. Default is "root".
 
+* `state_timeout` (string) - The time to wait, as a duration string,
+for a droplet to enter a desired state (such as "active") before
+timing out. The default state timeout is "3m".
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your

@@ -26,7 +26,7 @@ func (s *stepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	}
 
 	ui.Say("Waiting for snapshot to complete...")
-	err = waitForDropletState("active", dropletId, client)
+	err = waitForDropletState("active", dropletId, client, c)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot to complete: %s", err)
 		state["error"] = err
