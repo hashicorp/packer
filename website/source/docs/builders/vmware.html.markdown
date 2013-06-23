@@ -67,6 +67,11 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
+* `disk_size` (int) - The size of the hard disk for the VM in megabytes.
+  The builder uses expandable, not fixed-size virtual hard disks, so the
+  actual file representing the disk will not use the full size unless it is full.
+  By default this is set to 40,000 (40 GB).
+
 * `guest_os_type` (string) - The guest OS type being installed. This will be
   set in the VMware VMX. By default this is "other". By specifying a more specific
   OS type, VMware may perform some optimizations or virtual hardware changes
