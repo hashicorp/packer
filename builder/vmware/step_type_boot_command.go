@@ -96,8 +96,9 @@ func (*stepTypeBootCommand) Cleanup(map[string]interface{}) {}
 func vncSendString(c *vnc.ClientConn, original string) {
 	special := make(map[string]uint32)
 	special["<enter>"] = 0xFF0D
-	special["<return>"] = 0xFF0D
 	special["<esc>"] = 0xFF1B
+	special["<return>"] = 0xFF0D
+	special["<tab>"] = 0xFF09
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
