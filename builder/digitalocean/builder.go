@@ -39,12 +39,14 @@ type config struct {
 	SSHPort      uint   `mapstructure:"ssh_port"`
 	SSHTimeout   time.Duration
 	EventDelay   time.Duration
+	StateTimeout time.Duration
 
 	PackerDebug bool `mapstructure:"packer_debug"`
 
 	RawSnapshotName string `mapstructure:"snapshot_name"`
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawEventDelay   string `mapstructure:"event_delay"`
+	RawStateTimeout string `mapstructure:"state_timeout"`
 }
 
 type Builder struct {
@@ -104,6 +106,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawEventDelay = "5s"
 	}
 
+	if b.config.RawStateTimeout == "" {
+		// Default to 3 minute timeouts waiting for
+		// desired state. i.e waiting for droplet to become active
+		b.config.RawStateTimeout = "3m"
+	}
+
 	// A list of errors on the configuration
 	errs := make([]error, 0)
 
@@ -117,17 +125,23 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("an api_key must be specified"))
 	}
 
-	timeout, err := time.ParseDuration(b.config.RawSSHTimeout)
+	sshTimeout, err := time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
-	b.config.SSHTimeout = timeout
+	b.config.SSHTimeout = sshTimeout
 
-	delay, err := time.ParseDuration(b.config.RawEventDelay)
+	eventDelay, err := time.ParseDuration(b.config.RawEventDelay)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing event_delay: %s", err))
 	}
-	b.config.EventDelay = delay
+	b.config.EventDelay = eventDelay
+
+	stateTimeout, err := time.ParseDuration(b.config.RawStateTimeout)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
+	}
+	b.config.StateTimeout = stateTimeout
 
 	// Parse the name of the snapshot
 	snapNameBuf := new(bytes.Buffer)

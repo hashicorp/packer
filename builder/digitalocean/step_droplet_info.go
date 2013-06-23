@@ -11,11 +11,12 @@ type stepDropletInfo struct{}
 func (s *stepDropletInfo) Run(state map[string]interface{}) multistep.StepAction {
 	client := state["client"].(*DigitalOceanClient)
 	ui := state["ui"].(packer.Ui)
+	c := state["config"].(config)
 	dropletId := state["droplet_id"].(uint)
 
 	ui.Say("Waiting for droplet to become active...")
 
-	err := waitForDropletState("active", dropletId, client)
+	err := waitForDropletState("active", dropletId, client, c)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for droplet to become active: %s", err)
 		state["error"] = err
