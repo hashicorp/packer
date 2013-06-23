@@ -102,6 +102,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 	scripts := make([]string, len(p.config.Scripts))
+	copy(scripts, p.config.Scripts)
 
 	// If we have an inline script, then turn that into a temporary
 	// shell script and use that.
