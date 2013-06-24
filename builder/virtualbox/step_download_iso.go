@@ -67,6 +67,7 @@ DownloadWaitLoop:
 				err := fmt.Errorf("Error downloading ISO: %s", err)
 				state["error"] = err
 				ui.Error(err.Error())
+				return multistep.ActionHalt
 			}
 
 			break DownloadWaitLoop
