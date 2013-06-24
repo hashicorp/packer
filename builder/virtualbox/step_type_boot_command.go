@@ -82,8 +82,9 @@ func (*stepTypeBootCommand) Cleanup(map[string]interface{}) {}
 func scancodes(message string) []string {
 	special := make(map[string][]string)
 	special["<enter>"] = []string{"1c", "9c"}
-	special["<return>"] = []string{"1c", "9c"}
 	special["<esc>"] = []string{"01", "81"}
+	special["<return>"] = []string{"1c", "9c"}
+	special["<tab>"] = []string{"0f", "8f"}
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
