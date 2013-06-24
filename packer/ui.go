@@ -161,7 +161,7 @@ func (rw *ReaderWriterUi) Message(message string) {
 	defer rw.l.Unlock()
 
 	log.Printf("ui: %s", message)
-	_, err := fmt.Fprintf(rw.Writer, message+"\n")
+	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
 		panic(err)
 	}
