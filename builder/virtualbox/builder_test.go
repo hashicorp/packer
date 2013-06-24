@@ -102,6 +102,32 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_GuestAdditionsPath(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	delete(config, "disk_size")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	if b.config.GuestAdditionsPath != "VBoxGuestAdditions.iso" {
+		t.Fatalf("bad: %s", b.config.GuestAdditionsPath)
+	}
+
+	config["guest_additions_path"] = "foo"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.GuestAdditionsPath != "foo" {
+		t.Fatalf("bad size: %s", b.config.GuestAdditionsPath)
+	}
+}
+
 func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	var b Builder
 	config := testConfig()
