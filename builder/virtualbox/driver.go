@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -29,6 +30,9 @@ type Driver interface {
 	// properly. If there is any indication the driver can't function,
 	// this will return an error.
 	Verify() error
+
+	// Version reads the version of VirtualBox that is installed.
+	Version() (string, error)
 }
 
 type VBox42Driver struct {
@@ -103,4 +107,22 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 
 func (d *VBox42Driver) Verify() error {
 	return nil
+}
+
+func (d *VBox42Driver) Version() (string, error) {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "--version")
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	versionRe := regexp.MustCompile("[^.0-9]")
+	matches := versionRe.Split(stdout.String(), 2)
+	if len(matches) == 0 {
+		return "", fmt.Errorf("No version found: %s", stdout.String())
+	}
+
+	return matches[0], nil
 }

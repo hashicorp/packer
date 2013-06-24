@@ -315,3 +315,31 @@ func TestBuilderPrepare_VBoxManage(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.VBoxManage)
 	}
 }
+
+func TestBuilderPrepare_VBoxVersionFile(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test empty
+	delete(config, "virtualbox_version_file")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.VBoxVersionFile != ".vbox_version" {
+		t.Fatalf("bad value: %s", b.config.VBoxVersionFile)
+	}
+
+	// Test with a good one
+	config["virtualbox_version_file"] = "foo"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.VBoxVersionFile != "foo" {
+		t.Fatalf("bad value: %s", b.config.VBoxVersionFile)
+	}
+}
