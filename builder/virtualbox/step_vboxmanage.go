@@ -46,7 +46,7 @@ func (s *stepVBoxManage) Run(state map[string]interface{}) multistep.StepAction 
 			command[i] = buf.String()
 		}
 
-		ui.Say(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
+		ui.Message(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error executing command: %s", err)
 			state["error"] = err
