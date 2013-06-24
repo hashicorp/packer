@@ -25,27 +25,28 @@ type Builder struct {
 }
 
 type config struct {
-	BootCommand     []string      `mapstructure:"boot_command"`
-	BootWait        time.Duration ``
-	DiskSize        uint          `mapstructure:"disk_size"`
-	GuestOSType     string        `mapstructure:"guest_os_type"`
-	HTTPDir         string        `mapstructure:"http_directory"`
-	HTTPPortMin     uint          `mapstructure:"http_port_min"`
-	HTTPPortMax     uint          `mapstructure:"http_port_max"`
-	ISOMD5          string        `mapstructure:"iso_md5"`
-	ISOUrl          string        `mapstructure:"iso_url"`
-	OutputDir       string        `mapstructure:"output_directory"`
-	ShutdownCommand string        `mapstructure:"shutdown_command"`
-	ShutdownTimeout time.Duration ``
-	SSHHostPortMin  uint          `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax  uint          `mapstructure:"ssh_host_port_max"`
-	SSHPassword     string        `mapstructure:"ssh_password"`
-	SSHPort         uint          `mapstructure:"ssh_port"`
-	SSHUser         string        `mapstructure:"ssh_username"`
-	SSHWaitTimeout  time.Duration ``
-	VBoxVersionFile string        `mapstructure:"virtualbox_version_file"`
-	VBoxManage      [][]string    `mapstructure:"vboxmanage"`
-	VMName          string        `mapstructure:"vm_name"`
+	BootCommand        []string      `mapstructure:"boot_command"`
+	BootWait           time.Duration ``
+	DiskSize           uint          `mapstructure:"disk_size"`
+	GuestAdditionsPath string        `mapstructure:"guest_additions_path"`
+	GuestOSType        string        `mapstructure:"guest_os_type"`
+	HTTPDir            string        `mapstructure:"http_directory"`
+	HTTPPortMin        uint          `mapstructure:"http_port_min"`
+	HTTPPortMax        uint          `mapstructure:"http_port_max"`
+	ISOMD5             string        `mapstructure:"iso_md5"`
+	ISOUrl             string        `mapstructure:"iso_url"`
+	OutputDir          string        `mapstructure:"output_directory"`
+	ShutdownCommand    string        `mapstructure:"shutdown_command"`
+	ShutdownTimeout    time.Duration ``
+	SSHHostPortMin     uint          `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax     uint          `mapstructure:"ssh_host_port_max"`
+	SSHPassword        string        `mapstructure:"ssh_password"`
+	SSHPort            uint          `mapstructure:"ssh_port"`
+	SSHUser            string        `mapstructure:"ssh_username"`
+	SSHWaitTimeout     time.Duration ``
+	VBoxVersionFile    string        `mapstructure:"virtualbox_version_file"`
+	VBoxManage         [][]string    `mapstructure:"vboxmanage"`
+	VMName             string        `mapstructure:"vm_name"`
 
 	PackerDebug bool `mapstructure:"packer_debug"`
 
@@ -66,6 +67,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.GuestAdditionsPath == "" {
+		b.config.GuestAdditionsPath = "VBoxGuestAdditions.iso"
 	}
 
 	if b.config.GuestOSType == "" {
@@ -206,6 +211,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	steps := []multistep.Step{
+		new(stepDownloadGuestAdditions),
 		new(stepDownloadISO),
 		new(stepPrepareOutputDir),
 		new(stepHTTPServer),
