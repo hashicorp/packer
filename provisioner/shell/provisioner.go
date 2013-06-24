@@ -193,6 +193,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 				ui.Message(strings.TrimSpace(output))
 			case exitStatus := <-exitChan:
 				log.Printf("shell provisioner exited with status %d", exitStatus)
+
+				if exitStatus != 0 {
+					ui.Error(fmt.Sprintf("Script excited with non-zero exit status: %d", exitStatus))
+				}
+
 				break OutputLoop
 			}
 		}
