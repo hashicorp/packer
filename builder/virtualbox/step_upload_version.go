@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
 // This step uploads a file containing the VirtualBox version, which
@@ -16,6 +17,11 @@ func (s *stepUploadVersion) Run(state map[string]interface{}) multistep.StepActi
 	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
+
+	if config.VBoxVersionFile == "" {
+		log.Println("VBoxVersionFile is empty. Not uploading.")
+		return multistep.ActionContinue
+	}
 
 	version, err := driver.Version()
 	if err != nil {
