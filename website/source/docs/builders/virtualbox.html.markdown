@@ -119,6 +119,16 @@ Optional:
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as virtual machine is booted.
 
+* `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
+  execute in order to further customize the virtual machine being created.
+  The value of this is an array of commands to execute. The commands are executed
+  in the order defined in the template. For each command, the command is
+  defined itself as an array of strings, where each string represents a single
+  argument on the command-line to `VBoxManage` (but excluding `VBoxManage`
+  itself). Each arg is treated as a [configuration template](/docs/templates/configuration-templates.html),
+  where the `Name` variable is replaced with the VM name. More details on how
+  to use `VBoxManage` are below.
+
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer".
 
@@ -161,3 +171,33 @@ an Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 </pre>
+
+## VBoxManage Commands
+
+In order to perform extra customization of the virtual machine, a template
+can define extra calls to `VBoxMangage` to perform. [VBoxManage](http://www.virtualbox.org/manual/ch08.html)
+is the command-line interface to VirtualBox where you can completely control
+VirtualBox. It can be used to do things such as set RAM, CPUs, etc.
+
+Extra VBoxManage commands are defined in the template in the `vboxmanage` section.
+An example is shown below that sets the memory and number of CPUs within the
+virtual machine:
+
+<pre class="prettyprint">
+{
+  "vboxmanage": [
+    ["modifyvm", "{{.Name}}", "--memory", "1024"],
+    ["modifyvm", "{{.Name}}", "--cpus", "2"]
+  ]
+}
+</pre>
+
+The value of `vboxmanage` is an array of commands to execute. These commands
+are executed in the order defined. So in the above example, the memory will be
+set followed by the CPUs.
+
+Each command itself is an array of strings, where each string is an argument
+to `VBoxManage`. Each argument is treated as a
+[configuration template](/docs/templates/configuration-templates.html).
+The only available variable is `Name` which is replaced with the unique
+name of the VM, which is required for many VBoxManage calls.
