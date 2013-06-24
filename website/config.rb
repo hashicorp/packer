@@ -22,6 +22,10 @@ response.body.split("\n").each do |line|
   $packer_files[os] << filename
 end
 
+$packer_os = ["darwin", "linux", "windows"] & $packer_files.keys
+$packer_os += $packer_files.keys
+$packer_os.uniq!
+
 $packer_files.each do |key, value|
   value.sort!
 end
