@@ -36,7 +36,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 
 	// Request a PTY
 	termModes := ssh.TerminalModes{
-		ssh.ECHO: 0, // do not echo
+		ssh.ECHO:          0,     // do not echo
 		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
 		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
