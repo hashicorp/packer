@@ -34,6 +34,17 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	session.Stdout = cmd.Stdout
 	session.Stderr = cmd.Stderr
 
+	// Request a PTY
+	termModes := ssh.TerminalModes{
+		ssh.ECHO: 0, // do not echo
+		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+	}
+
+	if err = session.RequestPty("xterm", 80, 40, termModes); err != nil {
+		return
+	}
+
 	log.Printf("starting remote command: %s", cmd.Command)
 	err = session.Start(cmd.Command + "\n")
 	if err != nil {
