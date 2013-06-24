@@ -26,22 +26,13 @@ are served using the `plugin.ServeProvisioner` function.
 
 The interface that must be implemented for a provisioner is the
 `packer.Provisioner` interface. It is reproduced below for easy reference.
-The reference below also contains some basic documentation of what each of
-the methods are supposed to do.
+The actual interface in the source code contains some basic documentation as well explaining
+what each method should do.
+
 
 <pre class="prettyprint">
-// A provisioner is responsible for installing and configuring software
-// on a machine prior to building the actual image.
 type Provisioner interface {
-	// Prepare is called with a set of configurations to setup the
-	// internal state of the provisioner. The multiple configurations
-	// should be merged in some sane way.
 	Prepare(...interface{}) error
-
-	// Provision is called to actually provision the machine. A UI is
-	// given to communicate with the user, and a communicator is given that
-	// is guaranteed to be connected to some machine so that provisioning
-	// can be done.
 	Provision(Ui, Communicator)
 }
 </pre>

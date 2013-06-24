@@ -23,30 +23,14 @@ Prior to reading this page, it is assumed you have read the page on
 ## The Interface
 
 The interface that must be implemented for a builder is the `packer.Builder`
-interface. It is reproduced below for easy reference. The reference below
-also contains some basic documentatin of what each of the methods are
-supposed to do.
+interface. It is reproduced below for easy reference. The actual interface
+in the source code contains some basic documentation as well explaining
+what each method should do.
 
 <pre class="prettyprint">
 type Builder interface {
-	// Prepare is responsible for configuring the builder and validating
-	// that configuration. Any setup should be done in this method. Note that
-	// NO side effects should take place in prepare, it is meant as a state
-	// setup only. Calling Prepare is not necessarilly followed by a Run.
-	//
-	// The parameters to Prepare are a set of interface{} values of the
-	// configuration. These are almost always `map[string]interface{}`
-	// parsed from a template, but no guarantee is made.
-	//
-	// Each of the configuration values should merge into the final
-	// configuration.
 	Prepare(...interface{}) error
-
-	// Run is where the actual build should take place. It takes a Build and a Ui.
 	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
-
-	// Cancel cancels a possibly running Builder. This should block until
-	// the builder actually cancels and cleans up after itself.
 	Cancel()
 }
 </pre>
