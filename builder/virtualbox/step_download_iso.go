@@ -7,7 +7,11 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
+	"io"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -20,9 +24,11 @@ import (
 //
 // Produces:
 //   iso_path string
-type stepDownloadISO struct{}
+type stepDownloadISO struct {
+	isoCopyDir string
+}
 
-func (s stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction {
+func (s *stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction {
 	cache := state["cache"].(packer.Cache)
 	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
@@ -81,10 +87,42 @@ DownloadWaitLoop:
 		}
 	}
 
+	// VirtualBox is really dumb and can't figure out that the file is an
+	// ISO unless it has a ".iso" extension. We can't modify the cache
+	// filenames so we just do a copy.
+	tempdir, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
+		return multistep.ActionHalt
+	}
+	s.isoCopyDir = tempdir
+
+	f, err := os.Create(filepath.Join(tempdir, "image.iso"))
+	if err != nil {
+		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
+		return multistep.ActionHalt
+	}
+	defer f.Close()
+
+	sourceF, err := os.Open(cachePath)
+	if err != nil {
+		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
+		return multistep.ActionHalt
+	}
+
+	if _, err := io.Copy(f, sourceF); err != nil {
+		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
+		return multistep.ActionHalt
+	}
+
 	log.Printf("Path to ISO on disk: %s", cachePath)
-	state["iso_path"] = cachePath
+	state["iso_path"] = f.Name()
 
 	return multistep.ActionContinue
 }
 
-func (stepDownloadISO) Cleanup(map[string]interface{}) {}
+func (s *stepDownloadISO) Cleanup(map[string]interface{}) {
+	if s.isoCopyDir != "" {
+		os.RemoveAll(s.isoCopyDir)
+	}
+}
