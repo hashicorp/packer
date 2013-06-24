@@ -43,7 +43,7 @@ func (s *stepUploadGuestAdditions) Run(state map[string]interface{}) multistep.S
 	t := template.Must(template.New("path").Parse(config.GuestAdditionsPath))
 	t.Execute(&processedPath, tplData)
 
-	ui.Say("Upload VirtualBox guest additions ISO...")
+	ui.Say("Uploading VirtualBox guest additions ISO...")
 	if err := comm.Upload(processedPath.String(), f); err != nil {
 		state["error"] = fmt.Errorf("Error uploading guest additions: %s", err)
 		return multistep.ActionHalt
