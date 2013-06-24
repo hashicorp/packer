@@ -1,3 +1,18 @@
+header .header {
+    height: 200px;
+    background: #000000;
+
+    h1 {
+        margin-bottom: -8px;
+        margin-top: 60px;
+        text-transform: uppercase;
+    }
+
+    span {
+        font-size: 20px;
+    }
+}
+
 .hero {
     height: $hero-height;
     background: #000000 url(/images/hero_image.jpg) no-repeat 35px -40px;
@@ -17,7 +32,6 @@
     .download-container {
         background: url(/images/down_arrow.png) no-repeat top left;
         min-height: 73px;
-        width: 320px;
         margin: 0 auto;
         padding-left: 100px;
     }
@@ -42,6 +56,59 @@
     }
 }
 
+.downloads {
+    margin-top: 20px;
+
+    .description {
+        margin-bottom: 20px;
+    }
+
+    .download {
+        border-bottom: 1px solid #b2b2b2;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+
+        .details {
+            padding-left: 95px;
+
+            li {
+                display: inline-block;
+
+                &:after {
+                    content: " | ";
+                }
+
+                &:last-child:after {
+                    content: "";
+                }
+            }
+
+            a {
+                font-size: 22px;
+                color: darken($green, 15%);
+
+                &:hover {
+                    color: darken($green, 30%);
+                }
+
+                &:active {
+                    color: darken($green, 50%);
+                }
+            }
+        }
+
+        .icon {
+            img {
+                width: 75px;
+            }
+        }
+
+        .os-name {
+            font-size: 40px;
+            margin-bottom: -3px;
+        }
+    }
+}
 
 .marketting {
     p {

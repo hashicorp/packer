@@ -1,0 +1,40 @@
+---
+page_title: "Downloads"
+---
+
+<header class="dark-background">
+<div class="container header text-center">
+	<h1 class="text-green">Downloads</h1>
+	<span class="text-green">Latest version: <%= latest_version %></span>
+</div>
+</header>
+
+<section class="downloads">
+<div class="container">
+	<div class="description row">
+		<div class="span8 offset2">
+			<p>
+			Below are all available downloads for the latest version of Packer
+			(<%= latest_version %>). Please download the proper package for your
+			operating system and architecture.
+			</p>
+		</div>
+	</div>
+	<% $packer_files.each do |os, files| %>
+		<div class="row">
+			<div class="span8 offset2 download">
+				<div class="icon pull-left"><img src="/images/icons/icon_<%= os %>.png"></div>
+				<div class="details">
+					<h2 class="os-name"><%= download_os_human(os) %></h2>
+					<ul>
+						<% files.each do |file| %>
+						<li><a href="<%= download_url(file) %>"><%= download_arch(file) %></a></li>
+						<% end %>
+					</ul>
+					<div class="clearfix"></div>
+				</div>
+			</div>
+		</div>
+	<% end %>
+</div>
+</section>
