@@ -3,12 +3,9 @@ package ssh
 import (
 	"bytes"
 	"code.google.com/p/go.crypto/ssh"
-	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"net"
-	"strings"
 	"testing"
-	"time"
 )
 
 // private key for mock server
@@ -98,38 +95,6 @@ func newMockLineServer(t *testing.T) string {
 		channel.Accept()
 		t.Log("Accepted channel")
 		defer channel.Close()
-
-		data := make([]byte, 0)
-		_, err = channel.Read(data)
-		if err == nil {
-			t.Error("should've gotten a request (exec)")
-			return
-		}
-
-		req, ok := err.(ssh.ChannelRequest)
-		if !ok {
-			t.Errorf("couldn't convert err to channel request: %s", err)
-			return
-		}
-
-		if req.Request != "exec" {
-			t.Errorf("unexpected request type: %s", req.Request)
-			return
-		}
-
-		// Ack it
-		channel.AckRequest(true)
-
-		// Just respond back with the payload. We trim the first 4 bytes
-		// off of here because it is "\x00\x00\x00\t" and I don't really know
-		// why.
-		payload := strings.TrimSpace(string(req.Payload[4:]))
-		response := fmt.Sprintf("ack: %s", payload)
-		_, err = channel.Write([]byte(response))
-		if err != nil {
-			t.Errorf("error writing response: %s", err)
-			return
-		}
 	}()
 	return l.Addr().String()
 }
@@ -184,19 +149,5 @@ func TestStart(t *testing.T) {
 	cmd.Command = "echo foo"
 	cmd.Stdout = stdout
 
-	err = client.Start(&cmd)
-	if err != nil {
-		t.Fatalf("error executing command: %s", err)
-	}
-
-	// Wait for it to complete
-	t.Log("Waiting for command to complete")
-	for !cmd.Exited {
-		time.Sleep(50 * time.Millisecond)
-	}
-
-	// Should have the correct output
-	if stdout.String() != "ack: echo foo" {
-		t.Fatalf("unknown output: %#v", stdout.String())
-	}
+	client.Start(&cmd)
 }
