@@ -66,6 +66,12 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
+* `guest_additions_path` (string) - The path on the guest virtual machine
+  where the VirtualBox guest additions ISO will be uploaded. By default this
+  is "VBoxGuestAdditions.iso" which should upload into the login directory
+  of the user. This is a [configuration template](/docs/templates/configuration-templates.html)
+  where the `Version` variable is replaced with the VirtualBox version.
+
 * `guest_os_type` (string) - The guest OS type being installed. By default
   this is "other", but you can get _dramatic_ performance improvements by
   setting this to the proper value. To view all available values for this
@@ -133,7 +139,7 @@ Optional:
   to upload a file that contains the VirtualBox version that was used to
   create the machine. This information can be useful for provisioning.
   By default this is ".vbox_version", which will generally upload it into
-  the home directory. If explicitly empty, the version file won't be uploaded.
+  the home directory.
 
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer".
