@@ -20,14 +20,14 @@ page_title: "Downloads"
 			</p>
 		</div>
 	</div>
-	<% $packer_files.each do |os, files| %>
+	<% $packer_os.each do |os| %>
 		<div class="row">
 			<div class="span8 offset2 download">
 				<div class="icon pull-left"><%= image_tag "/images/icons/icon_#{os}.png" %></div>
 				<div class="details">
 					<h2 class="os-name"><%= download_os_human(os) %></h2>
 					<ul>
-						<% files.each do |file| %>
+						<% $packer_files[os].each do |file| %>
 						<li><a href="<%= download_url(file) %>"><%= download_arch(file) %></a></li>
 						<% end %>
 					</ul>
