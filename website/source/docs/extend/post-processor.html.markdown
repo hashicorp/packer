@@ -31,23 +31,13 @@ are served using the `plugin.ServePostProcessor` function.
 
 The interface that must be implemented for a post-processor is the
 `packer.PostProcessor` interface. It is reproduced below for easy reference.
-The reference below also contains some basic documentation of what each of
-the methods are supposed to do.
+The actual interface in the source code contains some basic documentation as well explaining
+what each method should do.
+
 
 <pre class="prettyprint">
-// A PostProcessor is responsible for taking an artifact of a build
-// and doing some sort of post-processing to turn this into another
-// artifact. An example of a post-processor would be something that takes
-// the result of a build, compresses it, and returns a new artifact containing
-// a single file of the prior artifact compressed.
 type PostProcessor interface {
-	// Configure is responsible for setting up configuration, storing
-	// the state for later, and returning and errors, such as validation
-	// errors.
 	Configure(interface{}) error
-
-	// PostProcess takes a previously created Artifact and produces another
-	// Artifact. If an error occurs, it should return that error.
 	PostProcess(Artifact) (Artifact, error)
 }
 </pre>
