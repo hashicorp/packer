@@ -263,7 +263,7 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.RawStateTimeout != "3m" {
+	if b.config.RawStateTimeout != "6m" {
 		t.Errorf("invalid: %d", b.config.RawStateTimeout)
 	}
 
