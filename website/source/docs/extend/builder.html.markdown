@@ -138,10 +138,6 @@ about the artifact results, so it is important it never changes.
 Other than the builder ID, the rest should be self-explanatory by reading
 the [packer.Artifact interface documentation](#).
 
-## Hooks
-
-TODO: Hooks are still undergoing some thought...
-
 ## Provisioning
 
 Packer has built-in support for provisioning, but the moment when provisioning
@@ -158,6 +154,13 @@ hook.Run(packer.HookProvision, ui, comm, nil)
 
 At this point, Packer will run the provisioners and no additional work
 is necessary.
+
+<div class="alert alert-info alert-block">
+<strong>Note:</strong> Hooks are still undergoing thought around their
+general design and will likely change in a future version. They aren't
+fully "baked" yet, so they aren't documented here other than to tell you
+how to hook in provisioners.
+</div>
 
 ## Caching Files
 
