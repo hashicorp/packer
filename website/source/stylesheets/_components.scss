@@ -43,90 +43,13 @@
 }
 
 
-// break this out into sections
-
-.about {
-
-    hgroup {
-        display: table;
-        margin-bottom: $baseline * 2;
-        @include respond-to(mobile) {
-            display: block;
-        }
-    }
-
-    h2.has-dividers {
-        @include respond-to(mobile) {
-            display: block;
-        }
-    }
-
-    .dividers {
-
-    }
-
-}
-
-.vendors {
-
-    .company-logos {
-        text-indent: -999999px;
-        margin-left: 50px;
-        @include respond-to(mobile) {
-            margin-left: 0;
-        }
-
-        li {
-            height: 100px;
-            @include respond-to(mobile) {
-                margin-bottom: $baseline * 2;
-            }
-        }
-
-        .aws {
-            background: url(/images/works_with_aws.png) no-repeat center center;
-        }
-        .virtualbox {
-            background: url(/images/works_with_virtual.png) no-repeat center center;
-        }
-        .vmware {
-            background: url(/images/works_with_vmware.png) no-repeat center center;
-        }
-    }
-
-
-
-}
-
-.users {
-
-
-    .company-logos {
-        text-indent: -999999px;
-        margin-left: 40px;
-        @include respond-to(mobile) {
-            margin-left: 0;
-        }
-
-        li {
-            height: 100px;
-        }
-
-        .expedia {
-            background: url(../../img/user_expedia.png) no-repeat center center;
-        }
-        .bbc {
-            background: url(../../img/user_bbc.png) no-repeat center center;
-        }
-        .disqus {
-            background: url(../../img/user_disqus.png) no-repeat center center;
-        }
-        .edgecast {
-            background: url(../../img/user_edgecast.png) no-repeat center center;
-        }
+.marketting {
+    p {
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: justify;
     }
 }
-
 
 .docs-wrapper {
     clear: right;
