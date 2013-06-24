@@ -16,6 +16,11 @@ import (
 	"time"
 )
 
+var additionsVersionMap = map[string]string {
+	"4.2.1": "4.2.0",
+	"4.1.23": "4.1.22",
+}
+
 // This step uploads a file containing the VirtualBox version, which
 // can be useful for various provisioning reasons.
 //
@@ -33,6 +38,11 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 	if err != nil {
 		state["error"] = fmt.Errorf("Error reading version for guest additions download: %s", err)
 		return multistep.ActionHalt
+	}
+
+	if newVersion, ok := additionsVersionMap[version]; ok {
+		log.Printf("Rewriting guest additions version: %s to %s", version, newVersion)
+		version = newVersion
 	}
 
 	// First things first, we get the list of checksums for the files available
