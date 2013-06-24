@@ -113,6 +113,8 @@ func (s *stepWaitForSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 	ui := state["ui"].(packer.Ui)
 	vmxPath := state["vmx_path"].(string)
 
+	handshakeAttempts := 0
+
 	ui.Say("Waiting for SSH to become available...")
 	var comm packer.Communicator
 	var nc net.Conn
@@ -160,6 +162,14 @@ func (s *stepWaitForSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 
 		comm, err = ssh.New(nc, sshConfig)
 		if err != nil {
+			log.Printf("SSH handshake err: %s", err)
+
+			handshakeAttempts += 1
+			if handshakeAttempts < 10 {
+				// Try to connect via SSH a handful of times
+				continue
+			}
+
 			return nil, err
 		}
 
