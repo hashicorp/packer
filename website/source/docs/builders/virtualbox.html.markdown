@@ -184,6 +184,21 @@ an Ubuntu 12.04 installer:
 ]
 </pre>
 
+## Guest Additions
+
+Packer will automatically download the proper guest additions for the
+version of VirtualBox that is running and upload those guest additions into
+the virtual machine so that provisioners can easily install them.
+
+Packer downloads the guest additions from the official VirtualBox website,
+and verifies the file with the official checksums released by VirtualBox.
+
+After the virtual machine is up and the operating system is installed,
+Packer uploads the guest additions into the virtual machine. The path where
+they are uploaded is controllable by `guest_additions_path`, and defaults
+to "VBoxGuestAdditions.iso". Without an absolute path, it is uploaded to the
+home directory of the SSH user.
+
 ## VBoxManage Commands
 
 In order to perform extra customization of the virtual machine, a template
