@@ -109,7 +109,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.RawStateTimeout == "" {
 		// Default to 3 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active
-		b.config.RawStateTimeout = "3m"
+		b.config.RawStateTimeout = "6m"
 	}
 
 	// A list of errors on the configuration
