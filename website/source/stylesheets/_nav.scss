@@ -3,31 +3,20 @@ nav {
     padding: $baseline 0;
     padding: 0;
     margin: 0;
+    min-width: 940px;
     text-transform: uppercase;
     color: $white;
     font-family: $sans;
     font-size: 16px;
     border-bottom: 1px solid $border-dark;
-    @include respond-to(mobile) {
-        margin-right: -20px;
-        margin-left: -20px;
-    }
 
     ul {
         margin-top: ($baseline * 2);
         margin-left: $nav-height;
-        @include respond-to(mobile) {
-            margin-left: 50px;
-            margin-top: 12px;
-        }
 
         li {
             display: inline-block;
             margin-right: 50px;
-            @include respond-to(mobile) {
-                margin-bottom: 7px;
-                display: block;
-            }
         }
 
     }
@@ -40,9 +29,6 @@ nav {
         text-indent: -999999px;
         display: inline-block;
         margin-top: 25px;
-        @include respond-to(mobile) {
-            margin-top: 15px;
-        }
     }
 
     .active {
