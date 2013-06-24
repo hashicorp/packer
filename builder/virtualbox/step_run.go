@@ -48,7 +48,10 @@ func (s *stepRun) Cleanup(state map[string]interface{}) {
 
 	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
-	if err := driver.VBoxManage("controlvm", s.vmName, "poweroff"); err != nil {
-		ui.Error(fmt.Sprintf("Error shutting down VM: %s", err))
+
+	if running, _ := driver.IsRunning(s.vmName); running {
+		if err := driver.VBoxManage("controlvm", s.vmName, "poweroff"); err != nil {
+			ui.Error(fmt.Sprintf("Error shutting down VM: %s", err))
+		}
 	}
 }
