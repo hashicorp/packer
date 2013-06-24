@@ -43,6 +43,7 @@ type config struct {
 	SSHPort         uint          `mapstructure:"ssh_port"`
 	SSHUser         string        `mapstructure:"ssh_username"`
 	SSHWaitTimeout  time.Duration ``
+	VBoxVersionFile string        `mapstructure:"virtualbox_version_file"`
 	VBoxManage      [][]string    `mapstructure:"vboxmanage"`
 	VMName          string        `mapstructure:"vm_name"`
 
@@ -97,6 +98,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.VBoxManage == nil {
 		b.config.VBoxManage = make([][]string, 0)
+	}
+
+	if b.config.VBoxVersionFile == "" {
+		b.config.VBoxVersionFile = ".vbox_version"
 	}
 
 	if b.config.VMName == "" {
@@ -213,6 +218,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepRun),
 		new(stepTypeBootCommand),
 		new(stepWaitForSSH),
+		new(stepUploadVersion),
 		new(stepProvision),
 		new(stepShutdown),
 		new(stepExport),
