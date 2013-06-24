@@ -8,11 +8,11 @@ page_title: "Community"
 Packer is a new project with a growing community. Despite this, there are
 dedicated users willing to help through various mediums.
 
-**IRC:** `#packer-tool` on Freenode.
+**IRC:**&nbsp;`#packer-tool` on Freenode.
 
-**Mailing List:** [Packer Google Group](http://groups.google.com/group/packer-tool)
+**Mailing List:**&nbsp;[Packer Google Group](http://groups.google.com/group/packer-tool)
 
-**Bug Tracker:** [Issue tracker on GitHub](https://github.com/mitchellh/packer/issues).
+**Bug Tracker:**&nbsp;[Issue tracker on GitHub](https://github.com/mitchellh/packer/issues).
 Please only use this for reporting bugs. Do not ask for general help here. Use IRC
 or the mailing list for that.
 
