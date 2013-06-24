@@ -23,7 +23,7 @@ page_title: "Downloads"
 	<% $packer_files.each do |os, files| %>
 		<div class="row">
 			<div class="span8 offset2 download">
-				<div class="icon pull-left"><img src="/images/icons/icon_<%= os %>.png"></div>
+				<div class="icon pull-left"><%= image_tag "/images/icons/icon_#{os}.png" %></div>
 				<div class="details">
 					<h2 class="os-name"><%= download_os_human(os) %></h2>
 					<ul>
