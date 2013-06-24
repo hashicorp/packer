@@ -26,7 +26,7 @@ type Builder struct {
 
 type config struct {
 	DiskName        string            `mapstructure:"vmdk_name"`
-	DiskSize        uint            `mapstructure:"disk_size"`
+	DiskSize        uint              `mapstructure:"disk_size"`
 	GuestOSType     string            `mapstructure:"guest_os_type"`
 	ISOMD5          string            `mapstructure:"iso_md5"`
 	ISOUrl          string            `mapstructure:"iso_url"`
