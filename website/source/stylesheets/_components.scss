@@ -31,9 +31,18 @@ header .header {
 
     .download-container {
         background: url(/images/down_arrow.png) no-repeat top left;
+        display: inline-block;
         min-height: 73px;
         margin: 0 auto;
         padding-left: 100px;
+    }
+
+    .download-row {
+        text-align: center;
+
+        .small {
+            text-align: left;
+        }
     }
 
     h2 {
@@ -45,6 +54,7 @@ header .header {
         padding-top: 7px;
         padding-bottom: 3px;
         line-height: 1.0;
+        white-space: nowrap;
 
         &:hover {
             color: $dark-background;
