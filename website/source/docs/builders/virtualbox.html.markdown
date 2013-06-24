@@ -129,6 +129,12 @@ Optional:
   where the `Name` variable is replaced with the VM name. More details on how
   to use `VBoxManage` are below.
 
+* `virtualbox_version_file` (string) - The path within the virtual machine
+  to upload a file that contains the VirtualBox version that was used to
+  create the machine. This information can be useful for provisioning.
+  By default this is ".vbox_version", which will generally upload it into
+  the home directory. If explicitly empty, the version file won't be uploaded.
+
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer".
 
