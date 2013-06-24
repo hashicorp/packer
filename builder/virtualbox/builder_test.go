@@ -75,6 +75,32 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_DiskSize(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	delete(config, "disk_size")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	if b.config.DiskSize != 40000 {
+		t.Fatalf("bad size: %d", b.config.DiskSize)
+	}
+
+	config["disk_size"] = 60000
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.DiskSize != 60000 {
+		t.Fatalf("bad size: %s", b.config.DiskSize)
+	}
+}
+
 func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	var b Builder
 	config := testConfig()

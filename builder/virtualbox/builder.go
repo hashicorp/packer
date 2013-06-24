@@ -27,6 +27,7 @@ type Builder struct {
 type config struct {
 	BootCommand     []string      `mapstructure:"boot_command"`
 	BootWait        time.Duration ``
+	DiskSize        uint          `mapstructure:"disk_size"`
 	GuestOSType     string        `mapstructure:"guest_os_type"`
 	HTTPDir         string        `mapstructure:"http_directory"`
 	HTTPPortMin     uint          `mapstructure:"http_port_min"`
@@ -59,6 +60,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if b.config.DiskSize == 0 {
+		b.config.DiskSize = 40000
 	}
 
 	if b.config.GuestOSType == "" {

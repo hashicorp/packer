@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -24,7 +25,7 @@ func (s *stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction 
 	command := []string{
 		"createhd",
 		"--filename", path,
-		"--size", "40000",
+		"--size", strconv.FormatUint(uint64(config.DiskSize), 10),
 		"--format", format,
 		"--variant", "Standard",
 	}
