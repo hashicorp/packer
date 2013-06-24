@@ -66,7 +66,7 @@ Optional:
 
 * `state_timeout` (string) - The time to wait, as a duration string,
 for a droplet to enter a desired state (such as "active") before
-timing out. The default state timeout is "3m".
+timing out. The default state timeout is "6m".
 
 ## Basic Example
 
