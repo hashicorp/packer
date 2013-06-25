@@ -9,7 +9,7 @@ next_title: "Build an Image"
 # Install Packer
 
 Packer must first be installed on the machine you want to run it on.
-To make installation easy, Packer is distributed as a [binary package](#)
+To make installation easy, Packer is distributed as a [binary package](/downloads.html)
 for all supported platforms and architectures. This page will not cover how
 to compile Packer from source, as that is covered in the
 [README](https://github.com/mitchellh/packer/blob/master/README.md) and is only
@@ -17,7 +17,7 @@ recommended for advanced users.
 
 ## Installing Packer
 
-To install packer, first find the [appropriate package](#)
+To install packer, first find the [appropriate package](/downloads.html)
 for your system and download it. Packer is packaged as a "zip" file.
 
 Next, unzip the downloaded package into a directory where Packer will be
