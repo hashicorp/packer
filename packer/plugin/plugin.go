@@ -8,6 +8,7 @@
 package plugin
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
@@ -21,9 +22,16 @@ import (
 	"strings"
 )
 
+const MagicCookieKey = "PACKER_PLUGIN_MAGIC_COOKIE"
+const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2"
+
 // This serves a single RPC connection on the given RPC server on
 // a random port.
 func serve(server *rpc.Server) (err error) {
+	if os.Getenv(MagicCookieKey) != MagicCookieValue {
+		return errors.New("Please do not execute plugins directly. Packer will execute these for you.")
+	}
+
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
 		runtime.GOMAXPROCS(runtime.NumCPU())
