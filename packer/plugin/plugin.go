@@ -115,7 +115,8 @@ func ServeBuilder(builder packer.Builder) {
 
 	swallowInterrupts()
 	if err := serve(server); err != nil {
-		log.Panic(err)
+		log.Printf("ERROR: %s", err)
+		os.Exit(1)
 	}
 }
 
@@ -128,7 +129,8 @@ func ServeCommand(command packer.Command) {
 
 	swallowInterrupts()
 	if err := serve(server); err != nil {
-		log.Panic(err)
+		log.Printf("ERROR: %s", err)
+		os.Exit(1)
 	}
 }
 
@@ -141,7 +143,8 @@ func ServeHook(hook packer.Hook) {
 
 	swallowInterrupts()
 	if err := serve(server); err != nil {
-		log.Panic(err)
+		log.Printf("ERROR: %s", err)
+		os.Exit(1)
 	}
 }
 
@@ -154,7 +157,8 @@ func ServePostProcessor(p packer.PostProcessor) {
 
 	swallowInterrupts()
 	if err := serve(server); err != nil {
-		log.Panic(err)
+		log.Printf("ERROR: %s", err)
+		os.Exit(1)
 	}
 }
 
@@ -167,6 +171,7 @@ func ServeProvisioner(p packer.Provisioner) {
 
 	swallowInterrupts()
 	if err := serve(server); err != nil {
-		log.Panic(err)
+		log.Printf("ERROR: %s", err)
+		os.Exit(1)
 	}
 }
