@@ -205,6 +205,7 @@ func (c *Client) Start() (address string, err error) {
 	}
 
 	env := []string{
+		fmt.Sprintf("%s=%s", MagicCookieKey, MagicCookieValue),
 		fmt.Sprintf("PACKER_PLUGIN_MIN_PORT=%d", c.config.MinPort),
 		fmt.Sprintf("PACKER_PLUGIN_MAX_PORT=%d", c.config.MaxPort),
 	}
