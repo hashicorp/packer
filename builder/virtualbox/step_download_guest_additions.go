@@ -16,8 +16,8 @@ import (
 	"time"
 )
 
-var additionsVersionMap = map[string]string {
-	"4.2.1": "4.2.0",
+var additionsVersionMap = map[string]string{
+	"4.2.1":  "4.2.0",
 	"4.1.23": "4.1.22",
 }
 
