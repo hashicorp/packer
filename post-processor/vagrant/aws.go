@@ -13,6 +13,7 @@ import (
 
 type AWSBoxConfig struct {
 	OutputPath string `mapstructure:"output"`
+	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
 }
 
 type AWSVagrantfileTemplate struct {
@@ -61,7 +62,23 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 	}
 	defer vf.Close()
 
-	t := template.Must(template.New("vagrantfile").Parse(defaultVagrantfile))
+	vagrantfileContents := defaultAWSVagrantfile
+	if p.config.VagrantfileTemplate != "" {
+		f, err := os.Open(p.config.VagrantfileTemplate)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		contents, err := ioutil.ReadAll(f)
+		if err != nil {
+			return nil, err
+		}
+
+		vagrantfileContents = string(contents)
+	}
+
+	t := template.Must(template.New("vagrantfile").Parse(vagrantfileContents))
 	t.Execute(vf, tplData)
 	vf.Close()
 
@@ -79,7 +96,7 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 	return NewArtifact("aws", p.config.OutputPath), nil
 }
 
-var defaultVagrantfile = `
+var defaultAWSVagrantfile = `
 Vagrant.configure("2") do |config|
   config.vm.provider "aws" do |aws|
     {{ range $region, $ami := .Images }}
