@@ -47,11 +47,16 @@ Exactly _one_ of the following is required:
 Optional parameters:
 
 * `execute_command` (string) - The command to use to execute the script.
-  By default this is `sh {{ .Path }}`. The value of this is treated as a
-  [configuration template](/docs/templates/configuration-templates.html).
-  The only available variable in it is `Path` which is the path to the
-  script to run.
+  By default this is `{{ .Vars }} sh {{ .Path }}`. The value of this is
+  treated as [configuration template](/docs/templates/configuration-
+  templates.html). There are two available variables: `Path`, which is
+  the path to the script to run, and `Vars`, which is the list of
+  `environment_vars`, if configured.
 
 * `remote_path` (string) - The path where the script will be uploaded to
   in the machine. This defaults to "/tmp/script.sh". This value must be
   a writable location and any parent directories must already exist.
+
+* `environment_vars` (array of strings) - An array of key/value pairs
+  to inject prior to the execute_command. The format should be
+  `key=value`.
