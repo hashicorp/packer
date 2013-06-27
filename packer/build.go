@@ -161,6 +161,12 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 		return nil, err
 	}
 
+	// If there was no result, don't worry about running post-processors
+	// because there is nothing they can do, just return.
+	if builderArtifact == nil {
+		return nil, nil
+	}
+
 	errors := make([]error, 0)
 	keepOriginalArtifact := len(b.postProcessors) == 0
 
