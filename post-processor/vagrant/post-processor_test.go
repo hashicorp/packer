@@ -20,10 +20,18 @@ func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
 func TestBuilderPrepare_OutputPath(t *testing.T) {
 	var p PostProcessor
 
+	// Default
 	c := testConfig()
 	delete(c, "output")
 	err := p.Configure(c)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Bad template
+	c["output"] = "bad {{{{.Template}}}}"
+	err = p.Configure(c)
 	if err == nil {
-		t.Fatalf("configure should fail")
+		t.Fatal("should have error")
 	}
 }
