@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/mitchellh/packer/packer"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -23,6 +24,7 @@ type OutputPathTemplate struct {
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
 func DirToBox(dst, dir string) error {
+	log.Printf("Turning dir into box: %s", dir)
 	dstF, err := os.Create(dst)
 	if err != nil {
 		return err
@@ -37,6 +39,13 @@ func DirToBox(dst, dir string) error {
 
 	// This is the walk func that tars each of the files in the dir
 	tarWalk := func(path string, info os.FileInfo, prevErr error) error {
+		// Skip directories
+		if info.IsDir() {
+			log.Printf("Skiping directory '%s' for box '%s'", path, dst)
+			return nil
+		}
+
+		log.Printf("Box add: '%s' to '%s'", path, dst)
 		f, err := os.Open(path)
 		if err != nil {
 			return err

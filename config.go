@@ -31,7 +31,7 @@ const defaultConfig = `
 	},
 
 	"post-processors": {
-		"compress": "packer-post-processor-compress"
+		"vagrant": "packer-post-processor-vagrant"
 	},
 
 	"provisioners": {
