@@ -82,6 +82,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 	}
 
+	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", ppName))
 	return pp.PostProcess(ui, artifact)
 }
 
