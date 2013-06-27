@@ -142,15 +142,11 @@ header .header {
             padding: $docs-top-margin 80px;
             display: block;
 
-            p code {
-                font-size: 14px;
-            }
-
             code {
                 background-color: #000;
                 border: 0;
                 color: #b1d631;
-                font-size: 12px;
+                font-size: 14px;
             }
 
             a {
@@ -197,7 +193,7 @@ header .header {
 
             pre {
                 border: 0;
-                font-size: 12px;
+                font-size: 14px;
                 margin-left: -80px;
                 margin-right: -80px;
                 padding-top: 40px;
