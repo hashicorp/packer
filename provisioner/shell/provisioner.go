@@ -100,7 +100,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
+func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
@@ -109,8 +109,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 	if p.config.Inline != nil {
 		tf, err := ioutil.TempFile("", "packer-shell")
 		if err != nil {
-			ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
-			return
+			return fmt.Errorf("Error preparing shell script: %s", err)
 		}
 		defer os.Remove(tf.Name())
 
@@ -121,14 +120,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		writer := bufio.NewWriter(tf)
 		for _, command := range p.config.Inline {
 			if _, err := writer.WriteString(command + "\n"); err != nil {
-				ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
-				return
+				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
 
 		if err := writer.Flush(); err != nil {
-			ui.Error(fmt.Sprintf("Error preparing shell script: %s", err))
-			return
+			return fmt.Errorf("Error preparing shell script: %s", err)
 		}
 
 		tf.Close()
@@ -140,15 +137,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		log.Printf("Opening %s for reading", path)
 		f, err := os.Open(path)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Error opening shell script: %s", err))
-			return
+			return fmt.Errorf("Error opening shell script: %s", err)
 		}
 
 		log.Printf("Uploading %s => %s", path, p.config.RemotePath)
 		err = comm.Upload(p.config.RemotePath, f)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Error uploading shell script: %s", err))
-			return
+			return fmt.Errorf("Error uploading shell script: %s", err)
 		}
 
 		// Compile the command
@@ -168,8 +163,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 		log.Printf("Executing command: %s", cmd.Command)
 		err = comm.Start(&cmd)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Failed executing command: %s", err))
-			return
+			return fmt.Errorf("Failed executing command: %s", err)
 		}
 
 		exitChan := make(chan int, 1)
@@ -195,7 +189,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 				log.Printf("shell provisioner exited with status %d", exitStatus)
 
 				if exitStatus != 0 {
-					ui.Error(fmt.Sprintf("Script excited with non-zero exit status: %d", exitStatus))
+					return fmt.Errorf("Script exited with non-zero exit status: %d", exitStatus)
 				}
 
 				break OutputLoop
@@ -212,4 +206,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
 			ui.Message(output)
 		}
 	}
+
+	return nil
 }
