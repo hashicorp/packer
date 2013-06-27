@@ -131,3 +131,32 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
+
+func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
+	config := testConfig()
+
+	// Test with a bad case
+	config["environment_vars"] = []string{"badvar", "good=var"}
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a trickier case
+	config["environment_vars"] = []string{"=bad"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good case
+	// Note: baz= is a real env variable, just empty
+	config["environment_vars"] = []string{"FOO=bar", "baz="}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
