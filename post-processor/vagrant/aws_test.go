@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
+func TestAWSBoxPostProcessor_ImplementsPostProcessor(t *testing.T) {
 	var raw interface{}
 	raw = &AWSBoxPostProcessor{}
 	if _, ok := raw.(packer.PostProcessor); !ok {
