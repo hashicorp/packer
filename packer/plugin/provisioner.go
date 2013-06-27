@@ -19,13 +19,13 @@ func (c *cmdProvisioner) Prepare(configs ...interface{}) error {
 	return c.p.Prepare(configs...)
 }
 
-func (c *cmdProvisioner) Provision(ui packer.Ui, comm packer.Communicator) {
+func (c *cmdProvisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
 	}()
 
-	c.p.Provision(ui, comm)
+	return c.p.Provision(ui, comm)
 }
 
 func (c *cmdProvisioner) checkExit(p interface{}, cb func()) {

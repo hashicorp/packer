@@ -37,14 +37,14 @@ func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 	return
 }
 
-func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) {
+func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	// TODO: Error handling
 	server := rpc.NewServer()
 	RegisterCommunicator(server, comm)
 	RegisterUi(server, ui)
 
 	args := &ProvisionerProvisionArgs{serveSingleConn(server)}
-	p.client.Call("Provisioner.Provision", args, new(interface{}))
+	return p.client.Call("Provisioner.Provision", args, new(interface{}))
 }
 
 func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) error {
@@ -65,6 +65,9 @@ func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *int
 	comm := Communicator(client)
 	ui := &Ui{client}
 
-	p.p.Provision(ui, comm)
+	if err := p.p.Provision(ui, comm); err != nil {
+		return NewBasicError(err)
+	}
+
 	return nil
 }

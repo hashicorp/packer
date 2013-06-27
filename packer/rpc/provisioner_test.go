@@ -21,10 +21,11 @@ func (p *testProvisioner) Prepare(configs ...interface{}) error {
 	return nil
 }
 
-func (p *testProvisioner) Provision(ui packer.Ui, comm packer.Communicator) {
+func (p *testProvisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	p.provCalled = true
 	p.provComm = comm
 	p.provUi = ui
+	return nil
 }
 
 func TestProvisionerRPC(t *testing.T) {
