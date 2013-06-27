@@ -14,6 +14,7 @@ import (
 var builtins = map[string]string{
 	"mitchellh.amazonebs":  "aws",
 	"mitchellh.virtualbox": "virtualbox",
+	"mitchellh.vmware": "vmware",
 }
 
 type Config struct {
@@ -101,6 +102,8 @@ func keyToPostProcessor(key string) packer.PostProcessor {
 		return new(AWSBoxPostProcessor)
 	case "virtualbox":
 		return new(VBoxBoxPostProcessor)
+	case "vmware":
+		return new(VMwareBoxPostProcessor)
 	default:
 		return nil
 	}
