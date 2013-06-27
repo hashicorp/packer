@@ -21,6 +21,7 @@ const defaultConfig = `
 	"builders": {
 		"amazon-ebs": "packer-builder-amazon-ebs",
 		"digitalocean": "packer-builder-digitalocean",
+		"docker": "packer-builder-docker",
 		"virtualbox": "packer-builder-virtualbox",
 		"vmware": "packer-builder-vmware"
 	},
@@ -31,7 +32,8 @@ const defaultConfig = `
 	},
 
 	"post-processors": {
-		"compress": "packer-post-processor-compress"
+		"compress": "packer-post-processor-compress",
+		"docker-push": "packer-post-processor-docker-push"
 	},
 
 	"provisioners": {
