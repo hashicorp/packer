@@ -40,28 +40,31 @@ func (p *PostProcessor) Configure(raw interface{}) error {
 		return fmt.Errorf("output invalid template: %s", err)
 	}
 
-	mapConfig, ok := raw.(map[string]interface{})
-	if !ok {
-		panic("Raw configuration not a map")
-	}
-
-	errors := make([]error, 0)
-	for k, raw := range mapConfig {
-		pp := keyToPostProcessor(k)
-		if pp == nil {
-			continue
+	/*
+		TODO(mitchellh): We need a way to get the keys...
+		mapConfig, ok := raw.(map[string]interface{})
+		if !ok {
+			panic("Raw configuration not a map")
 		}
 
-		if err := pp.Configure(raw); err != nil {
-			errors = append(errors, err)
+		errors := make([]error, 0)
+		for k, raw := range mapConfig {
+			pp := keyToPostProcessor(k)
+			if pp == nil {
+				continue
+			}
+
+			if err := pp.Configure(raw); err != nil {
+				errors = append(errors, err)
+			}
+
+			p.premade[k] = pp
 		}
 
-		p.premade[k] = pp
-	}
-
-	if len(errors) > 0 {
-		return &packer.MultiError{errors}
-	}
+		if len(errors) > 0 {
+			return &packer.MultiError{errors}
+		}
+	*/
 
 	return nil
 }
