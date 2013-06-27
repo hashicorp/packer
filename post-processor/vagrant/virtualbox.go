@@ -38,7 +38,7 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	tplData := &VBoxVagrantfileTemplate{}
 
 	// Compile the output path
-	outputPath, err := ProcessOutputPath(p.config.OutputPath, "aws", artifact)
+	outputPath, err := ProcessOutputPath(p.config.OutputPath, "virtualbox", artifact)
 	if err != nil {
 		return nil, err
 	}
