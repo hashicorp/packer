@@ -14,7 +14,10 @@ func (*stepProvision) Run(state map[string]interface{}) multistep.StepAction {
 	ui := state["ui"].(packer.Ui)
 
 	log.Println("Running the provision hook")
-	hook.Run(packer.HookProvision, ui, comm, nil)
+	if err := hook.Run(packer.HookProvision, ui, comm, nil); err != nil {
+		state["error"] = err
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }
