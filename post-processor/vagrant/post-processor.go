@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
 var builtins = map[string]string{
@@ -15,10 +16,12 @@ var builtins = map[string]string{
 
 type Config struct {
 	OutputPath string `mapstructure:"output"`
+
 }
 
 type PostProcessor struct {
 	config Config
+	premade map[string]packer.PostProcessor
 }
 
 func (p *PostProcessor) Configure(raw interface{}) error {
@@ -31,6 +34,29 @@ func (p *PostProcessor) Configure(raw interface{}) error {
 		return fmt.Errorf("`output` must be specified.")
 	}
 
+	mapConfig, ok := raw.(map[string]interface{})
+	if !ok {
+		panic("Raw configuration not a map")
+	}
+
+	errors := make([]error, 0)
+	for k, raw := range mapConfig {
+		pp := keyToPostProcessor(k)
+		if pp == nil {
+			continue
+		}
+
+		if err := pp.Configure(raw); err != nil {
+			errors = append(errors, err)
+		}
+
+		p.premade[k] = pp
+	}
+
+	if len(errors) > 0 {
+		return &packer.MultiError{errors}
+	}
+
 	return nil
 }
 
@@ -40,20 +66,30 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
-	// Get the actual PostProcessor implementation for this type
-	var pp packer.PostProcessor
-	switch ppName {
-	case "aws":
-		pp = new(AWSBoxPostProcessor)
-	default:
-		return nil, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
-	}
+	// Use the premade PostProcessor if we have one. Otherwise, we
+	// create it and configure it here.
+	pp, ok := p.premade[ppName]
+	if !ok {
+		log.Printf("Premade post-processor for '%s' not found. Creating.", ppName)
+		pp = keyToPostProcessor(ppName)
+		if pp == nil {
+			return nil, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
+		}
 
-	// Prepare and run the post-processor
-	config := map[string]string{"output": p.config.OutputPath}
-	if err := pp.Configure(config); err != nil {
-		return nil, err
+		config := map[string]string{"output": p.config.OutputPath}
+		if err := pp.Configure(config); err != nil {
+			return nil, err
+		}
 	}
 
 	return pp.PostProcess(ui, artifact)
+}
+
+func keyToPostProcessor(key string) packer.PostProcessor {
+	switch key {
+	case "aws":
+		return new(AWSBoxPostProcessor)
+	default:
+		return nil
+	}
 }
