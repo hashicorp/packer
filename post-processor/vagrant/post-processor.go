@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"text/template"
 )
 
 var builtins = map[string]string{
@@ -31,7 +32,12 @@ func (p *PostProcessor) Configure(raw interface{}) error {
 	}
 
 	if p.config.OutputPath == "" {
-		return fmt.Errorf("`output` must be specified.")
+		p.config.OutputPath = "packer_{{.Provider}}.box"
+	}
+
+	_, err = template.New("output").Parse(p.config.OutputPath)
+	if err != nil {
+		return fmt.Errorf("output invalid template: %s", err)
 	}
 
 	mapConfig, ok := raw.(map[string]interface{})
