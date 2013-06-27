@@ -12,7 +12,8 @@ import (
 )
 
 type VBoxBoxConfig struct {
-	OutputPath string `mapstructure:"output"`
+	OutputPath          string `mapstructure:"output"`
+	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
 }
 
 type VBoxVagrantfileTemplate struct {
@@ -70,7 +71,23 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	}
 	defer vf.Close()
 
-	t := template.Must(template.New("vagrantfile").Parse(defaultVBoxVagrantfile))
+	vagrantfileContents := defaultVBoxVagrantfile
+	if p.config.VagrantfileTemplate != "" {
+		f, err := os.Open(p.config.VagrantfileTemplate)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		contents, err := ioutil.ReadAll(f)
+		if err != nil {
+			return nil, err
+		}
+
+		vagrantfileContents = string(contents)
+	}
+
+	t := template.Must(template.New("vagrantfile").Parse(vagrantfileContents))
 	t.Execute(vf, tplData)
 	vf.Close()
 
