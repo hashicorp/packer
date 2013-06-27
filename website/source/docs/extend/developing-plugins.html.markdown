@@ -91,6 +91,15 @@ installed using standard installation procedures.
 The specifics of how to implement each type of interface are covered
 in the relevant subsections available in the navigation to the left.
 
+<div class="alert alert-warn alert-block">
+<strong>Lock your dependencies.</strong> Unfortunately, Go's dependency
+management story is fairly sad. There are various unofficial methods out
+there for locking dependencies, and using one of them is highly recomended
+since the Packer codebase will continue to improve, potentially breaking
+APIs along the way until there is a stable release. By locking your dependencies,
+your plugins will continue to work with the version of Packer you lock to.
+</div>
+
 ## Logging and Debugging
 
 Plugins can use the standard Go `log` package to log. Anything logged
