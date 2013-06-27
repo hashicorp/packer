@@ -1,13 +1,17 @@
 package vagrant
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"text/template"
 )
 
@@ -34,8 +38,12 @@ func (p *VBoxBoxPostProcessor) Configure(raw interface{}) error {
 }
 
 func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, error) {
-	// TODO(mitchellh): Actually parse the base mac address
+	var err error
 	tplData := &VBoxVagrantfileTemplate{}
+	tplData.BaseMacAddress, err = p.findBaseMacAddress(artifact)
+	if err != nil {
+		return nil, err
+	}
 
 	// Compile the output path
 	outputPath, err := ProcessOutputPath(p.config.OutputPath, "virtualbox", artifact)
@@ -112,10 +120,44 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	return NewArtifact("virtualbox", outputPath), nil
 }
 
+func (p *VBoxBoxPostProcessor) findBaseMacAddress(a packer.Artifact) (string, error) {
+	log.Println("Looking for OVF for base mac address...")
+	var ovf string
+	for _, f := range a.Files() {
+		if strings.HasSuffix(f, ".ovf") {
+			log.Printf("OVF found: %s", f)
+			ovf = f
+			break
+		}
+	}
+
+	if ovf == "" {
+		return "", errors.New("ovf file couldn't be found")
+	}
+
+	f, err := os.Open(ovf)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	re := regexp.MustCompile(`<Adapter slot="0".+?MACAddress="(.+?)"`)
+	matches := re.FindSubmatch(data)
+	if matches == nil {
+		return "", errors.New("can't find base mac address in OVF")
+	}
+
+	log.Printf("Base mac address: %s", string(matches[1]))
+	return string(matches[1]), nil
+}
+
 var defaultVBoxVagrantfile = `
 Vagrant.configure("2") do |config|
-  config.vm.provider "virtualbox" do |vb|
-    # TODO
-  end
+  config.vm.base_mac = "{{ .BaseMacAddress }}"
 end
 `
