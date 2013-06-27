@@ -12,4 +12,3 @@ func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
 		t.Fatalf("AWS PostProcessor should be a PostProcessor")
 	}
 }
-
