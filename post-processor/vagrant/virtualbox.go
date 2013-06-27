@@ -37,6 +37,12 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	// TODO(mitchellh): Actually parse the base mac address
 	tplData := &VBoxVagrantfileTemplate{}
 
+	// Compile the output path
+	outputPath, err := ProcessOutputPath(p.config.OutputPath, "aws", artifact)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create a temporary directory for us to build the contents of the box in
 	dir, err := ioutil.TempDir("", "packer")
 	if err != nil {
@@ -99,11 +105,11 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 
 	// Compress the directory to the given output path
 	ui.Message(fmt.Sprintf("Compressing box..."))
-	if err := DirToBox(p.config.OutputPath, dir); err != nil {
+	if err := DirToBox(outputPath, dir); err != nil {
 		return nil, err
 	}
 
-	return NewArtifact("virtualbox", p.config.OutputPath), nil
+	return NewArtifact("virtualbox", outputPath), nil
 }
 
 var defaultVBoxVagrantfile = `
