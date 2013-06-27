@@ -7,27 +7,31 @@ raise "PACKER_VERSION must be set." if !ENV["PACKER_VERSION"]
 # Download the list of Packer downloads
 #-------------------------------------------------------------------------
 
-http = Net::HTTP.new("dl.bintray.com", 80)
-req = Net::HTTP::Get.new("/mitchellh/packer")
-req.basic_auth "mitchellh", ENV["BINTRAY_API_KEY"]
-response = http.request(req)
-
 $packer_files = {}
-response.body.split("\n").each do |line|
-  next if line !~ /\/mitchellh\/packer\/(#{ENV["PACKER_VERSION"]}.+?)\?/
-  filename = $1.to_s
-  os = filename.split("_")[1]
+$packer_os = []
 
-  $packer_files[os] ||= []
-  $packer_files[os] << filename
-end
+if !ENV["PACKER_DISABLE_DOWNLOAD_FETCH"]
+  http = Net::HTTP.new("dl.bintray.com", 80)
+  req = Net::HTTP::Get.new("/mitchellh/packer")
+  req.basic_auth "mitchellh", ENV["BINTRAY_API_KEY"]
+  response = http.request(req)
 
-$packer_os = ["darwin", "linux", "windows"] & $packer_files.keys
-$packer_os += $packer_files.keys
-$packer_os.uniq!
+  response.body.split("\n").each do |line|
+    next if line !~ /\/mitchellh\/packer\/(#{ENV["PACKER_VERSION"]}.+?)\?/
+      filename = $1.to_s
+    os = filename.split("_")[1]
 
-$packer_files.each do |key, value|
-  value.sort!
+    $packer_files[os] ||= []
+    $packer_files[os] << filename
+  end
+
+  $packer_os = ["darwin", "linux", "windows"] & $packer_files.keys
+  $packer_os += $packer_files.keys
+  $packer_os.uniq!
+
+  $packer_files.each do |key, value|
+    value.sort!
+  end
 end
 
 #-------------------------------------------------------------------------
