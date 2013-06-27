@@ -8,13 +8,13 @@ import (
 const BuilderId = "mitchellh.post-processor.vagrant"
 
 type Artifact struct {
-	Path string
+	Path     string
 	Provider string
 }
 
 func NewArtifact(provider, path string) *Artifact {
 	return &Artifact{
-		Path: path,
+		Path:     path,
 		Provider: provider,
 	}
 }
