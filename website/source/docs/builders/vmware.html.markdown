@@ -153,8 +153,19 @@ will be replaced by the proper key:
 
 * `<esc>` - Simulates pressing the escape key.
 
+* `<tab>` - Simulates pressing the tab key.
+
 * `<wait>` - Adds a one second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
+
+In addition to the special keys, each command to type is treated as a
+[configuration template](/docs/templates/configuration-templates.html).
+The available variables are:
+
+* `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
+  that is started serving the directory specified by the `http_directory`
+  configuration parameter. If `http_directory` isn't specified, these will
+  be blank!
 
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
