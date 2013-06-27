@@ -24,7 +24,7 @@ The example below is fully functional.
 ## Configuration Reference
 
 The reference of available configuratin options is listed below. The only
-required element is either "inline" or "path". Every other option is optional.
+required element is either "inline" or "script". Every other option is optional.
 
 Exactly _one_ of the following is required:
 
@@ -35,7 +35,7 @@ Exactly _one_ of the following is required:
   the next and so on. Inline scripts are the easiest way to pull of simple
   tasks within the machine.
 
-* `path` (string) - The path to a script to upload and execute in the machine.
+* `script` (string) - The path to a script to upload and execute in the machine.
   This path can be absolute or relative. If it is relative, it is relative
   to the working directory when Packer is executed.
 
