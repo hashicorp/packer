@@ -55,3 +55,23 @@ Optional parameters:
 * `remote_path` (string) - The path where the script will be uploaded to
   in the machine. This defaults to "/tmp/script.sh". This value must be
   a writable location and any parent directories must already exist.
+
+## Execute Command Example
+
+To many new users, the `execute_command` is puzzling. However, it provides
+an important function: customization of how the command is executed. The
+most common use case for this is dealing with **sudo password prompts**.
+
+For example, if the default user of an installed operating system is "packer"
+and has the password "packer" for sudo usage, then you'll likely want to
+change `execute_command` to be:
+
+```
+"echo 'packer' | sudo -S sh '{{ .Path }}'"
+```
+
+The `-S` flag tells `sudo` to read the password from stdin, which in this
+case is being piped in with the value of "packer".
+
+By setting the `execute_command` to this, your script(s) can run with
+root privileges without worrying about password prompts.
