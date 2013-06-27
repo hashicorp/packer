@@ -25,9 +25,13 @@ func (*artifact) Files() []string {
 	return nil
 }
 
-func (*artifact) Id() string {
-	// TODO(mitchellh): Id
-	return "TODO"
+func (a *artifact) Id() string {
+	parts := make([]string, 0, len(a.amis))
+	for region, amiId := range a.amis {
+		parts = append(parts, fmt.Sprintf("%s:%s", region, amiId))
+	}
+
+	return strings.Join(parts, ",")
 }
 
 func (a *artifact) String() string {
