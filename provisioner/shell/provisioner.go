@@ -31,12 +31,17 @@ type config struct {
 	// An array of multiple scripts to run.
 	Scripts []string
 
+	// An array of environment variables that will be injected before
+	// your command(s) are executed.
+	Vars []string `mapstructure:"environment_vars"`
+
 	// The remote path where the local shell script will be uploaded to.
 	// This should be set to a writable file that is in a pre-existing directory.
 	RemotePath string `mapstructure:"remote_path"`
 
 	// The command used to execute the script. The '{{ .Path }}' variable
-	// should be used to specify where the script goes.
+	// should be used to specify where the script goes, {{ .Vars }}
+	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
 }
 
@@ -45,6 +50,7 @@ type Provisioner struct {
 }
 
 type ExecuteCommandTemplate struct {
+	Vars string
 	Path string
 }
 
@@ -56,7 +62,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "sh {{.Path}}"
+		// Don't leave an empty space if Vars isn't configured
+		if p.config.Vars == nil {
+			p.config.ExecuteCommand = "sh {{.Path}}"
+		} else {
+			p.config.ExecuteCommand = "{{.Vars}} sh {{.Path}}"
+		}
+
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -69,6 +81,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Scripts == nil {
 		p.config.Scripts = make([]string, 0)
+	}
+
+	if p.config.Vars == nil {
+		p.config.Vars = make([]string, 0)
 	}
 
 	errs := make([]error, 0)
@@ -90,6 +106,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for _, path := range p.config.Scripts {
 		if _, err := os.Stat(path); err != nil {
 			errs = append(errs, fmt.Errorf("Bad script '%s': %s", path, err))
+		}
+	}
+
+	// Do a check for bad environment variables, such as '=foo', 'foobar'
+	for _, kv := range p.config.Vars {
+		vs := strings.Split(kv, "=")
+		if len(vs) != 2 || vs[0] == "" {
+			errs = append(errs, fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		}
 	}
 
@@ -146,10 +170,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error uploading shell script: %s", err)
 		}
 
+		// Flatten the environment variables
+		flattendVars := strings.Join(p.config.Vars, " ")
+
 		// Compile the command
 		var command bytes.Buffer
 		t := template.Must(template.New("command").Parse(p.config.ExecuteCommand))
-		t.Execute(&command, &ExecuteCommandTemplate{p.config.RemotePath})
+		t.Execute(&command, &ExecuteCommandTemplate{flattendVars, p.config.RemotePath})
 
 		// Setup the remote command
 		stdout_r, stdout_w := io.Pipe()
