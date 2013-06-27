@@ -12,7 +12,7 @@ type Provisioner interface {
 	// given to communicate with the user, and a communicator is given that
 	// is guaranteed to be connected to some machine so that provisioning
 	// can be done.
-	Provision(Ui, Communicator)
+	Provision(Ui, Communicator) error
 }
 
 // A Hook implementation that runs the given provisioners.
@@ -23,8 +23,12 @@ type ProvisionHook struct {
 }
 
 // Runs the provisioners in order.
-func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interface{}) {
+func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interface{}) error {
 	for _, p := range h.Provisioners {
-		p.Provision(ui, comm)
+		if err := p.Provision(ui, comm); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

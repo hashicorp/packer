@@ -27,15 +27,14 @@ func Hook(client *rpc.Client) *hook {
 	return &hook{client}
 }
 
-func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) {
+func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
 	server := rpc.NewServer()
 	RegisterCommunicator(server, comm)
 	RegisterUi(server, ui)
 	address := serveSingleConn(server)
 
 	args := &HookRunArgs{name, data, address}
-	h.client.Call("Hook.Run", args, new(interface{}))
-	return
+	return h.client.Call("Hook.Run", args, new(interface{}))
 }
 
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
@@ -44,7 +43,9 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 		return err
 	}
 
-	h.hook.Run(args.Name, &Ui{client}, Communicator(client), args.Data)
+	if err := h.hook.Run(args.Name, &Ui{client}, Communicator(client), args.Data); err != nil {
+		return NewBasicError(err)
+	}
 
 	*reply = nil
 	return nil

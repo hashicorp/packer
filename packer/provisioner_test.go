@@ -14,8 +14,9 @@ func (t *TestProvisioner) Prepare(configs ...interface{}) error {
 	return nil
 }
 
-func (t *TestProvisioner) Provision(Ui, Communicator) {
+func (t *TestProvisioner) Provision(Ui, Communicator) error {
 	t.provCalled = true
+	return nil
 }
 
 func TestProvisionHook_Impl(t *testing.T) {

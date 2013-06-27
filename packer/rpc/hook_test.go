@@ -12,8 +12,9 @@ type testHook struct {
 	runUi     packer.Ui
 }
 
-func (h *testHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) {
+func (h *testHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
 	h.runCalled = true
+	return nil
 }
 
 func TestHookRPC(t *testing.T) {

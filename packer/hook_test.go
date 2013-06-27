@@ -13,12 +13,13 @@ type TestHook struct {
 	runUi     Ui
 }
 
-func (t *TestHook) Run(name string, ui Ui, comm Communicator, data interface{}) {
+func (t *TestHook) Run(name string, ui Ui, comm Communicator, data interface{}) error {
 	t.runCalled = true
 	t.runComm = comm
 	t.runData = data
 	t.runName = name
 	t.runUi = ui
+	return nil
 }
 
 func TestDispatchHook_Implements(t *testing.T) {

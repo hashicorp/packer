@@ -12,7 +12,9 @@ func (helperProvisioner) Prepare(...interface{}) error {
 	return nil
 }
 
-func (helperProvisioner) Provision(packer.Ui, packer.Communicator) {}
+func (helperProvisioner) Provision(packer.Ui, packer.Communicator) error {
+	return nil
+}
 
 func TestProvisioner_NoExist(t *testing.T) {
 	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
