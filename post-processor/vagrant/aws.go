@@ -12,7 +12,7 @@ import (
 )
 
 type AWSBoxConfig struct {
-	OutputPath string `mapstructure:"output"`
+	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
 }
 
@@ -46,6 +46,12 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 		}
 
 		tplData.Images[parts[0]] = parts[1]
+	}
+
+	// Compile the output path
+	outputPath, err := ProcessOutputPath(p.config.OutputPath, "aws", artifact)
+	if err != nil {
+		return nil, err
 	}
 
 	// Create a temporary directory for us to build the contents of the box in
@@ -89,11 +95,11 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 	}
 
 	// Compress the directory to the given output path
-	if err := DirToBox(p.config.OutputPath, dir); err != nil {
+	if err := DirToBox(outputPath, dir); err != nil {
 		return nil, err
 	}
 
-	return NewArtifact("aws", p.config.OutputPath), nil
+	return NewArtifact("aws", outputPath), nil
 }
 
 var defaultAWSVagrantfile = `
