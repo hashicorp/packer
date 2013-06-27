@@ -89,3 +89,39 @@ compressed then uploaded, but the compressed result is not kept.
 
 As you may be able to imagine, the **simple** and **detailed** definitions
 are simply shortcuts for a **sequence** definition of only one element.
+
+## Input Artifacts
+
+When using post-processors, the input artifact (coming from a builder or
+another post-proccessor) is discarded by default after the post-processor runs.
+This is because generally, you don't want the intermediary artifacts on the
+way to the final artifact created.
+
+In some cases, however, you may want to keep the intermediary artifacts.
+You can tell Packer to keep these artifacts by setting the
+`keep_input_artifact` configuration to `true`. An example is shown below:
+
+<pre class="prettyprint">
+{
+  "post-processors": [
+    {
+      "type": "compress",
+      "keep_input_artifact": true
+    }
+  ]
+}
+</pre>
+
+This setting will only keep the input artifact to _that specific_
+post-processor. If you're specifying a sequence of post-processors, then
+all intermediaries are discarded by default except for the input artifacts
+to post-processors that explicitly state to keep the input artifact.
+
+<div class="alert alert-info alert-block">
+<strong>Note:</strong> The intuitive reader may be wondering what happens
+if multiple post-processors are specified (not in a sequence). Does Packer require the
+configuration to keep the input artifact on all the post-processors?
+The answer is no, of course not. Packer is smart enough to figure out
+that at least one post-processor requested that the input be kept, so it will keep
+it around.
+</div>
