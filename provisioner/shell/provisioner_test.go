@@ -35,11 +35,11 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_Path(t *testing.T) {
+func TestProvisionerPrepare_Script(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")
 
-	config["path"] = "/this/should/not/exist"
+	config["script"] = "/this/should/not/exist"
 	p := new(Provisioner)
 	err := p.Prepare(config)
 	if err == nil {
@@ -53,7 +53,7 @@ func TestProvisionerPrepare_Path(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	config["path"] = tf.Name()
+	config["script"] = tf.Name()
 	p = new(Provisioner)
 	err = p.Prepare(config)
 	if err != nil {
@@ -61,12 +61,12 @@ func TestProvisionerPrepare_Path(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_PathAndInline(t *testing.T) {
+func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
 	delete(config, "inline")
-	delete(config, "path")
+	delete(config, "script")
 	err := p.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
@@ -80,14 +80,14 @@ func TestProvisionerPrepare_PathAndInline(t *testing.T) {
 	defer os.Remove(tf.Name())
 
 	config["inline"] = []interface{}{"foo"}
-	config["path"] = tf.Name()
+	config["script"] = tf.Name()
 	err = p.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
 	}
 }
 
-func TestProvisionerPrepare_PathAndScripts(t *testing.T) {
+func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 

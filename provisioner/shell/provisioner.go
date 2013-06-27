@@ -26,7 +26,7 @@ type config struct {
 	Inline []string
 
 	// The local path of the shell script to upload and execute.
-	Path string
+	Script string
 
 	// An array of multiple scripts to run.
 	Scripts []string
@@ -73,12 +73,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	errs := make([]error, 0)
 
-	if p.config.Path != "" && len(p.config.Scripts) > 0 {
-		errs = append(errs, errors.New("Only one of path or scripts can be specified."))
+	if p.config.Script != "" && len(p.config.Scripts) > 0 {
+		errs = append(errs, errors.New("Only one of script or scripts can be specified."))
 	}
 
-	if p.config.Path != "" {
-		p.config.Scripts = []string{p.config.Path}
+	if p.config.Script != "" {
+		p.config.Scripts = []string{p.config.Script}
 	}
 
 	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
