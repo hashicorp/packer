@@ -16,11 +16,10 @@ var builtins = map[string]string{
 
 type Config struct {
 	OutputPath string `mapstructure:"output"`
-
 }
 
 type PostProcessor struct {
-	config Config
+	config  Config
 	premade map[string]packer.PostProcessor
 }
 
