@@ -13,6 +13,20 @@ func TestArtifact_Impl(t *testing.T) {
 	assert.Implementor(&artifact{}, &actual, "should be an Artifact")
 }
 
+func TestArtifactId(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	expected := `east:foo,west:bar`
+
+	amis := make(map[string]string)
+	amis["east"] = "foo"
+	amis["west"] = "bar"
+
+	a := &artifact{amis, nil}
+	result := a.Id()
+	assert.Equal(result, expected, "should match output")
+}
+
 func TestArtifactString(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
