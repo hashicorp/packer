@@ -13,7 +13,7 @@ var builtins = map[string]string{
 	"mitchellh.amazonebs": "aws",
 }
 
-type Config struct{
+type Config struct {
 	OutputPath string `mapstructure:"output"`
 }
 
