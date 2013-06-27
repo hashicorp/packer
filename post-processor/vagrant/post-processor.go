@@ -11,7 +11,7 @@ var builtins = map[string]string{
 	"mitchellh.amazonebs": "aws",
 }
 
-type Config struct {}
+type Config struct{}
 
 type PostProcessor struct {
 	config Config
