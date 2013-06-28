@@ -23,7 +23,7 @@ for your system and download it. Packer is packaged as a "zip" file.
 Next, unzip the downloaded package into a directory where Packer will be
 installed. On Unix systems, `~/packer` or `/usr/local/packer` is generally good,
 depending on whether you want to restrict the install to just your user
-or install it system-wide. On Windows systems, you can put it whereever you'd
+or install it system-wide. On Windows systems, you can put it wherever you'd
 like.
 
 After unzipping the package, the directory should contain a set of binary
@@ -49,7 +49,7 @@ Available commands are:
 ```
 
 If you get an error that `packer` could not be found, then your PATH
-environmental variable was not setup properly. Please go back and ensure
-that yoru PATH variable contains the directory which has Packer installed.
+environment variable was not setup properly. Please go back and ensure
+that your PATH variable contains the directory which has Packer installed.
 
 Otherwise, Packer is installed and you're ready to go!
