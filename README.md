@@ -11,12 +11,19 @@ Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel.
 Packer comes out of the box with support for creating AMIs (EC2), VMware
 images, and VirtualBox images. Support for more platforms can be added via
-plugins.
+plugins. The images that Packer creates an easily be turned into
+[Vagrant](http://www.vagrantup.com) boxes.
 
 ## Quick Start
 
-First, get Packer by either downloading a pre-built Packer binary for
-your operating system or [downloading and compiling Packer yourself](#developing-packer).
+**Note:** There is a great
+[introduction and getting started guide](http://localhost:4567/intro)
+for those with a bit more patience. Otherwise, the quick start below
+will get you up and running quickly, at the sacrifice of not explaining some
+key points.
+
+First, [downloada pre-built Packer binary](http://localhost:4567/downloads.html)
+for your operating system or [compile Packer yourself](#developing-packer).
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
@@ -32,9 +39,9 @@ own.
     "secret_key": "YOUR SECRET KEY HERE",
     "region": "us-east-1",
     "source_ami": "ami-de0d9eb7",
-    "instance_type": "m1.small",
+    "instance_type": "t1.micro",
     "ssh_username": "ubuntu",
-    "ami_name": "packer-quick-start {{.CreateTime}}"
+    "ami_name": "packer-example {{.CreateTime}}"
   }]
 }
 ```
