@@ -62,13 +62,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		// Don't leave an empty space if Vars isn't configured
-		if p.config.Vars == nil {
-			p.config.ExecuteCommand = "sh {{.Path}}"
-		} else {
-			p.config.ExecuteCommand = "{{.Vars}} sh {{.Path}}"
-		}
-
+		p.config.ExecuteCommand = "{{.Vars}} sh {{.Path}}"
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
