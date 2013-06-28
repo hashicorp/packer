@@ -78,6 +78,13 @@ you can do that as well.
 
 Validate the template with `packer validate`. This is always a good practice.
 
+<div class="alert alert-block alert-info">
+<strong>If you're looking for more DigitalOcean configuration options</strong>,
+you can find them on the <a href="/docs/builders/digitalocean.html">DigitalOcean
+Builder page</a> in the documentation. The documentation is more of a reference
+manual that contains a listing of all the available configuration options.
+</div>
+
 ## Build
 
 Now run `packer build example.json`. The output is too verbose to include
