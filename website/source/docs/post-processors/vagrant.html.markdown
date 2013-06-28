@@ -97,7 +97,9 @@ in the Vagrantfile for networking to work properly with Vagrant. An example
 Vagrantfile template is shown below:
 
 ```
-TODO
+Vagrant.configure("2") do |config|
+  config.vm.base_mac = "{{ .BaseMacAddress }}"
+end
 ```
 
 ### VMware Provider
