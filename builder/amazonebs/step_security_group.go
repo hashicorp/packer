@@ -67,6 +67,7 @@ func (s *stepSecurityGroup) Cleanup(state map[string]interface{}) {
 	ui.Say("Deleting temporary security group...")
 	_, err := ec2conn.DeleteSecurityGroup(ec2.SecurityGroup{Id: s.groupId})
 	if err != nil {
+		log.Printf("Error deleting security group: %s", err)
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up security group. Please delete the group manually: %s", s.groupId))
 	}
