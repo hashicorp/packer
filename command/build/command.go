@@ -128,17 +128,9 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	buildUis := make(map[string]packer.Ui)
 	for i, b := range builds {
-		var ui packer.Ui
-
-		ui = &packer.ColoredUi{
+		ui := &packer.ColoredUi{
 			Color: colors[i%len(colors)],
 			Ui:    env.Ui(),
-		}
-
-		ui = &packer.PrefixedUi{
-			fmt.Sprintf("==> %s", b.Name()),
-			fmt.Sprintf("    %s", b.Name()),
-			ui,
 		}
 
 		buildUis[b.Name()] = ui
