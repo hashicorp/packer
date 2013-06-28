@@ -44,8 +44,7 @@ list as contributors come and go.
 			<p>
 			<a href="http://jack.ly/">Jack Pearkes</a> created and maintains the DigitalOcean builder
 			for Packer. Outside of Packer, Jack is an avid open source
-			contributor, a founder of <a href="https://www.ircrelay.com/">IRCRelay</a>,
-			and a lover of all things nature.</p>
+			contributor and software consultant.</p>
 		</div>
 	</div>
 
