@@ -178,7 +178,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	keepOriginalArtifact := len(b.postProcessors) == 0
 
 	// Run the post-processors
-	PostProcessorRunSeqLoop:
+PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
@@ -208,57 +208,57 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 					log.Printf(
 						"Flagging to keep original artifact from post-processor '%s'",
 						corePP.processorType)
-						keepOriginalArtifact = true
-					}
+					keepOriginalArtifact = true
+				}
+			} else {
+				// We have a prior artifact. If we want to keep it, we append
+				// it to the results list. Otherwise, we destroy it.
+				if corePP.keepInputArtifact {
+					artifacts = append(artifacts, priorArtifact)
 				} else {
-					// We have a prior artifact. If we want to keep it, we append
-					// it to the results list. Otherwise, we destroy it.
-					if corePP.keepInputArtifact {
-						artifacts = append(artifacts, priorArtifact)
-					} else {
-						log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
-						if err := priorArtifact.Destroy(); err != nil {
-							errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
-						}
+					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
+					if err := priorArtifact.Destroy(); err != nil {
+						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
 					}
 				}
-
-				priorArtifact = artifact
 			}
 
-			// Add on the last artifact to the results
-			if priorArtifact != nil {
-				artifacts = append(artifacts, priorArtifact)
-			}
+			priorArtifact = artifact
 		}
 
-		if keepOriginalArtifact {
-			artifacts = append(artifacts, nil)
-			copy(artifacts[1:], artifacts)
-			artifacts[0] = builderArtifact
-		} else {
-			log.Printf("Deleting original artifact for build '%s'", b.name)
-			if err := builderArtifact.Destroy(); err != nil {
-				errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
-			}
+		// Add on the last artifact to the results
+		if priorArtifact != nil {
+			artifacts = append(artifacts, priorArtifact)
 		}
-
-		if len(errors) > 0 {
-			err = &MultiError{errors}
-		}
-
-		return artifacts, err
 	}
 
-	func (b *coreBuild) SetDebug(val bool) {
-		if b.prepareCalled {
-			panic("prepare has already been called")
+	if keepOriginalArtifact {
+		artifacts = append(artifacts, nil)
+		copy(artifacts[1:], artifacts)
+		artifacts[0] = builderArtifact
+	} else {
+		log.Printf("Deleting original artifact for build '%s'", b.name)
+		if err := builderArtifact.Destroy(); err != nil {
+			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
 		}
-
-		b.debug = val
 	}
 
-	// Cancels the build if it is running.
-	func (b *coreBuild) Cancel() {
-		b.builder.Cancel()
+	if len(errors) > 0 {
+		err = &MultiError{errors}
 	}
+
+	return artifacts, err
+}
+
+func (b *coreBuild) SetDebug(val bool) {
+	if b.prepareCalled {
+		panic("prepare has already been called")
+	}
+
+	b.debug = val
+}
+
+// Cancels the build if it is running.
+func (b *coreBuild) Cancel() {
+	b.builder.Cancel()
+}

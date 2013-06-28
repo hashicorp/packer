@@ -14,7 +14,7 @@ import (
 var builtins = map[string]string{
 	"mitchellh.amazonebs":  "aws",
 	"mitchellh.virtualbox": "virtualbox",
-	"mitchellh.vmware": "vmware",
+	"mitchellh.vmware":     "vmware",
 }
 
 type Config struct {
