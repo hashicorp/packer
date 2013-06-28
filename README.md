@@ -17,12 +17,12 @@ plugins. The images that Packer creates an easily be turned into
 ## Quick Start
 
 **Note:** There is a great
-[introduction and getting started guide](http://localhost:4567/intro)
+[introduction and getting started guide](http://www.packer.io/intro)
 for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
-First, [downloada pre-built Packer binary](http://localhost:4567/downloads.html)
+First, [downloada pre-built Packer binary](http://www.packer.io/downloads.html)
 for your operating system or [compile Packer yourself](#developing-packer).
 
 After Packer is installed, create your first template, which tells Packer
