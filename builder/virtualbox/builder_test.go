@@ -61,9 +61,16 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
+	// Test a default boot_wait
+	delete(config, "boot_wait")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
 	// Test with a bad boot_wait
 	config["boot_wait"] = "this is not good"
-	err := b.Prepare(config)
+	err = b.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
 	}

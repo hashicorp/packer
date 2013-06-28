@@ -89,6 +89,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.OutputDir = "virtualbox"
 	}
 
+	if b.config.RawBootWait == "" {
+		b.config.RawBootWait = "10s"
+	}
+
 	if b.config.SSHHostPortMin == 0 {
 		b.config.SSHHostPortMin = 2222
 	}
@@ -168,11 +172,9 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("Output directory already exists. It must not exist."))
 	}
 
-	if b.config.RawBootWait != "" {
-		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
-		}
+	b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 	}
 
 	if b.config.RawShutdownTimeout == "" {
