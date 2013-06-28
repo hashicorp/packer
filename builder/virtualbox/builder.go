@@ -137,7 +137,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			}
 
 			if url.Scheme == "file" {
-				if _, err := os.Stat(b.config.ISOUrl); err != nil {
+				if _, err := os.Stat(url.Path); err != nil {
 					errs = append(errs, fmt.Errorf("iso_url points to bad file: %s", err))
 				}
 			} else {
