@@ -48,7 +48,7 @@ func (a *artifact) Destroy() error {
 	errors := make([]error, 0)
 
 	for _, imageId := range a.amis {
-		log.Printf("Degistering image ID: %s", imageId)
+		log.Printf("Deregistering image ID: %s", imageId)
 		if _, err := a.conn.DeregisterImage(imageId); err != nil {
 			errors = append(errors, err)
 		}
