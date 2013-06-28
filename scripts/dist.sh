@@ -13,7 +13,7 @@ cd $DIR
 # of packer/version.go.
 VERSION=$(grep "const Version " packer/version.go | sed -E 's/.*"(.+)"$/\1/')
 VERSIONDIR="${VERSION}"
-PREVERSION=$(grep "const VersionPrerelease " packer/version.go | sed -E 's/.*"(.+)"$/\1/')
+PREVERSION=$(grep "const VersionPrerelease " packer/version.go | sed -E 's/.*"(.*)"$/\1/')
 if [ ! -z $PREVERSION ]; then
     PREVERSION="${PREVERSION}.$(date -u +%s)"
     VERSIONDIR="${VERSIONDIR}-${PREVERSION}"
