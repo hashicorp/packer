@@ -224,6 +224,31 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_OutputDir(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with existing dir
+	dir, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.RemoveAll(dir)
+
+	config["output_directory"] = dir
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good one
+	config["output_directory"] = "i-hope-i-dont-exist"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 	var b Builder
 	config := testConfig()

@@ -164,6 +164,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if _, err := os.Stat(b.config.OutputDir); err == nil {
+		errs = append(errs, errors.New("Output directory already exists. It must not exist."))
+	}
+
 	if b.config.RawBootWait != "" {
 		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
 		if err != nil {
