@@ -63,7 +63,6 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 		}
 	}
 
-
 	if p.config.VagrantfileTemplate != "" {
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
@@ -87,7 +86,6 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 		t.Execute(vf, new(struct{}))
 		vf.Close()
 	}
-
 
 	// Create the metadata
 	metadata := map[string]string{"provider": "vmware"}
