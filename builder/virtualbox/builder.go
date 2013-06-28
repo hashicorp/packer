@@ -181,6 +181,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawShutdownTimeout = "5m"
 	}
 
+	if b.config.RawSSHWaitTimeout == "" {
+		b.config.RawSSHWaitTimeout = "20m"
+	}
+
 	b.config.ShutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
@@ -192,10 +196,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.SSHUser == "" {
 		errs = append(errs, errors.New("An ssh_username must be specified."))
-	}
-
-	if b.config.RawSSHWaitTimeout == "" {
-		b.config.RawSSHWaitTimeout = "20m"
 	}
 
 	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
