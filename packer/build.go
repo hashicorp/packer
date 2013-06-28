@@ -126,7 +126,7 @@ func (b *coreBuild) Prepare() (err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
+func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -155,8 +155,15 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	hook := &DispatchHook{hooks}
 	artifacts := make([]Artifact, 0, 1)
 
+	// The builder just has a normal Ui, but prefixed
+	builderUi := &PrefixedUi{
+		fmt.Sprintf("==> %s", b.Name()),
+		fmt.Sprintf("    %s", b.Name()),
+		originalUi,
+	}
+
 	log.Printf("Running builder: %s", b.builderType)
-	builderArtifact, err := b.builder.Run(ui, hook, cache)
+	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
 	if err != nil {
 		return nil, err
 	}
@@ -171,12 +178,18 @@ func (b *coreBuild) Run(ui Ui, cache Cache) ([]Artifact, error) {
 	keepOriginalArtifact := len(b.postProcessors) == 0
 
 	// Run the post-processors
-PostProcessorRunSeqLoop:
+	PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
-			ui.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
-			artifact, err := corePP.processor.PostProcess(ui, priorArtifact)
+			ppUi := &PrefixedUi{
+				fmt.Sprintf("==> %s (%s)", b.Name(), corePP.processorType),
+				fmt.Sprintf("    %s (%s)", b.Name(), corePP.processorType),
+				originalUi,
+			}
+
+			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
+			artifact, err := corePP.processor.PostProcess(ppUi, priorArtifact)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
 				continue PostProcessorRunSeqLoop
@@ -195,57 +208,57 @@ PostProcessorRunSeqLoop:
 					log.Printf(
 						"Flagging to keep original artifact from post-processor '%s'",
 						corePP.processorType)
-					keepOriginalArtifact = true
-				}
-			} else {
-				// We have a prior artifact. If we want to keep it, we append
-				// it to the results list. Otherwise, we destroy it.
-				if corePP.keepInputArtifact {
-					artifacts = append(artifacts, priorArtifact)
+						keepOriginalArtifact = true
+					}
 				} else {
-					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
-					if err := priorArtifact.Destroy(); err != nil {
-						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
+					// We have a prior artifact. If we want to keep it, we append
+					// it to the results list. Otherwise, we destroy it.
+					if corePP.keepInputArtifact {
+						artifacts = append(artifacts, priorArtifact)
+					} else {
+						log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
+						if err := priorArtifact.Destroy(); err != nil {
+							errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
+						}
 					}
 				}
+
+				priorArtifact = artifact
 			}
 
-			priorArtifact = artifact
+			// Add on the last artifact to the results
+			if priorArtifact != nil {
+				artifacts = append(artifacts, priorArtifact)
+			}
 		}
 
-		// Add on the last artifact to the results
-		if priorArtifact != nil {
-			artifacts = append(artifacts, priorArtifact)
+		if keepOriginalArtifact {
+			artifacts = append(artifacts, nil)
+			copy(artifacts[1:], artifacts)
+			artifacts[0] = builderArtifact
+		} else {
+			log.Printf("Deleting original artifact for build '%s'", b.name)
+			if err := builderArtifact.Destroy(); err != nil {
+				errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
+			}
 		}
-	}
 
-	if keepOriginalArtifact {
-		artifacts = append(artifacts, nil)
-		copy(artifacts[1:], artifacts)
-		artifacts[0] = builderArtifact
-	} else {
-		log.Printf("Deleting original artifact for build '%s'", b.name)
-		if err := builderArtifact.Destroy(); err != nil {
-			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
+		if len(errors) > 0 {
+			err = &MultiError{errors}
 		}
+
+		return artifacts, err
 	}
 
-	if len(errors) > 0 {
-		err = &MultiError{errors}
+	func (b *coreBuild) SetDebug(val bool) {
+		if b.prepareCalled {
+			panic("prepare has already been called")
+		}
+
+		b.debug = val
 	}
 
-	return artifacts, err
-}
-
-func (b *coreBuild) SetDebug(val bool) {
-	if b.prepareCalled {
-		panic("prepare has already been called")
+	// Cancels the build if it is running.
+	func (b *coreBuild) Cancel() {
+		b.builder.Cancel()
 	}
-
-	b.debug = val
-}
-
-// Cancels the build if it is running.
-func (b *coreBuild) Cancel() {
-	b.builder.Cancel()
-}

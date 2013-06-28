@@ -113,7 +113,6 @@ func TestBuild_Run(t *testing.T) {
 	// Verify builder was run
 	builder := build.builder.(*TestBuilder)
 	assert.True(builder.runCalled, "run should be called")
-	assert.Equal(builder.runUi, ui, "run should be called with ui")
 
 	// Verify hooks are disapatchable
 	dispatchHook := builder.runHook
