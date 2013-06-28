@@ -218,6 +218,8 @@ func (c *Client) Start() (address string, err error) {
 	cmd.Env = append(cmd.Env, env...)
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
+
+	log.Printf("Starting plugin: %s %#v", cmd.Path, cmd.Args)
 	err = cmd.Start()
 	if err != nil {
 		return
@@ -250,6 +252,7 @@ func (c *Client) Start() (address string, err error) {
 	timeout := time.After(c.config.StartTimeout)
 
 	// Start looking for the address
+	log.Println("Waiting for RPC address for: %s", cmd.Path)
 	for done := false; !done; {
 		select {
 		case <-timeout:
