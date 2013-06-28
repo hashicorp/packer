@@ -68,6 +68,10 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	if b.config.RawBootWait != "10s" {
+		t.Fatalf("bad value: %s", b.config.RawBootWait)
+	}
+
 	// Test with a bad boot_wait
 	config["boot_wait"] = "this is not good"
 	err = b.Prepare(config)
@@ -324,9 +328,20 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
+	// Test a default boot_wait
+	delete(config, "ssh_wait_timeout")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.RawSSHWaitTimeout != "20m" {
+		t.Fatalf("bad value: %s", b.config.RawSSHWaitTimeout)
+	}
+
 	// Test with a bad value
 	config["ssh_wait_timeout"] = "this is not good"
-	err := b.Prepare(config)
+	err = b.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
 	}
