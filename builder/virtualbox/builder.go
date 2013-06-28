@@ -260,6 +260,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	// If we were interrupted or cancelled, then just exit.
+	if _, ok := state[multistep.StateCancelled]; ok {
+		return nil, errors.New("Build was cancelled.")
+	}
+
+	if _, ok := state[multistep.StateHalted]; ok {
+		return nil, errors.New("Build was halted.")
+	}
+
 	// Compile the artifact list
 	files := make([]string, 0, 5)
 	visit := func(path string, info os.FileInfo, err error) error {
