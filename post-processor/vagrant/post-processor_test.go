@@ -35,3 +35,15 @@ func TestBuilderPrepare_OutputPath(t *testing.T) {
 		t.Fatal("should have error")
 	}
 }
+
+func TestBuilderPrepare_PPConfig(t *testing.T) {
+	var p PostProcessor
+
+	// Default
+	c := testConfig()
+	c["aws"] = map[string]interface{}{}
+	err := p.Configure(c)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
