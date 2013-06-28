@@ -49,7 +49,7 @@ provisioner to run a local script within the machines:
 <pre class="prettyprint">
 {
   "type": "shell",
-  "path": "script.sh"
+  "script": "script.sh"
 }
 </pre>
 
