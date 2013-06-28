@@ -88,7 +88,7 @@ waitAll
 
 # Make the checksums
 pushd ./pkg/${VERSIONDIR}/dist
-shasum -a256 * > ./${VERSION}_SHA256SUMS
+shasum -a256 * > ./${VERSIONDIR}_SHA256SUMS
 popd
 
 exit 0
