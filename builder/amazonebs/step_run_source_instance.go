@@ -65,5 +65,9 @@ func (s *stepRunSourceInstance) Cleanup(state map[string]interface{}) {
 	ui.Say("Terminating the source AWS instance...")
 	if _, err := ec2conn.TerminateInstances([]string{s.instance.InstanceId}); err != nil {
 		ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
+		return
 	}
+
+	pending := []string{"pending", "running", "shutting-down", "stopped", "stopping"}
+	waitForState(ec2conn, s.instance, pending, "terminated")
 }
