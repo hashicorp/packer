@@ -18,8 +18,9 @@ if !ENV["PACKER_DISABLE_DOWNLOAD_FETCH"]
 
   response.body.split("\n").each do |line|
     next if line !~ /\/mitchellh\/packer\/(#{ENV["PACKER_VERSION"]}.+?)\?/
-      filename = $1.to_s
+    filename = $1.to_s
     os = filename.split("_")[1]
+    next if os == "SHA256SUMS"
 
     $packer_files[os] ||= []
     $packer_files[os] << filename
@@ -59,7 +60,9 @@ end
 #-------------------------------------------------------------------------
 helpers do
   def download_arch(file)
-    file.split("_")[2].split(".")[0]
+    parts = file.split("_")
+    return "" if parts.length != 3
+    parts[2].split(".")[0]
   end
 
   def download_os_human(os)
