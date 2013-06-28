@@ -187,10 +187,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			runArtifacts, err := b.Run(ui, env.Cache())
 
 			if err != nil {
-				ui.Error(fmt.Sprintf("Build errored: %s", err))
+				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
 				errors[name] = err
 			} else {
-				ui.Say("Build finished.")
+				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
 				artifacts[name] = runArtifacts
 			}
 		}(b)
