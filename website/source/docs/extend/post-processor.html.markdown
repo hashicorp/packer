@@ -38,7 +38,7 @@ what each method should do.
 <pre class="prettyprint">
 type PostProcessor interface {
 	Configure(interface{}) error
-	PostProcess(Artifact) (Artifact, error)
+	PostProcess(Ui, Artifact) (Artifact, error)
 }
 </pre>
 

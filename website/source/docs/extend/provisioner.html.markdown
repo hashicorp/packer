@@ -33,7 +33,7 @@ what each method should do.
 <pre class="prettyprint">
 type Provisioner interface {
 	Prepare(...interface{}) error
-	Provision(Ui, Communicator)
+	Provision(Ui, Communicator) error
 }
 </pre>
 
