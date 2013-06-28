@@ -73,7 +73,7 @@ This example is shown below:
 <pre class="prettyprint">
 {
   "type": "shell",
-  "path": "script.sh",
+  "script": "script.sh",
 
   "override": {
     "vmware": {
