@@ -109,6 +109,7 @@ DownloadWaitLoop:
 		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
 		return multistep.ActionHalt
 	}
+	defer sourceF.Close()
 
 	if _, err := io.Copy(f, sourceF); err != nil {
 		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
