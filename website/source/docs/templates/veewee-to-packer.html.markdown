@@ -14,7 +14,7 @@ of templates that can be readily used with Packer by simply converting them.
 
 ## Installation and Usage
 
-Since Veewee itself is a Ruby project, so to is the veewee-to-packer
+Since Veewee itself is a Ruby project, so too is the veewee-to-packer
 application so that it can read the Veewee configurations. Install it using RubyGems:
 
 ```
