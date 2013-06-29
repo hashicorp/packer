@@ -56,7 +56,7 @@ func serve(server *rpc.Server) (err error) {
 	var address string
 	var listener net.Listener
 	for port := minPort; port <= maxPort; port++ {
-		address = fmt.Sprintf(":%d", port)
+		address = fmt.Sprintf("127.0.0.1:%d", port)
 		listener, err = net.Listen("tcp", address)
 		if err != nil {
 			if !strings.Contains(err.Error(), "address already in use") {
