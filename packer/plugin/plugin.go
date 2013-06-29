@@ -19,7 +19,6 @@ import (
 	"os/signal"
 	"runtime"
 	"strconv"
-	"strings"
 )
 
 const MagicCookieKey = "PACKER_PLUGIN_MAGIC_COOKIE"
@@ -59,14 +58,8 @@ func serve(server *rpc.Server) (err error) {
 		address = fmt.Sprintf("127.0.0.1:%d", port)
 		listener, err = net.Listen("tcp", address)
 		if err != nil {
-			if !strings.Contains(err.Error(), "address already in use") {
-				// Not an address already in use error, return.
-				return
-			} else {
-				// Address is in use, just try another
-				err = nil
-				continue
-			}
+			err = nil
+			continue
 		}
 
 		break
