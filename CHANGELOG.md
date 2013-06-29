@@ -8,6 +8,7 @@ BUG FIXES:
 * virtualbox: `boot_wait` defaults to "10s" rather than 0. [GH-44]
 * virtualbox: if `http_port_min` and max are the same, it will no longer
   panic [GH-53]
+* vmware: `boot_wait` defaults to "10s" rather than 0. [GH-44]
 * vmware: if `http_port_min` and max are the same, it will no longer
   panic [GH-53]
 

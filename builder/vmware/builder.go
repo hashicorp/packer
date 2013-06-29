@@ -86,6 +86,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.HTTPPortMax = 9000
 	}
 
+	if b.config.RawBootWait == "" {
+		b.config.RawBootWait = "10s"
+	}
+
 	if b.config.VNCPortMin == 0 {
 		b.config.VNCPortMin = 5900
 	}
