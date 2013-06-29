@@ -180,6 +180,6 @@ an Ubuntu 12.04 installer:
   "fb=false debconf/frontend=noninteractive ",
   "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- <enter>"
+  "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
 </pre>
