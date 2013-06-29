@@ -1,6 +1,9 @@
 ## 0.1.2 (unreleased)
 
+BUG FIXES:
 
+* amazon-ebs: Sleep between checking instance state to avoid
+  RequestLimitExceeded [GH-50]
 
 ## 0.1.1 (June 28, 2013)
 
