@@ -111,6 +111,12 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 		return nil, err
 	}
 
+	// Rename the OVF file to box.ovf, as required by Vagrant
+	ui.Message("Renaming the OVF to box.ovf...")
+	if err := p.renameOVF(dir); err != nil {
+		return nil, err
+	}
+
 	// Compress the directory to the given output path
 	ui.Message(fmt.Sprintf("Compressing box..."))
 	if err := DirToBox(outputPath, dir); err != nil {
@@ -154,6 +160,21 @@ func (p *VBoxBoxPostProcessor) findBaseMacAddress(a packer.Artifact) (string, er
 
 	log.Printf("Base mac address: %s", string(matches[1]))
 	return string(matches[1]), nil
+}
+
+func (p *VBoxBoxPostProcessor) renameOVF(dir string) error {
+	log.Println("Looking for OVF to rename...")
+	matches, err := filepath.Glob(filepath.Join(dir, "*.ovf"))
+	if err != nil {
+		return err
+	}
+
+	if len(matches) > 1 {
+		return errors.New("More than one OVF file in VirtualBox artifact.")
+	}
+
+	log.Printf("Renaming: '%s' => box.ovf", matches[0])
+	return os.Rename(matches[0], filepath.Join(dir, "box.ovf"))
 }
 
 var defaultVBoxVagrantfile = `
