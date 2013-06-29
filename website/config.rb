@@ -82,7 +82,7 @@ helpers do
   end
 
   def download_url(file)
-    "http://dl.bintray.com/mitchellh/packer/#{file}?direct"
+    "https://dl.bintray.com/mitchellh/packer/#{file}?direct"
   end
 
   def latest_version
