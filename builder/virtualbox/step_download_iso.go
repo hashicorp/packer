@@ -35,9 +35,7 @@ func (s *stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction
 
 	checksum, err := hex.DecodeString(config.ISOMD5)
 	if err != nil {
-		err := fmt.Errorf("Error parsing checksum: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
+		state["error"] = fmt.Errorf("Error parsing checksum: %s", err)
 		return multistep.ActionHalt
 	}
 
@@ -111,6 +109,7 @@ DownloadWaitLoop:
 	}
 	defer sourceF.Close()
 
+	log.Printf("Copying ISO to temp location: %s", tempdir)
 	if _, err := io.Copy(f, sourceF); err != nil {
 		state["error"] = fmt.Errorf("Error copying ISO: %s", err)
 		return multistep.ActionHalt
