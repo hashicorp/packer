@@ -12,6 +12,7 @@ BUG FIXES:
 * amazon-ebs: Sleep between checking instance state to avoid
   RequestLimitExceeded [GH-50]
 * vagrant: Rename VirtualBox ovf to "box.ovf" [GH-64]
+* vagrant: VMware boxes have the correct provider type.
 * vmware: Properly populate files in artifact so that the Vagrant
   post-processor works. [GH-63]
 
