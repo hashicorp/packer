@@ -70,8 +70,9 @@ http://www.packer.io/docs
 ## Developing Packer
 
 If you wish to work on Packer itself, you'll first need [Go](http://golang.org)
-installed (version 1.1+ is _required_). Next, clone this repository then just type `make`.
-In a few moments, you'll have a working `packer` executable:
+installed (version 1.1+ is _required_). Next, clone this repository. You will need to 
+set the GOPATH environment variable to the directory of the repository. From there you 
+can just type `make`. In a few moments, you'll have a working `packer` executable:
 
 ```
 $ make
@@ -82,4 +83,4 @@ $ bin/packer
 
 You can run tests by typing `make test`. 
 
-This will run tests for Packer core along with all the core builders and commands and such that come with Packer.
+This will run tests for Packer core along wi th all the core builders and commands and such that come with Packer.
