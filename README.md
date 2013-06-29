@@ -11,7 +11,7 @@ Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel.
 Packer comes out of the box with support for creating AMIs (EC2), VMware
 images, and VirtualBox images. Support for more platforms can be added via
-plugins. 
+plugins.
 
 The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
@@ -70,8 +70,11 @@ http://www.packer.io/docs
 ## Developing Packer
 
 If you wish to work on Packer itself, you'll first need [Go](http://golang.org)
-installed (version 1.1+ is _required_). Next, clone this repository then just type `make`.
-In a few moments, you'll have a working `packer` executable:
+installed (version 1.1+ is _required_). Make sure you have Go properly installed,
+including setting up your [GOPATH](http://golang.org/doc/code.html#GOPATH).
+
+Next, clone this repository then just type `make`. In a few moments,
+you'll have a working `packer` executable:
 
 ```
 $ make
@@ -80,6 +83,6 @@ $ bin/packer
 ...
 ```
 
-You can run tests by typing `make test`. 
+You can run tests by typing `make test`.
 
 This will run tests for Packer core along with all the core builders and commands and such that come with Packer.
