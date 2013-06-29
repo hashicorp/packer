@@ -38,7 +38,14 @@ func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction 
 	portRange := int(config.HTTPPortMax - config.HTTPPortMin)
 	for {
 		var err error
-		httpPort = uint(rand.Intn(portRange)) + config.HTTPPortMin
+		var offset uint = 0
+
+		if portRange > 0 {
+			// Intn will panic if portRange == 0, so we do a check.
+			offset = uint(rand.Intn(portRange))
+		}
+
+		httpPort = offset + config.HTTPPortMin
 		httpAddr = fmt.Sprintf(":%d", httpPort)
 		log.Printf("Trying port: %d", httpPort)
 		s.l, err = net.Listen("tcp", httpAddr)
