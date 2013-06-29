@@ -7,6 +7,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Plugin servers consider a port in use if there is any
+  error listening to it. This fixes I18n issues and Windows. [GH-58]
 * amazon-ebs: Sleep between checking instance state to avoid
   RequestLimitExceeded [GH-50]
 * vagrant: Rename VirtualBox ovf to "box.ovf" [GH-64]
