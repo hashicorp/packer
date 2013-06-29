@@ -11,14 +11,14 @@ func TestParseTemplate_Basic(t *testing.T) {
 
 	data := `
 	{
-		"builders": []
+		"builders": [{"type": "something"}]
 	}
 	`
 
 	result, err := ParseTemplate([]byte(data))
 	assert.Nil(err, "should not error")
 	assert.NotNil(result, "template should not be nil")
-	assert.Length(result.Builders, 0, "no builders")
+	assert.Length(result.Builders, 1, "one builder")
 }
 
 func TestParseTemplate_Invalid(t *testing.T) {
@@ -140,6 +140,8 @@ func TestParseTemplate_Hooks(t *testing.T) {
 	data := `
 	{
 
+		"builders": [{"type": "foo"}],
+
 		"hooks": {
 			"event": ["foo", "bar"]
 		}
@@ -159,6 +161,8 @@ func TestParseTemplate_Hooks(t *testing.T) {
 func TestParseTemplate_PostProcessors(t *testing.T) {
 	data := `
 	{
+		"builders": [{"type": "foo"}],
+
 		"post-processors": [
 			"simple",
 
@@ -215,6 +219,8 @@ func TestParseTemplate_ProvisionerWithoutType(t *testing.T) {
 
 	data := `
 	{
+		"builders": [{"type": "foo"}],
+
 		"provisioners": [{}]
 	}
 	`
@@ -228,6 +234,8 @@ func TestParseTemplate_ProvisionerWithNonStringType(t *testing.T) {
 
 	data := `
 	{
+		"builders": [{"type": "foo"}],
+
 		"provisioners": [{
 			"type": 42
 		}]
@@ -243,6 +251,8 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 
 	data := `
 	{
+		"builders": [{"type": "foo"}],
+
 		"provisioners": [
 			{
 				"type": "shell"
