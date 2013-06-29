@@ -22,7 +22,7 @@ $ gem install veewee-to-packer
 ...
 ```
 
-Once installed, usage is easy! Just point call `veewee-to-packer` pointed
+Once installed, usage is easy! Just point `veewee-to-packer`
 at the `definition.rb` file of any template. The converter will output
 any warnings or messages about the conversion. The example below converts
 a CentOS template:
