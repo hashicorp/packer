@@ -61,7 +61,14 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
     pushd ${PLUGIN}
     xc
     popd
-    find ./pkg -type f -name ${PLUGIN_NAME} -execdir mv ${PLUGIN_NAME} packer-${PLUGIN_NAME} ';'
+    find ./pkg \
+        -type f \
+        -name ${PLUGIN_NAME} \
+        -execdir mv ${PLUGIN_NAME} packer-${PLUGIN_NAME} ';'
+    find ./pkg \
+        -type f \
+        -name ${PLUGIN_NAME}.exe \
+        -execdir mv ${PLUGIN_NAME}.exe packer-${PLUGIN_NAME}.exe ';'
     ) &
 done
 
