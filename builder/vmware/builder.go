@@ -263,7 +263,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Compile the artifact list
 	files := make([]string, 0, 10)
 	visit := func(path string, info os.FileInfo, err error) error {
-		files = append(files, path)
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+
 		return err
 	}
 
