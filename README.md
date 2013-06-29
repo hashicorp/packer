@@ -11,7 +11,9 @@ Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel.
 Packer comes out of the box with support for creating AMIs (EC2), VMware
 images, and VirtualBox images. Support for more platforms can be added via
-plugins. The images that Packer creates can easily be turned into
+plugins. 
+
+The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
 
 ## Quick Start
