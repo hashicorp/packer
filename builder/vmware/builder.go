@@ -224,6 +224,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepWaitForSSH{},
 		&stepProvision{},
 		&stepShutdown{},
+		&stepCleanFiles{},
 	}
 
 	// Setup the state bag
@@ -263,11 +264,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Compile the artifact list
 	files := make([]string, 0, 10)
 	visit := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
 		if !info.IsDir() {
 			files = append(files, path)
 		}
 
-		return err
+		return nil
 	}
 
 	if err := filepath.Walk(b.config.OutputDir, visit); err != nil {
