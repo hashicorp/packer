@@ -167,9 +167,11 @@ table {
 
 ::selection {
     background: #ffff00; /* Safari */
+    color: $black;
 }
 ::-moz-selection {
     background: #ffff00; /* Firefox */
+    color: $black;
 }
 
 input {
