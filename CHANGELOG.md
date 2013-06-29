@@ -1,4 +1,4 @@
-## 0.1.1 (unreleased)
+## 0.1.1 (June 28, 2013)
 
 BUG FIXES:
 
