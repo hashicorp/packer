@@ -172,6 +172,10 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		raw.rawConfig = v
 	}
 
+	if len(t.Builders) == 0 {
+		errors = append(errors, fmt.Errorf("No builders are defined in the template."))
+	}
+
 	// If there were errors, we put it into a MultiError and return
 	if len(errors) > 0 {
 		err = &MultiError{errors}

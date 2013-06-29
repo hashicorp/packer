@@ -2,6 +2,7 @@
 
 IMPROVEMENTS:
 
+* core: Template doesn't validate if there are no builders.
 * vmware: Delete any VMware files in the VM that aren't necessary for
   it to function.
 
