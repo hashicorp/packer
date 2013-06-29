@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"strconv"
 	"text/template"
 	"time"
@@ -68,6 +69,11 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 		if imageResp.Images[0].State == "available" {
 			break
 		}
+
+		log.Printf("Image in state %s, sleeping 2s before checking again",
+			imageResp.Images[0].State)
+
+		time.Sleep(2 * time.Second)
 	}
 
 	return multistep.ActionContinue
