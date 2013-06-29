@@ -22,7 +22,7 @@ for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
-First, [downloada pre-built Packer binary](http://www.packer.io/downloads.html)
+First, [download a pre-built Packer binary](http://www.packer.io/downloads.html)
 for your operating system or [compile Packer yourself](#developing-packer).
 
 After Packer is installed, create your first template, which tells Packer
