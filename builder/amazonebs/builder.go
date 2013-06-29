@@ -59,7 +59,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.AccessKey == "" {
+		b.config.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
+	}
+
+	if b.config.AccessKey == "" {
 		b.config.AccessKey = os.Getenv("AWS_ACCESS_KEY")
+	}
+
+	if b.config.SecretKey == "" {
+		b.config.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 	}
 
 	if b.config.SecretKey == "" {
