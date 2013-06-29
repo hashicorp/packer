@@ -1,5 +1,10 @@
 ## 0.1.2 (unreleased)
 
+IMPROVEMENTS:
+
+* vmware: Delete any VMware files in the VM that aren't necessary for
+  it to function.
+
 BUG FIXES:
 
 * amazon-ebs: Sleep between checking instance state to avoid
