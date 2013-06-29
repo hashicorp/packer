@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -73,6 +74,7 @@ func (d *DownloadClient) Cancel() {
 func (d *DownloadClient) Get() (string, error) {
 	// If we already have the file and it matches, then just return the target path.
 	if verify, _ := d.VerifyChecksum(d.config.TargetPath); verify {
+		log.Println("Initial checksum matched, no download needed.")
 		return d.config.TargetPath, nil
 	}
 
@@ -80,6 +82,8 @@ func (d *DownloadClient) Get() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	log.Printf("Parsed URL: %#v", url)
 
 	// Files when we don't copy the file are special cased.
 	var finalPath string
@@ -101,6 +105,7 @@ func (d *DownloadClient) Get() (string, error) {
 		}
 		defer f.Close()
 
+		log.Printf("Downloading: %s", url.String())
 		err = d.downloader.Download(f, url)
 	}
 
@@ -117,6 +122,10 @@ func (d *DownloadClient) Get() (string, error) {
 
 // PercentProgress returns the download progress as a percentage.
 func (d *DownloadClient) PercentProgress() uint {
+	if d.downloader == nil {
+		return 0
+	}
+
 	return uint((float64(d.downloader.Progress()) / float64(d.downloader.Total())) * 100)
 }
 
@@ -133,6 +142,7 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 	}
 	defer f.Close()
 
+	log.Printf("Verifying checksum of %s", path)
 	d.config.Hash.Reset()
 	io.Copy(d.config.Hash, f)
 	return bytes.Compare(d.config.Hash.Sum(nil), d.config.Checksum) == 0, nil
