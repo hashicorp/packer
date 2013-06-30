@@ -121,6 +121,11 @@ func (d *Fusion5Driver) vmrunPath() string {
 	return filepath.Join(d.AppPath, "Contents", "Library", "vmrun")
 }
 
+// @TODO: Be smarter about guest type before deciding on linux.iso.
+func (d *Fusion5Driver) vmwareToolsIsoPath() string {
+	return filepath.Join(d.AppPath, "Contents", "Library", "isoimages", "linux.iso")
+}
+
 func (d *Fusion5Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
 	var stdout, stderr bytes.Buffer
 
