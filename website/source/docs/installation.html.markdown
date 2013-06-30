@@ -47,6 +47,6 @@ Available commands are:
 
 If you get an error that `packer` could not be found, then your PATH
 environmental variable was not setup properly. Please go back and ensure
-that yoru PATH variable contains the directory which has Packer installed.
+that your PATH variable contains the directory which has Packer installed.
 
 Otherwise, Packer is installed and you're ready to go!
