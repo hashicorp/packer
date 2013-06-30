@@ -222,6 +222,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepRun{},
 		&stepTypeBootCommand{},
 		&stepWaitForSSH{},
+		&stepUploadTools{},
 		&stepProvision{},
 		&stepShutdown{},
 		&stepCleanFiles{},
