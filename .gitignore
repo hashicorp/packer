@@ -1,5 +1,6 @@
 /bin
 /local
 /pkg
+/src
 /website/.sass-cache
 /website/build
