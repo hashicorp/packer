@@ -4,9 +4,9 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os"
+	"fmt"
 )
-
-a {
 
 type stepUploadTools struct{}
 
@@ -18,7 +18,7 @@ func (*stepUploadTools) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Uploading the VMware Tools.")
 	log.Println("Uploading the VMware Tools.")
 
-	f, err := os.Open(driver.vmwareToolsIsoPath())
+	f, err := os.Open(driver.ToolsIsoPath())
 	if err != nil {
 		state["error"] = fmt.Errorf("Error opening VMware Tools ISO: %s", err)
 		return multistep.ActionHalt
