@@ -73,6 +73,8 @@ If you wish to work on Packer itself, you'll first need [Go](http://golang.org)
 installed (version 1.1+ is _required_). Make sure you have Go properly installed,
 including setting up your [GOPATH](http://golang.org/doc/code.html#GOPATH).
 
+Additionally, to build Packer, you will need [Mercurial](http://mercurial.selenic.com/) installed.
+
 Next, clone this repository then just type `make`. In a few moments,
 you'll have a working `packer` executable:
 
