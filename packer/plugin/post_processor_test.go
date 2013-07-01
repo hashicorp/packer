@@ -8,7 +8,7 @@ import (
 
 type helperPostProcessor byte
 
-func (helperPostProcessor) Configure(interface{}) error {
+func (helperPostProcessor) Configure(...interface{}) error {
 	return nil
 }
 

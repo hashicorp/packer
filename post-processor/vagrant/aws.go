@@ -24,10 +24,12 @@ type AWSBoxPostProcessor struct {
 	config AWSBoxConfig
 }
 
-func (p *AWSBoxPostProcessor) Configure(raw interface{}) error {
-	err := mapstructure.Decode(raw, &p.config)
-	if err != nil {
-		return err
+func (p *AWSBoxPostProcessor) Configure(raws ...interface{}) error {
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &p.config)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

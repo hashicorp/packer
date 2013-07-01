@@ -59,7 +59,7 @@ func TestBuild_Prepare(t *testing.T) {
 	corePP := build.postProcessors[0][0]
 	pp := corePP.processor.(*TestPostProcessor)
 	assert.True(pp.configCalled, "config should be called")
-	assert.Equal(pp.configVal, 42, "config should have right value")
+	assert.Equal(pp.configVal, []interface{}{42}, "config should have right value")
 }
 
 func TestBuild_Prepare_Twice(t *testing.T) {

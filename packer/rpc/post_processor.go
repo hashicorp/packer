@@ -17,6 +17,10 @@ type PostProcessorServer struct {
 	p packer.PostProcessor
 }
 
+type PostProcessorConfigureArgs struct {
+	Configs []interface{}
+}
+
 type PostProcessorProcessResponse struct {
 	Err        error
 	Keep       bool
@@ -26,8 +30,9 @@ type PostProcessorProcessResponse struct {
 func PostProcessor(client *rpc.Client) *postProcessor {
 	return &postProcessor{client}
 }
-func (p *postProcessor) Configure(raw interface{}) (err error) {
-	if cerr := p.client.Call("PostProcessor.Configure", &raw, &err); cerr != nil {
+func (p *postProcessor) Configure(raw ...interface{}) (err error) {
+	args := &PostProcessorConfigureArgs{Configs: raw}
+	if cerr := p.client.Call("PostProcessor.Configure", args, &err); cerr != nil {
 		err = cerr
 	}
 
@@ -60,8 +65,8 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 	return Artifact(client), response.Keep, nil
 }
 
-func (p *PostProcessorServer) Configure(raw *interface{}, reply *error) error {
-	*reply = p.p.Configure(*raw)
+func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *error) error {
+	*reply = p.p.Configure(args.Configs...)
 	if *reply != nil {
 		*reply = NewBasicError(*reply)
 	}
