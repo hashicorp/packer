@@ -1,3 +1,9 @@
+## 0.1.3 (unreleased)
+
+BUG FIXES:
+
+* core: More plugin server fixes that avoid hangs on OS X 10.7 [GH-87]
+
 ## 0.1.2 (June 29, 2013)
 
 IMPROVEMENTS:
