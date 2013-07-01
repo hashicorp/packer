@@ -117,6 +117,17 @@ Optional:
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as virtual machine is booted.
 
+* `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
+  upload into the VM. Valid values are "darwin", "linux", and "windows".
+  By default, this is empty, which means VMware tools won't be uploaded.
+
+* `tools_upload_path` (string) - The path in the VM to upload the VMware
+  tools. This only takes effect if `tools_upload_flavor` is non-empty.
+  This is a [configuration template](/docs/templates/configuration-templates.html)
+  that has a single valid variable: `Flavor`, which will be the value of
+  `tools_upload_flavor`. By default the upload path is set to
+  `{{.Flavor}}.iso`.
+
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer".
 
