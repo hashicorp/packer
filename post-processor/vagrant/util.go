@@ -89,7 +89,7 @@ func ProcessOutputPath(path string, buildName string, provider string, artifact 
 
 	tplData := &OutputPathTemplate{
 		ArtifactId: artifact.Id(),
-		BuildName: buildName,
+		BuildName:  buildName,
 		Provider:   provider,
 	}
 
