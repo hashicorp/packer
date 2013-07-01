@@ -4,13 +4,13 @@ type TestPostProcessor struct {
 	artifactId   string
 	keep         bool
 	configCalled bool
-	configVal    interface{}
+	configVal    []interface{}
 	ppCalled     bool
 	ppArtifact   Artifact
 	ppUi         Ui
 }
 
-func (pp *TestPostProcessor) Configure(v interface{}) error {
+func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	pp.configCalled = true
 	pp.configVal = v
 	return nil

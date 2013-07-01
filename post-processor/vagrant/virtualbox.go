@@ -28,10 +28,12 @@ type VBoxBoxPostProcessor struct {
 	config VBoxBoxConfig
 }
 
-func (p *VBoxBoxPostProcessor) Configure(raw interface{}) error {
-	err := mapstructure.Decode(raw, &p.config)
-	if err != nil {
-		return err
+func (p *VBoxBoxPostProcessor) Configure(raws ...interface{}) error {
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &p.config)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -179,6 +181,6 @@ func (p *VBoxBoxPostProcessor) renameOVF(dir string) error {
 
 var defaultVBoxVagrantfile = `
 Vagrant.configure("2") do |config|
-  config.vm.base_mac = "{{ .BaseMacAddress }}"
+config.vm.base_mac = "{{ .BaseMacAddress }}"
 end
 `

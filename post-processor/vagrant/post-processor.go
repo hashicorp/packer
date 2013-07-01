@@ -26,23 +26,26 @@ type PostProcessor struct {
 	premade map[string]packer.PostProcessor
 }
 
-func (p *PostProcessor) Configure(raw interface{}) error {
-	err := mapstructure.Decode(raw, &p.config)
-	if err != nil {
-		return err
+func (p *PostProcessor) Configure(raws ...interface{}) error {
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &p.config)
+		if err != nil {
+			return err
+		}
 	}
 
 	if p.config.OutputPath == "" {
 		p.config.OutputPath = "packer_{{.Provider}}.box"
 	}
 
-	_, err = template.New("output").Parse(p.config.OutputPath)
+	_, err := template.New("output").Parse(p.config.OutputPath)
 	if err != nil {
 		return fmt.Errorf("output invalid template: %s", err)
 	}
 
+	// TODO(mitchellh): Properly handle multiple raw configs
 	var mapConfig map[string]interface{}
-	if err := mapstructure.Decode(raw, &mapConfig); err != nil {
+	if err := mapstructure.Decode(raws[0], &mapConfig); err != nil {
 		return err
 	}
 

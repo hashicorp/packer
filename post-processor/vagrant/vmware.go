@@ -20,11 +20,14 @@ type VMwareBoxPostProcessor struct {
 	config VMwareBoxConfig
 }
 
-func (p *VMwareBoxPostProcessor) Configure(raw interface{}) error {
-	err := mapstructure.Decode(raw, &p.config)
-	if err != nil {
-		return err
+func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
+	for _, raw := range raws {
+		err := mapstructure.Decode(raw, &p.config)
+		if err != nil {
+			return err
+		}
 	}
+
 
 	return nil
 }

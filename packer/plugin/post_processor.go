@@ -10,13 +10,13 @@ type cmdPostProcessor struct {
 	client *Client
 }
 
-func (c *cmdPostProcessor) Configure(config interface{}) error {
+func (c *cmdPostProcessor) Configure(config ...interface{}) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
 	}()
 
-	return c.p.Configure(config)
+	return c.p.Configure(config...)
 }
 
 func (c *cmdPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
