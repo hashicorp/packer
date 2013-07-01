@@ -1,5 +1,9 @@
 ## 0.1.3 (unreleased)
 
+IMPROVEMENTS:
+
+* digitalocean: Errors contain human-friendly error messages. [GH-85]
+
 BUG FIXES:
 
 * core: More plugin server fixes that avoid hangs on OS X 10.7 [GH-87]
