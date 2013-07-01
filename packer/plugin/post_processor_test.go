@@ -12,8 +12,8 @@ func (helperPostProcessor) Configure(interface{}) error {
 	return nil
 }
 
-func (helperPostProcessor) PostProcess(packer.Ui, packer.Artifact) (packer.Artifact, error) {
-	return nil, nil
+func (helperPostProcessor) PostProcess(packer.Ui, packer.Artifact) (packer.Artifact, bool, error) {
+	return nil, false, nil
 }
 
 func TestPostProcessor_NoExist(t *testing.T) {

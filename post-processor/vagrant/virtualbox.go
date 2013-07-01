@@ -37,24 +37,24 @@ func (p *VBoxBoxPostProcessor) Configure(raw interface{}) error {
 	return nil
 }
 
-func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, error) {
+func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 	tplData := &VBoxVagrantfileTemplate{}
 	tplData.BaseMacAddress, err = p.findBaseMacAddress(artifact)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// Compile the output path
 	outputPath, err := ProcessOutputPath(p.config.OutputPath, "virtualbox", artifact)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// Create a temporary directory for us to build the contents of the box in
 	dir, err := ioutil.TempDir("", "packer")
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer os.RemoveAll(dir)
 
@@ -63,25 +63,25 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 		ui.Message(fmt.Sprintf("Copying: %s", path))
 		src, err := os.Open(path)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		defer src.Close()
 
 		dst, err := os.Create(filepath.Join(dir, filepath.Base(path)))
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		defer dst.Close()
 
 		if _, err := io.Copy(dst, src); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 
 	// Create the Vagrantfile from the template
 	vf, err := os.Create(filepath.Join(dir, "Vagrantfile"))
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer vf.Close()
 
@@ -89,13 +89,13 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	if p.config.VagrantfileTemplate != "" {
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		defer f.Close()
 
 		contents, err := ioutil.ReadAll(f)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		vagrantfileContents = string(contents)
@@ -108,22 +108,22 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	// Create the metadata
 	metadata := map[string]string{"provider": "virtualbox"}
 	if err := WriteMetadata(dir, metadata); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// Rename the OVF file to box.ovf, as required by Vagrant
 	ui.Message("Renaming the OVF to box.ovf...")
 	if err := p.renameOVF(dir); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// Compress the directory to the given output path
 	ui.Message(fmt.Sprintf("Compressing box..."))
 	if err := DirToBox(outputPath, dir); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return NewArtifact("virtualbox", outputPath), nil
+	return NewArtifact("virtualbox", outputPath), false, nil
 }
 
 func (p *VBoxBoxPostProcessor) findBaseMacAddress(a packer.Artifact) (string, error) {

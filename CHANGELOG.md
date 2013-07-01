@@ -13,6 +13,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * core: More plugin server fixes that avoid hangs on OS X 10.7 [GH-87]
+* vagrant: AWS boxes will keep the AMI artifact around [GH-55]
 * virtualbox: More robust version parsing for uploading guest additions. [GH-69]
 * virtualbox: Output dir and VM name defaults depend on build name,
   avoiding collisions. [GH-91]
