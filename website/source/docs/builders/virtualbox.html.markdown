@@ -66,6 +66,9 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
+* `disk_size` (int) - The size, in megabytes, of the hard disk to create
+  for the VM. By default, this is 40000 (40 GB).
+
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
   is "VBoxGuestAdditions.iso" which should upload into the login directory
