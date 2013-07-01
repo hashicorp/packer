@@ -1,6 +1,8 @@
 ## 0.1.4 (unreleased)
 
+IMPROVEMENTS:
 
+* core: Template syntax errors now show line and character number. [GH-56]
 
 ## 0.1.3 (July 1, 2013)
 
