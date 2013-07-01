@@ -18,6 +18,8 @@ import (
 type VBoxBoxConfig struct {
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+
+	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type VBoxVagrantfileTemplate struct {
@@ -48,7 +50,8 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	}
 
 	// Compile the output path
-	outputPath, err := ProcessOutputPath(p.config.OutputPath, "virtualbox", artifact)
+	outputPath, err := ProcessOutputPath(p.config.OutputPath,
+		p.config.PackerBuildName, "virtualbox", artifact)
 	if err != nil {
 		return nil, false, err
 	}

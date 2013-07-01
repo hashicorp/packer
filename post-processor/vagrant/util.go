@@ -17,6 +17,7 @@ import (
 // OutputPath variables.
 type OutputPathTemplate struct {
 	ArtifactId string
+	BuildName  string
 	Provider   string
 }
 
@@ -83,11 +84,12 @@ func DirToBox(dst, dir string) error {
 
 // ProcessOutputPath takes an output path template and executes it,
 // replacing variables with their respective values.
-func ProcessOutputPath(path string, provider string, artifact packer.Artifact) (string, error) {
+func ProcessOutputPath(path string, buildName string, provider string, artifact packer.Artifact) (string, error) {
 	var buf bytes.Buffer
 
 	tplData := &OutputPathTemplate{
 		ArtifactId: artifact.Id(),
+		BuildName: buildName,
 		Provider:   provider,
 	}
 

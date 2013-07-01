@@ -19,6 +19,8 @@ var builtins = map[string]string{
 
 type Config struct {
 	OutputPath string `mapstructure:"output"`
+
+	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type PostProcessor struct {
@@ -35,7 +37,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.OutputPath == "" {
-		p.config.OutputPath = "packer_{{.Provider}}.box"
+		p.config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
 	}
 
 	_, err := template.New("output").Parse(p.config.OutputPath)
@@ -49,6 +51,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
+	packerConfig := map[string]interface{}{
+		packer.BuildNameConfigKey: p.config.PackerBuildName,
+	}
+
 	p.premade = make(map[string]packer.PostProcessor)
 	errors := make([]error, 0)
 	for k, raw := range mapConfig {
@@ -57,7 +63,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			continue
 		}
 
-		if err := pp.Configure(raw); err != nil {
+		if err := pp.Configure(raw, packerConfig); err != nil {
 			errors = append(errors, err)
 		}
 

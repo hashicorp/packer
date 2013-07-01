@@ -14,6 +14,8 @@ import (
 type AWSBoxConfig struct {
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+
+	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type AWSVagrantfileTemplate struct {
@@ -51,7 +53,8 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 	}
 
 	// Compile the output path
-	outputPath, err := ProcessOutputPath(p.config.OutputPath, "aws", artifact)
+	outputPath, err := ProcessOutputPath(p.config.OutputPath,
+		p.config.PackerBuildName, "aws", artifact)
 	if err != nil {
 		return nil, false, err
 	}
