@@ -28,6 +28,7 @@ func main() {
 	}
 
 	log.Printf("Packer Version: %s %s", packer.Version, packer.VersionPrerelease)
+	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 
 	config, err := loadConfig()
 	if err != nil {
