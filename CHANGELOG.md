@@ -1,5 +1,11 @@
 ## 0.1.3 (unreleased)
 
+FEATURES:
+
+* The VMware builder can now upload the VMware tools for you into
+  the VM. This is opt-in, you must specify the `tools_upload_flavor`
+  option. See the website for more documentation.
+
 IMPROVEMENTS:
 
 * digitalocean: Errors contain human-friendly error messages. [GH-85]
