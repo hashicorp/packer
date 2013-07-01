@@ -97,7 +97,7 @@ func (b *coreBuild) Prepare() (err error) {
 
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey: b.name,
-		DebugConfigKey: b.debug,
+		DebugConfigKey:     b.debug,
 	}
 
 	// Prepare the builder
