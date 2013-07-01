@@ -41,7 +41,7 @@ func TestBuild_Prepare(t *testing.T) {
 
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey: "test",
-		DebugConfigKey: false,
+		DebugConfigKey:     false,
 	}
 
 	build := testBuild()
@@ -87,7 +87,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey: "test",
-		DebugConfigKey: true,
+		DebugConfigKey:     true,
 	}
 
 	build := testBuild()
