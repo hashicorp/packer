@@ -15,8 +15,7 @@ format:
 
 test:
 	@echo "$(OK_COLOR)==> Testing Packer...$(NO_COLOR)"
-	@go list -f '{{range .TestImports}}{{.}}\
-		{{end}}' ./... | xargs -n1 go get -d
+	@go list -f '{{range .TestImports}}{{.}} {{end}}' ./... | xargs -n1 go get -d
 	go test ./...
 
 .PHONY: all format test
