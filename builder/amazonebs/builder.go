@@ -15,6 +15,7 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os"
 	"text/template"
 	"time"
 )
@@ -55,6 +56,22 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if b.config.AccessKey == "" {
+		b.config.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
+	}
+
+	if b.config.AccessKey == "" {
+		b.config.AccessKey = os.Getenv("AWS_ACCESS_KEY")
+	}
+
+	if b.config.SecretKey == "" {
+		b.config.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	}
+
+	if b.config.SecretKey == "" {
+		b.config.SecretKey = os.Getenv("AWS_SECRET_KEY")
 	}
 
 	if b.config.SSHPort == 0 {
