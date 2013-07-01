@@ -13,6 +13,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * core: More plugin server fixes that avoid hangs on OS X 10.7 [GH-87]
+* virtualbox: More robust version parsing for uploading guest additions. [GH-69]
 
 ## 0.1.2 (June 29, 2013)
 
