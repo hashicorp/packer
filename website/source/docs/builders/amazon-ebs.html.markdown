@@ -37,6 +37,8 @@ each category, the available configuration keys are alphabetized.
 Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
+  If not specified, Packer will attempt to read this from environmental
+  variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order).
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
@@ -50,6 +52,8 @@ Required:
   to launch the EC2 instance to create the AMI.
 
 * `secret_key` (string) - The secret key used to communicate with AWS.
+  If not specified, Packer will attempt to read this from environmental
+  variables `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order).
 
 * `source_ami` (string) - The initial AMI used as a base for the newly
   created machine.
