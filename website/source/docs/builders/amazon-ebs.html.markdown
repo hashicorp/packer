@@ -87,6 +87,13 @@ Here is a basic example. It is completely valid except for the access keys:
 }
 </pre>
 
+<div class="alert alert-block alert-info">
+<strong>Note:</strong> Packer can also read the access key and secret
+access key from environmental variables. See the configuration reference in
+the section above for more information on what environmental variables Packer
+will look for.
+</div>
+
 ## AMI Name Variables
 
 The AMI name specified by the `ami_name` configuration variable is actually
