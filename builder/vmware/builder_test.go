@@ -309,6 +309,36 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default
+	delete(config, "tools_upload_path")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.ToolsUploadPath == "" {
+		t.Fatalf("bad value: %s", b.config.ToolsUploadPath)
+	}
+
+	// Test with a bad value
+	config["tools_upload_path"] = "{{{nope}"
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good one
+	config["tools_upload_path"] = "hey"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_VNCPort(t *testing.T) {
 	var b Builder
 	config := testConfig()

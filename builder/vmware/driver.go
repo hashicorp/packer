@@ -24,8 +24,8 @@ type Driver interface {
 	// Stop stops a VM specified by the path to the VMX given.
 	Stop(string) error
 
-	// Get the path to the VMware ISO.
-	ToolsIsoPath() string
+	// Get the path to the VMware ISO for the given flavor.
+	ToolsIsoPath(string) string
 
 	// Verify checks to make sure that this driver should function
 	// properly. This should check that all the files it will use
@@ -124,9 +124,8 @@ func (d *Fusion5Driver) vmrunPath() string {
 	return filepath.Join(d.AppPath, "Contents", "Library", "vmrun")
 }
 
-// @TODO: Be smarter about guest type before deciding on linux.iso.
-func (d *Fusion5Driver) ToolsIsoPath() string {
-	return filepath.Join(d.AppPath, "Contents", "Library", "isoimages", "linux.iso")
+func (d *Fusion5Driver) ToolsIsoPath(k string) string {
+	return filepath.Join(d.AppPath, "Contents", "Library", "isoimages", k+".iso")
 }
 
 func (d *Fusion5Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {

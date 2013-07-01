@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -25,27 +26,29 @@ type Builder struct {
 }
 
 type config struct {
-	DiskName        string            `mapstructure:"vmdk_name"`
-	DiskSize        uint              `mapstructure:"disk_size"`
-	GuestOSType     string            `mapstructure:"guest_os_type"`
-	ISOMD5          string            `mapstructure:"iso_md5"`
-	ISOUrl          string            `mapstructure:"iso_url"`
-	VMName          string            `mapstructure:"vm_name"`
-	OutputDir       string            `mapstructure:"output_directory"`
-	HTTPDir         string            `mapstructure:"http_directory"`
-	HTTPPortMin     uint              `mapstructure:"http_port_min"`
-	HTTPPortMax     uint              `mapstructure:"http_port_max"`
-	BootCommand     []string          `mapstructure:"boot_command"`
-	BootWait        time.Duration     ``
-	ShutdownCommand string            `mapstructure:"shutdown_command"`
-	ShutdownTimeout time.Duration     ``
-	SSHUser         string            `mapstructure:"ssh_username"`
-	SSHPassword     string            `mapstructure:"ssh_password"`
-	SSHPort         uint              `mapstructure:"ssh_port"`
-	SSHWaitTimeout  time.Duration     ``
-	VMXData         map[string]string `mapstructure:"vmx_data"`
-	VNCPortMin      uint              `mapstructure:"vnc_port_min"`
-	VNCPortMax      uint              `mapstructure:"vnc_port_max"`
+	DiskName          string            `mapstructure:"vmdk_name"`
+	DiskSize          uint              `mapstructure:"disk_size"`
+	GuestOSType       string            `mapstructure:"guest_os_type"`
+	ISOMD5            string            `mapstructure:"iso_md5"`
+	ISOUrl            string            `mapstructure:"iso_url"`
+	VMName            string            `mapstructure:"vm_name"`
+	OutputDir         string            `mapstructure:"output_directory"`
+	HTTPDir           string            `mapstructure:"http_directory"`
+	HTTPPortMin       uint              `mapstructure:"http_port_min"`
+	HTTPPortMax       uint              `mapstructure:"http_port_max"`
+	BootCommand       []string          `mapstructure:"boot_command"`
+	BootWait          time.Duration     ``
+	ShutdownCommand   string            `mapstructure:"shutdown_command"`
+	ShutdownTimeout   time.Duration     ``
+	SSHUser           string            `mapstructure:"ssh_username"`
+	SSHPassword       string            `mapstructure:"ssh_password"`
+	SSHPort           uint              `mapstructure:"ssh_port"`
+	SSHWaitTimeout    time.Duration     ``
+	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
+	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
+	VMXData           map[string]string `mapstructure:"vmx_data"`
+	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
+	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
 
 	PackerDebug bool `mapstructure:"packer_debug"`
 
@@ -104,6 +107,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.SSHPort == 0 {
 		b.config.SSHPort = 22
+	}
+
+	if b.config.ToolsUploadPath == "" {
+		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
 	}
 
 	// Accumulate any errors
@@ -192,6 +199,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
+	if _, err := template.New("path").Parse(b.config.ToolsUploadPath); err != nil {
+		errs = append(errs, fmt.Errorf("tools_upload_path invalid: %s", err))
+	}
+
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
@@ -213,6 +224,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	steps := []multistep.Step{
+		&stepPrepareTools{},
 		&stepDownloadISO{},
 		&stepPrepareOutputDir{},
 		&stepCreateDisk{},
