@@ -75,12 +75,14 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		// https://groups.google.com/forum/#!topic/golang-nuts/fizimmXtVfc
 		newline := []byte{'\x0a'}
 
+		// Calculate the start/end position of the line where the error is
 		start := bytes.LastIndex(data[:syntaxErr.Offset], newline)+1
 		end := len(data)
 		if idx := bytes.Index(data[start:], newline); idx >= 0 {
 			end = start + idx
 		}
 
+		// Count the line number we're on plus the offset in the line
 		line := bytes.Count(data[:start], newline)+1
 		pos := int(syntaxErr.Offset) - start - 1
 
