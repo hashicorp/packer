@@ -16,7 +16,7 @@ func Test_netListenerInRange(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	// Open up port 10000 so that we take up a port
-	L1000, err := net.Listen("tcp", ":11000")
+	L1000, err := net.Listen("tcp", "127.0.0.1:11000")
 	defer L1000.Close()
 	assert.Nil(err, "should be able to bind to port 10000")
 
