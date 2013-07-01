@@ -252,7 +252,7 @@ func (c *Client) Start() (address string, err error) {
 	timeout := time.After(c.config.StartTimeout)
 
 	// Start looking for the address
-	log.Println("Waiting for RPC address for: %s", cmd.Path)
+	log.Printf("Waiting for RPC address for: %s", cmd.Path)
 	for done := false; !done; {
 		select {
 		case <-timeout:
