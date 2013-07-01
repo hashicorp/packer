@@ -2,6 +2,7 @@ package packer
 
 type TestPostProcessor struct {
 	artifactId   string
+	keep         bool
 	configCalled bool
 	configVal    interface{}
 	ppCalled     bool
@@ -15,9 +16,9 @@ func (pp *TestPostProcessor) Configure(v interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ui Ui, a Artifact) (Artifact, error) {
+func (pp *TestPostProcessor) PostProcess(ui Ui, a Artifact) (Artifact, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppUi = ui
-	return &TestArtifact{id: pp.artifactId}, nil
+	return &TestArtifact{id: pp.artifactId}, pp.keep, nil
 }

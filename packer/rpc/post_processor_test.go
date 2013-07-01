@@ -22,11 +22,11 @@ func (pp *TestPostProcessor) Configure(v interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, error) {
+func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppUi = ui
-	return testPostProcessorArtifact, nil
+	return testPostProcessorArtifact, false, nil
 }
 
 func TestPostProcessorRPC(t *testing.T) {
@@ -63,7 +63,7 @@ func TestPostProcessorRPC(t *testing.T) {
 	// Test PostProcess
 	a := new(testArtifact)
 	ui := new(testUi)
-	artifact, err := pClient.PostProcess(ui, a)
+	artifact, _, err := pClient.PostProcess(ui, a)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

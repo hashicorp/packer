@@ -245,6 +245,33 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	if !reflect.DeepEqual(artifactIds, expectedIds) {
 		t.Fatalf("unexpected ids: %#v", artifactIds)
 	}
+
+	// Test case: Test that with a single post-processor that forcibly
+	// keeps inputs, that the artifacts are kept.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		[]coreBuildPostProcessor{
+			coreBuildPostProcessor{
+				&TestPostProcessor{artifactId: "pp", keep: true}, "pp", 42, false,
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(ui, cache)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"b", "pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {

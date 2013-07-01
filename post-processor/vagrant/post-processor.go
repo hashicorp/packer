@@ -68,10 +68,10 @@ func (p *PostProcessor) Configure(raw interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	ppName, ok := builtins[artifact.BuilderId()]
 	if !ok {
-		return nil, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
 	// Use the premade PostProcessor if we have one. Otherwise, we
@@ -81,12 +81,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		log.Printf("Premade post-processor for '%s' not found. Creating.", ppName)
 		pp = keyToPostProcessor(ppName)
 		if pp == nil {
-			return nil, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
+			return nil, false, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
 		}
 
 		config := map[string]string{"output": p.config.OutputPath}
 		if err := pp.Configure(config); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 

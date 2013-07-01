@@ -194,7 +194,7 @@ PostProcessorRunSeqLoop:
 			}
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
-			artifact, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
 				continue PostProcessorRunSeqLoop
@@ -205,11 +205,12 @@ PostProcessorRunSeqLoop:
 				continue PostProcessorRunSeqLoop
 			}
 
+			keep = keep || corePP.keepInputArtifact
 			if i == 0 {
 				// This is the first post-processor. We handle deleting
 				// previous artifacts a bit different because multiple
 				// post-processors may be using the original and need it.
-				if !keepOriginalArtifact && corePP.keepInputArtifact {
+				if !keepOriginalArtifact && keep {
 					log.Printf(
 						"Flagging to keep original artifact from post-processor '%s'",
 						corePP.processorType)
@@ -218,7 +219,7 @@ PostProcessorRunSeqLoop:
 			} else {
 				// We have a prior artifact. If we want to keep it, we append
 				// it to the results list. Otherwise, we destroy it.
-				if corePP.keepInputArtifact {
+				if keep {
 					artifacts = append(artifacts, priorArtifact)
 				} else {
 					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
