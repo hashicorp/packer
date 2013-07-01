@@ -2,7 +2,6 @@ package vmware
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -18,6 +17,9 @@ type GuestIPFinder interface {
 // DHCPLeaseGuestLookup looks up the IP address of a guest using DHCP
 // lease information from the VMware network devices.
 type DHCPLeaseGuestLookup struct {
+	// Driver that is being used (to find leases path)
+	Driver Driver
+
 	// Device that the guest is connected to.
 	Device string
 
@@ -26,7 +28,7 @@ type DHCPLeaseGuestLookup struct {
 }
 
 func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {
-	fh, err := os.Open(fmt.Sprintf("/var/db/vmware/vmnet-dhcpd-%s.leases", f.Device))
+	fh, err := os.Open(f.Driver.DhcpLeasesPath(f.Device))
 	if err != nil {
 		return "", err
 	}

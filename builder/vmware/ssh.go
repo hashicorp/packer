@@ -12,6 +12,7 @@ import (
 
 func sshAddress(state map[string]interface{}) (string, error) {
 	config := state["config"].(*config)
+	driver := state["driver"].(Driver)
 	vmxPath := state["vmx_path"].(string)
 
 	log.Println("Lookup up IP information...")
@@ -37,6 +38,7 @@ func sshAddress(state map[string]interface{}) (string, error) {
 	}
 
 	ipLookup := &DHCPLeaseGuestLookup{
+		Driver:     driver,
 		Device:     "vmnet8",
 		MACAddress: macAddress,
 	}
