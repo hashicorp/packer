@@ -27,6 +27,8 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
+	log.Printf("Packer Version: %s %s", packer.Version, packer.VersionPrerelease)
+
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
