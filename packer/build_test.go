@@ -39,19 +39,22 @@ func TestBuild_Name(t *testing.T) {
 func TestBuild_Prepare(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	debugFalseConfig := map[string]interface{}{DebugConfigKey: false}
+	packerConfig := map[string]interface{}{
+		BuildNameConfigKey: "test",
+		DebugConfigKey: false,
+	}
 
 	build := testBuild()
 	builder := build.builder.(*TestBuilder)
 
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, []interface{}{42, debugFalseConfig}, "prepare config should be 42")
+	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
 
 	coreProv := build.provisioners[0]
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfigs, []interface{}{42, debugFalseConfig}, "prepare should be called with proper config")
+	assert.Equal(prov.prepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
 
 	corePP := build.postProcessors[0][0]
 	pp := corePP.processor.(*TestPostProcessor)
@@ -82,7 +85,10 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 func TestBuild_Prepare_Debug(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	debugConfig := map[string]interface{}{DebugConfigKey: true}
+	packerConfig := map[string]interface{}{
+		BuildNameConfigKey: "test",
+		DebugConfigKey: true,
+	}
 
 	build := testBuild()
 	builder := build.builder.(*TestBuilder)
@@ -90,12 +96,12 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	build.SetDebug(true)
 	build.Prepare()
 	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, []interface{}{42, debugConfig}, "prepare config should be 42")
+	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
 
 	coreProv := build.provisioners[0]
 	prov := coreProv.provisioner.(*TestProvisioner)
 	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfigs, []interface{}{42, debugConfig}, "prepare should be called with proper config")
+	assert.Equal(prov.prepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
 }
 
 func TestBuild_Run(t *testing.T) {

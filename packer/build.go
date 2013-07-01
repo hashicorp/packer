@@ -6,6 +6,10 @@ import (
 	"sync"
 )
 
+// This is the key in configurations that is set to the name of the
+// build.
+const BuildNameConfigKey = "packer_build_name"
+
 // This is the key in configurations that is set to "true" when Packer
 // debugging is enabled.
 const DebugConfigKey = "packer_debug"
@@ -91,12 +95,13 @@ func (b *coreBuild) Prepare() (err error) {
 
 	b.prepareCalled = true
 
-	debugConfig := map[string]interface{}{
+	packerConfig := map[string]interface{}{
+		BuildNameConfigKey: b.name,
 		DebugConfigKey: b.debug,
 	}
 
 	// Prepare the builder
-	err = b.builder.Prepare(b.builderConfig, debugConfig)
+	err = b.builder.Prepare(b.builderConfig, packerConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
 		return
@@ -106,7 +111,7 @@ func (b *coreBuild) Prepare() (err error) {
 	for _, coreProv := range b.provisioners {
 		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
 		copy(configs, coreProv.config)
-		configs = append(configs, debugConfig)
+		configs = append(configs, packerConfig)
 
 		if err = coreProv.provisioner.Prepare(configs...); err != nil {
 			return
