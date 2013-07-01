@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
@@ -56,6 +57,29 @@ type rawProvisionerConfig struct {
 	rawConfig interface{}
 }
 
+// displaySyntaxError returns a location for the json syntax error
+// Adapted from:
+// https://groups.google.com/forum/#!topic/golang-nuts/fizimmXtVfc
+func displaySyntaxError(js []byte, syntaxError error) (err error) {
+	syntax, ok := syntaxError.(*json.SyntaxError)
+	if !ok {
+		err = syntaxError
+		return
+	}
+	newline := []byte{'\x0a'}
+	space := []byte{' '}
+
+	start, end := bytes.LastIndex(js[:syntax.Offset], newline)+1, len(js)
+	if idx := bytes.Index(js[start:], newline); idx >= 0 {
+		end = start + idx
+	}
+	
+	line, pos := bytes.Count(js[:start], newline)+1, int(syntax.Offset) - start - 1
+	
+	err = fmt.Errorf("\nError in line %d: %s \n%s\n%s^", line, syntaxError, js[start:end], bytes.Repeat(space, pos))
+	return
+}
+
 // ParseTemplate takes a byte slice and parses a Template from it, returning
 // the template and possibly errors while loading the template. The error
 // could potentially be a MultiError, representing multiple errors. Knowing
@@ -65,6 +89,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	var rawTpl rawTemplate
 	err = json.Unmarshal(data, &rawTpl)
 	if err != nil {
+		err = displaySyntaxError(data, err)
 		return
 	}
 
