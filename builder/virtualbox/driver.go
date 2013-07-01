@@ -124,11 +124,12 @@ func (d *VBox42Driver) Version() (string, error) {
 		return "", err
 	}
 
-	log.Printf("VBoxManage --version output: %s", stdout.String())
+	versionOutput := strings.TrimSpace(stdout.String())
+	log.Printf("VBoxManage --version output: %s", versionOutput)
 	versionRe := regexp.MustCompile("[^.0-9]")
-	matches := versionRe.Split(stdout.String(), 2)
+	matches := versionRe.Split(versionOutput, 2)
 	if len(matches) == 0 {
-		return "", fmt.Errorf("No version found: %s", stdout.String())
+		return "", fmt.Errorf("No version found: %s", versionOutput)
 	}
 
 	log.Printf("VirtualBox version: %s", matches[0])
