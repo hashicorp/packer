@@ -3,6 +3,8 @@
 IMPROVEMENTS:
 
 * core: Template syntax errors now show line and character number. [GH-56]
+* amazon-ebs: Access key and secret access key default to
+  environmental variables. [GH-40]
 
 ## 0.1.3 (July 1, 2013)
 
