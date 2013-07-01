@@ -50,7 +50,8 @@ type config struct {
 	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
 
-	PackerDebug bool `mapstructure:"packer_debug"`
+	PackerBuildName string `mapstructure:"packer_build_name"`
+	PackerDebug     bool   `mapstructure:"packer_debug"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -78,7 +79,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.VMName == "" {
-		b.config.VMName = "packer"
+		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
 	if b.config.HTTPPortMin == 0 {
@@ -102,7 +103,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.OutputDir == "" {
-		b.config.OutputDir = "vmware"
+		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
 	if b.config.SSHPort == 0 {

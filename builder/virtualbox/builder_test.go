@@ -13,6 +13,8 @@ func testConfig() map[string]interface{} {
 		"iso_md5":      "foo",
 		"iso_url":      "http://www.google.com/",
 		"ssh_username": "foo",
+
+		packer.BuildNameConfigKey: "foo",
 	}
 }
 
@@ -36,7 +38,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad guest OS type: %s", b.config.GuestOSType)
 	}
 
-	if b.config.OutputDir != "virtualbox" {
+	if b.config.OutputDir != "output-foo" {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
 
@@ -52,7 +54,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad ssh port: %d", b.config.SSHPort)
 	}
 
-	if b.config.VMName != "packer" {
+	if b.config.VMName != "packer-foo" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
 	}
 }

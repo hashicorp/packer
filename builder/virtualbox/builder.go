@@ -48,7 +48,8 @@ type config struct {
 	VBoxManage         [][]string    `mapstructure:"vboxmanage"`
 	VMName             string        `mapstructure:"vm_name"`
 
-	PackerDebug bool `mapstructure:"packer_debug"`
+	PackerBuildName string `mapstructure:"packer_build_name"`
+	PackerDebug     bool   `mapstructure:"packer_debug"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -86,7 +87,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.OutputDir == "" {
-		b.config.OutputDir = "virtualbox"
+		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
 	if b.config.RawBootWait == "" {
@@ -114,7 +115,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.VMName == "" {
-		b.config.VMName = "packer"
+		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
 	errs := make([]error, 0)
