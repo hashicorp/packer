@@ -20,7 +20,7 @@ func PortRange(min, max int) {
 // bound to that port.
 func netListenerInRange(min, max int) net.Listener {
 	for port := min; port <= max; port++ {
-		l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+		l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 		if err == nil {
 			return l
 		}
