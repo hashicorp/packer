@@ -95,8 +95,9 @@ Optional:
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`
-  is executed. By default this is "vmware". This directory must not exist
-  or be empty prior to running the builder.
+  is executed. This directory must not exist or be empty prior to running the builder.
+  By default this is "output-BUILDNAME" where "BUILDNAME" is the name
+  of the build.
 
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
@@ -129,10 +130,11 @@ Optional:
   `{{.Flavor}}.iso`.
 
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
-  machine, without the file extension. By default this is "packer".
+  machine, without the file extension. By default this is "packer-BUILDNAME",
+  where "BUILDNAME" is the name of the build.
 
 * `vmdk_name` (string) - The filename of the virtual disk that'll be created,
-  without the extension. This defaults to "packer".
+  without the extension. This is a This defaults to "packer".
 
 * `vmx_data` (object, string keys and string values) - Arbitrary key/values
   to enter into the virtual machine VMX file. This is for advanced users
