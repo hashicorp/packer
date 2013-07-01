@@ -14,6 +14,8 @@ import (
 type VMwareBoxConfig struct {
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+
+	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type VMwareBoxPostProcessor struct {
@@ -28,13 +30,13 @@ func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-
 	return nil
 }
 
 func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	// Compile the output path
-	outputPath, err := ProcessOutputPath(p.config.OutputPath, "vmware", artifact)
+	outputPath, err := ProcessOutputPath(p.config.OutputPath,
+		p.config.PackerBuildName, "vmware", artifact)
 	if err != nil {
 		return nil, false, err
 	}
