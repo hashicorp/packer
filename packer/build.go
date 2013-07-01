@@ -121,7 +121,8 @@ func (b *coreBuild) Prepare() (err error) {
 	// Prepare the post-processors
 	for _, ppSeq := range b.postProcessors {
 		for _, corePP := range ppSeq {
-			if err = corePP.processor.Configure(corePP.config); err != nil {
+			err = corePP.processor.Configure(corePP.config, packerConfig)
+			if err != nil {
 				return
 			}
 		}
