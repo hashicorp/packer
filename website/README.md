@@ -17,7 +17,7 @@ commands:
 
 ```
 $ bundle
-$ bundle exec middleman server
+$ PACKER_DISABLE_DOWNLOAD_FETCH=true PACKER_VERSION=1.0 bundle exec middleman server
 ```
 
 Then open up `localhost:4567`. Note that some URLs you may need to append
