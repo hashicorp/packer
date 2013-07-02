@@ -23,9 +23,7 @@ func (stepCompactDisk) Run(state map[string]interface{}) multistep.StepAction {
 
 	ui.Say("Compacting the disk image")
 	if err := driver.CompactDisk(full_disk_path); err != nil {
-		err := fmt.Errorf("Error compacting disk: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
+		state["error"] := fmt.Errorf("Error compacting disk: %s", err)
 		return multistep.ActionHalt
 	}
 
