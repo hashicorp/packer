@@ -6,6 +6,11 @@ IMPROVEMENTS:
 * amazon-ebs: Access key and secret access key default to
   environmental variables. [GH-40]
 
+BUG FIXES:
+
+* vmware: Wait until shut down cleans up properly to avoid corrupt
+  disk files [GH-111]
+
 ## 0.1.3 (July 1, 2013)
 
 FEATURES:
