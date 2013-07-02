@@ -59,6 +59,16 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 				continue
 			}
 
+			if code == "wait5" {
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			if code == "wait10" {
+				time.Sleep(10 * time.Second)
+				continue
+			}
+
 			// Since typing is sometimes so slow, we check for an interrupt
 			// in between each character.
 			if _, ok := state[multistep.StateCancelled]; ok {
@@ -116,9 +126,21 @@ func scancodes(message string) []string {
 		var scancode []string
 
 		if strings.HasPrefix(message, "<wait>") {
-			log.Printf("Special code <wait> found, will sleep at this point.")
+			log.Printf("Special code <wait> found, will sleep 1 second at this point.")
 			scancode = []string{"wait"}
 			message = message[len("<wait>"):]
+		}
+
+		if strings.HasPrefix(message, "<wait5>") {
+			log.Printf("Special code <wait5> found, will sleep 5 seconds at this point.")
+			scancode = []string{"wait5"}
+			message = message[len("<wait5>"):]
+		}
+
+		if strings.HasPrefix(message, "<wait10>") {
+			log.Printf("Special code <wait10> found, will sleep 10 seconds at this point.")
+			scancode = []string{"wait10"}
+			message = message[len("<wait10>"):]
 		}
 
 		if scancode == nil {
