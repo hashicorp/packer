@@ -6,11 +6,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step compacts the virtual disk for the VM. If "compact_disk" is not
-// true, it will immediately return.
+// This step compacts the virtual disk for the VM.
 //
 // Uses:
-//   config *config
 //   driver Driver
 //   ui     packer.Ui
 //
