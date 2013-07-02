@@ -239,6 +239,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepProvision{},
 		&stepShutdown{},
 		&stepCleanFiles{},
+		&stepCompactDisk{},
 	}
 
 	// Setup the state bag

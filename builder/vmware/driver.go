@@ -12,6 +12,9 @@ import (
 
 // A driver is able to talk to VMware, control virtual machines, etc.
 type Driver interface {
+	// CompactDisk compacts a virtual disk.
+	CompactDisk(string) error
+
 	// CreateDisk creates a virtual disk with the given size.
 	CreateDisk(string, string) error
 
@@ -38,6 +41,20 @@ type Driver interface {
 type Fusion5Driver struct {
 	// This is the path to the "VMware Fusion.app"
 	AppPath string
+}
+
+func (d *Fusion5Driver) CompactDisk(diskPath string) error {
+	defragCmd := exec.Command(d.vdiskManagerPath(), "-d", diskPath)
+	if _, _, err := d.runAndLog(defragCmd); err != nil {
+		return err
+	}
+
+	shrinkCmd := exec.Command(d.vdiskManagerPath(), "-k", diskPath)
+	if _, _, err := d.runAndLog(shrinkCmd); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Fusion5Driver) CreateDisk(output string, size string) error {
