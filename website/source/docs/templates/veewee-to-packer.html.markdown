@@ -49,7 +49,7 @@ specific builder configurations.
 
 None, really. The tool will tell you if it can't convert a part of a
 template, and whether that is a critical error or just a warning.
-Most of Veewees functions translate perfectly over to Packer. There are
+Most of Veewee's functions translate perfectly over to Packer. There are
 still a couple missing features in Packer, but they're minimal.
 
 ## Bugs
