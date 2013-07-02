@@ -6,6 +6,8 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -72,8 +74,33 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		}
 	}
 
-	log.Println("Giving VMware a few extra seconds to clean up after itself...")
-	time.Sleep(5 * time.Second)
+	ui.Message("Waiting for VMware to clean up after itself...")
+	lockPattern := filepath.Join(config.OutputDir, "*.lck")
+	timer := time.After(15 * time.Second)
+LockWaitLoop:
+	for {
+		locks, err := filepath.Glob(lockPattern)
+		if err == nil {
+			if len(locks) == 0 {
+				log.Println("No more lock files found. VMware is clean.")
+				break
+			}
+
+			if len(locks) == 1 && strings.HasSuffix(locks[0], ".vmx.lck") {
+				log.Println("Only waiting on VMX lock. VMware is clean.")
+				break
+			}
+
+			log.Printf("Waiting on lock files: %#v", locks)
+		}
+
+		select {
+		case <-timer:
+			log.Println("Reached timeout on waiting for clean VMware. Assuming clean.")
+			break LockWaitLoop
+		case <-time.After(1 * time.Second):
+		}
+	}
 
 	log.Println("VM shut down.")
 	return multistep.ActionContinue
