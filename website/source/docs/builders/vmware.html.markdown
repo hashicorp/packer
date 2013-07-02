@@ -168,7 +168,7 @@ will be replaced by the proper key:
 
 * `<tab>` - Simulates pressing the tab key.
 
-* `<wait>` - Adds a one second pause before sending any additional keys. This
+* `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
 
 In addition to the special keys, each command to type is treated as a
