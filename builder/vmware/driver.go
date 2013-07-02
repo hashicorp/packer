@@ -19,7 +19,7 @@ type Driver interface {
 	IsRunning(string) (bool, error)
 
 	// Start starts a VM specified by the path to the VMX given.
-	Start(string) error
+	Start(string, bool) error
 
 	// Stop stops a VM specified by the path to the VMX given.
 	Stop(string) error
@@ -70,8 +70,13 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Fusion5Driver) Start(vmxPath string) error {
-	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "start", vmxPath, "gui")
+func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {
+	guiArgument := "gui"
+	if headless == true {
+		guiArgument = "nogui"
+	}
+
+	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "start", vmxPath, guiArgument)
 	if _, _, err := d.runAndLog(cmd); err != nil {
 		return err
 	}
