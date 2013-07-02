@@ -30,6 +30,7 @@ type config struct {
 	DiskSize           uint          `mapstructure:"disk_size"`
 	GuestAdditionsPath string        `mapstructure:"guest_additions_path"`
 	GuestOSType        string        `mapstructure:"guest_os_type"`
+	Headless           bool          `mapstructure:"headless"`
 	HTTPDir            string        `mapstructure:"http_directory"`
 	HTTPPortMin        uint          `mapstructure:"http_port_min"`
 	HTTPPortMax        uint          `mapstructure:"http_port_max"`
