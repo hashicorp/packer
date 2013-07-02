@@ -6,7 +6,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step compacts the virtual disks for the VM.
+// This step compacts the virtual disk for the VM. If "compact_disk" is not
+// true, it will immediately return.
 //
 // Uses:
 //   config *config
@@ -18,12 +19,12 @@ import (
 type stepCompactDisk struct{}
 
 func (stepCompactDisk) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
+	full_disk_path := state["full_disk_path"].(string)
 
 	ui.Say("Compacting the disk image")
-	if err := driver.CompactDisk(config.FullDiskPath); err != nil {
+	if err := driver.CompactDisk(full_disk_path); err != nil {
 		err := fmt.Errorf("Error compacting disk: %s", err)
 		state["error"] = err
 		ui.Error(err.Error())
