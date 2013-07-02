@@ -33,7 +33,7 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	s.vmxPath = vmxPath
 
 	ui.Say("Starting virtual machine...")
-	if err := driver.Start(vmxPath); err != nil {
+	if err := driver.Start(vmxPath, config.Headless); err != nil {
 		err := fmt.Errorf("Error starting VM: %s", err)
 		state["error"] = err
 		ui.Error(err.Error())

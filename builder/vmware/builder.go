@@ -33,6 +33,7 @@ type config struct {
 	ISOUrl            string            `mapstructure:"iso_url"`
 	VMName            string            `mapstructure:"vm_name"`
 	OutputDir         string            `mapstructure:"output_directory"`
+	Headless          bool              `mapstructure:"headless"`
 	HTTPDir           string            `mapstructure:"http_directory"`
 	HTTPPortMin       uint              `mapstructure:"http_port_min"`
 	HTTPPortMax       uint              `mapstructure:"http_port_max"`
