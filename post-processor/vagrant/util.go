@@ -40,6 +40,11 @@ func DirToBox(dst, dir string) error {
 
 	// This is the walk func that tars each of the files in the dir
 	tarWalk := func(path string, info os.FileInfo, prevErr error) error {
+		// If there was a prior error, return it
+		if prevErr != nil {
+			return prevErr
+		}
+
 		// Skip directories
 		if info.IsDir() {
 			log.Printf("Skiping directory '%s' for box '%s'", path, dst)
