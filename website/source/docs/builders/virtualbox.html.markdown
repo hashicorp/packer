@@ -54,7 +54,7 @@ Required:
 Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
-  when the virtual machine is firsted booted. The goal of these commands should
+  when the virtual machine is first booted. The goal of these commands should
   be to type just enough to initialize the operating system installer. Special
   keys can be typed as well, and are covered in the section below on the boot
   command. If this is not specified, it is assumed the installer will start
@@ -127,7 +127,7 @@ Optional:
 
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
   available. By default this is "20m", or 20 minutes. Note that this should
-  be quite long since the timer begins as soon as virtual machine is booted.
+  be quite long since the timer begins as soon as the virtual machine is booted.
 
 * `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
   execute in order to further customize the virtual machine being created.
