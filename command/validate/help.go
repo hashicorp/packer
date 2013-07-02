@@ -1,7 +1,7 @@
 package validate
 
 const helpString = `
-Usage: packer validate TEMPLATE
+Usage: packer validate [options] TEMPLATE
 
   Checks the template is valid by parsing the template and also
   checking the configuration with the various builders, provisioners, etc.

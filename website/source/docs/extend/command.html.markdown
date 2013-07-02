@@ -52,7 +52,7 @@ it is not required. You're allowed to make the help look like anything
 you please.
 
 ```
-Usage: packer COMMAND ARGS...
+Usage: packer COMMAND [options] ARGS...
 
   Brief one or two sentence about the function of the command.
 
