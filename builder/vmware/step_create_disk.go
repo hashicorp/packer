@@ -24,8 +24,7 @@ func (stepCreateDisk) Run(state map[string]interface{}) multistep.StepAction {
 	ui := state["ui"].(packer.Ui)
 
 	ui.Say("Creating virtual machine disk")
-	output := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
-	if err := driver.CreateDisk(output, fmt.Sprintf("%dM", config.DiskSize)); err != nil {
+	if err := driver.CreateDisk(config.FullDiskPath, fmt.Sprintf("%dM", config.DiskSize)); err != nil {
 		err := fmt.Errorf("Error creating disk: %s", err)
 		state["error"] = err
 		ui.Error(err.Error())

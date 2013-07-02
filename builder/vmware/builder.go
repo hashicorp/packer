@@ -52,6 +52,7 @@ type config struct {
 
 	PackerBuildName string `mapstructure:"packer_build_name"`
 	PackerDebug     bool   `mapstructure:"packer_debug"`
+	FullDiskPath    string ``
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -113,6 +114,9 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.ToolsUploadPath == "" {
 		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
 	}
+
+	// Store the full path to the disk file.
+	b.config.FullDiskPath = filepath.Join(b.config.OutputDir, b.config.DiskName+".vmdk")
 
 	// Accumulate any errors
 	var err error
