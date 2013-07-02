@@ -114,6 +114,20 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			continue
 		}
 
+		if strings.HasPrefix(original, "<wait5>") {
+			log.Printf("Special code '<wait5>' found, sleeping 5 seconds")
+			time.Sleep(5 * time.Second)
+			original = original[len("<wait5>"):]
+			continue
+		}
+
+		if strings.HasPrefix(original, "<wait10>") {
+			log.Printf("Special code '<wait10>' found, sleeping 10 seconds")
+			time.Sleep(10 * time.Second)
+			original = original[len("<wait10>"):]
+			continue
+		}
+
 		for specialCode, specialValue := range special {
 			if strings.HasPrefix(original, specialCode) {
 				log.Printf("Special code '%s' found, replacing with: %d", specialCode, specialValue)
