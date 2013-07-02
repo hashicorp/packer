@@ -72,6 +72,9 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		}
 	}
 
+	log.Println("Giving VMware a few extra seconds to clean up after itself...")
+	time.Sleep(5 * time.Second)
+
 	log.Println("VM shut down.")
 	return multistep.ActionContinue
 }
