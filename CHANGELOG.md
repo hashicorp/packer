@@ -1,5 +1,9 @@
 ## 0.1.4 (unreleased)
 
+FEATURES:
+
+* vmware: Disks are defragmented and compacted at the end of the build.
+
 IMPROVEMENTS:
 
 * core: Template syntax errors now show line and character number. [GH-56]
