@@ -116,7 +116,7 @@ Optional:
 
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
   available. By default this is "20m", or 20 minutes. Note that this should
-  be quite long since the timer begins as soon as virtual machine is booted.
+  be quite long since the timer begins as soon as the virtual machine is booted.
 
 * `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
   upload into the VM. Valid values are "darwin", "linux", and "windows".
@@ -134,7 +134,7 @@ Optional:
   where "BUILDNAME" is the name of the build.
 
 * `vmdk_name` (string) - The filename of the virtual disk that'll be created,
-  without the extension. This is a This defaults to "packer".
+  without the extension. This defaults to "packer".
 
 * `vmx_data` (object, string keys and string values) - Arbitrary key/values
   to enter into the virtual machine VMX file. This is for advanced users
