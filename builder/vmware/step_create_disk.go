@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
 )
 
 // This step creates the virtual disks for the VM.

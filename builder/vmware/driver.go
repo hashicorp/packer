@@ -44,13 +44,13 @@ type Fusion5Driver struct {
 }
 
 func (d *Fusion5Driver) CompactDisk(diskPath string) error {
-	cmd := exec.Command(d.vdiskManagerPath(), "-d", diskPath)
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	defragCmd := exec.Command(d.vdiskManagerPath(), "-d", diskPath)
+	if _, _, err := d.runAndLog(defragCmd); err != nil {
 		return err
 	}
 
-	cmd := exec.Command(d.vdiskManagerPath(), "-k", diskPath)
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	shrinkCmd := exec.Command(d.vdiskManagerPath(), "-k", diskPath)
+	if _, _, err := d.runAndLog(shrinkCmd); err != nil {
 		return err
 	}
 
