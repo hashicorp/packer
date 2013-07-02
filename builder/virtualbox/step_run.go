@@ -25,6 +25,9 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Starting the virtual machine...")
 	guiArgument := "gui"
 	if config.Headless == true {
+		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
+			"In headless mode, errors during the boot sequence or OS setup\n" +
+			"won't be easily visible. Use at your own discresion.")
 		guiArgument = "headless"
 	}
 	command := []string{"startvm", vmName, "--type", guiArgument}
