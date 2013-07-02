@@ -1,12 +1,14 @@
 package packer
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 )
 
@@ -86,19 +88,29 @@ func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 }
 
 func (u *PrefixedUi) Ask(query string) (string, error) {
-	return u.Ui.Ask(fmt.Sprintf("%s: %s", u.SayPrefix, query))
+	return u.Ui.Ask(u.prefixLines(u.SayPrefix, query))
 }
 
 func (u *PrefixedUi) Say(message string) {
-	u.Ui.Say(fmt.Sprintf("%s: %s", u.SayPrefix, message))
+	u.Ui.Say(u.prefixLines(u.SayPrefix, message))
 }
 
 func (u *PrefixedUi) Message(message string) {
-	u.Ui.Message(fmt.Sprintf("%s: %s", u.MessagePrefix, message))
+	u.Ui.Message(u.prefixLines(u.MessagePrefix, message))
 }
 
 func (u *PrefixedUi) Error(message string) {
-	u.Ui.Error(fmt.Sprintf("%s: %s", u.SayPrefix, message))
+	u.Ui.Error(u.prefixLines(u.SayPrefix, message))
+}
+
+func (u *PrefixedUi) prefixLines(prefix, message string) string {
+	var result bytes.Buffer
+
+	for _, line := range strings.Split(message, "\n") {
+		result.WriteString(fmt.Sprintf("%s: %s\n", prefix, line))
+	}
+
+	return strings.TrimSpace(result.String())
 }
 
 func (rw *ReaderWriterUi) Ask(query string) (string, error) {

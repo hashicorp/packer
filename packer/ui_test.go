@@ -50,6 +50,9 @@ func TestPrefixedUi(t *testing.T) {
 
 	prefixUi.Error("bar")
 	assert.Equal(readWriter(bufferUi), "mitchell: bar\n", "should have prefix")
+
+	prefixUi.Say("foo\nbar")
+	assert.Equal(readWriter(bufferUi), "mitchell: foo\nmitchell: bar\n", "should multiline")
 }
 
 func TestColoredUi_ImplUi(t *testing.T) {
