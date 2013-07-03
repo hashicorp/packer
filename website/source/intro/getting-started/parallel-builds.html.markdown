@@ -73,7 +73,7 @@ The entire template should now [look like this](https://gist.github.com/mitchell
 
 Additional builders are simply added to the `builders` array in the template.
 This tells Packer to build multiple images. The builder `type` values don't
-even need tdo be different! In fact, if you wanted to build multiple AMIs,
+even need to be different! In fact, if you wanted to build multiple AMIs,
 you can do that as well.
 
 Validate the template with `packer validate`. This is always a good practice.
