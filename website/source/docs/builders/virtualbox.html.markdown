@@ -82,12 +82,10 @@ Optional:
   how to optimize the virtual hardware to work best with that operating
   system.
 
-* `headless` (bool) - Packer defaults to building VMware and VirtualBox
+* `headless` (bool) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
-  start without a console. For VMware machines, Packer will output VNC
-  connection information in case you need to connect to the console to
-  debug the build process.
+  start without a console.
 
 * `http_directory` (string) - Path to a directory to serve using an HTTP
   server. The files in this directory will be available over HTTP that will
