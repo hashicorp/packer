@@ -39,6 +39,7 @@ type config struct {
 	HTTPPortMax       uint              `mapstructure:"http_port_max"`
 	BootCommand       []string          `mapstructure:"boot_command"`
 	BootWait          time.Duration     ``
+	SkipCompaction    bool              `mapstructure:"skip_compaction"`
 	ShutdownCommand   string            `mapstructure:"shutdown_command"`
 	ShutdownTimeout   time.Duration     ``
 	SSHUser           string            `mapstructure:"ssh_username"`

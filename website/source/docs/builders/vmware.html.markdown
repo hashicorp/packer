@@ -106,6 +106,11 @@ Optional:
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
+* `skip_compaction` (bool) - As of Packer 0.1.4, VMware-created disks are defragmented
+  and compacted at the end of the build process. If you are doing your own zeroing out
+  of the disks you may find that the compaction step results in slightly larger boxes.
+  Compaction will run unless you set this value to true.
+
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
   string, which tells Packer to just forcefully shut down the machine.
