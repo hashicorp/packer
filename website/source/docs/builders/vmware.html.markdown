@@ -77,7 +77,7 @@ Optional:
   OS type, VMware may perform some optimizations or virtual hardware changes
   to better support the operating system running in the virtual machine.
 
-* `headless` (bool) - Packer defaults to building VMware and VirtualBox
+* `headless` (bool) - Packer defaults to building VMware
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console. For VMware machines, Packer will output VNC
