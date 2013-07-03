@@ -1,4 +1,4 @@
-## 0.1.4 (unreleased)
+## 0.1.4 (July 2, 2013)
 
 FEATURES:
 
