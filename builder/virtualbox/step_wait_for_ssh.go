@@ -112,6 +112,8 @@ func (s *stepWaitForSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 			User: config.SSHUser,
 			Auth: []gossh.ClientAuth{
 				gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),
+				gossh.ClientAuthKeyboardInteractive(
+					ssh.PasswordKeyboardInteractive(config.SSHPassword)),
 			},
 		}
 

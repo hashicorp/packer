@@ -16,6 +16,8 @@ IMPROVEMENTS:
 * core: Template syntax errors now show line and character number. [GH-56]
 * amazon-ebs: Access key and secret access key default to
   environmental variables. [GH-40]
+* virtualbox: Send password for keyboard-interactive auth [GH-121]
+* vmware: Send password for keyboard-interactive auth [GH-121]
 
 BUG FIXES:
 
