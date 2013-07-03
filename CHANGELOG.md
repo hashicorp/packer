@@ -9,6 +9,7 @@ FEATURES:
 * vmware: <wait5> and <wait10> codes for waiting 5 and 10 seconds
   during the boot sequence, respectively. [GH-97]
 * vmware: Disks are defragmented and compacted at the end of the build.
+  This can be disabled using "skip_compaction"
 
 IMPROVEMENTS:
 
