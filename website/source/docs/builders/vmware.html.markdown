@@ -77,6 +77,13 @@ Optional:
   OS type, VMware may perform some optimizations or virtual hardware changes
   to better support the operating system running in the virtual machine.
 
+* `headless` (bool) - Packer defaults to building VMware
+  virtual machines by launching a GUI that shows the console of the
+  machine being built. When this value is set to true, the machine will
+  start without a console. For VMware machines, Packer will output VNC
+  connection information in case you need to connect to the console to
+  debug the build process.
+
 * `http_directory` (string) - Path to a directory to serve using an HTTP
   server. The files in this directory will be available over HTTP that will
   be requestable from the virtual machine. This is useful for hosting
