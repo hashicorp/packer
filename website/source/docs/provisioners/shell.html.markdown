@@ -23,7 +23,7 @@ The example below is fully functional.
 
 ## Configuration Reference
 
-The reference of available configuratin options is listed below. The only
+The reference of available configuration options is listed below. The only
 required element is either "inline" or "script". Every other option is optional.
 
 Exactly _one_ of the following is required:
