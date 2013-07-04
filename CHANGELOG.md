@@ -5,6 +5,11 @@ FEATURES:
 * "file" uploader will upload files and directories from the machine
   running Packer to the remote machine.
 
+IMPROVEMENTS:
+
+* virtualbox: Delete the packer-made SSH port forwarding prior to
+  exporting the VM.
+
 ## 0.1.4 (July 2, 2013)
 
 FEATURES:
