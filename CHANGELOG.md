@@ -1,6 +1,9 @@
 ## 0.1.5 (unreleased)
 
+FEATURES:
 
+* "file" uploader will upload files and directories from the machine
+  running Packer to the remote machine.
 
 ## 0.1.4 (July 2, 2013)
 
