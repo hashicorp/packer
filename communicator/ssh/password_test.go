@@ -45,4 +45,3 @@ func TestPasswordKeybardInteractive_Challenge(t *testing.T) {
 		t.Fatalf("invalid password: %#v", result)
 	}
 }
-
