@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -75,6 +76,7 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 
 	vagrantfileContents := defaultAWSVagrantfile
 	if p.config.VagrantfileTemplate != "" {
+		log.Printf("Using vagrantfile template: %s", p.config.VagrantfileTemplate)
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
 			return nil, false, err
