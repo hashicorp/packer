@@ -60,9 +60,9 @@ type config struct {
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
-	bootWait          time.Duration     ``
-	shutdownTimeout   time.Duration     ``
-	sshWaitTimeout    time.Duration     ``
+	bootWait        time.Duration ``
+	shutdownTimeout time.Duration ``
+	sshWaitTimeout  time.Duration ``
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {

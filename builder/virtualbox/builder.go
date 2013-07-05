@@ -26,30 +26,31 @@ type Builder struct {
 }
 
 type config struct {
-	BootCommand          []string      `mapstructure:"boot_command"`
-	DiskSize             uint          `mapstructure:"disk_size"`
-	FloppyFiles          []string      `mapstructure:"floppy_files"`
-	GuestAdditionsPath   string        `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string        `mapstructure:"guest_additions_url"`
-	GuestAdditionsSHA256 string        `mapstructure:"guest_additions_sha256"`
-	GuestOSType          string        `mapstructure:"guest_os_type"`
-	Headless             bool          `mapstructure:"headless"`
-	HTTPDir              string        `mapstructure:"http_directory"`
-	HTTPPortMin          uint          `mapstructure:"http_port_min"`
-	HTTPPortMax          uint          `mapstructure:"http_port_max"`
-	ISOChecksum          string        `mapstructure:"iso_checksum"`
-	ISOChecksumType      string        `mapstructure:"iso_checksum_type"`
-	ISOUrl               string        `mapstructure:"iso_url"`
-	OutputDir            string        `mapstructure:"output_directory"`
-	ShutdownCommand      string        `mapstructure:"shutdown_command"`
-	SSHHostPortMin       uint          `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax       uint          `mapstructure:"ssh_host_port_max"`
-	SSHPassword          string        `mapstructure:"ssh_password"`
-	SSHPort              uint          `mapstructure:"ssh_port"`
-	SSHUser              string        `mapstructure:"ssh_username"`
-	VBoxVersionFile      string        `mapstructure:"virtualbox_version_file"`
-	VBoxManage           [][]string    `mapstructure:"vboxmanage"`
-	VMName               string        `mapstructure:"vm_name"`
+	BootCommand          []string   `mapstructure:"boot_command"`
+	DiskSize             uint       `mapstructure:"disk_size"`
+	FloppyFiles          []string   `mapstructure:"floppy_files"`
+	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
+	GuestOSType          string     `mapstructure:"guest_os_type"`
+	Headless             bool       `mapstructure:"headless"`
+	HTTPDir              string     `mapstructure:"http_directory"`
+	HTTPPortMin          uint       `mapstructure:"http_port_min"`
+	HTTPPortMax          uint       `mapstructure:"http_port_max"`
+	ISOChecksum          string     `mapstructure:"iso_checksum"`
+	ISOChecksumType      string     `mapstructure:"iso_checksum_type"`
+	ISOUrl               string     `mapstructure:"iso_url"`
+	OutputDir            string     `mapstructure:"output_directory"`
+	ShutdownCommand      string     `mapstructure:"shutdown_command"`
+	SourceOVF            string     `mapstructure:"source_ovf"`
+	SSHHostPortMin       uint       `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax       uint       `mapstructure:"ssh_host_port_max"`
+	SSHPassword          string     `mapstructure:"ssh_password"`
+	SSHPort              uint       `mapstructure:"ssh_port"`
+	SSHUser              string     `mapstructure:"ssh_username"`
+	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
+	VBoxManage           [][]string `mapstructure:"vboxmanage"`
+	VMName               string     `mapstructure:"vm_name"`
 
 	PackerBuildName string `mapstructure:"packer_build_name"`
 	PackerDebug     bool   `mapstructure:"packer_debug"`
@@ -59,9 +60,9 @@ type config struct {
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
-	bootWait             time.Duration ``
-	shutdownTimeout      time.Duration ``
-	sshWaitTimeout       time.Duration ``
+	bootWait        time.Duration ``
+	shutdownTimeout time.Duration ``
+	sshWaitTimeout  time.Duration ``
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -157,59 +158,71 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
-	if b.config.ISOChecksum == "" {
-		errs = append(errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-	} else {
-		b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
-	}
-
-	if b.config.ISOChecksumType == "" {
-		errs = append(errs, errors.New("The iso_checksum_type must be specified."))
-	} else {
-		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
-		if h := common.HashForType(b.config.ISOChecksumType); h == nil {
-			errs = append(
-				errs,
-				fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
-		}
-	}
-
-	if b.config.ISOUrl == "" {
-		errs = append(errs, errors.New("An iso_url must be specified."))
-	} else {
-		url, err := url.Parse(b.config.ISOUrl)
+	if b.config.SourceOVF != "" {
+		// Check that the VM file exists
+		url, err := url.Parse(b.config.SourceOVF)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("iso_url is not a valid URL: %s", err))
 		} else {
-			if url.Scheme == "" {
-				url.Scheme = "file"
+			if _, err := os.Stat(url.Path); err != nil {
+				errs = append(errs, fmt.Errorf("source_ovf points to bad file: %s", err))
 			}
+		}
+	} else {
+		if b.config.ISOChecksum == "" {
+			errs = append(errs, errors.New("Due to large file sizes, an iso_checksum is required"))
+		} else {
+			b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
+		}
 
-			if url.Scheme == "file" {
-				if _, err := os.Stat(url.Path); err != nil {
-					errs = append(errs, fmt.Errorf("iso_url points to bad file: %s", err))
-				}
-			} else {
-				supportedSchemes := []string{"file", "http", "https"}
-				scheme := strings.ToLower(url.Scheme)
-
-				found := false
-				for _, supported := range supportedSchemes {
-					if scheme == supported {
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					errs = append(errs, fmt.Errorf("Unsupported URL scheme in iso_url: %s", scheme))
-				}
+		if b.config.ISOChecksumType == "" {
+			errs = append(errs, errors.New("The iso_checksum_type must be specified."))
+		} else {
+			b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
+			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
+				errs = append(
+					errs,
+					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
 			}
 		}
 
-		if len(errs) == 0 {
-			// Put the URL back together since we may have modified it
-			b.config.ISOUrl = url.String()
+		if b.config.ISOUrl == "" {
+			errs = append(errs, errors.New("An iso_url must be specified."))
+		} else {
+			url, err := url.Parse(b.config.ISOUrl)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("iso_url is not a valid URL: %s", err))
+			} else {
+				if url.Scheme == "" {
+					url.Scheme = "file"
+				}
+
+				if url.Scheme == "file" {
+					if _, err := os.Stat(url.Path); err != nil {
+						errs = append(errs, fmt.Errorf("iso_url points to bad file: %s", err))
+					}
+				} else {
+					supportedSchemes := []string{"file", "http", "https"}
+					scheme := strings.ToLower(url.Scheme)
+
+					found := false
+					for _, supported := range supportedSchemes {
+						if scheme == supported {
+							found = true
+							break
+						}
+					}
+
+					if !found {
+						errs = append(errs, fmt.Errorf("Unsupported URL scheme in iso_url: %s", scheme))
+					}
+				}
+			}
+
+			if len(errs) == 0 {
+				// Put the URL back together since we may have modified it
+				b.config.ISOUrl = url.String()
+			}
 		}
 	}
 
@@ -308,28 +321,51 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	steps := []multistep.Step{
 		new(stepDownloadGuestAdditions),
-		new(stepDownloadISO),
+	}
+
+	isImport := (b.config.SourceOVF != "")
+	if !isImport {
+		steps = append(steps, new(stepDownloadISO))
+	}
+
+	steps = append(steps,
 		new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
 		new(stepHTTPServer),
 		new(stepSuppressMessages),
-		new(stepCreateVM),
-		new(stepCreateDisk),
-		new(stepAttachISO),
-		new(stepAttachFloppy),
+	)
+
+	if isImport {
+		steps = append(steps, new(stepImportVM))
+	} else {
+		steps = append(steps,
+			new(stepCreateVM),
+			new(stepCreateDisk),
+			new(stepAttachISO),
+			new(stepAttachFloppy),
+		)
+	}
+
+	steps = append(steps,
 		new(stepForwardSSH),
 		new(stepVBoxManage),
 		new(stepRun),
-		new(stepTypeBootCommand),
+	)
+
+	if !isImport {
+		steps = append(steps, new(stepTypeBootCommand))
+	}
+
+	steps = append(steps,
 		new(stepWaitForSSH),
 		new(stepUploadVersion),
 		new(stepUploadGuestAdditions),
 		new(stepProvision),
 		new(stepShutdown),
 		new(stepExport),
-	}
+	)
 
 	// Setup the state bag
 	state := make(map[string]interface{})
