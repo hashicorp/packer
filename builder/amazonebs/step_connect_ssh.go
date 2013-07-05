@@ -49,6 +49,8 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 		connectQuit <- true
 	}()
 
+	var comm packer.Communicator
+
 	go func() {
 		var err error
 
@@ -66,9 +68,15 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 				"Opening TCP conn for SSH to %s:%d (attempt %d)",
 				instance.DNSName, config.SSHPort, attempts)
 			s.conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
+
+			if err == nil {
+				comm, err = ssh.New(s.conn, sshConfig)
+			}
 			if err == nil {
 				break
 			}
+
+			log.Printf("TCP/SSH connection failed: %s", err)
 
 			// A brief sleep so we're not being overly zealous attempting
 			// to connect to the instance.
@@ -98,11 +106,6 @@ ConnectWaitLoop:
 				return multistep.ActionHalt
 			}
 		}
-	}
-
-	var comm packer.Communicator
-	if err == nil {
-		comm, err = ssh.New(s.conn, sshConfig)
 	}
 
 	if err != nil {
