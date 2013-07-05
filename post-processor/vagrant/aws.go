@@ -105,6 +105,7 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 
 	// Compress the directory to the given output path
 	if err := DirToBox(outputPath, dir); err != nil {
+		err = fmt.Errorf("error creating box: %s", err)
 		return nil, false, err
 	}
 

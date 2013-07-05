@@ -25,7 +25,7 @@ type OutputPathTemplate struct {
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
 func DirToBox(dst, dir string) error {
-	log.Printf("Turning dir into box: %s", dir)
+	log.Printf("Turning dir into box: %s => %s", dir, dst)
 	dstF, err := os.Create(dst)
 	if err != nil {
 		return err
