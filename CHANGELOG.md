@@ -12,6 +12,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* vagrant: The `BuildName` template propery works properly in
+  the output path.
 * vagrant: Properly configure the provider-specific post-processors so
   things like `vagrantfile_template` work. [GH-129]
 

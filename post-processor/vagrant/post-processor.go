@@ -40,8 +40,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
+	ppExtraConfig := make(map[string]interface{})
 	if p.config.OutputPath == "" {
 		p.config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
+		ppExtraConfig["output"] = p.config.OutputPath
 	}
 
 	_, err := template.New("output").Parse(p.config.OutputPath)
@@ -49,14 +51,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return fmt.Errorf("output invalid template: %s", err)
 	}
 
+	// Store the extra configuration for post-processors
+	p.rawConfigs = append(p.rawConfigs, ppExtraConfig)
+
 	// TODO(mitchellh): Properly handle multiple raw configs
 	var mapConfig map[string]interface{}
 	if err := mapstructure.Decode(raws[0], &mapConfig); err != nil {
 		return err
-	}
-
-	packerConfig := map[string]interface{}{
-		packer.BuildNameConfigKey: p.config.PackerBuildName,
 	}
 
 	p.premade = make(map[string]packer.PostProcessor)
@@ -67,7 +68,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			continue
 		}
 
-		if err := pp.Configure(raw, packerConfig); err != nil {
+		// Create the proper list of configurations
+		ppConfigs := make([]interface{}, 0, len(p.rawConfigs)+1)
+		copy(ppConfigs, p.rawConfigs)
+		ppConfigs = append(ppConfigs, raw)
+
+		if err := pp.Configure(ppConfigs...); err != nil {
 			errors = append(errors, err)
 		}
 
