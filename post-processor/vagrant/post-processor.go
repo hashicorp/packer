@@ -24,11 +24,15 @@ type Config struct {
 }
 
 type PostProcessor struct {
-	config  Config
-	premade map[string]packer.PostProcessor
+	config     Config
+	premade    map[string]packer.PostProcessor
+	rawConfigs []interface{}
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
+	// Store the raw configs for usage later
+	p.rawConfigs = raws
+
 	for _, raw := range raws {
 		err := mapstructure.Decode(raw, &p.config)
 		if err != nil {
@@ -93,8 +97,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
 		}
 
-		config := map[string]string{"output": p.config.OutputPath}
-		if err := pp.Configure(config); err != nil {
+		if err := pp.Configure(p.rawConfigs...); err != nil {
 			return nil, false, err
 		}
 	}

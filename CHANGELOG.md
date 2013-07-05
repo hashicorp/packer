@@ -10,6 +10,11 @@ IMPROVEMENTS:
 * virtualbox: Delete the packer-made SSH port forwarding prior to
   exporting the VM.
 
+BUG FIXES:
+
+* vagrant: Properly configure the provider-specific post-processors so
+  things like `vagrantfile_template` work. [GH-129]
+
 ## 0.1.4 (July 2, 2013)
 
 FEATURES:
