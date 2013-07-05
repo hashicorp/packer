@@ -8,7 +8,7 @@ Plugins allow new functionality to be added to Packer without
 modifying the core source code. Packer plugins are able to add new
 commands, builders, provisioners, hooks, and more. In fact, much of Packer
 itself is implemented by writing plugins that are simply distributed with
-the Packer. For example, all the commands, builders, provisioners, and more
+Packer. For example, all the commands, builders, provisioners, and more
 that ship with Packer are implemented as Plugins that are simply hardcoded
 to load with Packer.
 
