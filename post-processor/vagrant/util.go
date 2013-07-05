@@ -47,7 +47,7 @@ func DirToBox(dst, dir string) error {
 
 		// Skip directories
 		if info.IsDir() {
-			log.Printf("Skiping directory '%s' for box '%s'", path, dst)
+			log.Printf("Skipping directory '%s' for box '%s'", path, dst)
 			return nil
 		}
 

@@ -21,17 +21,17 @@ func (s *stepExport) Run(state map[string]interface{}) multistep.StepAction {
 	ui := state["ui"].(packer.Ui)
 	vmName := state["vmName"].(string)
 
-  // Clear out the Packer-created forwarding rule
+	// Clear out the Packer-created forwarding rule
 	ui.Say(fmt.Sprintf("Deleting forwarded port mapping for SSH (host port %d)", state["sshHostPort"]))
 	command := []string{"modifyvm", vmName, "--natpf1", "delete", "packerssh"}
 	if err := driver.VBoxManage(command...); err != nil {
 		err := fmt.Errorf("Error deleting port forwarding rule: %s", err)
-    state["error"] = err
+		state["error"] = err
 		ui.Error(err.Error())
-    return multistep.ActionHalt
+		return multistep.ActionHalt
 	}
 
-  // Export the VM to an OVF
+	// Export the VM to an OVF
 	outputPath := filepath.Join(config.OutputDir, "packer.ovf")
 
 	command = []string{

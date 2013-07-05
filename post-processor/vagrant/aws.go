@@ -79,12 +79,14 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 		log.Printf("Using vagrantfile template: %s", p.config.VagrantfileTemplate)
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
+			err = fmt.Errorf("error opening vagrantfile template: %s", err)
 			return nil, false, err
 		}
 		defer f.Close()
 
 		contents, err := ioutil.ReadAll(f)
 		if err != nil {
+			err = fmt.Errorf("error reading vagrantfile template: %s", err)
 			return nil, false, err
 		}
 

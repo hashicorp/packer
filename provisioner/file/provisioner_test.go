@@ -114,7 +114,7 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 	}
 
 	config := map[string]interface{}{
-		"source": tf.Name(),
+		"source":      tf.Name(),
 		"destination": "something",
 	}
 
