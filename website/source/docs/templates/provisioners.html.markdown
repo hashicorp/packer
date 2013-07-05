@@ -39,7 +39,7 @@ the `type` key. This key specifies the name of the provisioner to use.
 Additional keys within the object are used to configure the provisioner,
 with the exception of a handful of special keys, covered later.
 
-As an example, the "shell" provisioner requires at least the `script` key,
+As an example, the "shell" provisioner requires a key such as `script`
 which specifies a path to a shell script to execute within the machines
 being created.
 
