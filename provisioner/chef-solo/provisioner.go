@@ -5,7 +5,6 @@ package chefSolo
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
@@ -29,13 +28,10 @@ var Ui packer.Ui
 
 type config struct {
 	// An array of local paths of cookbooks to upload.
-	CookbookPaths []string `mapstructure:"cookbook_paths"`
-
-	// The local path of the cookbooks to upload.
-	CookbookPath string `mapstructure:"cookbook_path"`
+	CookbooksPaths []string `mapstructure:"cookbooks_paths"`
 
 	// An array of recipes to run.
-	RunList []string `mapstructure:"run_list"`
+	Recipes []string
 
 	// A string of JSON that will be used as the JSON attributes for the
 	// Chef run.
@@ -64,24 +60,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 	
-	if p.config.CookbookPaths == nil {
-		p.config.CookbookPaths = make([]string, 0)
+	if p.config.CookbooksPaths == nil {
+		p.config.CookbooksPaths = make([]string, 0)
 	}
 
-	if p.config.CookbookPath == "" {
-		p.config.CookbookPath = DefaultCookbookPath
-	}
-	
-	if len(p.config.CookbookPaths) > 0 && p.config.CookbookPath != "" {
-		errs = append(errs, errors.New("Only one of cookbooks or cookbook can be specified."))
-	}
-	
-	if len(p.config.CookbookPaths) == 0 {
-		p.config.CookbookPaths = append(p.config.CookbookPaths, p.config.CookbookPath)
-	}
-
-	if p.config.RunList == nil {
-		p.config.RunList = make([]string, 0)
+	if p.config.Recipes == nil {
+		p.config.Recipes = make([]string, 0)
 	}
 
 	if p.config.Json != nil {
@@ -92,7 +76,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Json = make(map[string]interface{})
 	}
 
-	for _, path := range p.config.CookbookPaths {
+	for _, path := range p.config.CookbooksPaths {
 		pFileInfo, err := os.Stat(path)
 		
 		if err != nil || !pFileInfo.IsDir() {
@@ -108,8 +92,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	cookbookPaths := make([]string, len(p.config.CookbookPaths))
-	copy(cookbookPaths, p.config.CookbookPaths)
+	cookbooksPaths := make([]string, len(p.config.CookbooksPaths))
+	copy(cookbooksPaths, p.config.CookbooksPaths)
 	
 	Ui = ui
 	
@@ -124,18 +108,18 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error creating remote staging directory: %s", err)
 	}
 	
-	soloRbPath, err := CreateSoloRb(p.config.CookbookPaths, comm)
+	soloRbPath, err := CreateSoloRb(p.config.CookbooksPaths, comm)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef Solo configuration file: %s", err)
 	}
 	
-	jsonPath, err := CreateAttributesJson(p.config.Json, p.config.RunList, comm)
+	jsonPath, err := CreateAttributesJson(p.config.Json, p.config.Recipes, comm)
 	if err != nil {
 		return fmt.Errorf("Error uploading JSON attributes file: %s", err)
 	}
 	
 	// Upload all cookbooks
-	for _, path := range cookbookPaths {
+	for _, path := range cookbooksPaths {
 		ui.Say(fmt.Sprintf("Copying cookbook path: %s", path))
 		err = UploadLocalDirectory(path, comm)
 		if err != nil {
@@ -156,7 +140,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error running Chef Solo: %s", err)
 	}
 	
-	return fmt.Errorf("Die")
+	// return fmt.Errorf("Die")
 
 	return nil
 }
@@ -214,7 +198,7 @@ func CreateRemoteDirectory(path string, comm packer.Communicator) (err error) {
 	return
 }
 
-func CreateSoloRb(cookbookPaths []string, comm packer.Communicator) (str string, err error) {
+func CreateSoloRb(cookbooksPaths []string, comm packer.Communicator) (str string, err error) {
 	Ui.Say(fmt.Sprintf("Creating Chef configuration file..."))
 	
 	remotePath := RemoteStagingPath + "/solo.rb"
@@ -227,7 +211,7 @@ func CreateSoloRb(cookbookPaths []string, comm packer.Communicator) (str string,
 	writer := bufio.NewWriter(tf)
 	
 	// Messy, messy...
-	cbPathsCat := "\"" + RemoteCookbookPath + "/" + strings.Join(cookbookPaths, "\",\"" + RemoteCookbookPath + "/") + "\""
+	cbPathsCat := "\"" + RemoteCookbookPath + "/" + strings.Join(cookbooksPaths, "\",\"" + RemoteCookbookPath + "/") + "\""
 	contents := "file_cache_path \"" + RemoteFileCachePath + "\"\ncookbook_path [" + cbPathsCat + "]\n"
 	
 	if _, err := writer.WriteString(contents); err != nil {
@@ -254,17 +238,17 @@ func CreateSoloRb(cookbookPaths []string, comm packer.Communicator) (str string,
 	return remotePath, nil
 }
 
-func CreateAttributesJson(jsonAttrs map[string]interface{}, runList []string, comm packer.Communicator) (str string, err error) {
+func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, comm packer.Communicator) (str string, err error) {
 	Ui.Say(fmt.Sprintf("Creating and uploading Chef attributes file"))
 	remotePath := RemoteStagingPath + "/node.json"
 	
-	var formattedRunList []string
-	for _, value := range runList {
-		formattedRunList = append(formattedRunList, "recipe[" + value + "]")
+	var formattedRecipes []string
+	for _, value := range recipes {
+		formattedRecipes = append(formattedRecipes, "recipe[" + value + "]")
 	}
 	
-	// Add RunList to JSON
-	jsonAttrs["run_list"] = formattedRunList
+	// Add Recipes to JSON
+	jsonAttrs["run_list"] = formattedRecipes
 	
 	// Convert to JSON string
 	jsonString, err := json.MarshalIndent(jsonAttrs, "", "  ")
