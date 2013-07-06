@@ -17,6 +17,7 @@ import (
 	"strings"
 	"text/template"
 	"path/filepath"
+	"encoding/json"
 )
 
 const RemoteStagingPath = "/tmp/provision/chef-solo"
@@ -36,9 +37,14 @@ type config struct {
 	// An array of recipes to run.
 	RunList []string `mapstructure:"run_list"`
 
-	// An array of environment variables that will be injected before
-	// your command(s) are executed.
-	JsonFile string `mapstructure:"json_file"`
+	// A string of JSON that will be used as the JSON attributes for the
+	// Chef run.
+	Json map[string]interface{}
+	
+	UseSudo bool `mapstructure:"use_sudo"`
+	
+	// If true
+	SkipInstall bool `mapstructure:"skip_install"`
 }
 
 type Provisioner struct {
@@ -48,7 +54,6 @@ type Provisioner struct {
 type ExecuteRecipeTemplate struct {
 	SoloRbPath string
 	JsonPath string
-	RunList string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -79,10 +84,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RunList = make([]string, 0)
 	}
 
-	if p.config.JsonFile != "" {
-		if _, err := os.Stat(p.config.JsonFile); err != nil {
-			errs = append(errs, fmt.Errorf("Bad JSON attributes file '%s': %s", p.config.JsonFile, err))
+	if p.config.Json != nil {
+		if _, err := json.Marshal(p.config.Json); err != nil {
+			errs = append(errs, fmt.Errorf("Bad JSON: %s", err))
 		}
+	} else {
+		p.config.Json = make(map[string]interface{})
 	}
 
 	for _, path := range p.config.CookbookPaths {
@@ -122,7 +129,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error creating Chef Solo configuration file: %s", err)
 	}
 	
-	jsonPath, err := CreateAttributesJson(p.config.JsonFile, comm)
+	jsonPath, err := CreateAttributesJson(p.config.Json, p.config.RunList, comm)
 	if err != nil {
 		return fmt.Errorf("Error uploading JSON attributes file: %s", err)
 	}
@@ -137,18 +144,19 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 	
 	// Execute requested recipes
-	for _, recipe := range p.config.RunList {
-		ui.Say(fmt.Sprintf("chef-solo running recipe: %s", recipe))
-		// Compile the command
-		var command bytes.Buffer
-		t := template.Must(template.New("chef-run").Parse("sudo chef-solo --no-color -c {{.SoloRbPath}} -j {{.JsonPath}} -o {{.RunList}}"))
-		t.Execute(&command, &ExecuteRecipeTemplate{soloRbPath, jsonPath, recipe})
-		
-		err = executeCommand(command.String(), comm)
-		if err != nil {
-			return fmt.Errorf("Error running recipe %s: %s", recipe, err)
-		}
+	ui.Say("Beginning Chef Solo run")
+	
+	// Compile the command
+	var command bytes.Buffer
+	t := template.Must(template.New("chef-run").Parse("sudo chef-solo --no-color -c {{.SoloRbPath}} -j {{.JsonPath}}"))
+	t.Execute(&command, &ExecuteRecipeTemplate{soloRbPath, jsonPath})
+	
+	err = executeCommand(command.String(), comm)
+	if err != nil {
+		return fmt.Errorf("Error running Chef Solo: %s", err)
 	}
+	
+	return fmt.Errorf("Die")
 
 	return nil
 }
@@ -246,31 +254,42 @@ func CreateSoloRb(cookbookPaths []string, comm packer.Communicator) (str string,
 	return remotePath, nil
 }
 
-func CreateAttributesJson(jsonFile string, comm packer.Communicator) (str string, err error) {
-	Ui.Say(fmt.Sprintf("Uploading Chef attributes file %s", jsonFile))
+func CreateAttributesJson(jsonAttrs map[string]interface{}, runList []string, comm packer.Communicator) (str string, err error) {
+	Ui.Say(fmt.Sprintf("Creating and uploading Chef attributes file"))
 	remotePath := RemoteStagingPath + "/node.json"
 	
-	// Create an empty JSON file if none given
-	if jsonFile == "" {
-		tf, err := ioutil.TempFile("", "packer-chef-solo-json")
-		if err != nil {
-			return "", fmt.Errorf("Error preparing Chef attributes file: %s", err)
-		}
-		defer os.Remove(tf.Name())
-
-		// Write our contents to it
-		writer := bufio.NewWriter(tf)
-		if _, err := writer.WriteString("{}"); err != nil {
-			return "", fmt.Errorf("Error preparing Chef attributes file: %s", err)
-		}
-
-		if err := writer.Flush(); err != nil {
-			return "", fmt.Errorf("Error preparing Chef attributes file: %s", err)
-		}
-		
-		jsonFile = tf.Name()
-		tf.Close()
+	var formattedRunList []string
+	for _, value := range runList {
+		formattedRunList = append(formattedRunList, "recipe[" + value + "]")
 	}
+	
+	// Add RunList to JSON
+	jsonAttrs["run_list"] = formattedRunList
+	
+	// Convert to JSON string
+	jsonString, err := json.MarshalIndent(jsonAttrs, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("Error parsing JSON attributes: %s", err)
+	}
+	
+	tf, err := ioutil.TempFile("", "packer-chef-solo-json")
+	if err != nil {
+		return "", fmt.Errorf("Error preparing Chef attributes file: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	// Write our contents to it
+	writer := bufio.NewWriter(tf)
+	if _, err := writer.WriteString(string(jsonString)); err != nil {
+		return "", fmt.Errorf("Error preparing Chef attributes file: %s", err)
+	}
+
+	if err := writer.Flush(); err != nil {
+		return "", fmt.Errorf("Error preparing Chef attributes file: %s", err)
+	}
+	
+	jsonFile := tf.Name()
+	tf.Close()
 	
 	log.Printf("Opening %s for reading", jsonFile)
 	f, err := os.Open(jsonFile)
