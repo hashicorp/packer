@@ -37,7 +37,7 @@ type config struct {
 	// Chef run.
 	Json map[string]interface{}
 	
-	UseSudo bool `mapstructure:"use_sudo"`
+	AvoidSudo bool `mapstructure:"avoid_sudo"`
 	
 	// If true
 	SkipInstall bool `mapstructure:"skip_install"`
@@ -50,6 +50,11 @@ type Provisioner struct {
 type ExecuteRecipeTemplate struct {
 	SoloRbPath string
 	JsonPath string
+	UseSudo bool
+}
+
+type ExecuteInstallChefTemplate struct {
+	AvoidSudo bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -98,7 +103,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	Ui = ui
 	
 	// Generic setup for Chef runs
-	err := InstallChefSolo(comm)
+	err := InstallChefSolo(p.config.AvoidSudo, comm)
 	if err != nil {
 		return fmt.Errorf("Error installing Chef Solo: %s", err)
 	}
@@ -132,8 +137,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	
 	// Compile the command
 	var command bytes.Buffer
-	t := template.Must(template.New("chef-run").Parse("sudo chef-solo --no-color -c {{.SoloRbPath}} -j {{.JsonPath}}"))
-	t.Execute(&command, &ExecuteRecipeTemplate{soloRbPath, jsonPath})
+	t := template.Must(template.New("chef-run").Parse("{{if .UseSudo}}sudo {{end}}chef-solo --no-color -c {{.SoloRbPath}} -j {{.JsonPath}}"))
+	t.Execute(&command, &ExecuteRecipeTemplate{soloRbPath, jsonPath, !p.config.AvoidSudo})
 	
 	err = executeCommand(command.String(), comm)
 	if err != nil {
@@ -290,10 +295,14 @@ func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, co
 	return remotePath, nil
 }
 
-func InstallChefSolo(comm packer.Communicator) (err error) {
+func InstallChefSolo(avoidSudo bool, comm packer.Communicator) (err error) {
 	Ui.Say(fmt.Sprintf("Installing Chef Solo"))
-	var installCommand = "curl -L https://www.opscode.com/chef/install.sh | sudo bash"
-	err = executeCommand(installCommand, comm)
+	
+	var command bytes.Buffer
+	t := template.Must(template.New("install-chef").Parse("curl -L https://www.opscode.com/chef/install.sh | {{if .UseSudo}}sudo {{end}}bash"))
+	t.Execute(&command, map[string]bool{"UseSudo": !avoidSudo})
+	
+	err = executeCommand(command.String(), comm)
 	if err != nil {
 	  return fmt.Errorf("Unable to install Chef Solo: %d", err)
 	}
