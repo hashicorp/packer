@@ -38,7 +38,7 @@ type config struct {
 	Json map[string]interface{}
 	
 	// Option to avoid sudo use when executing commands. Defaults to false.
-	AvoidSudo bool `mapstructure:"avoid_sudo"`
+	PreventSudo bool `mapstructure:"prevent_sudo"`
 	
 	// If true, skips installing Chef. Defaults to false.
 	SkipInstall bool `mapstructure:"skip_install"`
@@ -51,11 +51,11 @@ type Provisioner struct {
 type ExecuteRecipeTemplate struct {
 	SoloRbPath string
 	JsonPath string
-	UseSudo bool
+	Sudo bool
 }
 
 type ExecuteInstallChefTemplate struct {
-	AvoidSudo bool
+	PreventSudo bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -105,7 +105,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	Ui = ui
 	
 	if !p.config.SkipInstall {
-		err = InstallChefSolo(p.config.AvoidSudo, comm)
+		err = InstallChefSolo(p.config.PreventSudo, comm)
 		if err != nil {
 			return fmt.Errorf("Error installing Chef Solo: %s", err)
 		}
@@ -140,8 +140,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	
 	// Compile the command
 	var command bytes.Buffer
-	t := template.Must(template.New("chef-run").Parse("{{if .UseSudo}}sudo {{end}}chef-solo --no-color -c {{.SoloRbPath}} -j {{.JsonPath}}"))
-	t.Execute(&command, &ExecuteRecipeTemplate{soloRbPath, jsonPath, !p.config.AvoidSudo})
+	t := template.Must(template.New("chef-run").Parse("{{if .Sudo}}sudo {{end}}chef-solo --no-color -c {{.SoloRbPath}} -j {{.JsonPath}}"))
+	t.Execute(&command, &ExecuteRecipeTemplate{soloRbPath, jsonPath, !p.config.PreventSudo})
 	
 	err = executeCommand(command.String(), comm)
 	if err != nil {
@@ -298,12 +298,12 @@ func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, co
 	return remotePath, nil
 }
 
-func InstallChefSolo(avoidSudo bool, comm packer.Communicator) (err error) {
+func InstallChefSolo(preventSudo bool, comm packer.Communicator) (err error) {
 	Ui.Say(fmt.Sprintf("Installing Chef Solo"))
 	
 	var command bytes.Buffer
-	t := template.Must(template.New("install-chef").Parse("curl -L https://www.opscode.com/chef/install.sh | {{if .UseSudo}}sudo {{end}}bash"))
-	t.Execute(&command, map[string]bool{"UseSudo": !avoidSudo})
+	t := template.Must(template.New("install-chef").Parse("curl -L https://www.opscode.com/chef/install.sh | {{if .sudo}}sudo {{end}}bash"))
+	t.Execute(&command, map[string]bool{"sudo": !preventSudo})
 	
 	err = executeCommand(command.String(), comm)
 	if err != nil {
