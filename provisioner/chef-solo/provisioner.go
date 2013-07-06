@@ -37,9 +37,10 @@ type config struct {
 	// Chef run.
 	Json map[string]interface{}
 	
+	// Option to avoid sudo use when executing commands. Defaults to false.
 	AvoidSudo bool `mapstructure:"avoid_sudo"`
 	
-	// If true
+	// If true, skips installing Chef. Defaults to false.
 	SkipInstall bool `mapstructure:"skip_install"`
 }
 
@@ -100,12 +101,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	cookbooksPaths := make([]string, len(p.config.CookbooksPaths))
 	copy(cookbooksPaths, p.config.CookbooksPaths)
 	
+	var err error
 	Ui = ui
 	
-	// Generic setup for Chef runs
-	err := InstallChefSolo(p.config.AvoidSudo, comm)
-	if err != nil {
-		return fmt.Errorf("Error installing Chef Solo: %s", err)
+	if !p.config.SkipInstall {
+		err = InstallChefSolo(p.config.AvoidSudo, comm)
+		if err != nil {
+			return fmt.Errorf("Error installing Chef Solo: %s", err)
+		}
 	}
 	
 	err = CreateRemoteDirectory(RemoteCookbookPath, comm)
@@ -145,7 +148,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error running Chef Solo: %s", err)
 	}
 	
-	// return fmt.Errorf("Die")
+	return fmt.Errorf("Die")
 
 	return nil
 }
