@@ -9,6 +9,8 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* core: If SCP is not available, a more descriptive error message
+  is shown telling the user. [GH-127]
 * virtualbox: Delete the packer-made SSH port forwarding prior to
   exporting the VM.
 
