@@ -35,7 +35,7 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 	ui := state["ui"].(packer.Ui)
 	config := state["config"].(*config)
 
-  // Get VBox version
+	// Get VBox version
 	version, err := driver.Version()
 	if err != nil {
 		state["error"] = fmt.Errorf("Error reading version for guest additions download: %s", err)
@@ -49,17 +49,17 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 
 	additionsName := fmt.Sprintf("VBoxGuestAdditions_%s.iso", version)
 
-  // Use provided version or get it from virtualbox.org
-  var checksum string
+	// Use provided version or get it from virtualbox.org
+	var checksum string
 
-  if config.GuestAdditionsSHA256 != "" {
-    checksum = config.GuestAdditionsSHA256
-  } else {
-    checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
-    if action != multistep.ActionContinue {
-  		return action
-  	}
-  }
+	if config.GuestAdditionsSHA256 != "" {
+		checksum = config.GuestAdditionsSHA256
+	} else {
+		checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
+		if action != multistep.ActionContinue {
+			return action
+		}
+	}
 
 	checksumBytes, err := hex.DecodeString(checksum)
 	if err != nil {
@@ -67,14 +67,14 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 		return multistep.ActionHalt
 	}
 
-  // Use the provided source (URL or file path) or generate it
-  url := config.GuestAdditionsURL
-  if url == "" {
-    url = fmt.Sprintf(
-		  "http://download.virtualbox.org/virtualbox/%s/%s",
-  		version,
-  		additionsName)
-  }
+	// Use the provided source (URL or file path) or generate it
+	url := config.GuestAdditionsURL
+	if url == "" {
+		url = fmt.Sprintf(
+			"http://download.virtualbox.org/virtualbox/%s/%s",
+			version,
+			additionsName)
+	}
 
 	log.Printf("Guest additions URL: %s", url)
 
@@ -138,12 +138,12 @@ DownloadWaitLoop:
 	return result, multistep.ActionContinue
 }
 
-func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256 (state map[string]interface{}, additionsVersion string, additionsName string) (string, multistep.StepAction) {
-  // First things first, we get the list of checksums for the files available
+func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]interface{}, additionsVersion string, additionsName string) (string, multistep.StepAction) {
+	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf("http://download.virtualbox.org/virtualbox/%s/SHA256SUMS", additionsVersion)
 	checksumsFile, err := ioutil.TempFile("", "packer")
-	
+
 	if err != nil {
 		state["error"] = fmt.Errorf(
 			"Failed creating temporary file to store guest addition checksums: %s",
@@ -203,6 +203,6 @@ func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256 (state map[string]i
 		return "", multistep.ActionHalt
 	}
 
-  return checksum, multistep.ActionContinue
+	return checksum, multistep.ActionContinue
 
 }
