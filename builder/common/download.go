@@ -107,6 +107,9 @@ func (d *DownloadClient) Get() (string, error) {
 
 		log.Printf("Downloading: %s", url.String())
 		err = d.downloader.Download(f, url)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	if d.config.Hash != nil {
@@ -160,9 +163,20 @@ func (*HTTPDownloader) Cancel() {
 }
 
 func (d *HTTPDownloader) Download(dst io.Writer, src *url.URL) error {
+	log.Printf("Starting download: %s", src.String())
 	resp, err := http.Get(src.String())
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != 200 {
+		log.Printf(
+			"Non-200 status code: %d. Getting error body.", resp.StatusCode)
+
+		errorBody := new(bytes.Buffer)
+		io.Copy(errorBody, resp.Body)
+		return fmt.Errorf("HTTP error '%d'! Remote side responded:\n%s",
+			resp.StatusCode, errorBody.String())
 	}
 
 	d.progress = 0
