@@ -28,7 +28,8 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.2-server-amd64.iso",
   "iso_md5": "af5f788aee1b32c4b2634734309cc9e9",
   "ssh_username": "packer",
-  "ssh_wait_timeout": "30s"
+  "ssh_wait_timeout": "30s",
+  "shutdown_command": "shutdown -P now"
 }
 </pre>
 
