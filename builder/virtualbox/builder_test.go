@@ -119,7 +119,7 @@ func TestBuilderPrepare_GuestAdditionsPath(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	delete(config, "disk_size")
+	delete(config, "guest_additions_path")
 	err := b.Prepare(config)
 	if err != nil {
 		t.Fatalf("bad err: %s", err)
