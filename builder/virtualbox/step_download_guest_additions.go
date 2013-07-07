@@ -142,17 +142,17 @@ func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]in
 	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf("http://download.virtualbox.org/virtualbox/%s/SHA256SUMS", additionsVersion)
-	checksumsFile, err := ioutil.TempFile("", "packer")
 
+	checksumsFile, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		state["error"] = fmt.Errorf(
 			"Failed creating temporary file to store guest addition checksums: %s",
 			err)
 		return "", multistep.ActionHalt
 	}
+	defer os.Remove(checksumsFile.Name())
 
 	checksumsFile.Close()
-	defer os.Remove(checksumsFile.Name())
 
 	downloadConfig := &common.DownloadConfig{
 		Url:        checksumsUrl,
