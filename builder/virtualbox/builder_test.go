@@ -216,7 +216,6 @@ func TestBuilderPrepare_GuestAdditionsURL(t *testing.T) {
 	}
 }
 
-
 func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	var b Builder
 	config := testConfig()
