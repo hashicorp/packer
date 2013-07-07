@@ -14,6 +14,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Non-200 response codes on downloads now show proper errors.
+  [GH-141]
 * vagrant: The `BuildName` template propery works properly in
   the output path.
 * vagrant: Properly configure the provider-specific post-processors so
