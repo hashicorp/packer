@@ -57,6 +57,11 @@ Optional parameters:
   the path to the script to run, and `Vars`, which is the list of
   `environment_vars`, if configured.
 
+* `inline_shebang` (string) - The
+  [shebang](http://en.wikipedia.org/wiki/Shebang_(Unix)) value to use when
+  running commands specified by `inline`. By default, this is `/bin/sh`.
+  If you're not using `inline`, then this configuration has no effect.
+
 * `remote_path` (string) - The path where the script will be uploaded to
   in the machine. This defaults to "/tmp/script.sh". This value must be
   a writable location and any parent directories must already exist.
