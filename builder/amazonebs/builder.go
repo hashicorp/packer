@@ -37,7 +37,8 @@ type config struct {
 	SSHTimeout   time.Duration
 
 	// Configuration of the resulting AMI
-	AMIName string `mapstructure:"ami_name"`
+	AMIName             string                   `mapstructure:"ami_name"`
+	BlockDeviceMappings []ec2.BlockDeviceMapping `mapstructure:"block_device_mappings"`
 
 	PackerDebug   bool   `mapstructure:"packer_debug"`
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`

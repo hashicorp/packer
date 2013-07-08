@@ -37,8 +37,9 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the AMI: %s", amiName))
 	createOpts := &ec2.CreateImage{
-		InstanceId: instance.InstanceId,
-		Name:       amiName,
+		InstanceId:   instance.InstanceId,
+		Name:         amiName,
+		BlockDevices: config.BlockDeviceMappings,
 	}
 
 	createResp, err := ec2conn.CreateImage(createOpts)
