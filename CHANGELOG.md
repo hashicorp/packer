@@ -22,6 +22,8 @@ BUG FIXES:
   the output path.
 * vagrant: Properly configure the provider-specific post-processors so
   things like `vagrantfile_template` work. [GH-129]
+* vagrant: Close filehandles when copying files so Windows can
+  rename files. [GH-100]
 
 ## 0.1.4 (July 2, 2013)
 

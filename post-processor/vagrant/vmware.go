@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -51,19 +50,9 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 	// Copy all of the original contents into the temporary directory
 	for _, path := range artifact.Files() {
 		ui.Message(fmt.Sprintf("Copying: %s", path))
-		src, err := os.Open(path)
-		if err != nil {
-			return nil, false, err
-		}
-		defer src.Close()
 
-		dst, err := os.Create(filepath.Join(dir, filepath.Base(path)))
-		if err != nil {
-			return nil, false, err
-		}
-		defer dst.Close()
-
-		if _, err := io.Copy(dst, src); err != nil {
+		dstPath := filepath.Join(dir, filepath.Base(path))
+		if err := CopyContents(dstPath, path); err != nil {
 			return nil, false, err
 		}
 	}

@@ -21,6 +21,27 @@ type OutputPathTemplate struct {
 	Provider   string
 }
 
+// Copies a file by copying the contents of the file to another place.
+func CopyContents(dst, src string) error {
+	srcF, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcF.Close()
+
+	dstF, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer dstF.Close()
+
+	if _, err := io.Copy(dstF, srcF); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // DirToBox takes the directory and compresses it into a Vagrant-compatible
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
