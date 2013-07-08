@@ -11,7 +11,7 @@ const Version = "0.1.5"
 // Any pre-release marker for the version. If this is "" (empty string),
 // then it means that it is a final release. Otherwise, this is the
 // pre-release marker.
-const VersionPrerelease = "dev"
+const VersionPrerelease = ""
 
 type versionCommand byte
 

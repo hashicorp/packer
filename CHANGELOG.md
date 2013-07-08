@@ -1,9 +1,9 @@
-## 0.1.5 (unreleased)
+## 0.1.5 (July 7, 2013)
 
 FEATURES:
 
-* "file" uploader will upload files and directories from the machine
-  running Packer to the remote machine.
+* "file" uploader will upload files from the machine running Packer to the
+  remote machine.
 * VirtualBox guest additions URL and checksum can now be specified, allowing
   the VirtualBox builder to have the ability to be used completely offline.
 
