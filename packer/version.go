@@ -6,12 +6,12 @@ import (
 )
 
 // The version of packer.
-const Version = "0.1.5"
+const Version = "0.1.6"
 
 // Any pre-release marker for the version. If this is "" (empty string),
 // then it means that it is a final release. Otherwise, this is the
 // pre-release marker.
-const VersionPrerelease = ""
+const VersionPrerelease = "dev"
 
 type versionCommand byte
 
