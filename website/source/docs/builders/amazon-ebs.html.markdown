@@ -63,6 +63,9 @@ Required:
 
 Optional:
 
+* `block_device_mappings` (array of block device structures) - The additional
+block device mappings to be included in the AMI.
+
 * `ssh_port` (int) - The port that SSH will be available on. This defaults
   to port 22.
 
@@ -93,6 +96,32 @@ access key from environmental variables. See the configuration reference in
 the section above for more information on what environmental variables Packer
 will look for.
 </div>
+
+Here is an example with additional block device mappings which will map
+/dev/sdb onto ephemeral0 and /dev/sdc onto ephemeral1.
+
+<pre class="prettyprint">
+{
+  "type": "amazon-ebs",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "source_ami": "ami-de0d9eb7",
+  "instance_type": "t1.micro",
+  "ssh_username": "ubuntu",
+  "ami_name": "packer-quick-start {{.CreateTime}}",
+  "block_device_mappings": [
+    {
+      "DeviceName": "/dev/sdb",
+      "VirtualName": "ephemeral0"
+    },
+    {
+      "DeviceName": "/dev/sdc",
+      "VirtualName": "ephemeral1"
+    }
+  ]
+}
+</pre>
 
 ## AMI Name Variables
 
