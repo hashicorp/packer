@@ -62,7 +62,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{.Vars}} sh {{.Path}}"
+		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
