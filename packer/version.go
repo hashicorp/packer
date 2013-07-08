@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+// The git commit that is being compiled. This will be filled in by the
+// compiler for source builds.
+var GitCommit string
+
 // The version of packer.
 const Version = "0.1.6"
 
@@ -27,6 +31,10 @@ func (versionCommand) Run(env Environment, args []string) int {
 	fmt.Fprintf(&versionString, "Packer v%s", Version)
 	if VersionPrerelease != "" {
 		fmt.Fprintf(&versionString, ".%s", VersionPrerelease)
+	}
+
+	if GitCommit != "" {
+		fmt.Fprintf(&versionString, " (%s)", GitCommit)
 	}
 
 	env.Ui().Say(versionString.String())
