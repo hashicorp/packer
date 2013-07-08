@@ -11,6 +11,10 @@ IMPROVEMENTS:
 
 * core: If SCP is not available, a more descriptive error message
   is shown telling the user. [GH-127]
+* shell: Scripts are now executed by default according to their shebang,
+  not with `/bin/sh`. [GH-105]
+* shell: You can specify what interpreter you want inline scripts to
+  run with `inline_shebang`.
 * virtualbox: Delete the packer-made SSH port forwarding prior to
   exporting the VM.
 
