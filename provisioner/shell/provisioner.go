@@ -165,12 +165,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		if err != nil {
 			return fmt.Errorf("Error opening shell script: %s", err)
 		}
+		defer f.Close()
 
 		log.Printf("Uploading %s => %s", path, p.config.RemotePath)
 		err = comm.Upload(p.config.RemotePath, f)
 		if err != nil {
 			return fmt.Errorf("Error uploading shell script: %s", err)
 		}
+
+		// Close the original file since we copied it
+		f.Close()
 
 		// Flatten the environment variables
 		flattendVars := strings.Join(p.config.Vars, " ")
