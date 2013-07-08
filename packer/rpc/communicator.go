@@ -153,12 +153,14 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 	var cmd packer.RemoteCmd
 	cmd.Command = args.Command
 
+	toClose := make([]net.Conn, 0)
 	if args.StdinAddress != "" {
 		stdinC, err := net.Dial("tcp", args.StdinAddress)
 		if err != nil {
 			return err
 		}
 
+		toClose = append(toClose, stdinC)
 		cmd.Stdin = stdinC
 	}
 
@@ -168,6 +170,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 			return err
 		}
 
+		toClose = append(toClose, stdoutC)
 		cmd.Stdout = stdoutC
 	}
 
@@ -177,6 +180,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 			return err
 		}
 
+		toClose = append(toClose, stderrC)
 		cmd.Stderr = stderrC
 	}
 
@@ -196,6 +200,9 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 	// exit. When it does, report it back to caller...
 	go func() {
 		defer responseC.Close()
+		for _, conn := range toClose {
+			defer conn.Close()
+		}
 
 		for !cmd.Exited {
 			time.Sleep(50 * time.Millisecond)
