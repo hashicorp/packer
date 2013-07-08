@@ -31,10 +31,10 @@ func (versionCommand) Run(env Environment, args []string) int {
 	fmt.Fprintf(&versionString, "Packer v%s", Version)
 	if VersionPrerelease != "" {
 		fmt.Fprintf(&versionString, ".%s", VersionPrerelease)
-	}
 
-	if GitCommit != "" {
-		fmt.Fprintf(&versionString, " (%s)", GitCommit)
+		if GitCommit != "" {
+			fmt.Fprintf(&versionString, " (%s)", GitCommit)
+		}
 	}
 
 	env.Ui().Say(versionString.String())
