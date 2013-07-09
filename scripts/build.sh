@@ -18,7 +18,7 @@ cd $DIR
 
 # Get the git commit
 GIT_COMMIT=$(git rev-parse --short HEAD)
-GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES")
+GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 # Compile the main Packer app
 echo -e "${OK_COLOR}--> Compiling Packer${NO_COLOR}"
