@@ -1,6 +1,15 @@
-## 0.1.6 (unreleased)
+## 0.2.0 (unreleased)
 
+FEATURES:
 
+* VirtualBox and VMware can now have `floppy_files` specified to attach
+  floppy disks when booting. This allows for unattended Windows installs.
+
+BUG FIXES:
+
+* core: UI messages are now properly prefixed with spaces again.
+* virtualbox: "paused" doesn't mean the VM is stopped, improving
+  shutdown detection.
 
 ## 0.1.5 (July 7, 2013)
 
