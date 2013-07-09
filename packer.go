@@ -102,7 +102,7 @@ func loadConfig() (*config, error) {
 		mustExist = false
 
 		if err != nil {
-			log.Printf("Error detecing default config file path: %s", err)
+			log.Printf("Error detecting default config file path: %s", err)
 		}
 	}
 
