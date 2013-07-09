@@ -18,6 +18,8 @@ import (
 // root level are supported.
 type StepCreateFloppy struct {
 	Files []string
+
+	floppyPath string
 }
 
 func (s *StepCreateFloppy) Run(state map[string]interface{}) multistep.StepAction {
@@ -36,6 +38,9 @@ func (s *StepCreateFloppy) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 	defer floppyF.Close()
+
+	// Set the path so we can remove it later
+	s.floppyPath = floppyF.Name()
 
 	log.Printf("Floppy path: %s", floppyF.Name())
 
@@ -91,12 +96,16 @@ func (s *StepCreateFloppy) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	// Set the path to the floppy so it can be used later
-	state["floppy_path"] = floppyF.Name()
+	state["floppy_path"] = s.floppyPath
 
 	return multistep.ActionHalt
 }
 
 func (s *StepCreateFloppy) Cleanup(map[string]interface{}) {
+	if s.floppyPath != "" {
+		log.Printf("Deleting floppy disk: %s", s.floppyPath)
+		os.Remove(s.floppyPath)
+	}
 }
 
 func (s *StepCreateFloppy) addSingleFile(dir fs.Directory, src string) error {
