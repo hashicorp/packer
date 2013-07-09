@@ -4,6 +4,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -104,6 +105,33 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 60000 {
 		t.Fatalf("bad size: %s", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_FloppyFiles(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	delete(config, "floppy_files")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	if len(b.config.FloppyFiles) != 0 {
+		t.Fatalf("bad: %#v", b.config.FloppyFiles)
+	}
+
+	config["floppy_files"] = []string{"foo", "bar"}
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	expected := []string{"foo", "bar"}
+	if !reflect.DeepEqual(b.config.FloppyFiles, expected) {
+		t.Fatalf("bad: %#v", b.config.FloppyFiles)
 	}
 }
 
