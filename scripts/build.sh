@@ -1,6 +1,8 @@
 #!/bin/bash
 #
 # This script only builds the application from source.
+set -e
+
 NO_COLOR="\x1b[0m"
 OK_COLOR="\x1b[32;01m"
 ERROR_COLOR="\x1b[31;01m"
