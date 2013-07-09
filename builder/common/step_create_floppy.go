@@ -98,7 +98,7 @@ func (s *StepCreateFloppy) Run(state map[string]interface{}) multistep.StepActio
 	// Set the path to the floppy so it can be used later
 	state["floppy_path"] = s.floppyPath
 
-	return multistep.ActionHalt
+	return multistep.ActionContinue
 }
 
 func (s *StepCreateFloppy) Cleanup(map[string]interface{}) {
