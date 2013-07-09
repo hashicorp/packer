@@ -59,6 +59,12 @@ func (d *VBox42Driver) IsRunning(name string) (bool, error) {
 		if line == `VMState="stopping"` {
 			return true, nil
 		}
+
+		// We consider "paused" to still be running. We wait for it to
+		// be completely stopped or some other state.
+		if line == `VMState="paused"` {
+			return true, nil
+		}
 	}
 
 	return false, nil
