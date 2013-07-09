@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+	"unicode"
 )
 
 type UiColor uint
@@ -110,7 +111,7 @@ func (u *PrefixedUi) prefixLines(prefix, message string) string {
 		result.WriteString(fmt.Sprintf("%s: %s\n", prefix, line))
 	}
 
-	return strings.TrimSpace(result.String())
+	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
 }
 
 func (rw *ReaderWriterUi) Ask(query string) (string, error) {
