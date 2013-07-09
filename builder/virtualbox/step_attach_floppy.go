@@ -85,7 +85,6 @@ func (s *stepAttachFloppy) Cleanup(state map[string]interface{}) {
 	defer os.Remove(s.floppyPath)
 
 	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
 	vmName := state["vmName"].(string)
 
 	command := []string{
@@ -97,7 +96,7 @@ func (s *stepAttachFloppy) Cleanup(state map[string]interface{}) {
 	}
 
 	if err := driver.VBoxManage(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error unregistering floppy: %s", err))
+		log.Printf("Error unregistering floppy: %s", err)
 	}
 }
 
