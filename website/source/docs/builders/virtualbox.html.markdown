@@ -70,6 +70,13 @@ Optional:
 * `disk_size` (int) - The size, in megabytes, of the hard disk to create
   for the VM. By default, this is 40000 (40 GB).
 
+* `floppy_files` (array of strings) - A list of files to put onto a floppy
+  disk that is attached when the VM is booted for the first time. This is
+  most useful for unattended Windows installs, which look for an
+  `Autounattend.xml` file on removable media. By default no floppy will
+  be attached. The files listed in this configuration will all be put
+  into the root directory of the floppy disk; sub-directories are not supported.
+
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
   is "VBoxGuestAdditions.iso" which should upload into the login directory

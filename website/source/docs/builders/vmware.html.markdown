@@ -73,6 +73,13 @@ Optional:
   actual file representing the disk will not use the full size unless it is full.
   By default this is set to 40,000 (40 GB).
 
+* `floppy_files` (array of strings) - A list of files to put onto a floppy
+  disk that is attached when the VM is booted for the first time. This is
+  most useful for unattended Windows installs, which look for an
+  `Autounattend.xml` file on removable media. By default no floppy will
+  be attached. The files listed in this configuration will all be put
+  into the root directory of the floppy disk; sub-directories are not supported.
+
 * `guest_os_type` (string) - The guest OS type being installed. This will be
   set in the VMware VMX. By default this is "other". By specifying a more specific
   OS type, VMware may perform some optimizations or virtual hardware changes
