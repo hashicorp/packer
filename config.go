@@ -35,6 +35,7 @@ const defaultConfig = `
 	},
 
 	"provisioners": {
+		"file": "packer-provisioner-file",
 		"shell": "packer-provisioner-shell",
 		"chef-solo": "packer-provisioner-chef-solo"
 	}

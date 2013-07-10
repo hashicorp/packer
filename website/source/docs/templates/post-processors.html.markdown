@@ -72,7 +72,7 @@ A **sequence definition** is a JSON array comprised of other **simple** or
 **detailed** definitions. The post-processors defined in the array are run
 in order, with the artifact of each feeding into the next, and any intermediary
 artifacts being discarded. A sequence definition may not contain another
-sequence definition. Sequnce definitions are used to chain together multiple
+sequence definition. Sequence definitions are used to chain together multiple
 post-processors. An example is shown below, where the artifact of a build is
 compressed then uploaded, but the compressed result is not kept.
 
@@ -93,7 +93,7 @@ are simply shortcuts for a **sequence** definition of only one element.
 ## Input Artifacts
 
 When using post-processors, the input artifact (coming from a builder or
-another post-proccessor) is discarded by default after the post-processor runs.
+another post-processor) is discarded by default after the post-processor runs.
 This is because generally, you don't want the intermediary artifacts on the
 way to the final artifact created.
 

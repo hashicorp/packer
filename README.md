@@ -77,8 +77,8 @@ For some additional dependencies, Go needs [Mercurial](http://mercurial.selenic.
 to be installed. Packer itself doesn't require this but a dependency of a
 dependency does.
 
-Next, clone this repository then just type `make`. In a few moments,
-you'll have a working `packer` executable:
+Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer` and
+then just type `make`. In a few moments, you'll have a working `packer` executable:
 
 ```
 $ make

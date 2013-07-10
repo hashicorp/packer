@@ -81,7 +81,7 @@ Here is a basic example. It is completely valid except for the access keys:
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
   "source_ami": "ami-de0d9eb7",
-  "instance_type": "m1.small",
+  "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{.CreateTime}}"
 }

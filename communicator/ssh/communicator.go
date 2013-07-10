@@ -3,6 +3,7 @@ package ssh
 import (
 	"bytes"
 	"code.google.com/p/go.crypto/ssh"
+	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
@@ -145,6 +146,14 @@ func (c *comm) Upload(path string, input io.Reader) error {
 			// Otherwise, we have an ExitErorr, meaning we can just read
 			// the exit status
 			log.Printf("non-zero exit status: %d", exitErr.ExitStatus())
+
+			// If we exited with status 127, it means SCP isn't available.
+			// Return a more descriptive error for that.
+			if exitErr.ExitStatus() == 127 {
+				return errors.New(
+					"SCP failed to start. This usually means that SCP is not\n" +
+						"properly installed on the remote system.")
+			}
 		}
 
 		return err

@@ -89,7 +89,7 @@ the prior linked page for information on syntax if you're unfamiliar with it.
 
 The available variables are shown below:
 
-* `CreateTime`- This will be replaced with the Unix timestamp of when the
+* `CreateTime` - This will be replaced with the Unix timestamp of when the
   image is created.
 
 ## Finding Image, Region, and Size IDs

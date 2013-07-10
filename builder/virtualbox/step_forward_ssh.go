@@ -36,7 +36,7 @@ func (s *stepForwardSSH) Run(state map[string]interface{}) multistep.StepAction 
 		}
 	}
 
-	// Attach the disk to the controller
+	// Create a forwarded port mapping to the VM
 	ui.Say(fmt.Sprintf("Creating forwarded port mapping for SSH (host port %d)", sshHostPort))
 	command := []string{
 		"modifyvm", vmName,

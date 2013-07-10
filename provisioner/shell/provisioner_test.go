@@ -35,6 +35,33 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_InlineShebang(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "inline_shebang")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if p.config.InlineShebang != "/bin/sh" {
+		t.Fatalf("bad value: %s", p.config.InlineShebang)
+	}
+
+	// Test with a good one
+	config["inline_shebang"] = "foo"
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if p.config.InlineShebang != "foo" {
+		t.Fatalf("bad value: %s", p.config.InlineShebang)
+	}
+}
+
 func TestProvisionerPrepare_Script(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")

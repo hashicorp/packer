@@ -27,7 +27,9 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	log.Printf("Packer Version: %s %s", packer.Version, packer.VersionPrerelease)
+	log.Printf(
+		"Packer Version: %s %s %s",
+		packer.Version, packer.VersionPrerelease, packer.GitCommit)
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 
 	config, err := loadConfig()
@@ -100,7 +102,7 @@ func loadConfig() (*config, error) {
 		mustExist = false
 
 		if err != nil {
-			log.Printf("Error detecing default config file path: %s", err)
+			log.Printf("Error detecting default config file path: %s", err)
 		}
 	}
 

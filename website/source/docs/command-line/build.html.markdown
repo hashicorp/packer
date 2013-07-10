@@ -14,7 +14,7 @@ artifacts that are created will be outputted at the end of the build.
 * `-debug` - Disables parallelization and enables debug mode. Debug mode flags
   the builders that they should output debugging information. The exact behavior
   of debug mode is left to the builder. In general, builders usually will stop
-  between each step, waiting keyboard input before continuing. This will allow
+  between each step, waiting for keyboard input before continuing. This will allow
   the user to inspect state and so on.
 
 * `-except=foo,bar,baz` - Builds all the builds except those with the given

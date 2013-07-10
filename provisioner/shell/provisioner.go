@@ -25,6 +25,9 @@ type config struct {
 	// in the context of a single shell.
 	Inline []string
 
+	// The shebang value used when running inline scripts.
+	InlineShebang string `mapstructure:"inline_shebang"`
+
 	// The local path of the shell script to upload and execute.
 	Script string
 
@@ -62,11 +65,15 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{.Vars}} sh {{.Path}}"
+		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
 		p.config.Inline = nil
+	}
+
+	if p.config.InlineShebang == "" {
+		p.config.InlineShebang = "/bin/sh"
 	}
 
 	if p.config.RemotePath == "" {
@@ -136,6 +143,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
+		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
 		for _, command := range p.config.Inline {
 			if _, err := writer.WriteString(command + "\n"); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
@@ -157,12 +165,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		if err != nil {
 			return fmt.Errorf("Error opening shell script: %s", err)
 		}
+		defer f.Close()
 
 		log.Printf("Uploading %s => %s", path, p.config.RemotePath)
 		err = comm.Upload(p.config.RemotePath, f)
 		if err != nil {
 			return fmt.Errorf("Error uploading shell script: %s", err)
 		}
+
+		// Close the original file since we copied it
+		f.Close()
 
 		// Flatten the environment variables
 		flattendVars := strings.Join(p.config.Vars, " ")

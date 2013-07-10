@@ -22,7 +22,10 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 	name := config.VMName
 
 	commands := make([][]string, 4)
-	commands[0] = []string{"createvm", "--name", name, "--ostype", config.GuestOSType, "--register"}
+	commands[0] = []string{
+		"createvm", "--name", name,
+		"--ostype", config.GuestOSType, "--register",
+	}
 	commands[1] = []string{
 		"modifyvm", name,
 		"--boot1", "disk", "--boot2", "dvd", "--boot3", "none", "--boot4", "none",
