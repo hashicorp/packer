@@ -36,10 +36,10 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Building and writing VMX file")
 
 	tplData := &vmxTemplateData{
-		config.VMName,
-		config.GuestOSType,
-		config.DiskName,
-		isoPath,
+		Name:     config.VMName,
+		GuestOS:  config.GuestOSType,
+		DiskName: config.DiskName,
+		ISOPath:  isoPath,
 	}
 
 	var buf bytes.Buffer
@@ -53,6 +53,13 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 			log.Printf("Setting VMX: '%s' = '%s'", k, v)
 			vmxData[k] = v
 		}
+	}
+
+	if floppyPathRaw, ok := state["floppy_path"]; ok {
+		log.Println("Floppy path present, setting in VMX")
+		vmxData["floppy0.present"] = "TRUE"
+		vmxData["floppy0.fileType"] = "file"
+		vmxData["floppy0.fileName"] = floppyPathRaw.(string)
 	}
 
 	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")

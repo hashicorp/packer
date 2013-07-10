@@ -28,7 +28,8 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.2-server-amd64.iso",
   "iso_md5": "af5f788aee1b32c4b2634734309cc9e9",
   "ssh_username": "packer",
-  "ssh_wait_timeout": "30s"
+  "ssh_wait_timeout": "30s",
+  "shutdown_command": "shutdown -P now"
 }
 </pre>
 
@@ -71,6 +72,13 @@ Optional:
   The builder uses expandable, not fixed-size virtual hard disks, so the
   actual file representing the disk will not use the full size unless it is full.
   By default this is set to 40,000 (40 GB).
+
+* `floppy_files` (array of strings) - A list of files to put onto a floppy
+  disk that is attached when the VM is booted for the first time. This is
+  most useful for unattended Windows installs, which look for an
+  `Autounattend.xml` file on removable media. By default no floppy will
+  be attached. The files listed in this configuration will all be put
+  into the root directory of the floppy disk; sub-directories are not supported.
 
 * `guest_os_type` (string) - The guest OS type being installed. This will be
   set in the VMware VMX. By default this is "other". By specifying a more specific

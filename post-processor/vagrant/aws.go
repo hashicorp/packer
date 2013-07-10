@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -75,14 +76,17 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 
 	vagrantfileContents := defaultAWSVagrantfile
 	if p.config.VagrantfileTemplate != "" {
+		log.Printf("Using vagrantfile template: %s", p.config.VagrantfileTemplate)
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
+			err = fmt.Errorf("error opening vagrantfile template: %s", err)
 			return nil, false, err
 		}
 		defer f.Close()
 
 		contents, err := ioutil.ReadAll(f)
 		if err != nil {
+			err = fmt.Errorf("error reading vagrantfile template: %s", err)
 			return nil, false, err
 		}
 
@@ -101,6 +105,7 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 
 	// Compress the directory to the given output path
 	if err := DirToBox(outputPath, dir); err != nil {
+		err = fmt.Errorf("error creating box: %s", err)
 		return nil, false, err
 	}
 

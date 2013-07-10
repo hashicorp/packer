@@ -1,6 +1,47 @@
-## 0.1.5 (unreleased)
+## 0.2.0 (unreleased)
 
+FEATURES:
 
+* VirtualBox and VMware can now have `floppy_files` specified to attach
+  floppy disks when booting. This allows for unattended Windows installs.
+
+BUG FIXES:
+
+* core: UI messages are now properly prefixed with spaces again.
+* virtualbox: "paused" doesn't mean the VM is stopped, improving
+  shutdown detection.
+
+## 0.1.5 (July 7, 2013)
+
+FEATURES:
+
+* "file" uploader will upload files from the machine running Packer to the
+  remote machine.
+* VirtualBox guest additions URL and checksum can now be specified, allowing
+  the VirtualBox builder to have the ability to be used completely offline.
+
+IMPROVEMENTS:
+
+* core: If SCP is not available, a more descriptive error message
+  is shown telling the user. [GH-127]
+* shell: Scripts are now executed by default according to their shebang,
+  not with `/bin/sh`. [GH-105]
+* shell: You can specify what interpreter you want inline scripts to
+  run with `inline_shebang`.
+* virtualbox: Delete the packer-made SSH port forwarding prior to
+  exporting the VM.
+
+BUG FIXES:
+
+* core: Non-200 response codes on downloads now show proper errors.
+  [GH-141]
+* amazon-ebs: SSH handshake is retried. [GH-130]
+* vagrant: The `BuildName` template propery works properly in
+  the output path.
+* vagrant: Properly configure the provider-specific post-processors so
+  things like `vagrantfile_template` work. [GH-129]
+* vagrant: Close filehandles when copying files so Windows can
+  rename files. [GH-100]
 
 ## 0.1.4 (July 2, 2013)
 
