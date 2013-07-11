@@ -40,8 +40,8 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		var stdout, stderr bytes.Buffer
 		cmd := &packer.RemoteCmd{
 			Command: config.ShutdownCommand,
-			Stdout: &stdout,
-			Stderr: &stderr,
+			Stdout:  &stdout,
+			Stderr:  &stderr,
 		}
 		if err := comm.Start(cmd); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
