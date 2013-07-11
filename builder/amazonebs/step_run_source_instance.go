@@ -28,6 +28,22 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		SecurityGroups: []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
 	}
 
+    ui.Say("Validating Source AMI...")
+    imageResp, err := ec2conn.Images([]string{config.SourceAmi}, ec2.NewFilter())
+    if err != nil {
+    	err := fmt.Errorf("There was a problem with the provided source AMI: %s", err)
+    	state["error"] = err
+    	ui.Error(err.Error())
+        return multistep.ActionHalt
+    }
+
+    if imageResp.Images[0].RootDeviceType != "ebs" {
+    	err := fmt.Errorf("The provided source AMI is instance-store based. The amazon-ebs bundler can only work with EBS based AMIs.")
+        state["error"] = err
+        ui.Error(err.Error())
+    	return multistep.ActionHalt
+    }
+
 	ui.Say("Launching a source AWS instance...")
 	runResp, err := ec2conn.RunInstances(runOpts)
 	if err != nil {
