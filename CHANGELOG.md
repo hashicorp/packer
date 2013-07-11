@@ -7,6 +7,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* amazon-ebs: Verify the source AMI is EBS-backed before launching. [GH-169]
 * vmware: error if shutdown command has non-zero exit status.
 
 BUG FIXES:
