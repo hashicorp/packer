@@ -40,10 +40,10 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	s.instance = &runResp.Instances[0]
 	log.Printf("instance id: %s", s.instance.InstanceId)
 
-	ui.Say("Waiting for instance to become ready...")
+	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
 	s.instance, err = waitForState(ec2conn, s.instance, []string{"pending"}, "running")
 	if err != nil {
-		err := fmt.Errorf("Error waiting for instance to become ready: %s", err)
+		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", s.instance.InstanceId, err)
 		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
