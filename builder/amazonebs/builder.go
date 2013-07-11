@@ -15,7 +15,6 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"os"
 	"sort"
 	"strings"
 	"text/template"
@@ -84,22 +83,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if b.config.AccessKey == "" {
-		b.config.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
-	}
-
-	if b.config.AccessKey == "" {
-		b.config.AccessKey = os.Getenv("AWS_ACCESS_KEY")
-	}
-
-	if b.config.SecretKey == "" {
-		b.config.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
-	}
-
-	if b.config.SecretKey == "" {
-		b.config.SecretKey = os.Getenv("AWS_SECRET_KEY")
-	}
-
 	if b.config.SSHPort == 0 {
 		b.config.SSHPort = 22
 	}
@@ -109,14 +92,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	if b.config.AccessKey == "" {
-		errs = append(errs, errors.New("An access_key must be specified"))
-	}
-
-	if b.config.SecretKey == "" {
-		errs = append(errs, errors.New("A secret_key must be specified"))
-	}
-
 	if b.config.SourceAmi == "" {
 		errs = append(errs, errors.New("A source_ami must be specified"))
 	}
@@ -163,7 +138,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		panic("region not found")
 	}
 
-	auth := aws.Auth{b.config.AccessKey, b.config.SecretKey}
+	auth, err := aws.GetAuth(b.config.AccessKey, b.config.SecretKey)
+	if err != nil {
+		return nil, err
+	}
+
 	ec2conn := ec2.New(auth, region)
 
 	// Setup the state bag and initial state for the steps
