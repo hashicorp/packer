@@ -5,6 +5,10 @@ FEATURES:
 * VirtualBox and VMware can now have `floppy_files` specified to attach
   floppy disks when booting. This allows for unattended Windows installs.
 
+IMPROVEMENTS:
+
+* vmware: error if shutdown command has non-zero exit status.
+
 BUG FIXES:
 
 * core: UI messages are now properly prefixed with spaces again.

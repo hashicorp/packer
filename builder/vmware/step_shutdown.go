@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -35,7 +36,13 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 	if config.ShutdownCommand != "" {
 		ui.Say("Gracefully halting virtual machine...")
 		log.Printf("Executing shutdown command: %s", config.ShutdownCommand)
-		cmd := &packer.RemoteCmd{Command: config.ShutdownCommand}
+
+		var stdout, stderr bytes.Buffer
+		cmd := &packer.RemoteCmd{
+			Command: config.ShutdownCommand,
+			Stdout: &stdout,
+			Stderr: &stderr,
+		}
 		if err := comm.Start(cmd); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state["error"] = err
@@ -45,6 +52,17 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 
 		// Wait for the command to run
 		cmd.Wait()
+
+		// If the command failed to run, notify the user in some way.
+		if cmd.ExitStatus != 0 {
+			state["error"] = fmt.Errorf(
+				"Shutdown command has non-zero exit status.\n\nStdout: %s\n\nStderr: %s",
+				stdout.String(), stderr.String())
+			return multistep.ActionHalt
+		}
+
+		log.Printf("Shutdown stdout: %s", stdout.String())
+		log.Printf("Shutdown stderr: %s", stderr.String())
 
 		// Wait for the machine to actually shut down
 		log.Printf("Waiting max %s for shutdown to complete", config.ShutdownTimeout)
