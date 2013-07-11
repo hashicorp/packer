@@ -149,8 +149,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error running Chef Solo: %s", err)
 	}
 
-	// return fmt.Errorf("Die")
-
 	return nil
 }
 
@@ -178,6 +176,7 @@ func UploadLocalDirectory(localDir string, comm packer.Communicator) (err error)
 		return
 	}
 
+	log.Printf("Uploading directory %s", localDir)
 	err = filepath.Walk(localDir, visitPath)
 	if err != nil {
 		return fmt.Errorf("Error uploading cookbook %s: %s", localDir, err)
@@ -187,7 +186,8 @@ func UploadLocalDirectory(localDir string, comm packer.Communicator) (err error)
 }
 
 func CreateRemoteDirectory(path string, comm packer.Communicator) (err error) {
-	//Ui.Say(fmt.Sprintf("Creating directory: %s", path))
+	log.Printf("Creating remote directory: %s ", path)
+
 	var copyCommand = []string{"mkdir -p", path}
 
 	var cmd packer.RemoteCmd
@@ -211,6 +211,7 @@ func CreateSoloRb(cookbooksPaths []string, comm packer.Communicator) (str string
 	Ui.Say(fmt.Sprintf("Creating Chef configuration file..."))
 
 	remotePath := RemoteStagingPath + "/solo.rb"
+
 	tf, err := ioutil.TempFile("", "packer-chef-solo-rb")
 	if err != nil {
 		return "", fmt.Errorf("Error preparing Chef solo.rb: %s", err)
@@ -234,12 +235,13 @@ func CreateSoloRb(cookbooksPaths []string, comm packer.Communicator) (str string
 	name := tf.Name()
 	tf.Close()
 	f, err := os.Open(name)
-	comm.Upload(remotePath, f)
-
 	defer os.Remove(name)
 
-	// Upload the Chef Solo configuration file to the cookbook directory.
+	log.Printf("Chef configuration file contents: %s", contents)
 
+	// Upload the Chef Solo configuration file to the cookbook directory.
+	log.Printf("Uploading chef configuration file to %s", remotePath)
+	err = comm.Upload(remotePath, f)
 	if err != nil {
 		return "", fmt.Errorf("Error uploading Chef Solo configuration file: %s", err)
 	}
@@ -257,7 +259,10 @@ func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, co
 	}
 
 	// Add Recipes to JSON
-	jsonAttrs["run_list"] = formattedRecipes
+	if len(formattedRecipes) > 0 {
+		log.Printf("Overriding node run list: %s", strings.Join(formattedRecipes, ", "))
+		jsonAttrs["run_list"] = formattedRecipes
+	}
 
 	// Convert to JSON string
 	jsonString, err := json.MarshalIndent(jsonAttrs, "", "  ")
