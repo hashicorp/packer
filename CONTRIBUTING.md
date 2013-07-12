@@ -41,3 +41,27 @@ it raises the chances we can quickly merge or address your contributions.
    linked.
 
 5. The issue is closed.
+
+## Setting up Go to work on Packer
+
+If you have never worked with Go before, you will have to complete the
+following steps in order to be able to compile and test Packer.
+
+1. Install Go. On a Mac, you can `brew install go`.
+
+2. Set and export the `GOPATH` environment variable. For example, you can
+   add `export GOPATH=$HOME/Documents/golang` to your `.bash_profile`.
+
+3. Download the Packer source (and its dependencies) by running
+   `go get github.com/mitchellh/packer`. This will download the Packer
+   source to `$GOPATH/src/github.com/mitchellh/packer`.
+
+4. Make your changes to the Packer source. You can run `make` from the main
+   source directory to recompile all the binaries. Any compilation errors
+   will be shown when the binaries are rebuilding.
+
+5. Test your changes by running `make test` and then running
+   `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine.
+
+6. If everything works well and the tests pass, run `go fmt` on your code
+   before submitting a pull request.
