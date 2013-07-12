@@ -36,7 +36,6 @@ func (stepPrepareOutputDir) Cleanup(state map[string]interface{}) {
 		ui := state["ui"].(packer.Ui)
 
 		ui.Say("Deleting output directory...")
-
 		for i := 0; i < 5; i++ {
 			err := os.RemoveAll(config.OutputDir)
 			if err == nil {
