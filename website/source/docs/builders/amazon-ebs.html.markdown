@@ -63,6 +63,12 @@ Required:
 
 Optional:
 
+* `security_group_id` (string) - The ID (_not_ the name) of the security
+  group to assign to the instance. By default this is not set and Packer
+  will automatically create a new temporary security group to allow SSH
+  access. Note that if this is specified, you must be sure the security
+  group allows access to the `ssh_port` given below.
+
 * `ssh_port` (int) - The port that SSH will be available on. This defaults
   to port 22.
 
