@@ -21,12 +21,14 @@ func (Command) Help() string {
 
 func (c Command) Run(env packer.Environment, args []string) int {
 	var cfgDebug bool
+	var cfgForce bool
 	var cfgExcept []string
 	var cfgOnly []string
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
+	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
 	cmdFlags.Var((*stringSliceValue)(&cfgExcept), "except", "build all builds except these")
 	cmdFlags.Var((*stringSliceValue)(&cfgOnly), "only", "only build the given builds by name")
 	if err := cmdFlags.Parse(args); err != nil {
@@ -141,11 +143,13 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	env.Ui().Say("")
 
 	log.Printf("Build debug mode: %v", cfgDebug)
+	log.Printf("Force build: %v", cfgForce)
 
-	// Set the debug mode and prepare all the builds
+	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
+		b.SetForce(cfgForce)
 		err := b.Prepare()
 		if err != nil {
 			env.Ui().Error(err.Error())
