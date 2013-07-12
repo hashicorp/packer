@@ -55,6 +55,7 @@ type config struct {
 
 	PackerBuildName string `mapstructure:"packer_build_name"`
 	PackerDebug     bool   `mapstructure:"packer_debug"`
+	PackerForce     bool   `mapstructure:"packer_force"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -175,7 +176,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if _, err := os.Stat(b.config.OutputDir); err == nil {
-		errs = append(errs, errors.New("Output directory already exists. It must not exist."))
+		if b.config.PackerForce {
+			log.Printf("Build forced, removing existing output directory: %s", string(b.config.OutputDir))
+				os.RemoveAll(b.config.OutputDir)
+		} else {
+			errs = append(errs, errors.New("Output directory already exists. It must not exist."))
+		}
 	}
 
 	if b.config.SSHUser == "" {

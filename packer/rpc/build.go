@@ -69,6 +69,12 @@ func (b *build) SetDebug(val bool) {
 	}
 }
 
+func (b *build) SetForce(val bool) {
+	if err := b.client.Call("Build.SetForce", val, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
 func (b *build) Cancel() {
 	if err := b.client.Call("Build.Cancel", new(interface{}), new(interface{})); err != nil {
 		panic(err)
@@ -108,6 +114,11 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *[]string) error {
 
 func (b *BuildServer) SetDebug(val *bool, reply *interface{}) error {
 	b.build.SetDebug(*val)
+	return nil
+}
+
+func (b *BuildServer) SetForce(val *bool, reply *interface{}) error {
+	b.build.SetForce(*val)
 	return nil
 }
 
