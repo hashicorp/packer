@@ -2,6 +2,8 @@
 
 FEATURES:
 
+* DigitalOcean API key and client IDs can now be passed in as
+  environmental variables. See the documentatin for more details.
 * VirtualBox and VMware can now have `floppy_files` specified to attach
   floppy disks when booting. This allows for unattended Windows installs.
 
