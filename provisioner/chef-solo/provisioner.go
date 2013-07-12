@@ -19,10 +19,12 @@ import (
 	"text/template"
 )
 
-const RemoteStagingPath = "/tmp/provision/chef-solo"
-const RemoteFileCachePath = "/tmp/provision/chef-solo"
-const RemoteCookbookPath = "/tmp/provision/chef-solo/cookbooks"
-const DefaultCookbooksPath = "cookbooks"
+const (
+	RemoteStagingPath    = "/tmp/provision/chef-solo"
+	RemoteFileCachePath  = "/tmp/provision/chef-solo"
+	RemoteCookbookPath   = "/tmp/provision/chef-solo/cookbooks"
+	DefaultCookbooksPath = "cookbooks"
+)
 
 var Ui packer.Ui
 
@@ -68,7 +70,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.CookbooksPaths == nil {
 		p.config.CookbooksPaths = []string{DefaultCookbooksPath}
-
 	}
 
 	if p.config.Recipes == nil {
@@ -99,9 +100,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	cookbooksPaths := make([]string, len(p.config.CookbooksPaths))
-	copy(cookbooksPaths, p.config.CookbooksPaths)
-
 	var err error
 	Ui = ui
 
@@ -128,7 +126,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	// Upload all cookbooks
-	for _, path := range cookbooksPaths {
+	for _, path := range p.config.CookbooksPaths {
 		ui.Say(fmt.Sprintf("Copying cookbook path: %s", path))
 		err = UploadLocalDirectory(path, comm)
 		if err != nil {
@@ -148,6 +146,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if err != nil {
 		return fmt.Errorf("Error running Chef Solo: %s", err)
 	}
+
+	return fmt.Errorf("SUCESS")
 
 	return nil
 }
@@ -208,7 +208,7 @@ func CreateRemoteDirectory(path string, comm packer.Communicator) (err error) {
 }
 
 func CreateSoloRb(cookbooksPaths []string, comm packer.Communicator) (str string, err error) {
-	Ui.Say(fmt.Sprintf("Creating Chef configuration file..."))
+	Ui.Say("Creating Chef configuration file...")
 
 	remotePath := RemoteStagingPath + "/solo.rb"
 
@@ -220,11 +220,24 @@ func CreateSoloRb(cookbooksPaths []string, comm packer.Communicator) (str string
 	// Write our contents to it
 	writer := bufio.NewWriter(tf)
 
-	// Messy, messy...
-	cbPathsCat := "\"" + RemoteCookbookPath + "/" + strings.Join(cookbooksPaths, "\",\""+RemoteCookbookPath+"/") + "\""
-	contents := "file_cache_path \"" + RemoteFileCachePath + "\"\ncookbook_path [" + cbPathsCat + "]\n"
+	var cookbooksPathsFull = make([]string, len(cookbooksPaths))
+	for i, path := range cookbooksPaths {
+		cookbooksPathsFull[i] = "\"" + RemoteCookbookPath + "/" + path + "\""
+	}
 
-	if _, err := writer.WriteString(contents); err != nil {
+	var contents bytes.Buffer
+	var soloRbText = `
+	file_cache_path "{{.FileCachePath}}"
+	cookbook_path   [{{.CookbookPath}}]
+`
+
+	t := template.Must(template.New("soloRb").Parse(soloRbText))
+	t.Execute(&contents, map[string]string{
+		"FileCachePath": RemoteFileCachePath,
+		"CookbookPath":  strings.Join(cookbooksPathsFull, ","),
+	})
+
+	if _, err := writer.WriteString(contents.String()); err != nil {
 		return "", fmt.Errorf("Error preparing solo.rb: %s", err)
 	}
 
@@ -245,12 +258,12 @@ func CreateSoloRb(cookbooksPaths []string, comm packer.Communicator) (str string
 	if err != nil {
 		return "", fmt.Errorf("Error uploading Chef Solo configuration file: %s", err)
 	}
-	//executeCommand("sudo cat " + remotePath, comm)
+
 	return remotePath, nil
 }
 
 func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, comm packer.Communicator) (str string, err error) {
-	Ui.Say(fmt.Sprintf("Creating and uploading Chef attributes file"))
+	Ui.Say("Creating and uploading Chef attributes file")
 	remotePath := RemoteStagingPath + "/node.json"
 
 	var formattedRecipes []string
@@ -305,7 +318,7 @@ func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, co
 }
 
 func InstallChefSolo(preventSudo bool, comm packer.Communicator) (err error) {
-	Ui.Say(fmt.Sprintf("Installing Chef Solo"))
+	Ui.Say("Installing Chef Solo")
 
 	var command bytes.Buffer
 	t := template.Must(template.New("install-chef").Parse("curl -L https://www.opscode.com/chef/install.sh | {{if .sudo}}sudo {{end}}bash"))
@@ -329,7 +342,6 @@ func executeCommand(command string, comm packer.Communicator) (err error) {
 	cmd.Stdout = stdout_w
 	cmd.Stderr = stderr_w
 
-	//Ui.Say(fmt.Sprintf("Executing command: %s", cmd.Command))
 	log.Printf("Executing command: %s", cmd.Command)
 	err = comm.Start(&cmd)
 	if err != nil {
