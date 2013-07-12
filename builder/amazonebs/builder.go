@@ -29,12 +29,13 @@ type config struct {
 	SecretKey string `mapstructure:"secret_key"`
 
 	// Information for the source instance
-	Region       string
-	SourceAmi    string `mapstructure:"source_ami"`
-	InstanceType string `mapstructure:"instance_type"`
-	SSHUsername  string `mapstructure:"ssh_username"`
-	SSHPort      int    `mapstructure:"ssh_port"`
-	SSHTimeout   time.Duration
+	Region          string
+	SourceAmi       string `mapstructure:"source_ami"`
+	InstanceType    string `mapstructure:"instance_type"`
+	SSHUsername     string `mapstructure:"ssh_username"`
+	SSHPort         int    `mapstructure:"ssh_port"`
+	SSHTimeout      time.Duration
+	SecurityGroupId string `mapstructure:"security_group_id"`
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
