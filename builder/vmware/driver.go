@@ -38,24 +38,36 @@ type Driver interface {
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
 func NewDriver() (Driver, error) {
-	var driver Driver
+	drivers := []Driver{}
 
 	switch runtime.GOOS {
 	case "darwin":
-		driver = &Fusion5Driver{
-			AppPath: "/Applications/VMware Fusion.app",
+		drivers = []Driver{
+			&Fusion5Driver{
+				AppPath: "/Applications/VMware Fusion.app",
+			},
 		}
 	case "linux":
-		fallthrough
+		drivers = []Driver{
+			new(Workstation9Driver),
+			new(Player5LinuxDriver),
+		}
 	case "windows":
-		driver = &Workstation9Driver{}
+		drivers = []Driver{
+			new(Workstation9Driver),
+		}
 	default:
 		return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 	}
 
-	if err := driver.Verify(); err != nil {
-		return nil, err
+	errs := ""
+	for _, driver := range drivers {
+		err := driver.Verify()
+		if err == nil {
+			return driver, nil
+		}
+		errs += err.Error() + "\n"
 	}
 
-	return driver, nil
+	return nil, fmt.Errorf("Unable to initialize any driver:\n%s", errs)
 }
