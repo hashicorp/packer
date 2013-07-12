@@ -12,6 +12,7 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -64,6 +65,16 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Optional configuration with defaults
 	//
+	if b.config.APIKey == "" {
+		// Default to environment variable for api_key, if it exists
+		b.config.APIKey = os.Getenv("DIGITALOCEAN_API_KEY")
+	}
+
+	if b.config.ClientID == "" {
+		// Default to environment variable for client_id, if it exists
+		b.config.ClientID = os.Getenv("DIGITALOCEAN_CLIENT_ID")
+	}
+
 	if b.config.RegionID == 0 {
 		// Default to Region "New York"
 		b.config.RegionID = 1
