@@ -219,9 +219,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if _, err := os.Stat(b.config.OutputDir); err == nil {
-		if !b.config.PackerForce {
-			errs = append(errs, errors.New("Output directory already exists. It must not exist."))
+	if !b.config.PackerForce {
+		if _, err := os.Stat(b.config.OutputDir); err == nil {
+			errs = append(
+				errs,
+				errors.New("Output directory already exists. It must not exist."))
 		}
 	}
 

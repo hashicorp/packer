@@ -15,7 +15,7 @@ func (stepPrepareOutputDir) Run(state map[string]interface{}) multistep.StepActi
 	if _, err := os.Stat(config.OutputDir); err == nil && config.PackerForce {
 		ui.Say("Deleting previous output directory...")
 		os.RemoveAll(config.OutputDir)
-  }
+	}
 
 	if err := os.MkdirAll(config.OutputDir, 0755); err != nil {
 		state["error"] = err
