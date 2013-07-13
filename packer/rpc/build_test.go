@@ -17,6 +17,7 @@ type testBuild struct {
 	runCache       packer.Cache
 	runUi          packer.Ui
 	setDebugCalled bool
+	setForceCalled bool
 	cancelCalled   bool
 
 	errRunResult bool
@@ -46,6 +47,10 @@ func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, er
 
 func (b *testBuild) SetDebug(bool) {
 	b.setDebugCalled = true
+}
+
+func (b *testBuild) SetForce(bool) {
+	b.setForceCalled = true
 }
 
 func (b *testBuild) Cancel() {
@@ -103,6 +108,10 @@ func TestBuildRPC(t *testing.T) {
 	// Test SetDebug
 	bClient.SetDebug(true)
 	assert.True(b.setDebugCalled, "should be called")
+
+	// Test SetForce
+	bClient.SetForce(true)
+	assert.True(b.setForceCalled, "should be called")
 
 	// Test Cancel
 	bClient.Cancel()

@@ -14,6 +14,10 @@ const BuildNameConfigKey = "packer_build_name"
 // debugging is enabled.
 const DebugConfigKey = "packer_debug"
 
+// This is the key in configurations that is set to "true" when Packer
+// force build is enabled.
+const ForceConfigKey = "packer_force"
+
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
 type Build interface {
@@ -42,6 +46,12 @@ type Build interface {
 	// When SetDebug is set to true, parallelism between builds is
 	// strictly prohibited.
 	SetDebug(bool)
+
+	// SetForce will enable/disable forcing a build when artifacts exist. 
+	//
+	// When SetForce is set to true, existing artifacts from the build are
+	// deleted prior to the build.
+	SetForce(bool)
 }
 
 // A build struct represents a single build job, the result of which should
@@ -58,6 +68,7 @@ type coreBuild struct {
 	provisioners   []coreBuildProvisioner
 
 	debug         bool
+	force         bool
 	l             sync.Mutex
 	prepareCalled bool
 }
@@ -98,6 +109,7 @@ func (b *coreBuild) Prepare() (err error) {
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey: b.name,
 		DebugConfigKey:     b.debug,
+		ForceConfigKey:     b.force,
 	}
 
 	// Prepare the builder
@@ -263,6 +275,14 @@ func (b *coreBuild) SetDebug(val bool) {
 	}
 
 	b.debug = val
+}
+
+func (b *coreBuild) SetForce(val bool) {
+	if b.prepareCalled {
+		panic("prepare has already been called")
+	}
+
+	b.force = val
 }
 
 // Cancels the build if it is running.
