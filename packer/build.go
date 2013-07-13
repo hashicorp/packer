@@ -47,7 +47,7 @@ type Build interface {
 	// strictly prohibited.
 	SetDebug(bool)
 
-	// SetForce will enable/disable forcing a build when artifacts exist. 
+	// SetForce will enable/disable forcing a build when artifacts exist.
 	//
 	// When SetForce is set to true, existing artifacts from the build are
 	// deleted prior to the build.
