@@ -14,23 +14,22 @@ import (
 )
 
 func main() {
-	switch packer_log := os.Getenv("PACKER_LOG"); packer_log {
-	case "":
+	// Setup logging if PACKER_LOG is set.
+	// Log to PACKER_LOG_PATH if it is set, otherwise default to stderr.
+	if os.Getenv("PACKER_LOG") == "" {
 		// If we don't have logging explicitly enabled, then disable it
 		log.SetOutput(ioutil.Discard)
-	case "1":
-		// Legacy logging is enabled, make sure it goes to stderr
-		log.SetOutput(os.Stderr)
-	default:
-		{
-			// Use a file for logging
-			file, err := os.OpenFile(packer_log, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	} else {
+		if log_path := os.Getenv("PACKER_LOG_PATH"); log_path == "" {
+			log.SetOutput(os.Stderr)
+		} else {
+			file, err := os.OpenFile(log_path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 			if err == nil {
 				log.SetOutput(file)
 			} else {
 				// Problem opening the file, fail back to Stderr
 				log.SetOutput(os.Stderr)
-				log.Printf("Could not open %s for logging (%s). Using stderr instead.", packer_log, err.Error())
+				log.Printf("Could not open %s for logging (%s). Using stderr instead.", log_path, err.Error())
 			}
 		}
 	}
