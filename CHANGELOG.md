@@ -8,6 +8,8 @@ FEATURES:
   environmental variables. See the documentatin for more details.
 * VirtualBox and VMware can now have `floppy_files` specified to attach
   floppy disks when booting. This allows for unattended Windows installs.
+* `packer build` has a new `-force` flag that forces the removal of
+  existing artifacts if they exist. [GH-173]
 
 IMPROVEMENTS:
 
