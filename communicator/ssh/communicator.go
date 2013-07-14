@@ -192,6 +192,7 @@ func (c *comm) newSession() (*ssh.Session, error) {
 	log.Println("opening new ssh session")
 	session, err := c.client.NewSession()
 	if err != nil {
+		log.Printf("ssh session open error: '%s', attempting reconnect", err)
 		if err := c.reconnect(); err != nil {
 			return nil, err
 		}
