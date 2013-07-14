@@ -3,6 +3,8 @@ package common
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -53,6 +55,10 @@ func HashForType(t string) hash.Hash {
 	switch t {
 	case "md5":
 		return md5.New()
+	case "sha1":
+		return sha1.New()
+	case "sha256":
+		return sha256.New()
 	default:
 		return nil
 	}
