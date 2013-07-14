@@ -25,7 +25,8 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "type": "virtualbox",
   "guest_os_type": "Ubuntu_64",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.2-server-amd64.iso",
-  "iso_md5": "af5f788aee1b32c4b2634734309cc9e9",
+  "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
+  "iso_checksum_type": "md5",
   "ssh_username": "packer",
   "ssh_wait_timeout": "30s",
   "shutdown_command": "shutdown -P now"
@@ -40,9 +41,13 @@ each category, the available options are alphabetized and described.
 
 Required:
 
-* `iso_md5` (string) - The MD5 checksum for the OS ISO file. Because ISO
+* `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
-  to booting a virtual machine with the ISO attached.
+  to booting a virtual machine with the ISO attached. The type of the
+  checksum is specified with `iso_checksum_type`, documented below.
+
+* `iso_checksum_type` (string) - The type of the checksum specified in
+  `iso_checksum`. Valid values are "md5", "sha1", or "sha256" currently.
 
 * `iso_url` (string) - A URL to the ISO containing the installation image.
   This URL can be either an HTTP URL or a file URL (or path to a file).
