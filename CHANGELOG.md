@@ -12,6 +12,8 @@ FEATURES:
   existing artifacts if they exist. [GH-173]
 * You can now log to a file (instead of just stderr) by setting the
   `PACKER_LOG_FILE` environmental variable. [GH-168]
+* Checksums other than MD5 can now be used. SHA1 and SHA256 can also
+  be used. See the documentation on `iso_checksum_type` for more info. [GH-175]
 
 IMPROVEMENTS:
 
