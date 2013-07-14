@@ -73,7 +73,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
-	env.Ui().Say(indented.String())
+	result := indented.String()
+	result = strings.Replace(result, `\u003c`, "<", -1)
+	result = strings.Replace(result, `\u003e`, ">", -1)
+	env.Ui().Say(result)
 	return 0
 }
 
