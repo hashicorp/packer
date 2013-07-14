@@ -87,7 +87,7 @@ func (s *stepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 
 	// Create the function that will be used to create the connection
 	connFunc := ssh.ConnectFunc(
-		"tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
+		"tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort), 5*time.Minute)
 
 	ui.Say("Waiting for SSH to become available...")
 	var comm packer.Communicator

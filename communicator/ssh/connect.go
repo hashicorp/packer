@@ -10,13 +10,13 @@ import (
 // ConnectFunc is a convenience method for returning a function
 // that just uses net.Dial to communicate with the remote end that
 // is suitable for use with the SSH communicator configuration.
-func ConnectFunc(network, addr string) func() (net.Conn, error) {
+func ConnectFunc(network, addr string, timeout time.Duration) func() (net.Conn, error) {
 	return func() (net.Conn, error) {
-		timeout := time.After(5 * time.Minute)
+		timeoutCh := time.After(timeout)
 
 		for {
 			select {
-			case <-timeout:
+			case <-timeoutCh:
 				return nil, errors.New("timeout connecting to remote machine")
 			default:
 			}

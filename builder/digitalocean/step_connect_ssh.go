@@ -32,7 +32,10 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	connFunc := ssh.ConnectFunc("tcp", fmt.Sprintf("%s:%d", ipAddress, config.SSHPort))
+	connFunc := ssh.ConnectFunc(
+		"tcp",
+		fmt.Sprintf("%s:%d", ipAddress, config.SSHPort),
+		5*time.Minute)
 
 	// Build the actual SSH client configuration
 	sshConfig := &ssh.Config{
