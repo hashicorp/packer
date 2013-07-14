@@ -41,14 +41,11 @@ type config struct {
 	HTTPPortMin       uint              `mapstructure:"http_port_min"`
 	HTTPPortMax       uint              `mapstructure:"http_port_max"`
 	BootCommand       []string          `mapstructure:"boot_command"`
-	BootWait          time.Duration     ``
 	SkipCompaction    bool              `mapstructure:"skip_compaction"`
 	ShutdownCommand   string            `mapstructure:"shutdown_command"`
-	ShutdownTimeout   time.Duration     ``
 	SSHUser           string            `mapstructure:"ssh_username"`
 	SSHPassword       string            `mapstructure:"ssh_password"`
 	SSHPort           uint              `mapstructure:"ssh_port"`
-	SSHWaitTimeout    time.Duration     ``
 	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
 	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
 	VMXData           map[string]string `mapstructure:"vmx_data"`
@@ -62,6 +59,10 @@ type config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
+
+	bootWait          time.Duration     ``
+	shutdownTimeout   time.Duration     ``
+	sshWaitTimeout    time.Duration     ``
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -222,7 +223,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.RawBootWait != "" {
-		b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
+		b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
@@ -232,7 +233,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawShutdownTimeout = "5m"
 	}
 
-	b.config.ShutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
+	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
@@ -241,7 +242,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawSSHWaitTimeout = "20m"
 	}
 
-	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
+	b.config.sshWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
