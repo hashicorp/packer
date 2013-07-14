@@ -17,6 +17,7 @@ IMPROVEMENTS:
 
 * everything: invalid keys in configuration are now considered validation
   errors. [GH-104]
+* amazon-ebs: Credentials will come from IAM role if available. [GH-160]
 * amazon-ebs: Verify the source AMI is EBS-backed before launching. [GH-169]
 * vmware: error if shutdown command has non-zero exit status.
 
