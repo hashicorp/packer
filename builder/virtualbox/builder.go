@@ -27,7 +27,6 @@ type Builder struct {
 
 type config struct {
 	BootCommand          []string      `mapstructure:"boot_command"`
-	BootWait             time.Duration ``
 	DiskSize             uint          `mapstructure:"disk_size"`
 	FloppyFiles          []string      `mapstructure:"floppy_files"`
 	GuestAdditionsPath   string        `mapstructure:"guest_additions_path"`
@@ -43,13 +42,11 @@ type config struct {
 	ISOUrl               string        `mapstructure:"iso_url"`
 	OutputDir            string        `mapstructure:"output_directory"`
 	ShutdownCommand      string        `mapstructure:"shutdown_command"`
-	ShutdownTimeout      time.Duration ``
 	SSHHostPortMin       uint          `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax       uint          `mapstructure:"ssh_host_port_max"`
 	SSHPassword          string        `mapstructure:"ssh_password"`
 	SSHPort              uint          `mapstructure:"ssh_port"`
 	SSHUser              string        `mapstructure:"ssh_username"`
-	SSHWaitTimeout       time.Duration ``
 	VBoxVersionFile      string        `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string    `mapstructure:"vboxmanage"`
 	VMName               string        `mapstructure:"vm_name"`
@@ -61,6 +58,10 @@ type config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
+
+	bootWait             time.Duration ``
+	shutdownTimeout      time.Duration ``
+	sshWaitTimeout       time.Duration ``
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -261,7 +262,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	b.config.BootWait, err = time.ParseDuration(b.config.RawBootWait)
+	b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 	}
@@ -274,7 +275,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawSSHWaitTimeout = "20m"
 	}
 
-	b.config.ShutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
+	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
@@ -287,7 +288,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("An ssh_username must be specified."))
 	}
 
-	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
+	b.config.sshWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}

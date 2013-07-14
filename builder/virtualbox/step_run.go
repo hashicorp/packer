@@ -40,9 +40,9 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 
 	s.vmName = vmName
 
-	if int64(config.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait))
-		time.Sleep(config.BootWait)
+	if int64(config.bootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.bootWait))
+		time.Sleep(config.bootWait)
 	}
 
 	return multistep.ActionContinue
