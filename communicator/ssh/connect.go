@@ -3,6 +3,7 @@ package ssh
 import (
 	"log"
 	"net"
+	"time"
 )
 
 // ConnectFunc is a convenience method for returning a function
@@ -11,6 +12,6 @@ import (
 func ConnectFunc(network, addr string) func() (net.Conn, error) {
 	return func() (net.Conn, error) {
 		log.Printf("Opening conn for SSH to %s %s", network, addr)
-		return net.Dial(network, addr)
+		return net.DialTimeout(network, addr, 15 * time.Second)
 	}
 }
