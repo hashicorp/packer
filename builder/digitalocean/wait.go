@@ -17,9 +17,7 @@ func waitForDropletState(desiredState string, dropletId uint, client *DigitalOce
 			attempts += 1
 
 			log.Printf("Checking droplet status... (attempt: %d)", attempts)
-
 			_, status, err := client.DropletStatus(dropletId)
-
 			if err != nil {
 				log.Println(err)
 				break
@@ -37,7 +35,7 @@ func waitForDropletState(desiredState string, dropletId uint, client *DigitalOce
 	}()
 
 	log.Printf("Waiting for up to %s for droplet to become %s", c.RawStateTimeout, desiredState)
-	timeout := time.After(c.StateTimeout)
+	timeout := time.After(c.stateTimeout)
 
 ActiveWaitLoop:
 	for {
