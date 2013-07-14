@@ -38,7 +38,8 @@ type config struct {
 	HTTPDir              string        `mapstructure:"http_directory"`
 	HTTPPortMin          uint          `mapstructure:"http_port_min"`
 	HTTPPortMax          uint          `mapstructure:"http_port_max"`
-	ISOMD5               string        `mapstructure:"iso_md5"`
+	ISOChecksum          string        `mapstructure:"iso_checksum"`
+	ISOChecksumType      string        `mapstructure:"iso_checksum_type"`
 	ISOUrl               string        `mapstructure:"iso_url"`
 	OutputDir            string        `mapstructure:"output_directory"`
 	ShutdownCommand      string        `mapstructure:"shutdown_command"`
@@ -155,10 +156,21 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
-	if b.config.ISOMD5 == "" {
-		errs = append(errs, errors.New("Due to large file sizes, an iso_md5 is required"))
+	if b.config.ISOChecksum == "" {
+		errs = append(errs, errors.New("Due to large file sizes, an iso_checksum is required"))
 	} else {
-		b.config.ISOMD5 = strings.ToLower(b.config.ISOMD5)
+		b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
+	}
+
+	if b.config.ISOChecksumType == "" {
+		errs = append(errs, errors.New("The iso_checksum_type must be specified."))
+	} else {
+		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
+		if h := common.HashForType(b.config.ISOChecksumType); h == nil {
+			errs = append(
+				errs,
+				fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
+		}
 	}
 
 	if b.config.ISOUrl == "" {

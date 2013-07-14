@@ -1,7 +1,6 @@
 package virtualbox
 
 import (
-	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -33,7 +32,7 @@ func (s *stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction
 	config := state["config"].(*config)
 	ui := state["ui"].(packer.Ui)
 
-	checksum, err := hex.DecodeString(config.ISOMD5)
+	checksum, err := hex.DecodeString(config.ISOChecksum)
 	if err != nil {
 		state["error"] = fmt.Errorf("Error parsing checksum: %s", err)
 		return multistep.ActionHalt
@@ -47,7 +46,7 @@ func (s *stepDownloadISO) Run(state map[string]interface{}) multistep.StepAction
 		Url:        config.ISOUrl,
 		TargetPath: cachePath,
 		CopyFile:   false,
-		Hash:       md5.New(),
+		Hash:       common.HashForType(config.ISOChecksumType),
 		Checksum:   checksum,
 	}
 
