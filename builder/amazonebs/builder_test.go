@@ -148,6 +148,18 @@ func TestBuilderPrepare_InstanceType(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_InvalidKey(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Add a random key
+	config["i_should_not_be_valid"] = true
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestBuilderPrepare_Region(t *testing.T) {
 	var b Builder
 	config := testConfig()

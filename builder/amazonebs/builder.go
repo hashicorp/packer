@@ -16,6 +16,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+	"sort"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -50,12 +52,35 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
-	var err error
+	var md mapstructure.Metadata
+	decoderConfig := &mapstructure.DecoderConfig{
+		Metadata: &md,
+		Result:   &b.config,
+	}
+
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return err
+	}
 
 	for _, raw := range raws {
-		err := mapstructure.Decode(raw, &b.config)
+		err := decoder.Decode(raw)
 		if err != nil {
 			return err
+		}
+	}
+
+	// Accumulate any errors
+	errs := make([]error, 0)
+
+	// Unused keys are errors
+	if len(md.Unused) > 0 {
+		sort.Strings(md.Unused)
+		for _, unused := range md.Unused {
+			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
+				errs = append(
+					errs, fmt.Errorf("Unknown configuration key: %s", unused))
+			}
 		}
 	}
 
@@ -84,8 +109,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	errs := make([]error, 0)
-
 	if b.config.AccessKey == "" {
 		errs = append(errs, errors.New("An access_key must be specified"))
 	}

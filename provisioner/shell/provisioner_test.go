@@ -62,6 +62,18 @@ func TestProvisionerPrepare_InlineShebang(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_InvalidKey(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	// Add a random key
+	config["i_should_not_be_valid"] = true
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestProvisionerPrepare_Script(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")

@@ -6,6 +6,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"os"
+	"sort"
+	"strings"
 )
 
 type config struct {
@@ -21,13 +23,37 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	var md mapstructure.Metadata
+	decoderConfig := &mapstructure.DecoderConfig{
+		Metadata: &md,
+		Result:   &p.config,
+	}
+
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return err
+	}
+
 	for _, raw := range raws {
-		if err := mapstructure.Decode(raw, &p.config); err != nil {
+		err := decoder.Decode(raw)
+		if err != nil {
 			return err
 		}
 	}
 
-	errs := []error{}
+	// Accumulate any errors
+	errs := make([]error, 0)
+
+	// Unused keys are errors
+	if len(md.Unused) > 0 {
+		sort.Strings(md.Unused)
+		for _, unused := range md.Unused {
+			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
+				errs = append(
+					errs, fmt.Errorf("Unknown configuration key: %s", unused))
+			}
+		}
+	}
 
 	if _, err := os.Stat(p.config.Source); err != nil {
 		errs = append(errs,

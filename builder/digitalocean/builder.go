@@ -13,7 +13,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -56,15 +58,39 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
+	var md mapstructure.Metadata
+	decoderConfig := &mapstructure.DecoderConfig{
+		Metadata: &md,
+		Result:   &b.config,
+	}
+
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return err
+	}
+
 	for _, raw := range raws {
-		err := mapstructure.Decode(raw, &b.config)
+		err := decoder.Decode(raw)
 		if err != nil {
 			return err
 		}
 	}
 
+	// Accumulate any errors
+	errs := make([]error, 0)
+
+	// Unused keys are errors
+	if len(md.Unused) > 0 {
+		sort.Strings(md.Unused)
+		for _, unused := range md.Unused {
+			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
+				errs = append(
+					errs, fmt.Errorf("Unknown configuration key: %s", unused))
+			}
+		}
+	}
+
 	// Optional configuration with defaults
-	//
 	if b.config.APIKey == "" {
 		// Default to environment variable for api_key, if it exists
 		b.config.APIKey = os.Getenv("DIGITALOCEAN_API_KEY")
@@ -123,11 +149,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.RawStateTimeout = "6m"
 	}
 
-	// A list of errors on the configuration
-	errs := make([]error, 0)
-
 	// Required configurations that will display errors if not set
-	//
 	if b.config.ClientID == "" {
 		errs = append(errs, errors.New("a client_id must be specified"))
 	}
