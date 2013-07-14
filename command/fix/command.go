@@ -1,6 +1,7 @@
 package fix
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -47,6 +48,32 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Close the file since we're done with that
 	tplF.Close()
 
+	// Run the template through the various fixers
+	fixers := []Fixer{Fixers["iso-md5"]}
+	input := templateData
+	for _, fixer := range fixers {
+		var err error
+		input, err = fixer.Fix(input)
+		if err != nil {
+			env.Ui().Error(fmt.Sprintf("Error fixing: %s", err))
+			return 1
+		}
+	}
+
+	var output bytes.Buffer
+	encoder := json.NewEncoder(&output)
+	if err := encoder.Encode(input); err != nil {
+		env.Ui().Error(fmt.Sprintf("Error encoding: %s", err))
+		return 1
+	}
+
+	var indented bytes.Buffer
+	if err := json.Indent(&indented, output.Bytes(), "", "  "); err != nil {
+		env.Ui().Error(fmt.Sprintf("Error encoding: %s", err))
+		return 1
+	}
+
+	env.Ui().Say(indented.String())
 	return 0
 }
 

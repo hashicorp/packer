@@ -9,7 +9,8 @@ Usage: packer fix [options] TEMPLATE
   If the template cannot be fixed due to an error, the command will exit
   with a non-zero exit status. Error messages will appear on standard error.
 
-Options:
+Fixes that are run:
 
-  -verbose        Output each fix to standard error
+  iso-md5         Replaces "iso_md5" in builders with newer "iso_checksum"
+
 `
