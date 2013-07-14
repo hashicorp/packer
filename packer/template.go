@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"sort"
 )
 
 // The rawTemplate struct represents the structure of a template read
@@ -15,7 +16,7 @@ type rawTemplate struct {
 	Builders       []map[string]interface{}
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
-	PostProcessors []interface{} `json:"post-processors"`
+	PostProcessors []interface{} `mapstructure:"post-processors"`
 }
 
 // The Template struct represents a parsed template, parsed into the most
@@ -63,8 +64,8 @@ type rawProvisionerConfig struct {
 // and checking for this can be useful, if you wish to format it in a certain
 // way.
 func ParseTemplate(data []byte) (t *Template, err error) {
-	var rawTpl rawTemplate
-	err = json.Unmarshal(data, &rawTpl)
+	var rawTplInterface interface{}
+	err = json.Unmarshal(data, &rawTplInterface)
 	if err != nil {
 		syntaxErr, ok := err.(*json.SyntaxError)
 		if !ok {
@@ -92,13 +93,40 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		return
 	}
 
+	// Decode the raw template interface into the actual rawTemplate
+	// structure, checking for any extranneous keys along the way.
+	var md mapstructure.Metadata
+	var rawTpl rawTemplate
+	decoderConfig := &mapstructure.DecoderConfig{
+		Metadata: &md,
+		Result:   &rawTpl,
+	}
+
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return
+	}
+
+	err = decoder.Decode(rawTplInterface)
+	if err != nil {
+		return
+	}
+
+	errors := make([]error, 0)
+
+	if len(md.Unused) > 0 {
+		sort.Strings(md.Unused)
+		for _, unused := range md.Unused {
+			errors = append(
+				errors, fmt.Errorf("Unknown root level key in template: '%s'", unused))
+		}
+	}
+
 	t = &Template{}
 	t.Builders = make(map[string]rawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
 	t.PostProcessors = make([][]rawPostProcessorConfig, len(rawTpl.PostProcessors))
 	t.Provisioners = make([]rawProvisionerConfig, len(rawTpl.Provisioners))
-
-	errors := make([]error, 0)
 
 	// Gather all the builders
 	for i, v := range rawTpl.Builders {
@@ -203,6 +231,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	// If there were errors, we put it into a MultiError and return
 	if len(errors) > 0 {
 		err = &MultiError{errors}
+		t = nil
 		return
 	}
 

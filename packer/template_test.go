@@ -37,6 +37,23 @@ func TestParseTemplate_Invalid(t *testing.T) {
 	assert.Nil(result, "should have no result")
 }
 
+func TestParseTemplate_InvalidKeys(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	// Note there is an extra comma below for a purposeful
+	// syntax error in the JSON.
+	data := `
+	{
+		"builders": [{"type": "foo"}],
+		"what is this": ""
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	assert.NotNil(err, "should have an error")
+	assert.Nil(result, "should have no result")
+}
+
 func TestParseTemplate_BuilderWithoutType(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
