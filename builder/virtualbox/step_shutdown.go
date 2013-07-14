@@ -45,8 +45,8 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		cmd.Wait()
 
 		// Wait for the machine to actually shut down
-		log.Printf("Waiting max %s for shutdown to complete", config.ShutdownTimeout)
-		shutdownTimer := time.After(config.ShutdownTimeout)
+		log.Printf("Waiting max %s for shutdown to complete", config.shutdownTimeout)
+		shutdownTimer := time.After(config.shutdownTimeout)
 		for {
 			running, _ := driver.IsRunning(vmName)
 			if !running {
