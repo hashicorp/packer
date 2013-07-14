@@ -14,12 +14,24 @@ import (
 )
 
 func main() {
+	// Setup logging if PACKER_LOG is set.
+	// Log to PACKER_LOG_PATH if it is set, otherwise default to stderr.
 	if os.Getenv("PACKER_LOG") == "" {
 		// If we don't have logging explicitly enabled, then disable it
 		log.SetOutput(ioutil.Discard)
 	} else {
-		// Logging is enabled, make sure it goes to stderr
-		log.SetOutput(os.Stderr)
+		if log_path := os.Getenv("PACKER_LOG_PATH"); log_path == "" {
+			log.SetOutput(os.Stderr)
+		} else {
+			file, err := os.OpenFile(log_path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+			if err == nil {
+				log.SetOutput(file)
+			} else {
+				// Problem opening the file, fail back to Stderr
+				log.SetOutput(os.Stderr)
+				log.Printf("Could not open %s for logging (%s). Using stderr instead.", log_path, err.Error())
+			}
+		}
 	}
 
 	// If there is no explicit number of Go threads to use, then set it
