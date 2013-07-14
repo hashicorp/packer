@@ -40,9 +40,6 @@ type config struct {
 	SnapshotName string
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
-	SSHTimeout   time.Duration
-	EventDelay   time.Duration
-	StateTimeout time.Duration
 
 	PackerDebug bool `mapstructure:"packer_debug"`
 
@@ -50,6 +47,12 @@ type config struct {
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawEventDelay   string `mapstructure:"event_delay"`
 	RawStateTimeout string `mapstructure:"state_timeout"`
+
+	// These are unexported since they're set by other fields
+	// being set.
+	sshTimeout   time.Duration
+	eventDelay   time.Duration
+	stateTimeout time.Duration
 }
 
 type Builder struct {
@@ -162,19 +165,19 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
-	b.config.SSHTimeout = sshTimeout
+	b.config.sshTimeout = sshTimeout
 
 	eventDelay, err := time.ParseDuration(b.config.RawEventDelay)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing event_delay: %s", err))
 	}
-	b.config.EventDelay = eventDelay
+	b.config.eventDelay = eventDelay
 
 	stateTimeout, err := time.ParseDuration(b.config.RawStateTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
 	}
-	b.config.StateTimeout = stateTimeout
+	b.config.stateTimeout = stateTimeout
 
 	// Parse the name of the snapshot
 	snapNameBuf := new(bytes.Buffer)

@@ -60,7 +60,7 @@ func (s *stepCreateDroplet) Cleanup(state map[string]interface{}) {
 	// Otherwise we get "pending event" errors, even though there isn't
 	// one.
 	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
-	time.Sleep(c.EventDelay)
+	time.Sleep(c.eventDelay)
 
 	err := client.DestroyDroplet(s.dropletId)
 
