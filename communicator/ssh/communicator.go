@@ -46,7 +46,7 @@ func New(config *Config) (result *comm, err error) {
 }
 
 func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
-	session, err := c.client.NewSession()
+	session, err := c.newSession()
 	if err != nil {
 		return
 	}
@@ -77,7 +77,6 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	// exit boolean and status.
 	go func() {
 		defer session.Close()
-
 		err := session.Wait()
 		cmd.ExitStatus = 0
 		if err != nil {
@@ -94,8 +93,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 }
 
 func (c *comm) Upload(path string, input io.Reader) error {
-	log.Println("Opening new SSH session")
-	session, err := c.client.NewSession()
+	session, err := c.newSession()
 	if err != nil {
 		return err
 	}
@@ -190,16 +188,37 @@ func (c *comm) Download(string, io.Writer) error {
 	panic("not implemented yet")
 }
 
+func (c *comm) newSession() (*ssh.Session, error) {
+	log.Println("opening new ssh session")
+	session, err := c.client.NewSession()
+	if err != nil {
+		if err := c.reconnect(); err != nil {
+			return nil, err
+		}
+
+		return c.client.NewSession()
+	}
+
+	return session, nil
+}
+
 func (c *comm) reconnect() (err error) {
 	if c.conn != nil {
 		c.conn.Close()
 	}
 
+	log.Printf("reconnecting to TCP connection for SSH")
 	c.conn, err = c.config.Connection()
 	if err != nil {
+		log.Printf("reconnection error: %s", err)
 		return
 	}
 
+	log.Printf("handshaking with SSH")
 	c.client, err = ssh.Client(c.conn, c.config.SSHConfig)
+	if err != nil {
+		log.Printf("handshake error: %s", err)
+	}
+
 	return
 }
