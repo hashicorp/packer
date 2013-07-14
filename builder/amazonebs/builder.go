@@ -35,7 +35,6 @@ type config struct {
 	InstanceType    string `mapstructure:"instance_type"`
 	SSHUsername     string `mapstructure:"ssh_username"`
 	SSHPort         int    `mapstructure:"ssh_port"`
-	SSHTimeout      time.Duration
 	SecurityGroupId string `mapstructure:"security_group_id"`
 
 	// Configuration of the resulting AMI
@@ -43,6 +42,9 @@ type config struct {
 
 	PackerDebug   bool   `mapstructure:"packer_debug"`
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
+
+	// Unexported fields that are calculated from others
+	sshTimeout time.Duration
 }
 
 type Builder struct {
@@ -110,7 +112,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
 	}
 
-	b.config.SSHTimeout, err = time.ParseDuration(b.config.RawSSHTimeout)
+	b.config.sshTimeout, err = time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
