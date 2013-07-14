@@ -115,12 +115,20 @@ func TestNew_Invalid(t *testing.T) {
 		},
 	}
 
-	conn, err := net.Dial("tcp", newMockLineServer(t))
-	if err != nil {
-		t.Fatalf("unable to dial to remote side: %s", err)
+	conn := func() (net.Conn, error) {
+		conn, err := net.Dial("tcp", newMockLineServer(t))
+		if err != nil {
+			t.Fatalf("unable to dial to remote side: %s", err)
+		}
+		return conn, err
 	}
 
-	_, err = New(conn, clientConfig)
+	config := &Config{
+		Connection: conn,
+		SSHConfig: clientConfig,
+	}
+
+	_, err := New(config)
 	if err == nil {
 		t.Fatal("should have had an error connecting")
 	}
@@ -134,12 +142,20 @@ func TestStart(t *testing.T) {
 		},
 	}
 
-	conn, err := net.Dial("tcp", newMockLineServer(t))
-	if err != nil {
-		t.Fatalf("unable to dial to remote side: %s", err)
+	conn := func() (net.Conn, error) {
+		conn, err := net.Dial("tcp", newMockLineServer(t))
+		if err != nil {
+			t.Fatalf("unable to dial to remote side: %s", err)
+		}
+		return conn, err
 	}
 
-	client, err := New(conn, clientConfig)
+	config := &Config{
+		Connection: conn,
+		SSHConfig: clientConfig,
+	}
+
+	client, err := New(config)
 	if err != nil {
 		t.Fatalf("error connecting to SSH: %s", err)
 	}

@@ -14,13 +14,34 @@ import (
 
 type comm struct {
 	client *ssh.ClientConn
+	config *Config
+	conn net.Conn
+}
+
+// Config is the structure used to configure the SSH communicator.
+type Config struct {
+	// The configuration of the Go SSH connection
+	SSHConfig *ssh.ClientConfig
+
+	// Connection returns a new connection. The current connection
+	// in use will be closed as part of the Close method, or in the
+	// case an error occurs.
+	Connection func() (net.Conn, error)
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
-func New(c net.Conn, config *ssh.ClientConfig) (result *comm, err error) {
-	client, err := ssh.Client(c, config)
-	result = &comm{client}
+func New(config *Config) (result *comm, err error) {
+	// Establish an initial connection and connect
+	result = &comm{
+		config: config,
+	}
+
+	if err = result.reconnect(); err != nil {
+		result = nil
+		return
+	}
+
 	return
 }
 
@@ -167,4 +188,18 @@ func (c *comm) Upload(path string, input io.Reader) error {
 
 func (c *comm) Download(string, io.Writer) error {
 	panic("not implemented yet")
+}
+
+func (c *comm) reconnect() (err error) {
+	if c.conn != nil {
+		c.conn.Close()
+	}
+
+	c.conn, err = c.config.Connection()
+	if err != nil {
+		return
+	}
+
+	c.client, err = ssh.Client(c.conn, c.config.SSHConfig)
+	return
 }

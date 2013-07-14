@@ -9,13 +9,12 @@ import (
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"net"
 	"time"
 )
 
 type stepConnectSSH struct {
 	cancel bool
-	conn   net.Conn
+	comm   packer.Communicator
 }
 
 func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction {
@@ -45,6 +44,7 @@ WaitLoop:
 				return multistep.ActionHalt
 			}
 
+			s.comm = comm
 			state["communicator"] = comm
 			break WaitLoop
 		case <-timeout:
@@ -63,9 +63,9 @@ WaitLoop:
 }
 
 func (s *stepConnectSSH) Cleanup(map[string]interface{}) {
-	if s.conn != nil {
-		s.conn.Close()
-		s.conn = nil
+	if s.comm != nil {
+		// Close it TODO
+		s.comm = nil
 	}
 }
 
@@ -85,14 +85,13 @@ func (s *stepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 		return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 	}
 
+	// Create the function that will be used to create the connection
+	connFunc := ssh.ConnectFunc(
+		"tcp", fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
+
 	ui.Say("Waiting for SSH to become available...")
 	var comm packer.Communicator
-	var nc net.Conn
 	for {
-		if nc != nil {
-			nc.Close()
-		}
-
 		time.Sleep(5 * time.Second)
 
 		if s.cancel {
@@ -100,28 +99,29 @@ func (s *stepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 			return nil, errors.New("SSH wait cancelled")
 		}
 
-		// Attempt to connect to SSH port
-		log.Printf(
-			"Opening TCP conn for SSH to %s:%d",
-			instance.DNSName, config.SSHPort)
-		nc, err := net.Dial("tcp",
-			fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort))
+		// First just attempt a normal TCP connection that we close right
+		// away. We just test this in order to wait for the TCP port to be ready.
+		nc, err := connFunc()
 		if err != nil {
 			log.Printf("TCP connection to SSH ip/port failed: %s", err)
 			continue
 		}
+		nc.Close()
 
-		// Build the actual SSH client configuration
-		sshConfig := &gossh.ClientConfig{
-			User: config.SSHUsername,
-			Auth: []gossh.ClientAuth{
-				gossh.ClientAuthKeyring(keyring),
+		// Build the configuration to connect to SSH
+		config := &ssh.Config{
+			Connection: connFunc,
+			SSHConfig: &gossh.ClientConfig{
+				User: config.SSHUsername,
+				Auth: []gossh.ClientAuth{
+					gossh.ClientAuthKeyring(keyring),
+				},
 			},
 		}
 
 		sshConnectSuccess := make(chan bool, 1)
 		go func() {
-			comm, err = ssh.New(nc, sshConfig)
+			comm, err = ssh.New(config)
 			if err != nil {
 				log.Printf("SSH connection fail: %s", err)
 				sshConnectSuccess <- false
@@ -145,7 +145,5 @@ func (s *stepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 		break
 	}
 
-	// Store the connection so we can close it later
-	s.conn = nc
 	return comm, nil
 }
