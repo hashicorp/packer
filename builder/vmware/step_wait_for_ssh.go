@@ -141,7 +141,8 @@ func (s *stepWaitForSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 		log.Printf("Detected IP: %s", ip)
 
 		// Attempt to connect to SSH port
-		connFunc := ssh.ConnectFunc("tcp", fmt.Sprintf("%s:%d", ip, config.SSHPort))
+		connFunc := ssh.ConnectFunc(
+			"tcp", fmt.Sprintf("%s:%d", ip, config.SSHPort), 5*time.Minute)
 		nc, err := connFunc()
 		if err != nil {
 			log.Printf("TCP connection to SSH ip/port failed: %s", err)
