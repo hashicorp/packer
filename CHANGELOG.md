@@ -1,7 +1,17 @@
 ## 0.2.0 (unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+* "iso_md5" in the virtualbox and vmware builders is replaced with
+  "iso_checksum" and "iso_checksum_type" (with the latter set to "md5").
+  See the announce below on `packer fix` to automatically fix your templates.
+
 FEATURES:
 
+* **NEW COMMAND:** `packer fix` will attempt to fix templates from older
+  versions of Packer that are now broken due to backwards incompatibilities.
+  This command will fix the backwards incompatibilities introduced in this
+  version.
 * Amazon EBS builder can now optionally use a pre-made security group
   instead of randomly generating one.
 * DigitalOcean API key and client IDs can now be passed in as
