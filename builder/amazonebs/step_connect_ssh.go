@@ -30,9 +30,9 @@ func (s *stepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 		waitDone <- true
 	}()
 
-	log.Printf("Waiting for SSH, up to timeout: %s", config.SSHTimeout.String())
+	log.Printf("Waiting for SSH, up to timeout: %s", config.sshTimeout.String())
 
-	timeout := time.After(config.SSHTimeout)
+	timeout := time.After(config.sshTimeout)
 WaitLoop:
 	for {
 		// Wait for either SSH to become available, a timeout to occur,
