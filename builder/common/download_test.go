@@ -40,3 +40,22 @@ func TestDownloadClient_VerifyChecksum(t *testing.T) {
 		t.Fatal("didn't verify")
 	}
 }
+
+func TestHashForType(t *testing.T) {
+	if h := HashForType("md5"); h == nil {
+		t.Fatalf("md5 hash is nil")
+	} else {
+		h.Write([]byte("foo"))
+		result := h.Sum(nil)
+
+		expected := "acbd18db4cc2f85cedef654fccc4a4d8"
+		actual := hex.EncodeToString(result)
+		if actual != expected {
+			t.Fatalf("bad hash: %s", actual)
+		}
+	}
+
+	if HashForType("fake") != nil {
+		t.Fatalf("fake hash is not nil")
+	}
+}
