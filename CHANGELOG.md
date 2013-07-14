@@ -36,6 +36,8 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * core: UI messages are now properly prefixed with spaces again.
+* core: If SSH connection ends, re-connection attempts will take
+  place. [GH-152]
 * virtualbox: "paused" doesn't mean the VM is stopped, improving
   shutdown detection.
 
