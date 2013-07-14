@@ -27,6 +27,7 @@ const defaultConfig = `
 
 	"commands": {
 		"build": "packer-command-build",
+		"fix": "packer-command-fix",
 		"validate": "packer-command-validate"
 	},
 
