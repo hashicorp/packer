@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,23 +17,24 @@ import (
 func main() {
 	// Setup logging if PACKER_LOG is set.
 	// Log to PACKER_LOG_PATH if it is set, otherwise default to stderr.
-	if os.Getenv("PACKER_LOG") == "" {
-		// If we don't have logging explicitly enabled, then disable it
-		log.SetOutput(ioutil.Discard)
-	} else {
-		if log_path := os.Getenv("PACKER_LOG_PATH"); log_path == "" {
-			log.SetOutput(os.Stderr)
-		} else {
-			file, err := os.OpenFile(log_path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
-			if err == nil {
-				log.SetOutput(file)
-			} else {
-				// Problem opening the file, fail back to Stderr
-				log.SetOutput(os.Stderr)
-				log.Printf("Could not open %s for logging (%s). Using stderr instead.", log_path, err.Error())
+	var logOutput io.Writer = ioutil.Discard
+	if os.Getenv("PACKER_LOG") != "" {
+		logOutput = os.Stderr
+
+		if logPath := os.Getenv("PACKER_LOG_PATH"); logPath != "" {
+			var err error
+			logOutput, err = os.Create(logPath)
+			if err != nil {
+				fmt.Fprintf(
+					os.Stderr,
+					"Couldn't open '%s' for logging: %s",
+					logPath, err)
+				os.Exit(1)
 			}
 		}
 	}
+
+	log.SetOutput(logOutput)
 
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
