@@ -221,6 +221,11 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
+		// The provisioners not only don't need or want the override settings
+		// (as they are processed as part of the preparation below), but will
+		// actively reject them as invalid configuration.
+		delete(v, "override")
+
 		raw.rawConfig = v
 	}
 
