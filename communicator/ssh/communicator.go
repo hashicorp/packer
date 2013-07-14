@@ -15,7 +15,7 @@ import (
 type comm struct {
 	client *ssh.ClientConn
 	config *Config
-	conn net.Conn
+	conn   net.Conn
 }
 
 // Config is the structure used to configure the SSH communicator.

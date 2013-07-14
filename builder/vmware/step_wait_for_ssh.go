@@ -25,7 +25,7 @@ import (
 //   communicator packer.Communicator
 type stepWaitForSSH struct {
 	cancel bool
-	comm packer.Communicator
+	comm   packer.Communicator
 }
 
 func (s *stepWaitForSSH) Run(state map[string]interface{}) multistep.StepAction {

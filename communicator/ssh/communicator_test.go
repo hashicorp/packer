@@ -125,7 +125,7 @@ func TestNew_Invalid(t *testing.T) {
 
 	config := &Config{
 		Connection: conn,
-		SSHConfig: clientConfig,
+		SSHConfig:  clientConfig,
 	}
 
 	_, err := New(config)
@@ -152,7 +152,7 @@ func TestStart(t *testing.T) {
 
 	config := &Config{
 		Connection: conn,
-		SSHConfig: clientConfig,
+		SSHConfig:  clientConfig,
 	}
 
 	client, err := New(config)
