@@ -10,6 +10,8 @@ FEATURES:
   floppy disks when booting. This allows for unattended Windows installs.
 * `packer build` has a new `-force` flag that forces the removal of
   existing artifacts if they exist. [GH-173]
+* You can now log to a file (instead of just stderr) by setting the
+  `PACKER_LOG_FILE` environmental variable. [GH-168]
 
 IMPROVEMENTS:
 
