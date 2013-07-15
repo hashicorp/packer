@@ -26,30 +26,30 @@ type Builder struct {
 }
 
 type config struct {
-	BootCommand          []string      `mapstructure:"boot_command"`
-	DiskSize             uint          `mapstructure:"disk_size"`
-	FloppyFiles          []string      `mapstructure:"floppy_files"`
-	GuestAdditionsPath   string        `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string        `mapstructure:"guest_additions_url"`
-	GuestAdditionsSHA256 string        `mapstructure:"guest_additions_sha256"`
-	GuestOSType          string        `mapstructure:"guest_os_type"`
-	Headless             bool          `mapstructure:"headless"`
-	HTTPDir              string        `mapstructure:"http_directory"`
-	HTTPPortMin          uint          `mapstructure:"http_port_min"`
-	HTTPPortMax          uint          `mapstructure:"http_port_max"`
-	ISOChecksum          string        `mapstructure:"iso_checksum"`
-	ISOChecksumType      string        `mapstructure:"iso_checksum_type"`
-	ISOUrl               string        `mapstructure:"iso_url"`
-	OutputDir            string        `mapstructure:"output_directory"`
-	ShutdownCommand      string        `mapstructure:"shutdown_command"`
-	SSHHostPortMin       uint          `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax       uint          `mapstructure:"ssh_host_port_max"`
-	SSHPassword          string        `mapstructure:"ssh_password"`
-	SSHPort              uint          `mapstructure:"ssh_port"`
-	SSHUser              string        `mapstructure:"ssh_username"`
-	VBoxVersionFile      string        `mapstructure:"virtualbox_version_file"`
-	VBoxManage           [][]string    `mapstructure:"vboxmanage"`
-	VMName               string        `mapstructure:"vm_name"`
+	BootCommand          []string   `mapstructure:"boot_command"`
+	DiskSize             uint       `mapstructure:"disk_size"`
+	FloppyFiles          []string   `mapstructure:"floppy_files"`
+	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
+	GuestOSType          string     `mapstructure:"guest_os_type"`
+	Headless             bool       `mapstructure:"headless"`
+	HTTPDir              string     `mapstructure:"http_directory"`
+	HTTPPortMin          uint       `mapstructure:"http_port_min"`
+	HTTPPortMax          uint       `mapstructure:"http_port_max"`
+	ISOChecksum          string     `mapstructure:"iso_checksum"`
+	ISOChecksumType      string     `mapstructure:"iso_checksum_type"`
+	ISOUrl               string     `mapstructure:"iso_url"`
+	OutputDir            string     `mapstructure:"output_directory"`
+	ShutdownCommand      string     `mapstructure:"shutdown_command"`
+	SSHHostPortMin       uint       `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax       uint       `mapstructure:"ssh_host_port_max"`
+	SSHPassword          string     `mapstructure:"ssh_password"`
+	SSHPort              uint       `mapstructure:"ssh_port"`
+	SSHUser              string     `mapstructure:"ssh_username"`
+	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
+	VBoxManage           [][]string `mapstructure:"vboxmanage"`
+	VMName               string     `mapstructure:"vm_name"`
 
 	PackerBuildName string `mapstructure:"packer_build_name"`
 	PackerDebug     bool   `mapstructure:"packer_debug"`
@@ -59,9 +59,9 @@ type config struct {
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
-	bootWait             time.Duration ``
-	shutdownTimeout      time.Duration ``
-	sshWaitTimeout       time.Duration ``
+	bootWait        time.Duration ``
+	shutdownTimeout time.Duration ``
+	sshWaitTimeout  time.Duration ``
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {

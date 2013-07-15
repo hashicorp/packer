@@ -2,8 +2,8 @@ package packer
 
 import (
 	"cgl.tideland.biz/asserts"
-	"sort"
 	"reflect"
+	"sort"
 	"testing"
 )
 
