@@ -3,6 +3,7 @@ package packer
 import (
 	"cgl.tideland.biz/asserts"
 	"sort"
+	"reflect"
 	"testing"
 )
 
@@ -556,7 +557,22 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 	`
 
 	template, err := ParseTemplate([]byte(data))
-	assert.Nil(err, "should not error")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	rawConfig := template.Provisioners[0].rawConfig
+	if rawConfig == nil {
+		t.Fatal("missing provisioner raw config")
+	}
+
+	expected := map[string]interface{}{
+		"type": "test-prov",
+	}
+
+	if !reflect.DeepEqual(rawConfig, expected) {
+		t.Fatalf("bad raw: %#v", rawConfig)
+	}
 
 	builder := testBuilder()
 	builderMap := map[string]Builder{
