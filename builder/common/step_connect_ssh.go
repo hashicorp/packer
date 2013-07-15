@@ -73,6 +73,9 @@ WaitLoop:
 			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
 			if _, ok := state[multistep.StateCancelled]; ok {
+				// The step sequence was cancelled, so cancel waiting for SSH
+				// and just start the halting process.
+				s.cancel = true
 				log.Println("Interrupt detected, quitting waiting for SSH.")
 				return multistep.ActionHalt
 			}
