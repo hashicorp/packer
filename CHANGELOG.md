@@ -27,8 +27,10 @@ FEATURES:
 
 IMPROVEMENTS:
 
-* everything: invalid keys in configuration are now considered validation
+* core: invalid keys in configuration are now considered validation
   errors. [GH-104]
+* core: all builders now share a common SSH connection core, improving
+  SSH reliability over all the builders.
 * amazon-ebs: Credentials will come from IAM role if available. [GH-160]
 * amazon-ebs: Verify the source AMI is EBS-backed before launching. [GH-169]
 * shell provisioner: the build name and builder type are available in
