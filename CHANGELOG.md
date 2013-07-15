@@ -31,6 +31,9 @@ IMPROVEMENTS:
   errors. [GH-104]
 * amazon-ebs: Credentials will come from IAM role if available. [GH-160]
 * amazon-ebs: Verify the source AMI is EBS-backed before launching. [GH-169]
+* shell provisioner: the build name and builder type are available in
+  the `PACKER_BUILD_NAME` and `PACKER_BUILDER_TYPE` env vars by default,
+  respectively. [GH-154]
 * vmware: error if shutdown command has non-zero exit status.
 
 BUG FIXES:

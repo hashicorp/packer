@@ -47,6 +47,10 @@ type config struct {
 	// should be used to specify where the script goes, {{ .Vars }}
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
+
+	// Packer configurations, these come from Packer itself
+	PackerBuildName   string `mapstructure:"packer_build_name"`
+	PackerBuilderType string `mapstructure:"packer_builder_type"`
 }
 
 type Provisioner struct {
@@ -139,7 +143,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for _, kv := range p.config.Vars {
 		vs := strings.Split(kv, "=")
 		if len(vs) != 2 || vs[0] == "" {
-			errs = append(errs, fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
+			errs = append(
+				errs,
+				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		}
 	}
 
@@ -182,6 +188,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		tf.Close()
 	}
 
+	// Build our variables up by adding in the build name and builder type
+	envVars := make([]string, len(p.config.Vars)+2)
+	envVars[0] = "PACKER_BUILD_NAME=" + p.config.PackerBuildName
+	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
+	copy(envVars[2:], p.config.Vars)
+
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
 
@@ -202,7 +214,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		f.Close()
 
 		// Flatten the environment variables
-		flattendVars := strings.Join(p.config.Vars, " ")
+		flattendVars := strings.Join(envVars, " ")
 
 		// Compile the command
 		var command bytes.Buffer
