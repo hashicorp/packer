@@ -284,7 +284,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepConfigureVNC{},
 		&stepRun{},
 		&stepTypeBootCommand{},
-		&stepWaitForSSH{},
+		&common.StepConnectSSH{
+			SSHAddress:     sshAddress,
+			SSHConfig:      sshConfig,
+			SSHWaitTimeout: b.config.sshWaitTimeout,
+		},
 		&stepUploadTools{},
 		&stepProvision{},
 		&stepShutdown{},
