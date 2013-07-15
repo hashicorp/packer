@@ -48,7 +48,8 @@ Optional parameters:
 
 * `environment_vars` (array of strings) - An array of key/value pairs
   to inject prior to the execute_command. The format should be
-  `key=value`.
+  `key=value`. Packer injects some environmental variables by default
+  into the environment, as well, which are covered in the section below.
 
 * `execute_command` (string) - The command to use to execute the script.
   By default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value of this is
@@ -85,3 +86,17 @@ case is being piped in with the value of "packer".
 
 By setting the `execute_command` to this, your script(s) can run with
 root privileges without worrying about password prompts.
+
+## Default Environmental Variables
+
+In addition to being able to specify custom environmental variables using
+the `environmental_vars` configuration, the provisioner automatically
+defines certain commonly useful environmental variables:
+
+* `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
+  This is most useful when Packer is making multiple builds and you want to
+  distinguish them slightly from a common provisioning script.
+
+* `PACKER_BUILDER_TYPE` is the type of the builder that was used to create
+  the machine that the script is running on. This is useful if you want to
+  run only certain parts of the script on systems built with certain builders.
