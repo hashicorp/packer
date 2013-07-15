@@ -147,8 +147,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error running Chef Solo: %s", err)
 	}
 
-	return fmt.Errorf("SUCESS")
-
 	return nil
 }
 
