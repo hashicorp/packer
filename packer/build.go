@@ -11,6 +11,11 @@ const (
 	// build.
 	BuildNameConfigKey = "packer_build_name"
 
+	// This is the key in the configuration that is set to the type
+	// of the builder that is run. This is useful for provisioners and
+	// such who want to make use of this.
+	BuilderTypeConfigKey = "packer_builder_type"
+
 	// This is the key in configurations that is set to "true" when Packer
 	// debugging is enabled.
 	DebugConfigKey = "packer_debug"
@@ -109,9 +114,10 @@ func (b *coreBuild) Prepare() (err error) {
 	b.prepareCalled = true
 
 	packerConfig := map[string]interface{}{
-		BuildNameConfigKey: b.name,
-		DebugConfigKey:     b.debug,
-		ForceConfigKey:     b.force,
+		BuildNameConfigKey:   b.name,
+		BuilderTypeConfigKey: b.builderType,
+		DebugConfigKey:       b.debug,
+		ForceConfigKey:       b.force,
 	}
 
 	// Prepare the builder
