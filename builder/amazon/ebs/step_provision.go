@@ -1,4 +1,4 @@
-package amazonebs
+package ebs
 
 import (
 	"github.com/mitchellh/multistep"

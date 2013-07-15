@@ -1,4 +1,4 @@
-package amazonebs
+package ebs
 
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
