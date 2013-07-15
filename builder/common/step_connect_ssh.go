@@ -24,11 +24,11 @@ type StepConnectSSH struct {
 	// SSHAddress is a function that returns the TCP address to connect to
 	// for SSH. This is a function so that you can query information
 	// if necessary for this address.
-	SSHAddress func() (string, error)
+	SSHAddress func(map[string]interface{}) (string, error)
 
 	// SSHConfig is a function that returns the proper client configuration
 	// for SSH access.
-	SSHConfig func() (*gossh.ClientConfig, error)
+	SSHConfig func(map[string]interface{}) (*gossh.ClientConfig, error)
 
 	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
 	SSHWaitTimeout time.Duration
@@ -46,7 +46,7 @@ func (s *StepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 	waitDone := make(chan bool, 1)
 	go func() {
 		ui.Say("Waiting for SSH to become available...")
-		comm, err = s.waitForSSH()
+		comm, err = s.waitForSSH(state)
 		waitDone <- true
 	}()
 
@@ -85,7 +85,7 @@ WaitLoop:
 func (s *StepConnectSSH) Cleanup(map[string]interface{}) {
 }
 
-func (s *StepConnectSSH) waitForSSH() (packer.Communicator, error) {
+func (s *StepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Communicator, error) {
 	handshakeAttempts := 0
 
 	var comm packer.Communicator
@@ -98,14 +98,14 @@ func (s *StepConnectSSH) waitForSSH() (packer.Communicator, error) {
 		}
 
 		// First we request the TCP connection information
-		address, err := s.SSHAddress()
+		address, err := s.SSHAddress(state)
 		if err != nil {
 			log.Printf("Error getting SSH address: %s", err)
 			continue
 		}
 
 		// Retrieve the SSH configuration
-		sshConfig, err := s.SSHConfig()
+		sshConfig, err := s.SSHConfig(state)
 		if err != nil {
 			log.Printf("Error getting SSH config: %s", err)
 			continue
