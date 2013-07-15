@@ -41,28 +41,34 @@ each category, the available options are alphabetized and described.
 
 Required:
 
-* `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-  files are so large, this is required and Packer will verify it prior
-  to booting a virtual machine with the ISO attached. The type of the
-  checksum is specified with `iso_checksum_type`, documented below.
-
-* `iso_checksum_type` (string) - The type of the checksum specified in
-  `iso_checksum`. Valid values are "md5", "sha1", or "sha256" currently.
-
-* `iso_url` (string) - A URL to the ISO containing the installation image.
-  This URL can be either an HTTP URL or a file URL (or path to a file).
-  If this is an HTTP URL, Packer will download it and cache it between
-  runs.
-
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
+
+* For building a new VM:
+  + `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
+    files are so large, this is required and Packer will verify it prior
+    to booting a virtual machine with the ISO attached. The type of the
+    checksum is specified with `iso_checksum_type`, documented below.
+
+  + `iso_checksum_type` (string) - The type of the checksum specified in
+    `iso_checksum`. Valid values are "md5", "sha1", or "sha256" currently.
+
+  + `iso_url` (string) - A URL to the ISO containing the installation image.
+    This URL can be either an HTTP URL or a file URL (or path to a file).
+    If this is an HTTP URL, Packer will download it and cache it between
+    runs.
+
+* For building from an existing OVF:
+  + `source_ovf` (string) - A path to an .ovf VM descriptor to build from.
+    This is an XML file that describes a packaged virtual machine. It is
+    typically in a directory with one or more disk images.
 
 Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
-  when the virtual machine is first booted. The goal of these commands should
-  be to type just enough to initialize the operating system installer. Special
-  keys can be typed as well, and are covered in the section below on the boot
+  when first booting a new VM. The goal of these commands should be to type
+  just enough to initialize the operating system installer. Special keys can
+  be typed as well, and are covered in the section below on the boot
   command. If this is not specified, it is assumed the installer will start
   itself.
 
@@ -73,7 +79,7 @@ Optional:
   the default is 10 seconds.
 
 * `disk_size` (int) - The size, in megabytes, of the hard disk to create
-  for the VM. By default, this is 40000 (40 GB).
+  when building a new VM. By default, this is 40000 (40 GB).
 
 * `floppy_files` (array of strings) - A list of files to put onto a floppy
   disk that is attached when the VM is booted for the first time. This is

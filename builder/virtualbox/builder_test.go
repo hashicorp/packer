@@ -382,6 +382,40 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_InputVM(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	config["iso_url"] = ""
+	config["iso_checksum"] = ""
+
+	// test with existing file
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config["source_ovf"] = tf.Name()
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatal("should not have error: %s", err)
+	}
+
+	// test with nonexistent file
+	config["source_ovf"] = "i/am/a/file/that/doesnt/exist"
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// test failure if neither inputVM nor iso is specified
+	config["source_ovf"] = ""
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestBuilderPrepare_OutputDir(t *testing.T) {
 	var b Builder
 	config := testConfig()

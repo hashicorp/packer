@@ -6,38 +6,30 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step creates the actual virtual machine.
+// This step imports an existing virtual machine in the OVF format.
 //
 // Produces:
 //   vmName string - The name of the VM
-type stepCreateVM struct {
+type stepImportVM struct {
 	vmName string
 }
 
-func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
+func (s *stepImportVM) Run(state map[string]interface{}) multistep.StepAction {
+	var commands [][]string
 	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
 	ui := state["ui"].(packer.Ui)
 
 	name := config.VMName
 
-	commands := make([][]string, 4)
-	commands[0] = []string{
-		"createvm", "--name", name,
-		"--ostype", config.GuestOSType, "--register",
-	}
-	commands[1] = []string{
-		"modifyvm", name,
-		"--boot1", "disk", "--boot2", "dvd", "--boot3", "none", "--boot4", "none",
-	}
-	commands[2] = []string{"modifyvm", name, "--cpus", "1"}
-	commands[3] = []string{"modifyvm", name, "--memory", "512"}
+	commands = make([][]string, 1)
+	commands[0] = []string{"import", config.SourceOVF, "--options", "keepallmacs", "--vsys", "0", "--vmname", name}
 
-	ui.Say("Creating virtual machine...")
+	ui.Say("importing virtual machine...")
 	for _, command := range commands {
 		err := driver.VBoxManage(command...)
 		if err != nil {
-			err := fmt.Errorf("Error creating VM: %s", err)
+			err := fmt.Errorf("Error importing VM: %s", err)
 			state["error"] = err
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -55,7 +47,7 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateVM) Cleanup(state map[string]interface{}) {
+func (s *stepImportVM) Cleanup(state map[string]interface{}) {
 	if s.vmName == "" {
 		return
 	}
