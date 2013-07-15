@@ -323,7 +323,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepVBoxManage),
 		new(stepRun),
 		new(stepTypeBootCommand),
-		new(stepWaitForSSH),
+		&common.StepConnectSSH{
+			SSHAddress:     sshAddress,
+			SSHConfig:      sshConfig,
+			SSHWaitTimeout: b.config.sshWaitTimeout,
+		},
 		new(stepUploadVersion),
 		new(stepUploadGuestAdditions),
 		new(stepProvision),
