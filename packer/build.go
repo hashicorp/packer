@@ -6,17 +6,19 @@ import (
 	"sync"
 )
 
-// This is the key in configurations that is set to the name of the
-// build.
-const BuildNameConfigKey = "packer_build_name"
+const (
+	// This is the key in configurations that is set to the name of the
+	// build.
+	BuildNameConfigKey = "packer_build_name"
 
-// This is the key in configurations that is set to "true" when Packer
-// debugging is enabled.
-const DebugConfigKey = "packer_debug"
+	// This is the key in configurations that is set to "true" when Packer
+	// debugging is enabled.
+	DebugConfigKey = "packer_debug"
 
-// This is the key in configurations that is set to "true" when Packer
-// force build is enabled.
-const ForceConfigKey = "packer_force"
+	// This is the key in configurations that is set to "true" when Packer
+	// force build is enabled.
+	ForceConfigKey = "packer_force"
+)
 
 // A Build represents a single job within Packer that is responsible for
 // building some machine image artifact. Builds are meant to be parallelized.
