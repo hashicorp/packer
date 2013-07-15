@@ -159,7 +159,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepKeyPair{},
 		&stepSecurityGroup{},
 		&stepRunSourceInstance{},
-		&stepConnectSSH{},
+		&common.StepConnectSSH{
+			SSHAddress:     sshAddress,
+			SSHConfig:      sshConfig,
+			SSHWaitTimeout: b.config.sshTimeout,
+		},
 		&stepProvision{},
 		&stepStopInstance{},
 		&stepCreateAMI{},
