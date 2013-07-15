@@ -216,7 +216,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateSSHKey),
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
-		new(stepConnectSSH),
+		&common.StepConnectSSH{
+			SSHAddress:     sshAddress,
+			SSHConfig:      sshConfig,
+			SSHWaitTimeout: 5 * time.Minute,
+		},
 		new(stepProvision),
 		new(stepPowerOff),
 		new(stepSnapshot),
