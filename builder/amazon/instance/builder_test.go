@@ -12,4 +12,3 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 		t.Fatalf("Builder should be a builder")
 	}
 }
-
