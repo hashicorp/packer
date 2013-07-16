@@ -2,6 +2,7 @@ package vmware
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -95,6 +96,16 @@ func (d *Workstation9LinuxDriver) Verify() error {
 
 	if err := d.findVdiskManager(); err != nil {
 		return fmt.Errorf("Required application 'vmware-vdiskmanager' not found in path.")
+	}
+
+	// Check to see if it APPEARS to be licensed.
+	matches, err := filepath.Glob("/etc/vmware/license-*")
+	if err != nil {
+		return fmt.Errorf("Error looking for VMware license: %s", err)
+	}
+
+	if len(matches) == 0 {
+		return errors.New("Workstation does not appear to be licensed. Please license it.")
 	}
 
 	return nil
