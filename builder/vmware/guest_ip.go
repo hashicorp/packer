@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -66,6 +67,10 @@ func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {
 			curIp = lastIp
 			curLeaseEnd = lastLeaseEnd
 		}
+	}
+
+	if curIp == "" {
+		return "", errors.New("IP not found for MAC in DHCP leases")
 	}
 
 	return curIp, nil

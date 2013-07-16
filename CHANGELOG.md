@@ -45,6 +45,7 @@ BUG FIXES:
   place. [GH-152]
 * virtualbox: "paused" doesn't mean the VM is stopped, improving
   shutdown detection.
+* vmware: error if guest IP could not be detected. [GH-189]
 
 ## 0.1.5 (July 7, 2013)
 
