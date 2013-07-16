@@ -290,7 +290,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: b.config.sshWaitTimeout,
 		},
 		&stepUploadTools{},
-		&stepProvision{},
+		&common.StepProvision{},
 		&stepShutdown{},
 		&stepCleanFiles{},
 		&stepCleanVMX{},

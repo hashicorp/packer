@@ -221,7 +221,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: 5 * time.Minute,
 		},
-		new(stepProvision),
+		new(common.StepProvision),
 		new(stepPowerOff),
 		new(stepSnapshot),
 	}

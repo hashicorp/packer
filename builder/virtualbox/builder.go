@@ -330,7 +330,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(stepUploadVersion),
 		new(stepUploadGuestAdditions),
-		new(stepProvision),
+		new(common.StepProvision),
 		new(stepShutdown),
 		new(stepExport),
 	}
