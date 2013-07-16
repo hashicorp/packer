@@ -143,8 +143,15 @@ func (d *Workstation9LinuxDriver) runAndLog(cmd *exec.Cmd) (string, string, erro
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 
-	log.Printf("stdout: %s", strings.TrimSpace(stdout.String()))
-	log.Printf("stderr: %s", strings.TrimSpace(stderr.String()))
+	stdoutString := strings.TrimSpace(stdout.String())
+	stderrString := strings.TrimSpace(stderr.String())
+
+	if _, ok := err.(*exec.ExitError); ok {
+		err = fmt.Errorf("VMware error: %s", stderrString)
+	}
+
+	log.Printf("stdout: %s", stdoutString)
+	log.Printf("stderr: %s", stderrString)
 
 	return stdout.String(), stderr.String(), err
 }
