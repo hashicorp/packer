@@ -255,7 +255,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
-	b.driver, err = b.newDriver()
+	b.driver, err = NewDriver()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed creating VMware driver: %s", err))
 	}
@@ -357,38 +357,4 @@ func (b *Builder) Cancel() {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
 	}
-}
-
-func (b *Builder) newFusionDriver() (Driver, error) {
-	fusionAppPath := "/Applications/VMware Fusion.app"
-	driver := &Fusion5Driver{fusionAppPath}
-	if err := driver.Verify(); err != nil {
-		return nil, err
-	}
-
-	return driver, nil
-}
-
-func (b *Builder) newWorkstationLinuxDriver() (Driver, error) {
-	driver := &WS9LnxDriver{}
-	if err := driver.Verify(); err != nil {
-		return nil, err
-	}
-
-	return driver, nil
-}
-
-func (b *Builder) newDriver() (Driver, error) {
-	fusion, fusionErr := b.newFusionDriver()
-	ws, wsErr := b.newWorkstationLinuxDriver()
-
-	if fusionErr == nil {
-		return fusion, nil
-	}
-
-	if wsErr == nil {
-		return ws, nil
-	}
-
-	return nil, fmt.Errorf("Unable to initialise VMware driver:\nFusion 5: %s\nWorkstation 9: %s", fusionErr, wsErr)
 }
