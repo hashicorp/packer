@@ -13,7 +13,7 @@ import (
 type VMwareBoxConfig struct {
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
-
+	Provider string `mapstructure:"provider"`
 	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
@@ -81,8 +81,12 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 		vf.Close()
 	}
 
+	if p.config.Provider == "" {
+		p.config.Provider = "vmware_desktop"
+	}
+
 	// Create the metadata
-	metadata := map[string]string{"provider": "vmware_desktop"}
+	metadata := map[string]string{"provider": p.config.Provider}
 	if err := WriteMetadata(dir, metadata); err != nil {
 		return nil, false, err
 	}

@@ -111,3 +111,7 @@ The VMware provider itself can be configured with specific options:
   [text template](http://golang.org/pkg/text/template). By default no
   Vagrantfile is packaged with the box. Note that currently no variables
   are available in the template, but this may change in the future.
+
+* `provider` (string) - The Vagrant VMware provider to use, defaults to
+  "vmware_desktop".  To build boxes compatible with VMware Fusion, for example,
+  you would set this to "vmware_fusion".
