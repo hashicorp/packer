@@ -1,8 +1,18 @@
 package common
 
 import (
+	"os"
 	"testing"
 )
+
+func init() {
+	// Clear out the AWS access key env vars so they don't
+	// affect our tests.
+	os.Setenv("AWS_ACCESS_KEY_ID", "")
+	os.Setenv("AWS_ACCESS_KEY", "")
+	os.Setenv("AWS_SECRET_ACCESS_KEY", "")
+	os.Setenv("AWS_SECRET_KEY", "")
+}
 
 func testConfig() *RunConfig {
 	return &RunConfig{
