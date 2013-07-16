@@ -21,11 +21,18 @@ fi
 
 echo "Version: ${VERSION} ${PREVERSION}"
 
+# Determine the arch/os combos we're building for
+XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
+XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
+
+echo "Arch: ${XC_ARCH}"
+echo "OS: ${XC_OS}"
+
 # This function builds whatever directory we're in...
 xc() {
     goxc \
-        -arch="386 amd64 arm" \
-        -os="linux darwin windows freebsd openbsd" \
+        -arch="$XC_ARCH" \
+        -os="$XC_OS" \
         -d="${DIR}/pkg" \
         -pv="${VERSION}" \
         -pr="${PREVERSION}" \
