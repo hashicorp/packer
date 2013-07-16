@@ -30,6 +30,9 @@ type Driver interface {
 	// Get the path to the VMware ISO for the given flavor.
 	ToolsIsoPath(string) string
 
+	// Get the path to the DHCP leases file for the given device.
+	DhcpLeasesPath(string) string
+
 	// Verify checks to make sure that this driver should function
 	// properly. This should check that all the files it will use
 	// appear to exist and so on. If everything is okay, this doesn't
@@ -150,7 +153,151 @@ func (d *Fusion5Driver) ToolsIsoPath(k string) string {
 	return filepath.Join(d.AppPath, "Contents", "Library", "isoimages", k+".iso")
 }
 
+func (d *Fusion5Driver) DhcpLeasesPath(device string) string {
+	return "/etc/vmware/vmnet-dhcpd-" + device + ".leases"
+}
+
 func (d *Fusion5Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
+	var stdout, stderr bytes.Buffer
+
+	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	log.Printf("stdout: %s", strings.TrimSpace(stdout.String()))
+	log.Printf("stderr: %s", strings.TrimSpace(stderr.String()))
+
+	return stdout.String(), stderr.String(), err
+}
+
+// WS9LnxDriver is a driver that can run VMware Workstation 9 on Linux.
+type WS9LnxDriver struct {
+	// These are paths to useful VMware Workstation binaries
+	AppPath          string
+	VdiskManagerPath string
+	VmrunPath        string
+}
+
+func (d *WS9LnxDriver) CompactDisk(diskPath string) error {
+	defragCmd := exec.Command(d.VdiskManagerPath, "-d", diskPath)
+	if _, _, err := d.runAndLog(defragCmd); err != nil {
+		return err
+	}
+
+	shrinkCmd := exec.Command(d.VdiskManagerPath, "-k", diskPath)
+	if _, _, err := d.runAndLog(shrinkCmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *WS9LnxDriver) CreateDisk(output string, size string) error {
+	cmd := exec.Command(d.VdiskManagerPath, "-c", "-s", size, "-a", "lsilogic", "-t", "1", output)
+	if _, _, err := d.runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *WS9LnxDriver) IsRunning(vmxPath string) (bool, error) {
+	vmxPath, err := filepath.Abs(vmxPath)
+	if err != nil {
+		return false, err
+	}
+
+	cmd := exec.Command(d.VmrunPath, "-T", "ws", "list")
+	stdout, _, err := d.runAndLog(cmd)
+	if err != nil {
+		return false, err
+	}
+
+	for _, line := range strings.Split(stdout, "\n") {
+		if line == vmxPath {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (d *WS9LnxDriver) Start(vmxPath string, headless bool) error {
+	guiArgument := "gui"
+	if headless {
+		guiArgument = "nogui"
+	}
+
+	cmd := exec.Command(d.VmrunPath, "-T", "ws", "start", vmxPath, guiArgument)
+	if _, _, err := d.runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *WS9LnxDriver) Stop(vmxPath string) error {
+	cmd := exec.Command(d.VmrunPath, "-T", "ws", "stop", vmxPath, "hard")
+	if _, _, err := d.runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *WS9LnxDriver) Verify() error {
+	if err := d.findApp(); err != nil {
+		return fmt.Errorf("VMware Workstation application ('vmware') not found in path.")
+	}
+
+	if err := d.findVmrun(); err != nil {
+		return fmt.Errorf("Critical application 'vmrun' not found in path.")
+	}
+
+	if err := d.findVdiskManager(); err != nil {
+		return fmt.Errorf("Critical application 'vmware-vdiskmanager' not found in path.")
+	}
+
+	return nil
+}
+
+func (d *WS9LnxDriver) findApp() error {
+	path, err := exec.LookPath("vmware")
+	if err != nil {
+		return err
+	}
+	d.AppPath = path
+	return nil
+}
+
+func (d *WS9LnxDriver) findVdiskManager() error {
+	path, err := exec.LookPath("vmware-vdiskmanager")
+	if err != nil {
+		return err
+	}
+	d.VdiskManagerPath = path
+	return nil
+}
+
+func (d *WS9LnxDriver) findVmrun() error {
+	path, err := exec.LookPath("vmrun")
+	if err != nil {
+		return err
+	}
+	d.VmrunPath = path
+	return nil
+}
+
+func (d *WS9LnxDriver) ToolsIsoPath(flavor string) string {
+	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
+}
+
+func (d *WS9LnxDriver) DhcpLeasesPath(device string) string {
+	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
+}
+
+func (d *WS9LnxDriver) runAndLog(cmd *exec.Cmd) (string, string, error) {
 	var stdout, stderr bytes.Buffer
 
 	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
