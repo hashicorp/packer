@@ -46,6 +46,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
 
 	// Accumulate any errors
 	if b.config.AMIName == "" {
