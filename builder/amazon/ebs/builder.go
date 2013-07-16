@@ -22,6 +22,7 @@ import (
 const BuilderId = "mitchellh.amazonebs"
 
 type config struct {
+	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	VpcId           string `mapstructure:"vpc_id"`
 	SubnetId        string `mapstructure:"subnet_id"`
@@ -29,8 +30,6 @@ type config struct {
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
-
-	PackerDebug bool `mapstructure:"packer_debug"`
 }
 
 type Builder struct {
