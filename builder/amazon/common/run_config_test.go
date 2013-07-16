@@ -16,10 +16,10 @@ func init() {
 
 func testConfig() *RunConfig {
 	return &RunConfig{
-		Region: "us-east-1",
-		SourceAmi: "abcd",
+		Region:       "us-east-1",
+		SourceAmi:    "abcd",
 		InstanceType: "m1.small",
-		SSHUsername: "root",
+		SSHUsername:  "root",
 	}
 }
 
