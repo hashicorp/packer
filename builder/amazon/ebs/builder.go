@@ -164,7 +164,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: b.config.sshTimeout,
 		},
-		&stepProvision{},
+		&common.StepProvision{},
 		&stepStopInstance{},
 		&stepCreateAMI{},
 	}
