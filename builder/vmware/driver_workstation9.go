@@ -90,11 +90,11 @@ func (d *Workstation9LinuxDriver) Verify() error {
 	}
 
 	if err := d.findVmrun(); err != nil {
-		return fmt.Errorf("Critical application 'vmrun' not found in path.")
+		return fmt.Errorf("Required application 'vmrun' not found in path.")
 	}
 
 	if err := d.findVdiskManager(); err != nil {
-		return fmt.Errorf("Critical application 'vmware-vdiskmanager' not found in path.")
+		return fmt.Errorf("Required application 'vmware-vdiskmanager' not found in path.")
 	}
 
 	return nil
