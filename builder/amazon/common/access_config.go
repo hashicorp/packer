@@ -16,6 +16,6 @@ func (c *AccessConfig) Auth() (aws.Auth, error) {
 	return aws.GetAuth(c.AccessKey, c.SecretKey)
 }
 
-func (c *AccessConfig) Validate() []error {
+func (c *AccessConfig) Prepare() []error {
 	return nil
 }
