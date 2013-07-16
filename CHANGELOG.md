@@ -1,6 +1,8 @@
 ## 0.2.1 (unreleased)
 
+FEATURES:
 
+* VMware builder now works with Workstation 9 on Linux.
 
 ## 0.2.0 (July 16, 2013)
 
