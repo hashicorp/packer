@@ -17,7 +17,8 @@ if !ENV["PACKER_DISABLE_DOWNLOAD_FETCH"]
   response = http.request(req)
 
   response.body.split("\n").each do |line|
-    next if line !~ /\/mitchellh\/packer\/(#{ENV["PACKER_VERSION"]}.+?)\?/
+    next if line !~ /\/mitchellh\/packer\/(#{Regexp.quote(ENV["PACKER_VERSION"])}.+?)'/
+      p $1.to_s
     filename = $1.to_s
     os = filename.split("_")[1]
     next if os == "SHA256SUMS"
