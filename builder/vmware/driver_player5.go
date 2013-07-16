@@ -35,7 +35,7 @@ func (d *Player5LinuxDriver) CompactDisk(diskPath string) error {
 }
 
 func (d *Player5LinuxDriver) qemuCompactDisk(diskPath string) error {
-	cmd := exec.Command(d.QemuImgPath, "convert", "-f", "vmdk", "-O", "vmdk", "-o", "compat6", diskPath, diskPath + ".new")
+	cmd := exec.Command(d.QemuImgPath, "convert", "-f", "vmdk", "-O", "vmdk", "-o", "compat6", diskPath, diskPath+".new")
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (d *Player5LinuxDriver) qemuCompactDisk(diskPath string) error {
 		return err
 	}
 
-	if err := os.Rename(diskPath + ".new", diskPath); err != nil {
+	if err := os.Rename(diskPath+".new", diskPath); err != nil {
 		return err
 	}
 

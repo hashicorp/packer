@@ -1,7 +1,6 @@
 package vmware
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -20,12 +19,12 @@ type Workstation9Driver struct {
 
 func (d *Workstation9Driver) CompactDisk(diskPath string) error {
 	defragCmd := exec.Command(d.VdiskManagerPath, "-d", diskPath)
-	if _, _, err := d.runAndLog(defragCmd); err != nil {
+	if _, _, err := runAndLog(defragCmd); err != nil {
 		return err
 	}
 
 	shrinkCmd := exec.Command(d.VdiskManagerPath, "-k", diskPath)
-	if _, _, err := d.runAndLog(shrinkCmd); err != nil {
+	if _, _, err := runAndLog(shrinkCmd); err != nil {
 		return err
 	}
 
@@ -34,7 +33,7 @@ func (d *Workstation9Driver) CompactDisk(diskPath string) error {
 
 func (d *Workstation9Driver) CreateDisk(output string, size string) error {
 	cmd := exec.Command(d.VdiskManagerPath, "-c", "-s", size, "-a", "lsilogic", "-t", "1", output)
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -48,7 +47,7 @@ func (d *Workstation9Driver) IsRunning(vmxPath string) (bool, error) {
 	}
 
 	cmd := exec.Command(d.VmrunPath, "-T", "ws", "list")
-	stdout, _, err := d.runAndLog(cmd)
+	stdout, _, err := runAndLog(cmd)
 	if err != nil {
 		return false, err
 	}
@@ -69,7 +68,7 @@ func (d *Workstation9Driver) Start(vmxPath string, headless bool) error {
 	}
 
 	cmd := exec.Command(d.VmrunPath, "-T", "ws", "start", vmxPath, guiArgument)
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -78,7 +77,7 @@ func (d *Workstation9Driver) Start(vmxPath string, headless bool) error {
 
 func (d *Workstation9Driver) Stop(vmxPath string) error {
 	cmd := exec.Command(d.VmrunPath, "-T", "ws", "stop", vmxPath, "hard")
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -135,30 +134,4 @@ func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
 
 func (d *Workstation9Driver) DhcpLeasesPath(device string) string {
 	return workstationDhcpLeasesPath(device)
-}
-
-func (d *Workstation9Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
-	var stdout, stderr bytes.Buffer
-
-	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
-	stdoutString := strings.TrimSpace(stdout.String())
-	stderrString := strings.TrimSpace(stderr.String())
-
-	if _, ok := err.(*exec.ExitError); ok {
-		err = fmt.Errorf("VMware error: %s", stderrString)
-	}
-
-	log.Printf("stdout: %s", stdoutString)
-	log.Printf("stderr: %s", stderrString)
-
-	// Replace these for Windows, we only want to deal with Unix
-	// style line endings.
-	returnStdout := strings.Replace(stdout.String(), "\r\n", "\n", -1)
-	returnStderr := strings.Replace(stderr.String(), "\r\n", "\n", -1)
-
-	return returnStdout, returnStderr, err
 }
