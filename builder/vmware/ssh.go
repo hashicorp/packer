@@ -47,6 +47,11 @@ func sshAddress(state map[string]interface{}) (string, error) {
 		return "", fmt.Errorf("IP lookup failed: %s", err)
 	}
 
+	if ipAddress == "" {
+		log.Println("IP is blank, no IP yet.")
+		return "", errors.New("IP is blank")
+	}
+
 	log.Printf("Detected IP: %s", ipAddress)
 	return fmt.Sprintf("%s:%d", ipAddress, config.SSHPort), nil
 }
