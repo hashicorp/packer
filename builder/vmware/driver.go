@@ -1,8 +1,12 @@
 package vmware
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"os/exec"
 	"runtime"
+	"strings"
 )
 
 // A driver is able to talk to VMware, control virtual machines, etc.
@@ -56,4 +60,25 @@ func NewDriver() (Driver, error) {
 	}
 
 	return driver, nil
+}
+
+func runAndLog(cmd *exec.Cmd) (string, string, error) {
+	var stdout, stderr bytes.Buffer
+
+	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	stdoutString := strings.TrimSpace(stdout.String())
+	stderrString := strings.TrimSpace(stderr.String())
+
+	if _, ok := err.(*exec.ExitError); ok {
+		err = fmt.Errorf("VMware error: %s", stderrString)
+	}
+
+	log.Printf("stdout: %s", stdoutString)
+	log.Printf("stderr: %s", stderrString)
+
+	return stdout.String(), stderr.String(), err
 }
