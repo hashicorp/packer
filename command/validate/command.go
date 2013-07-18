@@ -33,16 +33,14 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	// Read the file into a byte array so that we can parse the template
 	log.Printf("Reading template: %s", args[0])
-	tplData, err := ioutil.ReadFile(args[0])
-	if err != nil {
+	if tplData, err := ioutil.ReadFile(args[0]); err != nil {
 		env.Ui().Error(fmt.Sprintf("Failed to read template file: %s", err))
 		return 1
 	}
 
 	// Parse the template into a machine-usable format
 	log.Println("Parsing template...")
-	tpl, err := packer.ParseTemplate(tplData)
-	if err != nil {
+	if tpl, err := packer.ParseTemplate(tplData); err != nil {
 		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
 	}
@@ -67,8 +65,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
 		log.Printf("Creating build from template for: %s", buildName)
-		build, err := tpl.Build(buildName, components)
-		if err != nil {
+		if build, err := tpl.Build(buildName, components); err != nil {
 			errs = append(errs, fmt.Errorf("Build '%s': %s", buildName, err))
 			continue
 		}
