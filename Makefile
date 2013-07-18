@@ -10,6 +10,9 @@ all:
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
 	@./scripts/build.sh
 
+clean:
+	@rm -rf bin/ local/ pkg/ src/ website/.sass-cache website/build
+
 format:
 	go fmt ./...
 
