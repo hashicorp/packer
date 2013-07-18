@@ -79,5 +79,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 	defer f.Close()
 
-	return comm.Upload(p.config.Destination, f)
+	err = comm.Upload(p.config.Destination, f)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Upload failed: %s", err))
+	}
+	return err
 }
