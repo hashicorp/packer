@@ -41,6 +41,15 @@ func (d *Workstation9LinuxDriver) CreateDisk(output string, size string) error {
 	return nil
 }
 
+func (d *Workstation9LinuxDriver) CloneDisk(input string, output string, size string) error {
+	cmd := exec.Command(d.VdiskManagerPath, "-r", input, "-s", size, "-t", "1", output)
+	if _, _, err := d.runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *Workstation9LinuxDriver) IsRunning(vmxPath string) (bool, error) {
 	vmxPath, err := filepath.Abs(vmxPath)
 	if err != nil {
