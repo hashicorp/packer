@@ -497,7 +497,6 @@ func TestTemplate_Build(t *testing.T) {
 	`
 
 	expectedConfig := map[string]interface{}{
-		"name": "test1",
 		"type": "test-builder",
 	}
 
