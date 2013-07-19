@@ -116,11 +116,11 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	}()
 
 	// Get a pipe to stdout so that we can get responses back
-	scp_reader, err := session.StdoutPipe()
+	stdoutPipe, err := session.StdoutPipe()
 	if err != nil {
 		return err
 	}
-	r := bufio.NewReader(scp_reader)
+	stdoutR := bufio.NewReader(stdoutPipe)
 
 	// Set stderr to a bytes buffer
 	stderr := new(bytes.Buffer)
@@ -149,14 +149,14 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	// Start the protocol
 	log.Println("Beginning file upload...")
 	fmt.Fprintln(w, "C0644", input_memory.Len(), target_file)
-	err = check_response(r)
+	err = checkSCPStatus(stdoutR)
 	if err != nil {
 		return err
 	}
 
 	io.Copy(w, input_memory)
 	fmt.Fprint(w, "\x00")
-	err = check_response(r)
+	err = checkSCPStatus(stdoutR)
 	if err != nil {
 		return err
 	}
@@ -235,16 +235,24 @@ func (c *comm) reconnect() (err error) {
 	return
 }
 
-func check_response(r *bufio.Reader) (err error) {
-	scp_status_code, err := r.ReadByte()
+// checkSCPStatus checks that a prior command sent to SCP completed
+// successfully. If it did not complete successfully, an error will
+// be returned.
+func checkSCPStatus(r *bufio.Reader) error {
+	code, err := r.ReadByte()
 	if err != nil {
 		return err
 	}
-	if scp_status_code != 0 {
+
+	if code != 0 {
 		// Treat any non-zero (really 1 and 2) as fatal errors
-		error_message, _, err := r.ReadLine()
-		err = fmt.Errorf(string(error_message[:]))
-		return err
+		message, _, err := r.ReadLine()
+		if err != nil {
+			return fmt.Errorf("Error reading error message: %s", err)
+		}
+
+		return errors.New(string(message))
 	}
+
 	return nil
 }
