@@ -1,9 +1,27 @@
 package common
 
 import (
+	"github.com/mitchellh/mapstructure"
 	"reflect"
 	"testing"
 )
+
+func TestCheckUnusedConfig(t *testing.T) {
+	md := &mapstructure.Metadata{
+		Unused: make([]string, 0),
+	}
+
+	err := CheckUnusedConfig(md)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	md.Unused = []string{"foo", "bar"}
+	err = CheckUnusedConfig(md)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
 
 func TestDecodeConfig(t *testing.T) {
 	type Local struct {
