@@ -161,6 +161,10 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
+		// Now that we have the name, remove it from the config - as the builder
+		// itself doesn't know about, and it will cause a validation error.
+		delete(v, "name")
+
 		raw.rawConfig = v
 
 		t.Builders[raw.Name] = raw
