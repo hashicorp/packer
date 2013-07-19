@@ -4,6 +4,10 @@ FEATURES:
 
 * VMware builder now works with Workstation 9 on Linux.
 
+BUG FIXES:
+
+* core: build names no longer cause invalid config errors. [GH-197]
+
 ## 0.2.0 (July 16, 2013)
 
 BACKWARDS INCOMPATIBILITIES:
