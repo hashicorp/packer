@@ -128,6 +128,19 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 	builder, ok := result.Builders["bob"]
 	assert.True(ok, "should have bob builder")
 	assert.Equal(builder.Type, "amazon-ebs", "builder should be amazon-ebs")
+
+	rawConfig := builder.rawConfig
+	if rawConfig == nil {
+		t.Fatal("missing builder raw config")
+	}
+
+	expected := map[string]interface{}{
+		"type": "amazon-ebs",
+	}
+
+	if !reflect.DeepEqual(rawConfig, expected) {
+		t.Fatalf("bad raw: %#v", rawConfig)
+	}
 }
 
 func TestParseTemplate_BuilderWithConflictingName(t *testing.T) {
