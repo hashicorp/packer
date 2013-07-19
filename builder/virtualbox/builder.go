@@ -3,7 +3,6 @@ package virtualbox
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
@@ -65,22 +64,9 @@ type config struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
-	var md mapstructure.Metadata
-	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   &b.config,
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	md, err := common.DecodeConfig(&b.config, raws...)
 	if err != nil {
 		return err
-	}
-
-	for _, raw := range raws {
-		err := decoder.Decode(raw)
-		if err != nil {
-			return err
-		}
 	}
 
 	// Accumulate any errors
