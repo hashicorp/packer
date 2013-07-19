@@ -22,3 +22,21 @@ func (e *MultiError) Error() string {
 		"%d error(s) occurred:\n\n%s",
 		len(e.Errors), strings.Join(points, "\n"))
 }
+
+// MultiErrorAppend is a helper function that will append more errors
+// onto a MultiError in order to create a larger multi-error. If the
+// original error is not a MultiError, it will be turned into one.
+func MultiErrorAppend(err error, errs ...error) *MultiError {
+	switch err := err.(type) {
+	case *MultiError:
+		err.Errors = append(err.Errors, errs...)
+		return err
+	default:
+		newErrs := make([]error, len(errs)+1)
+		newErrs[0] = err
+		copy(newErrs[1:], errs)
+		return &MultiError{
+			Errors: newErrs,
+		}
+	}
+}
