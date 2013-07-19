@@ -50,6 +50,7 @@ type config struct {
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
+	SourceOvfFile        string     `mapstructure:"source_ovf_file"`
 
 	PackerBuildName string `mapstructure:"packer_build_name"`
 	PackerDebug     bool   `mapstructure:"packer_debug"`
@@ -127,6 +128,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.RawBootWait == "" {
 		b.config.RawBootWait = "10s"
+	}
+
+	if b.config.SourceOvfFile != "" {
+		if _, err:= os.Stat(b.config.SourceOvfFile);  err != nil {
+			errs = append(errs, fmt.Errorf("source_ovf_file points to bad file: %s", err))
+		}
 	}
 
 	if b.config.SSHHostPortMin == 0 {
@@ -306,7 +313,36 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	steps := []multistep.Step{
+	var steps []multistep.Step
+	if b.config.SourceOvfFile != "" {
+		log.Println("SourceOvfFile defined...")
+		steps = []multistep.Step{
+		new(stepDownloadGuestAdditions),
+		new(stepPrepareOutputDir),
+		&common.StepCreateFloppy{
+			Files: b.config.FloppyFiles,
+		},
+		new(stepHTTPServer),
+		new(stepSuppressMessages),
+		new(stepImportSourceOvf),
+		new(stepCloneVM),
+		new(stepDeleteSourceOvf),
+		new(stepForwardSSH),
+		new(stepVBoxManage),
+		new(stepRun),
+		&common.StepConnectSSH{
+			SSHAddress:     sshAddress,
+			SSHConfig:      sshConfig,
+			SSHWaitTimeout: b.config.sshWaitTimeout,
+		},
+		new(stepUploadVersion),
+		new(stepUploadGuestAdditions),
+		new(common.StepProvision),
+		new(stepShutdown),
+		new(stepExport),
+		}
+	} else {
+		steps = []multistep.Step{
 		new(stepDownloadGuestAdditions),
 		new(stepDownloadISO),
 		new(stepPrepareOutputDir),
@@ -333,6 +369,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(common.StepProvision),
 		new(stepShutdown),
 		new(stepExport),
+		}
 	}
 
 	// Setup the state bag
