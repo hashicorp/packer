@@ -161,9 +161,6 @@ func (c *comm) Upload(path string, input io.Reader) error {
 		return err
 	}
 
-	// TODO(mitchellh): Each step above results in a 0/1/2 being sent by
-	// the remote side to confirm. We should check for those confirmations.
-
 	// Close the stdin, which sends an EOF, and then set w to nil so that
 	// our defer func doesn't close it again since that is unsafe with
 	// the Go SSH package.
