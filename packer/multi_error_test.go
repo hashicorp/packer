@@ -40,6 +40,12 @@ func TestMultiErrorAppend_MultiError(t *testing.T) {
 	if len(result.Errors) != 2 {
 		t.Fatalf("wrong len: %d", len(result.Errors))
 	}
+
+	original = &MultiError{}
+	result = MultiErrorAppend(original, errors.New("bar"))
+	if len(result.Errors) != 1 {
+		t.Fatalf("wrong len: %d", len(result.Errors))
+	}
 }
 
 func TestMultiErrorAppend_NonMultiError(t *testing.T) {

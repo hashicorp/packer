@@ -12,9 +12,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"sort"
 	"strconv"
-	"strings"
 	"text/template"
 	"time"
 )
@@ -66,18 +64,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	errs := make([]error, 0)
-
-	// Unused keys are errors
-	if len(md.Unused) > 0 {
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
-			}
-		}
-	}
+	errs := common.CheckUnusedConfig(md)
 
 	// Optional configuration with defaults
 	if b.config.APIKey == "" {
@@ -140,28 +127,33 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Required configurations that will display errors if not set
 	if b.config.ClientID == "" {
-		errs = append(errs, errors.New("a client_id must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("a client_id must be specified"))
 	}
 
 	if b.config.APIKey == "" {
-		errs = append(errs, errors.New("an api_key must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("an api_key must be specified"))
 	}
 
 	sshTimeout, err := time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
 	b.config.sshTimeout = sshTimeout
 
 	eventDelay, err := time.ParseDuration(b.config.RawEventDelay)
 	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing event_delay: %s", err))
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing event_delay: %s", err))
 	}
 	b.config.eventDelay = eventDelay
 
 	stateTimeout, err := time.ParseDuration(b.config.RawStateTimeout)
 	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
 	}
 	b.config.stateTimeout = stateTimeout
 
@@ -172,14 +164,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 	t, err := template.New("snapshot").Parse(b.config.RawSnapshotName)
 	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
 	} else {
 		t.Execute(snapNameBuf, tData)
 		b.config.SnapshotName = snapNameBuf.String()
 	}
 
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	log.Printf("Config: %+v", b.config)

@@ -27,8 +27,20 @@ func (e *MultiError) Error() string {
 // onto a MultiError in order to create a larger multi-error. If the
 // original error is not a MultiError, it will be turned into one.
 func MultiErrorAppend(err error, errs ...error) *MultiError {
+	if err == nil {
+		err = new(MultiError)
+	}
+
 	switch err := err.(type) {
 	case *MultiError:
+		if err == nil {
+			err = new(MultiError)
+		}
+
+		if err.Errors == nil {
+			err.Errors = make([]error, 0, len(errs))
+		}
+
 		err.Errors = append(err.Errors, errs...)
 		return err
 	default:
