@@ -10,7 +10,7 @@ import (
 
 // CheckUnusedConfig is a helper that makes sure that the there are no
 // unused configuration keys, properly ignoring keys that don't matter.
-func CheckUnusedConfig(md *mapstructure.Metadata) error {
+func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 	errs := make([]error, 0)
 
 	if md.Unused != nil && len(md.Unused) > 0 {
