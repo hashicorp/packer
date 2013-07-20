@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"path/filepath"
-	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -72,12 +72,12 @@ func (f *FileCache) RUnlock(key string) {
 }
 
 func (f *FileCache) cachePath(key string, hashKey string) string {
-	var suffixPattern = regexp.MustCompile(`(\.\w+)$`)
-	matches := suffixPattern.FindStringSubmatch(key)
 	suffix := ""
-	if matches != nil {
-		suffix = matches[0]
+	dotIndex := strings.LastIndex(key, ".")
+	if dotIndex > -1 {
+		suffix = key[dotIndex:len(key)]
 	}
+
 	return filepath.Join(f.CacheDir, hashKey+suffix)
 }
 
