@@ -95,8 +95,22 @@ func (*stepTypeBootCommand) Cleanup(map[string]interface{}) {}
 
 func vncSendString(c *vnc.ClientConn, original string) {
 	special := make(map[string]uint32)
+	special["<backspace>"] = 0xFF08
+	special["<delete>"] = 0xFFFF
 	special["<enter>"] = 0xFF0D
 	special["<esc>"] = 0xFF1B
+	special["<f1>"] = 0xFFBE
+	special["<f2>"] = 0xFFBF
+	special["<f3>"] = 0xFFC0
+	special["<f4>"] = 0xFFC1
+	special["<f5>"] = 0xFFC2
+	special["<f6>"] = 0xFFC3
+	special["<f7>"] = 0xFFC4
+	special["<f8>"] = 0xFFC5
+	special["<f9>"] = 0xFFC6
+	special["<f10>"] = 0xFFC7
+	special["<f11>"] = 0xFFC8
+	special["<f12>"] = 0xFFC9
 	special["<return>"] = 0xFF0D
 	special["<tab>"] = 0xFF09
 
