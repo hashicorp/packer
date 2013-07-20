@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"path/filepath"
+	"regexp"
 	"sync"
 )
 
@@ -13,6 +14,9 @@ type Cache interface {
 	// Lock takes a key and returns the path where the file can be written to.
 	// Packer guarantees that no other process will write to this file while
 	// the lock is held.
+	//
+	// If the key has an extension (e.g., file.ext), the resulting path
+	// will have that extension as well.
 	//
 	// The cache will block and wait for the lock.
 	Lock(string) string
@@ -68,7 +72,13 @@ func (f *FileCache) RUnlock(key string) {
 }
 
 func (f *FileCache) cachePath(key string, hashKey string) string {
-	return filepath.Join(f.CacheDir, hashKey)
+	var suffixPattern = regexp.MustCompile(`(\.\w+)$`)
+	matches := suffixPattern.FindStringSubmatch(key)
+	suffix := ""
+	if matches != nil {
+		suffix = matches[0]
+	}
+	return filepath.Join(f.CacheDir, hashKey+suffix)
 }
 
 func (f *FileCache) hashKey(key string) string {
