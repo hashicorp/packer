@@ -4,6 +4,11 @@ FEATURES:
 
 * VMware builder now works with Workstation 9 on Linux.
 
+IMPROVEMENTS:
+
+* virtualbox, vmware: Add backspace, delete, and F1-F12 keys to the boot
+  command.
+
 BUG FIXES:
 
 * core: build names no longer cause invalid config errors. [GH-197]
