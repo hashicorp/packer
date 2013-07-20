@@ -44,7 +44,7 @@ func (f *FileCache) Lock(key string) string {
 	rw := f.rwLock(hashKey)
 	rw.Lock()
 
-	return filepath.Join(f.CacheDir, hashKey)
+	return f.cachePath(key, hashKey)
 }
 
 func (f *FileCache) Unlock(key string) {
@@ -58,13 +58,17 @@ func (f *FileCache) RLock(key string) (string, bool) {
 	rw := f.rwLock(hashKey)
 	rw.RLock()
 
-	return filepath.Join(f.CacheDir, hashKey), true
+	return f.cachePath(key, hashKey), true
 }
 
 func (f *FileCache) RUnlock(key string) {
 	hashKey := f.hashKey(key)
 	rw := f.rwLock(hashKey)
 	rw.RUnlock()
+}
+
+func (f *FileCache) cachePath(key string, hashKey string) string {
+	return filepath.Join(f.CacheDir, hashKey)
 }
 
 func (f *FileCache) hashKey(key string) string {
