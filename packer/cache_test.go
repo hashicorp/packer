@@ -42,6 +42,7 @@ func TestFileCache(t *testing.T) {
 	if !strings.HasSuffix(path, ".iso") {
 		t.Fatalf("path doesn't end with suffix '%s': '%s'", ".iso", path)
 	}
+
 	err = ioutil.WriteFile(path, []byte("data"), 0666)
 	if err != nil {
 		t.Fatalf("error writing: %s", err)
