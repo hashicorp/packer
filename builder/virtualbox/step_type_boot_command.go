@@ -91,8 +91,22 @@ func (*stepTypeBootCommand) Cleanup(map[string]interface{}) {}
 
 func scancodes(message string) []string {
 	special := make(map[string][]string)
+	special["<backspace>"] = []string{"ff", "08"}
+	special["<delete>"] = []string{"ff", "ff"}
 	special["<enter>"] = []string{"1c", "9c"}
 	special["<esc>"] = []string{"01", "81"}
+	special["<f1>"] = []string{"ff", "be"}
+	special["<f2>"] = []string{"ff", "bf"}
+	special["<f3>"] = []string{"ff", "c0"}
+	special["<f4>"] = []string{"ff", "c1"}
+	special["<f5>"] = []string{"ff", "c2"}
+	special["<f6>"] = []string{"ff", "c3"}
+	special["<f7>"] = []string{"ff", "c4"}
+	special["<f8>"] = []string{"ff", "c5"}
+	special["<f9>"] = []string{"ff", "c6"}
+	special["<f10>"] = []string{"ff", "c7"}
+	special["<f11>"] = []string{"ff", "c8"}
+	special["<f12>"] = []string{"ff", "c9"}
 	special["<return>"] = []string{"1c", "9c"}
 	special["<tab>"] = []string{"0f", "8f"}
 
