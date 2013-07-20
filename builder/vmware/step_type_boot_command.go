@@ -95,8 +95,8 @@ func (*stepTypeBootCommand) Cleanup(map[string]interface{}) {}
 
 func vncSendString(c *vnc.ClientConn, original string) {
 	special := make(map[string]uint32)
-	special["<backspace>"] = 0xFF08
-	special["<delete>"] = 0xFFFF
+	special["<bs>"] = 0xFF08
+	special["<del>"] = 0xFFFF
 	special["<enter>"] = 0xFF0D
 	special["<esc>"] = 0xFF1B
 	special["<f1>"] = 0xFFBE
