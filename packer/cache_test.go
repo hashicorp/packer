@@ -3,6 +3,7 @@ package packer
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -36,19 +37,23 @@ func TestFileCache(t *testing.T) {
 	defer os.RemoveAll(cacheDir)
 
 	cache := &FileCache{CacheDir: cacheDir}
-	path := cache.Lock("foo")
+	path := cache.Lock("foo.iso")
+
+	if !strings.HasSuffix(path, ".iso") {
+		t.Fatalf("path doesn't end with suffix '%s': '%s'", ".iso", path)
+	}
 	err = ioutil.WriteFile(path, []byte("data"), 0666)
 	if err != nil {
 		t.Fatalf("error writing: %s", err)
 	}
 
-	cache.Unlock("foo")
+	cache.Unlock("foo.iso")
 
-	path, ok := cache.RLock("foo")
+	path, ok := cache.RLock("foo.iso")
 	if !ok {
 		t.Fatal("cache says key doesn't exist")
 	}
-	defer cache.RUnlock("foo")
+	defer cache.RUnlock("foo.iso")
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
