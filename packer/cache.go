@@ -76,6 +76,11 @@ func (f *FileCache) cachePath(key string, hashKey string) string {
 	dotIndex := strings.LastIndex(key, ".")
 	if dotIndex > -1 {
 		suffix = key[dotIndex:len(key)]
+
+		idx := strings.Index(suffix, "?")
+		if idx != -1 {
+			suffix = suffix[0:idx]
+		}
 	}
 
 	return filepath.Join(f.CacheDir, hashKey+suffix)

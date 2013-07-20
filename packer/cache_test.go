@@ -37,8 +37,13 @@ func TestFileCache(t *testing.T) {
 	defer os.RemoveAll(cacheDir)
 
 	cache := &FileCache{CacheDir: cacheDir}
-	path := cache.Lock("foo.iso")
+	path := cache.Lock("foo.ext?foo=bar")
+	defer cache.Unlock("foo.ext?foo=bar")
+	if !strings.HasSuffix(path, ".ext") {
+		t.Fatalf("bad extension with question mark: %s", path)
+	}
 
+	path = cache.Lock("foo.iso")
 	if !strings.HasSuffix(path, ".iso") {
 		t.Fatalf("path doesn't end with suffix '%s': '%s'", ".iso", path)
 	}
