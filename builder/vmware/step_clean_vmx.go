@@ -22,9 +22,6 @@ import (
 type stepCleanVMX struct{}
 
 func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
-	if _, ok := state["floppy_path"]; !ok {
-		return multistep.ActionContinue
-	}
 
 	ui := state["ui"].(packer.Ui)
 	vmxPath := state["vmx_path"].(string)
@@ -35,15 +32,22 @@ func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	// Delete the floppy0 entries so the floppy is no longer mounted
-	ui.Say("Unmounting floppy from VMX...")
-	for k, _ := range vmxData {
-		if strings.HasPrefix(k, "floppy0.") {
-			log.Printf("Deleting key: %s", k)
-			delete(vmxData, k)
+	if _, ok := state["floppy_path"]; ok {
+		// Delete the floppy0 entries so the floppy is no longer mounted
+		ui.Say("Unmounting floppy from VMX...")
+		for k, _ := range vmxData {
+			if strings.HasPrefix(k, "floppy0.") {
+				log.Printf("Deleting key: %s", k)
+				delete(vmxData, k)
+			}
 		}
+		vmxData["floppy0.present"] = "FALSE"
 	}
-	vmxData["floppy0.present"] = "FALSE"
+
+	// Change the CD-ROM device back to auto-detect, ejecting the iso
+	ui.Say("Detatching ISO from CD-ROM device...")
+	vmxData["ide1:0.fileName"] = "auto detect"
+	vmxData["ide1:0.deviceType"] = "cdrom-raw"
 
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
