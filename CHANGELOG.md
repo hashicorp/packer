@@ -8,6 +8,8 @@ IMPROVEMENTS:
 
 * virtualbox, vmware: Add backspace, delete, and F1-F12 keys to the boot
   command.
+* virtualbox: massive performance improvements with big ISO files because
+  an expensive copy is avoided. [GH-202]
 
 BUG FIXES:
 
