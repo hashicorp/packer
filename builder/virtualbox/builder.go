@@ -242,7 +242,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		if _, err := os.Stat(b.config.OutputDir); err == nil {
 			errs = packer.MultiErrorAppend(
 				errs,
-				errors.New("Output directory already exists. It must not exist."))
+				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
 		}
 	}
 
