@@ -42,12 +42,20 @@ block below.
   "provisioners": [{
     "type": "shell",
     "inline": [
+      "sleep 30",
       "sudo apt-get update",
       "sudo apt-get install -y redis-server"
     ]
   }]
 }
 </pre>
+
+<div class="alert alert-block alert-info">
+<strong>Note:</strong> The <code>sleep 30</code> in the example above is
+very important. Because Packer is able to detect and SSH into the instance
+as soon as SSH is available, Ubuntu actually doesn't get proper amounts
+of time to initialize. The sleep makes sure that the OS properly initializes.
+</div>
 
 Hopefully it is obvious, but the `builders` section shouldn't actually
 contain "...", it should be the contents setup in the previous page
