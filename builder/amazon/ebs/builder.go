@@ -91,7 +91,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepKeyPair{},
-		&stepSecurityGroup{},
+		&awscommon.StepSecurityGroup{
+			SecurityGroupId: b.config.SecurityGroupId,
+			SSHPort: b.config.SSHPort,
+		},
 		&stepRunSourceInstance{},
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
