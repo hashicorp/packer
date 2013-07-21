@@ -3,6 +3,8 @@
 package instance
 
 import (
+	"errors"
+	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
@@ -10,6 +12,7 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os"
 )
 
 // The unique ID for this builder
@@ -21,6 +24,10 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+
+	X509CertPath   string `mapstructure:"x509_cert_path"`
+	X509KeyPath    string `mapstructure:"x509_key_path"`
+	X509UploadPath string `mapstructure:"x509_upload_path"`
 }
 
 type Builder struct {
@@ -38,6 +45,24 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
+
+	if b.config.X509CertPath == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("x509_cert_path is required"))
+	} else if _, err := os.Stat(b.config.X509CertPath); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("x509_cert_path points to bad file: %s", err))
+	}
+
+	if b.config.X509KeyPath == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("x509_key_path is required"))
+	} else if _, err := os.Stat(b.config.X509KeyPath); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("x509_key_path points to bad file: %s", err))
+	}
+
+	if b.config.X509UploadPath == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("x509_upload_path is required"))
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
@@ -62,7 +87,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag and initial state for the steps
 	state := make(map[string]interface{})
-	state["config"] = b.config
+	state["config"] = &b.config
 	state["ec2"] = ec2conn
 	state["hook"] = hook
 	state["ui"] = ui
@@ -85,6 +110,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
 		&common.StepProvision{},
+		&StepUploadX509Cert{},
 	}
 
 	// Run!
