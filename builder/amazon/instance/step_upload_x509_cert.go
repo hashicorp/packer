@@ -20,11 +20,13 @@ func (s *StepUploadX509Cert) Run(state map[string]interface{}) multistep.StepAct
 	ui.Say("Uploading X509 Certificate...")
 	if err := s.uploadSingle(comm, x509RemoteCertPath, config.X509CertPath); err != nil {
 		state["error"] = fmt.Errorf("Error uploading X509 cert: %s", err)
+		ui.Error(state["error"].(error).Error())
 		return multistep.ActionHalt
 	}
 
 	if err := s.uploadSingle(comm, x509RemoteKeyPath, config.X509KeyPath); err != nil {
 		state["error"] = fmt.Errorf("Error uploading X509 cert: %s", err)
+		ui.Error(state["error"].(error).Error())
 		return multistep.ActionHalt
 	}
 
