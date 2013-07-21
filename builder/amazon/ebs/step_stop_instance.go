@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
+	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -26,7 +27,7 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 
 	// Wait for the instance to actual stop
 	ui.Say("Waiting for the instance to stop...")
-	instance, err = waitForState(ec2conn, instance, []string{"running", "stopping"}, "stopped")
+	instance, err = awscommon.WaitForState(ec2conn, instance, []string{"running", "stopping"}, "stopped")
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
 		state["error"] = err
