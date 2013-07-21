@@ -79,6 +79,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			InstanceType:       b.config.InstanceType,
 			SourceAMI:          b.config.SourceAmi,
 		},
+		&common.StepConnectSSH{
+			SSHAddress:     awscommon.SSHAddress(b.config.SSHPort),
+			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
+			SSHWaitTimeout: b.config.SSHTimeout(),
+		},
 	}
 
 	// Run!
