@@ -27,6 +27,10 @@ func (s *StepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 		return multistep.ActionContinue
 	}
 
+	if s.SSHPort == 0 {
+		panic("SSHPort must be set to a non-zero value.")
+	}
+
 	// Create the group
 	ui.Say("Creating temporary security group for this instance...")
 	groupName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
