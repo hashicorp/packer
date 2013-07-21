@@ -28,7 +28,7 @@ func (s *StepUploadX509Cert) Run(state map[string]interface{}) multistep.StepAct
 		return multistep.ActionHalt
 	}
 
-	return multistep.ActionHalt
+	return multistep.ActionContinue
 }
 
 func (s *StepUploadX509Cert) Cleanup(map[string]interface{}) {}
