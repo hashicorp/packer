@@ -26,6 +26,7 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		MinCount:       0,
 		MaxCount:       0,
 		SecurityGroups: []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
+		SubnetId:       config.SubnetId,
 	}
 
 	ui.Say("Launching a source AWS instance...")
