@@ -24,8 +24,6 @@ const BuilderId = "mitchellh.amazonebs"
 type config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
-	VpcId           string `mapstructure:"vpc_id"`
-	SubnetId        string `mapstructure:"subnet_id"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	// Configuration of the resulting AMI
@@ -101,8 +99,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceAMI:          b.config.SourceAmi,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
+			SSHAddress:     awscommon.SSHAddress(b.config.SSHPort),
+			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
 		&common.StepProvision{},
