@@ -7,6 +7,8 @@ import (
 	"github.com/mitchellh/packer/communicator/ssh"
 )
 
+// SSHAddress returns a function that can be given to the SSH communicator
+// for determining the SSH address based on the instance DNS name.
 func SSHAddress(port int) func(map[string]interface{}) (string, error) {
 	return func(state map[string]interface{}) (string, error) {
 		instance := state["instance"].(*ec2.Instance)
@@ -14,6 +16,9 @@ func SSHAddress(port int) func(map[string]interface{}) (string, error) {
 	}
 }
 
+// SSHConfig returns a function that can be used for the SSH communicator
+// config for connecting to the instance created over SSH using the generated
+// private key.
 func SSHConfig(username string) func(map[string]interface{}) (*gossh.ClientConfig, error) {
 	return func(state map[string]interface{}) (*gossh.ClientConfig, error) {
 		privateKey := state["privateKey"].(string)
