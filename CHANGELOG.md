@@ -10,6 +10,7 @@ IMPROVEMENTS:
   command.
 * virtualbox: massive performance improvements with big ISO files because
   an expensive copy is avoided. [GH-202]
+* vmware: CD is removed prior to exporting final machine. [GH-198]
 
 BUG FIXES:
 
