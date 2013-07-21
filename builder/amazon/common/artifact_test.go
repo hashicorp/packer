@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"cgl.tideland.biz/asserts"
@@ -10,7 +10,7 @@ func TestArtifact_Impl(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	var actual packer.Artifact
-	assert.Implementor(&artifact{}, &actual, "should be an Artifact")
+	assert.Implementor(&Artifact{}, &actual, "should be an Artifact")
 }
 
 func TestArtifactId(t *testing.T) {
@@ -22,7 +22,7 @@ func TestArtifactId(t *testing.T) {
 	amis["east"] = "foo"
 	amis["west"] = "bar"
 
-	a := &artifact{amis, nil}
+	a := &Artifact{amis, nil}
 	result := a.Id()
 	assert.Equal(result, expected, "should match output")
 }
@@ -39,7 +39,7 @@ west: bar`
 	amis["east"] = "foo"
 	amis["west"] = "bar"
 
-	a := &artifact{amis, nil}
+	a := &Artifact{amis, nil}
 	result := a.String()
 	assert.Equal(result, expected, "should match output")
 }
