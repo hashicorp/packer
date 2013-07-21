@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"fmt"
@@ -8,35 +8,39 @@ import (
 	"strings"
 )
 
-type artifact struct {
+// Artifact is an artifact implementation that contains built AMIs.
+type Artifact struct {
 	// A map of regions to AMI IDs.
-	amis map[string]string
+	Amis map[string]string
+
+	// BuilderId is the unique ID for the builder that created this AMI
+	BuilderIdValue string
 
 	// EC2 connection for performing API stuff.
-	conn *ec2.EC2
+	Conn *ec2.EC2
 }
 
-func (*artifact) BuilderId() string {
-	return BuilderId
+func (a *Artifact) BuilderId() string {
+	return a.BuilderIdValue
 }
 
-func (*artifact) Files() []string {
+func (*Artifact) Files() []string {
 	// We have no files
 	return nil
 }
 
-func (a *artifact) Id() string {
-	parts := make([]string, 0, len(a.amis))
-	for region, amiId := range a.amis {
+func (a *Artifact) Id() string {
+	parts := make([]string, 0, len(a.Amis))
+	for region, amiId := range a.Amis {
 		parts = append(parts, fmt.Sprintf("%s:%s", region, amiId))
 	}
 
 	return strings.Join(parts, ",")
 }
 
-func (a *artifact) String() string {
-	amiStrings := make([]string, 0, len(a.amis))
-	for region, id := range a.amis {
+func (a *Artifact) String() string {
+	amiStrings := make([]string, 0, len(a.Amis))
+	for region, id := range a.Amis {
 		single := fmt.Sprintf("%s: %s", region, id)
 		amiStrings = append(amiStrings, single)
 	}
@@ -44,12 +48,12 @@ func (a *artifact) String() string {
 	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
 }
 
-func (a *artifact) Destroy() error {
+func (a *Artifact) Destroy() error {
 	errors := make([]error, 0)
 
-	for _, imageId := range a.amis {
+	for _, imageId := range a.Amis {
 		log.Printf("Deregistering image ID: %s", imageId)
-		if _, err := a.conn.DeregisterImage(imageId); err != nil {
+		if _, err := a.Conn.DeregisterImage(imageId); err != nil {
 			errors = append(errors, err)
 		}
 
