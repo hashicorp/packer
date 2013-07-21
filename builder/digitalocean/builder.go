@@ -4,7 +4,6 @@
 package digitalocean
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -12,17 +11,11 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"strconv"
-	"text/template"
 	"time"
 )
 
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
-
-type snapshotNameData struct {
-	CreateTime string
-}
 
 // Configuration tells the builder the credentials
 // to use while communicating with DO and describes the image
@@ -103,11 +96,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.SSHPort = 22
 	}
 
-	if b.config.RawSnapshotName == "" {
-		// Default to packer-{{ unix timestamp (utc) }}
-		b.config.RawSnapshotName = "packer-{{.CreateTime}}"
-	}
-
 	if b.config.RawSSHTimeout == "" {
 		// Default to 1 minute timeouts
 		b.config.RawSSHTimeout = "1m"
@@ -121,7 +109,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.RawStateTimeout == "" {
 		// Default to 6 minute timeouts waiting for
-		// desired state. i.e waiting for droplet to become active
 		b.config.RawStateTimeout = "6m"
 	}
 
@@ -157,18 +144,16 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 	b.config.stateTimeout = stateTimeout
 
-	// Parse the name of the snapshot
-	snapNameBuf := new(bytes.Buffer)
-	tData := snapshotNameData{
-		strconv.FormatInt(time.Now().UTC().Unix(), 10),
+	if b.config.RawSnapshotName == "" {
+		// Default to packer-{{ unix timestamp (utc) }}
+		b.config.RawSnapshotName = "packer-{{.CreateTime}}"
 	}
-	t, err := template.New("snapshot").Parse(b.config.RawSnapshotName)
+
+	// Parse the name of the snapshot
+	b.config.SnapshotName, err = packer.FormatName(b.config.RawSnapshotName)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
-	} else {
-		t.Execute(snapNameBuf, tData)
-		b.config.SnapshotName = snapNameBuf.String()
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

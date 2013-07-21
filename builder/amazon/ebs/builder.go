@@ -14,7 +14,6 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"text/template"
 	"time"
 )
 
@@ -35,12 +34,13 @@ type config struct {
 	SecurityGroupId string `mapstructure:"security_group_id"`
 
 	// Configuration of the resulting AMI
-	AMIName string `mapstructure:"ami_name"`
+	RawAMIName string `mapstructure:"ami_name"`
 
 	PackerDebug   bool   `mapstructure:"packer_debug"`
 	RawSSHTimeout string `mapstructure:"ssh_timeout"`
 
 	// Unexported fields that are calculated from others
+	amiName    string
 	sshTimeout time.Duration
 }
 
@@ -96,11 +96,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
 
-	if b.config.AMIName == "" {
+	if b.config.RawAMIName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
 	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
+		b.config.amiName, err = packer.FormatName(b.config.RawAMIName)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing ami_name: %s", err))

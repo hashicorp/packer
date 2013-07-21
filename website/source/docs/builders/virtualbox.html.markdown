@@ -175,7 +175,11 @@ Optional:
 
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer-BUILDNAME",
-  where "BUILDNAME" is the name of the build.
+  where "BUILDNAME" is the name of the build. The name specified by the
+  `vm_name` configuration variable is actually treated as a
+  [configuration template](/docs/templates/configuration-templates.html).
+  Packer provides a set of [variables](/docs/templates/configuration-templates.html#variables)
+  that it will replace within the name.
 
 ## Boot Command
 

@@ -47,3 +47,34 @@ resulting in a VMX that looks like this:
 displayName = "packer"
 guestOS = "otherlinux"
 </pre>
+
+## Name configuration variables<a id="variables"></a>
+
+The variables supported in the naming templates for AMI, snapshots and VM's are:
+ 
+* `.CreateTime` - This will be replaced with the Unix timestamp of when
+   the AMI was built.
+* `time "TimeZone" "TimeFormat"` - This will be replaced with the time format
+as formatted by the [Go Language time formatter](http://golang.org/pkg/time/#pkg-constants).
+* `user` - Put in the username of the user running the script.
+
+### Examples
+* CreateTime
+<pre>
+"ami_name": "My Packer AMI {{.CreateTime}}"
+</pre>
+
+* ISO 8601 time format
+<pre>
+  "ami_name": "packer-{{time \"UTC\" \"2006-01-02T15:04:05Z\""}}"
+</pre>
+
+* Local time format
+<pre>
+  "ami_name": "packer-{{time \"Local\" \"2006-01-02T15:04:05Z\""}}"
+</pre>
+
+* Username
+<pre>
+  "ami_name": "packer-{{user}}"
+</pre>

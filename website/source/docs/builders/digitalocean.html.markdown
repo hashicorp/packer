@@ -86,13 +86,8 @@ own access tokens:
 ## Snapshot Name Variables
 
 The `snapshot_name` for a DigitalOcean image must be unique. The configuration
-variable is actually treated as a [configuration template](/docs/templates/configuration-templates.html) and has various variables available to help keep this unique. Read
+variable is actually treated as a [configuration template](/docs/templates/configuration-templates.html) and has various [variables](/docs/templates/configuration-templates.html#variables) available to help keep this unique. Read
 the prior linked page for information on syntax if you're unfamiliar with it.
-
-The available variables are shown below:
-
-* `CreateTime` - This will be replaced with the Unix timestamp of when the
-  image is created.
 
 ## Finding Image, Region, and Size IDs
 

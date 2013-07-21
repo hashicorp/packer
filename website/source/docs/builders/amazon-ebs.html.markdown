@@ -104,10 +104,6 @@ will look for.
 
 The AMI name specified by the `ami_name` configuration variable is actually
 treated as a [configuration template](/docs/templates/configuration-templates.html).
-Packer provides a set of variables that it will replace
-within the AMI name. This helps ensure the AMI name is unique, as AWS requires.
-
-The available variables are shown below:
-
-* `CreateTime` - This will be replaced with the Unix timestamp of when
-  the AMI was built.
+Packer provides a set of [variables](/docs/templates/configuration-templates.html#variables)
+that it will replace within the AMI name. This helps ensure the AMI name
+is unique, as AWS requires.

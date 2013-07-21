@@ -47,7 +47,6 @@ type config struct {
 	SSHUser              string     `mapstructure:"ssh_username"`
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
-	VMName               string     `mapstructure:"vm_name"`
 
 	PackerBuildName string `mapstructure:"packer_build_name"`
 	PackerDebug     bool   `mapstructure:"packer_debug"`
@@ -56,10 +55,12 @@ type config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
+	RawVMName          string `mapstructure:"vm_name"`
 
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
+	VMName          string
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -123,8 +124,14 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.VBoxVersionFile = ".vbox_version"
 	}
 
-	if b.config.VMName == "" {
+	if b.config.RawVMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	} else {
+		b.config.VMName, err = packer.FormatName(b.config.RawVMName)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing VMName: %s", err))
+		}
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
