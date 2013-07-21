@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"cgl.tideland.biz/identifier"
@@ -10,18 +10,20 @@ import (
 	"log"
 )
 
-type stepSecurityGroup struct {
-	groupId string
+type StepSecurityGroup struct {
+	SecurityGroupId string
+	SSHPort int
+
+	createdGroupId string
 }
 
-func (s *stepSecurityGroup) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(config)
+func (s *StepSecurityGroup) Run(state map[string]interface{}) multistep.StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	ui := state["ui"].(packer.Ui)
 
-	if config.SecurityGroupId != "" {
-		log.Printf("Using specified security group: %s", config.SecurityGroupId)
-		state["securityGroupId"] = config.SecurityGroupId
+	if s.SecurityGroupId != "" {
+		log.Printf("Using specified security group: %s", s.SecurityGroupId)
+		state["securityGroupId"] = s.SecurityGroupId
 		return multistep.ActionContinue
 	}
 
@@ -36,14 +38,14 @@ func (s *stepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 	}
 
 	// Set the group ID so we can delete it later
-	s.groupId = groupResp.Id
+	s.createdGroupId = groupResp.Id
 
 	// Authorize the SSH access
 	perms := []ec2.IPPerm{
 		ec2.IPPerm{
 			Protocol:  "tcp",
-			FromPort:  config.SSHPort,
-			ToPort:    config.SSHPort,
+			FromPort:  s.SSHPort,
+			ToPort:    s.SSHPort,
 			SourceIPs: []string{"0.0.0.0/0"},
 		},
 	}
@@ -57,13 +59,13 @@ func (s *stepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 	}
 
 	// Set some state data for use in future steps
-	state["securityGroupId"] = s.groupId
+	state["securityGroupId"] = s.createdGroupId
 
 	return multistep.ActionContinue
 }
 
-func (s *stepSecurityGroup) Cleanup(state map[string]interface{}) {
-	if s.groupId == "" {
+func (s *StepSecurityGroup) Cleanup(state map[string]interface{}) {
+	if s.createdGroupId == "" {
 		return
 	}
 
@@ -71,10 +73,10 @@ func (s *stepSecurityGroup) Cleanup(state map[string]interface{}) {
 	ui := state["ui"].(packer.Ui)
 
 	ui.Say("Deleting temporary security group...")
-	_, err := ec2conn.DeleteSecurityGroup(ec2.SecurityGroup{Id: s.groupId})
+	_, err := ec2conn.DeleteSecurityGroup(ec2.SecurityGroup{Id: s.createdGroupId})
 	if err != nil {
 		log.Printf("Error deleting security group: %s", err)
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up security group. Please delete the group manually: %s", s.groupId))
+			"Error cleaning up security group. Please delete the group manually: %s", s.createdGroupId))
 	}
 }
