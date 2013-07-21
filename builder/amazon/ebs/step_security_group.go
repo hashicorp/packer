@@ -29,7 +29,7 @@ func (s *stepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 	ui.Say("Creating temporary security group for this instance...")
 	groupName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
 	log.Printf("Temporary group name: %s", groupName)
-	groupResp, err := ec2conn.CreateSecurityGroup(groupName, "Temporary group for Packer")
+	groupResp, err := ec2conn.CreateSecurityGroup(ec2.SecurityGroup{Name: groupName, Description: "Temporary group for Packer", VpcId: config.VpcId})
 	if err != nil {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
