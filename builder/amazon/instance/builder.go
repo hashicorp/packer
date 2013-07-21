@@ -72,7 +72,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepKeyPair{},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
-			SSHPort: b.config.SSHPort,
+			SSHPort:         b.config.SSHPort,
+		},
+		&awscommon.StepRunSourceInstance{
+			ExpectedRootDevice: "instance-store",
+			InstanceType:       b.config.InstanceType,
+			SourceAMI:          b.config.SourceAmi,
 		},
 	}
 

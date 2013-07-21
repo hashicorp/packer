@@ -12,7 +12,7 @@ import (
 
 type StepSecurityGroup struct {
 	SecurityGroupId string
-	SSHPort int
+	SSHPort         int
 
 	createdGroupId string
 }

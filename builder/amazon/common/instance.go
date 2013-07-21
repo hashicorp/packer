@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func waitForState(ec2conn *ec2.EC2, originalInstance *ec2.Instance, pending []string, target string) (i *ec2.Instance, err error) {
+func WaitForState(ec2conn *ec2.EC2, originalInstance *ec2.Instance, pending []string, target string) (i *ec2.Instance, err error) {
 	log.Printf("Waiting for instance state to become: %s", target)
 
 	i = originalInstance
