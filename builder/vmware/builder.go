@@ -92,7 +92,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.RawVMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	} else {
-		b.config.VMName, err = packer.FormatName(b.config.RawVMName)
+		b.config.VMName, err = common.FormatName(b.config.RawVMName)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing VMName: %s", err))

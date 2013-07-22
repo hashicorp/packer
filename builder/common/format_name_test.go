@@ -1,4 +1,4 @@
-package packer
+package common
 
 import (
 	"cgl.tideland.biz/asserts"

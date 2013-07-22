@@ -100,7 +100,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
 	} else {
-		b.config.amiName, err = packer.FormatName(b.config.RawAMIName)
+		b.config.amiName, err = common.FormatName(b.config.RawAMIName)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing ami_name: %s", err))

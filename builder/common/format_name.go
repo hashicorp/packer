@@ -1,4 +1,4 @@
-package packer
+package common
 
 import (
 	"bytes"

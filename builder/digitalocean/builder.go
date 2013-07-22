@@ -150,7 +150,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	// Parse the name of the snapshot
-	b.config.SnapshotName, err = packer.FormatName(b.config.RawSnapshotName)
+	b.config.SnapshotName, err = common.FormatName(b.config.RawSnapshotName)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
