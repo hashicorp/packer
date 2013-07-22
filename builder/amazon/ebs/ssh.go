@@ -10,7 +10,11 @@ import (
 func sshAddress(state map[string]interface{}) (string, error) {
 	config := state["config"].(config)
 	instance := state["instance"].(*ec2.Instance)
-	return fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort), nil
+	if config.VpcId == "" {
+		return fmt.Sprintf("%s:%d", instance.DNSName, config.SSHPort), nil
+	} else {
+		return fmt.Sprintf("%s:%d", instance.PrivateIpAddress, config.SSHPort), nil
+	}
 }
 
 func sshConfig(state map[string]interface{}) (*gossh.ClientConfig, error) {

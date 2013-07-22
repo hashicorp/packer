@@ -76,6 +76,12 @@ Optional:
   before timing out. The format of this value is a duration such as "5s"
   or "5m". The default SSH timeout is "1m", or one minute.
 
+* `subnet_id` (string) - If using VPC, the ID of the subnet, such as
+  "subnet-12345def", where Packer will launch the EC2 instance.
+
+* `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
+  VPC ID in order to create a temporary security group within the VPC.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
