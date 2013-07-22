@@ -22,7 +22,10 @@ func TestArtifactId(t *testing.T) {
 	amis["east"] = "foo"
 	amis["west"] = "bar"
 
-	a := &Artifact{amis, nil}
+	a := &Artifact{
+		Amis: amis,
+	}
+
 	result := a.Id()
 	assert.Equal(result, expected, "should match output")
 }
@@ -39,7 +42,7 @@ west: bar`
 	amis["east"] = "foo"
 	amis["west"] = "bar"
 
-	a := &Artifact{amis, nil}
+	a := &Artifact{Amis: amis}
 	result := a.String()
 	assert.Equal(result, expected, "should match output")
 }
