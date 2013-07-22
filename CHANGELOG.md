@@ -6,6 +6,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* amazon-ebs: Can now launch instances into a VPC for added protection [GH-210]
 * virtualbox, vmware: Add backspace, delete, and F1-F12 keys to the boot
   command.
 * virtualbox: massive performance improvements with big ISO files because
