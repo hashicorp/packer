@@ -103,6 +103,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ExpectedRootDevice: "instance-store",
 			InstanceType:       b.config.InstanceType,
 			SourceAMI:          b.config.SourceAmi,
+			SubnetId: b.config.SubnetId,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     awscommon.SSHAddress(b.config.SSHPort),
