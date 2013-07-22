@@ -131,7 +131,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.SourceOvfFile != "" {
-		if _, err:= os.Stat(b.config.SourceOvfFile);  err != nil {
+		if _, err := os.Stat(b.config.SourceOvfFile); err != nil {
 			errs = append(errs, fmt.Errorf("source_ovf_file points to bad file: %s", err))
 		}
 	}
@@ -317,58 +317,58 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.SourceOvfFile != "" {
 		log.Println("SourceOvfFile defined...")
 		steps = []multistep.Step{
-		new(stepDownloadGuestAdditions),
-		new(stepPrepareOutputDir),
-		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
-		},
-		new(stepHTTPServer),
-		new(stepSuppressMessages),
-		new(stepImportSourceOvf),
-		new(stepCloneVM),
-		new(stepDeleteSourceOvf),
-		new(stepForwardSSH),
-		new(stepVBoxManage),
-		new(stepRun),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
-		},
-		new(stepUploadVersion),
-		new(stepUploadGuestAdditions),
-		new(common.StepProvision),
-		new(stepShutdown),
-		new(stepExport),
+			new(stepDownloadGuestAdditions),
+			new(stepPrepareOutputDir),
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			new(stepHTTPServer),
+			new(stepSuppressMessages),
+			new(stepImportSourceOvf),
+			new(stepCloneVM),
+			new(stepDeleteSourceOvf),
+			new(stepForwardSSH),
+			new(stepVBoxManage),
+			new(stepRun),
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			new(stepUploadVersion),
+			new(stepUploadGuestAdditions),
+			new(common.StepProvision),
+			new(stepShutdown),
+			new(stepExport),
 		}
 	} else {
 		steps = []multistep.Step{
-		new(stepDownloadGuestAdditions),
-		new(stepDownloadISO),
-		new(stepPrepareOutputDir),
-		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
-		},
-		new(stepHTTPServer),
-		new(stepSuppressMessages),
-		new(stepCreateVM),
-		new(stepCreateDisk),
-		new(stepAttachISO),
-		new(stepAttachFloppy),
-		new(stepForwardSSH),
-		new(stepVBoxManage),
-		new(stepRun),
-		new(stepTypeBootCommand),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
-		},
-		new(stepUploadVersion),
-		new(stepUploadGuestAdditions),
-		new(common.StepProvision),
-		new(stepShutdown),
-		new(stepExport),
+			new(stepDownloadGuestAdditions),
+			new(stepDownloadISO),
+			new(stepPrepareOutputDir),
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			new(stepHTTPServer),
+			new(stepSuppressMessages),
+			new(stepCreateVM),
+			new(stepCreateDisk),
+			new(stepAttachISO),
+			new(stepAttachFloppy),
+			new(stepForwardSSH),
+			new(stepVBoxManage),
+			new(stepRun),
+			new(stepTypeBootCommand),
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			new(stepUploadVersion),
+			new(stepUploadGuestAdditions),
+			new(common.StepProvision),
+			new(stepShutdown),
+			new(stepExport),
 		}
 	}
 

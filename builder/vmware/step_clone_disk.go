@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
-        "os"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 // This step creates the virtual disks for the VM.
@@ -29,14 +29,13 @@ func (s stepCloneDisk) Run(state map[string]interface{}) multistep.StepAction {
 	sourcevmxpath := config.SourceVMXPath
 	full_disk_path := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
 
-
-        vmxData, err := s.readVMX(config.SourceVMXPath)
-        if err != nil {
-                err := fmt.Errorf("Error reading Source VMX file: %s", err)
-                state["error"] = err
-                ui.Error(err.Error())
-                return multistep.ActionHalt
-        }
+	vmxData, err := s.readVMX(config.SourceVMXPath)
+	if err != nil {
+		err := fmt.Errorf("Error reading Source VMX file: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 	//ui.Say(fmt.Sprintf("Dir %s", filepath.Dir(sourcevmxpath)))
 	//ui.Say(fmt.Sprintf("%s", vmxData["scsi0:0.fileName"]))
 	full_source_disk_path := filepath.Join(filepath.Dir(sourcevmxpath), vmxData["scsi0:0.fileName"])
@@ -57,16 +56,16 @@ func (s stepCloneDisk) Run(state map[string]interface{}) multistep.StepAction {
 func (stepCloneDisk) Cleanup(map[string]interface{}) {}
 
 func (stepCloneDisk) readVMX(vmxPath string) (map[string]string, error) {
-        vmxF, err := os.Open(vmxPath)
-        if err != nil {
-                return nil, err
-        }
-        defer vmxF.Close()
+	vmxF, err := os.Open(vmxPath)
+	if err != nil {
+		return nil, err
+	}
+	defer vmxF.Close()
 
-        vmxBytes, err := ioutil.ReadAll(vmxF)
-        if err != nil {
-                return nil, err
-        }
+	vmxBytes, err := ioutil.ReadAll(vmxF)
+	if err != nil {
+		return nil, err
+	}
 
-        return ParseVMX(string(vmxBytes)), nil
+	return ParseVMX(string(vmxBytes)), nil
 }

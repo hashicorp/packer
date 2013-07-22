@@ -20,7 +20,7 @@ func (s *stepImportSourceOvf) Run(state map[string]interface{}) multistep.StepAc
 	ui := state["ui"].(packer.Ui)
 
 	name := config.VMName
-        sourceOvf := config.SourceOvfFile
+	sourceOvf := config.SourceOvfFile
 	sourceVmName := fmt.Sprintf("source_%s", name)
 
 	commands := make([][]string, 1)

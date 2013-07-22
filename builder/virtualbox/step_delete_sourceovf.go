@@ -6,8 +6,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-
 type stepDeleteSourceOvf struct{}
+
 func (s *stepDeleteSourceOvf) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
@@ -24,4 +24,4 @@ func (s *stepDeleteSourceOvf) Run(state map[string]interface{}) multistep.StepAc
 	return multistep.ActionContinue
 }
 
-func (s *stepDeleteSourceOvf) Cleanup(state map[string]interface{}) { }
+func (s *stepDeleteSourceOvf) Cleanup(state map[string]interface{}) {}

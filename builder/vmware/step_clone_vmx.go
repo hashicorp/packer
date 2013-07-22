@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"path/filepath"
 	"io/ioutil"
+	"log"
 	"os"
+	"path/filepath"
 )
 
 type stepCloneVMX struct{}
@@ -21,7 +21,7 @@ func (s stepCloneVMX) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say("Cloning and writing VMX file")
 
 	vmxData, err := s.readVMX(config.SourceVMXPath)
-        if err != nil {
+	if err != nil {
 		err := fmt.Errorf("Error reading Source VMX file: %s", err)
 		state["error"] = err
 		ui.Error(err.Error())
@@ -63,16 +63,16 @@ func (s stepCloneVMX) Run(state map[string]interface{}) multistep.StepAction {
 func (stepCloneVMX) Cleanup(map[string]interface{}) {}
 
 func (stepCloneVMX) readVMX(vmxPath string) (map[string]string, error) {
-        vmxF, err := os.Open(vmxPath)
-        if err != nil {
-                return nil, err
-        }
-        defer vmxF.Close()
+	vmxF, err := os.Open(vmxPath)
+	if err != nil {
+		return nil, err
+	}
+	defer vmxF.Close()
 
-        vmxBytes, err := ioutil.ReadAll(vmxF)
-        if err != nil {
-                return nil, err
-        }
+	vmxBytes, err := ioutil.ReadAll(vmxF)
+	if err != nil {
+		return nil, err
+	}
 
-        return ParseVMX(string(vmxBytes)), nil
+	return ParseVMX(string(vmxBytes)), nil
 }
