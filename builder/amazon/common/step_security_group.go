@@ -13,7 +13,7 @@ import (
 type StepSecurityGroup struct {
 	SecurityGroupId string
 	SSHPort         int
-	VpcId string
+	VpcId           string
 
 	createdGroupId string
 }
@@ -37,9 +37,9 @@ func (s *StepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 	groupName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
 	log.Printf("Temporary group name: %s", groupName)
 	group := ec2.SecurityGroup{
-		Name: groupName,
+		Name:        groupName,
 		Description: "Temporary group for Packer",
-		VpcId: s.VpcId,
+		VpcId:       s.VpcId,
 	}
 	groupResp, err := ec2conn.CreateSecurityGroup(group)
 	if err != nil {

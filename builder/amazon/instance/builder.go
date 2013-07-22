@@ -98,12 +98,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
 			SSHPort:         b.config.SSHPort,
+			VpcId:           b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
 			ExpectedRootDevice: "instance-store",
 			InstanceType:       b.config.InstanceType,
 			SourceAMI:          b.config.SourceAmi,
-			SubnetId: b.config.SubnetId,
+			SubnetId:           b.config.SubnetId,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     awscommon.SSHAddress(b.config.SSHPort),
