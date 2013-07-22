@@ -4,6 +4,20 @@ FEATURES:
 
 * VMware builder now works with Workstation 9 on Linux.
 
+IMPROVEMENTS:
+
+* amazon-ebs: Can now launch instances into a VPC for added protection [GH-210]
+* virtualbox, vmware: Add backspace, delete, and F1-F12 keys to the boot
+  command.
+* virtualbox: massive performance improvements with big ISO files because
+  an expensive copy is avoided. [GH-202]
+* vmware: CD is removed prior to exporting final machine. [GH-198]
+
+BUG FIXES:
+
+* core: build names no longer cause invalid config errors. [GH-197]
+* communicator/ssh: SCP exit codes are tested and errors are reported. [GH-195]
+
 ## 0.2.0 (July 16, 2013)
 
 BACKWARDS INCOMPATIBILITIES:

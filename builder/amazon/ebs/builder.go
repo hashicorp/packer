@@ -10,13 +10,10 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"sort"
-	"strings"
 	"text/template"
 	"time"
 )
@@ -36,6 +33,8 @@ type config struct {
 	SSHUsername     string `mapstructure:"ssh_username"`
 	SSHPort         int    `mapstructure:"ssh_port"`
 	SecurityGroupId string `mapstructure:"security_group_id"`
+	VpcId           string `mapstructure:"vpc_id"`
+	SubnetId        string `mapstructure:"subnet_id"`
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
@@ -53,37 +52,13 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
-	var md mapstructure.Metadata
-	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   &b.config,
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	md, err := common.DecodeConfig(&b.config, raws...)
 	if err != nil {
 		return err
 	}
 
-	for _, raw := range raws {
-		err := decoder.Decode(raw)
-		if err != nil {
-			return err
-		}
-	}
-
 	// Accumulate any errors
-	errs := make([]error, 0)
-
-	// Unused keys are errors
-	if len(md.Unused) > 0 {
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
-			}
-		}
-	}
+	errs := common.CheckUnusedConfig(md)
 
 	if b.config.SSHPort == 0 {
 		b.config.SSHPort = 22
@@ -95,39 +70,47 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Accumulate any errors
 	if b.config.SourceAmi == "" {
-		errs = append(errs, errors.New("A source_ami must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("A source_ami must be specified"))
 	}
 
 	if b.config.InstanceType == "" {
-		errs = append(errs, errors.New("An instance_type must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("An instance_type must be specified"))
 	}
 
 	if b.config.Region == "" {
-		errs = append(errs, errors.New("A region must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("A region must be specified"))
 	} else if _, ok := aws.Regions[b.config.Region]; !ok {
-		errs = append(errs, fmt.Errorf("Unknown region: %s", b.config.Region))
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Unknown region: %s", b.config.Region))
 	}
 
 	if b.config.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("An ssh_username must be specified"))
 	}
 
 	b.config.sshTimeout, err = time.ParseDuration(b.config.RawSSHTimeout)
 	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
 
 	if b.config.AMIName == "" {
-		errs = append(errs, errors.New("ami_name must be specified"))
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ami_name must be specified"))
 	} else {
 		_, err = template.New("ami").Parse(b.config.AMIName)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("Failed parsing ami_name: %s", err))
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
 		}
 	}
 
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	log.Printf("Config: %+v", b.config)

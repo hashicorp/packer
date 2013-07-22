@@ -133,7 +133,7 @@ func (d *Fusion5Driver) ToolsIsoPath(k string) string {
 }
 
 func (d *Fusion5Driver) DhcpLeasesPath(device string) string {
-	return "/etc/vmware/vmnet-dhcpd-" + device + ".leases"
+	return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
 }
 
 func (d *Fusion5Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {

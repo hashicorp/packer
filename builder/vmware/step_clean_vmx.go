@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -22,12 +23,11 @@ import (
 type stepCleanVMX struct{}
 
 func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
-	if _, ok := state["floppy_path"]; !ok {
-		return multistep.ActionContinue
-	}
-
+	isoPath := state["iso_path"].(string)
 	ui := state["ui"].(packer.Ui)
 	vmxPath := state["vmx_path"].(string)
+
+	ui.Say("Cleaning VMX prior to finishing up...")
 
 	vmxData, err := s.readVMX(vmxPath)
 	if err != nil {
@@ -35,15 +35,35 @@ func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	// Delete the floppy0 entries so the floppy is no longer mounted
-	ui.Say("Unmounting floppy from VMX...")
+	if _, ok := state["floppy_path"]; ok {
+		// Delete the floppy0 entries so the floppy is no longer mounted
+		ui.Message("Unmounting floppy from VMX...")
+		for k, _ := range vmxData {
+			if strings.HasPrefix(k, "floppy0.") {
+				log.Printf("Deleting key: %s", k)
+				delete(vmxData, k)
+			}
+		}
+		vmxData["floppy0.present"] = "FALSE"
+	}
+
+	ui.Message("Detatching ISO from CD-ROM device...")
+	devRe := regexp.MustCompile(`^ide\d:\d\.`)
 	for k, _ := range vmxData {
-		if strings.HasPrefix(k, "floppy0.") {
-			log.Printf("Deleting key: %s", k)
-			delete(vmxData, k)
+		match := devRe.FindString(k)
+		if match == "" {
+			continue
+		}
+
+		filenameKey := match + ".filename"
+		if filename, ok := vmxData[filenameKey]; ok {
+			if filename == isoPath {
+				// Change the CD-ROM device back to auto-detect to eject
+				vmxData[filenameKey] = "auto detect"
+				vmxData[match + ".deviceType"] = "cdrom-raw"
+			}
 		}
 	}
-	vmxData["floppy0.present"] = "FALSE"
 
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
