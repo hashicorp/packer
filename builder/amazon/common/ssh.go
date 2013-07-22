@@ -11,8 +11,15 @@ import (
 // for determining the SSH address based on the instance DNS name.
 func SSHAddress(port int) func(map[string]interface{}) (string, error) {
 	return func(state map[string]interface{}) (string, error) {
+		var host string
 		instance := state["instance"].(*ec2.Instance)
-		return fmt.Sprintf("%s:%d", instance.DNSName, port), nil
+		if instance.VpcId != "" {
+			host = instance.PrivateIpAddress
+		} else {
+			host = instance.DNSName
+		}
+
+		return fmt.Sprintf("%s:%d", host, port), nil
 	}
 }
 
