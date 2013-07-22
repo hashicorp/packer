@@ -194,7 +194,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.SourceVMXPath != "" {
 		if _, err := os.Stat(b.config.SourceVMXPath); err != nil {
-			errs = append(errs, fmt.Errorf("source_vmx_path points to bad file: %s", err))
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("source_vmx_path points to bad file: %s", err))
 		}
 	}
 

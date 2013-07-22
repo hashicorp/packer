@@ -106,7 +106,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.SourceOvfFile != "" {
 		if _, err := os.Stat(b.config.SourceOvfFile); err != nil {
-			errs = append(errs, fmt.Errorf("source_ovf_file points to bad file: %s", err))
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("source_ovf_file points to bad file"))
 		}
 	}
 
