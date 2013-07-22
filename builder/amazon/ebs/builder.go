@@ -33,6 +33,8 @@ type config struct {
 	SSHUsername     string `mapstructure:"ssh_username"`
 	SSHPort         int    `mapstructure:"ssh_port"`
 	SecurityGroupId string `mapstructure:"security_group_id"`
+	VpcId           string `mapstructure:"vpc_id"`
+	SubnetId        string `mapstructure:"subnet_id"`
 
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
