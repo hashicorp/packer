@@ -36,8 +36,7 @@ func (s stepCloneDisk) Run(state map[string]interface{}) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	//ui.Say(fmt.Sprintf("Dir %s", filepath.Dir(sourcevmxpath)))
-	//ui.Say(fmt.Sprintf("%s", vmxData["scsi0:0.fileName"]))
+
 	full_source_disk_path := filepath.Join(filepath.Dir(sourcevmxpath), vmxData["scsi0:0.fileName"])
 	// the full source disk pack is assuming vmxData is returning a relative path.  we need to check that assumption.
 
