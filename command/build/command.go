@@ -250,6 +250,11 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		env.Ui().Say("\n==> Builds finished but no artifacts were created.")
 	}
 
+	if len(errors) > 0 {
+		// If any errors occurred, exit with a non-zero exit status
+		return 1
+	}
+
 	return 0
 }
 
