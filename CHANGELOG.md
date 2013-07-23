@@ -16,6 +16,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * core: build names no longer cause invalid config errors. [GH-197]
+* command/build: If any builds fail, exit with non-zero exit status.
 * communicator/ssh: SCP exit codes are tested and errors are reported. [GH-195]
 
 ## 0.2.0 (July 16, 2013)
