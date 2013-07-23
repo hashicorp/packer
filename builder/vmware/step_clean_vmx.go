@@ -23,7 +23,7 @@ import (
 type stepCleanVMX struct{}
 
 func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
-	isoPath := state["iso_path"].(string)
+	isoPath, isoExists := state["iso_path"]
 	ui := state["ui"].(packer.Ui)
 	vmxPath := state["vmx_path"].(string)
 
@@ -47,20 +47,22 @@ func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
 		vmxData["floppy0.present"] = "FALSE"
 	}
 
-	ui.Message("Detatching ISO from CD-ROM device...")
-	devRe := regexp.MustCompile(`^ide\d:\d\.`)
-	for k, _ := range vmxData {
-		match := devRe.FindString(k)
-		if match == "" {
-			continue
-		}
+	if isoExists {
+		ui.Message("Detatching ISO from CD-ROM device...")
+		devRe := regexp.MustCompile(`^ide\d:\d\.`)
+		for k, _ := range vmxData {
+			match := devRe.FindString(k)
+			if match == "" {
+				continue
+			}
 
-		filenameKey := match + ".filename"
-		if filename, ok := vmxData[filenameKey]; ok {
-			if filename == isoPath {
-				// Change the CD-ROM device back to auto-detect to eject
-				vmxData[filenameKey] = "auto detect"
-				vmxData[match + ".deviceType"] = "cdrom-raw"
+			filenameKey := match + ".filename"
+			if filename, ok := vmxData[filenameKey]; ok {
+				if filename == isoPath.(string) {
+					// Change the CD-ROM device back to auto-detect to eject
+					vmxData[filenameKey] = "auto detect"
+					vmxData[match+".deviceType"] = "cdrom-raw"
+				}
 			}
 		}
 	}
