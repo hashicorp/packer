@@ -34,15 +34,12 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		ui.Say("Gracefully halting virtual machine...")
 		log.Printf("Executing shutdown command: %s", config.ShutdownCommand)
 		cmd := &packer.RemoteCmd{Command: config.ShutdownCommand}
-		if err := comm.Start(cmd); err != nil {
+		if err := cmd.StartWithUi(comm, ui); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state["error"] = err
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-
-		// Wait for the command to run
-		cmd.Wait()
 
 		// Wait for the machine to actually shut down
 		log.Printf("Waiting max %s for shutdown to complete", config.shutdownTimeout)
