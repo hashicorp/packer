@@ -47,6 +47,7 @@ type config struct {
 	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
 	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
 	VMXData           map[string]string `mapstructure:"vmx_data"`
+	SourceVMXPath     string            `mapstructure:"source_vmx_path"`
 	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
 
@@ -191,6 +192,13 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if b.config.SourceVMXPath != "" {
+		if _, err := os.Stat(b.config.SourceVMXPath); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("source_vmx_path points to bad file: %s", err))
+		}
+	}
+
 	if !b.config.PackerForce {
 		if _, err := os.Stat(b.config.OutputDir); err == nil {
 			errs = packer.MultiErrorAppend(
@@ -259,30 +267,59 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	steps := []multistep.Step{
-		&stepPrepareTools{},
-		&stepDownloadISO{},
-		&stepPrepareOutputDir{},
-		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
-		},
-		&stepCreateDisk{},
-		&stepCreateVMX{},
-		&stepHTTPServer{},
-		&stepConfigureVNC{},
-		&stepRun{},
-		&stepTypeBootCommand{},
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
-		},
-		&stepUploadTools{},
-		&common.StepProvision{},
-		&stepShutdown{},
-		&stepCleanFiles{},
-		&stepCleanVMX{},
-		&stepCompactDisk{},
+	var steps []multistep.Step
+	if b.config.SourceVMXPath != "" {
+		log.Println("SourceVMXPath defined...")
+		steps = []multistep.Step{
+			&stepPrepareTools{},
+			&stepPrepareOutputDir{},
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			&stepCloneVMX{},
+			&stepCloneDisk{},
+			&stepHTTPServer{},
+			&stepConfigureVNC{},
+			&stepRun{},
+			&stepTypeBootCommand{},
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			&stepUploadTools{},
+			&common.StepProvision{},
+			&stepShutdown{},
+			&stepCleanFiles{},
+			&stepCleanVMX{},
+			&stepCompactDisk{},
+		}
+	} else {
+		steps = []multistep.Step{
+			&stepPrepareTools{},
+			&stepDownloadISO{},
+			&stepPrepareOutputDir{},
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			&stepCreateDisk{},
+			&stepCreateVMX{},
+			&stepHTTPServer{},
+			&stepConfigureVNC{},
+			&stepRun{},
+			&stepTypeBootCommand{},
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			&stepUploadTools{},
+			&common.StepProvision{},
+			&stepShutdown{},
+			&stepCleanFiles{},
+			&stepCleanVMX{},
+			&stepCompactDisk{},
+		}
 	}
 
 	// Setup the state bag

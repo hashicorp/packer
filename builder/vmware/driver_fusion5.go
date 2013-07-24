@@ -39,6 +39,15 @@ func (d *Fusion5Driver) CreateDisk(output string, size string) error {
 	return nil
 }
 
+func (d *Fusion5Driver) CloneDisk(input string, output string, size string) error {
+	cmd := exec.Command(d.vdiskManagerPath(), "-r", input, "-s", size, "-t", "1", output)
+	if _, _, err := d.runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	vmxPath, err := filepath.Abs(vmxPath)
 	if err != nil {
