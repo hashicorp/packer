@@ -7,10 +7,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -221,59 +219,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		t := template.Must(template.New("command").Parse(p.config.ExecuteCommand))
 		t.Execute(&command, &ExecuteCommandTemplate{flattendVars, p.config.RemotePath})
 
-		// Setup the remote command
-		stdout_r, stdout_w := io.Pipe()
-		stderr_r, stderr_w := io.Pipe()
-
-		var cmd packer.RemoteCmd
-		cmd.Command = command.String()
-		cmd.Stdout = stdout_w
-		cmd.Stderr = stderr_w
-
+		cmd := &packer.RemoteCmd{Command: command.String()}
 		log.Printf("Executing command: %s", cmd.Command)
-		err = comm.Start(&cmd)
-		if err != nil {
+		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Failed executing command: %s", err)
 		}
 
-		exitChan := make(chan int, 1)
-		stdoutChan := iochan.DelimReader(stdout_r, '\n')
-		stderrChan := iochan.DelimReader(stderr_r, '\n')
-
-		go func() {
-			defer stdout_w.Close()
-			defer stderr_w.Close()
-
-			cmd.Wait()
-			exitChan <- cmd.ExitStatus
-		}()
-
-	OutputLoop:
-		for {
-			select {
-			case output := <-stderrChan:
-				ui.Message(strings.TrimSpace(output))
-			case output := <-stdoutChan:
-				ui.Message(strings.TrimSpace(output))
-			case exitStatus := <-exitChan:
-				log.Printf("shell provisioner exited with status %d", exitStatus)
-
-				if exitStatus != 0 {
-					return fmt.Errorf("Script exited with non-zero exit status: %d", exitStatus)
-				}
-
-				break OutputLoop
-			}
-		}
-
-		// Make sure we finish off stdout/stderr because we may have gotten
-		// a message from the exit channel first.
-		for output := range stdoutChan {
-			ui.Message(output)
-		}
-
-		for output := range stderrChan {
-			ui.Message(output)
+		if cmd.ExitStatus != 0 {
+			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
 		}
 	}
 
