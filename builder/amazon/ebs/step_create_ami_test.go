@@ -45,7 +45,7 @@ func TestWaitForAMI(t *testing.T) {
 
 	// Then
 	if err != nil {
-		panic("expected waitForAMI to pass successfully")
+		t.Fatal("expected waitForAMI to pass successfully")
 	}
 }
 
@@ -63,10 +63,10 @@ func TestWaitForAMIFailsImmediately(t *testing.T) {
 
 	// Then
 	if err == nil {
-		panic("expected waitForAMI to fail")
+		t.Fatal("expected waitForAMI to fail")
 	}
 	if time.Since(started) > wait {
-		panic("expected to have failed immediately")
+		t.Fatal("expected to have failed immediately")
 	}
 }
 
@@ -84,9 +84,9 @@ func TestWaitForAMIIgnoresInvalidAMIID(t *testing.T) {
 
 	// Then
 	if err == nil {
-		panic("expected waitForAMI to fail")
+		t.Fatal("expected waitForAMI to fail")
 	}
 	if time.Since(started) < timeout {
-		panic("expected elapsed time > timeout since the reason we failed was InvalidAMIID.NotFound")
+		t.Fatal("expected elapsed time > timeout since the reason we failed was InvalidAMIID.NotFound")
 	}
 }
