@@ -1,7 +1,9 @@
 package packer
 
 import (
+	"github.com/mitchellh/iochan"
 	"io"
+	"strings"
 	"time"
 )
 
@@ -55,6 +57,61 @@ type Communicator interface {
 	// with the contents writing to the given writer. This method will
 	// block until it completes.
 	Download(string, io.Writer) error
+}
+
+// StartWithUi runs the remote command and streams the output to any
+// configured Writers for stdout/stderr, while also writing each line
+// as it comes to a Ui.
+func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
+	stdout_r, stdout_w := io.Pipe()
+	stderr_r, stderr_w := io.Pipe()
+
+	// Set the writers for the output so that we get it streamed to us
+	r.Stdout = stdout_w
+	r.Stderr = stderr_w
+
+	// Start the command
+	if err := c.Start(r); err != nil {
+		return err
+	}
+
+	// Create the channels we'll use for data
+	exitCh := make(chan int, 1)
+	stdoutCh := iochan.DelimReader(stdout_r, '\n')
+	stderrCh := iochan.DelimReader(stderr_r, '\n')
+
+	// Start the goroutine to watch for the exit
+	go func() {
+		defer stdout_w.Close()
+		defer stderr_w.Close()
+		r.Wait()
+		exitCh <- r.ExitStatus
+	}()
+
+	// Loop and get all our output
+OutputLoop:
+	for {
+		select {
+		case output := <-stderrCh:
+			ui.Message(strings.TrimSpace(output))
+		case output := <-stdoutCh:
+			ui.Message(strings.TrimSpace(output))
+		case <-exitCh:
+			break OutputLoop
+		}
+	}
+
+	// Make sure we finish off stdout/stderr because we may have gotten
+	// a message from the exit channel before finishing these first.
+	for output := range stdoutCh {
+		ui.Message(strings.TrimSpace(output))
+	}
+
+	for output := range stderrCh {
+		ui.Message(strings.TrimSpace(output))
+	}
+
+	return nil
 }
 
 // Wait waits for the remote command to complete.
