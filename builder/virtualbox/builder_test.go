@@ -563,3 +563,19 @@ func TestBuilderPrepare_VBoxVersionFile(t *testing.T) {
 		t.Fatalf("bad value: %s", b.config.VBoxVersionFile)
 	}
 }
+
+func TestBuilderPrepare_VMName(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test format
+	name := "packer-test"
+	config["vm_name"] = name
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatal("should not have error")
+	}
+	if b.config.VMName != name {
+		t.Fatal("name should be equal")
+	}
+}

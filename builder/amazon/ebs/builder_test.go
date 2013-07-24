@@ -73,6 +73,17 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have error")
 	}
+
+	// Test format
+	name := "packer-test"
+	config["ami_name"] = name
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatal("should not have error")
+	}
+	if b.config.amiName != name {
+		t.Fatal("name should be equal")
+	}
 }
 
 func TestBuilderPrepare_InstanceType(t *testing.T) {

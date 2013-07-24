@@ -32,7 +32,6 @@ type config struct {
 	ISOChecksum       string            `mapstructure:"iso_checksum"`
 	ISOChecksumType   string            `mapstructure:"iso_checksum_type"`
 	ISOUrl            string            `mapstructure:"iso_url"`
-	VMName            string            `mapstructure:"vm_name"`
 	OutputDir         string            `mapstructure:"output_directory"`
 	Headless          bool              `mapstructure:"headless"`
 	HTTPDir           string            `mapstructure:"http_directory"`
@@ -57,10 +56,12 @@ type config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
+	RawVMName          string `mapstructure:"vm_name"`
 
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
+	VMName          string
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -88,8 +89,14 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.GuestOSType = "other"
 	}
 
-	if b.config.VMName == "" {
+	if b.config.RawVMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	} else {
+		b.config.VMName, err = common.FormatName(b.config.RawVMName)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing VMName: %s", err))
+		}
 	}
 
 	if b.config.HTTPPortMin == 0 {

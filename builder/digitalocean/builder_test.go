@@ -357,4 +357,15 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 		t.Fatalf("failed to parse int in template: %s", err)
 	}
 
+	// Test format
+	name := "packer-test"
+	config["snapshot_name"] = name
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatal("should not have error")
+	}
+	if b.config.SnapshotName != name {
+		t.Fatal("name should be equal")
+	}
+
 }
