@@ -30,6 +30,9 @@ func (s *StepUploadX509Cert) Run(state map[string]interface{}) multistep.StepAct
 		return multistep.ActionHalt
 	}
 
+	state["x509RemoteCertPath"] = x509RemoteCertPath
+	state["x509RemoteKeyPath"] = x509RemoteKeyPath
+
 	return multistep.ActionContinue
 }
 

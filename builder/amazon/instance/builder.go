@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+	"strings"
 )
 
 // The unique ID for this builder
@@ -25,9 +26,11 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	X509CertPath   string `mapstructure:"x509_cert_path"`
-	X509KeyPath    string `mapstructure:"x509_key_path"`
-	X509UploadPath string `mapstructure:"x509_upload_path"`
+	AccountId        string `mapstructure:"account_id"`
+	BundleVolCommand string `mapstructure:"bundle_vol_command"`
+	X509CertPath     string `mapstructure:"x509_cert_path"`
+	X509KeyPath      string `mapstructure:"x509_key_path"`
+	X509UploadPath   string `mapstructure:"x509_upload_path"`
 }
 
 type Builder struct {
@@ -45,6 +48,21 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
+
+	if b.config.AccountId == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
+	} else {
+		b.config.AccountId = strings.Replace(b.config.AccountId, "-", "", -1)
+	}
+
+	if b.config.BundleVolCommand == "" {
+		b.config.BundleVolCommand = "ec2-bundle-vol " +
+			"-k {{.KeyPath}} " +
+			"-u {{.AccountId}} " +
+			"-c {{.CertPath}} " +
+			"-r {{.Architecture}} " +
+			"-e {{.PrivatePath}}"
+	}
 
 	if b.config.X509CertPath == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("x509_cert_path is required"))

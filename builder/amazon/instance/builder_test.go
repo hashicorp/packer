@@ -14,6 +14,7 @@ func testConfig() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
+		"account_id":       "foo",
 		"instance_type":    "m1.small",
 		"region":           "us-east-1",
 		"source_ami":       "foo",
@@ -29,6 +30,33 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 	raw = &Builder{}
 	if _, ok := raw.(packer.Builder); !ok {
 		t.Fatalf("Builder should be a builder")
+	}
+}
+
+func TestBuilderPrepare_AccountId(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	config["account_id"] = ""
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	config["account_id"] = "foo"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+
+	config["account_id"] = "0123-0456-7890"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.AccountId != "012304567890" {
+		t.Errorf("should strip hyphens: %s", b.config.AccountId)
 	}
 }
 
