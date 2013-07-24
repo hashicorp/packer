@@ -67,6 +67,14 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
+	if cmd.ExitStatus != 0 {
+		state["error"] = fmt.Errorf(
+			"Volume bundling failed. Please see the output above for more\n" +
+				"details on what went wrong.")
+		ui.Error(state["error"].(error).Error())
+		return multistep.ActionHalt
+	}
+
 	return multistep.ActionContinue
 }
 
