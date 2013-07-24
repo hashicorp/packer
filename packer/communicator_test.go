@@ -38,6 +38,7 @@ func (c *TestCommunicator) Download(string, io.Writer) error {
 func TestRemoteCmd_StartWithUi(t *testing.T) {
 	data := "hello\nworld\nthere"
 
+	originalOutput := new(bytes.Buffer)
 	rcOutput := new(bytes.Buffer)
 	uiOutput := new(bytes.Buffer)
 	rcOutput.WriteString(data)
@@ -53,6 +54,7 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 
 	rc := &RemoteCmd{
 		Command: "test",
+		Stdout:  originalOutput,
 	}
 
 	go func() {
@@ -67,6 +69,10 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 
 	if uiOutput.String() != strings.TrimSpace(data)+"\n" {
 		t.Fatalf("bad output: '%s'", uiOutput.String())
+	}
+
+	if originalOutput.String() != data {
+		t.Fatalf("original is bad: '%s'", originalOutput.String())
 	}
 }
 

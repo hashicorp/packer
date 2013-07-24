@@ -67,8 +67,17 @@ func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
 	stderr_r, stderr_w := io.Pipe()
 
 	// Set the writers for the output so that we get it streamed to us
-	r.Stdout = stdout_w
-	r.Stderr = stderr_w
+	if r.Stdout == nil {
+		r.Stdout = stdout_w
+	} else {
+		r.Stdout = io.MultiWriter(r.Stdout, stdout_w)
+	}
+
+	if r.Stderr == nil {
+		r.Stderr = stderr_w
+	} else {
+		r.Stderr = io.MultiWriter(r.Stderr, stderr_w)
+	}
 
 	// Start the command
 	if err := c.Start(r); err != nil {
