@@ -63,7 +63,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	}
 
 	// Wait for the image to become ready
-	timeout := 1 * time.Minute                        // maximum time to wait for
+	timeout := 5 * time.Minute                        // maximum time to wait for
 	wait := 2 * time.Second                           // time to wait between checks
 	err = waitForAMI(ui, imageFetcher, timeout, wait) // Wait for the AMI to be ready
 	if err != nil {
@@ -106,7 +106,7 @@ func waitForAMI(ui packer.Ui, imageFetcher func() (*ec2.ImagesResp, error), time
 		select {
 		case <-time.After(wait):
 		case <-timeoutTimer:
-			return errors.New("AMI not available after 1 minute")
+			return errors.New("AMI not available after 5 minutes")
 		}
 	}
 
