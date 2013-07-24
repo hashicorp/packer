@@ -65,6 +65,8 @@ type Communicator interface {
 func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
+	defer stdout_w.Close()
+	defer stderr_w.Close()
 
 	// Set the writers for the output so that we get it streamed to us
 	if r.Stdout == nil {
