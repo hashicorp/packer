@@ -56,7 +56,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.BundleVolCommand == "" {
-		b.config.BundleVolCommand = "ec2-bundle-vol " +
+		b.config.BundleVolCommand = "sudo -n ec2-bundle-vol " +
 			"-k {{.KeyPath}} " +
 			"-u {{.AccountId}} " +
 			"-c {{.CertPath}} " +
