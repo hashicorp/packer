@@ -6,7 +6,9 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"strconv"
 	"text/template"
+	"time"
 )
 
 type bundleCmdData struct {
@@ -17,6 +19,10 @@ type bundleCmdData struct {
 	KeyPath      string
 	Prefix       string
 	PrivatePath  string
+}
+
+type bundlePrefixData struct {
+	CreateTime string
 }
 
 type StepBundleVolume struct{}
@@ -49,6 +55,13 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	// Bundle the volume
+	var bundlePrefix bytes.Buffer
+	prefixTData := bundlePrefixData{
+		CreateTime: strconv.FormatInt(time.Now().UTC().Unix(), 10),
+	}
+	t := template.Must(template.New("bundlePrefix").Parse(config.BundlePrefix))
+	t.Execute(&bundlePrefix, prefixTData)
+
 	var bundleCmd bytes.Buffer
 	tData := bundleCmdData{
 		AccountId:    config.AccountId,
@@ -56,10 +69,10 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 		CertPath:     x509RemoteCertPath,
 		Destination:  config.BundleDestination,
 		KeyPath:      x509RemoteKeyPath,
-		Prefix:       config.BundlePrefix,
+		Prefix:       bundlePrefix.String(),
 		PrivatePath:  config.X509UploadPath,
 	}
-	t := template.Must(template.New("bundleCmd").Parse(config.BundleVolCommand))
+	t = template.Must(template.New("bundleCmd").Parse(config.BundleVolCommand))
 	t.Execute(&bundleCmd, tData)
 
 	ui.Say("Bundling the volume...")
@@ -78,6 +91,10 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 		ui.Error(state["error"].(error).Error())
 		return multistep.ActionHalt
 	}
+
+	// Store the manifest path
+	state["manifest_path"] = fmt.Sprintf(
+		"%s/%s.manifest.xml", config.BundleDestination, bundlePrefix.String())
 
 	return multistep.ActionContinue
 }

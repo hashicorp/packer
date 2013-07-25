@@ -21,6 +21,7 @@ type StepUploadBundle struct{}
 func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepAction {
 	comm := state["communicator"].(packer.Communicator)
 	config := state["config"].(*Config)
+	manifestPath := state["manifest_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
 	var uploadCmd bytes.Buffer
@@ -28,9 +29,8 @@ func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepActio
 		AccessKey:       config.AccessKey,
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
-		ManifestPath: fmt.Sprintf(
-			"%s/%s.manifest.xml", config.BundleDestination, config.BundlePrefix),
-		SecretKey: config.SecretKey,
+		ManifestPath:    manifestPath,
+		SecretKey:       config.SecretKey,
 	}
 	t := template.Must(template.New("uploadCmd").Parse(config.BundleUploadCommand))
 	t.Execute(&uploadCmd, tData)
