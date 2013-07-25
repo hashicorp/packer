@@ -61,7 +61,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			"-u {{.AccountId}} " +
 			"-c {{.CertPath}} " +
 			"-r {{.Architecture}} " +
-			"-e {{.PrivatePath}}"
+			"-e {{.PrivatePath}} " +
+			"--batch"
 	}
 
 	if b.config.X509CertPath == "" {
