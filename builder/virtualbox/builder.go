@@ -24,6 +24,8 @@ type Builder struct {
 }
 
 type config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	BootCommand          []string   `mapstructure:"boot_command"`
 	DiskSize             uint       `mapstructure:"disk_size"`
 	FloppyFiles          []string   `mapstructure:"floppy_files"`
@@ -48,10 +50,6 @@ type config struct {
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
-
-	PackerBuildName string `mapstructure:"packer_build_name"`
-	PackerDebug     bool   `mapstructure:"packer_debug"`
-	PackerForce     bool   `mapstructure:"packer_force"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
