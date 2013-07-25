@@ -130,6 +130,11 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
 
+	// On windows, filepath.Dir uses backslash seperators (ie. "\tmp").
+	// This does not work when the target host is unix.  Switch to forward slash
+	// which works for unix and windows
+	target_dir = filepath.ToSlash(target_dir)
+
 	// Start the sink mode on the other side
 	// TODO(mitchellh): There are probably issues with shell escaping the path
 	log.Println("Starting remote scp process in sink mode")
