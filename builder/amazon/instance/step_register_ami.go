@@ -1,4 +1,4 @@
-package ebs
+package instance
 
 import (
 	"bytes"
@@ -12,16 +12,16 @@ import (
 	"time"
 )
 
-type stepCreateAMI struct{}
-
 type amiNameData struct {
 	CreateTime string
 }
 
-func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(config)
+type StepRegisterAMI struct{}
+
+func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction {
+	config := state["config"].(*Config)
 	ec2conn := state["ec2"].(*ec2.EC2)
-	instance := state["instance"].(*ec2.Instance)
+	manifestPath := state["remote_manifest_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
 	// Parse the name of the AMI
@@ -34,30 +34,28 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	t.Execute(amiNameBuf, tData)
 	amiName := amiNameBuf.String()
 
-	// Create the image
-	ui.Say(fmt.Sprintf("Creating the AMI: %s", amiName))
-	createOpts := &ec2.CreateImage{
-		InstanceId: instance.InstanceId,
-		Name:       amiName,
+	ui.Say("Registering the AMI...")
+	registerOpts := &ec2.RegisterImage{
+		ImageLocation: manifestPath,
+		Name:          amiName,
 	}
 
-	createResp, err := ec2conn.CreateImage(createOpts)
+	registerResp, err := ec2conn.RegisterImage(registerOpts)
 	if err != nil {
-		err := fmt.Errorf("Error creating AMI: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
+		state["error"] = fmt.Errorf("Error registering AMI: %s", err)
+		ui.Error(state["error"].(error).Error())
 		return multistep.ActionHalt
 	}
 
 	// Set the AMI ID in the state
-	ui.Say(fmt.Sprintf("AMI: %s", createResp.ImageId))
+	ui.Say(fmt.Sprintf("AMI: %s", registerResp.ImageId))
 	amis := make(map[string]string)
-	amis[config.Region] = createResp.ImageId
+	amis[config.Region] = registerResp.ImageId
 	state["amis"] = amis
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
-	if err := awscommon.WaitForAMI(ec2conn, createResp.ImageId); err != nil {
+	if err := awscommon.WaitForAMI(ec2conn, registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
 		state["error"] = err
 		ui.Error(err.Error())
@@ -67,6 +65,4 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateAMI) Cleanup(map[string]interface{}) {
-	// No cleanup...
-}
+func (s *StepRegisterAMI) Cleanup(map[string]interface{}) {}

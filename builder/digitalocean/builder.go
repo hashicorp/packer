@@ -28,6 +28,8 @@ type snapshotNameData struct {
 // to use while communicating with DO and describes the image
 // you are creating
 type config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	ClientID string `mapstructure:"client_id"`
 	APIKey   string `mapstructure:"api_key"`
 	RegionID uint   `mapstructure:"region_id"`
@@ -37,8 +39,6 @@ type config struct {
 	SnapshotName string
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
-
-	PackerDebug bool `mapstructure:"packer_debug"`
 
 	RawSnapshotName string `mapstructure:"snapshot_name"`
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
