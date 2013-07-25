@@ -26,14 +26,15 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	AccountId         string `mapstructure:"account_id"`
-	BundleDestination string `mapstructure:"bundle_destination"`
-	BundlePrefix      string `mapstructure:"bundle_prefix"`
-	BundleVolCommand  string `mapstructure:"bundle_vol_command"`
-	S3Bucket          string `mapstructure:"s3_bucket"`
-	X509CertPath      string `mapstructure:"x509_cert_path"`
-	X509KeyPath       string `mapstructure:"x509_key_path"`
-	X509UploadPath    string `mapstructure:"x509_upload_path"`
+	AccountId           string `mapstructure:"account_id"`
+	BundleDestination   string `mapstructure:"bundle_destination"`
+	BundlePrefix        string `mapstructure:"bundle_prefix"`
+	BundleUploadCommand string `mapstructure:"bundle_upload_command"`
+	BundleVolCommand    string `mapstructure:"bundle_vol_command"`
+	S3Bucket            string `mapstructure:"s3_bucket"`
+	X509CertPath        string `mapstructure:"x509_cert_path"`
+	X509KeyPath         string `mapstructure:"x509_key_path"`
+	X509UploadPath      string `mapstructure:"x509_upload_path"`
 }
 
 type Builder struct {
@@ -55,15 +56,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.BundlePrefix = "image"
 	}
 
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
-
-	if b.config.AccountId == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
-	} else {
-		b.config.AccountId = strings.Replace(b.config.AccountId, "-", "", -1)
+	if b.config.BundleUploadCommand == "" {
+		b.config.BundleUploadCommand = "sudo -n ec2-upload-bundle " +
+			"-b {{.BucketName}} " +
+			"-m {{.ManifestPath}} " +
+			"-a {{.AccessKey}} " +
+			"-s {{.SecretKey}} " +
+			"-d {{.BundleDirectory}} " +
+			"--batch " +
+			"--retry"
 	}
 
 	if b.config.BundleVolCommand == "" {
@@ -76,6 +77,17 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			"-d {{.Destination}} " +
 			"-p {{.Prefix}} " +
 			"--batch"
+	}
+
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
+
+	if b.config.AccountId == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
+	} else {
+		b.config.AccountId = strings.Replace(b.config.AccountId, "-", "", -1)
 	}
 
 	if b.config.S3Bucket == "" {
@@ -150,6 +162,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
 		&StepBundleVolume{},
+		&StepUploadBundle{},
 	}
 
 	// Run!
