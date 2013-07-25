@@ -2,6 +2,8 @@
 
 FEATURES:
 
+* New builder: `amazon-instance` can create instance-storage backed
+  AMIs.
 * VMware builder now works with Workstation 9 on Linux.
 
 IMPROVEMENTS:
