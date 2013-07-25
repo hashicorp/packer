@@ -53,7 +53,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.BundlePrefix == "" {
-		b.config.BundlePrefix = "image"
+		b.config.BundlePrefix = "image-{{.CreateTime}}"
 	}
 
 	if b.config.BundleUploadCommand == "" {
