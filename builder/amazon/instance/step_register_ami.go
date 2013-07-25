@@ -3,6 +3,7 @@ package instance
 import (
 	"bytes"
 	"fmt"
+	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"strconv"
@@ -17,8 +18,8 @@ type amiNameData struct {
 type StepRegisterAMI struct{}
 
 func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction {
-	comm := state["communicator"].(packer.Communicator)
 	config := state["config"].(*Config)
+	ec2conn := state["ec2"].(*ec2.EC2)
 	manifestPath := state["remote_manifest_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
@@ -33,27 +34,23 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	amiName := amiNameBuf.String()
 
 	ui.Say("Registering the AMI...")
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf(
-			"ec2-register %s -n '%s' -O '%s' -W '%s'",
-			manifestPath,
-			amiName,
-			config.AccessKey,
-			config.SecretKey),
+	registerOpts := &ec2.RegisterImage{
+		ImageLocation: manifestPath,
+		Name:          amiName,
 	}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+
+	registerResp, err := ec2conn.RegisterImage(registerOpts)
+	if err != nil {
 		state["error"] = fmt.Errorf("Error registering AMI: %s", err)
 		ui.Error(state["error"].(error).Error())
 		return multistep.ActionHalt
 	}
 
-	if cmd.ExitStatus != 0 {
-		state["error"] = fmt.Errorf(
-			"AMI registration failed. Please see the output above for more\n" +
-				"details on what went wrong.")
-		ui.Error(state["error"].(error).Error())
-		return multistep.ActionHalt
-	}
+	// Set the AMI ID in the state
+	ui.Say(fmt.Sprintf("AMI: %s", registerResp.ImageId))
+	amis := make(map[string]string)
+	amis[config.Region] = registerResp.ImageId
+	state["amis"] = amis
 
 	return multistep.ActionContinue
 }
