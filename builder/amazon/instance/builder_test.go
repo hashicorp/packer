@@ -213,7 +213,7 @@ func TestBuilderPrepare_X509UploadPath(t *testing.T) {
 
 	config["x509_upload_path"] = ""
 	err := b.Prepare(config)
-	if err == nil {
-		t.Fatal("should have error")
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 }
