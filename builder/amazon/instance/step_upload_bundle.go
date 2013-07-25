@@ -21,6 +21,7 @@ type StepUploadBundle struct{}
 func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepAction {
 	comm := state["communicator"].(packer.Communicator)
 	config := state["config"].(*Config)
+	manifestName := state["manifest_name"].(string)
 	manifestPath := state["manifest_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
@@ -50,6 +51,9 @@ func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepActio
 		ui.Error(state["error"].(error).Error())
 		return multistep.ActionHalt
 	}
+
+	state["remote_manifest_path"] = fmt.Sprintf(
+		"%s/%s", config.S3Bucket, manifestName)
 
 	return multistep.ActionContinue
 }

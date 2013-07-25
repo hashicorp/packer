@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"text/template"
 )
 
 // The unique ID for this builder
@@ -27,6 +28,7 @@ type Config struct {
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	AccountId           string `mapstructure:"account_id"`
+	AMIName             string `mapstructure:"ami_name"`
 	BundleDestination   string `mapstructure:"bundle_destination"`
 	BundlePrefix        string `mapstructure:"bundle_prefix"`
 	BundleUploadCommand string `mapstructure:"bundle_upload_command"`
@@ -88,6 +90,17 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
 	} else {
 		b.config.AccountId = strings.Replace(b.config.AccountId, "-", "", -1)
+	}
+
+	if b.config.AMIName == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ami_name must be specified"))
+	} else {
+		_, err = template.New("ami").Parse(b.config.AMIName)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
+		}
 	}
 
 	if b.config.S3Bucket == "" {
@@ -163,6 +176,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepUploadX509Cert{},
 		&StepBundleVolume{},
 		&StepUploadBundle{},
+		&StepRegisterAMI{},
 	}
 
 	// Run!
@@ -187,7 +201,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
-	return nil, nil
+	// Build the artifact and return it
+	artifact := &awscommon.Artifact{
+		Amis:           state["amis"].(map[string]string),
+		BuilderIdValue: BuilderId,
+		Conn:           ec2conn,
+	}
+
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {

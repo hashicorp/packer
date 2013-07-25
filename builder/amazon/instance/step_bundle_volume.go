@@ -93,8 +93,10 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	// Store the manifest path
+	manifestName := bundlePrefix.String() + ".manifest.xml"
+	state["manifest_name"] = manifestName
 	state["manifest_path"] = fmt.Sprintf(
-		"%s/%s.manifest.xml", config.BundleDestination, bundlePrefix.String())
+		"%s/%s", config.BundleDestination, manifestName)
 
 	return multistep.ActionContinue
 }
