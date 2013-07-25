@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
+	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 	"strconv"
 	"text/template"
 	"time"
@@ -57,23 +57,11 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
-	for {
-		imageResp, err := ec2conn.Images([]string{createResp.ImageId}, ec2.NewFilter())
-		if err != nil {
-			err := fmt.Errorf("Error querying images: %s", err)
-			state["error"] = err
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		if imageResp.Images[0].State == "available" {
-			break
-		}
-
-		log.Printf("Image in state %s, sleeping 2s before checking again",
-			imageResp.Images[0].State)
-
-		time.Sleep(2 * time.Second)
+	if err := awscommon.WaitForAMI(ec2conn, createResp.ImageId); err != nil {
+		err := fmt.Errorf("Error waiting for AMI: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue

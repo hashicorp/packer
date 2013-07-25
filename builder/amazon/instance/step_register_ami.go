@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
+	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 	"strconv"
 	"text/template"
@@ -51,6 +52,15 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	amis := make(map[string]string)
 	amis[config.Region] = registerResp.ImageId
 	state["amis"] = amis
+
+	// Wait for the image to become ready
+	ui.Say("Waiting for AMI to become ready...")
+	if err := awscommon.WaitForAMI(ec2conn, registerResp.ImageId); err != nil {
+		err := fmt.Errorf("Error waiting for AMI: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }
