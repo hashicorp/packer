@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"cgl.tideland.biz/identifier"
@@ -10,11 +10,11 @@ import (
 	"log"
 )
 
-type stepKeyPair struct {
+type StepKeyPair struct {
 	keyName string
 }
 
-func (s *stepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
+func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	ui := state["ui"].(packer.Ui)
 
@@ -23,9 +23,7 @@ func (s *stepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
-		err := fmt.Errorf("Error creating temporary keypair: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
+		state["error"] = fmt.Errorf("Error creating temporary keypair: %s", err)
 		return multistep.ActionHalt
 	}
 
@@ -39,7 +37,7 @@ func (s *stepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepKeyPair) Cleanup(state map[string]interface{}) {
+func (s *StepKeyPair) Cleanup(state map[string]interface{}) {
 	// If no key name is set, then we never created it, so just return
 	if s.keyName == "" {
 		return

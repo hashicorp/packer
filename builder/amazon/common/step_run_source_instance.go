@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"fmt"
@@ -8,12 +8,16 @@ import (
 	"log"
 )
 
-type stepRunSourceInstance struct {
+type StepRunSourceInstance struct {
+	ExpectedRootDevice string
+	InstanceType       string
+	SourceAMI          string
+	SubnetId           string
+
 	instance *ec2.Instance
 }
 
-func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(config)
+func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	keyName := state["keyPair"].(string)
 	securityGroupId := state["securityGroupId"].(string)
@@ -21,25 +25,26 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 
 	runOpts := &ec2.RunInstances{
 		KeyName:        keyName,
-		ImageId:        config.SourceAmi,
-		InstanceType:   config.InstanceType,
+		ImageId:        s.SourceAMI,
+		InstanceType:   s.InstanceType,
 		MinCount:       0,
 		MaxCount:       0,
 		SecurityGroups: []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
-		SubnetId:       config.SubnetId,
+		SubnetId:       s.SubnetId,
 	}
 
 	ui.Say("Launching a source AWS instance...")
-	imageResp, err := ec2conn.Images([]string{config.SourceAmi}, ec2.NewFilter())
+	imageResp, err := ec2conn.Images([]string{s.SourceAMI}, ec2.NewFilter())
 	if err != nil {
 		state["error"] = fmt.Errorf("There was a problem with the source AMI: %s", err)
 		return multistep.ActionHalt
 	}
 
-	if imageResp.Images[0].RootDeviceType != "ebs" {
+	if s.ExpectedRootDevice != "" && imageResp.Images[0].RootDeviceType != s.ExpectedRootDevice {
 		state["error"] = fmt.Errorf(
-			"The provided source AMI is instance-store based. The\n" +
-				"amazon-ebs bundler can only work with EBS based AMIs.")
+			"The provided source AMI has an invalid root device type.\n"+
+				"Expected '%s', got '%s'.",
+			s.ExpectedRootDevice, imageResp.Images[0].RootDeviceType)
 		return multistep.ActionHalt
 	}
 
@@ -55,7 +60,7 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	log.Printf("instance id: %s", s.instance.InstanceId)
 
 	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
-	s.instance, err = waitForState(ec2conn, s.instance, []string{"pending"}, "running")
+	s.instance, err = WaitForState(ec2conn, s.instance, []string{"pending"}, "running")
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", s.instance.InstanceId, err)
 		state["error"] = err
@@ -68,7 +73,7 @@ func (s *stepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	return multistep.ActionContinue
 }
 
-func (s *stepRunSourceInstance) Cleanup(state map[string]interface{}) {
+func (s *StepRunSourceInstance) Cleanup(state map[string]interface{}) {
 	if s.instance == nil {
 		return
 	}
@@ -83,5 +88,5 @@ func (s *stepRunSourceInstance) Cleanup(state map[string]interface{}) {
 	}
 
 	pending := []string{"pending", "running", "shutting-down", "stopped", "stopping"}
-	waitForState(ec2conn, s.instance, pending, "terminated")
+	WaitForState(ec2conn, s.instance, pending, "terminated")
 }
