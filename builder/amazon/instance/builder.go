@@ -81,6 +81,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			"--batch"
 	}
 
+	if b.config.X509UploadPath == "" {
+		b.config.X509UploadPath = "/tmp"
+	}
+
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
@@ -119,10 +123,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	} else if _, err := os.Stat(b.config.X509KeyPath); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("x509_key_path points to bad file: %s", err))
-	}
-
-	if b.config.X509UploadPath == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("x509_upload_path is required"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
