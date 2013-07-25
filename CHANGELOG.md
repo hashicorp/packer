@@ -17,9 +17,12 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/virtualbox: Trim carriage returns for Windows to properly
+  detect VM state on Windows. [GH-218]
 * core: build names no longer cause invalid config errors. [GH-197]
 * command/build: If any builds fail, exit with non-zero exit status.
 * communicator/ssh: SCP exit codes are tested and errors are reported. [GH-195]
+* communicator/ssh: Properly change slash direction for Windows hosts. [GH-218]
 
 ## 0.2.0 (July 16, 2013)
 
