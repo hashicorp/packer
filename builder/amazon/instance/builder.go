@@ -26,11 +26,14 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	AccountId        string `mapstructure:"account_id"`
-	BundleVolCommand string `mapstructure:"bundle_vol_command"`
-	X509CertPath     string `mapstructure:"x509_cert_path"`
-	X509KeyPath      string `mapstructure:"x509_key_path"`
-	X509UploadPath   string `mapstructure:"x509_upload_path"`
+	AccountId         string `mapstructure:"account_id"`
+	BundleDestination string `mapstructure:"bundle_destination"`
+	BundlePrefix      string `mapstructure:"bundle_prefix"`
+	BundleVolCommand  string `mapstructure:"bundle_vol_command"`
+	S3Bucket          string `mapstructure:"s3_bucket"`
+	X509CertPath      string `mapstructure:"x509_cert_path"`
+	X509KeyPath       string `mapstructure:"x509_key_path"`
+	X509UploadPath    string `mapstructure:"x509_upload_path"`
 }
 
 type Builder struct {
@@ -42,6 +45,14 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&b.config, raws...)
 	if err != nil {
 		return err
+	}
+
+	if b.config.BundleDestination == "" {
+		b.config.BundleDestination = "/tmp"
+	}
+
+	if b.config.BundlePrefix == "" {
+		b.config.BundlePrefix = "image"
 	}
 
 	// Accumulate any errors
@@ -62,7 +73,13 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			"-c {{.CertPath}} " +
 			"-r {{.Architecture}} " +
 			"-e {{.PrivatePath}} " +
+			"-d {{.Destination}} " +
+			"-p {{.Prefix}} " +
 			"--batch"
+	}
+
+	if b.config.S3Bucket == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("s3_bucket is required"))
 	}
 
 	if b.config.X509CertPath == "" {

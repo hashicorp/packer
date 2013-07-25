@@ -13,7 +13,9 @@ type bundleCmdData struct {
 	AccountId    string
 	Architecture string
 	CertPath     string
+	Destination  string
 	KeyPath      string
+	Prefix       string
 	PrivatePath  string
 }
 
@@ -52,7 +54,9 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 		AccountId:    config.AccountId,
 		Architecture: instance.Architecture,
 		CertPath:     x509RemoteCertPath,
+		Destination:  config.BundleDestination,
 		KeyPath:      x509RemoteKeyPath,
+		Prefix:       config.BundlePrefix,
 		PrivatePath:  config.X509UploadPath,
 	}
 	t := template.Must(template.New("bundleCmd").Parse(config.BundleVolCommand))

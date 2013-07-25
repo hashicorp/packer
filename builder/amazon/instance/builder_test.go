@@ -17,6 +17,7 @@ func testConfig() map[string]interface{} {
 		"account_id":       "foo",
 		"instance_type":    "m1.small",
 		"region":           "us-east-1",
+		"s3_bucket":        "foo",
 		"source_ami":       "foo",
 		"ssh_username":     "bob",
 		"x509_cert_path":   tf.Name(),
@@ -60,6 +61,36 @@ func TestBuilderPrepare_AccountId(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_BundleDestination(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	config["bundle_destination"] = ""
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.BundleDestination != "/tmp" {
+		t.Fatalf("bad: %s", b.config.BundleDestination)
+	}
+}
+
+func TestBuilderPrepare_BundlePrefix(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	config["bundle_prefix"] = ""
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.BundlePrefix != "image" {
+		t.Fatalf("bad: %s", b.config.BundlePrefix)
+	}
+}
+
 func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -69,6 +100,23 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	err := b.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_S3Bucket(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	config["s3_bucket"] = ""
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	config["s3_bucket"] = "foo"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Errorf("err: %s", err)
 	}
 }
 
