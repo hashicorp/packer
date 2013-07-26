@@ -16,8 +16,9 @@ import (
 var Ui packer.Ui
 
 type config struct {
-	// If true, skips installing Salt. Defaults to false.
-	SkipInstall bool `mapstructure:"skip_install"`
+	// If true, run the salt-bootstrap script
+	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
+	BootstrapArgs string `mapstructure:"bootstrap_args"`
 }
 
 type Provisioner struct {
@@ -64,26 +65,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func InstallSalt(comm packer.Communicator) (err error) {
-	Ui.Say("Installing Salt")
-	cmd := "wget -O - http://bootstrap.saltstack.org | sudo sh"
-	if err = executeCommand(cmd, comm); err != nil {
-		return fmt.Errorf("Unable to install Salt: %d", err)
-	}
-
-	return nil
-}
-
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	var err error
 	Ui = ui
 
-	if !p.config.SkipInstall {
-		if err = InstallSalt(comm); err != nil {
-			return fmt.Errorf("Error installing Salt: %s", err)
+	if !p.config.SkipBootstrap {
+		cmd := fmt.Sprintf("wget -O - http://bootstrap.saltstack.org | sudo sh -s %s", p.config.BootstrapArgs)
+		Ui.Say(fmt.Sprintf("Installing Salt with command %s", cmd))
+		if err = executeCommand(cmd, comm); err != nil {
+			return fmt.Errorf("Unable to install Salt: %d", err)
 		}
 	}
-
 	return nil
 }
 
