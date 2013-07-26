@@ -8,12 +8,13 @@ FEATURES:
 
 IMPROVEMENTS:
 
-* amazon-ebs: Can now launch instances into a VPC for added protection [GH-210]
-* virtualbox, vmware: Add backspace, delete, and F1-F12 keys to the boot
+* builder/amazon/all: Ctrl-C while waiting for state change works
+* builder/amazon/ebs: Can now launch instances into a VPC for added protection [GH-210]
+* builder/virtualbox,vmware: Add backspace, delete, and F1-F12 keys to the boot
   command.
-* virtualbox: massive performance improvements with big ISO files because
+* builder/virtualbox: massive performance improvements with big ISO files because
   an expensive copy is avoided. [GH-202]
-* vmware: CD is removed prior to exporting final machine. [GH-198]
+* builder/vmware: CD is removed prior to exporting final machine. [GH-198]
 
 BUG FIXES:
 
