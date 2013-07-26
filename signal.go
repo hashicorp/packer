@@ -15,8 +15,12 @@ func setupSignalHandlers(env packer.Environment) {
 	signal.Notify(ch, os.Interrupt)
 
 	go func() {
+		// First interrupt. We mostly ignore this because it allows the
+		// plugins time to cleanup.
 		<-ch
-		log.Println("First interrupt. Ignoring, will let plugins handle...")
+		log.Println("First interrupt. Ignoring, but closing stdin...")
+
+		// Second interrupt. Go down hard.
 		<-ch
 		log.Println("Second interrupt. Exiting now.")
 
