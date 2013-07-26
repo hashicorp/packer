@@ -51,7 +51,7 @@ func (d *VBox42Driver) IsRunning(name string) (bool, error) {
 
 	for _, line := range strings.Split(stdout.String(), "\n") {
 		// Need to trim off CR character when running in windows
-		line = strings.TrimRight(line, "\r");
+		line = strings.TrimRight(line, "\r")
 
 		if line == `VMState="running"` {
 			return true, nil
