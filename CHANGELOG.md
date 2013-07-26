@@ -18,6 +18,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/amazon/all: Gracefully handle when AMI appears to not exist
+  while AWS state is propogating. [GH-207]
 * builder/virtualbox: Trim carriage returns for Windows to properly
   detect VM state on Windows. [GH-218]
 * core: build names no longer cause invalid config errors. [GH-197]
