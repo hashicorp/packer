@@ -60,7 +60,14 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	log.Printf("instance id: %s", s.instance.InstanceId)
 
 	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
-	s.instance, err = WaitForState(ec2conn, s.instance, []string{"pending"}, "running")
+	stateChange := StateChangeConf{
+		Conn:      ec2conn,
+		Instance:  s.instance,
+		Pending:   []string{"pending"},
+		Target:    "running",
+		StepState: state,
+	}
+	s.instance, err = WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", s.instance.InstanceId, err)
 		state["error"] = err
@@ -87,6 +94,12 @@ func (s *StepRunSourceInstance) Cleanup(state map[string]interface{}) {
 		return
 	}
 
-	pending := []string{"pending", "running", "shutting-down", "stopped", "stopping"}
-	WaitForState(ec2conn, s.instance, pending, "terminated")
+	stateChange := StateChangeConf{
+		Conn:     ec2conn,
+		Instance: s.instance,
+		Pending:  []string{"pending", "running", "shutting-down", "stopped", "stopping"},
+		Target:   "running",
+	}
+
+	WaitForState(&stateChange)
 }
