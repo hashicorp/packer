@@ -46,6 +46,9 @@ func main() {
 		packer.Version, packer.VersionPrerelease, packer.GitCommit)
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 
+	// Prepare stdin for plugin usage by switching it to a pipe
+	setupStdin()
+
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)

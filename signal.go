@@ -18,7 +18,7 @@ func setupSignalHandlers(env packer.Environment) {
 		// First interrupt. We mostly ignore this because it allows the
 		// plugins time to cleanup.
 		<-ch
-		log.Println("First interrupt. Ignoring, but closing stdin...")
+		log.Println("First interrupt. Ignoring to allow plugins to clean up.")
 
 		// Second interrupt. Go down hard.
 		<-ch
