@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 )
@@ -45,5 +47,52 @@ func TestClient_Start_Timeout(t *testing.T) {
 	_, err := c.Start()
 	if err == nil {
 		t.Fatal("err should not be nil")
+	}
+}
+
+func TestClient_Stdin(t *testing.T) {
+	// Overwrite stdin for this test with a temporary file
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	defer tf.Close()
+
+	if _, err = tf.WriteString("hello"); err != nil {
+		t.Fatalf("error: %s", err)
+	}
+
+	if err = tf.Sync(); err != nil {
+		t.Fatalf("error: %s", err)
+	}
+
+	if _, err = tf.Seek(0, 0); err != nil {
+		t.Fatalf("error: %s", err)
+	}
+
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+	os.Stdin = tf
+
+	process := helperProcess("stdin")
+	c := NewClient(&ClientConfig{Cmd: process})
+	defer c.Kill()
+
+	_, err = c.Start()
+	if err != nil {
+		t.Fatalf("error: %s", err)
+	}
+
+	for {
+		if c.Exited() {
+			break
+		}
+
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	if !process.ProcessState.Success() {
+		t.Fatal("process didn't exit cleanly")
 	}
 }

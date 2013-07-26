@@ -216,6 +216,7 @@ func (c *Client) Start() (address string, err error) {
 	cmd := c.config.Cmd
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, env...)
+	cmd.Stdin = os.Stdin
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
 
