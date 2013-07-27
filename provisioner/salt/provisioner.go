@@ -3,12 +3,15 @@
 package salt
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/iochan"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -19,6 +22,9 @@ type config struct {
 	// If true, run the salt-bootstrap script
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
+
+	// Local path to the salt state tree
+	LocalStateTree string `mapstructure:"local_state_tree"`
 }
 
 type Provisioner struct {
@@ -58,6 +64,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if p.config.LocalStateTree == "" {
+		errs = append(errs, errors.New("Please specify a local_state_tree"))
+	}
+
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
 	}
@@ -72,14 +82,79 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if !p.config.SkipBootstrap {
 		cmd := fmt.Sprintf("wget -O - http://bootstrap.saltstack.org | sudo sh -s %s", p.config.BootstrapArgs)
 		Ui.Say(fmt.Sprintf("Installing Salt with command %s", cmd))
-		if err = executeCommand(cmd, comm); err != nil {
+		if err = ExecuteCommand(cmd, comm); err != nil {
 			return fmt.Errorf("Unable to install Salt: %d", err)
 		}
 	}
+
+	remoteTempDir := "salt"
+	Ui.Say(fmt.Sprintf("Creating remote directory: %s", remoteTempDir))
+	if err = ExecuteCommand(fmt.Sprintf("mkdir -p %s", remoteTempDir), comm); err != nil {
+		return fmt.Errorf("Error creating remote salt state directory: %s", err)
+	}
+
+	Ui.Say(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
+	if err = UploadLocalDirectory(p.config.LocalStateTree, remoteTempDir, comm); err != nil {
+		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
+	}
+
+	Ui.Say(fmt.Sprintf("Moving %s to /srv/salt", remoteTempDir))
+	if err = ExecuteCommand(fmt.Sprintf("sudo mv %s /srv/salt", remoteTempDir), comm); err != nil {
+		return fmt.Errorf("Unable to move %s to /srv/salt: %d", remoteTempDir, err)
+	}
+
+	Ui.Say("Running highstate")
+	if err = ExecuteCommand("sudo salt-call --local state.highstate -l debug", comm); err != nil {
+		return fmt.Errorf("Error executing highstate: %s", err)
+	}
+
+	Ui.Say("Removing /srv/salt")
+	if err = ExecuteCommand("sudo rm -r /srv/salt", comm); err != nil {
+		return fmt.Errorf("Unable to remove /srv/salt: %d", err)
+	}
+
 	return nil
 }
 
-func executeCommand(command string, comm packer.Communicator) (err error) {
+func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communicator) (err error) {
+	visitPath := func(localPath string, f os.FileInfo, err error) (err2 error) {
+		localRelPath := strings.Replace(localPath, localDir, "", 1)
+		remotePath := fmt.Sprintf("%s/%s", remoteDir, localRelPath)
+		if f.IsDir() && f.Name() == ".git" {
+			return filepath.SkipDir
+		}
+		if f.IsDir() {
+			// Make remote directory
+			err = ExecuteCommand(fmt.Sprintf("mkdir -p %s", remotePath), comm)
+			if err != nil {
+				return err
+			}
+		} else {
+			// Upload file to existing directory
+			file, err := os.Open(localPath)
+			if err != nil {
+				return fmt.Errorf("Error opening file: %s", err)
+			}
+			defer file.Close()
+
+			Ui.Say(fmt.Sprintf("Uploading file %s: %s", localPath, remotePath))
+			err = comm.Upload(remotePath, file)
+			if err != nil {
+				return fmt.Errorf("Error uploading file: %s", err)
+			}
+		}
+		return
+	}
+
+	err = filepath.Walk(localDir, visitPath)
+	if err != nil {
+		return fmt.Errorf("Error uploading local directory %s: %s", localDir, err)
+	}
+
+	return nil
+}
+
+func ExecuteCommand(command string, comm packer.Communicator) (err error) {
 	// Setup the remote command
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
@@ -115,7 +190,7 @@ OutputLoop:
 		case output := <-stdoutChan:
 			Ui.Message(strings.TrimSpace(output))
 		case exitStatus := <-exitChan:
-			log.Printf("Chef Solo provisioner exited with status %d", exitStatus)
+			log.Printf("Salt provisioner exited with status %d", exitStatus)
 
 			if exitStatus != 0 {
 				return fmt.Errorf("Command exited with non-zero exit status: %d", exitStatus)
