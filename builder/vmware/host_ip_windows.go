@@ -5,12 +5,12 @@ package vmware
 
 import (
 	"errors"
-	"regexp"
+	"io/ioutil"
 	"log"
-	"strings"
 	"net"
 	"os"
-	"io/ioutil"
+	"regexp"
+	"strings"
 )
 
 // Interface to help find the host IP that is available from within
@@ -38,12 +38,13 @@ func (f *IfconfigIPFinder) HostIP() (string, error) {
 	log.Printf("Searching for MAC %s", vmwareMac)
 	re := regexp.MustCompile("(?i)^" + vmwareMac)
 
-	var rv string
+	ip := ""
 
 	for _, ifi := range ift {
-		log.Printf("Found interface %s", ifi.HardwareAddr.String())
+		mac := ifi.HardwareAddr.String()
+		log.Printf("Found MAC %s", mac)
 
-		matches := re.FindStringSubmatch(ifi.HardwareAddr.String())
+		matches := re.FindStringSubmatch(mac)
 
 		if matches == nil {
 			continue
@@ -51,23 +52,25 @@ func (f *IfconfigIPFinder) HostIP() (string, error) {
 
 		addrs, err := ifi.Addrs()
 		if err != nil {
-			log.Printf("No IP addresses found for %s", ifi.HardwareAddr.String())
+			log.Printf("No IP addresses found for MAC %s", mac)
 			continue
 		}
 
 		for _, address := range addrs {
-			rv = address.String()
-			log.Printf("Found VMWare IP address %s", address.String())
+			ip = address.String()
+			log.Printf("Found IP address %s for MAC %s", ip, mac)
 		}
 
 		// continue looping as VMNet8 comes after VMNet1 (at least on my system)
 	}
 
-	if rv > "" {
-		return rv, nil
+	if ip == "" {
+		return "", errors.New("No MACs found matching " + vmwareMac)
 	}
 
-	return "", errors.New("No VMWare MAC addresses found")
+	log.Printf("Returning IP address %s", ip)
+
+	return ip, nil
 }
 
 func getVMWareMAC() (string, error) {
@@ -75,11 +78,14 @@ func getVMWareMAC() (string, error) {
 	const defaultMacRe = "00:50:56"
 
 	programData := os.Getenv("ProgramData")
+	programData = strings.Replace(programData, "\\", "/", -1)
 	vmnetnat := programData + "/VMware/vmnetnat.conf"
 	if _, err := os.Stat(vmnetnat); os.IsNotExist(err) {
 		log.Printf("File not found: '%s' (found '%s' in %%ProgramData%%)", vmnetnat, programData)
 		return defaultMacRe, err
 	}
+
+	log.Printf("Searching for key hostMAC in '%s'", vmnetnat)
 
 	fh, err := os.Open(vmnetnat)
 	if err != nil {
@@ -96,13 +102,16 @@ func getVMWareMAC() (string, error) {
 
 	for _, line := range strings.Split(string(bytes), "\n") {
 		// Need to trim off CR character when running in windows
-		line = strings.TrimRight(line, "\r");
+		line = strings.TrimRight(line, "\r")
 
 		matches := hostMacRe.FindStringSubmatch(line)
 		if matches != nil {
+			log.Printf("Found MAC '%s' in '%s'", matches[1], vmnetnat)
 			return matches[1], nil
 		}
 	}
+
+	log.Printf("Did not find key hostMAC in '%s', using %s instead", vmnetnat, defaultMacRe)
 
 	return defaultMacRe, nil
 

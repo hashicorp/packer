@@ -11,8 +11,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"unsafe"
-    "syscall"
 )
 
 // Workstation9Driver is a driver that can run VMware Workstation 9
@@ -104,16 +104,16 @@ func (d *Workstation9Driver) Verify() error {
 	}
 
 	// Check to see if it APPEARS to be licensed.
-/*
-	matches, err := filepath.Glob("/etc/vmware/license-*")
-	if err != nil {
-		return fmt.Errorf("Error looking for VMware license: %s", err)
-	}
+	/*
+		matches, err := filepath.Glob("/etc/vmware/license-*")
+		if err != nil {
+			return fmt.Errorf("Error looking for VMware license: %s", err)
+		}
 
-	if len(matches) == 0 {
-		return errors.New("Workstation does not appear to be licensed. Please license it.")
-	}
-*/
+		if len(matches) == 0 {
+			return errors.New("Workstation does not appear to be licensed. Please license it.")
+		}
+	*/
 	return nil
 }
 
@@ -126,6 +126,7 @@ func (d *Workstation9Driver) findApp() error {
 		}
 		path += "vmware.exe"
 	}
+	path = strings.Replace(path, "\\", "/", -1)
 	log.Printf("Using '%s' for vmware path", path)
 	d.AppPath = path
 
@@ -141,6 +142,7 @@ func (d *Workstation9Driver) findVdiskManager() error {
 		}
 		path += "vmware-vdiskmanager.exe"
 	}
+	path = strings.Replace(path, "\\", "/", -1)
 	log.Printf("Using '%s' for vmware-vdiskmanager path", path)
 	d.VdiskManagerPath = path
 	return nil
@@ -155,6 +157,7 @@ func (d *Workstation9Driver) findVmrun() error {
 		}
 		path += "vmrun.exe"
 	}
+	path = strings.Replace(path, "\\", "/", -1)
 	log.Printf("Using '%s' for vmrun path", path)
 	d.VmrunPath = path
 	return nil
@@ -203,41 +206,41 @@ func (d *Workstation9Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
 // see http://blog.natefinch.com/2012/11/go-win-stuff.html
 
 func readRegString(hive syscall.Handle, subKeyPath, valueName string) (value string, err error) {
-    var h syscall.Handle
-    err = syscall.RegOpenKeyEx(hive, syscall.StringToUTF16Ptr(subKeyPath), 0, syscall.KEY_READ, &h)
-    if err != nil {
-        return
-     }
-     defer syscall.RegCloseKey(h)
+	var h syscall.Handle
+	err = syscall.RegOpenKeyEx(hive, syscall.StringToUTF16Ptr(subKeyPath), 0, syscall.KEY_READ, &h)
+	if err != nil {
+		return
+	}
+	defer syscall.RegCloseKey(h)
 
-    var typ uint32
-    var bufSize uint32
+	var typ uint32
+	var bufSize uint32
 
-    err = syscall.RegQueryValueEx(
-              h,
-              syscall.StringToUTF16Ptr(valueName),
-              nil,
-              &typ,
-              nil,
-              &bufSize)
-    if err != nil {
-        return
-    }
+	err = syscall.RegQueryValueEx(
+		h,
+		syscall.StringToUTF16Ptr(valueName),
+		nil,
+		&typ,
+		nil,
+		&bufSize)
+	if err != nil {
+		return
+	}
 
-    data := make([]uint16, bufSize/2+1)
+	data := make([]uint16, bufSize/2+1)
 
-    err = syscall.RegQueryValueEx(
-              h,
-              syscall.StringToUTF16Ptr(valueName),
-              nil,
-              &typ,
-              (*byte)(unsafe.Pointer(&data[0])),
-              &bufSize)
-    if err != nil {
-        return
-    }
+	err = syscall.RegQueryValueEx(
+		h,
+		syscall.StringToUTF16Ptr(valueName),
+		nil,
+		&typ,
+		(*byte)(unsafe.Pointer(&data[0])),
+		&bufSize)
+	if err != nil {
+		return
+	}
 
-    return syscall.UTF16ToString(data), nil
+	return syscall.UTF16ToString(data), nil
 }
 
 func getVmwarePath() (s string, e error) {
