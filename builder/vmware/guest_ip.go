@@ -51,7 +51,7 @@ func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {
 
 	for _, line := range strings.Split(string(dhcpBytes), "\n") {
 		// Need to trim off CR character when running in windows
-		line = strings.TrimRight(line, "\r");
+		line = strings.TrimRight(line, "\r")
 
 		matches := ipLineRe.FindStringSubmatch(line)
 		if matches != nil {
