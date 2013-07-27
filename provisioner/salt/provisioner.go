@@ -18,6 +18,8 @@ import (
 
 var Ui packer.Ui
 
+const DefaultTempConfigDir = "/tmp/salt"
+
 type config struct {
 	// If true, run the salt-bootstrap script
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
@@ -72,7 +74,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.TempConfigDir == "" {
-		p.config.TempConfigDir = "/tmp/salt"
+		p.config.TempConfigDir = DefaultTempConfigDir
 	}
 
 	if len(errs) > 0 {
