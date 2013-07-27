@@ -50,6 +50,9 @@ func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {
 	macLineRe := regexp.MustCompile(`^\s*hardware ethernet (.+?);$`)
 
 	for _, line := range strings.Split(string(dhcpBytes), "\n") {
+		// Need to trim off CR character when running in windows
+		line = strings.TrimRight(line, "\r");
+
 		matches := ipLineRe.FindStringSubmatch(line)
 		if matches != nil {
 			lastIp = matches[1]
