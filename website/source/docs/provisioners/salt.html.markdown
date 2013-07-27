@@ -15,15 +15,22 @@ The example below is fully functional.
 <pre class="prettyprint">
 {
     "type": "salt",
-    "bootstrap_args": "git v0.14.0"
+    "bootstrap_args": "git v0.16.0"
+    "local_state_tree": "/Users/me/salt"
 }
 </pre>
 
 ## Configuration Reference
 
-The reference of available configuration options is listed below:
+The reference of available configuration options is listed below. The only required argument is the path to your local salt state tree.
 
-* `skip_bootstrap` (boolean) - By default Packer runs [salt bootstrap](https://github.com/saltstack/salt-bootstrap) to install salt. Set this to true to skip this step.
+Required:
+
+* `local_state_tree` (string) - The path to your local [state tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree). This will be uploaded to the `/srv/salt` on the remote, and removed before shutdown.
+
+Optional:
+
+* `skip_bootstrap` (boolean) - By default the salt provisioner runs [salt bootstrap](https://github.com/saltstack/salt-bootstrap) to install salt. Set this to true to skip this step.
 
 * `boostrap_args` (string) -
-  Arguments to send to the bootstrap script. Usage is somewhat documented on [github](https://github.com/saltstack/salt-bootstrap), but the [script itself](https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh) has more detailed usage instructions. Default is no arguments.
+  Arguments to send to the bootstrap script. Usage is somewhat documented on [github](https://github.com/saltstack/salt-bootstrap), but the [script itself](https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh) has more detailed usage instructions. By default, no arguments are sent to the script.
