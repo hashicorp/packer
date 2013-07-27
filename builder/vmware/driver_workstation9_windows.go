@@ -1,19 +1,22 @@
-// +build darwin freebsd linux netbsd openbsd
+// +build windows
+// Contributed by Ross Smith II (smithii.com)
 
 package vmware
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"unsafe"
+    "syscall"
 )
 
 // Workstation9Driver is a driver that can run VMware Workstation 9
-// on non-Windows platforms.
+// on Windows.
 type Workstation9Driver struct {
 	AppPath          string
 	VdiskManagerPath string
@@ -101,6 +104,7 @@ func (d *Workstation9Driver) Verify() error {
 	}
 
 	// Check to see if it APPEARS to be licensed.
+/*
 	matches, err := filepath.Glob("/etc/vmware/license-*")
 	if err != nil {
 		return fmt.Errorf("Error looking for VMware license: %s", err)
@@ -109,43 +113,70 @@ func (d *Workstation9Driver) Verify() error {
 	if len(matches) == 0 {
 		return errors.New("Workstation does not appear to be licensed. Please license it.")
 	}
-
+*/
 	return nil
 }
 
 func (d *Workstation9Driver) findApp() error {
-	path, err := exec.LookPath("vmware")
+	path, err := exec.LookPath("vmware.exe")
 	if err != nil {
-		return err
+		path, err := getVmwarePath()
+		if err != nil {
+			return err
+		}
+		path += "vmware.exe"
 	}
+	log.Printf("Using '%s' for vmware path", path)
 	d.AppPath = path
+
 	return nil
 }
 
 func (d *Workstation9Driver) findVdiskManager() error {
-	path, err := exec.LookPath("vmware-vdiskmanager")
+	path, err := exec.LookPath("vmware-vdiskmanager.exe")
 	if err != nil {
-		return err
+		path, err := getVmwarePath()
+		if err != nil {
+			return err
+		}
+		path += "vmware-vdiskmanager.exe"
 	}
+	log.Printf("Using '%s' for vmware-vdiskmanager path", path)
 	d.VdiskManagerPath = path
 	return nil
 }
 
 func (d *Workstation9Driver) findVmrun() error {
-	path, err := exec.LookPath("vmrun")
+	path, err := exec.LookPath("vmrun.exe")
 	if err != nil {
-		return err
+		path, err := getVmwarePath()
+		if err != nil {
+			return err
+		}
+		path += "vmrun.exe"
 	}
+	log.Printf("Using '%s' for vmrun path", path)
 	d.VmrunPath = path
 	return nil
 }
 
 func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
-	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
+	path, err := getVmwarePath()
+	if err != nil {
+		return ""
+	} else {
+		return path + flavor + ".iso"
+	}
 }
 
 func (d *Workstation9Driver) DhcpLeasesPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
+	programData := os.Getenv("ProgramData")
+	rv := programData + "/VMware/vmnetdhcp.leases"
+	if _, err := os.Stat(rv); os.IsNotExist(err) {
+		log.Printf("File not found: '%s' (found '%s' in %%ProgramData%%)", rv, programData)
+		return ""
+	}
+	return rv
 }
 
 func (d *Workstation9Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
@@ -167,4 +198,57 @@ func (d *Workstation9Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
 	log.Printf("stderr: %s", stderrString)
 
 	return stdout.String(), stderr.String(), err
+}
+
+// see http://blog.natefinch.com/2012/11/go-win-stuff.html
+
+func readRegString(hive syscall.Handle, subKeyPath, valueName string) (value string, err error) {
+    var h syscall.Handle
+    err = syscall.RegOpenKeyEx(hive, syscall.StringToUTF16Ptr(subKeyPath), 0, syscall.KEY_READ, &h)
+    if err != nil {
+        return
+     }
+     defer syscall.RegCloseKey(h)
+
+    var typ uint32
+    var bufSize uint32
+
+    err = syscall.RegQueryValueEx(
+              h,
+              syscall.StringToUTF16Ptr(valueName),
+              nil,
+              &typ,
+              nil,
+              &bufSize)
+    if err != nil {
+        return
+    }
+
+    data := make([]uint16, bufSize/2+1)
+
+    err = syscall.RegQueryValueEx(
+              h,
+              syscall.StringToUTF16Ptr(valueName),
+              nil,
+              &typ,
+              (*byte)(unsafe.Pointer(&data[0])),
+              &bufSize)
+    if err != nil {
+        return
+    }
+
+    return syscall.UTF16ToString(data), nil
+}
+
+func getVmwarePath() (s string, e error) {
+	key := "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\vmware.exe"
+	subkey := "Path"
+	s, e = readRegString(syscall.HKEY_LOCAL_MACHINE, key, subkey)
+	if e != nil {
+		log.Printf("Unable to read registry key %s\\%s", key, subkey)
+		return "", e
+	}
+	log.Printf("Found '%s' in registry key %s\\%s", s, key, subkey)
+	s = strings.Replace(s, "\\", "/", -1)
+	return s, nil
 }
