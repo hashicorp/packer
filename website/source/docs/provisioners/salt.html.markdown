@@ -34,3 +34,5 @@ Optional:
 
 * `boostrap_args` (string) -
   Arguments to send to the bootstrap script. Usage is somewhat documented on [github](https://github.com/saltstack/salt-bootstrap), but the [script itself](https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh) has more detailed usage instructions. By default, no arguments are sent to the script.
+
+* `temp_config_dir` (string) - Where your local state tree will be copied before moving to the `/srv/salt` directory. Default is `/tmp/salt`.

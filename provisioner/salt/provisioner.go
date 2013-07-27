@@ -25,6 +25,9 @@ type config struct {
 
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
+
+	// Where files will be copied before moving to the /srv/salt directory
+	TempConfigDir string `mapstructure:"temp_config_dir"`
 }
 
 type Provisioner struct {
@@ -68,6 +71,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = append(errs, errors.New("Please specify a local_state_tree"))
 	}
 
+	if p.config.TempConfigDir == "" {
+		p.config.TempConfigDir = "/tmp/salt"
+	}
+
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
 	}
@@ -87,24 +94,23 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	remoteTempDir := "salt"
-	Ui.Say(fmt.Sprintf("Creating remote directory: %s", remoteTempDir))
-	if err = ExecuteCommand(fmt.Sprintf("mkdir -p %s", remoteTempDir), comm); err != nil {
+	Ui.Say(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
+	if err = ExecuteCommand(fmt.Sprintf("mkdir -p %s", p.config.TempConfigDir), comm); err != nil {
 		return fmt.Errorf("Error creating remote salt state directory: %s", err)
 	}
 
 	Ui.Say(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
-	if err = UploadLocalDirectory(p.config.LocalStateTree, remoteTempDir, comm); err != nil {
+	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm); err != nil {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
-	Ui.Say(fmt.Sprintf("Moving %s to /srv/salt", remoteTempDir))
-	if err = ExecuteCommand(fmt.Sprintf("sudo mv %s /srv/salt", remoteTempDir), comm); err != nil {
-		return fmt.Errorf("Unable to move %s to /srv/salt: %d", remoteTempDir, err)
+	Ui.Say(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
+	if err = ExecuteCommand(fmt.Sprintf("sudo mv %s /srv/salt", p.config.TempConfigDir), comm); err != nil {
+		return fmt.Errorf("Unable to move %s to /srv/salt: %d", p.config.TempConfigDir, err)
 	}
 
 	Ui.Say("Running highstate")
-	if err = ExecuteCommand("sudo salt-call --local state.highstate -l debug", comm); err != nil {
+	if err = ExecuteCommand("sudo salt-call --local state.highstate -l info", comm); err != nil {
 		return fmt.Errorf("Error executing highstate: %s", err)
 	}
 
@@ -119,7 +125,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communicator) (err error) {
 	visitPath := func(localPath string, f os.FileInfo, err error) (err2 error) {
 		localRelPath := strings.Replace(localPath, localDir, "", 1)
-		remotePath := fmt.Sprintf("%s/%s", remoteDir, localRelPath)
+		remotePath := fmt.Sprintf("%s%s", remoteDir, localRelPath)
 		if f.IsDir() && f.Name() == ".git" {
 			return filepath.SkipDir
 		}
