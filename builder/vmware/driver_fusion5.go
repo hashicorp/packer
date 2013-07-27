@@ -1,9 +1,7 @@
 package vmware
 
 import (
-	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,12 +16,12 @@ type Fusion5Driver struct {
 
 func (d *Fusion5Driver) CompactDisk(diskPath string) error {
 	defragCmd := exec.Command(d.vdiskManagerPath(), "-d", diskPath)
-	if _, _, err := d.runAndLog(defragCmd); err != nil {
+	if _, _, err := runAndLog(defragCmd); err != nil {
 		return err
 	}
 
 	shrinkCmd := exec.Command(d.vdiskManagerPath(), "-k", diskPath)
-	if _, _, err := d.runAndLog(shrinkCmd); err != nil {
+	if _, _, err := runAndLog(shrinkCmd); err != nil {
 		return err
 	}
 
@@ -32,7 +30,7 @@ func (d *Fusion5Driver) CompactDisk(diskPath string) error {
 
 func (d *Fusion5Driver) CreateDisk(output string, size string) error {
 	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", "lsilogic", "-t", "1", output)
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -46,7 +44,7 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	}
 
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "list")
-	stdout, _, err := d.runAndLog(cmd)
+	stdout, _, err := runAndLog(cmd)
 	if err != nil {
 		return false, err
 	}
@@ -67,7 +65,7 @@ func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {
 	}
 
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "start", vmxPath, guiArgument)
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -76,7 +74,7 @@ func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {
 
 func (d *Fusion5Driver) Stop(vmxPath string) error {
 	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "stop", vmxPath, "hard")
-	if _, _, err := d.runAndLog(cmd); err != nil {
+	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
 
@@ -125,18 +123,4 @@ func (d *Fusion5Driver) ToolsIsoPath(k string) string {
 
 func (d *Fusion5Driver) DhcpLeasesPath(device string) string {
 	return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
-}
-
-func (d *Fusion5Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
-	var stdout, stderr bytes.Buffer
-
-	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
-	log.Printf("stdout: %s", strings.TrimSpace(stdout.String()))
-	log.Printf("stderr: %s", strings.TrimSpace(stderr.String()))
-
-	return stdout.String(), stderr.String(), err
 }

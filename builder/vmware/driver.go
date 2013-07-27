@@ -1,8 +1,12 @@
 package vmware
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"os/exec"
 	"runtime"
+	"strings"
 )
 
 // A driver is able to talk to VMware, control virtual machines, etc.
@@ -38,22 +42,54 @@ type Driver interface {
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
 func NewDriver() (Driver, error) {
-	var driver Driver
+	drivers := []Driver{}
 
 	switch runtime.GOOS {
 	case "darwin":
-		driver = &Fusion5Driver{
-			AppPath: "/Applications/VMware Fusion.app",
-		}
+		drivers = append(drivers,
+			&Fusion5Driver{
+				AppPath: "/Applications/VMware Fusion.app",
+			},
+		)
 	case "linux":
-		driver = &Workstation9LinuxDriver{}
+		drivers = append(drivers,
+			&Workstation9LinuxDriver{},
+			&Player5LinuxDriver{},
+		)
 	default:
 		return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 	}
 
-	if err := driver.Verify(); err != nil {
-		return nil, err
+	errs := ""
+
+	for _, driver := range drivers {
+		err := driver.Verify()
+		if err == nil {
+			return driver, nil
+		}
+		errs += "  " + err.Error() + "\n"
 	}
 
-	return driver, nil
+	return nil, fmt.Errorf("Unable to initialise any driver:\n%s", errs)
+}
+
+func runAndLog(cmd *exec.Cmd) (string, string, error) {
+	var stdout, stderr bytes.Buffer
+
+	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	stdoutString := strings.TrimSpace(stdout.String())
+	stderrString := strings.TrimSpace(stderr.String())
+
+	if _, ok := err.(*exec.ExitError); ok {
+		err = fmt.Errorf("VMware error: %s", stderrString)
+	}
+
+	log.Printf("stdout: %s", stdoutString)
+	log.Printf("stderr: %s", stderrString)
+
+	return stdout.String(), stderr.String(), err
 }
