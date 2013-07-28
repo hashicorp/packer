@@ -43,7 +43,7 @@ way through to production.
 Since Packer creates consistent images for multiple platforms in parallel,
 it is perfect for creating [appliances](http://en.wikipedia.org/wiki/Software_appliance)
 and disposable product demos. As your software changes, you can automatically
-create applicances with the software pre-installed. Potential users can then
+create appliances with the software pre-installed. Potential users can then
 get started with your software by deploying it to the environment of their
 choice.
 
