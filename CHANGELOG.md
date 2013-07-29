@@ -1,6 +1,9 @@
 ## 0.2.2 (unreleased)
 
+BUG FIXES:
 
+* builder/virtualbox,vmware: relative paths work properly as URL
+  configurations. [GH-215]
 
 ## 0.2.1 (July 26, 2013)
 

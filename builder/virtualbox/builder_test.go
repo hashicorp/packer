@@ -209,38 +209,10 @@ func TestBuilderPrepare_GuestAdditionsURL(t *testing.T) {
 		t.Fatalf("should be empty: %s", b.config.GuestAdditionsURL)
 	}
 
-	config["guest_additions_url"] = "i/am/a/file/that/doesnt/exist"
-	err = b.Prepare(config)
-	if err == nil {
-		t.Error("should have error")
-	}
-
-	config["guest_additions_url"] = "file:i/am/a/file/that/doesnt/exist"
-	err = b.Prepare(config)
-	if err == nil {
-		t.Error("should have error")
-	}
-
 	config["guest_additions_url"] = "http://www.packer.io"
 	err = b.Prepare(config)
 	if err != nil {
 		t.Errorf("should not have error: %s", err)
-	}
-
-	tf, err := ioutil.TempFile("", "packer")
-	if err != nil {
-		t.Fatalf("error tempfile: %s", err)
-	}
-	defer os.Remove(tf.Name())
-
-	config["guest_additions_url"] = tf.Name()
-	err = b.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.GuestAdditionsURL != "file://"+tf.Name() {
-		t.Fatalf("guest_additions_url should be modified: %s", b.config.GuestAdditionsURL)
 	}
 }
 
@@ -347,38 +319,10 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	config["iso_url"] = "i/am/a/file/that/doesnt/exist"
-	err = b.Prepare(config)
-	if err == nil {
-		t.Error("should have error")
-	}
-
-	config["iso_url"] = "file:i/am/a/file/that/doesnt/exist"
-	err = b.Prepare(config)
-	if err == nil {
-		t.Error("should have error")
-	}
-
 	config["iso_url"] = "http://www.packer.io"
 	err = b.Prepare(config)
 	if err != nil {
 		t.Errorf("should not have error: %s", err)
-	}
-
-	tf, err := ioutil.TempFile("", "packer")
-	if err != nil {
-		t.Fatalf("error tempfile: %s", err)
-	}
-	defer os.Remove(tf.Name())
-
-	config["iso_url"] = tf.Name()
-	err = b.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ISOUrl != "file://"+tf.Name() {
-		t.Fatalf("iso_url should be modified: %s", b.config.ISOUrl)
 	}
 }
 
