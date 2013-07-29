@@ -34,7 +34,7 @@ type RemoteCmd struct {
 	ExitStatus int
 
 	// Internal locks and such used for safely setting some shared variables
-	l sync.Mutex
+	l        sync.Mutex
 	exitCond *sync.Cond
 }
 
