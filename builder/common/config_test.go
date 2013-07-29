@@ -88,6 +88,16 @@ func TestDownloadableURL(t *testing.T) {
 	if u != "http://packer.io/path" {
 		t.Fatalf("bad: %s", u)
 	}
+
+	// No path
+	u, err = DownloadableURL("HTTP://packer.io")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if u != "http://packer.io" {
+		t.Fatalf("bad: %s", u)
+	}
 }
 
 func TestDownloadableURL_FilePaths(t *testing.T) {
