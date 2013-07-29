@@ -4,7 +4,7 @@ import (
 	"github.com/mitchellh/iochan"
 	"io"
 	"strings"
-	"time"
+	"sync"
 )
 
 // RemoteCmd represents a remote command being prepared or run.
@@ -32,6 +32,10 @@ type RemoteCmd struct {
 
 	// Once Exited is true, this will contain the exit code of the process.
 	ExitStatus int
+
+	// Internal locks and such used for safely setting some shared variables
+	l sync.Mutex
+	exitCond *sync.Cond
 }
 
 // A Communicator is the interface used to communicate with the machine
@@ -125,9 +129,38 @@ OutputLoop:
 	return nil
 }
 
+// SetExited is a helper for setting that this process is exited. This
+// should be called by communicators who are running a remote command in
+// order to set that the command is done.
+func (r *RemoteCmd) SetExited(status int) {
+	r.l.Lock()
+	if r.exitCond == nil {
+		r.exitCond = sync.NewCond(new(sync.Mutex))
+	}
+	r.l.Unlock()
+
+	r.exitCond.L.Lock()
+	defer r.exitCond.L.Unlock()
+
+	r.Exited = true
+	r.ExitStatus = status
+	r.exitCond.Broadcast()
+}
+
 // Wait waits for the remote command to complete.
 func (r *RemoteCmd) Wait() {
+	// Make sure our condition variable is initialized.
+	r.l.Lock()
+	if r.exitCond == nil {
+		r.exitCond = sync.NewCond(new(sync.Mutex))
+	}
+	r.l.Unlock()
+
+	// Wait on the condition variable to notify we exited
+	r.exitCond.L.Lock()
+	defer r.exitCond.L.Unlock()
+
 	for !r.Exited {
-		time.Sleep(50 * time.Millisecond)
+		r.exitCond.Wait()
 	}
 }

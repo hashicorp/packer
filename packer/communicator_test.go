@@ -59,7 +59,7 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		rc.Exited = true
+		rc.SetExited(0)
 	}()
 
 	err := rc.StartWithUi(testComm, testUi)
@@ -85,8 +85,7 @@ func TestRemoteCmd_Wait(t *testing.T) {
 		result <- true
 	}()
 
-	cmd.ExitStatus = 42
-	cmd.Exited = true
+	cmd.SetExited(42)
 
 	select {
 	case <-result:
