@@ -96,8 +96,7 @@ func TestCommunicatorRPC(t *testing.T) {
 	assert.Equal(data, "infoo\n", "should be correct stdin")
 
 	// Test that we can get the exit status properly
-	c.startCmd.ExitStatus = 42
-	c.startCmd.Exited = true
+	c.startCmd.SetExited(42)
 
 	for i := 0; i < 5; i++ {
 		if cmd.Exited {

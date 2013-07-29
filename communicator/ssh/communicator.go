@@ -79,15 +79,15 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	go func() {
 		defer session.Close()
 		err := session.Wait()
-		cmd.ExitStatus = 0
+		exitStatus := 0
 		if err != nil {
 			exitErr, ok := err.(*ssh.ExitError)
 			if ok {
-				cmd.ExitStatus = exitErr.ExitStatus()
+				exitStatus = exitErr.ExitStatus()
 			}
 		}
 
-		cmd.Exited = true
+		cmd.SetExited(exitStatus)
 	}()
 
 	return

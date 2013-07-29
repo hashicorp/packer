@@ -8,7 +8,6 @@ import (
 	"log"
 	"net"
 	"net/rpc"
-	"time"
 )
 
 // An implementation of packer.Communicator where the communicator is actually
@@ -203,10 +202,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 			defer conn.Close()
 		}
 
-		for !cmd.Exited {
-			time.Sleep(50 * time.Millisecond)
-		}
-
+		cmd.Wait()
 		responseWriter.Encode(&CommandFinished{cmd.ExitStatus})
 	}()
 
