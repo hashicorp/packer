@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"path/filepath"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"net/url"
@@ -75,6 +76,18 @@ func DownloadableURL(original string) (string, error) {
 		if _, err := os.Stat(url.Path); err != nil {
 			return "", err
 		}
+
+		url.Path, err = filepath.Abs(url.Path)
+		if err != nil {
+			return "", err
+		}
+
+		url.Path, err = filepath.EvalSymlinks(url.Path)
+		if err != nil {
+			return "", err
+		}
+
+		url.Path = filepath.Clean(url.Path)
 	}
 
 	// Make sure it is lowercased
