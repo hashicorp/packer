@@ -91,8 +91,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 			log.Panic(err)
 		}
 
-		cmd.ExitStatus = finished.ExitStatus
-		cmd.Exited = true
+		cmd.SetExited(finished.ExitStatus)
 	}()
 
 	err = c.client.Call("Communicator.Start", &args, new(interface{}))
