@@ -2,11 +2,11 @@ package common
 
 import (
 	"fmt"
-	"path/filepath"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -97,7 +97,7 @@ func DownloadableURL(original string) (string, error) {
 	// we distribute with a version of Go that fixes that bug.
 	//
 	// See: https://code.google.com/p/go/issues/detail?id=5927
-	if url.Path[0] != '/' {
+	if url.Path != "" && url.Path[0] != '/' {
 		url.Path = "/" + url.Path
 	}
 
