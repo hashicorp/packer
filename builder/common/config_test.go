@@ -98,6 +98,13 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	defer os.Remove(tf.Name())
 	tf.Close()
 
+	tfPath, err := filepath.EvalSymlinks(tf.Name())
+	if err != nil {
+		t.Fatalf("tempfile err: %s", err)
+	}
+
+	tfPath = filepath.Clean(tfPath)
+
 	// Relative filepath. We run this test in a func so that
 	// the defers run right away.
 	func() {
@@ -106,19 +113,19 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 			t.Fatalf("getwd err: %s", err)
 		}
 
-		err = os.Chdir(filepath.Dir(tf.Name()))
+		err = os.Chdir(filepath.Dir(tfPath))
 		if err != nil {
 			t.Fatalf("chdir err: %s", err)
 		}
 		defer os.Chdir(wd)
 
-		filename := filepath.Base(tf.Name())
+		filename := filepath.Base(tfPath)
 		u, err := DownloadableURL(filename)
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 
-		if u != fmt.Sprintf("file:///%s", filename) {
+		if u != fmt.Sprintf("file://%s", tfPath) {
 			t.Fatalf("unexpected: %s", u)
 		}
 	}()
@@ -132,12 +139,12 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 		}
 
 		// Good file
-		u, err := DownloadableURL(prefix + tf.Name())
+		u, err := DownloadableURL(prefix + tfPath)
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 
-		if u != fmt.Sprintf("file://%s", tf.Name()) {
+		if u != fmt.Sprintf("file://%s", tfPath) {
 			t.Fatalf("unexpected: %s", u)
 		}
 	}
