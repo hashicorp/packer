@@ -16,7 +16,6 @@ func init() {
 
 func testConfig() *RunConfig {
 	return &RunConfig{
-		Region:       "us-east-1",
 		SourceAmi:    "abcd",
 		InstanceType: "m1.small",
 		SSHUsername:  "root",
@@ -35,24 +34,6 @@ func TestRunConfigPrepare_InstanceType(t *testing.T) {
 	c := testConfig()
 	c.InstanceType = ""
 	if err := c.Prepare(); len(err) != 1 {
-		t.Fatalf("err: %s", err)
-	}
-}
-
-func TestRunConfigPrepare_Region(t *testing.T) {
-	c := testConfig()
-	c.Region = ""
-	if err := c.Prepare(); len(err) != 1 {
-		t.Fatalf("err: %s", err)
-	}
-
-	c.Region = "us-east-12"
-	if err := c.Prepare(); len(err) != 1 {
-		t.Fatalf("err: %s", err)
-	}
-
-	c.Region = "us-east-1"
-	if err := c.Prepare(); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 }
