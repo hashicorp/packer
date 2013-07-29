@@ -39,7 +39,7 @@ const defaultConfig = `
 	"provisioners": {
 		"file": "packer-provisioner-file",
 		"shell": "packer-provisioner-shell",
-		"salt": "packer-provisioner-salt"
+		"salt-masterless": "packer-provisioner-salt-masterless"
 	}
 }
 `

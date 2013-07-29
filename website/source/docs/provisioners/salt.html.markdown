@@ -2,11 +2,11 @@
 layout: "docs"
 ---
 
-# Salt Provisioner
+# Salt Masterless Provisioner
 
-Type: `salt`
+Type: `salt-masterless`
 
-The salt provisioner provisions machines built by Packer using [Salt](http://saltstack.com/) states.
+The salt-masterless provisioner provisions machines built by Packer using [Salt](http://saltstack.com/) states.
 
 ## Basic Example
 
@@ -14,7 +14,7 @@ The example below is fully functional.
 
 <pre class="prettyprint">
 {
-    "type": "salt",
+    "type": "salt-masterless",
     "bootstrap_args": "git v0.16.0"
     "local_state_tree": "/Users/me/salt"
 }

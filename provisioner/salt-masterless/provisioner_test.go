@@ -1,4 +1,4 @@
-package salt
+package saltMasterless
 
 import (
 	"github.com/mitchellh/packer/packer"

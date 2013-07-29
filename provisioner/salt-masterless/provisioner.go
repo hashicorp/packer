@@ -1,6 +1,6 @@
 // This package implements a provisioner for Packer that executes a
 // saltstack highstate within the remote machine
-package salt
+package saltMasterless
 
 import (
 	"errors"
