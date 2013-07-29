@@ -7,7 +7,6 @@ import (
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -153,42 +152,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("An iso_url must be specified."))
 	} else {
-		url, err := url.Parse(b.config.ISOUrl)
+		b.config.ISOUrl, err = common.DownloadableURL(b.config.ISOUrl)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("iso_url is not a valid URL: %s", err))
-		} else {
-			if url.Scheme == "" {
-				url.Scheme = "file"
-			}
-
-			if url.Scheme == "file" {
-				if _, err := os.Stat(url.Path); err != nil {
-					errs = packer.MultiErrorAppend(
-						errs, fmt.Errorf("iso_url points to bad file: %s", err))
-				}
-			} else {
-				supportedSchemes := []string{"file", "http", "https"}
-				scheme := strings.ToLower(url.Scheme)
-
-				found := false
-				for _, supported := range supportedSchemes {
-					if scheme == supported {
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					errs = packer.MultiErrorAppend(
-						errs, fmt.Errorf("Unsupported URL scheme in iso_url: %s", scheme))
-				}
-			}
-		}
-
-		if errs == nil || len(errs.Errors) == 0 {
-			// Put the URL back together since we may have modified it
-			b.config.ISOUrl = url.String()
+				errs, fmt.Errorf("iso_url: %s", err))
 		}
 	}
 
@@ -197,42 +164,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.GuestAdditionsURL != "" {
-		url, err := url.Parse(b.config.GuestAdditionsURL)
+		b.config.GuestAdditionsURL, err = common.DownloadableURL(b.config.GuestAdditionsURL)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("guest_additions_url is not a valid URL: %s", err))
-		} else {
-			if url.Scheme == "" {
-				url.Scheme = "file"
-			}
-
-			if url.Scheme == "file" {
-				if _, err := os.Stat(url.Path); err != nil {
-					errs = packer.MultiErrorAppend(
-						errs, fmt.Errorf("guest_additions_url points to bad file: %s", err))
-				}
-			} else {
-				supportedSchemes := []string{"file", "http", "https"}
-				scheme := strings.ToLower(url.Scheme)
-
-				found := false
-				for _, supported := range supportedSchemes {
-					if scheme == supported {
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					errs = packer.MultiErrorAppend(
-						errs, fmt.Errorf("Unsupported URL scheme in guest_additions_url: %s", scheme))
-				}
-			}
-		}
-
-		if errs == nil || len(errs.Errors) == 0 {
-			// Put the URL back together since we may have modified it
-			b.config.GuestAdditionsURL = url.String()
+				errs, fmt.Errorf("guest_additions_url: %s", err))
 		}
 	}
 
