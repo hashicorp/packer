@@ -46,6 +46,7 @@ func NewDriver() (Driver, error) {
 			AppPath: "/Applications/VMware Fusion.app",
 		}
 	case "linux":
+		fallthrough
 	case "windows":
 		driver = &Workstation9Driver{}
 	default:
