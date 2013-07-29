@@ -50,7 +50,7 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	// Set the AMI ID in the state
 	ui.Say(fmt.Sprintf("AMI: %s", registerResp.ImageId))
 	amis := make(map[string]string)
-	amis[config.Region] = registerResp.ImageId
+	amis[ec2conn.Region.Name] = registerResp.ImageId
 	state["amis"] = amis
 
 	// Wait for the image to become ready

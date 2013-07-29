@@ -3,14 +3,12 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
 	"time"
 )
 
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	Region          string
 	SourceAmi       string `mapstructure:"source_ami"`
 	InstanceType    string `mapstructure:"instance_type"`
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
@@ -43,12 +41,6 @@ func (c *RunConfig) Prepare() []error {
 
 	if c.InstanceType == "" {
 		errs = append(errs, errors.New("An instance_type must be specified"))
-	}
-
-	if c.Region == "" {
-		errs = append(errs, errors.New("A region must be specified"))
-	} else if _, ok := aws.Regions[c.Region]; !ok {
-		errs = append(errs, fmt.Errorf("Unknown region: %s", c.Region))
 	}
 
 	if c.SSHUsername == "" {

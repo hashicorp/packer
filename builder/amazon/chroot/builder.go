@@ -1,36 +1,30 @@
-// The amazonebs package contains a packer.Builder implementation that
-// builds AMIs for Amazon EC2.
-//
-// In general, there are two types of AMIs that can be created: ebs-backed or
-// instance-store. This builder _only_ builds ebs-backed images.
-package ebs
+// The chroot package is able to create an Amazon AMI without requiring
+// the launch of a new instance for every build. It does this by attaching
+// and mounting the root volume of another AMI and chrooting into that
+// directory. It then creates an AMI from that attached drive.
+package chroot
 
 import (
-	"errors"
-	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"text/template"
 )
 
 // The unique ID for this builder
-const BuilderId = "mitchellh.amazonebs"
+const BuilderId = "mitchellh.amazon.chroot"
 
-type config struct {
+// Config is the configuration that is chained through the steps and
+// settable from the template.
+type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
-	awscommon.RunConfig    `mapstructure:",squash"`
-
-	// Configuration of the resulting AMI
-	AMIName string `mapstructure:"ami_name"`
 }
 
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
@@ -40,22 +34,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	// Defaults
+
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
-
-	// Accumulate any errors
-	if b.config.AMIName == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ami_name must be specified"))
-	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
-		}
-	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
@@ -80,34 +63,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag and initial state for the steps
 	state := make(map[string]interface{})
-	state["config"] = b.config
+	state["config"] = &b.config
 	state["ec2"] = ec2conn
 	state["hook"] = hook
 	state["ui"] = ui
 
 	// Build the steps
-	steps := []multistep.Step{
-		&awscommon.StepKeyPair{},
-		&awscommon.StepSecurityGroup{
-			SecurityGroupId: b.config.SecurityGroupId,
-			SSHPort:         b.config.SSHPort,
-			VpcId:           b.config.VpcId,
-		},
-		&awscommon.StepRunSourceInstance{
-			ExpectedRootDevice: "ebs",
-			InstanceType:       b.config.InstanceType,
-			SourceAMI:          b.config.SourceAmi,
-			SubnetId:           b.config.SubnetId,
-		},
-		&common.StepConnectSSH{
-			SSHAddress:     awscommon.SSHAddress(b.config.SSHPort),
-			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
-		},
-		&common.StepProvision{},
-		&stepStopInstance{},
-		&stepCreateAMI{},
-	}
+	steps := []multistep.Step{}
 
 	// Run!
 	if b.config.PackerDebug {
