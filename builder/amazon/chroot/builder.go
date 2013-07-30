@@ -72,7 +72,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&StepCheckEC2{},
+		&StepInstanceInfo{},
 		&StepSourceAMIInfo{},
 		&StepCreateVolume{},
 	}
