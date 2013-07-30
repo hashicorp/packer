@@ -35,12 +35,17 @@ func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction 
 			return multistep.ActionHalt
 		}
 
+		flags := "-t " + mountInfo[0]
+		if mountInfo[0] == "bind" {
+			flags = "--bind"
+		}
+
 		ui.Message(fmt.Sprintf("Mounting: %s", mountInfo[2]))
 		stderr := new(bytes.Buffer)
 		mountCommand := fmt.Sprintf(
-			"%s -t %s %s %s",
+			"%s %s %s %s",
 			config.MountCommand,
-			mountInfo[0],
+			flags,
 			mountInfo[1],
 			innerPath)
 		cmd := exec.Command("/bin/sh", "-c", mountCommand)
