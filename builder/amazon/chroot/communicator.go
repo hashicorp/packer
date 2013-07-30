@@ -53,7 +53,8 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 
 func (c *Communicator) Upload(dst string, r io.Reader) error {
 	dst = filepath.Join(c.Chroot, dst)
-	f, err := os.Open(dst)
+	log.Printf("Uploading to chroot dir: %s", dst)
+	f, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
@@ -68,6 +69,7 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 
 func (c *Communicator) Download(src string, w io.Writer) error {
 	src = filepath.Join(c.Chroot, src)
+	log.Printf("Downloading from chroot dir: %s", src)
 	f, err := os.Open(src)
 	if err != nil {
 		return err
