@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/rpc"
 	"os"
@@ -97,6 +98,10 @@ func NewClient(config *ClientConfig) (c *Client) {
 
 	if config.StartTimeout == 0 {
 		config.StartTimeout = 1 * time.Minute
+	}
+
+	if config.Stderr == nil {
+		config.Stderr = ioutil.Discard
 	}
 
 	c = &Client{config: config}
@@ -300,10 +305,7 @@ func (c *Client) logStderr(r io.Reader) {
 		line, err := bufR.ReadString('\n')
 		if line != "" {
 			log.Printf("%s: %s", c.config.Cmd.Path, line)
-
-			if c.config.Stderr != nil {
-				c.config.Stderr.Write([]byte(line))
-			}
+			c.config.Stderr.Write([]byte(line))
 		}
 
 		if err == io.EOF {
