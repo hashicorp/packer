@@ -48,7 +48,7 @@ func (s *StepInstanceInfo) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
-	instance := instancesResp.Reservations[0].Instances[0]
+	instance := &instancesResp.Reservations[0].Instances[0]
 	state["instance"] = instance
 
 	return multistep.ActionContinue
