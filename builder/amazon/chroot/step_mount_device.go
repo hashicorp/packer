@@ -8,7 +8,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"text/template"
 )
+
+type mountPathData struct {
+	Device string
+}
 
 // StepMountDevice mounts the attached device.
 //
@@ -23,7 +29,13 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 	ui := state["ui"].(packer.Ui)
 	device := state["device"].(string)
 
-	mountPath := config.MountPath
+	mountPathRaw := new(bytes.Buffer)
+	t := template.Must(template.New("mountPath").Parse(config.MountPath))
+	t.Execute(mountPathRaw, &mountPathData{
+		Device: filepath.Basename(device),
+	})
+
+	mountPath := mountPathRaw.String()
 	log.Printf("Mount path: %s", mountPath)
 
 	if err := os.MkdirAll(mountPath, 0755); err != nil {
@@ -45,6 +57,9 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	// Set the mount path so we remember to unmount it later
+	s.mountPath = mountPath
 
 	return multistep.ActionContinue
 }
