@@ -24,7 +24,7 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 	mountPath := state["mount_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
-	s.files = make([]string, len(config.CopyFiles))
+	s.files = make([]string, 0, len(config.CopyFiles))
 	if len(config.CopyFiles) > 0 {
 		ui.Say("Copying files from host to chroot...")
 		for _, path := range config.CopyFiles {
