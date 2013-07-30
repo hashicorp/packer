@@ -32,7 +32,7 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 	mountPathRaw := new(bytes.Buffer)
 	t := template.Must(template.New("mountPath").Parse(config.MountPath))
 	t.Execute(mountPathRaw, &mountPathData{
-		Device: filepath.Basename(device),
+		Device: filepath.Base(device),
 	})
 
 	mountPath := mountPathRaw.String()
@@ -60,6 +60,7 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 
 	// Set the mount path so we remember to unmount it later
 	s.mountPath = mountPath
+	state["mount_path"] = s.mountPath
 
 	return multistep.ActionContinue
 }
