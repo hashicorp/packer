@@ -18,6 +18,10 @@ import (
 // The unique ID for this builder
 const BuilderId = "mitchellh.amazon.chroot"
 
+// CleanupFunc is a type that is strung throughout the state bag in
+// order to perform cleanup at earlier points.
+type CleanupFunc func(map[string]interface{}) error
+
 // Config is the configuration that is chained through the steps and
 // settable from the template.
 type Config struct {
@@ -138,6 +142,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepMountExtra{},
 		&StepCopyFiles{},
 		&StepChrootProvision{},
+		&StepEarlyCleanup{},
 	}
 
 	// Run!

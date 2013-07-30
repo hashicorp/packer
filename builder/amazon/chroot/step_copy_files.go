@@ -11,8 +11,12 @@ import (
 )
 
 // StepCopyFiles copies some files from the host into the chroot environment.
+//
+// Produces:
+//   copy_files_cleanup CleanupFunc - A function to clean up the copied files
+//   early.
 type StepCopyFiles struct {
-	mounts []string
+	files []string
 }
 
 func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
@@ -20,6 +24,7 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 	mountPath := state["mount_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
+	s.files = make([]string, len(config.CopyFiles))
 	if len(config.CopyFiles) > 0 {
 		ui.Say("Copying files from host to chroot...")
 		for _, path := range config.CopyFiles {
@@ -33,13 +38,35 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+
+			s.files = append(s.files, chrootPath)
 		}
 	}
 
+	state["copy_files_cleanup"] = s.CleanupFunc
 	return multistep.ActionContinue
 }
 
-func (s *StepCopyFiles) Cleanup(state map[string]interface{}) {}
+func (s *StepCopyFiles) Cleanup(state map[string]interface{}) {
+	ui := state["ui"].(packer.Ui)
+	if err := s.CleanupFunc(state); err != nil {
+		ui.Error(err.Error())
+	}
+}
+
+func (s *StepCopyFiles) CleanupFunc(map[string]interface{}) error {
+	if s.files != nil {
+		for _, file := range s.files {
+			log.Printf("Removing: %s", file)
+			if err := os.Remove(file); err != nil {
+				return err
+			}
+		}
+	}
+
+	s.files = nil
+	return nil
+}
 
 func (s *StepCopyFiles) copySingle(dst, src string) error {
 	// Stat the src file so we can copy the mode later

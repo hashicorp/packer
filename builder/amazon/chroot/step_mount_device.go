@@ -20,6 +20,7 @@ type mountPathData struct {
 //
 // Produces:
 //   mount_path string - The location where the volume was mounted.
+//   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
 	mountPath string
 }
@@ -61,13 +62,21 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 	// Set the mount path so we remember to unmount it later
 	s.mountPath = mountPath
 	state["mount_path"] = s.mountPath
+	state["mount_device_cleanup"] = s.CleanupFunc
 
 	return multistep.ActionContinue
 }
 
 func (s *StepMountDevice) Cleanup(state map[string]interface{}) {
+	ui := state["ui"].(packer.Ui)
+	if err := s.CleanupFunc(state); err != nil {
+		ui.Error(err.Error())
+	}
+}
+
+func (s *StepMountDevice) CleanupFunc(state map[string]interface{}) error {
 	if s.mountPath == "" {
-		return
+		return nil
 	}
 
 	config := state["config"].(*Config)
@@ -77,8 +86,9 @@ func (s *StepMountDevice) Cleanup(state map[string]interface{}) {
 	unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, s.mountPath)
 	cmd := exec.Command("/bin/sh", "-c", unmountCommand)
 	if err := cmd.Run(); err != nil {
-		ui.Error(fmt.Sprintf(
-			"Error unmounting root device: %s", err))
-		return
+		return fmt.Errorf("Error unmounting root device: %s", err)
 	}
+
+	s.mountPath = ""
+	return nil
 }
