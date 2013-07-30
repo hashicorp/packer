@@ -10,6 +10,7 @@ import (
 // AMI and details on how to access that launched image.
 type RunConfig struct {
 	SourceAmi       string `mapstructure:"source_ami"`
+	IamInstanceProfile string `mapstructure:"iam_instance_profile"`
 	InstanceType    string `mapstructure:"instance_type"`
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	SSHUsername     string `mapstructure:"ssh_username"`
