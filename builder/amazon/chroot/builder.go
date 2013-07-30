@@ -26,6 +26,7 @@ type Config struct {
 
 	AttachedDevicePath string     `mapstructure:"attached_device_path"`
 	ChrootMounts       [][]string `mapstructure:"chroot_mounts"`
+	CopyFiles          []string   `mapstructure:"copy_files"`
 	DevicePath         string     `mapstructure:"device_path"`
 	MountCommand       string     `mapstructure:"mount_command"`
 	MountPath          string     `mapstructure:"mount_path"`
@@ -49,6 +50,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.ChrootMounts = make([][]string, 0)
 	}
 
+	if b.config.CopyFiles == nil {
+		b.config.CopyFiles = make([]string, 0)
+	}
+
 	if len(b.config.ChrootMounts) == 0 {
 		b.config.ChrootMounts = [][]string{
 			[]string{"proc", "proc", "/proc"},
@@ -57,6 +62,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			[]string{"devpts", "devpts", "/dev/pts"},
 			[]string{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
 		}
+	}
+
+	if len(b.config.CopyFiles) == 0 {
+		b.config.CopyFiles = []string{"/etc/resolv.conf"}
 	}
 
 	if b.config.DevicePath == "" {
@@ -127,6 +136,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepAttachVolume{},
 		&StepMountDevice{},
 		&StepMountExtra{},
+		&StepCopyFiles{},
 		&StepChrootProvision{},
 	}
 
