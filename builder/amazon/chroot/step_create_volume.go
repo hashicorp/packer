@@ -86,6 +86,7 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
+	state["volume_id"] = s.volumeId
 	return multistep.ActionContinue
 }
 
