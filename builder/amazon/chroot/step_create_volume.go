@@ -63,4 +63,17 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateVolume) Cleanup(map[string]interface{}) {}
+func (s *StepCreateVolume) Cleanup(state map[string]interface{}) {
+	if s.volumeId == "" {
+		return
+	}
+
+	ec2conn := state["ec2"].(*ec2.EC2)
+	ui := state["ui"].(packer.Ui)
+
+	ui.Say("Deleting the created EBS volume...")
+	_, err := ec2conn.DeleteVolume(s.volumeId)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting EBS volume: %s", err))
+	}
+}
