@@ -72,12 +72,16 @@ func (s *StepMountExtra) Cleanup(state map[string]interface{}) {
 	config := state["config"].(*Config)
 	ui := state["ui"].(packer.Ui)
 
-	for _, path := range s.mounts {
+	for i := len(s.mounts) - 1; i >= 0; i-- {
+		path := s.mounts[i]
 		unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, path)
+
+		stderr := new(bytes.Buffer)
 		cmd := exec.Command("/bin/sh", "-c", unmountCommand)
+		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			ui.Error(fmt.Sprintf(
-				"Error unmounting root device: %s", err))
+				"Error unmounting device: %s\nStderr: %s", err, stderr.String()))
 			return
 		}
 	}
