@@ -21,6 +21,8 @@ const BuilderId = "mitchellh.amazon.chroot"
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
+
+	SourceAmi string `mapstructure:"source_ami"`
 }
 
 type Builder struct {
@@ -71,6 +73,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&StepCheckEC2{},
+		&StepSourceAMIInfo{},
 	}
 
 	// Run!
