@@ -35,7 +35,8 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
-	cmd := exec.Command("mount", device, mountPath)
+	mountCommand := fmt.Sprintf("%s %s %s", config.MountCommand, device, mountPath)
+	cmd := exec.Command("/bin/sh", "-c", mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf(
@@ -53,16 +54,12 @@ func (s *StepMountDevice) Cleanup(state map[string]interface{}) {
 		return
 	}
 
+	config := state["config"].(*Config)
 	ui := state["ui"].(packer.Ui)
 	ui.Say("Unmounting the root device...")
 
-	path, err := exec.LookPath("umount")
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error umounting root device: %s", err))
-		return
-	}
-
-	cmd := exec.Command(path, s.mountPath)
+	unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, s.mountPath)
+	cmd := exec.Command("bin/sh", "-c", unmountCommand)
 	if err := cmd.Run(); err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error unmounting root device: %s", err))
