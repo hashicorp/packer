@@ -12,7 +12,7 @@ import (
 type StateChangeConf struct {
 	Conn      *ec2.EC2
 	Pending   []string
-	Refresh func() (interface{}, string, error)
+	Refresh   func() (interface{}, string, error)
 	StepState map[string]interface{}
 	Target    string
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
+	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -59,6 +60,31 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 
 	// Set the volume ID so we remember to delete it later
 	s.volumeId = createVolumeResp.VolumeId
+	log.Printf("Volume ID: %s", s.volumeId)
+
+	// Wait for the volume to become ready
+	stateChange := awscommon.StateChangeConf{
+		Conn:      ec2conn,
+		Pending:   []string{"creating"},
+		StepState: state,
+		Target:    "available",
+		Refresh: func() (interface{}, string, error) {
+			resp, err := ec2conn.Volumes([]string{s.volumeId}, ec2.NewFilter())
+			if err != nil {
+				return nil, "", err
+			}
+
+			return nil, resp.Volumes[0].Status, nil
+		},
+	}
+
+	_, err = awscommon.WaitForState(&stateChange)
+	if err != nil {
+		err := fmt.Errorf("Error waiting for volume: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }

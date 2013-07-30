@@ -64,7 +64,7 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		Conn:      ec2conn,
 		Pending:   []string{"pending"},
 		Target:    "running",
-		Refresh:  InstanceStateRefreshFunc(ec2conn, s.instance),
+		Refresh:   InstanceStateRefreshFunc(ec2conn, s.instance),
 		StepState: state,
 	}
 	latestInstance, err := WaitForState(&stateChange)
@@ -96,10 +96,10 @@ func (s *StepRunSourceInstance) Cleanup(state map[string]interface{}) {
 	}
 
 	stateChange := StateChangeConf{
-		Conn:     ec2conn,
-		Pending:  []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-		Refresh:  InstanceStateRefreshFunc(ec2conn, s.instance),
-		Target:   "running",
+		Conn:    ec2conn,
+		Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
+		Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
+		Target:  "running",
 	}
 
 	WaitForState(&stateChange)
