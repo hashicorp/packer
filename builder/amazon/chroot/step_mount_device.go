@@ -75,7 +75,7 @@ func (s *StepMountDevice) Cleanup(state map[string]interface{}) {
 	ui.Say("Unmounting the root device...")
 
 	unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, s.mountPath)
-	cmd := exec.Command("bin/sh", "-c", unmountCommand)
+	cmd := exec.Command("/bin/sh", "-c", unmountCommand)
 	if err := cmd.Run(); err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error unmounting root device: %s", err))
