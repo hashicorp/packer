@@ -24,10 +24,13 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
-	SourceAmi          string `mapstructure:"source_ami"`
-	AttachedDevicePath string `mapstructure:"attached_device_path"`
-	DevicePath         string `mapstructure:"device_path"`
-	MountPath          string `mapstructure:"mount_path"`
+	AttachedDevicePath string   `mapstructure:"attached_device_path"`
+	ChrootMounts       []string `mapstructure:"chroot_mounts"`
+	DevicePath         string   `mapstructure:"device_path"`
+	MountCommand       string   `mapstructure:"mount_command"`
+	MountPath          string   `mapstructure:"mount_path"`
+	SourceAmi          string   `mapstructure:"source_ami"`
+	UnmountCommand     string   `mapstructure:"unmount_command"`
 }
 
 type Builder struct {
@@ -42,12 +45,34 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	// Defaults
+	if b.config.ChrootMounts == nil {
+		b.config.ChrootMounts = make([]string, 0)
+	}
+
+	if len(b.config.ChrootMounts) == 0 {
+		b.config.ChrootMounts = []string{
+			"{{.MountCommand}} -t proc proc {{.MountPath}}/proc",
+			"{{.MountCommand}} -t sysfs sysfs {{.MountPath}}/sys",
+			"{{.MountCommand}} -t bind /dev {{.MountPath}}/dev",
+			"{{.MountCommand}} -t devpts devpts {{.MountPath}}/dev/pts",
+			"{{.MountCommand}} -t binfmt_misc binfmt_misc {{.MountPath}}/proc/sys/fs/binfmt_misc",
+		}
+	}
+
 	if b.config.DevicePath == "" {
 		b.config.DevicePath = "/dev/sdh"
 	}
 
+	if b.config.MountCommand == "" {
+		b.config.MountCommand = "mount"
+	}
+
 	if b.config.MountPath == "" {
 		b.config.MountPath = "/var/packer-amazon-chroot/volumes/{{.Device}}"
+	}
+
+	if b.config.UnmountCommand == "" {
+		b.config.UnmountCommand = "umount"
 	}
 
 	// Accumulate any errors
