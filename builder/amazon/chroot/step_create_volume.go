@@ -49,6 +49,7 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 		VolumeType: rootDevice.VolumeType,
 		IOPS:       rootDevice.IOPS,
 	}
+	log.Printf("Create args: %#v", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
