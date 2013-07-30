@@ -96,6 +96,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepSourceAMIInfo{},
 		&StepCreateVolume{},
 		&StepAttachVolume{},
+		&StepMountDevice{},
 	}
 
 	// Run!
