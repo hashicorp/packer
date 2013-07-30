@@ -35,7 +35,7 @@ func (s *StepSourceAMIInfo) Run(state map[string]interface{}) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
-	image := imageResp.Images[0]
+	image := &imageResp.Images[0]
 
 	// It must be EBS-backed otherwise the build won't work
 	if image.RootDeviceType != "ebs" {
