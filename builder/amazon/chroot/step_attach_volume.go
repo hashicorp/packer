@@ -89,7 +89,7 @@ func (s *StepAttachVolume) Cleanup(state map[string]interface{}) {
 	// Wait for the volume to detach
 	stateChange := awscommon.StateChangeConf{
 		Conn:      ec2conn,
-		Pending:   []string{"detaching"},
+		Pending:   []string{"attaching", "attached", "detaching"},
 		StepState: state,
 		Target:    "detached",
 		Refresh: func() (interface{}, string, error) {
