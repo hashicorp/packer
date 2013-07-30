@@ -69,7 +69,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state["ui"] = ui
 
 	// Build the steps
-	steps := []multistep.Step{}
+	steps := []multistep.Step{
+		&StepCheckEC2{},
+	}
 
 	// Run!
 	if b.config.PackerDebug {
