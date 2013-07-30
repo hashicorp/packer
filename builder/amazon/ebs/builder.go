@@ -97,6 +97,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ExpectedRootDevice: "ebs",
 			InstanceType:       b.config.InstanceType,
 			SourceAMI:          b.config.SourceAmi,
+			IamInstanceProfile: b.config.IamInstanceProfile,
 			SubnetId:           b.config.SubnetId,
 		},
 		&common.StepConnectSSH{
