@@ -20,12 +20,13 @@ type StepAttachVolume struct {
 }
 
 func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepAction {
+	config := state["config"].(*Config)
 	ec2conn := state["ec2"].(*ec2.EC2)
 	instance := state["instance"].(*ec2.Instance)
 	ui := state["ui"].(packer.Ui)
 	volumeId := state["volume_id"].(string)
 
-	device := "/dev/sdh"
+	device := config.DevicePath
 
 	ui.Say("Attaching the root volume...")
 	_, err := ec2conn.AttachVolume(volumeId, instance.InstanceId, device)

@@ -24,7 +24,10 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
-	SourceAmi string `mapstructure:"source_ami"`
+	SourceAmi          string `mapstructure:"source_ami"`
+	AttachedDevicePath string `mapstructure:"attached_device_path"`
+	DevicePath         string `mapstructure:"device_path"`
+	MountPath          string `mapstructure:"mount_path"`
 }
 
 type Builder struct {
@@ -39,10 +42,21 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	// Defaults
+	if b.config.DevicePath == "" {
+		b.config.DevicePath = "/dev/sdh"
+	}
+
+	if b.config.MountPath == "" {
+		b.config.MountPath = "/var/packer-amazon-chroot/volumes/{{.Device}}"
+	}
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
+
+	if b.config.SourceAmi == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("source_ami is required."))
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
