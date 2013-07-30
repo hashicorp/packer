@@ -14,6 +14,7 @@ import (
 //
 // Produces:
 //   device string - The location where the volume was attached.
+//   attach_cleanup CleanupFunc
 type StepAttachVolume struct {
 	attached bool
 	volumeId string
@@ -70,12 +71,20 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	state["device"] = config.AttachedDevicePath
+	state["attach_cleanup"] = s.CleanupFunc
 	return multistep.ActionContinue
 }
 
 func (s *StepAttachVolume) Cleanup(state map[string]interface{}) {
+	ui := state["ui"].(packer.Ui)
+	if err := s.CleanupFunc(state); err != nil {
+		ui.Error(err.Error())
+	}
+}
+
+func (s *StepAttachVolume) CleanupFunc(state map[string]interface{}) error {
 	if !s.attached {
-		return
+		return nil
 	}
 
 	ec2conn := state["ec2"].(*ec2.EC2)
@@ -84,9 +93,10 @@ func (s *StepAttachVolume) Cleanup(state map[string]interface{}) {
 	ui.Say("Detaching EBS volume...")
 	_, err := ec2conn.DetachVolume(s.volumeId)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error detaching EBS volume: %s", err))
-		return
+		return fmt.Errorf("Error detaching EBS volume: %s", err)
 	}
+
+	s.attached = false
 
 	// Wait for the volume to detach
 	stateChange := awscommon.StateChangeConf{
@@ -111,7 +121,8 @@ func (s *StepAttachVolume) Cleanup(state map[string]interface{}) {
 
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error waiting for volume: %s", err))
-		return
+		return fmt.Errorf("Error waiting for volume: %s", err)
 	}
+
+	return nil
 }

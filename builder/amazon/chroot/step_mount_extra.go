@@ -12,7 +12,7 @@ import (
 // StepMountExtra mounts the attached device.
 //
 // Produces:
-//   mount_path string - The location where the volume was mounted.
+//   mount_extra_cleanup CleanupFunc - To perform early cleanup
 type StepMountExtra struct {
 	mounts []string
 }
@@ -61,28 +61,40 @@ func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction 
 		s.mounts = append(s.mounts, innerPath)
 	}
 
+	state["mount_extra_cleanup"] = s.CleanupFunc
 	return multistep.ActionContinue
 }
 
 func (s *StepMountExtra) Cleanup(state map[string]interface{}) {
-	if s.mounts == nil {
+	ui := state["ui"].(packer.Ui)
+
+	if err := s.CleanupFunc(state); err != nil {
+		ui.Error(err.Error())
 		return
+	}
+}
+
+func (s *StepMountExtra) CleanupFunc(state map[string]interface{}) error {
+	if s.mounts == nil {
+		return nil
 	}
 
 	config := state["config"].(*Config)
-	ui := state["ui"].(packer.Ui)
-
-	for i := len(s.mounts) - 1; i >= 0; i-- {
-		path := s.mounts[i]
+	for len(s.mounts) > 0 {
+		var path string
+		lastIndex := len(s.mounts) - 1
+		path, s.mounts = s.mounts[lastIndex], s.mounts[:lastIndex]
 		unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, path)
 
 		stderr := new(bytes.Buffer)
 		cmd := exec.Command("/bin/sh", "-c", unmountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
-			ui.Error(fmt.Sprintf(
-				"Error unmounting device: %s\nStderr: %s", err, stderr.String()))
-			return
+			return fmt.Errorf(
+				"Error unmounting device: %s\nStderr: %s", err, stderr.String())
 		}
 	}
+
+	s.mounts = nil
+	return nil
 }
