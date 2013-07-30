@@ -12,6 +12,7 @@ type StepRunSourceInstance struct {
 	ExpectedRootDevice string
 	InstanceType       string
 	SourceAMI          string
+	IamInstanceProfile string
 	SubnetId           string
 
 	instance *ec2.Instance
@@ -24,13 +25,14 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	ui := state["ui"].(packer.Ui)
 
 	runOpts := &ec2.RunInstances{
-		KeyName:        keyName,
-		ImageId:        s.SourceAMI,
-		InstanceType:   s.InstanceType,
-		MinCount:       0,
-		MaxCount:       0,
-		SecurityGroups: []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
-		SubnetId:       s.SubnetId,
+		KeyName:            keyName,
+		ImageId:            s.SourceAMI,
+		InstanceType:       s.InstanceType,
+		MinCount:           0,
+		MaxCount:           0,
+		SecurityGroups:     []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
+		IamInstanceProfile: s.IamInstanceProfile,
+		SubnetId:           s.SubnetId,
 	}
 
 	ui.Say("Launching a source AWS instance...")
