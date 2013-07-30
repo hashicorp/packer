@@ -13,7 +13,7 @@ import (
 // available device location.
 //
 // Produces:
-//   volume_id string - The ID of the created volume
+//   device string - The location where the volume was attached.
 type StepAttachVolume struct {
 	attached bool
 	volumeId string
@@ -68,6 +68,7 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
+	state["device"] = device
 	return multistep.ActionContinue
 }
 
