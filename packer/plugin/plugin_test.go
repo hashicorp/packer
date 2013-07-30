@@ -67,6 +67,10 @@ func TestHelperProcess(*testing.T) {
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)
+	case "stderr":
+		fmt.Println(":1234")
+		log.Println("HELLO")
+		log.Println("WORLD")
 	case "stdin":
 		fmt.Println(":1234")
 		data := make([]byte, 5)

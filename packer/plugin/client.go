@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -53,6 +54,10 @@ type ClientConfig struct {
 	// StartTimeout is the timeout to wait for the plugin to say it
 	// has started successfully.
 	StartTimeout time.Duration
+
+	// If non-nil, then the stderr of the client will be written to here
+	// (as well as the log).
+	Stderr io.Writer
 }
 
 // This makes sure all the managed subprocesses are killed and properly
@@ -211,13 +216,13 @@ func (c *Client) Start() (address string, err error) {
 	}
 
 	stdout := new(bytes.Buffer)
-	stderr := new(bytes.Buffer)
+	stderr_r, stderr_w := io.Pipe()
 
 	cmd := c.config.Cmd
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, env...)
 	cmd.Stdin = os.Stdin
-	cmd.Stderr = stderr
+	cmd.Stderr = stderr_w
 	cmd.Stdout = stdout
 
 	log.Printf("Starting plugin: %s %#v", cmd.Path, cmd.Args)
@@ -241,13 +246,14 @@ func (c *Client) Start() (address string, err error) {
 
 	// Start goroutine to wait for process to exit
 	go func() {
+		defer stderr_w.Close()
 		cmd.Wait()
 		log.Printf("%s: plugin process exited\n", cmd.Path)
 		c.exited = true
 	}()
 
 	// Start goroutine that logs the stderr
-	go c.logStderr(stderr)
+	go c.logStderr(stderr_r)
 
 	// Some channels for the next step
 	timeout := time.After(c.config.StartTimeout)
@@ -288,22 +294,21 @@ func (c *Client) Start() (address string, err error) {
 	return
 }
 
-func (c *Client) logStderr(buf *bytes.Buffer) {
-	for done := false; !done; {
-		if c.Exited() {
-			done = true
-		}
+func (c *Client) logStderr(r io.Reader) {
+	bufR := bufio.NewReader(r)
+	for {
+		line, err := bufR.ReadString('\n')
+		if line != "" {
+			log.Printf("%s: %s", c.config.Cmd.Path, line)
 
-		var err error
-		for err != io.EOF {
-			var line string
-			line, err = buf.ReadString('\n')
-			if line != "" {
-				log.Printf("%s: %s", c.config.Cmd.Path, line)
+			if c.config.Stderr != nil {
+				c.config.Stderr.Write([]byte(line))
 			}
 		}
 
-		time.Sleep(10 * time.Millisecond)
+		if err == io.EOF {
+			break
+		}
 	}
 
 	// Flag that we've completed logging for others

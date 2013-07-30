@@ -1,8 +1,10 @@
 package plugin
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -47,6 +49,32 @@ func TestClient_Start_Timeout(t *testing.T) {
 	_, err := c.Start()
 	if err == nil {
 		t.Fatal("err should not be nil")
+	}
+}
+
+func TestClient_Stderr(t *testing.T) {
+	stderr := new(bytes.Buffer)
+	process := helperProcess("stderr")
+	c := NewClient(&ClientConfig{
+		Cmd:    process,
+		Stderr: stderr,
+	})
+	defer c.Kill()
+
+	if _, err := c.Start(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	for !c.Exited() {
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	if !strings.Contains(stderr.String(), "HELLO\n") {
+		t.Fatalf("bad log data: '%s'", stderr.String())
+	}
+
+	if !strings.Contains(stderr.String(), "WORLD\n") {
+		t.Fatalf("bad log data: '%s'", stderr.String())
 	}
 }
 
