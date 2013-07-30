@@ -69,7 +69,7 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
-	state["device"] = device
+	state["device"] = config.AttachedDevicePath
 	return multistep.ActionContinue
 }
 

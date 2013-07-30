@@ -63,6 +63,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.DevicePath = "/dev/sdh"
 	}
 
+	if b.config.AttachedDevicePath == "" {
+		b.config.AttachedDevicePath = "/dev/xvdh"
+	}
+
 	if b.config.MountCommand == "" {
 		b.config.MountCommand = "mount"
 	}
