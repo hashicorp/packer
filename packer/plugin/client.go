@@ -244,9 +244,18 @@ func (c *Client) Start() (address string, err error) {
 
 	// Start goroutine to wait for process to exit
 	go func() {
+		// Make sure we close the write end of our stderr listener so
+		// that the log goroutine ends properly.
 		defer stderr_w.Close()
+
+		// Wait for the command to end.
 		cmd.Wait()
+
+		// Log and make sure to flush the logs write away
 		log.Printf("%s: plugin process exited\n", cmd.Path)
+		os.Stderr.Sync()
+
+		// Mark that we exited
 		c.exited = true
 	}()
 
