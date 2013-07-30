@@ -5,12 +5,14 @@
 package chroot
 
 import (
+	"errors"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"runtime"
 )
 
 // The unique ID for this builder
@@ -51,6 +53,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	if runtime.GOOS != "linux" {
+		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")
+	}
+
 	region, err := b.config.Region()
 	if err != nil {
 		return nil, err
