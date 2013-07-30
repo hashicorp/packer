@@ -28,7 +28,7 @@ var managedClients = make([]*Client, 0, 5)
 type Client struct {
 	config      *ClientConfig
 	exited      bool
-	doneLogging bool
+	doneLogging chan struct{}
 	l           sync.Mutex
 	address     string
 }
@@ -188,16 +188,7 @@ func (c *Client) Kill() {
 	cmd.Process.Kill()
 
 	// Wait for the client to finish logging so we have a complete log
-	done := make(chan bool)
-	go func() {
-		for !c.doneLogging {
-			time.Sleep(10 * time.Millisecond)
-		}
-
-		done <- true
-	}()
-
-	<-done
+	<-c.doneLogging
 }
 
 // Starts the underlying subprocess, communicating with it to negotiate
@@ -213,6 +204,8 @@ func (c *Client) Start() (address string, err error) {
 	if c.address != "" {
 		return c.address, nil
 	}
+
+	c.doneLogging = make(chan struct{})
 
 	env := []string{
 		fmt.Sprintf("%s=%s", MagicCookieKey, MagicCookieValue),
@@ -314,7 +307,7 @@ func (c *Client) logStderr(r io.Reader) {
 	}
 
 	// Flag that we've completed logging for others
-	c.doneLogging = true
+	close(c.doneLogging)
 }
 
 func (c *Client) rpcClient() (*rpc.Client, error) {
