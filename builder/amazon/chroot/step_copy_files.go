@@ -42,11 +42,18 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 func (s *StepCopyFiles) Cleanup(state map[string]interface{}) {}
 
 func (s *StepCopyFiles) copySingle(dst, src string) error {
+	// Stat the src file so we can copy the mode later
 	srcInfo, err := os.Stat(src)
 	if err != nil {
 		return err
 	}
 
+	// Remove any existing destination file
+	if err := os.Remove(dst); err != nil {
+		return err
+	}
+
+	// Copy the files
 	srcF, err := os.Open(src)
 	if err != nil {
 		return err
@@ -57,11 +64,14 @@ func (s *StepCopyFiles) copySingle(dst, src string) error {
 	if err != nil {
 		return err
 	}
+	defer dstF.Close()
 
 	if _, err := io.Copy(dstF, srcF); err != nil {
 		return err
 	}
+	dstF.Close()
 
+	// Match the mode
 	if err := os.Chmod(dst, srcInfo.Mode()); err != nil {
 		return err
 	}
