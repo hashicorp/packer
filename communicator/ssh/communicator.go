@@ -87,6 +87,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 			}
 		}
 
+		log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 	}()
 

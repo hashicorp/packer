@@ -8,7 +8,6 @@ package ebs
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -67,9 +66,9 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	region, ok := aws.Regions[b.config.Region]
-	if !ok {
-		panic("region not found")
+	region, err := b.config.Region()
+	if err != nil {
+		return nil, err
 	}
 
 	auth, err := b.config.AccessConfig.Auth()
