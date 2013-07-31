@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"net"
+	"runtime"
 	"strings"
 	"text/template"
 	"time"
@@ -64,7 +65,13 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
 	// Determine the host IP
-	ipFinder := &IfconfigIPFinder{"vmnet8"}
+	var ipFinder HostIPFinder
+	if runtime.GOOS == "windows" {
+		ipFinder = new(VMnetNatConfIPFinder)
+	} else {
+		ipFinder = &IfconfigIPFinder{Device: "vmnet8"}
+	}
+
 	hostIp, err := ipFinder.HostIP()
 	if err != nil {
 		err := fmt.Errorf("Error detecting host IP: %s", err)
