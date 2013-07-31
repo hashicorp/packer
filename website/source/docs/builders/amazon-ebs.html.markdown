@@ -58,6 +58,10 @@ Required:
 
 Optional:
 
+* `iam_instance_profile` (string) - The name of an
+  [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
+  to launch the EC2 instance with.
+
 * `security_group_id` (string) - The ID (_not_ the name) of the security
   group to assign to the instance. By default this is not set and Packer
   will automatically create a new temporary security group to allow SSH
