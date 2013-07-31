@@ -61,7 +61,7 @@ func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction 
 		s.mounts = append(s.mounts, innerPath)
 	}
 
-	state["mount_extra_cleanup"] = s.CleanupFunc
+	state["mount_extra_cleanup"] = s
 	return multistep.ActionContinue
 }
 

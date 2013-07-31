@@ -21,9 +21,9 @@ func (s *StepEarlyCleanup) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	for _, key := range cleanupKeys {
-		f := state[key].(CleanupFunc)
+		c := state[key].(Cleanup)
 		log.Printf("Running cleanup func: %s", key)
-		if err := f(state); err != nil {
+		if err := c.CleanupFunc(state); err != nil {
 			err := fmt.Errorf("Error cleaning up: %s", err)
 			state["error"] = err
 			ui.Error(err.Error())

@@ -62,7 +62,7 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 	// Set the mount path so we remember to unmount it later
 	s.mountPath = mountPath
 	state["mount_path"] = s.mountPath
-	state["mount_device_cleanup"] = s.CleanupFunc
+	state["mount_device_cleanup"] = s
 
 	return multistep.ActionContinue
 }
