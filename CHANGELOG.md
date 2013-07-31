@@ -5,6 +5,7 @@ FEATURES:
 * New builder: `amazon-chroot` can create EBS-backed AMIs without launching
   a new EC2 instance. This can shave minutes off of the AMI creation process.
   See the docs for more info.
+* The `vmware` builder now works with Workstation 9 on Windows. [GH-222]
 
 IMPROVEMENTS:
 
