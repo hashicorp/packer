@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
+	"strings"
 )
 
 // StepAttachVolume attaches the previously created volume to an
@@ -21,16 +22,17 @@ type StepAttachVolume struct {
 }
 
 func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*Config)
 	ec2conn := state["ec2"].(*ec2.EC2)
+	device := state["device"].(string)
 	instance := state["instance"].(*ec2.Instance)
 	ui := state["ui"].(packer.Ui)
 	volumeId := state["volume_id"].(string)
 
-	device := config.DevicePath
+	// For the API call, it expects "sd" prefixed devices.
+	attachVolume := strings.Replace(device, "/xvd", "/sd", 1)
 
-	ui.Say("Attaching the root volume...")
-	_, err := ec2conn.AttachVolume(volumeId, instance.InstanceId, device)
+	ui.Say(fmt.Sprintf("Attaching the root volume to %s", attachVolume))
+	_, err := ec2conn.AttachVolume(volumeId, instance.InstanceId, attachVolume)
 	if err != nil {
 		err := fmt.Errorf("Error attaching volume: %s", err)
 		state["error"] = err
@@ -70,7 +72,6 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
-	state["device"] = device
 	state["attach_cleanup"] = s
 	return multistep.ActionContinue
 }
