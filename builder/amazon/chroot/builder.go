@@ -24,10 +24,10 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
-	AttachedDevicePath string     `mapstructure:"attached_device_path"`
 	ChrootMounts       [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles          []string   `mapstructure:"copy_files"`
 	DevicePath         string     `mapstructure:"device_path"`
+	DevicePrefix       string     `mapstructure:"device_prefix"`
 	MountCommand       string     `mapstructure:"mount_command"`
 	MountPath          string     `mapstructure:"mount_path"`
 	SourceAmi          string     `mapstructure:"source_ami"`
@@ -70,10 +70,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.DevicePath == "" {
 		b.config.DevicePath = "/dev/sdh"
-	}
-
-	if b.config.AttachedDevicePath == "" {
-		b.config.AttachedDevicePath = "/dev/xvdh"
 	}
 
 	if b.config.MountCommand == "" {
