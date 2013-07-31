@@ -36,7 +36,16 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 		Device: filepath.Base(device),
 	})
 
+	var err error
 	mountPath := mountPathRaw.String()
+	mountPath, err = filepath.Abs(mountPath)
+	if err != nil {
+		err := fmt.Errorf("Error preparing mount directory: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	log.Printf("Mount path: %s", mountPath)
 
 	if err := os.MkdirAll(mountPath, 0755); err != nil {
