@@ -3,6 +3,7 @@ package vmware
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -28,7 +29,13 @@ type DHCPLeaseGuestLookup struct {
 }
 
 func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {
-	fh, err := os.Open(f.Driver.DhcpLeasesPath(f.Device))
+	dhcpLeasesPath := f.Driver.DhcpLeasesPath(f.Device)
+	log.Printf("DHCP leases path: %s", dhcpLeasesPath)
+	if dhcpLeasesPath == "" {
+		return "", errors.New("no DHCP leases path found.")
+	}
+
+	fh, err := os.Open(dhcpLeasesPath)
 	if err != nil {
 		return "", err
 	}

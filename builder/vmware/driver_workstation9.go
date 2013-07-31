@@ -105,6 +105,10 @@ func (d *Workstation9Driver) Verify() error {
 		}
 	}
 
+	log.Printf("VMware app path: %s", d.AppPath)
+	log.Printf("vmrun path: %s", d.VmrunPath)
+	log.Printf("vdisk-manager path: %s", d.VdiskManagerPath)
+
 	if _, err := os.Stat(d.AppPath); err != nil {
 		return fmt.Errorf("VMware application not found: %s", d.AppPath)
 	}
