@@ -19,6 +19,24 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_ChrootMounts(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	config["chroot_mounts"] = nil
+	err := b.Prepare(config)
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+
+	config["chroot_mounts"] = [][]string{
+		[]string{"bad"},
+	}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
 func TestBuilderPrepare_SourceAmi(t *testing.T) {
 	b := &Builder{}
 	config := testConfig()
