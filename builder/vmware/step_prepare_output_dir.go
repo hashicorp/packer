@@ -3,7 +3,9 @@ package vmware
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"os"
+	"time"
 )
 
 type stepPrepareOutputDir struct{}
@@ -34,6 +36,15 @@ func (stepPrepareOutputDir) Cleanup(state map[string]interface{}) {
 		ui := state["ui"].(packer.Ui)
 
 		ui.Say("Deleting output directory...")
-		os.RemoveAll(config.OutputDir)
+
+		for i := 0; i < 5; i++ {
+			err := os.RemoveAll(config.OutputDir)
+			if err == nil {
+				break
+			}
+
+			log.Printf("Error removing output dir: %s", err)
+			time.Sleep(2 * time.Second)
+		}
 	}
 }
