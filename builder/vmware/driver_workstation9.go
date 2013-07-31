@@ -155,5 +155,10 @@ func (d *Workstation9Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
-	return stdout.String(), stderr.String(), err
+	// Replace these for Windows, we only want to deal with Unix
+	// style line endings.
+	returnStdout := strings.Replace(stdout.String(), "\r\n", "\n", -1)
+	returnStderr := strings.Replace(stderr.String(), "\r\n", "\n", -1)
+
+	return returnStdout, returnStderr, err
 }
