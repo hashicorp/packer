@@ -127,6 +127,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepPrepareDevice{},
 		&StepCreateVolume{},
 		&StepAttachVolume{},
+		&StepEarlyUnflock{},
 		&StepMountDevice{},
 		&StepMountExtra{},
 		&StepCopyFiles{},

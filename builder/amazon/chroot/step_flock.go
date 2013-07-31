@@ -10,6 +10,9 @@ import (
 )
 
 // StepFlock provisions the instance within a chroot.
+//
+// Produces:
+//   flock_cleanup Cleanup - To perform early cleanup
 type StepFlock struct {
 	fh *os.File
 }
@@ -46,14 +49,24 @@ func (s *StepFlock) Run(state map[string]interface{}) multistep.StepAction {
 	// the lock.
 	s.fh = f
 
+	state["flock_cleanup"] = s
 	return multistep.ActionContinue
 }
 
 func (s *StepFlock) Cleanup(state map[string]interface{}) {
+	s.CleanupFunc(state)
+}
+
+func (s *StepFlock) CleanupFunc(state map[string]interface{}) error {
 	if s.fh == nil {
-		return
+		return nil
 	}
 
 	log.Printf("Unlocking: %s", s.fh.Name())
-	unlockFile(s.fh)
+	if err := unlockFile(s.fh); err != nil {
+		return err
+	}
+
+	s.fh = nil
+	return nil
 }
