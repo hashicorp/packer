@@ -70,7 +70,7 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
-	state["device"] = config.AttachedDevicePath
+	state["device"] = device
 	state["attach_cleanup"] = s
 	return multistep.ActionContinue
 }
