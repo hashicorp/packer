@@ -1,4 +1,4 @@
-package instance
+package chroot
 
 import (
 	"bytes"
@@ -16,12 +16,14 @@ type amiNameData struct {
 	CreateTime string
 }
 
+// StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct{}
 
 func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*Config)
 	ec2conn := state["ec2"].(*ec2.EC2)
-	manifestPath := state["remote_manifest_path"].(string)
+	image := state["source_image"].(*ec2.Image)
+	snapshotId := state["snapshot_id"].(string)
 	ui := state["ui"].(packer.Ui)
 
 	// Parse the name of the AMI
@@ -35,9 +37,23 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	amiName := amiNameBuf.String()
 
 	ui.Say("Registering the AMI...")
+	blockDevices := make([]ec2.BlockDeviceMapping, len(image.BlockDevices))
+	for i, device := range image.BlockDevices {
+		newDevice := device
+		if newDevice.DeviceName == image.RootDeviceName {
+			newDevice.SnapshotId = snapshotId
+		}
+
+		blockDevices[i] = newDevice
+	}
+
 	registerOpts := &ec2.RegisterImage{
-		ImageLocation: manifestPath,
-		Name:          amiName,
+		Name:           amiName,
+		Architecture:   image.Architecture,
+		KernelId:       image.KernelId,
+		RamdiskId:      image.RamdiskId,
+		RootDeviceName: image.RootDeviceName,
+		BlockDevices:   blockDevices,
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -65,4 +81,4 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	return multistep.ActionContinue
 }
 
-func (s *StepRegisterAMI) Cleanup(map[string]interface{}) {}
+func (s *StepRegisterAMI) Cleanup(state map[string]interface{}) {}
