@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -102,6 +103,18 @@ func (d *Workstation9Driver) Verify() error {
 		if d.VdiskManagerPath, err = workstationFindVdiskManager(); err != nil {
 			return err
 		}
+	}
+
+	if _, err := os.Stat(d.AppPath); err != nil {
+		return fmt.Errorf("VMware application not found: %s", d.AppPath)
+	}
+
+	if _, err := os.Stat(d.VmrunPath); err != nil {
+		return fmt.Errorf("'vmrun' application not found: %s", d.VmrunPath)
+	}
+
+	if _, err := os.Stat(d.VdiskManagerPath); err != nil {
+		return fmt.Errorf("'vmrun' application not found: %s", d.VdiskManagerPath)
 	}
 
 	// Check to see if it APPEARS to be licensed.
