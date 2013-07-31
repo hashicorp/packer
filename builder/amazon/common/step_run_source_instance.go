@@ -99,7 +99,7 @@ func (s *StepRunSourceInstance) Cleanup(state map[string]interface{}) {
 		Conn:    ec2conn,
 		Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
 		Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
-		Target:  "running",
+		Target:  "terminated",
 	}
 
 	WaitForState(&stateChange)
