@@ -83,6 +83,14 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
 
+	for _, mounts := range b.config.ChrootMounts {
+		if len(mounts) != 3 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("Each chroot_mounts entry should be three elements."))
+			break
+		}
+	}
+
 	if b.config.SourceAmi == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("source_ami is required."))
 	}
