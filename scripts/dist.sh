@@ -36,6 +36,7 @@ xc() {
         -d="${DIR}/pkg" \
         -pv="${VERSION}" \
         -pr="${PREVERSION}" \
+        $XC_OPTS \
         go-install \
         xc
 }
