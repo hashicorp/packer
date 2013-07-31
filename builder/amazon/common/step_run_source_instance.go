@@ -41,6 +41,7 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		state["error"] = fmt.Errorf("There was a problem with the source AMI: %s", err)
 		return multistep.ActionHalt
 	}
+
 	if len(imageResp.Images) != 1 {
 		state["error"] = fmt.Errorf("The source AMI '%s' could not be found.", s.SourceAMI)
 		return multistep.ActionHalt
