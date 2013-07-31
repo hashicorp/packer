@@ -1,5 +1,11 @@
 ## 0.2.2 (unreleased)
 
+FEATURES:
+
+* New builder: `amazon-chroot` can create EBS-backed AMIs without launching
+  a new EC2 instance. This can shave minutes off of the AMI creation process.
+  See the docs for more info.
+
 BUG FIXES:
 
 * builder/virtualbox,vmware: relative paths work properly as URL
