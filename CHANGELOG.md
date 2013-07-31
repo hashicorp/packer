@@ -6,6 +6,11 @@ FEATURES:
   a new EC2 instance. This can shave minutes off of the AMI creation process.
   See the docs for more info.
 
+IMPROVEMENTS:
+
+* builder/amazon/all: Added `iam_instance_profile` to launch the source
+  image with a given IAM profile. [GH-226]
+
 BUG FIXES:
 
 * builder/virtualbox,vmware: relative paths work properly as URL
