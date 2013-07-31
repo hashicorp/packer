@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -118,6 +119,13 @@ LockWaitLoop:
 			break LockWaitLoop
 		case <-time.After(1 * time.Second):
 		}
+	}
+
+	if runtime.GOOS == "windows" {
+		// Windows takes a while to yield control of the files when the
+		// process is exiting. We just sleep here. In the future, it'd be
+		// nice to find a better solution to this.
+		time.Sleep(5 * time.Second)
 	}
 
 	log.Println("VM shut down.")
