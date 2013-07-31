@@ -2,6 +2,7 @@ package common
 
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
+	"errors"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/packer/communicator/ssh"
@@ -13,10 +14,12 @@ func SSHAddress(port int) func(map[string]interface{}) (string, error) {
 	return func(state map[string]interface{}) (string, error) {
 		var host string
 		instance := state["instance"].(*ec2.Instance)
-		if instance.VpcId != "" {
+		if instance.DNSName != "" {
+			host = instance.DNSName
+		} else if instance.VpcId == "" {
 			host = instance.PrivateIpAddress
 		} else {
-			host = instance.DNSName
+			return "", errors.New("couldn't determine IP address for instance")
 		}
 
 		return fmt.Sprintf("%s:%d", host, port), nil
