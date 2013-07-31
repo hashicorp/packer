@@ -30,7 +30,7 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) func() (interface{
 }
 
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
-	log.Printf("Waiting for instance state to become: %s", conf.Target)
+	log.Printf("Waiting for state to become: %s", conf.Target)
 
 	for {
 		var currentState string
