@@ -9,6 +9,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* core: Colors won't be outputted on Windows unless in Cygwin.
 * builder/amazon/all: Added `iam_instance_profile` to launch the source
   image with a given IAM profile. [GH-226]
 

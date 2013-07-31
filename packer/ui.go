@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+	"runtime"
 	"unicode"
 )
 
@@ -80,12 +81,30 @@ func (u *ColoredUi) Error(message string) {
 }
 
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
+	if !u.supportsColors() {
+		return message
+	}
+
 	attr := 0
 	if bold {
 		attr = 1
 	}
 
 	return fmt.Sprintf("\033[%d;%d;40m%s\033[0m", attr, color, message)
+}
+
+func (u *ColoredUi) supportsColors() bool {
+	// For now, on non-Windows machine, just assume it does
+	if runtime.GOOS != "windows" {
+		return true
+	}
+
+	// On Windows, if we appear to be in Cygwin, then it does
+	cygwin := os.Getenv("CYGWIN") != "" ||
+		os.Getenv("OSTYPE") == "cygwin" ||
+		os.Getenv("TERM") == "cygwin"
+
+	return cygwin
 }
 
 func (u *PrefixedUi) Ask(query string) (string, error) {
