@@ -9,15 +9,15 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	SourceAmi       string `mapstructure:"source_ami"`
+	SourceAmi          string `mapstructure:"source_ami"`
 	IamInstanceProfile string `mapstructure:"iam_instance_profile"`
-	InstanceType    string `mapstructure:"instance_type"`
-	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
-	SSHUsername     string `mapstructure:"ssh_username"`
-	SSHPort         int    `mapstructure:"ssh_port"`
-	SecurityGroupId string `mapstructure:"security_group_id"`
-	SubnetId        string `mapstructure:"subnet_id"`
-	VpcId           string `mapstructure:"vpc_id"`
+	InstanceType       string `mapstructure:"instance_type"`
+	RawSSHTimeout      string `mapstructure:"ssh_timeout"`
+	SSHUsername        string `mapstructure:"ssh_username"`
+	SSHPort            int    `mapstructure:"ssh_port"`
+	SecurityGroupId    string `mapstructure:"security_group_id"`
+	SubnetId           string `mapstructure:"subnet_id"`
+	VpcId              string `mapstructure:"vpc_id"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
