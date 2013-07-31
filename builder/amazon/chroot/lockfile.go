@@ -2,7 +2,10 @@
 
 package chroot
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
 func lockFile(*os.File) error {
 	return errors.New("not supported on Windows")
