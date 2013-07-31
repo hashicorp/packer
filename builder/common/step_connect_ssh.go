@@ -34,8 +34,7 @@ type StepConnectSSH struct {
 	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
 	SSHWaitTimeout time.Duration
 
-	cancel bool
-	comm   packer.Communicator
+	comm packer.Communicator
 }
 
 func (s *StepConnectSSH) Run(state map[string]interface{}) multistep.StepAction {
@@ -44,10 +43,11 @@ func (s *StepConnectSSH) Run(state map[string]interface{}) multistep.StepAction 
 	var comm packer.Communicator
 	var err error
 
+	cancel := make(chan struct{})
 	waitDone := make(chan bool, 1)
 	go func() {
 		ui.Say("Waiting for SSH to become available...")
-		comm, err = s.waitForSSH(state)
+		comm, err = s.waitForSSH(state, cancel)
 		waitDone <- true
 	}()
 
@@ -70,13 +70,13 @@ WaitLoop:
 			break WaitLoop
 		case <-timeout:
 			ui.Error("Timeout waiting for SSH.")
-			s.cancel = true
+			close(cancel)
 			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
 			if _, ok := state[multistep.StateCancelled]; ok {
 				// The step sequence was cancelled, so cancel waiting for SSH
 				// and just start the halting process.
-				s.cancel = true
+				close(cancel)
 				log.Println("Interrupt detected, quitting waiting for SSH.")
 				return multistep.ActionHalt
 			}
@@ -89,16 +89,16 @@ WaitLoop:
 func (s *StepConnectSSH) Cleanup(map[string]interface{}) {
 }
 
-func (s *StepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Communicator, error) {
+func (s *StepConnectSSH) waitForSSH(state map[string]interface{}, cancel <-chan struct{}) (packer.Communicator, error) {
 	handshakeAttempts := 0
 
 	var comm packer.Communicator
 	for {
-		time.Sleep(5 * time.Second)
-
-		if s.cancel {
+		select {
+		case <-cancel:
 			log.Println("SSH wait cancelled. Exiting loop.")
 			return nil, errors.New("SSH wait cancelled")
+		case <-time.After(5 * time.Second):
 		}
 
 		// First we request the TCP connection information
@@ -130,6 +130,7 @@ func (s *StepConnectSSH) waitForSSH(state map[string]interface{}) (packer.Commun
 			SSHConfig:  sshConfig,
 		}
 
+		log.Println("Attempting SSH connection...")
 		comm, err = ssh.New(config)
 		if err != nil {
 			log.Printf("SSH handshake err: %s", err)
