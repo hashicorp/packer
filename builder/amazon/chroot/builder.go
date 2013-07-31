@@ -72,7 +72,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.MountPath == "" {
-		b.config.MountPath = "/var/packer-amazon-chroot/volumes/{{.Device}}"
+		b.config.MountPath = "packer-amazon-chroot-volumes/{{.Device}}"
 	}
 
 	if b.config.UnmountCommand == "" {
