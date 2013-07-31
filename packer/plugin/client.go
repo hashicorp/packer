@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 )
 
 // This is a slice of the "managed" clients which are cleaned up when
@@ -306,8 +307,10 @@ func (c *Client) logStderr(r io.Reader) {
 	for {
 		line, err := bufR.ReadString('\n')
 		if line != "" {
-			log.Printf("%s: %s", c.config.Cmd.Path, line)
 			c.config.Stderr.Write([]byte(line))
+
+			line = strings.TrimRightFunc(line, unicode.IsSpace)
+			log.Printf("%s: %s", c.config.Cmd.Path, line)
 		}
 
 		if err == io.EOF {
