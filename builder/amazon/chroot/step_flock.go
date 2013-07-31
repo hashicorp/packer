@@ -1,0 +1,59 @@
+package chroot
+
+import (
+	"fmt"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"log"
+	"os"
+	"path/filepath"
+)
+
+// StepFlock provisions the instance within a chroot.
+type StepFlock struct {
+	fh *os.File
+}
+
+func (s *StepFlock) Run(state map[string]interface{}) multistep.StepAction {
+	ui := state["ui"].(packer.Ui)
+
+	lockfile := "/var/lock/packer-chroot/lock"
+	if err := os.MkdirAll(filepath.Dir(lockfile), 0755); err != nil {
+		err := fmt.Errorf("Error creating lock: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	log.Printf("Obtaining lock: %s", lockfile)
+	f, err := os.Create(lockfile)
+	if err != nil {
+		err := fmt.Errorf("Error creating lock: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// LOCK!
+	if err := lockFile(f); err != nil {
+		err := fmt.Errorf("Error creating lock: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Set the file handle, we can't close it because we need to hold
+	// the lock.
+	s.fh = f
+
+	return multistep.ActionContinue
+}
+
+func (s *StepFlock) Cleanup(state map[string]interface{}) {
+	if s.fh == nil {
+		return
+	}
+
+	log.Printf("Unlocking: %s", s.fh.Name())
+	unlockFile(s.fh)
+}
