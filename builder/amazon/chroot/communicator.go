@@ -45,6 +45,9 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 			}
 		}
 
+		log.Printf(
+			"Chroot executation ended with '%d': '%s'",
+			exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 	}()
 
