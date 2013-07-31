@@ -1,10 +1,7 @@
-// +build darwin freebsd linux netbsd openbsd
-
 package vmware
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -88,64 +85,39 @@ func (d *Workstation9Driver) Stop(vmxPath string) error {
 }
 
 func (d *Workstation9Driver) Verify() error {
-	if err := d.findApp(); err != nil {
-		return fmt.Errorf("VMware Workstation application ('vmware') not found in path.")
+	var err error
+	if d.AppPath == "" {
+		if d.AppPath, err = workstationFindVMware(); err != nil {
+			return err
+		}
 	}
 
-	if err := d.findVmrun(); err != nil {
-		return fmt.Errorf("Required application 'vmrun' not found in path.")
+	if d.VmrunPath == "" {
+		if d.VmrunPath, err = workstationFindVmrun(); err != nil {
+			return err
+		}
 	}
 
-	if err := d.findVdiskManager(); err != nil {
-		return fmt.Errorf("Required application 'vmware-vdiskmanager' not found in path.")
+	if d.VdiskManagerPath == "" {
+		if d.VdiskManagerPath, err = workstationFindVdiskManager(); err != nil {
+			return err
+		}
 	}
 
 	// Check to see if it APPEARS to be licensed.
-	matches, err := filepath.Glob("/etc/vmware/license-*")
-	if err != nil {
-		return fmt.Errorf("Error looking for VMware license: %s", err)
-	}
-
-	if len(matches) == 0 {
-		return errors.New("Workstation does not appear to be licensed. Please license it.")
-	}
-
-	return nil
-}
-
-func (d *Workstation9Driver) findApp() error {
-	path, err := exec.LookPath("vmware")
-	if err != nil {
+	if err := workstationCheckLicense(); err != nil {
 		return err
 	}
-	d.AppPath = path
-	return nil
-}
 
-func (d *Workstation9Driver) findVdiskManager() error {
-	path, err := exec.LookPath("vmware-vdiskmanager")
-	if err != nil {
-		return err
-	}
-	d.VdiskManagerPath = path
-	return nil
-}
-
-func (d *Workstation9Driver) findVmrun() error {
-	path, err := exec.LookPath("vmrun")
-	if err != nil {
-		return err
-	}
-	d.VmrunPath = path
 	return nil
 }
 
 func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
-	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
+	return workstationToolsIsoPath(flavor)
 }
 
 func (d *Workstation9Driver) DhcpLeasesPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
+	return workstationDhcpLeasesPath(device)
 }
 
 func (d *Workstation9Driver) runAndLog(cmd *exec.Cmd) (string, string, error) {
