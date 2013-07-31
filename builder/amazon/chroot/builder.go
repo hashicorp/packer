@@ -24,14 +24,13 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
-	ChrootMounts       [][]string `mapstructure:"chroot_mounts"`
-	CopyFiles          []string   `mapstructure:"copy_files"`
-	DevicePath         string     `mapstructure:"device_path"`
-	DevicePrefix       string     `mapstructure:"device_prefix"`
-	MountCommand       string     `mapstructure:"mount_command"`
-	MountPath          string     `mapstructure:"mount_path"`
-	SourceAmi          string     `mapstructure:"source_ami"`
-	UnmountCommand     string     `mapstructure:"unmount_command"`
+	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
+	CopyFiles      []string   `mapstructure:"copy_files"`
+	DevicePath     string     `mapstructure:"device_path"`
+	MountCommand   string     `mapstructure:"mount_command"`
+	MountPath      string     `mapstructure:"mount_path"`
+	SourceAmi      string     `mapstructure:"source_ami"`
+	UnmountCommand string     `mapstructure:"unmount_command"`
 }
 
 type Builder struct {
@@ -66,10 +65,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if len(b.config.CopyFiles) == 0 {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}
-	}
-
-	if b.config.DevicePath == "" {
-		b.config.DevicePath = "/dev/sdh"
 	}
 
 	if b.config.MountCommand == "" {
@@ -128,6 +123,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&StepInstanceInfo{},
 		&StepSourceAMIInfo{},
+		&StepPrepareDevice{},
 		&StepCreateVolume{},
 		&StepAttachVolume{},
 		&StepMountDevice{},
