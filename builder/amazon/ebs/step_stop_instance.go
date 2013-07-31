@@ -34,8 +34,7 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 		Refresh:   awscommon.InstanceStateRefreshFunc(ec2conn, instance),
 		StepState: state,
 	}
-	instanceRaw, err := awscommon.WaitForState(&stateChange)
-	instance = instanceRaw.(*ec2.Instance)
+	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
 		state["error"] = err
