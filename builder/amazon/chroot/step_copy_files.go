@@ -43,7 +43,7 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 		}
 	}
 
-	state["copy_files_cleanup"] = s.CleanupFunc
+	state["copy_files_cleanup"] = s
 	return multistep.ActionContinue
 }
 
