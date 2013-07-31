@@ -46,7 +46,9 @@ func NewDriver() (Driver, error) {
 			AppPath: "/Applications/VMware Fusion.app",
 		}
 	case "linux":
-		driver = &Workstation9LinuxDriver{}
+		fallthrough
+	case "windows":
+		driver = &Workstation9Driver{}
 	default:
 		return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 	}

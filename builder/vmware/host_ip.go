@@ -1,3 +1,5 @@
+// +build darwin freebsd linux netbsd openbsd
+
 package vmware
 
 import (
