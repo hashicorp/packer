@@ -73,6 +73,8 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 		return multistep.ActionHalt
 	}
 
+	log.Printf("Host IP for the VMware machine: %s", hostIp)
+
 	tplData := &bootCommandTemplateData{
 		hostIp,
 		httpPort,
