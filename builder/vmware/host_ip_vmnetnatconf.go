@@ -57,7 +57,9 @@ func (*VMnetNatConfIPFinder) HostIP() (string, error) {
 			break
 		}
 
-		return "", err
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return "", errors.New("host IP not found in NAT config")
