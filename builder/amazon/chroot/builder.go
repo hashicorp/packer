@@ -6,6 +6,7 @@ package chroot
 
 import (
 	"errors"
+	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -13,6 +14,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"runtime"
+	"text/template"
 )
 
 // The unique ID for this builder
@@ -24,6 +26,7 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
+	AMIName        string     `mapstructure:"ami_name"`
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
 	DevicePath     string     `mapstructure:"device_path"`
@@ -82,6 +85,17 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
+
+	if b.config.AMIName == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ami_name must be specified"))
+	} else {
+		_, err = template.New("ami").Parse(b.config.AMIName)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
+		}
+	}
 
 	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {

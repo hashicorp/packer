@@ -1,23 +1,40 @@
 package chroot
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
+	"strconv"
+	"text/template"
+	"time"
 )
+
+type amiNameData struct {
+	CreateTime string
+}
 
 // StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct{}
 
 func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction {
+	config := state["config"].(*Config)
 	ec2conn := state["ec2"].(*ec2.EC2)
 	image := state["source_image"].(*ec2.Image)
 	snapshotId := state["snapshot_id"].(string)
 	ui := state["ui"].(packer.Ui)
 
-	amiName := "foo"
+	// Parse the name of the AMI
+	amiNameBuf := new(bytes.Buffer)
+	tData := amiNameData{
+		strconv.FormatInt(time.Now().UTC().Unix(), 10),
+	}
+
+	t := template.Must(template.New("ami").Parse(config.AMIName))
+	t.Execute(amiNameBuf, tData)
+	amiName := amiNameBuf.String()
 
 	ui.Say("Registering the AMI...")
 	blockDevices := make([]ec2.BlockDeviceMapping, len(image.BlockDevices))
