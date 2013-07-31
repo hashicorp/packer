@@ -17,6 +17,8 @@ BUG FIXES:
 
 * builder/virtualbox,vmware: relative paths work properly as URL
   configurations. [GH-215]
+* builder/virtualbox,vmware: fix race condition in deleting the output
+  directory on Windows by retrying.
 
 ## 0.2.1 (July 26, 2013)
 
