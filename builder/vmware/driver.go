@@ -70,10 +70,13 @@ func NewDriver() (Driver, error) {
 		if err == nil {
 			return driver, nil
 		}
-		errs += err.Error() + "\n"
+		errs += "* " + err.Error() + "\n"
 	}
 
-	return nil, fmt.Errorf("Unable to initialize any driver:\n%s", errs)
+	return nil, fmt.Errorf(
+		"Unable to initialize any driver for this platform. The errors\n"+
+			"from each driver are shown below. Please fix at least one driver\n"+
+			"to continue:\n%s", errs)
 }
 
 func runAndLog(cmd *exec.Cmd) (string, string, error) {
