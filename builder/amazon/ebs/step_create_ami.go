@@ -12,7 +12,9 @@ import (
 	"time"
 )
 
-type stepCreateAMI struct{}
+type stepCreateAMI struct {
+	Tags []ec2.Tag
+}
 
 type amiNameData struct {
 	CreateTime string
@@ -62,6 +64,19 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 		state["error"] = err
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	// Add tags to AMI
+	if s.Tags != nil {
+		ui.Say(fmt.Sprintf("Add tags to AMI (%s)...", createResp.ImageId))
+		amiId := []string{createResp.ImageId}
+		_, err := ec2conn.CreateTags(amiId, s.Tags)
+		if err != nil {
+			err := fmt.Errorf("Error adding tags to AMI (%s): %s", createResp.ImageId, err)
+			state["error"] = err
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue
