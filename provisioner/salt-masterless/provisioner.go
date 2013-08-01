@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-var Ui packer.Ui
-
 const DefaultTempConfigDir = "/tmp/salt"
 
 type Config struct {
@@ -81,7 +79,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
-	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm); err != nil {
+	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm, ui); err != nil {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
@@ -106,7 +104,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return nil
 }
 
-func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communicator) (err error) {
+func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communicator, ui packer.Ui) (err error) {
 	visitPath := func(localPath string, f os.FileInfo, err error) (err2 error) {
 		localRelPath := strings.Replace(localPath, localDir, "", 1)
 		remotePath := fmt.Sprintf("%s%s", remoteDir, localRelPath)
@@ -116,7 +114,7 @@ func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communi
 		if f.IsDir() {
 			// Make remote directory
 			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", remotePath)}
-			if err = cmd.StartWithUi(comm, Ui); err != nil {
+			if err = cmd.StartWithUi(comm, ui); err != nil {
 				return err
 			}
 		} else {
@@ -127,7 +125,7 @@ func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communi
 			}
 			defer file.Close()
 
-			Ui.Message(fmt.Sprintf("Uploading file %s: %s", localPath, remotePath))
+			ui.Message(fmt.Sprintf("Uploading file %s: %s", localPath, remotePath))
 			if err = comm.Upload(remotePath, file); err != nil {
 				return fmt.Errorf("Error uploading file: %s", err)
 			}
