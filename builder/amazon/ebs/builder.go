@@ -107,7 +107,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&stepStopInstance{},
-		&stepCreateAMI{},
+		&stepCreateAMI{
+			Tags: b.config.Tags,
+		},
 	}
 
 	// Run!
