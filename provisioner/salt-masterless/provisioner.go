@@ -5,11 +5,10 @@ package saltmasterless
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/builder/common"
 	"github.com/mitchellh/packer/packer"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 )
 
@@ -17,7 +16,7 @@ var Ui packer.Ui
 
 const DefaultTempConfigDir = "/tmp/salt"
 
-type config struct {
+type Config struct {
 	// If true, run the salt-bootstrap script
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
@@ -30,52 +29,29 @@ type config struct {
 }
 
 type Provisioner struct {
-	config config
+	config Config
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	var md mapstructure.Metadata
-	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   &p.config,
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	md, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
-	}
-
-	for _, raw := range raws {
-		err := decoder.Decode(raw)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Accumulate any errors
-	errs := make([]error, 0)
-
-	// Unused keys are errors
-	if len(md.Unused) > 0 {
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
-			}
-		}
-	}
-
-	if p.config.LocalStateTree == "" {
-		errs = append(errs, errors.New("Please specify a local_state_tree"))
 	}
 
 	if p.config.TempConfigDir == "" {
 		p.config.TempConfigDir = DefaultTempConfigDir
 	}
 
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
+
+	if p.config.LocalStateTree == "" {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Please specify a local_state_tree"))
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
