@@ -6,6 +6,7 @@ FEATURES:
   a new EC2 instance. This can shave minutes off of the AMI creation process.
   See the docs for more info.
 * The `vmware` builder now works with Workstation 9 on Windows. [GH-222]
+* The `vmware` builder now works with Player 5 on Linux. [GH-190]
 
 IMPROVEMENTS:
 
