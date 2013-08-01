@@ -30,8 +30,8 @@ platform is noted. They are listed in alphabetical order. For more detailed
 information on supported configuration parameters and usage, please see
 the appropriate [documentation page within the documentation section](/docs).
 
-* ***Amazon EC2 (AMI)***. EBS-backed AMIs within EC2, optionally distributed
-  to multiple regions.
+* ***Amazon EC2 (AMI)***. Both EBS-backed and instance-store AMIs within EC2,
+  optionally distributed to multiple regions.
 
 * ***DigitalOcean***. Snapshots for [DigitalOcean](http://www.digitalocean.com)
   that can be used to start a pre-configured DigitalOcean instance of any size.
