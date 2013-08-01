@@ -8,9 +8,10 @@ Type: `vmware`
 
 The VMware builder is able to create VMware virtual machines. It currently
 supports building virtual machines on hosts running
-[VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X, and
-[VMware Workstation](http://www.vmware.com/products/workstation/overview.html) for Linux and Windows.
-Support for VMWare ESXi/vSphere and VMWare Player is forthcoming.
+[VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X,
+[VMware Workstation](http://www.vmware.com/products/workstation/overview.html)
+for Linux and Windows, and
+[VMware Player](http://www.vmware.com/products/player/) on Linux.
 
 The builder builds a virtual machine by creating a new virtual machine
 from scratch, booting it, installing an OS, provisioning software within
