@@ -60,40 +60,41 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	var err error
 
+	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
 			Command: fmt.Sprintf("wget -O - http://bootstrap.saltstack.org | sudo sh -s %s", p.config.BootstrapArgs),
 		}
-		ui.Say(fmt.Sprintf("Installing Salt with command %s", cmd))
+		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Unable to install Salt: %d", err)
 		}
 	}
 
-	ui.Say(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
+	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
 	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Error creating remote salt state directory: %s", err)
 	}
 
-	ui.Say(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
+	ui.Message(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
 	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm); err != nil {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
-	ui.Say(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
+	ui.Message(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
 	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s /srv/salt", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Unable to move %s to /srv/salt: %d", p.config.TempConfigDir, err)
 	}
 
-	ui.Say("Running highstate")
+	ui.Message("Running highstate")
 	cmd = &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info"}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Error executing highstate: %s", err)
 	}
 
-	ui.Say("Removing /srv/salt")
+	ui.Message("Removing /srv/salt")
 	cmd = &packer.RemoteCmd{Command: "sudo rm -r /srv/salt"}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Unable to remove /srv/salt: %d", err)
@@ -123,7 +124,7 @@ func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communi
 			}
 			defer file.Close()
 
-			Ui.Say(fmt.Sprintf("Uploading file %s: %s", localPath, remotePath))
+			Ui.Message(fmt.Sprintf("Uploading file %s: %s", localPath, remotePath))
 			if err = comm.Upload(remotePath, file); err != nil {
 				return fmt.Errorf("Error uploading file: %s", err)
 			}
