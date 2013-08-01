@@ -48,6 +48,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.LocalStateTree == "" {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Please specify a local_state_tree"))
+	} else if _, err := os.Stat(p.config.LocalStateTree); err != nil {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("local_state_tree must exist and be accessible"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

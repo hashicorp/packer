@@ -2,12 +2,13 @@ package saltmasterless
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"os"
 	"testing"
 )
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"local_state_tree": "/Users/me/salt",
+		"local_state_tree": os.TempDir(),
 	}
 }
 
@@ -42,5 +43,22 @@ func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	err := p.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestProvisionerPrepare_LocalStateTree(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	config["local_state_tree"] = "/i/dont/exist/i/think"
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	config["local_state_tree"] = os.TempDir()
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }
