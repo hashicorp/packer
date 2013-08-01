@@ -120,7 +120,9 @@ func (d *Player5LinuxDriver) Verify() error {
 
 	if err := d.findVdiskManager(); err != nil {
 		if err := d.findQemuImg(); err != nil {
-			return fmt.Errorf("Neither 'vmware-vdiskmanager', not 'qemu-img' found in path.")
+			return fmt.Errorf(
+				"Neither 'vmware-vdiskmanager', nor 'qemu-img' found in path.\n" +
+					"One of these is required to configure disks for VMware Player.")
 		}
 	}
 
