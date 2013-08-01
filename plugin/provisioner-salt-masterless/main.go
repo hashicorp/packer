@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	plugin.ServeProvisioner(new(saltMasterless.Provisioner))
+	plugin.ServeProvisioner(new(saltmasterless.Provisioner))
 }
