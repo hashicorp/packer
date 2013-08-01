@@ -59,42 +59,41 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	var err error
-	Ui = ui
 
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
 			Command: fmt.Sprintf("wget -O - http://bootstrap.saltstack.org | sudo sh -s %s", p.config.BootstrapArgs),
 		}
-		Ui.Say(fmt.Sprintf("Installing Salt with command %s", cmd))
+		ui.Say(fmt.Sprintf("Installing Salt with command %s", cmd))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Unable to install Salt: %d", err)
 		}
 	}
 
-	Ui.Say(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
+	ui.Say(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
 	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Error creating remote salt state directory: %s", err)
 	}
 
-	Ui.Say(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
+	ui.Say(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
 	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm); err != nil {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
-	Ui.Say(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
+	ui.Say(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
 	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s /srv/salt", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Unable to move %s to /srv/salt: %d", p.config.TempConfigDir, err)
 	}
 
-	Ui.Say("Running highstate")
+	ui.Say("Running highstate")
 	cmd = &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info"}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Error executing highstate: %s", err)
 	}
 
-	Ui.Say("Removing /srv/salt")
+	ui.Say("Removing /srv/salt")
 	cmd = &packer.RemoteCmd{Command: "sudo rm -r /srv/salt"}
 	if err = cmd.StartWithUi(comm, ui); err != nil {
 		return fmt.Errorf("Unable to remove /srv/salt: %d", err)
