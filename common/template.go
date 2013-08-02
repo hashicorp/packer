@@ -181,7 +181,10 @@ func traverseSliceStrings(n string, v reflect.Value, f traverseFunc) {
 }
 
 func traverseStructStrings(n string, v reflect.Value, f traverseFunc) {
-	n = n + "."
+	if n != "" {
+		n = n + "."
+	}
+
 	vt := v.Type()
 	for i := 0; i < vt.NumField(); i++ {
 		field := v.FieldByIndex([]int{i})
