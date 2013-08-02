@@ -206,10 +206,10 @@ func TestConfigTemplateProcess(t *testing.T) {
 	}
 
 	config := &S{
-		Foo: "foo",
-		Bar: []string{"foo"},
+		Foo: `{{user "foo"}}`,
+		Bar: []string{`{{builder "bar"}}`},
 		Baz: map[string]string{
-			"foo": "foo",
+			`{{user "foo"}}`: `{{builder "bar"}}`,
 		},
 	}
 
@@ -217,6 +217,13 @@ func TestConfigTemplateProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+
+	if err := ct.Check(); err != nil {
+		t.Fatalf("check err: %s", err)
+	}
+
+	ct.BuilderVars["bar"] = "baz"
+	ct.UserVars["foo"] = "bar"
 
 	if err := ct.Process(); err != nil {
 		t.Fatalf("err: %s", err)
@@ -226,11 +233,11 @@ func TestConfigTemplateProcess(t *testing.T) {
 		t.Fatalf("bad value: %s", config.Foo)
 	}
 
-	if config.Bar[0] != "bar" {
+	if config.Bar[0] != "baz" {
 		t.Fatalf("bad value: %s", config.Bar[0])
 	}
 
-	if config.Baz["bar"] != "bar" {
+	if config.Baz["bar"] != "baz" {
 		t.Fatalf("bad value: %s", config.Baz["bar"])
 	}
 }

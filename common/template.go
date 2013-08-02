@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
@@ -15,7 +16,11 @@ type traverseFunc func(string, string) string
 // common functions to all strings within Packer without any extra effort
 // by the implementor.
 type ConfigTemplate struct {
-	v reflect.Value
+	BuilderVars map[string]string
+	UserVars    map[string]string
+	root        *template.Template
+	t           map[string]*template.Template
+	v           reflect.Value
 }
 
 // NewConfigTemplate will return a new configuration template processor
@@ -37,9 +42,24 @@ func NewConfigTemplate(i interface{}) (*ConfigTemplate, error) {
 		return nil, errors.New("Interface must be a struct")
 	}
 
-	return &ConfigTemplate{
-		v: v,
-	}, nil
+	result := &ConfigTemplate{
+		BuilderVars: make(map[string]string),
+		UserVars:    make(map[string]string),
+		t:           make(map[string]*template.Template),
+		v:           v,
+	}
+
+	root := template.New("configTemplateRoot")
+	root.Funcs(template.FuncMap{
+		"builder": result.Builder,
+		"user":    result.User,
+	})
+
+	// Set the template root so we can have a place to store
+	// our template data.
+	result.root = root
+
+	return result, nil
 }
 
 // Check verifies that all the string values in the given
@@ -49,10 +69,12 @@ func (ct *ConfigTemplate) Check() error {
 	errs := make([]error, 0)
 
 	f := func(n string, s string) string {
-		_, err := template.New("field").Parse(s)
+		t, err := ct.root.New(n).Parse(s)
 		if err != nil {
 			errs = append(errs,
 				fmt.Errorf("%s is not a valid template: %s", n, err))
+		} else {
+			ct.t[n] = t
 		}
 
 		return s
@@ -69,12 +91,35 @@ func (ct *ConfigTemplate) Check() error {
 // Process goes over all the string values in the structure and runs
 // the template on each of them, modifying them in place.
 func (ct *ConfigTemplate) Process() error {
+	buf := new(bytes.Buffer)
 	f := func(n string, s string) string {
-		return "bar"
+		t := ct.t[n]
+
+		buf.Reset()
+		t.Execute(buf, nil)
+		return buf.String()
 	}
 
 	traverseStructStrings("", ct.v, f)
 	return nil
+}
+
+func (ct *ConfigTemplate) Builder(n string) (string, error) {
+	result, ok := ct.BuilderVars[n]
+	if !ok {
+		return "", fmt.Errorf("uknown builder var: %s", n)
+	}
+
+	return result, nil
+}
+
+func (ct *ConfigTemplate) User(n string) (string, error) {
+	result, ok := ct.UserVars[n]
+	if !ok {
+		return "", fmt.Errorf("uknown user var: %s", n)
+	}
+
+	return result, nil
 }
 
 func traverseMapStrings(n string, v reflect.Value, f traverseFunc) {
@@ -86,7 +131,7 @@ func traverseMapStrings(n string, v reflect.Value, f traverseFunc) {
 
 		kv := v.MapIndex(k)
 		fieldName := n + k.Interface().(string)
-		newK, kRep := traverseValue(fieldName, k, f)
+		newK, kRep := traverseValue(fieldName+" (key)", k, f)
 		newV, vRep := traverseValue(fieldName, kv, f)
 
 		var replaceKey, replaceValue reflect.Value
