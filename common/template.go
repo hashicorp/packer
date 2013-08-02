@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-type traverseFunc func(string, string) (string, bool)
+type traverseFunc func(string, string) string
 
 // ConfigTemplate processes your entire configuration struct and processes
 // all strings through the Golang text/template processor. This exposes
@@ -48,14 +48,14 @@ func NewConfigTemplate(i interface{}) (*ConfigTemplate, error) {
 func (ct *ConfigTemplate) Check() error {
 	errs := make([]error, 0)
 
-	f := func(n string, s string) (string, bool) {
+	f := func(n string, s string) string {
 		_, err := template.New("field").Parse(s)
 		if err != nil {
 			errs = append(errs,
 				fmt.Errorf("%s is not a valid template: %s", n, err))
 		}
 
-		return "", false
+		return s
 	}
 
 	traverseStructStrings("", ct.v, f)
@@ -63,6 +63,17 @@ func (ct *ConfigTemplate) Check() error {
 		return &packer.MultiError{errs}
 	}
 
+	return nil
+}
+
+// Process goes over all the string values in the structure and runs
+// the template on each of them, modifying them in place.
+func (ct *ConfigTemplate) Process() error {
+	f := func(n string, s string) string {
+		return "bar"
+	}
+
+	traverseStructStrings("", ct.v, f)
 	return nil
 }
 
@@ -75,8 +86,24 @@ func traverseMapStrings(n string, v reflect.Value, f traverseFunc) {
 
 		kv := v.MapIndex(k)
 		fieldName := n + k.Interface().(string)
-		traverseValue(fieldName, k, f)
-		traverseValue(fieldName, kv, f)
+		newK, kRep := traverseValue(fieldName, k, f)
+		newV, vRep := traverseValue(fieldName, kv, f)
+
+		var replaceKey, replaceValue reflect.Value
+		if vRep {
+			replaceValue = reflect.ValueOf(newV)
+		} else {
+			replaceValue = kv
+		}
+
+		if kRep {
+			v.SetMapIndex(k, reflect.Zero(kv.Type()))
+			replaceKey = reflect.ValueOf(newK)
+		} else {
+			replaceKey = k
+		}
+
+		v.SetMapIndex(replaceKey, replaceValue)
 	}
 }
 
@@ -88,7 +115,9 @@ func traverseSliceStrings(n string, v reflect.Value, f traverseFunc) {
 		}
 
 		fieldName := fmt.Sprintf("%s[%d]", n, i)
-		traverseValue(fieldName, elem, f)
+		if r, do := traverseValue(fieldName, elem, f); do {
+			elem.SetString(r)
+		}
 	}
 }
 
@@ -103,7 +132,9 @@ func traverseStructStrings(n string, v reflect.Value, f traverseFunc) {
 
 		sf := vt.Field(i)
 		fieldName := n + sf.Name
-		traverseValue(fieldName, field, f)
+		if r, do := traverseValue(fieldName, field, f); do {
+			field.SetString(r)
+		}
 	}
 }
 
@@ -116,7 +147,7 @@ func traverseValue(n string, v reflect.Value, f traverseFunc) (string, bool) {
 	case reflect.Slice:
 		traverseSliceStrings(n, v, f)
 	case reflect.String:
-		return f(n, v.Interface().(string))
+		return f(n, v.Interface().(string)), true
 	}
 
 	return "", false

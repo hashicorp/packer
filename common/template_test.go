@@ -197,3 +197,40 @@ func TestConfigTemplateCheck_Slice(t *testing.T) {
 		t.Fatal("error expected")
 	}
 }
+
+func TestConfigTemplateProcess(t *testing.T) {
+	type S struct {
+		Foo string
+		Bar []string
+		Baz map[string]string
+	}
+
+	config := &S{
+		Foo: "foo",
+		Bar: []string{"foo"},
+		Baz: map[string]string{
+			"foo": "foo",
+		},
+	}
+
+	ct, err := NewConfigTemplate(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := ct.Process(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if config.Foo != "bar" {
+		t.Fatalf("bad value: %s", config.Foo)
+	}
+
+	if config.Bar[0] != "bar" {
+		t.Fatalf("bad value: %s", config.Bar[0])
+	}
+
+	if config.Baz["bar"] != "bar" {
+		t.Fatalf("bad value: %s", config.Baz["bar"])
+	}
+}
