@@ -81,6 +81,8 @@ Optional:
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
 
+* `tags` (array of key/value pairs) - Tags applied to the AMI.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
@@ -94,7 +96,11 @@ Here is a basic example. It is completely valid except for the access keys:
   "source_ami": "ami-de0d9eb7",
   "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{.CreateTime}}"
+  "ami_name": "packer-quick-start {{.CreateTime}}",
+  "tags": [
+    { "key": "myTagName1", "value": "myTagValue1" },
+    { "key": "myTagName2", "value": "myTagValue2" }
+  ]
 }
 </pre>
 
