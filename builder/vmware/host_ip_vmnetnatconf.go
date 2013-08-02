@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -17,15 +16,18 @@ import (
 type VMnetNatConfIPFinder struct{}
 
 func (*VMnetNatConfIPFinder) HostIP() (string, error) {
-	programData := os.Getenv("ProgramData")
-	if programData == "" {
-		return "", errors.New("ProgramData directory not found.")
+	const VMNETNAT_CONF = "vmnetnat.conf"
+
+	driver := &Workstation9Driver{}
+
+	vmnetnat := driver.VmnetnatConfPath()
+
+	if vmnetnat == "" {
+		return "", fmt.Errorf("Could not find %s", VMNETNAT_CONF)
 	}
 
-	programData = strings.Replace(programData, "\\", "/", -1)
-	vmnetnat := filepath.Join(programData, "/VMware/vmnetnat.conf")
 	if _, err := os.Stat(vmnetnat); err != nil {
-		return "", fmt.Errorf("Error with vmnetnat.conf: %s", err)
+		return "", fmt.Errorf("Error with %s: %s", VMNETNAT_CONF, err)
 	}
 
 	f, err := os.Open(vmnetnat)
@@ -62,5 +64,5 @@ func (*VMnetNatConfIPFinder) HostIP() (string, error) {
 		}
 	}
 
-	return "", errors.New("host IP not found in NAT config")
+	return "", errors.New("host IP not found in " + vmnetnat)
 }

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 )
@@ -90,6 +91,10 @@ func DownloadableURL(original string) (string, error) {
 		url.Path = filepath.Clean(url.Path)
 	}
 
+	if runtime.GOOS == "windows" {
+		url.Path = strings.Replace(url.Path, "\\", "/", -1)
+	}
+
 	// Make sure it is lowercased
 	url.Scheme = strings.ToLower(url.Scheme)
 
@@ -97,8 +102,10 @@ func DownloadableURL(original string) (string, error) {
 	// we distribute with a version of Go that fixes that bug.
 	//
 	// See: https://code.google.com/p/go/issues/detail?id=5927
-	if url.Path != "" && url.Path[0] != '/' {
-		url.Path = "/" + url.Path
+	if runtime.GOOS != "windows" {
+		if url.Path != "" && url.Path[0] != '/' {
+			url.Path = "/" + url.Path
+		}
 	}
 
 	// Verify that the scheme is something we support in our common downloader.
