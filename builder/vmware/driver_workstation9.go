@@ -135,3 +135,7 @@ func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
 func (d *Workstation9Driver) DhcpLeasesPath(device string) string {
 	return workstationDhcpLeasesPath(device)
 }
+
+func (d *Workstation9Driver) VmnetnatConfPath() string {
+	return workstationVmnetnatConfPath()
+}
