@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"reflect"
@@ -9,19 +10,37 @@ import (
 
 type traverseFunc func(string, string) (string, bool)
 
-// CheckTemplates verifies that all the string values in the given
-// configuration struct are valid templates. If not, an error is
-// returned.
-func CheckTemplates(i interface{}) *packer.MultiError {
+// ConfigTemplate processes your entire configuration struct and processes
+// all strings through the Golang text/template processor. This exposes
+// common functions to all strings within Packer without any extra effort
+// by the implementor.
+type ConfigTemplate struct {
+	v reflect.Value
+}
+
+// NewConfigTemplate will return a new configuration template processor
+// for the given interface. The interface passed in should generally be
+// a pointer to your configuration struct, because ConfigTemplate will
+// modify data in-place.
+func NewConfigTemplate(i interface{}) (*ConfigTemplate, error) {
 	v := reflect.ValueOf(i).Elem()
 	if !v.CanAddr() {
-		panic("Arg to CheckTemplates isn't addressable")
+		return nil, errors.New("Interface isn't addressable")
 	}
 
 	if v.Kind() != reflect.Struct {
-		panic("Arg to CheckTemplates must be a struct")
+		return nil, errors.New("Interface must be a struct")
 	}
 
+	return &ConfigTemplate{
+		v: v,
+	}, nil
+}
+
+// Check verifies that all the string values in the given
+// configuration struct are valid templates. If not, an error is
+// returned.
+func (ct *ConfigTemplate) Check() error {
 	errs := make([]error, 0)
 
 	f := func(n string, s string) (string, bool) {
@@ -34,15 +53,11 @@ func CheckTemplates(i interface{}) *packer.MultiError {
 		return "", false
 	}
 
-	traverseStructStrings("", v, f)
+	traverseStructStrings("", ct.v, f)
 	if len(errs) > 0 {
 		return &packer.MultiError{errs}
 	}
 
-	return nil
-}
-
-func ProcessTemplates(i interface{}) *packer.MultiError {
 	return nil
 }
 

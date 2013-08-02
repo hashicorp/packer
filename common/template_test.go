@@ -18,15 +18,25 @@ func TestCheckTemplates_Basic(t *testing.T) {
 
 	// Test valid case
 	s := valid
-	err := CheckTemplates(&s)
+	ct, err := NewConfigTemplate(&s)
 	if err != nil {
 		t.Fatalf("err: %s", err)
+	}
+
+	err = ct.Check()
+	if err != nil {
+		t.Fatalf("err: %p", err)
 	}
 
 	// Test invalid
 	s = valid
 	s.A = "{{invalid}}"
-	err = CheckTemplates(&s)
+	ct, err = NewConfigTemplate(&s)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = ct.Check()
 	if err == nil {
 		t.Fatal("error expected")
 	}
@@ -40,15 +50,24 @@ func TestCheckTemplates_Map(t *testing.T) {
 	s := &S{
 		M: map[string]string{"valid": "valid"},
 	}
-	err := CheckTemplates(s)
+	ct, err := NewConfigTemplate(s)
 	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := ct.Check(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	s = &S{
 		M: map[string]string{"{{invalid}}": "valid"},
 	}
-	err = CheckTemplates(s)
+	ct, err = NewConfigTemplate(s)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = ct.Check()
 	if err == nil {
 		t.Fatal("error expected")
 	}
@@ -67,13 +86,22 @@ func TestCheckTemplates_Nested(t *testing.T) {
 	}
 
 	sn := &S_nested{A: S{A: "foo"}}
-	err := CheckTemplates(sn)
+	ct, err := NewConfigTemplate(sn)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
+	if err := ct.Check(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
 	sn = &S_nested{A: S{A: "{{invalid}}"}}
-	err = CheckTemplates(sn)
+	ct, err = NewConfigTemplate(sn)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = ct.Check()
 	if err == nil {
 		t.Fatal("error expected")
 	}
@@ -89,13 +117,22 @@ func TestCheckTemplates_Slice(t *testing.T) {
 	}
 
 	ss := &S_slice{A: []string{"valid"}}
-	err := CheckTemplates(ss)
+	ct, err := NewConfigTemplate(ss)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
+	if err := ct.Check(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
 	ss = &S_slice{A: []string{"{{invalid}}"}}
-	err = CheckTemplates(ss)
+	ct, err = NewConfigTemplate(ss)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = ct.Check()
 	if err == nil {
 		t.Fatal("error expected")
 	}
@@ -110,8 +147,12 @@ func TestCheckTemplates_Slice(t *testing.T) {
 			S_slice{A: []string{"valid"}},
 		},
 	}
-	err = CheckTemplates(st)
+	ct, err = NewConfigTemplate(st)
 	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := ct.Check(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -120,7 +161,12 @@ func TestCheckTemplates_Slice(t *testing.T) {
 			S_slice{A: []string{"{{invalid}}"}},
 		},
 	}
-	err = CheckTemplates(st)
+	ct, err = NewConfigTemplate(st)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = ct.Check()
 	if err == nil {
 		t.Fatal("error expected")
 	}
