@@ -194,7 +194,7 @@ func findDataFile(file string) string {
 		[]string{os.Getenv("VMWARE_DATA"), ""},
 		[]string{path, ""},
 		[]string{os.Getenv("ProgramData"), "/VMWare"},
-		[]string{os.Getenv("ALLUSERSPROFILE"), "/VMWare"},
+		[]string{os.Getenv("ALLUSERSPROFILE"), "/Application Data/VMWare"},
 	}
 
 	return findFile(file, paths)
