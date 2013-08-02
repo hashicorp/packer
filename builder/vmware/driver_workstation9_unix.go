@@ -41,3 +41,7 @@ func workstationDhcpLeasesPath(device string) string {
 func workstationToolsIsoPath(flavor string) string {
 	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
 }
+
+func workstationVmnetnatConfPath() string {
+	return ""
+}
