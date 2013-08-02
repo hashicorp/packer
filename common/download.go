@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+  "runtime"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -106,7 +107,13 @@ func (d *DownloadClient) Get() (string, error) {
 	// Files when we don't copy the file are special cased.
 	var finalPath string
 	if url.Scheme == "file" && !d.config.CopyFile {
-		finalPath = url.Path
+    // Remove forward slash on absolute Windows file URLs
+    // Before processing
+		if runtime.GOOS == "windows" && url.Path[0] == '/' {
+      finalPath = url.Path[1:len(url.Path)]
+    } else {
+      finalPath = url.Path
+    }
 	} else {
 		finalPath = d.config.TargetPath
 
