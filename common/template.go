@@ -92,15 +92,29 @@ func (ct *ConfigTemplate) Check() error {
 // the template on each of them, modifying them in place.
 func (ct *ConfigTemplate) Process() error {
 	buf := new(bytes.Buffer)
+	errs := make([]error, 0)
+
 	f := func(n string, s string) string {
-		t := ct.t[n]
+		t, ok := ct.t[n]
+		if !ok {
+			panic("template not found: " + n)
+		}
 
 		buf.Reset()
-		t.Execute(buf, nil)
+		err := t.Execute(buf, nil)
+		if err != nil {
+			errs = append(errs,
+				fmt.Errorf("Error processing %s: %s", n, err))
+		}
+
 		return buf.String()
 	}
 
 	traverseStructStrings("", ct.v, f)
+	if len(errs) > 0 {
+		return &packer.MultiError{errs}
+	}
+
 	return nil
 }
 

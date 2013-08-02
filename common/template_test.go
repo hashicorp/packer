@@ -241,3 +241,26 @@ func TestConfigTemplateProcess(t *testing.T) {
 		t.Fatalf("bad value: %s", config.Baz["bar"])
 	}
 }
+
+func TestConfigTemplateProcess_Error(t *testing.T) {
+	type S struct {
+		Foo string
+	}
+
+	config := &S{
+		Foo: `{{user 42}}`,
+	}
+
+	ct, err := NewConfigTemplate(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := ct.Check(); err != nil {
+		t.Fatalf("check err: %s", err)
+	}
+
+	if err := ct.Process(); err == nil {
+		t.Fatal("expected error")
+	}
+}
