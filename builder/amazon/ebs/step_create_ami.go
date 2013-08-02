@@ -69,8 +69,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	// Add tags to AMI
 	if s.Tags != nil {
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", createResp.ImageId))
-		amiId := []string{createResp.ImageId}
-		_, err := ec2conn.CreateTags(amiId, s.Tags)
+		_, err := ec2conn.CreateTags([]string{createResp.ImageId}, s.Tags)
 		if err != nil {
 			err := fmt.Errorf("Error adding tags to AMI (%s): %s", createResp.ImageId, err)
 			state["error"] = err
