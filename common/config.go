@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-  "runtime"
+	"runtime"
 	"sort"
 	"strings"
 )
@@ -74,11 +74,11 @@ func DownloadableURL(original string) (string, error) {
 	}
 
 	if url.Scheme == "file" {
-    // For Windows absolute file paths, remove leading /
-    // prior to processing
-    if runtime.GOOS == "windows" && url.Path[0] == '/' {
-      url.Path = url.Path[1:len(url.Path)]
-    }
+		// For Windows absolute file paths, remove leading /
+		// prior to processing
+		if runtime.GOOS == "windows" && url.Path[0] == '/' {
+			url.Path = url.Path[1:len(url.Path)]
+		}
 
 		if _, err := os.Stat(url.Path); err != nil {
 			return "", err
