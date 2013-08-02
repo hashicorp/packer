@@ -138,7 +138,7 @@ func TestConfigTemplateCheck_Slice(t *testing.T) {
 
 	// Test slice valid/invalid
 	type S_slice struct {
-		A []string
+		A []string `mapstructure:"my_name"`
 		B int
 	}
 

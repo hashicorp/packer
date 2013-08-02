@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"reflect"
+	"strings"
 	"text/template"
 )
 
@@ -192,8 +193,22 @@ func traverseStructStrings(n string, v reflect.Value, f traverseFunc) {
 			field = field.Elem()
 		}
 
+		// Determine the field name. By default it is just the lowercase
+		// field name, but if a mapstructure field name is specified,
+		// prefer that.
 		sf := vt.Field(i)
-		fieldName := n + sf.Name
+		fieldName := strings.ToLower(sf.Name)
+		mapstructureTag := sf.Tag.Get("mapstructure")
+		if mapstructureTag != "" {
+			commaIdx := strings.Index(mapstructureTag, ",")
+			if commaIdx == -1 {
+				commaIdx = len(mapstructureTag)
+			}
+
+			fieldName = mapstructureTag[0:commaIdx]
+		}
+
+		fieldName = n + fieldName
 		if r, do := traverseValue(fieldName, field, f); do {
 			field.SetString(r)
 		}
