@@ -119,6 +119,8 @@ func (ct *ConfigTemplate) Process() error {
 	return nil
 }
 
+// Builder is the function exposed as "builder" within the templates and
+// looks up builder variables.
 func (ct *ConfigTemplate) Builder(n string) (string, error) {
 	result, ok := ct.BuilderVars[n]
 	if !ok {
@@ -128,6 +130,8 @@ func (ct *ConfigTemplate) Builder(n string) (string, error) {
 	return result, nil
 }
 
+// User is the function exposed as "user" within the templates and
+// looks up user variables.
 func (ct *ConfigTemplate) User(n string) (string, error) {
 	result, ok := ct.UserVars[n]
 	if !ok {
