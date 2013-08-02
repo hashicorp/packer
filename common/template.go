@@ -23,7 +23,12 @@ type ConfigTemplate struct {
 // a pointer to your configuration struct, because ConfigTemplate will
 // modify data in-place.
 func NewConfigTemplate(i interface{}) (*ConfigTemplate, error) {
-	v := reflect.ValueOf(i).Elem()
+	v := reflect.ValueOf(i)
+	if v.Kind() != reflect.Interface && v.Kind() != reflect.Ptr {
+		return nil, errors.New("Interface should be an interface or pointer.")
+	}
+
+	v = v.Elem()
 	if !v.CanAddr() {
 		return nil, errors.New("Interface isn't addressable")
 	}

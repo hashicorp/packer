@@ -4,7 +4,33 @@ import (
 	"testing"
 )
 
-func TestCheckTemplates_Basic(t *testing.T) {
+func TestNewConfigTemplate(t *testing.T) {
+	_, err := NewConfigTemplate(nil)
+	if err == nil {
+		t.Fatal("should err")
+	}
+
+	_, err = NewConfigTemplate(struct{}{})
+	if err == nil {
+		t.Fatal("should err")
+	}
+
+	_, err = NewConfigTemplate(new(int))
+	if err == nil {
+		t.Fatal("should err")
+	}
+
+	ct, err := NewConfigTemplate(&struct{}{})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if ct == nil {
+		t.Fatal("result should not be nil")
+	}
+}
+
+func TestConfigTemplateCheck_Basic(t *testing.T) {
 	t.Parallel()
 
 	type S struct {
@@ -42,7 +68,7 @@ func TestCheckTemplates_Basic(t *testing.T) {
 	}
 }
 
-func TestCheckTemplates_Map(t *testing.T) {
+func TestConfigTemplateCheck_Map(t *testing.T) {
 	type S struct {
 		M map[string]string
 	}
@@ -73,7 +99,7 @@ func TestCheckTemplates_Map(t *testing.T) {
 	}
 }
 
-func TestCheckTemplates_Nested(t *testing.T) {
+func TestConfigTemplateCheck_Nested(t *testing.T) {
 	t.Parallel()
 
 	// Test nested valid/invalid
@@ -107,7 +133,7 @@ func TestCheckTemplates_Nested(t *testing.T) {
 	}
 }
 
-func TestCheckTemplates_Slice(t *testing.T) {
+func TestConfigTemplateCheck_Slice(t *testing.T) {
 	t.Parallel()
 
 	// Test slice valid/invalid
