@@ -1,6 +1,9 @@
 ## 0.2.3 (unreleased)
 
+BUG FIXES:
 
+* core: Absolute/relative filepaths on Windows now work for iso_url
+  and other settings. [GH-240]
 
 ## 0.2.2 (August 1, 2013)
 
