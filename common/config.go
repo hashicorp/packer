@@ -74,8 +74,8 @@ func DownloadableURL(original string) (string, error) {
 	}
 
 	if url.Scheme == "file" {
-		// For Windows absolute file paths, remove leading /
-		// prior to processing
+		// For Windows absolute file paths, remove leading / prior to processing
+		// since net/url turns "C:/" into "/C:/"
 		if runtime.GOOS == "windows" && url.Path[0] == '/' {
 			url.Path = url.Path[1:len(url.Path)]
 		}
