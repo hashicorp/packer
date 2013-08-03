@@ -9,15 +9,30 @@ import (
 	"time"
 )
 
+// StateRefreshFunc is a function type used for StateChangeConf that is
+// responsible for refreshing the item being watched for a state change.
+//
+// It returns three results. `result` is any object that will be returned
+// as the final object after waiting for state change. This allows you to
+// return the final updated object, for example an EC2 instance after refreshing
+// it.
+//
+// `state` is the latest state of that object. And `err` is any error that
+// may have happened while refreshing the state.
+type StateRefreshFunc func() (result interface{}, state string, err error)
+
+// StateChangeConf is the configuration struct used for `WaitForState`.
 type StateChangeConf struct {
 	Conn      *ec2.EC2
 	Pending   []string
-	Refresh   func() (interface{}, string, error)
+	Refresh   StateRefreshFunc
 	StepState map[string]interface{}
 	Target    string
 }
 
-func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) func() (interface{}, string, error) {
+// InstanceStateRefreshFunc returns a StateRefreshFunc that is used to watch
+// an EC2 instance.
+func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := conn.Instances([]string{i.InstanceId}, ec2.NewFilter())
 		if err != nil {
@@ -29,6 +44,8 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) func() (interface{
 	}
 }
 
+// WaitForState watches an object and waits for it to achieve a certain
+// state.
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
