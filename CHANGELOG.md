@@ -4,6 +4,8 @@ BUG FIXES:
 
 * core: Absolute/relative filepaths on Windows now work for iso_url
   and other settings. [GH-240]
+* builder/amazon/all: instance info is refreshed while waiting for SSH,
+  allowing Packer to see updated IP/DNS info. [GH-243]
 
 ## 0.2.2 (August 1, 2013)
 
