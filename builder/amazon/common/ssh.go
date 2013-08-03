@@ -10,14 +10,24 @@ import (
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the instance DNS name.
-func SSHAddress(port int) func(map[string]interface{}) (string, error) {
+func SSHAddress(e *ec2.EC2, port int) func(map[string]interface{}) (string, error) {
 	return func(state map[string]interface{}) (string, error) {
 		var host string
-		instance := state["instance"].(*ec2.Instance)
-		if instance.DNSName != "" {
-			host = instance.DNSName
-		} else if instance.VpcId == "" {
-			host = instance.PrivateIpAddress
+		i := state["instance"].(*ec2.Instance)
+		r, err := e.Instances([]string{i.InstanceId}, ec2.NewFilter())
+		if err != nil {
+			return "", err
+		}
+
+		if len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
+			return "", fmt.Errorf("instance not found: %s", i.InstanceId)
+		}
+
+		i = &r.Reservations[0].Instances[0]
+		if i.DNSName != "" {
+			host = i.DNSName
+		} else if i.VpcId == "" {
+			host = i.PrivateIpAddress
 		} else {
 			return "", errors.New("couldn't determine IP address for instance")
 		}
