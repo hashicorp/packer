@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/packer/communicator/ssh"
+	"time"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
@@ -35,6 +36,7 @@ func SSHAddress(e *ec2.EC2, port int) func(map[string]interface{}) (string, erro
 			}
 
 			state["instance"] = &r.Reservations[0].Instances[0]
+			time.Sleep(1 * time.Second)
 		}
 
 		return "", errors.New("couldn't determine IP address for instance")
