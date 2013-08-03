@@ -78,11 +78,13 @@ and has the password "packer" for sudo usage, then you'll likely want to
 change `execute_command` to be:
 
 ```
-"echo 'packer' | sudo -S sh '{{ .Path }}'"
+"echo 'packer' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
 ```
 
 The `-S` flag tells `sudo` to read the password from stdin, which in this
-case is being piped in with the value of "packer".
+case is being piped in with the value of "packer". The `-E` flag tells `sudo`
+to preserve the environment, allowing our environmental variables to work
+within the script.
 
 By setting the `execute_command` to this, your script(s) can run with
 root privileges without worrying about password prompts.
