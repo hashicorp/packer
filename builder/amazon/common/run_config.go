@@ -3,7 +3,6 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
 	"time"
 )
 
@@ -19,7 +18,6 @@ type RunConfig struct {
 	SecurityGroupId    string `mapstructure:"security_group_id"`
 	SubnetId           string `mapstructure:"subnet_id"`
 	VpcId              string `mapstructure:"vpc_id"`
-	Tags               []ec2.Tag
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
