@@ -49,7 +49,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	tplF.Close()
 
 	// Run the template through the various fixers
-	fixers := []Fixer{Fixers["iso-md5"]}
+	fixers := []Fixer{
+		Fixers["iso-md5"],
+		Fixers["global-templates"],
+	}
 	input := templateData
 	for _, fixer := range fixers {
 		var err error
