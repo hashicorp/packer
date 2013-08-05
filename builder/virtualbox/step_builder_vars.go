@@ -27,7 +27,12 @@ func (s *stepBuilderVars) Run(state map[string]interface{}) multistep.StepAction
 	config.template.BuilderVars["http_port"] = strconv.FormatInt(int64(httpPort), 10)
 	config.template.BuilderVars["vbox_version"] = version
 
-	// TODO(mitchellh): recursion problem here or something. Wah.
+	// Pre-process the VM name so we can use that as a builder var
+	if err := config.template.ProcessSingle("vm_name"); err != nil {
+		state["error"] = fmt.Errorf("Error processing vm_name: %s", err)
+		return multistep.ActionHalt
+	}
+
 	config.template.BuilderVars["vm_name"] = config.VMName
 
 	return multistep.ActionContinue
