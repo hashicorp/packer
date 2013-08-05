@@ -18,7 +18,7 @@ func SSHAddress(e *ec2.EC2, port int) func(map[string]interface{}) (string, erro
 			i := state["instance"].(*ec2.Instance)
 			if i.DNSName != "" {
 				host = i.DNSName
-			} else if i.VpcId == "" {
+			} else if i.VpcId != "" {
 				host = i.PrivateIpAddress
 			}
 
