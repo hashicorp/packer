@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type traverseFunc func(string, string) string
@@ -52,8 +54,9 @@ func NewConfigTemplate(i interface{}) (*ConfigTemplate, error) {
 
 	root := template.New("configTemplateRoot")
 	root.Funcs(template.FuncMap{
-		"builder": result.Builder,
-		"user":    result.User,
+		"builder":   result.Builder,
+		"timestamp": templateTimestamp,
+		"user":      result.User,
 	})
 
 	// Set the template root so we can have a place to store
@@ -139,6 +142,10 @@ func (ct *ConfigTemplate) User(n string) (string, error) {
 	}
 
 	return result, nil
+}
+
+func templateTimestamp() string {
+	return strconv.FormatInt(time.Now().UTC().Unix(), 10)
 }
 
 func traverseMapStrings(n string, v reflect.Value, f traverseFunc) {

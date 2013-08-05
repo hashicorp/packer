@@ -1,7 +1,10 @@
 package common
 
 import (
+	"math"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func TestNewConfigTemplate(t *testing.T) {
@@ -250,6 +253,39 @@ func TestConfigTemplateProcess(t *testing.T) {
 
 	if config.Inner != "bar inner" {
 		t.Fatalf("bad value: %s", config.Inner)
+	}
+}
+
+func TestConfigTemplateProcess_Time(t *testing.T) {
+	type S struct {
+		Foo string
+	}
+
+	config := &S{
+		Foo: `{{timestamp}}`,
+	}
+
+	ct, err := NewConfigTemplate(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := ct.Check(); err != nil {
+		t.Fatalf("check err: %s", err)
+	}
+
+	if err := ct.Process(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	val, err := strconv.ParseInt(config.Foo, 10, 64)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	currentTime := time.Now().UTC().Unix()
+	if math.Abs(float64(currentTime-val)) > 10 {
+		t.Fatalf("val: %d (current: %d)", val, currentTime)
 	}
 }
 
