@@ -3,7 +3,6 @@ package digitalocean
 import (
 	"github.com/mitchellh/packer/packer"
 	"os"
-	"strconv"
 	"testing"
 )
 
@@ -326,35 +325,26 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test default
+	// Test set
+	config["snapshot_name"] = "foobarbaz"
 	err := b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.RawSnapshotName != "packer-{{.CreateTime}}" {
-		t.Errorf("invalid: %d", b.config.RawSnapshotName)
-	}
-
-	// Test set
-	config["snapshot_name"] = "foobarbaz"
+	// Test set with bad template
+	config["snapshot_name"] = "{{unknownfunc}}"
 	b = Builder{}
 	err = b.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
+	if err == nil {
+		t.Fatal("should have error")
 	}
 
 	// Test set with template
-	config["snapshot_name"] = "{{.CreateTime}}"
+	config["snapshot_name"] = "{{timestamp}}"
 	b = Builder{}
 	err = b.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-
-	_, err = strconv.ParseInt(b.config.SnapshotName, 0, 0)
-	if err != nil {
-		t.Fatalf("failed to parse int in template: %s", err)
-	}
-
 }
