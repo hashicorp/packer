@@ -1,25 +1,17 @@
 package virtualbox
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
-	"text/template"
 	"time"
 	"unicode"
 	"unicode/utf8"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
-
-type bootCommandTemplateData struct {
-	HTTPIP   string
-	HTTPPort uint
-	Name     string
-}
 
 // This step "types" the boot command into the VM over VNC.
 //
@@ -37,23 +29,12 @@ type stepTypeBootCommand struct{}
 func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
 	driver := state["driver"].(Driver)
-	httpPort := state["http_port"].(uint)
 	ui := state["ui"].(packer.Ui)
 	vmName := state["vmName"].(string)
 
-	tplData := &bootCommandTemplateData{
-		"10.0.2.2",
-		httpPort,
-		config.VMName,
-	}
-
 	ui.Say("Typing the boot command...")
 	for _, command := range config.BootCommand {
-		var buf bytes.Buffer
-		t := template.Must(template.New("boot").Parse(command))
-		t.Execute(&buf, tplData)
-
-		for _, code := range scancodes(buf.String()) {
+		for _, code := range scancodes(command) {
 			if code == "wait" {
 				time.Sleep(1 * time.Second)
 				continue
