@@ -201,6 +201,45 @@ func TestConfigTemplateCheck_Slice(t *testing.T) {
 	}
 }
 
+func TestConfigTemplateProcessSingle(t *testing.T) {
+	type S struct {
+		Foo string
+		Bar string
+	}
+
+	config := &S{
+		Foo: `{{user "foo"}}`,
+		Bar: `{{user "bar"}}`,
+	}
+
+	ct, err := NewConfigTemplate(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := ct.Check(); err != nil {
+		t.Fatalf("check err: %s", err)
+	}
+
+	ct.UserVars["foo"] = "bar"
+
+	if err := ct.ProcessSingle("foo"); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if config.Foo != "bar" {
+		t.Fatalf("bad value: %s", config.Foo)
+	}
+
+	if config.Bar != `{{user "bar"}}` {
+		t.Fatalf("bad value: %s", config.Bar)
+	}
+
+	if err := ct.ProcessSingle("foo"); err == nil {
+		t.Fatal("should have error reprocessing")
+	}
+}
+
 func TestConfigTemplateProcess(t *testing.T) {
 	type InnerS struct {
 		Inner string

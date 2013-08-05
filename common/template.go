@@ -21,6 +21,7 @@ type traverseFunc func(string, string) string
 type ConfigTemplate struct {
 	BuilderVars map[string]string
 	UserVars    map[string]string
+	processed   map[string]struct{}
 	root        *template.Template
 	t           map[string]*template.Template
 	v           reflect.Value
@@ -48,6 +49,7 @@ func NewConfigTemplate(i interface{}) (*ConfigTemplate, error) {
 	result := &ConfigTemplate{
 		BuilderVars: make(map[string]string),
 		UserVars:    make(map[string]string),
+		processed:   make(map[string]struct{}),
 		t:           make(map[string]*template.Template),
 		v:           v,
 	}
@@ -95,23 +97,15 @@ func (ct *ConfigTemplate) Check() error {
 // Process goes over all the string values in the structure and runs
 // the template on each of them, modifying them in place.
 func (ct *ConfigTemplate) Process() error {
-	buf := new(bytes.Buffer)
 	errs := make([]error, 0)
 
 	f := func(n string, s string) string {
-		t, ok := ct.t[n]
-		if !ok {
-			panic("template not found: " + n)
-		}
-
-		buf.Reset()
-		err := t.Execute(buf, nil)
+		result, err := ct.processSingle(n)
 		if err != nil {
-			errs = append(errs,
-				fmt.Errorf("Error processing %s: %s", n, err))
+			errs = append(errs, err)
 		}
 
-		return buf.String()
+		return result
 	}
 
 	traverseStructStrings("", ct.v, f)
@@ -120,6 +114,57 @@ func (ct *ConfigTemplate) Process() error {
 	}
 
 	return nil
+}
+
+// ProcessSingle processes a single element of configuration. If the
+// configuration key has already been processed, it is an error. Once processed,
+// this key will be skipped when Process is called.
+func (ct *ConfigTemplate) ProcessSingle(n string) error {
+	var err error
+	found := false
+
+	f := func(curN string, s string) string {
+		if curN != n {
+			return s
+		}
+
+		found = true
+
+		var result string
+		result, err = ct.processSingle(n)
+		if err != nil {
+			return s
+		}
+
+		return result
+	}
+
+	traverseStructStrings("", ct.v, f)
+	if !found {
+		err = fmt.Errorf("key '%s' not found", n)
+	}
+
+	return err
+}
+
+func (ct *ConfigTemplate) processSingle(n string) (string, error) {
+	if _, ok := ct.processed[n]; ok {
+		return "", fmt.Errorf("key already processed: %s", n)
+	}
+
+	t, ok := ct.t[n]
+	if !ok {
+		return "", fmt.Errorf("template not found: " + n)
+	}
+
+	buf := new(bytes.Buffer)
+	err := t.Execute(buf, nil)
+	if err != nil {
+		return "", fmt.Errorf("Error processing %s: %s", n, err)
+	}
+
+	ct.processed[n] = struct{}{}
+	return buf.String(), nil
 }
 
 // Builder is the function exposed as "builder" within the templates and
