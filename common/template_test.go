@@ -221,6 +221,7 @@ func TestConfigTemplateProcessSingle(t *testing.T) {
 		t.Fatalf("check err: %s", err)
 	}
 
+	ct.UserVars["bar"] = "baz"
 	ct.UserVars["foo"] = "bar"
 
 	if err := ct.ProcessSingle("foo"); err != nil {
@@ -237,6 +238,18 @@ func TestConfigTemplateProcessSingle(t *testing.T) {
 
 	if err := ct.ProcessSingle("foo"); err == nil {
 		t.Fatal("should have error reprocessing")
+	}
+
+	if err := ct.Process(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if config.Foo != "bar" {
+		t.Fatalf("bad value: %s", config.Foo)
+	}
+
+	if config.Bar != "baz" {
+		t.Fatalf("bad value: %s", config.Bar)
 	}
 }
 

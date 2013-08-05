@@ -100,6 +100,10 @@ func (ct *ConfigTemplate) Process() error {
 	errs := make([]error, 0)
 
 	f := func(n string, s string) string {
+		if _, ok := ct.processed[n]; ok {
+			return s
+		}
+
 		result, err := ct.processSingle(n)
 		if err != nil {
 			errs = append(errs, err)
