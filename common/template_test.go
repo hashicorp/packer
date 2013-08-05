@@ -199,10 +199,15 @@ func TestConfigTemplateCheck_Slice(t *testing.T) {
 }
 
 func TestConfigTemplateProcess(t *testing.T) {
+	type InnerS struct {
+		Inner string
+	}
+
 	type S struct {
 		Foo string
 		Bar []string
 		Baz map[string]string
+		InnerS
 	}
 
 	config := &S{
@@ -212,6 +217,8 @@ func TestConfigTemplateProcess(t *testing.T) {
 			`{{user "foo"}}`: `{{builder "bar"}}`,
 		},
 	}
+
+	config.Inner = `{{user "foo"}} inner`
 
 	ct, err := NewConfigTemplate(config)
 	if err != nil {
@@ -239,6 +246,10 @@ func TestConfigTemplateProcess(t *testing.T) {
 
 	if config.Baz["bar"] != "baz" {
 		t.Fatalf("bad value: %s", config.Baz["bar"])
+	}
+
+	if config.Inner != "bar inner" {
+		t.Fatalf("bad value: %s", config.Inner)
 	}
 }
 
