@@ -204,6 +204,11 @@ func traverseStructStrings(n string, v reflect.Value, f traverseFunc) {
 			field = field.Elem()
 		}
 
+		// If the field isn't exported, then ignore it.
+		if !field.CanSet() {
+			continue
+		}
+
 		// Determine the field name. By default it is just the lowercase
 		// field name, but if a mapstructure field name is specified,
 		// prefer that.
