@@ -109,6 +109,8 @@ Optional:
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
   "subnet-12345def", where Packer will launch the EC2 instance.
 
+* `tags` (object of key/value strings) - Tags applied to the AMI.
+
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
 
