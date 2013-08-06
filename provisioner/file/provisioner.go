@@ -3,11 +3,9 @@ package file
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"os"
-	"sort"
-	"strings"
 )
 
 type config struct {
@@ -23,49 +21,26 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	var md mapstructure.Metadata
-	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   &p.config,
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	md, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
 	}
 
-	for _, raw := range raws {
-		err := decoder.Decode(raw)
-		if err != nil {
-			return err
-		}
-	}
-
 	// Accumulate any errors
-	errs := make([]error, 0)
-
-	// Unused keys are errors
-	if len(md.Unused) > 0 {
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
-			}
-		}
-	}
+	errs := common.CheckUnusedConfig(md)
 
 	if _, err := os.Stat(p.config.Source); err != nil {
-		errs = append(errs,
+		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
 	}
 
 	if p.config.Destination == "" {
-		errs = append(errs, errors.New("Destination must be specified."))
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Destination must be specified."))
 	}
 
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
