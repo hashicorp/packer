@@ -30,9 +30,6 @@ type config struct {
 
 	// Tags for the AMI
 	Tags map[string]string
-
-	// Unexported fields that are calculated from others
-	ec2Tags []ec2.Tag
 }
 
 type Builder struct {
@@ -61,15 +58,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
 		}
-	}
-
-	// Convert Tags to ec2.Tag
-	if b.config.Tags != nil {
-		var ec2Tags []ec2.Tag
-		for key, value := range b.config.Tags {
-			ec2Tags = append(ec2Tags, ec2.Tag{key, value})
-		}
-		b.config.ec2Tags = ec2Tags
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -122,9 +110,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&stepStopInstance{},
-		&stepCreateAMI{
-			Tags: b.config.ec2Tags,
-		},
+		&stepCreateAMI{},
+		&awscommon.StepCreateTags{b.config.Tags},
 	}
 
 	// Run!
