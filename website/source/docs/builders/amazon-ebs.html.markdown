@@ -97,10 +97,10 @@ Here is a basic example. It is completely valid except for the access keys:
   "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{.CreateTime}}",
-  "tags": [
-    { "key": "myTagName1", "value": "myTagValue1" },
-    { "key": "myTagName2", "value": "myTagValue2" }
-  ]
+  "tags": {
+    "myTagName1": "myTagValue1",
+    "myTagName2": "myTagValue2"
+  }
 }
 </pre>
 
