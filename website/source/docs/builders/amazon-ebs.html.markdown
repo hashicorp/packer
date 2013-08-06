@@ -78,10 +78,10 @@ Optional:
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
   "subnet-12345def", where Packer will launch the EC2 instance.
 
+* `tags` (object of key/value strings) - Tags applied to the AMI.
+
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
-
-* `tags` (array of key/value pairs) - Tags applied to the AMI.
 
 ## Basic Example
 
@@ -97,10 +97,6 @@ Here is a basic example. It is completely valid except for the access keys:
   "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{.CreateTime}}",
-  "tags": {
-    "myTagName1": "myTagValue1",
-    "myTagName2": "myTagValue2"
-  }
 }
 </pre>
 
@@ -110,6 +106,28 @@ access key from environmental variables. See the configuration reference in
 the section above for more information on what environmental variables Packer
 will look for.
 </div>
+
+## Tag Example
+
+Here is an example using the optional AMI tags. This will add the tags
+"OS_Version" and "Release" to the finished AMI.
+
+<pre class="prettyprint">
+{
+  "type": "amazon-ebs",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "source_ami": "ami-de0d9eb7",
+  "instance_type": "t1.micro",
+  "ssh_username": "ubuntu",
+  "ami_name": "packer-quick-start {{.CreateTime}}",
+  "tags": {
+    "OS_Version": "Ubuntu",
+    "Release": "Latest"
+  }
+}
+</pre>
 
 ## AMI Name Variables
 
