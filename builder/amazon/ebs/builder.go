@@ -29,7 +29,7 @@ type config struct {
 	AMIName string `mapstructure:"ami_name"`
 
 	// Tags for the AMI
-	Tags []map[string]string
+	Tags map[string]string
 
 	// Unexported fields that are calculated from others
 	ec2Tags []ec2.Tag
@@ -63,24 +63,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	// Accumulate any errors
+	// Convert Tags to ec2.Tag
 	if b.config.Tags != nil {
 		var ec2Tags []ec2.Tag
-		for _, tag := range b.config.Tags {
-			if _, ok := tag["key"]; !ok {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Unknown tag configuration, expecting 'key'"))
-				continue
-			}
-			if _, ok := tag["value"]; !ok {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Unknown tag configuration, expecting 'value'"))
-				continue
-			}
-			ec2Tags = append(ec2Tags, ec2.Tag{
-				Key:   tag["key"],
-				Value: tag["value"],
-			})
+		for key, value := range b.config.Tags {
+			ec2Tags = append(ec2Tags, ec2.Tag{key, value})
 		}
 		b.config.ec2Tags = ec2Tags
 	}
