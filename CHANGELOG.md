@@ -1,5 +1,9 @@
 ## 0.2.3 (unreleased)
 
+IMPROVEMENTS:
+
+* builder/amazon/all: Added Amazon AMI tag support [GH-233]
+
 BUG FIXES:
 
 * core: Absolute/relative filepaths on Windows now work for iso_url
