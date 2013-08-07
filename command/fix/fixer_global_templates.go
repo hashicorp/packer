@@ -52,6 +52,8 @@ func (f FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]inte
 			builder = f.fixDigitalOcean(builder)
 		case "virtualbox":
 			builder = f.fixVirtualBox(builder)
+		case "vmware":
+			builder = f.fixVMware(builder)
 		default:
 		}
 	}
@@ -70,6 +72,29 @@ func (FixerGlobalTemplates) fixVirtualBox(builder map[string]interface{}) map[st
 		"HTTPPort": "http_port",
 		"Name":     "vm_name",
 		"Version":  "vbox_version",
+	}
+
+	err := common.TraverseStrings(&builder, func(n string, v string) string {
+		for orig, replacement := range builderVars {
+			re := regexp.MustCompile(fmt.Sprintf(`(?i){{\s*\.%s\s*}}`, orig))
+			v = re.ReplaceAllString(v, fmt.Sprintf(`{{builder "%s"}}`, replacement))
+		}
+
+		return v
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return builder
+}
+
+func (FixerGlobalTemplates) fixVMware(builder map[string]interface{}) map[string]interface{} {
+	builderVars := map[string]string{
+		"HTTPIP":   "http_ip",
+		"HTTPPort": "http_port",
+		"Flavor":   "flavor",
+		"Name":     "vm_name",
 	}
 
 	err := common.TraverseStrings(&builder, func(n string, v string) string {
