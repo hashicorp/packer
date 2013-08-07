@@ -7,14 +7,12 @@ package ebs
 
 import (
 	"errors"
-	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"text/template"
 )
 
 // The unique ID for this builder
@@ -30,6 +28,8 @@ type config struct {
 
 	// Tags for the AMI
 	Tags map[string]string
+
+	template *common.ConfigTemplate
 }
 
 type Builder struct {
@@ -49,15 +49,19 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
 
 	// Accumulate any errors
+	b.config.template, err = common.NewConfigTemplate(&b.config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = b.config.template.Check()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
 	if b.config.AMIName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
-	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
-		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -90,6 +94,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&common.StepProcessConfigTemplate{
+			ConfigTemplate: b.config.template,
+		},
 		&awscommon.StepKeyPair{},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
