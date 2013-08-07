@@ -164,6 +164,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepRunSourceInstance{
 			ExpectedRootDevice: "instance-store",
 			InstanceType:       b.config.InstanceType,
+			UserData:           b.config.UserData,
 			SourceAMI:          b.config.SourceAmi,
 			SubnetId:           b.config.SubnetId,
 		},

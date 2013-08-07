@@ -11,6 +11,7 @@ import (
 type StepRunSourceInstance struct {
 	ExpectedRootDevice string
 	InstanceType       string
+	UserData           string
 	SourceAMI          string
 	IamInstanceProfile string
 	SubnetId           string
@@ -28,6 +29,7 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		KeyName:            keyName,
 		ImageId:            s.SourceAMI,
 		InstanceType:       s.InstanceType,
+		UserData:           s.UserData,
 		MinCount:           0,
 		MaxCount:           0,
 		SecurityGroups:     []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
