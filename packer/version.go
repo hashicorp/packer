@@ -10,12 +10,12 @@ import (
 var GitCommit string
 
 // The version of packer.
-const Version = "0.2.3"
+const Version = "0.2.4"
 
 // Any pre-release marker for the version. If this is "" (empty string),
 // then it means that it is a final release. Otherwise, this is the
 // pre-release marker.
-const VersionPrerelease = ""
+const VersionPrerelease = "dev"
 
 type versionCommand byte
 
