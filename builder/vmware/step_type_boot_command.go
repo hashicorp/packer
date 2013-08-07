@@ -1,7 +1,6 @@
 package vmware
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/go-vnc"
 	"github.com/mitchellh/multistep"
@@ -10,19 +9,12 @@ import (
 	"net"
 	"runtime"
 	"strings"
-	"text/template"
 	"time"
 	"unicode"
 	"unicode/utf8"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
-
-type bootCommandTemplateData struct {
-	HTTPIP   string
-	HTTPPort uint
-	Name     string
-}
 
 // This step "types" the boot command into the VM over VNC.
 //
@@ -38,7 +30,6 @@ type stepTypeBootCommand struct{}
 
 func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
-	httpPort := state["http_port"].(uint)
 	ui := state["ui"].(packer.Ui)
 	vncPort := state["vnc_port"].(uint)
 
@@ -82,19 +73,9 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 
 	log.Printf("Host IP for the VMware machine: %s", hostIp)
 
-	tplData := &bootCommandTemplateData{
-		hostIp,
-		httpPort,
-		config.VMName,
-	}
-
 	ui.Say("Typing the boot command over VNC...")
 	for _, command := range config.BootCommand {
-		var buf bytes.Buffer
-		t := template.Must(template.New("boot").Parse(command))
-		t.Execute(&buf, tplData)
-
-		vncSendString(c, buf.String())
+		vncSendString(c, command)
 	}
 
 	return multistep.ActionContinue

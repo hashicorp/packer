@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -58,6 +57,8 @@ type config struct {
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
+
+	template *common.ConfigTemplate
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -119,6 +120,16 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.ToolsUploadPath == "" {
 		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
+	}
+
+	b.config.template, err = common.NewConfigTemplate(&b.config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = b.config.template.Check()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
@@ -197,11 +208,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
-	if _, err := template.New("path").Parse(b.config.ToolsUploadPath); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("tools_upload_path invalid: %s", err))
-	}
-
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
@@ -225,6 +231,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	steps := []multistep.Step{
+		new(stepHTTPListener),
+		new(stepBuilderVars),
+		&common.StepProcessConfigTemplate{
+			ConfigTemplate: b.config.template,
+		},
 		&stepPrepareTools{},
 		&stepDownloadISO{},
 		&stepPrepareOutputDir{},
