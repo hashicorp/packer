@@ -13,6 +13,38 @@ func TestFixerGlobalTemplates_Impl(t *testing.T) {
 	}
 }
 
+func TestFixerGlobalTemplatesFix_AmazonChroot(t *testing.T) {
+	var f FixerGlobalTemplates
+
+	input := map[string]interface{}{
+		"builders": []interface{}{
+			map[string]string{
+				"type":       "amazon-chroot",
+				"ami_name":   "foo-{{.CreateTime}}",
+				"mount_path": "foo-{{.Device}}",
+			},
+		},
+	}
+
+	expected := map[string]interface{}{
+		"builders": []map[string]interface{}{
+			map[string]interface{}{
+				"type":       "amazon-chroot",
+				"ami_name":   "foo-{{timestamp}}",
+				"mount_path": `foo-{{builder "device"}}`,
+			},
+		},
+	}
+
+	output, err := f.Fix(input)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !reflect.DeepEqual(output, expected) {
+		t.Fatalf("unexpected: %#v\nexpected: %#v\n", output, expected)
+	}
+}
 func TestFixerGlobalTemplatesFix_DigitalOcean(t *testing.T) {
 	var f FixerGlobalTemplates
 

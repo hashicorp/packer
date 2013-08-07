@@ -25,7 +25,7 @@ func (f FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]inte
 	}
 
 	// Go through each builder and replace the iso_md5 if we can
-	for _, builder := range tpl.Builders {
+	for i, builder := range tpl.Builders {
 		builderTypeRaw, ok := builder["type"]
 		if !ok {
 			continue
@@ -48,6 +48,8 @@ func (f FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]inte
 
 		// Builder-specific replacements
 		switch builderType {
+		case "amazon-chroot":
+			builder = f.fixAmazonChroot(builder)
 		case "digitalocean":
 			builder = f.fixDigitalOcean(builder)
 		case "virtualbox":
@@ -56,10 +58,32 @@ func (f FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]inte
 			builder = f.fixVMware(builder)
 		default:
 		}
+
+		tpl.Builders[i] = builder
 	}
 
 	input["builders"] = tpl.Builders
 	return input, nil
+}
+
+func (FixerGlobalTemplates) fixAmazonChroot(builder map[string]interface{}) map[string]interface{} {
+	builderVars := map[string]string{
+		"Device": "device",
+	}
+
+	err := common.TraverseStrings(&builder, func(n string, v string) string {
+		for orig, replacement := range builderVars {
+			re := regexp.MustCompile(fmt.Sprintf(`(?i){{\s*\.%s\s*}}`, orig))
+			v = re.ReplaceAllString(v, fmt.Sprintf(`{{builder "%s"}}`, replacement))
+		}
+
+		return v
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return builder
 }
 
 func (FixerGlobalTemplates) fixDigitalOcean(builder map[string]interface{}) map[string]interface{} {
