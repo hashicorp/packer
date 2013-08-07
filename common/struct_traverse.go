@@ -9,22 +9,13 @@ import (
 
 type TraverseFunc func(string, string) string
 
-func TraverseStructStrings(i interface{}, f TraverseFunc) error {
-	v := reflect.ValueOf(i)
-	if v.Kind() != reflect.Interface && v.Kind() != reflect.Ptr {
-		return errors.New("Interface should be an interface or pointer.")
-	}
-
-	v = v.Elem()
+func TraverseStrings(i interface{}, f TraverseFunc) error {
+	v := reflect.Indirect(reflect.ValueOf(i))
 	if !v.CanAddr() {
 		return errors.New("Interface isn't addressable")
 	}
 
-	if v.Kind() != reflect.Struct {
-		return errors.New("Interface must be a struct")
-	}
-
-	traverseStructStrings("", v, f)
+	traverseValue("", v, f)
 	return nil
 }
 
@@ -112,6 +103,11 @@ func traverseStructStrings(n string, v reflect.Value, f TraverseFunc) {
 }
 
 func traverseValue(n string, v reflect.Value, f TraverseFunc) (string, bool) {
+	v = reflect.Indirect(v)
+	if v.Kind() == reflect.Interface {
+		v = v.Elem()
+	}
+
 	switch v.Kind() {
 	case reflect.Map:
 		traverseMapStrings(n, v, f)

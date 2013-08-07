@@ -1,7 +1,9 @@
 package fix
 
 import (
+	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"regexp"
 )
 
@@ -10,7 +12,7 @@ import (
 // new "{{timestamp}}" format.
 type FixerGlobalTemplates struct{}
 
-func (FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (f FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
 		Builders []map[string]interface{}
@@ -35,24 +37,52 @@ func (FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]interf
 			continue
 		}
 
-		if builderType != "digitalocean" {
-			continue
+		// Convert the timestamps in all templates
+		timestampRe := regexp.MustCompile(`(?i){{\s*\.CreateTime\s*}}`)
+		err := common.TraverseStrings(&builder, func(n string, v string) string {
+			return timestampRe.ReplaceAllString(v, "{{timestamp}}")
+		})
+		if err != nil {
+			return nil, err
 		}
 
-		snapshotNameRaw, ok := builder["snapshot_name"]
-		if !ok {
-			continue
+		// Builder-specific replacements
+		switch builderType {
+		case "digitalocean":
+			builder = f.fixDigitalOcean(builder)
+		case "virtualbox":
+			builder = f.fixVirtualBox(builder)
+		default:
 		}
-
-		snapshotName, ok := snapshotNameRaw.(string)
-		if !ok {
-			continue
-		}
-
-		re := regexp.MustCompile(`(?i){{\.CreateTime}}`)
-		builder["snapshot_name"] = re.ReplaceAllString(snapshotName, "{{timestamp}}")
 	}
 
 	input["builders"] = tpl.Builders
 	return input, nil
+}
+
+func (FixerGlobalTemplates) fixDigitalOcean(builder map[string]interface{}) map[string]interface{} {
+	return builder
+}
+
+func (FixerGlobalTemplates) fixVirtualBox(builder map[string]interface{}) map[string]interface{} {
+	builderVars := map[string]string{
+		"HTTPIP":   "http_ip",
+		"HTTPPort": "http_port",
+		"Name":     "vm_name",
+		"Version":  "vbox_version",
+	}
+
+	err := common.TraverseStrings(&builder, func(n string, v string) string {
+		for orig, replacement := range builderVars {
+			re := regexp.MustCompile(fmt.Sprintf(`(?i){{\s*\.%s\s*}}`, orig))
+			v = re.ReplaceAllString(v, fmt.Sprintf(`{{builder "%s"}}`, replacement))
+		}
+
+		return v
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return builder
 }
