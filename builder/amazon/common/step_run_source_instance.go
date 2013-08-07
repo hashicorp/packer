@@ -29,7 +29,7 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		KeyName:            keyName,
 		ImageId:            s.SourceAMI,
 		InstanceType:       s.InstanceType,
-		UserData:           s.UserData,
+		UserData:           []byte(s.UserData),
 		MinCount:           0,
 		MaxCount:           0,
 		SecurityGroups:     []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
