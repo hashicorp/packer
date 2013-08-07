@@ -7,12 +7,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
 	"os"
-	"sort"
 	"strings"
 	"text/template"
 )
@@ -61,37 +60,13 @@ type ExecuteCommandTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	var md mapstructure.Metadata
-	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   &p.config,
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	md, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
 	}
 
-	for _, raw := range raws {
-		err := decoder.Decode(raw)
-		if err != nil {
-			return err
-		}
-	}
-
 	// Accumulate any errors
-	errs := make([]error, 0)
-
-	// Unused keys are errors
-	if len(md.Unused) > 0 {
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
-			}
-		}
-	}
+	errs := common.CheckUnusedConfig(md)
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
@@ -118,7 +93,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
-		errs = append(errs, errors.New("Only one of script or scripts can be specified."))
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Only one of script or scripts can be specified."))
 	}
 
 	if p.config.Script != "" {
@@ -126,14 +102,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
-		errs = append(errs, errors.New("Either a script file or inline script must be specified."))
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Either a script file or inline script must be specified."))
 	} else if len(p.config.Scripts) > 0 && p.config.Inline != nil {
-		errs = append(errs, errors.New("Only a script file or an inline script can be specified, not both."))
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Only a script file or an inline script can be specified, not both."))
 	}
 
 	for _, path := range p.config.Scripts {
 		if _, err := os.Stat(path); err != nil {
-			errs = append(errs, fmt.Errorf("Bad script '%s': %s", path, err))
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Bad script '%s': %s", path, err))
 		}
 	}
 
@@ -141,14 +120,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for _, kv := range p.config.Vars {
 		vs := strings.Split(kv, "=")
 		if len(vs) != 2 || vs[0] == "" {
-			errs = append(
-				errs,
+			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		}
 	}
 
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
