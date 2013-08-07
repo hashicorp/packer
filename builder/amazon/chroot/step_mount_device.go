@@ -9,18 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"text/template"
 )
 
-type mountPathData struct {
-	Device string
-}
-
-// StepMountDevice mounts the attached device.
-//
-// Produces:
-//   mount_path string - The location where the volume was mounted.
-//   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
 	mountPath string
 }
@@ -30,15 +20,7 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 	ui := state["ui"].(packer.Ui)
 	device := state["device"].(string)
 
-	mountPathRaw := new(bytes.Buffer)
-	t := template.Must(template.New("mountPath").Parse(config.MountPath))
-	t.Execute(mountPathRaw, &mountPathData{
-		Device: filepath.Base(device),
-	})
-
-	var err error
-	mountPath := mountPathRaw.String()
-	mountPath, err = filepath.Abs(mountPath)
+	mountPath, err := filepath.Abs(config.MountPath)
 	if err != nil {
 		err := fmt.Errorf("Error preparing mount directory: %s", err)
 		state["error"] = err
