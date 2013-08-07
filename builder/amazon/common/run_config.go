@@ -12,6 +12,7 @@ type RunConfig struct {
 	SourceAmi          string `mapstructure:"source_ami"`
 	IamInstanceProfile string `mapstructure:"iam_instance_profile"`
 	InstanceType       string `mapstructure:"instance_type"`
+	UserData           string `mapstructure:"user_data"`
 	RawSSHTimeout      string `mapstructure:"ssh_timeout"`
 	SSHUsername        string `mapstructure:"ssh_username"`
 	SSHPort            int    `mapstructure:"ssh_port"`
