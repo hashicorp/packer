@@ -14,7 +14,6 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"text/template"
 )
 
 // The unique ID for this builder
@@ -30,6 +29,8 @@ type config struct {
 
 	// Tags for the AMI
 	Tags map[string]string
+
+	tpl *common.Template
 }
 
 type Builder struct {
@@ -43,22 +44,44 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	b.config.tpl, err = common.NewTemplate()
+	if err != nil {
+		return err
+	}
+
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 
 	// Accumulate any errors
 	if b.config.AMIName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
-	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
-		}
+	} else if b.config.AMIName, err = b.config.tpl.Process(b.config.AMIName, nil); err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
+
+	newTags := make(map[string]string)
+	for k, v := range b.config.Tags {
+		k, err = b.config.tpl.Process(k, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing tag key %s: %s", k, err))
+			continue
+		}
+
+		v, err = b.config.tpl.Process(v, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing tag value '%s': %s", v, err))
+			continue
+		}
+
+		newTags[k] = v
+	}
+
+	b.config.Tags = newTags
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
