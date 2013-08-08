@@ -13,7 +13,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"text/template"
 )
 
 // The unique ID for this builder
@@ -138,12 +137,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.AMIName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
-	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
-		}
 	}
 
 	if b.config.S3Bucket == "" {
