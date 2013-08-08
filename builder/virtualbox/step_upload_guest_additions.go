@@ -1,12 +1,10 @@
 package virtualbox
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"os"
-	"text/template"
 )
 
 type guestAdditionsPathTemplate struct {
@@ -39,12 +37,16 @@ func (s *stepUploadGuestAdditions) Run(state map[string]interface{}) multistep.S
 		Version: version,
 	}
 
-	var processedPath bytes.Buffer
-	t := template.Must(template.New("path").Parse(config.GuestAdditionsPath))
-	t.Execute(&processedPath, tplData)
+	config.GuestAdditionsPath, err = config.tpl.Process(config.GuestAdditionsPath, tplData)
+	if err != nil {
+		err := fmt.Errorf("Error preparing guest additions path: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	ui.Say("Uploading VirtualBox guest additions ISO...")
-	if err := comm.Upload(processedPath.String(), f); err != nil {
+	if err := comm.Upload(config.GuestAdditionsPath, f); err != nil {
 		state["error"] = fmt.Errorf("Error uploading guest additions: %s", err)
 		return multistep.ActionHalt
 	}
