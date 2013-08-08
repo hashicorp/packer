@@ -51,14 +51,10 @@ func traverseMapStrings(n string, v reflect.Value, f TraverseFunc) {
 
 func traverseSliceStrings(n string, v reflect.Value, f TraverseFunc) {
 	for i := 0; i < v.Len(); i++ {
-		elem := v.Index(i)
-		if elem.Kind() == reflect.Ptr {
-			elem = elem.Elem()
-		}
-
+		elem := reflect.Indirect(v.Index(i))
 		fieldName := fmt.Sprintf("%s[%d]", n, i)
 		if r, do := traverseValue(fieldName, elem, f); do {
-			elem.SetString(r)
+			elem.Set(reflect.ValueOf(r))
 		}
 	}
 }
@@ -97,7 +93,7 @@ func traverseStructStrings(n string, v reflect.Value, f TraverseFunc) {
 
 		fieldName = n + fieldName
 		if r, do := traverseValue(fieldName, field, f); do {
-			field.SetString(r)
+			field.Set(reflect.ValueOf(r))
 		}
 	}
 }
