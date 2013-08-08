@@ -27,6 +27,11 @@ type config struct {
 	// Configuration of the resulting AMI
 	AMIName string `mapstructure:"ami_name"`
 
+	// AMI attributes
+	AMIDescription string   `mapstructure:"ami_description"`
+	AMIUsers       []string `mapstructure:"ami_users"`
+	AMIGroups      []string `mapstructure:"ami_groups"`
+
 	// Tags for the AMI
 	Tags map[string]string
 
@@ -136,6 +141,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepStopInstance{},
 		&stepCreateAMI{},
 		&awscommon.StepCreateTags{Tags: b.config.Tags},
+		&awscommon.StepModifyAttributes{
+			Description: b.config.AMIDescription,
+			Users:       b.config.AMIUsers,
+			Groups:      b.config.AMIGroups,
+		},
 	}
 
 	// Run!

@@ -37,6 +37,12 @@ type Config struct {
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
 
+	// AMI attributes
+	AMIDescription  string   `mapstructure:"ami_description"`
+	AMIUsers        []string `mapstructure:"ami_users"`
+	AMIGroups       []string `mapstructure:"ami_groups"`
+	AMIProductCodes []string `mapstructure:"ami_product_codes"`
+
 	tpl *common.Template
 }
 
@@ -210,6 +216,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepUploadBundle{},
 		&StepRegisterAMI{},
 		&awscommon.StepCreateTags{Tags: b.config.Tags},
+		&awscommon.StepModifyAttributes{
+			Description:  b.config.AMIDescription,
+			Users:        b.config.AMIUsers,
+			Groups:       b.config.AMIGroups,
+			ProductCodes: b.config.AMIProductCodes,
+		},
 	}
 
 	// Run!
