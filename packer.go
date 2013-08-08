@@ -90,6 +90,7 @@ func main() {
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Packer initialization error: \n\n%s\n", err)
+		plugin.CleanupClients()
 		os.Exit(1)
 	}
 
@@ -98,6 +99,7 @@ func main() {
 	exitCode, err := env.Cli(os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err.Error())
+		plugin.CleanupClients()
 		os.Exit(1)
 	}
 
