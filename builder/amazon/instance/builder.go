@@ -37,6 +37,8 @@ type Config struct {
 	X509CertPath        string `mapstructure:"x509_cert_path"`
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
+
+	tpl *common.Template
 }
 
 type Builder struct {
@@ -46,6 +48,11 @@ type Builder struct {
 
 func (b *Builder) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&b.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	b.config.tpl, err = common.NewTemplate()
 	if err != nil {
 		return err
 	}
@@ -87,8 +94,40 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
+
+	validates := map[string]*string{
+		"bundle_prefix":         &b.config.BundlePrefix,
+		"bundle_upload_command": &b.config.BundleUploadCommand,
+		"bundle_vol_command":    &b.config.BundleVolCommand,
+	}
+
+	for n, ptr := range validates {
+		if err := b.config.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
+	templates := map[string]*string{
+		"account_id":         &b.config.AccountId,
+		"ami_name":           &b.config.AMIName,
+		"bundle_destination": &b.config.BundleDestination,
+		"s3_bucket":          &b.config.S3Bucket,
+		"x509_cert_path":     &b.config.X509CertPath,
+		"x509_key_path":      &b.config.X509KeyPath,
+		"x509_upload_path":   &b.config.X509UploadPath,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = b.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
 
 	if b.config.AccountId == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))

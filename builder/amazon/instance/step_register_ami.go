@@ -1,20 +1,12 @@
 package instance
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
-	"strconv"
-	"text/template"
-	"time"
 )
-
-type amiNameData struct {
-	CreateTime string
-}
 
 type StepRegisterAMI struct{}
 
@@ -24,20 +16,10 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	manifestPath := state["remote_manifest_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
-	// Parse the name of the AMI
-	amiNameBuf := new(bytes.Buffer)
-	tData := amiNameData{
-		strconv.FormatInt(time.Now().UTC().Unix(), 10),
-	}
-
-	t := template.Must(template.New("ami").Parse(config.AMIName))
-	t.Execute(amiNameBuf, tData)
-	amiName := amiNameBuf.String()
-
 	ui.Say("Registering the AMI...")
 	registerOpts := &ec2.RegisterImage{
 		ImageLocation: manifestPath,
-		Name:          amiName,
+		Name:          config.AMIName,
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
