@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestTemplateProcess(t *testing.T) {
+func TestTemplateProcess_timestamp(t *testing.T) {
 	tpl, err := NewTemplate()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -26,5 +26,23 @@ func TestTemplateProcess(t *testing.T) {
 	currentTime := time.Now().UTC().Unix()
 	if math.Abs(float64(currentTime-val)) > 10 {
 		t.Fatalf("val: %d (current: %d)", val, currentTime)
+	}
+}
+
+func TestTemplateProcess_user(t *testing.T) {
+	tpl, err := NewTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tpl.UserData["foo"] = "bar"
+
+	result, err := tpl.Process(`{{user "foo"}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != "bar" {
+		t.Fatalf("bad: %s", result)
 	}
 }
