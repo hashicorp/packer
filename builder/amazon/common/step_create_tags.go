@@ -22,6 +22,7 @@ func (s *StepCreateTags) Run(state map[string]interface{}) multistep.StepAction 
 
 		var ec2Tags []ec2.Tag
 		for key, value := range s.Tags {
+			ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"", key, value))
 			ec2Tags = append(ec2Tags, ec2.Tag{key, value})
 		}
 
