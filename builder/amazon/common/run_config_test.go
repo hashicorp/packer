@@ -24,7 +24,7 @@ func testConfig() *RunConfig {
 
 func TestRunConfigPrepare(t *testing.T) {
 	c := testConfig()
-	err := c.Prepare()
+	err := c.Prepare(nil)
 	if len(err) > 0 {
 		t.Fatalf("err: %s", err)
 	}
@@ -33,7 +33,7 @@ func TestRunConfigPrepare(t *testing.T) {
 func TestRunConfigPrepare_InstanceType(t *testing.T) {
 	c := testConfig()
 	c.InstanceType = ""
-	if err := c.Prepare(); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 1 {
 		t.Fatalf("err: %s", err)
 	}
 }
@@ -41,7 +41,7 @@ func TestRunConfigPrepare_InstanceType(t *testing.T) {
 func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 	c := testConfig()
 	c.SourceAmi = ""
-	if err := c.Prepare(); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 1 {
 		t.Fatalf("err: %s", err)
 	}
 }
@@ -49,7 +49,7 @@ func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 func TestRunConfigPrepare_SSHPort(t *testing.T) {
 	c := testConfig()
 	c.SSHPort = 0
-	if err := c.Prepare(); len(err) != 0 {
+	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -58,7 +58,7 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 	}
 
 	c.SSHPort = 44
-	if err := c.Prepare(); len(err) != 0 {
+	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -70,12 +70,12 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 func TestRunConfigPrepare_SSHTimeout(t *testing.T) {
 	c := testConfig()
 	c.RawSSHTimeout = ""
-	if err := c.Prepare(); len(err) != 0 {
+	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
 	c.RawSSHTimeout = "bad"
-	if err := c.Prepare(); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 1 {
 		t.Fatalf("err: %s", err)
 	}
 }
@@ -83,7 +83,7 @@ func TestRunConfigPrepare_SSHTimeout(t *testing.T) {
 func TestRunConfigPrepare_SSHUsername(t *testing.T) {
 	c := testConfig()
 	c.SSHUsername = ""
-	if err := c.Prepare(); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 1 {
 		t.Fatalf("err: %s", err)
 	}
 }
