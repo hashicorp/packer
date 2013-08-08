@@ -14,6 +14,8 @@ type config struct {
 
 	// The remote path where the local file will be uploaded to.
 	Destination string
+
+	tpl *common.Template
 }
 
 type Provisioner struct {
@@ -26,8 +28,27 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	p.config.tpl, err = common.NewTemplate()
+	if err != nil {
+		return err
+	}
+
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+
+	templates := map[string]*string{
+		"source":      &p.config.Source,
+		"destination": &p.config.Destination,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
 
 	if _, err := os.Stat(p.config.Source); err != nil {
 		errs = packer.MultiErrorAppend(errs,
