@@ -50,7 +50,12 @@ func (t *Template) Process(s string, data interface{}) (string, error) {
 
 // Validate the template.
 func (t *Template) Validate(s string) error {
-	_, err := t.root.New(t.nextTemplateName()).Parse(s)
+	root, err := t.root.Clone()
+	if err != nil {
+		return err
+	}
+
+	_, err = root.New("template").Parse(s)
 	return err
 }
 
