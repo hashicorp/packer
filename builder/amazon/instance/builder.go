@@ -177,7 +177,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepBundleVolume{},
 		&StepUploadBundle{},
 		&StepRegisterAMI{},
-		&awscommon.StepCreateTags{b.config.Tags},
+		&awscommon.StepCreateTags{Tags: b.config.Tags},
 	}
 
 	// Run!
