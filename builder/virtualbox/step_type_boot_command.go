@@ -1,13 +1,11 @@
 package virtualbox
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
-	"text/template"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -49,11 +47,15 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 
 	ui.Say("Typing the boot command...")
 	for _, command := range config.BootCommand {
-		var buf bytes.Buffer
-		t := template.Must(template.New("boot").Parse(command))
-		t.Execute(&buf, tplData)
+		command, err := config.tpl.Process(command, tplData)
+		if err != nil {
+			err := fmt.Errorf("Error preparing boot command: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 
-		for _, code := range scancodes(buf.String()) {
+		for _, code := range scancodes(command) {
 			if code == "wait" {
 				time.Sleep(1 * time.Second)
 				continue
