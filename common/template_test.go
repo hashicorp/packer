@@ -46,3 +46,22 @@ func TestTemplateProcess_user(t *testing.T) {
 		t.Fatalf("bad: %s", result)
 	}
 }
+
+func TestTemplateValidate(t *testing.T) {
+	tpl, err := NewTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Valid
+	err = tpl.Validate(`{{user "foo"}}`)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Invalid
+	err = tpl.Validate(`{{idontexist}}`)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
