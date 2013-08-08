@@ -4,34 +4,32 @@ layout: "docs"
 
 # Configuration Templates
 
-Certain configuration parameters within templates are themselves a
-type of "template." These are not Packer templates, but text templates,
-where variables can be used to modify the value of a configuration parameter
-during runtime.
+All strings within templates are processed by a common Packer templating
+engine, where variables and functions can be used to modify the value of
+a configuration parameter at runtime.
 
-For example, the `ami_name` configuration for the [AMI builder](/docs/builders/amazon-ebs.html)
-is a template. An example value may be `My Packer AMI {{.CreateTime}}`. At
-runtime, this will be turned into `My Packer AMI 1370900368`, where the
-"CreateTime" variable was replaced with the Unix timestamp of when the
-AMI was actually created.
+For example, the `{{timestamp}}` function can be used in any string to
+generate the current timestamp. This is useful for configurations that require
+unique keys, such as AMI names. By setting the AMI name to something like
+`My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second.
 
-This sort of templating is pervasive throughout Packer. Instead of documenting
-the templating syntax in each location, it is documented once here so
-you know how to use it.
+In addition to globally available functions like timestamp shown before,
+some configurations have special local variables that are available only
+for that configuration. These are recognizable because they're prefixed by
+a period, such as `{{.Name}}`.
 
-<div class="alert alert-info">
-<strong>For advanced users:</strong> The templates are actually parsed and executed
-using Go's <a href="http://golang.org/pkg/text/template/">text/template</a>
-package. It therefore supports the complete template syntax.
-</div>
+The complete syntax is covered in the next section, followed by a reference
+of globally available functions.
 
 ## Syntax
 
-99% of the time all you'll need within configuration templates are variables.
-Variables are accessed by using `{{.VARIABLENAME}}`. The "." prefixing the
-variable name signals that you're accessing a variable on the root
-template object. All template directives go between braces. Here is a piece
-of a VMware VMX template that uses variables:
+The syntax of templates is extremely simple. Anything template related
+happens within double-braces: `{{ }}`. Variables are prefixed with a period
+and capitalized, such as `{{.Variable}}` and functions are just directly
+within the braces, such as `{{timestamp}}`.
+
+Here is an example from the VMware VMX template that shows configuration
+templates in action:
 
 <pre>
 .encoding = "UTF-8"
@@ -47,3 +45,11 @@ resulting in a VMX that looks like this:
 displayName = "packer"
 guestOS = "otherlinux"
 </pre>
+
+## Global Functions
+
+While some configuration settings have local variables specific to only that
+configuration, a set of functions are available globally for use in _any string_
+in Packer templates. These are listed below for reference.
+
+* ``timestamp`` - The current Unix timestamp in UTC.
