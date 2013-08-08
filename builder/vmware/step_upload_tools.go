@@ -33,6 +33,13 @@ func (*stepUploadTools) Run(state map[string]interface{}) multistep.StepAction {
 
 	tplData := &toolsUploadPathTemplate{Flavor: config.ToolsUploadFlavor}
 	config.ToolsUploadPath, err = config.tpl.Process(config.ToolsUploadPath, tplData)
+	if err != nil {
+		err := fmt.Errorf("Error preparing upload path: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	if err := comm.Upload(config.ToolsUploadPath, f); err != nil {
 		state["error"] = fmt.Errorf("Error uploading VMware Tools: %s", err)
 		return multistep.ActionHalt
