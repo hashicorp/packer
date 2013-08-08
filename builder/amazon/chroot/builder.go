@@ -14,7 +14,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"runtime"
-	"text/template"
 )
 
 // The unique ID for this builder
@@ -34,6 +33,8 @@ type Config struct {
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 	UnmountCommand string     `mapstructure:"unmount_command"`
+
+	tpl *common.Template
 }
 
 type Builder struct {
@@ -43,6 +44,11 @@ type Builder struct {
 
 func (b *Builder) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&b.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	b.config.tpl, err = common.NewTemplate()
 	if err != nil {
 		return err
 	}
@@ -84,29 +90,61 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
 
 	if b.config.AMIName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
-	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
-		}
+	} else if b.config.AMIName, err = b.config.tpl.Process(b.config.AMIName, nil); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error processing ami_name: %s", err))
 	}
 
-	for _, mounts := range b.config.ChrootMounts {
+	for i, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("Each chroot_mounts entry should be three elements."))
 			break
 		}
+
+		for j, entry := range mounts {
+			b.config.ChrootMounts[i][j], err = b.config.tpl.Process(entry, nil)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("Error processing chroot_mounts[%d][%d]: %s",
+						i, j, err))
+			}
+		}
+	}
+
+	for i, file := range b.config.CopyFiles {
+		var err error
+		b.config.CopyFiles[i], err = b.config.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing copy_files[%d]: %s",
+					i, err))
+		}
 	}
 
 	if b.config.SourceAmi == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("source_ami is required."))
+	}
+
+	templates := map[string]*string{
+		"device_path":     &b.config.DevicePath,
+		"mount_command":   &b.config.MountCommand,
+		"source_ami":      &b.config.SourceAmi,
+		"unmount_command": &b.config.UnmountCommand,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = b.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
