@@ -8,12 +8,17 @@ import (
 	"time"
 )
 
+// Template processes string data as a text/template with some common
+// elements and functions available. Plugin creators should process as
+// many fields as possible through this.
 type Template struct {
 	UserData map[string]string
 
 	root *template.Template
+	i    int
 }
 
+// NewTemplate creates a new template processor.
 func NewTemplate() (*Template, error) {
 	result := &Template{
 		UserData: make(map[string]string),
@@ -28,8 +33,9 @@ func NewTemplate() (*Template, error) {
 	return result, nil
 }
 
+// Process processes a single string, compiling and executing the template.
 func (t *Template) Process(s string, data interface{}) (string, error) {
-	tpl, err := t.root.New("tpl").Parse(s)
+	tpl, err := t.root.New(t.nextTemplateName()).Parse(s)
 	if err != nil {
 		return "", err
 	}
@@ -40,6 +46,18 @@ func (t *Template) Process(s string, data interface{}) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+// Validate the template.
+func (t *Template) Validate(s string) error {
+	_, err := t.root.New(t.nextTemplateName()).Parse(s)
+	return err
+}
+
+func (t *Template) nextTemplateName() string {
+	name := fmt.Sprintf("tpl%d", t.i)
+	t.i++
+	return name
 }
 
 // User is the function exposed as "user" within the templates and
