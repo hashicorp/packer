@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"github.com/mitchellh/packer/common"
 	"time"
 )
 
@@ -23,7 +24,15 @@ type RunConfig struct {
 	sshTimeout time.Duration
 }
 
-func (c *RunConfig) Prepare() []error {
+func (c *RunConfig) Prepare(t *common.Template) []error {
+	if t == nil {
+		var err error
+		t, err = common.NewTemplate()
+		if err != nil {
+			return []error{err}
+		}
+	}
+
 	// Defaults
 	if c.SSHPort == 0 {
 		c.SSHPort = 22
@@ -46,6 +55,26 @@ func (c *RunConfig) Prepare() []error {
 
 	if c.SSHUsername == "" {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
+	}
+
+	templates := map[string]*string{
+		"iam_instance_profile": &c.IamInstanceProfile,
+		"instance_type":        &c.InstanceType,
+		"ssh_timeout":          &c.RawSSHTimeout,
+		"security_group_id":    &c.SecurityGroupId,
+		"ssh_username":         &c.SSHUsername,
+		"source_ami":           &c.SourceAmi,
+		"subnet_id":            &c.SubnetId,
+		"vpc_id":               &c.VpcId,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = t.Process(*ptr, nil)
+		if err != nil {
+			errs = append(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
 	}
 
 	c.sshTimeout, err = time.ParseDuration(c.RawSSHTimeout)
