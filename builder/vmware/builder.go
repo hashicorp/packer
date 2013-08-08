@@ -58,10 +58,16 @@ type config struct {
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
+	tpl             *common.Template
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&b.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	b.config.tpl, err = common.NewTemplate()
 	if err != nil {
 		return err
 	}
@@ -120,6 +126,72 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.ToolsUploadPath == "" {
 		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
 	}
+
+	// Errors
+	templates := map[string]*string{
+		"disk_name":           &b.config.DiskName,
+		"guest_os_type":       &b.config.GuestOSType,
+		"http_directory":      &b.config.HTTPDir,
+		"iso_checksum":        &b.config.ISOChecksum,
+		"iso_checksum_type":   &b.config.ISOChecksumType,
+		"iso_url":             &b.config.ISOUrl,
+		"output_directory":    &b.config.OutputDir,
+		"shutdown_command":    &b.config.ShutdownCommand,
+		"ssh_password":        &b.config.SSHPassword,
+		"ssh_username":        &b.config.SSHUser,
+		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
+		"vm_name":             &b.config.VMName,
+		"boot_wait":           &b.config.RawBootWait,
+		"shutdown_timeout":    &b.config.RawShutdownTimeout,
+		"ssh_wait_timeout":    &b.config.RawSSHWaitTimeout,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = b.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, command := range b.config.BootCommand {
+		if err := b.config.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
+		}
+	}
+
+	for i, file := range b.config.FloppyFiles {
+		var err error
+		b.config.FloppyFiles[i], err = b.config.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing floppy_files[%d]: %s",
+					i, err))
+		}
+	}
+
+	newVMXData := make(map[string]string)
+	for k, v := range b.config.VMXData {
+		k, err = b.config.tpl.Process(k, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing VMX data key %s: %s", k, err))
+			continue
+		}
+
+		v, err = b.config.tpl.Process(v, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing VMX data value '%s': %s", v, err))
+			continue
+		}
+
+		newVMXData[k] = v
+	}
+
+	b.config.VMXData = newVMXData
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
 		errs = packer.MultiErrorAppend(
