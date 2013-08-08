@@ -57,10 +57,16 @@ type config struct {
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
+	tpl             *common.Template
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&b.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	b.config.tpl, err = common.NewTemplate()
 	if err != nil {
 		return err
 	}
@@ -122,6 +128,53 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	}
+
+	// Errors
+	templates := map[string]*string{
+		"guest_additions_path":    &b.config.GuestAdditionsPath,
+		"guest_additions_url":     &b.config.GuestAdditionsURL,
+		"guest_additions_sha256":  &b.config.GuestAdditionsSHA256,
+		"guest_os_type":           &b.config.GuestOSType,
+		"http_directory":          &b.config.HTTPDir,
+		"iso_checksum":            &b.config.ISOChecksum,
+		"iso_checksum_type":       &b.config.ISOChecksumType,
+		"iso_url":                 &b.config.ISOUrl,
+		"output_directory":        &b.config.OutputDir,
+		"shutdown_command":        &b.config.ShutdownCommand,
+		"ssh_password":            &b.config.SSHPassword,
+		"ssh_username":            &b.config.SSHUser,
+		"virtualbox_version_file": &b.config.VBoxVersionFile,
+		"vm_name":                 &b.config.VMName,
+		"boot_wait":               &b.config.RawBootWait,
+		"shutdown_timeout":        &b.config.RawShutdownTimeout,
+		"ssh_wait_timeout":        &b.config.RawSSHWaitTimeout,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = b.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, command := range b.config.BootCommand {
+		if err := b.config.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
+		}
+	}
+
+	for i, file := range b.config.FloppyFiles {
+		var err error
+		b.config.FloppyFiles[i], err = b.config.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing floppy_files[%d]: %s",
+					i, err))
+		}
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
@@ -213,6 +266,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
+	}
+
+	for i, args := range b.config.VBoxManage {
+		for j, arg := range args {
+			if err := b.config.tpl.Validate(arg); err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("Error processing vboxmanage[%d][%d]: %s", i, j, err))
+			}
+		}
 	}
 
 	b.driver, err = b.newDriver()

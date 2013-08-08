@@ -1,12 +1,10 @@
 package virtualbox
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"strings"
-	"text/template"
 )
 
 type commandTemplate struct {
@@ -40,10 +38,14 @@ func (s *stepVBoxManage) Run(state map[string]interface{}) multistep.StepAction 
 		copy(command, originalCommand)
 
 		for i, arg := range command {
-			var buf bytes.Buffer
-			t := template.Must(template.New("arg").Parse(arg))
-			t.Execute(&buf, tplData)
-			command[i] = buf.String()
+			var err error
+			command[i], err = config.tpl.Process(arg, tplData)
+			if err != nil {
+				err := fmt.Errorf("Error preparing vboxmanage command: %s", err)
+				state["error"] = err
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 
 		ui.Message(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
