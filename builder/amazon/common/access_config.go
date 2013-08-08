@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
+	"github.com/mitchellh/packer/common"
 	"strings"
 	"unicode"
 )
@@ -36,11 +37,39 @@ func (c *AccessConfig) Region() (aws.Region, error) {
 	return aws.Regions[region], nil
 }
 
-func (c *AccessConfig) Prepare() []error {
+func (c *AccessConfig) Prepare(t *common.Template) []error {
+	if t == nil {
+		var err error
+		t, err = common.NewTemplate()
+		if err != nil {
+			return []error{err}
+		}
+	}
+
+	templates := map[string]*string{
+		"access_key": &c.AccessKey,
+		"secret_key": &c.SecretKey,
+		"region":     &c.RawRegion,
+	}
+
+	errs := make([]error, 0)
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = t.Process(*ptr, nil)
+		if err != nil {
+			errs = append(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
 	if c.RawRegion != "" {
 		if _, ok := aws.Regions[c.RawRegion]; !ok {
-			return []error{fmt.Errorf("Unknown region: %s", c.RawRegion)}
+			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
+	}
+
+	if len(errs) > 0 {
+		return errs
 	}
 
 	return nil
