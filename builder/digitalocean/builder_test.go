@@ -332,8 +332,8 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.RawSnapshotName != "packer-{{.CreateTime}}" {
-		t.Errorf("invalid: %d", b.config.RawSnapshotName)
+	if b.config.SnapshotName == "" {
+		t.Errorf("invalid: %s", b.config.SnapshotName)
 	}
 
 	// Test set
@@ -345,7 +345,7 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	}
 
 	// Test set with template
-	config["snapshot_name"] = "{{.CreateTime}}"
+	config["snapshot_name"] = "{{timestamp}}"
 	b = Builder{}
 	err = b.Prepare(config)
 	if err != nil {
