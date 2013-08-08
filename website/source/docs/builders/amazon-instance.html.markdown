@@ -151,6 +151,14 @@ the section above for more information on what environmental variables Packer
 will look for.
 </div>
 
+<div class="alert alert-block">
+  <strong>Warning!</strong> Some versions of ec2-bundle-vol silently
+ignore all .pem and .gpg files during the bundling of the AMI, which can
+cause problems on some systems, for example Ubuntu. You may want to
+customize the bundle volume command with `bundle_vol_command` to include
+those files (see the `--no-filter` option of `ec2-bundle-vol`).
+</div>
+
 ## AMI Name Variables
 
 The AMI name specified by the `ami_name` configuration variable is actually
