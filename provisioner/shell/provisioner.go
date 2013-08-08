@@ -13,7 +13,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"text/template"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
@@ -48,6 +47,8 @@ type config struct {
 	// Packer configurations, these come from Packer itself
 	PackerBuildName   string `mapstructure:"packer_build_name"`
 	PackerBuilderType string `mapstructure:"packer_builder_type"`
+
+	tpl *common.Template
 }
 
 type Provisioner struct {
@@ -61,6 +62,11 @@ type ExecuteCommandTemplate struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&p.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	p.config.tpl, err = common.NewTemplate()
 	if err != nil {
 		return err
 	}
@@ -99,6 +105,38 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Script != "" {
 		p.config.Scripts = []string{p.config.Script}
+	}
+
+	templates := map[string]*string{
+		"inline_shebang": &p.config.InlineShebang,
+		"script":         &p.config.Script,
+		"remote_path":    &p.config.RemotePath,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	sliceTemplates := map[string][]string{
+		"inline":           p.config.Inline,
+		"scripts":          p.config.Scripts,
+		"environment_vars": p.config.Vars,
+	}
+
+	for n, slice := range sliceTemplates {
+		for i, elem := range slice {
+			var err error
+			slice[i], err = p.config.tpl.Process(elem, nil)
+			if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
+			}
+		}
 	}
 
 	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
@@ -193,11 +231,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		flattendVars := strings.Join(envVars, " ")
 
 		// Compile the command
-		var command bytes.Buffer
-		t := template.Must(template.New("command").Parse(p.config.ExecuteCommand))
-		t.Execute(&command, &ExecuteCommandTemplate{flattendVars, p.config.RemotePath})
+		command := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
+			Vars: flattendVars,
+			Path: p.config.RemotePath,
+		})
 
-		cmd := &packer.RemoteCmd{Command: command.String()}
+		cmd := &packer.RemoteCmd{Command: command}
 		log.Printf("Executing command: %s", cmd.Command)
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Failed executing command: %s", err)
