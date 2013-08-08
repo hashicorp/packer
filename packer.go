@@ -101,7 +101,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	plugin.CleanupClients()
 	os.Exit(exitCode)
 }
 
