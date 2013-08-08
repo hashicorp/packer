@@ -4,7 +4,6 @@
 package digitalocean
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -12,17 +11,11 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"strconv"
-	"text/template"
 	"time"
 )
 
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
-
-type snapshotNameData struct {
-	CreateTime string
-}
 
 // Configuration tells the builder the credentials
 // to use while communicating with DO and describes the image
@@ -36,11 +29,10 @@ type config struct {
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
 
-	SnapshotName string
+	SnapshotName string `mapstructure:"snapshot_name"`
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
 
-	RawSnapshotName string `mapstructure:"snapshot_name"`
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawEventDelay   string `mapstructure:"event_delay"`
 	RawStateTimeout string `mapstructure:"state_timeout"`
@@ -50,6 +42,8 @@ type config struct {
 	sshTimeout   time.Duration
 	eventDelay   time.Duration
 	stateTimeout time.Duration
+
+	tpl *common.Template
 }
 
 type Builder struct {
@@ -59,6 +53,11 @@ type Builder struct {
 
 func (b *Builder) Prepare(raws ...interface{}) error {
 	md, err := common.DecodeConfig(&b.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	b.config.tpl, err = common.NewTemplate()
 	if err != nil {
 		return err
 	}
@@ -92,6 +91,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.ImageID = 284203
 	}
 
+	if b.config.SnapshotName == "" {
+		// Default to packer-{{ unix timestamp (utc) }}
+		b.config.SnapshotName = "packer-{{timestamp}}"
+	}
+
 	if b.config.SSHUsername == "" {
 		// Default to "root". You can override this if your
 		// SourceImage has a different user account then the DO default
@@ -101,11 +105,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if b.config.SSHPort == 0 {
 		// Default to port 22 per DO default
 		b.config.SSHPort = 22
-	}
-
-	if b.config.RawSnapshotName == "" {
-		// Default to packer-{{ unix timestamp (utc) }}
-		b.config.RawSnapshotName = "packer-{{.CreateTime}}"
 	}
 
 	if b.config.RawSSHTimeout == "" {
@@ -123,6 +122,25 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		// Default to 6 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active
 		b.config.RawStateTimeout = "6m"
+	}
+
+	templates := map[string]*string{
+		"client_id":     &b.config.ClientID,
+		"api_key":       &b.config.APIKey,
+		"snapshot_name": &b.config.SnapshotName,
+		"ssh_username":  &b.config.SSHUsername,
+		"ssh_timeout":   &b.config.RawSSHTimeout,
+		"event_delay":   &b.config.RawEventDelay,
+		"state_timeout": &b.config.RawStateTimeout,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = b.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
 	}
 
 	// Required configurations that will display errors if not set
@@ -156,20 +174,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
 	}
 	b.config.stateTimeout = stateTimeout
-
-	// Parse the name of the snapshot
-	snapNameBuf := new(bytes.Buffer)
-	tData := snapshotNameData{
-		strconv.FormatInt(time.Now().UTC().Unix(), 10),
-	}
-	t, err := template.New("snapshot").Parse(b.config.RawSnapshotName)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
-	} else {
-		t.Execute(snapNameBuf, tData)
-		b.config.SnapshotName = snapNameBuf.String()
-	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
