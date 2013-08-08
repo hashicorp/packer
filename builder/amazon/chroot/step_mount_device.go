@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"text/template"
 )
 
 type mountPathData struct {
@@ -30,14 +29,17 @@ func (s *StepMountDevice) Run(state map[string]interface{}) multistep.StepAction
 	ui := state["ui"].(packer.Ui)
 	device := state["device"].(string)
 
-	mountPathRaw := new(bytes.Buffer)
-	t := template.Must(template.New("mountPath").Parse(config.MountPath))
-	t.Execute(mountPathRaw, &mountPathData{
+	mountPath, err := config.tpl.Process(config.MountPath, &mountPathData{
 		Device: filepath.Base(device),
 	})
 
-	var err error
-	mountPath := mountPathRaw.String()
+	if err != nil {
+		err := fmt.Errorf("Error preparing mount directory: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	mountPath, err = filepath.Abs(mountPath)
 	if err != nil {
 		err := fmt.Errorf("Error preparing mount directory: %s", err)
