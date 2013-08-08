@@ -59,7 +59,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
 	} else if b.config.AMIName, err = b.config.tpl.Process(b.config.AMIName, nil); err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error processing ami_name: %s", err))
 	}
 
 	newTags := make(map[string]string)
