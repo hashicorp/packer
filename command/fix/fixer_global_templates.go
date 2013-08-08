@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
+	"log"
 	"regexp"
 )
 
@@ -47,6 +48,7 @@ func (f FixerGlobalTemplates) Fix(input map[string]interface{}) (map[string]inte
 		}
 
 		// Builder-specific replacements
+		log.Printf("Fixing templates in type '%s'", builderType)
 		switch builderType {
 		case "amazon-chroot":
 			builder = f.fixAmazonChroot(builder)
