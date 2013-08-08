@@ -1,11 +1,9 @@
 package instance
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"text/template"
 )
 
 type uploadCmdData struct {
@@ -25,19 +23,23 @@ func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepActio
 	manifestPath := state["manifest_path"].(string)
 	ui := state["ui"].(packer.Ui)
 
-	var uploadCmd bytes.Buffer
-	tData := uploadCmdData{
+	var err error
+	config.BundleUploadCommand, err = config.tpl.Process(config.BundleUploadCommand, uploadCmdData{
 		AccessKey:       config.AccessKey,
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
 		SecretKey:       config.SecretKey,
+	})
+	if err != nil {
+		err := fmt.Errorf("Error processing bundle upload command: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
-	t := template.Must(template.New("uploadCmd").Parse(config.BundleUploadCommand))
-	t.Execute(&uploadCmd, tData)
 
 	ui.Say("Uploading the bundle...")
-	cmd := &packer.RemoteCmd{Command: uploadCmd.String()}
+	cmd := &packer.RemoteCmd{Command: config.BundleUploadCommand}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		state["error"] = fmt.Errorf("Error uploading volume: %s", err)
 		ui.Error(state["error"].(error).Error())
