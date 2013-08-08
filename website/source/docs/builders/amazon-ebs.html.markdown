@@ -37,8 +37,8 @@ Required:
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
-  To help make this unique, certain template parameters are available for
-  this value, which are documented below.
+  To help make this unique, use a function like `timestamp` (see
+  [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
 * `instance_type` (string) - The EC2 instance type to use while building
   the AMI, such as "m1.small".
@@ -96,7 +96,7 @@ Here is a basic example. It is completely valid except for the access keys:
   "source_ami": "ami-de0d9eb7",
   "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{.CreateTime}}",
+  "ami_name": "packer-quick-start {{timestamp}}",
 }
 </pre>
 
@@ -121,22 +121,10 @@ Here is an example using the optional AMI tags. This will add the tags
   "source_ami": "ami-de0d9eb7",
   "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{.CreateTime}}",
+  "ami_name": "packer-quick-start {{timestamp}}",
   "tags": {
     "OS_Version": "Ubuntu",
     "Release": "Latest"
   }
 }
 </pre>
-
-## AMI Name Variables
-
-The AMI name specified by the `ami_name` configuration variable is actually
-treated as a [configuration template](/docs/templates/configuration-templates.html).
-Packer provides a set of variables that it will replace
-within the AMI name. This helps ensure the AMI name is unique, as AWS requires.
-
-The available variables are shown below:
-
-* `CreateTime` - This will be replaced with the Unix timestamp of when
-  the AMI was built.

@@ -41,8 +41,8 @@ Required:
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
-  To help make this unique, certain template parameters are available for
-  this value, which are documented below.
+  To help make this unique, use a function like `timestamp` (see
+  [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
 * `instance_type` (string) - The EC2 instance type to use while building
   the AMI, such as "m1.small".
@@ -78,7 +78,7 @@ Optional:
   "/tmp". This directory must exist and be writable.
 
 * `bundle_prefix` (string) - The prefix for files created from bundling
-  the root volume. By default this is "image-{{.Createtime}}". The `CreateTime`
+  the root volume. By default this is "image-{{timestamp}}". The `timestamp`
   variable should be used to make sure this is unique, otherwise it can
   collide with other created AMIs by Packer in your account.
 
@@ -140,7 +140,7 @@ Here is a basic example. It is completely valid except for the access keys:
   "x509_key_path": "x509.key",
   "x509_upload_path": "/tmp",
 
-  "ami_name": "packer-quick-start {{.CreateTime}}"
+  "ami_name": "packer-quick-start {{timestamp}}"
 }
 </pre>
 
@@ -150,18 +150,6 @@ access key from environmental variables. See the configuration reference in
 the section above for more information on what environmental variables Packer
 will look for.
 </div>
-
-## AMI Name Variables
-
-The AMI name specified by the `ami_name` configuration variable is actually
-treated as a [configuration template](/docs/templates/configuration-templates.html).
-Packer provides a set of variables that it will replace
-within the AMI name. This helps ensure the AMI name is unique, as AWS requires.
-
-The available variables are shown below:
-
-* `CreateTime` - This will be replaced with the Unix timestamp of when
-  the AMI was built.
 
 ## Custom Bundle Commands
 
