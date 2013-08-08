@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"math/rand"
 	"net"
 	"net/http"
 )
@@ -15,51 +13,30 @@ import (
 //
 // Uses:
 //   config *config
+//   http_listener net.Listener
+//   http_port int
 //   ui     packer.Ui
 //
 // Produces:
 //   http_port int - The port the HTTP server started on.
-type stepHTTPServer struct {
-	l net.Listener
-}
+type stepHTTPServer struct{}
 
 func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction {
 	config := state["config"].(*config)
+	httpListener := state["http_listener"].(net.Listener)
+	httpPort := state["http_port"].(int)
 	ui := state["ui"].(packer.Ui)
 
-	var httpPort uint = 0
 	if config.HTTPDir == "" {
-		state["http_port"] = httpPort
 		return multistep.ActionContinue
-	}
-
-	// Find an available TCP port for our HTTP server
-	var httpAddr string
-	portRange := int(config.HTTPPortMax - config.HTTPPortMin)
-	for {
-		var err error
-		var offset uint = 0
-
-		if portRange > 0 {
-			// Intn will panic if portRange == 0, so we do a check.
-			offset = uint(rand.Intn(portRange))
-		}
-
-		httpPort = offset + config.HTTPPortMin
-		httpAddr = fmt.Sprintf(":%d", httpPort)
-		log.Printf("Trying port: %d", httpPort)
-		s.l, err = net.Listen("tcp", httpAddr)
-		if err == nil {
-			break
-		}
 	}
 
 	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", httpPort))
 
 	// Start the HTTP server and run it in the background
 	fileServer := http.FileServer(http.Dir(config.HTTPDir))
-	server := &http.Server{Addr: httpAddr, Handler: fileServer}
-	go server.Serve(s.l)
+	server := &http.Server{Handler: fileServer}
+	go server.Serve(httpListener)
 
 	// Save the address into the state so it can be accessed in the future
 	state["http_port"] = httpPort
@@ -67,9 +44,4 @@ func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *stepHTTPServer) Cleanup(map[string]interface{}) {
-	if s.l != nil {
-		// Close the listener so that the HTTP server stops
-		s.l.Close()
-	}
-}
+func (s *stepHTTPServer) Cleanup(map[string]interface{}) {}

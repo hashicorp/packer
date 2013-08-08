@@ -18,6 +18,7 @@ type config struct {
 
 type Provisioner struct {
 	config config
+	template *common.ConfigTemplate
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -28,6 +29,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+
+	p.template, err = common.NewConfigTemplate(&p.config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = p.template.Check()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
 
 	if _, err := os.Stat(p.config.Source); err != nil {
 		errs = packer.MultiErrorAppend(errs,
@@ -47,6 +58,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	err := p.template.Process()
+	if err != nil {
+		return err
+	}
+
 	ui.Say(fmt.Sprintf("Uploading %s => %s", p.config.Source, p.config.Destination))
 	f, err := os.Open(p.config.Source)
 	if err != nil {

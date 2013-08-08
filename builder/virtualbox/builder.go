@@ -57,6 +57,8 @@ type config struct {
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
+
+	template *common.ConfigTemplate
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -122,6 +124,17 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	}
+
+	// Errors
+	b.config.template, err = common.NewConfigTemplate(&b.config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = b.config.template.Check()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
@@ -230,6 +243,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	steps := []multistep.Step{
+		new(stepHTTPListener),
+		new(stepBuilderVars),
+		&common.StepProcessConfigTemplate{
+			ConfigTemplate: b.config.template,
+		},
 		new(stepDownloadGuestAdditions),
 		new(stepDownloadISO),
 		new(stepPrepareOutputDir),

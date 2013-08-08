@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"os"
 	"strings"
 )
@@ -49,10 +50,19 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	tplF.Close()
 
 	// Run the template through the various fixers
-	fixers := []Fixer{Fixers["iso-md5"]}
+	fixers := []string{
+		"iso-md5",
+		"global-template",
+	}
 	input := templateData
-	for _, fixer := range fixers {
+	for _, name := range fixers {
 		var err error
+		log.Printf("Running fixer: %s", name)
+		fixer, ok := Fixers[name]
+		if !ok {
+			panic("BAD FIXER: " + name)
+		}
+
 		input, err = fixer.Fix(input)
 		if err != nil {
 			env.Ui().Error(fmt.Sprintf("Error fixing: %s", err))

@@ -4,7 +4,6 @@
 package digitalocean
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -12,8 +11,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"strconv"
-	"text/template"
 	"time"
 )
 
@@ -36,11 +33,10 @@ type config struct {
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
 
-	SnapshotName string
+	SnapshotName string `mapstructure:"snapshot_name"`
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
 
-	RawSnapshotName string `mapstructure:"snapshot_name"`
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawEventDelay   string `mapstructure:"event_delay"`
 	RawStateTimeout string `mapstructure:"state_timeout"`
@@ -50,6 +46,8 @@ type config struct {
 	sshTimeout   time.Duration
 	eventDelay   time.Duration
 	stateTimeout time.Duration
+
+	template *common.ConfigTemplate
 }
 
 type Builder struct {
@@ -103,9 +101,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.SSHPort = 22
 	}
 
-	if b.config.RawSnapshotName == "" {
-		// Default to packer-{{ unix timestamp (utc) }}
-		b.config.RawSnapshotName = "packer-{{.CreateTime}}"
+	if b.config.SnapshotName == "" {
+		b.config.SnapshotName = "packer-{{timestamp}}"
 	}
 
 	if b.config.RawSSHTimeout == "" {
@@ -157,18 +154,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 	b.config.stateTimeout = stateTimeout
 
-	// Parse the name of the snapshot
-	snapNameBuf := new(bytes.Buffer)
-	tData := snapshotNameData{
-		strconv.FormatInt(time.Now().UTC().Unix(), 10),
-	}
-	t, err := template.New("snapshot").Parse(b.config.RawSnapshotName)
+	// Templating
+	b.config.template, err = common.NewConfigTemplate(&b.config)
 	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing snapshot_name: %s", err))
-	} else {
-		t.Execute(snapNameBuf, tData)
-		b.config.SnapshotName = snapNameBuf.String()
+		panic(err)
+	}
+
+	err = b.config.template.Check()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -192,6 +186,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&common.StepProcessConfigTemplate{
+			ConfigTemplate: b.config.template,
+		},
 		new(stepCreateSSHKey),
 		new(stepCreateDroplet),
 		new(stepDropletInfo),

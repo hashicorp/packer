@@ -6,7 +6,6 @@ package chroot
 
 import (
 	"errors"
-	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -14,7 +13,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"runtime"
-	"text/template"
 )
 
 // The unique ID for this builder
@@ -34,6 +32,8 @@ type Config struct {
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 	UnmountCommand string     `mapstructure:"unmount_command"`
+
+	template *common.ConfigTemplate
 }
 
 type Builder struct {
@@ -86,15 +86,19 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
 
+	b.config.template, err = common.NewConfigTemplate(&b.config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = b.config.template.Check()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
 	if b.config.AMIName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ami_name must be specified"))
-	} else {
-		_, err = template.New("ami").Parse(b.config.AMIName)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing ami_name: %s", err))
-		}
 	}
 
 	for _, mounts := range b.config.ChrootMounts {
@@ -147,6 +151,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepSourceAMIInfo{},
 		&StepFlock{},
 		&StepPrepareDevice{},
+		&StepBuilderVars{},
+		&common.StepProcessConfigTemplate{
+			ConfigTemplate: b.config.template,
+		},
 		&StepCreateVolume{},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
