@@ -12,7 +12,7 @@ import (
 // elements and functions available. Plugin creators should process as
 // many fields as possible through this.
 type Template struct {
-	UserData map[string]string
+	UserVars map[string]string
 
 	root *template.Template
 	i    int
@@ -21,7 +21,7 @@ type Template struct {
 // NewTemplate creates a new template processor.
 func NewTemplate() (*Template, error) {
 	result := &Template{
-		UserData: make(map[string]string),
+		UserVars: make(map[string]string),
 	}
 
 	result.root = template.New("configTemplateRoot")
@@ -68,7 +68,7 @@ func (t *Template) nextTemplateName() string {
 // User is the function exposed as "user" within the templates and
 // looks up user variables.
 func (t *Template) templateUser(n string) (string, error) {
-	result, ok := t.UserData[n]
+	result, ok := t.UserVars[n]
 	if !ok {
 		return "", fmt.Errorf("uknown user var: %s", n)
 	}

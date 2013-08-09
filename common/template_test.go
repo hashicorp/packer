@@ -35,7 +35,7 @@ func TestTemplateProcess_user(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	tpl.UserData["foo"] = "bar"
+	tpl.UserVars["foo"] = "bar"
 
 	result, err := tpl.Process(`{{user "foo"}}`, nil)
 	if err != nil {
