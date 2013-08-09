@@ -9,6 +9,8 @@ import (
 )
 
 type config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	// The local path of the file to upload.
 	Source string
 
@@ -32,6 +34,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)

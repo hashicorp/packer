@@ -45,6 +45,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+	b.config.tpl.UserVars = b.config.PackerUserVars
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
