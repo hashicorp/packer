@@ -23,10 +23,10 @@ const BuilderId = "mitchellh.amazon.instance"
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
+	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	AccountId           string `mapstructure:"account_id"`
-	AMIName             string `mapstructure:"ami_name"`
 	BundleDestination   string `mapstructure:"bundle_destination"`
 	BundlePrefix        string `mapstructure:"bundle_prefix"`
 	BundleUploadCommand string `mapstructure:"bundle_upload_command"`
@@ -36,12 +36,6 @@ type Config struct {
 	X509CertPath        string `mapstructure:"x509_cert_path"`
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
-
-	// AMI attributes
-	AMIDescription  string   `mapstructure:"ami_description"`
-	AMIUsers        []string `mapstructure:"ami_users"`
-	AMIGroups       []string `mapstructure:"ami_groups"`
-	AMIProductCodes []string `mapstructure:"ami_product_codes"`
 
 	tpl *common.Template
 }
@@ -100,6 +94,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 
 	validates := map[string]*string{
@@ -138,11 +133,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
 	} else {
 		b.config.AccountId = strings.Replace(b.config.AccountId, "-", "", -1)
-	}
-
-	if b.config.AMIName == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ami_name must be specified"))
 	}
 
 	if b.config.S3Bucket == "" {
