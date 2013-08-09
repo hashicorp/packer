@@ -7,14 +7,14 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type StepModifyAttributes struct {
+type StepModifyAMIAttributes struct {
 	Users        []string
 	Groups       []string
 	ProductCodes []string
 	Description  string
 }
 
-func (s *StepModifyAttributes) Run(state map[string]interface{}) multistep.StepAction {
+func (s *StepModifyAMIAttributes) Run(state map[string]interface{}) multistep.StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	ui := state["ui"].(packer.Ui)
 	amis := state["amis"].(map[string]string)
@@ -50,6 +50,6 @@ func (s *StepModifyAttributes) Run(state map[string]interface{}) multistep.StepA
 	return multistep.ActionContinue
 }
 
-func (s *StepModifyAttributes) Cleanup(state map[string]interface{}) {
+func (s *StepModifyAMIAttributes) Cleanup(state map[string]interface{}) {
 	// No cleanup...
 }
