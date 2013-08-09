@@ -190,6 +190,14 @@ sudo -n ec2-bundle-vol \
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-bundle-vol` command.
 
+<div class="alert alert-block">
+  <strong>Warning!</strong> Some versions of ec2-bundle-vol silently
+ignore all .pem and .gpg files during the bundling of the AMI, which can
+cause problems on some systems, such as Ubuntu. You may want to
+customize the bundle volume command to include those files (see the
+<code>--no-filter</code> option of ec2-bundle-vol).
+</div>
+
 ### Bundle Upload Command
 
 The default value for `bundle_upload_command` is shown below. It is split
