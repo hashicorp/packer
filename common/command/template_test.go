@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestBuildFiltersValidate(t *testing.T) {
-	bf := new(BuildFilters)
+func TestBuildOptionsValidate(t *testing.T) {
+	bf := new(BuildOptions)
 
 	err := bf.Validate()
 	if err != nil {
