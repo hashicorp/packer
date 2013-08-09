@@ -50,7 +50,7 @@ func TestBuild_Prepare(t *testing.T) {
 	build := testBuild()
 	builder := build.builder.(*TestBuilder)
 
-	build.Prepare()
+	build.Prepare(nil)
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
 
@@ -67,7 +67,7 @@ func TestBuild_Prepare(t *testing.T) {
 
 func TestBuild_Prepare_Twice(t *testing.T) {
 	build := testBuild()
-	if err := build.Prepare(); err != nil {
+	if err := build.Prepare(nil); err != nil {
 		t.Fatalf("bad error: %s", err)
 	}
 
@@ -82,7 +82,7 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 		}
 	}()
 
-	build.Prepare()
+	build.Prepare(nil)
 }
 
 func TestBuild_Prepare_Debug(t *testing.T) {
@@ -99,7 +99,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	builder := build.builder.(*TestBuilder)
 
 	build.SetDebug(true)
-	build.Prepare()
+	build.Prepare(nil)
 	assert.True(builder.prepareCalled, "prepare should be called")
 	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
 
@@ -116,7 +116,7 @@ func TestBuild_Run(t *testing.T) {
 	ui := testUi()
 
 	build := testBuild()
-	build.Prepare()
+	build.Prepare(nil)
 	artifacts, err := build.Run(ui, cache)
 	assert.Nil(err, "should not error")
 	assert.Equal(len(artifacts), 2, "should have two artifacts")
@@ -152,7 +152,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build := testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{}
 
-	build.Prepare()
+	build.Prepare(nil)
 	artifacts, err := build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -177,7 +177,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare()
+	build.Prepare(nil)
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -205,7 +205,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare()
+	build.Prepare(nil)
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -235,7 +235,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare()
+	build.Prepare(nil)
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -262,7 +262,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare()
+	build.Prepare(nil)
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)

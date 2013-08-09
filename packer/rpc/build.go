@@ -30,8 +30,8 @@ func (b *build) Name() (result string) {
 	return
 }
 
-func (b *build) Prepare() (err error) {
-	if cerr := b.client.Call("Build.Prepare", new(interface{}), &err); cerr != nil {
+func (b *build) Prepare(v map[string]string) (err error) {
+	if cerr := b.client.Call("Build.Prepare", v, &err); cerr != nil {
 		return cerr
 	}
 
@@ -86,8 +86,8 @@ func (b *BuildServer) Name(args *interface{}, reply *string) error {
 	return nil
 }
 
-func (b *BuildServer) Prepare(args interface{}, reply *error) error {
-	*reply = b.build.Prepare()
+func (b *BuildServer) Prepare(v map[string]string, reply *error) error {
+	*reply = b.build.Prepare(v)
 	return nil
 }
 
