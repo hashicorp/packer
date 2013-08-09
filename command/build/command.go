@@ -22,13 +22,13 @@ func (Command) Help() string {
 func (c Command) Run(env packer.Environment, args []string) int {
 	var cfgDebug bool
 	var cfgForce bool
-	buildFilters := new(cmdcommon.BuildFilters)
+	buildOptions := new(cmdcommon.BuildOptions)
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
 	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
-	cmdcommon.BuildFilterFlags(cmdFlags, buildFilters)
+	cmdcommon.BuildOptionFlags(cmdFlags, buildOptions)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
@@ -39,7 +39,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
-	if err := buildFilters.Validate(); err != nil {
+	if err := buildOptions.Validate(); err != nil {
 		env.Ui().Error(err.Error())
 		env.Ui().Error("")
 		env.Ui().Error(c.Help())
@@ -63,7 +63,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Go through each builder and compile the builds that we care about
-	builds, err := buildFilters.Builds(tpl, components)
+	builds, err := buildOptions.Builds(tpl, components)
 	if err != nil {
 		env.Ui().Error(err.Error())
 		return 1
