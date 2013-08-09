@@ -15,4 +15,5 @@ Options:
   -syntax-only           Only check syntax. Do not verify config of the template.
   -except=foo,bar,baz    Validate all builds other than these
   -only=foo,bar,baz      Validate only these builds
+  -var 'key=value'           Variable for templates, can be used multiple times.
 `

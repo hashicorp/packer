@@ -46,6 +46,14 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
+	userVars, err := buildOptions.AllUserVars()
+	if err != nil {
+		env.Ui().Error(fmt.Sprintf("Error compiling user variables: %s", err))
+		env.Ui().Error("")
+		env.Ui().Error(c.Help())
+		return 1
+	}
+
 	// Read the file into a byte array so that we can parse the template
 	log.Printf("Reading template: %s", args[0])
 	tpl, err := packer.ParseTemplateFile(args[0])
@@ -104,7 +112,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
-		err := b.Prepare(nil)
+		err := b.Prepare(userVars)
 		if err != nil {
 			env.Ui().Error(err.Error())
 			return 1

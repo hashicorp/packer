@@ -40,6 +40,14 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
+	userVars, err := buildOptions.AllUserVars()
+	if err != nil {
+		env.Ui().Error(fmt.Sprintf("Error compiling user variables: %s", err))
+		env.Ui().Error("")
+		env.Ui().Error(c.Help())
+		return 1
+	}
+
 	// Parse the template into a machine-usable format
 	log.Printf("Reading template: %s", args[0])
 	tpl, err := packer.ParseTemplateFile(args[0])
@@ -73,7 +81,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Check the configuration of all builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		err := b.Prepare(nil)
+		err := b.Prepare(userVars)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Errors validating build '%s'. %s", b.Name(), err))
 		}
