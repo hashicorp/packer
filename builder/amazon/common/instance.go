@@ -36,6 +36,7 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := conn.Instances([]string{i.InstanceId}, ec2.NewFilter())
 		if err != nil {
+			log.Printf("Error on InstanceStateRefresh: %s", err)
 			return nil, "", err
 		}
 
