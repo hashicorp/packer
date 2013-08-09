@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func testComponentFinder() *ComponentFinder {
+	builderFactory := func(n string) (Builder, error) { return testBuilder(), nil }
+	ppFactory := func(n string) (PostProcessor, error) { return new(TestPostProcessor), nil }
+	provFactory := func(n string) (Provisioner, error) { return new(TestProvisioner), nil }
+	return &ComponentFinder{
+		Builder:       builderFactory,
+		PostProcessor: ppFactory,
+		Provisioner:   provFactory,
+	}
+}
+
 func TestParseTemplate_Basic(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
@@ -298,6 +309,28 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 	assert.Length(result.Provisioners, 1, "should have one provisioner")
 	assert.Equal(result.Provisioners[0].Type, "shell", "provisioner should be shell")
 	assert.NotNil(result.Provisioners[0].rawConfig, "should have raw config")
+}
+
+func TestParseTemplate_Variables(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": "bar",
+			"bar": ""
+		},
+
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Variables == nil || len(result.Variables) != 2 {
+		t.Fatalf("bad vars: %#v", result.Variables)
+	}
 }
 
 func TestTemplate_BuildNames(t *testing.T) {
@@ -612,4 +645,40 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 	assert.True(ok, "should be a core build")
 	assert.Equal(len(coreBuild.provisioners), 1, "should have one provisioner")
 	assert.Equal(len(coreBuild.provisioners[0].config), 2, "should have two configs on the provisioner")
+}
+
+func TestTemplateBuild_variables(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": "bar"
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	build, err := template.Build("test1", testComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	coreBuild, ok := build.(*coreBuild)
+	if !ok {
+		t.Fatalf("couldn't convert!")
+	}
+
+	if len(coreBuild.variables) != 1 {
+		t.Fatalf("bad vars: %#v", coreBuild.variables)
+	}
 }

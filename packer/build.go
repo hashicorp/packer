@@ -73,6 +73,7 @@ type coreBuild struct {
 	hooks          map[string][]Hook
 	postProcessors [][]coreBuildPostProcessor
 	provisioners   []coreBuildProvisioner
+	variables      map[string]string
 
 	debug         bool
 	force         bool
