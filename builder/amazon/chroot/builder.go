@@ -52,6 +52,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+	b.config.tpl.UserVars = b.config.PackerUserVars
 
 	// Defaults
 	if b.config.ChrootMounts == nil {
