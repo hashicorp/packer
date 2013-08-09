@@ -13,6 +13,7 @@ var testBuildArtifact = &testArtifact{}
 type testBuild struct {
 	nameCalled     bool
 	prepareCalled  bool
+	prepareVars    map[string]string
 	runCalled      bool
 	runCache       packer.Cache
 	runUi          packer.Ui
@@ -28,8 +29,9 @@ func (b *testBuild) Name() string {
 	return "name"
 }
 
-func (b *testBuild) Prepare() error {
+func (b *testBuild) Prepare(v map[string]string) error {
 	b.prepareCalled = true
+	b.prepareVars = v
 	return nil
 }
 
@@ -78,8 +80,15 @@ func TestBuildRPC(t *testing.T) {
 	assert.True(b.nameCalled, "name should be called")
 
 	// Test Prepare
-	bClient.Prepare()
+	bClient.Prepare(map[string]string{"foo": "bar"})
 	assert.True(b.prepareCalled, "prepare should be called")
+	if len(b.prepareVars) != 1 {
+		t.Fatalf("bad vars: %#v", b.prepareVars)
+	}
+
+	if b.prepareVars["foo"] != "bar" {
+		t.Fatalf("bad vars: %#v", b.prepareVars)
+	}
 
 	// Test Run
 	cache := new(testCache)
