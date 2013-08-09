@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"os"
 	"strings"
 )
@@ -61,6 +62,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			panic("fixer not found: " + name)
 		}
 
+		log.Printf("Running fixer: %s", name)
 		input, err = fixer.Fix(input)
 		if err != nil {
 			env.Ui().Error(fmt.Sprintf("Error fixing: %s", err))
