@@ -150,7 +150,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
-		err := b.Prepare()
+		err := b.Prepare(nil)
 		if err != nil {
 			env.Ui().Error(err.Error())
 			return 1
