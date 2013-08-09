@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	cmdcommon "github.com/mitchellh/packer/common/command"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -22,15 +23,13 @@ func (Command) Help() string {
 func (c Command) Run(env packer.Environment, args []string) int {
 	var cfgDebug bool
 	var cfgForce bool
-	var cfgExcept []string
-	var cfgOnly []string
+	buildFilters := new(cmdcommon.BuildFilters)
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
 	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
-	cmdFlags.Var((*stringSliceValue)(&cfgExcept), "except", "build all builds except these")
-	cmdFlags.Var((*stringSliceValue)(&cfgOnly), "only", "only build the given builds by name")
+	cmdcommon.BuildFilterFlags(cmdFlags, buildFilters)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
@@ -41,8 +40,9 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
-	if len(cfgOnly) > 0 && len(cfgExcept) > 0 {
-		env.Ui().Error("Only one of '-except' or '-only' may be specified.\n")
+	if err := buildFilters.Validate(); err != nil {
+		env.Ui().Error(err.Error())
+		env.Ui().Error("")
 		env.Ui().Error(c.Help())
 		return 1
 	}
@@ -72,47 +72,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Go through each builder and compile the builds that we care about
-	buildNames := tpl.BuildNames()
-	builds := make([]packer.Build, 0, len(buildNames))
-	for _, buildName := range buildNames {
-		if len(cfgExcept) > 0 {
-			found := false
-			for _, only := range cfgExcept {
-				if buildName == only {
-					found = true
-					break
-				}
-			}
-
-			if found {
-				log.Printf("Skipping build '%s' because specified by -except.", buildName)
-				continue
-			}
-		}
-
-		if len(cfgOnly) > 0 {
-			found := false
-			for _, only := range cfgOnly {
-				if buildName == only {
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				log.Printf("Skipping build '%s' because not specified by -only.", buildName)
-				continue
-			}
-		}
-
-		log.Printf("Creating build: %s", buildName)
-		build, err := tpl.Build(buildName, components)
-		if err != nil {
-			env.Ui().Error(fmt.Sprintf("Failed to create build '%s': \n\n%s", buildName, err))
-			return 1
-		}
-
-		builds = append(builds, build)
+	builds, err := buildFilters.Builds(tpl, components)
+	if err != nil {
+		env.Ui().Error(err.Error())
+		return 1
 	}
 
 	if cfgDebug {
