@@ -10,8 +10,9 @@ import (
 // BuildOptions is a set of options related to builds that can be set
 // from the command line.
 type BuildOptions struct {
-	Except []string
-	Only   []string
+	UserVars map[string]string
+	Except   []string
+	Only     []string
 }
 
 // Validate validates the options
