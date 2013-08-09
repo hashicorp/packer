@@ -5,8 +5,6 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"strconv"
-	"time"
 )
 
 type bundleCmdData struct {
@@ -17,10 +15,6 @@ type bundleCmdData struct {
 	KeyPath      string
 	Prefix       string
 	PrivatePath  string
-}
-
-type bundlePrefixData struct {
-	CreateTime string
 }
 
 type StepBundleVolume struct{}
@@ -54,16 +48,6 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 
 	// Bundle the volume
 	var err error
-	config.BundlePrefix, err = config.tpl.Process(config.BundlePrefix, bundlePrefixData{
-		CreateTime: strconv.FormatInt(time.Now().UTC().Unix(), 10),
-	})
-	if err != nil {
-		err := fmt.Errorf("Error processing bundle prefix: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	config.BundleVolCommand, err = config.tpl.Process(config.BundleVolCommand, bundleCmdData{
 		AccountId:    config.AccountId,
 		Architecture: instance.Architecture,
