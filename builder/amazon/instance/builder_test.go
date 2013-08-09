@@ -115,7 +115,7 @@ func TestBuilderPrepare_BundlePrefix(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if b.config.BundlePrefix != "image-{{.CreateTime}}" {
+	if b.config.BundlePrefix == "" {
 		t.Fatalf("bad: %s", b.config.BundlePrefix)
 	}
 }
