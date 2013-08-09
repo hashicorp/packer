@@ -12,6 +12,7 @@ func BuildOptionFlags(fs *flag.FlagSet, f *BuildOptions) {
 	fs.Var((*SliceValue)(&f.Except), "except", "build all builds except these")
 	fs.Var((*SliceValue)(&f.Only), "only", "only build the given builds by name")
 	fs.Var((*userVarValue)(&f.UserVars), "var", "specify a user variable")
+	fs.Var((*AppendSliceValue)(&f.UserVarFiles), "var-file", "file with user variables")
 }
 
 // userVarValue is a flag.Value that parses out user variables in

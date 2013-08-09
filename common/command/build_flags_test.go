@@ -17,6 +17,8 @@ func TestBuildOptionFlags(t *testing.T) {
 		"-var=foo=bar",
 		"-var", "bar=baz",
 		"-var=foo=bang",
+		"-var-file=foo",
+		"-var-file=bar",
 	}
 
 	err := fs.Parse(args)
@@ -44,6 +46,11 @@ func TestBuildOptionFlags(t *testing.T) {
 
 	if opts.UserVars["bar"] != "baz" {
 		t.Fatalf("bad: %#v", opts.UserVars)
+	}
+
+	expected = []string{"foo", "bar"}
+	if !reflect.DeepEqual(opts.UserVarFiles, expected) {
+		t.Fatalf("bad: %#v", opts.UserVarFiles)
 	}
 }
 
