@@ -61,7 +61,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.BundlePrefix == "" {
-		b.config.BundlePrefix = "image-{{.CreateTime}}"
+		b.config.BundlePrefix = "image-{{timestamp}}"
 	}
 
 	if b.config.BundleUploadCommand == "" {
@@ -97,7 +97,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 
 	validates := map[string]*string{
-		"bundle_prefix":         &b.config.BundlePrefix,
 		"bundle_upload_command": &b.config.BundleUploadCommand,
 		"bundle_vol_command":    &b.config.BundleVolCommand,
 	}
@@ -113,6 +112,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		"account_id":         &b.config.AccountId,
 		"ami_name":           &b.config.AMIName,
 		"bundle_destination": &b.config.BundleDestination,
+		"bundle_prefix":      &b.config.BundlePrefix,
 		"s3_bucket":          &b.config.S3Bucket,
 		"x509_cert_path":     &b.config.X509CertPath,
 		"x509_key_path":      &b.config.X509KeyPath,
