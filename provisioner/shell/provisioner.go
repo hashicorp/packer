@@ -4,7 +4,6 @@ package shell
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/common"
@@ -231,10 +230,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		flattendVars := strings.Join(envVars, " ")
 
 		// Compile the command
-		command := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
+		command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
 			Vars: flattendVars,
 			Path: p.config.RemotePath,
 		})
+		if err != nil {
+			return fmt.Errorf("Error processing command: %s", err)
+		}
 
 		cmd := &packer.RemoteCmd{Command: command}
 		log.Printf("Executing command: %s", cmd.Command)
