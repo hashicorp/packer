@@ -17,12 +17,12 @@ func (Command) Help() string {
 
 func (c Command) Run(env packer.Environment, args []string) int {
 	var cfgSyntaxOnly bool
-	buildFilters := new(cmdcommon.BuildFilters)
+	buildOptions := new(cmdcommon.BuildOptions)
 
 	cmdFlags := flag.NewFlagSet("validate", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgSyntaxOnly, "syntax-only", false, "check syntax only")
-	cmdcommon.BuildFilterFlags(cmdFlags, buildFilters)
+	cmdcommon.BuildOptionFlags(cmdFlags, buildOptions)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
@@ -33,7 +33,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		return 1
 	}
 
-	if err := buildFilters.Validate(); err != nil {
+	if err := buildOptions.Validate(); err != nil {
 		env.Ui().Error(err.Error())
 		env.Ui().Error("")
 		env.Ui().Error(c.Help())
@@ -64,7 +64,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Otherwise, get all the builds
-	builds, err := buildFilters.Builds(tpl, components)
+	builds, err := buildOptions.Builds(tpl, components)
 	if err != nil {
 		env.Ui().Error(err.Error())
 		return 1

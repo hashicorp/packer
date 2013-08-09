@@ -7,14 +7,15 @@ import (
 	"log"
 )
 
-// BuildFilters is a set of options to filter the builds out of a template.
-type BuildFilters struct {
+// BuildOptions is a set of options related to builds that can be set
+// from the command line.
+type BuildOptions struct {
 	Except []string
 	Only   []string
 }
 
-// Validate validates the filter settings
-func (f *BuildFilters) Validate() error {
+// Validate validates the options
+func (f *BuildOptions) Validate() error {
 	if len(f.Except) > 0 && len(f.Only) > 0 {
 		return errors.New("Only one of '-except' or '-only' may be specified.")
 	}
@@ -23,8 +24,8 @@ func (f *BuildFilters) Validate() error {
 }
 
 // Builds returns the builds out of the given template that pass the
-// configured filters.
-func (f *BuildFilters) Builds(t *packer.Template, cf *packer.ComponentFinder) ([]packer.Build, error) {
+// configured options.
+func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([]packer.Build, error) {
 	buildNames := t.BuildNames()
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
