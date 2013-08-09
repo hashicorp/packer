@@ -35,3 +35,19 @@ func TestBuildOptionsValidate(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestBuildOptionsValidate_userVarFiles(t *testing.T) {
+	bf := new(BuildOptions)
+
+	err := bf.Validate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Non-existent file
+	bf.UserVarFiles = []string{"ireallyshouldntexistanywhere"}
+	err = bf.Validate()
+	if err == nil {
+		t.Fatal("should error")
+	}
+}

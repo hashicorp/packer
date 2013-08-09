@@ -1,24 +1,36 @@
 package command
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"log"
+	"os"
 )
 
 // BuildOptions is a set of options related to builds that can be set
 // from the command line.
 type BuildOptions struct {
-	UserVars map[string]string
-	Except   []string
-	Only     []string
+	UserVarFiles []string
+	UserVars     map[string]string
+	Except       []string
+	Only         []string
 }
 
 // Validate validates the options
 func (f *BuildOptions) Validate() error {
 	if len(f.Except) > 0 && len(f.Only) > 0 {
 		return errors.New("Only one of '-except' or '-only' may be specified.")
+	}
+
+	if len(f.UserVarFiles) > 0 {
+		for _, path := range f.UserVarFiles {
+			if _, err := os.Stat(path); err != nil {
+				return fmt.Errorf("Cannot access: %s", path)
+			}
+		}
 	}
 
 	return nil
@@ -28,6 +40,18 @@ func (f *BuildOptions) Validate() error {
 // file paths and the vars on the command line.
 func (f *BuildOptions) AllUserVars() (map[string]string, error) {
 	all := make(map[string]string)
+
+	// Copy in the variables from the files
+	for _, path := range f.UserVarFiles {
+		fileVars, err := readFileVars(path)
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range fileVars {
+			all[k] = v
+		}
+	}
 
 	// Copy in the command-line vars
 	for k, v := range f.UserVars {
@@ -83,4 +107,19 @@ func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([
 	}
 
 	return builds, nil
+}
+
+func readFileVars(path string) (map[string]string, error) {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	vars := make(map[string]string)
+	err = json.Unmarshal(bytes, &vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return vars, nil
 }
