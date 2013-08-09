@@ -8,6 +8,10 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+* **User Variables** allow you to specify variables within your templates
+  that can be replaced using the command-line, files, or environmental
+  variables. This dramatically improves the portability of packer templates.
+  See the documentation for more information.
 * All strings in a template are now processed for variables/functions,
   so things like `{{timestamp}}` can be used everywhere. More features will
   be added in the future.
