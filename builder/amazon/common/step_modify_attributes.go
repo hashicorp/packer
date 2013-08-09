@@ -20,6 +20,17 @@ func (s *StepModifyAttributes) Run(state map[string]interface{}) multistep.StepA
 	amis := state["amis"].(map[string]string)
 	ami := amis[ec2conn.Region.Name]
 
+	// Determine if there is any work to do.
+	valid := false
+	valid = valid || s.Description != ""
+	valid = valid || (s.Users != nil && len(s.Users) > 0)
+	valid = valid || (s.Groups != nil && len(s.Groups) > 0)
+	valid = valid || (s.ProductCodes != nil && len(s.ProductCodes) > 0)
+
+	if !valid {
+		return multistep.ActionContinue
+	}
+
 	options := &ec2.ModifyImageAttribute{
 		Description:  s.Description,
 		AddUsers:     s.Users,
