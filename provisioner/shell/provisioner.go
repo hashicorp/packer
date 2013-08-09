@@ -17,6 +17,8 @@ import (
 const DefaultRemotePath = "/tmp/script.sh"
 
 type config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	// An inline script to execute. Multiple strings are all executed
 	// in the context of a single shell.
 	Inline []string
@@ -43,10 +45,6 @@ type config struct {
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
-	// Packer configurations, these come from Packer itself
-	PackerBuildName   string `mapstructure:"packer_build_name"`
-	PackerBuilderType string `mapstructure:"packer_builder_type"`
-
 	tpl *common.Template
 }
 
@@ -69,6 +67,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
