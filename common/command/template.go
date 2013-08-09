@@ -24,6 +24,19 @@ func (f *BuildOptions) Validate() error {
 	return nil
 }
 
+// AllUserVars returns the user variables, compiled from both the
+// file paths and the vars on the command line.
+func (f *BuildOptions) AllUserVars() (map[string]string, error) {
+	all := make(map[string]string)
+
+	// Copy in the command-line vars
+	for k, v := range f.UserVars {
+		all[k] = v
+	}
+
+	return all, nil
+}
+
 // Builds returns the builds out of the given template that pass the
 // configured options.
 func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([]packer.Build, error) {
