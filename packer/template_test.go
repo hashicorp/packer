@@ -2,6 +2,7 @@ package packer
 
 import (
 	"cgl.tideland.biz/asserts"
+	"io/ioutil"
 	"reflect"
 	"sort"
 	"testing"
@@ -15,6 +16,30 @@ func testComponentFinder() *ComponentFinder {
 		Builder:       builderFactory,
 		PostProcessor: ppFactory,
 		Provisioner:   provFactory,
+	}
+}
+
+func TestParseTemplateFile_basic(t *testing.T) {
+	data := `
+	{
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Write([]byte(data))
+	tf.Close()
+
+	result, err := ParseTemplateFile(tf.Name())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(result.Builders) != 1 {
+		t.Fatalf("bad: %#v", result.Builders)
 	}
 }
 
