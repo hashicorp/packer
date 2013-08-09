@@ -12,5 +12,7 @@ Usage: packer validate [options] TEMPLATE
 
 Options:
 
-  -syntax-only        Only check syntax. Do not verify config of the template.
+  -syntax-only           Only check syntax. Do not verify config of the template.
+  -except=foo,bar,baz    Validate all builds other than these
+  -only=foo,bar,baz      Validate only these builds
 `
