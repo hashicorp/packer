@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"io/ioutil"
 	"sort"
 )
 
@@ -253,6 +254,17 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	}
 
 	return
+}
+
+// ParseTemplateFile takes the given template file and parses it into
+// a single template.
+func ParseTemplateFile(path string) (*Template, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseTemplate(data)
 }
 
 func parsePostProvisioner(i int, rawV interface{}) (result []map[string]interface{}, errors []error) {
