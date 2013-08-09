@@ -52,6 +52,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Run the template through the various fixers
 	fixers := []string{
 		"iso-md5",
+		"createtime",
 	}
 
 	input := templateData
