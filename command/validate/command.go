@@ -79,7 +79,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Check the configuration of all builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		err := b.Prepare()
+		err := b.Prepare(nil)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Errors validating build '%s'. %s", b.Name(), err))
 		}
