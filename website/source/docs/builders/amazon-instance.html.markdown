@@ -73,6 +73,21 @@ Required:
 
 Optional:
 
+* `ami_description` (string) - The description to set for the resulting
+  AMI(s). By default this description is empty.
+
+* `ami_groups` (array of string) - A list of groups that have access
+  to launch the resulting AMI(s). By default no groups have permission
+  to launch the AMI.
+
+* `ami_product_codes` (array of string) - A list of product codes to
+  associate with the AMI. By default no product codes are associated with
+  the AMI.
+
+* `ami_users` (array of string) - A list of account IDs that have access
+  to launch the resulting AMI(s). By default no additional users other than the user
+  creating the AMI has permissions to launch it.
+
 * `bundle_destination` (string) - The directory on the running instance
   where the bundled AMI will be saved prior to uploading. By default this is
   "/tmp". This directory must exist and be writable.

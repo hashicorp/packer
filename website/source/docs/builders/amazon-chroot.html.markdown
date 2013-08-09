@@ -78,6 +78,21 @@ Required:
 
 Optional:
 
+* `ami_description` (string) - The description to set for the resulting
+  AMI(s). By default this description is empty.
+
+* `ami_groups` (array of string) - A list of groups that have access
+  to launch the resulting AMI(s). By default no groups have permission
+  to launch the AMI.
+
+* `ami_product_codes` (array of string) - A list of product codes to
+  associate with the AMI. By default no product codes are associated with
+  the AMI.
+
+* `ami_users` (array of string) - A list of account IDs that have access
+  to launch the resulting AMI(s). By default no additional users other than the user
+  creating the AMI has permissions to launch it.
+
 * `chroot_mounts` (list of list of strings) - This is a list of additional
   devices to mount into the chroot environment. This configuration parameter
   requires some additional documentation which is in the "Chroot Mounts" section
