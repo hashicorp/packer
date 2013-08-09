@@ -24,8 +24,8 @@ const BuilderId = "mitchellh.amazon.chroot"
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
+	awscommon.AMIConfig    `mapstructure:",squash"`
 
-	AMIName        string     `mapstructure:"ami_name"`
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
 	DevicePath     string     `mapstructure:"device_path"`
@@ -91,14 +91,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
-
-	if b.config.AMIName == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ami_name must be specified"))
-	} else if b.config.AMIName, err = b.config.tpl.Process(b.config.AMIName, nil); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Error processing ami_name: %s", err))
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
 
 	for i, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
@@ -195,6 +188,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepEarlyCleanup{},
 		&StepSnapshot{},
 		&StepRegisterAMI{},
+		&awscommon.StepModifyAMIAttributes{
+			Description: b.config.AMIDescription,
+			Users:       b.config.AMIUsers,
+			Groups:      b.config.AMIGroups,
+		},
 	}
 
 	// Run!
