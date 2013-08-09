@@ -1,6 +1,16 @@
-## 0.2.4 (unreleased)
+## 0.3.0 (unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
 
+* All `{{.CreateTime}}` variables within templates (such as for AMI names)
+  are now replaced with `{{timestamp}}`. Run `packer fix` to fix your
+  templates.
+
+FEATURES:
+
+* All strings in a template are now processed for variables/functions,
+  so things like `{{timestamp}}` can be used everywhere. More features will
+  be added in the future.
 
 ## 0.2.3 (August 7, 2013)
 
