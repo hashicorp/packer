@@ -1,9 +1,9 @@
 package command
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	jsonutil "github.com/mitchellh/packer/common/json"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -116,7 +116,7 @@ func readFileVars(path string) (map[string]string, error) {
 	}
 
 	vars := make(map[string]string)
-	err = json.Unmarshal(bytes, &vars)
+	err = jsonutil.Unmarshal(bytes, &vars)
 	if err != nil {
 		return nil, err
 	}
