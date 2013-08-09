@@ -3,6 +3,7 @@ package validate
 import (
 	"flag"
 	"fmt"
+	cmdcommon "github.com/mitchellh/packer/common/command"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -17,10 +18,12 @@ func (Command) Help() string {
 
 func (c Command) Run(env packer.Environment, args []string) int {
 	var cfgSyntaxOnly bool
+	buildFilters := new(cmdcommon.BuildFilters)
 
 	cmdFlags := flag.NewFlagSet("validate", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgSyntaxOnly, "syntax-only", false, "check syntax only")
+	cmdcommon.BuildFilterFlags(cmdFlags, buildFilters)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
@@ -28,6 +31,13 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	args = cmdFlags.Args()
 	if len(args) != 1 {
 		cmdFlags.Usage()
+		return 1
+	}
+
+	if err := buildFilters.Validate(); err != nil {
+		env.Ui().Error(err.Error())
+		env.Ui().Error("")
+		env.Ui().Error(c.Help())
 		return 1
 	}
 
@@ -63,17 +73,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Otherwise, get all the builds
-	buildNames := tpl.BuildNames()
-	builds := make([]packer.Build, 0, len(buildNames))
-	for _, buildName := range buildNames {
-		log.Printf("Creating build from template for: %s", buildName)
-		build, err := tpl.Build(buildName, components)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Build '%s': %s", buildName, err))
-			continue
-		}
-
-		builds = append(builds, build)
+	builds, err := buildFilters.Builds(tpl, components)
+	if err != nil {
+		env.Ui().Error(err.Error())
+		return 1
 	}
 
 	// Check the configuration of all builds
