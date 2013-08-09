@@ -15,6 +15,8 @@ import (
 const DefaultTempConfigDir = "/tmp/salt"
 
 type Config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	// If true, run the salt-bootstrap script
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
@@ -24,6 +26,8 @@ type Config struct {
 
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
+
+	tpl *common.Template
 }
 
 type Provisioner struct {
@@ -36,12 +40,33 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	p.config.tpl, err = common.NewTemplate()
+	if err != nil {
+		return err
+	}
+	p.config.tpl.UserVars = p.config.PackerUserVars
+
 	if p.config.TempConfigDir == "" {
 		p.config.TempConfigDir = DefaultTempConfigDir
 	}
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+
+	templates := map[string]*string{
+		"bootstrap_args":   &p.config.BootstrapArgs,
+		"local_state_tree": &p.config.LocalStateTree,
+		"temp_config_dir":  &p.config.TempConfigDir,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
 
 	if p.config.LocalStateTree == "" {
 		errs = packer.MultiErrorAppend(errs,
