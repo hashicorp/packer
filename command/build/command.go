@@ -6,7 +6,6 @@ import (
 	"fmt"
 	cmdcommon "github.com/mitchellh/packer/common/command"
 	"github.com/mitchellh/packer/packer"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -49,15 +48,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	// Read the file into a byte array so that we can parse the template
 	log.Printf("Reading template: %s", args[0])
-	tplData, err := ioutil.ReadFile(args[0])
-	if err != nil {
-		env.Ui().Error(fmt.Sprintf("Failed to read template file: %s", err))
-		return 1
-	}
-
-	// Parse the template into a machine-usable format
-	log.Println("Parsing template...")
-	tpl, err := packer.ParseTemplate(tplData)
+	tpl, err := packer.ParseTemplateFile(args[0])
 	if err != nil {
 		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
