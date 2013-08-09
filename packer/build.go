@@ -35,7 +35,7 @@ type Build interface {
 
 	// Prepare configures the various components of this build and reports
 	// any errors in doing so (such as syntax errors, validation errors, etc.)
-	Prepare() error
+	Prepare(v map[string]string) error
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
@@ -103,8 +103,9 @@ func (b *coreBuild) Name() string {
 }
 
 // Prepare prepares the build by doing some initialization for the builder
-// and any hooks. This _must_ be called prior to Run.
-func (b *coreBuild) Prepare() (err error) {
+// and any hooks. This _must_ be called prior to Run. The parameter is the
+// overrides for the variables within the template (if any).
+func (b *coreBuild) Prepare(v map[string]string) (err error) {
 	b.l.Lock()
 	defer b.l.Unlock()
 
