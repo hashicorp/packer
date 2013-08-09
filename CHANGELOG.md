@@ -11,6 +11,8 @@ FEATURES:
 * All strings in a template are now processed for variables/functions,
   so things like `{{timestamp}}` can be used everywhere. More features will
   be added in the future.
+* The `amazon` builders (all of them) can now have attributes of their
+  resulting AMIs modified, such as access permissions and product codes.
 
 ## 0.2.3 (August 7, 2013)
 
