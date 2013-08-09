@@ -33,7 +33,7 @@ Along with each key, it is noted whether it is required or not.
   information on how to define and configure a provisioner, read the
   sub-section on [configuring provisioners in templates](/docs/templates/provisioners.html).
 
-* `post-processors` (optional) is an array of one or more objects that defines the 
+* `post-processors` (optional) is an array of one or more objects that defines the
   various post-processing steps to take with the built images. This is an optional
   field. If not specified, then no post-processing will be done. For more
   information on what post-processors do and how they're defined, read the
@@ -56,7 +56,7 @@ missing valid AWS access keys. Otherwise, it would work properly with
       "source_ami": "ami-de0d9eb7",
       "instance_type": "t1.micro",
       "ssh_username": "ubuntu",
-      "ami_name": "packer {{.CreateTime}}"
+      "ami_name": "packer {{timestamp}}"
     }
   ],
 
