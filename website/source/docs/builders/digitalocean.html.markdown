@@ -52,9 +52,9 @@ Optional:
   which is the 512MB droplet.
 
 * `snapshot_name` (string) - The name of the resulting snapshot that will
-  appear in your account. This must be unique. To help make this unique,
-  certain template parameters are available for this value, and are documented
-  below.
+  appear in your account. This must be unique.
+  To help make this unique, use a function like `timestamp` (see
+  [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
 * `ssh_port` (int) - The port that SSH will be available on. Defaults to port
   22.
@@ -82,17 +82,6 @@ own access tokens:
   "api_key": "YOUR API KEY"
 }
 </pre>
-
-## Snapshot Name Variables
-
-The `snapshot_name` for a DigitalOcean image must be unique. The configuration
-variable is actually treated as a [configuration template](/docs/templates/configuration-templates.html) and has various variables available to help keep this unique. Read
-the prior linked page for information on syntax if you're unfamiliar with it.
-
-The available variables are shown below:
-
-* `CreateTime` - This will be replaced with the Unix timestamp of when the
-  image is created.
 
 ## Finding Image, Region, and Size IDs
 
