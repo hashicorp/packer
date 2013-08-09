@@ -23,6 +23,10 @@ const (
 	// This is the key in configurations that is set to "true" when Packer
 	// force build is enabled.
 	ForceConfigKey = "packer_force"
+
+	// This key contains a map[string]string of the user variables for
+	// template processing.
+	UserVariablesConfigKey = "packer_user_variables"
 )
 
 // A Build represents a single job within Packer that is responsible for
@@ -105,7 +109,7 @@ func (b *coreBuild) Name() string {
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
-func (b *coreBuild) Prepare(v map[string]string) (err error) {
+func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
 	b.l.Lock()
 	defer b.l.Unlock()
 
@@ -115,11 +119,37 @@ func (b *coreBuild) Prepare(v map[string]string) (err error) {
 
 	b.prepareCalled = true
 
+	// Compile the variables
+	variables := make(map[string]string)
+	for k, v := range b.variables {
+		variables[k] = v
+	}
+
+	if userVars != nil {
+		errs := make([]error, 0)
+		for k, v := range userVars {
+			if _, ok := variables[k]; !ok {
+				errs = append(
+					errs, fmt.Errorf("Unknown user variable: %s", k))
+				continue
+			}
+
+			variables[k] = v
+		}
+
+		if len(errs) > 0 {
+			return &MultiError{
+				Errors: errs,
+			}
+		}
+	}
+
 	packerConfig := map[string]interface{}{
-		BuildNameConfigKey:   b.name,
-		BuilderTypeConfigKey: b.builderType,
-		DebugConfigKey:       b.debug,
-		ForceConfigKey:       b.force,
+		BuildNameConfigKey:     b.name,
+		BuilderTypeConfigKey:   b.builderType,
+		DebugConfigKey:         b.debug,
+		ForceConfigKey:         b.force,
+		UserVariablesConfigKey: variables,
 	}
 
 	// Prepare the builder
