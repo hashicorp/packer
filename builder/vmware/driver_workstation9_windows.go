@@ -18,44 +18,49 @@ func workstationCheckLicense() error {
 }
 
 func workstationFindVdiskManager() (string, error) {
-	path, _ := exec.LookPath("vmware-vdiskmanager.exe")
-	if fileExists(path) {
+	path, err := exec.LookPath("vmware-vdiskmanager.exe")
+	if err == nil {
 		return path, nil
 	}
 
-	return findProgramFile("vmware-vdiskmanager.exe"), nil
+	return findFile("vmware-vdiskmanager.exe", workstationProgramFilePaths()), nil
 }
 
 func workstationFindVMware() (string, error) {
 	path, _ := exec.LookPath("vmware.exe")
-	if fileExists(path) {
+	if err == nil {
 		return path, nil
 	}
 
-	return findProgramFile("vmware.exe"), nil
+	return findFile("vmware.exe", workstationProgramFilePaths()), nil
 }
 
 func workstationFindVmrun() (string, error) {
 	path, _ := exec.LookPath("vmrun.exe")
-	if fileExists(path) {
+	if err == nil {
 		return path, nil
 	}
 
-	return findProgramFile("vmrun.exe"), nil
+	return findFile("vmrun.exe", workstationProgramFilePaths()), nil
 }
 
 func workstationToolsIsoPath(flavor string) string {
-	return findProgramFile(flavor + ".iso")
+	return findFile(flavor+".iso", workstationProgramFilePaths()), nil
 }
 
 func workstationDhcpLeasesPath(device string) string {
-	path, _ := workstationVmnetDhcpLeasesPathFromRegistry()
-
-	if fileExists(path) {
+	path, err := workstationDhcpLeasesPathRegistry()
+	if err != nil {
+		log.Printf("Error finding leases in registry: %s", err)
+	} else if _, err := os.Stat(path); err == nil {
 		return path
 	}
 
-	return findDataFile("vmnetdhcp.leases")
+	return findFile("vmnetdhcp.leases", workstationDataFilePaths()), nil
+}
+
+func workstationVmnetnatConfPath() string {
+	return findFile("vmnetnat.conf", workstationDataFilePaths()), nil
 }
 
 // See http://blog.natefinch.com/2012/11/go-win-stuff.html
@@ -111,7 +116,7 @@ func workstationVMwareRoot() (s string, err error) {
 }
 
 // This reads the VMware DHCP leases path from the Windows registry.
-func workstationVmnetDhcpLeasesPathFromRegistry() (s string, err error) {
+func workstationDhcpLeasesPathRegistry() (s string, err error) {
 	key := "SYSTEM\\CurrentControlSet\\services\\VMnetDHCP\\Parameters"
 	subkey := "LeaseFile"
 	s, err = readRegString(syscall.HKEY_LOCAL_MACHINE, key, subkey)
@@ -123,21 +128,6 @@ func workstationVmnetDhcpLeasesPathFromRegistry() (s string, err error) {
 	return normalizePath(s), nil
 }
 
-func fileExists(file string) bool {
-	if file == "" {
-		return false
-	}
-
-	if _, err := os.Stat(file); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-		log.Println(err.Error())
-	}
-
-	return true
-}
-
 func normalizePath(path string) string {
 	path = strings.Replace(path, "\\", "/", -1)
 	path = strings.Replace(path, "//", "/", -1)
@@ -145,63 +135,82 @@ func normalizePath(path string) string {
 	return path
 }
 
-type Paths [][]string
-
-func findFile(file string, paths Paths) string {
-	for _, a := range paths {
-		if a[0] == "" {
-			continue
-		}
-
-		path := filepath.Join(a[0], a[1], file)
-
+func findFile(file string, paths []string) string {
+	for _, path := range paths {
+		path = filepath.Join(path, file)
 		path = normalizePath(path)
-
 		log.Printf("Searching for file '%s'", path)
 
-		if fileExists(path) {
+		if _, err := os.Stat(path); err != nil {
 			log.Printf("Found file '%s'", path)
 			return path
 		}
 	}
 
 	log.Printf("File not found: '%s'", file)
-
 	return ""
 }
 
-func findProgramFile(file string) string {
-	path, _ := workstationVMwareRoot()
-
-	paths := Paths{
-		[]string{os.Getenv("VMWARE_HOME"), ""},
-		[]string{path, ""},
-		[]string{os.Getenv("ProgramFiles(x86)"), "/VMware/VMware Workstation"},
-		[]string{os.Getenv("ProgramFiles"), "/VMware/VMware Workstation"},
+// workstationProgramFilesPaths returns a list of paths that are eligible
+// to contain program files we may want just as vmware.exe.
+func workstationProgramFilePaths() []string {
+	path, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
 	}
 
-	return findFile(file, paths)
-}
-
-func findDataFile(file string) string {
-	path, _ := workstationVmnetDhcpLeasesPathFromRegistry()
+	paths := make([]string, 0, 5)
+	if os.Getenv("VMWARE_HOME") != "" {
+		paths = append(paths, os.Getenv("VMWARE_HOME"))
+	}
 
 	if path != "" {
-		path = filepath.Dir(path)
+		paths = append(paths, path)
 	}
 
-	paths := Paths{
-		[]string{os.Getenv("VMWARE_DATA"), ""},
-		[]string{path, ""},
-		[]string{os.Getenv("ProgramData"), "/VMWare"},
-		[]string{os.Getenv("ALLUSERSPROFILE"), "/Application Data/VMWare"},
+	if os.Getenv("ProgramFiles(x86)") != "" {
+		paths = append(paths,
+			filepath.Join(os.Getenv("ProgramFiles(x86)"), "/VMware/VMware Workstation"))
 	}
 
-	return findFile(file, paths)
+	if os.Getenv("ProgramFiles") != "" {
+		paths = append(paths,
+			filepath.Join(os.Getenv("ProgramFiles"), "/VMware/VMware Workstation"))
+	}
+
+	return paths
 }
 
-func workstationVmnetnatConfPath() string {
-	const VMNETNAT_CONF = "vmnetnat.conf"
+// workstationDataFilePaths returns a list of paths that are eligible
+// to contain data files we may want such as vmnet NAT configuration files.
+func workstationDataFilePaths() []string {
+	leasesPath, err := workstationVmnetDhcpLeasesPathFromRegistry()
+	if err != nil {
+		log.Printf("Error getting DHCP leases path: %s", err)
+	}
 
-	return findDataFile(VMNETNAT_CONF)
+	if leasesPath != "" {
+		leasesPath = filepath.Dir(leasesPath)
+	}
+
+	paths := make([]string, 0, 5)
+	if os.Getenv("VMWARE_DATA") != "" {
+		paths = append(paths, os.Getenv("VMWARE_DATA"))
+	}
+
+	if path != "" {
+		paths = append(paths, leasesPath)
+	}
+
+	if os.Getenv("ProgramData") != "" {
+		paths = append(paths,
+			filepath.Join(os.Getenv("ProgramData"), "/VMware"))
+	}
+
+	if os.Getenv("ALLUSERSPROFILE") != "" {
+		paths = append(paths,
+			filepath.Join(os.Getenv("ALLUSERSPROFILE"), "/Application Data/VMware"))
+	}
+
+	return paths
 }
