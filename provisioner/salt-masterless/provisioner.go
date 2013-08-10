@@ -21,6 +21,9 @@ type Config struct {
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
 
+	// Local path to the minion config
+	MinionConfig string `mapstructure:"minion_config"`
+
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
 
@@ -55,6 +58,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	templates := map[string]*string{
 		"bootstrap_args":   &p.config.BootstrapArgs,
+		"minion_config":    &p.config.MinionConfig,
 		"local_state_tree": &p.config.LocalStateTree,
 		"temp_config_dir":  &p.config.TempConfigDir,
 	}
@@ -72,6 +76,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if _, err := os.Stat(p.config.LocalStateTree); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				errors.New("local_state_tree must exist and be accessible"))
+		}
+	}
+
+	if p.config.MinionConfig != "" {
+		if _, err := os.Stat(p.config.MinionConfig); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("minion_config must exist and be accessible"))
 		}
 	}
 
@@ -94,6 +105,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		if err = cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Unable to install Salt: %d", err)
 		}
+	}
+
+	if p.config.MinionConfig != "" {
+		err := uploadMinionConfig(comm, "/etc/salt/minion", p.config.MinionConfig)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm, ui); err != nil {
+		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
 	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
@@ -170,4 +192,17 @@ func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communi
 	}
 
 	return nil
+}
+
+func uploadMinionConfig(comm packer.Communicator, dst string, src string) error {
+	ui.Message(fmt.Sprintf("Uploading minion config: %s", src))
+	f, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("Error opening minion config: %s", err)
+	}
+	defer f.Close()
+
+	if err = comm.Upload(dst, f); err != nil {
+		return fmt.Errorf("Error uploading minion config: %s", err)
+	}
 }
