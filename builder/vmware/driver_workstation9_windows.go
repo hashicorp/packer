@@ -18,63 +18,44 @@ func workstationCheckLicense() error {
 }
 
 func workstationFindVdiskManager() (string, error) {
-	path, err := exec.LookPath("vmware-vdiskmanager.exe")
-	if err == nil {
+	path, _ := exec.LookPath("vmware-vdiskmanager.exe")
+	if fileExists(path) {
 		return path, nil
 	}
 
-	path, err = workstationVMwareRoot()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(path, "vmware-vdiskmanager.exe"), nil
+	return findProgramFile("vmware-vdiskmanager.exe"), nil
 }
 
 func workstationFindVMware() (string, error) {
-	path, err := exec.LookPath("vmware.exe")
-	if err == nil {
+	path, _ := exec.LookPath("vmware.exe")
+	if fileExists(path) {
 		return path, nil
 	}
 
-	path, err = workstationVMwareRoot()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(path, "vmware.exe"), nil
+	return findProgramFile("vmware.exe"), nil
 }
 
 func workstationFindVmrun() (string, error) {
-	path, err := exec.LookPath("vmrun.exe")
-	if err == nil {
+	path, _ := exec.LookPath("vmrun.exe")
+	if fileExists(path) {
 		return path, nil
 	}
 
-	path, err = workstationVMwareRoot()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(path, "vmrun.exe"), nil
+	return findProgramFile("vmrun.exe"), nil
 }
 
 func workstationToolsIsoPath(flavor string) string {
-	path, err := workstationVMwareRoot()
-	if err != nil {
-		return ""
-	}
-
-	return filepath.Join(path, flavor+".iso")
+	return findProgramFile(flavor + ".iso")
 }
 
 func workstationDhcpLeasesPath(device string) string {
-	programData := os.Getenv("ProgramData")
-	if programData == "" {
-		return ""
+	path, _ := workstationVmnetDhcpLeasesPathFromRegistry()
+
+	if fileExists(path) {
+		return path
 	}
 
-	return filepath.Join(programData, "/VMware/vmnetdhcp.leases")
+	return findDataFile("vmnetdhcp.leases")
 }
 
 // See http://blog.natefinch.com/2012/11/go-win-stuff.html
@@ -126,6 +107,101 @@ func workstationVMwareRoot() (s string, err error) {
 		return
 	}
 
-	s = strings.Replace(s, "\\", "/", -1)
-	return
+	return normalizePath(s), nil
+}
+
+// This reads the VMware DHCP leases path from the Windows registry.
+func workstationVmnetDhcpLeasesPathFromRegistry() (s string, err error) {
+	key := "SYSTEM\\CurrentControlSet\\services\\VMnetDHCP\\Parameters"
+	subkey := "LeaseFile"
+	s, err = readRegString(syscall.HKEY_LOCAL_MACHINE, key, subkey)
+	if err != nil {
+		log.Printf(`Unable to read registry key %s\%s`, key, subkey)
+		return
+	}
+
+	return normalizePath(s), nil
+}
+
+func fileExists(file string) bool {
+	if file == "" {
+		return false
+	}
+
+	if _, err := os.Stat(file); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		log.Println(err.Error())
+	}
+
+	return true
+}
+
+func normalizePath(path string) string {
+	path = strings.Replace(path, "\\", "/", -1)
+	path = strings.Replace(path, "//", "/", -1)
+	path = strings.TrimRight(path, "/")
+	return path
+}
+
+type Paths [][]string
+
+func findFile(file string, paths Paths) string {
+	for _, a := range paths {
+		if a[0] == "" {
+			continue
+		}
+
+		path := filepath.Join(a[0], a[1], file)
+
+		path = normalizePath(path)
+
+		log.Printf("Searching for file '%s'", path)
+
+		if fileExists(path) {
+			log.Printf("Found file '%s'", path)
+			return path
+		}
+	}
+
+	log.Printf("File not found: '%s'", file)
+
+	return ""
+}
+
+func findProgramFile(file string) string {
+	path, _ := workstationVMwareRoot()
+
+	paths := Paths{
+		[]string{os.Getenv("VMWARE_HOME"), ""},
+		[]string{path, ""},
+		[]string{os.Getenv("ProgramFiles(x86)"), "/VMware/VMware Workstation"},
+		[]string{os.Getenv("ProgramFiles"), "/VMware/VMware Workstation"},
+	}
+
+	return findFile(file, paths)
+}
+
+func findDataFile(file string) string {
+	path, _ := workstationVmnetDhcpLeasesPathFromRegistry()
+
+	if path != "" {
+		path = filepath.Dir(path)
+	}
+
+	paths := Paths{
+		[]string{os.Getenv("VMWARE_DATA"), ""},
+		[]string{path, ""},
+		[]string{os.Getenv("ProgramData"), "/VMWare"},
+		[]string{os.Getenv("ALLUSERSPROFILE"), "/Application Data/VMWare"},
+	}
+
+	return findFile(file, paths)
+}
+
+func workstationVmnetnatConfPath() string {
+	const VMNETNAT_CONF = "vmnetnat.conf"
+
+	return findDataFile(VMNETNAT_CONF)
 }
