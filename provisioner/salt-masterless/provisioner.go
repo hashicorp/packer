@@ -120,12 +120,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error executing highstate: %s", err)
 	}
 
-	ui.Message("Removing /srv/salt")
-	cmd = &packer.RemoteCmd{Command: "sudo rm -r /srv/salt"}
-	if err = cmd.StartWithUi(comm, ui); err != nil {
-		return fmt.Errorf("Unable to remove /srv/salt: %d", err)
-	}
-
 	return nil
 }
 
