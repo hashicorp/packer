@@ -25,6 +25,8 @@ BUG FIXES:
   using multiple environmental variables. [GH-263]
 * provisioner/salt-masterless: states aren't deleted after the run
   anymore. [GH-265]
+* provisioner/salt-masterless: error if any commands exit with a non-zero
+  exit status. [GH-266]
 
 ## 0.2.3 (August 7, 2013)
 

@@ -99,7 +99,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
 	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", p.config.TempConfigDir)}
-	if err = cmd.StartWithUi(comm, ui); err != nil {
+	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		return fmt.Errorf("Error creating remote salt state directory: %s", err)
 	}
 
@@ -110,13 +110,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	ui.Message(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
 	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s /srv/salt", p.config.TempConfigDir)}
-	if err = cmd.StartWithUi(comm, ui); err != nil {
+	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		return fmt.Errorf("Unable to move %s to /srv/salt: %d", p.config.TempConfigDir, err)
 	}
 
 	ui.Message("Running highstate")
 	cmd = &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info"}
-	if err = cmd.StartWithUi(comm, ui); err != nil {
+	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		return fmt.Errorf("Error executing highstate: %s", err)
 	}
 
