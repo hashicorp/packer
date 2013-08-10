@@ -16,18 +16,15 @@ import (
 type VMnetNatConfIPFinder struct{}
 
 func (*VMnetNatConfIPFinder) HostIP() (string, error) {
-	const VMNETNAT_CONF = "vmnetnat.conf"
-
 	driver := &Workstation9Driver{}
 
 	vmnetnat := driver.VmnetnatConfPath()
-
 	if vmnetnat == "" {
-		return "", fmt.Errorf("Could not find %s", VMNETNAT_CONF)
+		return "", errors.New("Could not find NAT vmnet conf file")
 	}
 
 	if _, err := os.Stat(vmnetnat); err != nil {
-		return "", fmt.Errorf("Error with %s: %s", VMNETNAT_CONF, err)
+		return "", fmt.Errorf("Could not find NAT vmnet conf file: %s", vmnetnat)
 	}
 
 	f, err := os.Open(vmnetnat)
