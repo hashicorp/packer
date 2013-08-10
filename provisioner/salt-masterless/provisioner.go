@@ -21,6 +21,9 @@ type Config struct {
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
 
+	// Local path to the minion config 
+	MinionConfig string `mapstructure:"minion_config"`
+
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
 
@@ -55,6 +58,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	templates := map[string]*string{
 		"bootstrap_args":   &p.config.BootstrapArgs,
+		"minion_config": &p.config.MinionConfig,
 		"local_state_tree": &p.config.LocalStateTree,
 		"temp_config_dir":  &p.config.TempConfigDir,
 	}
@@ -67,6 +71,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
 	}
+
+	if p.config.MinionConfig != "" {
+		  if _, err := os.Stat(p.config.MinionConfig); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("minion_config must exist and be accessible"))
+		}
+        }
 
 	if p.config.LocalStateTree == "" {
 		errs = packer.MultiErrorAppend(errs,
@@ -95,6 +106,25 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		if err = cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Unable to install Salt: %d", err)
 		}
+	}
+
+	if p.config.MinionConfig != "" {
+                remotePath := "/etc/salt/minion"
+		ui.Message(fmt.Sprintf("Uploading minion config: %s", p.config.MinionConfig))
+		file, err := os.Open(p.config.MinionConfig)
+		if err != nil {
+			return fmt.Errorf("Error opening file: %s", err)
+		}
+		defer file.Close()
+
+		ui.Message(fmt.Sprintf("Uploading file %s: %s", p.config.MinionConfig, remotePath))
+		if err = comm.Upload(remotePath, file); err != nil {
+			return fmt.Errorf("Error uploading file: %s", err)
+		}
+        }
+
+	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm, ui); err != nil {
+		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
 	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
