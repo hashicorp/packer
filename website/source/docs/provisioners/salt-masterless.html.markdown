@@ -24,14 +24,11 @@ The example below is fully functional.
 
 The reference of available configuration options is listed below. The only required argument is the path to your local salt state tree.
 
-Required:
+Optional:
 
 * `local_state_tree` (string) - The path to your local
   [state tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
-  This will be uploaded to the `/srv/salt` on the remote, and removed before
-  shutdown.
-
-Optional:
+  This will be uploaded to the `/srv/salt` on the remote.
 
 * `skip_bootstrap` (boolean) - By default the salt provisioner runs
   [salt bootstrap](https://github.com/saltstack/salt-bootstrap) to install
