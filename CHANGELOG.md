@@ -18,6 +18,11 @@ FEATURES:
 * The `amazon` builders (all of them) can now have attributes of their
   resulting AMIs modified, such as access permissions and product codes.
 
+BUG FIXES:
+
+* provisioner/salt-masterless: states aren't deleted after the run
+  anymore. [GH-265]
+
 ## 0.2.3 (August 7, 2013)
 
 IMPROVEMENTS:
