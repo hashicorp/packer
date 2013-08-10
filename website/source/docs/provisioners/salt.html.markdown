@@ -24,11 +24,14 @@ The example below is fully functional.
 
 The reference of available configuration options is listed below. The only required argument is the path to your local salt state tree.
 
-Optional:
+Required:
 
 * `local_state_tree` (string) - The path to your local
   [state tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
-  This will be uploaded to the `/srv/salt` on the remote.
+  This will be uploaded to the `/srv/salt` on the remote, and removed before
+  shutdown.
+
+Optional:
 
 * `skip_bootstrap` (boolean) - By default the salt provisioner runs
   [salt bootstrap](https://github.com/saltstack/salt-bootstrap) to install
@@ -40,9 +43,9 @@ Optional:
   has more detailed usage instructions. By default, no arguments are sent to
   the script.
 
+* `temp_config_dir` (string) - Where your local state tree will be copied
+  before moving to the `/srv/salt` directory. Default is `/tmp/salt`.
+
 * `minion_config` (string) - The path to your local
   [minion config](http://docs.saltstack.com/topics/configuration.html).
   This will be uploaded to the `/etc/salt` on the remote.
-
-* `temp_config_dir` (string) - Where your local state tree will be copied
-  before moving to the `/srv/salt` directory. Default is `/tmp/salt`.
