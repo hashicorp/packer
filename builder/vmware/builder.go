@@ -28,6 +28,7 @@ type config struct {
 
 	DiskName          string            `mapstructure:"vmdk_name"`
 	DiskSize          uint              `mapstructure:"disk_size"`
+	SingleDisk        bool              `mapstructure:"single_disk"`
 	FloppyFiles       []string          `mapstructure:"floppy_files"`
 	GuestOSType       string            `mapstructure:"guest_os_type"`
 	ISOChecksum       string            `mapstructure:"iso_checksum"`
@@ -41,6 +42,7 @@ type config struct {
 	HTTPPortMax       uint              `mapstructure:"http_port_max"`
 	BootCommand       []string          `mapstructure:"boot_command"`
 	SkipCompaction    bool              `mapstructure:"skip_compaction"`
+	SkipPtyRequest    bool              `mapstructure:"skip_pty_request"`
 	ShutdownCommand   string            `mapstructure:"shutdown_command"`
 	SSHUser           string            `mapstructure:"ssh_username"`
 	SSHPassword       string            `mapstructure:"ssh_password"`
@@ -311,6 +313,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepRun{},
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
+			SkipPtyRequest: b.config.SkipPtyRequest,
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: b.config.sshWaitTimeout,

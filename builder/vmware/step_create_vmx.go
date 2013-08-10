@@ -53,6 +53,12 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 			log.Printf("Setting VMX: '%s' = '%s'", k, v)
 			vmxData[k] = v
 		}
+
+		if _, ok := vmxData["ide0:0.present"]; ok {
+			vmxData["ide0:0.fileName"] = vmxData["scsi0:0.fileName"]
+			delete(vmxData, "scsi0:0.fileName")
+			vmxData["scsi0.present"] = "FALSE"
+		}
 	}
 
 	if floppyPathRaw, ok := state["floppy_path"]; ok {
