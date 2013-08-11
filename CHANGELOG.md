@@ -18,6 +18,12 @@ FEATURES:
 * The `amazon` builders (all of them) can now have attributes of their
   resulting AMIs modified, such as access permissions and product codes.
 
+IMPROVEMENTS:
+
+* provisioner/salt-masterless: `local_state_tree` is no longer required,
+  allowing you to use shell provisioner (or others) to bring this down.
+  [GH-269]
+
 BUG FIXES:
 
 * builder/vmware: Workstation works on Windows XP now. [GH-238]
