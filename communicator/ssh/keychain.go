@@ -26,6 +26,18 @@ func (k *SimpleKeychain) AddPEMKey(key string) (err error) {
 	return
 }
 
+func (k *SimpleKeychain) AddPEMKeyPassword(key string, password string) (err error) {
+	block, _ := pem.Decode([]byte(key))
+	bytes, _ := x509.DecryptPEMBlock(block, []byte(password))
+	rsakey, err := x509.ParsePKCS1PrivateKey(bytes)
+	if err != nil {
+		return
+	}
+
+	k.keys = append(k.keys, rsakey)
+	return
+}
+
 // Key method for ssh.ClientKeyring interface
 func (k *SimpleKeychain) Key(i int) (interface{}, error) {
 	if i < 0 || i >= len(k.keys) {
