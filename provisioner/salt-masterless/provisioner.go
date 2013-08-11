@@ -73,7 +73,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs,
 				errors.New("local_state_tree must exist and be accessible"))
 		}
-        }
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
