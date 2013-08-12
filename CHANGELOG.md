@@ -6,6 +6,10 @@ IMPROVEMENTS:
   for the provisioner to attempt to _start_ the remote process. This allows
   the shell provisioner to work properly with reboots. [GH-260]
 
+BUG FIXES:
+
+* builder/vmware: Fix issue with finding driver files. [GH-279]
+
 ## 0.3.0 (August 12, 2013)
 
 BACKWARDS INCOMPATIBILITIES:

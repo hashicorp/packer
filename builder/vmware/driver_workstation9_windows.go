@@ -141,7 +141,7 @@ func findFile(file string, paths []string) string {
 		path = normalizePath(path)
 		log.Printf("Searching for file '%s'", path)
 
-		if _, err := os.Stat(path); err != nil {
+		if _, err := os.Stat(path); err == nil {
 			log.Printf("Found file '%s'", path)
 			return path
 		}
