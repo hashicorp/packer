@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 )
 
@@ -61,6 +62,12 @@ type BasicUi struct {
 	Writer      io.Writer
 	l           sync.Mutex
 	interrupted bool
+}
+
+// MachineReadableUi is a UI that only outputs machine-readable output
+// to the given Writer.
+type MachineReadableUi struct {
+	Writer io.Writer
 }
 
 func (u *ColoredUi) Ask(query string) (string, error) {
@@ -231,4 +238,43 @@ func (rw *BasicUi) Error(message string) {
 
 func (rw *BasicUi) Machine(t string, args ...string) {
 	log.Printf("machine readable: %s %#v", t, args)
+}
+
+func (u *MachineReadableUi) Ask(query string) (string, error) {
+	return "", errors.New("machine-readable UI can't ask")
+}
+
+func (u *MachineReadableUi) Say(message string) {
+	u.Machine("ui", "say", message)
+}
+
+func (u *MachineReadableUi) Message(message string) {
+	u.Machine("ui", "message", message)
+}
+
+func (u *MachineReadableUi) Error(message string) {
+	u.Machine("ui", "error", message)
+}
+
+func (u *MachineReadableUi) Machine(category string, args ...string) {
+	now := time.Now().UTC()
+
+	// Determine if we have a target, and set it
+	target := ""
+	commaIdx := strings.Index(category, ",")
+	if commaIdx > -1 {
+		target = category[0:commaIdx]
+		category = category[commaIdx+1:]
+	}
+
+	// Prepare the args
+	for i, v := range args {
+		args[i] = strings.Replace(v, ",", "%!(PACKER_COMMA)", -1)
+	}
+	argsString := strings.Join(args, ",")
+
+	_, err := fmt.Fprintf(u.Writer, "%d,%s,%s,%s", now.Unix(), target, category, argsString)
+	if err != nil {
+		panic(err)
+	}
 }
