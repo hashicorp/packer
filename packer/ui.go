@@ -140,8 +140,8 @@ func (u *TargettedUi) Error(message string) {
 }
 
 func (u *TargettedUi) Machine(t string, args ...string) {
-	// Just pass it through for now.
-	u.Ui.Machine(t, args...)
+	// Prefix in the target, then pass through
+	u.Ui.Machine(fmt.Sprintf("%s,%s", u.Target, t), args...)
 }
 
 func (u *TargettedUi) prefixLines(arrow bool, message string) string {
