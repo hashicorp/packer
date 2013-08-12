@@ -17,7 +17,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 cd $DIR
 
 # Get the git commit
-GIT_COMMIT=$(git rev-parse --short HEAD)
+GIT_COMMIT=$(git rev-parse HEAD)
 GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 # Compile the main Packer app
