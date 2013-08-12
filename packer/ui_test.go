@@ -3,6 +3,7 @@ package packer
 import (
 	"bytes"
 	"cgl.tideland.biz/asserts"
+	"strings"
 	"testing"
 )
 
@@ -104,6 +105,44 @@ func TestBasicUi_Say(t *testing.T) {
 
 	bufferUi.Say("5")
 	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
+}
+
+func TestMachineReadableUi_ImplUi(t *testing.T) {
+	var raw interface{}
+	raw = &MachineReadableUi{}
+	if _, ok := raw.(Ui); !ok {
+		t.Fatalf("MachineReadableUi must implement Ui")
+	}
+}
+
+func TestMachineReadableUi(t *testing.T) {
+	var data, expected string
+
+	buf := new(bytes.Buffer)
+	ui := &MachineReadableUi{Writer: buf}
+
+	ui.Machine("foo", "bar", "baz")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = ",foo,bar,baz"
+	if data != expected {
+		t.Fatalf("bad: %s", data)
+	}
+
+	buf.Reset()
+	ui.Machine("mitchellh,foo", "bar", "baz")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = "mitchellh,foo,bar,baz"
+	if data != expected {
+		t.Fatalf("bad: %s", data)
+	}
+
+	buf.Reset()
+	ui.Machine("foo", "foo,bar")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = ",foo,foo%!(PACKER_COMMA)bar"
+	if data != expected {
+		t.Fatalf("bad: %s", data)
+	}
 }
 
 // This reads the output from the bytes.Buffer in our test object
