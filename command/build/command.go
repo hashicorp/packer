@@ -219,7 +219,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 				if artifact != nil {
 					ui.Machine("artifact", iStr, "builder-id", artifact.BuilderId())
 					ui.Machine("artifact", iStr, "id", artifact.Id())
-					ui.Machine("artifact", iStr, "string", message.String())
+					ui.Machine("artifact", iStr, "string", artifact.String())
 
 					files := artifact.Files()
 					ui.Machine("artifact",
