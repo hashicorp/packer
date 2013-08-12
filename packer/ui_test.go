@@ -121,27 +121,39 @@ func TestMachineReadableUi(t *testing.T) {
 	buf := new(bytes.Buffer)
 	ui := &MachineReadableUi{Writer: buf}
 
+	// No target
 	ui.Machine("foo", "bar", "baz")
 	data = strings.SplitN(buf.String(), ",", 2)[1]
-	expected = ",foo,bar,baz"
+	expected = ",foo,bar,baz\n"
 	if data != expected {
 		t.Fatalf("bad: %s", data)
 	}
 
+	// Target
 	buf.Reset()
 	ui.Machine("mitchellh,foo", "bar", "baz")
 	data = strings.SplitN(buf.String(), ",", 2)[1]
-	expected = "mitchellh,foo,bar,baz"
+	expected = "mitchellh,foo,bar,baz\n"
 	if data != expected {
 		t.Fatalf("bad: %s", data)
 	}
 
+	// Commas
 	buf.Reset()
 	ui.Machine("foo", "foo,bar")
 	data = strings.SplitN(buf.String(), ",", 2)[1]
-	expected = ",foo,foo%!(PACKER_COMMA)bar"
+	expected = ",foo,foo%!(PACKER_COMMA)bar\n"
 	if data != expected {
 		t.Fatalf("bad: %s", data)
+	}
+
+	// New lines
+	buf.Reset()
+	ui.Machine("foo", "foo\n")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = ",foo,foo\\n\n"
+	if data != expected {
+		t.Fatalf("bad: %#v", data)
 	}
 }
 
