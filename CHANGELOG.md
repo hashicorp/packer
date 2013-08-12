@@ -22,6 +22,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* builder/amazon/all: User data can be passed to start the instances. [GH-253]
 * provisioner/salt-masterless: `local_state_tree` is no longer required,
   allowing you to use shell provisioner (or others) to bring this down.
   [GH-269]
