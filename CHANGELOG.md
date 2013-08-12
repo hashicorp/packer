@@ -9,6 +9,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * builder/vmware: Fix issue with finding driver files. [GH-279]
+* provisioner/salt-masterless: Uploads work properly from Windows. [GH-276]
 
 ## 0.3.0 (August 12, 2013)
 
