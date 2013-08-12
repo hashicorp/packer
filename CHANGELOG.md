@@ -1,6 +1,10 @@
 ## 0.3.1 (unreleased)
 
+IMPROVEMENTS:
 
+* provisioner/shell: New setting `start_retry_timeout` which is the timeout
+  for the provisioner to attempt to _start_ the remote process. This allows
+  the shell provisioner to work properly with reboots. [GH-260]
 
 ## 0.3.0 (August 12, 2013)
 
