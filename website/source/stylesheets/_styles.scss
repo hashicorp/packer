@@ -122,6 +122,18 @@ a {
 
 }
 
+dt {
+    font-size: 18px;
+}
+
+dd {
+    font-family: $serif;
+    font-size: 17px;
+    line-height: 1.5;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+}
+
 ul,
 ol {
     margin: 0;
