@@ -51,9 +51,12 @@ type PrefixedUi struct {
 	Ui            Ui
 }
 
-// The ReaderWriterUi is a UI that writes and reads from standard Go
-// io.Reader and io.Writer.
-type ReaderWriterUi struct {
+// The BasicUI is a UI that reads and writes from a standard Go reader
+// and writer. It is safe to be called from multiple goroutines. The
+// target for machine-readable output can be configured by prefixing the
+// type of the machine readable output with the target and separating it
+// with a comma.
+type BasicUi struct {
 	Reader      io.Reader
 	Writer      io.Writer
 	l           sync.Mutex
@@ -144,7 +147,7 @@ func (u *PrefixedUi) prefixLines(prefix, message string) string {
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
 }
 
-func (rw *ReaderWriterUi) Ask(query string) (string, error) {
+func (rw *BasicUi) Ask(query string) (string, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -188,7 +191,7 @@ func (rw *ReaderWriterUi) Ask(query string) (string, error) {
 	}
 }
 
-func (rw *ReaderWriterUi) Say(message string) {
+func (rw *BasicUi) Say(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -199,7 +202,7 @@ func (rw *ReaderWriterUi) Say(message string) {
 	}
 }
 
-func (rw *ReaderWriterUi) Message(message string) {
+func (rw *BasicUi) Message(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -210,7 +213,7 @@ func (rw *ReaderWriterUi) Message(message string) {
 	}
 }
 
-func (rw *ReaderWriterUi) Error(message string) {
+func (rw *BasicUi) Error(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -221,6 +224,6 @@ func (rw *ReaderWriterUi) Error(message string) {
 	}
 }
 
-func (rw *ReaderWriterUi) Machine(t string, args ...string) {
+func (rw *BasicUi) Machine(t string, args ...string) {
 	// TODO
 }
