@@ -106,6 +106,9 @@ func (su *stubUi) Ask(string) (string, error) {
 func (su *stubUi) Error(string) {
 }
 
+func (su *stubUi) Machine(string, ...string) {
+}
+
 func (su *stubUi) Message(string) {
 }
 

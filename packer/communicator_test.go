@@ -47,7 +47,7 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 		Stdout: rcOutput,
 	}
 
-	testUi := &ReaderWriterUi{
+	testUi := &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: uiOutput,
 	}

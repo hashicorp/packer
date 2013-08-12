@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Validate - Command-Line"
 ---
 
 # Command-Line: Validate

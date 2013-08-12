@@ -73,7 +73,7 @@ type EnvironmentConfig struct {
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
 	config.Commands = make([]string, 0)
-	config.Ui = &ReaderWriterUi{
+	config.Ui = &BasicUi{
 		Reader: os.Stdin,
 		Writer: os.Stdout,
 	}
@@ -299,6 +299,9 @@ func (e *coreEnvironment) printHelp() {
 		// Output the command and the synopsis
 		e.ui.Say(fmt.Sprintf("    %v     %v", key, synopsis))
 	}
+
+	e.ui.Say("\nGlobally recognized options:")
+	e.ui.Say("    -machine-readable    Machine-readable output format.")
 }
 
 // Returns the UI for the environment. The UI is the interface that should
