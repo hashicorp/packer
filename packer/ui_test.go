@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func testUi() *ReaderWriterUi {
-	return &ReaderWriterUi{
+func testUi() *BasicUi {
+	return &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -71,15 +71,15 @@ func TestPrefixedUi_ImplUi(t *testing.T) {
 	}
 }
 
-func TestReaderWriterUi_ImplUi(t *testing.T) {
+func TestBasicUi_ImplUi(t *testing.T) {
 	var raw interface{}
-	raw = &ReaderWriterUi{}
+	raw = &BasicUi{}
 	if _, ok := raw.(Ui); !ok {
-		t.Fatalf("ReaderWriterUi must implement Ui")
+		t.Fatalf("BasicUi must implement Ui")
 	}
 }
 
-func TestReaderWriterUi_Error(t *testing.T) {
+func TestBasicUi_Error(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
@@ -91,7 +91,7 @@ func TestReaderWriterUi_Error(t *testing.T) {
 	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
-func TestReaderWriterUi_Say(t *testing.T) {
+func TestBasicUi_Say(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
@@ -105,7 +105,7 @@ func TestReaderWriterUi_Say(t *testing.T) {
 
 // This reads the output from the bytes.Buffer in our test object
 // and then resets the buffer.
-func readWriter(ui *ReaderWriterUi) (result string) {
+func readWriter(ui *BasicUi) (result string) {
 	buffer := ui.Writer.(*bytes.Buffer)
 	result = buffer.String()
 	buffer.Reset()

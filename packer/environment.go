@@ -73,7 +73,7 @@ type EnvironmentConfig struct {
 func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config := &EnvironmentConfig{}
 	config.Commands = make([]string, 0)
-	config.Ui = &ReaderWriterUi{
+	config.Ui = &BasicUi{
 		Reader: os.Stdin,
 		Writer: os.Stdout,
 	}

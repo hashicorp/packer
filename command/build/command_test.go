@@ -9,7 +9,7 @@ import (
 
 func testEnvironment() packer.Environment {
 	config := packer.DefaultEnvironmentConfig()
-	config.Ui = &packer.ReaderWriterUi{
+	config.Ui = &packer.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
