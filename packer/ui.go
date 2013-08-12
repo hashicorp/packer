@@ -43,12 +43,14 @@ type ColoredUi struct {
 	Ui         Ui
 }
 
-// PrefixedUi is a UI that wraps another UI implementation and adds a
-// prefix to all the messages going out.
-type PrefixedUi struct {
-	SayPrefix     string
-	MessagePrefix string
-	Ui            Ui
+// TargettedUi is a UI that wraps another UI implementation and modifies
+// the output to indicate a specific target. Specifically, all Say output
+// is prefixed with the target name. Message output is not prefixed but
+// is offset by the length of the target so that output is lined up properly
+// with Say output. Machine-readable output has the proper target set.
+type TargettedUi struct {
+	Target string
+	Ui     Ui
 }
 
 // The BasicUI is a UI that reads and writes from a standard Go reader
@@ -116,32 +118,37 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
-func (u *PrefixedUi) Ask(query string) (string, error) {
-	return u.Ui.Ask(u.prefixLines(u.SayPrefix, query))
+func (u *TargettedUi) Ask(query string) (string, error) {
+	return u.Ui.Ask(u.prefixLines(true, query))
 }
 
-func (u *PrefixedUi) Say(message string) {
-	u.Ui.Say(u.prefixLines(u.SayPrefix, message))
+func (u *TargettedUi) Say(message string) {
+	u.Ui.Say(u.prefixLines(true, message))
 }
 
-func (u *PrefixedUi) Message(message string) {
-	u.Ui.Message(u.prefixLines(u.MessagePrefix, message))
+func (u *TargettedUi) Message(message string) {
+	u.Ui.Message(u.prefixLines(false, message))
 }
 
-func (u *PrefixedUi) Error(message string) {
-	u.Ui.Error(u.prefixLines(u.SayPrefix, message))
+func (u *TargettedUi) Error(message string) {
+	u.Ui.Error(u.prefixLines(true, message))
 }
 
-func (u *PrefixedUi) Machine(t string, args ...string) {
+func (u *TargettedUi) Machine(t string, args ...string) {
 	// Just pass it through for now.
 	u.Ui.Machine(t, args...)
 }
 
-func (u *PrefixedUi) prefixLines(prefix, message string) string {
+func (u *TargettedUi) prefixLines(arrow bool, message string) string {
+	arrowText := "==>"
+	if !arrow {
+		arrowText = strings.Repeat(" ", len(arrowText))
+	}
+
 	var result bytes.Buffer
 
 	for _, line := range strings.Split(message, "\n") {
-		result.WriteString(fmt.Sprintf("%s: %s\n", prefix, line))
+		result.WriteString(fmt.Sprintf("%s %s: %s\n", arrowText, u.Target, line))
 	}
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
