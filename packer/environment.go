@@ -301,7 +301,7 @@ func (e *coreEnvironment) printHelp() {
 	}
 
 	e.ui.Say("\nGlobally recognized options:")
-	e.ui.Say("    --machine-readable    Machine-readable output format.")
+	e.ui.Say("    -machine-readable    Machine-readable output format.")
 }
 
 // Returns the UI for the environment. The UI is the interface that should

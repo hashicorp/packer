@@ -122,7 +122,7 @@ func main() {
 // to remove this flag.
 func extractMachineReadable(args []string) ([]string, bool) {
 	for i, arg := range args {
-		if arg == "--machine-readable" {
+		if arg == "-machine-readable" {
 			// We found it. Slice it out.
 			result := make([]string, len(args)-1)
 			copy(result, args[:i])
