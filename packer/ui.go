@@ -273,7 +273,7 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 	}
 	argsString := strings.Join(args, ",")
 
-	_, err := fmt.Fprintf(u.Writer, "%d,%s,%s,%s", now.Unix(), target, category, argsString)
+	_, err := fmt.Fprintf(u.Writer, "%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
 	if err != nil {
 		panic(err)
 	}
