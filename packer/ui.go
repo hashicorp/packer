@@ -33,6 +33,7 @@ type Ui interface {
 	Say(string)
 	Message(string)
 	Error(string)
+	Machine(string, ...string)
 }
 
 // ColoredUi is a UI that is colored using terminal colors.
@@ -80,6 +81,11 @@ func (u *ColoredUi) Error(message string) {
 	u.Ui.Error(u.colorize(message, color, true))
 }
 
+func (u *ColoredUi) Machine(t string, args ...string) {
+	// Don't colorize machine-readable output
+	u.Ui.Machine(t, args...)
+}
+
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 	if !u.supportsColors() {
 		return message
@@ -121,6 +127,11 @@ func (u *PrefixedUi) Message(message string) {
 
 func (u *PrefixedUi) Error(message string) {
 	u.Ui.Error(u.prefixLines(u.SayPrefix, message))
+}
+
+func (u *PrefixedUi) Machine(t string, args ...string) {
+	// Just pass it through for now.
+	u.Ui.Machine(t, args...)
 }
 
 func (u *PrefixedUi) prefixLines(prefix, message string) string {
@@ -208,4 +219,8 @@ func (rw *ReaderWriterUi) Error(message string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (rw *ReaderWriterUi) Machine(t string, args ...string) {
+	// TODO
 }
