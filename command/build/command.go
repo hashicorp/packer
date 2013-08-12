@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -195,7 +196,16 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	if len(artifacts) > 0 {
 		env.Ui().Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts {
-			for _, artifact := range buildArtifacts {
+			// Create a UI for the machine readable stuff to be targetted
+			ui := &packer.TargettedUi{
+				Target: name,
+				Ui:     env.Ui(),
+			}
+
+			// Machine-readable helpful
+			ui.Machine("artifact-count", strconv.FormatInt(int64(len(buildArtifacts)), 10))
+
+			for i, artifact := range buildArtifacts {
 				var message bytes.Buffer
 				fmt.Fprintf(&message, "--> %s: ", name)
 
@@ -203,6 +213,24 @@ func (c Command) Run(env packer.Environment, args []string) int {
 					fmt.Fprintf(&message, artifact.String())
 				} else {
 					fmt.Fprint(&message, "<nothing>")
+				}
+
+				iStr := strconv.FormatInt(int64(i), 10)
+				if artifact != nil {
+					ui.Machine("artifact", iStr, "builder-id", artifact.BuilderId())
+					ui.Machine("artifact", iStr, "id", artifact.Id())
+					ui.Machine("artifact", iStr, "string", message.String())
+
+					files := artifact.Files()
+					ui.Machine("artifact",
+						iStr,
+						"files-count", strconv.FormatInt(int64(len(files)), 10))
+					for fi, file := range files {
+						fiStr := strconv.FormatInt(int64(fi), 10)
+						ui.Machine("artifact", iStr, "file", fiStr, file)
+					}
+				} else {
+					ui.Machine("artifact", iStr, "nil")
 				}
 
 				env.Ui().Say(message.String())
