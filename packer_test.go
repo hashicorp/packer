@@ -22,7 +22,7 @@ func TestExtractMachineReadable(t *testing.T) {
 	}
 
 	// Yes
-	args = []string{"foo", "--machine-readable", "baz"}
+	args = []string{"foo", "-machine-readable", "baz"}
 	result, mr = extractMachineReadable(args)
 	expected = []string{"foo", "baz"}
 	if !reflect.DeepEqual(result, expected) {
