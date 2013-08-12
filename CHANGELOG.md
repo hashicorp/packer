@@ -1,4 +1,4 @@
-## 0.3.0 (unreleased)
+## 0.3.0 (August 12, 2013)
 
 BACKWARDS INCOMPATIBILITIES:
 
