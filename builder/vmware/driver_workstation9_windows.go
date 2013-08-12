@@ -27,7 +27,7 @@ func workstationFindVdiskManager() (string, error) {
 }
 
 func workstationFindVMware() (string, error) {
-	path, _ := exec.LookPath("vmware.exe")
+	path, err := exec.LookPath("vmware.exe")
 	if err == nil {
 		return path, nil
 	}
@@ -36,7 +36,7 @@ func workstationFindVMware() (string, error) {
 }
 
 func workstationFindVmrun() (string, error) {
-	path, _ := exec.LookPath("vmrun.exe")
+	path, err := exec.LookPath("vmrun.exe")
 	if err == nil {
 		return path, nil
 	}
@@ -45,7 +45,7 @@ func workstationFindVmrun() (string, error) {
 }
 
 func workstationToolsIsoPath(flavor string) string {
-	return findFile(flavor+".iso", workstationProgramFilePaths()), nil
+	return findFile(flavor+".iso", workstationProgramFilePaths())
 }
 
 func workstationDhcpLeasesPath(device string) string {
@@ -56,11 +56,11 @@ func workstationDhcpLeasesPath(device string) string {
 		return path
 	}
 
-	return findFile("vmnetdhcp.leases", workstationDataFilePaths()), nil
+	return findFile("vmnetdhcp.leases", workstationDataFilePaths())
 }
 
 func workstationVmnetnatConfPath() string {
-	return findFile("vmnetnat.conf", workstationDataFilePaths()), nil
+	return findFile("vmnetnat.conf", workstationDataFilePaths())
 }
 
 // See http://blog.natefinch.com/2012/11/go-win-stuff.html
@@ -184,7 +184,7 @@ func workstationProgramFilePaths() []string {
 // workstationDataFilePaths returns a list of paths that are eligible
 // to contain data files we may want such as vmnet NAT configuration files.
 func workstationDataFilePaths() []string {
-	leasesPath, err := workstationVmnetDhcpLeasesPathFromRegistry()
+	leasesPath, err := workstationDhcpLeasesPathRegistry()
 	if err != nil {
 		log.Printf("Error getting DHCP leases path: %s", err)
 	}
@@ -198,7 +198,7 @@ func workstationDataFilePaths() []string {
 		paths = append(paths, os.Getenv("VMWARE_DATA"))
 	}
 
-	if path != "" {
+	if leasesPath != "" {
 		paths = append(paths, leasesPath)
 	}
 
