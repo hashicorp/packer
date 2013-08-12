@@ -19,8 +19,8 @@ type UiServer struct {
 
 // The arguments sent to Ui.Machine
 type UiMachineArgs struct {
-	category string
-	args     []string
+	Category string
+	Args     []string
 }
 
 func (u *Ui) Ask(query string) (result string, err error) {
@@ -36,11 +36,11 @@ func (u *Ui) Error(message string) {
 
 func (u *Ui) Machine(t string, args ...string) {
 	rpcArgs := &UiMachineArgs{
-		category: t,
-		args:     args,
+		Category: t,
+		Args:     args,
 	}
 
-	if err := u.client.Call("Ui.Message", rpcArgs, new(interface{})); err != nil {
+	if err := u.client.Call("Ui.Machine", rpcArgs, new(interface{})); err != nil {
 		panic(err)
 	}
 }
@@ -70,7 +70,7 @@ func (u *UiServer) Error(message *string, reply *interface{}) error {
 }
 
 func (u *UiServer) Machine(args *UiMachineArgs, reply *interface{}) error {
-	u.ui.Machine(args.category, args.args...)
+	u.ui.Machine(args.Category, args.Args...)
 
 	*reply = nil
 	return nil

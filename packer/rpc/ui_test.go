@@ -3,6 +3,7 @@ package rpc
 import (
 	"cgl.tideland.biz/asserts"
 	"net/rpc"
+	"reflect"
 	"testing"
 )
 
@@ -81,4 +82,18 @@ func TestUiRPC(t *testing.T) {
 
 	uiClient.Say("message")
 	assert.Equal(ui.sayMessage, "message", "message should be correct")
+
+	uiClient.Machine("foo", "bar", "baz")
+	if !ui.machineCalled {
+		t.Fatal("machine should be called")
+	}
+
+	if ui.machineType != "foo" {
+		t.Fatalf("bad type: %#v", ui.machineType)
+	}
+
+	expected := []string{"bar", "baz"}
+	if !reflect.DeepEqual(ui.machineArgs, expected) {
+		t.Fatalf("bad: %#v", ui.machineArgs)
+	}
 }
