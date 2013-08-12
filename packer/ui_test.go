@@ -36,23 +36,26 @@ func TestColoredUi(t *testing.T) {
 	}
 }
 
-func TestPrefixedUi(t *testing.T) {
+func TestTargettedUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
-	prefixUi := &PrefixedUi{"mitchell", "bar", bufferUi}
+	TargettedUi := &TargettedUi{
+		Target: "foo",
+		Ui:     bufferUi,
+	}
 
-	prefixUi.Say("foo")
-	assert.Equal(readWriter(bufferUi), "mitchell: foo\n", "should have prefix")
+	TargettedUi.Say("foo")
+	assert.Equal(readWriter(bufferUi), "==> foo: foo\n", "should have prefix")
 
-	prefixUi.Message("foo")
-	assert.Equal(readWriter(bufferUi), "bar: foo\n", "should have prefix")
+	TargettedUi.Message("foo")
+	assert.Equal(readWriter(bufferUi), "    foo: foo\n", "should have prefix")
 
-	prefixUi.Error("bar")
-	assert.Equal(readWriter(bufferUi), "mitchell: bar\n", "should have prefix")
+	TargettedUi.Error("bar")
+	assert.Equal(readWriter(bufferUi), "==> foo: bar\n", "should have prefix")
 
-	prefixUi.Say("foo\nbar")
-	assert.Equal(readWriter(bufferUi), "mitchell: foo\nmitchell: bar\n", "should multiline")
+	TargettedUi.Say("foo\nbar")
+	assert.Equal(readWriter(bufferUi), "==> foo: foo\n==> foo: bar\n", "should multiline")
 }
 
 func TestColoredUi_ImplUi(t *testing.T) {
@@ -63,11 +66,11 @@ func TestColoredUi_ImplUi(t *testing.T) {
 	}
 }
 
-func TestPrefixedUi_ImplUi(t *testing.T) {
+func TestTargettedUi_ImplUi(t *testing.T) {
 	var raw interface{}
-	raw = &PrefixedUi{}
+	raw = &TargettedUi{}
 	if _, ok := raw.(Ui); !ok {
-		t.Fatalf("PrefixedUi must implement Ui")
+		t.Fatalf("TargettedUi must implement Ui")
 	}
 }
 
