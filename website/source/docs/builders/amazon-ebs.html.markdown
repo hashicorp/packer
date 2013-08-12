@@ -95,6 +95,14 @@ Optional:
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
+* `user_data` (string) - User data to apply when launching the instance.
+  Note that you need to be careful about escaping characters due to the
+  templates being JSON. It is often more convenient to use `user_data_file`,
+  instead.
+
+* `user_data_file` (string) - Path to a file that will be used for the
+  user data when launching the instance.
+
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
 
