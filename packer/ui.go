@@ -54,10 +54,8 @@ type TargettedUi struct {
 }
 
 // The BasicUI is a UI that reads and writes from a standard Go reader
-// and writer. It is safe to be called from multiple goroutines. The
-// target for machine-readable output can be configured by prefixing the
-// type of the machine readable output with the target and separating it
-// with a comma.
+// and writer. It is safe to be called from multiple goroutines. Machine
+// readable output is simply logged for this UI.
 type BasicUi struct {
 	Reader      io.Reader
 	Writer      io.Writer
@@ -232,5 +230,5 @@ func (rw *BasicUi) Error(message string) {
 }
 
 func (rw *BasicUi) Machine(t string, args ...string) {
-	// TODO
+	log.Printf("machine readable: %s %#v", t, args)
 }
