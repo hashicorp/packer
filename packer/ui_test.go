@@ -3,11 +3,12 @@ package packer
 import (
 	"bytes"
 	"cgl.tideland.biz/asserts"
+	"strings"
 	"testing"
 )
 
-func testUi() *ReaderWriterUi {
-	return &ReaderWriterUi{
+func testUi() *BasicUi {
+	return &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -36,23 +37,26 @@ func TestColoredUi(t *testing.T) {
 	}
 }
 
-func TestPrefixedUi(t *testing.T) {
+func TestTargettedUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
-	prefixUi := &PrefixedUi{"mitchell", "bar", bufferUi}
+	targettedUi := &TargettedUi{
+		Target: "foo",
+		Ui:     bufferUi,
+	}
 
-	prefixUi.Say("foo")
-	assert.Equal(readWriter(bufferUi), "mitchell: foo\n", "should have prefix")
+	targettedUi.Say("foo")
+	assert.Equal(readWriter(bufferUi), "==> foo: foo\n", "should have prefix")
 
-	prefixUi.Message("foo")
-	assert.Equal(readWriter(bufferUi), "bar: foo\n", "should have prefix")
+	targettedUi.Message("foo")
+	assert.Equal(readWriter(bufferUi), "    foo: foo\n", "should have prefix")
 
-	prefixUi.Error("bar")
-	assert.Equal(readWriter(bufferUi), "mitchell: bar\n", "should have prefix")
+	targettedUi.Error("bar")
+	assert.Equal(readWriter(bufferUi), "==> foo: bar\n", "should have prefix")
 
-	prefixUi.Say("foo\nbar")
-	assert.Equal(readWriter(bufferUi), "mitchell: foo\nmitchell: bar\n", "should multiline")
+	targettedUi.Say("foo\nbar")
+	assert.Equal(readWriter(bufferUi), "==> foo: foo\n==> foo: bar\n", "should multiline")
 }
 
 func TestColoredUi_ImplUi(t *testing.T) {
@@ -63,23 +67,23 @@ func TestColoredUi_ImplUi(t *testing.T) {
 	}
 }
 
-func TestPrefixedUi_ImplUi(t *testing.T) {
+func TestTargettedUi_ImplUi(t *testing.T) {
 	var raw interface{}
-	raw = &PrefixedUi{}
+	raw = &TargettedUi{}
 	if _, ok := raw.(Ui); !ok {
-		t.Fatalf("PrefixedUi must implement Ui")
+		t.Fatalf("TargettedUi must implement Ui")
 	}
 }
 
-func TestReaderWriterUi_ImplUi(t *testing.T) {
+func TestBasicUi_ImplUi(t *testing.T) {
 	var raw interface{}
-	raw = &ReaderWriterUi{}
+	raw = &BasicUi{}
 	if _, ok := raw.(Ui); !ok {
-		t.Fatalf("ReaderWriterUi must implement Ui")
+		t.Fatalf("BasicUi must implement Ui")
 	}
 }
 
-func TestReaderWriterUi_Error(t *testing.T) {
+func TestBasicUi_Error(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
@@ -91,7 +95,7 @@ func TestReaderWriterUi_Error(t *testing.T) {
 	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
-func TestReaderWriterUi_Say(t *testing.T) {
+func TestBasicUi_Say(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
@@ -103,9 +107,59 @@ func TestReaderWriterUi_Say(t *testing.T) {
 	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
 }
 
+func TestMachineReadableUi_ImplUi(t *testing.T) {
+	var raw interface{}
+	raw = &MachineReadableUi{}
+	if _, ok := raw.(Ui); !ok {
+		t.Fatalf("MachineReadableUi must implement Ui")
+	}
+}
+
+func TestMachineReadableUi(t *testing.T) {
+	var data, expected string
+
+	buf := new(bytes.Buffer)
+	ui := &MachineReadableUi{Writer: buf}
+
+	// No target
+	ui.Machine("foo", "bar", "baz")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = ",foo,bar,baz\n"
+	if data != expected {
+		t.Fatalf("bad: %s", data)
+	}
+
+	// Target
+	buf.Reset()
+	ui.Machine("mitchellh,foo", "bar", "baz")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = "mitchellh,foo,bar,baz\n"
+	if data != expected {
+		t.Fatalf("bad: %s", data)
+	}
+
+	// Commas
+	buf.Reset()
+	ui.Machine("foo", "foo,bar")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = ",foo,foo%!(PACKER_COMMA)bar\n"
+	if data != expected {
+		t.Fatalf("bad: %s", data)
+	}
+
+	// New lines
+	buf.Reset()
+	ui.Machine("foo", "foo\n")
+	data = strings.SplitN(buf.String(), ",", 2)[1]
+	expected = ",foo,foo\\n\n"
+	if data != expected {
+		t.Fatalf("bad: %#v", data)
+	}
+}
+
 // This reads the output from the bytes.Buffer in our test object
 // and then resets the buffer.
-func readWriter(ui *ReaderWriterUi) (result string) {
+func readWriter(ui *BasicUi) (result string) {
 	buffer := ui.Writer.(*bytes.Buffer)
 	result = buffer.String()
 	buffer.Reset()

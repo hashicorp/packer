@@ -19,7 +19,7 @@ func init() {
 
 func testEnvironment() Environment {
 	config := DefaultEnvironmentConfig()
-	config.Ui = &ReaderWriterUi{
+	config.Ui = &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -45,8 +45,8 @@ func TestEnvironment_DefaultConfig_Ui(t *testing.T) {
 	config := DefaultEnvironmentConfig()
 	assert.NotNil(config.Ui, "default UI should not be nil")
 
-	rwUi, ok := config.Ui.(*ReaderWriterUi)
-	assert.True(ok, "default UI should be ReaderWriterUi")
+	rwUi, ok := config.Ui.(*BasicUi)
+	assert.True(ok, "default UI should be BasicUi")
 	assert.Equal(rwUi.Writer, os.Stdout, "default UI should go to stdout")
 	assert.Equal(rwUi.Reader, os.Stdin, "default UI should read from stdin")
 }
@@ -175,7 +175,7 @@ func TestEnvironment_DefaultCli_Help(t *testing.T) {
 
 	// A little lambda to help us test the output actually contains help
 	testOutput := func() {
-		buffer := defaultEnv.Ui().(*ReaderWriterUi).Writer.(*bytes.Buffer)
+		buffer := defaultEnv.Ui().(*BasicUi).Writer.(*bytes.Buffer)
 		output := buffer.String()
 		buffer.Reset()
 		assert.True(strings.Contains(output, "usage: packer"), "should print help")
@@ -341,7 +341,7 @@ func TestEnvironmentProvisioner_Error(t *testing.T) {
 func TestEnvironment_SettingUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	ui := &ReaderWriterUi{
+	ui := &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}

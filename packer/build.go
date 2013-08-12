@@ -213,11 +213,10 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	hook := &DispatchHook{hooks}
 	artifacts := make([]Artifact, 0, 1)
 
-	// The builder just has a normal Ui, but prefixed
-	builderUi := &PrefixedUi{
-		fmt.Sprintf("==> %s", b.Name()),
-		fmt.Sprintf("    %s", b.Name()),
-		originalUi,
+	// The builder just has a normal Ui, but targetted
+	builderUi := &TargettedUi{
+		Target: b.Name(),
+		Ui:     originalUi,
 	}
 
 	log.Printf("Running builder: %s", b.builderType)
@@ -240,10 +239,9 @@ PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
-			ppUi := &PrefixedUi{
-				fmt.Sprintf("==> %s (%s)", b.Name(), corePP.processorType),
-				fmt.Sprintf("    %s (%s)", b.Name(), corePP.processorType),
-				originalUi,
+			ppUi := &TargettedUi{
+				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.processorType),
+				Ui:     originalUi,
 			}
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))

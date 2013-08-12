@@ -1,6 +1,6 @@
 ---
 layout: "docs"
-page_title: "Command-line: Fix"
+page_title: "Fix - Command-Line"
 ---
 
 # Command-Line: Fix
