@@ -1,6 +1,7 @@
 package common
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -84,6 +85,44 @@ func TestRunConfigPrepare_SSHUsername(t *testing.T) {
 	c := testConfig()
 	c.SSHUsername = ""
 	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestRunConfigPrepare_UserData(t *testing.T) {
+	c := testConfig()
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+
+	c.UserData = "foo"
+	c.UserDataFile = tf.Name()
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestRunConfigPrepare_UserDataFile(t *testing.T) {
+	c := testConfig()
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	c.UserDataFile = "idontexistidontthink"
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+
+	c.UserDataFile = tf.Name()
+	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 }

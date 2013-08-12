@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"log"
 )
 
@@ -12,6 +13,7 @@ type StepRunSourceInstance struct {
 	ExpectedRootDevice string
 	InstanceType       string
 	UserData           string
+	UserDataFile       string
 	SourceAMI          string
 	IamInstanceProfile string
 	SubnetId           string
@@ -25,11 +27,22 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	securityGroupId := state["securityGroupId"].(string)
 	ui := state["ui"].(packer.Ui)
 
+	userData := s.UserData
+	if s.UserDataFile != "" {
+		contents, err := ioutil.ReadFile(s.UserDataFile)
+		if err != nil {
+			state["error"] = fmt.Errorf("Problem reading user data file: %s", err)
+			return multistep.ActionHalt
+		}
+
+		userData = string(contents)
+	}
+
 	runOpts := &ec2.RunInstances{
 		KeyName:            keyName,
 		ImageId:            s.SourceAMI,
 		InstanceType:       s.InstanceType,
-		UserData:           []byte(s.UserData),
+		UserData:           []byte(userData),
 		MinCount:           0,
 		MaxCount:           0,
 		SecurityGroups:     []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},

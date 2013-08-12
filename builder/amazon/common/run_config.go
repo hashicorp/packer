@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/common"
+	"os"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type RunConfig struct {
 	IamInstanceProfile string `mapstructure:"iam_instance_profile"`
 	InstanceType       string `mapstructure:"instance_type"`
 	UserData           string `mapstructure:"user_data"`
+	UserDataFile       string `mapstructure:"user_data_file"`
 	RawSSHTimeout      string `mapstructure:"ssh_timeout"`
 	SSHUsername        string `mapstructure:"ssh_username"`
 	SSHPort            int    `mapstructure:"ssh_port"`
@@ -56,6 +58,14 @@ func (c *RunConfig) Prepare(t *common.Template) []error {
 
 	if c.SSHUsername == "" {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
+	}
+
+	if c.UserData != "" && c.UserDataFile != "" {
+		errs = append(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+	} else if c.UserDataFile != "" {
+		if _, err := os.Stat(c.UserDataFile); err != nil {
+			errs = append(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
+		}
 	}
 
 	templates := map[string]*string{
