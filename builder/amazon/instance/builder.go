@@ -194,6 +194,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ExpectedRootDevice: "instance-store",
 			InstanceType:       b.config.InstanceType,
 			UserData:           b.config.UserData,
+			UserDataFile:       b.config.UserDataFile,
 			SourceAMI:          b.config.SourceAmi,
 			SubnetId:           b.config.SubnetId,
 		},
