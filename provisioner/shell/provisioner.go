@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
@@ -45,7 +46,13 @@ type config struct {
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
-	tpl *common.Template
+	// The timeout for retrying to start the process. Until this timeout
+	// is reached, if the provisioner can't start a process, it retries.
+	// This can be set high to allow for reboots.
+	RawStartRetryTimeout string `mapstructure:"start_retry_timeout"`
+
+	startRetryTimeout time.Duration
+	tpl               *common.Template
 }
 
 type Provisioner struct {
@@ -84,6 +91,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.InlineShebang = "/bin/sh"
 	}
 
+	if p.config.RawStartRetryTimeout == "" {
+		p.config.RawStartRetryTimeout = "5m"
+	}
+
 	if p.config.RemotePath == "" {
 		p.config.RemotePath = DefaultRemotePath
 	}
@@ -106,9 +117,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	templates := map[string]*string{
-		"inline_shebang": &p.config.InlineShebang,
-		"script":         &p.config.Script,
-		"remote_path":    &p.config.RemotePath,
+		"inline_shebang":      &p.config.InlineShebang,
+		"script":              &p.config.Script,
+		"start_retry_timeout": &p.config.RawStartRetryTimeout,
+		"remote_path":         &p.config.RemotePath,
 	}
 
 	for n, ptr := range templates {
@@ -158,6 +170,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
+		}
+	}
+
+	if p.config.RawStartRetryTimeout != "" {
+		p.config.startRetryTimeout, err = time.ParseDuration(p.config.RawStartRetryTimeout)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing start_retry_timeout: %s", err))
 		}
 	}
 
@@ -238,9 +258,26 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		cmd := &packer.RemoteCmd{Command: command}
+		startTimeout := time.After(p.config.startRetryTimeout)
 		log.Printf("Executing command: %s", cmd.Command)
-		if err := cmd.StartWithUi(comm, ui); err != nil {
-			return fmt.Errorf("Failed executing command: %s", err)
+		for {
+			if err := cmd.StartWithUi(comm, ui); err == nil {
+				break
+			}
+
+			// Create an error and log it
+			err = fmt.Errorf("Error executing command: %s", err)
+			log.Printf(err.Error())
+
+			// Check if we timed out, otherwise we retry. It is safe to
+			// retry since the only error case above is if the command
+			// failed to START.
+			select {
+			case <-startTimeout:
+				return err
+			default:
+				time.Sleep(2 * time.Second)
+			}
 		}
 
 		if cmd.ExitStatus != 0 {

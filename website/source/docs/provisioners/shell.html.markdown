@@ -67,6 +67,12 @@ Optional parameters:
   in the machine. This defaults to "/tmp/script.sh". This value must be
   a writable location and any parent directories must already exist.
 
+* `start_retry_timeout` (string) - The amount of time to attempt to
+  _start_ the remote process. By default this is "5m" or 5 minutes. This
+  setting exists in order to deal with times when SSH may restart, such as
+  a system reboot. Set this to a higher value if reboots take a longer
+  amount of time.
+
 ## Execute Command Example
 
 To many new users, the `execute_command` is puzzling. However, it provides
