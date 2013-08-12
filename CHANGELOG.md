@@ -29,6 +29,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/amazon/ebs,instance: Retry deleing security group a few times.
+  [GH-278]
 * builder/vmware: Workstation works on Windows XP now. [GH-238]
 * builder/vmware: Look for files on Windows in multiple locations
   using multiple environmental variables. [GH-263]
