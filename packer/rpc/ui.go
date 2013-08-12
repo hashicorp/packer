@@ -17,6 +17,12 @@ type UiServer struct {
 	ui packer.Ui
 }
 
+// The arguments sent to Ui.Machine
+type UiMachineArgs struct {
+	category string
+	args     []string
+}
+
 func (u *Ui) Ask(query string) (result string, err error) {
 	err = u.client.Call("Ui.Ask", query, &result)
 	return
@@ -24,6 +30,17 @@ func (u *Ui) Ask(query string) (result string, err error) {
 
 func (u *Ui) Error(message string) {
 	if err := u.client.Call("Ui.Error", message, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
+func (u *Ui) Machine(t string, args ...string) {
+	rpcArgs := &UiMachineArgs{
+		category: t,
+		args:     args,
+	}
+
+	if err := u.client.Call("Ui.Message", rpcArgs, new(interface{})); err != nil {
 		panic(err)
 	}
 }
@@ -47,6 +64,13 @@ func (u *UiServer) Ask(query string, reply *string) (err error) {
 
 func (u *UiServer) Error(message *string, reply *interface{}) error {
 	u.ui.Error(*message)
+
+	*reply = nil
+	return nil
+}
+
+func (u *UiServer) Machine(args *UiMachineArgs, reply *interface{}) error {
+	u.ui.Machine(args.category, args.args...)
 
 	*reply = nil
 	return nil
