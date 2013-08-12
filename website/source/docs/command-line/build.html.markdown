@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Build - Command-Line"
 ---
 
 # Command-Line: Build
@@ -22,7 +23,7 @@ artifacts that are created will be outputted at the end of the build.
   In general, a builder supporting the forced build will remove the artifacts from
   the previous build. This will allow the user to repeat a build without having to
   manually clean these artifacts beforehand.
-  
+
 * `-except=foo,bar,baz` - Builds all the builds except those with the given
   comma-separated names. Build names by default are the names of their builders,
   unless a specific `name` attribute is specified within the configuration.
