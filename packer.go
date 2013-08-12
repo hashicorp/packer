@@ -76,8 +76,13 @@ func main() {
 	log.Printf("Setting cache directory: %s", cacheDir)
 	cache := &packer.FileCache{CacheDir: cacheDir}
 
+	// Determine if we're in machine-readable mode by mucking around with
+	// the arguments...
+	args, machineReadable := extractMachineReadable(os.Args[1:])
+
 	defer plugin.CleanupClients()
 
+	// Create the environment configuration
 	envConfig := packer.DefaultEnvironmentConfig()
 	envConfig.Cache = cache
 	envConfig.Commands = config.CommandNames()
@@ -86,6 +91,11 @@ func main() {
 	envConfig.Components.Hook = config.LoadHook
 	envConfig.Components.PostProcessor = config.LoadPostProcessor
 	envConfig.Components.Provisioner = config.LoadProvisioner
+	if machineReadable {
+		envConfig.Ui = &packer.MachineReadableUi{
+			Writer: os.Stdout,
+		}
+	}
 
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {
@@ -96,7 +106,7 @@ func main() {
 
 	setupSignalHandlers(env)
 
-	exitCode, err := env.Cli(os.Args[1:])
+	exitCode, err := env.Cli(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err.Error())
 		plugin.CleanupClients()
@@ -105,6 +115,23 @@ func main() {
 
 	plugin.CleanupClients()
 	os.Exit(exitCode)
+}
+
+// extractMachineReadable checks the args for the machine readable
+// flag and returns whether or not it is on. It modifies the args
+// to remove this flag.
+func extractMachineReadable(args []string) ([]string, bool) {
+	for i, arg := range args {
+		if arg == "--machine-readable" {
+			// We found it. Slice it out.
+			result := make([]string, len(args)-1)
+			copy(result, args[:i])
+			copy(result[i:], args[i+1:])
+			return result, true
+		}
+	}
+
+	return args, false
 }
 
 func loadConfig() (*config, error) {
