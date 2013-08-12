@@ -77,7 +77,7 @@ returns become a literal `\r`.
 ## Message Types
 
 The set of machine-readable message types can be found in the
-[machine-readable format](#)
+[machine-readable format](/docs/machine-readable/index.html)
 complete documentation section. This section contains documentation
 on all the message types exposed by Packer core as well as all the
 components that ship with Packer by default.
