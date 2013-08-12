@@ -41,21 +41,21 @@ func TestTargettedUi(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	bufferUi := testUi()
-	TargettedUi := &TargettedUi{
+	targettedUi := &TargettedUi{
 		Target: "foo",
 		Ui:     bufferUi,
 	}
 
-	TargettedUi.Say("foo")
+	targettedUi.Say("foo")
 	assert.Equal(readWriter(bufferUi), "==> foo: foo\n", "should have prefix")
 
-	TargettedUi.Message("foo")
+	targettedUi.Message("foo")
 	assert.Equal(readWriter(bufferUi), "    foo: foo\n", "should have prefix")
 
-	TargettedUi.Error("bar")
+	targettedUi.Error("bar")
 	assert.Equal(readWriter(bufferUi), "==> foo: bar\n", "should have prefix")
 
-	TargettedUi.Say("foo\nbar")
+	targettedUi.Say("foo\nbar")
 	assert.Equal(readWriter(bufferUi), "==> foo: foo\n==> foo: bar\n", "should multiline")
 }
 
