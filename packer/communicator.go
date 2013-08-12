@@ -72,6 +72,14 @@ func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
 	defer stdout_w.Close()
 	defer stderr_w.Close()
 
+	// Retain the original stdout/stderr that we can replace back in.
+	originalStdout := r.Stdout
+	originalStderr := r.Stderr
+	defer func() {
+		r.Stdout = originalStdout
+		r.Stderr = originalStderr
+	}()
+
 	// Set the writers for the output so that we get it streamed to us
 	if r.Stdout == nil {
 		r.Stdout = stdout_w
