@@ -27,6 +27,10 @@ command-line flags for this command.`
 }
 
 func (versionCommand) Run(env Environment, args []string) int {
+	env.Ui().Machine("version", Version)
+	env.Ui().Machine("version-prelease", VersionPrerelease)
+	env.Ui().Machine("version-commit", GitCommit)
+
 	var versionString bytes.Buffer
 	fmt.Fprintf(&versionString, "Packer v%s", Version)
 	if VersionPrerelease != "" {

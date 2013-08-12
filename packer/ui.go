@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 )
 
@@ -33,6 +34,7 @@ type Ui interface {
 	Say(string)
 	Message(string)
 	Error(string)
+	Machine(string, ...string)
 }
 
 // ColoredUi is a UI that is colored using terminal colors.
@@ -42,21 +44,30 @@ type ColoredUi struct {
 	Ui         Ui
 }
 
-// PrefixedUi is a UI that wraps another UI implementation and adds a
-// prefix to all the messages going out.
-type PrefixedUi struct {
-	SayPrefix     string
-	MessagePrefix string
-	Ui            Ui
+// TargettedUi is a UI that wraps another UI implementation and modifies
+// the output to indicate a specific target. Specifically, all Say output
+// is prefixed with the target name. Message output is not prefixed but
+// is offset by the length of the target so that output is lined up properly
+// with Say output. Machine-readable output has the proper target set.
+type TargettedUi struct {
+	Target string
+	Ui     Ui
 }
 
-// The ReaderWriterUi is a UI that writes and reads from standard Go
-// io.Reader and io.Writer.
-type ReaderWriterUi struct {
+// The BasicUI is a UI that reads and writes from a standard Go reader
+// and writer. It is safe to be called from multiple goroutines. Machine
+// readable output is simply logged for this UI.
+type BasicUi struct {
 	Reader      io.Reader
 	Writer      io.Writer
 	l           sync.Mutex
 	interrupted bool
+}
+
+// MachineReadableUi is a UI that only outputs machine-readable output
+// to the given Writer.
+type MachineReadableUi struct {
+	Writer io.Writer
 }
 
 func (u *ColoredUi) Ask(query string) (string, error) {
@@ -78,6 +89,11 @@ func (u *ColoredUi) Error(message string) {
 	}
 
 	u.Ui.Error(u.colorize(message, color, true))
+}
+
+func (u *ColoredUi) Machine(t string, args ...string) {
+	// Don't colorize machine-readable output
+	u.Ui.Machine(t, args...)
 }
 
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
@@ -107,33 +123,43 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
-func (u *PrefixedUi) Ask(query string) (string, error) {
-	return u.Ui.Ask(u.prefixLines(u.SayPrefix, query))
+func (u *TargettedUi) Ask(query string) (string, error) {
+	return u.Ui.Ask(u.prefixLines(true, query))
 }
 
-func (u *PrefixedUi) Say(message string) {
-	u.Ui.Say(u.prefixLines(u.SayPrefix, message))
+func (u *TargettedUi) Say(message string) {
+	u.Ui.Say(u.prefixLines(true, message))
 }
 
-func (u *PrefixedUi) Message(message string) {
-	u.Ui.Message(u.prefixLines(u.MessagePrefix, message))
+func (u *TargettedUi) Message(message string) {
+	u.Ui.Message(u.prefixLines(false, message))
 }
 
-func (u *PrefixedUi) Error(message string) {
-	u.Ui.Error(u.prefixLines(u.SayPrefix, message))
+func (u *TargettedUi) Error(message string) {
+	u.Ui.Error(u.prefixLines(true, message))
 }
 
-func (u *PrefixedUi) prefixLines(prefix, message string) string {
+func (u *TargettedUi) Machine(t string, args ...string) {
+	// Prefix in the target, then pass through
+	u.Ui.Machine(fmt.Sprintf("%s,%s", u.Target, t), args...)
+}
+
+func (u *TargettedUi) prefixLines(arrow bool, message string) string {
+	arrowText := "==>"
+	if !arrow {
+		arrowText = strings.Repeat(" ", len(arrowText))
+	}
+
 	var result bytes.Buffer
 
 	for _, line := range strings.Split(message, "\n") {
-		result.WriteString(fmt.Sprintf("%s: %s\n", prefix, line))
+		result.WriteString(fmt.Sprintf("%s %s: %s\n", arrowText, u.Target, line))
 	}
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
 }
 
-func (rw *ReaderWriterUi) Ask(query string) (string, error) {
+func (rw *BasicUi) Ask(query string) (string, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -177,7 +203,7 @@ func (rw *ReaderWriterUi) Ask(query string) (string, error) {
 	}
 }
 
-func (rw *ReaderWriterUi) Say(message string) {
+func (rw *BasicUi) Say(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -188,7 +214,7 @@ func (rw *ReaderWriterUi) Say(message string) {
 	}
 }
 
-func (rw *ReaderWriterUi) Message(message string) {
+func (rw *BasicUi) Message(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
@@ -199,12 +225,57 @@ func (rw *ReaderWriterUi) Message(message string) {
 	}
 }
 
-func (rw *ReaderWriterUi) Error(message string) {
+func (rw *BasicUi) Error(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
 	log.Printf("ui error: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (rw *BasicUi) Machine(t string, args ...string) {
+	log.Printf("machine readable: %s %#v", t, args)
+}
+
+func (u *MachineReadableUi) Ask(query string) (string, error) {
+	return "", errors.New("machine-readable UI can't ask")
+}
+
+func (u *MachineReadableUi) Say(message string) {
+	u.Machine("ui", "say", message)
+}
+
+func (u *MachineReadableUi) Message(message string) {
+	u.Machine("ui", "message", message)
+}
+
+func (u *MachineReadableUi) Error(message string) {
+	u.Machine("ui", "error", message)
+}
+
+func (u *MachineReadableUi) Machine(category string, args ...string) {
+	now := time.Now().UTC()
+
+	// Determine if we have a target, and set it
+	target := ""
+	commaIdx := strings.Index(category, ",")
+	if commaIdx > -1 {
+		target = category[0:commaIdx]
+		category = category[commaIdx+1:]
+	}
+
+	// Prepare the args
+	for i, v := range args {
+		args[i] = strings.Replace(v, ",", "%!(PACKER_COMMA)", -1)
+		args[i] = strings.Replace(args[i], "\r", "\\r", -1)
+		args[i] = strings.Replace(args[i], "\n", "\\n", -1)
+	}
+	argsString := strings.Join(args, ",")
+
+	_, err := fmt.Fprintf(u.Writer, "%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
 	if err != nil {
 		panic(err)
 	}

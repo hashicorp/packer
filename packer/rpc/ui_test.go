@@ -11,6 +11,9 @@ type testUi struct {
 	askQuery       string
 	errorCalled    bool
 	errorMessage   string
+	machineCalled  bool
+	machineType    string
+	machineArgs    []string
 	messageCalled  bool
 	messageMessage string
 	sayCalled      bool
@@ -26,6 +29,12 @@ func (u *testUi) Ask(query string) (string, error) {
 func (u *testUi) Error(message string) {
 	u.errorCalled = true
 	u.errorMessage = message
+}
+
+func (u *testUi) Machine(t string, args ...string) {
+	u.machineCalled = true
+	u.machineType = t
+	u.machineArgs = args
 }
 
 func (u *testUi) Message(message string) {
