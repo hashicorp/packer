@@ -293,6 +293,9 @@ func (e *coreEnvironment) printHelp() {
 			synopsis = command.Synopsis()
 		}
 
+		// Machine-readable output of the available command
+		e.ui.Machine("command", key, synopsis)
+
 		// Pad the key with spaces so that they're all the same width
 		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))
 
