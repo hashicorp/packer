@@ -88,11 +88,12 @@ func (s *StepSecurityGroup) Cleanup(state map[string]interface{}) {
 	var err error
 	for i := 0; i < 5; i++ {
 		_, err = ec2conn.DeleteSecurityGroup(ec2.SecurityGroup{Id: s.createdGroupId})
-		if err != nil {
-			log.Printf("Error deleting security group: %s", err)
-			time.Sleep(5 * time.Second)
-			continue
+		if err == nil {
+			break
 		}
+
+		log.Printf("Error deleting security group: %s", err)
+		time.Sleep(5 * time.Second)
 	}
 
 	if err != nil {
