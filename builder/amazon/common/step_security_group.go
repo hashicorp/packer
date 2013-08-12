@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"time"
 )
 
 type StepSecurityGroup struct {
@@ -83,9 +84,18 @@ func (s *StepSecurityGroup) Cleanup(state map[string]interface{}) {
 	ui := state["ui"].(packer.Ui)
 
 	ui.Say("Deleting temporary security group...")
-	_, err := ec2conn.DeleteSecurityGroup(ec2.SecurityGroup{Id: s.createdGroupId})
+
+	var err error
+	for i := 0; i < 5; i++ {
+		_, err = ec2conn.DeleteSecurityGroup(ec2.SecurityGroup{Id: s.createdGroupId})
+		if err != nil {
+			log.Printf("Error deleting security group: %s", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+	}
+
 	if err != nil {
-		log.Printf("Error deleting security group: %s", err)
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up security group. Please delete the group manually: %s", s.createdGroupId))
 	}
