@@ -8,6 +8,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* core: built with Go 1.1.2
 * core: packer help output now loads much faster.
 * builder/virtualbox: Do not check for VirtualBox as part of template
   validation; only check at execution.
