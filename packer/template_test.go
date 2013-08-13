@@ -165,8 +165,8 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 	assert.True(ok, "should have bob builder")
 	assert.Equal(builder.Type, "amazon-ebs", "builder should be amazon-ebs")
 
-	rawConfig := builder.rawConfig
-	if rawConfig == nil {
+	RawConfig := builder.RawConfig
+	if RawConfig == nil {
 		t.Fatal("missing builder raw config")
 	}
 
@@ -174,8 +174,8 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 		"type": "amazon-ebs",
 	}
 
-	if !reflect.DeepEqual(rawConfig, expected) {
-		t.Fatalf("bad raw: %#v", rawConfig)
+	if !reflect.DeepEqual(RawConfig, expected) {
+		t.Fatalf("bad raw: %#v", RawConfig)
 	}
 }
 
@@ -333,7 +333,7 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 	assert.NotNil(result, "template should not be nil")
 	assert.Length(result.Provisioners, 1, "should have one provisioner")
 	assert.Equal(result.Provisioners[0].Type, "shell", "provisioner should be shell")
-	assert.NotNil(result.Provisioners[0].rawConfig, "should have raw config")
+	assert.NotNil(result.Provisioners[0].RawConfig, "should have raw config")
 }
 
 func TestParseTemplate_Variables(t *testing.T) {
@@ -631,8 +631,8 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	rawConfig := template.Provisioners[0].rawConfig
-	if rawConfig == nil {
+	RawConfig := template.Provisioners[0].RawConfig
+	if RawConfig == nil {
 		t.Fatal("missing provisioner raw config")
 	}
 
@@ -640,8 +640,8 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 		"type": "test-prov",
 	}
 
-	if !reflect.DeepEqual(rawConfig, expected) {
-		t.Fatalf("bad raw: %#v", rawConfig)
+	if !reflect.DeepEqual(RawConfig, expected) {
+		t.Fatalf("bad raw: %#v", RawConfig)
 	}
 
 	builder := testBuilder()
