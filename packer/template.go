@@ -24,36 +24,36 @@ type rawTemplate struct {
 // completed form it can be without additional processing by the caller.
 type Template struct {
 	Variables      map[string]string
-	Builders       map[string]rawBuilderConfig
+	Builders       map[string]RawBuilderConfig
 	Hooks          map[string][]string
-	PostProcessors [][]rawPostProcessorConfig
-	Provisioners   []rawProvisionerConfig
+	PostProcessors [][]RawPostProcessorConfig
+	Provisioners   []RawProvisionerConfig
 }
 
-// The rawBuilderConfig struct represents a raw, unprocessed builder
+// The RawBuilderConfig struct represents a raw, unprocessed builder
 // configuration. It contains the name of the builder as well as the
 // raw configuration. If requested, this is used to compile into a full
 // builder configuration at some point.
-type rawBuilderConfig struct {
+type RawBuilderConfig struct {
 	Name string
 	Type string
 
 	rawConfig interface{}
 }
 
-// rawPostProcessorConfig represents a raw, unprocessed post-processor
+// RawPostProcessorConfig represents a raw, unprocessed post-processor
 // configuration. It contains the type of the post processor as well as the
 // raw configuration that is handed to the post-processor for it to process.
-type rawPostProcessorConfig struct {
+type RawPostProcessorConfig struct {
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
 	rawConfig         interface{}
 }
 
-// rawProvisionerConfig represents a raw, unprocessed provisioner configuration.
+// RawProvisionerConfig represents a raw, unprocessed provisioner configuration.
 // It contains the type of the provisioner as well as the raw configuration
 // that is handed to the provisioner for it to process.
-type rawProvisionerConfig struct {
+type RawProvisionerConfig struct {
 	Type     string
 	Override map[string]interface{}
 
@@ -103,10 +103,10 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 
 	t = &Template{}
 	t.Variables = make(map[string]string)
-	t.Builders = make(map[string]rawBuilderConfig)
+	t.Builders = make(map[string]RawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
-	t.PostProcessors = make([][]rawPostProcessorConfig, len(rawTpl.PostProcessors))
-	t.Provisioners = make([]rawProvisionerConfig, len(rawTpl.Provisioners))
+	t.PostProcessors = make([][]RawPostProcessorConfig, len(rawTpl.PostProcessors))
+	t.Provisioners = make([]RawProvisionerConfig, len(rawTpl.Provisioners))
 
 	// Gather all the variables
 	for k, v := range rawTpl.Variables {
@@ -115,7 +115,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 
 	// Gather all the builders
 	for i, v := range rawTpl.Builders {
-		var raw rawBuilderConfig
+		var raw RawBuilderConfig
 		if err := mapstructure.Decode(v, &raw); err != nil {
 			if merr, ok := err.(*mapstructure.Error); ok {
 				for _, err := range merr.Errors {
@@ -165,7 +165,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
-		t.PostProcessors[i] = make([]rawPostProcessorConfig, len(rawPP))
+		t.PostProcessors[i] = make([]RawPostProcessorConfig, len(rawPP))
 		configs := t.PostProcessors[i]
 		for j, pp := range rawPP {
 			config := &configs[j]
