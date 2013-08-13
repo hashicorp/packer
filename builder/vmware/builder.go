@@ -19,7 +19,6 @@ const BuilderId = "mitchellh.vmware"
 
 type Builder struct {
 	config config
-	driver Driver
 	runner multistep.Runner
 }
 
@@ -280,12 +279,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
-	b.driver, err = NewDriver()
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed creating VMware driver: %s", err))
-	}
-
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -294,6 +287,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	// Initialize the driver that will handle our interaction with VMware
+	driver, err := NewDriver()
+	if err != nil {
+		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
+	}
+
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -327,7 +326,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := make(map[string]interface{})
 	state["cache"] = cache
 	state["config"] = &b.config
-	state["driver"] = b.driver
+	state["driver"] = driver
 	state["hook"] = hook
 	state["ui"] = ui
 
