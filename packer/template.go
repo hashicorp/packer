@@ -38,7 +38,7 @@ type RawBuilderConfig struct {
 	Name string
 	Type string
 
-	rawConfig interface{}
+	RawConfig interface{}
 }
 
 // RawPostProcessorConfig represents a raw, unprocessed post-processor
@@ -47,7 +47,7 @@ type RawBuilderConfig struct {
 type RawPostProcessorConfig struct {
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
-	rawConfig         interface{}
+	RawConfig         interface{}
 }
 
 // RawProvisionerConfig represents a raw, unprocessed provisioner configuration.
@@ -57,7 +57,7 @@ type RawProvisionerConfig struct {
 	Type     string
 	Override map[string]interface{}
 
-	rawConfig interface{}
+	RawConfig interface{}
 }
 
 // ParseTemplate takes a byte slice and parses a Template from it, returning
@@ -150,7 +150,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		// itself doesn't know about, and it will cause a validation error.
 		delete(v, "name")
 
-		raw.rawConfig = v
+		raw.RawConfig = v
 
 		t.Builders[raw.Name] = raw
 	}
@@ -186,7 +186,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 				continue
 			}
 
-			config.rawConfig = pp
+			config.RawConfig = pp
 		}
 	}
 
@@ -215,7 +215,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		// actively reject them as invalid configuration.
 		delete(v, "override")
 
-		raw.rawConfig = v
+		raw.RawConfig = v
 	}
 
 	if len(t.Builders) == 0 {
@@ -365,7 +365,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 			current[i] = coreBuildPostProcessor{
 				processor:         pp,
 				processorType:     rawPP.Type,
-				config:            rawPP.rawConfig,
+				config:            rawPP.RawConfig,
 				keepInputArtifact: rawPP.KeepInputArtifact,
 			}
 		}
@@ -388,7 +388,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		}
 
 		configs := make([]interface{}, 1, 2)
-		configs[0] = rawProvisioner.rawConfig
+		configs[0] = rawProvisioner.RawConfig
 
 		if rawProvisioner.Override != nil {
 			if override, ok := rawProvisioner.Override[name]; ok {
@@ -403,7 +403,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	b = &coreBuild{
 		name:           name,
 		builder:        builder,
-		builderConfig:  builderConfig.rawConfig,
+		builderConfig:  builderConfig.RawConfig,
 		builderType:    builderConfig.Type,
 		hooks:          hooks,
 		postProcessors: postProcessors,
