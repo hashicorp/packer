@@ -266,14 +266,11 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 func (e *coreEnvironment) printHelp() {
 	// Created a sorted slice of the map keys and record the longest
 	// command name so we can better format the output later.
-	i := 0
 	maxKeyLen := 0
 	for _, command := range e.commands {
 		if len(command) > maxKeyLen {
 			maxKeyLen = len(command)
 		}
-
-		i++
 	}
 
 	// Sort the keys
@@ -297,10 +294,10 @@ func (e *coreEnvironment) printHelp() {
 		e.ui.Machine("command", key, synopsis)
 
 		// Pad the key with spaces so that they're all the same width
-		key = fmt.Sprintf("%v%v", key, strings.Repeat(" ", maxKeyLen-len(key)))
+		key = fmt.Sprintf("%s%s", key, strings.Repeat(" ", maxKeyLen-len(key)))
 
 		// Output the command and the synopsis
-		e.ui.Say(fmt.Sprintf("    %v     %v", key, synopsis))
+		e.ui.Say(fmt.Sprintf("    %s     %s", key, synopsis))
 	}
 
 	e.ui.Say("\nGlobally recognized options:")
