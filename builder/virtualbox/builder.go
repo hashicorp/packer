@@ -18,7 +18,6 @@ const BuilderId = "mitchellh.virtualbox"
 
 type Builder struct {
 	config config
-	driver Driver
 	runner multistep.Runner
 }
 
@@ -278,12 +277,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	b.driver, err = b.newDriver()
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
-	}
-
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -292,6 +285,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	// Create the driver that we'll use to communicate with VirtualBox
+	driver, err := b.newDriver()
+	if err != nil {
+		return nil, fmt.Errorf("Failed creating VirtualBox driver: %s", err)
+	}
+
 	steps := []multistep.Step{
 		new(stepDownloadGuestAdditions),
 		new(stepDownloadISO),
@@ -325,7 +324,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := make(map[string]interface{})
 	state["cache"] = cache
 	state["config"] = &b.config
-	state["driver"] = b.driver
+	state["driver"] = driver
 	state["hook"] = hook
 	state["ui"] = ui
 
