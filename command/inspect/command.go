@@ -33,7 +33,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	// Read the file into a byte array so that we can parse the template
-	log.Printf("Reading template: %s", args[0])
+	log.Printf("Reading template: %#v", args[0])
 	tpl, err := packer.ParseTemplateFile(args[0])
 	if err != nil {
 		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
