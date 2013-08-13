@@ -12,6 +12,7 @@ IMPROVEMENTS:
   validation; only check at execution.
 * builder/vmware: Do not check for VMware as part of template validation;
   only check at execution.
+* command/build: A path of "-" will read the template from stdin.
 
 ## 0.3.1 (August 12, 2013)
 
