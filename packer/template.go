@@ -1,10 +1,13 @@
 package packer
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	jsonutil "github.com/mitchellh/packer/common/json"
+	"io"
 	"io/ioutil"
+	"os"
 	"sort"
 )
 
@@ -235,9 +238,23 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 // ParseTemplateFile takes the given template file and parses it into
 // a single template.
 func ParseTemplateFile(path string) (*Template, error) {
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
+	var data []byte
+
+	if path == "-" {
+		// Read from stdin...
+		buf := new(bytes.Buffer)
+		_, err := io.Copy(buf, os.Stdin)
+		if err != nil {
+			return nil, err
+		}
+
+		data = buf.Bytes()
+	} else {
+		var err error
+		data, err = ioutil.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return ParseTemplate(data)
