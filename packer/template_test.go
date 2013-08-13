@@ -3,6 +3,7 @@ package packer
 import (
 	"cgl.tideland.biz/asserts"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"sort"
 	"testing"
@@ -34,6 +35,39 @@ func TestParseTemplateFile_basic(t *testing.T) {
 	tf.Close()
 
 	result, err := ParseTemplateFile(tf.Name())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(result.Builders) != 1 {
+		t.Fatalf("bad: %#v", result.Builders)
+	}
+}
+
+func TestParseTemplateFile_stdin(t *testing.T) {
+	data := `
+	{
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+	tf.Write([]byte(data))
+
+	// Sync and seek to the beginning so that we can re-read the contents
+	tf.Sync()
+	tf.Seek(0, 0)
+
+	// Set stdin to something we control
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+	os.Stdin = tf
+
+	result, err := ParseTemplateFile("-")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
