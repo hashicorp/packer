@@ -245,7 +245,7 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 
 		// If we still don't have a command, show the help.
 		if command == nil {
-			log.Printf("Environment.CLI: command not found: %s\n", args[0])
+			e.ui.Error(fmt.Sprintf("Unknown command: %s\n", args[0]))
 			e.printHelp()
 			return 1, nil
 		}
