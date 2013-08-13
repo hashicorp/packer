@@ -8,6 +8,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* core: packer help output now loads much faster.
 * builder/virtualbox: Do not check for VirtualBox as part of template
   validation; only check at execution.
 * builder/vmware: Do not check for VMware as part of template validation;
