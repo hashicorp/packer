@@ -8,6 +8,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Remote command output containing '\r' now looks much better
+  within the Packer output.
 * builder/vmware: Fix issue with finding driver files. [GH-279]
 * provisioner/salt-masterless: Uploads work properly from Windows. [GH-276]
 
