@@ -95,7 +95,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 				output = fmt.Sprintf("%s (%s)", output, v.Type)
 			}
 
-			ui.Machine("template-build", k, v.Type)
+			ui.Machine("template-builder", k, v.Type)
 			ui.Say(output)
 
 		}
