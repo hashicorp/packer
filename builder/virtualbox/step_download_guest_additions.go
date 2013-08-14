@@ -21,6 +21,10 @@ var additionsVersionMap = map[string]string{
 	"4.1.23": "4.1.22",
 }
 
+type guestAdditionsUrlTemplate struct {
+	Version string
+}
+
 // This step uploads a file containing the VirtualBox version, which
 // can be useful for various provisioning reasons.
 //
@@ -69,7 +73,19 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 
 	// Use the provided source (URL or file path) or generate it
 	url := config.GuestAdditionsURL
-	if url == "" {
+	if url != "" {
+		tplData := &guestAdditionsUrlTemplate{
+			Version: version,
+		}
+
+		url, err = config.tpl.Process(url, tplData)
+		if err != nil {
+			err := fmt.Errorf("Error preparing guest additions url: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	} else {
 		url = fmt.Sprintf(
 			"http://download.virtualbox.org/virtualbox/%s/%s",
 			version,

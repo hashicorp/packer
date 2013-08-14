@@ -132,8 +132,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Errors
 	templates := map[string]*string{
-		"guest_additions_path":    &b.config.GuestAdditionsPath,
-		"guest_additions_url":     &b.config.GuestAdditionsURL,
 		"guest_additions_sha256":  &b.config.GuestAdditionsSHA256,
 		"guest_os_type":           &b.config.GuestOSType,
 		"http_directory":          &b.config.HTTPDir,
@@ -157,6 +155,18 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	validates := map[string]*string{
+		"guest_additions_path": &b.config.GuestAdditionsPath,
+		"guest_additions_url":  &b.config.GuestAdditionsURL,
+	}
+
+	for n, ptr := range validates {
+		if err := b.config.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
 		}
 	}
 
