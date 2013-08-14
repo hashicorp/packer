@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/mitchellh/panicwrap"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,31 +16,67 @@ import (
 )
 
 func main() {
-	// Setup logging if PACKER_LOG is set.
-	// Log to PACKER_LOG_PATH if it is set, otherwise default to stderr.
-	var logOutput io.Writer = ioutil.Discard
-	if os.Getenv("PACKER_LOG") != "" {
-		logOutput = os.Stderr
+	// Call realMain instead of doing the work here so we can use
+	// `defer` statements within the function and have them work properly.
+	// (defers aren't called with os.Exit)
+	os.Exit(realMain())
+}
 
-		if logPath := os.Getenv("PACKER_LOG_PATH"); logPath != "" {
-			var err error
-			logOutput, err = os.Create(logPath)
-			if err != nil {
-				fmt.Fprintf(
-					os.Stderr,
-					"Couldn't open '%s' for logging: %s",
-					logPath, err)
-				os.Exit(1)
-			}
-		}
-	}
-
-	log.SetOutput(logOutput)
-
+// realMain is executed from main and returns the exit status to exit with.
+func realMain() int {
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
+
+	// Determine where logs should go in general (requested by the user)
+	logWriter, err := logOutput()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't setup log output: %s", err)
+		return 1
+	}
+
+	// We also always send logs to a temporary file that we use in case
+	// there is a panic. Otherwise, we delete it.
+	logTempFile, err := ioutil.TempFile("", "packer-log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't setup logging tempfile: %s", err)
+		return 1
+	}
+	defer os.Remove(logTempFile.Name())
+	defer logTempFile.Close()
+
+	// Reset the log variables to minimize work in the subprocess
+	os.Setenv("PACKER_LOG", "")
+	os.Setenv("PACKER_LOG_FILE", "")
+
+	// Create the configuration for panicwrap and wrap our executable
+	wrapConfig := &panicwrap.WrapConfig{
+		Handler: panicHandler(logTempFile),
+		Writer:  io.MultiWriter(logTempFile, logWriter),
+	}
+
+	exitStatus, err := panicwrap.Wrap(wrapConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
+		return 1
+	}
+
+	if exitStatus >= 0 {
+		return exitStatus
+	}
+
+	// We're the child, so just close the tempfile we made in order to
+	// save file handles since the tempfile is only used by the parent.
+	logTempFile.Close()
+
+	return wrappedMain()
+}
+
+// wrappedMain is called only when we're wrapped by panicwrap and
+// returns the exit status to exit with.
+func wrappedMain() int {
+	log.SetOutput(os.Stderr)
 
 	log.Printf(
 		"Packer Version: %s %s %s",
@@ -52,7 +89,7 @@ func main() {
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
-		os.Exit(1)
+		return 1
 	}
 
 	log.Printf("Packer config: %+v", config)
@@ -65,12 +102,12 @@ func main() {
 	cacheDir, err = filepath.Abs(cacheDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
-		os.Exit(1)
+		return 1
 	}
 
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
-		os.Exit(1)
+		return 1
 	}
 
 	log.Printf("Setting cache directory: %s", cacheDir)
@@ -100,8 +137,7 @@ func main() {
 	env, err := packer.NewEnvironment(envConfig)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Packer initialization error: \n\n%s\n", err)
-		plugin.CleanupClients()
-		os.Exit(1)
+		return 1
 	}
 
 	setupSignalHandlers(env)
@@ -109,12 +145,10 @@ func main() {
 	exitCode, err := env.Cli(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err.Error())
-		plugin.CleanupClients()
-		os.Exit(1)
+		return 1
 	}
 
-	plugin.CleanupClients()
-	os.Exit(exitCode)
+	return exitCode
 }
 
 // extractMachineReadable checks the args for the machine readable
@@ -177,4 +211,22 @@ func loadConfig() (*config, error) {
 	}
 
 	return &config, nil
+}
+
+// logOutput determines where we should send logs (if anywhere).
+func logOutput() (logOutput io.Writer, err error) {
+	logOutput = ioutil.Discard
+	if os.Getenv("PACKER_LOG") != "" {
+		logOutput = os.Stderr
+
+		if logPath := os.Getenv("PACKER_LOG_PATH"); logPath != "" {
+			var err error
+			logOutput, err = os.Create(logPath)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return
 }

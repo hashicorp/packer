@@ -5,6 +5,8 @@ FEATURES:
 * New command: `packer inspect`. This command tells you the components of
   a template. It respects the `-machine-readable` flag as well so you can
   parse out components of a template.
+* Packer will detect its own crashes (always a bug) and save a "crash.log"
+  file.
 
 IMPROVEMENTS:
 
