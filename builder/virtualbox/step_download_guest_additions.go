@@ -92,6 +92,14 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 			additionsName)
 	}
 
+	url, err = common.DownloadableURL(url)
+	if err != nil {
+		err := fmt.Errorf("Error preparing guest additions url: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	log.Printf("Guest additions URL: %s", url)
 
 	log.Printf("Acquiring lock to download the guest additions ISO.")

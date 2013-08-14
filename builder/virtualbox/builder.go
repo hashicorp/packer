@@ -226,14 +226,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.GuestAdditionsSHA256 = strings.ToLower(b.config.GuestAdditionsSHA256)
 	}
 
-	if b.config.GuestAdditionsURL != "" {
-		b.config.GuestAdditionsURL, err = common.DownloadableURL(b.config.GuestAdditionsURL)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("guest_additions_url: %s", err))
-		}
-	}
-
 	if !b.config.PackerForce {
 		if _, err := os.Stat(b.config.OutputDir); err == nil {
 			errs = packer.MultiErrorAppend(
