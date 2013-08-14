@@ -18,6 +18,8 @@ A crash log has been placed at "crash.log" relative to your current
 working directory. It would be immensely helpful if you could please
 report the crash with Packer[1] so that we can fix this.
 
+[1]: https://github.com/mitchellh/packer/issues
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!! PACKER CRASH !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 `
 
