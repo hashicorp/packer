@@ -148,12 +148,12 @@ func (d *DownloadClient) Get() (string, error) {
 }
 
 // PercentProgress returns the download progress as a percentage.
-func (d *DownloadClient) PercentProgress() uint {
+func (d *DownloadClient) PercentProgress() int {
 	if d.downloader == nil {
-		return 0
+		return -1
 	}
 
-	return uint((float64(d.downloader.Progress()) / float64(d.downloader.Total())) * 100)
+	return int((float64(d.downloader.Progress()) / float64(d.downloader.Total())) * 100)
 }
 
 // VerifyChecksum tests that the path matches the checksum for the

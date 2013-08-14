@@ -20,6 +20,13 @@ IMPROVEMENTS:
   only check at execution.
 * command/build: A path of "-" will read the template from stdin.
 
+BUG FIXES:
+
+* builder/virtualbox: dowload progress won't be shown until download
+  actually starts. [GH-288]
+* builder/vmware: dowload progress won't be shown until download
+  actually starts. [GH-288]
+
 ## 0.3.1 (August 12, 2013)
 
 IMPROVEMENTS:
