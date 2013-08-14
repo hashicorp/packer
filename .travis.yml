@@ -5,5 +5,14 @@ go:
     - tip
 
 install: make deps
-
 script: make test
+
+notifications:
+    flowdock:
+        secure: fZrcf9rlh2IrQrlch1sHkn3YI7SKvjGnAl/zyV5D6NROe1Bbr6d3QRMuCXWWdhJHzjKmXk5rIzbqJhUc0PNF7YjxGNKSzqWMQ56KcvN1k8DzlqxpqkcA3Jbs6fXCWo2fssRtZ7hj/wOP1f5n6cc7kzHDt9dgaYJ6nO2fqNPJiTc=
+
+    irc:
+        channels:
+            - "chat.freenode.net#packer-tool"
+        on_success: change
+        on_failure: always
