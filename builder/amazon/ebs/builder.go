@@ -22,6 +22,7 @@ type config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
+	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	// Tags for the AMI
@@ -119,6 +120,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceAMI:          b.config.SourceAmi,
 			IamInstanceProfile: b.config.IamInstanceProfile,
 			SubnetId:           b.config.SubnetId,
+			BlockDevices:       b.config.BlockDevices,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     awscommon.SSHAddress(ec2conn, b.config.SSHPort),

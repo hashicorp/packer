@@ -24,6 +24,7 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
+	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	AccountId           string `mapstructure:"account_id"`
@@ -198,6 +199,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			UserDataFile:       b.config.UserDataFile,
 			SourceAMI:          b.config.SourceAmi,
 			SubnetId:           b.config.SubnetId,
+			BlockDevices:       b.config.BlockDevices,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     awscommon.SSHAddress(ec2conn, b.config.SSHPort),

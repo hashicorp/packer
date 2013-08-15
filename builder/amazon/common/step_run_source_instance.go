@@ -17,6 +17,7 @@ type StepRunSourceInstance struct {
 	SourceAMI          string
 	IamInstanceProfile string
 	SubnetId           string
+	BlockDevices       BlockDevices
 
 	instance *ec2.Instance
 }
@@ -48,6 +49,7 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		SecurityGroups:     []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
 		IamInstanceProfile: s.IamInstanceProfile,
 		SubnetId:           s.SubnetId,
+		BlockDevices:       s.BlockDevices.BuildLaunchDevices(),
 	}
 
 	ui.Say("Launching a source AWS instance...")
