@@ -2,7 +2,6 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
@@ -10,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 )
 
 type AWSBoxConfig struct {
@@ -18,6 +16,8 @@ type AWSBoxConfig struct {
 
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+
+	tpl *common.Template
 }
 
 type AWSVagrantfileTemplate struct {
@@ -29,11 +29,46 @@ type AWSBoxPostProcessor struct {
 }
 
 func (p *AWSBoxPostProcessor) Configure(raws ...interface{}) error {
-	for _, raw := range raws {
-		err := mapstructure.Decode(raw, &p.config)
+	md, err := common.DecodeConfig(&p.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	p.config.tpl, err = common.NewTemplate()
+	if err != nil {
+		return err
+	}
+	p.config.tpl.UserVars = p.config.PackerUserVars
+
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
+
+	templates := map[string]*string{
+		"output": &p.config.OutputPath,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
 		if err != nil {
-			return err
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
+	}
+
+	validates := map[string]*string{
+		"vagrantfile_template": &p.config.VagrantfileTemplate,
+	}
+
+	for n, ptr := range validates {
+		if err := p.config.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
@@ -94,8 +129,11 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 		vagrantfileContents = string(contents)
 	}
 
-	t := template.Must(template.New("vagrantfile").Parse(vagrantfileContents))
-	t.Execute(vf, tplData)
+	vagrantfileContents, err = p.config.tpl.Process(vagrantfileContents, tplData)
+	if err != nil {
+		return nil, false, fmt.Errorf("Error writing Vagrantfile: %s", err)
+	}
+	vf.Write([]byte(vagrantfileContents))
 	vf.Close()
 
 	// Create the metadata
