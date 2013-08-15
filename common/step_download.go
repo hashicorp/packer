@@ -29,6 +29,10 @@ type StepDownload struct {
 	// into the state.
 	ResultKey string
 
+	// The path where the result should go, otherwise it goes to the
+	// cache directory.
+	TargetPath string
+
 	// A list of URLs to attempt to download this thing.
 	Url []string
 }
@@ -37,10 +41,14 @@ func (s *StepDownload) Run(state map[string]interface{}) multistep.StepAction {
 	cache := state["cache"].(packer.Cache)
 	ui := state["ui"].(packer.Ui)
 
-	checksum, err := hex.DecodeString(s.Checksum)
-	if err != nil {
-		state["error"] = fmt.Errorf("Error parsing checksum: %s", err)
-		return multistep.ActionHalt
+	var checksum []byte
+	if s.Checksum != "" {
+		var err error
+		checksum, err = hex.DecodeString(s.Checksum)
+		if err != nil {
+			state["error"] = fmt.Errorf("Error parsing checksum: %s", err)
+			return multistep.ActionHalt
+		}
 	}
 
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
@@ -48,13 +56,17 @@ func (s *StepDownload) Run(state map[string]interface{}) multistep.StepAction {
 	var finalPath string
 	for _, url := range s.Url {
 		ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
-		log.Printf("Acquiring lock to download: %s", url)
-		cachePath := cache.Lock(url)
-		defer cache.Unlock(url)
+
+		targetPath := s.TargetPath
+		if targetPath == "" {
+			log.Printf("Acquiring lock to download: %s", url)
+			targetPath = cache.Lock(url)
+			defer cache.Unlock(url)
+		}
 
 		config := &DownloadConfig{
 			Url:        url,
-			TargetPath: cachePath,
+			TargetPath: targetPath,
 			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
