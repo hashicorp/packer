@@ -7,6 +7,8 @@ FEATURES:
   parse out components of a template.
 * Packer will detect its own crashes (always a bug) and save a "crash.log"
   file.
+* builder/virtualbox: You may now specify multiple URLs for an ISO
+  using "iso_url" in a template. The URLs will be tried in order.
 
 IMPROVEMENTS:
 
