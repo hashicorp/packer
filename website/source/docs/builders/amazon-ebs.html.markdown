@@ -58,6 +58,12 @@ Required:
 
 Optional:
 
+* `ami_block_device_mappings` (array of block device mappings) - Add the block
+  device mappings to the AMI. The block device mappings allow for keys:
+  "device_name" (string), "virtual_name" (string), "snapshot_id" (string),
+  "volume_type" (string), "volume_size" (int), "delete_on_termination" (bool),
+  and "iops" (int).
+
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
@@ -76,6 +82,10 @@ Optional:
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
+
+* `launch_block_device_mappings` (array of block device mappings) - Add the
+  block device mappings to the launch instance. The block device mappings are
+  the same as `ami_block_device_mappings` above.
 
 * `security_group_id` (string) - The ID (_not_ the name) of the security
   group to assign to the instance. By default this is not set and Packer
@@ -129,6 +139,34 @@ access key from environmental variables. See the configuration reference in
 the section above for more information on what environmental variables Packer
 will look for.
 </div>
+
+## AMI Block Device Mappings Example
+
+Here is an example using the optional AMI block device mappings. This will add
+the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
+
+<pre class="prettyprint">
+{
+  "type": "amazon-ebs",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "source_ami": "ami-de0d9eb7",
+  "instance_type": "t1.micro",
+  "ssh_username": "ubuntu",
+  "ami_name": "packer-quick-start {{timestamp}}",
+  "ami_block_device_mappings": [
+      {
+          "device_name": "/dev/sdb",
+          "virtual_name": "ephemeral0"
+      },
+      {
+          "device_name": "/dev/sdc",
+          "virtual_name": "ephemeral1"
+      }
+  ]
+}
+</pre>
 
 ## Tag Example
 
