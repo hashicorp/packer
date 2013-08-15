@@ -73,6 +73,13 @@ Required:
 
 Optional:
 
+* `ami_block_device_mappings` (array of block device mappings) - Add the block
+  device mappings to the AMI. The block device mappings allow for keys:
+  "device_name" (string), "virtual_name" (string), "snapshot_id" (string),
+  "volume_type" (string), "volume_size" (int), "delete_on_termination" (bool),
+  and "iops" (int). See [amazon-ebs](/docs/builders/amazon-ebs.html) for an
+  example template.
+
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
@@ -107,6 +114,10 @@ Optional:
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
+
+* `launch_block_device_mappings` (array of block device mappings) - Add the
+  block device mappings to the launch instance. The block device mappings are
+  the same as `ami_block_device_mappings` above.
 
 * `security_group_id` (string) - The ID (_not_ the name) of the security
   group to assign to the instance. By default this is not set and Packer
