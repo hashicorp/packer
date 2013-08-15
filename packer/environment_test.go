@@ -17,6 +17,17 @@ func init() {
 	log.SetOutput(ioutil.Discard)
 }
 
+func testComponentFinder() *ComponentFinder {
+	builderFactory := func(n string) (Builder, error) { return testBuilder(), nil }
+	ppFactory := func(n string) (PostProcessor, error) { return new(TestPostProcessor), nil }
+	provFactory := func(n string) (Provisioner, error) { return new(TestProvisioner), nil }
+	return &ComponentFinder{
+		Builder:       builderFactory,
+		PostProcessor: ppFactory,
+		Provisioner:   provFactory,
+	}
+}
+
 func testEnvironment() Environment {
 	config := DefaultEnvironmentConfig()
 	config.Ui = &BasicUi{
