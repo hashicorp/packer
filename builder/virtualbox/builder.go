@@ -37,7 +37,7 @@ type config struct {
 	HTTPPortMax          uint       `mapstructure:"http_port_max"`
 	ISOChecksum          string     `mapstructure:"iso_checksum"`
 	ISOChecksumType      string     `mapstructure:"iso_checksum_type"`
-	ISOUrl               string     `mapstructure:"iso_url"`
+	ISOUrls              []string   `mapstructure:"iso_urls"`
 	OutputDir            string     `mapstructure:"output_directory"`
 	ShutdownCommand      string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin       uint       `mapstructure:"ssh_host_port_min"`
@@ -50,6 +50,7 @@ type config struct {
 	VMName               string     `mapstructure:"vm_name"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
+	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
@@ -137,7 +138,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		"http_directory":          &b.config.HTTPDir,
 		"iso_checksum":            &b.config.ISOChecksum,
 		"iso_checksum_type":       &b.config.ISOChecksumType,
-		"iso_url":                 &b.config.ISOUrl,
+		"iso_url":                 &b.config.RawSingleISOUrl,
 		"output_directory":        &b.config.OutputDir,
 		"shutdown_command":        &b.config.ShutdownCommand,
 		"ssh_password":            &b.config.SSHPassword,
@@ -155,6 +156,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, url := range b.config.ISOUrls {
+		var err error
+		b.config.ISOUrls[i], err = b.config.tpl.Process(url, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing iso_urls[%d]: %s", i, err))
 		}
 	}
 
@@ -211,14 +221,21 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if b.config.ISOUrl == "" {
+	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("An iso_url must be specified."))
-	} else {
-		b.config.ISOUrl, err = common.DownloadableURL(b.config.ISOUrl)
+			errs, errors.New("One of iso_url or iso_urls must be specified."))
+	} else if b.config.RawSingleISOUrl != "" && len(b.config.ISOUrls) > 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
+	} else if b.config.RawSingleISOUrl != "" {
+		b.config.ISOUrls = []string{b.config.RawSingleISOUrl}
+	}
+
+	for i, url := range b.config.ISOUrls {
+		b.config.ISOUrls[i], err = common.DownloadableURL(url)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("iso_url: %s", err))
+				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
 		}
 	}
 
@@ -300,7 +317,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
 			ResultKey:    "iso_path",
-			Url:          []string{b.config.ISOUrl},
+			Url:          b.config.ISOUrls,
 		},
 		new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
