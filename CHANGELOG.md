@@ -9,6 +9,8 @@ FEATURES:
   file.
 * builder/virtualbox: You may now specify multiple URLs for an ISO
   using "iso_url" in a template. The URLs will be tried in order.
+* builder/vmware: You may now specify multiple URLs for an ISO
+  using "iso_url" in a template. The URLs will be tried in order.
 
 IMPROVEMENTS:
 
