@@ -19,6 +19,7 @@ IMPROVEMENTS:
 * builder/vmware: Do not check for VMware as part of template validation;
   only check at execution.
 * command/build: A path of "-" will read the template from stdin.
+* builder/amazon: add block device mappings [GH-90]
 
 BUG FIXES:
 
