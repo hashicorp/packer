@@ -32,6 +32,7 @@ BUG FIXES:
   actually starts. [GH-288]
 * builder/vmware: dowload progress won't be shown until download
   actually starts. [GH-288]
+* post-processor/vagrant: Process user variables. [GH-295]
 
 ## 0.3.1 (August 12, 2013)
 
