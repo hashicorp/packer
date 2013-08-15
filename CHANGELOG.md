@@ -22,6 +22,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/amazon-instance: send IAM instance profile data. [GH-294]
 * builder/virtualbox: dowload progress won't be shown until download
   actually starts. [GH-288]
 * builder/vmware: dowload progress won't be shown until download
