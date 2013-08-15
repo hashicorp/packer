@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -15,10 +16,10 @@ import (
 )
 
 type VBoxBoxConfig struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
-
-	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type VBoxVagrantfileTemplate struct {

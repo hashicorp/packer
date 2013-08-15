@@ -3,6 +3,7 @@ package vagrant
 import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
@@ -11,10 +12,10 @@ import (
 )
 
 type VMwareBoxConfig struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
-
-	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type VMwareBoxPostProcessor struct {

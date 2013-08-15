@@ -19,8 +19,6 @@ var builtins = map[string]string{
 
 type Config struct {
 	OutputPath string `mapstructure:"output"`
-
-	PackerBuildName string `mapstructure:"packer_build_name"`
 }
 
 type PostProcessor struct {
