@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
 var additionsVersionMap = map[string]string{
@@ -105,47 +104,6 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 }
 
 func (s *stepDownloadGuestAdditions) Cleanup(state map[string]interface{}) {}
-
-func (s *stepDownloadGuestAdditions) progressDownload(c *common.DownloadClient, state map[string]interface{}) (string, multistep.StepAction) {
-	ui := state["ui"].(packer.Ui)
-
-	var result string
-	downloadCompleteCh := make(chan error, 1)
-
-	// Start a goroutine to actually do the download...
-	go func() {
-		var err error
-		result, err = c.Get()
-		downloadCompleteCh <- err
-	}()
-
-	progressTicker := time.NewTicker(5 * time.Second)
-	defer progressTicker.Stop()
-
-	// A loop that handles showing progress as well as timing out and handling
-	// interrupts and all that.
-DownloadWaitLoop:
-	for {
-		select {
-		case err := <-downloadCompleteCh:
-			if err != nil {
-				state["error"] = fmt.Errorf("Error downloading: %s", err)
-				return "", multistep.ActionHalt
-			}
-
-			break DownloadWaitLoop
-		case <-progressTicker.C:
-			ui.Message(fmt.Sprintf("Download progress: %d%%", c.PercentProgress()))
-		case <-time.After(1 * time.Second):
-			if _, ok := state[multistep.StateCancelled]; ok {
-				ui.Say("Interrupt received. Cancelling download...")
-				return "", multistep.ActionHalt
-			}
-		}
-	}
-
-	return result, multistep.ActionContinue
-}
 
 func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]interface{}, additionsVersion string, additionsName string) (string, multistep.StepAction) {
 	// First things first, we get the list of checksums for the files available
