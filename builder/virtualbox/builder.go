@@ -295,7 +295,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps := []multistep.Step{
 		new(stepDownloadGuestAdditions),
-		new(stepDownloadISO),
+		&common.StepDownload{
+			Checksum:     b.config.ISOChecksum,
+			ChecksumType: b.config.ISOChecksumType,
+			Description:  "ISO",
+			ResultKey:    "iso_path",
+			Url:          []string{b.config.ISOUrl},
+		},
 		new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
