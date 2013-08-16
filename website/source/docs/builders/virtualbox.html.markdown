@@ -125,6 +125,12 @@ Optional:
   server to be on one port, make this minimum and maximum port the same.
   By default the values are 8000 and 9000, respectively.
 
+* `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
+  Packer will try these in order. If anything goes wrong attempting to download
+  or while downloading a single URL, it will move on to the next. All URLs
+  must point to the same file (same checksum). By default this is empty
+  and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
+
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`
