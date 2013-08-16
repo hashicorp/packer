@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.
@@ -14,10 +14,10 @@ type AMIConfig struct {
 	AMIProductCodes []string `mapstructure:"ami_product_codes"`
 }
 
-func (c *AMIConfig) Prepare(t *common.Template) []error {
+func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if t == nil {
 		var err error
-		t, err = common.NewTemplate()
+		t, err = packer.NewConfigTemplate()
 		if err != nil {
 			return []error{err}
 		}

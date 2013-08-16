@@ -27,7 +27,7 @@ type Config struct {
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
-	tpl *common.Template
+	tpl *packer.ConfigTemplate
 }
 
 type Provisioner struct {
@@ -40,7 +40,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	p.config.tpl, err = common.NewTemplate()
+	p.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}

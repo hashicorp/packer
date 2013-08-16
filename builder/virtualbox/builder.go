@@ -57,7 +57,7 @@ type config struct {
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
-	tpl             *common.Template
+	tpl             *packer.ConfigTemplate
 }
 
 func (b *Builder) Prepare(raws ...interface{}) error {
@@ -66,7 +66,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	b.config.tpl, err = common.NewTemplate()
+	b.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}

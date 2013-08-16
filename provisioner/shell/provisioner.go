@@ -52,7 +52,7 @@ type config struct {
 	RawStartRetryTimeout string `mapstructure:"start_retry_timeout"`
 
 	startRetryTimeout time.Duration
-	tpl               *common.Template
+	tpl               *packer.ConfigTemplate
 }
 
 type Provisioner struct {
@@ -70,7 +70,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	p.config.tpl, err = common.NewTemplate()
+	p.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}
