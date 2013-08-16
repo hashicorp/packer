@@ -29,6 +29,8 @@ BUG FIXES:
 
 * windows: file URLs are easier to get right as Packer
   has better parsing and error handling for Windows file paths. [GH-284]
+* builder/amazon/all: Modifying more than one AMI attribute type no longer
+  crashes.
 * builder/amazon-instance: send IAM instance profile data. [GH-294]
 * builder/virtualbox: dowload progress won't be shown until download
   actually starts. [GH-288]
