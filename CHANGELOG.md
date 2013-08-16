@@ -30,8 +30,12 @@ BUG FIXES:
 * builder/amazon-instance: send IAM instance profile data. [GH-294]
 * builder/virtualbox: dowload progress won't be shown until download
   actually starts. [GH-288]
+* builder/virtualbox: floppy files names of 13 characters are now properly
+  written to the FAT12 filesystem. [GH-285]
 * builder/vmware: dowload progress won't be shown until download
   actually starts. [GH-288]
+* builder/virtualbox: floppy files names of 13 characters are now properly
+  written to the FAT12 filesystem. [GH-285]
 * post-processor/vagrant: Process user variables. [GH-295]
 
 ## 0.3.1 (August 12, 2013)
