@@ -64,6 +64,15 @@ func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metada
 // a completely valid URL. For example, the original URL might be "local/file.iso"
 // which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
 func DownloadableURL(original string) (string, error) {
+	if runtime.GOOS == "windows" {
+		// If the distance to the first ":" is just one character, assume
+		// we're dealing with a drive letter and thus a file path.
+		idx := strings.Index(original, ":")
+		if idx == 1 {
+			original = "file:///" + original
+		}
+	}
+
 	url, err := url.Parse(original)
 	if err != nil {
 		return "", err
