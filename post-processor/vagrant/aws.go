@@ -17,7 +17,7 @@ type AWSBoxConfig struct {
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
 
-	tpl *common.Template
+	tpl *packer.ConfigTemplate
 }
 
 type AWSVagrantfileTemplate struct {
@@ -34,7 +34,7 @@ func (p *AWSBoxPostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	p.config.tpl, err = common.NewTemplate()
+	p.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}

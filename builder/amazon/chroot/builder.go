@@ -34,7 +34,7 @@ type Config struct {
 	SourceAmi      string     `mapstructure:"source_ami"`
 	UnmountCommand string     `mapstructure:"unmount_command"`
 
-	tpl *common.Template
+	tpl *packer.ConfigTemplate
 }
 
 type Builder struct {
@@ -48,7 +48,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	b.config.tpl, err = common.NewTemplate()
+	b.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}

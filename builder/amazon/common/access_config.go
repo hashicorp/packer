@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 	"strings"
 	"unicode"
 )
@@ -37,10 +37,10 @@ func (c *AccessConfig) Region() (aws.Region, error) {
 	return aws.Regions[region], nil
 }
 
-func (c *AccessConfig) Prepare(t *common.Template) []error {
+func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if t == nil {
 		var err error
-		t, err = common.NewTemplate()
+		t, err = packer.NewConfigTemplate()
 		if err != nil {
 			return []error{err}
 		}

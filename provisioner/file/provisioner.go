@@ -17,7 +17,7 @@ type config struct {
 	// The remote path where the local file will be uploaded to.
 	Destination string
 
-	tpl *common.Template
+	tpl *packer.ConfigTemplate
 }
 
 type Provisioner struct {
@@ -30,7 +30,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	p.config.tpl, err = common.NewTemplate()
+	p.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}

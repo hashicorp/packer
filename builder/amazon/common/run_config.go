@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 	"os"
 	"time"
 )
@@ -27,10 +27,10 @@ type RunConfig struct {
 	sshTimeout time.Duration
 }
 
-func (c *RunConfig) Prepare(t *common.Template) []error {
+func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if t == nil {
 		var err error
-		t, err = common.NewTemplate()
+		t, err = packer.NewConfigTemplate()
 		if err != nil {
 			return []error{err}
 		}
