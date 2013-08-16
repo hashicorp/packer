@@ -38,6 +38,7 @@ BUG FIXES:
   written to the FAT12 filesystem. [GH-285]
 * builder/vmware: dowload progress won't be shown until download
   actually starts. [GH-288]
+* builder/vmware: interrupt works while typing commands over VNC.
 * builder/virtualbox: floppy files names of 13 characters are now properly
   written to the FAT12 filesystem. [GH-285]
 * post-processor/vagrant: Process user variables. [GH-295]
