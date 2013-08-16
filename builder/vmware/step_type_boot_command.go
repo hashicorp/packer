@@ -96,6 +96,12 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 			return multistep.ActionHalt
 		}
 
+		// Check for interrupts between typing things so we can cancel
+		// since this isn't the fastest thing.
+		if _, ok := state[multistep.StateCancelled]; ok {
+			return multistep.ActionHalt
+		}
+
 		vncSendString(c, command)
 	}
 
