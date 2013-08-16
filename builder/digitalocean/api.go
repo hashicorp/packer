@@ -53,10 +53,9 @@ func (d DigitalOceanClient) New(client string, key string) *DigitalOceanClient {
 
 // Creates an SSH Key and returns it's id
 func (d DigitalOceanClient) CreateKey(name string, pub string) (uint, error) {
-	// Escape the public key
-	pub = url.QueryEscape(pub)
-
-	params := fmt.Sprintf("name=%v&ssh_pub_key=%v", name, pub)
+	params := url.Values{}
+	params.Set("name", name)
+	params.Set("ssh_pub_key", pub)
 
 	body, err := NewRequest(d, "ssh_keys/new", params)
 	if err != nil {
@@ -72,15 +71,18 @@ func (d DigitalOceanClient) CreateKey(name string, pub string) (uint, error) {
 // Destroys an SSH key
 func (d DigitalOceanClient) DestroyKey(id uint) error {
 	path := fmt.Sprintf("ssh_keys/%v/destroy", id)
-	_, err := NewRequest(d, path, "")
+	_, err := NewRequest(d, path, url.Values{})
 	return err
 }
 
 // Creates a droplet and returns it's id
 func (d DigitalOceanClient) CreateDroplet(name string, size uint, image uint, region uint, keyId uint) (uint, error) {
-	params := fmt.Sprintf(
-		"name=%v&image_id=%v&size_id=%v&region_id=%v&ssh_key_ids=%v",
-		name, image, size, region, keyId)
+	params := url.Values{}
+	params.Set("name", name)
+	params.Set("size_id", fmt.Sprintf("%v", size))
+	params.Set("image_id", fmt.Sprintf("%v", image))
+	params.Set("region_id", fmt.Sprintf("%v", region))
+	params.Set("ssh_key_ids", fmt.Sprintf("%v", keyId))
 
 	body, err := NewRequest(d, "droplets/new", params)
 	if err != nil {
@@ -96,7 +98,7 @@ func (d DigitalOceanClient) CreateDroplet(name string, size uint, image uint, re
 // Destroys a droplet
 func (d DigitalOceanClient) DestroyDroplet(id uint) error {
 	path := fmt.Sprintf("droplets/%v/destroy", id)
-	_, err := NewRequest(d, path, "")
+	_, err := NewRequest(d, path, url.Values{})
 	return err
 }
 
@@ -104,7 +106,7 @@ func (d DigitalOceanClient) DestroyDroplet(id uint) error {
 func (d DigitalOceanClient) PowerOffDroplet(id uint) error {
 	path := fmt.Sprintf("droplets/%v/power_off", id)
 
-	_, err := NewRequest(d, path, "")
+	_, err := NewRequest(d, path, url.Values{})
 
 	return err
 }
@@ -112,7 +114,9 @@ func (d DigitalOceanClient) PowerOffDroplet(id uint) error {
 // Creates a snaphot of a droplet by it's ID
 func (d DigitalOceanClient) CreateSnapshot(id uint, name string) error {
 	path := fmt.Sprintf("droplets/%v/snapshot", id)
-	params := fmt.Sprintf("name=%v", name)
+
+	params := url.Values{}
+	params.Set("name", name)
 
 	_, err := NewRequest(d, path, params)
 
@@ -121,7 +125,7 @@ func (d DigitalOceanClient) CreateSnapshot(id uint, name string) error {
 
 // Returns all available images.
 func (d DigitalOceanClient) Images() ([]Image, error) {
-	resp, err := NewRequest(d, "images", "")
+	resp, err := NewRequest(d, "images", url.Values{})
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +141,7 @@ func (d DigitalOceanClient) Images() ([]Image, error) {
 // Destroys an image by its ID.
 func (d DigitalOceanClient) DestroyImage(id uint) error {
 	path := fmt.Sprintf("images/%d/destroy", id)
-	_, err := NewRequest(d, path, "")
+	_, err := NewRequest(d, path, url.Values{})
 	return err
 }
 
@@ -145,7 +149,7 @@ func (d DigitalOceanClient) DestroyImage(id uint) error {
 func (d DigitalOceanClient) DropletStatus(id uint) (string, string, error) {
 	path := fmt.Sprintf("droplets/%v", id)
 
-	body, err := NewRequest(d, path, "")
+	body, err := NewRequest(d, path, url.Values{})
 	if err != nil {
 		return "", "", err
 	}
@@ -165,10 +169,14 @@ func (d DigitalOceanClient) DropletStatus(id uint) (string, string, error) {
 
 // Sends an api request and returns a generic map[string]interface of
 // the response.
-func NewRequest(d DigitalOceanClient, path string, params string) (map[string]interface{}, error) {
+func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[string]interface{}, error) {
 	client := d.client
-	url := fmt.Sprintf("%s/%s?%s&client_id=%s&api_key=%s",
-		DIGITALOCEAN_API_URL, path, params, d.ClientID, d.APIKey)
+
+	// Add the authentication parameters
+	params.Set("client_id", d.ClientID)
+	params.Set("api_key", d.APIKey)
+
+	url := fmt.Sprintf("%s/%s?%s", DIGITALOCEAN_API_URL, path, params.Encode())
 
 	var decodedResponse map[string]interface{}
 
