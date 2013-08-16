@@ -107,3 +107,23 @@ defines certain commonly useful environmental variables:
 * `PACKER_BUILDER_TYPE` is the type of the builder that was used to create
   the machine that the script is running on. This is useful if you want to
   run only certain parts of the script on systems built with certain builders.
+
+## Handling Reboots
+
+Provisioning sometimes involves restarts, usually when updating the operating
+system. Packer is able to tolerate restarts via the shell provisioner.
+
+Packer handles this by retrying to start scripts for a period of time
+before failing. This allows time for the machine to start up and be ready
+to run scripts. The amount of time the provisioner will wait is configured
+using `start_retry_timeout`, which defaults to a few minutes.
+
+Sometimes, when executing a command like `reboot`, the shell script will
+return and Packer will start executing the next one before SSH actually
+quits and the machine restarts. For this, put a long `sleep` after the
+reboot so that SSH will eventually be killed automatically:
+
+```
+reboot
+sleep 60
+```
