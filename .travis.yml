@@ -16,3 +16,7 @@ notifications:
             - "chat.freenode.net#packer-tool"
         on_success: change
         on_failure: always
+
+matrix:
+    allow_failures:
+        - go: tip
