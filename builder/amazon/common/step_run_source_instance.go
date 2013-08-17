@@ -92,7 +92,6 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		StepState: state,
 	}
 	latestInstance, err := WaitForState(&stateChange)
-	s.instance = latestInstance.(*ec2.Instance)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", s.instance.InstanceId, err)
 		state["error"] = err
@@ -100,6 +99,7 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 		return multistep.ActionHalt
 	}
 
+	s.instance = latestInstance.(*ec2.Instance)
 	state["instance"] = s.instance
 
 	return multistep.ActionContinue
