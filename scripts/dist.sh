@@ -60,15 +60,11 @@ waitAll() {
 trap "kill 0" SIGINT SIGTERM EXIT
 
 # Build our root project
-xc &
+xc
 
 # Build all the plugins
 for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
     PLUGIN_NAME=$(basename ${PLUGIN})
-    (
-    pushd ${PLUGIN}
-    xc
-    popd
     find ./pkg \
         -type f \
         -name ${PLUGIN_NAME} \
@@ -77,10 +73,7 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
         -type f \
         -name ${PLUGIN_NAME}.exe \
         -execdir mv ${PLUGIN_NAME}.exe packer-${PLUGIN_NAME}.exe ';'
-    ) &
 done
-
-waitAll
 
 # Zip all the packages
 mkdir -p ./pkg/${VERSIONDIR}/dist
