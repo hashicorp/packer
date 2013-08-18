@@ -188,7 +188,18 @@ func (*HTTPDownloader) Cancel() {
 
 func (d *HTTPDownloader) Download(dst io.Writer, src *url.URL) error {
 	log.Printf("Starting download: %s", src.String())
-	resp, err := http.Get(src.String())
+	req, err := http.NewRequest("GET", src.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return err
 	}

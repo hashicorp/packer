@@ -1,6 +1,9 @@
 ## 0.3.3 (unreleased)
 
+IMPROVEMENTS:
 
+* core: All HTTP downloads across Packer now support the standard
+  proxy environmental variables (`HTTP_PROXY`, `NO_PROXY`, etc.) [GH-252]
 
 ## 0.3.2 (August 18, 2013)
 
