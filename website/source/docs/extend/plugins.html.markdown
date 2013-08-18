@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Packer Plugins - Extend Packer"
 ---
 
 # Packer Plugins

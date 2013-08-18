@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Custom Builder - Extend Packer"
 ---
 
 # Custom Builder Development
