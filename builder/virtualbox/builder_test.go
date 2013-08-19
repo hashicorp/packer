@@ -58,6 +58,10 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	if b.config.VMName != "packer-foo" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
 	}
+
+	if b.config.Format != "ovf" {
+		t.Errorf("bad format: %s", b.config.Format)
+	}
 }
 
 func TestBuilderPrepare_BootWait(t *testing.T) {
@@ -241,6 +245,34 @@ func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	// Good
 	config["http_port_min"] = 500
 	config["http_port_max"] = 1000
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_Format(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Bad
+	config["format"] = "illegal value"
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good
+	config["format"] = "ova"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Good
+	config["format"] = "ovf"
 	b = Builder{}
 	err = b.Prepare(config)
 	if err != nil {
