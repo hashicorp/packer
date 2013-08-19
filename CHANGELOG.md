@@ -1,5 +1,9 @@
 ## 0.3.3 (unreleased)
 
+FEATURES:
+
+* builder/virtualbox: support exporting in OVA format. [GH-309]
+
 IMPROVEMENTS:
 
 * core: All HTTP downloads across Packer now support the standard
