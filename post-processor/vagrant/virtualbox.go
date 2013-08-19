@@ -45,20 +45,8 @@ func (p *VBoxBoxPostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
-	templates := map[string]*string{
-		"output": &p.config.OutputPath,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
 	validates := map[string]*string{
+		"output":               &p.config.OutputPath,
 		"vagrantfile_template": &p.config.VagrantfileTemplate,
 	}
 
@@ -85,8 +73,11 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	}
 
 	// Compile the output path
-	outputPath, err := ProcessOutputPath(p.config.OutputPath,
-		p.config.PackerBuildName, "virtualbox", artifact)
+	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &OutputPathTemplate{
+		ArtifactId: artifact.Id(),
+		BuildName:  p.config.PackerBuildName,
+		Provider:   "virtualbox",
+	})
 	if err != nil {
 		return nil, false, err
 	}
