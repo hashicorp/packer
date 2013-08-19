@@ -48,6 +48,7 @@ type config struct {
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
+	Format         	     string     `mapstructure:"format"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
@@ -131,6 +132,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
+	if b.config.Format == "" {
+		b.config.Format = "ovf"
+	}
+
 	// Errors
 	templates := map[string]*string{
 		"guest_additions_sha256":  &b.config.GuestAdditionsSHA256,
@@ -145,6 +150,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		"ssh_username":            &b.config.SSHUser,
 		"virtualbox_version_file": &b.config.VBoxVersionFile,
 		"vm_name":                 &b.config.VMName,
+		"format":                  &b.config.Format,
 		"boot_wait":               &b.config.RawBootWait,
 		"shutdown_timeout":        &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":        &b.config.RawSSHWaitTimeout,
@@ -195,6 +201,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 				fmt.Errorf("Error processing floppy_files[%d]: %s",
 					i, err))
 		}
+	}
+
+	if !(b.config.Format == "ovf" || b.config.Format == "ova") {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("invalid format, only 'ovf' or 'ova' are allowed"))
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
