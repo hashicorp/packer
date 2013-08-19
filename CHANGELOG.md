@@ -4,6 +4,10 @@ IMPROVEMENTS:
 
 * core: All HTTP downloads across Packer now support the standard
   proxy environmental variables (`HTTP_PROXY`, `NO_PROXY`, etc.) [GH-252]
+* builder/amazon: API requests will use HTTP proxy if specified by
+  enviromental variables.
+* builder/digitalocean: API requests will use HTTP proxy if specified
+  by environmental variables.
 
 ## 0.3.2 (August 18, 2013)
 
