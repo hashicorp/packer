@@ -1,4 +1,4 @@
-## 0.3.3 (unreleased)
+## 0.3.3 (August 19, 2013)
 
 FEATURES:
 
