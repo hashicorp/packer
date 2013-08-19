@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/rpc"
 	"os"
 	"os/exec"
@@ -328,10 +329,14 @@ func (c *Client) rpcClient() (*rpc.Client, error) {
 		return nil, err
 	}
 
-	client, err := rpc.Dial("tcp", address)
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		return nil, err
 	}
 
-	return client, nil
+	// Make sure to set keep alive so that the connection doesn't die
+	tcpConn := conn.(*net.TCPConn)
+	tcpConn.SetKeepAlive(true)
+
+	return rpc.NewClient(tcpConn), nil
 }

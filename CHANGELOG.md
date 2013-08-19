@@ -15,6 +15,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: TCP connection between plugin processes will keep-alive. [GH-312]
 * core: No more "unused key keep_input_artifact" for post processors [GH-310]
 * post-processor/vagrant: `output_path` templates now work again.
 
