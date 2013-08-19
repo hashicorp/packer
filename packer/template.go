@@ -162,7 +162,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	// are actually three different formats that the user can use to define
 	// a post-processor.
 	for i, rawV := range rawTpl.PostProcessors {
-		rawPP, err := parsePostProvisioner(i, rawV)
+		rawPP, err := parsePostProcessor(i, rawV)
 		if err != nil {
 			errors = append(errors, err...)
 			continue
@@ -260,7 +260,7 @@ func ParseTemplateFile(path string) (*Template, error) {
 	return ParseTemplate(data)
 }
 
-func parsePostProvisioner(i int, rawV interface{}) (result []map[string]interface{}, errors []error) {
+func parsePostProcessor(i int, rawV interface{}) (result []map[string]interface{}, errors []error) {
 	switch v := rawV.(type) {
 	case string:
 		result = []map[string]interface{}{
