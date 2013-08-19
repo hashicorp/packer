@@ -27,6 +27,7 @@ type config struct {
 	BootCommand          []string   `mapstructure:"boot_command"`
 	DiskSize             uint       `mapstructure:"disk_size"`
 	FloppyFiles          []string   `mapstructure:"floppy_files"`
+	Format               string     `mapstructure:"format"`
 	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
 	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
 	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
@@ -48,7 +49,6 @@ type config struct {
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
-	Format         	     string     `mapstructure:"format"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
