@@ -82,6 +82,9 @@ Optional:
   be attached. The files listed in this configuration will all be put
   into the root directory of the floppy disk; sub-directories are not supported.
 
+* `format` (string) - Either "ovf" or "ova", this specifies the output
+  format of the exported virtual machine. This defaults to "ovf".
+
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
   is "VBoxGuestAdditions.iso" which should upload into the login directory
