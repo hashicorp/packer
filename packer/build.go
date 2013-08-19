@@ -90,7 +90,7 @@ type coreBuild struct {
 type coreBuildPostProcessor struct {
 	processor         PostProcessor
 	processorType     string
-	config            interface{}
+	config            map[string]interface{}
 	keepInputArtifact bool
 }
 

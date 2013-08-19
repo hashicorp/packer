@@ -50,7 +50,7 @@ type RawBuilderConfig struct {
 type RawPostProcessorConfig struct {
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
-	RawConfig         interface{}
+	RawConfig         map[string]interface{}
 }
 
 // RawProvisionerConfig represents a raw, unprocessed provisioner configuration.
@@ -188,6 +188,9 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 				errors = append(errors, fmt.Errorf("Post-processor %d.%d: missing 'type'", i+1, j+1))
 				continue
 			}
+
+			// Remove the input keep_input_artifact option
+			delete(pp, "keep_input_artifact")
 
 			config.RawConfig = pp
 		}

@@ -623,6 +623,11 @@ func TestTemplate_Build(t *testing.T) {
 	assert.Equal(len(coreBuild.postProcessors[1]), 2, "should have correct number")
 	assert.False(coreBuild.postProcessors[1][0].keepInputArtifact, "shoule be correct")
 	assert.True(coreBuild.postProcessors[1][1].keepInputArtifact, "shoule be correct")
+
+	config := coreBuild.postProcessors[1][1].config
+	if _, ok := config["keep_input_artifact"]; ok {
+		t.Fatal("should not have keep_input_artifact")
+	}
 }
 
 func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
