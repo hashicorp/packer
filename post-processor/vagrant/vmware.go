@@ -37,20 +37,8 @@ func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
-	templates := map[string]*string{
-		"output": &p.config.OutputPath,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
 	validates := map[string]*string{
+		"output":               &p.config.OutputPath,
 		"vagrantfile_template": &p.config.VagrantfileTemplate,
 	}
 
@@ -70,8 +58,11 @@ func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
 
 func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	// Compile the output path
-	outputPath, err := ProcessOutputPath(p.config.OutputPath,
-		p.config.PackerBuildName, "vmware", artifact)
+	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &OutputPathTemplate{
+		ArtifactId: artifact.Id(),
+		BuildName:  p.config.PackerBuildName,
+		Provider:   "vmware",
+	})
 	if err != nil {
 		return nil, false, err
 	}

@@ -9,6 +9,10 @@ IMPROVEMENTS:
 * builder/digitalocean: API requests will use HTTP proxy if specified
   by environmental variables.
 
+BUG FIXES:
+
+* post-processor/vagrant: `output_path` templates now work again.
+
 ## 0.3.2 (August 18, 2013)
 
 FEATURES:
