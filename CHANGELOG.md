@@ -11,6 +11,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: No more "unused key keep_input_artifact" for post processors [GH-310]
 * post-processor/vagrant: `output_path` templates now work again.
 
 ## 0.3.2 (August 18, 2013)

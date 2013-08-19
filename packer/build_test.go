@@ -20,7 +20,7 @@ func testBuild() *coreBuild {
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			[]coreBuildPostProcessor{
-				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "testPP", 42, true},
+				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "testPP", make(map[string]interface{}), true},
 			},
 		},
 		variables: make(map[string]string),
@@ -66,7 +66,7 @@ func TestBuild_Prepare(t *testing.T) {
 	corePP := build.postProcessors[0][0]
 	pp := corePP.processor.(*TestPostProcessor)
 	assert.True(pp.configCalled, "config should be called")
-	assert.Equal(pp.configVal, []interface{}{42, packerConfig}, "config should have right value")
+	assert.Equal(pp.configVal, []interface{}{make(map[string]interface{}), packerConfig}, "config should have right value")
 }
 
 func TestBuild_Prepare_Twice(t *testing.T) {
@@ -231,7 +231,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "pp", 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "pp", make(map[string]interface{}), false},
 		},
 	}
 
@@ -256,10 +256,10 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1"}, "pp", 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1"}, "pp", make(map[string]interface{}), false},
 		},
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2"}, "pp", 42, true},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2"}, "pp", make(map[string]interface{}), true},
 		},
 	}
 
@@ -284,12 +284,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1a"}, "pp", 42, false},
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1b"}, "pp", 42, true},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1a"}, "pp", make(map[string]interface{}), false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp1b"}, "pp", make(map[string]interface{}), true},
 		},
 		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2a"}, "pp", 42, false},
-			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2b"}, "pp", 42, false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2a"}, "pp", make(map[string]interface{}), false},
+			coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp2b"}, "pp", make(map[string]interface{}), false},
 		},
 	}
 
@@ -315,7 +315,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{
 		[]coreBuildPostProcessor{
 			coreBuildPostProcessor{
-				&TestPostProcessor{artifactId: "pp", keep: true}, "pp", 42, false,
+				&TestPostProcessor{artifactId: "pp", keep: true}, "pp", make(map[string]interface{}), false,
 			},
 		},
 	}
