@@ -43,7 +43,11 @@ type DigitalOceanClient struct {
 // Creates a new client for communicating with DO
 func (d DigitalOceanClient) New(client string, key string) *DigitalOceanClient {
 	c := &DigitalOceanClient{
-		client:   http.DefaultClient,
+		client: &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyFromEnvironment,
+			},
+		},
 		BaseURL:  DIGITALOCEAN_API_URL,
 		ClientID: client,
 		APIKey:   key,
