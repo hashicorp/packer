@@ -5,6 +5,11 @@ IMPROVEMENTS:
 * post-processor/vagrant: the file being compressed will be shown
   in the UI [GH-314]
 
+BUG FIXES:
+
+* provisioner/shell: Retry shell script uploads, making reboots more
+  robust if they happen to fail in this stage. [GH-282]
+
 ## 0.3.3 (August 19, 2013)
 
 FEATURES:

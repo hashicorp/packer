@@ -237,7 +237,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		defer f.Close()
 
 		log.Printf("Uploading %s => %s", path, p.config.RemotePath)
-		err = comm.Upload(p.config.RemotePath, f)
+		err = p.retryable(func() error {
+			return comm.Upload(p.config.RemotePath, f)
+		})
 		if err != nil {
 			return fmt.Errorf("Error uploading shell script: %s", err)
 		}
@@ -258,26 +260,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		cmd := &packer.RemoteCmd{Command: command}
-		startTimeout := time.After(p.config.startRetryTimeout)
 		log.Printf("Executing command: %s", cmd.Command)
-		for {
-			if err := cmd.StartWithUi(comm, ui); err == nil {
-				break
-			}
+		err = p.retryable(func() error {
+			return cmd.StartWithUi(comm, ui)
+		})
 
-			// Create an error and log it
-			err = fmt.Errorf("Error executing command: %s", err)
-			log.Printf(err.Error())
-
-			// Check if we timed out, otherwise we retry. It is safe to
-			// retry since the only error case above is if the command
-			// failed to START.
-			select {
-			case <-startTimeout:
-				return err
-			default:
-				time.Sleep(2 * time.Second)
-			}
+		if err != nil {
+			return err
 		}
 
 		if cmd.ExitStatus != 0 {
@@ -286,4 +275,30 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	return nil
+}
+
+// retryable will retry the given function over and over until a
+// non-error is returned.
+func (p *Provisioner) retryable(f func() error) error {
+	startTimeout := time.After(p.config.startRetryTimeout)
+	for {
+		var err error
+		if err = f(); err == nil {
+			return nil
+		}
+
+		// Create an error and log it
+		err = fmt.Errorf("Retryable error: %s", err)
+		log.Printf(err.Error())
+
+		// Check if we timed out, otherwise we retry. It is safe to
+		// retry since the only error case above is if the command
+		// failed to START.
+		select {
+		case <-startTimeout:
+			return err
+		default:
+			time.Sleep(2 * time.Second)
+		}
+	}
 }
