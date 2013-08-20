@@ -7,6 +7,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Avoid panics when double-interrupting Packer.
 * provisioner/shell: Retry shell script uploads, making reboots more
   robust if they happen to fail in this stage. [GH-282]
 
