@@ -78,7 +78,8 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 
 		conn, err := responseL.Accept()
 		if err != nil {
-			log.Panic(err)
+			cmd.SetExited(123)
+			return
 		}
 
 		defer conn.Close()
@@ -87,7 +88,8 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 
 		var finished CommandFinished
 		if err := decoder.Decode(&finished); err != nil {
-			log.Panic(err)
+			cmd.SetExited(123)
+			return
 		}
 
 		cmd.SetExited(finished.ExitStatus)
