@@ -73,6 +73,9 @@ type ClientConfig struct {
 //
 // This must only be called _once_.
 func CleanupClients() {
+	// Set the killed to true so that we don't get unexpected panics
+	Killed = true
+
 	// Kill all the managed clients in parallel and use a WaitGroup
 	// to wait for them all to finish up.
 	var wg sync.WaitGroup

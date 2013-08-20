@@ -28,7 +28,6 @@ func setupSignalHandlers(env packer.Environment) {
 
 		// Force kill all the plugins, but mark that we're killing them
 		// first so that we don't get panics everywhere.
-		plugin.Killed = true
 		plugin.CleanupClients()
 		os.Exit(1)
 	}()
