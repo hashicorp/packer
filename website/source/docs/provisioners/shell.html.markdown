@@ -154,6 +154,6 @@ will echo the script statements as it is executing.
 Your first provisoner can tell the machine to wait until it completely boots.
 
     {
-       "type": "script"
+       "type": "script",
        "inline": [ "sleep 10" ]
     }
