@@ -1,6 +1,9 @@
 ## 0.3.4 (unreleased)
 
+IMPROVEMENTS:
 
+* post-processor/vagrant: the file being compressed will be shown
+  in the UI [GH-314]
 
 ## 0.3.3 (August 19, 2013)
 

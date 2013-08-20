@@ -4,6 +4,8 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
+	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"os"
@@ -42,7 +44,7 @@ func CopyContents(dst, src string) error {
 // DirToBox takes the directory and compresses it into a Vagrant-compatible
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
-func DirToBox(dst, dir string) error {
+func DirToBox(dst, dir string, ui packer.Ui) error {
 	log.Printf("Turning dir into box: %s => %s", dir, dst)
 	dstF, err := os.Create(dst)
 	if err != nil {
@@ -88,6 +90,10 @@ func DirToBox(dst, dir string) error {
 		header.Name, err = filepath.Rel(dir, path)
 		if err != nil {
 			return err
+		}
+
+		if ui != nil {
+			ui.Message(fmt.Sprintf("Compressing: %s", header.Name))
 		}
 
 		if err := tarWriter.WriteHeader(header); err != nil {

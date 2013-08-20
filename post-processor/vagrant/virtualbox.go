@@ -143,7 +143,7 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 
 	// Compress the directory to the given output path
 	ui.Message(fmt.Sprintf("Compressing box..."))
-	if err := DirToBox(outputPath, dir); err != nil {
+	if err := DirToBox(outputPath, dir, ui); err != nil {
 		return nil, false, err
 	}
 
