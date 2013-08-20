@@ -22,7 +22,7 @@ func (c *cmdHook) Run(name string, ui packer.Ui, comm packer.Communicator, data 
 func (c *cmdHook) checkExit(p interface{}, cb func()) {
 	if c.client.Exited() {
 		cb()
-	} else if p != nil {
+	} else if p != nil && !Killed {
 		log.Panic(p)
 	}
 }

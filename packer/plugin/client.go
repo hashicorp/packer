@@ -20,6 +20,10 @@ import (
 	"unicode"
 )
 
+// If this is true, then the "unexpected EOF" panic will not be
+// raised throughout the clients.
+var Killed = false
+
 // This is a slice of the "managed" clients which are cleaned up when
 // calling Cleanup
 var managedClients = make([]*Client, 0, 5)

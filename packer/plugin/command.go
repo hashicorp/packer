@@ -45,7 +45,7 @@ func (c *cmdCommand) Synopsis() (result string) {
 func (c *cmdCommand) checkExit(p interface{}, cb func()) {
 	if c.client.Exited() {
 		cb()
-	} else if p != nil {
+	} else if p != nil && !Killed {
 		log.Panic(p)
 	}
 }

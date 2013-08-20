@@ -40,7 +40,7 @@ func (b *cmdBuilder) Cancel() {
 func (c *cmdBuilder) checkExit(p interface{}, cb func()) {
 	if c.client.Exited() && cb != nil {
 		cb()
-	} else if p != nil {
+	} else if p != nil && !Killed {
 		log.Panic(p)
 	}
 }

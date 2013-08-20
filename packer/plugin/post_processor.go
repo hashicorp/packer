@@ -31,7 +31,7 @@ func (c *cmdPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.
 func (c *cmdPostProcessor) checkExit(p interface{}, cb func()) {
 	if c.client.Exited() {
 		cb()
-	} else if p != nil {
+	} else if p != nil && !Killed {
 		log.Panic(p)
 	}
 }
