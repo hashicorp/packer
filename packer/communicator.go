@@ -33,9 +33,11 @@ type RemoteCmd struct {
 	// Once Exited is true, this will contain the exit code of the process.
 	ExitStatus int
 
-	// Internal locks and such used for safely setting some shared variables
-	l      sync.Mutex
+	// Internal fields
 	exitCh chan struct{}
+
+	// This thing is a mutex, lock when making modifications concurrently
+	sync.Mutex
 }
 
 // A Communicator is the interface used to communicate with the machine
@@ -76,6 +78,9 @@ func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
 	originalStdout := r.Stdout
 	originalStderr := r.Stderr
 	defer func() {
+		r.Lock()
+		defer r.Unlock()
+
 		r.Stdout = originalStdout
 		r.Stderr = originalStderr
 	}()
@@ -141,8 +146,8 @@ OutputLoop:
 // should be called by communicators who are running a remote command in
 // order to set that the command is done.
 func (r *RemoteCmd) SetExited(status int) {
-	r.l.Lock()
-	defer r.l.Unlock()
+	r.Lock()
+	defer r.Unlock()
 
 	if r.exitCh == nil {
 		r.exitCh = make(chan struct{})
@@ -156,11 +161,11 @@ func (r *RemoteCmd) SetExited(status int) {
 // Wait waits for the remote command to complete.
 func (r *RemoteCmd) Wait() {
 	// Make sure our condition variable is initialized.
-	r.l.Lock()
+	r.Lock()
 	if r.exitCh == nil {
 		r.exitCh = make(chan struct{})
 	}
-	r.l.Unlock()
+	r.Unlock()
 
 	<-r.exitCh
 }
