@@ -147,3 +147,13 @@ while the provisioner is using /bin/sh.
 
 * Adding a `-x` flag to the shebang at the top of the script (`#!/bin/sh -x`)
 will echo the script statements as it is executing.
+
+*My builds don't always work the same*
+
+* Some distrobutions start the SSH daemon before other core services. This can create race conditions.
+Your first provisoner can tell the machine to wait until it completely boots.
+
+    {
+       "type": "script",
+       "inline": [ "sleep 10" ]
+    }
