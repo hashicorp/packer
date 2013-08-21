@@ -5,7 +5,9 @@ go:
     - tip
 
 install: make deps
-script: make test
+script:
+    - go test ./...
+    - go test -race ./...
 
 notifications:
     flowdock:
