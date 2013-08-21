@@ -15,6 +15,9 @@ type TestCommunicator struct {
 
 func (c *TestCommunicator) Start(rc *RemoteCmd) error {
 	go func() {
+		rc.Lock()
+		defer rc.Unlock()
+
 		if rc.Stdout != nil && c.Stdout != nil {
 			io.Copy(rc.Stdout, c.Stdout)
 		}
