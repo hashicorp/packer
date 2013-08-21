@@ -15,7 +15,7 @@ type Driver interface {
 	CompactDisk(string) error
 
 	// CreateDisk creates a virtual disk with the given size.
-	CreateDisk(string, string) error
+	CreateDisk(string, string, bool) error
 
 	// Checks if the VMX file at the given path is running.
 	IsRunning(string) (bool, error)
@@ -103,4 +103,12 @@ func runAndLog(cmd *exec.Cmd) (string, string, error) {
 	returnStderr := strings.Replace(stderr.String(), "\r\n", "\n", -1)
 
 	return returnStdout, returnStderr, err
+}
+
+func diskType(singleDisk bool) string {
+	if singleDisk {
+		return "0"
+	} else {
+		return "1"
+	}
 }

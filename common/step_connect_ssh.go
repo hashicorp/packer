@@ -34,6 +34,8 @@ type StepConnectSSH struct {
 	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
 	SSHWaitTimeout time.Duration
 
+	SkipPtyRequest bool
+
 	comm packer.Communicator
 }
 
@@ -126,8 +128,9 @@ func (s *StepConnectSSH) waitForSSH(state map[string]interface{}, cancel <-chan 
 
 		// Then we attempt to connect via SSH
 		config := &ssh.Config{
-			Connection: connFunc,
-			SSHConfig:  sshConfig,
+			Connection:     connFunc,
+			SkipPtyRequest: s.SkipPtyRequest,
+			SSHConfig:      sshConfig,
 		}
 
 		log.Println("Attempting SSH connection...")
