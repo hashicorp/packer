@@ -122,6 +122,8 @@ func NewClient(config *ClientConfig) (c *Client) {
 
 // Tells whether or not the underlying process has exited.
 func (c *Client) Exited() bool {
+	c.l.Lock()
+	defer c.l.Unlock()
 	return c.exited
 }
 
