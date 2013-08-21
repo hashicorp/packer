@@ -26,6 +26,9 @@ if [ ! -z $PACKER_RACE ]; then
     PACKER_RACE="-race"
 fi
 
+echo -e "${OK_COLOR}--> Installing dependencies to speed up builds...${NO_COLOR}"
+go get ./...
+
 # Compile the main Packer app
 echo -e "${OK_COLOR}--> Compiling Packer${NO_COLOR}"
 go build \
