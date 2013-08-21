@@ -150,10 +150,13 @@ will echo the script statements as it is executing.
 
 *My builds don't always work the same*
 
-* Some distrobutions start the SSH daemon before other core services. This can create race conditions.
-Your first provisoner can tell the machine to wait until it completely boots.
+* Some distributions start the SSH daemon before other core services which
+can create race conditions. Your first provisoner can tell the machine to
+wait until it completely boots.
 
+<pre class="prettyprint">
     {
        "type": "script",
        "inline": [ "sleep 10" ]
     }
+</pre>
