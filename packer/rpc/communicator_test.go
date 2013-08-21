@@ -99,7 +99,10 @@ func TestCommunicatorRPC(t *testing.T) {
 	c.startCmd.SetExited(42)
 
 	for i := 0; i < 5; i++ {
-		if cmd.Exited {
+		cmd.Lock()
+		exited := cmd.Exited
+		cmd.Unlock()
+		if exited {
 			assert.Equal(cmd.ExitStatus, 42, "should have proper exit status")
 			break
 		}
