@@ -12,6 +12,7 @@ type AMIConfig struct {
 	AMIUsers        []string `mapstructure:"ami_users"`
 	AMIGroups       []string `mapstructure:"ami_groups"`
 	AMIProductCodes []string `mapstructure:"ami_product_codes"`
+	AMIRegions      []string `mapstructure:"ami_regions"`
 }
 
 func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
@@ -42,6 +43,7 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"ami_users":         c.AMIUsers,
 		"ami_groups":        c.AMIGroups,
 		"ami_product_codes": c.AMIProductCodes,
+		"ami_regions":       c.AMIRegions,
 	}
 
 	for n, slice := range sliceTemplates {
