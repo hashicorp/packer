@@ -251,6 +251,7 @@ func (c *Client) Start() (address string, err error) {
 	}()
 
 	// Start goroutine to wait for process to exit
+	exitCh := make(chan struct{})
 	go func() {
 		// Make sure we close the write end of our stderr/stdout so
 		// that the readers send EOF properly.
@@ -265,6 +266,11 @@ func (c *Client) Start() (address string, err error) {
 		os.Stderr.Sync()
 
 		// Mark that we exited
+		close(exitCh)
+
+		// Set that we exited, which takes a lock
+		c.l.Lock()
+		defer c.l.Unlock()
 		c.exited = true
 	}()
 
@@ -304,32 +310,16 @@ func (c *Client) Start() (address string, err error) {
 
 	// Start looking for the address
 	log.Printf("Waiting for RPC address for: %s", cmd.Path)
-	for done := false; !done; {
-		select {
-		case <-timeout:
-			err = errors.New("timeout while waiting for plugin to start")
-			done = true
-		case line := <-linesCh:
-			// Trim the address and reset the err since we were able
-			// to read some sort of address.
-			c.address = strings.TrimSpace(string(line))
-			address = c.address
-			return
-		default:
-		}
-
-		if err == nil && c.Exited() {
-			err = errors.New("plugin exited before we could connect")
-			done = true
-		}
-
-		// If error is nil from previously, return now
-		if err != nil {
-			return
-		}
-
-		// Wait a bit
-		time.Sleep(10 * time.Millisecond)
+	select {
+	case <-timeout:
+		err = errors.New("timeout while waiting for plugin to start")
+	case <-exitCh:
+		err = errors.New("plugin exited before we could connect")
+	case line := <-linesCh:
+		// Trim the address and reset the err since we were able
+		// to read some sort of address.
+		c.address = strings.TrimSpace(string(line))
+		address = c.address
 	}
 
 	return
