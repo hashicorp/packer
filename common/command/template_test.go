@@ -77,6 +77,26 @@ func TestBuildOptionsBuilds_only(t *testing.T) {
 	}
 }
 
+func TestBuildOptionsBuilds_exceptNonExistent(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Except = []string{"i-dont-exist"}
+
+	_, err := opts.Builds(testTemplate())
+	if err == nil {
+		t.Fatal("err should not be nil")
+	}
+}
+
+func TestBuildOptionsBuilds_onlyNonExistent(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Only = []string{"i-dont-exist"}
+
+	_, err := opts.Builds(testTemplate())
+	if err == nil {
+		t.Fatal("err should not be nil")
+	}
+}
+
 func TestBuildOptionsValidate(t *testing.T) {
 	bf := new(BuildOptions)
 

@@ -1,6 +1,9 @@
 ## 0.3.5 (unreleased)
 
+BUG FIXES:
 
+* command/build,command/validate: If a non-existent build is specified to
+  '-only' or '-except', it is now an error. [GH-326]
 
 ## 0.3.4 (August 21, 2013)
 
