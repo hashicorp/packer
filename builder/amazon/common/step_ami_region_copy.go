@@ -23,8 +23,9 @@ func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepActi
 		return multistep.ActionContinue
 	}
 
+	ui.Say(fmt.Sprintf("Copying AMI (%s) to other regions...", ami))
 	for _, region := range s.Regions {
-		ui.Say(fmt.Sprintf("Copying AMI (%s) to region (%s)...", ami, region))
+		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
 		// Connect to the region where the AMI will be copied to
 		regionconn := ec2.New(ec2conn.Auth, aws.Regions[region])
