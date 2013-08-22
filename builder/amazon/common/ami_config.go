@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -12,6 +13,7 @@ type AMIConfig struct {
 	AMIUsers        []string `mapstructure:"ami_users"`
 	AMIGroups       []string `mapstructure:"ami_groups"`
 	AMIProductCodes []string `mapstructure:"ami_product_codes"`
+	AMIRegions      []string `mapstructure:"ami_regions"`
 }
 
 func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
@@ -42,6 +44,7 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"ami_users":         c.AMIUsers,
 		"ami_groups":        c.AMIGroups,
 		"ami_product_codes": c.AMIProductCodes,
+		"ami_regions":       c.AMIRegions,
 	}
 
 	for n, slice := range sliceTemplates {
@@ -57,6 +60,14 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
+	}
+
+	if len(c.AMIRegions) > 0 {
+		for _, region := range c.AMIRegions {
+			if _, ok := aws.Regions[region]; !ok {
+				errs = append(errs, fmt.Errorf("Unknown region: %s", region))
+			}
+		}
 	}
 
 	if len(errs) > 0 {
