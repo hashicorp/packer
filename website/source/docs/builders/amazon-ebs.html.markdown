@@ -75,6 +75,10 @@ Optional:
   associate with the AMI. By default no product codes are associated with
   the AMI.
 
+* `ami_regions` (array of string) - A list of regions to copy the AMI to.
+  Tags and attributes are copied along with the AMI. AMI copying takes time
+  depending on the size of the AMI, but will generally take many minutes.
+
 * `ami_users` (array of string) - A list of account IDs that have access
   to launch the resulting AMI(s). By default no additional users other than the user
   creating the AMI has permissions to launch it.
