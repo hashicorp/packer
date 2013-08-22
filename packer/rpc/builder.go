@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/gob"
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"net"
