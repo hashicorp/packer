@@ -6,7 +6,6 @@
 package ebs
 
 import (
-	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -24,9 +23,6 @@ type config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-
-	// Tags for the AMI
-	Tags map[string]string
 
 	tpl *packer.ConfigTemplate
 }
@@ -53,28 +49,6 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
-
-	// Accumulate any errors
-	newTags := make(map[string]string)
-	for k, v := range b.config.Tags {
-		k, err = b.config.tpl.Process(k, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing tag key %s: %s", k, err))
-			continue
-		}
-
-		v, err = b.config.tpl.Process(v, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing tag value '%s': %s", v, err))
-			continue
-		}
-
-		newTags[k] = v
-	}
-
-	b.config.Tags = newTags
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
@@ -132,9 +106,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateAMI{},
 		&awscommon.StepAMIRegionCopy{
 			Regions: b.config.AMIRegions,
-			Tags:    b.config.Tags,
+			Tags:    b.config.AMITags,
 		},
-		&awscommon.StepCreateTags{Tags: b.config.Tags},
+		&awscommon.StepCreateTags{
+			Tags: b.config.AMITags,
+		},
 		&awscommon.StepModifyAMIAttributes{
 			Description: b.config.AMIDescription,
 			Users:       b.config.AMIUsers,
