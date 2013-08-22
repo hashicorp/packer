@@ -2,6 +2,7 @@
 
 FEATURES:
 
+* builder/amazon: Copy AMI to multiple regions with `ami_regions`. [GH-322]
 * builder/vmware: The root hard drive type can now be specified with
   "disk_type_id" for advanced users. [GH-328]
 
