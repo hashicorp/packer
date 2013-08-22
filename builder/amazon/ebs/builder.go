@@ -136,6 +136,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Users:       b.config.AMIUsers,
 			Groups:      b.config.AMIGroups,
 		},
+		&awscommon.StepAMIRegionCopyAttributes{
+			Regions: b.config.AMIRegions,
+			Tags:    b.config.Tags,
+		},
 	}
 
 	// Run!
