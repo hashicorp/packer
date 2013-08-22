@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -59,6 +60,14 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
+	}
+
+	if len(c.AMIRegions) > 0 {
+		for _, region := range c.AMIRegions {
+			if _, ok := aws.Regions[region]; !ok {
+				errs = append(errs, fmt.Errorf("Unknown region: %s", region))
+			}
+		}
 	}
 
 	if len(errs) > 0 {
