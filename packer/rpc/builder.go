@@ -70,7 +70,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		var response BuilderRunResponse
 		if err := decoder.Decode(&response); err != nil {
-			log.Panic(err)
+			response.Err = fmt.Errorf("Error waiting for Run: %s", err)
 		}
 
 		runResponseCh <- &response
