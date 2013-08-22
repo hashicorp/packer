@@ -33,7 +33,6 @@ type Config struct {
 	BundleUploadCommand string `mapstructure:"bundle_upload_command"`
 	BundleVolCommand    string `mapstructure:"bundle_vol_command"`
 	S3Bucket            string `mapstructure:"s3_bucket"`
-	Tags                map[string]string
 	X509CertPath        string `mapstructure:"x509_cert_path"`
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
@@ -213,9 +212,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
 			Regions: b.config.AMIRegions,
-			Tags:    b.config.Tags,
+			Tags:    b.config.AMITags,
 		},
-		&awscommon.StepCreateTags{Tags: b.config.Tags},
+		&awscommon.StepCreateTags{
+			Tags: b.config.AMITags,
+		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:  b.config.AMIDescription,
 			Users:        b.config.AMIUsers,
