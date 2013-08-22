@@ -1,5 +1,10 @@
 ## 0.3.5 (unreleased)
 
+FEATURES:
+
+* builder/vmware: The root hard drive type can now be specified with
+  "disk_type_id" for advanced users. [GH-328]
+
 BUG FIXES:
 
 * core: Fixed a couple cases where a double ctrl-C could panic.
