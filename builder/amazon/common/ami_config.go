@@ -8,12 +8,13 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	AMIName         string   `mapstructure:"ami_name"`
-	AMIDescription  string   `mapstructure:"ami_description"`
-	AMIUsers        []string `mapstructure:"ami_users"`
-	AMIGroups       []string `mapstructure:"ami_groups"`
-	AMIProductCodes []string `mapstructure:"ami_product_codes"`
-	AMIRegions      []string `mapstructure:"ami_regions"`
+	AMIName         string            `mapstructure:"ami_name"`
+	AMIDescription  string            `mapstructure:"ami_description"`
+	AMIUsers        []string          `mapstructure:"ami_users"`
+	AMIGroups       []string          `mapstructure:"ami_groups"`
+	AMIProductCodes []string          `mapstructure:"ami_product_codes"`
+	AMIRegions      []string          `mapstructure:"ami_regions"`
+	AMITags         map[string]string `mapstructure:"tags"`
 }
 
 func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
@@ -86,6 +87,27 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 		c.AMIRegions = regions
 	}
+
+	newTags := make(map[string]string)
+	for k, v := range c.AMITags {
+		k, err := t.Process(k, nil)
+		if err != nil {
+			errs = append(errs,
+				fmt.Errorf("Error processing tag key %s: %s", k, err))
+			continue
+		}
+
+		v, err := t.Process(v, nil)
+		if err != nil {
+			errs = append(errs,
+				fmt.Errorf("Error processing tag value '%s': %s", v, err))
+			continue
+		}
+
+		newTags[k] = v
+	}
+
+	c.AMITags = newTags
 
 	if len(errs) > 0 {
 		return errs
