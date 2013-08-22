@@ -117,6 +117,8 @@ Optional:
   template where the `.Device` variable is replaced with the name of the
   device where the volume is attached.
 
+* `tags` (object of key/value strings) - Tags applied to the AMI.
+
 * `unmount_command` (string) - Just like `mount_command`, except this is
   the command to unmount devices.
 
