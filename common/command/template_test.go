@@ -1,8 +1,45 @@
 package command
 
 import (
+	"github.com/mitchellh/packer/packer"
 	"testing"
 )
+
+func testTemplate() (*packer.Template, *packer.ComponentFinder) {
+	tplData := `{
+	"builders": [
+	{
+		"type": "foo"
+	},
+	{
+		"type": "bar"
+	}
+	]
+}`
+
+	tpl, err := packer.ParseTemplate([]byte(tplData))
+	if err != nil {
+		panic(err)
+	}
+
+	cf := &packer.ComponentFinder{
+		Builder: func(string) (packer.Builder, error) { return new(packer.MockBuilder), nil },
+	}
+
+	return tpl, cf
+}
+
+func TestBuildOptionsBuilds(t *testing.T) {
+	opts := new(BuildOptions)
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 2 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+}
 
 func TestBuildOptionsValidate(t *testing.T) {
 	bf := new(BuildOptions)
