@@ -41,6 +41,42 @@ func TestBuildOptionsBuilds(t *testing.T) {
 	}
 }
 
+func TestBuildOptionsBuilds_except(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Except = []string{"foo"}
+
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 1 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+
+	if bs[0].Name() != "bar" {
+		t.Fatalf("bad: %s", bs[0].Name())
+	}
+}
+
+func TestBuildOptionsBuilds_only(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Only = []string{"foo"}
+
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 1 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+
+	if bs[0].Name() != "foo" {
+		t.Fatalf("bad: %s", bs[0].Name())
+	}
+}
+
 func TestBuildOptionsValidate(t *testing.T) {
 	bf := new(BuildOptions)
 
