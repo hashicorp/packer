@@ -2,6 +2,7 @@
 
 BUG FIXES:
 
+* core: Fixed a couple cases where a double ctrl-C could panic.
 * command/build,command/validate: If a non-existent build is specified to
   '-only' or '-except', it is now an error. [GH-326]
 
