@@ -8,12 +8,12 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type StepAMIRegionCopyAttributes struct {
+type StepAMIRegionCopy struct {
 	Regions []string
 	Tags    map[string]string
 }
 
-func (s *StepAMIRegionCopyAttributes) Run(state map[string]interface{}) multistep.StepAction {
+func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepAction {
 	ec2conn := state["ec2"].(*ec2.EC2)
 	ui := state["ui"].(packer.Ui)
 	amis := state["amis"].(map[string]string)
@@ -74,6 +74,6 @@ func (s *StepAMIRegionCopyAttributes) Run(state map[string]interface{}) multiste
 	return multistep.ActionContinue
 }
 
-func (s *StepAMIRegionCopyAttributes) Cleanup(state map[string]interface{}) {
+func (s *StepAMIRegionCopy) Cleanup(state map[string]interface{}) {
 	// No cleanup...
 }
