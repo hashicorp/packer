@@ -211,16 +211,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepBundleVolume{},
 		&StepUploadBundle{},
 		&StepRegisterAMI{},
+		&awscommon.StepAMIRegionCopy{
+			Regions: b.config.AMIRegions,
+			Tags:    b.config.Tags,
+		},
 		&awscommon.StepCreateTags{Tags: b.config.Tags},
 		&awscommon.StepModifyAMIAttributes{
 			Description:  b.config.AMIDescription,
 			Users:        b.config.AMIUsers,
 			Groups:       b.config.AMIGroups,
 			ProductCodes: b.config.AMIProductCodes,
-		},
-		&awscommon.StepAMIRegionCopyAttributes{
-			Regions: b.config.AMIRegions,
-			Tags:    b.config.Tags,
 		},
 	}
 
