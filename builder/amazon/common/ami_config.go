@@ -63,11 +63,28 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	if len(c.AMIRegions) > 0 {
+		regionSet := make(map[string]struct{})
+		regions := make([]string, 0, len(c.AMIRegions))
+
 		for _, region := range c.AMIRegions {
+			// If we already saw the region, then don't look again
+			if _, ok := regionSet[region]; ok {
+				continue
+			}
+
+			// Mark that we saw the region
+			regionSet[region] = struct{}{}
+
+			// Verify the region is real
 			if _, ok := aws.Regions[region]; !ok {
 				errs = append(errs, fmt.Errorf("Unknown region: %s", region))
+				continue
 			}
+
+			regions = append(regions, region)
 		}
+
+		c.AMIRegions = regions
 	}
 
 	if len(errs) > 0 {
