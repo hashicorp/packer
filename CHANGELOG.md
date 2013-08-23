@@ -15,6 +15,8 @@ BUG FIXES:
 * core: Fixed a couple cases where a double ctrl-C could panic.
 * command/build,command/validate: If a non-existent build is specified to
   '-only' or '-except', it is now an error. [GH-326]
+* provisioner/shell: Retry upload if start command fails, making reboot
+  handling much more robust.
 
 ## 0.3.4 (August 21, 2013)
 
