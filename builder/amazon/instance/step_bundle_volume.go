@@ -27,25 +27,6 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 	x509RemoteCertPath := state["x509RemoteCertPath"].(string)
 	x509RemoteKeyPath := state["x509RemoteKeyPath"].(string)
 
-	// Verify the AMI tools are available
-	ui.Say("Checking for EC2 AMI tools...")
-	cmd := &packer.RemoteCmd{Command: "ec2-ami-tools-version"}
-	if err := comm.Start(cmd); err != nil {
-		state["error"] = fmt.Errorf("Error checking for AMI tools: %s", err)
-		ui.Error(state["error"].(error).Error())
-		return multistep.ActionHalt
-	}
-	cmd.Wait()
-
-	if cmd.ExitStatus != 0 {
-		state["error"] = fmt.Errorf(
-			"The EC2 AMI tools could not be detected. These must be manually\n" +
-				"via a provisioner or some other means and are required for Packer\n" +
-				"to create an instance-store AMI.")
-		ui.Error(state["error"].(error).Error())
-		return multistep.ActionHalt
-	}
-
 	// Bundle the volume
 	var err error
 	config.BundleVolCommand, err = config.tpl.Process(config.BundleVolCommand, bundleCmdData{
@@ -65,7 +46,7 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	ui.Say("Bundling the volume...")
-	cmd = new(packer.RemoteCmd)
+	cmd := new(packer.RemoteCmd)
 	cmd.Command = config.BundleVolCommand
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		state["error"] = fmt.Errorf("Error bundling volume: %s", err)
