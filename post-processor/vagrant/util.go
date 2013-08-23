@@ -111,48 +111,6 @@ func DirToBox(dst, dir string, ui packer.Ui) error {
 	return filepath.Walk(dir, tarWalk)
 }
 
-func OvaToDir(dir, src string) error {
-	log.Printf("Turning ova to dir: %s => %s", src, dir)
-	srcF, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcF.Close()
-
-	tarReader := tar.NewReader(srcF)
-
-	for {
-
-		hdr, err := tarReader.Next()
-		if hdr == nil || err == io.EOF {
-			break
-		}
-
-		info := hdr.FileInfo()
-
-		// Shouldn't be any directories, skip them
-		if info.IsDir() {
-			continue
-		}
-
-		path := filepath.Join(dir, info.Name())
-		output, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-		defer output.Close()
-
-		os.Chmod(path, info.Mode())
-		os.Chtimes(path, hdr.AccessTime, hdr.ModTime)
-
-		if _, err := io.Copy(output, tarReader); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // WriteMetadata writes the "metadata.json" file for a Vagrant box.
 func WriteMetadata(dir string, contents interface{}) error {
 	f, err := os.Create(filepath.Join(dir, "metadata.json"))
