@@ -61,20 +61,20 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	go func() {
 		defer responseL.Close()
 
+		var response BuilderRunResponse
+		defer func() { runResponseCh <- &response }()
+
 		conn, err := responseL.Accept()
 		if err != nil {
-			log.Panic(err)
+			response.Err = err
+			return
 		}
 		defer conn.Close()
 
 		decoder := gob.NewDecoder(conn)
-
-		var response BuilderRunResponse
 		if err := decoder.Decode(&response); err != nil {
 			response.Err = fmt.Errorf("Error waiting for Run: %s", err)
 		}
-
-		runResponseCh <- &response
 	}()
 
 	args := &BuilderRunArgs{
@@ -154,7 +154,7 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 
 		err := responseWriter.Encode(&BuilderRunResponse{responseErr, responseAddress})
 		if err != nil {
-			panic(err)
+			log.Printf("BuildServer.Run error: %s", err)
 		}
 	}()
 
