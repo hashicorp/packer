@@ -33,7 +33,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Store the raw configs for usage later
 	p.rawConfigs = raws
 
-	md, err := common.DecodeConfig(&p.config, raws...)
+	_, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
 	}
@@ -44,20 +44,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	tpl.UserVars = p.config.PackerUserVars
 
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
+	// Defaults
 	ppExtraConfig := make(map[string]interface{})
 	if p.config.OutputPath == "" {
 		p.config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
 		ppExtraConfig["output"] = p.config.OutputPath
 	}
 
-	//	_, err := template.New("output").Parse(p.config.OutputPath)
+	// Accumulate any errors
+	errs := new(packer.MultiError)
 	if err := tpl.Validate(p.config.OutputPath); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing output template: %s", err))
-		return errs
 	}
 
 	// Store the extra configuration for post-processors
@@ -66,11 +64,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// TODO(mitchellh): Properly handle multiple raw configs
 	var mapConfig map[string]interface{}
 	if err := mapstructure.Decode(raws[0], &mapConfig); err != nil {
-		return err
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("Failed to decode config: %s", err))
+		return errs
 	}
 
 	p.premade = make(map[string]packer.PostProcessor)
-	errors := make([]error, 0)
 	for k, raw := range mapConfig {
 		pp := keyToPostProcessor(k)
 		if pp == nil {
@@ -83,14 +82,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		ppConfigs = append(ppConfigs, raw)
 
 		if err := pp.Configure(ppConfigs...); err != nil {
-			errors = append(errors, err)
+			errs = packer.MultiErrorAppend(errs, err)
 		}
 
 		p.premade[k] = pp
 	}
 
-	if len(errors) > 0 {
-		return &packer.MultiError{errors}
+	if len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
