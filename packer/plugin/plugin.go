@@ -94,8 +94,10 @@ func swallowInterrupts() {
 	signal.Notify(ch, os.Interrupt)
 
 	go func() {
-		<-ch
-		log.Println("Received interrupt signal. Ignoring.")
+		for {
+			<-ch
+			log.Println("Received interrupt signal. Ignoring.")
+		}
 	}()
 }
 
