@@ -236,17 +236,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 		defer f.Close()
 
-		log.Printf("Uploading %s => %s", path, p.config.RemotePath)
-		err = p.retryable(func() error {
-			return comm.Upload(p.config.RemotePath, f)
-		})
-		if err != nil {
-			return fmt.Errorf("Error uploading shell script: %s", err)
-		}
-
-		// Close the original file since we copied it
-		f.Close()
-
 		// Flatten the environment variables
 		flattendVars := strings.Join(envVars, " ")
 
@@ -259,15 +248,30 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error processing command: %s", err)
 		}
 
-		cmd := &packer.RemoteCmd{Command: command}
-		log.Printf("Executing command: %s", cmd.Command)
+		// Upload the file and run the command. Do this in the context of
+		// a single retryable function so that we don't end up with
+		// the case that the upload succeeded, a restart is initiated,
+		// and then the command is executed but the file doesn't exist
+		// any longer.
+		var cmd *packer.RemoteCmd
 		err = p.retryable(func() error {
+			if _, err := f.Seek(0, 0); err != nil {
+				return err
+			}
+
+			if err := comm.Upload(p.config.RemotePath, f); err != nil {
+				return fmt.Errorf("Error uploading script: %s", err)
+			}
+
+			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
 		})
-
 		if err != nil {
 			return err
 		}
+
+		// Close the original file since we copied it
+		f.Close()
 
 		if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
