@@ -105,7 +105,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 func (b *builder) Cancel() {
 	if err := b.client.Call("Builder.Cancel", new(interface{}), new(interface{})); err != nil {
-		panic(err)
+		log.Printf("Error cancelling builder: %s", err)
 	}
 }
 
