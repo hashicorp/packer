@@ -1,10 +1,12 @@
 package vagrant
 
 import (
+	"archive/tar"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -85,14 +87,16 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 
 	// Copy all of the original contents into the temporary directory
 	for _, path := range artifact.Files() {
-		ui.Message(fmt.Sprintf("Copying: %s", path))
 
+		// We treat OVA files specially, we unpack those into the temporary
+		// directory so we can get the resulting disk and OVF.
 		if extension := filepath.Ext(path); extension == ".ova" {
-			log.Printf("File is an OVA: %s", path)
-			if err := OvaToDir(dir, filepath.Base(path)); err != nil {
+			ui.Message(fmt.Sprintf("Unpacking OVA: %s", path))
+			if err := DecompressOva(dir, filepath.Base(path)); err != nil {
 				return nil, false, err
 			}
 		} else {
+			ui.Message(fmt.Sprintf("Copying: %s", path))
 			dstPath := filepath.Join(dir, filepath.Base(path))
 			if err := CopyContents(dstPath, path); err != nil {
 				return nil, false, err
@@ -213,6 +217,53 @@ func (p *VBoxBoxPostProcessor) findBaseMacAddress(dir string) (string, error) {
 
 	log.Printf("Base mac address: %s", string(matches[1]))
 	return string(matches[1]), nil
+}
+
+// DecompressOva takes an ova file and decompresses it into the target
+// directory.
+func DecompressOva(dir, src string) error {
+	log.Printf("Turning ova to dir: %s => %s", src, dir)
+	srcF, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcF.Close()
+
+	tarReader := tar.NewReader(srcF)
+	for {
+		hdr, err := tarReader.Next()
+		if hdr == nil || err == io.EOF {
+			break
+		}
+
+		info := hdr.FileInfo()
+
+		// Shouldn't be any directories, skip them
+		if info.IsDir() {
+			continue
+		}
+
+		// We wrap this in an anonymous function so that the defers
+		// inside are handled more quickly so we can give up file handles.
+		err = func() error {
+			path := filepath.Join(dir, info.Name())
+			output, err := os.Create(path)
+			if err != nil {
+				return err
+			}
+			defer output.Close()
+
+			os.Chmod(path, info.Mode())
+			os.Chtimes(path, hdr.AccessTime, hdr.ModTime)
+			_, err = io.Copy(output, tarReader)
+			return err
+		}()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 var defaultVBoxVagrantfile = `
