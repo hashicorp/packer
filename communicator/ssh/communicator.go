@@ -160,7 +160,7 @@ func (c *comm) Upload(path string, input io.Reader) error {
 		return err
 	}
 
-	if _, err := io.Copy(w, input_memory); err != nil{
+	if _, err := io.Copy(w, input_memory); err != nil {
 		return err
 	}
 
