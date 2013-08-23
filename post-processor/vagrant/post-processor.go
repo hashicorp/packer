@@ -6,9 +6,9 @@ package vagrant
 import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"text/template"
 )
 
 var builtins = map[string]string{
@@ -18,6 +18,8 @@ var builtins = map[string]string{
 }
 
 type Config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	OutputPath string `mapstructure:"output"`
 }
 
@@ -31,12 +33,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Store the raw configs for usage later
 	p.rawConfigs = raws
 
-	for _, raw := range raws {
-		err := mapstructure.Decode(raw, &p.config)
-		if err != nil {
-			return err
-		}
+	md, err := common.DecodeConfig(&p.config, raws...)
+	if err != nil {
+		return err
 	}
+
+	tpl, err := packer.NewConfigTemplate()
+	if err != nil {
+		return err
+	}
+	tpl.UserVars = p.config.PackerUserVars
+
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
 
 	ppExtraConfig := make(map[string]interface{})
 	if p.config.OutputPath == "" {
@@ -44,9 +53,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		ppExtraConfig["output"] = p.config.OutputPath
 	}
 
-	_, err := template.New("output").Parse(p.config.OutputPath)
-	if err != nil {
-		return fmt.Errorf("output invalid template: %s", err)
+	//	_, err := template.New("output").Parse(p.config.OutputPath)
+	if err := tpl.Validate(p.config.OutputPath); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error parsing output template: %s", err))
+		return errs
 	}
 
 	// Store the extra configuration for post-processors
