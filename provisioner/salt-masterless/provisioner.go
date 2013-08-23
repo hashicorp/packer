@@ -108,6 +108,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if p.config.MinionConfig != "" {
+		ui.Message(fmt.Sprintf("Uploading minion config: %s", p.config.MinionConfig))
 		err := uploadMinionConfig(comm, "/etc/salt/minion", p.config.MinionConfig)
 		if err != nil {
 			return err
@@ -195,7 +196,6 @@ func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communi
 }
 
 func uploadMinionConfig(comm packer.Communicator, dst string, src string) error {
-	ui.Message(fmt.Sprintf("Uploading minion config: %s", src))
 	f, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("Error opening minion config: %s", err)
@@ -205,4 +205,6 @@ func uploadMinionConfig(comm packer.Communicator, dst string, src string) error 
 	if err = comm.Upload(dst, f); err != nil {
 		return fmt.Errorf("Error uploading minion config: %s", err)
 	}
+
+	return nil
 }
