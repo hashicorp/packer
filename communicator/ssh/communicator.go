@@ -160,7 +160,10 @@ func (c *comm) Upload(path string, input io.Reader) error {
 		return err
 	}
 
-	io.Copy(w, input_memory)
+	if _, err := io.Copy(w, input_memory); err != nil{
+		return err
+	}
+
 	fmt.Fprint(w, "\x00")
 	err = checkSCPStatus(stdoutR)
 	if err != nil {
