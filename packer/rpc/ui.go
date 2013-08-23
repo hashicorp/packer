@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"net/rpc"
 )
 
@@ -30,7 +31,7 @@ func (u *Ui) Ask(query string) (result string, err error) {
 
 func (u *Ui) Error(message string) {
 	if err := u.client.Call("Ui.Error", message, new(interface{})); err != nil {
-		panic(err)
+		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
 
@@ -41,19 +42,19 @@ func (u *Ui) Machine(t string, args ...string) {
 	}
 
 	if err := u.client.Call("Ui.Machine", rpcArgs, new(interface{})); err != nil {
-		panic(err)
+		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
 
 func (u *Ui) Message(message string) {
 	if err := u.client.Call("Ui.Message", message, new(interface{})); err != nil {
-		panic(err)
+		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
 
 func (u *Ui) Say(message string) {
 	if err := u.client.Call("Ui.Say", message, new(interface{})); err != nil {
-		panic(err)
+		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
 
