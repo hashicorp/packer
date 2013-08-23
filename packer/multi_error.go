@@ -37,10 +37,6 @@ func MultiErrorAppend(err error, errs ...error) *MultiError {
 			err = new(MultiError)
 		}
 
-		if err.Errors == nil {
-			err.Errors = make([]error, 0, len(errs))
-		}
-
 		err.Errors = append(err.Errors, errs...)
 		return err
 	default:
