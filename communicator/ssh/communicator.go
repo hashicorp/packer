@@ -204,6 +204,10 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	return nil
 }
 
+func (c *comm) UploadDir(dst string, src string, excl []string) error {
+	return nil
+}
+
 func (c *comm) Download(string, io.Writer) error {
 	panic("not implemented yet")
 }
