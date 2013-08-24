@@ -52,7 +52,7 @@ func TestProvisionerRPC(t *testing.T) {
 
 	// Test Provision
 	ui := &testUi{}
-	comm := &testCommunicator{}
+	comm := new(packer.MockCommunicator)
 	pClient.Provision(ui, comm)
 	assert.True(p.provCalled, "provision should be called")
 
