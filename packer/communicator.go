@@ -59,6 +59,11 @@ type Communicator interface {
 	// it completes.
 	Upload(string, io.Reader) error
 
+	// UploadDir uploads the contents of a directory recursively to
+	// the remote path. It also takes an optional slice of paths to
+	// ignore when uploading.
+	UploadDir(string, string, []string) error
+
 	// Download downloads a file from the machine from the given remote path
 	// with the contents writing to the given writer. This method will
 	// block until it completes.
