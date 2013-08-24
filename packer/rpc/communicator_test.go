@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"net/rpc"
+	"reflect"
 	"testing"
 )
 
@@ -102,6 +103,27 @@ func TestCommunicatorRPC(t *testing.T) {
 
 	if c.UploadData != "uploadfoo\n" {
 		t.Fatalf("bad: %s", c.UploadData)
+	}
+
+	// Test that we can upload directories
+	dirDst := "foo"
+	dirSrc := "bar"
+	dirExcl := []string{"foo"}
+	err = remote.UploadDir(dirDst, dirSrc, dirExcl)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.UploadDirDst != dirDst {
+		t.Fatalf("bad: %s", c.UploadDirDst)
+	}
+
+	if c.UploadDirSrc != dirSrc {
+		t.Fatalf("bad: %s", c.UploadDirSrc)
+	}
+
+	if !reflect.DeepEqual(c.UploadDirExclude, dirExcl) {
+		t.Fatalf("bad: %#v", c.UploadDirExclude)
 	}
 
 	// Test that we can download things

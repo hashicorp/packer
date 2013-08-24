@@ -20,6 +20,10 @@ type MockCommunicator struct {
 	UploadPath   string
 	UploadData   string
 
+	UploadDirDst     string
+	UploadDirSrc     string
+	UploadDirExclude []string
+
 	DownloadCalled bool
 	DownloadPath   string
 	DownloadData   string
@@ -78,7 +82,11 @@ func (c *MockCommunicator) Upload(path string, r io.Reader) error {
 	return nil
 }
 
-func (c *MockCommunicator) UploadDir(string, string, []string) error {
+func (c *MockCommunicator) UploadDir(dst string, src string, excl []string) error {
+	c.UploadDirDst = dst
+	c.UploadDirSrc = src
+	c.UploadDirExclude = excl
+
 	return nil
 }
 
