@@ -2,41 +2,10 @@ package packer
 
 import (
 	"bytes"
-	"io"
 	"strings"
 	"testing"
 	"time"
 )
-
-type TestCommunicator struct {
-	Stderr io.Reader
-	Stdout io.Reader
-}
-
-func (c *TestCommunicator) Start(rc *RemoteCmd) error {
-	go func() {
-		rc.Lock()
-		defer rc.Unlock()
-
-		if rc.Stdout != nil && c.Stdout != nil {
-			io.Copy(rc.Stdout, c.Stdout)
-		}
-
-		if rc.Stderr != nil && c.Stderr != nil {
-			io.Copy(rc.Stderr, c.Stderr)
-		}
-	}()
-
-	return nil
-}
-
-func (c *TestCommunicator) Upload(string, io.Reader) error {
-	return nil
-}
-
-func (c *TestCommunicator) Download(string, io.Writer) error {
-	return nil
-}
 
 func TestRemoteCmd_StartWithUi(t *testing.T) {
 	data := "hello\nworld\nthere"
@@ -46,7 +15,7 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 	uiOutput := new(bytes.Buffer)
 	rcOutput.WriteString(data)
 
-	testComm := &TestCommunicator{
+	testComm := &MockCommunicator{
 		Stdout: rcOutput,
 	}
 
