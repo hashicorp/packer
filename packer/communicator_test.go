@@ -11,14 +11,10 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 	data := "hello\nworld\nthere"
 
 	originalOutput := new(bytes.Buffer)
-	rcOutput := new(bytes.Buffer)
 	uiOutput := new(bytes.Buffer)
-	rcOutput.WriteString(data)
 
-	testComm := &MockCommunicator{
-		Stdout: rcOutput,
-	}
-
+	testComm := new(MockCommunicator)
+	testComm.StartStdout = data
 	testUi := &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: uiOutput,
@@ -29,22 +25,20 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 		Stdout:  originalOutput,
 	}
 
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-		rc.SetExited(0)
-	}()
-
 	err := rc.StartWithUi(testComm, testUi)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	if uiOutput.String() != strings.TrimSpace(data)+"\n" {
+	rc.Wait()
+
+	expected := strings.TrimSpace(data)
+	if uiOutput.String() != expected+"\n" {
 		t.Fatalf("bad output: '%s'", uiOutput.String())
 	}
 
-	if originalOutput.String() != data {
-		t.Fatalf("original is bad: '%s'", originalOutput.String())
+	if originalOutput.String() != expected {
+		t.Fatalf("bad: %#v", originalOutput.String())
 	}
 }
 

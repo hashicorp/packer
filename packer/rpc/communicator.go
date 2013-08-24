@@ -123,6 +123,10 @@ func (c *communicator) Upload(path string, r io.Reader) (err error) {
 	return
 }
 
+func (c *communicator) UploadDir(dst string, src string, exclude []string) error {
+	return nil
+}
+
 func (c *communicator) Download(path string, w io.Writer) (err error) {
 	// We need to create a server that can proxy that data downloaded
 	// into the writer because we can't gob encode a writer directly.
