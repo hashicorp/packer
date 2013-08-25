@@ -24,8 +24,8 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
 {
   "type": "virtualbox",
   "guest_os_type": "Ubuntu_64",
-  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.2-server-amd64.iso",
-  "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
+  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
+  "iso_checksum": "7d335ca541fc4945b674459cde7bffb9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
   "ssh_wait_timeout": "30s",
