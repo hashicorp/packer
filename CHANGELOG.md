@@ -9,6 +9,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* core: Output message when Ctrl-C received that we're cleaning up. [GH-338]
 * builder/amazon: Tagging now works with all amazon builder types.
 
 BUG FIXES:
