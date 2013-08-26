@@ -1,4 +1,4 @@
-package chefSolo
+package chefsolo
 
 import (
 	"github.com/mitchellh/packer/packer"
