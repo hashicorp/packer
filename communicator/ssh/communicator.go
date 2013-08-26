@@ -313,9 +313,11 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader) erro
 
 func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) error {
 	for _, fi := range fs {
+		realPath := filepath.Join(root, fi.Name())
+
 		if !fi.IsDir() {
 			// It is a regular file, just upload it
-			f, err := os.Open(filepath.Join(root, fi.Name()))
+			f, err := os.Open(realPath)
 			if err != nil {
 				return err
 			}
@@ -328,58 +330,44 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 			if err != nil {
 				return err
 			}
+
+			continue
+		}
+
+		// It is a directory, recursively upload
+		log.Printf("SCP: starting directory upload: %s", fi.Name())
+		fmt.Fprintln(w, "D0755 0", fi.Name())
+		err := checkSCPStatus(r)
+		if err != nil {
+			return err
+		}
+
+		f, err := os.Open(realPath)
+		if err != nil {
+			return err
+		}
+
+		// Execute this in a function just so that we have easy "defer"
+		// available because laziness.
+		err = func() error {
+			defer f.Close()
+
+			entries, err := f.Readdir(-1)
+			if err != nil {
+				return err
+			}
+
+			return scpUploadDir(realPath, entries, w, r)
+		}()
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintln(w, "E")
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
-}
-
-func scpWalkFn(cur string, dst string, src string, w io.Writer, r *bufio.Reader) filepath.WalkFunc {
-	return func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if path == cur {
-			// Don't upload ourselves
-			return nil
-		}
-
-		// Get the relative path so that we can check excludes and also
-		// so that we can build the full destination path
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		// TODO(mitchellh): Check excludes
-		targetPath := filepath.Base(relPath)
-		if info.IsDir() {
-			log.Printf("SCP: starting directory upload: %s", targetPath)
-			fmt.Fprintln(w, "D0755 0", targetPath)
-			err := checkSCPStatus(r)
-			if err != nil {
-				return err
-			}
-
-			err = filepath.Walk(path, scpWalkFn(path, dst, src, w, r))
-			if err != nil {
-				return err
-			}
-
-			fmt.Fprintln(w, "E")
-			return checkSCPStatus(r)
-		}
-
-		// Open the file for uploading
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		// Upload the file like any normal SCP operation
-		targetPath = filepath.Base(relPath)
-		return scpUploadFile(targetPath, f, w, r)
-	}
 }
