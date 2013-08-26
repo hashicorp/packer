@@ -113,19 +113,30 @@ func (c *comm) Upload(path string, input io.Reader) error {
 }
 
 func (c *comm) UploadDir(dst string, src string, excl []string) error {
-	f, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	entries, err := f.Readdir(-1)
-	if err != nil {
-		return err
-	}
-
+	log.Printf("Upload dir '%s' to '%s'", src, dst)
 	scpFunc := func(w io.Writer, r *bufio.Reader) error {
-		return scpUploadDir(src, entries, w, r)
+		uploadEntries := func() error {
+			f, err := os.Open(src)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			entries, err := f.Readdir(-1)
+			if err != nil {
+				return err
+			}
+
+			return scpUploadDir(src, entries, w, r)
+		}
+
+		if src[len(src)-1] != '/' {
+			log.Printf("No trailing slash, creating the source directory name")
+			return scpUploadDirProtocol(filepath.Base(src), w, r, uploadEntries)
+		} else {
+			// Trailing slash, so only upload the contents
+			return uploadEntries()
+		}
 	}
 
 	return c.scpSession("scp -rvt "+dst, scpFunc)
@@ -311,6 +322,26 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader) erro
 	return nil
 }
 
+func scpUploadDirProtocol(name string, w io.Writer, r *bufio.Reader, f func() error) error {
+	log.Printf("SCP: starting directory upload: %s", name)
+	fmt.Fprintln(w, "D0755 0", name)
+	err := checkSCPStatus(r)
+	if err != nil {
+		return err
+	}
+
+	if err := f(); err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, "E")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) error {
 	for _, fi := range fs {
 		realPath := filepath.Join(root, fi.Name())
@@ -335,21 +366,11 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 		}
 
 		// It is a directory, recursively upload
-		log.Printf("SCP: starting directory upload: %s", fi.Name())
-		fmt.Fprintln(w, "D0755 0", fi.Name())
-		err := checkSCPStatus(r)
-		if err != nil {
-			return err
-		}
-
-		f, err := os.Open(realPath)
-		if err != nil {
-			return err
-		}
-
-		// Execute this in a function just so that we have easy "defer"
-		// available because laziness.
-		err = func() error {
+		err := scpUploadDirProtocol(fi.Name(), w, r, func() error {
+			f, err := os.Open(realPath)
+			if err != nil {
+				return err
+			}
 			defer f.Close()
 
 			entries, err := f.Readdir(-1)
@@ -358,12 +379,7 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 			}
 
 			return scpUploadDir(realPath, entries, w, r)
-		}()
-		if err != nil {
-			return err
-		}
-
-		fmt.Fprintln(w, "E")
+		})
 		if err != nil {
 			return err
 		}
