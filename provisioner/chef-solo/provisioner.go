@@ -1,6 +1,7 @@
-// This package implements a provisioner for Packer that executes
-// shell scripts within the remote machine.
-package chefSolo
+// This package implements a provisioner for Packer that uses
+// Chef to provision the remote machine, specifically with chef-solo (that is,
+// without a Chef server).
+package chefsolo
 
 import (
 	"bufio"
@@ -8,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/iochan"
-	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
@@ -28,26 +29,21 @@ const (
 
 var Ui packer.Ui
 
-type config struct {
-	// An array of local paths of cookbooks to upload.
+type Config struct {
+	common.PackerConfig `mapstructure:",squash"`
+
 	CookbooksPaths []string `mapstructure:"cookbooks_paths"`
+	InstallCommand string   `mapstructure:"install_command"`
+	Recipes        []string
+	Json           map[string]interface{}
+	PreventSudo    bool `mapstructure:"prevent_sudo"`
+	SkipInstall    bool `mapstructure:"skip_install"`
 
-	// An array of recipes to run.
-	Recipes []string
-
-	// A string of JSON that will be used as the JSON attributes for the
-	// Chef run.
-	Json map[string]interface{}
-
-	// Option to avoid sudo use when executing commands. Defaults to false.
-	PreventSudo bool `mapstructure:"prevent_sudo"`
-
-	// If true, skips installing Chef. Defaults to false.
-	SkipInstall bool `mapstructure:"skip_install"`
+	tpl *packer.ConfigTemplate
 }
 
 type Provisioner struct {
-	config config
+	config Config
 }
 
 type ExecuteRecipeTemplate struct {
@@ -56,20 +52,31 @@ type ExecuteRecipeTemplate struct {
 	Sudo       bool
 }
 
-type ExecuteInstallChefTemplate struct {
-	PreventSudo bool
+type InstallChefTemplate struct {
+	Sudo bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	errs := make([]error, 0)
-	for _, raw := range raws {
-		if err := mapstructure.Decode(raw, &p.config); err != nil {
-			return err
-		}
+	md, err := common.DecodeConfig(&p.config, raws...)
+	if err != nil {
+		return err
 	}
+
+	p.config.tpl, err = packer.NewConfigTemplate()
+	if err != nil {
+		return err
+	}
+	p.config.tpl.UserVars = p.config.PackerUserVars
+
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
 
 	if p.config.CookbooksPaths == nil {
 		p.config.CookbooksPaths = []string{DefaultCookbooksPath}
+	}
+
+	if p.config.InstallCommand == "" {
+		p.config.InstallCommand = "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash"
 	}
 
 	if p.config.Recipes == nil {
@@ -78,7 +85,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Json != nil {
 		if _, err := json.Marshal(p.config.Json); err != nil {
-			errs = append(errs, fmt.Errorf("Bad JSON: %s", err))
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad JSON: %s", err))
 		}
 	} else {
 		p.config.Json = make(map[string]interface{})
@@ -88,12 +96,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(path)
 
 		if err != nil || !pFileInfo.IsDir() {
-			errs = append(errs, fmt.Errorf("Bad cookbook path '%s': %s", path, err))
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad cookbook path '%s': %s", path, err))
 		}
 	}
 
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
@@ -104,9 +113,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	Ui = ui
 
 	if !p.config.SkipInstall {
-		err = InstallChefSolo(p.config.PreventSudo, comm)
-		if err != nil {
-			return fmt.Errorf("Error installing Chef Solo: %s", err)
+		if err := p.installChef(ui, comm); err != nil {
+			return fmt.Errorf("Error installing Chef: %s", err)
 		}
 	}
 
@@ -315,16 +323,24 @@ func CreateAttributesJson(jsonAttrs map[string]interface{}, recipes []string, co
 	return remotePath, nil
 }
 
-func InstallChefSolo(preventSudo bool, comm packer.Communicator) (err error) {
-	Ui.Say("Installing Chef Solo")
+func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error {
+	ui.Message("Installing Chef...")
 
-	var command bytes.Buffer
-	t := template.Must(template.New("install-chef").Parse("curl -L https://www.opscode.com/chef/install.sh | {{if .sudo}}sudo {{end}}bash"))
-	t.Execute(&command, map[string]bool{"sudo": !preventSudo})
-
-	err = executeCommand(command.String(), comm)
+	command, err := p.config.tpl.Process(p.config.InstallCommand, &InstallChefTemplate{
+		Sudo: !p.config.PreventSudo,
+	})
 	if err != nil {
-		return fmt.Errorf("Unable to install Chef Solo: %d", err)
+		return err
+	}
+
+	cmd := &packer.RemoteCmd{Command: command}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf(
+			"Install script exited with non-zero exit status %d", cmd.ExitStatus)
 	}
 
 	return nil
