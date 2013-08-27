@@ -23,6 +23,8 @@ BUG FIXES:
 * core: Fixed a couple cases where a double ctrl-C could panic.
 * builder/amazon/instance: Remove check for ec2-ami-tools because it
   didn't allow absolute paths to work properly. [GH-330]
+* builder/digitalocean: Send a soft shutdown request so that files
+  are properly synced before shutdown. [GH-332]
 * command/build,command/validate: If a non-existent build is specified to
   '-only' or '-except', it is now an error. [GH-326]
 * post-processor/vagrant: Setting OutputPath with a timestamp now
