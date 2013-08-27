@@ -222,7 +222,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 }
 
 func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config string, json string) error {
-	command, err := p.config.tpl.Process(p.config.InstallCommand, &ExecuteTemplate{
+	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
 		ConfigPath: config,
 		JsonPath:   json,
 		Sudo:       !p.config.PreventSudo,
