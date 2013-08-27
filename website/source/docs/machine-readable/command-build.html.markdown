@@ -147,18 +147,15 @@ of `packer build`.
 		</p>
 	</dd>
 
-	<dt>error (2)</dt>
+	<dt>error (1)</dt>
 	<dd>
 		<p>
-		A build error that occurred.
+		A build error that occurred. The target of this output will be
+		the build that had the error.
 		</p>
 
 		<p>
-		<strong>Data 1: name</strong> - The name of the build that had an error.
-		</p>
-
-		<p>
-		<strong>Data 2: error</strong> - The error message as a string.
+		<strong>Data 1: error</strong> - The error message as a string.
 		</p>
 	</dd>
 </dl>
