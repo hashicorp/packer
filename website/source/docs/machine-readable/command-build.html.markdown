@@ -39,7 +39,9 @@ of `packer build`.
 	<dt>artifact-count (1)</dt>
 	<dd>
 		<p>
-		The number of artifacts associated with the given target.
+		The number of artifacts associated with the given target. This
+		will always be outputted _before_ any other artifact information,
+		so you're able to know how many upcoming artifacts to look for.
 		</p>
 
 		<p>
@@ -120,6 +122,34 @@ of `packer build`.
 
 		<p>
 		<strong>Data 1: string</strong> - The string output for the artifact.
+		</p>
+	</dd>
+
+	<dt>error-count (1)</dt>
+	<dd>
+		<p>
+		The number of errors that occurred during the build. This will
+		always be outputted before any errors so you know how many are coming.
+		</p>
+
+		<p>
+		<strong>Data 1: count</strong> - The number of build errors as
+		a base 10 integer.
+		</p>
+	</dd>
+
+	<dt>error (2)</dt>
+	<dd>
+		<p>
+		A build error that occurred.
+		</p>
+
+		<p>
+		<strong>Data 1: name</strong> - The name of the build that had an error.
+		</p>
+
+		<p>
+		<strong>Data 2: error</strong> - The error message as a string.
 		</p>
 	</dd>
 </dl>
