@@ -14,6 +14,8 @@ IMPROVEMENTS:
 
 * core: Output message when Ctrl-C received that we're cleaning up. [GH-338]
 * builder/amazon: Tagging now works with all amazon builder types.
+* builder/vmware: Option `ssh_skip_request_pty` for not requesting a PTY
+  for the SSH connection. [GH-270]
 * command/build: Machine-readable output now contains build errors, if any.
 * command/build: An "end" sentinel is outputted in machine-readable output
   for artifact listing so it is easier to know when it is over.
