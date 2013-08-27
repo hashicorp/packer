@@ -32,15 +32,14 @@ func (s *stepPowerOff) Run(state map[string]interface{}) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Waiting for droplet to power off...")
+	log.Println("Waiting for poweroff event to complete...")
 
-	err = waitForDropletState("off", dropletId, client, c)
-	if err != nil {
-		err := fmt.Errorf("Error waiting for droplet to become 'off': %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+	// This arbitrary sleep is because we can't wait for the state
+	// of the droplet to be 'off', as stepShutdown should already
+	// have accomplished that, and the state indicator is the same.
+	// We just have to assume that this event will process quickly.
+	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
+	time.Sleep(c.eventDelay)
 
 	return multistep.ActionContinue
 }
