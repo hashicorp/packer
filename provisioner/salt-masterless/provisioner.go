@@ -27,8 +27,8 @@ type Config struct {
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
 
-	// Local path to the salt pillar tree
-	LocalPillarTree string `mapstructure:"local_pillar_tree"`
+	// Local path to the salt pillar roots
+	LocalPillarRoots string `mapstructure:"local_pillar_roots"`
 
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
@@ -63,7 +63,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"bootstrap_args":    &p.config.BootstrapArgs,
 		"minion_config":     &p.config.MinionConfig,
 		"local_state_tree":  &p.config.LocalStateTree,
-		"local_pillar_tree": &p.config.LocalPillarTree,
+		"local_pillar_roots": &p.config.LocalPillarRoots,
 		"temp_config_dir":   &p.config.TempConfigDir,
 	}
 
@@ -83,10 +83,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.LocalPillarTree != "" {
-		if _, err := os.Stat(p.config.LocalPillarTree); err != nil {
+	if p.config.LocalPillarRoots != "" {
+		if _, err := os.Stat(p.config.LocalPillarRoots); err != nil {
 			errs = packer.MultiErrorAppend(errs,
-				errors.New("local_pillar_tree must exist and be accessible"))
+				errors.New("local_pillar_roots must exist and be accessible"))
 		}
 	}
 
@@ -155,7 +155,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Unable to move %s/states to /srv/salt: %d", p.config.TempConfigDir, err)
 	}
 
-	if p.config.LocalPillarTree != "" {
+	if p.config.LocalPillarRoots != "" {
 
 		ui.Message(fmt.Sprintf("Creating remote pillar directory: %s/pillar", p.config.TempConfigDir))
 		cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s/pillar", p.config.TempConfigDir)}
@@ -167,9 +167,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error creating remote pillar directory: %s", err)
 		}
 
-		ui.Message(fmt.Sprintf("Uploading local pillar tree: %s", p.config.LocalPillarTree))
-		if err = UploadLocalDirectory(p.config.LocalPillarTree, fmt.Sprintf("%s/pillar", p.config.TempConfigDir), comm, ui); err != nil {
-			return fmt.Errorf("Error uploading local pillar tree to remote: %s", err)
+		ui.Message(fmt.Sprintf("Uploading local pillar roots: %s", p.config.LocalPillarRoots))
+		if err = UploadLocalDirectory(p.config.LocalPillarRoots, fmt.Sprintf("%s/pillar", p.config.TempConfigDir), comm, ui); err != nil {
+			return fmt.Errorf("Error uploading local pillar roots to remote: %s", err)
 		}
 
 		ui.Message(fmt.Sprintf("Moving %s/pillar to /srv/pillar", p.config.TempConfigDir))

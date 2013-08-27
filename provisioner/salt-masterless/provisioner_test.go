@@ -87,17 +87,17 @@ func TestProvisionerPrepare_LocalStateTree(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_LocalPillarTree(t *testing.T) {
+func TestProvisionerPrepare_LocalPillarRoots(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	config["local_pillar_tree"] = "/i/dont/exist/i/think"
+	config["local_pillar_roots"] = "/i/dont/exist/i/think"
 	err := p.Prepare(config)
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
-	config["local_pillar_tree"] = os.TempDir()
+	config["local_pillar_roots"] = os.TempDir()
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
