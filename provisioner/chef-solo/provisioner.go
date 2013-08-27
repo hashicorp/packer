@@ -111,13 +111,21 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	if err := p.createStagingDir(ui, comm); err != nil {
+	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
 		return fmt.Errorf("Error creating staging directory: %s", err)
 	}
 
-	// TODO(mitchellh): Upload cookbooks
+	cookbookPaths := make([]string, 0, len(p.config.CookbookPaths))
+	for i, path := range p.config.CookbookPaths {
+		targetPath := fmt.Sprintf("%s/cookbooks-%d", p.config.StagingDir, i)
+		if err := p.uploadDirectory(ui, comm, targetPath, path); err != nil {
+			return fmt.Errorf("Error uploading cookbooks: %s", err)
+		}
 
-	configPath, err := p.createConfig(ui, comm)
+		cookbookPaths = append(cookbookPaths, targetPath)
+	}
+
+	configPath, err := p.createConfig(ui, comm, cookbookPaths)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -134,11 +142,30 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return nil
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
+	if err := p.createDir(ui, comm, dst); err != nil {
+		return err
+	}
+
+	// Make sure there is a trailing "/" so that the directory isn't
+	// created on the other side.
+	if src[len(src)-1] != '/' {
+		src = src + "/"
+	}
+
+	return comm.UploadDir(dst, src, nil)
+}
+
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string) (string, error) {
 	ui.Message("Creating configuration file 'solo.rb'")
 
-	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths))
+	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
 	for i, path := range p.config.RemoteCookbookPaths {
+		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
+	}
+
+	for i, path := range localCookbooks {
+		i = len(p.config.RemoteCookbookPaths) + i
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
 	}
 
@@ -186,10 +213,10 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 	return remotePath, nil
 }
 
-func (p *Provisioner) createStagingDir(ui packer.Ui, comm packer.Communicator) error {
-	ui.Message(fmt.Sprintf("Creating staging directory: %s", p.config.StagingDir))
+func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p '%s'", p.config.StagingDir),
+		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
 
 	if err := cmd.StartWithUi(comm, ui); err != nil {
