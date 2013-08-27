@@ -80,6 +80,12 @@ Optional:
   actual file representing the disk will not use the full size unless it is full.
   By default this is set to 40,000 (40 GB).
 
+* `disk_type_id` (string) - The type of VMware virtual disk to create.
+  The default is "1", which corresponds to a growable virtual disk split in
+  2GB files.  This option is for advanced usage, modify only if you
+  know what you're doing.  For more information, please consult the
+  [Virtual Disk Manager User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf).
+
 * `floppy_files` (array of strings) - A list of files to put onto a floppy
   disk that is attached when the VM is booted for the first time. This is
   most useful for unattended Windows installs, which look for an

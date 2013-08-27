@@ -70,6 +70,38 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 	return nil
 }
 
+func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+	walkFn := func(fullPath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		path, err := filepath.Rel(src, fullPath)
+		if err != nil {
+			return err
+		}
+
+		for _, e := range exclude {
+			if e == path {
+				log.Printf("Skipping excluded file: %s", path)
+				return nil
+			}
+		}
+
+		dstPath := filepath.Join(dst, path)
+		f, err := os.Open(fullPath)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		return c.Upload(dstPath, f)
+	}
+
+	log.Printf("Uploading directory '%s' to '%s'", src, dst)
+	return filepath.Walk(src, walkFn)
+}
+
 func (c *Communicator) Download(src string, w io.Writer) error {
 	src = filepath.Join(c.Chroot, src)
 	log.Printf("Downloading from chroot dir: %s", src)

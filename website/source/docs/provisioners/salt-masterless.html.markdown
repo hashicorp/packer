@@ -40,5 +40,9 @@ Optional:
   has more detailed usage instructions. By default, no arguments are sent to
   the script.
 
+* `minion_config` (string) - The path to your local
+  [minion config](http://docs.saltstack.com/topics/configuration.html).
+  This will be uploaded to the `/etc/salt` on the remote.
+
 * `temp_config_dir` (string) - Where your local state tree will be copied
   before moving to the `/srv/salt` directory. Default is `/tmp/salt`.

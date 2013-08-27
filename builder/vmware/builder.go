@@ -27,6 +27,7 @@ type config struct {
 
 	DiskName          string            `mapstructure:"vmdk_name"`
 	DiskSize          uint              `mapstructure:"disk_size"`
+	DiskTypeId        string            `mapstructure:"disk_type_id"`
 	FloppyFiles       []string          `mapstructure:"floppy_files"`
 	GuestOSType       string            `mapstructure:"guest_os_type"`
 	ISOChecksum       string            `mapstructure:"iso_checksum"`
@@ -82,6 +83,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.DiskTypeId == "" {
+		// Default is growable virtual disk split in 2GB files.
+		b.config.DiskTypeId = "1"
 	}
 
 	if b.config.FloppyFiles == nil {

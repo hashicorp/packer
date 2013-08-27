@@ -1,16 +1,17 @@
 package vagrant
 
 import (
+	"archive/tar"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 )
 
 type VBoxBoxConfig struct {
@@ -66,11 +67,6 @@ func (p *VBoxBoxPostProcessor) Configure(raws ...interface{}) error {
 
 func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
-	tplData := &VBoxVagrantfileTemplate{}
-	tplData.BaseMacAddress, err = p.findBaseMacAddress(artifact)
-	if err != nil {
-		return nil, false, err
-	}
 
 	// Compile the output path
 	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &OutputPathTemplate{
@@ -91,15 +87,31 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 
 	// Copy all of the original contents into the temporary directory
 	for _, path := range artifact.Files() {
-		ui.Message(fmt.Sprintf("Copying: %s", path))
 
-		dstPath := filepath.Join(dir, filepath.Base(path))
-		if err := CopyContents(dstPath, path); err != nil {
-			return nil, false, err
+		// We treat OVA files specially, we unpack those into the temporary
+		// directory so we can get the resulting disk and OVF.
+		if extension := filepath.Ext(path); extension == ".ova" {
+			ui.Message(fmt.Sprintf("Unpacking OVA: %s", path))
+			if err := DecompressOva(dir, filepath.Base(path)); err != nil {
+				return nil, false, err
+			}
+		} else {
+			ui.Message(fmt.Sprintf("Copying: %s", path))
+			dstPath := filepath.Join(dir, filepath.Base(path))
+			if err := CopyContents(dstPath, path); err != nil {
+				return nil, false, err
+			}
 		}
+
 	}
 
 	// Create the Vagrantfile from the template
+	tplData := &VBoxVagrantfileTemplate{}
+	tplData.BaseMacAddress, err = p.findBaseMacAddress(dir)
+	if err != nil {
+		return nil, false, err
+	}
+
 	vf, err := os.Create(filepath.Join(dir, "Vagrantfile"))
 	if err != nil {
 		return nil, false, err
@@ -150,19 +162,40 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	return NewArtifact("virtualbox", outputPath), false, nil
 }
 
-func (p *VBoxBoxPostProcessor) findBaseMacAddress(a packer.Artifact) (string, error) {
-	log.Println("Looking for OVF for base mac address...")
-	var ovf string
-	for _, f := range a.Files() {
-		if strings.HasSuffix(f, ".ovf") {
-			log.Printf("OVF found: %s", f)
-			ovf = f
-			break
-		}
+func (p *VBoxBoxPostProcessor) findOvf(dir string) (string, error) {
+	log.Println("Looking for OVF in artifact...")
+	file_matches, err := filepath.Glob(filepath.Join(dir, "*.ovf"))
+	if err != nil {
+		return "", err
 	}
 
-	if ovf == "" {
+	if len(file_matches) > 1 {
+		return "", errors.New("More than one OVF file in VirtualBox artifact.")
+	}
+
+	if len(file_matches) < 1 {
 		return "", errors.New("ovf file couldn't be found")
+	}
+
+	return file_matches[0], err
+}
+
+func (p *VBoxBoxPostProcessor) renameOVF(dir string) error {
+	log.Println("Looking for OVF to rename...")
+	ovf, err := p.findOvf(dir)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Renaming: '%s' => box.ovf", ovf)
+	return os.Rename(ovf, filepath.Join(dir, "box.ovf"))
+}
+
+func (p *VBoxBoxPostProcessor) findBaseMacAddress(dir string) (string, error) {
+	log.Println("Looking for OVF for base mac address...")
+	ovf, err := p.findOvf(dir)
+	if err != nil {
+		return "", err
 	}
 
 	f, err := os.Open(ovf)
@@ -186,19 +219,51 @@ func (p *VBoxBoxPostProcessor) findBaseMacAddress(a packer.Artifact) (string, er
 	return string(matches[1]), nil
 }
 
-func (p *VBoxBoxPostProcessor) renameOVF(dir string) error {
-	log.Println("Looking for OVF to rename...")
-	matches, err := filepath.Glob(filepath.Join(dir, "*.ovf"))
+// DecompressOva takes an ova file and decompresses it into the target
+// directory.
+func DecompressOva(dir, src string) error {
+	log.Printf("Turning ova to dir: %s => %s", src, dir)
+	srcF, err := os.Open(src)
 	if err != nil {
 		return err
 	}
+	defer srcF.Close()
 
-	if len(matches) > 1 {
-		return errors.New("More than one OVF file in VirtualBox artifact.")
+	tarReader := tar.NewReader(srcF)
+	for {
+		hdr, err := tarReader.Next()
+		if hdr == nil || err == io.EOF {
+			break
+		}
+
+		info := hdr.FileInfo()
+
+		// Shouldn't be any directories, skip them
+		if info.IsDir() {
+			continue
+		}
+
+		// We wrap this in an anonymous function so that the defers
+		// inside are handled more quickly so we can give up file handles.
+		err = func() error {
+			path := filepath.Join(dir, info.Name())
+			output, err := os.Create(path)
+			if err != nil {
+				return err
+			}
+			defer output.Close()
+
+			os.Chmod(path, info.Mode())
+			os.Chtimes(path, hdr.AccessTime, hdr.ModTime)
+			_, err = io.Copy(output, tarReader)
+			return err
+		}()
+		if err != nil {
+			return err
+		}
 	}
 
-	log.Printf("Renaming: '%s' => box.ovf", matches[0])
-	return os.Rename(matches[0], filepath.Join(dir, "box.ovf"))
+	return nil
 }
 
 var defaultVBoxVagrantfile = `

@@ -15,7 +15,7 @@ type Driver interface {
 	CompactDisk(string) error
 
 	// CreateDisk creates a virtual disk with the given size.
-	CreateDisk(string, string) error
+	CreateDisk(string, string, string) error
 
 	// Checks if the VMX file at the given path is running.
 	IsRunning(string) (bool, error)

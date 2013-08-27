@@ -1,6 +1,33 @@
 ## 0.3.5 (unreleased)
 
+FEATURES:
 
+* **NEW PROVISIONER:** `chef-solo`. You can now provision with Chef
+  using `chef-solo` from local cookbooks.
+* builder/amazon: Copy AMI to multiple regions with `ami_regions`. [GH-322]
+* builder/vmware: The root hard drive type can now be specified with
+  "disk_type_id" for advanced users. [GH-328]
+* provisioner/salt-masterless: Ability to specfy a minion config. [GH-264]
+* **NEW BUILDER:** `openstack`. You can now build on OpenStack. [GH-155]
+
+IMPROVEMENTS:
+
+* core: Output message when Ctrl-C received that we're cleaning up. [GH-338]
+* builder/amazon: Tagging now works with all amazon builder types.
+
+BUG FIXES:
+
+* core: Fixed a couple cases where a double ctrl-C could panic.
+* builder/amazon/instance: Remove check for ec2-ami-tools because it
+  didn't allow absolute paths to work properly. [GH-330]
+* command/build,command/validate: If a non-existent build is specified to
+  '-only' or '-except', it is now an error. [GH-326]
+* post-processor/vagrant: Setting OutputPath with a timestamp now
+  always works properly. [GH-324]
+* post-processor/vagrant: VirtualBox OVA formats now turn into
+  Vagrant boxes properly. [GH-331]
+* provisioner/shell: Retry upload if start command fails, making reboot
+  handling much more robust.
 
 ## 0.3.4 (August 21, 2013)
 

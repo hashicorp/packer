@@ -23,6 +23,7 @@ const defaultConfig = `
 		"amazon-chroot": "packer-builder-amazon-chroot",
 		"amazon-instance": "packer-builder-amazon-instance",
 		"digitalocean": "packer-builder-digitalocean",
+		"openstack": "packer-builder-openstack",
 		"virtualbox": "packer-builder-virtualbox",
 		"vmware": "packer-builder-vmware"
 	},
@@ -39,6 +40,7 @@ const defaultConfig = `
 	},
 
 	"provisioners": {
+		"chef-solo": "packer-provisioner-chef-solo",
 		"file": "packer-provisioner-file",
 		"shell": "packer-provisioner-shell",
 		"salt-masterless": "packer-provisioner-salt-masterless"

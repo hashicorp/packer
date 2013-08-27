@@ -65,6 +65,27 @@ func (f *BuildOptions) AllUserVars() (map[string]string, error) {
 // configured options.
 func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([]packer.Build, error) {
 	buildNames := t.BuildNames()
+
+	checks := make(map[string][]string)
+	checks["except"] = f.Except
+	checks["only"] = f.Only
+	for t, ns := range checks {
+		for _, n := range ns {
+			found := false
+			for _, actual := range buildNames {
+				if actual == n {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				return nil, fmt.Errorf(
+					"Unknown build in '%s' flag: %s", t, n)
+			}
+		}
+	}
+
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
 		if len(f.Except) > 0 {

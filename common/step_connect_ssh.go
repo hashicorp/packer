@@ -116,7 +116,7 @@ func (s *StepConnectSSH) waitForSSH(state map[string]interface{}, cancel <-chan 
 		}
 
 		// Attempt to connect to SSH port
-		connFunc := ssh.ConnectFunc("tcp", address, 5*time.Minute)
+		connFunc := ssh.ConnectFunc("tcp", address)
 		nc, err := connFunc()
 		if err != nil {
 			log.Printf("TCP connection to SSH ip/port failed: %s", err)
