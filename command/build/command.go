@@ -187,8 +187,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	if len(errors) > 0 {
+		env.Ui().Machine("error-count", strconv.FormatInt(int64(len(errors)), 10))
 		env.Ui().Error("\n==> Some builds didn't complete successfully and had errors:")
 		for name, err := range errors {
+			env.Ui().Machine("error", name, err.Error())
 			env.Ui().Error(fmt.Sprintf("--> %s: %s", name, err))
 		}
 	}
