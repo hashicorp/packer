@@ -115,6 +115,15 @@ func (d DigitalOceanClient) PowerOffDroplet(id uint) error {
 	return err
 }
 
+// Shutsdown a droplet. This is a "soft" shutdown.
+func (d DigitalOceanClient) ShutdownDroplet(id uint) error {
+	path := fmt.Sprintf("droplets/%v/shutdown", id)
+
+	_, err := NewRequest(d, path, url.Values{})
+
+	return err
+}
+
 // Creates a snaphot of a droplet by it's ID
 func (d DigitalOceanClient) CreateSnapshot(id uint, name string) error {
 	path := fmt.Sprintf("droplets/%v/snapshot", id)
