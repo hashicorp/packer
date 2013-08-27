@@ -14,15 +14,6 @@ import (
 	"strings"
 )
 
-const (
-	RemoteStagingPath    = "/tmp/provision/chef-solo"
-	RemoteFileCachePath  = "/tmp/provision/chef-solo"
-	RemoteCookbookPath   = "/tmp/provision/chef-solo/cookbooks"
-	DefaultCookbooksPath = "cookbooks"
-)
-
-var Ui packer.Ui
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
