@@ -45,6 +45,7 @@ type config struct {
 	SSHUser           string            `mapstructure:"ssh_username"`
 	SSHPassword       string            `mapstructure:"ssh_password"`
 	SSHPort           uint              `mapstructure:"ssh_port"`
+	SSHSkipRequestPty bool              `mapstructure:"ssh_skip_request_pty"`
 	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
 	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
 	VMXData           map[string]string `mapstructure:"vmx_data"`
@@ -342,6 +343,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: b.config.sshWaitTimeout,
+			NoPty:          b.config.SSHSkipRequestPty,
 		},
 		&stepUploadTools{},
 		&common.StepProvision{},

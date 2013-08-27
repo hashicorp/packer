@@ -29,6 +29,9 @@ type Config struct {
 	// in use will be closed as part of the Close method, or in the
 	// case an error occurs.
 	Connection func() (net.Conn, error)
+
+	// NoPty, if true, will not request a pty from the remote end.
+	NoPty bool
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -58,15 +61,17 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	session.Stdout = cmd.Stdout
 	session.Stderr = cmd.Stderr
 
-	// Request a PTY
-	termModes := ssh.TerminalModes{
-		ssh.ECHO:          0,     // do not echo
-		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
-		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
-	}
+	if !c.config.NoPty {
+		// Request a PTY
+		termModes := ssh.TerminalModes{
+			ssh.ECHO:          0,     // do not echo
+			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+		}
 
-	if err = session.RequestPty("xterm", 80, 40, termModes); err != nil {
-		return
+		if err = session.RequestPty("xterm", 80, 40, termModes); err != nil {
+			return
+		}
 	}
 
 	log.Printf("starting remote command: %s", cmd.Command)

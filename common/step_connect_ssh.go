@@ -34,6 +34,9 @@ type StepConnectSSH struct {
 	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
 	SSHWaitTimeout time.Duration
 
+	// NoPty, if true, will not request a Pty from the remote end.
+	NoPty bool
+
 	comm packer.Communicator
 }
 
@@ -128,6 +131,7 @@ func (s *StepConnectSSH) waitForSSH(state map[string]interface{}, cancel <-chan 
 		config := &ssh.Config{
 			Connection: connFunc,
 			SSHConfig:  sshConfig,
+			NoPty:      s.NoPty,
 		}
 
 		log.Println("Attempting SSH connection...")

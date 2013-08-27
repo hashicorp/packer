@@ -154,6 +154,10 @@ Optional:
 * `ssh_port` (int) - The port that SSH will listen on within the virtual
   machine. By default this is 22.
 
+* `ssh_skip_request_pty` (bool) - If true, a pty will not be requested as
+  part of the SSH connection. By default, this is "false", so a pty
+  _will_ be requested.
+
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as the virtual machine is booted.
