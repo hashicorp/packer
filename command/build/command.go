@@ -235,6 +235,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 					ui.Machine("artifact", iStr, "nil")
 				}
 
+				ui.Machine("artifact", iStr, "end")
 				env.Ui().Say(message.String())
 			}
 		}

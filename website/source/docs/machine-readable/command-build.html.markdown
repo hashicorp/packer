@@ -61,6 +61,15 @@ of `packer build`.
 		</p>
 	</dd>
 
+	<dt>artifact subtype: end (0)</dt>
+	<dd>
+		<p>
+		The last machine-readable output line outputted for an artifact.
+		This is a sentinel value so you know that no more data related to
+		the targetted artifact will be outputted.
+		</p>
+	</dd>
+
 	<dt>artifact subtype: file (2)</dt>
 	<dd>
 		<p>
