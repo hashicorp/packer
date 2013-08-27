@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	plugin.ServeProvisioner(new(chefSolo.Provisioner))
+	plugin.ServeProvisioner(new(chefsolo.Provisioner))
 }
