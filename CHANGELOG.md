@@ -8,6 +8,7 @@ FEATURES:
 * builder/vmware: The root hard drive type can now be specified with
   "disk_type_id" for advanced users. [GH-328]
 * provisioner/salt-masterless: Ability to specfy a minion config. [GH-264]
+* **NEW BUILDER:** `openstack`. You can now build on OpenStack. [GH-155]
 
 IMPROVEMENTS:
 
