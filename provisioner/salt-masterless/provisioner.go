@@ -27,6 +27,9 @@ type Config struct {
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
 
+	// Local path to the salt pillar tree
+	LocalPillarTree string `mapstructure:"local_pillar_tree"`
+
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
@@ -57,10 +60,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
-		"bootstrap_args":   &p.config.BootstrapArgs,
-		"minion_config":    &p.config.MinionConfig,
-		"local_state_tree": &p.config.LocalStateTree,
-		"temp_config_dir":  &p.config.TempConfigDir,
+		"bootstrap_args":    &p.config.BootstrapArgs,
+		"minion_config":     &p.config.MinionConfig,
+		"local_state_tree":  &p.config.LocalStateTree,
+		"local_pillar_tree": &p.config.LocalPillarTree,
+		"temp_config_dir":   &p.config.TempConfigDir,
 	}
 
 	for n, ptr := range templates {
@@ -76,6 +80,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if _, err := os.Stat(p.config.LocalStateTree); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				errors.New("local_state_tree must exist and be accessible"))
+		}
+	}
+
+	if p.config.LocalPillarTree != "" {
+		if _, err := os.Stat(p.config.LocalPillarTree); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("local_pillar_tree must exist and be accessible"))
 		}
 	}
 
@@ -119,8 +130,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
-	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", p.config.TempConfigDir)}
+	ui.Message(fmt.Sprintf("Creating remote states directory: %s/states", p.config.TempConfigDir))
+	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s/states", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -130,18 +141,46 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
-	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm, ui); err != nil {
+	if err = UploadLocalDirectory(p.config.LocalStateTree, fmt.Sprintf("%s/states", p.config.TempConfigDir), comm, ui); err != nil {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
 	ui.Message(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
-	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s /srv/salt", p.config.TempConfigDir)}
+	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/states /srv/salt/", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
 		}
 
-		return fmt.Errorf("Unable to move %s to /srv/salt: %d", p.config.TempConfigDir, err)
+		return fmt.Errorf("Unable to move %s/states to /srv/salt: %d", p.config.TempConfigDir, err)
+	}
+
+	if p.config.LocalPillarTree != "" {
+
+		ui.Message(fmt.Sprintf("Creating remote pillar directory: %s/pillar", p.config.TempConfigDir))
+		cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s/pillar", p.config.TempConfigDir)}
+		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
+			}
+
+			return fmt.Errorf("Error creating remote pillar directory: %s", err)
+		}
+
+		ui.Message(fmt.Sprintf("Uploading local pillar tree: %s", p.config.LocalPillarTree))
+		if err = UploadLocalDirectory(p.config.LocalPillarTree, fmt.Sprintf("%s/pillar", p.config.TempConfigDir), comm, ui); err != nil {
+			return fmt.Errorf("Error uploading local pillar tree to remote: %s", err)
+		}
+
+		ui.Message(fmt.Sprintf("Moving %s/pillar to /srv/pillar", p.config.TempConfigDir))
+		cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/pillar /srv/pillar", p.config.TempConfigDir)}
+		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
+			}
+
+			return fmt.Errorf("Unable to move %s/pillar to /srv/pillar: %d", p.config.TempConfigDir, err)
+		}
 	}
 
 	ui.Message("Running highstate")
