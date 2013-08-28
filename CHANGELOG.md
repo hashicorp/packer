@@ -6,6 +6,8 @@ FEATURES:
 * **NEW PROVISIONER:** `chef-solo`. You can now provision with Chef
   using `chef-solo` from local cookbooks.
 * builder/amazon: Copy AMI to multiple regions with `ami_regions`. [GH-322]
+* builder/virtualbox: Can now use SSH keys as an auth mechanism for
+  SSH using `ssh_key_path`. [GH-70]
 * builder/vmware: The root hard drive type can now be specified with
   "disk_type_id" for advanced users. [GH-328]
 * provisioner/salt-masterless: Ability to specfy a minion config. [GH-264]

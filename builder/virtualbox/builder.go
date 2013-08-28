@@ -43,6 +43,7 @@ type config struct {
 	ShutdownCommand      string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin       uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax       uint       `mapstructure:"ssh_host_port_max"`
+	SSHKeyPath           string     `mapstructure:"ssh_key_path"`
 	SSHPassword          string     `mapstructure:"ssh_password"`
 	SSHPort              uint       `mapstructure:"ssh_port"`
 	SSHUser              string     `mapstructure:"ssh_username"`
@@ -280,6 +281,16 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
+	}
+
+	if b.config.SSHKeyPath != "" {
+		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
+		} else if _, err := sshKeyToKeyring(b.config.SSHKeyPath); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
+		}
 	}
 
 	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
