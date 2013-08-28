@@ -9,6 +9,7 @@ FEATURES:
 * builder/vmware: The root hard drive type can now be specified with
   "disk_type_id" for advanced users. [GH-328]
 * provisioner/salt-masterless: Ability to specfy a minion config. [GH-264]
+* provisioner/salt-masterless: Ability to upload pillars. [GH-353]
 
 IMPROVEMENTS:
 
