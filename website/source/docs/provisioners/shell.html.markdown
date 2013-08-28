@@ -128,6 +128,15 @@ reboot
 sleep 60
 ```
 
+Some OS configurations don't properly kill all network connections on
+reboot, causing the provisioner to hang despite a reboot occuring.
+In this case, make sure you shut down the network interfaces
+on reboot or in your shell script. For example, on Gentoo:
+
+```
+/etc/init.d/net.eth0 stop
+```
+
 ## Troubleshooting
 
 *My shell script doesn't work correctly on Ubuntu*
