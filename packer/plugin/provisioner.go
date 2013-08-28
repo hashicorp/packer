@@ -29,7 +29,7 @@ func (c *cmdProvisioner) Provision(ui packer.Ui, comm packer.Communicator) error
 }
 
 func (c *cmdProvisioner) checkExit(p interface{}, cb func()) {
-	if c.client.Exited() {
+	if c.client.Exited() && cb != nil {
 		cb()
 	} else if p != nil && !Killed {
 		log.Panic(p)
