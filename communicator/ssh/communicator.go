@@ -119,6 +119,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		for {
 			dummy, err := c.config.Connection()
 			if err == nil {
+				failures = 0
 				dummy.Close()
 			}
 
