@@ -28,6 +28,8 @@ BUG FIXES:
 * core: Fixed a couple cases where a double ctrl-C could panic.
 * core: Template validation fails if an override is specified for a
   non-existent builder. [GH-336]
+* core: The SSH connection is heartbeated so that drops can be
+  detected. [GH-200]
 * builder/amazon/instance: Remove check for ec2-ami-tools because it
   didn't allow absolute paths to work properly. [GH-330]
 * builder/digitalocean: Send a soft shutdown request so that files
