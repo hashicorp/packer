@@ -148,6 +148,11 @@ Optional:
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
+* `ssh_key_path` (string) - Path to a private key to use for authenticating
+  with SSH. By default this is not set (key-based auth won't be used).
+  The associated public key is expected to already be configured on the
+  VM being prepared by some other process (kickstart, etc.).
+
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
