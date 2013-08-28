@@ -17,18 +17,9 @@ type StepRunSourceServer struct {
 }
 
 func (s *StepRunSourceServer) Run(state map[string]interface{}) multistep.StepAction {
-	accessor := state["accessor"].(*gophercloud.Access)
-	api := state["api"].(*gophercloud.ApiCriteria)
+	csp := state["csp"].(gophercloud.CloudServersProvider)
 	keyName := state["keyPair"].(string)
 	ui := state["ui"].(packer.Ui)
-
-	csp, err := gophercloud.ServersApi(accessor, *api)
-	if err != nil {
-		err := fmt.Errorf("Error connecting to api: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
 
 	// XXX - validate image and flavor is available
 
@@ -52,11 +43,9 @@ func (s *StepRunSourceServer) Run(state map[string]interface{}) multistep.StepAc
 
 	ui.Say(fmt.Sprintf("Waiting for server (%s) to become ready...", s.server.Id))
 	stateChange := StateChangeConf{
-		Accessor:  accessor,
-		Api:       api,
 		Pending:   []string{"BUILD"},
 		Target:    "ACTIVE",
-		Refresh:   ServerStateRefreshFunc(accessor, api, s.server),
+		Refresh:   ServerStateRefreshFunc(csp, s.server),
 		StepState: state,
 	}
 	latestServer, err := WaitForState(&stateChange)
@@ -78,17 +67,8 @@ func (s *StepRunSourceServer) Cleanup(state map[string]interface{}) {
 		return
 	}
 
-	accessor := state["accessor"].(*gophercloud.Access)
-	api := state["api"].(*gophercloud.ApiCriteria)
+	csp := state["csp"].(gophercloud.CloudServersProvider)
 	ui := state["ui"].(packer.Ui)
-
-	csp, err := gophercloud.ServersApi(accessor, *api)
-	if err != nil {
-		err := fmt.Errorf("Error connecting to api: %s", err)
-		state["error"] = err
-		ui.Error(err.Error())
-		return
-	}
 
 	ui.Say("Terminating the source server...")
 	if err := csp.DeleteServerById(s.server.Id); err != nil {
@@ -97,11 +77,9 @@ func (s *StepRunSourceServer) Cleanup(state map[string]interface{}) {
 	}
 
 	stateChange := StateChangeConf{
-		Accessor: accessor,
-		Api:      api,
-		Pending:  []string{"ACTIVE", "BUILD", "REBUILD", "SUSPENDED"},
-		Refresh:  ServerStateRefreshFunc(accessor, api, s.server),
-		Target:   "DELETED",
+		Pending: []string{"ACTIVE", "BUILD", "REBUILD", "SUSPENDED"},
+		Refresh: ServerStateRefreshFunc(csp, s.server),
+		Target:  "DELETED",
 	}
 
 	WaitForState(&stateChange)

@@ -60,19 +60,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err != nil {
 		return nil, err
 	}
-
-	// Setup the state bag and initial state for the steps
-	state := make(map[string]interface{})
-	state["config"] = b.config
-	state["accessor"] = auth
 	api := &gophercloud.ApiCriteria{
 		Name:      "cloudServersOpenStack",
 		Region:    "DFW",
 		VersionId: "2",
 		UrlChoice: gophercloud.PublicURL,
 	}
-	state["api"] = api
+	csp, err := gophercloud.ServersApi(auth, *api)
+	if err != nil {
+		return nil, err
+	}
 
+	// Setup the state bag and initial state for the steps
+	state := make(map[string]interface{})
+	state["config"] = b.config
+	state["csp"] = csp
 	state["hook"] = hook
 	state["ui"] = ui
 
@@ -85,7 +87,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceImage: b.config.SourceImage,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(&auth, api, b.config.SSHPort),
+			SSHAddress:     SSHAddress(csp, b.config.SSHPort),
 			SSHConfig:      SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},

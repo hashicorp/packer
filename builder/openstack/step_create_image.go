@@ -12,8 +12,7 @@ import (
 type stepCreateImage struct{}
 
 func (s *stepCreateImage) Run(state map[string]interface{}) multistep.StepAction {
-	accessor := state["accessor"].(*gophercloud.Access)
-	api := state["api"].(*gophercloud.ApiCriteria)
+	csp := state["csp"].(gophercloud.CloudServersProvider)
 	config := state["config"].(config)
 	server := state["server"].(*gophercloud.Server)
 	ui := state["ui"].(packer.Ui)
@@ -23,7 +22,6 @@ func (s *stepCreateImage) Run(state map[string]interface{}) multistep.StepAction
 	createOpts := gophercloud.CreateImage{
 		Name: config.ImageName,
 	}
-	csp, err := gophercloud.ServersApi(accessor, *api)
 	imageId, err := csp.CreateImage(server.Id, createOpts)
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
@@ -38,7 +36,7 @@ func (s *stepCreateImage) Run(state map[string]interface{}) multistep.StepAction
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for image to become ready...")
-	if err := WaitForImage(accessor, api, imageId); err != nil {
+	if err := WaitForImage(csp, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
 		state["error"] = err
 		ui.Error(err.Error())
@@ -53,9 +51,8 @@ func (s *stepCreateImage) Cleanup(map[string]interface{}) {
 }
 
 // WaitForImage waits for the given Image ID to become ready.
-func WaitForImage(accessor *gophercloud.Access, api *gophercloud.ApiCriteria, imageId string) error {
+func WaitForImage(csp gophercloud.CloudServersProvider, imageId string) error {
 	for {
-		csp, err := gophercloud.ServersApi(accessor, *api)
 		image, err := csp.ImageById(imageId)
 		if err != nil {
 			return err

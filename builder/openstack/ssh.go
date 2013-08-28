@@ -11,14 +11,13 @@ import (
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(accessor *gophercloud.AccessProvider, api *gophercloud.ApiCriteria, port int) func(map[string]interface{}) (string, error) {
+func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(map[string]interface{}) (string, error) {
 	return func(state map[string]interface{}) (string, error) {
 		for j := 0; j < 2; j++ {
 			s := state["server"].(*gophercloud.Server)
 			if s.AccessIPv4 != "" {
 				return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
 			}
-			csp, err := gophercloud.ServersApi(*accessor, *api)
 			serverState, err := csp.ServerById(s.Id)
 
 			if err != nil {

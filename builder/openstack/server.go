@@ -23,8 +23,6 @@ type StateRefreshFunc func() (result interface{}, state string, progress int, er
 
 // StateChangeConf is the configuration struct used for `WaitForState`.
 type StateChangeConf struct {
-	Accessor  *gophercloud.Access
-	Api       *gophercloud.ApiCriteria
 	Pending   []string
 	Refresh   StateRefreshFunc
 	StepState map[string]interface{}
@@ -33,9 +31,8 @@ type StateChangeConf struct {
 
 // ServerStateRefreshFunc returns a StateRefreshFunc that is used to watch
 // an openstacn server.
-func ServerStateRefreshFunc(accessor *gophercloud.Access, api *gophercloud.ApiCriteria, s *gophercloud.Server) StateRefreshFunc {
+func ServerStateRefreshFunc(csp gophercloud.CloudServersProvider, s *gophercloud.Server) StateRefreshFunc {
 	return func() (interface{}, string, int, error) {
-		csp, err := gophercloud.ServersApi(accessor, *api)
 		resp, err := csp.ServerById(s.Id)
 		if err != nil {
 			log.Printf("Error on ServerStateRefresh: %s", err)
