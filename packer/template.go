@@ -221,6 +221,14 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		// actively reject them as invalid configuration.
 		delete(v, "override")
 
+		// Verify that the override keys exist...
+		for name, _ := range raw.Override {
+			if _, ok := t.Builders[name]; !ok {
+				errors = append(
+					errors, fmt.Errorf("provisioner %d: build '%s' not found for override", i+1, name))
+			}
+		}
+
 		raw.RawConfig = v
 	}
 

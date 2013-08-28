@@ -700,6 +700,34 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 	assert.Equal(len(coreBuild.provisioners[0].config), 2, "should have two configs on the provisioner")
 }
 
+func TestTemplate_Build_ProvisionerOverrideBad(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+
+				"override": {
+					"testNope": {}
+				}
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestTemplateBuild_variables(t *testing.T) {
 	data := `
 	{
