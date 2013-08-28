@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -60,6 +61,8 @@ func HashForType(t string) hash.Hash {
 		return sha1.New()
 	case "sha256":
 		return sha256.New()
+	case "sha512":
+		return sha512.New()
 	default:
 		return nil
 	}
