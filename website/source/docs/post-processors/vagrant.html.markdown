@@ -52,7 +52,7 @@ below, with more details about certain options in following sections.
   [configuration template](/docs/templates/configuration-templates.html).
   The variable `Provider` is replaced by the Vagrant provider the box is for.
   The variable `ArtifactId` is replaced by the ID of the input artifact.
-  By default, the value of this config is `packer_{{.Provider}}.box`.
+  By default, the value of this config is `packer_{{.BuildName}}_{{.Provider}}.box`.
 
 * `aws`, `virtualbox`, or `vmware` (objects) - These are used to configure
   the specific options for certain providers. A reference of available
