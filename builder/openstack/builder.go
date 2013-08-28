@@ -112,8 +112,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	// XXX - add artifact
-	return nil, nil
+	// Build the artifact and return it
+	artifact := &Artifact{
+		ImageId:        state["image"].(string),
+		BuilderIdValue: BuilderId,
+		Conn:           csp,
+	}
+
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {
