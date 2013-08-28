@@ -1,13 +1,13 @@
 package vmware
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
-	"text/template"
 )
 
 type vmxTemplateData struct {
@@ -42,11 +42,37 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		ISOPath:  isoPath,
 	}
 
-	var buf bytes.Buffer
-	t := template.Must(template.New("vmx").Parse(DefaultVMXTemplate))
-	t.Execute(&buf, tplData)
+	vmxTemplate := DefaultVMXTemplate
+	if config.VMXTemplatePath != "" {
+		f, err := os.Open(config.VMXTemplatePath)
+		if err != nil {
+			err := fmt.Errorf("Error reading VMX template: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		defer f.Close()
 
-	vmxData := ParseVMX(buf.String())
+		rawBytes, err := ioutil.ReadAll(f)
+		if err != nil {
+			err := fmt.Errorf("Error reading VMX template: %s", err)
+			state["error"] = err
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		vmxTemplate = string(rawBytes)
+	}
+
+	vmxContents, err := config.tpl.Process(vmxTemplate, tplData)
+	if err != nil {
+		err := fmt.Errorf("Error procesing VMX template: %s", err)
+		state["error"] = err
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	vmxData := ParseVMX(vmxContents)
 	if config.VMXData != nil {
 		log.Println("Setting custom VMX data...")
 		for k, v := range config.VMXData {

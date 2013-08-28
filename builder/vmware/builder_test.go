@@ -437,6 +437,56 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test bad
+	config["vmx_template_path"] = "/i/dont/exist/forreal"
+	err := b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test good
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	defer tf.Close()
+
+	if _, err := tf.Write([]byte("HELLO!")); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	config["vmx_template_path"] = tf.Name()
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Bad template
+	tf2, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(tf2.Name())
+	defer tf2.Close()
+
+	if _, err := tf2.Write([]byte("{{foo}")); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	config["vmx_template_path"] = tf2.Name()
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestBuilderPrepare_VNCPort(t *testing.T) {
 	var b Builder
 	config := testConfig()

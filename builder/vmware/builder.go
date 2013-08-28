@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -49,6 +50,7 @@ type config struct {
 	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
 	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
 	VMXData           map[string]string `mapstructure:"vmx_data"`
+	VMXTemplatePath   string            `mapstructure:"vmx_template_path"`
 	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
 
@@ -152,6 +154,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		"boot_wait":           &b.config.RawBootWait,
 		"shutdown_timeout":    &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":    &b.config.RawSSHWaitTimeout,
+		"vmx_template_path":   &b.config.VMXTemplatePath,
 	}
 
 	for n, ptr := range templates {
@@ -298,6 +301,14 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("tools_upload_path invalid: %s", err))
 	}
 
+	if b.config.VMXTemplatePath != "" {
+		if err := b.validateVMXTemplatePath(); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("vmx_template_path is invalid: %s", err))
+		}
+
+	}
+
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
@@ -413,4 +424,19 @@ func (b *Builder) Cancel() {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
 	}
+}
+
+func (b *Builder) validateVMXTemplatePath() error {
+	f, err := os.Open(b.config.VMXTemplatePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
+	return b.config.tpl.Validate(string(data))
 }
