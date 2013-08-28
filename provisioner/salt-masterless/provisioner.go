@@ -60,11 +60,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
-		"bootstrap_args":    &p.config.BootstrapArgs,
-		"minion_config":     &p.config.MinionConfig,
-		"local_state_tree":  &p.config.LocalStateTree,
+		"bootstrap_args":     &p.config.BootstrapArgs,
+		"minion_config":      &p.config.MinionConfig,
+		"local_state_tree":   &p.config.LocalStateTree,
 		"local_pillar_roots": &p.config.LocalPillarRoots,
-		"temp_config_dir":   &p.config.TempConfigDir,
+		"temp_config_dir":    &p.config.TempConfigDir,
 	}
 
 	for n, ptr := range templates {
@@ -156,7 +156,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if p.config.LocalPillarRoots != "" {
-
 		ui.Message(fmt.Sprintf("Creating remote pillar directory: %s/pillar", p.config.TempConfigDir))
 		cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s/pillar", p.config.TempConfigDir)}
 		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
