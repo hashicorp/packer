@@ -79,6 +79,48 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
+	templates := map[string]*string{
+		"staging_dir": &p.config.StagingDir,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	sliceTemplates := map[string][]string{
+		"cookbook_paths":        p.config.CookbookPaths,
+		"remote_cookbook_paths": p.config.RemoteCookbookPaths,
+		"run_list":              p.config.RunList,
+	}
+
+	for n, slice := range sliceTemplates {
+		for i, elem := range slice {
+			var err error
+			slice[i], err = p.config.tpl.Process(elem, nil)
+			if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
+			}
+		}
+	}
+
+	validates := map[string]*string{
+		"execute_command": &p.config.ExecuteCommand,
+		"install_command": &p.config.InstallCommand,
+	}
+
+	for n, ptr := range validates {
+		if err := p.config.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
 	for _, path := range p.config.CookbookPaths {
 		pFileInfo, err := os.Stat(path)
 
