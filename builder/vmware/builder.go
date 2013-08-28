@@ -44,6 +44,7 @@ type config struct {
 	SkipCompaction    bool              `mapstructure:"skip_compaction"`
 	ShutdownCommand   string            `mapstructure:"shutdown_command"`
 	SSHUser           string            `mapstructure:"ssh_username"`
+	SSHKeyPath        string            `mapstructure:"ssh_key_path"`
 	SSHPassword       string            `mapstructure:"ssh_password"`
 	SSHPort           uint              `mapstructure:"ssh_port"`
 	SSHSkipRequestPty bool              `mapstructure:"ssh_skip_request_pty"`
@@ -260,6 +261,16 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
+		}
+	}
+
+	if b.config.SSHKeyPath != "" {
+		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
+		} else if _, err := sshKeyToKeyring(b.config.SSHKeyPath); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
 	}
 
