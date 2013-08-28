@@ -20,6 +20,10 @@ type SimpleKeychain struct {
 // AddPEMKey adds a simple PEM encoded private key to the keychain.
 func (k *SimpleKeychain) AddPEMKey(key string) (err error) {
 	block, _ := pem.Decode([]byte(key))
+	if block == nil {
+		return errors.New("no block in key")
+	}
+
 	rsakey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return
