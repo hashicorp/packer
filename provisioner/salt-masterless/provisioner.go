@@ -118,26 +118,31 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	if p.config.MinionConfig != "" {
-		ui.Message(fmt.Sprintf("Uploading minion config: %s", p.config.MinionConfig))
-		err := uploadMinionConfig(comm, "/etc/salt/minion", p.config.MinionConfig)
-		if err != nil {
-			return err
-		}
-	}
-
-	if err = UploadLocalDirectory(p.config.LocalStateTree, p.config.TempConfigDir, comm, ui); err != nil {
-		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
-	}
-
-	ui.Message(fmt.Sprintf("Creating remote states directory: %s/states", p.config.TempConfigDir))
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s/states", p.config.TempConfigDir)}
+	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
+	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
 		}
 
 		return fmt.Errorf("Error creating remote salt state directory: %s", err)
+	}
+
+	if p.config.MinionConfig != "" {
+		ui.Message(fmt.Sprintf("Uploading minion config: %s", p.config.MinionConfig))
+		if err = uploadMinionConfig(comm, fmt.Sprintf("%s/minion", p.config.TempConfigDir), p.config.MinionConfig); err != nil {
+			return fmt.Errorf("Error uploading local minion config file to remote: %s", err)
+		}
+
+		ui.Message(fmt.Sprintf("Moving %s/minion to /etc/salt/minion", p.config.TempConfigDir))
+		cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/minion /etc/salt/minion", p.config.TempConfigDir)}
+		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
+			}
+
+			return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %d", p.config.TempConfigDir, err)
+		}
 	}
 
 	ui.Message(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
