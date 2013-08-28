@@ -190,6 +190,13 @@ Optional:
   uses a randomly chosen port in this range that appears available. By default
   this is 5900 to 6000. The minimum and maximum ports are inclusive.
 
+* `vmx_template_path` (string) - Path to a
+  [configuration template](/docs/templates/configuration-templates.html) that
+  defines the contents of the virtual machine VMX file for VMware. This is
+  for **advanced users only** as this can render the virtual machine
+  non-functional. See below for more information. For basic VMX modifications,
+  try `vmx_data` first.
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys
@@ -240,3 +247,29 @@ an Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
 </pre>
+
+## VMX Template
+
+The heart of a VMware machine is the "vmx" file. This contains all the
+virtual hardware metadata necessary for the VM to function. Packer by default
+uses a [safe, flexible VMX file](https://github.com/mitchellh/packer/blob/20541a7eda085aa5cf35bfed5069592ca49d106e/builder/vmware/step_create_vmx.go#L84).
+But for advanced users, this template can be customized. This allows
+Packer to build virtual machines of effectively any guest operating system
+type.
+
+<div class="alert alert-block alert-warn">
+<p>
+<strong>This is an advanced feature.</strong> Modifying the VMX template
+can easily cause your virtual machine to not boot properly. Please only
+modify the template if you know what you're doing.
+</p>
+</div>
+
+Within the template, a handful of variables are available so that your
+template can continue working with the rest of the Packer machinery. Using
+these variables isn't required, however.
+
+* `Name` - The name of the virtual machine.
+* `GuestOS` - The VMware-valid guest OS type.
+* `DiskName` - The filename (without the suffix) of the main virtual disk.
+* `ISOPath` - The path to the ISO to use for the OS installation.
