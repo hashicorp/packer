@@ -25,7 +25,7 @@ type Config struct {
 	PreventSudo         bool     `mapstructure:"prevent_sudo"`
 	RunList             []string `mapstructure:"run_list"`
 	SkipInstall         bool     `mapstructure:"skip_install"`
-	StagingDir          string   `mapstructure:"staging_directory"`
+	StagingDir          string   `mapstructure:"staging_dir"`
 
 	tpl *packer.ConfigTemplate
 }
