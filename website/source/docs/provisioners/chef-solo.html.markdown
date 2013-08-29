@@ -33,7 +33,7 @@ configuration is actually required, but at least `run_list` is recommended.
 
 * `cookbook_paths` (array of strings) - This is an array of paths to
   "cookbooks" directories on your local filesystem. These will be uploaded
-  to the remote machine in the directory specified by the `staging_dir`.
+  to the remote machine in the directory specified by the `staging_directory`.
   By default, this is empty.
 
 * `execute_command` (string) - The command used to execute Chef. This has
@@ -62,7 +62,7 @@ configuration is actually required, but at least `run_list` is recommended.
 * `skip_install` (boolean) - If true, Chef will not automatically be installed
   on the machine using the Opscode omnibus installers.
 
-* `staging_dir` (string) - This is the directory where all the configuration
+* `staging_directory` (string) - This is the directory where all the configuration
   of Chef by Packer will be placed. By default this is "/tmp/packer-chef-solo".
   This directory doesn't need to exist but must have proper permissions so that
   the SSH user that Packer uses is able to create directories and write into
