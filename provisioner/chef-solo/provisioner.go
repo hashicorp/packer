@@ -95,7 +95,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	sliceTemplates := map[string][]string{
 		"cookbook_paths":        p.config.CookbookPaths,
 		"remote_cookbook_paths": p.config.RemoteCookbookPaths,
-		"run_list":              p.config.RunList,
 	}
 
 	for n, slice := range sliceTemplates {
@@ -236,10 +235,17 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 	if err != nil {
 		return "", err
 	}
+    var jsonString = string(jsonBytes)
+    println(jsonString)
+
+    result, err := p.config.tpl.Process(jsonString, nil)
+	if err != nil {
+		return "", err
+	}
 
 	// Upload the bytes
 	remotePath := filepath.Join(p.config.StagingDir, "node.json")
-	if err := comm.Upload(remotePath, bytes.NewReader(jsonBytes)); err != nil {
+	if err := comm.Upload(remotePath, bytes.NewReader([]byte(result))); err != nil {
 		return "", err
 	}
 
