@@ -65,12 +65,12 @@ func TestJsonTemplateProcess_user(t *testing.T) {
 	}
 	var jsonString = string(jsonBytes)
 
-	result, err := tpl.Process(jsonString, nil)
+	jsonString, err = tpl.Process(jsonString, nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	var dat map[string]map[string]interface{}
-	if err := json.Unmarshal([]byte(result), &dat); err != nil {
+	if err := json.Unmarshal([]byte(jsonString), &dat); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
