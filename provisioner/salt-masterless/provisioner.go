@@ -204,7 +204,7 @@ func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communi
 	visitPath := func(localPath string, f os.FileInfo, err error) (err2 error) {
 		localRelPath := strings.Replace(localPath, localDir, "", 1)
 		localRelPath = strings.Replace(localRelPath, "\\", "/", -1)
-		remotePath := fmt.Sprintf("%s%s", remoteDir, localRelPath)
+		remotePath := filepath.Join(remoteDir, localRelPath)
 		if f.IsDir() && f.Name() == ".git" {
 			return filepath.SkipDir
 		}

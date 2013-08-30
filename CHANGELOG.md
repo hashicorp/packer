@@ -3,6 +3,7 @@
 BUG FIXES:
 
 * core: Fix possible panic when ctrl-C during provisioner run.
+* provisioners/salt-masterless: Use filepath join to properly join paths.
 
 ## 0.3.5 (August 28, 2013)
 
