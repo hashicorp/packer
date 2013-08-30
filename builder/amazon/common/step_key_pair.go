@@ -8,9 +8,13 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os"
 )
 
 type StepKeyPair struct {
+	Debug        bool
+	DebugKeyPath string
+
 	keyName string
 }
 
@@ -33,6 +37,23 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	// Set some state data for use in future steps
 	state["keyPair"] = keyName
 	state["privateKey"] = keyResp.KeyMaterial
+
+	// If we're in debug mode, output the private key to the working
+	// directory.
+	if s.Debug {
+		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
+		f, err := os.Create(s.DebugKeyPath)
+		if err != nil {
+			state["error"] = fmt.Errorf("Error saving debug key: %s", err)
+			return multistep.ActionHalt
+		}
+		defer f.Close()
+
+		if _, err := f.Write([]byte(keyResp.KeyMaterial)); err != nil {
+			state["error"] = fmt.Errorf("Error saving debug key: %s", err)
+			return multistep.ActionHalt
+		}
+	}
 
 	return multistep.ActionContinue
 }

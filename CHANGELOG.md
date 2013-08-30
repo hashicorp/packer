@@ -1,5 +1,10 @@
 ## 0.3.6 (unreleased)
 
+IMPROVEMENTS:
+
+* builder/amazon: In `-debug` mode, the keypair used will be saved to
+  the current directory so you can access the machine. [GH-373]
+
 BUG FIXES:
 
 * core: Fix possible panic when ctrl-C during provisioner run.
