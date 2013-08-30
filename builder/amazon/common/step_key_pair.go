@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+	"runtime"
 )
 
 type StepKeyPair struct {
@@ -56,9 +57,11 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 		}
 
 		// Chmod it so that it is SSH ready
-		if err := f.Chmod(0600); err != nil {
-			state["error"] = fmt.Errorf("Error setting permissions of debug key: %s", err)
-			return multistep.ActionHalt
+		if runtime.GOOS != "windows" {
+			if err := f.Chmod(0600); err != nil {
+				state["error"] = fmt.Errorf("Error setting permissions of debug key: %s", err)
+				return multistep.ActionHalt
+			}
 		}
 	}
 
