@@ -6,6 +6,7 @@
 package ebs
 
 import (
+	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -80,7 +81,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&awscommon.StepKeyPair{},
+		&awscommon.StepKeyPair{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
 			SSHPort:         b.config.SSHPort,
