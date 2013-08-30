@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"encoding/json"
 	"math"
 	"strconv"
 	"testing"
