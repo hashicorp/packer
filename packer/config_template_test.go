@@ -1,11 +1,11 @@
 package packer
 
 import (
+	"encoding/json"
 	"math"
 	"strconv"
 	"testing"
 	"time"
-	"encoding/json"
 )
 
 func TestConfigTemplateProcess_timestamp(t *testing.T) {
@@ -47,39 +47,6 @@ func TestConfigTemplateProcess_user(t *testing.T) {
 		t.Fatalf("bad: %s", result)
 	}
 }
-
-func TestJsonTemplateProcess_user(t *testing.T) {
-	tpl, err := NewConfigTemplate()
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	tpl.UserVars["foo"] = "bar"
-	jsonData := make(map[string]interface{})
-	jsonData["key"] = map[string]string{
-	    "key1": "{{user `foo`}}",
-	}
-	jsonBytes, err := json.MarshalIndent(jsonData, "", "  ")
-	if err != nil {
-	    t.Fatalf("err: %s", err)
-	}
-	var jsonString = string(jsonBytes)
-
-	jsonString, err = tpl.Process(jsonString, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	var dat map[string]map[string]interface{}
-	if err := json.Unmarshal([]byte(jsonString), &dat); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if dat["key"]["key1"] != "bar" {
-	    t.Fatalf("found %s instead", dat["key"]["key1"])
-	}
-
-}
-
 
 func TestConfigTemplateValidate(t *testing.T) {
 	tpl, err := NewConfigTemplate()

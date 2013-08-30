@@ -51,3 +51,24 @@ func TestProvisionerPrepare_cookbookPaths(t *testing.T) {
 		t.Fatalf("unexpected: %#v", p.config.CookbookPaths)
 	}
 }
+
+func TestProvisionerPrepare_json(t *testing.T) {
+	config := testConfig()
+	config["json"] = map[string]interface{}{
+		"foo": "{{ user `foo` }}",
+	}
+
+	config[packer.UserVariablesConfigKey] = map[string]string{
+		"foo": `"bar\baz"`,
+	}
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.Json["foo"] != `"bar\baz"` {
+		t.Fatalf("bad: %#v", p.config.Json)
+	}
+}
