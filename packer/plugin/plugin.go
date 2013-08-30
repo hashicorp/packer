@@ -177,3 +177,8 @@ func ServeProvisioner(p packer.Provisioner) {
 		os.Exit(1)
 	}
 }
+
+// Tests whether or not the plugin was interrupted or not.
+func Interrupted() bool {
+	return atomic.LoadInt32(&Interrupts) > 0
+}
