@@ -49,8 +49,15 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 		}
 		defer f.Close()
 
+		// Write the key out
 		if _, err := f.Write([]byte(keyResp.KeyMaterial)); err != nil {
 			state["error"] = fmt.Errorf("Error saving debug key: %s", err)
+			return multistep.ActionHalt
+		}
+
+		// Chmod it so that it is SSH ready
+		if err := f.Chmod(0600); err != nil {
+			state["error"] = fmt.Errorf("Error setting permissions of debug key: %s", err)
 			return multistep.ActionHalt
 		}
 	}
