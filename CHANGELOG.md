@@ -5,6 +5,8 @@ IMPROVEMENTS:
 * builder/amazon: In `-debug` mode, the keypair used will be saved to
   the current directory so you can access the machine. [GH-373]
 * builder/amazon: In `-debug` mode, the DNS is outputted.
+* provisioner/chef-solo: You can now use user variables in the `json`
+  configuration for Chef. [GH-362]
 
 BUG FIXES:
 
