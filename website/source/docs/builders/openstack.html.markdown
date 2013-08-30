@@ -56,7 +56,7 @@ Optional:
   or "5m". The default SSH timeout is "1m".
 
 * `ssh_username` (string) - The username to use in order to communicate
-  over SSH to the running droplet. The default is "root".
+  over SSH to the running server. The default is "root".
 
 ## Basic Example
 
