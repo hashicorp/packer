@@ -145,46 +145,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
-	jsonBytes, err := json.Marshal(p.config.Json)
-	if err != nil {
-		// This really shouldn't happen since we literally just unmarshalled
-		panic(err)
-	}
-
-	// Copy the user variables so that we can restore them later, and
-	// make sure we make the quotes JSON-friendly in the user variables.
-	originalUserVars := make(map[string]string)
-	for k, v := range p.config.tpl.UserVars {
-		originalUserVars[k] = v
-	}
-
-	// Make sure we reset them no matter what
-	defer func() {
-		p.config.tpl.UserVars = originalUserVars
-	}()
-
-	// Make the current user variables JSON string safe.
-	for k, v := range p.config.tpl.UserVars {
-		v = strings.Replace(v, `\`, `\\`, -1)
-		v = strings.Replace(v, `"`, `\"`, -1)
-		p.config.tpl.UserVars[k] = v
-	}
-
-	// Process the bytes with the template processor
-	jsonBytesProcessed, err := p.config.tpl.Process(string(jsonBytes), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal([]byte(jsonBytesProcessed), &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if !p.config.SkipInstall {
 		if err := p.installChef(ui, comm); err != nil {
@@ -359,6 +319,46 @@ func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error 
 	}
 
 	return nil
+}
+
+func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
+	jsonBytes, err := json.Marshal(p.config.Json)
+	if err != nil {
+		// This really shouldn't happen since we literally just unmarshalled
+		panic(err)
+	}
+
+	// Copy the user variables so that we can restore them later, and
+	// make sure we make the quotes JSON-friendly in the user variables.
+	originalUserVars := make(map[string]string)
+	for k, v := range p.config.tpl.UserVars {
+		originalUserVars[k] = v
+	}
+
+	// Make sure we reset them no matter what
+	defer func() {
+		p.config.tpl.UserVars = originalUserVars
+	}()
+
+	// Make the current user variables JSON string safe.
+	for k, v := range p.config.tpl.UserVars {
+		v = strings.Replace(v, `\`, `\\`, -1)
+		v = strings.Replace(v, `"`, `\"`, -1)
+		p.config.tpl.UserVars[k] = v
+	}
+
+	// Process the bytes with the template processor
+	jsonBytesProcessed, err := p.config.tpl.Process(string(jsonBytes), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal([]byte(jsonBytesProcessed), &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 var DefaultConfigTemplate = `
