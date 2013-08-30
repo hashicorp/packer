@@ -152,6 +152,11 @@ between dash and bash can be found on the [DashAsBinSh](https://wiki.ubuntu.com/
 * See the above tip. More than likely your login shell is using /bin/bash
 while the provisioner is using /bin/sh.
 
+*My installs hang when using `apt-get` or `yum`*
+
+* Make sure you add a "-y" to the command to prevent it from requiring
+user input before proceeding.
+
 *How do I tell what my shell script is doing?*
 
 * Adding a `-x` flag to the shebang at the top of the script (`#!/bin/sh -x`)
