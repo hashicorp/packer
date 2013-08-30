@@ -10,6 +10,7 @@ import (
 )
 
 type StepRunSourceInstance struct {
+	Debug              bool
 	ExpectedRootDevice string
 	InstanceType       string
 	UserData           string
@@ -100,6 +101,17 @@ func (s *StepRunSourceInstance) Run(state map[string]interface{}) multistep.Step
 	}
 
 	s.instance = latestInstance.(*ec2.Instance)
+
+	if s.Debug {
+		if s.instance.DNSName != "" {
+			ui.Message(fmt.Sprintf("Public DNS: %s", s.instance.DNSName))
+		}
+
+		if s.instance.PrivateIpAddress != "" {
+			ui.Message(fmt.Sprintf("Private IP: %s", s.instance.PrivateIpAddress))
+		}
+	}
+
 	state["instance"] = s.instance
 
 	return multistep.ActionContinue
