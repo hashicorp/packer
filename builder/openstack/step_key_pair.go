@@ -14,16 +14,16 @@ type StepKeyPair struct {
 	keyName string
 }
 
-func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
-	csp := state["csp"].(gophercloud.CloudServersProvider)
-	ui := state["ui"].(packer.Ui)
+func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary keypair for this instance...")
 	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
 	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := csp.CreateKeyPair(gophercloud.NewKeyPair{Name: keyName})
 	if err != nil {
-		state["error"] = fmt.Errorf("Error creating temporary keypair: %s", err)
+		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -31,20 +31,20 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	s.keyName = keyName
 
 	// Set some state data for use in future steps
-	state["keyPair"] = keyName
-	state["privateKey"] = keyResp.PrivateKey
+	state.Put("keyPair", keyName)
+	state.Put("privateKey", keyResp.PrivateKey)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepKeyPair) Cleanup(state map[string]interface{}) {
+func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
 	if s.keyName == "" {
 		return
 	}
 
-	csp := state["csp"].(gophercloud.CloudServersProvider)
-	ui := state["ui"].(packer.Ui)
+	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting temporary keypair...")
 	err := csp.DeleteKeyPair(s.keyName)

@@ -72,11 +72,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Setup the state bag and initial state for the steps
-	state := make(map[string]interface{})
-	state["config"] = b.config
-	state["csp"] = csp
-	state["hook"] = hook
-	state["ui"] = ui
+	state := new(multistep.BasicStateBag)
+	state.Put("config", b.config)
+	state.Put("csp", csp)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -108,13 +108,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.runner.Run(state)
 
 	// If there was an error, return that
-	if rawErr, ok := state["error"]; ok {
+	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
 
 	// Build the artifact and return it
 	artifact := &Artifact{
-		ImageId:        state["image"].(string),
+		ImageId:        state.Get("image").(string),
 		BuilderIdValue: BuilderId,
 		Conn:           csp,
 	}
