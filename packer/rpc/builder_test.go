@@ -72,7 +72,7 @@ func TestBuilderRPC(t *testing.T) {
 
 	// Test Run
 	cache := new(testCache)
-	hook := &testHook{}
+	hook := &packer.MockHook{}
 	ui := &testUi{}
 	artifact, err := bClient.Run(ui, hook, cache)
 	assert.Nil(err, "should have no error")
@@ -83,7 +83,7 @@ func TestBuilderRPC(t *testing.T) {
 		assert.True(cache.lockCalled, "lock should be called")
 
 		b.runHook.Run("foo", nil, nil, nil)
-		assert.True(hook.runCalled, "run should be called")
+		assert.True(hook.RunCalled, "run should be called")
 
 		b.runUi.Say("format")
 		assert.True(ui.sayCalled, "say should be called")
