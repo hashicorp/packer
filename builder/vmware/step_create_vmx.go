@@ -28,10 +28,10 @@ type vmxTemplateData struct {
 //   vmx_path string - The path to the VMX file.
 type stepCreateVMX struct{}
 
-func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	isoPath := state["iso_path"].(string)
-	ui := state["ui"].(packer.Ui)
+func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	isoPath := state.Get("iso_path").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Building and writing VMX file")
 
@@ -47,7 +47,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		f, err := os.Open(config.VMXTemplatePath)
 		if err != nil {
 			err := fmt.Errorf("Error reading VMX template: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -56,7 +56,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		rawBytes, err := ioutil.ReadAll(f)
 		if err != nil {
 			err := fmt.Errorf("Error reading VMX template: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -67,7 +67,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	vmxContents, err := config.tpl.Process(vmxTemplate, tplData)
 	if err != nil {
 		err := fmt.Errorf("Error procesing VMX template: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -81,7 +81,7 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 		}
 	}
 
-	if floppyPathRaw, ok := state["floppy_path"]; ok {
+	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
 		log.Println("Floppy path present, setting in VMX")
 		vmxData["floppy0.present"] = "TRUE"
 		vmxData["floppy0.fileType"] = "file"
@@ -91,17 +91,17 @@ func (stepCreateVMX) Run(state map[string]interface{}) multistep.StepAction {
 	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error creating VMX file: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state["vmx_path"] = vmxPath
+	state.Put("vmx_path", vmxPath)
 
 	return multistep.ActionContinue
 }
 
-func (stepCreateVMX) Cleanup(map[string]interface{}) {
+func (stepCreateVMX) Cleanup(multistep.StateBag) {
 }
 
 // This is the default VMX template used if no other template is given.

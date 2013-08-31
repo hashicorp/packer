@@ -23,9 +23,9 @@ var KeepFileExtensions = []string{".nvram", ".vmdk", ".vmsd", ".vmx", ".vmxf"}
 //   <nothing>
 type stepCleanFiles struct{}
 
-func (stepCleanFiles) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	ui := state["ui"].(packer.Ui)
+func (stepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting unnecessary VMware files...")
 	visit := func(path string, info os.FileInfo, err error) error {
@@ -55,11 +55,11 @@ func (stepCleanFiles) Run(state map[string]interface{}) multistep.StepAction {
 	}
 
 	if err := filepath.Walk(config.OutputDir, visit); err != nil {
-		state["error"] = err
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
 }
 
-func (stepCleanFiles) Cleanup(map[string]interface{}) {}
+func (stepCleanFiles) Cleanup(multistep.StateBag) {}

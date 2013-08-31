@@ -4,16 +4,17 @@ import (
 	gossh "code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"io/ioutil"
 	"log"
 	"os"
 )
 
-func sshAddress(state map[string]interface{}) (string, error) {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	vmxPath := state["vmx_path"].(string)
+func sshAddress(state multistep.StateBag) (string, error) {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	vmxPath := state.Get("vmx_path").(string)
 
 	log.Println("Lookup up IP information...")
 	f, err := os.Open(vmxPath)
@@ -58,8 +59,8 @@ func sshAddress(state map[string]interface{}) (string, error) {
 	return fmt.Sprintf("%s:%d", ipAddress, config.SSHPort), nil
 }
 
-func sshConfig(state map[string]interface{}) (*gossh.ClientConfig, error) {
-	config := state["config"].(*config)
+func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
+	config := state.Get("config").(*config)
 
 	auth := []gossh.ClientAuth{
 		gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),

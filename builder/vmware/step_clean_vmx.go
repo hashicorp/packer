@@ -22,20 +22,20 @@ import (
 //   <nothing>
 type stepCleanVMX struct{}
 
-func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
-	isoPath := state["iso_path"].(string)
-	ui := state["ui"].(packer.Ui)
-	vmxPath := state["vmx_path"].(string)
+func (s stepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
+	isoPath := state.Get("iso_path").(string)
+	ui := state.Get("ui").(packer.Ui)
+	vmxPath := state.Get("vmx_path").(string)
 
 	ui.Say("Cleaning VMX prior to finishing up...")
 
 	vmxData, err := s.readVMX(vmxPath)
 	if err != nil {
-		state["error"] = fmt.Errorf("Error reading VMX: %s", err)
+		state.Put("error", fmt.Errorf("Error reading VMX: %s", err))
 		return multistep.ActionHalt
 	}
 
-	if _, ok := state["floppy_path"]; ok {
+	if _, ok := state.GetOk("floppy_path"); ok {
 		// Delete the floppy0 entries so the floppy is no longer mounted
 		ui.Message("Unmounting floppy from VMX...")
 		for k, _ := range vmxData {
@@ -67,14 +67,14 @@ func (s stepCleanVMX) Run(state map[string]interface{}) multistep.StepAction {
 
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
-		state["error"] = fmt.Errorf("Error writing VMX: %s", err)
+		state.Put("error", fmt.Errorf("Error writing VMX: %s", err))
 		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
 }
 
-func (stepCleanVMX) Cleanup(map[string]interface{}) {}
+func (stepCleanVMX) Cleanup(multistep.StateBag) {}
 
 func (stepCleanVMX) readVMX(vmxPath string) (map[string]string, error) {
 	vmxF, err := os.Open(vmxPath)
