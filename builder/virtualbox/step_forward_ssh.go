@@ -17,11 +17,11 @@ import (
 // Produces:
 type stepForwardSSH struct{}
 
-func (s *stepForwardSSH) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	log.Printf("Looking for available SSH port between %d and %d", config.SSHHostPortMin, config.SSHHostPortMax)
 	var sshHostPort uint
@@ -45,15 +45,15 @@ func (s *stepForwardSSH) Run(state map[string]interface{}) multistep.StepAction 
 	}
 	if err := driver.VBoxManage(command...); err != nil {
 		err := fmt.Errorf("Error creating port forwarding rule: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// Save the port we're using so that future steps can use it
-	state["sshHostPort"] = sshHostPort
+	state.Put("sshHostPort", sshHostPort)
 
 	return multistep.ActionContinue
 }
 
-func (s *stepForwardSSH) Cleanup(state map[string]interface{}) {}
+func (s *stepForwardSSH) Cleanup(state multistep.StateBag) {}

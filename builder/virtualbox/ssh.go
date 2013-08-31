@@ -3,18 +3,19 @@ package virtualbox
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"io/ioutil"
 	"os"
 )
 
-func sshAddress(state map[string]interface{}) (string, error) {
-	sshHostPort := state["sshHostPort"].(uint)
+func sshAddress(state multistep.StateBag) (string, error) {
+	sshHostPort := state.Get("sshHostPort").(uint)
 	return fmt.Sprintf("127.0.0.1:%d", sshHostPort), nil
 }
 
-func sshConfig(state map[string]interface{}) (*gossh.ClientConfig, error) {
-	config := state["config"].(*config)
+func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
+	config := state.Get("config").(*config)
 
 	auth := []gossh.ClientAuth{
 		gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),

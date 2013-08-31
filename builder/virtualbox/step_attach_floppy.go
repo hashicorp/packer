@@ -20,10 +20,10 @@ type stepAttachFloppy struct {
 	floppyPath string
 }
 
-func (s *stepAttachFloppy) Run(state map[string]interface{}) multistep.StepAction {
+func (s *stepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
-	if floppyPathRaw, ok := state["floppy_path"]; ok {
+	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
 		floppyPath = floppyPathRaw.(string)
 	} else {
 		log.Println("No floppy disk, not attaching.")
@@ -35,13 +35,13 @@ func (s *stepAttachFloppy) Run(state map[string]interface{}) multistep.StepActio
 	// floppy.
 	floppyPath, err := s.copyFloppy(floppyPath)
 	if err != nil {
-		state["error"] = fmt.Errorf("Error preparing floppy: %s", err)
+		state.Put("error", fmt.Errorf("Error preparing floppy: %s", err))
 		return multistep.ActionHalt
 	}
 
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	ui.Say("Attaching floppy disk...")
 
@@ -52,7 +52,7 @@ func (s *stepAttachFloppy) Run(state map[string]interface{}) multistep.StepActio
 		"--add", "floppy",
 	}
 	if err := driver.VBoxManage(command...); err != nil {
-		state["error"] = fmt.Errorf("Error creating floppy controller: %s", err)
+		state.Put("error", fmt.Errorf("Error creating floppy controller: %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -66,7 +66,7 @@ func (s *stepAttachFloppy) Run(state map[string]interface{}) multistep.StepActio
 		"--medium", floppyPath,
 	}
 	if err := driver.VBoxManage(command...); err != nil {
-		state["error"] = fmt.Errorf("Error attaching floppy: %s", err)
+		state.Put("error", fmt.Errorf("Error attaching floppy: %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -76,7 +76,7 @@ func (s *stepAttachFloppy) Run(state map[string]interface{}) multistep.StepActio
 	return multistep.ActionContinue
 }
 
-func (s *stepAttachFloppy) Cleanup(state map[string]interface{}) {
+func (s *stepAttachFloppy) Cleanup(state multistep.StateBag) {
 	if s.floppyPath == "" {
 		return
 	}
@@ -84,8 +84,8 @@ func (s *stepAttachFloppy) Cleanup(state map[string]interface{}) {
 	// Delete the floppy disk
 	defer os.Remove(s.floppyPath)
 
-	driver := state["driver"].(Driver)
-	vmName := state["vmName"].(string)
+	driver := state.Get("driver").(Driver)
+	vmName := state.Get("vmName").(string)
 
 	command := []string{
 		"storageattach", vmName,

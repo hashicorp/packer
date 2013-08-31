@@ -15,11 +15,11 @@ type stepAttachISO struct {
 	diskPath string
 }
 
-func (s *stepAttachISO) Run(state map[string]interface{}) multistep.StepAction {
-	driver := state["driver"].(Driver)
-	isoPath := state["iso_path"].(string)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
+	isoPath := state.Get("iso_path").(string)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	// Attach the disk to the controller
 	command := []string{
@@ -32,7 +32,7 @@ func (s *stepAttachISO) Run(state map[string]interface{}) multistep.StepAction {
 	}
 	if err := driver.VBoxManage(command...); err != nil {
 		err := fmt.Errorf("Error attaching ISO: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -43,14 +43,14 @@ func (s *stepAttachISO) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepAttachISO) Cleanup(state map[string]interface{}) {
+func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 	if s.diskPath == "" {
 		return
 	}
 
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	command := []string{
 		"storageattach", vmName,

@@ -23,12 +23,12 @@ import (
 //   <nothing>
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
-	comm := state["communicator"].(packer.Communicator)
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+	comm := state.Get("communicator").(packer.Communicator)
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	if config.ShutdownCommand != "" {
 		ui.Say("Gracefully halting virtual machine...")
@@ -36,7 +36,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		cmd := &packer.RemoteCmd{Command: config.ShutdownCommand}
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -53,7 +53,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 			select {
 			case <-shutdownTimer:
 				err := errors.New("Timeout while waiting for machine to shut down.")
-				state["error"] = err
+				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			default:
@@ -64,7 +64,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		ui.Say("Halting the virtual machine...")
 		if err := driver.Stop(vmName); err != nil {
 			err := fmt.Errorf("Error stopping VM: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -74,4 +74,4 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepShutdown) Cleanup(state map[string]interface{}) {}
+func (s *stepShutdown) Cleanup(state multistep.StateBag) {}
