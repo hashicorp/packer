@@ -5,17 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"time"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the instance DNS name.
-func SSHAddress(e *ec2.EC2, port int) func(map[string]interface{}) (string, error) {
-	return func(state map[string]interface{}) (string, error) {
+func SSHAddress(e *ec2.EC2, port int) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
 		for j := 0; j < 2; j++ {
 			var host string
-			i := state["instance"].(*ec2.Instance)
+			i := state.Get("instance").(*ec2.Instance)
 			if i.DNSName != "" {
 				host = i.DNSName
 			} else if i.VpcId != "" {
@@ -35,7 +36,7 @@ func SSHAddress(e *ec2.EC2, port int) func(map[string]interface{}) (string, erro
 				return "", fmt.Errorf("instance not found: %s", i.InstanceId)
 			}
 
-			state["instance"] = &r.Reservations[0].Instances[0]
+			state.Put("instance", &r.Reservations[0].Instances[0])
 			time.Sleep(1 * time.Second)
 		}
 
@@ -46,9 +47,9 @@ func SSHAddress(e *ec2.EC2, port int) func(map[string]interface{}) (string, erro
 // SSHConfig returns a function that can be used for the SSH communicator
 // config for connecting to the instance created over SSH using the generated
 // private key.
-func SSHConfig(username string) func(map[string]interface{}) (*gossh.ClientConfig, error) {
-	return func(state map[string]interface{}) (*gossh.ClientConfig, error) {
-		privateKey := state["privateKey"].(string)
+func SSHConfig(username string) func(multistep.StateBag) (*gossh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*gossh.ClientConfig, error) {
+		privateKey := state.Get("privateKey").(string)
 
 		keyring := new(ssh.SimpleKeychain)
 		if err := keyring.AddPEMKey(privateKey); err != nil {
