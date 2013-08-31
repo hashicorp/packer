@@ -37,16 +37,16 @@ type StepDownload struct {
 	Url []string
 }
 
-func (s *StepDownload) Run(state map[string]interface{}) multistep.StepAction {
-	cache := state["cache"].(packer.Cache)
-	ui := state["ui"].(packer.Ui)
+func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
+	cache := state.Get("cache").(packer.Cache)
+	ui := state.Get("ui").(packer.Ui)
 
 	var checksum []byte
 	if s.Checksum != "" {
 		var err error
 		checksum, err = hex.DecodeString(s.Checksum)
 		if err != nil {
-			state["error"] = fmt.Errorf("Error parsing checksum: %s", err)
+			state.Put("error", fmt.Errorf("Error parsing checksum: %s", err))
 			return multistep.ActionHalt
 		}
 	}
@@ -89,20 +89,20 @@ func (s *StepDownload) Run(state map[string]interface{}) multistep.StepAction {
 
 	if finalPath == "" {
 		err := fmt.Errorf("%s download failed.", s.Description)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state[s.ResultKey] = finalPath
+	state.Put(s.ResultKey, finalPath)
 	return multistep.ActionContinue
 }
 
-func (s *StepDownload) Cleanup(map[string]interface{}) {}
+func (s *StepDownload) Cleanup(multistep.StateBag) {}
 
-func (s *StepDownload) download(config *DownloadConfig, state map[string]interface{}) (string, error, bool) {
+func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
 	var path string
-	ui := state["ui"].(packer.Ui)
+	ui := state.Get("ui").(packer.Ui)
 	download := NewDownloadClient(config)
 
 	downloadCompleteCh := make(chan error, 1)
@@ -129,7 +129,7 @@ func (s *StepDownload) download(config *DownloadConfig, state map[string]interfa
 				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
 			}
 		case <-time.After(1 * time.Second):
-			if _, ok := state[multistep.StateCancelled]; ok {
+			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				ui.Say("Interrupt received. Cancelling download...")
 				return "", nil, false
 			}

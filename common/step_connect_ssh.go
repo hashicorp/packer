@@ -25,11 +25,11 @@ type StepConnectSSH struct {
 	// SSHAddress is a function that returns the TCP address to connect to
 	// for SSH. This is a function so that you can query information
 	// if necessary for this address.
-	SSHAddress func(map[string]interface{}) (string, error)
+	SSHAddress func(multistep.StateBag) (string, error)
 
 	// SSHConfig is a function that returns the proper client configuration
 	// for SSH access.
-	SSHConfig func(map[string]interface{}) (*gossh.ClientConfig, error)
+	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
 
 	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
 	SSHWaitTimeout time.Duration
@@ -40,8 +40,8 @@ type StepConnectSSH struct {
 	comm packer.Communicator
 }
 
-func (s *StepConnectSSH) Run(state map[string]interface{}) multistep.StepAction {
-	ui := state["ui"].(packer.Ui)
+func (s *StepConnectSSH) Run(state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator
 	var err error
@@ -69,14 +69,14 @@ WaitLoop:
 
 			ui.Say("Connected to SSH!")
 			s.comm = comm
-			state["communicator"] = comm
+			state.Put("communicator", comm)
 			break WaitLoop
 		case <-timeout:
 			ui.Error("Timeout waiting for SSH.")
 			close(cancel)
 			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
-			if _, ok := state[multistep.StateCancelled]; ok {
+			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				// The step sequence was cancelled, so cancel waiting for SSH
 				// and just start the halting process.
 				close(cancel)
@@ -89,10 +89,10 @@ WaitLoop:
 	return multistep.ActionContinue
 }
 
-func (s *StepConnectSSH) Cleanup(map[string]interface{}) {
+func (s *StepConnectSSH) Cleanup(multistep.StateBag) {
 }
 
-func (s *StepConnectSSH) waitForSSH(state map[string]interface{}, cancel <-chan struct{}) (packer.Communicator, error) {
+func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan struct{}) (packer.Communicator, error) {
 	handshakeAttempts := 0
 
 	var comm packer.Communicator
