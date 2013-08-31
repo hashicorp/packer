@@ -12,6 +12,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Concurrent map access is completely gone, fixing rare issues
+  with runtime memory corruption. [GH-307]
 * core: Fix possible panic when ctrl-C during provisioner run.
 * provisioners/salt-masterless: Use filepath join to properly join paths.
 
