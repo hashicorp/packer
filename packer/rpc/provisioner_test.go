@@ -7,32 +7,11 @@ import (
 	"testing"
 )
 
-type testProvisioner struct {
-	prepareCalled  bool
-	prepareConfigs []interface{}
-	provCalled     bool
-	provComm       packer.Communicator
-	provUi         packer.Ui
-}
-
-func (p *testProvisioner) Prepare(configs ...interface{}) error {
-	p.prepareCalled = true
-	p.prepareConfigs = configs
-	return nil
-}
-
-func (p *testProvisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	p.provCalled = true
-	p.provComm = comm
-	p.provUi = ui
-	return nil
-}
-
 func TestProvisionerRPC(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	// Create the interface to test
-	p := new(testProvisioner)
+	p := new(packer.MockProvisioner)
 
 	// Start the server
 	server := rpc.NewServer()
@@ -47,17 +26,23 @@ func TestProvisionerRPC(t *testing.T) {
 	config := 42
 	pClient := Provisioner(client)
 	pClient.Prepare(config)
-	assert.True(p.prepareCalled, "prepare should be called")
-	assert.Equal(p.prepareConfigs, []interface{}{42}, "prepare should be called with right arg")
+	assert.True(p.PrepCalled, "prepare should be called")
+	assert.Equal(p.PrepConfigs, []interface{}{42}, "prepare should be called with right arg")
 
 	// Test Provision
 	ui := &testUi{}
-	comm := new(packer.MockCommunicator)
+	comm := &packer.MockCommunicator{}
 	pClient.Provision(ui, comm)
-	assert.True(p.provCalled, "provision should be called")
+	assert.True(p.ProvCalled, "provision should be called")
 
-	p.provUi.Say("foo")
+	p.ProvUi.Say("foo")
 	assert.True(ui.sayCalled, "say should be called")
+
+	// Test Cancel
+	pClient.Cancel()
+	if !p.CancelCalled {
+		t.Fatal("cancel should be called")
+	}
 }
 
 func TestProvisioner_Implements(t *testing.T) {

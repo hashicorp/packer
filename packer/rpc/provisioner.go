@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"net/rpc"
 )
 
@@ -47,6 +48,13 @@ func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return p.client.Call("Provisioner.Provision", args, new(interface{}))
 }
 
+func (p *provisioner) Cancel() {
+	err := p.client.Call("Provisioner.Cancel", new(interface{}), new(interface{}))
+	if err != nil {
+		log.Printf("Provisioner.Cancel err: %s", err)
+	}
+}
+
 func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) error {
 	*reply = p.p.Prepare(args.Configs...)
 	if *reply != nil {
@@ -69,5 +77,10 @@ func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *int
 		return NewBasicError(err)
 	}
 
+	return nil
+}
+
+func (p *ProvisionerServer) Cancel(args *interface{}, reply *interface{}) error {
+	p.p.Cancel()
 	return nil
 }

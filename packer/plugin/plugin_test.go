@@ -64,7 +64,7 @@ func TestHelperProcess(*testing.T) {
 	case "post-processor":
 		ServePostProcessor(new(helperPostProcessor))
 	case "provisioner":
-		ServeProvisioner(new(helperProvisioner))
+		ServeProvisioner(new(packer.MockProvisioner))
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)
