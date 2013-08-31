@@ -2,6 +2,8 @@
 
 IMPROVEMENTS:
 
+* core: Much improved interrupt handling. For example, interrupts now
+  cancel much more quickly within provisioners.
 * builder/amazon: In `-debug` mode, the keypair used will be saved to
   the current directory so you can access the machine. [GH-373]
 * builder/amazon: In `-debug` mode, the DNS is outputted.
