@@ -28,6 +28,15 @@ func (c *cmdProvisioner) Provision(ui packer.Ui, comm packer.Communicator) error
 	return c.p.Provision(ui, comm)
 }
 
+func (c *cmdProvisioner) Cancel() {
+	defer func() {
+		r := recover()
+		c.checkExit(r, nil)
+	}()
+
+	c.p.Cancel()
+}
+
 func (c *cmdProvisioner) checkExit(p interface{}, cb func()) {
 	if c.client.Exited() && cb != nil {
 		cb()

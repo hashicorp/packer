@@ -13,6 +13,11 @@ type Provisioner interface {
 	// is guaranteed to be connected to some machine so that provisioning
 	// can be done.
 	Provision(Ui, Communicator) error
+
+	// Cancel is called to cancel the provisioning. This is usually called
+	// while Provision is still being called. The Provisioner should act
+	// to stop its execution as quickly as possible in a race-free way.
+	Cancel()
 }
 
 // A Hook implementation that runs the given provisioners.

@@ -589,7 +589,7 @@ func TestTemplate_Build(t *testing.T) {
 		"test-builder": builder,
 	}
 
-	provisioner := &TestProvisioner{}
+	provisioner := &MockProvisioner{}
 	provisionerMap := map[string]Provisioner{
 		"test-prov": provisioner,
 	}
@@ -677,7 +677,7 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 		"test-builder": builder,
 	}
 
-	provisioner := &TestProvisioner{}
+	provisioner := &MockProvisioner{}
 	provisionerMap := map[string]Provisioner{
 		"test-prov": provisioner,
 	}

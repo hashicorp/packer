@@ -2,23 +2,6 @@ package packer
 
 import "testing"
 
-type TestProvisioner struct {
-	prepCalled  bool
-	prepConfigs []interface{}
-	provCalled  bool
-}
-
-func (t *TestProvisioner) Prepare(configs ...interface{}) error {
-	t.prepCalled = true
-	t.prepConfigs = configs
-	return nil
-}
-
-func (t *TestProvisioner) Provision(Ui, Communicator) error {
-	t.provCalled = true
-	return nil
-}
-
 func TestProvisionHook_Impl(t *testing.T) {
 	var raw interface{}
 	raw = &ProvisionHook{}
@@ -28,8 +11,8 @@ func TestProvisionHook_Impl(t *testing.T) {
 }
 
 func TestProvisionHook(t *testing.T) {
-	pA := &TestProvisioner{}
-	pB := &TestProvisioner{}
+	pA := &MockProvisioner{}
+	pB := &MockProvisioner{}
 
 	ui := testUi()
 	var comm Communicator = nil
@@ -38,11 +21,11 @@ func TestProvisionHook(t *testing.T) {
 	hook := &ProvisionHook{[]Provisioner{pA, pB}}
 	hook.Run("foo", ui, comm, data)
 
-	if !pA.provCalled {
+	if !pA.ProvCalled {
 		t.Error("provision should be called on pA")
 	}
 
-	if !pB.provCalled {
+	if !pB.ProvCalled {
 		t.Error("provision should be called on pB")
 	}
 }
