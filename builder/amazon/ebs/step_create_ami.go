@@ -10,11 +10,11 @@ import (
 
 type stepCreateAMI struct{}
 
-func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(config)
-	ec2conn := state["ec2"].(*ec2.EC2)
-	instance := state["instance"].(*ec2.Instance)
-	ui := state["ui"].(packer.Ui)
+func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(config)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	instance := state.Get("instance").(*ec2.Instance)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the AMI: %s", config.AMIName))
@@ -27,7 +27,7 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	createResp, err := ec2conn.CreateImage(createOpts)
 	if err != nil {
 		err := fmt.Errorf("Error creating AMI: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -36,13 +36,13 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	ui.Say(fmt.Sprintf("AMI: %s", createResp.ImageId))
 	amis := make(map[string]string)
 	amis[ec2conn.Region.Name] = createResp.ImageId
-	state["amis"] = amis
+	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
 	if err := awscommon.WaitForAMI(ec2conn, createResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -50,6 +50,6 @@ func (s *stepCreateAMI) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateAMI) Cleanup(map[string]interface{}) {
+func (s *stepCreateAMI) Cleanup(multistep.StateBag) {
 	// No cleanup...
 }

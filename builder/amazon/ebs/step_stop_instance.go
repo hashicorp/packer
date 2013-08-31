@@ -10,17 +10,17 @@ import (
 
 type stepStopInstance struct{}
 
-func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	instance := state["instance"].(*ec2.Instance)
-	ui := state["ui"].(packer.Ui)
+func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	instance := state.Get("instance").(*ec2.Instance)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Stop the instance so we can create an AMI from it
 	ui.Say("Stopping the source instance...")
 	_, err := ec2conn.StopInstances(instance.InstanceId)
 	if err != nil {
 		err := fmt.Errorf("Error stopping instance: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -37,7 +37,7 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -45,6 +45,6 @@ func (s *stepStopInstance) Run(state map[string]interface{}) multistep.StepActio
 	return multistep.ActionContinue
 }
 
-func (s *stepStopInstance) Cleanup(map[string]interface{}) {
+func (s *stepStopInstance) Cleanup(multistep.StateBag) {
 	// No cleanup...
 }
