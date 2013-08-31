@@ -16,10 +16,10 @@ type StepRunSourceServer struct {
 	server *gophercloud.Server
 }
 
-func (s *StepRunSourceServer) Run(state map[string]interface{}) multistep.StepAction {
-	csp := state["csp"].(gophercloud.CloudServersProvider)
-	keyName := state["keyPair"].(string)
-	ui := state["ui"].(packer.Ui)
+func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
+	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	keyName := state.Get("keyPair").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	// XXX - validate image and flavor is available
 
@@ -33,7 +33,7 @@ func (s *StepRunSourceServer) Run(state map[string]interface{}) multistep.StepAc
 	serverResp, err := csp.CreateServer(server)
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -51,24 +51,24 @@ func (s *StepRunSourceServer) Run(state map[string]interface{}) multistep.StepAc
 	latestServer, err := WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for server (%s) to become ready: %s", s.server.Id, err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	s.server = latestServer.(*gophercloud.Server)
-	state["server"] = s.server
+	state.Put("server", s.server)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepRunSourceServer) Cleanup(state map[string]interface{}) {
+func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 	if s.server == nil {
 		return
 	}
 
-	csp := state["csp"].(gophercloud.CloudServersProvider)
-	ui := state["ui"].(packer.Ui)
+	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Terminating the source server...")
 	if err := csp.DeleteServerById(s.server.Id); err != nil {

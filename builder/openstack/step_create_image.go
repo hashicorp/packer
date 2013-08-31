@@ -11,11 +11,11 @@ import (
 
 type stepCreateImage struct{}
 
-func (s *stepCreateImage) Run(state map[string]interface{}) multistep.StepAction {
-	csp := state["csp"].(gophercloud.CloudServersProvider)
-	config := state["config"].(config)
-	server := state["server"].(*gophercloud.Server)
-	ui := state["ui"].(packer.Ui)
+func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
+	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	config := state.Get("config").(config)
+	server := state.Get("server").(*gophercloud.Server)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the image: %s", config.ImageName))
@@ -25,20 +25,20 @@ func (s *stepCreateImage) Run(state map[string]interface{}) multistep.StepAction
 	imageId, err := csp.CreateImage(server.Id, createOpts)
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// Set the Image ID in the state
 	ui.Say(fmt.Sprintf("Image: %s", imageId))
-	state["image"] = imageId
+	state.Put("image", imageId)
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for image to become ready...")
 	if err := WaitForImage(csp, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -46,7 +46,7 @@ func (s *stepCreateImage) Run(state map[string]interface{}) multistep.StepAction
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateImage) Cleanup(map[string]interface{}) {
+func (s *stepCreateImage) Cleanup(multistep.StateBag) {
 	// No cleanup...
 }
 

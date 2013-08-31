@@ -4,6 +4,7 @@ import (
 	gossh "code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/rackspace/gophercloud"
 	"time"
@@ -11,10 +12,10 @@ import (
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(map[string]interface{}) (string, error) {
-	return func(state map[string]interface{}) (string, error) {
+func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
 		for j := 0; j < 2; j++ {
-			s := state["server"].(*gophercloud.Server)
+			s := state.Get("server").(*gophercloud.Server)
 			if s.AccessIPv4 != "" {
 				return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
 			}
@@ -24,7 +25,7 @@ func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(map[string]
 				return "", err
 			}
 
-			state["server"] = serverState
+			state.Put("server", serverState)
 			time.Sleep(1 * time.Second)
 		}
 
@@ -35,9 +36,9 @@ func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(map[string]
 // SSHConfig returns a function that can be used for the SSH communicator
 // config for connecting to the instance created over SSH using the generated
 // private key.
-func SSHConfig(username string) func(map[string]interface{}) (*gossh.ClientConfig, error) {
-	return func(state map[string]interface{}) (*gossh.ClientConfig, error) {
-		privateKey := state["privateKey"].(string)
+func SSHConfig(username string) func(multistep.StateBag) (*gossh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*gossh.ClientConfig, error) {
+		privateKey := state.Get("privateKey").(string)
 
 		keyring := new(ssh.SimpleKeychain)
 		if err := keyring.AddPEMKey(privateKey); err != nil {
