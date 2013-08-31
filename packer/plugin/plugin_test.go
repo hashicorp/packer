@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"fmt"
+	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"os/exec"
@@ -54,7 +55,7 @@ func TestHelperProcess(*testing.T) {
 	case "command":
 		ServeCommand(new(helperCommand))
 	case "hook":
-		ServeHook(new(helperHook))
+		ServeHook(new(packer.MockHook))
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
 	case "mock":
@@ -63,7 +64,7 @@ func TestHelperProcess(*testing.T) {
 	case "post-processor":
 		ServePostProcessor(new(helperPostProcessor))
 	case "provisioner":
-		ServeProvisioner(new(helperProvisioner))
+		ServeProvisioner(new(packer.MockProvisioner))
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)

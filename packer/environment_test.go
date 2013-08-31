@@ -20,7 +20,7 @@ func init() {
 func testComponentFinder() *ComponentFinder {
 	builderFactory := func(n string) (Builder, error) { return testBuilder(), nil }
 	ppFactory := func(n string) (PostProcessor, error) { return new(TestPostProcessor), nil }
-	provFactory := func(n string) (Provisioner, error) { return new(TestProvisioner), nil }
+	provFactory := func(n string) (Provisioner, error) { return new(MockProvisioner), nil }
 	return &ComponentFinder{
 		Builder:       builderFactory,
 		PostProcessor: ppFactory,
@@ -227,7 +227,7 @@ func TestEnvironment_DefaultCli_Version(t *testing.T) {
 func TestEnvironment_Hook(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	hook := &TestHook{}
+	hook := &MockHook{}
 	hooks := make(map[string]Hook)
 	hooks["foo"] = hook
 
@@ -309,7 +309,7 @@ func TestEnvironment_PostProcessor_Error(t *testing.T) {
 func TestEnvironmentProvisioner(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	p := &TestProvisioner{}
+	p := &MockProvisioner{}
 	ps := make(map[string]Provisioner)
 	ps["foo"] = p
 

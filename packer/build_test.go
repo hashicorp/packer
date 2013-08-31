@@ -13,10 +13,10 @@ func testBuild() *coreBuild {
 		builderConfig: 42,
 		builderType:   "foo",
 		hooks: map[string][]Hook{
-			"foo": []Hook{&TestHook{}},
+			"foo": []Hook{&MockHook{}},
 		},
 		provisioners: []coreBuildProvisioner{
-			coreBuildProvisioner{&TestProvisioner{}, []interface{}{42}},
+			coreBuildProvisioner{&MockProvisioner{}, []interface{}{42}},
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			[]coreBuildPostProcessor{
@@ -59,9 +59,9 @@ func TestBuild_Prepare(t *testing.T) {
 	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
 
 	coreProv := build.provisioners[0]
-	prov := coreProv.provisioner.(*TestProvisioner)
-	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
+	prov := coreProv.provisioner.(*MockProvisioner)
+	assert.True(prov.PrepCalled, "prepare should be called")
+	assert.Equal(prov.PrepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
 
 	corePP := build.postProcessors[0][0]
 	pp := corePP.processor.(*TestPostProcessor)
@@ -104,9 +104,9 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
 
 	coreProv := build.provisioners[0]
-	prov := coreProv.provisioner.(*TestProvisioner)
-	assert.True(prov.prepCalled, "prepare should be called")
-	assert.Equal(prov.prepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
+	prov := coreProv.provisioner.(*MockProvisioner)
+	assert.True(prov.PrepCalled, "prepare should be called")
+	assert.Equal(prov.PrepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
 }
 
 func TestBuildPrepare_variables_default(t *testing.T) {
@@ -187,14 +187,14 @@ func TestBuild_Run(t *testing.T) {
 	dispatchHook := builder.runHook
 	dispatchHook.Run("foo", nil, nil, 42)
 
-	hook := build.hooks["foo"][0].(*TestHook)
-	assert.True(hook.runCalled, "run should be called")
-	assert.Equal(hook.runData, 42, "should have correct data")
+	hook := build.hooks["foo"][0].(*MockHook)
+	assert.True(hook.RunCalled, "run should be called")
+	assert.Equal(hook.RunData, 42, "should have correct data")
 
 	// Verify provisioners run
 	dispatchHook.Run(HookProvision, nil, nil, 42)
-	prov := build.provisioners[0].provisioner.(*TestProvisioner)
-	assert.True(prov.provCalled, "provision should be called")
+	prov := build.provisioners[0].provisioner.(*MockProvisioner)
+	assert.True(prov.ProvCalled, "provision should be called")
 
 	// Verify post-processor was run
 	pp := build.postProcessors[0][0].processor.(*TestPostProcessor)

@@ -200,6 +200,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return nil
 }
 
+func (p *Provisioner) Cancel() {
+	// Just hard quit. It isn't a big deal if what we're doing keeps
+	// running on the other side.
+	os.Exit(0)
+}
+
 func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communicator, ui packer.Ui) (err error) {
 	visitPath := func(localPath string, f os.FileInfo, err error) (err2 error) {
 		localRelPath := strings.Replace(localPath, localDir, "", 1)
