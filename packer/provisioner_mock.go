@@ -3,6 +3,8 @@ package packer
 // MockProvisioner is an implementation of Provisioner that can be
 // used for tests.
 type MockProvisioner struct {
+	ProvFunc func() error
+
 	PrepCalled   bool
 	PrepConfigs  []interface{}
 	ProvCalled   bool
@@ -19,7 +21,12 @@ func (t *MockProvisioner) Prepare(configs ...interface{}) error {
 func (t *MockProvisioner) Provision(ui Ui, comm Communicator) error {
 	t.ProvCalled = true
 	t.ProvUi = ui
-	return nil
+
+	if t.ProvFunc == nil {
+		return nil
+	}
+
+	return t.ProvFunc()
 }
 
 func (t *MockProvisioner) Cancel() {
