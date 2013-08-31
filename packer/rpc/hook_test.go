@@ -28,6 +28,10 @@ func TestHookRPC(t *testing.T) {
 	ui := &testUi{}
 	hClient.Run("foo", ui, nil, 42)
 	assert.True(h.RunCalled, "run should be called")
+
+	// Test Cancel
+	hClient.Cancel()
+	assert.True(h.CancelCalled, "cancel should be called")
 }
 
 func TestHook_Implements(t *testing.T) {

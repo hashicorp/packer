@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"net/rpc"
 )
 
@@ -38,7 +39,10 @@ func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data int
 }
 
 func (h *hook) Cancel() {
-	// TODO(mitchellh): implement
+	err := h.client.Call("Hook.Cancel", new(interface{}), new(interface{}))
+	if err != nil {
+		log.Printf("Hook.Cancel error: %s", err)
+	}
 }
 
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
@@ -52,5 +56,10 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 	}
 
 	*reply = nil
+	return nil
+}
+
+func (h *HookServer) Cancel(args *interface{}, reply *interface{}) error {
+	h.hook.Cancel()
 	return nil
 }
