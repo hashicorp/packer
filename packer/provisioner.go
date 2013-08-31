@@ -32,3 +32,8 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 
 	return nil
 }
+
+// Cancels the privisioners that are still running.
+func (h *ProvisionHook) Cancel() {
+	// TODO(mitchellh): implement
+}

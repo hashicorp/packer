@@ -7,21 +7,11 @@ import (
 	"testing"
 )
 
-type testHook struct {
-	runCalled bool
-	runUi     packer.Ui
-}
-
-func (h *testHook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
-	h.runCalled = true
-	return nil
-}
-
 func TestHookRPC(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
 	// Create the UI to test
-	h := new(testHook)
+	h := new(packer.MockHook)
 
 	// Serve
 	server := rpc.NewServer()
@@ -37,7 +27,7 @@ func TestHookRPC(t *testing.T) {
 	// Test Run
 	ui := &testUi{}
 	hClient.Run("foo", ui, nil, 42)
-	assert.True(h.runCalled, "run should be called")
+	assert.True(h.RunCalled, "run should be called")
 }
 
 func TestHook_Implements(t *testing.T) {

@@ -37,6 +37,10 @@ func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data int
 	return h.client.Call("Hook.Run", args, new(interface{}))
 }
 
+func (h *hook) Cancel() {
+	// TODO(mitchellh): implement
+}
+
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 	client, err := rpc.Dial("tcp", args.RPCAddress)
 	if err != nil {

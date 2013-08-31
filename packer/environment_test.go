@@ -227,7 +227,7 @@ func TestEnvironment_DefaultCli_Version(t *testing.T) {
 func TestEnvironment_Hook(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
-	hook := &TestHook{}
+	hook := &MockHook{}
 	hooks := make(map[string]Hook)
 	hooks["foo"] = hook
 

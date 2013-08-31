@@ -11,8 +11,14 @@ const HookProvision = "packer_provision"
 // you must reference the documentation for the specific hook you're interested
 // in. In addition to that, the Hook is given access to a UI so that it can
 // output things to the user.
+//
+// Cancel is called when the hook needs to be cancelled. This will usually
+// be called when Run is still in progress so the mechanism that handles this
+// must be race-free. Cancel should attempt to cancel the hook in the
+// quickest, safest way possible.
 type Hook interface {
 	Run(string, Ui, Communicator, interface{}) error
+	Cancel()
 }
 
 // A Hook implementation that dispatches based on an internal mapping.
@@ -38,3 +44,5 @@ func (h *DispatchHook) Run(name string, ui Ui, comm Communicator, data interface
 
 	return nil
 }
+
+func (h *DispatchHook) Cancel() {}

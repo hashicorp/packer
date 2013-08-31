@@ -13,7 +13,7 @@ func testBuild() *coreBuild {
 		builderConfig: 42,
 		builderType:   "foo",
 		hooks: map[string][]Hook{
-			"foo": []Hook{&TestHook{}},
+			"foo": []Hook{&MockHook{}},
 		},
 		provisioners: []coreBuildProvisioner{
 			coreBuildProvisioner{&TestProvisioner{}, []interface{}{42}},
@@ -187,9 +187,9 @@ func TestBuild_Run(t *testing.T) {
 	dispatchHook := builder.runHook
 	dispatchHook.Run("foo", nil, nil, 42)
 
-	hook := build.hooks["foo"][0].(*TestHook)
-	assert.True(hook.runCalled, "run should be called")
-	assert.Equal(hook.runData, 42, "should have correct data")
+	hook := build.hooks["foo"][0].(*MockHook)
+	assert.True(hook.RunCalled, "run should be called")
+	assert.Equal(hook.RunData, 42, "should have correct data")
 
 	// Verify provisioners run
 	dispatchHook.Run(HookProvision, nil, nil, 42)

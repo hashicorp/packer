@@ -1,16 +1,9 @@
 package plugin
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"testing"
 )
-
-type helperHook byte
-
-func (helperHook) Run(string, packer.Ui, packer.Communicator, interface{}) error {
-	return nil
-}
 
 func TestHook_NoExist(t *testing.T) {
 	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
