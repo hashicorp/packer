@@ -176,11 +176,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ec2conn := ec2.New(auth, region)
 
 	// Setup the state bag and initial state for the steps
-	state := make(map[string]interface{})
-	state["config"] = &b.config
-	state["ec2"] = ec2conn
-	state["hook"] = hook
-	state["ui"] = ui
+	state := new(multistep.BasicStateBag)
+	state.Put("config", &b.config)
+	state.Put("ec2", ec2conn)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -242,18 +242,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.runner.Run(state)
 
 	// If there was an error, return that
-	if rawErr, ok := state["error"]; ok {
+	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
 
 	// If there are no AMIs, then just return
-	if _, ok := state["amis"]; !ok {
+	if _, ok := state.GetOk("amis"); !ok {
 		return nil, nil
 	}
 
 	// Build the artifact and return it
 	artifact := &awscommon.Artifact{
-		Amis:           state["amis"].(map[string]string),
+		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Conn:           ec2conn,
 	}
