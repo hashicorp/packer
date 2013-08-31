@@ -23,13 +23,13 @@ type stepHTTPServer struct {
 	l net.Listener
 }
 
-func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	ui := state["ui"].(packer.Ui)
+func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	ui := state.Get("ui").(packer.Ui)
 
 	var httpPort uint = 0
 	if config.HTTPDir == "" {
-		state["http_port"] = httpPort
+		state.Put("http_port", httpPort)
 		return multistep.ActionContinue
 	}
 
@@ -62,12 +62,12 @@ func (s *stepHTTPServer) Run(state map[string]interface{}) multistep.StepAction 
 	go server.Serve(s.l)
 
 	// Save the address into the state so it can be accessed in the future
-	state["http_port"] = httpPort
+	state.Put("http_port", httpPort)
 
 	return multistep.ActionContinue
 }
 
-func (s *stepHTTPServer) Cleanup(map[string]interface{}) {
+func (s *stepHTTPServer) Cleanup(multistep.StateBag) {
 	if s.l != nil {
 		// Close the listener so that the HTTP server stops
 		s.l.Close()

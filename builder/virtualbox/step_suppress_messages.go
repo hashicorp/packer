@@ -11,14 +11,14 @@ import (
 // pop-up messages don't exist.
 type stepSuppressMessages struct{}
 
-func (stepSuppressMessages) Run(state map[string]interface{}) multistep.StepAction {
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
+func (stepSuppressMessages) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
 
 	log.Println("Suppressing annoying messages in VirtualBox")
 	if err := driver.SuppressMessages(); err != nil {
 		err := fmt.Errorf("Error configuring VirtualBox to suppress messages: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -26,4 +26,4 @@ func (stepSuppressMessages) Run(state map[string]interface{}) multistep.StepActi
 	return multistep.ActionContinue
 }
 
-func (stepSuppressMessages) Cleanup(map[string]interface{}) {}
+func (stepSuppressMessages) Cleanup(multistep.StateBag) {}

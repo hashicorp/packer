@@ -16,11 +16,11 @@ type stepRun struct {
 	vmName string
 }
 
-func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	ui.Say("Starting the virtual machine...")
 	guiArgument := "gui"
@@ -33,7 +33,7 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	command := []string{"startvm", vmName, "--type", guiArgument}
 	if err := driver.VBoxManage(command...); err != nil {
 		err := fmt.Errorf("Error starting VM: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -48,13 +48,13 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepRun) Cleanup(state map[string]interface{}) {
+func (s *stepRun) Cleanup(state multistep.StateBag) {
 	if s.vmName == "" {
 		return
 	}
 
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
 
 	if running, _ := driver.IsRunning(s.vmName); running {
 		if err := driver.VBoxManage("controlvm", s.vmName, "poweroff"); err != nil {

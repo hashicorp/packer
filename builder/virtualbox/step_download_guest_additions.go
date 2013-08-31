@@ -29,16 +29,16 @@ type guestAdditionsUrlTemplate struct {
 //   guest_additions_path string - Path to the guest additions.
 type stepDownloadGuestAdditions struct{}
 
-func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep.StepAction {
+func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	config := state["config"].(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*config)
 
 	// Get VBox version
 	version, err := driver.Version()
 	if err != nil {
-		state["error"] = fmt.Errorf("Error reading version for guest additions download: %s", err)
+		state.Put("error", fmt.Errorf("Error reading version for guest additions download: %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -71,7 +71,7 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 		url, err = config.tpl.Process(url, tplData)
 		if err != nil {
 			err := fmt.Errorf("Error preparing guest additions url: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -85,7 +85,7 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 	url, err = common.DownloadableURL(url)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions url: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -103,9 +103,9 @@ func (s *stepDownloadGuestAdditions) Run(state map[string]interface{}) multistep
 	return downStep.Run(state)
 }
 
-func (s *stepDownloadGuestAdditions) Cleanup(state map[string]interface{}) {}
+func (s *stepDownloadGuestAdditions) Cleanup(state multistep.StateBag) {}
 
-func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]interface{}, additionsVersion string, additionsName string) (string, multistep.StepAction) {
+func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
 	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf(
@@ -114,9 +114,9 @@ func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]in
 
 	checksumsFile, err := ioutil.TempFile("", "packer")
 	if err != nil {
-		state["error"] = fmt.Errorf(
+		state.Put("error", fmt.Errorf(
 			"Failed creating temporary file to store guest addition checksums: %s",
-			err)
+			err))
 		return "", multistep.ActionHalt
 	}
 	defer os.Remove(checksumsFile.Name())
@@ -136,9 +136,9 @@ func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]in
 
 	// Next, we find the checksum for the file we're looking to download.
 	// It is an error if the checksum cannot be found.
-	checksumsF, err := os.Open(state["guest_additions_checksums_path"].(string))
+	checksumsF, err := os.Open(state.Get("guest_additions_checksums_path").(string))
 	if err != nil {
-		state["error"] = fmt.Errorf("Error opening guest addition checksums: %s", err)
+		state.Put("error", fmt.Errorf("Error opening guest addition checksums: %s", err))
 		return "", multistep.ActionHalt
 	}
 	defer checksumsF.Close()
@@ -166,8 +166,8 @@ func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state map[string]in
 	}
 
 	if checksum == "" {
-		state["error"] = fmt.Errorf(
-			"The checksum for the file '%s' could not be found.", additionsName)
+		state.Put("error", fmt.Errorf(
+			"The checksum for the file '%s' could not be found.", additionsName))
 		return "", multistep.ActionHalt
 	}
 

@@ -14,10 +14,10 @@ type stepCreateVM struct {
 	vmName string
 }
 
-func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
+func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
 
 	name := config.VMName
 
@@ -38,7 +38,7 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 		err := driver.VBoxManage(command...)
 		if err != nil {
 			err := fmt.Errorf("Error creating VM: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -50,18 +50,18 @@ func (s *stepCreateVM) Run(state map[string]interface{}) multistep.StepAction {
 	}
 
 	// Set the final name in the state bag so others can use it
-	state["vmName"] = s.vmName
+	state.Put("vmName", s.vmName)
 
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateVM) Cleanup(state map[string]interface{}) {
+func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 	if s.vmName == "" {
 		return
 	}
 
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Unregistering and deleting virtual machine...")
 	if err := driver.VBoxManage("unregistervm", s.vmName, "--delete"); err != nil {

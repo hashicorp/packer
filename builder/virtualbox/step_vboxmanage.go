@@ -19,11 +19,11 @@ type commandTemplate struct {
 // Produces:
 type stepVBoxManage struct{}
 
-func (s *stepVBoxManage) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmName := state["vmName"].(string)
+func (s *stepVBoxManage) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
 
 	if len(config.VBoxManage) > 0 {
 		ui.Say("Executing custom VBoxManage commands...")
@@ -42,7 +42,7 @@ func (s *stepVBoxManage) Run(state map[string]interface{}) multistep.StepAction 
 			command[i], err = config.tpl.Process(arg, tplData)
 			if err != nil {
 				err := fmt.Errorf("Error preparing vboxmanage command: %s", err)
-				state["error"] = err
+				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
@@ -51,7 +51,7 @@ func (s *stepVBoxManage) Run(state map[string]interface{}) multistep.StepAction 
 		ui.Message(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error executing command: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -60,4 +60,4 @@ func (s *stepVBoxManage) Run(state map[string]interface{}) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *stepVBoxManage) Cleanup(state map[string]interface{}) {}
+func (s *stepVBoxManage) Cleanup(state multistep.StateBag) {}
