@@ -10,11 +10,11 @@ import (
 
 type StepRegisterAMI struct{}
 
-func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*Config)
-	ec2conn := state["ec2"].(*ec2.EC2)
-	manifestPath := state["remote_manifest_path"].(string)
-	ui := state["ui"].(packer.Ui)
+func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	manifestPath := state.Get("remote_manifest_path").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
 	registerOpts := &ec2.RegisterImage{
@@ -25,8 +25,8 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
 	if err != nil {
-		state["error"] = fmt.Errorf("Error registering AMI: %s", err)
-		ui.Error(state["error"].(error).Error())
+		state.Put("error", fmt.Errorf("Error registering AMI: %s", err))
+		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
@@ -34,13 +34,13 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	ui.Say(fmt.Sprintf("AMI: %s", registerResp.ImageId))
 	amis := make(map[string]string)
 	amis[ec2conn.Region.Name] = registerResp.ImageId
-	state["amis"] = amis
+	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
 	if err := awscommon.WaitForAMI(ec2conn, registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -48,4 +48,4 @@ func (s *StepRegisterAMI) Run(state map[string]interface{}) multistep.StepAction
 	return multistep.ActionContinue
 }
 
-func (s *StepRegisterAMI) Cleanup(map[string]interface{}) {}
+func (s *StepRegisterAMI) Cleanup(multistep.StateBag) {}

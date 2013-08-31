@@ -16,12 +16,12 @@ type uploadCmdData struct {
 
 type StepUploadBundle struct{}
 
-func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepAction {
-	comm := state["communicator"].(packer.Communicator)
-	config := state["config"].(*Config)
-	manifestName := state["manifest_name"].(string)
-	manifestPath := state["manifest_path"].(string)
-	ui := state["ui"].(packer.Ui)
+func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
+	comm := state.Get("communicator").(packer.Communicator)
+	config := state.Get("config").(*Config)
+	manifestName := state.Get("manifest_name").(string)
+	manifestPath := state.Get("manifest_path").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	var err error
 	config.BundleUploadCommand, err = config.tpl.Process(config.BundleUploadCommand, uploadCmdData{
@@ -33,7 +33,7 @@ func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepActio
 	})
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle upload command: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -41,23 +41,23 @@ func (s *StepUploadBundle) Run(state map[string]interface{}) multistep.StepActio
 	ui.Say("Uploading the bundle...")
 	cmd := &packer.RemoteCmd{Command: config.BundleUploadCommand}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
-		state["error"] = fmt.Errorf("Error uploading volume: %s", err)
-		ui.Error(state["error"].(error).Error())
+		state.Put("error", fmt.Errorf("Error uploading volume: %s", err))
+		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
 	if cmd.ExitStatus != 0 {
-		state["error"] = fmt.Errorf(
-			"Bundle upload failed. Please see the output above for more\n" +
-				"details on what went wrong.")
-		ui.Error(state["error"].(error).Error())
+		state.Put("error", fmt.Errorf(
+			"Bundle upload failed. Please see the output above for more\n"+
+				"details on what went wrong."))
+		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
-	state["remote_manifest_path"] = fmt.Sprintf(
-		"%s/%s", config.S3Bucket, manifestName)
+	state.Put("remote_manifest_path", fmt.Sprintf(
+		"%s/%s", config.S3Bucket, manifestName))
 
 	return multistep.ActionContinue
 }
 
-func (s *StepUploadBundle) Cleanup(state map[string]interface{}) {}
+func (s *StepUploadBundle) Cleanup(state multistep.StateBag) {}

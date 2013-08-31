@@ -19,13 +19,13 @@ type bundleCmdData struct {
 
 type StepBundleVolume struct{}
 
-func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepAction {
-	comm := state["communicator"].(packer.Communicator)
-	config := state["config"].(*Config)
-	instance := state["instance"].(*ec2.Instance)
-	ui := state["ui"].(packer.Ui)
-	x509RemoteCertPath := state["x509RemoteCertPath"].(string)
-	x509RemoteKeyPath := state["x509RemoteKeyPath"].(string)
+func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
+	comm := state.Get("communicator").(packer.Communicator)
+	config := state.Get("config").(*Config)
+	instance := state.Get("instance").(*ec2.Instance)
+	ui := state.Get("ui").(packer.Ui)
+	x509RemoteCertPath := state.Get("x509RemoteCertPath").(string)
+	x509RemoteKeyPath := state.Get("x509RemoteKeyPath").(string)
 
 	// Bundle the volume
 	var err error
@@ -40,7 +40,7 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 	})
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle volume command: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -49,26 +49,26 @@ func (s *StepBundleVolume) Run(state map[string]interface{}) multistep.StepActio
 	cmd := new(packer.RemoteCmd)
 	cmd.Command = config.BundleVolCommand
 	if err := cmd.StartWithUi(comm, ui); err != nil {
-		state["error"] = fmt.Errorf("Error bundling volume: %s", err)
-		ui.Error(state["error"].(error).Error())
+		state.Put("error", fmt.Errorf("Error bundling volume: %s", err))
+		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
 	if cmd.ExitStatus != 0 {
-		state["error"] = fmt.Errorf(
-			"Volume bundling failed. Please see the output above for more\n" +
-				"details on what went wrong.")
-		ui.Error(state["error"].(error).Error())
+		state.Put("error", fmt.Errorf(
+			"Volume bundling failed. Please see the output above for more\n"+
+				"details on what went wrong."))
+		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
 	// Store the manifest path
 	manifestName := config.BundlePrefix + ".manifest.xml"
-	state["manifest_name"] = manifestName
-	state["manifest_path"] = fmt.Sprintf(
-		"%s/%s", config.BundleDestination, manifestName)
+	state.Put("manifest_name", manifestName)
+	state.Put("manifest_path", fmt.Sprintf(
+		"%s/%s", config.BundleDestination, manifestName))
 
 	return multistep.ActionContinue
 }
 
-func (s *StepBundleVolume) Cleanup(map[string]interface{}) {}
+func (s *StepBundleVolume) Cleanup(multistep.StateBag) {}
