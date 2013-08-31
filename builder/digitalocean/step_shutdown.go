@@ -10,11 +10,11 @@ import (
 
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
-	client := state["client"].(*DigitalOceanClient)
-	c := state["config"].(config)
-	ui := state["ui"].(packer.Ui)
-	dropletId := state["droplet_id"].(uint)
+func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+	client := state.Get("client").(*DigitalOceanClient)
+	c := state.Get("config").(config)
+	ui := state.Get("ui").(packer.Ui)
+	dropletId := state.Get("droplet_id").(uint)
 
 	// Sleep arbitrarily before sending the request
 	// Otherwise we get "pending event" errors, even though there isn't
@@ -26,7 +26,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 
 	if err != nil {
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -36,7 +36,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 	err = waitForDropletState("off", dropletId, client, c)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for droplet to become 'off': %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -44,6 +44,6 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepShutdown) Cleanup(state map[string]interface{}) {
+func (s *stepShutdown) Cleanup(state multistep.StateBag) {
 	// no cleanup
 }
