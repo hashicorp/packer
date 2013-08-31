@@ -42,6 +42,13 @@ func (h *DispatchHook) Run(name string, ui Ui, comm Communicator, data interface
 	h.cancelled = false
 	h.l.Unlock()
 
+	// Make sure when we exit that we reset the running hook.
+	defer func() {
+		h.l.Lock()
+		defer h.l.Unlock()
+		h.runningHook = nil
+	}()
+
 	hooks, ok := h.Mapping[name]
 	if !ok {
 		// No hooks for that name. No problem.
