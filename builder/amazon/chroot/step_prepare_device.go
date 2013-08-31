@@ -13,9 +13,9 @@ type StepPrepareDevice struct {
 	mounts []string
 }
 
-func (s *StepPrepareDevice) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*Config)
-	ui := state["ui"].(packer.Ui)
+func (s *StepPrepareDevice) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
+	ui := state.Get("ui").(packer.Ui)
 
 	device := config.DevicePath
 	if device == "" {
@@ -24,7 +24,7 @@ func (s *StepPrepareDevice) Run(state map[string]interface{}) multistep.StepActi
 		device, err = AvailableDevice()
 		if err != nil {
 			err := fmt.Errorf("Error finding available device: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -32,14 +32,14 @@ func (s *StepPrepareDevice) Run(state map[string]interface{}) multistep.StepActi
 
 	if _, err := os.Stat(device); err == nil {
 		err := fmt.Errorf("Device is in use: %s", device)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	log.Printf("Device: %s", device)
-	state["device"] = device
+	state.Put("device", device)
 	return multistep.ActionContinue
 }
 
-func (s *StepPrepareDevice) Cleanup(state map[string]interface{}) {}
+func (s *StepPrepareDevice) Cleanup(state multistep.StateBag) {}

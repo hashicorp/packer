@@ -17,16 +17,16 @@ type StepSnapshot struct {
 	snapshotId string
 }
 
-func (s *StepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
-	volumeId := state["volume_id"].(string)
+func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+	volumeId := state.Get("volume_id").(string)
 
 	ui.Say("Creating snapshot...")
 	createSnapResp, err := ec2conn.CreateSnapshot(volumeId, "")
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -58,26 +58,26 @@ func (s *StepSnapshot) Run(state map[string]interface{}) multistep.StepAction {
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state["snapshot_id"] = s.snapshotId
+	state.Put("snapshot_id", s.snapshotId)
 	return multistep.ActionContinue
 }
 
-func (s *StepSnapshot) Cleanup(state map[string]interface{}) {
+func (s *StepSnapshot) Cleanup(state multistep.StateBag) {
 	if s.snapshotId == "" {
 		return
 	}
 
-	_, cancelled := state[multistep.StateCancelled]
-	_, halted := state[multistep.StateHalted]
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
 
 	if cancelled || halted {
-		ec2conn := state["ec2"].(*ec2.EC2)
-		ui := state["ui"].(packer.Ui)
+		ec2conn := state.Get("ec2").(*ec2.EC2)
+		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Removing snapshot since we cancelled or halted...")
 		_, err := ec2conn.DeleteSnapshots([]string{s.snapshotId})
 		if err != nil {

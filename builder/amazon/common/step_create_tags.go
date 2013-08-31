@@ -11,10 +11,10 @@ type StepCreateTags struct {
 	Tags map[string]string
 }
 
-func (s *StepCreateTags) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
-	amis := state["amis"].(map[string]string)
+func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+	amis := state.Get("amis").(map[string]string)
 	ami := amis[ec2conn.Region.Name]
 
 	if len(s.Tags) > 0 {
@@ -29,7 +29,7 @@ func (s *StepCreateTags) Run(state map[string]interface{}) multistep.StepAction 
 		_, err := ec2conn.CreateTags([]string{ami}, ec2Tags)
 		if err != nil {
 			err := fmt.Errorf("Error adding tags to AMI (%s): %s", ami, err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -38,6 +38,6 @@ func (s *StepCreateTags) Run(state map[string]interface{}) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateTags) Cleanup(state map[string]interface{}) {
+func (s *StepCreateTags) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }

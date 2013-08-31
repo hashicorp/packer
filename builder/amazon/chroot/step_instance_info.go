@@ -12,9 +12,9 @@ import (
 // StepInstanceInfo verifies that this builder is running on an EC2 instance.
 type StepInstanceInfo struct{}
 
-func (s *StepInstanceInfo) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Get our own instance ID
 	ui.Say("Gathering information about this EC2 instance...")
@@ -24,7 +24,7 @@ func (s *StepInstanceInfo) Run(state map[string]interface{}) multistep.StepActio
 		err := fmt.Errorf(
 			"Error retrieving the ID of the instance Packer is running on.\n" +
 				"Please verify Packer is running on a proper AWS EC2 instance.")
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -36,22 +36,22 @@ func (s *StepInstanceInfo) Run(state map[string]interface{}) multistep.StepActio
 	instancesResp, err := ec2conn.Instances([]string{instanceId}, ec2.NewFilter())
 	if err != nil {
 		err := fmt.Errorf("Error getting instance data: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	if len(instancesResp.Reservations) == 0 {
 		err := fmt.Errorf("Error getting instance data: no instance found.")
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	instance := &instancesResp.Reservations[0].Instances[0]
-	state["instance"] = instance
+	state.Put("instance", instance)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepInstanceInfo) Cleanup(map[string]interface{}) {}
+func (s *StepInstanceInfo) Cleanup(multistep.StateBag) {}

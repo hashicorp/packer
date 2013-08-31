@@ -14,10 +14,10 @@ type StepModifyAMIAttributes struct {
 	Description  string
 }
 
-func (s *StepModifyAMIAttributes) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
-	amis := state["amis"].(map[string]string)
+func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+	amis := state.Get("amis").(map[string]string)
 	ami := amis[ec2conn.Region.Name]
 
 	// Determine if there is any work to do.
@@ -65,7 +65,7 @@ func (s *StepModifyAMIAttributes) Run(state map[string]interface{}) multistep.St
 		_, err := ec2conn.ModifyImageAttribute(ami, opts)
 		if err != nil {
 			err := fmt.Errorf("Error modify AMI attributes: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -74,6 +74,6 @@ func (s *StepModifyAMIAttributes) Run(state map[string]interface{}) multistep.St
 	return multistep.ActionContinue
 }
 
-func (s *StepModifyAMIAttributes) Cleanup(state map[string]interface{}) {
+func (s *StepModifyAMIAttributes) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }

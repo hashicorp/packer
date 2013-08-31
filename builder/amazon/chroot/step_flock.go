@@ -17,13 +17,13 @@ type StepFlock struct {
 	fh *os.File
 }
 
-func (s *StepFlock) Run(state map[string]interface{}) multistep.StepAction {
-	ui := state["ui"].(packer.Ui)
+func (s *StepFlock) Run(state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
 
 	lockfile := "/var/lock/packer-chroot/lock"
 	if err := os.MkdirAll(filepath.Dir(lockfile), 0755); err != nil {
 		err := fmt.Errorf("Error creating lock: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -32,7 +32,7 @@ func (s *StepFlock) Run(state map[string]interface{}) multistep.StepAction {
 	f, err := os.Create(lockfile)
 	if err != nil {
 		err := fmt.Errorf("Error creating lock: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -40,7 +40,7 @@ func (s *StepFlock) Run(state map[string]interface{}) multistep.StepAction {
 	// LOCK!
 	if err := lockFile(f); err != nil {
 		err := fmt.Errorf("Error creating lock: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -49,15 +49,15 @@ func (s *StepFlock) Run(state map[string]interface{}) multistep.StepAction {
 	// the lock.
 	s.fh = f
 
-	state["flock_cleanup"] = s
+	state.Put("flock_cleanup", s)
 	return multistep.ActionContinue
 }
 
-func (s *StepFlock) Cleanup(state map[string]interface{}) {
+func (s *StepFlock) Cleanup(state multistep.StateBag) {
 	s.CleanupFunc(state)
 }
 
-func (s *StepFlock) CleanupFunc(state map[string]interface{}) error {
+func (s *StepFlock) CleanupFunc(state multistep.StateBag) error {
 	if s.fh == nil {
 		return nil
 	}

@@ -19,10 +19,10 @@ type StepCopyFiles struct {
 	files []string
 }
 
-func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*Config)
-	mountPath := state["mount_path"].(string)
-	ui := state["ui"].(packer.Ui)
+func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
+	mountPath := state.Get("mount_path").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	s.files = make([]string, 0, len(config.CopyFiles))
 	if len(config.CopyFiles) > 0 {
@@ -34,7 +34,7 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 
 			if err := s.copySingle(chrootPath, path); err != nil {
 				err := fmt.Errorf("Error copying file: %s", err)
-				state["error"] = err
+				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
@@ -43,18 +43,18 @@ func (s *StepCopyFiles) Run(state map[string]interface{}) multistep.StepAction {
 		}
 	}
 
-	state["copy_files_cleanup"] = s
+	state.Put("copy_files_cleanup", s)
 	return multistep.ActionContinue
 }
 
-func (s *StepCopyFiles) Cleanup(state map[string]interface{}) {
-	ui := state["ui"].(packer.Ui)
+func (s *StepCopyFiles) Cleanup(state multistep.StateBag) {
+	ui := state.Get("ui").(packer.Ui)
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
 	}
 }
 
-func (s *StepCopyFiles) CleanupFunc(map[string]interface{}) error {
+func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)

@@ -21,12 +21,12 @@ type StepAttachVolume struct {
 	volumeId string
 }
 
-func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	device := state["device"].(string)
-	instance := state["instance"].(*ec2.Instance)
-	ui := state["ui"].(packer.Ui)
-	volumeId := state["volume_id"].(string)
+func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	device := state.Get("device").(string)
+	instance := state.Get("instance").(*ec2.Instance)
+	ui := state.Get("ui").(packer.Ui)
+	volumeId := state.Get("volume_id").(string)
 
 	// For the API call, it expects "sd" prefixed devices.
 	attachVolume := strings.Replace(device, "/xvd", "/sd", 1)
@@ -35,7 +35,7 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 	_, err := ec2conn.AttachVolume(volumeId, instance.InstanceId, attachVolume)
 	if err != nil {
 		err := fmt.Errorf("Error attaching volume: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -67,29 +67,29 @@ func (s *StepAttachVolume) Run(state map[string]interface{}) multistep.StepActio
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state["attach_cleanup"] = s
+	state.Put("attach_cleanup", s)
 	return multistep.ActionContinue
 }
 
-func (s *StepAttachVolume) Cleanup(state map[string]interface{}) {
-	ui := state["ui"].(packer.Ui)
+func (s *StepAttachVolume) Cleanup(state multistep.StateBag) {
+	ui := state.Get("ui").(packer.Ui)
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
 	}
 }
 
-func (s *StepAttachVolume) CleanupFunc(state map[string]interface{}) error {
+func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	if !s.attached {
 		return nil
 	}
 
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Detaching EBS volume...")
 	_, err := ec2conn.DetachVolume(s.volumeId)

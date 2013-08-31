@@ -10,14 +10,14 @@ import (
 // StepEarlyUnflock unlocks the flock.
 type StepEarlyUnflock struct{}
 
-func (s *StepEarlyUnflock) Run(state map[string]interface{}) multistep.StepAction {
-	cleanup := state["flock_cleanup"].(Cleanup)
-	ui := state["ui"].(packer.Ui)
+func (s *StepEarlyUnflock) Run(state multistep.StateBag) multistep.StepAction {
+	cleanup := state.Get("flock_cleanup").(Cleanup)
+	ui := state.Get("ui").(packer.Ui)
 
 	log.Println("Unlocking file lock...")
 	if err := cleanup.CleanupFunc(state); err != nil {
 		err := fmt.Errorf("Error unlocking file lock: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -25,4 +25,4 @@ func (s *StepEarlyUnflock) Run(state map[string]interface{}) multistep.StepActio
 	return multistep.ActionContinue
 }
 
-func (s *StepEarlyUnflock) Cleanup(state map[string]interface{}) {}
+func (s *StepEarlyUnflock) Cleanup(state multistep.StateBag) {}
