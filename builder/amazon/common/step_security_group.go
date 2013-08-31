@@ -19,13 +19,13 @@ type StepSecurityGroup struct {
 	createdGroupId string
 }
 
-func (s *StepSecurityGroup) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	if s.SecurityGroupId != "" {
 		log.Printf("Using specified security group: %s", s.SecurityGroupId)
-		state["securityGroupId"] = s.SecurityGroupId
+		state.Put("securityGroupId", s.SecurityGroupId)
 		return multistep.ActionContinue
 	}
 
@@ -64,24 +64,24 @@ func (s *StepSecurityGroup) Run(state map[string]interface{}) multistep.StepActi
 	ui.Say("Authorizing SSH access on the temporary security group...")
 	if _, err := ec2conn.AuthorizeSecurityGroup(groupResp.SecurityGroup, perms); err != nil {
 		err := fmt.Errorf("Error creating temporary security group: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// Set some state data for use in future steps
-	state["securityGroupId"] = s.createdGroupId
+	state.Put("securityGroupId", s.createdGroupId)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepSecurityGroup) Cleanup(state map[string]interface{}) {
+func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 	if s.createdGroupId == "" {
 		return
 	}
 
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting temporary security group...")
 

@@ -11,10 +11,10 @@ type StepChrootProvision struct {
 	mounts []string
 }
 
-func (s *StepChrootProvision) Run(state map[string]interface{}) multistep.StepAction {
-	hook := state["hook"].(packer.Hook)
-	mountPath := state["mount_path"].(string)
-	ui := state["ui"].(packer.Ui)
+func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction {
+	hook := state.Get("hook").(packer.Hook)
+	mountPath := state.Get("mount_path").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Create our communicator
 	comm := &Communicator{
@@ -24,11 +24,11 @@ func (s *StepChrootProvision) Run(state map[string]interface{}) multistep.StepAc
 	// Provision
 	log.Println("Running the provision hook")
 	if err := hook.Run(packer.HookProvision, ui, comm, nil); err != nil {
-		state["error"] = err
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
 }
 
-func (s *StepChrootProvision) Cleanup(state map[string]interface{}) {}
+func (s *StepChrootProvision) Cleanup(state multistep.StateBag) {}

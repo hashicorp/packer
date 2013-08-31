@@ -17,10 +17,10 @@ type StepMountExtra struct {
 	mounts []string
 }
 
-func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*Config)
-	mountPath := state["mount_path"].(string)
-	ui := state["ui"].(packer.Ui)
+func (s *StepMountExtra) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
+	mountPath := state.Get("mount_path").(string)
+	ui := state.Get("ui").(packer.Ui)
 
 	s.mounts = make([]string, 0, len(config.ChrootMounts))
 
@@ -30,7 +30,7 @@ func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction 
 
 		if err := os.MkdirAll(innerPath, 0755); err != nil {
 			err := fmt.Errorf("Error creating mount directory: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -53,7 +53,7 @@ func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction 
 		if err := cmd.Run(); err != nil {
 			err := fmt.Errorf(
 				"Error mounting: %s\nStderr: %s", err, stderr.String())
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -61,12 +61,12 @@ func (s *StepMountExtra) Run(state map[string]interface{}) multistep.StepAction 
 		s.mounts = append(s.mounts, innerPath)
 	}
 
-	state["mount_extra_cleanup"] = s
+	state.Put("mount_extra_cleanup", s)
 	return multistep.ActionContinue
 }
 
-func (s *StepMountExtra) Cleanup(state map[string]interface{}) {
-	ui := state["ui"].(packer.Ui)
+func (s *StepMountExtra) Cleanup(state multistep.StateBag) {
+	ui := state.Get("ui").(packer.Ui)
 
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
@@ -74,12 +74,12 @@ func (s *StepMountExtra) Cleanup(state map[string]interface{}) {
 	}
 }
 
-func (s *StepMountExtra) CleanupFunc(state map[string]interface{}) error {
+func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 	if s.mounts == nil {
 		return nil
 	}
 
-	config := state["config"].(*Config)
+	config := state.Get("config").(*Config)
 	for len(s.mounts) > 0 {
 		var path string
 		lastIndex := len(s.mounts) - 1

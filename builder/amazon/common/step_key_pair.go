@@ -19,16 +19,16 @@ type StepKeyPair struct {
 	keyName string
 }
 
-func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary keypair for this instance...")
 	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
 	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
-		state["error"] = fmt.Errorf("Error creating temporary keypair: %s", err)
+		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -36,8 +36,8 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	s.keyName = keyName
 
 	// Set some state data for use in future steps
-	state["keyPair"] = keyName
-	state["privateKey"] = keyResp.KeyMaterial
+	state.Put("keyPair", keyName)
+	state.Put("privateKey", keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -45,21 +45,21 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
-			state["error"] = fmt.Errorf("Error saving debug key: %s", err)
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
 		defer f.Close()
 
 		// Write the key out
 		if _, err := f.Write([]byte(keyResp.KeyMaterial)); err != nil {
-			state["error"] = fmt.Errorf("Error saving debug key: %s", err)
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
 
 		// Chmod it so that it is SSH ready
 		if runtime.GOOS != "windows" {
 			if err := f.Chmod(0600); err != nil {
-				state["error"] = fmt.Errorf("Error setting permissions of debug key: %s", err)
+				state.Put("error", fmt.Errorf("Error setting permissions of debug key: %s", err))
 				return multistep.ActionHalt
 			}
 		}
@@ -68,14 +68,14 @@ func (s *StepKeyPair) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepKeyPair) Cleanup(state map[string]interface{}) {
+func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
 	if s.keyName == "" {
 		return
 	}
 
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting temporary keypair...")
 	_, err := ec2conn.DeleteKeyPair(s.keyName)

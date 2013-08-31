@@ -13,10 +13,10 @@ type StepAMIRegionCopy struct {
 	Tags    map[string]string
 }
 
-func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
-	amis := state["amis"].(map[string]string)
+func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+	amis := state.Get("amis").(map[string]string)
 	ami := amis[ec2conn.Region.Name]
 
 	if len(s.Regions) == 0 {
@@ -36,7 +36,7 @@ func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepActi
 
 		if err != nil {
 			err := fmt.Errorf("Error Copying AMI (%s) to region (%s): %s", ami, region, err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -44,7 +44,7 @@ func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepActi
 		ui.Say(fmt.Sprintf("Waiting for AMI (%s) in region (%s) to become ready...", resp.ImageId, region))
 		if err := WaitForAMI(regionconn, resp.ImageId); err != nil {
 			err := fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s", resp.ImageId, region, err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -62,7 +62,7 @@ func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepActi
 			_, err := regionconn.CreateTags([]string{resp.ImageId}, ec2Tags)
 			if err != nil {
 				err := fmt.Errorf("Error adding tags to AMI (%s): %s", resp.ImageId, err)
-				state["error"] = err
+				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
@@ -71,10 +71,10 @@ func (s *StepAMIRegionCopy) Run(state map[string]interface{}) multistep.StepActi
 		amis[region] = resp.ImageId
 	}
 
-	state["amis"] = amis
+	state.Put("amis", amis)
 	return multistep.ActionContinue
 }
 
-func (s *StepAMIRegionCopy) Cleanup(state map[string]interface{}) {
+func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }

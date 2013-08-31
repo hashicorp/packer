@@ -26,7 +26,7 @@ type StateChangeConf struct {
 	Conn      *ec2.EC2
 	Pending   []string
 	Refresh   StateRefreshFunc
-	StepState map[string]interface{}
+	StepState multistep.StateBag
 	Target    string
 }
 
@@ -62,7 +62,7 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 		}
 
 		if conf.StepState != nil {
-			if _, ok := conf.StepState[multistep.StateCancelled]; ok {
+			if _, ok := conf.StepState.GetOk(multistep.StateCancelled); ok {
 				return nil, errors.New("interrupted")
 			}
 		}

@@ -18,11 +18,11 @@ type StepCreateVolume struct {
 	volumeId string
 }
 
-func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepAction {
-	ec2conn := state["ec2"].(*ec2.EC2)
-	image := state["source_image"].(*ec2.Image)
-	instance := state["instance"].(*ec2.Instance)
-	ui := state["ui"].(packer.Ui)
+func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	image := state.Get("source_image").(*ec2.Image)
+	instance := state.Get("instance").(*ec2.Instance)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Determine the root device snapshot
 	log.Printf("Searching for root device of the image (%s)", image.RootDeviceName)
@@ -36,7 +36,7 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 
 	if rootDevice == nil {
 		err := fmt.Errorf("Couldn't find root device!")
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -54,7 +54,7 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
 		err := fmt.Errorf("Error creating root volume: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -82,22 +82,22 @@ func (s *StepCreateVolume) Run(state map[string]interface{}) multistep.StepActio
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state["volume_id"] = s.volumeId
+	state.Put("volume_id", s.volumeId)
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateVolume) Cleanup(state map[string]interface{}) {
+func (s *StepCreateVolume) Cleanup(state multistep.StateBag) {
 	if s.volumeId == "" {
 		return
 	}
 
-	ec2conn := state["ec2"].(*ec2.EC2)
-	ui := state["ui"].(packer.Ui)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting the created EBS volume...")
 	_, err := ec2conn.DeleteVolume(s.volumeId)

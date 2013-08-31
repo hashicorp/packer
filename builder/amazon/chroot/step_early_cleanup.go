@@ -11,8 +11,8 @@ import (
 // prepare for snapshotting and creating an AMI.
 type StepEarlyCleanup struct{}
 
-func (s *StepEarlyCleanup) Run(state map[string]interface{}) multistep.StepAction {
-	ui := state["ui"].(packer.Ui)
+func (s *StepEarlyCleanup) Run(state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
 	cleanupKeys := []string{
 		"copy_files_cleanup",
 		"mount_extra_cleanup",
@@ -21,11 +21,11 @@ func (s *StepEarlyCleanup) Run(state map[string]interface{}) multistep.StepActio
 	}
 
 	for _, key := range cleanupKeys {
-		c := state[key].(Cleanup)
+		c := state.Get(key).(Cleanup)
 		log.Printf("Running cleanup func: %s", key)
 		if err := c.CleanupFunc(state); err != nil {
 			err := fmt.Errorf("Error cleaning up: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -34,4 +34,4 @@ func (s *StepEarlyCleanup) Run(state map[string]interface{}) multistep.StepActio
 	return multistep.ActionContinue
 }
 
-func (s *StepEarlyCleanup) Cleanup(state map[string]interface{}) {}
+func (s *StepEarlyCleanup) Cleanup(state multistep.StateBag) {}
