@@ -207,7 +207,9 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 			hooks[HookProvision] = make([]Hook, 0, 1)
 		}
 
-		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{provisioners})
+		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+			Provisioners: provisioners,
+		})
 	}
 
 	hook := &DispatchHook{Mapping: hooks}

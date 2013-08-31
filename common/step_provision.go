@@ -42,6 +42,7 @@ func (*StepProvision) Run(state map[string]interface{}) multistep.StepAction {
 			return multistep.ActionContinue
 		case <-time.After(1 * time.Second):
 			if _, ok := state[multistep.StateCancelled]; ok {
+				log.Println("Cancelling provisioning due to interrupt...")
 				hook.Cancel()
 				return multistep.ActionHalt
 			}
