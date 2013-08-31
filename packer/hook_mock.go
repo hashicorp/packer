@@ -2,6 +2,8 @@ package packer
 
 // MockHook is an implementation of Hook that can be used for tests.
 type MockHook struct {
+	RunFunc func() error
+
 	RunCalled    bool
 	RunComm      Communicator
 	RunData      interface{}
@@ -16,7 +18,12 @@ func (t *MockHook) Run(name string, ui Ui, comm Communicator, data interface{}) 
 	t.RunData = data
 	t.RunName = name
 	t.RunUi = ui
-	return nil
+
+	if t.RunFunc == nil {
+		return nil
+	}
+
+	return t.RunFunc()
 }
 
 func (t *MockHook) Cancel() {
