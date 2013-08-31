@@ -210,7 +210,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{provisioners})
 	}
 
-	hook := &DispatchHook{hooks}
+	hook := &DispatchHook{Mapping: hooks}
 	artifacts := make([]Artifact, 0, 1)
 
 	// The builder just has a normal Ui, but targetted
