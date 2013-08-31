@@ -189,6 +189,14 @@ the section above for more information on what environmental variables Packer
 will look for.
 </div>
 
+## Accessing the Instance to Debug
+
+If you need to access the instance to debug for some reason, run the builder
+with the `-debug` flag. In debug mode, the Amazon builder will save the
+private key in the current directory and will output the DNS or IP information
+as well. You can use this information to access the instance as it is
+running.
+
 ## Custom Bundle Commands
 
 A lot of the process required for creating an instance-store backed AMI
