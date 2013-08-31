@@ -3,18 +3,19 @@ package digitalocean
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 )
 
-func sshAddress(state map[string]interface{}) (string, error) {
-	config := state["config"].(config)
-	ipAddress := state["droplet_ip"].(string)
+func sshAddress(state multistep.StateBag) (string, error) {
+	config := state.Get("config").(config)
+	ipAddress := state.Get("droplet_ip").(string)
 	return fmt.Sprintf("%s:%d", ipAddress, config.SSHPort), nil
 }
 
-func sshConfig(state map[string]interface{}) (*gossh.ClientConfig, error) {
-	config := state["config"].(config)
-	privateKey := state["privateKey"].(string)
+func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
+	config := state.Get("config").(config)
+	privateKey := state.Get("privateKey").(string)
 
 	keyring := new(ssh.SimpleKeychain)
 	if err := keyring.AddPEMKey(privateKey); err != nil {

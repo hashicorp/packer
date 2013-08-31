@@ -14,11 +14,11 @@ type stepCreateDroplet struct {
 	dropletId uint
 }
 
-func (s *stepCreateDroplet) Run(state map[string]interface{}) multistep.StepAction {
-	client := state["client"].(*DigitalOceanClient)
-	ui := state["ui"].(packer.Ui)
-	c := state["config"].(config)
-	sshKeyId := state["ssh_key_id"].(uint)
+func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
+	client := state.Get("client").(*DigitalOceanClient)
+	ui := state.Get("ui").(packer.Ui)
+	c := state.Get("config").(config)
+	sshKeyId := state.Get("ssh_key_id").(uint)
 
 	ui.Say("Creating droplet...")
 
@@ -29,7 +29,7 @@ func (s *stepCreateDroplet) Run(state map[string]interface{}) multistep.StepActi
 	dropletId, err := client.CreateDroplet(name, c.SizeID, c.ImageID, c.RegionID, sshKeyId)
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -38,20 +38,20 @@ func (s *stepCreateDroplet) Run(state map[string]interface{}) multistep.StepActi
 	s.dropletId = dropletId
 
 	// Store the droplet id for later
-	state["droplet_id"] = dropletId
+	state.Put("droplet_id", dropletId)
 
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateDroplet) Cleanup(state map[string]interface{}) {
+func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 	// If the dropletid isn't there, we probably never created it
 	if s.dropletId == 0 {
 		return
 	}
 
-	client := state["client"].(*DigitalOceanClient)
-	ui := state["ui"].(packer.Ui)
-	c := state["config"].(config)
+	client := state.Get("client").(*DigitalOceanClient)
+	ui := state.Get("ui").(packer.Ui)
+	c := state.Get("config").(config)
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
