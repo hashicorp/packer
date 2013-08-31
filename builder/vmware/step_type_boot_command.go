@@ -34,18 +34,18 @@ type bootCommandTemplateData struct {
 //   <nothing>
 type stepTypeBootCommand struct{}
 
-func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	httpPort := state["http_port"].(uint)
-	ui := state["ui"].(packer.Ui)
-	vncPort := state["vnc_port"].(uint)
+func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	httpPort := state.Get("http_port").(uint)
+	ui := state.Get("ui").(packer.Ui)
+	vncPort := state.Get("vnc_port").(uint)
 
 	// Connect to VNC
 	ui.Say("Connecting to VM via VNC")
 	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", vncPort))
 	if err != nil {
 		err := fmt.Errorf("Error connecting to VNC: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -54,7 +54,7 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: true})
 	if err != nil {
 		err := fmt.Errorf("Error handshaking with VNC: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -73,7 +73,7 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	hostIp, err := ipFinder.HostIP()
 	if err != nil {
 		err := fmt.Errorf("Error detecting host IP: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -91,14 +91,14 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 		command, err := config.tpl.Process(command, tplData)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
 		// Check for interrupts between typing things so we can cancel
 		// since this isn't the fastest thing.
-		if _, ok := state[multistep.StateCancelled]; ok {
+		if _, ok := state.GetOk(multistep.StateCancelled); ok {
 			return multistep.ActionHalt
 		}
 
@@ -108,7 +108,7 @@ func (s *stepTypeBootCommand) Run(state map[string]interface{}) multistep.StepAc
 	return multistep.ActionContinue
 }
 
-func (*stepTypeBootCommand) Cleanup(map[string]interface{}) {}
+func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func vncSendString(c *vnc.ClientConn, original string) {
 	special := make(map[string]uint32)

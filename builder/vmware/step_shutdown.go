@@ -27,12 +27,12 @@ import (
 //   <nothing>
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
-	comm := state["communicator"].(packer.Communicator)
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmxPath := state["vmx_path"].(string)
+func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+	comm := state.Get("communicator").(packer.Communicator)
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmxPath := state.Get("vmx_path").(string)
 
 	if config.ShutdownCommand != "" {
 		ui.Say("Gracefully halting virtual machine...")
@@ -46,7 +46,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 		}
 		if err := comm.Start(cmd); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -56,9 +56,9 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 
 		// If the command failed to run, notify the user in some way.
 		if cmd.ExitStatus != 0 {
-			state["error"] = fmt.Errorf(
+			state.Put("error", fmt.Errorf(
 				"Shutdown command has non-zero exit status.\n\nStdout: %s\n\nStderr: %s",
-				stdout.String(), stderr.String())
+				stdout.String(), stderr.String()))
 			return multistep.ActionHalt
 		}
 
@@ -77,7 +77,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 			select {
 			case <-shutdownTimer:
 				err := errors.New("Timeout while waiting for machine to shut down.")
-				state["error"] = err
+				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			default:
@@ -87,7 +87,7 @@ func (s *stepShutdown) Run(state map[string]interface{}) multistep.StepAction {
 	} else {
 		if err := driver.Stop(vmxPath); err != nil {
 			err := fmt.Errorf("Error stopping VM: %s", err)
-			state["error"] = err
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -132,4 +132,4 @@ LockWaitLoop:
 	return multistep.ActionContinue
 }
 
-func (s *stepShutdown) Cleanup(state map[string]interface{}) {}
+func (s *stepShutdown) Cleanup(state multistep.StateBag) {}

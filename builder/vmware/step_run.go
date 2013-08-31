@@ -22,12 +22,12 @@ type stepRun struct {
 	vmxPath  string
 }
 
-func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
-	vmxPath := state["vmx_path"].(string)
-	vncPort := state["vnc_port"].(uint)
+func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vmxPath := state.Get("vmx_path").(string)
+	vncPort := state.Get("vnc_port").(uint)
 
 	// Set the VMX path so that we know we started the machine
 	s.bootTime = time.Now()
@@ -43,7 +43,7 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 
 	if err := driver.Start(vmxPath, config.Headless); err != nil {
 		err := fmt.Errorf("Error starting VM: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -57,9 +57,9 @@ func (s *stepRun) Run(state map[string]interface{}) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepRun) Cleanup(state map[string]interface{}) {
-	driver := state["driver"].(Driver)
-	ui := state["ui"].(packer.Ui)
+func (s *stepRun) Cleanup(state multistep.StateBag) {
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
 
 	// If we started the machine... stop it.
 	if s.vmxPath != "" {

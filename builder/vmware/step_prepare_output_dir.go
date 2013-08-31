@@ -10,9 +10,9 @@ import (
 
 type stepPrepareOutputDir struct{}
 
-func (stepPrepareOutputDir) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	ui := state["ui"].(packer.Ui)
+func (stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	ui := state.Get("ui").(packer.Ui)
 
 	if _, err := os.Stat(config.OutputDir); err == nil && config.PackerForce {
 		ui.Say("Deleting previous output directory...")
@@ -20,20 +20,20 @@ func (stepPrepareOutputDir) Run(state map[string]interface{}) multistep.StepActi
 	}
 
 	if err := os.MkdirAll(config.OutputDir, 0755); err != nil {
-		state["error"] = err
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
 }
 
-func (stepPrepareOutputDir) Cleanup(state map[string]interface{}) {
-	_, cancelled := state[multistep.StateCancelled]
-	_, halted := state[multistep.StateHalted]
+func (stepPrepareOutputDir) Cleanup(state multistep.StateBag) {
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
 
 	if cancelled || halted {
-		config := state["config"].(*config)
-		ui := state["ui"].(packer.Ui)
+		config := state.Get("config").(*config)
+		ui := state.Get("ui").(packer.Ui)
 
 		ui.Say("Deleting output directory...")
 		for i := 0; i < 5; i++ {

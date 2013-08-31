@@ -22,15 +22,15 @@ import (
 //   vnc_port uint - The port that VNC is configured to listen on.
 type stepConfigureVNC struct{}
 
-func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	ui := state["ui"].(packer.Ui)
-	vmxPath := state["vmx_path"].(string)
+func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	ui := state.Get("ui").(packer.Ui)
+	vmxPath := state.Get("vmx_path").(string)
 
 	f, err := os.Open(vmxPath)
 	if err != nil {
 		err := fmt.Errorf("Error reading VMX data: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -38,7 +38,7 @@ func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
 	vmxBytes, err := ioutil.ReadAll(f)
 	if err != nil {
 		err := fmt.Errorf("Error reading VMX data: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -67,15 +67,15 @@ func (stepConfigureVNC) Run(state map[string]interface{}) multistep.StepAction {
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
-		state["error"] = err
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state["vnc_port"] = vncPort
+	state.Put("vnc_port", vncPort)
 
 	return multistep.ActionContinue
 }
 
-func (stepConfigureVNC) Cleanup(map[string]interface{}) {
+func (stepConfigureVNC) Cleanup(multistep.StateBag) {
 }

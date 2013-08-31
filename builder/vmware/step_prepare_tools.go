@@ -8,9 +8,9 @@ import (
 
 type stepPrepareTools struct{}
 
-func (*stepPrepareTools) Run(state map[string]interface{}) multistep.StepAction {
-	config := state["config"].(*config)
-	driver := state["driver"].(Driver)
+func (*stepPrepareTools) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
 
 	if config.ToolsUploadFlavor == "" {
 		return multistep.ActionContinue
@@ -18,16 +18,16 @@ func (*stepPrepareTools) Run(state map[string]interface{}) multistep.StepAction 
 
 	path := driver.ToolsIsoPath(config.ToolsUploadFlavor)
 	if _, err := os.Stat(path); err != nil {
-		state["error"] = fmt.Errorf(
+		state.Put("error", fmt.Errorf(
 			"Couldn't find VMware tools for '%s'! VMware often downloads these\n"+
 				"tools on-demand. However, to do this, you need to create a fake VM\n"+
 				"of the proper type then click the 'install tools' option in the\n"+
-				"VMware GUI.", config.ToolsUploadFlavor)
+				"VMware GUI.", config.ToolsUploadFlavor))
 		return multistep.ActionHalt
 	}
 
-	state["tools_upload_source"] = path
+	state.Put("tools_upload_source", path)
 	return multistep.ActionContinue
 }
 
-func (*stepPrepareTools) Cleanup(map[string]interface{}) {}
+func (*stepPrepareTools) Cleanup(multistep.StateBag) {}
