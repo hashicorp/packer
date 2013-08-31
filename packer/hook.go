@@ -1,5 +1,9 @@
 package packer
 
+import (
+	"sync"
+)
+
 // This is the hook that should be fired for provisioners to run.
 const HookProvision = "packer_provision"
 
@@ -24,12 +28,20 @@ type Hook interface {
 // A Hook implementation that dispatches based on an internal mapping.
 type DispatchHook struct {
 	Mapping map[string][]Hook
+
+	l           sync.Mutex
+	cancelled   bool
+	runningHook Hook
 }
 
 // Runs the hook with the given name by dispatching it to the proper
 // hooks if a mapping exists. If a mapping doesn't exist, then nothing
 // happens.
 func (h *DispatchHook) Run(name string, ui Ui, comm Communicator, data interface{}) error {
+	h.l.Lock()
+	h.cancelled = false
+	h.l.Unlock()
+
 	hooks, ok := h.Mapping[name]
 	if !ok {
 		// No hooks for that name. No problem.
@@ -37,6 +49,15 @@ func (h *DispatchHook) Run(name string, ui Ui, comm Communicator, data interface
 	}
 
 	for _, hook := range hooks {
+		h.l.Lock()
+		if h.cancelled {
+			h.l.Unlock()
+			return nil
+		}
+
+		h.runningHook = hook
+		h.l.Unlock()
+
 		if err := hook.Run(name, ui, comm, data); err != nil {
 			return err
 		}
@@ -45,4 +66,15 @@ func (h *DispatchHook) Run(name string, ui Ui, comm Communicator, data interface
 	return nil
 }
 
-func (h *DispatchHook) Cancel() {}
+// Cancels all the hooks that are currently in-flight, if any. This will
+// block until the hooks are all cancelled.
+func (h *DispatchHook) Cancel() {
+	h.l.Lock()
+	defer h.l.Unlock()
+
+	if h.runningHook != nil {
+		h.runningHook.Cancel()
+	}
+
+	h.cancelled = true
+}
