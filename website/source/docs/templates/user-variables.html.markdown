@@ -48,6 +48,10 @@ In the above example, the template defines two variables: `aws_access_key` and
 Later, the variables are used within the builder we defined in order to
 configure the actual keys for the Amazon builder.
 
+If the default value is `null`, then the user variable will be _required_.
+This means that the user must specify a value for this variable or template
+validation will fail.
+
 Using the variables is extremely easy. Variables are used by calling
 the user function in the form of <code>{{user &#96;variable&#96;}}</code>.
 This function can be used in _any string_ within the template, in
