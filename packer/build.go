@@ -126,14 +126,19 @@ func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
 	b.prepareCalled = true
 
 	// Compile the variables
+	varErrs := make([]error, 0)
 	variables := make(map[string]string)
 	for k, v := range b.variables {
-		if !v.Required {
-			variables[k] = v.Default
+		variables[k] = v.Default
+
+		if v.Required {
+			if _, ok := userVars[k]; !ok {
+				varErrs = append(varErrs,
+					fmt.Errorf("Required user variable '%s' not set", k))
+			}
 		}
 	}
 
-	varErrs := make([]error, 0)
 	if userVars != nil {
 		for k, v := range userVars {
 			if _, ok := variables[k]; !ok {
@@ -143,18 +148,6 @@ func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
 			}
 
 			variables[k] = v
-		}
-	}
-
-	// Verify all required variables have been set.
-	for k, v := range b.variables {
-		if !v.Required {
-			continue
-		}
-
-		if _, ok := variables[k]; !ok {
-			varErrs = append(
-				varErrs, fmt.Errorf("Required user variable '%s' not set", k))
 		}
 	}
 

@@ -175,6 +175,14 @@ func TestBuildPrepare_variablesRequired(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have had error")
 	}
+
+	// Test with setting the value
+	build = testBuild()
+	build.variables["foo"] = coreBuildVariable{Required: true}
+	err = build.Prepare(map[string]string{"foo": ""})
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
 }
 
 func TestBuild_Run(t *testing.T) {
