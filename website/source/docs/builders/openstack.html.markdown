@@ -37,7 +37,8 @@ Required:
 
 * `provider` (string) - The provider used to connect to the OpenStack service.
   If not specified, Packer will attempt to read this from the
-  `SDK_PROVIDER` environment variable.
+  `SDK_PROVIDER` environment variable. Currently the options supported are
+  `rackspace-us` or `rackspace-uk`. 
 
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
