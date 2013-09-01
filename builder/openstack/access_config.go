@@ -9,9 +9,10 @@ import (
 
 // AccessConfig is for common configuration related to openstack access
 type AccessConfig struct {
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
-	Provider string `mapstructure:"provider"`
+	Username  string `mapstructure:"username"`
+	Password  string `mapstructure:"password"`
+	Provider  string `mapstructure:"provider"`
+	RawRegion string `mapstructure:"region"`
 }
 
 // Auth returns a valid Auth object for access to openstack services, or
@@ -40,6 +41,10 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	return gophercloud.Authenticate(provider, authoptions)
 }
 
+func (c *AccessConfig) Region() string {
+	return c.RawRegion
+}
+
 func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if t == nil {
 		var err error
@@ -63,6 +68,10 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 			errs = append(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
+	}
+
+	if c.RawRegion == "" {
+		errs = append(errs, fmt.Errorf("region must be specified"))
 	}
 
 	if len(errs) > 0 {
