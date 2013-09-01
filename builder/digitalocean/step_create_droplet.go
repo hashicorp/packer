@@ -62,12 +62,20 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
 	time.Sleep(c.eventDelay)
 
-	err := client.DestroyDroplet(s.dropletId)
+	var err error
+	for i := 0; i < 5; i++ {
+		err = client.DestroyDroplet(s.dropletId)
+		if err == nil {
+			break
+		}
 
-	curlstr := fmt.Sprintf("curl '%v/droplets/%v/destroy?client_id=%v&api_key=%v'",
-		DIGITALOCEAN_API_URL, s.dropletId, c.ClientID, c.APIKey)
+		time.Sleep(2 * time.Second)
+	}
 
 	if err != nil {
+		curlstr := fmt.Sprintf("curl '%v/droplets/%v/destroy?client_id=%v&api_key=%v'",
+			DIGITALOCEAN_API_URL, s.dropletId, c.ClientID, c.APIKey)
+
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %v", curlstr))
 	}
