@@ -1,5 +1,10 @@
 ## 0.3.6 (unreleased)
 
+FEATURES:
+
+* User variables can now be specified as "required", meaning the user
+  MUST specify a value. Just set the default value to "null". [GH-374]
+
 IMPROVEMENTS:
 
 * core: Much improved interrupt handling. For example, interrupts now

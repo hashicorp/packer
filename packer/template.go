@@ -16,7 +16,7 @@ import (
 // "interface{}" pointers since we actually don't know what their contents
 // are until we read the "type" field.
 type rawTemplate struct {
-	Variables      map[string]string
+	Variables      map[string]interface{}
 	Builders       []map[string]interface{}
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
@@ -26,7 +26,7 @@ type rawTemplate struct {
 // The Template struct represents a parsed template, parsed into the most
 // completed form it can be without additional processing by the caller.
 type Template struct {
-	Variables      map[string]string
+	Variables      map[string]RawVariable
 	Builders       map[string]RawBuilderConfig
 	Hooks          map[string][]string
 	PostProcessors [][]RawPostProcessorConfig
@@ -61,6 +61,12 @@ type RawProvisionerConfig struct {
 	Override map[string]interface{}
 
 	RawConfig interface{}
+}
+
+// RawVariable represents a variable configuration within a template.
+type RawVariable struct {
+	Default  string
+	Required bool
 }
 
 // ParseTemplate takes a byte slice and parses a Template from it, returning
@@ -105,7 +111,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	}
 
 	t = &Template{}
-	t.Variables = make(map[string]string)
+	t.Variables = make(map[string]RawVariable)
 	t.Builders = make(map[string]RawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
 	t.PostProcessors = make([][]RawPostProcessorConfig, len(rawTpl.PostProcessors))
@@ -113,7 +119,22 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 
 	// Gather all the variables
 	for k, v := range rawTpl.Variables {
-		t.Variables[k] = v
+		var variable RawVariable
+		variable.Default = ""
+		variable.Required = v == nil
+
+		if v != nil {
+			def, ok := v.(string)
+			if !ok {
+				errors = append(errors,
+					fmt.Errorf("variable '%s': default value must be string or null", k))
+				continue
+			}
+
+			variable.Default = def
+		}
+
+		t.Variables[k] = variable
 	}
 
 	// Gather all the builders
@@ -428,6 +449,15 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		provisioners = append(provisioners, coreProv)
 	}
 
+	// Prepare the variables
+	variables := make(map[string]coreBuildVariable)
+	for k, v := range t.Variables {
+		variables[k] = coreBuildVariable{
+			Default:  v.Default,
+			Required: v.Required,
+		}
+	}
+
 	b = &coreBuild{
 		name:           name,
 		builder:        builder,
@@ -436,7 +466,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		hooks:          hooks,
 		postProcessors: postProcessors,
 		provisioners:   provisioners,
-		variables:      t.Variables,
+		variables:      variables,
 	}
 
 	return

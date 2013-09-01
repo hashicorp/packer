@@ -364,7 +364,7 @@ func TestParseTemplate_Variables(t *testing.T) {
 	{
 		"variables": {
 			"foo": "bar",
-			"bar": ""
+			"bar": null
 		},
 
 		"builders": [{"type": "something"}]
@@ -378,6 +378,39 @@ func TestParseTemplate_Variables(t *testing.T) {
 
 	if result.Variables == nil || len(result.Variables) != 2 {
 		t.Fatalf("bad vars: %#v", result.Variables)
+	}
+
+	if result.Variables["foo"].Default != "bar" {
+		t.Fatal("foo default is not right")
+	}
+
+	if result.Variables["foo"].Required {
+		t.Fatal("foo should not be required")
+	}
+
+	if result.Variables["bar"].Default != "" {
+		t.Fatal("default should be empty")
+	}
+
+	if !result.Variables["bar"].Required {
+		t.Fatal("bar should be required")
+	}
+}
+
+func TestParseTemplate_variablesBadDefault(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": 7,
+		},
+
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
 	}
 }
 

@@ -23,7 +23,7 @@ func testBuild() *coreBuild {
 				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "testPP", make(map[string]interface{}), true},
 			},
 		},
-		variables: make(map[string]string),
+		variables: make(map[string]coreBuildVariable),
 	}
 }
 
@@ -116,7 +116,7 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 	}
 
 	build := testBuild()
-	build.variables["foo"] = "bar"
+	build.variables["foo"] = coreBuildVariable{Default: "bar"}
 	builder := build.builder.(*TestBuilder)
 
 	err := build.Prepare(nil)
@@ -135,7 +135,7 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 
 func TestBuildPrepare_variables_nonexist(t *testing.T) {
 	build := testBuild()
-	build.variables["foo"] = "bar"
+	build.variables["foo"] = coreBuildVariable{Default: "bar"}
 
 	err := build.Prepare(map[string]string{"bar": "baz"})
 	if err == nil {
@@ -150,7 +150,7 @@ func TestBuildPrepare_variables_override(t *testing.T) {
 	}
 
 	build := testBuild()
-	build.variables["foo"] = "bar"
+	build.variables["foo"] = coreBuildVariable{Default: "bar"}
 	builder := build.builder.(*TestBuilder)
 
 	err := build.Prepare(map[string]string{"foo": "baz"})
@@ -164,6 +164,16 @@ func TestBuildPrepare_variables_override(t *testing.T) {
 
 	if !reflect.DeepEqual(builder.prepareConfig[1], packerConfig) {
 		t.Fatalf("prepare bad: %#v", builder.prepareConfig[1])
+	}
+}
+
+func TestBuildPrepare_variablesRequired(t *testing.T) {
+	build := testBuild()
+	build.variables["foo"] = coreBuildVariable{Required: true}
+
+	err := build.Prepare(map[string]string{})
+	if err == nil {
+		t.Fatal("should have had error")
 	}
 }
 
