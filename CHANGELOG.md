@@ -24,6 +24,7 @@ BUG FIXES:
 * builder/digitalocean: Retry destroy a few times because DO sometimes
   gives false errors.
 * builder/openstack: Properly handle the case no image is made. [GH-375]
+* builder/openstack: Specifying a region is now required in a template.
 * provisioners/salt-masterless: Use filepath join to properly join paths.
 
 ## 0.3.5 (August 28, 2013)
