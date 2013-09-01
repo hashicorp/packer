@@ -44,10 +44,20 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	ui := env.Ui()
 
 	// Variables
-	ui.Say("Variables and their defaults:\n")
 	if len(tpl.Variables) == 0 {
+		ui.Say("Variables:\n")
 		ui.Say("  <No variables>")
 	} else {
+		ui.Say("Required variables:\n")
+		for k, v := range tpl.Variables {
+			if v.Required {
+				ui.Machine("template-variable", k, v.Default, "1")
+				ui.Say("  " + k)
+			}
+		}
+
+		ui.Say("")
+		ui.Say("Optional variables and their defaults:\n")
 		keys := make([]string, 0, len(tpl.Variables))
 		max := 0
 		for k, _ := range tpl.Variables {
@@ -61,10 +71,14 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 		for _, k := range keys {
 			v := tpl.Variables[k]
+			if v.Required {
+				continue
+			}
+
 			padding := strings.Repeat(" ", max-len(k))
 			output := fmt.Sprintf("  %s%s = %s", k, padding, v)
 
-			ui.Machine("template-variable", k, v)
+			ui.Machine("template-variable", k, v.Default, "0")
 			ui.Say(output)
 		}
 	}
