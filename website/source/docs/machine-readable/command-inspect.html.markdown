@@ -9,7 +9,7 @@ These are the machine-readable types that exist as part of the output
 of `packer inspect`.
 
 <dl>
-	<dt>template-variable (2)</dt>
+	<dt>template-variable (3)</dt>
 	<dd>
 		<p>
 		A <a href="/docs/templates/user-variables.html">user variable</a>
@@ -23,6 +23,11 @@ of `packer inspect`.
 		<p>
 		<strong>Data 2: default</strong> - The default value of the
 		variable.
+		</p>
+
+		<p>
+		<strong>Data 3: required</strong> - If non-zero, then this variable
+		is required.
 		</p>
 	</dd>
 
