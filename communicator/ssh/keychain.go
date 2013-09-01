@@ -24,7 +24,12 @@ func (k *SimpleKeychain) AddPEMKey(key string) (err error) {
 		return errors.New("no block in key")
 	}
 
-	rsakey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	var rsakey interface{}
+	rsakey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		rsakey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+	}
+
 	if err != nil {
 		return
 	}
