@@ -77,7 +77,7 @@ type coreBuild struct {
 	hooks          map[string][]Hook
 	postProcessors [][]coreBuildPostProcessor
 	provisioners   []coreBuildProvisioner
-	variables      map[string]string
+	variables      map[string]coreBuildVariable
 
 	debug         bool
 	force         bool
@@ -101,6 +101,12 @@ type coreBuildProvisioner struct {
 	config      []interface{}
 }
 
+// A user-variable that is part of a single build.
+type coreBuildVariable struct {
+	Default  string
+	Required bool
+}
+
 // Returns the name of the build.
 func (b *coreBuild) Name() string {
 	return b.name
@@ -122,25 +128,41 @@ func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
 	// Compile the variables
 	variables := make(map[string]string)
 	for k, v := range b.variables {
-		variables[k] = v
+		if !v.Required {
+			variables[k] = v.Default
+		}
 	}
 
+	varErrs := make([]error, 0)
 	if userVars != nil {
-		errs := make([]error, 0)
 		for k, v := range userVars {
 			if _, ok := variables[k]; !ok {
-				errs = append(
-					errs, fmt.Errorf("Unknown user variable: %s", k))
+				varErrs = append(
+					varErrs, fmt.Errorf("Unknown user variable: %s", k))
 				continue
 			}
 
 			variables[k] = v
 		}
+	}
 
-		if len(errs) > 0 {
-			return &MultiError{
-				Errors: errs,
-			}
+	// Verify all required variables have been set.
+	for k, v := range b.variables {
+		if !v.Required {
+			continue
+		}
+
+		if _, ok := variables[k]; !ok {
+			varErrs = append(
+				varErrs, fmt.Errorf("Required user variable '%s' not set", k))
+		}
+	}
+
+	// If there were any problem with variables, return an error right
+	// away because we can't be certain anything else will actually work.
+	if len(varErrs) > 0 {
+		return &MultiError{
+			Errors: varErrs,
 		}
 	}
 
