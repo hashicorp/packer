@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Salt (Masterless) Provisioner"
 ---
 
 # Salt Masterless Provisioner

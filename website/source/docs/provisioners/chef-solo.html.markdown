@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Chef-Solo Provisioner"
 ---
 
 # Chef Solo Provisioner
