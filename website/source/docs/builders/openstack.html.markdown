@@ -39,6 +39,9 @@ Required:
   If not specified, Packer will attempt to read this from the
   `SDK_PROVIDER` environment variable.
 
+* `region` (string) - The name of the region, such as "DFW", in which
+  to launch the server to create the AMI.
+
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
 
@@ -69,9 +72,20 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "username": "",
   "password": "",
   "provider": "",
+  "region": "DFW",
   "ssh_username": "root",
   "image_name": "Test image",
   "source_image": "23b564c9-c3e6-49f9-bc68-86c7a9ab5018",
   "flavor": "2"
 }
 </pre>
+
+## Troubleshooting
+
+*I get the error "Missing or incorrect provider"*
+
+* Verify your "username", "password" and "provider" settings.
+
+*I get the error "Missing endpoint, or insufficient privileges to access endpoint"*
+
+* Verify your "region" setting.
