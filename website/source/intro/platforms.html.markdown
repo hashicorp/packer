@@ -36,6 +36,9 @@ the appropriate [documentation page within the documentation section](/docs).
 * ***DigitalOcean***. Snapshots for [DigitalOcean](http://www.digitalocean.com)
   that can be used to start a pre-configured DigitalOcean instance of any size.
 
+* ***OpenStack***. Images for [OpenStack](http://www.openstack.org)
+  that can be used to start pre-configured OpenStack servers.
+
 * ***VirtualBox (OVF)***. Exported virtual machines for VirtualBox, including
   virtual machine metadata such as RAM, CPUs, etc. These virtual machines are
   portable and can be started on any platform VirtualBox runs on.
