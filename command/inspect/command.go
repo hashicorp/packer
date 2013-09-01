@@ -48,15 +48,23 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		ui.Say("Variables:\n")
 		ui.Say("  <No variables>")
 	} else {
-		ui.Say("Required variables:\n")
+		requiredHeader := false
 		for k, v := range tpl.Variables {
 			if v.Required {
+				if !requiredHeader {
+					requiredHeader = true
+					ui.Say("Required variables:\n")
+				}
+
 				ui.Machine("template-variable", k, v.Default, "1")
 				ui.Say("  " + k)
 			}
 		}
 
-		ui.Say("")
+		if requiredHeader {
+			ui.Say("")
+		}
+
 		ui.Say("Optional variables and their defaults:\n")
 		keys := make([]string, 0, len(tpl.Variables))
 		max := 0
