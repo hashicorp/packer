@@ -10,6 +10,7 @@ func testConfig() map[string]interface{} {
 		"username":     "foo",
 		"password":     "bar",
 		"provider":     "foo",
+		"region":       "DFW",
 		"image_name":   "foo",
 		"source_image": "foo",
 		"flavor":       "foo",
