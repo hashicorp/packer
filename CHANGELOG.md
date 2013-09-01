@@ -22,6 +22,7 @@ BUG FIXES:
 * core: Fix possible panic when ctrl-C during provisioner run.
 * builder/digitalocean: Retry destroy a few times because DO sometimes
   gives false errors.
+* builder/openstack: Properly handle the case no image is made. [GH-375]
 * provisioners/salt-masterless: Use filepath join to properly join paths.
 
 ## 0.3.5 (August 28, 2013)
