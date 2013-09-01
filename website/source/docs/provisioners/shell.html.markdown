@@ -171,7 +171,7 @@ wait until it completely boots.
 
 <pre class="prettyprint">
     {
-       "type": "script",
+       "type": "shell",
        "inline": [ "sleep 10" ]
     }
 </pre>
