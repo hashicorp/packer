@@ -20,6 +20,8 @@ BUG FIXES:
 * core: Concurrent map access is completely gone, fixing rare issues
   with runtime memory corruption. [GH-307]
 * core: Fix possible panic when ctrl-C during provisioner run.
+* builder/digitalocean: Retry destroy a few times because DO sometimes
+  gives false errors.
 * provisioners/salt-masterless: Use filepath join to properly join paths.
 
 ## 0.3.5 (August 28, 2013)
