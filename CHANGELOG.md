@@ -1,6 +1,8 @@
 ## 0.3.7 (unreleased)
 
+BUG FIXES:
 
+* command/inspect: Fix weird output for default values for optional vars.
 
 ## 0.3.6 (September 2, 2013)
 
