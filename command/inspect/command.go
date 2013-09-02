@@ -84,7 +84,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 			}
 
 			padding := strings.Repeat(" ", max-len(k))
-			output := fmt.Sprintf("  %s%s = %s", k, padding, v)
+			output := fmt.Sprintf("  %s%s = %s", k, padding, v.Default)
 
 			ui.Machine("template-variable", k, v.Default, "0")
 			ui.Say(output)
