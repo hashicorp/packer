@@ -19,6 +19,9 @@ func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(multistep.S
 			if s.AccessIPv4 != "" {
 				return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
 			}
+			if s.AccessIPv6 != "" {
+				return fmt.Sprintf("[%s]:%d", s.AccessIPv6, port), nil
+			}
 			serverState, err := csp.ServerById(s.Id)
 
 			if err != nil {
