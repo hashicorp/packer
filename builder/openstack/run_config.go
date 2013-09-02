@@ -39,7 +39,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	if c.RawSSHTimeout == "" {
-		c.RawSSHTimeout = "1m"
+		c.RawSSHTimeout = "5m"
 	}
 
 	// Validation
