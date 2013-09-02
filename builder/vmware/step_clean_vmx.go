@@ -47,7 +47,7 @@ func (s stepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxData["floppy0.present"] = "FALSE"
 	}
 
-	ui.Message("Detatching ISO from CD-ROM device...")
+	ui.Message("Detaching ISO from CD-ROM device...")
 	devRe := regexp.MustCompile(`^ide\d:\d\.`)
 	for k, _ := range vmxData {
 		match := devRe.FindString(k)
