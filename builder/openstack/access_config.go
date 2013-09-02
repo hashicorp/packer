@@ -40,8 +40,11 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	authoptions := gophercloud.AuthOptions{
 		Username:    username,
 		Password:    password,
-		TenantName:  project,
 		AllowReauth: true,
+	}
+
+	if project != "" {
+		authoptions.TenantName = project
 	}
 
 	return gophercloud.Authenticate(provider, authoptions)
