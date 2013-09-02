@@ -12,6 +12,7 @@ IMPROVEMENTS:
 * builder/amazon: In `-debug` mode, the keypair used will be saved to
   the current directory so you can access the machine. [GH-373]
 * builder/amazon: In `-debug` mode, the DNS is outputted.
+* builder/openstack: IPv6 addresses supported for SSH. [GH-379]
 * communicator/ssh: Support for private keys encrypted using PKCS8. [GH-376]
 * provisioner/chef-solo: You can now use user variables in the `json`
   configuration for Chef. [GH-362]
