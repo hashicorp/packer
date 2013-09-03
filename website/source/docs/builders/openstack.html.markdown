@@ -51,6 +51,9 @@ Required:
 
 Optional:
 
+* `project` (string) - The project name to boot the instance into. Some
+  OpenStack installations require this. By default this is empty.
+
 * `ssh_port` (int) - The port that SSH will be available on. Defaults to port
   22.
 
