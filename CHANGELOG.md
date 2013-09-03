@@ -1,5 +1,9 @@
 ## 0.3.7 (unreleased)
 
+IMPROVEMENTS:
+
+* builder/openstack: Can now specify a project. [GH-382]
+
 BUG FIXES:
 
 * command/inspect: Fix weird output for default values for optional vars.
