@@ -194,10 +194,9 @@ Optional:
   This may have a value of either "kvm" or "xen" and you must have that
   support in on the machine on which you run the builder.
 
-* `headless` (bool) - Packer defaults to building VirtualBox
-  virtual machines by launching a GUI that shows the console of the
-  machine being built. When this value is set to true, the machine will
-  start without a console.
+* `headless` (bool) - Packer defaults to building virtual machines by
+  launching a GUI that shows the console of the machine being built.
+  When this value is set to true, the machine will start without a console.
 
 * `http_directory` (string) - Path to a directory to serve using an HTTP
   server. The files in this directory will be available over HTTP that will

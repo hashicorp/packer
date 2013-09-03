@@ -14,7 +14,7 @@ import (
 
 type DriverCancelCallback func(state multistep.StateBag) bool
 
-// A driver is able to talk to VirtualBox and perform certain
+// A driver is able to talk to qemu-system-x86_64 and perform certain
 // operations with it.
 type Driver interface {
 	// Initializes the driver with the given values:
@@ -29,7 +29,7 @@ type Driver interface {
 	Stop(string) error
 
 	// SuppressMessages should do what needs to be done in order to
-	// suppress any annoying popups from VirtualBox.
+	// suppress any annoying popups, if any.
 	SuppressMessages() error
 
 	// Qemu executes the given command via qemu-system-x86_64
@@ -50,7 +50,7 @@ type Driver interface {
 	// this will return an error.
 	Verify() error
 
-	// Version reads the version of VirtualBox that is installed.
+	// Version reads the version of Qemu that is installed.
 	Version() (string, error)
 }
 
