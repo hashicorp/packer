@@ -14,7 +14,24 @@ import (
 	"time"
 )
 
-const BuilderId = "tdhite.qemu"
+const BuilderId = "transcend.qemu"
+
+var netDevice = map[string]bool{
+	"ne2k_pci": true,
+	"i82551":   true,
+	"i82557b":  true,
+	"i82559er": true,
+	"rtl8139":  true,
+	"e1000":    true,
+	"pcnet":    true,
+	"virtio":   true,
+}
+
+var diskInterface = map[string]bool{
+	"ide":    true,
+	"scsi":   true,
+	"virtio": true,
+}
 
 type Builder struct {
 	config config
@@ -48,6 +65,8 @@ type config struct {
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
+	NetDevice       string     `mapstructure:"net_device"`
+	DiskInterface   string     `mapstructure:"disk_interface"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
@@ -135,6 +154,14 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.Format = "qcow2"
 	}
 
+	if b.config.NetDevice == "" {
+		b.config.NetDevice = "virtio"
+	}
+
+	if b.config.DiskInterface == "" {
+		b.config.DiskInterface = "virtio"
+	}
+
 	// Errors
 	templates := map[string]*string{
 		"http_directory":    &b.config.HTTPDir,
@@ -151,6 +178,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		"shutdown_timeout":  &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":  &b.config.RawSSHWaitTimeout,
 		"accelerator":       &b.config.Accelerator,
+		"net_device":        &b.config.NetDevice,
+		"disk_interface":    &b.config.DiskInterface,
 	}
 
 	for n, ptr := range templates {
@@ -196,6 +225,16 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen") {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("invalid format, only 'kvm' or 'xen' are allowed"))
+	}
+
+	if _, ok := netDevice[b.config.NetDevice]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized network device type"))
+	}
+
+	if _, ok := diskInterface[b.config.DiskInterface]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk interface type"))
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {

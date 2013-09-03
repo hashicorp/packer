@@ -47,6 +47,8 @@ paths to files, URLS for ISOs and checksums.
       "ssh_port": 22,
       "ssh_wait_timeout": "90m",
       "vm_name": "tdhtest",
+      "net_device": "virtio",
+      "disk_interface": "virtio",
       "boot_command":
       [
         "<tab><wait>",
@@ -57,8 +59,9 @@ paths to files, URLS for ISOs and checksums.
 }
 </pre>
 
-The following is a sample CentOS kickstart file you should place in the
-ttp_files directory with the name centos6-ks.cfg:
+The following is a working CentOS 6.x kickstart file adapted from
+an unknown source. You would place such a file in the http_files
+directory with the name centos6-ks.cfg:
 
 <pre class="prettyprint">
 text
@@ -172,6 +175,11 @@ Optional:
 * `disk_size` (int) - The size, in megabytes, of the hard disk to create
   for the VM. By default, this is 40000 (40 GB).
 
+* `disk_interface` (string) - The interface to use for the disk. Allowed
+  values include any of "ide," "scsi" or "virtio." Note also that any boot
+  commands or kickstart type scripts must have proper adjustments for
+  resulting device names. The Qemu builder uses "virtio" by default.
+
 * `floppy_files` (array of strings) - A list of files to put onto a floppy
   disk that is attached when the VM is booted for the first time. This is
   most useful for unattended Windows installs, which look for an
@@ -212,6 +220,12 @@ Optional:
   must point to the same file (same checksum). By default this is empty
   and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+* `net_device` (string) - The driver to use for the network interface. Allowed
+  values "ne2k_pci," "i82551," "i82557b," "i82559er," "rtl8139," "e1000,"
+  "pcnet" or "virtio." The Qemu builder uses "virtio" by default.
+
+* `qemuargs` (array of strings reserved for future use).
+
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`
@@ -250,8 +264,6 @@ Optional:
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as the virtual machine is booted.
-
-* `qemuargs` (array of strings reserved for future use).
 
 * `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
   the new virtual machine, without the file extension. By default this is
