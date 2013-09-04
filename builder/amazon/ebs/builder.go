@@ -109,14 +109,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 		&stepStopInstance{},
 		&stepCreateAMI{},
+		&awscommon.StepAMIRegionCopy{
+			Regions: b.config.AMIRegions,
+		},
 		&awscommon.StepModifyAMIAttributes{
 			Description: b.config.AMIDescription,
 			Users:       b.config.AMIUsers,
 			Groups:      b.config.AMIGroups,
-		},
-		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
-			Tags:    b.config.AMITags,
 		},
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,
