@@ -219,7 +219,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if !(b.config.Format == "qcow2" || b.config.Format == "raw") {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid format, only 'ovf' or 'ova' are allowed"))
+			errs, errors.New("invalid format, only 'qcow2' or 'img' are allowed"))
 	}
 
 	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen") {
