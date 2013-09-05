@@ -126,3 +126,24 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestRunConfigPrepare_SSHKeyPairPattern(t *testing.T) {
+	c := testConfig()
+	c.SSHKeyPairPattern = ""
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.SSHKeyPairPattern != "packer %s" {
+		t.Fatalf("invalid value: %s", c.SSHKeyPairPattern)
+	}
+
+	c.SSHKeyPairPattern = "valid-%s"
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.SSHKeyPairPattern != "valid-%s" {
+		t.Fatalf("invalid value: %s", c.SSHKeyPairPattern)
+	}
+}
