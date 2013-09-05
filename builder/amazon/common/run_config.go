@@ -11,18 +11,18 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	SourceAmi          string `mapstructure:"source_ami"`
-	IamInstanceProfile string `mapstructure:"iam_instance_profile"`
-	InstanceType       string `mapstructure:"instance_type"`
-	UserData           string `mapstructure:"user_data"`
-	UserDataFile       string `mapstructure:"user_data_file"`
-	RawSSHTimeout      string `mapstructure:"ssh_timeout"`
-	SSHUsername        string `mapstructure:"ssh_username"`
-	SSHPort            int    `mapstructure:"ssh_port"`
-	SecurityGroupId    string `mapstructure:"security_group_id"`
-	SubnetId           string `mapstructure:"subnet_id"`
-	VpcId              string `mapstructure:"vpc_id"`
-	SSHKeyPairPattern  string `mapstructure:"ssh_keypair_pattern"`
+	SourceAmi            string `mapstructure:"source_ami"`
+	IamInstanceProfile   string `mapstructure:"iam_instance_profile"`
+	InstanceType         string `mapstructure:"instance_type"`
+	UserData             string `mapstructure:"user_data"`
+	UserDataFile         string `mapstructure:"user_data_file"`
+	RawSSHTimeout        string `mapstructure:"ssh_timeout"`
+	SSHUsername          string `mapstructure:"ssh_username"`
+	SSHPort              int    `mapstructure:"ssh_port"`
+	SecurityGroupId      string `mapstructure:"security_group_id"`
+	SubnetId             string `mapstructure:"subnet_id"`
+	TemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
+	VpcId                string `mapstructure:"vpc_id"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -46,8 +46,8 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		c.RawSSHTimeout = "1m"
 	}
 
-	if c.SSHKeyPairPattern == "" {
-		c.SSHKeyPairPattern = "packer %s"
+	if c.TemporaryKeyPairName == "" {
+		c.TemporaryKeyPairName = "packer {{uuid}}"
 	}
 
 	// Validation
@@ -74,14 +74,15 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"iam_instance_profile": &c.IamInstanceProfile,
-		"instance_type":        &c.InstanceType,
-		"ssh_timeout":          &c.RawSSHTimeout,
-		"security_group_id":    &c.SecurityGroupId,
-		"ssh_username":         &c.SSHUsername,
-		"source_ami":           &c.SourceAmi,
-		"subnet_id":            &c.SubnetId,
-		"vpc_id":               &c.VpcId,
+		"iam_instance_profile":    &c.IamInstanceProfile,
+		"instance_type":           &c.InstanceType,
+		"ssh_timeout":             &c.RawSSHTimeout,
+		"security_group_id":       &c.SecurityGroupId,
+		"ssh_username":            &c.SSHUsername,
+		"source_ami":              &c.SourceAmi,
+		"subnet_id":               &c.SubnetId,
+		"temporary_key_pair_name": &c.TemporaryKeyPairName,
+		"vpc_id":                  &c.VpcId,
 	}
 
 	for n, ptr := range templates {

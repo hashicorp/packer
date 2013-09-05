@@ -187,6 +187,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:  b.config.TemporaryKeyPairName,
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
