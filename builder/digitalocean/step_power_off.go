@@ -32,6 +32,10 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		err = waitForDropletState("off", dropletId, client, 20*time.Second)
+		if err == nil {
+			// We reached the state!
+			break
+		}
 	}
 
 	if err != nil {
