@@ -8,7 +8,7 @@ import (
 
 // waitForState simply blocks until the droplet is in
 // a state we expect, while eventually timing out.
-func waitForDropletState(desiredState string, dropletId uint, client *DigitalOceanClient, c config) error {
+func waitForDropletState(desiredState string, dropletId uint, client *DigitalOceanClient, timeout time.Duration) error {
 	result := make(chan error, 1)
 	go func() {
 		attempts := 0
@@ -32,11 +32,11 @@ func waitForDropletState(desiredState string, dropletId uint, client *DigitalOce
 		}
 	}()
 
-	log.Printf("Waiting for up to %s for droplet to become %s", c.RawStateTimeout, desiredState)
+	log.Printf("Waiting for up to %d seconds for droplet to become %s", timeout, desiredState)
 	select {
 	case err := <-result:
 		return err
-	case <-time.After(c.stateTimeout):
+	case <-time.After(timeout):
 		err := fmt.Errorf("Timeout while waiting to for droplet to become '%s'", desiredState)
 		return err
 	}
