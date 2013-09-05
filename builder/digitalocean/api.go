@@ -198,7 +198,7 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 	log.Printf("sending new request to digitalocean: %s", scrubbedUrl)
 
 	var lastErr error
-	for attempts := 1; attempts < 5; attempts++ {
+	for attempts := 1; attempts < 10; attempts++ {
 		resp, err := client.Get(url)
 		if err != nil {
 			return nil, err
