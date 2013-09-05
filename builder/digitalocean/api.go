@@ -233,7 +233,7 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 		lastErr = errors.New(fmt.Sprintf("Received error from DigitalOcean (%d): %s",
 			resp.StatusCode, status))
 		log.Println(lastErr)
-		if strings.Contains(status, "has a pending event") {
+		if strings.Contains(status, "a pending event") {
 			// Retry, DigitalOcean sends these dumb "pending event"
 			// errors all the time.
 			time.Sleep(5 * time.Second)
