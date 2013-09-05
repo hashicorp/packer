@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"time"
 )
 
 type stepCreateDroplet struct {
@@ -55,16 +54,7 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
 
-	var err error
-	for i := 0; i < 5; i++ {
-		err = client.DestroyDroplet(s.dropletId)
-		if err == nil {
-			break
-		}
-
-		time.Sleep(2 * time.Second)
-	}
-
+	err := client.DestroyDroplet(s.dropletId)
 	if err != nil {
 		curlstr := fmt.Sprintf("curl '%v/droplets/%v/destroy?client_id=%v&api_key=%v'",
 			DIGITALOCEAN_API_URL, s.dropletId, c.ClientID, c.APIKey)
