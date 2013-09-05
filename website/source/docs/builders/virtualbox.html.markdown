@@ -108,6 +108,10 @@ Optional:
   how to optimize the virtual hardware to work best with that operating
   system.
 
+* `hard_drive_interface` (string) - The type of controller that the primary
+  hard drive is attached to, defaults to "ide".  When set to "sata", the
+  drive is attached to an AHCI SATA controller.
+
 * `headless` (bool) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
