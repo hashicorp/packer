@@ -33,6 +33,7 @@ type config struct {
 	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
 	GuestOSType          string     `mapstructure:"guest_os_type"`
 	Headless             bool       `mapstructure:"headless"`
+	HardDriveInterface   string     `mapstructure:"hard_drive_interface"`
 	HTTPDir              string     `mapstructure:"http_directory"`
 	HTTPPortMin          uint       `mapstructure:"http_port_min"`
 	HTTPPortMax          uint       `mapstructure:"http_port_max"`
@@ -87,6 +88,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.GuestAdditionsPath == "" {
 		b.config.GuestAdditionsPath = "VBoxGuestAdditions.iso"
+	}
+
+	if b.config.HardDriveInterface == "" {
+		b.config.HardDriveInterface = "ide"
 	}
 
 	if b.config.GuestOSType == "" {
