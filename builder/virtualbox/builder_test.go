@@ -252,6 +252,38 @@ func TestBuilderPrepare_GuestAdditionsURL(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_HardDriveInterface(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default boot_wait
+	delete(config, "hard_drive_interface")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.HardDriveInterface != "ide" {
+		t.Fatalf("bad: %s", b.config.HardDriveInterface)
+	}
+
+	// Test with a bad
+	config["hard_drive_interface"] = "fake"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good
+	config["hard_drive_interface"] = "sata"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	var b Builder
 	config := testConfig()

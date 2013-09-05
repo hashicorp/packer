@@ -32,8 +32,8 @@ type config struct {
 	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
 	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
 	GuestOSType          string     `mapstructure:"guest_os_type"`
-	Headless             bool       `mapstructure:"headless"`
 	HardDriveInterface   string     `mapstructure:"hard_drive_interface"`
+	Headless             bool       `mapstructure:"headless"`
 	HTTPDir              string     `mapstructure:"http_directory"`
 	HTTPPortMin          uint       `mapstructure:"http_port_min"`
 	HTTPPortMax          uint       `mapstructure:"http_port_max"`
@@ -146,6 +146,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	templates := map[string]*string{
 		"guest_additions_sha256":  &b.config.GuestAdditionsSHA256,
 		"guest_os_type":           &b.config.GuestOSType,
+		"hard_drive_interface":    &b.config.HardDriveInterface,
 		"http_directory":          &b.config.HTTPDir,
 		"iso_checksum":            &b.config.ISOChecksum,
 		"iso_checksum_type":       &b.config.ISOChecksumType,
@@ -212,6 +213,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	if !(b.config.Format == "ovf" || b.config.Format == "ova") {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("invalid format, only 'ovf' or 'ova' are allowed"))
+	}
+
+	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("hard_drive_interface can only be ide or sata"))
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {

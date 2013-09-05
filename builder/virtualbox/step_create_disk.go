@@ -51,6 +51,9 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	// Add a SATA controller if we were asked to use SATA. We still attach
+	// the IDE controller above because some other things (disks) require
+	// that.
 	if config.HardDriveInterface == "sata" {
 		controllerName = "SATA Controller"
 		command = []string{
