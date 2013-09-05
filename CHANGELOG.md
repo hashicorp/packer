@@ -2,6 +2,7 @@
 
 IMPROVEMENTS:
 
+* builder/digitalocean: Retry on any pending event errors.
 * builder/openstack: Can now specify a project. [GH-382]
 
 BUG FIXES:
