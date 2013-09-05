@@ -5,13 +5,13 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"time"
 )
 
 type stepPowerOff struct{}
 
 func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*DigitalOceanClient)
+	c := state.Get("config").(config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(uint)
 
@@ -38,7 +38,7 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	err = waitForDropletState("off", dropletId, client, 20*time.Second)
+	err = waitForDropletState("off", dropletId, client, c.stateTimeout)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
