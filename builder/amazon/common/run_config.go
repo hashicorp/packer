@@ -22,6 +22,7 @@ type RunConfig struct {
 	SecurityGroupId    string `mapstructure:"security_group_id"`
 	SubnetId           string `mapstructure:"subnet_id"`
 	VpcId              string `mapstructure:"vpc_id"`
+	SSHKeyPairPattern  string `mapstructure:"ssh_keypair_pattern"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -43,6 +44,10 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	if c.RawSSHTimeout == "" {
 		c.RawSSHTimeout = "1m"
+	}
+
+	if c.SSHKeyPairPattern == "" {
+		c.SSHKeyPairPattern = "packer %s"
 	}
 
 	// Validation
