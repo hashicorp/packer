@@ -5,13 +5,13 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"time"
 )
 
 type stepShutdown struct{}
 
 func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*DigitalOceanClient)
-	c := state.Get("config").(config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(uint)
 
@@ -22,7 +22,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	var err error
 	ui.Say("Gracefully shutting down droplet...")
 	for attempts := 1; attempts <= 10; attempts++ {
-		log.Printf("ShutdownDropetl attempt #%d...", attempts)
+		log.Printf("ShutdownDroplet attempt #%d...", attempts)
 		err := client.ShutdownDroplet(dropletId)
 		if err != nil {
 			err := fmt.Errorf("Error shutting down droplet: %s", err)
@@ -31,7 +31,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		err = waitForDropletState("off", dropletId, client, c.stateTimeout)
+		err = waitForDropletState("off", dropletId, client, 20*time.Second)
 		if err == nil {
 			break
 		}
