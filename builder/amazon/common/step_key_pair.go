@@ -13,8 +13,9 @@ import (
 )
 
 type StepKeyPair struct {
-	Debug        bool
-	DebugKeyPath string
+	Debug          bool
+	DebugKeyPath   string
+	KeyPairPattern string
 
 	keyName string
 }
@@ -24,7 +25,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary keypair for this instance...")
-	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
+	keyName := fmt.Sprintf(s.KeyPairPattern, hex.EncodeToString(identifier.NewUUID().Raw()))
 	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := ec2conn.CreateKeyPair(keyName)
 	if err != nil {
