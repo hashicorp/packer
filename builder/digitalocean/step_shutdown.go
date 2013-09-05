@@ -22,8 +22,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Waiting for droplet to shutdown...")
-	err = waitForDropletState("off", dropletId, client, c)
+	err = waitForDropletState("off", dropletId, client, c.stateTimeout)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for droplet to become 'off': %s", err)
 		state.Put("error", err)
