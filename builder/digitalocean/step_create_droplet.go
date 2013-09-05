@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 	"time"
 )
 
@@ -55,12 +54,6 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
-
-	// Sleep arbitrarily before sending destroy request
-	// Otherwise we get "pending event" errors, even though there isn't
-	// one.
-	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
-	time.Sleep(c.eventDelay)
 
 	var err error
 	for i := 0; i < 5; i++ {
