@@ -2,6 +2,8 @@ package packer
 
 import (
 	"bytes"
+	"cgl.tideland.biz/identifier"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"text/template"
@@ -28,6 +30,7 @@ func NewConfigTemplate() (*ConfigTemplate, error) {
 	result.root.Funcs(template.FuncMap{
 		"timestamp": templateTimestamp,
 		"user":      result.templateUser,
+		"uuid":      templateUuid,
 	})
 
 	return result, nil
@@ -78,4 +81,8 @@ func (t *ConfigTemplate) templateUser(n string) (string, error) {
 
 func templateTimestamp() string {
 	return strconv.FormatInt(time.Now().UTC().Unix(), 10)
+}
+
+func templateUuid() string {
+	return hex.EncodeToString(identifier.NewUUID().Raw())
 }

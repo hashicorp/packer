@@ -47,6 +47,22 @@ func TestConfigTemplateProcess_user(t *testing.T) {
 	}
 }
 
+func TestConfigTemplateProcess_uuid(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	result, err := tpl.Process(`{{uuid}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(result) != 32 {
+		t.Fatalf("err: %s", result)
+	}
+}
+
 func TestConfigTemplateValidate(t *testing.T) {
 	tpl, err := NewConfigTemplate()
 	if err != nil {
