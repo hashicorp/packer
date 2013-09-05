@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -51,9 +52,10 @@ func (a *Artifact) String() string {
 func (a *Artifact) Destroy() error {
 	errors := make([]error, 0)
 
-	for _, imageId := range a.Amis {
-		log.Printf("Deregistering image ID: %s", imageId)
-		if _, err := a.Conn.DeregisterImage(imageId); err != nil {
+	for region, imageId := range a.Amis {
+		log.Printf("Deregistering image ID (%s) from region (%s)", imageId, region)
+		regionconn := ec2.New(a.Conn.Auth, aws.Regions[region])
+		if _, err := regionconn.DeregisterImage(imageId); err != nil {
 			errors = append(errors, err)
 		}
 
