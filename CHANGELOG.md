@@ -21,6 +21,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/vmware: Autoanswer VMware dialogs. [GH-393]
 * command/inspect: Fix weird output for default values for optional vars.
 
 ## 0.3.6 (September 2, 2013)
