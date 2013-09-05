@@ -61,7 +61,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}()
 
-	err = waitForDropletState("off", dropletId, client, 2 * time.Minute)
+	err = waitForDropletState("off", dropletId, client, 2*time.Minute)
 	if err != nil {
 		log.Printf("Error waiting for graceful off: %s", err)
 	}
