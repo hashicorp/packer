@@ -6,6 +6,11 @@ BACKWARDS INCOMPATIBILITIES:
   The builder automatically waits for events to go away. Run your templates
   through `packer fix` to get rid of these.
 
+FEATURES:
+
+* New globally available template function: `uuid`. Generates a new random
+  UUID.
+
 IMPROVEMENTS:
 
 * builder/amazon/all: Ability to specify the format of the temporary
