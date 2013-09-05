@@ -12,7 +12,6 @@ type stepShutdown struct{}
 
 func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*DigitalOceanClient)
-	c := state.Get("config").(config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(uint)
 
