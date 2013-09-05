@@ -1,5 +1,11 @@
 ## 0.3.7 (unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+* The "event_delay" option for the DigitalOcean builder is now gone.
+  The builder automatically waits for events to go away. Run your templates
+  through `packer fix` to get rid of these.
+
 IMPROVEMENTS:
 
 * builder/digitalocean: Retry on any pending event errors.
