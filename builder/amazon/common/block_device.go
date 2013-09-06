@@ -17,8 +17,8 @@ type BlockDevice struct {
 }
 
 type BlockDevices struct {
-	AMIMappings    []BlockDevice `mapstructure:"ami_block_device_mappings,squash"`
-	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings,squash"`
+	AMIMappings    []BlockDevice `mapstructure:"ami_block_device_mappings"`
+	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
 func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
