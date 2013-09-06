@@ -17,6 +17,7 @@ IMPROVEMENTS:
 
 * builder/amazon/all: Ability to specify the format of the temporary
   keypair created. [GH-389]
+* builder/amazon/all: Support the NoDevice flag for block mappings. [GH-396]
 * builder/digitalocean: Retry on any pending event errors.
 * builder/openstack: Can now specify a project. [GH-382]
 * builder/virtualbox: Can now attach hard drive over SATA. [GH-391]
