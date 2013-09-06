@@ -285,7 +285,7 @@ func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) er
 
 	// Start the sink mode on the other side
 	// TODO(mitchellh): There are probably issues with shell escaping the path
-	log.Println("Starting remote scp process: %s", scpCommand)
+	log.Println("Starting remote scp process: ", scpCommand)
 	if err := session.Start(scpCommand); err != nil {
 		return err
 	}
