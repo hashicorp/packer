@@ -290,9 +290,11 @@ func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) er
 		return err
 	}
 
-	// Call our callback that executes in the context of SCP
+	// Call our callback that executes in the context of SCP. We ignore
+	// EOF errors if they occur because it usually means that SCP prematurely
+	// ended on the other side.
 	log.Println("Started SCP session, beginning transfers...")
-	if err := f(stdinW, stdoutR); err != nil {
+	if err := f(stdinW, stdoutR); err != nil && err != io.EOF {
 		return err
 	}
 
