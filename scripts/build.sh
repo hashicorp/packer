@@ -20,6 +20,12 @@ cd $DIR
 GIT_COMMIT=$(git rev-parse HEAD)
 GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
+# If we're building on Windows, specify an extension
+EXTENSION=""
+if [ "$(go env GOOS)" = "windows" ]; then
+    EXTENSION=".exe"
+fi
+
 # If we're building a race-enabled build, then set that up.
 if [ ! -z $PACKER_RACE ]; then
     echo -e "${OK_COLOR}--> Building with race detection enabled${NO_COLOR}"
@@ -35,7 +41,7 @@ go build \
     ${PACKER_RACE} \
     -ldflags "-X github.com/mitchellh/packer/packer.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
     -v \
-    -o bin/packer .
+    -o bin/packer${EXTENSION} .
 
 # Go over each plugin and build it
 for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
@@ -45,5 +51,5 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
         ${PACKER_RACE} \
         -ldflags "-X github.com/mitchellh/packer/packer.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
         -v \
-        -o bin/packer-${PLUGIN_NAME} ${PLUGIN}
+        -o bin/packer-${PLUGIN_NAME}${EXTENSION} ${PLUGIN}
 done
