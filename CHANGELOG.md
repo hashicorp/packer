@@ -23,6 +23,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/amazon/all: When copying AMI to multiple regions, copy
+  the metadata (tags and attributes) as well. [GH-388]
 * builder/vmware: Autoanswer VMware dialogs. [GH-393]
 * command/inspect: Fix weird output for default values for optional vars.
 
