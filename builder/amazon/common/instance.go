@@ -40,6 +40,12 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 			return nil, "", err
 		}
 
+		if len(resp.Reservations) == 0 || len(resp.Reservations[0].Instances) == 0 {
+			// Sometimes AWS just has consistency issues and doesn't see
+			// our instance yet. Return an empty state.
+			return nil, "", nil
+		}
+
 		i = &resp.Reservations[0].Instances[0]
 		return i, i.State.Name, nil
 	}
@@ -57,27 +63,31 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			return
 		}
 
-		if currentState == conf.Target {
-			return
-		}
-
-		if conf.StepState != nil {
-			if _, ok := conf.StepState.GetOk(multistep.StateCancelled); ok {
-				return nil, errors.New("interrupted")
+		// Check states only if we were able to refresh to an instance
+		// that exists.
+		if i != nil {
+			if currentState == conf.Target {
+				return
 			}
-		}
 
-		found := false
-		for _, allowed := range conf.Pending {
-			if currentState == allowed {
-				found = true
-				break
+			if conf.StepState != nil {
+				if _, ok := conf.StepState.GetOk(multistep.StateCancelled); ok {
+					return nil, errors.New("interrupted")
+				}
 			}
-		}
 
-		if !found {
-			fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
-			return
+			found := false
+			for _, allowed := range conf.Pending {
+				if currentState == allowed {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
+				return
+			}
 		}
 
 		time.Sleep(2 * time.Second)
