@@ -10,6 +10,8 @@ FEATURES:
 
 * New globally available template function: `uuid`. Generates a new random
   UUID.
+* New globally available template function: `isotime`. Generates the
+  current time in ISO standard format.
 
 IMPROVEMENTS:
 
