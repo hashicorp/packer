@@ -7,6 +7,28 @@ import (
 	"time"
 )
 
+func TestConfigTemplateProcess_isotime(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	result, err := tpl.Process(`{{isotime}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	val, err := time.Parse(time.RFC3339, result)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	currentTime := time.Now().UTC()
+	if currentTime.Sub(val) > 2*time.Second {
+		t.Fatalf("val: %d (current: %d)", val, currentTime)
+	}
+}
+
 func TestConfigTemplateProcess_timestamp(t *testing.T) {
 	tpl, err := NewConfigTemplate()
 	if err != nil {

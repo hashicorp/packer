@@ -28,6 +28,7 @@ func NewConfigTemplate() (*ConfigTemplate, error) {
 
 	result.root = template.New("configTemplateRoot")
 	result.root.Funcs(template.FuncMap{
+		"isotime":   templateISOTime,
 		"timestamp": templateTimestamp,
 		"user":      result.templateUser,
 		"uuid":      templateUuid,
@@ -77,6 +78,10 @@ func (t *ConfigTemplate) templateUser(n string) (string, error) {
 	}
 
 	return result, nil
+}
+
+func templateISOTime() string {
+	return time.Now().UTC().Format(time.RFC3339)
 }
 
 func templateTimestamp() string {
