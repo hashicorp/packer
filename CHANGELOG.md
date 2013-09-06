@@ -23,6 +23,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Detect if SCP is not enabled on the other side. [GH-386]
 * builder/amazon/all: When copying AMI to multiple regions, copy
   the metadata (tags and attributes) as well. [GH-388]
 * builder/amazon/all: Fix panic case where eventually consistent
