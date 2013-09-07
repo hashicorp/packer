@@ -191,7 +191,7 @@ Optional:
   By default this is ".vbox_version", which will generally upload it into
   the home directory.
 
-* `vm_name` (string) - This is the name of the VMX file for the new virtual
+* `vm_name` (string) - This is the name of the OVF file for the new virtual
   machine, without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
 
