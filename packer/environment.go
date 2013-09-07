@@ -4,7 +4,7 @@ package packer
 import (
 	"errors"
 	"fmt"
-        "io/ioutil"
+	"io/ioutil"
 	"log"
 	"os"
 	"sort"
