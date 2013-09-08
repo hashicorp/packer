@@ -43,7 +43,8 @@ const defaultConfig = `
 		"chef-solo": "packer-provisioner-chef-solo",
 		"file": "packer-provisioner-file",
 		"shell": "packer-provisioner-shell",
-		"salt-masterless": "packer-provisioner-salt-masterless"
+		"salt-masterless": "packer-provisioner-salt-masterless",
+    "puppet": "packer-provisioner-puppet"
 	}
 }
 `
