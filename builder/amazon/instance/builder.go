@@ -56,6 +56,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
+	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	if b.config.BundleDestination == "" {
 		b.config.BundleDestination = "/tmp"

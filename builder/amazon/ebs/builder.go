@@ -44,6 +44,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
+	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
