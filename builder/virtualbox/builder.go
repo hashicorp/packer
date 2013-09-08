@@ -343,39 +343,76 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating VirtualBox driver: %s", err)
 	}
 
-	steps := []multistep.Step{
-		new(stepDownloadGuestAdditions),
-		&common.StepDownload{
-			Checksum:     b.config.ISOChecksum,
-			ChecksumType: b.config.ISOChecksumType,
-			Description:  "ISO",
-			ResultKey:    "iso_path",
-			Url:          b.config.ISOUrls,
-		},
-		new(stepPrepareOutputDir),
-		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
-		},
-		new(stepHTTPServer),
-		new(stepSuppressMessages),
-		new(stepCreateVM),
-		new(stepCreateDisk),
-		new(stepAttachISO),
-		new(stepAttachFloppy),
-		new(stepForwardSSH),
-		new(stepVBoxManage),
-		new(stepRun),
-		new(stepTypeBootCommand),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
-		},
-		new(stepUploadVersion),
-		new(stepUploadGuestAdditions),
-		new(common.StepProvision),
-		new(stepShutdown),
-		new(stepExport),
+	steps := []multistep.Step{}
+
+	if b.config.GuestOSType == "Windows7" {
+		steps = append(steps,
+			new(stepDownloadGuestAdditions),
+			&common.StepDownload{
+				Checksum:     b.config.ISOChecksum,
+				ChecksumType: b.config.ISOChecksumType,
+				Description:  "ISO",
+				ResultKey:    "iso_path",
+				Url:          b.config.ISOUrls,
+			},
+			new(stepPrepareOutputDir),
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			new(stepHTTPServer),
+			new(stepSuppressMessages),
+			new(stepCreateVM),
+			new(stepCreateDisk),
+			new(stepAttachISO),
+			new(stepAttachGuestISO),
+			new(stepAttachFloppy),
+			new(stepForwardSSH),
+			new(stepVBoxManage),
+			new(stepRun),
+			new(stepTypeBootCommand),
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			new(stepUploadVersion),
+			new(common.StepProvision),
+			new(stepShutdown),
+			new(stepExport))
+	} else {
+		steps = append(steps,
+			new(stepDownloadGuestAdditions),
+			&common.StepDownload{
+				Checksum:     b.config.ISOChecksum,
+				ChecksumType: b.config.ISOChecksumType,
+				Description:  "ISO",
+				ResultKey:    "iso_path",
+				Url:          b.config.ISOUrls,
+			},
+			new(stepPrepareOutputDir),
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			new(stepHTTPServer),
+			new(stepSuppressMessages),
+			new(stepCreateVM),
+			new(stepCreateDisk),
+			new(stepAttachISO),
+			new(stepAttachFloppy),
+			new(stepForwardSSH),
+			new(stepVBoxManage),
+			new(stepRun),
+			new(stepTypeBootCommand),
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			new(stepUploadVersion),
+			new(stepUploadGuestAdditions),
+			new(common.StepProvision),
+			new(stepShutdown),
+			new(stepExport))
 	}
 
 	// Setup the state bag
