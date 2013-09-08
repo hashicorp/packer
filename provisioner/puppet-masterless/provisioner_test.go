@@ -1,4 +1,4 @@
-package puppet
+package puppetmasterless
 
 import (
 	"github.com/mitchellh/packer/packer"
