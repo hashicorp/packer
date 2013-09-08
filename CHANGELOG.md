@@ -12,6 +12,8 @@ FEATURES:
   UUID.
 * New globally available template function: `isotime`. Generates the
   current time in ISO standard format.
+* New Amazon template function: `clean_ami_name`. Substitutes '-' for
+  characters that are illegal to use in an AMI name.
 
 IMPROVEMENTS:
 
