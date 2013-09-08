@@ -53,4 +53,13 @@ While some configuration settings have local variables specific to only that
 configuration, a set of functions are available globally for use in _any string_
 in Packer templates. These are listed below for reference.
 
+* ``isotime`` - UTC time in RFC-3339 format.
 * ``timestamp`` - The current Unix timestamp in UTC.
+
+## Amazon Specific Functions
+
+Specific to Amazon builders:
+
+* ``clean_ami_name`` - AMI names can only contain certain characters. This
+  function will replace illegal characters with a '-" character. Example usage
+  since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
