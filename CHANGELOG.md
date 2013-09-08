@@ -29,6 +29,8 @@ BUG FIXES:
   the metadata (tags and attributes) as well. [GH-388]
 * builder/amazon/all: Fix panic case where eventually consistent
   instance state caused an index out of bounds.
+* builder/virtualbox: The `vm_name` setting now properly sets the OVF
+  name of the output. [GH-401]
 * builder/vmware: Autoanswer VMware dialogs. [GH-393]
 * command/inspect: Fix weird output for default values for optional vars.
 
