@@ -1,141 +1,180 @@
 // This package implements a provisioner for Packer that executes
-// Puppet within the remote machine
+// Puppet on the remote machine, configured to apply a local manifest
+// versus connecting to a Puppet master.
 package puppetmasterless
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/mitchellh/iochan"
-	"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 )
 
-const (
-	RemoteStagingPath   = "/tmp/provision/puppet"
-	DefaultModulePath   = "modules"
-	DefaultManifestPath = "manifests"
-	DefaultManifestFile = "site.pp"
-)
+type Config struct {
+	common.PackerConfig `mapstructure:",squash"`
+	tpl                 *packer.ConfigTemplate
 
-var Ui packer.Ui
+	// The command used to execute Puppet.
+	ExecuteCommand string `mapstructure:"execute_command"`
 
-type config struct {
 	// An array of local paths of modules to upload.
-	ModulePath string `mapstructure:"module_path"`
+	ModulePaths []string `mapstructure:"module_paths"`
 
-	// Path to the manifests
-	ManifestPath string `mapstructure:"manifest_path"`
-
-	// Manifest file
+	// The main manifest file to apply to kick off the entire thing.
 	ManifestFile string `mapstructure:"manifest_file"`
 
-	// Option to avoid sudo use when executing commands. Defaults to false.
+	// If true, `sudo` will NOT be used to execute Puppet.
 	PreventSudo bool `mapstructure:"prevent_sudo"`
+
+	// The directory where files will be uploaded. Packer requires write
+	// permissions in this directory.
+	StagingDir string `mapstructure:"staging_directory"`
 }
 
 type Provisioner struct {
-	config config
+	config Config
 }
 
-type ExecuteManifestTemplate struct {
-	Sudo       bool
-	Modulepath string
-	Manifest   string
+type ExecuteTemplate struct {
+	ModulePath   string
+	ManifestFile string
+	Sudo         bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	errs := make([]error, 0)
-	for _, raw := range raws {
-		if err := mapstructure.Decode(raw, &p.config); err != nil {
-			return err
+	md, err := common.DecodeConfig(&p.config, raws...)
+	if err != nil {
+		return err
+	}
+
+	p.config.tpl, err = packer.NewConfigTemplate()
+	if err != nil {
+		return err
+	}
+	p.config.tpl.UserVars = p.config.PackerUserVars
+
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
+
+	// Set some defaults
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' {{.ManifestFile}}"
+	}
+
+	if p.config.StagingDir == "" {
+		p.config.StagingDir = "/tmp/packer-puppet-masterless"
+	}
+
+	// Templates
+	templates := map[string]*string{
+		"staging_dir": &p.config.StagingDir,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
 	}
 
-	if p.config.ModulePath == "" {
-		p.config.ModulePath = DefaultModulePath
+	sliceTemplates := map[string][]string{
+		"module_paths": p.config.ModulePaths,
 	}
 
-	if p.config.ManifestPath == "" {
-		p.config.ManifestPath = DefaultManifestPath
+	for n, slice := range sliceTemplates {
+		for i, elem := range slice {
+			var err error
+			slice[i], err = p.config.tpl.Process(elem, nil)
+			if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
+			}
+		}
 	}
 
+	validates := map[string]*string{
+		"execute_command": &p.config.ExecuteCommand,
+	}
+
+	for n, ptr := range validates {
+		if err := p.config.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
+	// Validation
 	if p.config.ManifestFile == "" {
-		p.config.ManifestFile = DefaultManifestFile
-	}
-
-	if p.config.ModulePath != "" {
-		pFileInfo, err := os.Stat(p.config.ModulePath)
-
-		if err != nil || !pFileInfo.IsDir() {
-			errs = append(errs, fmt.Errorf("Bad module path '%s': %s", p.config.ModulePath, err))
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("A manifest_file must be specified."))
+	} else {
+		info, err := os.Stat(p.config.ManifestFile)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("manifest_file is invalid: %s", err))
+		} else if info.IsDir() {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("manifest_file must point to a file"))
 		}
 	}
 
-	if p.config.ManifestPath != "" {
-		pFileInfo, err := os.Stat(p.config.ManifestPath)
-
-		if err != nil || !pFileInfo.IsDir() {
-			errs = append(errs, fmt.Errorf("Bad manifest path '%s': %s", p.config.ManifestPath, err))
-		}
-	}
-
-	if p.config.ManifestFile != "" {
-		path := filepath.Join(p.config.ManifestPath, p.config.ManifestFile)
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			errs = append(errs, fmt.Errorf("No manifest file '%s': %s", path, err))
-		}
-	}
-
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 
 	return nil
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	var err error
-	Ui = ui
-
-	err = CreateRemoteDirectory(RemoteStagingPath, comm)
-	if err != nil {
-		return fmt.Errorf("Error creating remote staging directory: %s", err)
+	ui.Message("Creating Puppet staging directory...")
+	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
+		return fmt.Errorf("Error creating staging directory: %s", err)
 	}
 
 	// Upload all modules
-	ui.Say(fmt.Sprintf("Copying module path: %s", p.config.ModulePath))
-	err = UploadLocalDirectory(p.config.ModulePath, comm)
-	if err != nil {
-		return fmt.Errorf("Error uploading modules: %s", err)
+	modulePaths := make([]string, 0, len(p.config.ModulePaths))
+	for i, path := range p.config.ModulePaths {
+		ui.Message(fmt.Sprintf("Upload local modules from: %s", path))
+		targetPath := fmt.Sprintf("%s/module-%d", p.config.StagingDir, i)
+		if err := p.uploadDirectory(ui, comm, targetPath, path); err != nil {
+			return fmt.Errorf("Error uploading modules: %s", err)
+		}
+
+		modulePaths = append(modulePaths, targetPath)
 	}
 
 	// Upload manifests
-	ui.Say(fmt.Sprintf("Copying manifests: %s", p.config.ManifestPath))
-	err = UploadLocalDirectory(p.config.ManifestPath, comm)
+	ui.Message("Uploading manifests...")
+	remoteManifestFile, err := p.uploadManifests(ui, comm)
 	if err != nil {
 		return fmt.Errorf("Error uploading manifests: %s", err)
 	}
 
 	// Execute Puppet
-	ui.Say("Beginning Puppet run")
-
-	// Compile the command
-	var command bytes.Buffer
-	mpath := filepath.Join(RemoteStagingPath, p.config.ManifestPath)
-	manifest := filepath.Join(mpath, p.config.ManifestFile)
-	modulepath := filepath.Join(RemoteStagingPath, p.config.ModulePath)
-	t := template.Must(template.New("puppet-run").Parse("{{if .Sudo}}sudo {{end}}puppet apply --verbose --modulepath={{.Modulepath}} {{.Manifest}}"))
-	t.Execute(&command, &ExecuteManifestTemplate{!p.config.PreventSudo, modulepath, manifest})
-
-	err = executeCommand(command.String(), comm)
+	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
+		ManifestFile: remoteManifestFile,
+		ModulePath:   strings.Join(modulePaths, ":"),
+		Sudo:         !p.config.PreventSudo,
+	})
 	if err != nil {
-		return fmt.Errorf("Error running Puppet: %s", err)
+		return err
+	}
+
+	cmd := &packer.RemoteCmd{
+		Command: command,
+	}
+
+	ui.Message("Running Puppet...")
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Puppet exited with a non-zero exit status: %d", cmd.ExitStatus)
 	}
 
 	return nil
@@ -147,116 +186,57 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func UploadLocalDirectory(localDir string, comm packer.Communicator) (err error) {
-	visitPath := func(path string, f os.FileInfo, err error) (err2 error) {
-		var remotePath = RemoteStagingPath + "/" + path
-		if f.IsDir() {
-			// Make remote directory
-			err = CreateRemoteDirectory(remotePath, comm)
-			if err != nil {
-				return err
-			}
-		} else {
-			// Upload file to existing directory
-			file, err := os.Open(path)
-			if err != nil {
-				return fmt.Errorf("Error opening file: %s", err)
-			}
-
-			err = comm.Upload(remotePath, file)
-			if err != nil {
-				return fmt.Errorf("Error uploading file: %s", err)
-			}
-		}
-		return
+func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
+	// Create the remote manifests directory...
+	ui.Message("Uploading manifests...")
+	remoteManifestsPath := fmt.Sprintf("%s/manifests", p.config.StagingDir)
+	if err := p.createDir(ui, comm, remoteManifestsPath); err != nil {
+		return "", fmt.Errorf("Error creating manifests directory: %s", err)
 	}
 
-	log.Printf("Uploading directory %s", localDir)
-	err = filepath.Walk(localDir, visitPath)
+	// Upload the main manifest
+	f, err := os.Open(p.config.ManifestFile)
 	if err != nil {
-		return fmt.Errorf("Error uploading modules %s: %s", localDir, err)
+		return "", err
+	}
+	defer f.Close()
+
+	manifestFilename := filepath.Base(p.config.ManifestFile)
+	remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
+	if err := comm.Upload(remoteManifestFile, f); err != nil {
+		return "", err
+	}
+
+	return remoteManifestFile, nil
+}
+
+func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("mkdir -p '%s'", dir),
+	}
+
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status.")
 	}
 
 	return nil
 }
 
-func CreateRemoteDirectory(path string, comm packer.Communicator) (err error) {
-	log.Printf("Creating remote directory: %s ", path)
-
-	var copyCommand = []string{"mkdir -p", path}
-
-	var cmd packer.RemoteCmd
-	cmd.Command = strings.Join(copyCommand, " ")
-
-	var stdout bytes.Buffer
-	cmd.Stdout = &stdout
-
-	// Start the command
-	if err := comm.Start(&cmd); err != nil {
-		return fmt.Errorf("Unable to create remote directory %s: %d", path, err)
+func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
+	if err := p.createDir(ui, comm, dst); err != nil {
+		return err
 	}
 
-	// Wait for it to complete
-	cmd.Wait()
-
-	return
-}
-
-func executeCommand(command string, comm packer.Communicator) (err error) {
-	// Setup the remote command
-	stdout_r, stdout_w := io.Pipe()
-	stderr_r, stderr_w := io.Pipe()
-
-	var cmd packer.RemoteCmd
-	cmd.Command = command
-	cmd.Stdout = stdout_w
-	cmd.Stderr = stderr_w
-
-	log.Printf("Executing command: %s", cmd.Command)
-	err = comm.Start(&cmd)
-	if err != nil {
-		return fmt.Errorf("Failed executing command: %s", err)
+	// Make sure there is a trailing "/" so that the directory isn't
+	// created on the other side.
+	if src[len(src)-1] != '/' {
+		src = src + "/"
 	}
 
-	exitChan := make(chan int, 1)
-	stdoutChan := iochan.DelimReader(stdout_r, '\n')
-	stderrChan := iochan.DelimReader(stderr_r, '\n')
-
-	go func() {
-		defer stdout_w.Close()
-		defer stderr_w.Close()
-
-		cmd.Wait()
-		exitChan <- cmd.ExitStatus
-	}()
-
-OutputLoop:
-	for {
-		select {
-		case output := <-stderrChan:
-			Ui.Message(strings.TrimSpace(output))
-		case output := <-stdoutChan:
-			Ui.Message(strings.TrimSpace(output))
-		case exitStatus := <-exitChan:
-			log.Printf("Puppet provisioner exited with status %d", exitStatus)
-
-			if exitStatus != 0 {
-				return fmt.Errorf("Command exited with non-zero exit status: %d", exitStatus)
-			}
-
-			break OutputLoop
-		}
-	}
-
-	// Make sure we finish off stdout/stderr because we may have gotten
-	// a message from the exit channel first.
-	for output := range stdoutChan {
-		Ui.Message(output)
-	}
-
-	for output := range stderrChan {
-		Ui.Message(output)
-	}
-
-	return nil
+	return comm.UploadDir(dst, src, nil)
 }
