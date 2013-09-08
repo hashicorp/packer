@@ -53,6 +53,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
+	awscommon.AddAMITemplateFuncs(b.config.tpl)
 
 	// Defaults
 	if b.config.ChrootMounts == nil {
