@@ -1,6 +1,6 @@
 // This package implements a provisioner for Packer that executes
 // Puppet within the remote machine
-package puppet
+package puppetmasterless
 
 import (
 	"bytes"
