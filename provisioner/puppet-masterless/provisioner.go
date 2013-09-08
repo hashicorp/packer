@@ -149,7 +149,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	// Upload all modules
 	modulePaths := make([]string, 0, len(p.config.ModulePaths))
 	for i, path := range p.config.ModulePaths {
-		ui.Message(fmt.Sprintf("Upload local modules from: %s", path))
+		ui.Message(fmt.Sprintf("Uploading local modules from: %s", path))
 		targetPath := fmt.Sprintf("%s/module-%d", p.config.StagingDir, i)
 		if err := p.uploadDirectory(ui, comm, targetPath, path); err != nil {
 			return fmt.Errorf("Error uploading modules: %s", err)
@@ -179,7 +179,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		Command: command,
 	}
 
-	ui.Message("Running Puppet...")
+	ui.Message(fmt.Sprintf("Running Puppet: %s", command))
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
@@ -222,7 +222,6 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
