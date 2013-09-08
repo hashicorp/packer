@@ -101,7 +101,7 @@ func (s *stepAttachFloppy) Cleanup(state multistep.StateBag) {
 }
 
 func (s *stepAttachFloppy) copyFloppy(path string) (string, error) {
-	tempdir, err := ioutil.TempDir("", "packer")
+	tempdir, err := ioutil.TempDir(os.Getenv("PACKER_TMP"), "packer")
 	if err != nil {
 		return "", err
 	}

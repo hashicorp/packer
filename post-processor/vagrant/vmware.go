@@ -68,7 +68,7 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 	}
 
 	// Create a temporary directory for us to build the contents of the box in
-	dir, err := ioutil.TempDir("", "packer")
+	dir, err := ioutil.TempDir(os.Getenv("PACKER_TMP"), "packer")
 	if err != nil {
 		return nil, false, err
 	}
