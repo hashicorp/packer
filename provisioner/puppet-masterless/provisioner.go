@@ -122,6 +122,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	for i, path := range p.config.ModulePaths {
+		info, err := os.Stat(path)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("module_path[%d] is invalid: %s", i, err))
+		} else if !info.IsDir() {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("module_path[%d] must point to a directory"))
+		}
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
