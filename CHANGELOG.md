@@ -8,6 +8,8 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+* **NEW PROVISIONER:** `puppet-masterless`. You can now provision with
+  a masterless Puppet setup. [GH-234]
 * New globally available template function: `uuid`. Generates a new random
   UUID.
 * New globally available template function: `isotime`. Generates the
