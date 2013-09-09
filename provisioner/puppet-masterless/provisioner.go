@@ -249,7 +249,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus != 0 && cmd.ExitStatus != 2 {
 		return fmt.Errorf("Puppet exited with a non-zero exit status: %d", cmd.ExitStatus)
 	}
 
