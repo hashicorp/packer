@@ -26,6 +26,31 @@ func TestProvisioner_Impl(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_hieraConfigPath(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "hiera_config_path")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with a good one
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config["hiera_config_path"] = tf.Name()
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestProvisionerPrepare_manifestFile(t *testing.T) {
 	config := testConfig()
 
