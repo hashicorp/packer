@@ -72,6 +72,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say(fmt.Sprintf("Uploading %s => %s", p.config.Source, p.config.Destination))
+	info, err := os.Stat(p.config.Source)
+	if err != nil {
+		return err
+	}
+
+	// If we're uploading a directory, short circuit and do that
+	if info.IsDir() {
+		return comm.UploadDir(p.config.Destination, p.config.Source, nil)
+	}
+
+	// We're uploading a file...
 	f, err := os.Open(p.config.Source)
 	if err != nil {
 		return err
