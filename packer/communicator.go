@@ -67,7 +67,7 @@ type Communicator interface {
 	// is a trailing slash on the source "/". For example: "/tmp/src" as
 	// the source will create a "src" directory in the destination unless
 	// a trailing slash is added. This is identical behavior to rsync(1).
-	UploadDir(string, string, []string) error
+	UploadDir(dst string, src string, exclude []string) error
 
 	// Download downloads a file from the machine from the given remote path
 	// with the contents writing to the given writer. This method will
