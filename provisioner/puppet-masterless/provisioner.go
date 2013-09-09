@@ -19,6 +19,9 @@ type Config struct {
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
+	// Additional facts to set when executing Puppet
+	Facter map[string]string
+
 	// An array of local paths of modules to upload.
 	ModulePaths []string `mapstructure:"module_paths"`
 
@@ -38,6 +41,7 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
+	FacterVars   string
 	ModulePath   string
 	ManifestFile string
 	Sudo         bool
@@ -60,7 +64,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' {{.ManifestFile}}"
+		p.config.ExecuteCommand = "{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' {{.ManifestFile}}"
 	}
 
 	if p.config.StagingDir == "" {
@@ -106,6 +110,27 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				errs, fmt.Errorf("Error parsing %s: %s", n, err))
 		}
 	}
+
+	newFacts := make(map[string]string)
+	for k, v := range p.config.Facter {
+		k, err := p.config.tpl.Process(k, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing facter key %s: %s", k, err))
+			continue
+		}
+
+		v, err := p.config.tpl.Process(v, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing facter value '%s': %s", v, err))
+			continue
+		}
+
+		newFacts[k] = v
+	}
+
+	p.config.Facter = newFacts
 
 	// Validation
 	if p.config.ManifestFile == "" {
@@ -165,8 +190,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading manifests: %s", err)
 	}
 
+	// Compile the facter variables
+	facterVars := make([]string, 0, len(p.config.Facter))
+	for k, v := range p.config.Facter {
+		facterVars = append(facterVars, fmt.Sprintf("FACTER_%s='%s'", k, v))
+	}
+
 	// Execute Puppet
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
+		FacterVars:   strings.Join(facterVars, " "),
 		ManifestFile: remoteManifestFile,
 		ModulePath:   strings.Join(modulePaths, ":"),
 		Sudo:         !p.config.PreventSudo,
