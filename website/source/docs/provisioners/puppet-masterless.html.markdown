@@ -50,6 +50,10 @@ Optional parameters:
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
 
+* `facter` (object, string keys and values) - Additonal
+  [facts](http://puppetlabs.com/puppet/related-projects/facter) to make
+  available when Puppet is running.
+
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote
   machine. By default, this is empty.
@@ -71,7 +75,7 @@ By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Puppet:
 
 ```
-{{if .Sudo}sudo {{end}}puppet apply \
+{{.FacterVars}}{{if .Sudo} sudo -E {{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
   {{.ManifestFile}}
@@ -81,6 +85,8 @@ This command can be customized using the `execute_command` configuration.
 As you can see from the default value above, the value of this configuration
 can contain various template variables, defined below:
 
+* `FacterVars` - Shell-friendly string of environmental variables used
+  to set custom facts configured for this provisioner.
 * `ManifestFile` - The path on the remote machine to the manifest file
   for Puppet to use.
 * `ModulePath` - The paths to the module directories.
