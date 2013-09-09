@@ -22,6 +22,9 @@ type Config struct {
 	// Additional facts to set when executing Puppet
 	Facter map[string]string
 
+	// Path to a hiera configuration file to upload and use.
+	HieraConfigPath string `mapstructure:"hiera_config_path"`
+
 	// An array of local paths of modules to upload.
 	ModulePaths []string `mapstructure:"module_paths"`
 
@@ -41,10 +44,12 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
-	FacterVars   string
-	ModulePath   string
-	ManifestFile string
-	Sudo         bool
+	FacterVars         string
+	HasHieraConfigPath bool
+	HieraConfigPath    string
+	ModulePath         string
+	ManifestFile       string
+	Sudo               bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -64,7 +69,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' {{.ManifestFile}}"
+		p.config.ExecuteCommand = "{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}" +
+			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
+			"{{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
+			"{{.ManifestFile}}"
 	}
 
 	if p.config.StagingDir == "" {
@@ -133,6 +141,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.config.Facter = newFacts
 
 	// Validation
+	if p.config.HieraConfigPath != "" {
+		info, err := os.Stat(p.config.ManifestFile)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("hiera_config_path is invalid: %s", err))
+		} else if info.IsDir() {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("hiera_config_path must point to a file"))
+		}
+	}
+
 	if p.config.ManifestFile == "" {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("A manifest_file must be specified."))
@@ -171,6 +190,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error creating staging directory: %s", err)
 	}
 
+	// Upload hiera config if set
+	remoteHieraConfigPath := ""
+	if p.config.HieraConfigPath != "" {
+		var err error
+		remoteHieraConfigPath, err = p.uploadHieraConfig(ui, comm)
+		if err != nil {
+			return fmt.Errorf("Error uploading hiera config: %s", err)
+		}
+	}
+
 	// Upload all modules
 	modulePaths := make([]string, 0, len(p.config.ModulePaths))
 	for i, path := range p.config.ModulePaths {
@@ -198,10 +227,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
-		FacterVars:   strings.Join(facterVars, " "),
-		ManifestFile: remoteManifestFile,
-		ModulePath:   strings.Join(modulePaths, ":"),
-		Sudo:         !p.config.PreventSudo,
+		FacterVars:         strings.Join(facterVars, " "),
+		HasHieraConfigPath: remoteHieraConfigPath != "",
+		HieraConfigPath:    remoteHieraConfigPath,
+		ManifestFile:       remoteManifestFile,
+		ModulePath:         strings.Join(modulePaths, ":"),
+		Sudo:               !p.config.PreventSudo,
 	})
 	if err != nil {
 		return err
@@ -227,6 +258,22 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) (string, error) {
+	ui.Message("Uploading hiera configuration...")
+	f, err := os.Open(p.config.HieraConfigPath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	path := fmt.Sprintf("%s/hiera.yaml", p.config.StagingDir)
+	if err := comm.Upload(path, f); err != nil {
+		return "", err
+	}
+
+	return path, nil
 }
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
