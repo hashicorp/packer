@@ -32,11 +32,25 @@ func TestProvisionerPrepare_cookbookPaths(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	rolesPath, err := ioutil.TempDir("", "roles")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	dataBagsPath, err := ioutil.TempDir("", "data_bags")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
 	defer os.Remove(path1)
 	defer os.Remove(path2)
+	defer os.Remove(rolesPath)
+	defer os.Remove(dataBagsPath)
 
 	config := testConfig()
 	config["cookbook_paths"] = []string{path1, path2}
+	config["roles_path"] = rolesPath
+	config["data_bags_path"] = dataBagsPath
 
 	err = p.Prepare(config)
 	if err != nil {
@@ -49,6 +63,14 @@ func TestProvisionerPrepare_cookbookPaths(t *testing.T) {
 
 	if p.config.CookbookPaths[0] != path1 || p.config.CookbookPaths[1] != path2 {
 		t.Fatalf("unexpected: %#v", p.config.CookbookPaths)
+	}
+	
+	if p.config.RolesPath != rolesPath {
+		t.Fatalf("unexpected: %#v", p.config.RolesPath)
+	}
+
+	if p.config.DataBagsPath != dataBagsPath {
+		t.Fatalf("unexpected: %#v", p.config.DataBagsPath)
 	}
 }
 
