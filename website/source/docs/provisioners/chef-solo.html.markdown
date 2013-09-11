@@ -37,6 +37,14 @@ configuration is actually required, but at least `run_list` is recommended.
   to the remote machine in the directory specified by the `staging_directory`.
   By default, this is empty.
 
+* `roles_path` (string) - The path to the "roles" directory on your local filesystem.
+  These will be uploaded to the remote machine in the directory specified by the 
+  `staging_directory`.  By default, this is empty.
+
+* `data_bags_path` (string) - The path to the "data_bags" directory on your local filesystem.
+  These will be uploaded to the remote machine in the directory specified by the 
+  `staging_directory`.  By default, this is empty.
+
 * `execute_command` (string) - The command used to execute Chef. This has
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
