@@ -69,7 +69,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}" +
+		p.config.ExecuteCommand = "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"--detailed-exitcodes " +
