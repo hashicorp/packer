@@ -7,6 +7,8 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * builder/amazon/*: While waiting for AMI, will detect "failed" state.
+* builder/amazon/*: Waiting for state will detect if the resource (AMI,
+  instance, etc.) disappears from under it.
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
 
