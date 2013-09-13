@@ -82,6 +82,8 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
+	notfoundTick := 0
+
 	for {
 		var currentState string
 		i, currentState, err = conf.Refresh()
@@ -89,9 +91,17 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			return
 		}
 
-		// Check states only if we were able to refresh to an instance
-		// that exists.
-		if i != nil {
+		if i == nil {
+			// If we didn't find the resource, check if we have been
+			// not finding it for awhile, and if so, report an error.
+			notfoundTick += 1
+			if notfoundTick > 20 {
+				return nil, errors.New("couldn't find resource")
+			}
+		} else {
+			// Reset the counter for when a resource isn't found
+			notfoundTick = 0
+
 			if currentState == conf.Target {
 				return
 			}
