@@ -1,7 +1,12 @@
 ## 0.3.8 (unreleased)
 
+IMPROVEMENTS:
+
+* builder/amazon/*: Interrupts work while waiting for AMI to be ready.
+
 BUG FIXES:
 
+* builder/amazon/*: While waiting for AMI, will detect "failed" state.
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
 
