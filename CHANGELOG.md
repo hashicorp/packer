@@ -1,6 +1,9 @@
 ## 0.3.8 (unreleased)
 
+BUG FIXES:
 
+* provisioner/puppet-masterless: Fix failure case when both facter vars
+  are used and prevent_sudo. [GH-415]
 
 ## 0.3.7 (September 9, 2013)
 
