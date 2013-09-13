@@ -30,6 +30,32 @@ type StateChangeConf struct {
 	Target    string
 }
 
+// AMIStateRefreshFunc returns a StateRefreshFunc that is used to watch
+// an AMI for state changes.
+func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := conn.Images([]string{imageId}, ec2.NewFilter())
+		if err != nil {
+			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidAMIID.NotFound" {
+				// Set this to nil as if we didn't find anything.
+				resp = nil
+			} else {
+				log.Printf("Error on AMIStateRefresh: %s", err)
+				return nil, "", err
+			}
+		}
+
+		if resp == nil || len(resp.Images) == 0 {
+			// Sometimes AWS has consistency issues and doesn't see the
+			// AMI. Return an empty state.
+			return nil, "", nil
+		}
+
+		i := resp.Images[0]
+		return i, i.State, nil
+	}
+}
+
 // InstanceStateRefreshFunc returns a StateRefreshFunc that is used to watch
 // an EC2 instance.
 func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {

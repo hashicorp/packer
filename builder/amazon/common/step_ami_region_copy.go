@@ -40,8 +40,17 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		ui.Say(fmt.Sprintf("Waiting for AMI (%s) in region (%s) to become ready...", resp.ImageId, region))
-		if err := WaitForAMI(regionconn, resp.ImageId); err != nil {
+		stateChange := StateChangeConf{
+			Conn:      regionconn,
+			Pending:   []string{"pending"},
+			Target:    "available",
+			Refresh:   AMIStateRefreshFunc(regionconn, resp.ImageId),
+			StepState: state,
+		}
+
+		ui.Say(fmt.Sprintf("Waiting for AMI (%s) in region (%s) to become ready...",
+			resp.ImageId, region))
+		if _, err := WaitForState(&stateChange); err != nil {
 			err := fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s", resp.ImageId, region, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
