@@ -215,7 +215,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	// Upload manifests
-	ui.Message("Uploading manifests...")
 	remoteManifestFile, err := p.uploadManifests(ui, comm)
 	if err != nil {
 		return fmt.Errorf("Error uploading manifests: %s", err)
