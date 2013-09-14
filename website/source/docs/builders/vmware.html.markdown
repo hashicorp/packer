@@ -27,7 +27,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
 <pre class="prettyprint">
 {
   "type": "vmware",
-  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.2-server-amd64.iso",
+  "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
