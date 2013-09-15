@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"code.google.com/p/go.crypto/ssh"
 	"io"
 )
 
@@ -53,15 +54,15 @@ func (k *SimpleKeychain) AddPEMKeyPassword(key string, password string) (err err
 }
 
 // Key method for ssh.ClientKeyring interface
-func (k *SimpleKeychain) Key(i int) (interface{}, error) {
+func (k *SimpleKeychain) Key(i int) (ssh.PublicKey, error) {
 	if i < 0 || i >= len(k.keys) {
 		return nil, nil
 	}
 	switch key := k.keys[i].(type) {
 	case *rsa.PrivateKey:
-		return &key.PublicKey, nil
+		return ssh.NewRSAPublicKey(&key.PublicKey), nil
 	case *dsa.PrivateKey:
-		return &key.PublicKey, nil
+		return ssh.NewDSAPublicKey(&key.PublicKey), nil
 	}
 	panic("unknown key type")
 }
