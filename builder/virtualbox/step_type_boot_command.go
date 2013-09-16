@@ -99,7 +99,7 @@ func scancodes(message string) []string {
   //
   // Scancodes are recorded here in pairs. The first entry represents
   // the key press and the second entry represents the key release and is
-  // derived from the first by the addition of 0x81.
+  // derived from the first by the addition of 0x80.
 	special := make(map[string][]string)
 	special["<bs>"] = []string{"0e", "8e"}
 	special["<del>"] = []string{"53", "d3"}
