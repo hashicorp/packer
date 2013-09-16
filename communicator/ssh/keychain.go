@@ -1,13 +1,13 @@
 package ssh
 
 import (
+	"code.google.com/p/go.crypto/ssh"
 	"crypto"
 	"crypto/dsa"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"code.google.com/p/go.crypto/ssh"
 	"io"
 )
 
