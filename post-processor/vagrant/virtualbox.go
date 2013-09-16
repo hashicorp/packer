@@ -32,7 +32,7 @@ type VBoxBoxPostProcessor struct {
 }
 
 func (p *VBoxBoxPostProcessor) Configure(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	_, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
 	}
@@ -43,8 +43,12 @@ func (p *VBoxBoxPostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
+	log.Printf("Output Path Template is: %s", p.config.OutputPath)
+	log.Printf("VagrantfileTemplate is: %s", p.config.VagrantfileTemplate)
+
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
+	errs := new(packer.MultiError)
+	//errs := common.CheckUnusedConfig(md)
 
 	validates := map[string]*string{
 		"output":               &p.config.OutputPath,
