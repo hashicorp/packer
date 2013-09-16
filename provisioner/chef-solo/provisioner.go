@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +18,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	ConfigTemplate      string   `mapstructure:"config_template"`
 	CookbookPaths       []string `mapstructure:"cookbook_paths"`
 	ExecuteCommand      string   `mapstructure:"execute_command"`
 	InstallCommand      string   `mapstructure:"install_command"`
@@ -80,7 +82,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
-		"staging_dir": &p.config.StagingDir,
+		"config_template": &p.config.ConfigTemplate,
+		"staging_dir":     &p.config.StagingDir,
 	}
 
 	for n, ptr := range templates {
@@ -118,6 +121,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if err := p.config.tpl.Validate(*ptr); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
+	if p.config.ConfigTemplate != "" {
+		fi, err := os.Stat(p.config.ConfigTemplate)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad config template path: %s", err))
+		} else if fi.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Config template path must be a file: %s", err))
 		}
 	}
 
@@ -216,7 +230,24 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
 	}
 
-	configString, err := p.config.tpl.Process(DefaultConfigTemplate, &ConfigTemplate{
+	// Read the template
+	tpl := DefaultConfigTemplate
+	if p.config.ConfigTemplate != "" {
+		f, err := os.Open(p.config.ConfigTemplate)
+		if err != nil {
+			return "", err
+		}
+		defer f.Close()
+
+		tplBytes, err := ioutil.ReadAll(f)
+		if err != nil {
+			return "", err
+		}
+
+		tpl = string(tplBytes)
+	}
+
+	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
 		CookbookPaths: strings.Join(cookbook_paths, ","),
 	})
 	if err != nil {

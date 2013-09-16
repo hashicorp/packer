@@ -32,6 +32,13 @@ The example below is fully functional and expects cookbooks in the
 The reference of available configuration options is listed below. No
 configuration is actually required, but at least `run_list` is recommended.
 
+* `config_template` (string) - Path to a template that will be used for
+  the Chef configuration file. By default Packer only sets configuration
+  it needs to match the settings set in the provisioner configuration. If
+  you need to set configurations that the Packer provisioner doesn't support,
+  then you should use a custom configuration template. See the dedicated
+  "Chef Configuration" section below for more details.
+
 * `cookbook_paths` (array of strings) - This is an array of paths to
   "cookbooks" directories on your local filesystem. These will be uploaded
   to the remote machine in the directory specified by the `staging_directory`.
@@ -69,6 +76,25 @@ configuration is actually required, but at least `run_list` is recommended.
   the SSH user that Packer uses is able to create directories and write into
   this folder. If the permissions are not correct, use a shell provisioner
   prior to this to configure it properly.
+
+## Chef Configuration
+
+By default, Packer uses a simple Chef configuration file in order to set
+the options specified for the provisioner. But Chef is a complex tool that
+supports many configuration options. Packer allows you to specify a custom
+configuration template if you'd like to set custom configurations.
+
+The default value for the configuration template is:
+
+```
+cookbook_path [{{.CookbookPaths}}]
+```
+
+This template is a [configuration template](/docs/templates/configuration-templates.html)
+and has a set of variables available to use:
+
+* `CookbookPaths` is the set of cookbook paths ready to embedded directly
+  into a Ruby array to configure Chef.
 
 ## Execute Command
 
