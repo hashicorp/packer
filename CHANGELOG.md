@@ -9,6 +9,7 @@ BUG FIXES:
 * builder/amazon/*: While waiting for AMI, will detect "failed" state.
 * builder/amazon/*: Waiting for state will detect if the resource (AMI,
   instance, etc.) disappears from under it.
+* builder/virtualbox: F1-F12 and delete scancodes now work. [GH-425]
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
 
