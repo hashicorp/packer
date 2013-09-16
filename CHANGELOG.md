@@ -1,5 +1,10 @@
 ## 0.3.8 (unreleased)
 
+FEATURES:
+
+* provisioner/chef-solo: Ability to specify a custom Chef configuration
+  template.
+
 IMPROVEMENTS:
 
 * builder/amazon/*: Interrupts work while waiting for AMI to be ready.
