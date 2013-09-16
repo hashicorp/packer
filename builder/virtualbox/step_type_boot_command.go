@@ -93,13 +93,13 @@ func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func scancodes(message string) []string {
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
-  //
-  // Scancodes represent raw keyboard output and are fed to the VM by the
-  // VBoxManage controlvm keyboardputscancode program.
-  //
-  // Scancodes are recorded here in pairs. The first entry represents
-  // the key press and the second entry represents the key release and is
-  // derived from the first by the addition of 0x80.
+	//
+	// Scancodes represent raw keyboard output and are fed to the VM by the
+	// VBoxManage controlvm keyboardputscancode program.
+	//
+	// Scancodes are recorded here in pairs. The first entry represents
+	// the key press and the second entry represents the key release and is
+	// derived from the first by the addition of 0x81.
 	special := make(map[string][]string)
 	special["<bs>"] = []string{"0e", "8e"}
 	special["<del>"] = []string{"53", "d3"}
