@@ -40,7 +40,6 @@ func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
 
 	// Accumulate any errors
 	errs := new(packer.MultiError)
-	//errs := common.CheckUnusedConfig(md)
 
 	validates := map[string]*string{
 		"output":               &p.config.OutputPath,
