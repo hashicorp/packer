@@ -30,6 +30,7 @@ type Config struct {
 	CopyFiles      []string   `mapstructure:"copy_files"`
 	DevicePath     string     `mapstructure:"device_path"`
 	MountCommand   string     `mapstructure:"mount_command"`
+	ChrootCommand  string     `mapstructure:"chroot_command"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 	UnmountCommand string     `mapstructure:"unmount_command"`
@@ -82,6 +83,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.MountCommand = "mount"
 	}
 
+	if b.config.ChrootCommand == "" {
+		b.config.ChrootCommand = "chroot"
+	}
+
 	if b.config.MountPath == "" {
 		b.config.MountPath = "packer-amazon-chroot-volumes/{{.Device}}"
 	}
@@ -129,6 +134,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	templates := map[string]*string{
 		"device_path":     &b.config.DevicePath,
 		"mount_command":   &b.config.MountCommand,
+		"chroot_command":  &b.config.ChrootCommand,
 		"source_ami":      &b.config.SourceAmi,
 		"unmount_command": &b.config.UnmountCommand,
 	}

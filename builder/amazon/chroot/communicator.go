@@ -14,15 +14,12 @@ import (
 // commands locally but within a chroot.
 type Communicator struct {
 	Chroot string
+    ChrootCommand string
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	chrootCmdPath, err := exec.LookPath("chroot")
-	if err != nil {
-		return err
-	}
 
-	localCmd := exec.Command(chrootCmdPath, c.Chroot, "/bin/sh", "-c", cmd.Command)
+	localCmd := exec.Command(c.ChrootCommand, c.Chroot, "/bin/sh", "-c", cmd.Command)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
