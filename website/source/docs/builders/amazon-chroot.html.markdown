@@ -126,6 +126,10 @@ Optional:
 * `unmount_command` (string) - Just like `mount_command`, except this is
   the command to unmount devices.
 
+* `chroot_command` (string) - The command to use to create the chroot.
+  This defaults to "chroot", but like `mount_command`, it may be useful
+  to use `sudo` or variables.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
