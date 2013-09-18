@@ -117,6 +117,50 @@ func TestProvisionerPrepare_cookbookPaths(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_dataBagsPath(t *testing.T) {
+	var p Provisioner
+
+	dataBagsPath, err := ioutil.TempDir("", "data_bags")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(dataBagsPath)
+
+	config := testConfig()
+	config["data_bags_path"] = dataBagsPath
+
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.DataBagsPath != dataBagsPath {
+		t.Fatalf("unexpected: %#v", p.config.DataBagsPath)
+	}
+}
+
+func TestProvisionerPrepare_rolesPath(t *testing.T) {
+	var p Provisioner
+
+	rolesPath, err := ioutil.TempDir("", "roles")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(rolesPath)
+
+	config := testConfig()
+	config["roles_path"] = rolesPath
+
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.RolesPath != rolesPath {
+		t.Fatalf("unexpected: %#v", p.config.RolesPath)
+	}
+}
+
 func TestProvisionerPrepare_json(t *testing.T) {
 	config := testConfig()
 	config["json"] = map[string]interface{}{
