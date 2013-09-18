@@ -77,7 +77,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 
 		// Create the proper list of configurations
-		ppConfigs := make([]interface{}, 0, len(p.rawConfigs)+1)
+		ppConfigs := make([]interface{}, len(p.rawConfigs), len(p.rawConfigs)+1)
 		copy(ppConfigs, p.rawConfigs)
 		ppConfigs = append(ppConfigs, raw)
 

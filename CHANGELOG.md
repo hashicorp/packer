@@ -20,6 +20,7 @@ BUG FIXES:
 * builder/amazon/instance: Make AccessKey/SecretKey available to bundle
   command even when they come from the environment. [GH-434]
 * builder/virtualbox: F1-F12 and delete scancodes now work. [GH-425]
+* post-processor/vagrant: Override configurations properly work. [GH-426]
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
 
