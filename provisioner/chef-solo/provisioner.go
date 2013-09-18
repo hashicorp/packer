@@ -20,8 +20,8 @@ type Config struct {
 
 	ConfigTemplate      string   `mapstructure:"config_template"`
 	CookbookPaths       []string `mapstructure:"cookbook_paths"`
-	RolesPath      		string   `mapstructure:"roles_path"`
-	DataBagsPath     	string   `mapstructure:"data_bags_path"`
+	RolesPath           string   `mapstructure:"roles_path"`
+	DataBagsPath        string   `mapstructure:"data_bags_path"`
 	ExecuteCommand      string   `mapstructure:"execute_command"`
 	InstallCommand      string   `mapstructure:"install_command"`
 	RemoteCookbookPaths []string `mapstructure:"remote_cookbook_paths"`
@@ -39,9 +39,9 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	CookbookPaths 	string
-	RolesPath 		string
-	DataBagsPath 	string
+	CookbookPaths string
+	RolesPath     string
+	DataBagsPath  string
 }
 
 type ExecuteTemplate struct {
@@ -147,10 +147,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				errs, fmt.Errorf("Bad cookbook path '%s': %s", path, err))
 		}
 	}
-	
+
 	if p.config.RolesPath != "" {
 		pFileInfo, err := os.Stat(p.config.RolesPath)
-		
+
 		if err != nil || !pFileInfo.IsDir() {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Bad roles path '%s': %s", p.config.RolesPath, err))
@@ -159,7 +159,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.DataBagsPath != "" {
 		pFileInfo, err := os.Stat(p.config.DataBagsPath)
-		
+
 		if err != nil || !pFileInfo.IsDir() {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Bad data bags path '%s': %s", p.config.DataBagsPath, err))
@@ -201,7 +201,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		cookbookPaths = append(cookbookPaths, targetPath)
 	}
-	
+
 	rolesPath := ""
 	if p.config.RolesPath != "" {
 		rolesPath := fmt.Sprintf("%s/roles", p.config.StagingDir)
@@ -267,7 +267,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 		i = len(p.config.RemoteCookbookPaths) + i
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
 	}
-	
+
 	roles_path := ""
 	if rolesPath != "" {
 		roles_path = fmt.Sprintf(`"%s"`, rolesPath)
@@ -297,8 +297,8 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
 		CookbookPaths: strings.Join(cookbook_paths, ","),
-		RolesPath: roles_path,
-		DataBagsPath: data_bags_path,
+		RolesPath:     roles_path,
+		DataBagsPath:  data_bags_path,
 	})
 	if err != nil {
 		return "", err
