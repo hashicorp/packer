@@ -20,6 +20,8 @@ type Config struct {
 
 	ConfigTemplate      string   `mapstructure:"config_template"`
 	CookbookPaths       []string `mapstructure:"cookbook_paths"`
+	RolesPath      		string   `mapstructure:"roles_path"`
+	DataBagsPath     	string   `mapstructure:"data_bags_path"`
 	ExecuteCommand      string   `mapstructure:"execute_command"`
 	InstallCommand      string   `mapstructure:"install_command"`
 	RemoteCookbookPaths []string `mapstructure:"remote_cookbook_paths"`
@@ -37,7 +39,9 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	CookbookPaths string
+	CookbookPaths 	string
+	RolesPath 		string
+	DataBagsPath 	string
 }
 
 type ExecuteTemplate struct {
@@ -143,6 +147,24 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				errs, fmt.Errorf("Bad cookbook path '%s': %s", path, err))
 		}
 	}
+	
+	if p.config.RolesPath != "" {
+		pFileInfo, err := os.Stat(p.config.RolesPath)
+		
+		if err != nil || !pFileInfo.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad roles path '%s': %s", p.config.RolesPath, err))
+		}
+	}
+
+	if p.config.DataBagsPath != "" {
+		pFileInfo, err := os.Stat(p.config.DataBagsPath)
+		
+		if err != nil || !pFileInfo.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad data bags path '%s': %s", p.config.DataBagsPath, err))
+		}
+	}
 
 	// Process the user variables within the JSON and set the JSON.
 	// Do this early so that we can validate and show errors.
@@ -179,8 +201,24 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		cookbookPaths = append(cookbookPaths, targetPath)
 	}
+	
+	rolesPath := ""
+	if p.config.RolesPath != "" {
+		rolesPath := fmt.Sprintf("%s/roles", p.config.StagingDir)
+		if err := p.uploadDirectory(ui, comm, rolesPath, p.config.RolesPath); err != nil {
+			return fmt.Errorf("Error uploading roles: %s", err)
+		}
+	}
 
-	configPath, err := p.createConfig(ui, comm, cookbookPaths)
+	dataBagsPath := ""
+	if p.config.DataBagsPath != "" {
+		dataBagsPath := fmt.Sprintf("%s/data_bags", p.config.StagingDir)
+		if err := p.uploadDirectory(ui, comm, dataBagsPath, p.config.DataBagsPath); err != nil {
+			return fmt.Errorf("Error uploading data bags: %s", err)
+		}
+	}
+
+	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -217,7 +255,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string) (string, error) {
 	ui.Message("Creating configuration file 'solo.rb'")
 
 	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
@@ -228,6 +266,16 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	for i, path := range localCookbooks {
 		i = len(p.config.RemoteCookbookPaths) + i
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
+	}
+	
+	roles_path := ""
+	if rolesPath != "" {
+		roles_path = fmt.Sprintf(`"%s"`, rolesPath)
+	}
+
+	data_bags_path := ""
+	if dataBagsPath != "" {
+		data_bags_path = fmt.Sprintf(`"%s"`, dataBagsPath)
 	}
 
 	// Read the template
@@ -249,6 +297,8 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
 		CookbookPaths: strings.Join(cookbook_paths, ","),
+		RolesPath: roles_path,
+		DataBagsPath: data_bags_path,
 	})
 	if err != nil {
 		return "", err
@@ -399,5 +449,11 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 }
 
 var DefaultConfigTemplate = `
-cookbook_path [{{.CookbookPaths}}]
+cookbook_path 	[{{.CookbookPaths}}]
+{{if .RolesPath != ""}}
+role_path		{{.RolesPath}}
+{{end}}
+{{if .DataBagsPath != ""}}
+data_bag_path	{{.DataBagsPath}}
+{{end}}
 `
