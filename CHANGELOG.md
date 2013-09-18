@@ -16,6 +16,8 @@ BUG FIXES:
   instance, etc.) disappears from under it.
 * builder/amazon/instance: Exclude only contents of /tmp, not /tmp
   itself. [GH-437]
+* builder/amazon/instance: Make AccessKey/SecretKey available to bundle
+  command even when they come from the environment. [GH-434]
 * builder/virtualbox: F1-F12 and delete scancodes now work. [GH-425]
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
