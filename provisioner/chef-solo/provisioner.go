@@ -40,8 +40,8 @@ type Provisioner struct {
 
 type ConfigTemplate struct {
 	CookbookPaths string
-	RolesPath     string
 	DataBagsPath  string
+	RolesPath     string
 }
 
 type ExecuteTemplate struct {
@@ -268,16 +268,6 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
 	}
 
-	roles_path := ""
-	if rolesPath != "" {
-		roles_path = fmt.Sprintf(`"%s"`, rolesPath)
-	}
-
-	data_bags_path := ""
-	if dataBagsPath != "" {
-		data_bags_path = fmt.Sprintf(`"%s"`, dataBagsPath)
-	}
-
 	// Read the template
 	tpl := DefaultConfigTemplate
 	if p.config.ConfigTemplate != "" {
@@ -297,8 +287,8 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
 		CookbookPaths: strings.Join(cookbook_paths, ","),
-		RolesPath:     roles_path,
-		DataBagsPath:  data_bags_path,
+		RolesPath:     rolesPath,
+		DataBagsPath:  dataBagsPath,
 	})
 	if err != nil {
 		return "", err
@@ -451,9 +441,9 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 var DefaultConfigTemplate = `
 cookbook_path 	[{{.CookbookPaths}}]
 {{if .RolesPath != ""}}
-role_path		{{.RolesPath}}
+role_path		"{{.RolesPath}}"
 {{end}}
 {{if .DataBagsPath != ""}}
-data_bag_path	{{.DataBagsPath}}
+data_bag_path	"{{.DataBagsPath}}"
 {{end}}
 `
