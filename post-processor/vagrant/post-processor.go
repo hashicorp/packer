@@ -45,10 +45,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	tpl.UserVars = p.config.PackerUserVars
 
 	// Defaults
-	ppExtraConfig := make(map[string]interface{})
 	if p.config.OutputPath == "" {
 		p.config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
-		ppExtraConfig["output"] = p.config.OutputPath
 	}
 
 	// Accumulate any errors
@@ -58,10 +56,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("Error parsing output template: %s", err))
 	}
 
+	// Store extra configuration we'll send to each post-processor type
+	ppExtraConfig := make(map[string]interface{})
+	ppExtraConfig["output"] = p.config.OutputPath
+
 	// Store the extra configuration for post-processors
 	p.rawConfigs = append(p.rawConfigs, ppExtraConfig)
 
-	// TODO(mitchellh): Properly handle multiple raw configs
+	// TODO(mitchellh): Properly handle multiple raw configs. This isn't
+	// very pressing at the moment because at the time of this comment
+	// only the first member of raws can contain the actual type-overrides.
 	var mapConfig map[string]interface{}
 	if err := mapstructure.Decode(raws[0], &mapConfig); err != nil {
 		errs = packer.MultiErrorAppend(errs,
