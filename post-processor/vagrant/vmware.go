@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -23,7 +24,7 @@ type VMwareBoxPostProcessor struct {
 }
 
 func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	_, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
 	}
@@ -34,8 +35,11 @@ func (p *VMwareBoxPostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
+	log.Printf("Output Path Template is: %s", p.config.OutputPath)
+	log.Printf("VagrantfileTemplate is: %s", p.config.VagrantfileTemplate)
+
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
+	errs := new(packer.MultiError)
 
 	validates := map[string]*string{
 		"output":               &p.config.OutputPath,
@@ -85,6 +89,7 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 	}
 
 	if p.config.VagrantfileTemplate != "" {
+		log.Printf("Retrieving Vagrantfile Template: %s", p.config.VagrantfileTemplate)
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
 			return nil, false, err
@@ -103,6 +108,7 @@ func (p *VMwareBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artif
 		}
 		defer vf.Close()
 
+		log.Printf("Processing template contents into a new Vagrantfile: %s", p.config.VagrantfileTemplate)
 		vagrantfileContents, err := p.config.tpl.Process(string(contents), nil)
 		if err != nil {
 			return nil, false, fmt.Errorf("Error writing Vagrantfile: %s", err)

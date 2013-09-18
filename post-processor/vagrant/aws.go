@@ -29,7 +29,7 @@ type AWSBoxPostProcessor struct {
 }
 
 func (p *AWSBoxPostProcessor) Configure(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	_, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
 	}
@@ -40,8 +40,11 @@ func (p *AWSBoxPostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
+	log.Printf("Output Path Template is: %s", p.config.OutputPath)
+	log.Printf("VagrantfileTemplate is: %s", p.config.VagrantfileTemplate)
+
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
+	errs := new(packer.MultiError)
 
 	validates := map[string]*string{
 		"output":               &p.config.OutputPath,
@@ -102,6 +105,7 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 	defer vf.Close()
 
 	vagrantfileContents := defaultAWSVagrantfile
+	log.Printf("Retrieving Vagrantfile Template: %s", p.config.VagrantfileTemplate)
 	if p.config.VagrantfileTemplate != "" {
 		log.Printf("Using vagrantfile template: %s", p.config.VagrantfileTemplate)
 		f, err := os.Open(p.config.VagrantfileTemplate)
@@ -120,6 +124,7 @@ func (p *AWSBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact
 		vagrantfileContents = string(contents)
 	}
 
+	log.Printf("Processing template contents into a new Vagrantfile: %s", p.config.VagrantfileTemplate)
 	vagrantfileContents, err = p.config.tpl.Process(vagrantfileContents, tplData)
 	if err != nil {
 		return nil, false, fmt.Errorf("Error writing Vagrantfile: %s", err)
