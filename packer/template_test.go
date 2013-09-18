@@ -414,7 +414,6 @@ func TestParseTemplate_variablesBadDefault(t *testing.T) {
 	}
 }
 
-//tests for the description field in the template
 func TestParseTemplate_BuilderWithDescription(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
