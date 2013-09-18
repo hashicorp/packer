@@ -414,6 +414,84 @@ func TestParseTemplate_variablesBadDefault(t *testing.T) {
 	}
 }
 
+//tests for the description field in the template
+func TestParseTemplate_BuilderWithDescription(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"builders": [
+			{
+				"type": "amazon-ebs",
+				"Description": "amazon description"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	assert.Nil(err, "should not error")
+	assert.NotNil(result, "template should not be nil")
+	assert.Length(result.Description, 1, "should have one description")
+
+	descript, ok := result.Description["amazon-ebs"]
+	assert.True(ok, "should have amazon-ebs description")
+	assert.Equal(descript, "amazon description", "Description should be 'amazon description'")
+}
+func TestParseTemplate_BuilderWithoutDescription(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"builders": [
+			{
+				"name": "amazon builder",
+				"type": "amazon-ebs"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	assert.Nil(err, "should not error")
+	assert.NotNil(result, "template should not be nil")
+	assert.Length(result.Description, 1, "should have one description")
+
+	descript, ok := result.Description["amazon builder"]
+	assert.True(ok, "should have amazon description")
+	assert.Equal(descript, "", "Description field should be empty")
+}
+func TestParseTemplate_BuilderWithMultipleDescriptions(t *testing.T) {
+	assert := asserts.NewTestingAsserts(t, true)
+
+	data := `
+	{
+		"builders": [
+			{
+				"name": "amazon builder",
+				"type": "amazon-ebs",
+				"Description": "Amazon description"
+			}, {
+				"type": "virtualbox",
+				"Description": "virtualbox description"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	assert.Nil(err, "should not error")
+	assert.NotNil(result, "template should not be nil")
+	assert.Length(result.Description, 2, "should have two descriptions")
+
+	descript, ok := result.Description["amazon builder"]
+	assert.True(ok, "should have amazon description")
+	assert.Equal(descript, "Amazon description", "Description field should be 'amazon description'")
+	descript, ok = result.Description["virtualbox"]
+	assert.True(ok, "should have virtualbox description")
+	assert.Equal(descript, "virtualbox description", "Description field should be 'virtualbox description'")
+}
+
 func TestTemplate_BuildNames(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
