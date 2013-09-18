@@ -107,7 +107,7 @@ func TestProvisionerPrepare_cookbookPaths(t *testing.T) {
 	if p.config.CookbookPaths[0] != path1 || p.config.CookbookPaths[1] != path2 {
 		t.Fatalf("unexpected: %#v", p.config.CookbookPaths)
 	}
-	
+
 	if p.config.RolesPath != rolesPath {
 		t.Fatalf("unexpected: %#v", p.config.RolesPath)
 	}
