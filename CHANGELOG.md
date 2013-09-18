@@ -7,13 +7,15 @@ FEATURES:
 
 IMPROVEMENTS:
 
-* builder/amazon/*: Interrupts work while waiting for AMI to be ready.
+* builder/amazon/all: Interrupts work while waiting for AMI to be ready.
 
 BUG FIXES:
 
-* builder/amazon/*: While waiting for AMI, will detect "failed" state.
-* builder/amazon/*: Waiting for state will detect if the resource (AMI,
+* builder/amazon/all: While waiting for AMI, will detect "failed" state.
+* builder/amazon/all: Waiting for state will detect if the resource (AMI,
   instance, etc.) disappears from under it.
+* builder/amazon/instance: Exclude only contents of /tmp, not /tmp
+  itself. [GH-437]
 * builder/virtualbox: F1-F12 and delete scancodes now work. [GH-425]
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
