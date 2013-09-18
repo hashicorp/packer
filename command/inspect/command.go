@@ -111,9 +111,15 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 		for i, k := range keys {
 			v := tpl.Builders[k]
+<<<<<<< HEAD
 			d := fmt.Sprintf("  - %s", tpl.Builders[k].Description)
 			// if there is no description for a builder, print out <No description available>
 			if tpl.Builders[k].Description == "" {
+=======
+			d := fmt.Sprintf("  - %s", tpl.Description[k])
+			// if there is no description for a builder, print out <No description available>
+			if tpl.Description[k] == "" {
+>>>>>>> 7de5de4... Implemented a description field for the packer template, the description is outputted when inspecting or building the template.
 				d = fmt.Sprintf("  <No description available>")
 			}
 			
