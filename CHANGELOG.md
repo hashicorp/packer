@@ -4,6 +4,7 @@ FEATURES:
 
 * provisioner/chef-solo: Ability to specify a custom Chef configuration
   template.
+* provisioner/chef-solo: Roles and data bags support. [GH-348]
 
 IMPROVEMENTS:
 
