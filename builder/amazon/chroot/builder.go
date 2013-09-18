@@ -33,6 +33,7 @@ type Config struct {
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 	UnmountCommand string     `mapstructure:"unmount_command"`
+	Description	   string	  `mapstructure:"Description"`
 
 	tpl *packer.ConfigTemplate
 }

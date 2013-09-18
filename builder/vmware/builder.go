@@ -54,6 +54,7 @@ type config struct {
 	VMXTemplatePath   string            `mapstructure:"vmx_template_path"`
 	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
+	Description		  string 			`mapstructure:"Description"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`

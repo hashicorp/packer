@@ -51,6 +51,7 @@ type config struct {
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
+	Description 		 string 	`mapstructure:"Description"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`

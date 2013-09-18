@@ -24,6 +24,7 @@ type config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+	Description	   string  `mapstructure:"Description"`
 
 	tpl *packer.ConfigTemplate
 }

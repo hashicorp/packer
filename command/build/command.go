@@ -100,6 +100,11 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 		buildUis[b.Name()] = ui
 		ui.Say(fmt.Sprintf("%s output will be in this color.", b.Name()))
+		if tpl.Description[b.Name()] != "" {
+		ui.Say(fmt.Sprintf("  Description: %s", tpl.Description[b.Name()]))
+		} else {
+			ui.Say(fmt.Sprintf("  <No Description available>"))
+		}
 	}
 
 	// Add a newline between the color output and the actual output
