@@ -87,6 +87,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	templates := map[string]*string{
 		"config_template": &p.config.ConfigTemplate,
+		"data_bags_path":  &p.config.DataBagsPath,
+		"roles_path":      &p.config.RolesPath,
 		"staging_dir":     &p.config.StagingDir,
 	}
 
