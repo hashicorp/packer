@@ -2,6 +2,8 @@
 
 FEATURES:
 
+* builders/virtualbox: Guest additions can be attached rather than uploaded,
+  easier to handle for Windows guests. [GH-405]
 * provisioner/chef-solo: Ability to specify a custom Chef configuration
   template.
 * provisioner/chef-solo: Roles and data bags support. [GH-348]
