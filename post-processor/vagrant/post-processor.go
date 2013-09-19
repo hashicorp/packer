@@ -56,6 +56,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Store extra configuration we'll send to each post-processor type
 	p.extraConfig = make(map[string]interface{})
 	p.extraConfig["output"] = p.config.OutputPath
+	p.extraConfig["packer_build_name"] = p.config.PackerBuildName
+	p.extraConfig["packer_builder_type"] = p.config.PackerBuilderType
+	p.extraConfig["packer_debug"] = p.config.PackerDebug
+	p.extraConfig["packer_force"] = p.config.PackerForce
+	p.extraConfig["packer_user_variables"] = p.config.PackerUserVars
 
 	// TODO(mitchellh): Properly handle multiple raw configs. This isn't
 	// very pressing at the moment because at the time of this comment
