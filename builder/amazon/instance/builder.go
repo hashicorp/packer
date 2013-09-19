@@ -36,6 +36,7 @@ type Config struct {
 	X509CertPath        string `mapstructure:"x509_cert_path"`
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
+	Description	   		string `mapstructure:"Description"`
 
 	tpl *packer.ConfigTemplate
 }

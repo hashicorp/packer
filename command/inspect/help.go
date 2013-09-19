@@ -9,5 +9,5 @@ Usage: packer inspect TEMPLATE
 
 Options:
 
-  -machine-readable  Machine-readable output
+  -machine-readable  Machine-readable output!!!
 `

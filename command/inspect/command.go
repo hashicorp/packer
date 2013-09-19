@@ -109,17 +109,23 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 		sort.Strings(keys)
 
-		for _, k := range keys {
+		for i, k := range keys {
 			v := tpl.Builders[k]
+			d := fmt.Sprintf("  - %s", tpl.Description[k])
+			// if there is no description for a builder, print out <No description available>
+			if tpl.Description[k] == "" {
+				d = fmt.Sprintf("  <No description available>")
+			}
+			
 			padding := strings.Repeat(" ", max-len(k))
-			output := fmt.Sprintf("  %s%s", k, padding)
+			output := fmt.Sprintf("%d:  %s%s", i+1, k, padding)
 			if v.Name != v.Type {
 				output = fmt.Sprintf("%s (%s)", output, v.Type)
 			}
 
 			ui.Machine("template-builder", k, v.Type)
 			ui.Say(output)
-
+			ui.Say(d)
 		}
 	}
 
