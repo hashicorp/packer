@@ -46,7 +46,7 @@ func (h *hook) Cancel() {
 }
 
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
-	client, err := rpc.Dial("tcp", args.RPCAddress)
+	client, err := rpcDial(args.RPCAddress)
 	if err != nil {
 		return err
 	}

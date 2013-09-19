@@ -14,6 +14,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Set TCP KeepAlives on internally created RPC connections so that
+  they don't die. [GH-416]
 * builder/amazon/all: While waiting for AMI, will detect "failed" state.
 * builder/amazon/all: Waiting for state will detect if the resource (AMI,
   instance, etc.) disappears from under it.

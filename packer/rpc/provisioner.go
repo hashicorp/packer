@@ -65,7 +65,7 @@ func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) 
 }
 
 func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *interface{}) error {
-	client, err := rpc.Dial("tcp", args.RPCAddress)
+	client, err := rpcDial(args.RPCAddress)
 	if err != nil {
 		return err
 	}
