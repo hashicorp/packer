@@ -177,7 +177,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 
 	toClose := make([]net.Conn, 0)
 	if args.StdinAddress != "" {
-		stdinC, err := net.Dial("tcp", args.StdinAddress)
+		stdinC, err := tcpDial(args.StdinAddress)
 		if err != nil {
 			return err
 		}
@@ -187,7 +187,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 	}
 
 	if args.StdoutAddress != "" {
-		stdoutC, err := net.Dial("tcp", args.StdoutAddress)
+		stdoutC, err := tcpDial(args.StdoutAddress)
 		if err != nil {
 			return err
 		}
@@ -197,7 +197,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 	}
 
 	if args.StderrAddress != "" {
-		stderrC, err := net.Dial("tcp", args.StderrAddress)
+		stderrC, err := tcpDial(args.StderrAddress)
 		if err != nil {
 			return err
 		}
@@ -208,7 +208,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 
 	// Connect to the response address so we can write our result to it
 	// when ready.
-	responseC, err := net.Dial("tcp", args.ResponseAddress)
+	responseC, err := tcpDial(args.ResponseAddress)
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 }
 
 func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interface{}) (err error) {
-	readerC, err := net.Dial("tcp", args.ReaderAddress)
+	readerC, err := tcpDial(args.ReaderAddress)
 	if err != nil {
 		return
 	}
@@ -250,7 +250,7 @@ func (c *CommunicatorServer) UploadDir(args *CommunicatorUploadDirArgs, reply *e
 }
 
 func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *interface{}) (err error) {
-	writerC, err := net.Dial("tcp", args.WriterAddress)
+	writerC, err := tcpDial(args.WriterAddress)
 	if err != nil {
 		return
 	}
