@@ -42,6 +42,12 @@ type ConfigTemplate struct {
 	CookbookPaths string
 	DataBagsPath  string
 	RolesPath     string
+
+	// Templates don't support boolean statements until Go 1.2. In the
+	// mean time, we do this.
+	// TODO(mitchellh): Remove when Go 1.2 is released
+	HasDataBagsPath bool
+	HasRolesPath    bool
 }
 
 type ExecuteTemplate struct {
@@ -288,9 +294,11 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		CookbookPaths: strings.Join(cookbook_paths, ","),
-		RolesPath:     rolesPath,
-		DataBagsPath:  dataBagsPath,
+		CookbookPaths:   strings.Join(cookbook_paths, ","),
+		RolesPath:       rolesPath,
+		DataBagsPath:    dataBagsPath,
+		HasRolesPath:    rolesPath != "",
+		HasDataBagsPath: dataBagsPath != "",
 	})
 	if err != nil {
 		return "", err
@@ -442,10 +450,10 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 
 var DefaultConfigTemplate = `
 cookbook_path 	[{{.CookbookPaths}}]
-{{if .RolesPath != ""}}
+{{if .HasRolesPath}}
 role_path		"{{.RolesPath}}"
 {{end}}
-{{if .DataBagsPath != ""}}
+{{if .HasDataBagsPath}}
 data_bag_path	"{{.DataBagsPath}}"
 {{end}}
 `
