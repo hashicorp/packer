@@ -48,6 +48,8 @@ type RawBuilderConfig struct {
 // configuration. It contains the type of the post processor as well as the
 // raw configuration that is handed to the post-processor for it to process.
 type RawPostProcessorConfig struct {
+	TemplateOnlyExcept `mapstructure:",squash"`
+
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
 	RawConfig         map[string]interface{}
@@ -57,9 +59,10 @@ type RawPostProcessorConfig struct {
 // It contains the type of the provisioner as well as the raw configuration
 // that is handed to the provisioner for it to process.
 type RawProvisionerConfig struct {
+	TemplateOnlyExcept `mapstructure:",squash"`
+
 	Type     string
 	Override map[string]interface{}
-	Only     []string
 
 	RawConfig interface{}
 }
@@ -190,32 +193,50 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
-		t.PostProcessors[i] = make([]RawPostProcessorConfig, len(rawPP))
-		configs := t.PostProcessors[i]
+		configs := make([]RawPostProcessorConfig, 0, len(rawPP))
 		for j, pp := range rawPP {
-			config := &configs[j]
-			if err := mapstructure.Decode(pp, config); err != nil {
+			var config RawPostProcessorConfig
+			if err := mapstructure.Decode(pp, &config); err != nil {
 				if merr, ok := err.(*mapstructure.Error); ok {
 					for _, err := range merr.Errors {
-						errors = append(errors, fmt.Errorf("Post-processor #%d.%d: %s", i+1, j+1, err))
+						errors = append(errors,
+							fmt.Errorf("Post-processor #%d.%d: %s", i+1, j+1, err))
 					}
 				} else {
-					errors = append(errors, fmt.Errorf("Post-processor %d.%d: %s", i+1, j+1, err))
+					errors = append(errors,
+						fmt.Errorf("Post-processor %d.%d: %s", i+1, j+1, err))
 				}
 
 				continue
 			}
 
 			if config.Type == "" {
-				errors = append(errors, fmt.Errorf("Post-processor %d.%d: missing 'type'", i+1, j+1))
+				errors = append(errors,
+					fmt.Errorf("Post-processor %d.%d: missing 'type'", i+1, j+1))
 				continue
 			}
 
 			// Remove the input keep_input_artifact option
+			config.TemplateOnlyExcept.Prune(pp)
 			delete(pp, "keep_input_artifact")
 
+			// Verify that the only settings are good
+			if errs := config.TemplateOnlyExcept.Validate(t.Builders); len(errs) > 0 {
+				for _, err := range errs {
+					errors = append(errors,
+						fmt.Errorf("Post-processor %d.%d: %s", i+1, j+1, err))
+				}
+
+				continue
+			}
+
 			config.RawConfig = pp
+
+			// Add it to the list of configs
+			configs = append(configs, config)
 		}
+
+		t.PostProcessors[i] = configs
 	}
 
 	// Gather all the provisioners
@@ -239,7 +260,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		}
 
 		// Delete the keys that we used
-		delete(v, "only")
+		raw.TemplateOnlyExcept.Prune(v)
 		delete(v, "override")
 
 		// Verify that the override keys exist...
@@ -251,14 +272,8 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		}
 
 		// Verify that the only settings are good
-		if len(raw.Only) > 0 {
-			for _, n := range raw.Only {
-				if _, ok := t.Builders[n]; !ok {
-					errors = append(errors,
-						fmt.Errorf("provisioner %d: 'only' specified builder '%s' not found",
-							i+1, n))
-				}
-			}
+		if errs := raw.TemplateOnlyExcept.Validate(t.Builders); len(errs) > 0 {
+			errors = append(errors, errs...)
 		}
 
 		raw.RawConfig = v
@@ -411,8 +426,12 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	// Prepare the post-processors
 	postProcessors := make([][]coreBuildPostProcessor, 0, len(t.PostProcessors))
 	for _, rawPPs := range t.PostProcessors {
-		current := make([]coreBuildPostProcessor, len(rawPPs))
-		for i, rawPP := range rawPPs {
+		current := make([]coreBuildPostProcessor, 0, len(rawPPs))
+		for _, rawPP := range rawPPs {
+			if rawPP.TemplateOnlyExcept.Skip(name) {
+				continue
+			}
+
 			pp, err := components.PostProcessor(rawPP.Type)
 			if err != nil {
 				return nil, err
@@ -422,12 +441,18 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 				return nil, fmt.Errorf("PostProcessor type not found: %s", rawPP.Type)
 			}
 
-			current[i] = coreBuildPostProcessor{
+			current = append(current, coreBuildPostProcessor{
 				processor:         pp,
 				processorType:     rawPP.Type,
 				config:            rawPP.RawConfig,
 				keepInputArtifact: rawPP.KeepInputArtifact,
-			}
+			})
+		}
+
+		// If we have no post-processors in this chain, just continue.
+		// This can happen if the post-processors skip certain builds.
+		if len(current) == 0 {
+			continue
 		}
 
 		postProcessors = append(postProcessors, current)
@@ -436,19 +461,8 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	// Prepare the provisioners
 	provisioners := make([]coreBuildProvisioner, 0, len(t.Provisioners))
 	for _, rawProvisioner := range t.Provisioners {
-		if len(rawProvisioner.Only) > 0 {
-			onlyFound := false
-			for _, n := range rawProvisioner.Only {
-				if n == name {
-					onlyFound = true
-					break
-				}
-			}
-
-			if !onlyFound {
-				// Skip this provisioner
-				continue
-			}
+		if rawProvisioner.TemplateOnlyExcept.Skip(name) {
+			continue
 		}
 
 		var provisioner Provisioner
@@ -493,6 +507,53 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		postProcessors: postProcessors,
 		provisioners:   provisioners,
 		variables:      variables,
+	}
+
+	return
+}
+
+// TemplateOnlyExcept contains the logic required for "only" and "except"
+// meta-parameters.
+type TemplateOnlyExcept struct {
+	Only   []string
+	Except []string
+}
+
+// Prune will prune out the used values from the raw map.
+func (t *TemplateOnlyExcept) Prune(raw map[string]interface{}) {
+	delete(raw, "except")
+	delete(raw, "only")
+}
+
+// Skip tests if we should skip putting this item onto a build.
+func (t *TemplateOnlyExcept) Skip(name string) bool {
+	if len(t.Only) > 0 {
+		onlyFound := false
+		for _, n := range t.Only {
+			if n == name {
+				onlyFound = true
+				break
+			}
+		}
+
+		if !onlyFound {
+			// Skip this provisioner
+			return true
+		}
+	}
+
+	return false
+}
+
+// Validates the only/except parameters.
+func (t *TemplateOnlyExcept) Validate(b map[string]RawBuilderConfig) (e []error) {
+	if len(t.Only) > 0 {
+		for _, n := range t.Only {
+			if _, ok := b[n]; !ok {
+				e = append(e,
+					fmt.Errorf("'only' specified builder '%s' not found", n))
+			}
+		}
 	}
 
 	return
