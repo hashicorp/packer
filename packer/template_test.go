@@ -11,10 +11,15 @@ import (
 
 func testTemplateComponentFinder() *ComponentFinder {
 	builder := testBuilder()
+	pp := new(TestPostProcessor)
 	provisioner := &MockProvisioner{}
 
 	builderMap := map[string]Builder{
 		"test-builder": builder,
+	}
+
+	ppMap := map[string]PostProcessor{
+		"test-pp": pp,
 	}
 
 	provisionerMap := map[string]Provisioner{
@@ -22,10 +27,12 @@ func testTemplateComponentFinder() *ComponentFinder {
 	}
 
 	builderFactory := func(n string) (Builder, error) { return builderMap[n], nil }
+	ppFactory := func(n string) (PostProcessor, error) { return ppMap[n], nil }
 	provFactory := func(n string) (Provisioner, error) { return provisionerMap[n], nil }
 	return &ComponentFinder{
-		Builder:     builderFactory,
-		Provisioner: provFactory,
+		Builder:       builderFactory,
+		PostProcessor: ppFactory,
+		Provisioner:   provFactory,
 	}
 }
 
@@ -680,6 +687,86 @@ func TestTemplate_Build(t *testing.T) {
 	config := coreBuild.postProcessors[1][1].config
 	if _, ok := config["keep_input_artifact"]; ok {
 		t.Fatal("should not have keep_input_artifact")
+	}
+}
+
+func TestTemplateBuild_onlyPPInvalid(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"only": "test5"
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_onlyPP(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"only": ["test2"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no post-processors
+	build, err := template.Build("test1", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.postProcessors) > 0 {
+		t.Fatal("should have no postProcessors")
+	}
+
+	// Verify test2 has no post-processors
+	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.postProcessors) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.postProcessors))
 	}
 }
 
