@@ -707,7 +707,7 @@ func TestTemplateBuild_exeptPPInvalid(t *testing.T) {
 		"post-processors": [
 			{
 				"type": "test-pp",
-				"except": "test5"
+				"except": ["test5"]
 			}
 		]
 	}
@@ -787,7 +787,7 @@ func TestTemplateBuild_exceptProvInvalid(t *testing.T) {
 		"provisioners": [
 			{
 				"type": "test-prov",
-				"except": "test5"
+				"except": ["test5"]
 			}
 		]
 	}
@@ -867,7 +867,7 @@ func TestTemplateBuild_onlyPPInvalid(t *testing.T) {
 		"post-processors": [
 			{
 				"type": "test-pp",
-				"only": "test5"
+				"only": ["test5"]
 			}
 		]
 	}
@@ -947,7 +947,7 @@ func TestTemplateBuild_onlyProvInvalid(t *testing.T) {
 		"provisioners": [
 			{
 				"type": "test-prov",
-				"only": "test5"
+				"only": ["test5"]
 			}
 		]
 	}
