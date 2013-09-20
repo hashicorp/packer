@@ -60,9 +60,9 @@ func (k *SimpleKeychain) Key(i int) (ssh.PublicKey, error) {
 	}
 	switch key := k.keys[i].(type) {
 	case *rsa.PrivateKey:
-		return ssh.NewRSAPublicKey(&key.PublicKey), nil
+		return ssh.NewPublicKey(&key.PublicKey)
 	case *dsa.PrivateKey:
-		return ssh.NewDSAPublicKey(&key.PublicKey), nil
+		return ssh.NewPublicKey(&key.PublicKey)
 	}
 	panic("unknown key type")
 }
