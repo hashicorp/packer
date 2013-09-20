@@ -554,6 +554,11 @@ func (t *TemplateOnlyExcept) Skip(name string) bool {
 
 // Validates the only/except parameters.
 func (t *TemplateOnlyExcept) Validate(b map[string]RawBuilderConfig) (e []error) {
+	if len(t.Only) > 0 && len(t.Except) > 0 {
+		e = append(e,
+			fmt.Errorf("Only one of 'only' or 'except' may be specified."))
+	}
+
 	if len(t.Only) > 0 {
 		for _, n := range t.Only {
 			if _, ok := b[n]; !ok {

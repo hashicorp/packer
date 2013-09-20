@@ -690,7 +690,67 @@ func TestTemplate_Build(t *testing.T) {
 	}
 }
 
-func TestTemplateBuild_exeptPPInvalid(t *testing.T) {
+func TestTemplateBuild_exceptOnlyPP(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"except": ["test1"],
+				"only": ["test1"]
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_exceptOnlyProv(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"except": ["test1"],
+				"only": ["test1"]
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_exceptPPInvalid(t *testing.T) {
 	data := `
 	{
 		"builders": [
