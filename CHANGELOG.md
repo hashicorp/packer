@@ -2,6 +2,9 @@
 
 FEATURES:
 
+* core: You can now specify `only` and `except` configurations on any
+  provisioner or post-processor to specify a list of builds that they
+  are valid for. [GH-438]
 * builders/virtualbox: Guest additions can be attached rather than uploaded,
   easier to handle for Windows guests. [GH-405]
 * provisioner/chef-solo: Ability to specify a custom Chef configuration
