@@ -563,5 +563,12 @@ func (t *TemplateOnlyExcept) Validate(b map[string]RawBuilderConfig) (e []error)
 		}
 	}
 
+	for _, n := range t.Except {
+		if _, ok := b[n]; !ok {
+			e = append(e,
+				fmt.Errorf("'except' specified builder '%s' not found", n))
+		}
+	}
+
 	return
 }
