@@ -59,6 +59,7 @@ type RawPostProcessorConfig struct {
 type RawProvisionerConfig struct {
 	Type     string
 	Override map[string]interface{}
+	Only     []string
 
 	RawConfig interface{}
 }
@@ -237,9 +238,8 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
-		// The provisioners not only don't need or want the override settings
-		// (as they are processed as part of the preparation below), but will
-		// actively reject them as invalid configuration.
+		// Delete the keys that we used
+		delete(v, "only")
 		delete(v, "override")
 
 		// Verify that the override keys exist...
@@ -247,6 +247,17 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			if _, ok := t.Builders[name]; !ok {
 				errors = append(
 					errors, fmt.Errorf("provisioner %d: build '%s' not found for override", i+1, name))
+			}
+		}
+
+		// Verify that the only settings are good
+		if len(raw.Only) > 0 {
+			for _, n := range raw.Only {
+				if _, ok := t.Builders[n]; !ok {
+					errors = append(errors,
+						fmt.Errorf("provisioner %d: 'only' specified builder '%s' not found",
+							i+1, n))
+				}
 			}
 		}
 
@@ -425,6 +436,21 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	// Prepare the provisioners
 	provisioners := make([]coreBuildProvisioner, 0, len(t.Provisioners))
 	for _, rawProvisioner := range t.Provisioners {
+		if len(rawProvisioner.Only) > 0 {
+			onlyFound := false
+			for _, n := range rawProvisioner.Only {
+				if n == name {
+					onlyFound = true
+					break
+				}
+			}
+
+			if !onlyFound {
+				// Skip this provisioner
+				continue
+			}
+		}
+
 		var provisioner Provisioner
 		provisioner, err = components.Provisioner(rawProvisioner.Type)
 		if err != nil {
