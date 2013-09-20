@@ -690,6 +690,166 @@ func TestTemplate_Build(t *testing.T) {
 	}
 }
 
+func TestTemplateBuild_exeptPPInvalid(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"except": "test5"
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_exceptPP(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"except": ["test1"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no post-processors
+	build, err := template.Build("test1", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.postProcessors) > 0 {
+		t.Fatal("should have no postProcessors")
+	}
+
+	// Verify test2 has no post-processors
+	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.postProcessors) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.postProcessors))
+	}
+}
+
+func TestTemplateBuild_exceptProvInvalid(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"except": "test5"
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_exceptProv(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"except": ["test1"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no provisioners
+	build, err := template.Build("test1", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.provisioners) > 0 {
+		t.Fatal("should have no provisioners")
+	}
+
+	// Verify test2 has no provisioners
+	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.provisioners) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.provisioners))
+	}
+}
+
 func TestTemplateBuild_onlyPPInvalid(t *testing.T) {
 	data := `
 	{
