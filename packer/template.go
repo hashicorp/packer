@@ -273,7 +273,10 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 
 		// Verify that the only settings are good
 		if errs := raw.TemplateOnlyExcept.Validate(t.Builders); len(errs) > 0 {
-			errors = append(errors, errs...)
+			for _, err := range errs {
+				errors = append(errors,
+					fmt.Errorf("provisioner %d: %s", i+1, err))
+			}
 		}
 
 		raw.RawConfig = v
