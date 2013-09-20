@@ -36,13 +36,15 @@ type stepTypeBootCommand struct{}
 
 func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
+	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
+	vncIp := state.Get("vnc_ip").(string)
 	vncPort := state.Get("vnc_port").(uint)
 
 	// Connect to VNC
 	ui.Say("Connecting to VM via VNC")
-	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", vncPort))
+	nc, err := net.Dial("tcp", fmt.Sprintf("%s:%d", vncIp, vncPort))
 	if err != nil {
 		err := fmt.Errorf("Error connecting to VNC: %s", err)
 		state.Put("error", err)
@@ -64,7 +66,9 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	// Determine the host IP
 	var ipFinder HostIPFinder
-	if runtime.GOOS == "windows" {
+	if finder, ok := driver.(HostIPFinder); ok {
+		ipFinder = finder
+	} else if runtime.GOOS == "windows" {
 		ipFinder = new(VMnetNatConfIPFinder)
 	} else {
 		ipFinder = &IfconfigIPFinder{Device: "vmnet8"}
