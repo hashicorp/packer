@@ -9,6 +9,26 @@ import (
 	"testing"
 )
 
+func testTemplateComponentFinder() *ComponentFinder {
+	builder := testBuilder()
+	provisioner := &MockProvisioner{}
+
+	builderMap := map[string]Builder{
+		"test-builder": builder,
+	}
+
+	provisionerMap := map[string]Provisioner{
+		"test-prov": provisioner,
+	}
+
+	builderFactory := func(n string) (Builder, error) { return builderMap[n], nil }
+	provFactory := func(n string) (Provisioner, error) { return provisionerMap[n], nil }
+	return &ComponentFinder{
+		Builder:     builderFactory,
+		Provisioner: provFactory,
+	}
+}
+
 func TestParseTemplateFile_basic(t *testing.T) {
 	data := `
 	{
@@ -660,6 +680,86 @@ func TestTemplate_Build(t *testing.T) {
 	config := coreBuild.postProcessors[1][1].config
 	if _, ok := config["keep_input_artifact"]; ok {
 		t.Fatal("should not have keep_input_artifact")
+	}
+}
+
+func TestTemplateBuild_onlyProvInvalid(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"only": "test5"
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_onlyProv(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"only": ["test2"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no provisioners
+	build, err := template.Build("test1", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.provisioners) > 0 {
+		t.Fatal("should have no provisioners")
+	}
+
+	// Verify test2 has no provisioners
+	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.provisioners) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.provisioners))
 	}
 }
 
