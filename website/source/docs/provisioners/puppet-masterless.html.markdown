@@ -79,7 +79,7 @@ By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Puppet:
 
 ```
-{{.FacterVars}}{{if .Sudo} sudo -E {{end}}puppet apply \
+{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
   {{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
