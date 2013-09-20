@@ -542,6 +542,13 @@ func (t *TemplateOnlyExcept) Skip(name string) bool {
 		}
 	}
 
+	// If the name is in the except list, then skip that
+	for _, n := range t.Except {
+		if n == name {
+			return true
+		}
+	}
+
 	return false
 }
 
