@@ -55,6 +55,13 @@ type config struct {
 	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
 
+	RemoteType      string `mapstructure:"remote_type"`
+	RemoteDatastore string `mapstructure:"remote_datastore"`
+	RemoteHost      string `mapstructure:"remote_host"`
+	RemotePort      uint   `mapstructure:"remote_port"`
+	RemoteUser      string `mapstructure:"remote_username"`
+	RemotePassword  string `mapstructure:"remote_password"`
+
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -158,6 +165,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"shutdown_timeout":    &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":    &b.config.RawSSHWaitTimeout,
 		"vmx_template_path":   &b.config.VMXTemplatePath,
+		"remote_host":         &b.config.RemoteHost,
+		"remote_datastore":    &b.config.RemoteDatastore,
+		"remote_user":         &b.config.RemoteUser,
+		"remote_password":     &b.config.RemotePassword,
 	}
 
 	for n, ptr := range templates {
@@ -343,7 +354,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Initialize the driver that will handle our interaction with VMware
-	driver, err := NewDriver()
+	var driver Driver
+	var err error
+	var sshAddressFunc func(multistep.StateBag) (string, error) = sshAddress
+	var downloadFunc func(*common.DownloadConfig, multistep.StateBag) (string, error, bool)
+
+	if b.config.RemoteType == "" {
+		driver, err = NewDriver()
+	} else {
+		driver, err = NewRemoteDriver(&b.config)
+		sshAddressFunc = driver.(RemoteDriver).SSHAddress()
+		downloadFunc = driver.(RemoteDriver).Download()
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
@@ -359,6 +382,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			Download:     downloadFunc,
 		},
 		&stepPrepareOutputDir{},
 		&common.StepCreateFloppy{
@@ -371,7 +395,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepRun{},
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
+			SSHAddress:     sshAddressFunc,
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: b.config.sshWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
