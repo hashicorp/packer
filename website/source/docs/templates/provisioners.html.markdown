@@ -53,6 +53,30 @@ provisioner to run a local script within the machines:
 }
 </pre>
 
+## Run on Specific Builds
+
+You can use the `only` or `except` configurations to run a provisioner
+only with specific builds. These two configurations do what you expect:
+`only` will only run the provisioner on the specified builds and
+`except` will run the provisioner on anything other than the specified
+builds.
+
+An example of `only` being used is shown below, but the usage of `except`
+is effectively the same:
+
+<pre class="prettyprint">
+{
+  "type": "shell",
+  "script": "script.sh",
+  "only": ["virtualbox"]
+}
+</pre>
+
+The values within `only` or `except` are _build names_, not builder
+types. If you recall, build names by default are just their builder type,
+but if you specify a custom `name` parameter, then you should use that
+as the value instead of the type.
+
 ## Build-Specific Overrides
 
 While the goal of Packer is to produce identical machine images, it
