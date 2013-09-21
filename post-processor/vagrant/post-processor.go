@@ -127,7 +127,17 @@ func (p *PostProcessor) subPostProcessor(key string, specific interface{}, extra
 		return nil, nil
 	}
 
-	if err := pp.Configure(extra, specific); err != nil {
+	var err error
+
+	// only spend specific configuration when it exists
+	// otherwise process will fail during post processing
+	if specific != nil {
+		err = pp.Configure(extra, specific)
+	} else {
+		err = pp.Configure(extra)
+	}
+
+	if err != nil {
 		return nil, err
 	}
 
