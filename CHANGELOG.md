@@ -35,6 +35,8 @@ BUG FIXES:
 * post-processor/vagrant: Override configurations properly work. [GH-426]
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
+* provisioner/puppet-masterless: User variables now work properly in
+  manifest file and hiera path. [GH-448]
 
 ## 0.3.7 (September 9, 2013)
 
