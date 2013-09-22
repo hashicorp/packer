@@ -15,6 +15,7 @@ IMPROVEMENTS:
 
 * core: User variables can now be used for integer, boolean, etc.
   values. [GH-418]
+* core: Plugins made with incompatible versions will no longer load.
 * builder/amazon/all: Interrupts work while waiting for AMI to be ready.
 * provisioner/shell: Script line-endings are automatically converted to
   Unix-style line-endings. Can be disabled by setting "binary" to "true".

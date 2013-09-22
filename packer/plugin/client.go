@@ -317,10 +317,24 @@ func (c *Client) Start() (address string, err error) {
 		err = errors.New("timeout while waiting for plugin to start")
 	case <-exitCh:
 		err = errors.New("plugin exited before we could connect")
-	case line := <-linesCh:
-		// Trim the address and reset the err since we were able
-		// to read some sort of address.
-		c.address = strings.TrimSpace(string(line))
+	case lineBytes := <-linesCh:
+		// Trim the line and split by "|" in order to get the parts of
+		// the output.
+		line := strings.TrimSpace(string(lineBytes))
+		parts := strings.SplitN(line, "|", 2)
+		if len(parts) < 2 {
+			err = fmt.Errorf("Unrecognized remote plugin message: %s", line)
+			return
+		}
+
+		// Test the API version
+		if parts[0] != APIVersion {
+			err = fmt.Errorf("Incompatible API version with plugin. "+
+				"Plugin version: %s, Ours: %s", parts[0], APIVersion)
+			return
+		}
+
+		c.address = parts[1]
 		address = c.address
 	}
 
