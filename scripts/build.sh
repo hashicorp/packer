@@ -26,6 +26,9 @@ if [ "$(go env GOOS)" = "windows" ]; then
     EXTENSION=".exe"
 fi
 
+# Make sure that if we're killed, we kill all our subprocseses
+trap "kill 0" SIGINT SIGTERM EXIT
+
 # If we're building a race-enabled build, then set that up.
 if [ ! -z $PACKER_RACE ]; then
     echo -e "${OK_COLOR}--> Building with race detection enabled${NO_COLOR}"
@@ -50,7 +53,16 @@ waitAll() {
     fi
 }
 
-echo -e "${OK_COLOR}--> NOTE: Compilation of components will be done in parallel.${NO_COLOR}"
+waitSingle() {
+    if [ ! -z $PACKER_NO_BUILD_PARALLEL ]; then
+        waitAll
+    fi
+}
+
+if [ -z $PACKER_NO_BUILD_PARALLEL ]; then
+    echo -e "${OK_COLOR}--> NOTE: Compilation of components " \
+        "will be done in parallel.${NO_COLOR}"
+fi
 
 # Compile the main Packer app
 echo -e "${OK_COLOR}--> Compiling Packer${NO_COLOR}"
@@ -61,6 +73,8 @@ go build \
     -v \
     -o bin/packer${EXTENSION} .
 ) &
+
+waitSingle
 
 # Go over each plugin and build it
 for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
@@ -73,6 +87,8 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
         -v \
         -o bin/packer-${PLUGIN_NAME}${EXTENSION} ${PLUGIN}
     ) &
+
+    waitSingle
 done
 
 waitAll
