@@ -33,6 +33,8 @@ const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d69
 // This serves a single RPC connection on the given RPC server on
 // a random port.
 func serve(server *rpc.Server) (err error) {
+	log.Printf("Plugin build against Packer '%s'", packer.GitCommit)
+
 	if os.Getenv(MagicCookieKey) != MagicCookieValue {
 		return errors.New("Please do not execute plugins directly. Packer will execute these for you.")
 	}
