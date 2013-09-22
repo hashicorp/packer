@@ -16,6 +16,7 @@ deps:
 
 updatedeps:
 	@echo "$(OK_COLOR)==> Updating all dependencies$(NO_COLOR)"
+	@go get -d -v -u ./...
 	@echo $(DEPS) | xargs -n1 go get -d -u
 
 clean:
