@@ -82,7 +82,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Templates
 	templates := map[string]*string{
-		"staging_dir": &p.config.StagingDir,
+		"hiera_config_path": &p.config.HieraConfigPath,
+		"manifest_file":     &p.config.ManifestFile,
+		"staging_dir":       &p.config.StagingDir,
 	}
 
 	for n, ptr := range templates {
