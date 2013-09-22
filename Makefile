@@ -28,4 +28,4 @@ test: deps
 	@echo "$(OK_COLOR)==> Testing Packer...$(NO_COLOR)"
 	go test ./...
 
-.PHONY: all deps format test
+.PHONY: all deps format test updatedeps
