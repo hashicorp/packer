@@ -35,21 +35,44 @@ fi
 echo -e "${OK_COLOR}--> Installing dependencies to speed up builds...${NO_COLOR}"
 go get ./...
 
+# This function waits for all background tasks to complete
+waitAll() {
+    RESULT=0
+    for job in `jobs -p`; do
+        wait $job
+        if [ $? -ne 0 ]; then
+            RESULT=1
+        fi
+    done
+
+    if [ $RESULT -ne 0 ]; then
+        exit $RESULT
+    fi
+}
+
+echo -e "${OK_COLOR}--> NOTE: Compilation of components will be done in parallel.${NO_COLOR}"
+
 # Compile the main Packer app
 echo -e "${OK_COLOR}--> Compiling Packer${NO_COLOR}"
+(
 go build \
     ${PACKER_RACE} \
     -ldflags "-X github.com/mitchellh/packer/packer.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
     -v \
     -o bin/packer${EXTENSION} .
+) &
 
 # Go over each plugin and build it
 for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
     PLUGIN_NAME=$(basename ${PLUGIN})
     echo -e "${OK_COLOR}--> Compiling Plugin: ${PLUGIN_NAME}${NO_COLOR}"
+    (
     go build \
         ${PACKER_RACE} \
         -ldflags "-X github.com/mitchellh/packer/packer.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
         -v \
         -o bin/packer-${PLUGIN_NAME}${EXTENSION} ${PLUGIN}
+    ) &
 done
+
+waitAll
