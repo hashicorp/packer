@@ -142,6 +142,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		if err != nil {
 			errors = append(errors,
 				fmt.Errorf("Error decoding default value for user var '%s': %s", k, err))
+			continue
 		}
 
 		t.Variables[k] = variable
