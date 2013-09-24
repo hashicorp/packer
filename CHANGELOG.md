@@ -1,6 +1,8 @@
 ## 0.3.9 (unreleased)
 
+BUG FIXES:
 
+* core: default user variable values don't need to be strings. [GH-456]
 
 ## 0.3.8 (September 22, 2013)
 

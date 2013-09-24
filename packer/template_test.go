@@ -391,7 +391,8 @@ func TestParseTemplate_Variables(t *testing.T) {
 	{
 		"variables": {
 			"foo": "bar",
-			"bar": null
+			"bar": null,
+			"baz": 27
 		},
 
 		"builders": [{"type": "something"}]
@@ -403,7 +404,7 @@ func TestParseTemplate_Variables(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if result.Variables == nil || len(result.Variables) != 2 {
+	if result.Variables == nil || len(result.Variables) != 3 {
 		t.Fatalf("bad vars: %#v", result.Variables)
 	}
 
@@ -421,6 +422,14 @@ func TestParseTemplate_Variables(t *testing.T) {
 
 	if !result.Variables["bar"].Required {
 		t.Fatal("bar should be required")
+	}
+
+	if result.Variables["baz"].Default != "27" {
+		t.Fatal("default should be empty")
+	}
+
+	if result.Variables["baz"].Required {
+		t.Fatal("baz should not be required")
 	}
 }
 
