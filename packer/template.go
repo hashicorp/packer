@@ -124,18 +124,24 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	// Gather all the variables
 	for k, v := range rawTpl.Variables {
 		var variable RawVariable
-		variable.Default = ""
 		variable.Required = v == nil
 
-		if v != nil {
-			def, ok := v.(string)
-			if !ok {
-				errors = append(errors,
-					fmt.Errorf("variable '%s': default value must be string or null", k))
-				continue
-			}
+		// Create a new mapstructure decoder in order to decode the default
+		// value since this is the only value in the regular template that
+		// can be weakly typed.
+		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			Result:           &variable.Default,
+			WeaklyTypedInput: true,
+		})
+		if err != nil {
+			// This should never happen.
+			panic(err)
+		}
 
-			variable.Default = def
+		err = decoder.Decode(v)
+		if err != nil {
+			errors = append(errors,
+				fmt.Errorf("Error decoding default value for user var '%s': %s", k, err))
 		}
 
 		t.Variables[k] = variable
