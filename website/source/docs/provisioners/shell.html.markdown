@@ -102,7 +102,7 @@ root privileges without worrying about password prompts.
 ## Default Environmental Variables
 
 In addition to being able to specify custom environmental variables using
-the `environmental_vars` configuration, the provisioner automatically
+the `environment_vars` configuration, the provisioner automatically
 defines certain commonly useful environmental variables:
 
 * `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
