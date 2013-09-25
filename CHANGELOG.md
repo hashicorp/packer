@@ -3,6 +3,7 @@
 BUG FIXES:
 
 * core: default user variable values don't need to be strings. [GH-456]
+* builder/amazon-chroot: Fix errors with waitin for state change. [GH-459]
 
 ## 0.3.8 (September 22, 2013)
 
