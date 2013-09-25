@@ -60,7 +60,8 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 				return nil, "", errors.New("No attachments on volume.")
 			}
 
-			return nil, resp.Volumes[0].Attachments[0].Status, nil
+			a := resp.Volumes[0].Attachments[0]
+			return a, a.Status, nil
 		},
 	}
 
@@ -111,12 +112,12 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 				return nil, "", err
 			}
 
-			state := "detached"
-			if len(resp.Volumes[0].Attachments) > 0 {
-				state = resp.Volumes[0].Attachments[0].Status
+			v := resp.Volumes[0]
+			if len(v.Attachments) > 0 {
+				return v, v.Attachments[0].Status, nil
+			} else {
+				return v, "detached", nil
 			}
-
-			return nil, state, nil
 		},
 	}
 
