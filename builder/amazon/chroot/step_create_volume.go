@@ -75,7 +75,8 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 				return nil, "", err
 			}
 
-			return nil, resp.Volumes[0].Status, nil
+			v := resp.Volumes[0]
+			return v, v.Status, nil
 		},
 	}
 
