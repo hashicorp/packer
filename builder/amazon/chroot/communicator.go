@@ -13,13 +13,14 @@ import (
 // Communicator is a special communicator that works by executing
 // commands locally but within a chroot.
 type Communicator struct {
-	Chroot string
-    ChrootCommand string
+	Chroot        string
+	ChrootCommand string
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 
-	localCmd := exec.Command(c.ChrootCommand, c.Chroot, "/bin/sh", "-c", cmd.Command)
+	chrootCommand := fmt.Sprintf("%s %s %s", c.ChrootCommand, c.Chroot, cmd.Command)
+	localcmd := exec.Command("/bin/sh", "-c", chrootCommand)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
