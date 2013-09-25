@@ -17,7 +17,8 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	image := state.Get("source_image").(*ec2.Image)
 	snapshotId := state.Get("snapshot_id").(string)
 	ui := state.Get("ui").(packer.Ui)
-
+	image.Description = config.Description
+	
 	ui.Say("Registering the AMI...")
 	blockDevices := make([]ec2.BlockDeviceMapping, len(image.BlockDevices))
 	for i, device := range image.BlockDevices {
@@ -36,6 +37,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		RamdiskId:      image.RamdiskId,
 		RootDeviceName: image.RootDeviceName,
 		BlockDevices:   blockDevices,
+		Description:	config.Description,
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
