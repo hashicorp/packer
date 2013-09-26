@@ -22,6 +22,7 @@ type StepCopyFiles struct {
 func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
+	copyCmd := state.Get("copy_command").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	s.files = make([]string, 0, len(config.CopyFiles))
@@ -32,7 +33,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			if err := s.copySingle(chrootPath, path); err != nil {
+			if err := copySingle(chrootPath, path, copyCmd); err != nil {
 				err := fmt.Errorf("Error copying file: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())

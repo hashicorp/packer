@@ -15,6 +15,7 @@ import (
 type Communicator struct {
 	Chroot        string
 	ChrootCommand string
+	CopyCommand   string
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
@@ -71,13 +72,10 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 		}
 
 		dstPath := filepath.Join(dst, path)
-		f, err := os.Open(fullPath)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		return c.Upload(dstPath, f)
+		dst = filepath.Join(c.Chroot, dst)
+		log.Printf("Uploading to chroot dir: %s", dst)
+		return copySingle(dst, "", c.CopyCommand)
+		//return c.Upload(dstPath, f)
 	}
 
 	log.Printf("Uploading directory '%s' to '%s'", src, dst)
