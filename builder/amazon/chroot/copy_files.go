@@ -2,10 +2,7 @@ package chroot
 
 import (
 	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
-	"syscall"
 )
 
 func copySingle(dst string, src string, copyCommand string) error {

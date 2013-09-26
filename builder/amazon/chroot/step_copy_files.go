@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -66,49 +65,5 @@ func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
 	}
 
 	s.files = nil
-	return nil
-}
-
-/* TODO: move to util file.
- * change prototype to
-      func copySingle(dst string, src string, copyCommand string) error
- * I think we should switch to cp for copying files, then allow specifying a copy_files_command or something.
-Maybe we should just do a execute_wrapper that allows you to wrap every command...
-*/
-func (s *StepCopyFiles) copySingle(dst, src string) error {
-	// Stat the src file so we can copy the mode later
-	srcInfo, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	// Remove any existing destination file
-	if err := os.Remove(dst); err != nil {
-		return err
-	}
-
-	// Copy the files
-	srcF, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcF.Close()
-
-	dstF, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstF.Close()
-
-	if _, err := io.Copy(dstF, srcF); err != nil {
-		return err
-	}
-	dstF.Close()
-
-	// Match the mode
-	if err := os.Chmod(dst, srcInfo.Mode()); err != nil {
-		return err
-	}
-
 	return nil
 }
