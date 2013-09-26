@@ -68,6 +68,12 @@ func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
 	return nil
 }
 
+/* TODO: move to util file.
+ * change prototype to
+      func copySingle(dst string, src string, copyCommand string) error
+ * I think we should switch to cp for copying files, then allow specifying a copy_files_command or something.
+Maybe we should just do a execute_wrapper that allows you to wrap every command...
+*/
 func (s *StepCopyFiles) copySingle(dst, src string) error {
 	// Stat the src file so we can copy the mode later
 	srcInfo, err := os.Stat(src)
