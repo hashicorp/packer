@@ -24,15 +24,12 @@ type Config struct {
 }
 
 type PostProcessor struct {
-	config     Config
-	premade    map[string]packer.PostProcessor
-	rawConfigs []interface{}
+	config      Config
+	premade     map[string]packer.PostProcessor
+	extraConfig map[string]interface{}
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	// Store the raw configs for usage later
-	p.rawConfigs = raws
-
 	_, err := common.DecodeConfig(&p.config, raws...)
 	if err != nil {
 		return err
@@ -45,10 +42,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	tpl.UserVars = p.config.PackerUserVars
 
 	// Defaults
-	ppExtraConfig := make(map[string]interface{})
 	if p.config.OutputPath == "" {
 		p.config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
-		ppExtraConfig["output"] = p.config.OutputPath
 	}
 
 	// Accumulate any errors
@@ -58,10 +53,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("Error parsing output template: %s", err))
 	}
 
-	// Store the extra configuration for post-processors
-	p.rawConfigs = append(p.rawConfigs, ppExtraConfig)
+	// Store extra configuration we'll send to each post-processor type
+	p.extraConfig = make(map[string]interface{})
+	p.extraConfig["output"] = p.config.OutputPath
+	p.extraConfig["packer_build_name"] = p.config.PackerBuildName
+	p.extraConfig["packer_builder_type"] = p.config.PackerBuilderType
+	p.extraConfig["packer_debug"] = p.config.PackerDebug
+	p.extraConfig["packer_force"] = p.config.PackerForce
+	p.extraConfig["packer_user_variables"] = p.config.PackerUserVars
 
-	// TODO(mitchellh): Properly handle multiple raw configs
+	// TODO(mitchellh): Properly handle multiple raw configs. This isn't
+	// very pressing at the moment because at the time of this comment
+	// only the first member of raws can contain the actual type-overrides.
 	var mapConfig map[string]interface{}
 	if err := mapstructure.Decode(raws[0], &mapConfig); err != nil {
 		errs = packer.MultiErrorAppend(errs,
@@ -71,18 +74,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	p.premade = make(map[string]packer.PostProcessor)
 	for k, raw := range mapConfig {
-		pp := keyToPostProcessor(k)
-		if pp == nil {
+		pp, err := p.subPostProcessor(k, raw, p.extraConfig)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
 			continue
 		}
 
-		// Create the proper list of configurations
-		ppConfigs := make([]interface{}, 0, len(p.rawConfigs)+1)
-		copy(ppConfigs, p.rawConfigs)
-		ppConfigs = append(ppConfigs, raw)
-
-		if err := pp.Configure(ppConfigs...); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+		if pp == nil {
+			continue
 		}
 
 		p.premade[k] = pp
@@ -106,13 +105,15 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	pp, ok := p.premade[ppName]
 	if !ok {
 		log.Printf("Premade post-processor for '%s' not found. Creating.", ppName)
-		pp = keyToPostProcessor(ppName)
-		if pp == nil {
-			return nil, false, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
+
+		var err error
+		pp, err = p.subPostProcessor(ppName, nil, p.extraConfig)
+		if err != nil {
+			return nil, false, err
 		}
 
-		if err := pp.Configure(p.rawConfigs...); err != nil {
-			return nil, false, err
+		if pp == nil {
+			return nil, false, fmt.Errorf("Vagrant box post-processor not found: %s", ppName)
 		}
 	}
 
@@ -120,6 +121,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	return pp.PostProcess(ui, artifact)
 }
 
+func (p *PostProcessor) subPostProcessor(key string, specific interface{}, extra map[string]interface{}) (packer.PostProcessor, error) {
+	pp := keyToPostProcessor(key)
+	if pp == nil {
+		return nil, nil
+	}
+
+	if err := pp.Configure(extra, specific); err != nil {
+		return nil, err
+	}
+
+	return pp, nil
+}
+
+// keyToPostProcessor maps a configuration key to the actual post-processor
+// it will be configuring. This returns a new instance of that post-processor.
 func keyToPostProcessor(key string) packer.PostProcessor {
 	switch key {
 	case "aws":

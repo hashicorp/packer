@@ -41,8 +41,9 @@ func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metadata, error) {
 	var md mapstructure.Metadata
 	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   target,
+		Metadata:         &md,
+		Result:           target,
+		WeaklyTypedInput: true,
 	}
 
 	decoder, err := mapstructure.NewDecoder(decoderConfig)

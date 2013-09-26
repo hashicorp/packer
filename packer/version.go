@@ -10,7 +10,7 @@ import (
 var GitCommit string
 
 // The version of packer.
-const Version = "0.3.8"
+const Version = "0.3.9"
 
 // Any pre-release marker for the version. If this is "" (empty string),
 // then it means that it is a final release. Otherwise, this is the

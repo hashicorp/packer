@@ -30,9 +30,16 @@ var Interrupts int32 = 0
 const MagicCookieKey = "PACKER_PLUGIN_MAGIC_COOKIE"
 const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2"
 
+// The APIVersion is outputted along with the RPC address. The plugin
+// client validates this API version and will show an error if it doesn't
+// know how to speak it.
+const APIVersion = "1"
+
 // This serves a single RPC connection on the given RPC server on
 // a random port.
 func serve(server *rpc.Server) (err error) {
+	log.Printf("Plugin build against Packer '%s'", packer.GitCommit)
+
 	if os.Getenv(MagicCookieKey) != MagicCookieValue {
 		return errors.New("Please do not execute plugins directly. Packer will execute these for you.")
 	}
@@ -75,7 +82,7 @@ func serve(server *rpc.Server) (err error) {
 
 	// Output the address to stdout
 	log.Printf("Plugin address: %s\n", address)
-	fmt.Println(address)
+	fmt.Printf("%s|%s\n", APIVersion, address)
 	os.Stdout.Sync()
 
 	// Accept a connection

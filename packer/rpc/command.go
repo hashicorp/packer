@@ -66,7 +66,7 @@ func (c *CommandServer) Help(args *interface{}, reply *string) error {
 }
 
 func (c *CommandServer) Run(args *CommandRunArgs, reply *int) error {
-	client, err := rpc.Dial("tcp", args.RPCAddress)
+	client, err := rpcDial(args.RPCAddress)
 	if err != nil {
 		return err
 	}

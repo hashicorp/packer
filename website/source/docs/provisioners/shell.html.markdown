@@ -47,6 +47,10 @@ Exactly _one_ of the following is required:
 
 Optional parameters:
 
+* `binary` (boolean) - If true, specifies that the script(s) are binary
+   files, and Packer should therefore not convert Windows line endings to
+   Unix line endings (if there are any). By default this is false.
+
 * `environment_vars` (array of strings) - An array of key/value pairs
   to inject prior to the execute_command. The format should be
   `key=value`. Packer injects some environmental variables by default
@@ -98,7 +102,7 @@ root privileges without worrying about password prompts.
 ## Default Environmental Variables
 
 In addition to being able to specify custom environmental variables using
-the `environmental_vars` configuration, the provisioner automatically
+the `environment_vars` configuration, the provisioner automatically
 defines certain commonly useful environmental variables:
 
 * `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
