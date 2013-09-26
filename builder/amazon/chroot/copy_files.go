@@ -1,18 +1,15 @@
 package chroot
 
 import (
-	"log"
+	"fmt"
 	"os/exec"
 )
 
-func copySingle(dst string, src string, copyCommand string) error {
+func copySingle(dest string, src string, copyCommand string) error {
 	cpCommand := fmt.Sprintf("sudo cp -fn %s %s", src, dest)
-	localcmd := exec.Command("/bin/sh", "-c", cpCommand)
-	log.Println(localcmd.Args)
-	out, err := localcmd.CombinedOutput()
-	if err != nil {
-		log.Println(err)
+	localCmd := exec.Command("/bin/sh", "-c", cpCommand)
+	if err := localCmd.Run(); err != nil {
+		return err
 	}
-	log.Printf("output: %s", out)
 	return nil
 }

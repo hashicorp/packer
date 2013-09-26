@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
@@ -21,7 +22,7 @@ type Communicator struct {
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 
 	chrootCommand := fmt.Sprintf("%s %s %s", c.ChrootCommand, c.Chroot, cmd.Command)
-	localcmd := exec.Command("/bin/sh", "-c", chrootCommand)
+	localCmd := exec.Command("/bin/sh", "-c", chrootCommand)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
