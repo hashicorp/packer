@@ -6,7 +6,7 @@ import (
 )
 
 func copySingle(dest string, src string, copyCommand string) error {
-	cpCommand := fmt.Sprintf("sudo cp -fn %s %s", src, dest)
+	cpCommand := fmt.Sprintf("%s %s %s", copyCommand, src, dest)
 	localCmd := exec.Command("/bin/sh", "-c", cpCommand)
 	if err := localCmd.Run(); err != nil {
 		return err
