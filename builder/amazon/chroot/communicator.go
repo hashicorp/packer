@@ -52,22 +52,6 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	return nil
 }
 
-func (c *Communicator) Upload(dst string, r io.Reader) error {
-	dst = filepath.Join(c.Chroot, dst)
-	log.Printf("Uploading to chroot dir: %s", dst)
-	f, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if _, err := io.Copy(f, r); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
 	walkFn := func(fullPath string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -98,6 +82,22 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 	log.Printf("Uploading directory '%s' to '%s'", src, dst)
 	return filepath.Walk(src, walkFn)
+}
+
+func (c *Communicator) Upload(dst string, r io.Reader) error {
+	dst = filepath.Join(c.Chroot, dst)
+	log.Printf("Uploading to chroot dir: %s", dst)
+	f, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, r); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
