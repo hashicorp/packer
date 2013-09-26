@@ -88,10 +88,9 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 			}
 		}
 
-		dstPath := filepath.Join(dst, path)
-		dst := filepath.Join(c.Chroot, dst)
+		chrootDest := filepath.Join(c.Chroot, dst, path)
 		log.Printf("Uploading to chroot dir: %s", dst)
-		return copySingle(dst, fullPath, c.CopyCommand)
+		return copySingle(chrootDest, fullPath, c.CopyCommand)
 	}
 
 	log.Printf("Uploading directory '%s' to '%s'", src, dst)
