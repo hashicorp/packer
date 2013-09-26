@@ -20,6 +20,8 @@ type Config struct {
 
 	ConfigTemplate      string   `mapstructure:"config_template"`
 	CookbookPaths       []string `mapstructure:"cookbook_paths"`
+	RolesPath           string   `mapstructure:"roles_path"`
+	DataBagsPath        string   `mapstructure:"data_bags_path"`
 	ExecuteCommand      string   `mapstructure:"execute_command"`
 	InstallCommand      string   `mapstructure:"install_command"`
 	RemoteCookbookPaths []string `mapstructure:"remote_cookbook_paths"`
@@ -38,6 +40,14 @@ type Provisioner struct {
 
 type ConfigTemplate struct {
 	CookbookPaths string
+	DataBagsPath  string
+	RolesPath     string
+
+	// Templates don't support boolean statements until Go 1.2. In the
+	// mean time, we do this.
+	// TODO(mitchellh): Remove when Go 1.2 is released
+	HasDataBagsPath bool
+	HasRolesPath    bool
 }
 
 type ExecuteTemplate struct {
@@ -83,6 +93,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	templates := map[string]*string{
 		"config_template": &p.config.ConfigTemplate,
+		"data_bags_path":  &p.config.DataBagsPath,
+		"roles_path":      &p.config.RolesPath,
 		"staging_dir":     &p.config.StagingDir,
 	}
 
@@ -144,6 +156,24 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if p.config.RolesPath != "" {
+		pFileInfo, err := os.Stat(p.config.RolesPath)
+
+		if err != nil || !pFileInfo.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad roles path '%s': %s", p.config.RolesPath, err))
+		}
+	}
+
+	if p.config.DataBagsPath != "" {
+		pFileInfo, err := os.Stat(p.config.DataBagsPath)
+
+		if err != nil || !pFileInfo.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad data bags path '%s': %s", p.config.DataBagsPath, err))
+		}
+	}
+
 	// Process the user variables within the JSON and set the JSON.
 	// Do this early so that we can validate and show errors.
 	p.config.Json, err = p.processJsonUserVars()
@@ -180,7 +210,23 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		cookbookPaths = append(cookbookPaths, targetPath)
 	}
 
-	configPath, err := p.createConfig(ui, comm, cookbookPaths)
+	rolesPath := ""
+	if p.config.RolesPath != "" {
+		rolesPath := fmt.Sprintf("%s/roles", p.config.StagingDir)
+		if err := p.uploadDirectory(ui, comm, rolesPath, p.config.RolesPath); err != nil {
+			return fmt.Errorf("Error uploading roles: %s", err)
+		}
+	}
+
+	dataBagsPath := ""
+	if p.config.DataBagsPath != "" {
+		dataBagsPath := fmt.Sprintf("%s/data_bags", p.config.StagingDir)
+		if err := p.uploadDirectory(ui, comm, dataBagsPath, p.config.DataBagsPath); err != nil {
+			return fmt.Errorf("Error uploading data bags: %s", err)
+		}
+	}
+
+	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -217,7 +263,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string) (string, error) {
 	ui.Message("Creating configuration file 'solo.rb'")
 
 	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
@@ -248,7 +294,11 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		CookbookPaths: strings.Join(cookbook_paths, ","),
+		CookbookPaths:   strings.Join(cookbook_paths, ","),
+		RolesPath:       rolesPath,
+		DataBagsPath:    dataBagsPath,
+		HasRolesPath:    rolesPath != "",
+		HasDataBagsPath: dataBagsPath != "",
 	})
 	if err != nil {
 		return "", err
@@ -399,5 +449,11 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 }
 
 var DefaultConfigTemplate = `
-cookbook_path [{{.CookbookPaths}}]
+cookbook_path 	[{{.CookbookPaths}}]
+{{if .HasRolesPath}}
+role_path		"{{.RolesPath}}"
+{{end}}
+{{if .HasDataBagsPath}}
+data_bag_path	"{{.DataBagsPath}}"
+{{end}}
 `

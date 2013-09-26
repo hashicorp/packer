@@ -28,6 +28,7 @@ type config struct {
 	DiskSize             uint       `mapstructure:"disk_size"`
 	FloppyFiles          []string   `mapstructure:"floppy_files"`
 	Format               string     `mapstructure:"format"`
+	GuestAdditionsAttach bool       `mapstructure:"guest_additions_attach"`
 	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
 	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
 	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
@@ -361,6 +362,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		new(stepAttachISO),
+		new(stepAttachGuestAdditions),
 		new(stepAttachFloppy),
 		new(stepForwardSSH),
 		new(stepVBoxManage),

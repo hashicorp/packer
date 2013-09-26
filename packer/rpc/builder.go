@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"net"
 	"net/rpc"
 )
 
@@ -95,7 +94,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
-	client, err := rpc.Dial("tcp", response.RPCAddress)
+	client, err := rpcDial(response.RPCAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -119,12 +118,12 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
 }
 
 func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
-	client, err := rpc.Dial("tcp", args.RPCAddress)
+	client, err := rpcDial(args.RPCAddress)
 	if err != nil {
 		return err
 	}
 
-	responseC, err := net.Dial("tcp", args.ResponseAddress)
+	responseC, err := tcpDial(args.ResponseAddress)
 	if err != nil {
 		return err
 	}

@@ -1,22 +1,49 @@
-## 0.3.8 (unreleased)
-
-FEATURES:
-
-* provisioner/chef-solo: Ability to specify a custom Chef configuration
-  template.
-
-IMPROVEMENTS:
-
-* builder/amazon/*: Interrupts work while waiting for AMI to be ready.
+## 0.3.9 (unreleased)
 
 BUG FIXES:
 
-* builder/amazon/*: While waiting for AMI, will detect "failed" state.
-* builder/amazon/*: Waiting for state will detect if the resource (AMI,
+* core: default user variable values don't need to be strings. [GH-456]
+
+## 0.3.8 (September 22, 2013)
+
+FEATURES:
+
+* core: You can now specify `only` and `except` configurations on any
+  provisioner or post-processor to specify a list of builds that they
+  are valid for. [GH-438]
+* builders/virtualbox: Guest additions can be attached rather than uploaded,
+  easier to handle for Windows guests. [GH-405]
+* provisioner/chef-solo: Ability to specify a custom Chef configuration
+  template.
+* provisioner/chef-solo: Roles and data bags support. [GH-348]
+
+IMPROVEMENTS:
+
+* core: User variables can now be used for integer, boolean, etc.
+  values. [GH-418]
+* core: Plugins made with incompatible versions will no longer load.
+* builder/amazon/all: Interrupts work while waiting for AMI to be ready.
+* provisioner/shell: Script line-endings are automatically converted to
+  Unix-style line-endings. Can be disabled by setting "binary" to "true".
+  [GH-277]
+
+BUG FIXES:
+
+* core: Set TCP KeepAlives on internally created RPC connections so that
+  they don't die. [GH-416]
+* builder/amazon/all: While waiting for AMI, will detect "failed" state.
+* builder/amazon/all: Waiting for state will detect if the resource (AMI,
   instance, etc.) disappears from under it.
+* builder/amazon/instance: Exclude only contents of /tmp, not /tmp
+  itself. [GH-437]
+* builder/amazon/instance: Make AccessKey/SecretKey available to bundle
+  command even when they come from the environment. [GH-434]
 * builder/virtualbox: F1-F12 and delete scancodes now work. [GH-425]
+* post-processor/vagrant: Override configurations properly work. [GH-426]
 * provisioner/puppet-masterless: Fix failure case when both facter vars
   are used and prevent_sudo. [GH-415]
+* provisioner/puppet-masterless: User variables now work properly in
+  manifest file and hiera path. [GH-448]
 
 ## 0.3.7 (September 9, 2013)
 

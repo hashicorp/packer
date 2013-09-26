@@ -52,7 +52,7 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error)
 
 	artifacts := make([]packer.Artifact, len(result))
 	for i, addr := range result {
-		client, err := rpc.Dial("tcp", addr)
+		client, err := rpcDial(addr)
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +92,7 @@ func (b *BuildServer) Prepare(v map[string]string, reply *error) error {
 }
 
 func (b *BuildServer) Run(args *BuildRunArgs, reply *[]string) error {
-	client, err := rpc.Dial("tcp", args.UiRPCAddress)
+	client, err := rpcDial(args.UiRPCAddress)
 	if err != nil {
 		return err
 	}

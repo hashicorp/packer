@@ -125,3 +125,28 @@ The answer is no, of course not. Packer is smart enough to figure out
 that at least one post-processor requested that the input be kept, so it will keep
 it around.
 </div>
+
+## Run on Specific Builds
+
+You can use the `only` or `except` configurations to run a post-processor
+only with specific builds. These two configurations do what you expect:
+`only` will only run the post-processor on the specified builds and
+`except` will run the post-processor on anything other than the specified
+builds.
+
+An example of `only` being used is shown below, but the usage of `except`
+is effectively the same. `only` and `except` can only be specified on "detailed"
+configurations. If you have a sequence of post-processors to run, `only`
+and `except` will only affect that single post-processor in the sequence.
+
+<pre class="prettyprint">
+{
+  "type": "vagrant",
+  "only": ["virtualbox"]
+}
+</pre>
+
+The values within `only` or `except` are _build names_, not builder
+types. If you recall, build names by default are just their builder type,
+but if you specify a custom `name` parameter, then you should use that
+as the value instead of the type.

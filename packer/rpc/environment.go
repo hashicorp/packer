@@ -28,7 +28,7 @@ func (e *Environment) Builder(name string) (b packer.Builder, err error) {
 		return
 	}
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpcDial(reply)
 	if err != nil {
 		return
 	}
@@ -43,7 +43,7 @@ func (e *Environment) Cache() packer.Cache {
 		panic(err)
 	}
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpcDial(reply)
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func (e *Environment) Hook(name string) (h packer.Hook, err error) {
 		return
 	}
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpcDial(reply)
 	if err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ func (e *Environment) PostProcessor(name string) (p packer.PostProcessor, err er
 		return
 	}
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpcDial(reply)
 	if err != nil {
 		return
 	}
@@ -96,7 +96,7 @@ func (e *Environment) Provisioner(name string) (p packer.Provisioner, err error)
 		return
 	}
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpcDial(reply)
 	if err != nil {
 		return
 	}
@@ -109,7 +109,7 @@ func (e *Environment) Ui() packer.Ui {
 	var reply string
 	e.client.Call("Environment.Ui", new(interface{}), &reply)
 
-	client, err := rpc.Dial("tcp", reply)
+	client, err := rpcDial(reply)
 	if err != nil {
 		panic(err)
 	}

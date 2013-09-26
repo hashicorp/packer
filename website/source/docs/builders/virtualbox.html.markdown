@@ -85,6 +85,10 @@ Optional:
 * `format` (string) - Either "ovf" or "ova", this specifies the output
   format of the exported virtual machine. This defaults to "ovf".
 
+* `guest_additions_attach` (bool) - If this is true (defaults to "false"),
+  the guest additions ISO will be attached to the virtual machine as a CD
+  rather than uploaded as a raw ISO.
+
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
   is "VBoxGuestAdditions.iso" which should upload into the login directory
