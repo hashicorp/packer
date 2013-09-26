@@ -408,8 +408,27 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 	for _, fi := range fs {
 		realPath := filepath.Join(root, fi.Name())
 
-		if !fi.IsDir() {
-			// It is a regular file, just upload it
+		// Track if this is actually a symlink to a directory. If it is
+		// a symlink to a file we don't do any special behavior because uploading
+		// a file just works. If it is a directory, we need to know so we
+		// treat it as such.
+		isSymlinkToDir := false
+		if fi.Mode() & os.ModeSymlink == os.ModeSymlink {
+			symPath, err := filepath.EvalSymlinks(realPath)
+			if err != nil {
+				return err
+			}
+
+			symFi, err := os.Lstat(symPath)
+			if err != nil {
+				return err
+			}
+
+			isSymlinkToDir = symFi.IsDir()
+		}
+
+		if !fi.IsDir() && !isSymlinkToDir {
+			// It is a regular file (or symlink to a file), just upload it
 			f, err := os.Open(realPath)
 			if err != nil {
 				return err

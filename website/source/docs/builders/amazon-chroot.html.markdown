@@ -188,3 +188,37 @@ out of your AMI builds.
 
 Packer properly obtains a process lock for the parallelism-sensitive parts
 of its internals such as finding an available device.
+
+## Using an IAM Instance Profile
+
+If AWS keys are not specified in the template or through environment variables
+Packer will use credentials provided by the instance's IAM profile, if it has one.
+
+The following policy document provides the minimal set permissions necessary for Packer to work:
+
+<pre class="prettyprint">
+{
+  "Statement": [{
+      "Effect": "Allow",
+      "Action" : [
+        "ec2:AttachVolume",
+        "ec2:CreateVolume",
+        "ec2:DeleteVolume",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume",
+
+        "ec2:DescribeInstances",
+
+        "ec2:CreateSnapshot",
+        "ec2:DeleteSnapshot",
+        "ec2:DescribeSnapshots",
+
+        "ec2:DescribeImages",
+        "ec2:RegisterImage",
+
+        "ec2:CreateTags"
+      ],
+      "Resource" : "*"
+  }]
+}
+</pre>
