@@ -2,7 +2,6 @@ package chroot
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 )
