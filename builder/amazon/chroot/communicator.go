@@ -1,5 +1,7 @@
 package chroot
 
+//  pf := func () { somefunc("a str", 1) } 
+
 import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
@@ -12,18 +14,18 @@ import (
 	"syscall"
 )
 
+type Command func(string) *exec.Cmd
+
 // Communicator is a special communicator that works by executing
 // commands locally but within a chroot.
 type Communicator struct {
-	Chroot        string
-	ChrootCommand string
-	CopyCommand   string
+	Chroot         string
+	ChrootCmd      Command
+	wrappedCommand Command
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-
-	chrootCommand := fmt.Sprintf("%s %s %s", c.ChrootCommand, c.Chroot, cmd.Command)
-	localCmd := exec.Command("/bin/sh", "-c", chrootCommand)
+	localCmd := c.ChrootCmd(cmd.Command)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
@@ -64,7 +66,8 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 	}
 	defer os.Remove(tf.Name())
 	io.Copy(tf, r)
-	return copySingle(dst, tf.Name(), c.CopyCommand)
+	cpCmd := fmt.Sprintf("cp %s %s", dst, tf.Name())
+	return (*c.ChrootCmd(cpCmd)).Run()
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
@@ -87,7 +90,8 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 		chrootDest := filepath.Join(c.Chroot, dst, path)
 		log.Printf("Uploading to chroot dir: %s", dst)
-		return copySingle(chrootDest, fullPath, c.CopyCommand)
+		cpCmd := fmt.Sprintf("cp %s %s", chrootDest, fullPath)
+		return c.ChrootCmd(cpCmd).Run()
 	}
 
 	log.Printf("Uploading directory '%s' to '%s'", src, dst)

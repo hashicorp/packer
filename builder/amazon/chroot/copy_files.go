@@ -2,16 +2,17 @@ package chroot
 
 import (
 	"fmt"
-	"os/exec"
 	"log"
+	"os/exec"
 )
 
-func copySingle(dest string, src string, copyCommand string) error {
-	cpCommand := fmt.Sprintf("%s %s %s", copyCommand, src, dest)
-	localCmd := exec.Command("/bin/sh", "-c", cpCommand)
-	log.Printf("Executing copy: %s %#v", localCmd.Path, localCmd.Args)
-	if err := localCmd.Run(); err != nil {
-		return err
-	}
-	return nil
+func ChrootCommand(chroot string, command string) *exec.Cmd {
+	chrootCommand := fmt.Sprintf("chroot %s %s", chroot, command)
+	return ShellCommand(chrootCommand)
+}
+
+func ShellCommand(command string) *exec.Cmd {
+	cmd := exec.Command("/bin/sh", "-c", command)
+	log.Printf("WrappedCommand(%s) -> #%v", command, cmd.Args)
+	return cmd
 }
