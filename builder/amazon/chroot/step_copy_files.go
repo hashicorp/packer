@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -56,7 +57,9 @@ func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
-			if err := copySingle(file, "", "rm"); err != nil {
+			chrootCommand := fmt.Sprintf("rm %s", file)
+			localCmd := exec.Command("/bin/sh", "-c", chrootCommand)
+			if err := localCmd.Run(); err != nil {
 				return err
 			}
 		}
