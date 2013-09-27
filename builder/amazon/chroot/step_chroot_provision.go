@@ -14,15 +14,14 @@ type StepChrootProvision struct {
 func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	mountPath := state.Get("mount_path").(string)
-	chrootCommand := state.Get("chroot_command").(string)
-	copyCommand := state.Get("copy_command").(string)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Create our communicator
 	comm := &Communicator{
 		Chroot:        mountPath,
-		ChrootCommand: chrootCommand,
-		CopyCommand:   copyCommand,
+		ChrootCommand: config.ChrootCommand,
+		CopyCommand:   config.CopyCommand,
 	}
 
 	// Provision
