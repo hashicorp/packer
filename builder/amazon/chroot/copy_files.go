@@ -9,7 +9,7 @@ import (
 func copySingle(dest string, src string, copyCommand string) error {
 	cpCommand := fmt.Sprintf("%s %s %s", copyCommand, src, dest)
 	localCmd := exec.Command("/bin/sh", "-c", cpCommand)
-	log.Println(localCmd.Args)
+	log.Printf("Executing copy: %s %#v", localCmd.Path, localCmd.Args)
 	if err := localCmd.Run(); err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -57,17 +58,13 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, r io.Reader) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
-	f, err := os.Create(dst)
+	tf, err := ioutil.TempFile("", "packer-amazon-chroot")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error preparing shell script: %s", err)
 	}
-	defer f.Close()
-
-	if _, err := io.Copy(f, r); err != nil {
-		return err
-	}
-
-	return nil
+	defer os.Remove(tf.Name())
+	io.Copy(tf, r)
+	return copySingle(dst, tf.Name(), c.CopyCommand)
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
