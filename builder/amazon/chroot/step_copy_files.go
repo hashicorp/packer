@@ -60,7 +60,6 @@ func (s *StepCopyFiles) CleanupFunc(state multistep.StateBag) error {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
 			localCmd := wrappedCommand(fmt.Sprintf("rm -f %s", file))
-			log.Println(localCmd.Args)
 			if err := localCmd.Run(); err != nil {
 				return err
 			}

@@ -59,7 +59,7 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
 	mountCommand := fmt.Sprintf("mount %s %s", device, mountPath)
-	wrappedCommand := state.Get("wrappedCommand").(Command)
+	wrappedCommand := state.Get("wrappedCommand").(*Command)
 	cmd := wrappedCommand(mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
