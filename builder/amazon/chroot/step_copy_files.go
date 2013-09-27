@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -22,6 +21,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
 
 	s.files = make([]string, 0, len(config.CopyFiles))
 	if len(config.CopyFiles) > 0 {
@@ -31,7 +31,8 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			if err := copySingle(chrootPath, path, config.CopyCommand); err != nil {
+			cmd := fmt.Sprintf("cp %s %s", chrootPath, path)
+			if err := wrappedCommand(cmd); err != nil {
 				err := fmt.Errorf("Error copying file: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
@@ -53,12 +54,13 @@ func (s *StepCopyFiles) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
+func (s *StepCopyFiles) CleanupFunc(state multistep.StateBag) error {
+	wrappedCommand := state.Get("wrappedCommand").(Command)
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
-			chrootCommand := fmt.Sprintf("rm %s", file)
-			localCmd := exec.Command("/bin/sh", "-c", chrootCommand)
+			localCmd := wrappedCommand(fmt.Sprintf("rm -f %s", file))
+			log.Println(localCmd.Args)
 			if err := localCmd.Run(); err != nil {
 				return err
 			}

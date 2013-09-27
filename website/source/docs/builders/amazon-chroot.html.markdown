@@ -111,9 +111,11 @@ Optional:
   of the source AMI will be attached. This defaults to "" (empty string),
   which forces Packer to find an open device automatically.
 
-* `mount_command` (string) - The command to use to mount devices. This
-  defaults to "mount". This may be useful to set if you want to set
-  environmental variables or perhaps run it with `sudo` or so on.
+* `command_wrapper` (string) - How to run shell commands. This
+  defaults to "{{.Command}}". This may be useful to set if you want to set
+  environmental variables or perhaps run it with `sudo` or so on. This is a
+  configuration template where the `.Command` variable is replaced with the
+  command to be run..
 
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
@@ -122,13 +124,6 @@ Optional:
   device where the volume is attached.
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
-
-* `unmount_command` (string) - Just like `mount_command`, except this is
-  the command to unmount devices.
-
-* `chroot_command` (string) - The command to use to create the chroot.
-  This defaults to "chroot", but like `mount_command`, it may be useful
-  to use `sudo` or variables.
 
 ## Basic Example
 
