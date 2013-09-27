@@ -13,6 +13,6 @@ func ChrootCommand(chroot string, command string) *exec.Cmd {
 
 func ShellCommand(command string) *exec.Cmd {
 	cmd := exec.Command("/bin/sh", "-c", command)
-	log.Printf("WrappedCommand(%s) -> #%v", command, cmd.Args)
+	log.Printf("ShellCommand(%s) -> #%v", command, cmd.Args)
 	return cmd
 }

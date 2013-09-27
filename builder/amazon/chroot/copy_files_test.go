@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"

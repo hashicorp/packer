@@ -83,7 +83,7 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		var path string
 		lastIndex := len(s.mounts) - 1
 		path, s.mounts = s.mounts[lastIndex], s.mounts[:lastIndex]
-		unmountCommand := fmt.Sprintf("unmount %s", path)
+		unmountCommand := fmt.Sprintf("umount %s", path)
 
 		stderr := new(bytes.Buffer)
 		cmd := wrappedCommand(unmountCommand)
