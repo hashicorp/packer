@@ -66,7 +66,7 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 	}
 	defer os.Remove(tf.Name())
 	io.Copy(tf, r)
-	cpCmd := fmt.Sprintf("cp %s %s", dst, tf.Name())
+	cpCmd := fmt.Sprintf("cp %s %s", tf.Name(), dst)
 	return (*c.ChrootCmd(cpCmd)).Run()
 }
 
@@ -90,7 +90,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 		chrootDest := filepath.Join(c.Chroot, dst, path)
 		log.Printf("Uploading to chroot dir: %s", dst)
-		cpCmd := fmt.Sprintf("cp %s %s", chrootDest, fullPath)
+		cpCmd := fmt.Sprintf("cp %s %s", fullPath, chrootDest)
 		return c.ChrootCmd(cpCmd).Run()
 	}
 

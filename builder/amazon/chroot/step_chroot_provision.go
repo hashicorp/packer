@@ -4,6 +4,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os/exec"
 )
 
 // StepChrootProvision provisions the instance within a chroot.
@@ -11,16 +12,14 @@ type StepChrootProvision struct {
 	mounts []string
 }
 
-type WrappedCommandTemplate struct {
-	Command string
-}
-
 func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(Command)
-	chrootCmd := state.Get("chrootCmd").(Command)
+	chrootCmd := func(command string) *exec.Cmd {
+		return ChrootCommand(mountPath, command)
+	}
 
 	// Create our communicator
 	comm := &Communicator{
