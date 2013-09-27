@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"os"
 	"path/filepath"
 )
 
@@ -31,7 +30,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			if err := copySingle(chrootPath, path, config.ChrootCommand); err != nil {
+			if err := copySingle(chrootPath, path, config.CopyCommand); err != nil {
 				err := fmt.Errorf("Error copying file: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
@@ -57,7 +56,7 @@ func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
-			if err := os.Remove(file); err != nil {
+			if err := copySingle(file, "", "rm"); err != nil {
 				return err
 			}
 		}
