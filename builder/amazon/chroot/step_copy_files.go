@@ -31,7 +31,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			cmd := fmt.Sprintf("cp %s %s", chrootPath, path)
+			cmd := fmt.Sprintf("cp %s %s", path, chrootPath)
 			if err := wrappedCommand(cmd); err != nil {
 				err := fmt.Errorf("Error copying file: %s", err)
 				state.Put("error", err)
