@@ -35,11 +35,6 @@ Required:
 
 Optional:
 
-* `event_delay` (string) - The delay, as a duration string, before checking
-  the status of an event. DigitalOcean's current API has consistency issues
-  where events take time to appear after being created. This defaults to "5s"
-  and generally shouldn't have to be changed.
-
 * `image_id` (int) - The ID of the base image to use. This is the image that
   will be used to launch a new droplet and provision it. Defaults to "284203",
   which happens to be "Ubuntu 12.04 x64 Server."
