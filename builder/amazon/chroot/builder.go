@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os/exec"
 	"runtime"
 )
 
@@ -160,12 +161,23 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	ec2conn := ec2.New(auth, region)
 
+	wrappedCommand := func(command string) *exec.Cmd {
+		wrapped, err := b.config.tpl.Process(b.config.CommandWrapper, &WrappedCommandTemplate{
+			Command: command,
+		})
+		if err != nil {
+			ui.Error(err.Error())
+		}
+		return ShellCommand(wrapped)
+	}
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("ec2", ec2conn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("wrappedCommand", Command(wrappedCommand))
 
 	// Build the steps
 	steps := []multistep.Step{

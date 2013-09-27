@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -56,10 +57,15 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	chrootCmd := func(command string) *exec.Cmd {
+		return ChrootCommand(mountPath, command)
+	}
+	state.Put("chrootCmd", Command(chrootCmd))
+
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
 	mountCommand := fmt.Sprintf("mount %s %s", device, mountPath)
-	wrappedCommand := state.Get("wrappedCommand").(*Command)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
 	cmd := wrappedCommand(mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {

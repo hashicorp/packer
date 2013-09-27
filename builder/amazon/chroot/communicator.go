@@ -21,7 +21,7 @@ type Command func(string) *exec.Cmd
 type Communicator struct {
 	Chroot         string
 	ChrootCmd      Command
-	wrappedCommand Command
+	WrappedCommand Command
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
