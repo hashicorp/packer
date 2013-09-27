@@ -13,7 +13,7 @@ type StepChrootProvision struct {
 }
 
 type WrappedCommandTemplate struct {
-	command string
+	Command string
 }
 
 func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction {
@@ -26,7 +26,7 @@ func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction
 	}
 	wrappedCommand := func(command string) *exec.Cmd {
 		wrapped, err := config.tpl.Process(config.CommandWrapper, &WrappedCommandTemplate{
-			command: command,
+			Command: command,
 		})
 		if err != nil {
 			ui.Error(err.Error())
