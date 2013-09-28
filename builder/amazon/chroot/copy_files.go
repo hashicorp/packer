@@ -7,12 +7,13 @@ import (
 )
 
 func ChrootCommand(chroot string, command string) *exec.Cmd {
-	chrootCommand := fmt.Sprintf("chroot %s %s", chroot, command)
-	return ShellCommand(chrootCommand)
+	cmd := fmt.Sprintf("sudo chroot %s", chroot)
+	return ShellCommand(cmd, command)
 }
 
-func ShellCommand(command string) *exec.Cmd {
-	cmd := exec.Command("/bin/sh", "-c", command)
-	log.Printf("ShellCommand(%s) -> #%v", command, cmd.Args)
+func ShellCommand(commands ...string) *exec.Cmd {
+	cmds := append([]string{"-c"}, commands...)
+	cmd := exec.Command("/bin/sh", cmds...)
+	log.Printf("ShellCommand: %s %v", cmd.Path, cmd.Args[1:])
 	return cmd
 }

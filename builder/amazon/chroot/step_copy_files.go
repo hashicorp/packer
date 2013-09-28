@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -22,6 +23,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(Command)
+	stderr := new(bytes.Buffer)
 
 	s.files = make([]string, 0, len(config.CopyFiles))
 	if len(config.CopyFiles) > 0 {
@@ -31,9 +33,12 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			cmd := fmt.Sprintf("cp %s %s", path, chrootPath)
-			if err := wrappedCommand(cmd); err != nil {
-				err := fmt.Errorf("Error copying file: %s", err)
+			cmd := wrappedCommand(fmt.Sprintf("cp %s %s", path, chrootPath))
+			stderr.Reset()
+			cmd.Stderr = stderr
+			if err := cmd.Run(); err != nil {
+				err := fmt.Errorf(
+					"Error copying file: %s\nnStderr: %s", err, stderr.String())
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
