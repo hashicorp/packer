@@ -6,6 +6,8 @@ BUG FIXES:
 * builder/amazon-chroot: Fix errors with waitin for state change. [GH-459]
 * communicator/ssh: SCP uploads now work properly when directories
   contain symlinks. [GH-449]
+* provisioner/chef-solo: Data bags and roles path are now properly
+  populated when set. [GH-470]
 
 ## 0.3.8 (September 22, 2013)
 
