@@ -212,7 +212,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	rolesPath := ""
 	if p.config.RolesPath != "" {
-		rolesPath := fmt.Sprintf("%s/roles", p.config.StagingDir)
+		rolesPath = fmt.Sprintf("%s/roles", p.config.StagingDir)
 		if err := p.uploadDirectory(ui, comm, rolesPath, p.config.RolesPath); err != nil {
 			return fmt.Errorf("Error uploading roles: %s", err)
 		}
@@ -220,7 +220,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	dataBagsPath := ""
 	if p.config.DataBagsPath != "" {
-		dataBagsPath := fmt.Sprintf("%s/data_bags", p.config.StagingDir)
+		dataBagsPath = fmt.Sprintf("%s/data_bags", p.config.StagingDir)
 		if err := p.uploadDirectory(ui, comm, dataBagsPath, p.config.DataBagsPath); err != nil {
 			return fmt.Errorf("Error uploading data bags: %s", err)
 		}
