@@ -49,7 +49,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 		}
 
 		log.Printf(
-			"Chroot executation ended with '%d': '%s'",
+			"Chroot executation exited with '%d': '%s'",
 			exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 	}()
@@ -67,35 +67,39 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 	defer os.Remove(tf.Name())
 	io.Copy(tf, r)
 	cpCmd := fmt.Sprintf("cp %s %s", tf.Name(), dst)
-	return (*c.ChrootCmd(cpCmd)).Run()
+	return (c.WrappedCommand(cpCmd)).Run()
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	walkFn := func(fullPath string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		path, err := filepath.Rel(src, fullPath)
-		if err != nil {
-			return err
-		}
-
-		for _, e := range exclude {
-			if e == path {
-				log.Printf("Skipping excluded file: %s", path)
-				return nil
+	/*
+		walkFn := func(fullPath string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
 			}
+
+			path, err := filepath.Rel(src, fullPath)
+			if err != nil {
+				return err
+			}
+
+			for _, e := range exclude {
+				if e == path {
+					log.Printf("Skipping excluded file: %s", path)
+					return nil
+				}
+			}
+
+			chrootDest := filepath.Join(c.Chroot, dst, path)
+			log.Printf("Uploading dir %s to chroot dir: %s", src, dst)
+			cpCmd := fmt.Sprintf("cp %s %s", fullPath, chrootDest)
+			return c.WrappedCommand(cpCmd).Run()
 		}
+	*/
 
-		chrootDest := filepath.Join(c.Chroot, dst, path)
-		log.Printf("Uploading to chroot dir: %s", dst)
-		cpCmd := fmt.Sprintf("cp %s %s", fullPath, chrootDest)
-		return c.ChrootCmd(cpCmd).Run()
-	}
-
-	log.Printf("Uploading directory '%s' to '%s'", src, dst)
-	return filepath.Walk(src, walkFn)
+	chrootDest := filepath.Join(c.Chroot, dst)
+	log.Printf("Uploading directory '%s' to '%s'", src, chrootDest)
+	cpCmd := fmt.Sprintf("cp -R %s* %s", src, chrootDest)
+	return c.WrappedCommand(cpCmd).Run()
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
