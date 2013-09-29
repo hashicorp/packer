@@ -40,6 +40,7 @@ const defaultConfig = `
 	},
 
 	"provisioners": {
+		"ansible-local": "packer-provisioner-ansible-local",
 		"chef-solo": "packer-provisioner-chef-solo",
 		"file": "packer-provisioner-file",
 		"puppet-masterless": "packer-provisioner-puppet-masterless",
