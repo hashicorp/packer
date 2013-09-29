@@ -96,6 +96,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 		}
 	*/
 
+	// TODO: remove any file copied if it appears in `exclude`
 	chrootDest := filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading directory '%s' to '%s'", src, chrootDest)
 	cpCmd := fmt.Sprintf("cp -R %s* %s", src, chrootDest)
