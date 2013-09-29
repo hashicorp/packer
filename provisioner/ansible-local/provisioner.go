@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	tpl                 *packer.ConfigTemplate
@@ -47,7 +49,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = "/tmp/packer-provisioner-ansible-local"
+		p.config.StagingDir = DefaultStagingDir
 	}
 
 	// Templates
