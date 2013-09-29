@@ -20,6 +20,28 @@ func TestProvisioner_Impl(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_Defaults(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	playbook_file, err := ioutil.TempFile("", "playbook")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(playbook_file.Name())
+
+	config["playbook_file"] = playbook_file.Name()
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.StagingDir != DefaultStagingDir {
+		t.Fatalf("unexpected staging dir %s, expected %s",
+			p.config.StagingDir, DefaultStagingDir)
+	}
+}
+
 func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
