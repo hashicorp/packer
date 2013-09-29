@@ -227,7 +227,7 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 		}
 
 		if status == "ERROR" {
-			status = decodedResponse["error_message"].(string)
+			status = decodedResponse["message"].(string)
 		}
 
 		lastErr = errors.New(fmt.Sprintf("Received error from DigitalOcean (%d): %s",
