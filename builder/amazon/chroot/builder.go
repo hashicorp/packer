@@ -166,9 +166,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ec2conn := ec2.New(auth, region)
 
 	wrappedCommand := func(command string) *exec.Cmd {
-		wrapped, err := b.config.tpl.Process(b.config.CommandWrapper, &wrappedCommandTemplate{
-			Command: command,
-		})
+		wrapped, err := b.config.tpl.Process(
+			b.config.CommandWrapper, &wrappedCommandTemplate{
+				Command: command,
+			})
 		if err != nil {
 			ui.Error(err.Error())
 		}
