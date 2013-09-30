@@ -21,7 +21,7 @@ type Communicator struct {
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("sudo chroot %s '%s'", c.Chroot, cmd.Command))
+		fmt.Sprintf("chroot %s %s", c.Chroot, cmd.Command))
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 		}
 
 		log.Printf(
-			"Chroot executation exited with '%d': '%s'",
+			"Chroot execution exited with '%d': '%s'",
 			exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 	}()
