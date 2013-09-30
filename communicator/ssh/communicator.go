@@ -413,7 +413,7 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 		// a file just works. If it is a directory, we need to know so we
 		// treat it as such.
 		isSymlinkToDir := false
-		if fi.Mode() & os.ModeSymlink == os.ModeSymlink {
+		if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
 			symPath, err := filepath.EvalSymlinks(realPath)
 			if err != nil {
 				return err
