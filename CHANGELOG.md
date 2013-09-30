@@ -1,5 +1,10 @@
 ## 0.3.9 (unreleased)
 
+FEATURES:
+
+* The Amazon chroot builder is now able to run without any `sudo` privileges
+  by using the "command_wrapper" configuration. [GH-430]
+
 BUG FIXES:
 
 * core: default user variable values don't need to be strings. [GH-456]
