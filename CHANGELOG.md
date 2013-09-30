@@ -4,8 +4,11 @@ BUG FIXES:
 
 * core: default user variable values don't need to be strings. [GH-456]
 * builder/amazon-chroot: Fix errors with waitin for state change. [GH-459]
+* builder/digitalocean: Use proper error message JSON key (DO API change).
 * communicator/ssh: SCP uploads now work properly when directories
   contain symlinks. [GH-449]
+* provisioner/chef-solo: Data bags and roles path are now properly
+  populated when set. [GH-470]
 
 ## 0.3.8 (September 22, 2013)
 

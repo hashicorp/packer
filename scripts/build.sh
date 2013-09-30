@@ -92,3 +92,6 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
 done
 
 waitAll
+
+# Reset signal trapping to avoid "Terminated: 15" at the end
+trap - SIGINT SIGTERM EXIT
