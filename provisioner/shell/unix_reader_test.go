@@ -31,3 +31,21 @@ func TestUnixReader(t *testing.T) {
 		t.Fatalf("bad: %#v", result.String())
 	}
 }
+
+func TestUnixReader_unixOnly(t *testing.T) {
+	input := "one\ntwo\nthree\n"
+	expected := "one\ntwo\nthree\n"
+
+	r := &UnixReader{
+		Reader: bytes.NewReader([]byte(input)),
+	}
+
+	result := new(bytes.Buffer)
+	if _, err := io.Copy(result, r); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.String() != expected {
+		t.Fatalf("bad: %#v", result.String())
+	}
+}
