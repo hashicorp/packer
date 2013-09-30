@@ -6,7 +6,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"os"
-	"os/exec"
 )
 
 // StepMountExtra mounts the attached device.
@@ -21,6 +20,7 @@ func (s *StepMountExtra) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
 
 	s.mounts = make([]string, 0, len(config.ChrootMounts))
 
@@ -43,12 +43,11 @@ func (s *StepMountExtra) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Message(fmt.Sprintf("Mounting: %s", mountInfo[2]))
 		stderr := new(bytes.Buffer)
 		mountCommand := fmt.Sprintf(
-			"%s %s %s %s",
-			config.MountCommand,
+			"mount %s %s %s",
 			flags,
 			mountInfo[1],
 			innerPath)
-		cmd := exec.Command("/bin/sh", "-c", mountCommand)
+		cmd := wrappedCommand(mountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			err := fmt.Errorf(
@@ -79,15 +78,15 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		return nil
 	}
 
-	config := state.Get("config").(*Config)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
 	for len(s.mounts) > 0 {
 		var path string
 		lastIndex := len(s.mounts) - 1
 		path, s.mounts = s.mounts[lastIndex], s.mounts[:lastIndex]
-		unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, path)
+		unmountCommand := fmt.Sprintf("umount %s", path)
 
 		stderr := new(bytes.Buffer)
-		cmd := exec.Command("/bin/sh", "-c", unmountCommand)
+		cmd := wrappedCommand(unmountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf(

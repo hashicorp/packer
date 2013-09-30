@@ -7,7 +7,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -59,8 +58,9 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
-	mountCommand := fmt.Sprintf("%s %s %s", config.MountCommand, device, mountPath)
-	cmd := exec.Command("/bin/sh", "-c", mountCommand)
+	mountCommand := fmt.Sprintf("mount %s %s", device, mountPath)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
+	cmd := wrappedCommand(mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf(
@@ -90,12 +90,12 @@ func (s *StepMountDevice) CleanupFunc(state multistep.StateBag) error {
 		return nil
 	}
 
-	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Unmounting the root device...")
 
-	unmountCommand := fmt.Sprintf("%s %s", config.UnmountCommand, s.mountPath)
-	cmd := exec.Command("/bin/sh", "-c", unmountCommand)
+	unmountCommand := fmt.Sprintf("umount %s", s.mountPath)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
+	cmd := wrappedCommand(unmountCommand)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("Error unmounting root device: %s", err)
 	}
