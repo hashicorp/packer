@@ -20,7 +20,7 @@ func (s *StepMountExtra) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(Command)
+	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	s.mounts = make([]string, 0, len(config.ChrootMounts))
 
@@ -42,12 +42,19 @@ func (s *StepMountExtra) Run(state multistep.StateBag) multistep.StepAction {
 
 		ui.Message(fmt.Sprintf("Mounting: %s", mountInfo[2]))
 		stderr := new(bytes.Buffer)
-		mountCommand := fmt.Sprintf(
+		mountCommand, err := wrappedCommand(fmt.Sprintf(
 			"mount %s %s %s",
 			flags,
 			mountInfo[1],
-			innerPath)
-		cmd := wrappedCommand(mountCommand)
+			innerPath))
+		if err != nil {
+			err := fmt.Errorf("Error creating mount command: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		cmd := ShellCommand(mountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			err := fmt.Errorf(
@@ -78,15 +85,18 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		return nil
 	}
 
-	wrappedCommand := state.Get("wrappedCommand").(Command)
+	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	for len(s.mounts) > 0 {
 		var path string
 		lastIndex := len(s.mounts) - 1
 		path, s.mounts = s.mounts[lastIndex], s.mounts[:lastIndex]
-		unmountCommand := fmt.Sprintf("umount %s", path)
+		unmountCommand, err := wrappedCommand(fmt.Sprintf("umount %s", path))
+		if err != nil {
+			return fmt.Errorf("Error creating unmount command: %s", err)
+		}
 
 		stderr := new(bytes.Buffer)
-		cmd := wrappedCommand(unmountCommand)
+		cmd := ShellCommand(unmountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf(
