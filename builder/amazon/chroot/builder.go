@@ -28,9 +28,9 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
+	CommandWrapper string     `mapstructure:"command_wrapper"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
 	DevicePath     string     `mapstructure:"device_path"`
-	CommandWrapper string     `mapstructure:"command_wrapper"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 
