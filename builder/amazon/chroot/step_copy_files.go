@@ -22,7 +22,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(Command)
+	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	stderr := new(bytes.Buffer)
 
 	s.files = make([]string, 0, len(config.CopyFiles))
@@ -33,8 +33,16 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			cmd := wrappedCommand(fmt.Sprintf("cp %s %s", path, chrootPath))
+			cmdText, err := wrappedCommand(fmt.Sprintf("cp %s %s", path, chrootPath))
+			if err != nil {
+				err := fmt.Errorf("Error building copy command: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
 			stderr.Reset()
+			cmd := ShellCommand(cmdText)
 			cmd.Stderr = stderr
 			if err := cmd.Run(); err != nil {
 				err := fmt.Errorf(
@@ -60,11 +68,16 @@ func (s *StepCopyFiles) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepCopyFiles) CleanupFunc(state multistep.StateBag) error {
-	wrappedCommand := state.Get("wrappedCommand").(Command)
+	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
-			localCmd := wrappedCommand(fmt.Sprintf("rm -f %s", file))
+			localCmdText, err := wrappedCommand(fmt.Sprintf("rm -f %s", file))
+			if err != nil {
+				return err
+			}
+
+			localCmd := ShellCommand(localCmdText)
 			if err := localCmd.Run(); err != nil {
 				return err
 			}

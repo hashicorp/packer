@@ -1,6 +1,6 @@
 package chroot
 
-//  pf := func () { somefunc("a str", 1) } 
+//  pf := func () { somefunc("a str", 1) }
 
 import (
 	"fmt"
@@ -14,18 +14,21 @@ import (
 	"syscall"
 )
 
-type Command func(string) *exec.Cmd
-
 // Communicator is a special communicator that works by executing
 // commands locally but within a chroot.
 type Communicator struct {
-	Chroot         string
-	ChrootCmd      Command
-	WrappedCommand Command
+	Chroot     string
+	CmdWrapper CommandWrapper
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	localCmd := c.ChrootCmd(cmd.Command)
+	command, err := c.CmdWrapper(
+		fmt.Sprintf("sudo chroot %s '%s'", c.Chroot, cmd.Command))
+	if err != nil {
+		return err
+	}
+
+	localCmd := ShellCommand(command)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
@@ -66,41 +69,25 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 	}
 	defer os.Remove(tf.Name())
 	io.Copy(tf, r)
-	cpCmd := fmt.Sprintf("cp %s %s", tf.Name(), dst)
-	return (c.WrappedCommand(cpCmd)).Run()
+
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp %s %s", tf.Name(), dst))
+	if err != nil {
+		return err
+	}
+
+	return ShellCommand(cpCmd).Run()
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	/*
-		walkFn := func(fullPath string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			path, err := filepath.Rel(src, fullPath)
-			if err != nil {
-				return err
-			}
-
-			for _, e := range exclude {
-				if e == path {
-					log.Printf("Skipping excluded file: %s", path)
-					return nil
-				}
-			}
-
-			chrootDest := filepath.Join(c.Chroot, dst, path)
-			log.Printf("Uploading dir %s to chroot dir: %s", src, dst)
-			cpCmd := fmt.Sprintf("cp %s %s", fullPath, chrootDest)
-			return c.WrappedCommand(cpCmd).Run()
-		}
-	*/
-
 	// TODO: remove any file copied if it appears in `exclude`
 	chrootDest := filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading directory '%s' to '%s'", src, chrootDest)
-	cpCmd := fmt.Sprintf("cp -R %s* %s", src, chrootDest)
-	return c.WrappedCommand(cpCmd).Run()
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp -R %s* %s", src, chrootDest))
+	if err != nil {
+		return err
+	}
+
+	return ShellCommand(cpCmd).Run()
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
