@@ -1,7 +1,5 @@
 package chroot
 
-//  pf := func () { somefunc("a str", 1) }
-
 import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
