@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"os/exec"
 	"runtime"
 )
 
@@ -29,12 +30,15 @@ type Config struct {
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
 	DevicePath     string     `mapstructure:"device_path"`
-	MountCommand   string     `mapstructure:"mount_command"`
+	CommandWrapper string     `mapstructure:"command_wrapper"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
-	UnmountCommand string     `mapstructure:"unmount_command"`
 
 	tpl *packer.ConfigTemplate
+}
+
+type wrappedCommandTemplate struct {
+	Command string
 }
 
 type Builder struct {
@@ -78,16 +82,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}
 	}
 
-	if b.config.MountCommand == "" {
-		b.config.MountCommand = "mount"
+	if b.config.CommandWrapper == "" {
+		b.config.CommandWrapper = "{{.Command}}"
 	}
 
 	if b.config.MountPath == "" {
 		b.config.MountPath = "packer-amazon-chroot-volumes/{{.Device}}"
-	}
-
-	if b.config.UnmountCommand == "" {
-		b.config.UnmountCommand = "umount"
 	}
 
 	// Accumulate any errors
@@ -127,10 +127,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	templates := map[string]*string{
-		"device_path":     &b.config.DevicePath,
-		"mount_command":   &b.config.MountCommand,
-		"source_ami":      &b.config.SourceAmi,
-		"unmount_command": &b.config.UnmountCommand,
+		"device_path": &b.config.DevicePath,
+		"source_ami":  &b.config.SourceAmi,
 	}
 
 	for n, ptr := range templates {
@@ -167,12 +165,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	ec2conn := ec2.New(auth, region)
 
+	wrappedCommand := func(command string) *exec.Cmd {
+		wrapped, err := b.config.tpl.Process(
+			b.config.CommandWrapper, &wrappedCommandTemplate{
+				Command: command,
+			})
+		if err != nil {
+			ui.Error(err.Error())
+		}
+		return ShellCommand(wrapped)
+	}
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("ec2", ec2conn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("wrappedCommand", Command(wrappedCommand))
 
 	// Build the steps
 	steps := []multistep.Step{

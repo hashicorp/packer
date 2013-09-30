@@ -1,12 +1,11 @@
 package chroot
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"io"
 	"log"
-	"os"
 	"path/filepath"
 )
 
@@ -23,6 +22,8 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
+	wrappedCommand := state.Get("wrappedCommand").(Command)
+	stderr := new(bytes.Buffer)
 
 	s.files = make([]string, 0, len(config.CopyFiles))
 	if len(config.CopyFiles) > 0 {
@@ -32,8 +33,12 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			if err := s.copySingle(chrootPath, path); err != nil {
-				err := fmt.Errorf("Error copying file: %s", err)
+			cmd := wrappedCommand(fmt.Sprintf("cp %s %s", path, chrootPath))
+			stderr.Reset()
+			cmd.Stderr = stderr
+			if err := cmd.Run(); err != nil {
+				err := fmt.Errorf(
+					"Error copying file: %s\nnStderr: %s", err, stderr.String())
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
@@ -54,54 +59,18 @@ func (s *StepCopyFiles) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func (s *StepCopyFiles) CleanupFunc(multistep.StateBag) error {
+func (s *StepCopyFiles) CleanupFunc(state multistep.StateBag) error {
+	wrappedCommand := state.Get("wrappedCommand").(Command)
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
-			if err := os.Remove(file); err != nil {
+			localCmd := wrappedCommand(fmt.Sprintf("rm -f %s", file))
+			if err := localCmd.Run(); err != nil {
 				return err
 			}
 		}
 	}
 
 	s.files = nil
-	return nil
-}
-
-func (s *StepCopyFiles) copySingle(dst, src string) error {
-	// Stat the src file so we can copy the mode later
-	srcInfo, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	// Remove any existing destination file
-	if err := os.Remove(dst); err != nil {
-		return err
-	}
-
-	// Copy the files
-	srcF, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcF.Close()
-
-	dstF, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstF.Close()
-
-	if _, err := io.Copy(dstF, srcF); err != nil {
-		return err
-	}
-	dstF.Close()
-
-	// Match the mode
-	if err := os.Chmod(dst, srcInfo.Mode()); err != nil {
-		return err
-	}
-
 	return nil
 }
