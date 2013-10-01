@@ -14,6 +14,8 @@ BUG FIXES:
   contain symlinks. [GH-449]
 * provisioner/chef-solo: Data bags and roles path are now properly
   populated when set. [GH-470]
+* provisioner/shell: Windows line endings are actually properly changed
+  to Unix line endings. [GH-477]
 
 ## 0.3.8 (September 22, 2013)
 
