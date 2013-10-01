@@ -33,8 +33,8 @@ func TestUnixReader(t *testing.T) {
 }
 
 func TestUnixReader_unixOnly(t *testing.T) {
-	input := "one\ntwo\nthree\n"
-	expected := "one\ntwo\nthree\n"
+	input := "one\n\ntwo\nthree\n"
+	expected := "one\n\ntwo\nthree\n"
 
 	r := &UnixReader{
 		Reader: bytes.NewReader([]byte(input)),

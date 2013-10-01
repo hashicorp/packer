@@ -2,7 +2,6 @@ package shell
 
 import (
 	"bufio"
-	"bytes"
 	"io"
 	"sync"
 )
@@ -54,35 +53,6 @@ func (r *UnixReader) Read(p []byte) (n int, err error) {
 // only returns unix-style lines. So even if the line is "one\r\n", the
 // token returned will be "one\n".
 func scanUnixLine(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	if atEOF && len(data) == 0 {
-		return 0, nil, nil
-	}
-
-	if i := bytes.IndexByte(data, '\n'); i >= 0 {
-		// We have a new-line terminated line. Return the line with the newline
-		return i + 1, dropCR(data[0 : i+1]), nil
-	}
-
-	if atEOF {
-		// We have a final, non-terminated line
-		return len(data), dropCR(data), nil
-	}
-
-	if data[len(data)-1] != '\r' {
-		// We have a normal line, just let it tokenize
-		return len(data), data, nil
-	}
-
-	// We need more data
-	return 0, nil, nil
-}
-
-func dropCR(data []byte) []byte {
-	if len(data) > 0 && data[len(data)-2] == '\r' {
-		// Trim off the last byte and replace it with a '\n'
-		data = data[0 : len(data)-1]
-		data[len(data)-1] = '\n'
-	}
-
-	return data
+	advance, token, err = bufio.ScanLines(data, atEOF)
+	return advance, append(token, "\n"...), err
 }
