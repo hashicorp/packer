@@ -269,7 +269,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				r = &UnixReader{Reader: r}
 			}
 
-			if err := comm.Upload(p.config.RemotePath, f); err != nil {
+			if err := comm.Upload(p.config.RemotePath, r); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
