@@ -41,19 +41,19 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	CookbookPaths 		string
-	DataBagsPath  		string
-	RolesPath     		string
-	EnvironmentsPath 	string
-	ChefEnvironment 	string
+	CookbookPaths    string
+	DataBagsPath     string
+	RolesPath        string
+	EnvironmentsPath string
+	ChefEnvironment  string
 
 	// Templates don't support boolean statements until Go 1.2. In the
 	// mean time, we do this.
 	// TODO(mitchellh): Remove when Go 1.2 is released
-	HasDataBagsPath 		bool
-	HasRolesPath    		bool
+	HasDataBagsPath     bool
+	HasRolesPath        bool
 	HasEnvironmentsPath bool
-	HasChefEnvironment	bool
+	HasChefEnvironment  bool
 }
 
 type ExecuteTemplate struct {
@@ -98,12 +98,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
-		"config_template": 		&p.config.ConfigTemplate,
-		"data_bags_path":  		&p.config.DataBagsPath,
-		"roles_path":      		&p.config.RolesPath,
-		"staging_dir":     		&p.config.StagingDir,
-		"environments_path": 	&p.config.EnvironmentsPath,
-		"chef_environment":   &p.config.ChefEnvironment,
+		"config_template":   &p.config.ConfigTemplate,
+		"data_bags_path":    &p.config.DataBagsPath,
+		"roles_path":        &p.config.RolesPath,
+		"staging_dir":       &p.config.StagingDir,
+		"environments_path": &p.config.EnvironmentsPath,
+		"chef_environment":  &p.config.ChefEnvironment,
 	}
 
 	for n, ptr := range templates {
@@ -319,14 +319,14 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		CookbookPaths:   			strings.Join(cookbook_paths, ","),
-		RolesPath:       			rolesPath,
-		DataBagsPath:    			dataBagsPath,
-		EnvironmentsPath: 		environmentsPath,
-		HasRolesPath:    			rolesPath != "",
-		HasDataBagsPath: 			dataBagsPath != "",
-		HasEnvironmentsPath: 	environmentsPath != "",
-		ChefEnvironment:      chefEnvironment,
+		CookbookPaths:       strings.Join(cookbook_paths, ","),
+		RolesPath:           rolesPath,
+		DataBagsPath:        dataBagsPath,
+		EnvironmentsPath:    environmentsPath,
+		HasRolesPath:        rolesPath != "",
+		HasDataBagsPath:     dataBagsPath != "",
+		HasEnvironmentsPath: environmentsPath != "",
+		ChefEnvironment:     chefEnvironment,
 	})
 	if err != nil {
 		return "", err
