@@ -20,7 +20,7 @@ func (r *UnixReader) Read(p []byte) (n int, err error) {
 	// Create the buffered reader once
 	r.once.Do(func() {
 		r.scanner = bufio.NewScanner(r.Reader)
-		r.scanner.Split(scanUnixLine)
+		r.scanner.Split(bufio.ScanLines)
 	})
 
 	// If we have no data in our buffer, scan to the next token
@@ -34,7 +34,9 @@ func (r *UnixReader) Read(p []byte) (n int, err error) {
 			return 0, err
 		}
 
-		r.buf = r.scanner.Bytes()
+		if len(r.scanner.Bytes()) > 0 {
+			r.buf = append(r.scanner.Bytes(), "\n"...)
+		}
 	}
 
 	// Write out as much data as we can to the buffer, storing the rest
@@ -47,12 +49,4 @@ func (r *UnixReader) Read(p []byte) (n int, err error) {
 	r.buf = r.buf[n:]
 
 	return
-}
-
-// scanUnixLine is a bufio.Scanner SplitFunc. It tokenizes on lines, but
-// only returns unix-style lines. So even if the line is "one\r\n", the
-// token returned will be "one\n".
-func scanUnixLine(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	advance, token, err = bufio.ScanLines(data, atEOF)
-	return advance, append(token, "\n"...), err
 }
