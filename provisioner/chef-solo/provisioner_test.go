@@ -19,6 +19,22 @@ func TestProvisioner_Impl(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
+	var p Provisioner
+
+	config := testConfig()
+	config["chef_environment"] = "some-env"
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.ChefEnvironment != "some-env" {
+		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
+	}
+}
+
 func TestProvisionerPrepare_configTemplate(t *testing.T) {
 	var err error
 	var p Provisioner
@@ -139,28 +155,6 @@ func TestProvisionerPrepare_dataBagsPath(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_rolesPath(t *testing.T) {
-	var p Provisioner
-
-	rolesPath, err := ioutil.TempDir("", "roles")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.Remove(rolesPath)
-
-	config := testConfig()
-	config["roles_path"] = rolesPath
-
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if p.config.RolesPath != rolesPath {
-		t.Fatalf("unexpected: %#v", p.config.RolesPath)
-	}
-}
-
 func TestProvisionerPrepare_environmentsPath(t *testing.T) {
 	var p Provisioner
 
@@ -183,19 +177,25 @@ func TestProvisionerPrepare_environmentsPath(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
+func TestProvisionerPrepare_rolesPath(t *testing.T) {
 	var p Provisioner
 
-	config := testConfig()
-	config["chef_environment"] = "some-env"
+	rolesPath, err := ioutil.TempDir("", "roles")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(rolesPath)
 
-	err := p.Prepare(config)
+	config := testConfig()
+	config["roles_path"] = rolesPath
+
+	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.ChefEnvironment != "some-env" {
-		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
+	if p.config.RolesPath != rolesPath {
+		t.Fatalf("unexpected: %#v", p.config.RolesPath)
 	}
 }
 
