@@ -53,7 +53,6 @@ type ConfigTemplate struct {
 	HasDataBagsPath     bool
 	HasRolesPath        bool
 	HasEnvironmentsPath bool
-	HasChefEnvironment  bool
 }
 
 type ExecuteTemplate struct {
