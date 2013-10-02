@@ -18,12 +18,12 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	ChefEnvironment     string   `mapstructure:"chef_environment"`
 	ConfigTemplate      string   `mapstructure:"config_template"`
 	CookbookPaths       []string `mapstructure:"cookbook_paths"`
 	RolesPath           string   `mapstructure:"roles_path"`
 	DataBagsPath        string   `mapstructure:"data_bags_path"`
 	EnvironmentsPath    string   `mapstructure:"environments_path"`
-	ChefEnvironment     string   `mapstructure:"chef_environment"`
 	ExecuteCommand      string   `mapstructure:"execute_command"`
 	InstallCommand      string   `mapstructure:"install_command"`
 	RemoteCookbookPaths []string `mapstructure:"remote_cookbook_paths"`
