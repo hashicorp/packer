@@ -191,9 +191,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			KeyPairName:  b.config.TemporaryKeyPairName,
 		},
 		&awscommon.StepSecurityGroup{
-			SecurityGroupId: b.config.SecurityGroupId,
-			SSHPort:         b.config.SSHPort,
-			VpcId:           b.config.VpcId,
+			SecurityGroupIds: b.config.SecurityGroupIds,
+			SSHPort:          b.config.SSHPort,
+			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
 			Debug:              b.config.PackerDebug,

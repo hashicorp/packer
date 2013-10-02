@@ -26,7 +26,7 @@ type StepRunSourceInstance struct {
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	keyName := state.Get("keyPair").(string)
-	securityGroupId := state.Get("securityGroupId").(string)
+	securityGroupIds := state.Get("securityGroupIds").([]string)
 	ui := state.Get("ui").(packer.Ui)
 
 	userData := s.UserData
@@ -40,6 +40,11 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		userData = string(contents)
 	}
 
+	securityGroups := make([]ec2.SecurityGroup, len(securityGroupIds))
+	for n, securityGroupId := range securityGroupIds {
+		securityGroups[n] = ec2.SecurityGroup{Id: securityGroupId}
+	}
+
 	runOpts := &ec2.RunInstances{
 		KeyName:            keyName,
 		ImageId:            s.SourceAMI,
@@ -47,7 +52,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		UserData:           []byte(userData),
 		MinCount:           0,
 		MaxCount:           0,
-		SecurityGroups:     []ec2.SecurityGroup{ec2.SecurityGroup{Id: securityGroupId}},
+		SecurityGroups:     securityGroups,
 		IamInstanceProfile: s.IamInstanceProfile,
 		SubnetId:           s.SubnetId,
 		BlockDevices:       s.BlockDevices.BuildLaunchDevices(),
