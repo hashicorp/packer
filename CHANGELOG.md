@@ -4,6 +4,7 @@ FEATURES:
 
 * The Amazon chroot builder is now able to run without any `sudo` privileges
   by using the "command_wrapper" configuration. [GH-430]
+* Chef provisioner supports environments. [GH-483]
 
 BUG FIXES:
 
