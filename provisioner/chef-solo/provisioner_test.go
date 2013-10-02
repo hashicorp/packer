@@ -161,6 +161,44 @@ func TestProvisionerPrepare_rolesPath(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_environmentsPath(t *testing.T) {
+	var p Provisioner
+
+	environmentsPath, err := ioutil.TempDir("", "environments")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(environmentsPath)
+
+	config := testConfig()
+	config["environments_path"] = environmentsPath
+
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.EnvironmentsPath != environmentsPath {
+		t.Fatalf("unexpected: %#v", p.config.EnvironmentsPath)
+	}
+}
+
+func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
+	var p Provisioner
+
+	config := testConfig()
+	config["chef_environment"] = "some-env"
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.ChefEnvironment != "some-env" {
+		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
+	}
+}
+
 func TestProvisionerPrepare_json(t *testing.T) {
 	config := testConfig()
 	config["json"] = map[string]interface{}{
