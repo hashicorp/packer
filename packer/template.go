@@ -33,7 +33,6 @@ type Template struct {
 	Hooks          map[string][]string
 	PostProcessors [][]RawPostProcessorConfig
 	Provisioners   []RawProvisionerConfig
-	Description map[string]string
 }
 
 // The RawBuilderConfig struct represents a raw, unprocessed builder
@@ -124,7 +123,6 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t.Hooks = rawTpl.Hooks
 	t.PostProcessors = make([][]RawPostProcessorConfig, len(rawTpl.PostProcessors))
 	t.Provisioners = make([]RawProvisionerConfig, len(rawTpl.Provisioners))
-	t.Description = make(map[string]string)
 	// Gather all the variables
 	for k, v := range rawTpl.Variables {
 		var variable RawVariable
