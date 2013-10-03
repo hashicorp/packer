@@ -73,6 +73,10 @@ Required:
 
 Optional:
 
+* `ami_copy_timeout` (string) - The time to wait for the AMI to copy to other
+  regions. The format of this value is a duration such as "5s" or "5m". The
+  default timeout is "30m", or 30 minutes.
+
 * `ami_block_device_mappings` (array of block device mappings) - Add the block
   device mappings to the AMI. The block device mappings allow for keys:
   "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
