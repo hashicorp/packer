@@ -80,6 +80,10 @@ Optional:
   (bool), "no\_device" (bool), and "iops" (int).
   See [amazon-ebs](/docs/builders/amazon-ebs.html) for an example template.
 
+* `ami_copy_timeout` (string) - The time to wait for the AMI to copy to other
+  regions. The format of this value is a duration such as "5s" or "5m". The
+  default timeout is "30m", or 30 minutes.
+
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 

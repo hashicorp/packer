@@ -4,17 +4,22 @@ import (
 	"fmt"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/packer/packer"
+	"time"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	AMIName         string            `mapstructure:"ami_name"`
-	AMIDescription  string            `mapstructure:"ami_description"`
-	AMIUsers        []string          `mapstructure:"ami_users"`
-	AMIGroups       []string          `mapstructure:"ami_groups"`
-	AMIProductCodes []string          `mapstructure:"ami_product_codes"`
-	AMIRegions      []string          `mapstructure:"ami_regions"`
-	AMITags         map[string]string `mapstructure:"tags"`
+	AMIName           string            `mapstructure:"ami_name"`
+	AMIDescription    string            `mapstructure:"ami_description"`
+	AMIUsers          []string          `mapstructure:"ami_users"`
+	AMIGroups         []string          `mapstructure:"ami_groups"`
+	AMIProductCodes   []string          `mapstructure:"ami_product_codes"`
+	AMIRegions        []string          `mapstructure:"ami_regions"`
+	RawAMICopyTimeout string            `mapstructure:"ami_copy_timeout"`
+	AMITags           map[string]string `mapstructure:"tags"`
+
+	// Unexported fields that are calculated from others
+	amiCopyTimeout time.Duration
 }
 
 func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
@@ -26,9 +31,15 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
+	// Defaults
+	if c.RawAMICopyTimeout == "" {
+		c.RawAMICopyTimeout = "30m"
+	}
+
 	templates := map[string]*string{
-		"ami_name":        &c.AMIName,
-		"ami_description": &c.AMIDescription,
+		"ami_name":         &c.AMIName,
+		"ami_description":  &c.AMIDescription,
+		"ami_copy_timeout": &c.RawAMICopyTimeout,
 	}
 
 	errs := make([]error, 0)
@@ -88,6 +99,12 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 		c.AMIRegions = regions
 	}
 
+	var err error
+	c.amiCopyTimeout, err = time.ParseDuration(c.RawAMICopyTimeout)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Failed parsing ami_copy_timeout: %s", err))
+	}
+
 	newTags := make(map[string]string)
 	for k, v := range c.AMITags {
 		k, err := t.Process(k, nil)
@@ -114,4 +131,8 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	return nil
+}
+
+func (c *AMIConfig) AMICopyTimeout() time.Duration {
+	return c.amiCopyTimeout
 }
