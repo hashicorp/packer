@@ -4,6 +4,7 @@ BUG FIXES:
 
 * builder/all: timeout waiting for SSH connection is a failure. [GH-491]
 * builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
+* builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
 
 ## 0.3.9 (October 2, 2013)
 
