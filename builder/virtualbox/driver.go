@@ -136,6 +136,13 @@ func (d *VBox42Driver) Version() (string, error) {
 	versionOutput := strings.TrimSpace(stdout.String())
 	log.Printf("VBoxManage --version output: %s", versionOutput)
 
+	// If the "--version" output contains vboxdrv, then this is indicative
+	// of problems with the VirtualBox setup and we shouldn't really continue,
+	// whether or not we can read the version.
+	if strings.Contains(versionOutput, "vboxdrv") {
+		return "", fmt.Errorf("VirtualBox is not properly setup: %s", versionOutput)
+	}
+
 	versionRe := regexp.MustCompile("[^.0-9]")
 	matches := versionRe.Split(versionOutput, 2)
 	if len(matches) == 0 || matches[0] == "" {
