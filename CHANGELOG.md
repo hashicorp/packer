@@ -1,6 +1,8 @@
 ## 0.3.10 (unreleased)
 
+BUG FIXES:
 
+* builder/all: timeout waiting for SSH connection is a failure. [GH-491]
 
 ## 0.3.9 (October 2, 2013)
 
