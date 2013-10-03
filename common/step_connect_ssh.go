@@ -72,7 +72,9 @@ WaitLoop:
 			state.Put("communicator", comm)
 			break WaitLoop
 		case <-timeout:
-			ui.Error("Timeout waiting for SSH.")
+			err := fmt.Errorf("Timeout waiting for SSH.")
+			state.Put("error", err)
+			ui.Error(err.Error())
 			close(cancel)
 			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
