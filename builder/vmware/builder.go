@@ -140,7 +140,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 	
 	if b.config.Description == "" {
-		b.config.Description = "<No description available>"
+		b.config.Description = "<No Description>"
 	}
 
 	// Errors
