@@ -141,7 +141,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.Description == "" {
-		b.config.Description = fmt.Sprintf("<No Description>")
+		b.config.Description = "<No Description>"
 	}
 
 	if b.config.Format == "" {

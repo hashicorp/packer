@@ -20,7 +20,6 @@ type config struct {
 	AccessConfig        `mapstructure:",squash"`
 	ImageConfig         `mapstructure:",squash"`
 	RunConfig           `mapstructure:",squash"`
-	Description	 string `mapstructure:"Description"`
 
 	tpl *packer.ConfigTemplate
 }

@@ -65,6 +65,9 @@ func TestBuilderPrepare_Description(t *testing.T) {
 	// Test with a description field
 	config["description"] = "VM description"
 	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 	if b.config.Description != "VM description" {
 		t.Fatalf("Wrong value: %s", b.config.Description)
 	}

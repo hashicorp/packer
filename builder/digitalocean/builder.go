@@ -28,7 +28,6 @@ type config struct {
 	RegionID uint   `mapstructure:"region_id"`
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
-	Description string `mapstructure:"Description"`
 
 	SnapshotName string `mapstructure:"snapshot_name"`
 	SSHUsername  string `mapstructure:"ssh_username"`
