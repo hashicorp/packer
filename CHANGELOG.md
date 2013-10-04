@@ -3,6 +3,8 @@
 BUG FIXES:
 
 * builder/all: timeout waiting for SSH connection is a failure. [GH-491]
+* builder/digitalocean: don't panic if erroneous API response doesn't
+  contain error message. [GH-492]
 * builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
 * builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
 

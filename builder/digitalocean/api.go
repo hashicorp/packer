@@ -227,7 +227,13 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 		}
 
 		if status == "ERROR" {
-			status = decodedResponse["message"].(string)
+			statusRaw, ok := decodedResponse["message"]
+			if ok {
+				status = statusRaw.(string)
+			} else {
+				status = fmt.Sprintf(
+					"Unknown error. Full response body: %s", body)
+			}
 		}
 
 		lastErr = errors.New(fmt.Sprintf("Received error from DigitalOcean (%d): %s",
