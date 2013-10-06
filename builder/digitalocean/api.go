@@ -236,7 +236,10 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 		}
 
 		if status == "ERROR" {
-			statusRaw, ok := decodedResponse["error_message"]
+			statusRaw, ok := decodedResponse["message"]
+			if ! ok {
+				statusRaw, ok = decodedResponse["error_message"]
+			}
 			if ok {
 				status = statusRaw.(string)
 			} else {
