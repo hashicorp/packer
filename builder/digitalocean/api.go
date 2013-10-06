@@ -29,6 +29,15 @@ type ImagesResp struct {
 	Images []Image
 }
 
+type Region struct {
+	Id   uint
+	Name string
+}
+
+type RegionsResp struct {
+	Regions []Region
+}
+
 type DigitalOceanClient struct {
 	// The http client for communicating
 	client *http.Client
@@ -227,7 +236,7 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 		}
 
 		if status == "ERROR" {
-			statusRaw, ok := decodedResponse["message"]
+			statusRaw, ok := decodedResponse["error_message"]
 			if ok {
 				status = statusRaw.(string)
 			} else {
@@ -251,4 +260,36 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 	}
 
 	return nil, lastErr
+}
+
+// Returns all available regions.
+func (d DigitalOceanClient) Regions() ([]Region, error) {
+	resp, err := NewRequest(d, "regions", url.Values{})
+	if err != nil {
+		return nil, err
+	}
+
+	var result RegionsResp
+	if err := mapstructure.Decode(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return result.Regions, nil
+}
+
+func (d DigitalOceanClient) RegionName(region_id uint) (string, error) {
+	regions, err := d.Regions()
+	if err != nil {
+		return "", err
+	}
+
+	for _, region := range regions {
+		if region.Id == region_id {
+			return region.Name, nil
+		}
+	}
+
+	err = errors.New(fmt.Sprintf("Unknown region id %v", region_id))
+
+	return "", err
 }

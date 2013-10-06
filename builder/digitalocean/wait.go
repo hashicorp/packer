@@ -44,7 +44,7 @@ func waitForDropletState(desiredState string, dropletId uint, client *DigitalOce
 		}
 	}()
 
-	log.Printf("Waiting for up to %d seconds for droplet to become %s", timeout, desiredState)
+	log.Printf("Waiting for up to %d seconds for droplet to become %s", timeout/time.Second, desiredState)
 	select {
 	case err := <-result:
 		return err
