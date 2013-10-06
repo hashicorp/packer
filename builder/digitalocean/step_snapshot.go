@@ -62,6 +62,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	state.Put("snapshot_image_id", imageId)
 	state.Put("snapshot_name", c.SnapshotName)
+	state.Put("region_id", c.RegionID)
 
 	return multistep.ActionContinue
 }
