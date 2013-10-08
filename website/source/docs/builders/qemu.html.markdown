@@ -223,7 +223,38 @@ Optional:
   values "ne2k_pci," "i82551," "i82557b," "i82559er," "rtl8139," "e1000,"
   "pcnet" or "virtio." The Qemu builder uses "virtio" by default.
 
-* `qemuargs` (array of strings reserved for future use).
+* `qemuargs` (array of array of strings) - Allows complete control over
+  the qemu command line (though not, at this time, qemu-img). Each array
+  of strings makes up a command line switch that overrides matching default
+  switch/value pairs. Any value specified as an empty string is ignored.
+  All values after the switch are concatenated with no separater. For instance:
+
+<pre class="prettyprint">
+  . . .
+  "qemuargs": [
+    [ "-m", "1024m" ],
+    [ "--no-acpi", "" ],
+    [
+       "-netdev",
+      "user,id=mynet0,",
+      "hostfwd=hostip:hostport-guestip:guestport",
+      ""
+    ],
+    [ "-device", "virtio-net,netdev=mynet0" ]
+  ]
+  . . .
+</pre>
+
+  would produce the following (not including other defaults supplied by the builder and not otherwise conflicting with the qemuargs):
+
+<pre class="prettyprint">
+    qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+</pre>
+
+  Note that the qemu command line allows extreme flexibility, so beware of
+  conflicting arguments causing failures of your run. To see the defaults,
+  look in the packer.log file and search for the qemu-system-x86 command. The
+  arguments are all printed for review.
 
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
