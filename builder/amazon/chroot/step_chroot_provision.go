@@ -15,10 +15,12 @@ func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction
 	hook := state.Get("hook").(packer.Hook)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
+	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	// Create our communicator
 	comm := &Communicator{
-		Chroot: mountPath,
+		Chroot:     mountPath,
+		CmdWrapper: wrappedCommand,
 	}
 
 	// Provision

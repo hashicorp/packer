@@ -57,7 +57,7 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 		return nil, false, nil
 	}
 
-	client, err := rpc.Dial("tcp", response.RPCAddress)
+	client, err := rpcDial(response.RPCAddress)
 	if err != nil {
 		return nil, false, err
 	}
@@ -75,7 +75,7 @@ func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply 
 }
 
 func (p *PostProcessorServer) PostProcess(address string, reply *PostProcessorProcessResponse) error {
-	client, err := rpc.Dial("tcp", address)
+	client, err := rpcDial(address)
 	if err != nil {
 		return err
 	}

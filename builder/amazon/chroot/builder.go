@@ -27,14 +27,17 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
+	CommandWrapper string     `mapstructure:"command_wrapper"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
 	DevicePath     string     `mapstructure:"device_path"`
-	MountCommand   string     `mapstructure:"mount_command"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
-	UnmountCommand string     `mapstructure:"unmount_command"`
 
 	tpl *packer.ConfigTemplate
+}
+
+type wrappedCommandTemplate struct {
+	Command string
 }
 
 type Builder struct {
@@ -53,6 +56,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
+	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	// Defaults
 	if b.config.ChrootMounts == nil {
@@ -77,16 +81,12 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}
 	}
 
-	if b.config.MountCommand == "" {
-		b.config.MountCommand = "mount"
+	if b.config.CommandWrapper == "" {
+		b.config.CommandWrapper = "{{.Command}}"
 	}
 
 	if b.config.MountPath == "" {
 		b.config.MountPath = "packer-amazon-chroot-volumes/{{.Device}}"
-	}
-
-	if b.config.UnmountCommand == "" {
-		b.config.UnmountCommand = "umount"
 	}
 
 	// Accumulate any errors
@@ -126,10 +126,8 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	templates := map[string]*string{
-		"device_path":     &b.config.DevicePath,
-		"mount_command":   &b.config.MountCommand,
-		"source_ami":      &b.config.SourceAmi,
-		"unmount_command": &b.config.UnmountCommand,
+		"device_path": &b.config.DevicePath,
+		"source_ami":  &b.config.SourceAmi,
 	}
 
 	for n, ptr := range templates {
@@ -166,12 +164,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	ec2conn := ec2.New(auth, region)
 
+	wrappedCommand := func(command string) (string, error) {
+		return b.config.tpl.Process(
+			b.config.CommandWrapper, &wrappedCommandTemplate{
+				Command: command,
+			})
+	}
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("ec2", ec2conn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -189,14 +195,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepEarlyCleanup{},
 		&StepSnapshot{},
 		&StepRegisterAMI{},
+		&awscommon.StepAMIRegionCopy{
+			Regions: b.config.AMIRegions,
+		},
 		&awscommon.StepModifyAMIAttributes{
 			Description: b.config.AMIDescription,
 			Users:       b.config.AMIUsers,
 			Groups:      b.config.AMIGroups,
-		},
-		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
-			Tags:    b.config.AMITags,
 		},
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,

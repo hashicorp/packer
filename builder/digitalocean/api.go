@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const DIGITALOCEAN_API_URL = "https://api.digitalocean.com"
@@ -191,46 +192,63 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 
 	url := fmt.Sprintf("%s/%s?%s", DIGITALOCEAN_API_URL, path, params.Encode())
 
-	var decodedResponse map[string]interface{}
-
 	// Do some basic scrubbing so sensitive information doesn't appear in logs
 	scrubbedUrl := strings.Replace(url, d.ClientID, "CLIENT_ID", -1)
 	scrubbedUrl = strings.Replace(scrubbedUrl, d.APIKey, "API_KEY", -1)
 	log.Printf("sending new request to digitalocean: %s", scrubbedUrl)
 
-	resp, err := client.Get(url)
-	if err != nil {
-		return decodedResponse, err
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-
-	resp.Body.Close()
-	if err != nil {
-		return decodedResponse, err
-	}
-
-	log.Printf("response from digitalocean: %s", body)
-
-	err = json.Unmarshal(body, &decodedResponse)
-
-	// Check for bad JSON
-	if err != nil {
-		err = errors.New(fmt.Sprintf("Failed to decode JSON response (HTTP %v) from DigitalOcean: %s",
-			resp.StatusCode, body))
-		return decodedResponse, err
-	}
-
-	// Check for errors sent by digitalocean
-	status := decodedResponse["status"]
-	if status != "OK" {
-		// Get the actual error message if there is one
-		if status == "ERROR" {
-			status = decodedResponse["error_message"]
+	var lastErr error
+	for attempts := 1; attempts < 10; attempts++ {
+		resp, err := client.Get(url)
+		if err != nil {
+			return nil, err
 		}
-		err = errors.New(fmt.Sprintf("Received bad response (HTTP %v) from DigitalOcean: %s", resp.StatusCode, status))
-		return decodedResponse, err
+
+		body, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		log.Printf("response from digitalocean: %s", body)
+
+		var decodedResponse map[string]interface{}
+		err = json.Unmarshal(body, &decodedResponse)
+		if err != nil {
+			err = errors.New(fmt.Sprintf("Failed to decode JSON response (HTTP %v) from DigitalOcean: %s",
+				resp.StatusCode, body))
+			return decodedResponse, err
+		}
+
+		// Check for errors sent by digitalocean
+		status := decodedResponse["status"].(string)
+		if status == "OK" {
+			return decodedResponse, nil
+		}
+
+		if status == "ERROR" {
+			statusRaw, ok := decodedResponse["message"]
+			if ok {
+				status = statusRaw.(string)
+			} else {
+				status = fmt.Sprintf(
+					"Unknown error. Full response body: %s", body)
+			}
+		}
+
+		lastErr = errors.New(fmt.Sprintf("Received error from DigitalOcean (%d): %s",
+			resp.StatusCode, status))
+		log.Println(lastErr)
+		if strings.Contains(status, "a pending event") {
+			// Retry, DigitalOcean sends these dumb "pending event"
+			// errors all the time.
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		// Some other kind of error. Just return.
+		return decodedResponse, lastErr
 	}
 
-	return decodedResponse, nil
+	return nil, lastErr
 }

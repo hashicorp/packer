@@ -51,7 +51,8 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 				return nil, "", errors.New("No snapshots found.")
 			}
 
-			return nil, resp.Snapshots[0].Status, nil
+			s := resp.Snapshots[0]
+			return s, s.Status, nil
 		},
 	}
 

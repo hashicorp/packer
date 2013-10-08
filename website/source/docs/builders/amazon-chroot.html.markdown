@@ -111,9 +111,11 @@ Optional:
   of the source AMI will be attached. This defaults to "" (empty string),
   which forces Packer to find an open device automatically.
 
-* `mount_command` (string) - The command to use to mount devices. This
-  defaults to "mount". This may be useful to set if you want to set
-  environmental variables or perhaps run it with `sudo` or so on.
+* `command_wrapper` (string) - How to run shell commands. This
+  defaults to "{{.Command}}". This may be useful to set if you want to set
+  environmental variables or perhaps run it with `sudo` or so on. This is a
+  configuration template where the `.Command` variable is replaced with the
+  command to be run..
 
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
@@ -122,9 +124,6 @@ Optional:
   device where the volume is attached.
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
-
-* `unmount_command` (string) - Just like `mount_command`, except this is
-  the command to unmount devices.
 
 ## Basic Example
 
@@ -184,3 +183,37 @@ out of your AMI builds.
 
 Packer properly obtains a process lock for the parallelism-sensitive parts
 of its internals such as finding an available device.
+
+## Using an IAM Instance Profile
+
+If AWS keys are not specified in the template or through environment variables
+Packer will use credentials provided by the instance's IAM profile, if it has one.
+
+The following policy document provides the minimal set permissions necessary for Packer to work:
+
+<pre class="prettyprint">
+{
+  "Statement": [{
+      "Effect": "Allow",
+      "Action" : [
+        "ec2:AttachVolume",
+        "ec2:CreateVolume",
+        "ec2:DeleteVolume",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume",
+
+        "ec2:DescribeInstances",
+
+        "ec2:CreateSnapshot",
+        "ec2:DeleteSnapshot",
+        "ec2:DescribeSnapshots",
+
+        "ec2:DescribeImages",
+        "ec2:RegisterImage",
+
+        "ec2:CreateTags"
+      ],
+      "Resource" : "*"
+  }]
+}
+</pre>

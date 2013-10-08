@@ -126,3 +126,15 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
+	c := testConfig()
+	c.TemporaryKeyPairName = ""
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.TemporaryKeyPairName == "" {
+		t.Fatal("keypair empty")
+	}
+}

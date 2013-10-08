@@ -54,7 +54,7 @@ validation will fail.
 
 Using the variables is extremely easy. Variables are used by calling
 the user function in the form of <code>{{user &#96;variable&#96;}}</code>.
-This function can be used in _any string_ within the template, in
+This function can be used in _any value_ within the template, in
 builders, provisioners, _anything_. The user variable is available globally
 within the template.
 

@@ -5,7 +5,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"time"
 )
 
 type stepPowerOff struct{}
@@ -16,15 +15,22 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(uint)
 
-	// Sleep arbitrarily before sending power off request
-	// Otherwise we get "pending event" errors, even though there isn't
-	// one.
-	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
-	time.Sleep(c.eventDelay)
+	_, status, err := client.DropletStatus(dropletId)
+	if err != nil {
+		err := fmt.Errorf("Error checking droplet state: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-	// Poweroff the droplet so it can be snapshot
-	err := client.PowerOffDroplet(dropletId)
+	if status == "off" {
+		// Droplet is already off, don't do anything
+		return multistep.ActionContinue
+	}
 
+	// Pull the plug on the Droplet
+	ui.Say("Forcefully shutting down Droplet...")
+	err = client.PowerOffDroplet(dropletId)
 	if err != nil {
 		err := fmt.Errorf("Error powering off droplet: %s", err)
 		state.Put("error", err)
@@ -33,13 +39,12 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Println("Waiting for poweroff event to complete...")
-
-	// This arbitrary sleep is because we can't wait for the state
-	// of the droplet to be 'off', as stepShutdown should already
-	// have accomplished that, and the state indicator is the same.
-	// We just have to assume that this event will process quickly.
-	log.Printf("Sleeping for %v, event_delay", c.RawEventDelay)
-	time.Sleep(c.eventDelay)
+	err = waitForDropletState("off", dropletId, client, c.stateTimeout)
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }

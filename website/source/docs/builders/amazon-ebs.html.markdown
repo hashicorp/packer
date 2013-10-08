@@ -62,7 +62,7 @@ Optional:
   device mappings to the AMI. The block device mappings allow for keys:
   "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
   "volume\_type" (string), "volume\_size" (int), "delete\_on\_termination"
-  (bool), and "iops" (int).
+  (bool), "no\_device" (bool), and "iops" (int).
 
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.

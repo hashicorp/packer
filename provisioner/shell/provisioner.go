@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,6 +20,10 @@ const DefaultRemotePath = "/tmp/script.sh"
 
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
+
+	// If true, the script contains binary and line endings will not be
+	// converted from Windows to Unix-style.
+	Binary bool
 
 	// An inline script to execute. Multiple strings are all executed
 	// in the context of a single shell.
@@ -259,7 +264,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				return err
 			}
 
-			if err := comm.Upload(p.config.RemotePath, f); err != nil {
+			var r io.Reader = f
+			if !p.config.Binary {
+				r = &UnixReader{Reader: r}
+			}
+
+			if err := comm.Upload(p.config.RemotePath, r); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 

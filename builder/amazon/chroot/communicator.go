@@ -1,8 +1,10 @@
 package chroot
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -13,16 +15,18 @@ import (
 // Communicator is a special communicator that works by executing
 // commands locally but within a chroot.
 type Communicator struct {
-	Chroot string
+	Chroot     string
+	CmdWrapper CommandWrapper
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	chrootCmdPath, err := exec.LookPath("chroot")
+	command, err := c.CmdWrapper(
+		fmt.Sprintf("chroot %s %s", c.Chroot, cmd.Command))
 	if err != nil {
 		return err
 	}
 
-	localCmd := exec.Command(chrootCmdPath, c.Chroot, "/bin/sh", "-c", cmd.Command)
+	localCmd := ShellCommand(command)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
@@ -46,7 +50,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 		}
 
 		log.Printf(
-			"Chroot executation ended with '%d': '%s'",
+			"Chroot execution exited with '%d': '%s'",
 			exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 	}()
@@ -57,49 +61,31 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, r io.Reader) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
-	f, err := os.Create(dst)
+	tf, err := ioutil.TempFile("", "packer-amazon-chroot")
+	if err != nil {
+		return fmt.Errorf("Error preparing shell script: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	io.Copy(tf, r)
+
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp %s %s", tf.Name(), dst))
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	if _, err := io.Copy(f, r); err != nil {
-		return err
-	}
-
-	return nil
+	return ShellCommand(cpCmd).Run()
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	walkFn := func(fullPath string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		path, err := filepath.Rel(src, fullPath)
-		if err != nil {
-			return err
-		}
-
-		for _, e := range exclude {
-			if e == path {
-				log.Printf("Skipping excluded file: %s", path)
-				return nil
-			}
-		}
-
-		dstPath := filepath.Join(dst, path)
-		f, err := os.Open(fullPath)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		return c.Upload(dstPath, f)
+	// TODO: remove any file copied if it appears in `exclude`
+	chrootDest := filepath.Join(c.Chroot, dst)
+	log.Printf("Uploading directory '%s' to '%s'", src, chrootDest)
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp -R %s* %s", src, chrootDest))
+	if err != nil {
+		return err
 	}
 
-	log.Printf("Uploading directory '%s' to '%s'", src, dst)
-	return filepath.Walk(src, walkFn)
+	return ShellCommand(cpCmd).Run()
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {

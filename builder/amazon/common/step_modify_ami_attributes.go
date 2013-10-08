@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -18,7 +19,6 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
-	ami := amis[ec2conn.Region.Name]
 
 	// Determine if there is any work to do.
 	valid := false
@@ -59,15 +59,18 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		}
 	}
 
-	ui.Say("Modifying AMI attributes...")
-	for name, opts := range options {
-		ui.Message(fmt.Sprintf("Modifying: %s", name))
-		_, err := ec2conn.ModifyImageAttribute(ami, opts)
-		if err != nil {
-			err := fmt.Errorf("Error modify AMI attributes: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
+	for region, ami := range amis {
+		ui.Say(fmt.Sprintf("Modifying attributes on AMI (%s)...", ami))
+		regionconn := ec2.New(ec2conn.Auth, aws.Regions[region])
+		for name, opts := range options {
+			ui.Message(fmt.Sprintf("Modifying: %s", name))
+			_, err := regionconn.ModifyImageAttribute(ami, opts)
+			if err != nil {
+				err := fmt.Errorf("Error modify AMI attributes: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 
