@@ -1,11 +1,113 @@
-## 0.3.7 (unreleased)
-
-IMPROVEMENTS:
-
-* builder/openstack: Can now specify a project. [GH-382]
+## 0.3.10 (unreleased)
 
 BUG FIXES:
 
+* builder/all: timeout waiting for SSH connection is a failure. [GH-491]
+* builder/digitalocean: don't panic if erroneous API response doesn't
+  contain error message. [GH-492]
+* builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
+* builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
+
+## 0.3.9 (October 2, 2013)
+
+FEATURES:
+
+* The Amazon chroot builder is now able to run without any `sudo` privileges
+  by using the "command_wrapper" configuration. [GH-430]
+* Chef provisioner supports environments. [GH-483]
+
+BUG FIXES:
+
+* core: default user variable values don't need to be strings. [GH-456]
+* builder/amazon-chroot: Fix errors with waitin for state change. [GH-459]
+* builder/digitalocean: Use proper error message JSON key (DO API change).
+* communicator/ssh: SCP uploads now work properly when directories
+  contain symlinks. [GH-449]
+* provisioner/chef-solo: Data bags and roles path are now properly
+  populated when set. [GH-470]
+* provisioner/shell: Windows line endings are actually properly changed
+  to Unix line endings. [GH-477]
+
+## 0.3.8 (September 22, 2013)
+
+FEATURES:
+
+* core: You can now specify `only` and `except` configurations on any
+  provisioner or post-processor to specify a list of builds that they
+  are valid for. [GH-438]
+* builders/virtualbox: Guest additions can be attached rather than uploaded,
+  easier to handle for Windows guests. [GH-405]
+* provisioner/chef-solo: Ability to specify a custom Chef configuration
+  template.
+* provisioner/chef-solo: Roles and data bags support. [GH-348]
+
+IMPROVEMENTS:
+
+* core: User variables can now be used for integer, boolean, etc.
+  values. [GH-418]
+* core: Plugins made with incompatible versions will no longer load.
+* builder/amazon/all: Interrupts work while waiting for AMI to be ready.
+* provisioner/shell: Script line-endings are automatically converted to
+  Unix-style line-endings. Can be disabled by setting "binary" to "true".
+  [GH-277]
+
+BUG FIXES:
+
+* core: Set TCP KeepAlives on internally created RPC connections so that
+  they don't die. [GH-416]
+* builder/amazon/all: While waiting for AMI, will detect "failed" state.
+* builder/amazon/all: Waiting for state will detect if the resource (AMI,
+  instance, etc.) disappears from under it.
+* builder/amazon/instance: Exclude only contents of /tmp, not /tmp
+  itself. [GH-437]
+* builder/amazon/instance: Make AccessKey/SecretKey available to bundle
+  command even when they come from the environment. [GH-434]
+* builder/virtualbox: F1-F12 and delete scancodes now work. [GH-425]
+* post-processor/vagrant: Override configurations properly work. [GH-426]
+* provisioner/puppet-masterless: Fix failure case when both facter vars
+  are used and prevent_sudo. [GH-415]
+* provisioner/puppet-masterless: User variables now work properly in
+  manifest file and hiera path. [GH-448]
+
+## 0.3.7 (September 9, 2013)
+
+BACKWARDS INCOMPATIBILITIES:
+
+* The "event_delay" option for the DigitalOcean builder is now gone.
+  The builder automatically waits for events to go away. Run your templates
+  through `packer fix` to get rid of these.
+
+FEATURES:
+
+* **NEW PROVISIONER:** `puppet-masterless`. You can now provision with
+  a masterless Puppet setup. [GH-234]
+* New globally available template function: `uuid`. Generates a new random
+  UUID.
+* New globally available template function: `isotime`. Generates the
+  current time in ISO standard format.
+* New Amazon template function: `clean_ami_name`. Substitutes '-' for
+  characters that are illegal to use in an AMI name.
+
+IMPROVEMENTS:
+
+* builder/amazon/all: Ability to specify the format of the temporary
+  keypair created. [GH-389]
+* builder/amazon/all: Support the NoDevice flag for block mappings. [GH-396]
+* builder/digitalocean: Retry on any pending event errors.
+* builder/openstack: Can now specify a project. [GH-382]
+* builder/virtualbox: Can now attach hard drive over SATA. [GH-391]
+* provisioner/file: Can now upload directories. [GH-251]
+
+BUG FIXES:
+
+* core: Detect if SCP is not enabled on the other side. [GH-386]
+* builder/amazon/all: When copying AMI to multiple regions, copy
+  the metadata (tags and attributes) as well. [GH-388]
+* builder/amazon/all: Fix panic case where eventually consistent
+  instance state caused an index out of bounds.
+* builder/virtualbox: The `vm_name` setting now properly sets the OVF
+  name of the output. [GH-401]
+* builder/vmware: Autoanswer VMware dialogs. [GH-393]
 * command/inspect: Fix weird output for default values for optional vars.
 
 ## 0.3.6 (September 2, 2013)

@@ -18,7 +18,14 @@ type AccessConfig struct {
 // Auth returns a valid aws.Auth object for access to AWS services, or
 // an error if the authentication couldn't be resolved.
 func (c *AccessConfig) Auth() (aws.Auth, error) {
-	return aws.GetAuth(c.AccessKey, c.SecretKey)
+	auth, err := aws.GetAuth(c.AccessKey, c.SecretKey)
+	if err == nil {
+		// Store the accesskey and secret that we got...
+		c.AccessKey = auth.AccessKey
+		c.SecretKey = auth.SecretKey
+	}
+
+	return auth, err
 }
 
 // Region returns the aws.Region object for access to AWS services, requesting

@@ -161,9 +161,9 @@ on certain cache keys, and is given exclusive access to that key for the
 duration of the lock. This locking mechanism allows multiple builders to
 share cache data even though they're running in parallel.
 
-For example, both the VMware and VirtualBox support downloading an operating
-system ISO from the internet. Most of the time, this ISO is identical. The
-locking mechanisms of the cache allow one of the builders to download it
+For example, both the VMware and VirtualBox builders support downloading an
+operating system ISO from the internet. Most of the time, this ISO is identical.
+The locking mechanisms of the cache allow one of the builders to download it
 only once, but allow both builders to share the downloaded file.
 
 The [documentation for packer.Cache](#) is

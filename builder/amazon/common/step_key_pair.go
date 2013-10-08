@@ -1,13 +1,10 @@
 package common
 
 import (
-	"cgl.tideland.biz/identifier"
-	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 	"os"
 	"runtime"
 )
@@ -15,6 +12,7 @@ import (
 type StepKeyPair struct {
 	Debug        bool
 	DebugKeyPath string
+	KeyPairName  string
 
 	keyName string
 }
@@ -23,20 +21,18 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Creating temporary keypair for this instance...")
-	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
-	log.Printf("temporary keypair name: %s", keyName)
-	keyResp, err := ec2conn.CreateKeyPair(keyName)
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.KeyPairName))
+	keyResp, err := ec2conn.CreateKeyPair(s.KeyPairName)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
 	// Set the keyname so we know to delete it later
-	s.keyName = keyName
+	s.keyName = s.KeyPairName
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", keyName)
+	state.Put("keyPair", s.keyName)
 	state.Put("privateKey", keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working

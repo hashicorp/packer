@@ -85,6 +85,10 @@ Optional:
 * `format` (string) - Either "ovf" or "ova", this specifies the output
   format of the exported virtual machine. This defaults to "ovf".
 
+* `guest_additions_attach` (bool) - If this is true (defaults to "false"),
+  the guest additions ISO will be attached to the virtual machine as a CD
+  rather than uploaded as a raw ISO.
+
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
   is "VBoxGuestAdditions.iso" which should upload into the login directory
@@ -107,6 +111,10 @@ Optional:
   run `VBoxManage list ostypes`. Setting the correct value hints to VirtualBox
   how to optimize the virtual hardware to work best with that operating
   system.
+
+* `hard_drive_interface` (string) - The type of controller that the primary
+  hard drive is attached to, defaults to "ide".  When set to "sata", the
+  drive is attached to an AHCI SATA controller.
 
 * `headless` (bool) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
@@ -187,7 +195,7 @@ Optional:
   By default this is ".vbox_version", which will generally upload it into
   the home directory.
 
-* `vm_name` (string) - This is the name of the VMX file for the new virtual
+* `vm_name` (string) - This is the name of the OVF file for the new virtual
   machine, without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
 

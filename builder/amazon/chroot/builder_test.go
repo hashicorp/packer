@@ -82,3 +82,14 @@ func TestBuilderPrepare_SourceAmi(t *testing.T) {
 		t.Errorf("err: %s", err)
 	}
 }
+
+func TestBuilderPrepare_CommandWrapper(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	config["command_wrapper"] = "echo hi; {{.Command}}"
+	err := b.Prepare(config)
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+}

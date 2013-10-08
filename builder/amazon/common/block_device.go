@@ -13,11 +13,12 @@ type BlockDevice struct {
 	VolumeSize          int64  `mapstructure:"volume_size"`
 	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
 	IOPS                int64  `mapstructure:"iops"`
+	NoDevice            bool   `mapstructure:"no_device"`
 }
 
 type BlockDevices struct {
-	AMIMappings    []BlockDevice `mapstructure:"ami_block_device_mappings,squash"`
-	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings,squash"`
+	AMIMappings    []BlockDevice `mapstructure:"ami_block_device_mappings"`
+	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
 func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
@@ -32,6 +33,7 @@ func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
 			VolumeSize:          blockDevice.VolumeSize,
 			DeleteOnTermination: blockDevice.DeleteOnTermination,
 			IOPS:                blockDevice.IOPS,
+			NoDevice:            blockDevice.NoDevice,
 		})
 	}
 	return blockDevices

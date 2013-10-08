@@ -37,6 +37,21 @@ func TestClient(t *testing.T) {
 	}
 }
 
+func TestClientStart_badVersion(t *testing.T) {
+	config := &ClientConfig{
+		Cmd:          helperProcess("bad-version"),
+		StartTimeout: 50 * time.Millisecond,
+	}
+
+	c := NewClient(config)
+	defer c.Kill()
+
+	_, err := c.Start()
+	if err == nil {
+		t.Fatal("err should not be nil")
+	}
+}
+
 func TestClient_Start_Timeout(t *testing.T) {
 	config := &ClientConfig{
 		Cmd:          helperProcess("start-timeout"),

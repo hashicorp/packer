@@ -10,7 +10,6 @@ import (
 
 type StepAMIRegionCopy struct {
 	Regions []string
-	Tags    map[string]string
 }
 
 func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
@@ -41,31 +40,21 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		ui.Say(fmt.Sprintf("Waiting for AMI (%s) in region (%s) to become ready...", resp.ImageId, region))
-		if err := WaitForAMI(regionconn, resp.ImageId); err != nil {
+		stateChange := StateChangeConf{
+			Conn:      regionconn,
+			Pending:   []string{"pending"},
+			Target:    "available",
+			Refresh:   AMIStateRefreshFunc(regionconn, resp.ImageId),
+			StepState: state,
+		}
+
+		ui.Say(fmt.Sprintf("Waiting for AMI (%s) in region (%s) to become ready...",
+			resp.ImageId, region))
+		if _, err := WaitForState(&stateChange); err != nil {
 			err := fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s", resp.ImageId, region, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
-		}
-
-		// Need to re-apply Tags since they are not copied with the AMI
-		if len(s.Tags) > 0 {
-			ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", resp.ImageId))
-
-			var ec2Tags []ec2.Tag
-			for key, value := range s.Tags {
-				ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"", key, value))
-				ec2Tags = append(ec2Tags, ec2.Tag{key, value})
-			}
-
-			_, err := regionconn.CreateTags([]string{resp.ImageId}, ec2Tags)
-			if err != nil {
-				err := fmt.Errorf("Error adding tags to AMI (%s): %s", resp.ImageId, err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
 		}
 
 		amis[region] = resp.ImageId

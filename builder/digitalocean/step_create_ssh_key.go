@@ -38,8 +38,9 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("privateKey", string(pem.EncodeToMemory(&priv_blk)))
 
 	// Marshal the public key into SSH compatible format
-	pub := priv.PublicKey
-	pub_sshformat := string(ssh.MarshalAuthorizedKey(&pub))
+	// TODO properly handle the public key error
+	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
+	pub_sshformat := string(ssh.MarshalAuthorizedKey(pub))
 
 	// The name of the public key on DO
 	name := fmt.Sprintf("packer-%s", hex.EncodeToString(identifier.NewUUID().Raw()))

@@ -7,6 +7,28 @@ import (
 	"time"
 )
 
+func TestConfigTemplateProcess_isotime(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	result, err := tpl.Process(`{{isotime}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	val, err := time.Parse(time.RFC3339, result)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	currentTime := time.Now().UTC()
+	if currentTime.Sub(val) > 2*time.Second {
+		t.Fatalf("val: %d (current: %d)", val, currentTime)
+	}
+}
+
 func TestConfigTemplateProcess_timestamp(t *testing.T) {
 	tpl, err := NewConfigTemplate()
 	if err != nil {
@@ -44,6 +66,22 @@ func TestConfigTemplateProcess_user(t *testing.T) {
 
 	if result != "bar" {
 		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestConfigTemplateProcess_uuid(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	result, err := tpl.Process(`{{uuid}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(result) != 32 {
+		t.Fatalf("err: %s", result)
 	}
 }
 

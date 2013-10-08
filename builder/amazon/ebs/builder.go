@@ -44,6 +44,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return err
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
+	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
@@ -84,6 +85,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:  b.config.TemporaryKeyPairName,
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
@@ -109,14 +111,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 		&stepStopInstance{},
 		&stepCreateAMI{},
+		&awscommon.StepAMIRegionCopy{
+			Regions: b.config.AMIRegions,
+		},
 		&awscommon.StepModifyAMIAttributes{
 			Description: b.config.AMIDescription,
 			Users:       b.config.AMIUsers,
 			Groups:      b.config.AMIGroups,
-		},
-		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
-			Tags:    b.config.AMITags,
 		},
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,

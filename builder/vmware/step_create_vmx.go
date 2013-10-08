@@ -88,6 +88,9 @@ func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxData["floppy0.fileName"] = floppyPathRaw.(string)
 	}
 
+	// Set this so that no dialogs ever appear from Packer.
+	vmxData["msg.autoAnswer"] = "true"
+
 	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error creating VMX file: %s", err)
