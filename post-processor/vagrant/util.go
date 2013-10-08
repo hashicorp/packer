@@ -44,7 +44,7 @@ func CopyContents(dst, src string) error {
 // DirToBox takes the directory and compresses it into a Vagrant-compatible
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
-func DirToBox(dst, dir string, ui packer.Ui) error {
+func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 	log.Printf("Turning dir into box: %s => %s", dir, dst)
 	dstF, err := os.Create(dst)
 	if err != nil {
@@ -52,7 +52,10 @@ func DirToBox(dst, dir string, ui packer.Ui) error {
 	}
 	defer dstF.Close()
 
-	gzipWriter := gzip.NewWriter(dstF)
+	gzipWriter, err := gzip.NewWriterLevel(dstF, level)
+	if err != nil {
+		return err
+	}
 	defer gzipWriter.Close()
 
 	tarWriter := tar.NewWriter(gzipWriter)

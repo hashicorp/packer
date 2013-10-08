@@ -68,6 +68,11 @@ The AWS provider itself can be configured with specific options:
   this is a template that simply sets the AMIs for the various regions
   of the AWS build.
 
+* `compression_level` (integer) - An integer repesenting the
+  compression level to use when creating the Vagrant box.  Valid
+  values range from 0 to 9, with 0 being no compression and 9 being
+  the best compression.
+
 The `vagrantfile_template` has the `Images` variable which is a map
 of region (string) to AMI ID (string). An example Vagrantfile template for
 AWS is shown below. The example simply sets the AMI for each region.
