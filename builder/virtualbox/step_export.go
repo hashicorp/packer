@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
 	"log"
+	"path/filepath"
 	"time"
 )
 
