@@ -47,7 +47,7 @@ paths to files, URLS for ISOs and checksums.
       "ssh_port": 22,
       "ssh_wait_timeout": "90m",
       "vm_name": "tdhtest",
-      "net_device": "virtio",
+      "net_device": "virtio-net",
       "disk_interface": "virtio",
       "boot_command":
       [
@@ -227,7 +227,16 @@ Optional:
   the qemu command line (though not, at this time, qemu-img). Each array
   of strings makes up a command line switch that overrides matching default
   switch/value pairs. Any value specified as an empty string is ignored.
-  All values after the switch are concatenated with no separater. For instance:
+  All values after the switch are concatenated with no separater.
+
+  WARNING: The qemu command line allows extreme flexibility, so beware of
+  conflicting arguments causing failures of your run. For instance, using
+   --no-acpi could break the ability to send power signal type commands (e.g.,
+  shutdown -P now) to the virtual machine, thus preventing proper shutdown. To
+  see the defaults, look in the packer.log file and search for the
+  qemu-system-x86 command. The arguments are all printed for review.
+
+  The following shows a sample usage:
 
 <pre class="prettyprint">
   . . .
@@ -250,11 +259,6 @@ Optional:
 <pre class="prettyprint">
     qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
-
-  Note that the qemu command line allows extreme flexibility, so beware of
-  conflicting arguments causing failures of your run. To see the defaults,
-  look in the packer.log file and search for the qemu-system-x86 command. The
-  arguments are all printed for review.
 
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
