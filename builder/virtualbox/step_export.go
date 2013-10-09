@@ -5,6 +5,8 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"path/filepath"
+	"log"
+	"time"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
@@ -20,6 +22,10 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
+
+	// Wait a second to ensure VM is really shutdown.
+	log.Println("1 second timeout to ensure VM is really shutdown")
+	time.Sleep(1 * time.Second)
 
 	// Clear out the Packer-created forwarding rule
 	ui.Say("Preparing to export machine...")
