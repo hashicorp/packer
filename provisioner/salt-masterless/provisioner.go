@@ -150,8 +150,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
-	ui.Message(fmt.Sprintf("Moving %s to /srv/salt", p.config.TempConfigDir))
-	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/states /srv/salt/", p.config.TempConfigDir)}
+	ui.Message(fmt.Sprintf("Moving %s/states to /srv/salt", p.config.TempConfigDir))
+	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/states /srv/salt", p.config.TempConfigDir)}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
