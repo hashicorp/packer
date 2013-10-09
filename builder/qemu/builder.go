@@ -168,7 +168,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.NetDevice == "" {
-		b.config.NetDevice = "virtio"
+		b.config.NetDevice = "virtio-net"
 	}
 
 	if b.config.DiskInterface == "" {
