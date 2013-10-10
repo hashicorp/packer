@@ -8,8 +8,6 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 const DefaultTempConfigDir = "/tmp/salt"
@@ -146,7 +144,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
-	if err = UploadLocalDirectory(p.config.LocalStateTree, fmt.Sprintf("%s/states", p.config.TempConfigDir), comm, ui); err != nil {
+	if err = comm.UploadDir(fmt.Sprintf("%s/states", p.config.TempConfigDir),
+		p.config.LocalStateTree, []string{".git"}); err != nil {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
@@ -161,18 +160,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if p.config.LocalPillarRoots != "" {
-		ui.Message(fmt.Sprintf("Creating remote pillar directory: %s/pillar", p.config.TempConfigDir))
-		cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s/pillar", p.config.TempConfigDir)}
-		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
-			if err == nil {
-				err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
-			}
-
-			return fmt.Errorf("Error creating remote pillar directory: %s", err)
-		}
-
 		ui.Message(fmt.Sprintf("Uploading local pillar roots: %s", p.config.LocalPillarRoots))
-		if err = UploadLocalDirectory(p.config.LocalPillarRoots, fmt.Sprintf("%s/pillar", p.config.TempConfigDir), comm, ui); err != nil {
+		if err = comm.UploadDir(fmt.Sprintf("%s/pillar", p.config.TempConfigDir),
+			p.config.LocalPillarRoots, []string{".git"}); err != nil {
 			return fmt.Errorf("Error uploading local pillar roots to remote: %s", err)
 		}
 
@@ -204,44 +194,6 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
-}
-
-func UploadLocalDirectory(localDir string, remoteDir string, comm packer.Communicator, ui packer.Ui) (err error) {
-	visitPath := func(localPath string, f os.FileInfo, err error) (err2 error) {
-		localRelPath := strings.Replace(localPath, localDir, "", 1)
-		localRelPath = strings.Replace(localRelPath, "\\", "/", -1)
-		remotePath := filepath.Join(remoteDir, localRelPath)
-		if f.IsDir() && f.Name() == ".git" {
-			return filepath.SkipDir
-		}
-		if f.IsDir() {
-			// Make remote directory
-			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("mkdir -p %s", remotePath)}
-			if err = cmd.StartWithUi(comm, ui); err != nil {
-				return err
-			}
-		} else {
-			// Upload file to existing directory
-			file, err := os.Open(localPath)
-			if err != nil {
-				return fmt.Errorf("Error opening file: %s", err)
-			}
-			defer file.Close()
-
-			ui.Message(fmt.Sprintf("Uploading file %s: %s", localPath, remotePath))
-			if err = comm.Upload(remotePath, file); err != nil {
-				return fmt.Errorf("Error uploading file: %s", err)
-			}
-		}
-		return
-	}
-
-	err = filepath.Walk(localDir, visitPath)
-	if err != nil {
-		return fmt.Errorf("Error uploading local directory %s: %s", localDir, err)
-	}
-
-	return nil
 }
 
 func uploadMinionConfig(comm packer.Communicator, dst string, src string) error {
