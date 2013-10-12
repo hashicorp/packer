@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 )
@@ -151,6 +152,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		} else if fi.IsDir() {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Config template path must be a file: %s", err))
+		}
+	}
+
+	usr, _ := user.Current()
+	home_path := usr.HomeDir + "/"
+	for i, path := range p.config.CookbookPaths {
+		if path[:2] == "~/" {
+			p.config.CookbookPaths[i] = strings.Replace(path, "~/", home_path, 1)
 		}
 	}
 
