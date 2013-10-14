@@ -11,6 +11,8 @@ BUG FIXES:
 * builder/digitalocean: scrub API keys from config debug output [GH-516]
 * builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
 * builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
+* builder/virtualbox: sleep a bit before export to ensure the sesssion
+  is unlocked. [GH-512]
 * communicator/ssh: Fix issue where a panic could arise from a nil
   dereference. [GH-525]
 
