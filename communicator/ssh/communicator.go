@@ -238,6 +238,14 @@ func (c *comm) reconnect() (err error) {
 	log.Printf("reconnecting to TCP connection for SSH")
 	c.conn, err = c.config.Connection()
 	if err != nil {
+		// Explicitly set this to the REAL nil. Connection() can return
+		// a nil implementation of net.Conn which will make the
+		// "if c.conn == nil" check fail above. Read here for more information
+		// on this psychotic language feature:
+		//
+		// http://golang.org/doc/faq#nil_error
+		c.conn = nil
+
 		log.Printf("reconnection error: %s", err)
 		return
 	}
