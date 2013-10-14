@@ -4,6 +4,8 @@ BUG FIXES:
 
 * builder/all: timeout waiting for SSH connection is a failure. [GH-491]
 * builder/amazon: Scrub sensitive data from the logs. [GH-521]
+* builder/amazon: Handle the situation where an EC2 instance might not
+  be immediately available. [GH-522]
 * builder/digitalocean: don't panic if erroneous API response doesn't
   contain error message. [GH-492]
 * builder/digitalocean: scrub API keys from config debug output [GH-516]
