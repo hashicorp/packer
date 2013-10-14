@@ -1,5 +1,9 @@
 ## 0.3.10 (unreleased)
 
+IMPROVEMENTS:
+
+* post-processor/vagrant: support instance-store AMIs built by Packer. [GH-502]
+
 BUG FIXES:
 
 * builder/all: timeout waiting for SSH connection is a failure. [GH-491]
