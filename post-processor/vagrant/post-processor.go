@@ -12,9 +12,10 @@ import (
 )
 
 var builtins = map[string]string{
-	"mitchellh.amazonebs":  "aws",
-	"mitchellh.virtualbox": "virtualbox",
-	"mitchellh.vmware":     "vmware",
+	"mitchellh.amazonebs":       "aws",
+	"mitchellh.amazon.instance": "aws",
+	"mitchellh.virtualbox":      "virtualbox",
+	"mitchellh.vmware":          "vmware",
 }
 
 type Config struct {
