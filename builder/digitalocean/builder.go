@@ -11,7 +11,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -165,10 +164,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return errs
 	}
 
-	configRepr := fmt.Sprintf("Config: %+v", b.config)
-	scrubbedConfig := strings.Replace(configRepr, b.config.ClientID, "CLIENT_ID", -1)
-	scrubbedConfig = strings.Replace(scrubbedConfig, b.config.APIKey, "API_KEY", -1)
-	log.Println(scrubbedConfig)
+	common.ScrubConfig(b.config, b.config.ClientID, b.config.APIKey)
 	return nil
 }
 
