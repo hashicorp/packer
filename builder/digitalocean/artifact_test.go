@@ -14,8 +14,8 @@ func TestArtifact_Impl(t *testing.T) {
 }
 
 func TestArtifactString(t *testing.T) {
-	a := &Artifact{"packer-foobar", 42, nil}
-	expected := "A snapshot was created: packer-foobar"
+	a := &Artifact{"packer-foobar", 42, "San Francisco", 3, nil}
+	expected := "A snapshot was created: 'packer-foobar' in region 'San Francisco'"
 
 	if a.String() != expected {
 		t.Fatalf("artifact string should match: %v", expected)
