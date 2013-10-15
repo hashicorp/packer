@@ -57,5 +57,5 @@ func scanUnixLine(data []byte, atEOF bool) (advance int, token []byte, err error
 	if advance == 0 {
 		return
 	}
-	return advance, append(token, "\n"...), err
+	return advance, append(token, '\n'), err
 }
