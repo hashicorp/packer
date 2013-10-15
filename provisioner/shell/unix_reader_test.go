@@ -18,24 +18,24 @@ func TestUnixReader(t *testing.T) {
 	input := "one\r\ntwo\n\r\nthree\r\n"
 	expected := "one\ntwo\n\nthree\n"
 
-	r := &UnixReader{
-		Reader: bytes.NewReader([]byte(input)),
-	}
-
-	result := new(bytes.Buffer)
-	if _, err := io.Copy(result, r); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if result.String() != expected {
-		t.Fatalf("bad: %#v", result.String())
-	}
+	unixReaderTest(t, input, expected)
 }
 
 func TestUnixReader_unixOnly(t *testing.T) {
 	input := "\none\n\ntwo\nthree\n\n"
 	expected := "\none\n\ntwo\nthree\n\n"
 
+	unixReaderTest(t, input, expected)
+}
+
+func TestUnixReader_readsLastLine(t *testing.T) {
+	input := "one\ntwo"
+	expected := "one\ntwo\n"
+
+	unixReaderTest(t, input, expected)
+}
+
+func unixReaderTest(t *testing.T, input string, expected string) {
 	r := &UnixReader{
 		Reader: bytes.NewReader([]byte(input)),
 	}
