@@ -19,6 +19,8 @@ BUG FIXES:
   is unlocked. [GH-512]
 * communicator/ssh: Fix issue where a panic could arise from a nil
   dereference. [GH-525]
+* provisioner/shell: Won't block on certain scripts on Windows anymore.
+  [GH-507]
 
 ## 0.3.9 (October 2, 2013)
 
