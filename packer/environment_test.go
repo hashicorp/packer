@@ -2,12 +2,11 @@ package packer
 
 import (
 	"bytes"
-	"cgl.tideland.biz/asserts"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -44,40 +43,48 @@ func testEnvironment() Environment {
 }
 
 func TestEnvironment_DefaultConfig_Commands(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
-	assert.Empty(config.Commands, "should have no commands")
+	if len(config.Commands) != 0 {
+		t.Fatalf("bad: %#v", config.Commands)
+	}
 }
 
 func TestEnvironment_DefaultConfig_Ui(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
-	assert.NotNil(config.Ui, "default UI should not be nil")
+	if config.Ui == nil {
+		t.Fatal("config.Ui should not be nil")
+	}
 
 	rwUi, ok := config.Ui.(*BasicUi)
-	assert.True(ok, "default UI should be BasicUi")
-	assert.Equal(rwUi.Writer, os.Stdout, "default UI should go to stdout")
-	assert.Equal(rwUi.Reader, os.Stdin, "default UI should read from stdin")
+	if !ok {
+		t.Fatal("default UI should be BasicUi")
+	}
+	if rwUi.Writer != os.Stdout {
+		t.Fatal("default UI should go to stdout")
+	}
+	if rwUi.Reader != os.Stdin {
+		t.Fatal("default UI reader should go to stdin")
+	}
 }
 
 func TestNewEnvironment_NoConfig(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	env, err := NewEnvironment(nil)
-	assert.Nil(env, "env should be nil")
-	assert.NotNil(err, "should be an error")
+	if env != nil {
+		t.Fatal("env should be nil")
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
 }
 
 func TestEnvironment_NilComponents(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components = *new(ComponentFinder)
 
 	env, err := NewEnvironment(config)
-	assert.Nil(err, "should not have an error")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 
 	// All of these should not cause panics... so we don't assert
 	// anything but if there is a panic in the test then yeah, something
@@ -90,8 +97,6 @@ func TestEnvironment_NilComponents(t *testing.T) {
 }
 
 func TestEnvironment_Builder(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	builder := &TestBuilder{}
 	builders := make(map[string]Builder)
 	builders["foo"] = builder
@@ -101,33 +106,43 @@ func TestEnvironment_Builder(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 	returnedBuilder, err := env.Builder("foo")
-	assert.Nil(err, "should be no error")
-	assert.Equal(returnedBuilder, builder, "should return correct builder")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if returnedBuilder != builder {
+		t.Fatalf("bad: %#v", returnedBuilder)
+	}
 }
 
 func TestEnvironment_Builder_NilError(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Builder = func(n string) (Builder, error) { return nil, nil }
 
 	env, _ := NewEnvironment(config)
 	returnedBuilder, err := env.Builder("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Nil(returnedBuilder, "should be no builder")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if returnedBuilder != nil {
+		t.Fatalf("bad: %#v", returnedBuilder)
+	}
 }
 
 func TestEnvironment_Builder_Error(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Builder = func(n string) (Builder, error) { return nil, errors.New("foo") }
 
 	env, _ := NewEnvironment(config)
 	returnedBuilder, err := env.Builder("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Equal(err.Error(), "foo", "should be correct error")
-	assert.Nil(returnedBuilder, "should be no builder")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if err.Error() != "foo" {
+		t.Fatalf("bad err: %s", err)
+	}
+	if returnedBuilder != nil {
+		t.Fatalf("should be nil: %#v", returnedBuilder)
+	}
 }
 
 func TestEnvironment_Cache(t *testing.T) {
@@ -139,20 +154,20 @@ func TestEnvironment_Cache(t *testing.T) {
 }
 
 func TestEnvironment_Cli_Error(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Command = func(n string) (Command, error) { return nil, errors.New("foo") }
 
 	env, _ := NewEnvironment(config)
 	_, err := env.Cli([]string{"foo"})
-	assert.NotNil(err, "should be an error")
-	assert.Equal(err.Error(), "foo", "should be correct error")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if err.Error() != "foo" {
+		t.Fatalf("bad: %s", err)
+	}
 }
 
 func TestEnvironment_Cli_CallsRun(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	command := &TestCommand{}
 	commands := make(map[string]Command)
 	commands["foo"] = command
@@ -163,25 +178,33 @@ func TestEnvironment_Cli_CallsRun(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 	exitCode, err := env.Cli([]string{"foo", "bar", "baz"})
-	assert.Nil(err, "should be no error")
-	assert.Equal(exitCode, 0, "runs foo command")
-	assert.True(command.runCalled, "run should've been called")
-	assert.Equal(command.runEnv, env, "should've ran with env")
-	assert.Equal(command.runArgs, []string{"bar", "baz"}, "should have right args")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if exitCode != 0 {
+		t.Fatalf("bad: %d", exitCode)
+	}
+	if !command.runCalled {
+		t.Fatal("command should be run")
+	}
+	if command.runEnv != env {
+		t.Fatalf("bad env: %#v", command.runEnv)
+	}
+	if !reflect.DeepEqual(command.runArgs, []string{"bar", "baz"}) {
+		t.Fatalf("bad: %#v", command.runArgs)
+	}
 }
 
 func TestEnvironment_DefaultCli_Empty(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	defaultEnv := testEnvironment()
 
 	exitCode, _ := defaultEnv.Cli([]string{})
-	assert.Equal(exitCode, 1, "CLI with no args")
+	if exitCode != 1 {
+		t.Fatalf("bad: %d", exitCode)
+	}
 }
 
 func TestEnvironment_DefaultCli_Help(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	defaultEnv := testEnvironment()
 
 	// A little lambda to help us test the output actually contains help
@@ -189,44 +212,52 @@ func TestEnvironment_DefaultCli_Help(t *testing.T) {
 		buffer := defaultEnv.Ui().(*BasicUi).Writer.(*bytes.Buffer)
 		output := buffer.String()
 		buffer.Reset()
-		assert.True(strings.Contains(output, "usage: packer"), "should print help")
+		if !strings.Contains(output, "usage: packer") {
+			t.Fatalf("should contain help: %#v", output)
+		}
 	}
 
 	// Test "--help"
 	exitCode, _ := defaultEnv.Cli([]string{"--help"})
-	assert.Equal(exitCode, 1, "--help should print")
+	if exitCode != 1 {
+		t.Fatalf("bad: %d", exitCode)
+	}
 	testOutput()
 
 	// Test "-h"
 	exitCode, _ = defaultEnv.Cli([]string{"--help"})
-	assert.Equal(exitCode, 1, "--help should print")
+	if exitCode != 1 {
+		t.Fatalf("bad: %d", exitCode)
+	}
 	testOutput()
 }
 
 func TestEnvironment_DefaultCli_Version(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	defaultEnv := testEnvironment()
 
 	versionCommands := []string{"version", "--version", "-v"}
 	for _, command := range versionCommands {
 		exitCode, _ := defaultEnv.Cli([]string{command})
-		assert.Equal(exitCode, 0, fmt.Sprintf("%s should work", command))
+		if exitCode != 0 {
+			t.Fatalf("bad: %d", exitCode)
+		}
 
 		// Test the --version and -v can appear anywhere
 		exitCode, _ = defaultEnv.Cli([]string{"bad", command})
 
 		if command != "version" {
-			assert.Equal(exitCode, 0, fmt.Sprintf("%s should work anywhere", command))
+			if exitCode != 0 {
+				t.Fatalf("bad: %d", exitCode)
+			}
 		} else {
-			assert.Equal(exitCode, 1, fmt.Sprintf("%s should NOT work anywhere", command))
+			if exitCode != 1 {
+				t.Fatalf("bad: %d", exitCode)
+			}
 		}
 	}
 }
 
 func TestEnvironment_Hook(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	hook := &MockHook{}
 	hooks := make(map[string]Hook)
 	hooks["foo"] = hook
@@ -236,38 +267,46 @@ func TestEnvironment_Hook(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.Hook("foo")
-	assert.Nil(err, "should be no error")
-	assert.Equal(returned, hook, "should return correct hook")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if returned != hook {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironment_Hook_NilError(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Hook = func(n string) (Hook, error) { return nil, nil }
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.Hook("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Nil(returned, "should be no hook")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if returned != nil {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironment_Hook_Error(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Hook = func(n string) (Hook, error) { return nil, errors.New("foo") }
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.Hook("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Equal(err.Error(), "foo", "should be correct error")
-	assert.Nil(returned, "should be no hook")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if err.Error() != "foo" {
+		t.Fatalf("err: %s", err)
+	}
+	if returned != nil {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironment_PostProcessor(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	pp := &TestPostProcessor{}
 	pps := make(map[string]PostProcessor)
 	pps["foo"] = pp
@@ -277,38 +316,46 @@ func TestEnvironment_PostProcessor(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.PostProcessor("foo")
-	assert.Nil(err, "should be no error")
-	assert.Equal(returned, pp, "should return correct pp")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if returned != pp {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironment_PostProcessor_NilError(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.PostProcessor = func(n string) (PostProcessor, error) { return nil, nil }
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.PostProcessor("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Nil(returned, "should be no pp")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if returned != nil {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironment_PostProcessor_Error(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.PostProcessor = func(n string) (PostProcessor, error) { return nil, errors.New("foo") }
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.PostProcessor("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Equal(err.Error(), "foo", "should be correct error")
-	assert.Nil(returned, "should be no pp")
+	if err == nil {
+		t.Fatal("should be an error")
+	}
+	if err.Error() != "foo" {
+		t.Fatalf("bad err: %s", err)
+	}
+	if returned != nil {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironmentProvisioner(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	p := &MockProvisioner{}
 	ps := make(map[string]Provisioner)
 	ps["foo"] = p
@@ -318,25 +365,29 @@ func TestEnvironmentProvisioner(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.Provisioner("foo")
-	assert.Nil(err, "should be no error")
-	assert.Equal(returned, p, "should return correct provisioner")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if returned != p {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironmentProvisioner_NilError(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Provisioner = func(n string) (Provisioner, error) { return nil, nil }
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.Provisioner("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Nil(returned, "should be no provisioner")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if returned != nil {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironmentProvisioner_Error(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	config := DefaultEnvironmentConfig()
 	config.Components.Provisioner = func(n string) (Provisioner, error) {
 		return nil, errors.New("foo")
@@ -344,14 +395,18 @@ func TestEnvironmentProvisioner_Error(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 	returned, err := env.Provisioner("foo")
-	assert.NotNil(err, "should be an error")
-	assert.Equal(err.Error(), "foo", "should be correct error")
-	assert.Nil(returned, "should be no provisioner")
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if err.Error() != "foo" {
+		t.Fatalf("err: %s", err)
+	}
+	if returned != nil {
+		t.Fatalf("bad: %#v", returned)
+	}
 }
 
 func TestEnvironment_SettingUi(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	ui := &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
@@ -362,5 +417,7 @@ func TestEnvironment_SettingUi(t *testing.T) {
 
 	env, _ := NewEnvironment(config)
 
-	assert.Equal(env.Ui(), ui, "UIs should be equal")
+	if env.Ui() != ui {
+		t.Fatalf("UI should be equal: %#v", env.Ui())
+	}
 }
