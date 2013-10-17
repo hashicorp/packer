@@ -1,15 +1,14 @@
 package digitalocean
 
 import (
-	"cgl.tideland.biz/identifier"
 	"code.google.com/p/go.crypto/ssh"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -43,7 +42,7 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	pub_sshformat := string(ssh.MarshalAuthorizedKey(pub))
 
 	// The name of the public key on DO
-	name := fmt.Sprintf("packer-%s", hex.EncodeToString(identifier.NewUUID().Raw()))
+	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
 	keyId, err := client.CreateKey(name, pub_sshformat)
