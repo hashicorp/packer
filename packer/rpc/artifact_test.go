@@ -1,9 +1,9 @@
 package rpc
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
+	"reflect"
 	"testing"
 )
 
@@ -30,8 +30,6 @@ func (testArtifact) Destroy() error {
 }
 
 func TestArtifactRPC(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	// Create the interface to test
 	a := new(testArtifact)
 
@@ -42,21 +40,29 @@ func TestArtifactRPC(t *testing.T) {
 
 	// Create the client over RPC and run some methods to verify it works
 	client, err := rpc.Dial("tcp", address)
-	assert.Nil(err, "should be able to connect")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 	aClient := Artifact(client)
 
 	// Test
-	assert.Equal(aClient.BuilderId(), "bid", "should have correct builder ID")
-	assert.Equal(aClient.Files(), []string{"a", "b"}, "should have correct builder ID")
-	assert.Equal(aClient.Id(), "id", "should have correct builder ID")
-	assert.Equal(aClient.String(), "string", "should have correct builder ID")
+	if aClient.BuilderId() != "bid" {
+		t.Fatalf("bad: %s", aClient.BuilderId())
+	}
+
+	if !reflect.DeepEqual(aClient.Files(), []string{"a", "b"}) {
+		t.Fatalf("bad: %#v", aClient.Files())
+	}
+
+	if aClient.Id() != "id" {
+		t.Fatalf("bad: %s", aClient.Id())
+	}
+
+	if aClient.String() != "string" {
+		t.Fatalf("bad: %s", aClient.String())
+	}
 }
 
 func TestArtifact_Implements(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	var r packer.Artifact
-	a := Artifact(nil)
-
-	assert.Implementor(a, &r, "should be an Artifact")
+	var _ packer.Artifact = Artifact(nil)
 }
