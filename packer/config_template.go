@@ -93,5 +93,5 @@ func templateTimestamp() string {
 }
 
 func templateUuid() string {
-	return hex.EncodeToString(uuid.TimeOrderedUUID())
+	return uuid.TimeOrderedUUID()
 }
