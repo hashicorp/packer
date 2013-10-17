@@ -39,7 +39,7 @@ Optional:
   [salt bootstrap](https://github.com/saltstack/salt-bootstrap) to install
   salt. Set this to true to skip this step.
 
-* `boostrap_args` (string) - Arguments to send to the bootstrap script. Usage
+* `bootstrap_args` (string) - Arguments to send to the bootstrap script. Usage
   is somewhat documented on [github](https://github.com/saltstack/salt-bootstrap),
   but the [script itself](https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh)
   has more detailed usage instructions. By default, no arguments are sent to
