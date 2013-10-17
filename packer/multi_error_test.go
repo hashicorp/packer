@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"cgl.tideland.biz/asserts"
 	"errors"
 	"testing"
 )
@@ -15,8 +14,6 @@ func TestMultiError_Impl(t *testing.T) {
 }
 
 func TestMultiErrorError(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	expected := `2 error(s) occurred:
 
 * foo
@@ -28,7 +25,9 @@ func TestMultiErrorError(t *testing.T) {
 	}
 
 	multi := &MultiError{errors}
-	assert.Equal(multi.Error(), expected, "should have proper error")
+	if multi.Error() != expected {
+		t.Fatalf("bad: %s", multi.Error())
+	}
 }
 
 func TestMultiErrorAppend_MultiError(t *testing.T) {

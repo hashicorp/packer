@@ -80,7 +80,7 @@ func TestConfigTemplateProcess_uuid(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if len(result) != 32 {
+	if len(result) != 36 {
 		t.Fatalf("err: %s", result)
 	}
 }

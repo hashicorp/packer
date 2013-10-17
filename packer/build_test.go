@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"cgl.tideland.biz/asserts"
 	"reflect"
 	"testing"
 )
@@ -41,32 +40,43 @@ func testDefaultPackerConfig() map[string]interface{} {
 	}
 }
 func TestBuild_Name(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	build := testBuild()
-	assert.Equal(build.Name(), "test", "should have a name")
+	if build.Name() != "test" {
+		t.Fatalf("bad: %s", build.Name())
+	}
 }
 
 func TestBuild_Prepare(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
 	packerConfig := testDefaultPackerConfig()
 
 	build := testBuild()
 	builder := build.builder.(*TestBuilder)
 
 	build.Prepare(nil)
-	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
+	if !builder.prepareCalled {
+		t.Fatal("should be called")
+	}
+	if !reflect.DeepEqual(builder.prepareConfig, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", builder.prepareConfig)
+	}
 
 	coreProv := build.provisioners[0]
 	prov := coreProv.provisioner.(*MockProvisioner)
-	assert.True(prov.PrepCalled, "prepare should be called")
-	assert.Equal(prov.PrepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
+	if !prov.PrepCalled {
+		t.Fatal("prep should be called")
+	}
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", prov.PrepConfigs)
+	}
 
 	corePP := build.postProcessors[0][0]
 	pp := corePP.processor.(*TestPostProcessor)
-	assert.True(pp.configCalled, "config should be called")
-	assert.Equal(pp.configVal, []interface{}{make(map[string]interface{}), packerConfig}, "config should have right value")
+	if !pp.configCalled {
+		t.Fatal("should be called")
+	}
+	if !reflect.DeepEqual(pp.configVal, []interface{}{make(map[string]interface{}), packerConfig}) {
+		t.Fatalf("bad: %#v", pp.configVal)
+	}
 }
 
 func TestBuild_Prepare_Twice(t *testing.T) {
@@ -90,8 +100,6 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 }
 
 func TestBuild_Prepare_Debug(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	packerConfig := testDefaultPackerConfig()
 	packerConfig[DebugConfigKey] = true
 
@@ -100,13 +108,21 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 
 	build.SetDebug(true)
 	build.Prepare(nil)
-	assert.True(builder.prepareCalled, "prepare should be called")
-	assert.Equal(builder.prepareConfig, []interface{}{42, packerConfig}, "prepare config should be 42")
+	if !builder.prepareCalled {
+		t.Fatalf("should be called")
+	}
+	if !reflect.DeepEqual(builder.prepareConfig, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", builder.prepareConfig)
+	}
 
 	coreProv := build.provisioners[0]
 	prov := coreProv.provisioner.(*MockProvisioner)
-	assert.True(prov.PrepCalled, "prepare should be called")
-	assert.Equal(prov.PrepConfigs, []interface{}{42, packerConfig}, "prepare should be called with proper config")
+	if !prov.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", prov.PrepConfigs)
+	}
 }
 
 func TestBuildPrepare_variables_default(t *testing.T) {
@@ -186,37 +202,49 @@ func TestBuildPrepare_variablesRequired(t *testing.T) {
 }
 
 func TestBuild_Run(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	cache := &TestCache{}
 	ui := testUi()
 
 	build := testBuild()
 	build.Prepare(nil)
 	artifacts, err := build.Run(ui, cache)
-	assert.Nil(err, "should not error")
-	assert.Equal(len(artifacts), 2, "should have two artifacts")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(artifacts) != 2 {
+		t.Fatalf("bad: %#v", artifacts)
+	}
 
 	// Verify builder was run
 	builder := build.builder.(*TestBuilder)
-	assert.True(builder.runCalled, "run should be called")
+	if !builder.runCalled {
+		t.Fatal("should be called")
+	}
 
 	// Verify hooks are disapatchable
 	dispatchHook := builder.runHook
 	dispatchHook.Run("foo", nil, nil, 42)
 
 	hook := build.hooks["foo"][0].(*MockHook)
-	assert.True(hook.RunCalled, "run should be called")
-	assert.Equal(hook.RunData, 42, "should have correct data")
+	if !hook.RunCalled {
+		t.Fatal("should be called")
+	}
+	if hook.RunData != 42 {
+		t.Fatalf("bad: %#v", hook.RunData)
+	}
 
 	// Verify provisioners run
 	dispatchHook.Run(HookProvision, nil, nil, 42)
 	prov := build.provisioners[0].provisioner.(*MockProvisioner)
-	assert.True(prov.ProvCalled, "provision should be called")
+	if !prov.ProvCalled {
+		t.Fatal("should be called")
+	}
 
 	// Verify post-processor was run
 	pp := build.postProcessors[0][0].processor.(*TestPostProcessor)
-	assert.True(pp.ppCalled, "post processor should be called")
+	if !pp.ppCalled {
+		t.Fatal("should be called")
+	}
 }
 
 func TestBuild_Run_Artifacts(t *testing.T) {
@@ -356,23 +384,26 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 }
 
 func TestBuild_RunBeforePrepare(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	defer func() {
 		p := recover()
-		assert.NotNil(p, "should panic")
-		assert.Equal(p.(string), "Prepare must be called first", "right panic")
+		if p == nil {
+			t.Fatal("should panic")
+		}
+
+		if p.(string) != "Prepare must be called first" {
+			t.Fatalf("bad: %s", p.(string))
+		}
 	}()
 
 	testBuild().Run(testUi(), &TestCache{})
 }
 
 func TestBuild_Cancel(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	build := testBuild()
 	build.Cancel()
 
 	builder := build.builder.(*TestBuilder)
-	assert.True(builder.cancelCalled, "cancel should be called")
+	if !builder.cancelCalled {
+		t.Fatal("cancel should be called")
+	}
 }
