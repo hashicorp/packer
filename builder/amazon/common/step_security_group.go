@@ -1,11 +1,10 @@
 package common
 
 import (
-	"cgl.tideland.biz/identifier"
-	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
@@ -35,7 +34,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Create the group
 	ui.Say("Creating temporary security group for this instance...")
-	groupName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
+	groupName := fmt.Sprintf("packer %s", uuid.TimeOrderedUUID())
 	log.Printf("Temporary group name: %s", groupName)
 	group := ec2.SecurityGroup{
 		Name:        groupName,
