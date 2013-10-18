@@ -164,7 +164,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Printf("Config: %+v", b.config)
+	common.ScrubConfig(b.config, b.config.ClientID, b.config.APIKey)
 	return nil
 }
 

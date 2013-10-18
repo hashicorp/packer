@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"cgl.tideland.biz/asserts"
 	"errors"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
@@ -60,8 +59,6 @@ func (b *testBuild) Cancel() {
 }
 
 func TestBuildRPC(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	// Create the interface to test
 	b := new(testBuild)
 
@@ -72,16 +69,23 @@ func TestBuildRPC(t *testing.T) {
 
 	// Create the client over RPC and run some methods to verify it works
 	client, err := rpc.Dial("tcp", address)
-	assert.Nil(err, "should be able to connect")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 	bClient := Build(client)
 
 	// Test Name
 	bClient.Name()
-	assert.True(b.nameCalled, "name should be called")
+	if !b.nameCalled {
+		t.Fatal("name should be called")
+	}
 
 	// Test Prepare
 	bClient.Prepare(map[string]string{"foo": "bar"})
-	assert.True(b.prepareCalled, "prepare should be called")
+	if !b.prepareCalled {
+		t.Fatal("prepare should be called")
+	}
+
 	if len(b.prepareVars) != 1 {
 		t.Fatalf("bad vars: %#v", b.prepareVars)
 	}
@@ -94,44 +98,65 @@ func TestBuildRPC(t *testing.T) {
 	cache := new(testCache)
 	ui := new(testUi)
 	artifacts, err := bClient.Run(ui, cache)
-	assert.True(b.runCalled, "run should be called")
-	assert.Nil(err, "should not error")
-	assert.Equal(len(artifacts), 1, "should have one artifact")
-	assert.Equal(artifacts[0].BuilderId(), "bid", "should have proper builder id")
+	if !b.runCalled {
+		t.Fatal("run should be called")
+	}
+
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(artifacts) != 1 {
+		t.Fatalf("bad: %#v", artifacts)
+	}
+
+	if artifacts[0].BuilderId() != "bid" {
+		t.Fatalf("bad: %#v", artifacts)
+	}
 
 	// Test the UI given to run, which should be fully functional
 	if b.runCalled {
 		b.runCache.Lock("foo")
-		assert.True(cache.lockCalled, "lock should be called")
+		if !cache.lockCalled {
+			t.Fatal("lock shuld be called")
+		}
 
 		b.runUi.Say("format")
-		assert.True(ui.sayCalled, "say should be called")
-		assert.Equal(ui.sayMessage, "format", "message should be correct")
+		if !ui.sayCalled {
+			t.Fatal("say should be called")
+		}
+
+		if ui.sayMessage != "format" {
+			t.Fatalf("bad: %#v", ui.sayMessage)
+		}
 	}
 
 	// Test run with an error
 	b.errRunResult = true
 	_, err = bClient.Run(ui, cache)
-	assert.NotNil(err, "should not nil")
+	if err == nil {
+		t.Fatal("should error")
+	}
 
 	// Test SetDebug
 	bClient.SetDebug(true)
-	assert.True(b.setDebugCalled, "should be called")
+	if !b.setDebugCalled {
+		t.Fatal("should be called")
+	}
 
 	// Test SetForce
 	bClient.SetForce(true)
-	assert.True(b.setForceCalled, "should be called")
+	if !b.setForceCalled {
+		t.Fatal("should be called")
+	}
 
 	// Test Cancel
 	bClient.Cancel()
-	assert.True(b.cancelCalled, "cancel should be called")
+	if !b.cancelCalled {
+		t.Fatal("should be called")
+	}
 }
 
 func TestBuild_ImplementsBuild(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	var realBuild packer.Build
-	b := Build(nil)
-
-	assert.Implementor(b, &realBuild, "should be a Build")
+	var _ packer.Build = Build(nil)
 }

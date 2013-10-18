@@ -1,21 +1,15 @@
 package common
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"testing"
 )
 
 func TestArtifact_Impl(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	var actual packer.Artifact
-	assert.Implementor(&Artifact{}, &actual, "should be an Artifact")
+	var _ packer.Artifact = new(Artifact)
 }
 
 func TestArtifactId(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	expected := `east:foo,west:bar`
 
 	amis := make(map[string]string)
@@ -27,12 +21,12 @@ func TestArtifactId(t *testing.T) {
 	}
 
 	result := a.Id()
-	assert.Equal(result, expected, "should match output")
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
 }
 
 func TestArtifactString(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	expected := `AMIs were created:
 
 east: foo
@@ -44,5 +38,7 @@ west: bar`
 
 	a := &Artifact{Amis: amis}
 	result := a.String()
-	assert.Equal(result, expected, "should match output")
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
 }

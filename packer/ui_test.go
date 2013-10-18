@@ -2,7 +2,6 @@ package packer
 
 import (
 	"bytes"
-	"cgl.tideland.biz/asserts"
 	"strings"
 	"testing"
 )
@@ -38,25 +37,40 @@ func TestColoredUi(t *testing.T) {
 }
 
 func TestTargettedUi(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	bufferUi := testUi()
 	targettedUi := &TargettedUi{
 		Target: "foo",
 		Ui:     bufferUi,
 	}
 
+	var actual, expected string
 	targettedUi.Say("foo")
-	assert.Equal(readWriter(bufferUi), "==> foo: foo\n", "should have prefix")
+	actual = readWriter(bufferUi)
+	expected = "==> foo: foo\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 
 	targettedUi.Message("foo")
-	assert.Equal(readWriter(bufferUi), "    foo: foo\n", "should have prefix")
+	actual = readWriter(bufferUi)
+	expected = "    foo: foo\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 
 	targettedUi.Error("bar")
-	assert.Equal(readWriter(bufferUi), "==> foo: bar\n", "should have prefix")
+	actual = readWriter(bufferUi)
+	expected = "==> foo: bar\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 
 	targettedUi.Say("foo\nbar")
-	assert.Equal(readWriter(bufferUi), "==> foo: foo\n==> foo: bar\n", "should multiline")
+	actual = readWriter(bufferUi)
+	expected = "==> foo: foo\n==> foo: bar\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 }
 
 func TestColoredUi_ImplUi(t *testing.T) {
@@ -84,27 +98,42 @@ func TestBasicUi_ImplUi(t *testing.T) {
 }
 
 func TestBasicUi_Error(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	bufferUi := testUi()
 
+	var actual, expected string
 	bufferUi.Error("foo")
-	assert.Equal(readWriter(bufferUi), "foo\n", "basic output")
+	actual = readWriter(bufferUi)
+	expected = "foo\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 
 	bufferUi.Error("5")
-	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
+	actual = readWriter(bufferUi)
+	expected = "5\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 }
 
 func TestBasicUi_Say(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	bufferUi := testUi()
 
+	var actual, expected string
+
 	bufferUi.Say("foo")
-	assert.Equal(readWriter(bufferUi), "foo\n", "basic output")
+	actual = readWriter(bufferUi)
+	expected = "foo\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 
 	bufferUi.Say("5")
-	assert.Equal(readWriter(bufferUi), "5\n", "formatting")
+	actual = readWriter(bufferUi)
+	expected = "5\n"
+	if actual != expected {
+		t.Fatalf("bad: %#v", actual)
+	}
 }
 
 func TestMachineReadableUi_ImplUi(t *testing.T) {
