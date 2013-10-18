@@ -60,7 +60,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 			"storagectl", vmName,
 			"--name", controllerName,
 			"--add", "sata",
-			"--sataportcount", "1",
+			"--portcount", "1",
 		}
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
