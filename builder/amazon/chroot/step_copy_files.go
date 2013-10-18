@@ -33,7 +33,7 @@ func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			cmdText, err := wrappedCommand(fmt.Sprintf("cp %s %s", path, chrootPath))
+			cmdText, err := wrappedCommand(fmt.Sprintf("cp --remove-destination %s %s", path, chrootPath))
 			if err != nil {
 				err := fmt.Errorf("Error building copy command: %s", err)
 				state.Put("error", err)
