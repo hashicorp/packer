@@ -92,7 +92,7 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 		// directory so we can get the resulting disk and OVF.
 		if extension := filepath.Ext(path); extension == ".ova" {
 			ui.Message(fmt.Sprintf("Unpacking OVA: %s", path))
-			if err := DecompressOva(dir, filepath.Base(path)); err != nil {
+			if err := DecompressOva(dir, path); err != nil {
 				return nil, false, err
 			}
 		} else {
