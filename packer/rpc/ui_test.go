@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"cgl.tideland.biz/asserts"
 	"net/rpc"
 	"reflect"
 	"testing"
@@ -49,8 +48,6 @@ func (u *testUi) Say(message string) {
 }
 
 func TestUiRPC(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	// Create the UI to test
 	ui := new(testUi)
 
@@ -69,19 +66,33 @@ func TestUiRPC(t *testing.T) {
 
 	// Basic error and say tests
 	result, err := uiClient.Ask("query")
-	assert.Nil(err, "should not error")
-	assert.True(ui.askCalled, "ask should be called")
-	assert.Equal(ui.askQuery, "query", "should be correct")
-	assert.Equal(result, "foo", "should have correct result")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if !ui.askCalled {
+		t.Fatal("should be called")
+	}
+	if ui.askQuery != "query" {
+		t.Fatalf("bad: %s", ui.askQuery)
+	}
+	if result != "foo" {
+		t.Fatalf("bad: %#v", result)
+	}
 
 	uiClient.Error("message")
-	assert.Equal(ui.errorMessage, "message", "message should be correct")
+	if ui.errorMessage != "message" {
+		t.Fatalf("bad: %#v", ui.errorMessage)
+	}
 
 	uiClient.Message("message")
-	assert.Equal(ui.messageMessage, "message", "message should be correct")
+	if ui.messageMessage != "message" {
+		t.Fatalf("bad: %#v", ui.errorMessage)
+	}
 
 	uiClient.Say("message")
-	assert.Equal(ui.sayMessage, "message", "message should be correct")
+	if ui.sayMessage != "message" {
+		t.Fatalf("bad: %#v", ui.errorMessage)
+	}
 
 	uiClient.Machine("foo", "bar", "baz")
 	if !ui.machineCalled {

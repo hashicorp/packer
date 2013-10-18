@@ -159,7 +159,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Printf("Config: %+v", b.config)
+	log.Println(common.ScrubConfig(b.config), b.config.AccessKey, b.config.SecretKey)
 	return nil
 }
 

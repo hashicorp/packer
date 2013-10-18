@@ -2,9 +2,8 @@ package packer
 
 import (
 	"bytes"
-	"cgl.tideland.biz/identifier"
-	"encoding/hex"
 	"fmt"
+	"github.com/mitchellh/packer/common/uuid"
 	"strconv"
 	"text/template"
 	"time"
@@ -94,5 +93,5 @@ func templateTimestamp() string {
 }
 
 func templateUuid() string {
-	return hex.EncodeToString(identifier.NewUUID().Raw())
+	return uuid.TimeOrderedUUID()
 }

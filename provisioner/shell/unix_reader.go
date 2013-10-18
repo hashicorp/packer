@@ -54,5 +54,12 @@ func (r *UnixReader) Read(p []byte) (n int, err error) {
 // token returned will be "one\n".
 func scanUnixLine(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	advance, token, err = bufio.ScanLines(data, atEOF)
-	return advance, append(token, "\n"...), err
+	if advance == 0 {
+		// If we reached the end of a line without a newline, then
+		// just return as it is. Otherwise the Scanner will keep trying
+		// to scan, blocking forever.
+		return
+	}
+
+	return advance, append(token, '\n'), err
 }

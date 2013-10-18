@@ -1,10 +1,9 @@
 package openstack
 
 import (
-	"cgl.tideland.biz/identifier"
-	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 	"github.com/rackspace/gophercloud"
 	"log"
@@ -19,7 +18,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary keypair for this instance...")
-	keyName := fmt.Sprintf("packer %s", hex.EncodeToString(identifier.NewUUID().Raw()))
+	keyName := fmt.Sprintf("packer %s", uuid.TimeOrderedUUID())
 	log.Printf("temporary keypair name: %s", keyName)
 	keyResp, err := csp.CreateKeyPair(gophercloud.NewKeyPair{Name: keyName})
 	if err != nil {

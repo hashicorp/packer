@@ -1,9 +1,9 @@
 package rpc
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
+	"reflect"
 	"testing"
 )
 
@@ -65,8 +65,6 @@ func (e *testEnvironment) Ui() packer.Ui {
 }
 
 func TestEnvironmentRPC(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	// Create the interface to test
 	e := &testEnvironment{}
 
@@ -77,49 +75,70 @@ func TestEnvironmentRPC(t *testing.T) {
 
 	// Create the client over RPC and run some methods to verify it works
 	client, err := rpc.Dial("tcp", address)
-	assert.Nil(err, "should be able to connect")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 	eClient := &Environment{client}
 
 	// Test Builder
 	builder, _ := eClient.Builder("foo")
-	assert.True(e.builderCalled, "Builder should be called")
-	assert.Equal(e.builderName, "foo", "Correct name for Builder")
+	if !e.builderCalled {
+		t.Fatal("builder should be called")
+	}
+	if e.builderName != "foo" {
+		t.Fatalf("bad: %#v", e.builderName)
+	}
 
 	builder.Prepare(nil)
-	assert.True(testEnvBuilder.prepareCalled, "Prepare should be called")
+	if !testEnvBuilder.prepareCalled {
+		t.Fatal("should be called")
+	}
 
 	// Test Cache
 	cache := eClient.Cache()
 	cache.Lock("foo")
-	assert.True(testEnvCache.lockCalled, "lock should be called")
+	if !testEnvCache.lockCalled {
+		t.Fatal("should be called")
+	}
 
 	// Test Cli
 	cliArgs := []string{"foo", "bar"}
 	result, _ := eClient.Cli(cliArgs)
-	assert.True(e.cliCalled, "CLI should be called")
-	assert.Equal(e.cliArgs, cliArgs, "args should match")
-	assert.Equal(result, 42, "result shuld be 42")
+	if !e.cliCalled {
+		t.Fatal("should be called")
+	}
+	if !reflect.DeepEqual(e.cliArgs, cliArgs) {
+		t.Fatalf("bad: %#v", e.cliArgs)
+	}
+	if result != 42 {
+		t.Fatalf("bad: %#v", result)
+	}
 
 	// Test Provisioner
 	_, _ = eClient.Provisioner("foo")
-	assert.True(e.provCalled, "provisioner should be called")
-	assert.Equal(e.provName, "foo", "should have proper name")
+	if !e.provCalled {
+		t.Fatal("should be called")
+	}
+	if e.provName != "foo" {
+		t.Fatalf("bad: %s", e.provName)
+	}
 
 	// Test Ui
 	ui := eClient.Ui()
-	assert.True(e.uiCalled, "Ui should've been called")
+	if !e.uiCalled {
+		t.Fatal("should be called")
+	}
 
 	// Test calls on the Ui
 	ui.Say("format")
-	assert.True(testEnvUi.sayCalled, "Say should be called")
-	assert.Equal(testEnvUi.sayMessage, "format", "message should match")
+	if !testEnvUi.sayCalled {
+		t.Fatal("should be called")
+	}
+	if testEnvUi.sayMessage != "format" {
+		t.Fatalf("bad: %#v", testEnvUi.sayMessage)
+	}
 }
 
 func TestEnvironment_ImplementsEnvironment(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	var realVar packer.Environment
-	e := &Environment{nil}
-
-	assert.Implementor(e, &realVar, "should be an Environment")
+	var _ packer.Environment = new(Environment)
 }

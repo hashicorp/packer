@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"cgl.tideland.biz/asserts"
 	"sync"
 	"testing"
 	"time"
@@ -42,12 +41,7 @@ func (h *CancelHook) Cancel() {
 }
 
 func TestDispatchHook_Implements(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	var r Hook
-	c := &DispatchHook{}
-
-	assert.Implementor(c, &r, "should be a Hook")
+	var _ Hook = new(DispatchHook)
 }
 
 func TestDispatchHook_Run_NoHooks(t *testing.T) {
@@ -57,8 +51,6 @@ func TestDispatchHook_Run_NoHooks(t *testing.T) {
 }
 
 func TestDispatchHook_Run(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	hook := &MockHook{}
 
 	mapping := make(map[string][]Hook)
@@ -66,9 +58,15 @@ func TestDispatchHook_Run(t *testing.T) {
 	dh := &DispatchHook{Mapping: mapping}
 	dh.Run("foo", nil, nil, 42)
 
-	assert.True(hook.RunCalled, "run should be called")
-	assert.Equal(hook.RunName, "foo", "should be proper event")
-	assert.Equal(hook.RunData, 42, "should be correct data")
+	if !hook.RunCalled {
+		t.Fatal("should be called")
+	}
+	if hook.RunName != "foo" {
+		t.Fatalf("bad: %s", hook.RunName)
+	}
+	if hook.RunData != 42 {
+		t.Fatalf("bad: %#v", hook.RunData)
+	}
 }
 
 func TestDispatchHook_cancel(t *testing.T) {

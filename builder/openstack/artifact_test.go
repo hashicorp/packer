@@ -1,21 +1,15 @@
 package openstack
 
 import (
-	"cgl.tideland.biz/asserts"
 	"github.com/mitchellh/packer/packer"
 	"testing"
 )
 
 func TestArtifact_Impl(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
-	var actual packer.Artifact
-	assert.Implementor(&Artifact{}, &actual, "should be an Artifact")
+	var _ packer.Artifact = new(Artifact)
 }
 
 func TestArtifactId(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	expected := `b8cdf55b-c916-40bd-b190-389ec144c4ed`
 
 	a := &Artifact{
@@ -23,17 +17,19 @@ func TestArtifactId(t *testing.T) {
 	}
 
 	result := a.Id()
-	assert.Equal(result, expected, "should match output")
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
 }
 
 func TestArtifactString(t *testing.T) {
-	assert := asserts.NewTestingAsserts(t, true)
-
 	expected := "An image was created: b8cdf55b-c916-40bd-b190-389ec144c4ed"
 
 	a := &Artifact{
 		ImageId: "b8cdf55b-c916-40bd-b190-389ec144c4ed",
 	}
 	result := a.String()
-	assert.Equal(result, expected, "should match output")
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
 }

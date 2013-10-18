@@ -1,10 +1,9 @@
 package digitalocean
 
 import (
-	"cgl.tideland.biz/identifier"
-	"encoding/hex"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -21,7 +20,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Creating droplet...")
 
 	// Some random droplet name as it's temporary
-	name := fmt.Sprintf("packer-%s", hex.EncodeToString(identifier.NewUUID().Raw()))
+	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the droplet based on configuration
 	dropletId, err := client.CreateDroplet(name, c.SizeID, c.ImageID, c.RegionID, sshKeyId)

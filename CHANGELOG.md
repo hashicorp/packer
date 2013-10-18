@@ -1,12 +1,26 @@
 ## 0.3.10 (unreleased)
 
+IMPROVEMENTS:
+
+* post-processor/vagrant: support instance-store AMIs built by Packer. [GH-502]
+
 BUG FIXES:
 
 * builder/all: timeout waiting for SSH connection is a failure. [GH-491]
+* builder/amazon: Scrub sensitive data from the logs. [GH-521]
+* builder/amazon: Handle the situation where an EC2 instance might not
+  be immediately available. [GH-522]
 * builder/digitalocean: don't panic if erroneous API response doesn't
   contain error message. [GH-492]
+* builder/digitalocean: scrub API keys from config debug output [GH-516]
 * builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
 * builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
+* builder/virtualbox: sleep a bit before export to ensure the sesssion
+  is unlocked. [GH-512]
+* communicator/ssh: Fix issue where a panic could arise from a nil
+  dereference. [GH-525]
+* provisioner/shell: Won't block on certain scripts on Windows anymore.
+  [GH-507]
 
 ## 0.3.9 (October 2, 2013)
 
