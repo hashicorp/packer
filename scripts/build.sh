@@ -72,6 +72,8 @@ go build \
     -ldflags "-X github.com/mitchellh/packer/packer.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
     -v \
     -o bin/packer${EXTENSION} .
+
+    cp bin/packer${EXTENSION} ${GOPATH}/bin
 ) &
 
 waitSingle
@@ -86,6 +88,8 @@ for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
         -ldflags "-X github.com/mitchellh/packer/packer.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
         -v \
         -o bin/packer-${PLUGIN_NAME}${EXTENSION} ${PLUGIN}
+
+        cp bin/packer-${PLUGIN_NAME}${EXTENSION} ${GOPATH}/bin
     ) &
 
     waitSingle
