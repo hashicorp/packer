@@ -148,6 +148,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		"iso_url":             &b.config.RawSingleISOUrl,
 		"output_directory":    &b.config.OutputDir,
 		"shutdown_command":    &b.config.ShutdownCommand,
+		"ssh_key_path":        &b.config.SSHKeyPath,
 		"ssh_password":        &b.config.SSHPassword,
 		"ssh_username":        &b.config.SSHUser,
 		"tools_upload_flavor": &b.config.ToolsUploadFlavor,

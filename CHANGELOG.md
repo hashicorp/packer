@@ -20,6 +20,8 @@ BUG FIXES:
 * builder/virtualbox: sleep a bit before export to ensure the sesssion
   is unlocked. [GH-512]
 * builder/virtualbox: create SATA drives properly on VirtualBox 4.3 [GH-547]
+* builder/virtualbox: support user templates in SSH key path. [GH-539]
+* builder/vmware: support user templates in SSH key path. [GH-539]
 * communicator/ssh: Fix issue where a panic could arise from a nil
   dereference. [GH-525]
 * post-processor/vagrant: Fix issue with VirtualBox OVA. [GH-548]
