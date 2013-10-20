@@ -56,13 +56,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	// that.
 	if config.HardDriveInterface == "sata" {
 		controllerName = "SATA Controller"
-		command = []string{
-			"storagectl", vmName,
-			"--name", controllerName,
-			"--add", "sata",
-			"--sataportcount", "1",
-		}
-		if err := driver.VBoxManage(command...); err != nil {
+		if err := driver.CreateSATAController(vmName, controllerName); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())

@@ -19,8 +19,10 @@ BUG FIXES:
 * builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
 * builder/virtualbox: sleep a bit before export to ensure the sesssion
   is unlocked. [GH-512]
+* builder/virtualbox: create SATA drives properly on VirtualBox 4.3 [GH-547]
 * communicator/ssh: Fix issue where a panic could arise from a nil
   dereference. [GH-525]
+* post-processor/vagrant: Fix issue with VirtualBox OVA. [GH-548]
 * provisioner/shell: Won't block on certain scripts on Windows anymore.
   [GH-507]
 
