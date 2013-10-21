@@ -68,6 +68,11 @@ The AWS provider itself can be configured with specific options:
   this is a template that simply sets the AMIs for the various regions
   of the AWS build.
 
+* `compression_level` (integer) - An integer repesenting the
+  compression level to use when creating the Vagrant box.  Valid
+  values range from 0 to 9, with 0 being no compression and 9 being
+  the best compression.
+
 The `vagrantfile_template` has the `Images` variable which is a map
 of region (string) to AMI ID (string). An example Vagrantfile template for
 AWS is shown below. The example simply sets the AMI for each region.
@@ -91,6 +96,11 @@ The VirtualBox provider itself can be configured with specific options:
   [text template](http://golang.org/pkg/text/template). By default this is
   a template that just sets the base MAC address so that networking works.
 
+* `compression_level` (integer) - An integer repesenting the
+  compression level to use when creating the Vagrant box.  Valid
+  values range from 0 to 9, with 0 being no compression and 9 being
+  the best compression.
+
 The `vagrantfile_template` has the `BaseMACAddress` variable which is a string
 containing the MAC address of the first network interface. This must be set
 in the Vagrantfile for networking to work properly with Vagrant. An example
@@ -111,3 +121,8 @@ The VMware provider itself can be configured with specific options:
   [text template](http://golang.org/pkg/text/template). By default no
   Vagrantfile is packaged with the box. Note that currently no variables
   are available in the template, but this may change in the future.
+
+* `compression_level` (integer) - An integer repesenting the
+  compression level to use when creating the Vagrant box.  Valid
+  values range from 0 to 9, with 0 being no compression and 9 being
+  the best compression.
