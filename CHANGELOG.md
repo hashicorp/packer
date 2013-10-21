@@ -3,6 +3,8 @@
 IMPROVEMENTS:
 
 * post-processor/vagrant: support instance-store AMIs built by Packer. [GH-502]
+* post-processor/vagrant: can now specify compression level to use
+  when creating the box. [GH-506]
 
 BUG FIXES:
 
