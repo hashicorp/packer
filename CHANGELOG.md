@@ -1,5 +1,9 @@
 ## 0.3.10 (unreleased)
 
+FEATURES:
+
+* Ansible provisioner
+
 IMPROVEMENTS:
 
 * post-processor/vagrant: support instance-store AMIs built by Packer. [GH-502]
