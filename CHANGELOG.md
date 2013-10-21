@@ -25,6 +25,7 @@ BUG FIXES:
 * communicator/ssh: Fix issue where a panic could arise from a nil
   dereference. [GH-525]
 * post-processor/vagrant: Fix issue with VirtualBox OVA. [GH-548]
+* provisioner/salt: Move salt states to correct remote directory. [GH-513]
 * provisioner/shell: Won't block on certain scripts on Windows anymore.
   [GH-507]
 
