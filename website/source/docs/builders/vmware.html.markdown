@@ -20,10 +20,7 @@ containing all the files necessary to run the virtual machine.
 
 ## Basic Example
 
-Here is a basic example. This example is not functional. It will start the
-OS installer but then fail because we don't provide the preseed file for
-Ubuntu to self-install. Still, the example serves to show the basic configuration:
-
+Here is a basic example that builds Ubuntu 12.04.2 server.  Note: the username and password given here must match what's provided in the preseed file.
 <pre class="prettyprint">
 {
   "type": "vmware",
@@ -31,8 +28,9 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
-  "ssh_wait_timeout": "30s",
-  "shutdown_command": "shutdown -P now"
+  "ssh_password": "packer",
+  "shutdown_command": "echo packer | sudo -S shutdown -P now",
+  "boot_command": [ "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;", "/install/vmlinuz noapic ", "preseed/url=http://gist.github.com/dlovell/6574899/raw/c95ea6bcbcc1e56cbba6f53296a516a5d3b4cbb1/ubuntu-12.04.2-server-preseed.cfg ", "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ", "hostname={{ .Name }} ", "fb=false debconf/frontend=noninteractive ", "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ", "keyboard-configuration/variant=USA console-setup/ask_detect=false ", "initrd=/install/initrd.gz -- &lt;enter&gt;"]
 }
 </pre>
 
@@ -243,7 +241,7 @@ an Ubuntu 12.04 installer:
 [
   "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
   "/install/vmlinuz noapic ",
-  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "preseed/url=http://gist.github.com/dlovell/6574899/raw/c95ea6bcbcc1e56cbba6f53296a516a5d3b4cbb1/ubuntu-12.04.2-server-preseed.cfg ",
   "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
   "hostname={{ .Name }} ",
   "fb=false debconf/frontend=noninteractive ",
