@@ -23,6 +23,7 @@ type RunConfig struct {
 	SubnetId             string `mapstructure:"subnet_id"`
 	TemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
 	VpcId                string `mapstructure:"vpc_id"`
+	AvailZone            string `mapstructure:"avail_zone"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -83,6 +84,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"subnet_id":               &c.SubnetId,
 		"temporary_key_pair_name": &c.TemporaryKeyPairName,
 		"vpc_id":                  &c.VpcId,
+		"avail_zone":              &c.AvailZone,
 	}
 
 	for n, ptr := range templates {

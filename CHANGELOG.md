@@ -1,6 +1,9 @@
 ## 0.4.0 (unreleased)
 
+FEATURES:
 
+* builder/amazon/ebs: Ability to specify which availability zone to create
+  instance in. [GH-536]
 
 ## 0.3.10 (October 20, 2013)
 
