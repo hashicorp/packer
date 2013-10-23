@@ -1,8 +1,8 @@
 package uuid
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
 	"time"
 )
 
@@ -10,14 +10,15 @@ import (
 // bottom 96 are random.
 func TimeOrderedUUID() string {
 	unix := uint32(time.Now().UTC().Unix())
-	rand1 := rand.Uint32()
-	rand2 := rand.Uint32()
-	rand3 := rand.Uint32()
+
+	b := make([]byte, 12)
+	n, err := rand.Read(b)
+	if n != len(b) {
+		err = fmt.Errorf("Not enough entropy available")
+	}
+	if err != nil {
+		panic(err)
+	}
 	return fmt.Sprintf("%08x-%04x-%04x-%04x-%04x%08x",
-		unix,
-		uint16(rand1>>16),
-		uint16(rand1&0xffff),
-		uint16(rand2>>16),
-		uint16(rand2&0xffff),
-		rand3)
+		unix, b[0:2], b[2:4], b[4:6], b[6:8], b[8:])
 }

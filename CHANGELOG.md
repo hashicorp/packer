@@ -5,6 +5,11 @@ FEATURES:
 * builder/amazon/ebs: Ability to specify which availability zone to create
   instance in. [GH-536]
 
+BUG FIXES:
+
+* common/uuid: Use cryptographically secure PRNG when generating
+  UUIDs. [GH-552]
+
 ## 0.3.10 (October 20, 2013)
 
 FEATURES:
