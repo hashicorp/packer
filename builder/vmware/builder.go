@@ -340,6 +340,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
+	if b.config.ShutdownCommand == "" {
+		uiColor := &packer.ColoredUi{
+	    Color: 31,
+	    Ui:    ui,
+	    }
+	    uiColor.Message(fmt.Sprintf("!!!NO SHUTDOWN COMMAND WAS SPECIFIED,"+ 
+	    	" THIS CAN RESULT IN DATA LOSS!!!"))
+	}
+	
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
