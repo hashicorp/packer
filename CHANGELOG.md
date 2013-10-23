@@ -1,5 +1,9 @@
 ## 0.4.0 (unreleased)
 
+BUG FIXES:
+
+* common/uuid: Use cryptographically secure PRNG when generating
+  UUIDs. [GH-552]
 
 
 ## 0.3.10 (October 20, 2013)
