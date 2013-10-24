@@ -43,7 +43,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Set the VM name propery on the first command
+		// Set the VM name property on the first command
 		if s.vmName == "" {
 			s.vmName = name
 		}
