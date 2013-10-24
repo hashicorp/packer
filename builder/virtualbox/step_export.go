@@ -78,9 +78,7 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 
 	state.Put("exportPath", outputPath)
 
-	// //
-	// // Add the description field to the ovf file 
-	// //
+	// Add the description field to the ovf file 
 	ui.Say("Printing description of VM to vbox file...")
 
 	dir := fmt.Sprintf(outputPath)

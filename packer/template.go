@@ -21,7 +21,6 @@ type rawTemplate struct {
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
 	PostProcessors []interface{} `mapstructure:"post-processors"`
-	Description map[string]interface{}
 
 }
 
@@ -190,9 +189,6 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		raw.RawConfig = v
 
 		t.Builders[raw.Name] = raw
-		// use raw.Name as the keys for Description to correspond each description with their
-		// corresponding builder
-		t.Description[raw.Name] = raw.Description
 		
 	}
 
