@@ -120,6 +120,9 @@ Optional:
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
 
+* `avail_zone` (string) - Destination availability zone to launch instance in.
+  Leave this empty to allow Amazon to auto-assign..
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:

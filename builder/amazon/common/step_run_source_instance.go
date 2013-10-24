@@ -18,6 +18,7 @@ type StepRunSourceInstance struct {
 	SourceAMI          string
 	IamInstanceProfile string
 	SubnetId           string
+	AvailZone          string
 	BlockDevices       BlockDevices
 
 	instance *ec2.Instance
@@ -51,6 +52,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		IamInstanceProfile: s.IamInstanceProfile,
 		SubnetId:           s.SubnetId,
 		BlockDevices:       s.BlockDevices.BuildLaunchDevices(),
+		AvailZone:          s.AvailZone,
 	}
 
 	ui.Say("Launching a source AWS instance...")

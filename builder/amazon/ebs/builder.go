@@ -101,6 +101,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceAMI:          b.config.SourceAmi,
 			IamInstanceProfile: b.config.IamInstanceProfile,
 			SubnetId:           b.config.SubnetId,
+			AvailZone:          b.config.AvailZone,
 			BlockDevices:       b.config.BlockDevices,
 		},
 		&common.StepConnectSSH{
