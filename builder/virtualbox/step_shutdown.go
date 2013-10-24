@@ -71,6 +71,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Println("VM shut down.")
+
 	return multistep.ActionContinue
 }
 

@@ -7,6 +7,8 @@ import (
 	"log"
 	"path/filepath"
 	"time"
+	"io/ioutil"
+	"strings"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
@@ -75,6 +77,49 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	state.Put("exportPath", outputPath)
+
+	// //
+	// // Add the description field to the ovf file 
+	// //
+	ui.Say("Printing description of VM to vbox file...")
+
+	dir := fmt.Sprintf(outputPath)
+	b, err := ioutil.ReadFile(dir)
+	if err != nil {
+		err := fmt.Errorf("Error: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt	
+	}
+	tempString := string(b)
+	// descript is the formatted string we want to add to the ovf file
+	descript := fmt.Sprintf("\n    <AnnotationSection>\n      " +
+	"<Info>A human-readable annotation</Info>\n      " +  
+	"<Annotation>%s</Annotation>\n    </AnnotationSection>", config.Description)
+
+	newString := ""
+	// check if an annotation already exists
+	dExist := strings.Contains(tempString, "<Annotation>")
+
+	// appends letters to form a temporary string until we reach the point where we want
+	// to add the description field
+	for _, sub := range tempString {
+		newString += string(sub)
+		if strings.Contains(newString, "<Info>A virtual machine</Info>") && dExist == false{
+			newString += descript
+			dExist = true
+		}			
+	}
+
+	// Writes the new file 
+	err = ioutil.WriteFile(dir, []byte(newString), 0644)
+	if err != nil {
+		err := fmt.Errorf("Error writing to file: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt	
+	}
+
 
 	return multistep.ActionContinue
 }

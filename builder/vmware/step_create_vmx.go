@@ -73,8 +73,6 @@ func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vmxData := ParseVMX(vmxContents)
-	// *change
-	//vmxData["annotation"] = config.Description
 	if config.VMXData != nil {
 		log.Println("Setting custom VMX data...")
 		for k, v := range config.VMXData {

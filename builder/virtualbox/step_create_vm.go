@@ -10,19 +10,16 @@ import (
 //
 // Produces:
 //   vmName string - The name of the VM
-//   vmDescription string - the description of the VM
 type stepCreateVM struct {
 	vmName string
-	vmDescription string
 }
 
 func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-
+	
 	name := config.VMName
-	description := config.Description 
 
 	commands := make([][]string, 4)
 	commands[0] = []string{
@@ -50,15 +47,10 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		if s.vmName == "" {
 			s.vmName = name
 		}
-		// *change
-		if s.vmDescription == "" {
-			s.vmDescription = description
-		}
 	}
 	
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.vmName)
-	state.Put("vmDescription", s.vmDescription)
 	
 	return multistep.ActionContinue
 }
