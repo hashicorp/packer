@@ -18,6 +18,10 @@ func (tb *TestBuilder) Prepare(config ...interface{}) error {
 	return nil
 }
 
+func (tb *TestBuilder) ArtifactTypeId() string {
+	return tb.artifactId
+}
+
 func (tb *TestBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	tb.runCalled = true
 	tb.runHook = h

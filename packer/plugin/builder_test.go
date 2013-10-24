@@ -12,6 +12,10 @@ func (helperBuilder) Prepare(...interface{}) error {
 	return nil
 }
 
+func (helperBuilder) ArtifactTypeId() string {
+	return BuilderId
+}
+
 func (helperBuilder) Run(packer.Ui, packer.Hook, packer.Cache) (packer.Artifact, error) {
 	return nil, nil
 }

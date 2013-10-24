@@ -8,6 +8,9 @@ import (
 	"net/rpc"
 )
 
+// The unique ID for this builder
+const BuilderId = "mitchellh.rpc.builder"
+
 // An implementation of packer.Builder where the builder is actually executed
 // over an RPC connection.
 type builder struct {
@@ -45,6 +48,10 @@ func (b *builder) Prepare(config ...interface{}) (err error) {
 	}
 
 	return
+}
+
+func (*builder) ArtifactTypeId() string {
+	return BuilderId
 }
 
 func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
