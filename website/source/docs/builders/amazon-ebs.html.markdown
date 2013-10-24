@@ -121,7 +121,7 @@ Optional:
   VPC ID in order to create a temporary security group within the VPC.
 
 * `avail_zone` (string) - Destination availability zone to launch instance in.
-  Leave this empty to allow Amazon to auto-assign..
+  Leave this empty to allow Amazon to auto-assign.
 
 ## Basic Example
 
