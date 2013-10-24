@@ -21,7 +21,6 @@ type rawTemplate struct {
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
 	PostProcessors []interface{} `mapstructure:"post-processors"`
-
 }
 
 // The Template struct represents a parsed template, parsed into the most
@@ -32,6 +31,7 @@ type Template struct {
 	Hooks          map[string][]string
 	PostProcessors [][]RawPostProcessorConfig
 	Provisioners   []RawProvisionerConfig
+	Description map[string]string
 }
 
 // The RawBuilderConfig struct represents a raw, unprocessed builder
@@ -122,7 +122,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t.Hooks = rawTpl.Hooks
 	t.PostProcessors = make([][]RawPostProcessorConfig, len(rawTpl.PostProcessors))
 	t.Provisioners = make([]RawProvisionerConfig, len(rawTpl.Provisioners))
-
+	t.Description = make(map[string]string)
 	// Gather all the variables
 	for k, v := range rawTpl.Variables {
 		var variable RawVariable
@@ -190,7 +190,6 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		raw.RawConfig = v
 
 		t.Builders[raw.Name] = raw
-		
 	}
 
 	// Gather all the post-processors. This is a complicated process since there
