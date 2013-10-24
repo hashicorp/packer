@@ -21,6 +21,7 @@ type rawTemplate struct {
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
 	PostProcessors []interface{} `mapstructure:"post-processors"`
+
 }
 
 // The Template struct represents a parsed template, parsed into the most
@@ -40,6 +41,7 @@ type Template struct {
 type RawBuilderConfig struct {
 	Name string
 	Type string
+	Description string
 
 	RawConfig interface{}
 }
@@ -174,7 +176,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		if raw.Name == "" {
 			raw.Name = raw.Type
 		}
-
+		
 		// Check if we already have a builder with this name and error if so
 		if _, ok := t.Builders[raw.Name]; ok {
 			errors = append(errors, fmt.Errorf("builder with name '%s' already exists", raw.Name))
@@ -188,6 +190,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		raw.RawConfig = v
 
 		t.Builders[raw.Name] = raw
+		
 	}
 
 	// Gather all the post-processors. This is a complicated process since there
@@ -213,6 +216,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 					errors = append(errors,
 						fmt.Errorf("Post-processor %d.%d: %s", i+1, j+1, err))
 				}
+
 
 				continue
 			}

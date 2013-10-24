@@ -10,7 +10,7 @@ import (
 //
 // Produces:
 //   vmName string - The name of the VM
-// vmDescription string - the description of the VM
+//   vmDescription string - the description of the VM
 type stepCreateVM struct {
 	vmName string
 	vmDescription string
@@ -46,7 +46,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Set the VM name propery on the first command
+		// Set the VM name property on the first command
 		if s.vmName == "" {
 			s.vmName = name
 		}
@@ -55,11 +55,11 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 			s.vmDescription = description
 		}
 	}
-
+	
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.vmName)
 	state.Put("vmDescription", s.vmDescription)
-
+	
 	return multistep.ActionContinue
 }
 

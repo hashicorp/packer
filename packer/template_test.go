@@ -489,10 +489,7 @@ func TestParseTemplate_variablesBadDefault(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
-=======
 //tests for the description field in the template
->>>>>>> Added tests to test the description field
 func TestParseTemplate_BuilderWithDescription(t *testing.T) {
 	assert := asserts.NewTestingAsserts(t, true)
 
@@ -510,10 +507,9 @@ func TestParseTemplate_BuilderWithDescription(t *testing.T) {
 	result, err := ParseTemplate([]byte(data))
 	assert.Nil(err, "should not error")
 	assert.NotNil(result, "template should not be nil")
-	assert.Length(result.Description, 1, "should have one description")
+	assert.Length(result.Builders, 1, "should have one description")
 
-	descript, ok := result.Description["amazon-ebs"]
-	assert.True(ok, "should have amazon-ebs description")
+	descript := result.Builders["amazon-ebs"].Description
 	assert.Equal(descript, "amazon description", "Description should be 'amazon description'")
 }
 func TestParseTemplate_BuilderWithoutDescription(t *testing.T) {
@@ -533,10 +529,9 @@ func TestParseTemplate_BuilderWithoutDescription(t *testing.T) {
 	result, err := ParseTemplate([]byte(data))
 	assert.Nil(err, "should not error")
 	assert.NotNil(result, "template should not be nil")
-	assert.Length(result.Description, 1, "should have one description")
+	assert.Length(result.Builders, 1, "should have one description")
 
-	descript, ok := result.Description["amazon builder"]
-	assert.True(ok, "should have amazon description")
+	descript := result.Builders["amazon builder"].Description
 	assert.Equal(descript, "", "Description field should be empty")
 }
 func TestParseTemplate_BuilderWithMultipleDescriptions(t *testing.T) {
@@ -560,13 +555,11 @@ func TestParseTemplate_BuilderWithMultipleDescriptions(t *testing.T) {
 	result, err := ParseTemplate([]byte(data))
 	assert.Nil(err, "should not error")
 	assert.NotNil(result, "template should not be nil")
-	assert.Length(result.Description, 2, "should have two descriptions")
+	assert.Length(result.Builders, 2, "should have two descriptions")
 
-	descript, ok := result.Description["amazon builder"]
-	assert.True(ok, "should have amazon description")
+	descript := result.Builders["amazon builder"].Description
 	assert.Equal(descript, "Amazon description", "Description field should be 'amazon description'")
-	descript, ok = result.Description["virtualbox"]
-	assert.True(ok, "should have virtualbox description")
+	descript= result.Builders["virtualbox"].Description
 	assert.Equal(descript, "virtualbox description", "Description field should be 'virtualbox description'")
 }
 
