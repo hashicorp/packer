@@ -147,6 +147,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+func (*Builder) ArtifactTypeId() string {
+	return BuilderId
+}
+
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")

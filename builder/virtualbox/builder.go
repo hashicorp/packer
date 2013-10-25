@@ -337,6 +337,9 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	return nil
 }
+func (*Builder) ArtifactTypeId() string {
+	return BuilderId
+}
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox

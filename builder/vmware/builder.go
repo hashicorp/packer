@@ -333,6 +333,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+func (*Builder) ArtifactTypeId() string {
+	return BuilderId
+}
+
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Initialize the driver that will handle our interaction with VMware
 	driver, err := NewDriver()

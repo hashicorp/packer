@@ -55,6 +55,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+func (*Builder) ArtifactTypeId() string {
+	return BuilderId
+}
+
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	auth, err := b.config.AccessConfig.Auth()
 	if err != nil {

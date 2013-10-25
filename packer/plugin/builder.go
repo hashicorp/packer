@@ -5,6 +5,9 @@ import (
 	"log"
 )
 
+// The unique ID for this builder
+const BuilderId = "mitchellh.plugin.builder"
+
 type cmdBuilder struct {
 	builder packer.Builder
 	client  *Client
@@ -17,6 +20,10 @@ func (b *cmdBuilder) Prepare(config ...interface{}) error {
 	}()
 
 	return b.builder.Prepare(config...)
+}
+
+func (*cmdBuilder) ArtifactTypeId() string {
+	return BuilderId
 }
 
 func (b *cmdBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {

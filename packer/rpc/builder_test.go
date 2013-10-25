@@ -29,6 +29,10 @@ func (b *testBuilder) Prepare(config ...interface{}) error {
 	return nil
 }
 
+func (*testBuilder) ArtifactTypeId() string {
+	return BuilderId
+}
+
 func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	b.runCache = cache
 	b.runCalled = true

@@ -3,6 +3,7 @@ package packer
 // MockBuilder is an implementation of Builder that can be used for tests.
 // You can set some fake return values and you can keep track of what
 // methods were called on the builder. It is fairly basic.
+
 type MockBuilder struct {
 	ArtifactId string
 
@@ -19,6 +20,10 @@ func (tb *MockBuilder) Prepare(config ...interface{}) error {
 	tb.PrepareCalled = true
 	tb.PrepareConfig = config
 	return nil
+}
+
+func (tb *MockBuilder) ArtifactTypeId() string {
+	return tb.ArtifactId
 }
 
 func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {

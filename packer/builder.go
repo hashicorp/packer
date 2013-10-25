@@ -24,6 +24,8 @@ type Builder interface {
 	// configuration.
 	Prepare(...interface{}) error
 
+	ArtifactTypeId() string
+
 	// Run is where the actual build should take place. It takes a Build and a Ui.
 	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
 
