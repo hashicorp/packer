@@ -110,7 +110,7 @@ By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Chef:
 
 ```
-{{if .Sudo}sudo {{end}}chef-solo \
+{{if .Sudo}}sudo {{end}}chef-solo \
   --no-color \
   -c {{.ConfigPath}} \
   -j {{.JsonPath}}
