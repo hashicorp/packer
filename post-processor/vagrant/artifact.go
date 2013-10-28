@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const BuilderId = "mitchellh.post-processor.vagrant"
+const TypeId = "mitchellh.post-processor.vagrant"
 
 type Artifact struct {
 	Path     string
@@ -19,8 +19,8 @@ func NewArtifact(provider, path string) *Artifact {
 	}
 }
 
-func (*Artifact) BuilderId() string {
-	return BuilderId
+func (*Artifact) TypeId() string {
+	return TypeId
 }
 
 func (a *Artifact) Files() []string {

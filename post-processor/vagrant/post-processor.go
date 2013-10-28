@@ -96,9 +96,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	ppName, ok := builtins[artifact.BuilderId()]
+	ppName, ok := builtins[artifact.TypeId()]
 	if !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.TypeId())
 	}
 
 	// Use the premade PostProcessor if we have one. Otherwise, we

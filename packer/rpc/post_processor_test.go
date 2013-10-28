@@ -73,11 +73,11 @@ func TestPostProcessorRPC(t *testing.T) {
 		t.Fatal("postprocess should be called")
 	}
 
-	if p.ppArtifact.BuilderId() != "bid" {
+	if p.ppArtifact.TypeId() != "bid" {
 		t.Fatal("unknown artifact")
 	}
 
-	if artifact.BuilderId() != "bid" {
+	if artifact.TypeId() != "bid" {
 		t.Fatal("unknown result artifact")
 	}
 }

@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const BuilderId = "mitchellh.vmware"
+const TypeId = "mitchellh.vmware"
 
 type Builder struct {
 	config config

@@ -14,15 +14,15 @@ type Artifact struct {
 	// A map of regions to AMI IDs.
 	Amis map[string]string
 
-	// BuilderId is the unique ID for the builder that created this AMI
-	BuilderIdValue string
+	// TypeId is the unique ID for the builder that created this AMI
+	TypeIdValue string
 
 	// EC2 connection for performing API stuff.
 	Conn *ec2.EC2
 }
 
-func (a *Artifact) BuilderId() string {
-	return a.BuilderIdValue
+func (a *Artifact) TypeId() string {
+	return a.TypeIdValue
 }
 
 func (*Artifact) Files() []string {

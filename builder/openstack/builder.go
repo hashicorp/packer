@@ -13,7 +13,7 @@ import (
 )
 
 // The unique ID for this builder
-const BuilderId = "mitchellh.openstack"
+const TypeId = "mitchellh.openstack"
 
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -121,7 +121,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the artifact and return it
 	artifact := &Artifact{
 		ImageId:        state.Get("image").(string),
-		BuilderIdValue: BuilderId,
+		TypeIdValue: 	TypeId,
 		Conn:           csp,
 	}
 

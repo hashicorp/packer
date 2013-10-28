@@ -11,15 +11,15 @@ type Artifact struct {
 	// ImageId of built image
 	ImageId string
 
-	// BuilderId is the unique ID for the builder that created this image
-	BuilderIdValue string
+	// TypeId is the unique ID for the builder that created this image
+	TypeIdValue string
 
 	// OpenStack connection for performing API stuff.
 	Conn gophercloud.CloudServersProvider
 }
 
-func (a *Artifact) BuilderId() string {
-	return a.BuilderIdValue
+func (a *Artifact) TypeId() string {
+	return a.TypeIdValue
 }
 
 func (*Artifact) Files() []string {

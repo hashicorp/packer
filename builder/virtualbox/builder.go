@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const BuilderId = "mitchellh.virtualbox"
+const TypeId = "mitchellh.virtualbox"
 
 type Builder struct {
 	config config

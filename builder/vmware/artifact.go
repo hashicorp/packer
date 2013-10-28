@@ -12,8 +12,8 @@ type Artifact struct {
 	f   []string
 }
 
-func (*Artifact) BuilderId() string {
-	return BuilderId
+func (*Artifact) TypeId() string {
+	return TypeId
 }
 
 func (a *Artifact) Files() []string {

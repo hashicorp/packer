@@ -6,7 +6,7 @@ type MockArtifact struct {
 	DestroyCalled bool
 }
 
-func (*MockArtifact) BuilderId() string {
+func (*MockArtifact) TypeId() string {
 	return "bid"
 }
 

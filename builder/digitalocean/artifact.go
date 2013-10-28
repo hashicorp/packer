@@ -16,8 +16,8 @@ type Artifact struct {
 	client *DigitalOceanClient
 }
 
-func (*Artifact) BuilderId() string {
-	return BuilderId
+func (*Artifact) TypeId() string {
+	return TypeId
 }
 
 func (*Artifact) Files() []string {

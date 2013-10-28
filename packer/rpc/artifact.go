@@ -21,8 +21,8 @@ func Artifact(client *rpc.Client) *artifact {
 	return &artifact{client}
 }
 
-func (a *artifact) BuilderId() (result string) {
-	a.client.Call("Artifact.BuilderId", new(interface{}), &result)
+func (a *artifact) TypeId() (result string) {
+	a.client.Call("Artifact.TypeId", new(interface{}), &result)
 	return
 }
 
@@ -50,8 +50,8 @@ func (a *artifact) Destroy() error {
 	return result
 }
 
-func (s *ArtifactServer) BuilderId(args *interface{}, reply *string) error {
-	*reply = s.artifact.BuilderId()
+func (s *ArtifactServer) TypeId(args *interface{}, reply *string) error {
+	*reply = s.artifact.TypeId()
 	return nil
 }
 

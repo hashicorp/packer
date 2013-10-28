@@ -110,7 +110,7 @@ func TestBuildRPC(t *testing.T) {
 		t.Fatalf("bad: %#v", artifacts)
 	}
 
-	if artifacts[0].BuilderId() != "bid" {
+	if artifacts[0].TypeId() != "bid" {
 		t.Fatalf("bad: %#v", artifacts)
 	}
 
