@@ -53,9 +53,9 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
 		return err
 	}
 
-	portCountArg := "sataportcount"
+	portCountArg := "--sataportcount"
 	if strings.HasPrefix(version, "4.3") {
-		portCountArg = "portcount"
+		portCountArg = "--portcount"
 	}
 
 	command := []string{
