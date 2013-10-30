@@ -210,7 +210,7 @@ func (rw *BasicUi) Say(message string) {
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
-		panic(err)
+		log.Printf("[ERR] Failed to write to UI: %s", err)
 	}
 }
 
@@ -221,7 +221,7 @@ func (rw *BasicUi) Message(message string) {
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
-		panic(err)
+		log.Printf("[ERR] Failed to write to UI: %s", err)
 	}
 }
 
@@ -232,7 +232,7 @@ func (rw *BasicUi) Error(message string) {
 	log.Printf("ui error: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
-		panic(err)
+		log.Printf("[ERR] Failed to write to UI: %s", err)
 	}
 }
 
