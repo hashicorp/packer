@@ -209,6 +209,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			UserDataFile:       b.config.UserDataFile,
 			SourceAMI:          b.config.SourceAmi,
 			SubnetId:           b.config.SubnetId,
+			AvailabilityZone:   b.config.AvailabilityZone,
 			BlockDevices:       b.config.BlockDevices,
 		},
 		&common.StepConnectSSH{

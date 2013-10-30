@@ -1,6 +1,15 @@
 ## 0.4.0 (unreleased)
 
+FEATURES:
 
+* builder/amazon/ebs: Ability to specify which availability zone to create
+  instance in. [GH-536]
+
+BUG FIXES:
+
+* core: Won't panic when writing to a bad pipe. [GH-560]
+* common/uuid: Use cryptographically secure PRNG when generating
+  UUIDs. [GH-552]
 
 ## 0.3.10 (October 20, 2013)
 
