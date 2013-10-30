@@ -48,6 +48,31 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_Description(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	
+	// Test with no description field
+	config["description"] = ""
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if b.config.Description != "<No Description>" {
+		t.Fatalf("Wrong value: %s", b.config.Description)
+	}
+
+	// Test with a description field
+	config["description"] = "VM description"
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if b.config.Description != "VM description" {
+		t.Fatalf("Wrong value: %s", b.config.Description)
+	}
+}
+
 func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	b := &Builder{}
 	config := testConfig()

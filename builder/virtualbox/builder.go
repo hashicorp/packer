@@ -52,6 +52,7 @@ type config struct {
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
+	Description 		 string 	`mapstructure:"description"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
@@ -137,6 +138,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	}
+
+	if b.config.Description == "" {
+		b.config.Description = "<No Description>"
 	}
 
 	if b.config.Format == "" {

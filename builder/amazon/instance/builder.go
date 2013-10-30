@@ -36,6 +36,7 @@ type Config struct {
 	X509CertPath        string `mapstructure:"x509_cert_path"`
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
+	Description	   		string `mapstructure:"description"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -157,6 +158,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
+	}
+
+	if b.config.Description == "" {
+		b.config.Description = "<No Description>"
 	}
 
 	log.Println(common.ScrubConfig(b.config), b.config.AccessKey, b.config.SecretKey)

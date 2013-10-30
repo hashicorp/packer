@@ -489,6 +489,99 @@ func TestParseTemplate_variablesBadDefault(t *testing.T) {
 	}
 }
 
+//tests for the description field in the template
+func TestParseTemplate_BuilderWithDescription(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"type": "amazon-ebs",
+				"Description": "amazon description"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("should not error")
+	}
+	if result == nil {
+		t.Fatalf("template should not be nil")
+	}
+	if len(result.Builders) != 1 {
+		t.Fatalf("should only have one description")
+	}
+
+	descript := result.Builders["amazon-ebs"].Description
+	if descript != "amazon description" {
+		t.Fatalf("Description should be \"amazon description\"")
+	}
+}
+func TestParseTemplate_BuilderWithoutDescription(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "amazon builder",
+				"type": "amazon-ebs"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("should not error")
+	}
+	if result == nil {
+		t.Fatalf("template should not be nil")
+	}
+	if len(result.Builders) != 1 {
+		t.Fatalf("should only have one description")
+	}
+	descript := result.Builders["amazon builder"].Description
+	if descript != "" {
+		t.Fatalf("Description should be empty")
+	}
+}
+func TestParseTemplate_BuilderWithMultipleDescriptions(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "amazon builder",
+				"type": "amazon-ebs",
+				"Description": "Amazon description"
+			}, {
+				"type": "virtualbox",
+				"Description": "virtualbox description"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("should not error")
+	}
+	if result == nil {
+		t.Fatalf("template should not be nil")
+	}
+	if len(result.Builders) != 2 {
+		t.Fatalf("should have two descriptions")
+	}
+
+	descript := result.Builders["amazon builder"].Description
+	if descript != "Amazon description" {
+		t.Fatalf("Description field should be \"amazon description\"")
+	}
+	descript= result.Builders["virtualbox"].Description
+	if descript != "virtualbox description" {
+		t.Fatalf("Description field should be \"virtualbox description\"")
+	}
+}
+
 func TestTemplate_BuildNames(t *testing.T) {
 	data := `
 	{

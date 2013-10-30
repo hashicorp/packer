@@ -18,7 +18,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-
+	
 	name := config.VMName
 
 	commands := make([][]string, 4)
@@ -48,10 +48,10 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 			s.vmName = name
 		}
 	}
-
+	
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.vmName)
-
+	
 	return multistep.ActionContinue
 }
 

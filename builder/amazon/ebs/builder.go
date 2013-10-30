@@ -24,6 +24,7 @@ type config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+	Description	   string  `mapstructure:"description"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -54,6 +55,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
+	}
+	
+	if b.config.Description == "" {
+		b.config.Description = "<No Description>"
 	}
 
 	log.Println(common.ScrubConfig(b.config), b.config.AccessKey, b.config.SecretKey)

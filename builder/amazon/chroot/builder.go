@@ -32,6 +32,7 @@ type Config struct {
 	DevicePath     string     `mapstructure:"device_path"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
+	Description	   string	  `mapstructure:"description"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -82,11 +83,15 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if b.config.CommandWrapper == "" {
-		b.config.CommandWrapper = "{{.Command}}"
+   		b.config.CommandWrapper = "{{.Command}}"
 	}
 
 	if b.config.MountPath == "" {
 		b.config.MountPath = "packer-amazon-chroot-volumes/{{.Device}}"
+	}
+	
+	if b.config.Description == "" {
+		b.config.Description = "<No Description>"
 	}
 
 	// Accumulate any errors
@@ -165,11 +170,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ec2conn := ec2.New(auth, region)
 
 	wrappedCommand := func(command string) (string, error) {
-		return b.config.tpl.Process(
-			b.config.CommandWrapper, &wrappedCommandTemplate{
-				Command: command,
-			})
-	}
+    	return b.config.tpl.Process(
+	    	b.config.CommandWrapper, &wrappedCommandTemplate{        
+	      		Command: command,
+	   		})
+  	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
