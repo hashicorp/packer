@@ -13,6 +13,8 @@ BUG FIXES:
 * builder/openstack: Properly scrub password from logs [GH-554]
 * common/uuid: Use cryptographically secure PRNG when generating
   UUIDs. [GH-552]
+* communicator/ssh: File uploads that exceed the size of memory no longer
+  cause crashes. [GH-561]
 
 ## 0.3.10 (October 20, 2013)
 
