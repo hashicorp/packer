@@ -49,3 +49,7 @@ func (FixerCreateTime) Fix(input map[string]interface{}) (map[string]interface{}
 	input["builders"] = tpl.Builders
 	return input, nil
 }
+
+func (FixerCreateTime) Synopsis() string {
+	return `Replaces ".CreateTime" in builder configs with "{{timestamp}}"`
+}
