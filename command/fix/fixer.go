@@ -13,7 +13,8 @@ var Fixers map[string]Fixer
 
 func init() {
 	Fixers = map[string]Fixer{
-		"iso-md5":    new(FixerISOMD5),
-		"createtime": new(FixerCreateTime),
+		"iso-md5":             new(FixerISOMD5),
+		"createtime":          new(FixerCreateTime),
+		"virtualbox-gaattach": new(FixerVirtualBoxGAAttach),
 	}
 }
