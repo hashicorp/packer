@@ -34,8 +34,8 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
 }
 </pre>
 
-It is important to add a `shutdown_command`. By default Packer halts the 
-virtual machine and the file system may not be sync'd. Thus, changes made in a 
+It is important to add a `shutdown_command`. By default Packer halts the
+virtual machine and the file system may not be sync'd. Thus, changes made in a
 provisioner might not be saved.
 
 ## Configuration Reference
@@ -90,9 +90,11 @@ Optional:
 * `format` (string) - Either "ovf" or "ova", this specifies the output
   format of the exported virtual machine. This defaults to "ovf".
 
-* `guest_additions_attach` (bool) - If this is true (defaults to "false"),
-  the guest additions ISO will be attached to the virtual machine as a CD
-  rather than uploaded as a raw ISO.
+* `guest_additions_mode` (string) - The method by which guest additions
+  are made available to the guest for installation. Valid options are
+  "upload", "attach", or "disable". The functions of each of these should be
+  self-explanatory. The default value is "upload". If "disable" is used,
+  guest additions won't be downloaded, either.
 
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
