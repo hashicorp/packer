@@ -41,3 +41,7 @@ func (FixerISOMD5) Fix(input map[string]interface{}) (map[string]interface{}, er
 	input["builders"] = tpl.Builders
 	return input, nil
 }
+
+func (FixerISOMD5) Synopsis() string {
+	return `Replaces "iso_md5" in builders with "iso_checksum"`
+}

@@ -57,3 +57,7 @@ func (FixerVirtualBoxGAAttach) Fix(input map[string]interface{}) (map[string]int
 	input["builders"] = tpl.Builders
 	return input, nil
 }
+
+func (FixerVirtualBoxGAAttach) Synopsis() string {
+	return `Updates VirtualBox builders using "guest_additions_attach" to use "guest_additions_mode"`
+}
