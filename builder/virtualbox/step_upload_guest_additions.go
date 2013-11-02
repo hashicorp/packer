@@ -23,8 +23,8 @@ func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	ui := state.Get("ui").(packer.Ui)
 
 	// If we're attaching then don't do this, since we attached.
-	if config.GuestAdditionsAttach {
-		log.Println("Not uploading guest additions since we're attaching.")
+	if config.GuestAdditionsMode != GuestAdditionsModeUpload {
+		log.Println("Not uploading guest additions since mode is not upload")
 		return multistep.ActionContinue
 	}
 

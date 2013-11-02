@@ -65,6 +65,10 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
+	if b.config.GuestAdditionsMode != GuestAdditionsModeUpload {
+		t.Errorf("bad guest additions mode: %s", b.config.GuestAdditionsMode)
+	}
+
 	if b.config.GuestOSType != "Other" {
 		t.Errorf("bad guest OS type: %s", b.config.GuestOSType)
 	}
@@ -175,6 +179,38 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	expected := []string{"foo", "bar"}
 	if !reflect.DeepEqual(b.config.FloppyFiles, expected) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
+	}
+}
+
+func TestBuilderPrepare_GuestAdditionsMode(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// test default mode
+	delete(config, "guest_additions_mode")
+	err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	// Test another mode
+	config["guest_additions_mode"] = "attach"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.GuestAdditionsMode != GuestAdditionsModeAttach {
+		t.Fatalf("bad: %s", b.config.GuestAdditionsMode)
+	}
+
+	// Test bad mode
+	config["guest_additions_mode"] = "teleport"
+	b = Builder{}
+	err = b.Prepare(config)
+	if err == nil {
+		t.Fatal("should error")
 	}
 }
 
