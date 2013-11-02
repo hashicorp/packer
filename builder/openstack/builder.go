@@ -51,7 +51,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(b.config), b.config.Password)
+	log.Println(common.ScrubConfig(b.config, b.config.Password))
 	return nil
 }
 

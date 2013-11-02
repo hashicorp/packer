@@ -8,6 +8,9 @@ FEATURES:
 BUG FIXES:
 
 * core: Won't panic when writing to a bad pipe. [GH-560]
+* builder/amazon/all: Properly scrub access key and secret key from logs.
+  [GH-554]
+* builder/openstack: Properly scrub password from logs [GH-554]
 * common/uuid: Use cryptographically secure PRNG when generating
   UUIDs. [GH-552]
 
