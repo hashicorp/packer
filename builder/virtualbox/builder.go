@@ -16,6 +16,14 @@ import (
 
 const BuilderId = "mitchellh.virtualbox"
 
+// These are the different valid mode values for "guest_additions_mode" which
+// determine how guest additions are delivered to the guest.
+const (
+	GuestAdditionsModeDisable string = "disable"
+	GuestAdditionsModeAttach         = "attach"
+	GuestAdditionsModeUpload         = "upload"
+)
+
 type Builder struct {
 	config config
 	runner multistep.Runner
@@ -28,7 +36,7 @@ type config struct {
 	DiskSize             uint       `mapstructure:"disk_size"`
 	FloppyFiles          []string   `mapstructure:"floppy_files"`
 	Format               string     `mapstructure:"format"`
-	GuestAdditionsAttach bool       `mapstructure:"guest_additions_attach"`
+	GuestAdditionsMode   string     `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
 	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
 	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
@@ -85,6 +93,10 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	if b.config.FloppyFiles == nil {
 		b.config.FloppyFiles = make([]string, 0)
+	}
+
+	if b.config.GuestAdditionsMode == "" {
+		b.config.GuestAdditionsMode = "upload"
 	}
 
 	if b.config.GuestAdditionsPath == "" {
@@ -145,6 +157,7 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 
 	// Errors
 	templates := map[string]*string{
+		"guest_additions_mode":    &b.config.GuestAdditionsMode,
 		"guest_additions_sha256":  &b.config.GuestAdditionsSHA256,
 		"guest_os_type":           &b.config.GuestOSType,
 		"hard_drive_interface":    &b.config.HardDriveInterface,
@@ -262,6 +275,25 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
 		}
+	}
+
+	validMode := false
+	validModes := []string{
+		GuestAdditionsModeDisable,
+		GuestAdditionsModeAttach,
+		GuestAdditionsModeUpload,
+	}
+
+	for _, mode := range validModes {
+		if b.config.GuestAdditionsMode == mode {
+			validMode = true
+			break
+		}
+	}
+
+	if !validMode {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("guest_additions_mode is invalid. Must be one of: %v", validModes))
 	}
 
 	if b.config.GuestAdditionsSHA256 != "" {
