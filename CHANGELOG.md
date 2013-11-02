@@ -5,6 +5,11 @@ FEATURES:
 * builder/amazon/ebs: Ability to specify which availability zone to create
   instance in. [GH-536]
 
+IMPROVEMENTS:
+
+* builder/virtualbox: Can now disable guest addition download entirely
+  by setting "guest_additions_mode" to "disable" [GH-580]
+
 BUG FIXES:
 
 * core: Won't panic when writing to a bad pipe. [GH-560]
