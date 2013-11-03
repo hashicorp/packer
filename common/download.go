@@ -73,7 +73,8 @@ func HashForType(t string) hash.Hash {
 func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 	if c.DownloaderMap == nil {
 		c.DownloaderMap = map[string]Downloader{
-			"http": new(HTTPDownloader),
+			"http":  new(HTTPDownloader),
+			"https": new(HTTPDownloader),
 		}
 	}
 
