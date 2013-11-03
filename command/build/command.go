@@ -113,7 +113,8 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
-		err := b.Prepare(userVars)
+		// TODO(mitchellh): Handle warnings
+		_, err := b.Prepare(userVars)
 		if err != nil {
 			env.Ui().Error(err.Error())
 			return 1
