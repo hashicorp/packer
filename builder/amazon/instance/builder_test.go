@@ -40,19 +40,28 @@ func TestBuilderPrepare_AccountId(t *testing.T) {
 	config := testConfig()
 
 	config["account_id"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	config["account_id"] = "foo"
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
 
 	config["account_id"] = "0123-0456-7890"
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -68,7 +77,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 	// Test good
 	config["ami_name"] = "foo"
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -76,7 +88,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -84,7 +99,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -95,7 +113,10 @@ func TestBuilderPrepare_BundleDestination(t *testing.T) {
 	config := testConfig()
 
 	config["bundle_destination"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -110,7 +131,10 @@ func TestBuilderPrepare_BundlePrefix(t *testing.T) {
 	config := testConfig()
 
 	config["bundle_prefix"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -126,7 +150,10 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -137,13 +164,19 @@ func TestBuilderPrepare_S3Bucket(t *testing.T) {
 	config := testConfig()
 
 	config["s3_bucket"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	config["s3_bucket"] = "foo"
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
@@ -154,13 +187,19 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	config := testConfig()
 
 	config["x509_cert_path"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	config["x509_cert_path"] = "i/am/a/file/that/doesnt/exist"
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Error("should have error")
 	}
@@ -172,7 +211,10 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	defer os.Remove(tf.Name())
 
 	config["x509_cert_path"] = tf.Name()
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -183,13 +225,19 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	config := testConfig()
 
 	config["x509_key_path"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	config["x509_key_path"] = "i/am/a/file/that/doesnt/exist"
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Error("should have error")
 	}
@@ -201,7 +249,10 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	defer os.Remove(tf.Name())
 
 	config["x509_key_path"] = tf.Name()
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -212,7 +263,10 @@ func TestBuilderPrepare_X509UploadPath(t *testing.T) {
 	config := testConfig()
 
 	config["x509_upload_path"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
