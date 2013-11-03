@@ -62,6 +62,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	}
 
 	errs := make([]error, 0)
+	warnings := make(map[string][]string)
 
 	// The component finder for our builds
 	components := &packer.ComponentFinder{
@@ -81,7 +82,10 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Check the configuration of all builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		err := b.Prepare(userVars)
+		warns, err := b.Prepare(userVars)
+		if len(warns) > 0 {
+			warnings[b.Name()] = warns
+		}
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Errors validating build '%s'. %s", b.Name(), err))
 		}
@@ -98,6 +102,21 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		}
 
 		return 1
+	}
+
+	if len(warnings) > 0 {
+		env.Ui().Say("Template validation succeeded, but there were some warnings.")
+		env.Ui().Say("These are ONLY WARNINGS, and Packer will attempt to build the")
+		env.Ui().Say("template despite them, but they should be paid attention to.\n")
+
+		for build, warns := range warnings {
+			env.Ui().Say(fmt.Sprintf("Warnings for build '%s':\n", build))
+			for _, warning := range warns {
+				env.Ui().Say(fmt.Sprintf("* %s", warning))
+			}
+		}
+
+		return 0
 	}
 
 	env.Ui().Say("Template validated successfully.")
