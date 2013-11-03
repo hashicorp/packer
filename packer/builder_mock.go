@@ -4,7 +4,8 @@ package packer
 // You can set some fake return values and you can keep track of what
 // methods were called on the builder. It is fairly basic.
 type MockBuilder struct {
-	ArtifactId string
+	ArtifactId      string
+	PrepareWarnings []string
 
 	PrepareCalled bool
 	PrepareConfig []interface{}
@@ -15,10 +16,10 @@ type MockBuilder struct {
 	CancelCalled  bool
 }
 
-func (tb *MockBuilder) Prepare(config ...interface{}) error {
+func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
 	tb.PrepareCalled = true
 	tb.PrepareConfig = config
-	return nil
+	return tb.PrepareWarnings, nil
 }
 
 func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
