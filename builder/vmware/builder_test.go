@@ -64,7 +64,10 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 
 	// Test a default boot_wait
 	delete(config, "boot_wait")
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -75,7 +78,10 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 
 	// Test with a bad boot_wait
 	config["boot_wait"] = "this is not good"
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -83,7 +89,10 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 	// Test with a good one
 	config["boot_wait"] = "5s"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -95,7 +104,10 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 
 	// Test bad
 	config["iso_checksum"] = ""
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -103,7 +115,10 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	// Test good
 	config["iso_checksum"] = "FOo"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -119,7 +134,10 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 
 	// Test bad
 	config["iso_checksum_type"] = ""
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -127,7 +145,10 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	// Test good
 	config["iso_checksum_type"] = "mD5"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -139,7 +160,10 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	// Test unknown
 	config["iso_checksum_type"] = "fake"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -147,7 +171,10 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 func TestBuilderPrepare_Defaults(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -174,7 +201,10 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "disk_size")
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("bad err: %s", err)
 	}
@@ -185,7 +215,10 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	config["disk_size"] = 60000
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -200,7 +233,10 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "floppy_files")
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("bad err: %s", err)
 	}
@@ -211,7 +247,10 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 
 	config["floppy_files"] = []string{"foo", "bar"}
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -229,7 +268,10 @@ func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	// Bad
 	config["http_port_min"] = 1000
 	config["http_port_max"] = 500
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -237,7 +279,10 @@ func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	// Bad
 	config["http_port_min"] = -500
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -246,7 +291,10 @@ func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	config["http_port_min"] = 500
 	config["http_port_max"] = 1000
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -258,7 +306,10 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -273,7 +324,10 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	// Test both epty
 	config["iso_url"] = ""
 	b = Builder{}
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -281,7 +335,10 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	// Test iso_url set
 	config["iso_url"] = "http://www.packer.io"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Errorf("should not have error: %s", err)
 	}
@@ -295,7 +352,10 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	config["iso_url"] = "http://www.packer.io"
 	config["iso_urls"] = []string{"http://www.packer.io"}
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -308,7 +368,10 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Errorf("should not have error: %s", err)
 	}
@@ -335,7 +398,10 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 
 	config["output_directory"] = dir
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -343,7 +409,10 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	// Test with a good one
 	config["output_directory"] = "i-hope-i-dont-exist"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -355,7 +424,10 @@ func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 
 	// Test with a bad value
 	config["shutdown_timeout"] = "this is not good"
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -363,7 +435,10 @@ func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 	// Test with a good one
 	config["shutdown_timeout"] = "5s"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -375,14 +450,20 @@ func TestBuilderPrepare_sshKeyPath(t *testing.T) {
 
 	config["ssh_key_path"] = ""
 	b = Builder{}
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
 	config["ssh_key_path"] = "/i/dont/exist"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -401,7 +482,10 @@ func TestBuilderPrepare_sshKeyPath(t *testing.T) {
 
 	config["ssh_key_path"] = tf.Name()
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -412,7 +496,10 @@ func TestBuilderPrepare_sshKeyPath(t *testing.T) {
 	tf.Write([]byte(testPem))
 	config["ssh_key_path"] = tf.Name()
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -423,14 +510,20 @@ func TestBuilderPrepare_SSHUser(t *testing.T) {
 	config := testConfig()
 
 	config["ssh_username"] = ""
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	config["ssh_username"] = "exists"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -442,7 +535,10 @@ func TestBuilderPrepare_SSHPort(t *testing.T) {
 
 	// Test with a bad value
 	delete(config, "ssh_port")
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("bad err: %s", err)
 	}
@@ -454,7 +550,10 @@ func TestBuilderPrepare_SSHPort(t *testing.T) {
 	// Test with a good one
 	config["ssh_port"] = 44
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -470,7 +569,10 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 
 	// Test with a bad value
 	config["ssh_wait_timeout"] = "this is not good"
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -478,7 +580,10 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	// Test with a good one
 	config["ssh_wait_timeout"] = "5s"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -490,7 +595,10 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 
 	// Test a default
 	delete(config, "tools_upload_path")
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -502,7 +610,10 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 	// Test with a bad value
 	config["tools_upload_path"] = "{{{nope}"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -510,7 +621,10 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 	// Test with a good one
 	config["tools_upload_path"] = "hey"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -522,7 +636,10 @@ func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
 
 	// Test bad
 	config["vmx_template_path"] = "/i/dont/exist/forreal"
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -541,7 +658,10 @@ func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
 
 	config["vmx_template_path"] = tf.Name()
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -560,7 +680,10 @@ func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
 
 	config["vmx_template_path"] = tf2.Name()
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -573,7 +696,10 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	// Bad
 	config["vnc_port_min"] = 1000
 	config["vnc_port_max"] = 500
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -581,7 +707,10 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	// Bad
 	config["vnc_port_min"] = -500
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -590,7 +719,10 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	config["vnc_port_min"] = 500
 	config["vnc_port_max"] = 1000
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -605,7 +737,10 @@ func TestBuilderPrepare_VMXData(t *testing.T) {
 		"two": "bar",
 	}
 
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
