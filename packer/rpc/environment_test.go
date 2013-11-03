@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var testEnvBuilder = &testBuilder{}
+var testEnvBuilder = &packer.MockBuilder{}
 var testEnvCache = &testCache{}
 var testEnvUi = &testUi{}
 
@@ -90,7 +90,7 @@ func TestEnvironmentRPC(t *testing.T) {
 	}
 
 	builder.Prepare(nil)
-	if !testEnvBuilder.prepareCalled {
+	if !testEnvBuilder.PrepareCalled {
 		t.Fatal("should be called")
 	}
 

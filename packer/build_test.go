@@ -8,7 +8,7 @@ import (
 func testBuild() *coreBuild {
 	return &coreBuild{
 		name:          "test",
-		builder:       &TestBuilder{artifactId: "b"},
+		builder:       &MockBuilder{ArtifactId: "b"},
 		builderConfig: 42,
 		builderType:   "foo",
 		hooks: map[string][]Hook{
@@ -24,10 +24,6 @@ func testBuild() *coreBuild {
 		},
 		variables: make(map[string]coreBuildVariable),
 	}
-}
-
-func testBuilder() *TestBuilder {
-	return &TestBuilder{}
 }
 
 func testDefaultPackerConfig() map[string]interface{} {
@@ -50,14 +46,14 @@ func TestBuild_Prepare(t *testing.T) {
 	packerConfig := testDefaultPackerConfig()
 
 	build := testBuild()
-	builder := build.builder.(*TestBuilder)
+	builder := build.builder.(*MockBuilder)
 
 	build.Prepare(nil)
-	if !builder.prepareCalled {
+	if !builder.PrepareCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(builder.prepareConfig, []interface{}{42, packerConfig}) {
-		t.Fatalf("bad: %#v", builder.prepareConfig)
+	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
 	coreProv := build.provisioners[0]
@@ -81,7 +77,11 @@ func TestBuild_Prepare(t *testing.T) {
 
 func TestBuild_Prepare_Twice(t *testing.T) {
 	build := testBuild()
-	if err := build.Prepare(nil); err != nil {
+	warn, err := build.Prepare(nil)
+	if len(warn) > 0 {
+		t.Fatalf("bad: %#v", warn)
+	}
+	if err != nil {
 		t.Fatalf("bad error: %s", err)
 	}
 
@@ -99,20 +99,36 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 	build.Prepare(nil)
 }
 
+func TestBuildPrepare_BuilderWarniings(t *testing.T) {
+	expected := []string{"foo"}
+
+	build := testBuild()
+	builder := build.builder.(*MockBuilder)
+	builder.PrepareWarnings = expected
+
+	warn, err := build.Prepare(nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if !reflect.DeepEqual(warn, expected) {
+		t.Fatalf("bad: %#v", warn)
+	}
+}
+
 func TestBuild_Prepare_Debug(t *testing.T) {
 	packerConfig := testDefaultPackerConfig()
 	packerConfig[DebugConfigKey] = true
 
 	build := testBuild()
-	builder := build.builder.(*TestBuilder)
+	builder := build.builder.(*MockBuilder)
 
 	build.SetDebug(true)
 	build.Prepare(nil)
-	if !builder.prepareCalled {
+	if !builder.PrepareCalled {
 		t.Fatalf("should be called")
 	}
-	if !reflect.DeepEqual(builder.prepareConfig, []interface{}{42, packerConfig}) {
-		t.Fatalf("bad: %#v", builder.prepareConfig)
+	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
 	coreProv := build.provisioners[0]
@@ -133,19 +149,22 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 
 	build := testBuild()
 	build.variables["foo"] = coreBuildVariable{Default: "bar"}
-	builder := build.builder.(*TestBuilder)
+	builder := build.builder.(*MockBuilder)
 
-	err := build.Prepare(nil)
+	warn, err := build.Prepare(nil)
+	if len(warn) > 0 {
+		t.Fatalf("bad: %#v", warn)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !builder.prepareCalled {
+	if !builder.PrepareCalled {
 		t.Fatal("prepare should be called")
 	}
 
-	if !reflect.DeepEqual(builder.prepareConfig[1], packerConfig) {
-		t.Fatalf("prepare bad: %#v", builder.prepareConfig[1])
+	if !reflect.DeepEqual(builder.PrepareConfig[1], packerConfig) {
+		t.Fatalf("prepare bad: %#v", builder.PrepareConfig[1])
 	}
 }
 
@@ -153,7 +172,10 @@ func TestBuildPrepare_variables_nonexist(t *testing.T) {
 	build := testBuild()
 	build.variables["foo"] = coreBuildVariable{Default: "bar"}
 
-	err := build.Prepare(map[string]string{"bar": "baz"})
+	warn, err := build.Prepare(map[string]string{"bar": "baz"})
+	if len(warn) > 0 {
+		t.Fatalf("bad: %#v", warn)
+	}
 	if err == nil {
 		t.Fatal("should have had error")
 	}
@@ -167,19 +189,22 @@ func TestBuildPrepare_variables_override(t *testing.T) {
 
 	build := testBuild()
 	build.variables["foo"] = coreBuildVariable{Default: "bar"}
-	builder := build.builder.(*TestBuilder)
+	builder := build.builder.(*MockBuilder)
 
-	err := build.Prepare(map[string]string{"foo": "baz"})
+	warn, err := build.Prepare(map[string]string{"foo": "baz"})
+	if len(warn) > 0 {
+		t.Fatalf("bad: %#v", warn)
+	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !builder.prepareCalled {
+	if !builder.PrepareCalled {
 		t.Fatal("prepare should be called")
 	}
 
-	if !reflect.DeepEqual(builder.prepareConfig[1], packerConfig) {
-		t.Fatalf("prepare bad: %#v", builder.prepareConfig[1])
+	if !reflect.DeepEqual(builder.PrepareConfig[1], packerConfig) {
+		t.Fatalf("prepare bad: %#v", builder.PrepareConfig[1])
 	}
 }
 
@@ -187,7 +212,10 @@ func TestBuildPrepare_variablesRequired(t *testing.T) {
 	build := testBuild()
 	build.variables["foo"] = coreBuildVariable{Required: true}
 
-	err := build.Prepare(map[string]string{})
+	warn, err := build.Prepare(map[string]string{})
+	if len(warn) > 0 {
+		t.Fatalf("bad: %#v", warn)
+	}
 	if err == nil {
 		t.Fatal("should have had error")
 	}
@@ -195,7 +223,10 @@ func TestBuildPrepare_variablesRequired(t *testing.T) {
 	// Test with setting the value
 	build = testBuild()
 	build.variables["foo"] = coreBuildVariable{Required: true}
-	err = build.Prepare(map[string]string{"foo": ""})
+	warn, err = build.Prepare(map[string]string{"foo": ""})
+	if len(warn) > 0 {
+		t.Fatalf("bad: %#v", warn)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -216,13 +247,13 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify builder was run
-	builder := build.builder.(*TestBuilder)
-	if !builder.runCalled {
+	builder := build.builder.(*MockBuilder)
+	if !builder.RunCalled {
 		t.Fatal("should be called")
 	}
 
 	// Verify hooks are disapatchable
-	dispatchHook := builder.runHook
+	dispatchHook := builder.RunHook
 	dispatchHook.Run("foo", nil, nil, 42)
 
 	hook := build.hooks["foo"][0].(*MockHook)
@@ -402,8 +433,8 @@ func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
 	build.Cancel()
 
-	builder := build.builder.(*TestBuilder)
-	if !builder.cancelCalled {
+	builder := build.builder.(*MockBuilder)
+	if !builder.CancelCalled {
 		t.Fatal("cancel should be called")
 	}
 }

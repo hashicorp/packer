@@ -54,7 +54,7 @@ func TestHelperProcess(*testing.T) {
 		fmt.Printf("%s1|:1234\n", APIVersion)
 		<-make(chan int)
 	case "builder":
-		ServeBuilder(new(helperBuilder))
+		ServeBuilder(new(packer.MockBuilder))
 	case "command":
 		ServeCommand(new(helperCommand))
 	case "hook":
