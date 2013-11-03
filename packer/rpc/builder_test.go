@@ -30,13 +30,36 @@ func TestBuilderPrepare(t *testing.T) {
 
 	// Test Prepare
 	config := 42
-	bClient.Prepare(config)
+	warnings, err := bClient.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+
 	if !b.PrepareCalled {
 		t.Fatal("should be called")
 	}
 
 	if !reflect.DeepEqual(b.PrepareConfig, []interface{}{42}) {
 		t.Fatalf("bad: %#v", b.PrepareConfig)
+	}
+}
+
+func TestBuilderPrepare_Warnings(t *testing.T) {
+	b, bClient := builderRPCClient(t)
+
+	expected := []string{"foo"}
+	b.PrepareWarnings = expected
+
+	// Test Prepare
+	warnings, err := bClient.Prepare(nil)
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+	if !reflect.DeepEqual(warnings, expected) {
+		t.Fatalf("bad: %#v", warnings)
 	}
 }
 
