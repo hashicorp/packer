@@ -9,9 +9,11 @@ IMPROVEMENTS:
 
 * core: builders can now give warnings during validation. warnings won't
   fail the build but may hint at potential future problems.
-* builder/vmware,builder/virtualbox: ISO urls can now be https [GH-587]
 * builder/virtualbox: Can now disable guest addition download entirely
   by setting "guest_additions_mode" to "disable" [GH-580]
+* builder/virtualbox,vmware: ISO urls can now be https [GH-587]
+* builder/virtualbox,vmware: Warning if shutdown command is not specified,
+  since it is a common case of data loss.
 
 BUG FIXES:
 
