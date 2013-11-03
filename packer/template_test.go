@@ -9,7 +9,7 @@ import (
 )
 
 func testTemplateComponentFinder() *ComponentFinder {
-	builder := testBuilder()
+	builder := new(MockBuilder)
 	pp := new(TestPostProcessor)
 	provisioner := &MockProvisioner{}
 
@@ -706,7 +706,7 @@ func TestTemplate_Build(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	builder := testBuilder()
+	builder := new(MockBuilder)
 	builderMap := map[string]Builder{
 		"test-builder": builder,
 	}
@@ -1194,7 +1194,7 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 		t.Fatalf("bad raw: %#v", RawConfig)
 	}
 
-	builder := testBuilder()
+	builder := new(MockBuilder)
 	builderMap := map[string]Builder{
 		"test-builder": builder,
 	}
