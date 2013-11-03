@@ -21,6 +21,11 @@ type BuildRunArgs struct {
 	UiRPCAddress string
 }
 
+type BuildPrepareResponse struct {
+	Warnings []string
+	Error    error
+}
+
 func Build(client *rpc.Client) *build {
 	return &build{client}
 }
@@ -30,12 +35,13 @@ func (b *build) Name() (result string) {
 	return
 }
 
-func (b *build) Prepare(v map[string]string) (err error) {
-	if cerr := b.client.Call("Build.Prepare", v, &err); cerr != nil {
-		return cerr
+func (b *build) Prepare(v map[string]string) ([]string, error) {
+	var resp BuildPrepareResponse
+	if cerr := b.client.Call("Build.Prepare", v, &resp); cerr != nil {
+		return nil, cerr
 	}
 
-	return
+	return resp.Warnings, resp.Error
 }
 
 func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
@@ -86,8 +92,12 @@ func (b *BuildServer) Name(args *interface{}, reply *string) error {
 	return nil
 }
 
-func (b *BuildServer) Prepare(v map[string]string, reply *error) error {
-	*reply = b.build.Prepare(v)
+func (b *BuildServer) Prepare(v map[string]string, resp *BuildPrepareResponse) error {
+	warnings, err := b.build.Prepare(v)
+	*resp = BuildPrepareResponse{
+		Warnings: warnings,
+		Error:    err,
+	}
 	return nil
 }
 
