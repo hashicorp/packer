@@ -1,22 +1,9 @@
 package plugin
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"testing"
 )
-
-type helperBuilder byte
-
-func (helperBuilder) Prepare(...interface{}) error {
-	return nil
-}
-
-func (helperBuilder) Run(packer.Ui, packer.Hook, packer.Cache) (packer.Artifact, error) {
-	return nil, nil
-}
-
-func (helperBuilder) Cancel() {}
 
 func TestBuilder_NoExist(t *testing.T) {
 	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
