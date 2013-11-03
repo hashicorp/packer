@@ -23,10 +23,10 @@ type testBuilder struct {
 	nilRunResult bool
 }
 
-func (b *testBuilder) Prepare(config ...interface{}) error {
+func (b *testBuilder) Prepare(config ...interface{}) ([]string, error) {
 	b.prepareCalled = true
 	b.prepareConfig = config
-	return nil
+	return nil, nil
 }
 
 func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {

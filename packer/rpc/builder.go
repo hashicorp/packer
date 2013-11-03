@@ -29,6 +29,11 @@ type BuilderRunArgs struct {
 	ResponseAddress string
 }
 
+type BuilderPrepareResponse struct {
+	Warnings []string
+	Error    error
+}
+
 type BuilderRunResponse struct {
 	Err        error
 	RPCAddress string
@@ -38,13 +43,14 @@ func Builder(client *rpc.Client) *builder {
 	return &builder{client}
 }
 
-func (b *builder) Prepare(config ...interface{}) (err error) {
-	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &err)
+func (b *builder) Prepare(config ...interface{}) ([]string, error) {
+	var resp BuilderPrepareResponse
+	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &resp)
 	if cerr != nil {
-		err = cerr
+		return nil, cerr
 	}
 
-	return
+	return resp.Warnings, resp.Error
 }
 
 func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
@@ -108,12 +114,16 @@ func (b *builder) Cancel() {
 	}
 }
 
-func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *error) error {
-	err := b.builder.Prepare(args.Configs...)
+func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareResponse) error {
+	warnings, err := b.builder.Prepare(args.Configs...)
 	if err != nil {
-		*reply = NewBasicError(err)
+		err = NewBasicError(err)
 	}
 
+	*reply = BuilderPrepareResponse{
+		Warnings: warnings,
+		Error:    err,
+	}
 	return nil
 }
 
