@@ -44,6 +44,7 @@ func testConfig() map[string]interface{} {
 		"iso_checksum":      "foo",
 		"iso_checksum_type": "md5",
 		"iso_url":           "http://www.packer.io",
+		"shutdown_command":  "foo",
 		"ssh_username":      "foo",
 
 		packer.BuildNameConfigKey: "foo",
@@ -415,6 +416,21 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_ShutdownCommand(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "shutdown_command")
+
+	warns, err := b.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+
+	if len(warns) != 1 {
+		t.Fatalf("bad: %#v", warns)
 	}
 }
 
