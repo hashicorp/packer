@@ -84,8 +84,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
 
-	// Accumulate any errors
+	// Accumulate any errors and warnings
 	errs := common.CheckUnusedConfig(md)
+	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -363,11 +364,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+	// Warnings
+	if b.config.ShutdownCommand == "" {
+		warnings = append(warnings,
+			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
+				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
 
-	return nil, nil
+	if errs != nil && len(errs.Errors) > 0 {
+		return warnings, errs
+	}
+
+	return warnings, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
