@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"errors"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
 	"reflect"
@@ -10,47 +9,8 @@ import (
 
 var testBuilderArtifact = &testArtifact{}
 
-type testBuilder struct {
-	prepareCalled bool
-	prepareConfig []interface{}
-	runCalled     bool
-	runCache      packer.Cache
-	runHook       packer.Hook
-	runUi         packer.Ui
-	cancelCalled  bool
-
-	errRunResult bool
-	nilRunResult bool
-}
-
-func (b *testBuilder) Prepare(config ...interface{}) error {
-	b.prepareCalled = true
-	b.prepareConfig = config
-	return nil
-}
-
-func (b *testBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	b.runCache = cache
-	b.runCalled = true
-	b.runHook = hook
-	b.runUi = ui
-
-	if b.errRunResult {
-		return nil, errors.New("foo")
-	} else if b.nilRunResult {
-		return nil, nil
-	} else {
-		return testBuilderArtifact, nil
-	}
-}
-
-func (b *testBuilder) Cancel() {
-	b.cancelCalled = true
-}
-
-func TestBuilderRPC(t *testing.T) {
-	// Create the interface to test
-	b := new(testBuilder)
+func builderRPCClient(t *testing.T) (*packer.MockBuilder, packer.Builder) {
+	b := new(packer.MockBuilder)
 
 	// Start the server
 	server := rpc.NewServer()
@@ -62,18 +22,49 @@ func TestBuilderRPC(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	return b, Builder(client)
+}
+
+func TestBuilderPrepare(t *testing.T) {
+	b, bClient := builderRPCClient(t)
 
 	// Test Prepare
 	config := 42
-	bClient := Builder(client)
-	bClient.Prepare(config)
-	if !b.prepareCalled {
+	warnings, err := bClient.Prepare(config)
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+
+	if !b.PrepareCalled {
 		t.Fatal("should be called")
 	}
 
-	if !reflect.DeepEqual(b.prepareConfig, []interface{}{42}) {
-		t.Fatalf("bad: %#v", b.prepareConfig)
+	if !reflect.DeepEqual(b.PrepareConfig, []interface{}{42}) {
+		t.Fatalf("bad: %#v", b.PrepareConfig)
 	}
+}
+
+func TestBuilderPrepare_Warnings(t *testing.T) {
+	b, bClient := builderRPCClient(t)
+
+	expected := []string{"foo"}
+	b.PrepareWarnings = expected
+
+	// Test Prepare
+	warnings, err := bClient.Prepare(nil)
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+	if !reflect.DeepEqual(warnings, expected) {
+		t.Fatalf("bad: %#v", warnings)
+	}
+}
+
+func TestBuilderRun(t *testing.T) {
+	b, bClient := builderRPCClient(t)
 
 	// Test Run
 	cache := new(testCache)
@@ -84,59 +75,71 @@ func TestBuilderRPC(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !b.runCalled {
+	if !b.RunCalled {
 		t.Fatal("run should be called")
 	}
 
-	if b.runCalled {
-		b.runCache.Lock("foo")
-		if !cache.lockCalled {
-			t.Fatal("should be called")
-		}
-
-		b.runHook.Run("foo", nil, nil, nil)
-		if !hook.RunCalled {
-			t.Fatal("should be called")
-		}
-
-		b.runUi.Say("format")
-		if !ui.sayCalled {
-			t.Fatal("say should be called")
-		}
-
-		if ui.sayMessage != "format" {
-			t.Fatalf("bad: %s", ui.sayMessage)
-		}
-
-		if artifact.Id() != testBuilderArtifact.Id() {
-			t.Fatalf("bad: %s", artifact.Id())
-		}
+	b.RunCache.Lock("foo")
+	if !cache.lockCalled {
+		t.Fatal("should be called")
 	}
 
-	// Test run with nil result
-	b.nilRunResult = true
-	artifact, err = bClient.Run(ui, hook, cache)
+	b.RunHook.Run("foo", nil, nil, nil)
+	if !hook.RunCalled {
+		t.Fatal("should be called")
+	}
+
+	b.RunUi.Say("format")
+	if !ui.sayCalled {
+		t.Fatal("say should be called")
+	}
+
+	if ui.sayMessage != "format" {
+		t.Fatalf("bad: %s", ui.sayMessage)
+	}
+
+	if artifact.Id() != testBuilderArtifact.Id() {
+		t.Fatalf("bad: %s", artifact.Id())
+	}
+}
+
+func TestBuilderRun_nilResult(t *testing.T) {
+	b, bClient := builderRPCClient(t)
+	b.RunNilResult = true
+
+	cache := new(testCache)
+	hook := &packer.MockHook{}
+	ui := &testUi{}
+	artifact, err := bClient.Run(ui, hook, cache)
 	if artifact != nil {
 		t.Fatalf("bad: %#v", artifact)
 	}
 	if err != nil {
 		t.Fatalf("bad: %#v", err)
 	}
+}
 
-	// Test with an error
-	b.errRunResult = true
-	b.nilRunResult = false
-	artifact, err = bClient.Run(ui, hook, cache)
+func TestBuilderRun_ErrResult(t *testing.T) {
+	b, bClient := builderRPCClient(t)
+	b.RunErrResult = true
+
+	cache := new(testCache)
+	hook := &packer.MockHook{}
+	ui := &testUi{}
+	artifact, err := bClient.Run(ui, hook, cache)
 	if artifact != nil {
 		t.Fatalf("bad: %#v", artifact)
 	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
+}
 
-	// Test Cancel
+func TestBuilderCancel(t *testing.T) {
+	b, bClient := builderRPCClient(t)
+
 	bClient.Cancel()
-	if !b.cancelCalled {
+	if !b.CancelCalled {
 		t.Fatal("cancel should be called")
 	}
 }

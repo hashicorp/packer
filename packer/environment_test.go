@@ -17,7 +17,7 @@ func init() {
 }
 
 func testComponentFinder() *ComponentFinder {
-	builderFactory := func(n string) (Builder, error) { return testBuilder(), nil }
+	builderFactory := func(n string) (Builder, error) { return new(MockBuilder), nil }
 	ppFactory := func(n string) (PostProcessor, error) { return new(TestPostProcessor), nil }
 	provFactory := func(n string) (Provisioner, error) { return new(MockProvisioner), nil }
 	return &ComponentFinder{
@@ -97,7 +97,7 @@ func TestEnvironment_NilComponents(t *testing.T) {
 }
 
 func TestEnvironment_Builder(t *testing.T) {
-	builder := &TestBuilder{}
+	builder := &MockBuilder{}
 	builders := make(map[string]Builder)
 	builders["foo"] = builder
 

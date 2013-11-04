@@ -31,7 +31,10 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"access_key": []string{},
 	}
 
-	err := b.Prepare(c)
+	warnings, err := b.Prepare(c)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatalf("prepare should fail")
 	}
@@ -43,7 +46,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 	// Test good
 	config["ami_name"] = "foo"
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -51,7 +57,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -59,7 +68,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -71,7 +83,10 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}

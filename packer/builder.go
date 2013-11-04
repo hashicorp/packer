@@ -22,7 +22,10 @@ type Builder interface {
 	//
 	// Each of the configuration values should merge into the final
 	// configuration.
-	Prepare(...interface{}) error
+	//
+	// Prepare should return a list of warnings along with any errors
+	// that occured while preparing.
+	Prepare(...interface{}) ([]string, error)
 
 	// Run is where the actual build should take place. It takes a Build and a Ui.
 	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)

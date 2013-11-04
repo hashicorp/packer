@@ -32,7 +32,10 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"password": []string{},
 	}
 
-	err := b.Prepare(c)
+	warns, err := b.Prepare(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatalf("prepare should fail")
 	}
@@ -44,7 +47,10 @@ func TestBuilderPrepare_ImageName(t *testing.T) {
 
 	// Test good
 	config["image_name"] = "foo"
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -52,7 +58,10 @@ func TestBuilderPrepare_ImageName(t *testing.T) {
 	// Test bad
 	config["image_name"] = "foo {{"
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -60,7 +69,10 @@ func TestBuilderPrepare_ImageName(t *testing.T) {
 	// Test bad
 	delete(config, "image_name")
 	b = Builder{}
-	err = b.Prepare(config)
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -72,7 +84,10 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	err := b.Prepare(config)
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}

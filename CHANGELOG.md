@@ -5,11 +5,26 @@ FEATURES:
 * builder/amazon/ebs: Ability to specify which availability zone to create
   instance in. [GH-536]
 
+IMPROVEMENTS:
+
+* core: builders can now give warnings during validation. warnings won't
+  fail the build but may hint at potential future problems.
+* builder/virtualbox: Can now disable guest addition download entirely
+  by setting "guest_additions_mode" to "disable" [GH-580]
+* builder/virtualbox,vmware: ISO urls can now be https [GH-587]
+* builder/virtualbox,vmware: Warning if shutdown command is not specified,
+  since it is a common case of data loss.
+
 BUG FIXES:
 
 * core: Won't panic when writing to a bad pipe. [GH-560]
+* builder/amazon/all: Properly scrub access key and secret key from logs.
+  [GH-554]
+* builder/openstack: Properly scrub password from logs [GH-554]
 * common/uuid: Use cryptographically secure PRNG when generating
   UUIDs. [GH-552]
+* communicator/ssh: File uploads that exceed the size of memory no longer
+  cause crashes. [GH-561]
 
 ## 0.3.10 (October 20, 2013)
 

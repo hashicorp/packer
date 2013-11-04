@@ -26,7 +26,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 	// Test good
 	config["ami_name"] = "foo"
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -34,7 +37,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -42,7 +48,10 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -53,7 +62,10 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	config := testConfig()
 
 	config["chroot_mounts"] = nil
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
@@ -61,7 +73,10 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	config["chroot_mounts"] = [][]string{
 		[]string{"bad"},
 	}
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -71,13 +86,19 @@ func TestBuilderPrepare_SourceAmi(t *testing.T) {
 	config := testConfig()
 
 	config["source_ami"] = ""
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	config["source_ami"] = "foo"
-	err = b.Prepare(config)
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
@@ -88,7 +109,10 @@ func TestBuilderPrepare_CommandWrapper(t *testing.T) {
 	config := testConfig()
 
 	config["command_wrapper"] = "echo hi; {{.Command}}"
-	err := b.Prepare(config)
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}

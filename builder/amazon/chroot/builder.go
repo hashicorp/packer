@@ -45,15 +45,15 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) error {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	md, err := common.DecodeConfig(&b.config, raws...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	b.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	b.config.tpl.UserVars = b.config.PackerUserVars
 	b.config.tpl.Funcs(awscommon.TemplateFuncs)
@@ -140,11 +140,11 @@ func (b *Builder) Prepare(raws ...interface{}) error {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return errs
+		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config), b.config.AccessKey, b.config.SecretKey)
-	return nil
+	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey))
+	return nil, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {

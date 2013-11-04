@@ -53,6 +53,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	fixers := []string{
 		"iso-md5",
 		"createtime",
+		"virtualbox-gaattach",
 	}
 
 	input := templateData

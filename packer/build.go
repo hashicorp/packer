@@ -38,8 +38,9 @@ type Build interface {
 	Name() string
 
 	// Prepare configures the various components of this build and reports
-	// any errors in doing so (such as syntax errors, validation errors, etc.)
-	Prepare(v map[string]string) error
+	// any errors in doing so (such as syntax errors, validation errors, etc.).
+	// It also reports any warnings.
+	Prepare(v map[string]string) ([]string, error)
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
@@ -115,7 +116,7 @@ func (b *coreBuild) Name() string {
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
-func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
+func (b *coreBuild) Prepare(userVars map[string]string) (warn []string, err error) {
 	b.l.Lock()
 	defer b.l.Unlock()
 
@@ -154,7 +155,7 @@ func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
 	// If there were any problem with variables, return an error right
 	// away because we can't be certain anything else will actually work.
 	if len(varErrs) > 0 {
-		return &MultiError{
+		return nil, &MultiError{
 			Errors: varErrs,
 		}
 	}
@@ -168,7 +169,7 @@ func (b *coreBuild) Prepare(userVars map[string]string) (err error) {
 	}
 
 	// Prepare the builder
-	err = b.builder.Prepare(b.builderConfig, packerConfig)
+	warn, err = b.builder.Prepare(b.builderConfig, packerConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
 		return

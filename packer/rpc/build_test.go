@@ -4,21 +4,23 @@ import (
 	"errors"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
+	"reflect"
 	"testing"
 )
 
 var testBuildArtifact = &testArtifact{}
 
 type testBuild struct {
-	nameCalled     bool
-	prepareCalled  bool
-	prepareVars    map[string]string
-	runCalled      bool
-	runCache       packer.Cache
-	runUi          packer.Ui
-	setDebugCalled bool
-	setForceCalled bool
-	cancelCalled   bool
+	nameCalled      bool
+	prepareCalled   bool
+	prepareVars     map[string]string
+	prepareWarnings []string
+	runCalled       bool
+	runCache        packer.Cache
+	runUi           packer.Ui
+	setDebugCalled  bool
+	setForceCalled  bool
+	cancelCalled    bool
 
 	errRunResult bool
 }
@@ -28,10 +30,10 @@ func (b *testBuild) Name() string {
 	return "name"
 }
 
-func (b *testBuild) Prepare(v map[string]string) error {
+func (b *testBuild) Prepare(v map[string]string) ([]string, error) {
 	b.prepareCalled = true
 	b.prepareVars = v
-	return nil
+	return b.prepareWarnings, nil
 }
 
 func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
@@ -58,7 +60,7 @@ func (b *testBuild) Cancel() {
 	b.cancelCalled = true
 }
 
-func TestBuildRPC(t *testing.T) {
+func buildRPCClient(t *testing.T) (*testBuild, packer.Build) {
 	// Create the interface to test
 	b := new(testBuild)
 
@@ -72,7 +74,11 @@ func TestBuildRPC(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	bClient := Build(client)
+	return b, Build(client)
+}
+
+func TestBuild(t *testing.T) {
+	b, bClient := buildRPCClient(t)
 
 	// Test Name
 	bClient.Name()
@@ -154,6 +160,21 @@ func TestBuildRPC(t *testing.T) {
 	bClient.Cancel()
 	if !b.cancelCalled {
 		t.Fatal("should be called")
+	}
+}
+
+func TestBuildPrepare_Warnings(t *testing.T) {
+	b, bClient := buildRPCClient(t)
+
+	expected := []string{"foo"}
+	b.prepareWarnings = expected
+
+	warnings, err := bClient.Prepare(nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if !reflect.DeepEqual(warnings, expected) {
+		t.Fatalf("bad: %#v", warnings)
 	}
 }
 

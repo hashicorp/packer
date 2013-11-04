@@ -30,7 +30,7 @@ func (s *stepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	vmName := state.Get("vmName").(string)
 
 	// If we're not attaching the guest additions then just return
-	if !config.GuestAdditionsAttach {
+	if config.GuestAdditionsMode != GuestAdditionsModeAttach {
 		log.Println("Not attaching guest additions since we're uploading.")
 		return multistep.ActionContinue
 	}

@@ -113,10 +113,19 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
-		err := b.Prepare(userVars)
+
+		warnings, err := b.Prepare(userVars)
 		if err != nil {
 			env.Ui().Error(err.Error())
 			return 1
+		}
+		if len(warnings) > 0 {
+			ui := buildUis[b.Name()]
+			ui.Say(fmt.Sprintf("Warnings for build '%s':\n", b.Name()))
+			for _, warning := range warnings {
+				ui.Say(fmt.Sprintf("* %s", warning))
+			}
+			ui.Say("")
 		}
 	}
 
