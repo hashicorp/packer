@@ -22,6 +22,7 @@ BUG FIXES:
   [GH-554]
 * builder/openstack: Properly scrub password from logs [GH-554]
 * builder/virtualbox: No panic if SSH host port min/max is the same. [GH-594]
+* builder/vmware: Host IP lookup works for non-C locales. [GH-592]
 * common/uuid: Use cryptographically secure PRNG when generating
   UUIDs. [GH-552]
 * communicator/ssh: File uploads that exceed the size of memory no longer
