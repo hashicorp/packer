@@ -401,3 +401,55 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	}
 
 }
+
+func TestBuilderPrepare_DropletName(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.DropletName == "" {
+		t.Errorf("invalid: %s", b.config.DropletName)
+	}
+
+	// Test normal set
+	config["droplet_name"] = "foobar"
+	b = Builder{}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test with template
+	config["droplet_name"] = "foobar-{{timestamp}}"
+	b = Builder{}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test with bad template
+	config["droplet_name"] = "foobar-{{"
+	b = Builder{}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+}
