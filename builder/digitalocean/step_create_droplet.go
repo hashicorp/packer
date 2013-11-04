@@ -3,7 +3,6 @@ package digitalocean
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -19,11 +18,9 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Creating droplet...")
 
-	// Some random droplet name as it's temporary
-	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
-
 	// Create the droplet based on configuration
-	dropletId, err := client.CreateDroplet(name, c.SizeID, c.ImageID, c.RegionID, sshKeyId)
+	dropletId, err := client.CreateDroplet(c.DropletName, c.SizeID, c.ImageID, c.RegionID, sshKeyId)
+
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
 		state.Put("error", err)
