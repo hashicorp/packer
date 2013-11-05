@@ -1,6 +1,7 @@
 package vagrant
 
 import (
+	"compress/flate"
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +18,7 @@ type DigitalOceanBoxConfig struct {
 
 	OutputPath          string `mapstructure:"output"`
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+	CompressionLevel    string `mapstructure:"compression_level"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -47,6 +50,7 @@ func (p *DigitalOceanBoxPostProcessor) Configure(rDigitalOcean ...interface{}) e
 	validates := map[string]*string{
 		"output":               &p.config.OutputPath,
 		"vagrantfile_template": &p.config.VagrantfileTemplate,
+		"compression_level":    &p.config.CompressionLevel,
 	}
 
 	for n, ptr := range validates {
@@ -132,7 +136,15 @@ func (p *DigitalOceanBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer
 	}
 
 	// Compress the directory to the given output path
-	if err := DirToBox(outputPath, dir, ui); err != nil {
+	var level int = flate.DefaultCompression
+	if p.config.CompressionLevel != "" {
+		level, err = strconv.Atoi(p.config.CompressionLevel)
+		if err != nil {
+			return nil, false, err
+		}
+	}
+
+	if err := DirToBox(outputPath, dir, ui, level); err != nil {
 		err = fmt.Errorf("error creating box: %s", err)
 		return nil, false, err
 	}
