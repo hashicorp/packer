@@ -1,3 +1,9 @@
+## 0.4.0 (unreleased)
+
+FEATURES:
+
+* Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
+
 ## 0.3.11 (November 4, 2013)
 
 FEATURES:
