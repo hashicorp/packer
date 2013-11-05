@@ -2,8 +2,8 @@
 
 FEATURES:
 
-* Qemu builder. This builder builds a new VM compatible with KVM or Xen
-  using qemu.
+* QEMU builder. This builder builds a new VM compatible with KVM or Xen
+  using QEMU.
 * Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
 
 IMPROVEMENTS:

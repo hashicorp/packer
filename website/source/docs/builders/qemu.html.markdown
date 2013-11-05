@@ -2,7 +2,7 @@
 layout: "docs"
 ---
 
-# Qemu (qemu-system-x86_64) Builder
+# QEMU Builder
 
 Type: `qemu`
 
@@ -37,7 +37,7 @@ paths to files, URLS for ISOs and checksums.
       "format": "qcow2",
       "headless": false,
       "accelerator": "kvm",
-      "http_directory": "/home/tdhite/packer/httpfiles",
+      "http_directory": "httpdir",
       "http_port_min": 10082,
       "http_port_max": 10089,
       "ssh_host_port_min": 2222,
@@ -59,79 +59,10 @@ paths to files, URLS for ISOs and checksums.
 }
 </pre>
 
-The following is a working CentOS 6.x kickstart file adapted from
-an unknown source. You would place such a file in the http_files
-directory with the name centos6-ks.cfg:
-
-<pre class="prettyprint">
-text
-skipx
-install
-url --url http://mirror.raystedman.net/centos/6/os/x86_64/
-repo --name=updates --baseurl=http://mirror.raystedman.net/centos/6/updates/x86_64/
-lang en_US.UTF-8
-keyboard us
-rootpw s0m3password
-firewall --disable
-authconfig --enableshadow --passalgo=sha512
-selinux --disabled
-timezone Etc/UTC
-%include /tmp/kspre.cfg
-
-services --enabled=network,sshd/sendmail
-
-poweroff
-
-%packages --nobase
-at
-acpid
-cronie-noanacron
-crontabs
-logrotate
-mailx
-mlocate
-openssh-clients
-openssh-server
-rsync
-sendmail
-tmpwatch
-vixie-cron
-which
-wget
-yum
--biosdevname
--postfix
--prelink
-%end
-
-%pre
-bootdrive=vda
-
-if [ -f "/dev/$bootdrive" ] ; then
-  exec < /dev/tty3 > /dev/tty3
-  chvt 3
-  echo "ERROR: Drive device does not exist at /dev/$bootdrive!"
-  sleep 5
-  halt -f
-fi
-
-cat >/tmp/kspre.cfg <<CFG
-zerombr
-bootloader --location=mbr --driveorder=$bootdrive --append="nomodeset"
-clearpart --all --initlabel
-part /boot --ondrive=$bootdrive --fstype ext4 --fsoptions="relatime,nodev" --size=512
-part pv.1 --ondrive=$bootdrive --size 1 --grow
-volgroup vg0 pv.1
-logvol / --fstype ext4 --fsoptions="noatime,nodiratime,relatime,nodev" --name=root --vgname=vg0 --size=4096
-logvol swap --fstype swap --name=swap --vgname=vg0 --size 1 --grow
-CFG
-
-%end
-
-%post
-
-%end
-</pre>
+A working CentOS 6.x kickstart file can be found
+[at this URL](https://gist.github.com/mitchellh/7328271/raw/c91e0c4fa19c171a40b016c6c8f251f90d2ad0ba/centos6-ks.cfg), adapted from an unknown source.
+Place this file in the http directory with the proper name. For the
+example above, it should go into "httpdir" with a name of "centos6-ks.cfg".
 
 ## Configuration Reference
 
@@ -158,6 +89,10 @@ Required:
   once the OS is installed.
 
 Optional:
+
+* `accelerator` (string) - The accelerator type to use when running the VM.
+  This may have a value of either "kvm" or "xen" and you must have that
+  support in on the machine on which you run the builder.
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
@@ -189,10 +124,6 @@ Optional:
 
 * `format` (string) - Either "qcow2" or "img", this specifies the output
   format of the virtual machine image. This defaults to "qcow2".
-
-* `accelerator` (string) - The accelerator type to use when running the VM.
-  This may have a value of either "kvm" or "xen" and you must have that
-  support in on the machine on which you run the builder.
 
 * `headless` (bool) - Packer defaults to building virtual machines by
   launching a GUI that shows the console of the machine being built.
