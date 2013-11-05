@@ -51,6 +51,9 @@ Optional:
   To help make this unique, use a function like `timestamp` (see
   [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
+* `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
+  sets the hostname of the machine to this value.
+
 * `ssh_port` (int) - The port that SSH will be available on. Defaults to port
   22.
 

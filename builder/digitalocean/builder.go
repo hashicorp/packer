@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
@@ -30,6 +31,7 @@ type config struct {
 	ImageID  uint   `mapstructure:"image_id"`
 
 	SnapshotName string `mapstructure:"snapshot_name"`
+	DropletName  string `mapstructure:"droplet_name"`
 	SSHUsername  string `mapstructure:"ssh_username"`
 	SSHPort      uint   `mapstructure:"ssh_port"`
 
@@ -95,6 +97,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.SnapshotName = "packer-{{timestamp}}"
 	}
 
+	if b.config.DropletName == "" {
+		// Default to packer-[time-ordered-uuid]
+		b.config.DropletName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	}
+
 	if b.config.SSHUsername == "" {
 		// Default to "root". You can override this if your
 		// SourceImage has a different user account then the DO default
@@ -121,6 +128,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"client_id":     &b.config.ClientID,
 		"api_key":       &b.config.APIKey,
 		"snapshot_name": &b.config.SnapshotName,
+		"droplet_name":  &b.config.DropletName,
 		"ssh_username":  &b.config.SSHUsername,
 		"ssh_timeout":   &b.config.RawSSHTimeout,
 		"state_timeout": &b.config.RawStateTimeout,
