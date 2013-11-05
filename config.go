@@ -24,6 +24,7 @@ const defaultConfig = `
 		"amazon-instance": "packer-builder-amazon-instance",
 		"digitalocean": "packer-builder-digitalocean",
 		"openstack": "packer-builder-openstack",
+		"qemu": "packer-builder-qemu",
 		"virtualbox": "packer-builder-virtualbox",
 		"vmware": "packer-builder-vmware"
 	},
