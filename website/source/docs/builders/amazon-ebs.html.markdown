@@ -97,6 +97,10 @@ Optional:
   access. Note that if this is specified, you must be sure the security
   group allows access to the `ssh_port` given below.
 
+* `security_group_ids` (array of string) - A list of security groups as
+  described above. Note that if this is specified, you must omit the
+  security_group_id.
+
 * `ssh_port` (int) - The port that SSH will be available on. This defaults
   to port 22.
 
