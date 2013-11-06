@@ -21,6 +21,7 @@ type rawTemplate struct {
 	Hooks          map[string][]string
 	Provisioners   []map[string]interface{}
 	PostProcessors []interface{} `mapstructure:"post-processors"`
+	Descriptions   []map[string]interface{}
 }
 
 // The Template struct represents a parsed template, parsed into the most
@@ -31,6 +32,7 @@ type Template struct {
 	Hooks          map[string][]string
 	PostProcessors [][]RawPostProcessorConfig
 	Provisioners   []RawProvisionerConfig
+	Descriptions   map[string]RawDescription
 }
 
 // The RawBuilderConfig struct represents a raw, unprocessed builder
@@ -71,6 +73,16 @@ type RawProvisionerConfig struct {
 type RawVariable struct {
 	Default  string
 	Required bool
+}
+
+// RawDescription represents a description configuration, it contains the a builder type
+// and a corresponding description
+type RawDescription struct {
+	Name 		string
+	Type 		string
+	Description string
+
+	RawConfig interface{}
 }
 
 // ParseTemplate takes a byte slice and parses a Template from it, returning
@@ -120,6 +132,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	t.Hooks = rawTpl.Hooks
 	t.PostProcessors = make([][]RawPostProcessorConfig, len(rawTpl.PostProcessors))
 	t.Provisioners = make([]RawProvisionerConfig, len(rawTpl.Provisioners))
+	t.Descriptions = make(map[string]RawDescription)
 
 	// Gather all the variables
 	for k, v := range rawTpl.Variables {
@@ -287,6 +300,43 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		}
 
 		raw.RawConfig = v
+	}
+
+	// Gather all the descriptions
+	for i, v := range rawTpl.Descriptions {
+		var raw RawDescription
+		if err := mapstructure.Decode(v, &raw); err != nil {
+			if merr, ok := err.(*mapstructure.Error); ok {
+				for _, err := range merr.Errors {
+					errors = append(errors, fmt.Errorf("description %d: %s", i+1, err))
+				}
+			} else {
+				errors = append(errors, fmt.Errorf("description %d: %s", i+1, err))
+			}
+
+			continue
+		}
+
+		if raw.Type == "" {
+			errors = append(errors, fmt.Errorf("description %d: missing 'type'", i+1))
+			continue
+		}
+
+		// Attempt to get the name of the builder that corresponds with the description. 
+		// If the "name" key is missing, use the "type" field for the name
+		if raw.Name == "" {
+			raw.Name = raw.Type
+		}
+
+		// Check if we already have a description with this name and error if so
+		if _, ok := t.Descriptions[raw.Name]; ok {
+			errors = append(errors, fmt.Errorf("builder with name '%s' already has a description", raw.Name))
+			continue
+		}
+		delete(v, "name")
+
+		raw.RawConfig = v
+		t.Descriptions[raw.Name] = raw
 	}
 
 	if len(t.Builders) == 0 {
