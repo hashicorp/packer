@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 	"unicode"
 )
 
@@ -115,6 +116,16 @@ func (d *QemuDriver) Qemu(qemuArgs ...string) error {
 		d.vmCmd = nil
 		d.vmEndCh = nil
 	}()
+
+	// Wait at least a couple seconds for an early fail from Qemu so
+	// we can report that.
+	select {
+	case exit := <-endCh:
+		if exit != 0 {
+			return fmt.Errorf("Qemu failed to start. Please run with logs to get more info.")
+		}
+	case <-time.After(2 * time.Second):
+	}
 
 	// Setup our state so we know we are running
 	d.vmCmd = cmd
