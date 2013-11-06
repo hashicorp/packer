@@ -469,8 +469,10 @@ func (b *Builder) newDriver() (Driver, error) {
 	}
 
 	log.Printf("Qemu path: %s, Qemu Image page: %s", qemuPath, qemuImgPath)
-	driver := &QemuDriver{}
-	driver.Initialize(qemuPath, qemuImgPath)
+	driver := &QemuDriver{
+		QemuPath:    qemuPath,
+		QemuImgPath: qemuImgPath,
+	}
 
 	if err := driver.Verify(); err != nil {
 		return nil, err

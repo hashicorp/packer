@@ -20,11 +20,6 @@ type DriverCancelCallback func(state multistep.StateBag) bool
 // A driver is able to talk to qemu-system-x86_64 and perform certain
 // operations with it.
 type Driver interface {
-	// Initializes the driver with the given values:
-	// Arguments: qemuPath - string value for the qemu-system-x86_64 executable
-	//            qemuImgPath - string value for the qemu-img executable
-	Initialize(string, string)
-
 	// Stop stops a running machine, forcefully.
 	Stop() error
 
@@ -47,17 +42,12 @@ type Driver interface {
 }
 
 type QemuDriver struct {
-	qemuPath    string
-	qemuImgPath string
+	QemuPath    string
+	QemuImgPath string
 
 	vmCmd   *exec.Cmd
 	vmEndCh <-chan int
 	lock    sync.Mutex
-}
-
-func (d *QemuDriver) Initialize(qemuPath string, qemuImgPath string) {
-	d.qemuPath = qemuPath
-	d.qemuImgPath = qemuImgPath
 }
 
 func (d *QemuDriver) Stop() error {
@@ -84,8 +74,8 @@ func (d *QemuDriver) Qemu(qemuArgs ...string) error {
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
 
-	log.Printf("Executing %s: %#v", d.qemuPath, qemuArgs)
-	cmd := exec.Command(d.qemuPath, qemuArgs...)
+	log.Printf("Executing %s: %#v", d.QemuPath, qemuArgs)
+	cmd := exec.Command(d.QemuPath, qemuArgs...)
 	cmd.Stdout = stdout_w
 	cmd.Stderr = stderr_w
 
@@ -154,7 +144,7 @@ func (d *QemuDriver) QemuImg(args ...string) error {
 	var stdout, stderr bytes.Buffer
 
 	log.Printf("Executing qemu-img: %#v", args)
-	cmd := exec.Command(d.qemuImgPath, args...)
+	cmd := exec.Command(d.QemuImgPath, args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -179,7 +169,7 @@ func (d *QemuDriver) Verify() error {
 func (d *QemuDriver) Version() (string, error) {
 	var stdout bytes.Buffer
 
-	cmd := exec.Command(d.qemuPath, "-version")
+	cmd := exec.Command(d.QemuPath, "-version")
 	cmd.Stdout = &stdout
 	if err := cmd.Run(); err != nil {
 		return "", err
