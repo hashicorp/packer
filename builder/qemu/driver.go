@@ -28,10 +28,6 @@ type Driver interface {
 	// Stop stops a running machine, forcefully.
 	Stop(string) error
 
-	// SuppressMessages should do what needs to be done in order to
-	// suppress any annoying popups, if any.
-	SuppressMessages() error
-
 	// Qemu executes the given command via qemu-system-x86_64
 	Qemu(vmName string, qemuArgs ...string) error
 
@@ -92,10 +88,6 @@ func (d *QemuDriver) Stop(name string) error {
 		close(ds.cancelChan)
 		ds.cancelChan = nil
 	}
-	return nil
-}
-
-func (d *QemuDriver) SuppressMessages() error {
 	return nil
 }
 
