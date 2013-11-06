@@ -41,10 +41,7 @@ func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	msg = fmt.Sprintf("Found available VNC port: %d", vncPort)
-	ui.Say(msg)
-	log.Printf(msg)
-
+	ui.Say(fmt.Sprintf("Found available VNC port: %d", vncPort))
 	state.Put("vnc_port", vncPort)
 
 	return multistep.ActionContinue
