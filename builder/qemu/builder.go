@@ -387,7 +387,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		new(stepCreateDisk),
-		new(stepSuppressMessages),
 		new(stepHTTPServer),
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
