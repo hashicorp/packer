@@ -372,7 +372,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepHTTPServer),
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
-		new(stepRun),
+		&stepRun{
+			BootDrive: "d",
+			Message:   "Starting VM, booting from CD-ROM",
+		},
+		&stepBootWait{},
+		&stepTypeBootCommand{},
+		&stepWaitForShutdown{
+			Message: "Waiting for initial VM boot to shut down",
+		},
+		&stepRun{
+			BootDrive: "c",
+			Message:   "Starting VM, booting from hard disk",
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,

@@ -17,7 +17,6 @@ import (
 //   config *config
 //   driver Driver
 //   ui     packer.Ui
-//   vmName string
 //
 // Produces:
 //   <nothing>
@@ -28,7 +27,6 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	vmName := config.VMName
 
 	if config.ShutdownCommand != "" {
 		ui.Say("Gracefully halting virtual machine...")
@@ -41,28 +39,23 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Wait for the machine to actually shut down
-		log.Printf("Waiting max %s for shutdown to complete", config.shutdownTimeout)
-		shutdownTimer := time.After(config.shutdownTimeout)
-		for {
-			running, _ := driver.IsRunning(vmName)
-			if !running {
-				break
-			}
+		// Start the goroutine that will time out our graceful attempt
+		cancelCh := make(chan struct{}, 1)
+		go func() {
+			defer close(cancelCh)
+			<-time.After(config.shutdownTimeout)
+		}()
 
-			select {
-			case <-shutdownTimer:
-				err := errors.New("Timeout while waiting for machine to shut down.")
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			default:
-				time.Sleep(1 * time.Second)
-			}
+		log.Printf("Waiting max %s for shutdown to complete", config.shutdownTimeout)
+		if ok := driver.WaitForShutdown(cancelCh); !ok {
+			err := errors.New("Timeout while waiting for machine to shut down.")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	} else {
 		ui.Say("Halting the virtual machine...")
-		if err := driver.Stop(vmName); err != nil {
+		if err := driver.Stop(); err != nil {
 			err := fmt.Errorf("Error stopping VM: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
