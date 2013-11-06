@@ -1,15 +1,18 @@
 package qemu
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"io"
 	"log"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type DriverCancelCallback func(state multistep.StateBag) bool
@@ -92,20 +95,24 @@ func (d *QemuDriver) Stop(name string) error {
 }
 
 func (d *QemuDriver) Qemu(vmName string, qemuArgs ...string) error {
-	var stdout, stderr bytes.Buffer
+	stdout_r, stdout_w := io.Pipe()
+	stderr_r, stderr_w := io.Pipe()
 
 	log.Printf("Executing %s: %#v", d.qemuPath, qemuArgs)
 	ds := d.getDriverState(vmName)
 	ds.cmd = exec.Command(d.qemuPath, qemuArgs...)
-	ds.cmd.Stdout = &stdout
-	ds.cmd.Stderr = &stderr
+	ds.cmd.Stdout = stdout_w
+	ds.cmd.Stderr = stderr_w
+
+	go logReader("Qemu stdout", stdout_r)
+	go logReader("Qemu stderr", stderr_r)
 
 	err := ds.cmd.Start()
 
 	if err != nil {
 		err = fmt.Errorf("Error starting VM: %s", err)
 	} else {
-		log.Printf("---- Started Qemu ------- PID = ", ds.cmd.Process.Pid)
+		log.Printf("---- Started Qemu ------- PID = %d", ds.cmd.Process.Pid)
 
 		ds.cancelChan = make(chan struct{})
 
@@ -114,6 +121,8 @@ func (d *QemuDriver) Qemu(vmName string, qemuArgs ...string) error {
 
 		// start the virtual machine in the background
 		go func() {
+			defer stderr_w.Close()
+			defer stdout_w.Close()
 			ds.waitDone <- ds.cmd.Wait()
 		}()
 	}
@@ -241,4 +250,19 @@ func (d *QemuDriver) Version() (string, error) {
 
 	log.Printf("Qemu version: %s", matches[0])
 	return matches[0], nil
+}
+
+func logReader(name string, r io.Reader) {
+	bufR := bufio.NewReader(r)
+	for {
+		line, err := bufR.ReadString('\n')
+		if line != "" {
+			line = strings.TrimRightFunc(line, unicode.IsSpace)
+			log.Printf("%s: %s", name, line)
+		}
+
+		if err == io.EOF {
+			break
+		}
+	}
 }
