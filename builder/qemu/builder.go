@@ -54,11 +54,12 @@ type Builder struct {
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	Accelerator     string     `mapstructure:"accelerator"`
 	BootCommand     []string   `mapstructure:"boot_command"`
+	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
-	Accelerator     string     `mapstructure:"accelerator"`
 	Headless        bool       `mapstructure:"headless"`
 	HTTPDir         string     `mapstructure:"http_directory"`
 	HTTPPortMin     uint       `mapstructure:"http_port_min"`
@@ -66,6 +67,7 @@ type config struct {
 	ISOChecksum     string     `mapstructure:"iso_checksum"`
 	ISOChecksumType string     `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string   `mapstructure:"iso_urls"`
+	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
@@ -78,8 +80,6 @@ type config struct {
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
-	NetDevice       string     `mapstructure:"net_device"`
-	DiskInterface   string     `mapstructure:"disk_interface"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
