@@ -62,7 +62,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
 	tplData := &bootCommandTemplateData{
-		"127.0.0.1",
+		"10.0.2.2",
 		httpPort,
 		config.VMName,
 	}
