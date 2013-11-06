@@ -6,49 +6,51 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
+// stepRun runs the virtual machine
 type stepRun struct {
-	vmName string
+	BootDrive string
+	Message   string
 }
 
-func runBootCommand(state multistep.StateBag,
-	actionChannel chan multistep.StepAction) {
-	config := state.Get("config").(*config)
+func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	bootCmd := stepTypeBootCommand{}
 
-	if int64(config.bootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.bootWait))
-		time.Sleep(config.bootWait)
+	ui.Say(s.Message)
+
+	command := getCommandArgs(s.BootDrive, state)
+	if err := driver.Qemu(command...); err != nil {
+		err := fmt.Errorf("Error launching VM: %s", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
-	actionChannel <- bootCmd.Run(state)
+	return multistep.ActionContinue
 }
 
-func cancelCallback(state multistep.StateBag) bool {
-	cancel := false
-	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		cancel = true
-	}
-	return cancel
-}
-
-func (s *stepRun) getCommandArgs(
-	bootDrive string,
-	state multistep.StateBag) []string {
-
+func (s *stepRun) Cleanup(state multistep.StateBag) {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if err := driver.Stop(); err != nil {
+		ui.Error(fmt.Sprintf("Error shutting down VM: %s", err))
+	}
+}
+
+func getCommandArgs(bootDrive string, state multistep.StateBag) []string {
 	config := state.Get("config").(*config)
+	isoPath := state.Get("iso_path").(string)
+	vncPort := state.Get("vnc_port").(uint)
+	sshHostPort := state.Get("sshHostPort").(uint)
+	ui := state.Get("ui").(packer.Ui)
+
+	guiArgument := "sdl"
+	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	vmName := config.VMName
 	imgPath := filepath.Join(config.OutputDir,
 		fmt.Sprintf("%s.%s", vmName, strings.ToLower(config.Format)))
-	isoPath := state.Get("iso_path").(string)
-	vncPort := state.Get("vnc_port").(uint)
-	guiArgument := "sdl"
-	sshHostPort := state.Get("sshHostPort").(uint)
-	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 
 	if config.Headless == true {
 		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
@@ -111,75 +113,4 @@ func (s *stepRun) getCommandArgs(
 	}
 
 	return outArgs
-}
-
-func (s *stepRun) runVM(
-	sendBootCommands bool,
-	bootDrive string,
-	state multistep.StateBag) multistep.StepAction {
-
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
-	vmName := config.VMName
-
-	ui.Say("Starting the virtual machine for OS Install...")
-	command := s.getCommandArgs(bootDrive, state)
-	if err := driver.Qemu(vmName, command...); err != nil {
-		err := fmt.Errorf("Error launching VM: %s", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	s.vmName = vmName
-
-	// run the boot command after its own timeout
-	if sendBootCommands {
-		waitDone := make(chan multistep.StepAction, 1)
-		go runBootCommand(state, waitDone)
-		select {
-		case action := <-waitDone:
-			if action != multistep.ActionContinue {
-				// stop the VM in its tracks
-				driver.Stop(vmName)
-				return multistep.ActionHalt
-			}
-		}
-	}
-
-	ui.Say("Waiting for VM to shutdown...")
-	if err := driver.WaitForShutdown(vmName, sendBootCommands, state, cancelCallback); err != nil {
-		err := fmt.Errorf("Error waiting for initial VM install to shutdown: %s", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	return multistep.ActionContinue
-}
-
-func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
-	// First, the OS install boot
-	action := s.runVM(true, "d", state)
-
-	if action == multistep.ActionContinue {
-		// Then the provisioning install
-		action = s.runVM(false, "c", state)
-	}
-
-	return action
-}
-
-func (s *stepRun) Cleanup(state multistep.StateBag) {
-	if s.vmName == "" {
-		return
-	}
-
-	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
-
-	if running, _ := driver.IsRunning(s.vmName); running {
-		if err := driver.Stop(s.vmName); err != nil {
-			ui.Error(fmt.Sprintf("Error shutting down VM: %s", err))
-		}
-	}
 }
