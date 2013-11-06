@@ -115,13 +115,6 @@ Optional:
   commands or kickstart type scripts must have proper adjustments for
   resulting device names. The Qemu builder uses "virtio" by default.
 
-* `floppy_files` (array of strings) - A list of files to put onto a floppy
-  disk that is attached when the VM is booted for the first time. This is
-  most useful for unattended Windows installs, which look for an
-  `Autounattend.xml` file on removable media. By default no floppy will
-  be attached. The files listed in this configuration will all be put
-  into the root directory of the floppy disk; sub-directories are not supported.
-
 * `format` (string) - Either "qcow2" or "img", this specifies the output
   format of the virtual machine image. This defaults to "qcow2".
 
