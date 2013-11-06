@@ -58,7 +58,6 @@ type config struct {
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
-	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
 	HTTPDir         string     `mapstructure:"http_directory"`
@@ -109,10 +108,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
-	}
-
-	if b.config.FloppyFiles == nil {
-		b.config.FloppyFiles = make([]string, 0)
 	}
 
 	if b.config.Accelerator == "" {
@@ -217,16 +212,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err := b.config.tpl.Validate(command); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
-		}
-	}
-
-	for i, file := range b.config.FloppyFiles {
-		var err error
-		b.config.FloppyFiles[i], err = b.config.tpl.Process(file, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing floppy_files[%d]: %s",
-					i, err))
 		}
 	}
 
@@ -383,9 +368,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Url:          b.config.ISOUrls,
 		},
 		new(stepPrepareOutputDir),
-		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
-		},
 		new(stepCreateDisk),
 		new(stepHTTPServer),
 		new(stepForwardSSH),
