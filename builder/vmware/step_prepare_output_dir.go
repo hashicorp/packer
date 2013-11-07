@@ -1,39 +1,11 @@
 package vmware
 
 import (
-	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"os"
 	"time"
 )
-
-type OutputDir interface {
-	FileExists(path string) bool
-	MkdirAll(path string) error
-	RemoveAll(path string) error
-	DirType() string
-}
-
-type localOutputDir struct{}
-
-func (localOutputDir) FileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func (localOutputDir) MkdirAll(path string) error {
-	return os.MkdirAll(path, 0755)
-}
-
-func (localOutputDir) RemoveAll(path string) error {
-	return os.RemoveAll(path)
-}
-
-func (localOutputDir) DirType() string {
-	return "local"
-}
 
 type stepPrepareOutputDir struct{}
 
@@ -41,16 +13,21 @@ func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepActio
 	config := state.Get("config").(*config)
 	ui := state.Get("ui").(packer.Ui)
 
-	for _, dir := range s.outputDirs(state) {
-		if dir.FileExists(config.OutputDir) && config.PackerForce {
-			ui.Say(fmt.Sprintf("Deleting previous %s output directory...", dir.DirType()))
-			dir.RemoveAll(config.OutputDir)
-		}
+	dir := s.outputDir(state)
+	exists, err := dir.DirExists(config.OutputDir)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 
-		if err := dir.MkdirAll(config.OutputDir); err != nil {
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
+	if exists && config.PackerForce {
+		ui.Say("Deleting previous output directory...")
+		dir.RemoveAll(config.OutputDir)
+	}
+
+	if err := dir.MkdirAll(config.OutputDir); err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
@@ -64,30 +41,29 @@ func (s *stepPrepareOutputDir) Cleanup(state multistep.StateBag) {
 		config := state.Get("config").(*config)
 		ui := state.Get("ui").(packer.Ui)
 
-		for _, dir := range s.outputDirs(state) {
-			ui.Say(fmt.Sprintf("Deleting %s output directory...", dir.DirType()))
-			for i := 0; i < 5; i++ {
-				err := dir.RemoveAll(config.OutputDir)
-				if err == nil {
-					break
-				}
-
-				log.Printf("Error removing output dir: %s", err)
-				time.Sleep(2 * time.Second)
+		dir := s.outputDir(state)
+		ui.Say("Deleting output directory...")
+		for i := 0; i < 5; i++ {
+			err := dir.RemoveAll(config.OutputDir)
+			if err == nil {
+				break
 			}
+
+			log.Printf("Error removing output dir: %s", err)
+			time.Sleep(2 * time.Second)
 		}
 	}
 }
 
-func (s *stepPrepareOutputDir) outputDirs(state multistep.StateBag) []OutputDir {
+func (s *stepPrepareOutputDir) outputDir(state multistep.StateBag) (dir OutputDir) {
 	driver := state.Get("driver").(Driver)
-	dirs := []OutputDir{
-		localOutputDir{},
+
+	switch d := driver.(type) {
+	case OutputDir:
+		dir = d
+	default:
+		dir = new(localOutputDir)
 	}
 
-	if dir, ok := driver.(OutputDir); ok {
-		dirs = append(dirs, dir)
-	}
-
-	return dirs
+	return
 }
