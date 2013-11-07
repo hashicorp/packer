@@ -79,7 +79,6 @@ type RawVariable struct {
 // and a corresponding description
 type RawDescription struct {
 	Name 		string
-	Type 		string
 	Description string
 
 	RawConfig interface{}
@@ -162,6 +161,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 	}
 
 	// Gather all the builders
+	builderNames := make(map[string]string, len(rawTpl.Builders))
 	for i, v := range rawTpl.Builders {
 		var raw RawBuilderConfig
 		if err := mapstructure.Decode(v, &raw); err != nil {
@@ -193,6 +193,8 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			errors = append(errors, fmt.Errorf("builder with name '%s' already exists", raw.Name))
 			continue
 		}
+
+		builderNames[raw.Name] = raw.Name
 
 		// Now that we have the name, remove it from the config - as the builder
 		// itself doesn't know about, and it will cause a validation error.
@@ -317,20 +319,13 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			continue
 		}
 
-		if raw.Type == "" {
-			errors = append(errors, fmt.Errorf("description %d: missing 'type'", i+1))
-			continue
-		}
-
-		// Attempt to get the name of the builder that corresponds with the description. 
-		// If the "name" key is missing, use the "type" field for the name
-		if raw.Name == "" {
-			raw.Name = raw.Type
+		if builderNames[raw.Name] == "" {
+			errors = append(errors, fmt.Errorf("No builder exists with the name: '%s'", raw.Name))
 		}
 
 		// Check if we already have a description with this name and error if so
 		if _, ok := t.Descriptions[raw.Name]; ok {
-			errors = append(errors, fmt.Errorf("builder with name '%s' already has a description", raw.Name))
+			errors = append(errors, fmt.Errorf("'%s' already has a description", raw.Name))
 			continue
 		}
 		delete(v, "name")
