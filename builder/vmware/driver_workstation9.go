@@ -2,6 +2,7 @@ package vmware
 
 import (
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"log"
 	"os"
 	"os/exec"
@@ -59,6 +60,10 @@ func (d *Workstation9Driver) IsRunning(vmxPath string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (d *Workstation9Driver) SSHAddress(state multistep.StateBag) (string, error) {
+	return sshAddress(state)
 }
 
 func (d *Workstation9Driver) Start(vmxPath string, headless bool) error {

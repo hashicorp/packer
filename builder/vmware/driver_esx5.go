@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"io"
@@ -21,8 +20,13 @@ import (
 )
 
 type ESX5Driver struct {
-	comm   packer.Communicator
-	config *config
+	Host      string
+	Port      uint
+	Username  string
+	Password  string
+	Datastore string
+
+	comm packer.Communicator
 }
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
@@ -76,12 +80,10 @@ func (d *ESX5Driver) Verify() error {
 		d.connect,
 		d.checkSystemVersion,
 		d.checkGuestIPHackEnabled,
-		d.checkOutputFolder,
 	}
 
 	for _, check := range checks {
-		err := check()
-		if err != nil {
+		if err := check(); err != nil {
 			return err
 		}
 	}
@@ -90,7 +92,7 @@ func (d *ESX5Driver) Verify() error {
 }
 
 func (d *ESX5Driver) HostIP() (string, error) {
-	ip := net.ParseIP(d.config.RemoteHost)
+	ip := net.ParseIP(d.Host)
 	interfaces, err := net.Interfaces()
 	if err != nil {
 		return "", err
@@ -117,7 +119,7 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
 	var vncPort uint
 	// TODO(dougm) use esxcli network ip connection list
 	for port := portMin; port <= portMax; port++ {
-		address := fmt.Sprintf("%s:%d", d.config.RemoteHost, port)
+		address := fmt.Sprintf("%s:%d", d.Host, port)
 		log.Printf("Trying address: %s...", address)
 		l, err := net.DialTimeout("tcp", address, 1*time.Second)
 
@@ -135,23 +137,79 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
 		}
 	}
 
-	return d.config.RemoteHost, vncPort
+	return d.Host, vncPort
 }
 
-func (d *ESX5Driver) SSHAddress() func(multistep.StateBag) (string, error) {
-	return d.sshAddress
-}
+func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
+	config := state.Get("config").(*config)
 
-func (d *ESX5Driver) Download() func(*common.DownloadConfig, multistep.StateBag) (string, error, bool) {
-	return d.download
-}
-
-func (d *ESX5Driver) FileExists(path string) bool {
-	err := d.sh("test", "-e", d.datastorePath(path))
-	if err != nil {
-		return false
+	if address, ok := state.GetOk("vm_address"); ok {
+		return address.(string), nil
 	}
-	return true
+
+	r, err := d.esxcli("network", "vm", "list")
+	if err != nil {
+		return "", err
+	}
+
+	record, err := r.find("Name", config.VMName)
+	if err != nil {
+		return "", err
+	}
+	wid := record["WorldID"]
+	if wid == "" {
+		return "", errors.New("VM WorldID not found")
+	}
+
+	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
+	if err != nil {
+		return "", err
+	}
+
+	record, err = r.read()
+	if err != nil {
+		return "", err
+	}
+
+	if record["IPAddress"] == "0.0.0.0" {
+		return "", errors.New("VM network port found, but no IP address")
+	}
+
+	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
+	state.Put("vm_address", address)
+	return address, nil
+}
+
+/*
+func (d *ESX5Driver) Download(*common.DownloadConfig, multistep.StateBag) (string, error, bool) {
+	config := state.Get("config").(*config)
+
+	cacheRoot, _ := filepath.Abs(".")
+	targetFile, err := filepath.Rel(cacheRoot, dconfig.TargetPath)
+	if err != nil {
+		return "", err, false
+	}
+
+	if err := d.MkdirAll(filepath.Dir(targetFile)); err != nil {
+		return "", err, false
+	}
+
+	path := d.datastorePath(targetFile)
+	if d.verifyChecksum(config.ISOChecksumType, config.ISOChecksum, path) {
+		log.Println("Initial checksum matched, no download needed.")
+		return path, nil, true
+	}
+
+	// TODO(dougm) progress and handle interrupt
+	err = d.sh("wget", dconfig.Url, "-O", path)
+
+	return path, err, true
+}
+*/
+
+func (d *ESX5Driver) DirExists(path string) (bool, error) {
+	err := d.sh("test", "-e", d.datastorePath(path))
+	return err == nil, err
 }
 
 func (d *ESX5Driver) MkdirAll(path string) error {
@@ -162,32 +220,24 @@ func (d *ESX5Driver) RemoveAll(path string) error {
 	return d.sh("rm", "-rf", d.datastorePath(path))
 }
 
-func (d *ESX5Driver) DirType() string {
-	return "datastore"
-}
-
 func (d *ESX5Driver) datastorePath(path string) string {
-	return filepath.Join("/vmfs/volumes", d.config.RemoteDatastore, path)
+	return filepath.Join("/vmfs/volumes", d.Datastore, path)
 }
 
 func (d *ESX5Driver) connect() error {
-	if d.config.RemoteHost == "" {
-		return errors.New("A remote_host must be specified.")
-	}
-	if d.config.RemotePort == 0 {
-		d.config.RemotePort = 22
-	}
-	address := fmt.Sprintf("%s:%d", d.config.RemoteHost, d.config.RemotePort)
+	address := fmt.Sprintf("%s:%d", d.Host, d.Port)
+
 	auth := []gossh.ClientAuth{
-		gossh.ClientAuthPassword(ssh.Password(d.config.RemotePassword)),
+		gossh.ClientAuthPassword(ssh.Password(d.Password)),
 		gossh.ClientAuthKeyboardInteractive(
-			ssh.PasswordKeyboardInteractive(d.config.RemotePassword)),
+			ssh.PasswordKeyboardInteractive(d.Password)),
 	}
+
 	// TODO(dougm) KeyPath support
 	sshConfig := &ssh.Config{
 		Connection: ssh.ConnectFunc("tcp", address),
 		SSHConfig: &gossh.ClientConfig{
-			User: d.config.RemoteUser,
+			User: d.Username,
 			Auth: auth,
 		},
 		NoPty: true,
@@ -204,7 +254,6 @@ func (d *ESX5Driver) connect() error {
 
 func (d *ESX5Driver) checkSystemVersion() error {
 	r, err := d.esxcli("system", "version", "get")
-
 	if err != nil {
 		return err
 	}
@@ -214,20 +263,18 @@ func (d *ESX5Driver) checkSystemVersion() error {
 		return err
 	}
 
-	log.Printf("Connected to %s %s %s", record["Product"], record["Version"], record["Build"])
-
+	log.Printf("Connected to %s %s %s", record["Product"],
+		record["Version"], record["Build"])
 	return nil
 }
 
 func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 	r, err := d.esxcli("system", "settings", "advanced", "list", "-o", "/Net/GuestIPHack")
-
 	if err != nil {
 		return err
 	}
 
 	record, err := r.read()
-
 	if err != nil {
 		return err
 	}
@@ -238,42 +285,6 @@ func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 	}
 
 	return nil
-}
-
-func (d *ESX5Driver) checkOutputFolder() error {
-	if d.config.RemoteDatastore == "" {
-		d.config.RemoteDatastore = "datastore1"
-	}
-	if !d.config.PackerForce && d.FileExists(d.config.OutputDir) {
-		return fmt.Errorf("Output folder '%s' already exists. It must not exist.",
-			d.config.OutputDir)
-	}
-	return nil
-}
-
-func (d *ESX5Driver) download(config *common.DownloadConfig, state multistep.StateBag) (string, error, bool) {
-	cacheRoot, _ := filepath.Abs(".")
-	targetFile, err := filepath.Rel(cacheRoot, config.TargetPath)
-
-	if err != nil {
-		return "", err, false
-	}
-
-	path := d.datastorePath(targetFile)
-
-	err = d.MkdirAll(filepath.Dir(targetFile))
-	if err != nil {
-		return "", err, false
-	}
-
-	if d.verifyChecksum(d.config.ISOChecksumType, d.config.ISOChecksum, path) {
-		log.Println("Initial checksum matched, no download needed.")
-		return path, nil, true
-	}
-	// TODO(dougm) progress and handle interrupt
-	err = d.sh("wget", config.Url, "-O", path)
-
-	return path, err, true
 }
 
 func (d *ESX5Driver) upload(src, dst string) error {
@@ -377,42 +388,4 @@ func (r *esxcliReader) find(key, val string) (map[string]string, error) {
 			return record, nil
 		}
 	}
-}
-
-func (d *ESX5Driver) sshAddress(state multistep.StateBag) (string, error) {
-	if address, ok := state.GetOk("vm_address"); ok {
-		return address.(string), nil
-	}
-
-	r, err := d.esxcli("network", "vm", "list")
-	if err != nil {
-		return "", err
-	}
-
-	record, err := r.find("Name", d.config.VMName)
-	if err != nil {
-		return "", err
-	}
-	wid := record["WorldID"]
-	if wid == "" {
-		return "", errors.New("VM WorldID not found")
-	}
-
-	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
-	if err != nil {
-		return "", err
-	}
-
-	record, err = r.read()
-	if err != nil {
-		return "", err
-	}
-
-	if record["IPAddress"] == "0.0.0.0" {
-		return "", errors.New("VM network port found, but no IP address")
-	}
-
-	address := fmt.Sprintf("%s:%d", record["IPAddress"], d.config.SSHPort)
-	state.Put("vm_address", address)
-	return address, nil
 }
