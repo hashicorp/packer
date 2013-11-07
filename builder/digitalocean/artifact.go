@@ -12,6 +12,12 @@ type Artifact struct {
 	// The ID of the image
 	snapshotId uint
 
+	// The name of the region
+	regionName string
+
+	// The ID of the region
+	regionId uint
+
 	// The client for making API calls
 	client *DigitalOceanClient
 }
@@ -26,14 +32,15 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.snapshotName
+	// mimicing the aws builder
+	return fmt.Sprintf("%s:%s", a.regionName, a.snapshotName)
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A snapshot was created: %v", a.snapshotName)
+	return fmt.Sprintf("A snapshot was created: '%v' in region '%v'", a.snapshotName, a.regionName)
 }
 
 func (a *Artifact) Destroy() error {
-	log.Printf("Destroying image: %d", a.snapshotId)
+	log.Printf("Destroying image: %d (%s)", a.snapshotId, a.snapshotName)
 	return a.client.DestroyImage(a.snapshotId)
 }

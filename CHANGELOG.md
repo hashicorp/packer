@@ -1,3 +1,16 @@
+## 0.4.0 (unreleased)
+
+FEATURES:
+
+* QEMU builder. This builder builds a new VM compatible with KVM or Xen
+  using QEMU.
+* Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
+
+IMPROVEMENTS:
+
+* builder/amazon/all: Can now specify a list of multiple security group
+  IDs to apply. [GH-499]
+
 ## 0.3.11 (November 4, 2013)
 
 FEATURES:

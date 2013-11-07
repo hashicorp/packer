@@ -11,19 +11,20 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	SourceAmi            string `mapstructure:"source_ami"`
-	IamInstanceProfile   string `mapstructure:"iam_instance_profile"`
-	InstanceType         string `mapstructure:"instance_type"`
-	UserData             string `mapstructure:"user_data"`
-	UserDataFile         string `mapstructure:"user_data_file"`
-	RawSSHTimeout        string `mapstructure:"ssh_timeout"`
-	SSHUsername          string `mapstructure:"ssh_username"`
-	SSHPort              int    `mapstructure:"ssh_port"`
-	SecurityGroupId      string `mapstructure:"security_group_id"`
-	SubnetId             string `mapstructure:"subnet_id"`
-	TemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
-	VpcId                string `mapstructure:"vpc_id"`
-	AvailabilityZone     string `mapstructure:"availability_zone"`
+	SourceAmi            string   `mapstructure:"source_ami"`
+	IamInstanceProfile   string   `mapstructure:"iam_instance_profile"`
+	InstanceType         string   `mapstructure:"instance_type"`
+	UserData             string   `mapstructure:"user_data"`
+	UserDataFile         string   `mapstructure:"user_data_file"`
+	RawSSHTimeout        string   `mapstructure:"ssh_timeout"`
+	SSHUsername          string   `mapstructure:"ssh_username"`
+	SSHPort              int      `mapstructure:"ssh_port"`
+	SecurityGroupId      string   `mapstructure:"security_group_id"`
+	SecurityGroupIds     []string `mapstructure:"security_group_ids"`
+	SubnetId             string   `mapstructure:"subnet_id"`
+	TemporaryKeyPairName string   `mapstructure:"temporary_key_pair_name"`
+	VpcId                string   `mapstructure:"vpc_id"`
+	AvailabilityZone     string   `mapstructure:"availability_zone"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -74,11 +75,19 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
+	if c.SecurityGroupId != "" {
+		if len(c.SecurityGroupIds) > 0 {
+			errs = append(errs, fmt.Errorf("Only one of security_group_id or security_group_ids can be specified."))
+		} else {
+			c.SecurityGroupIds = []string{c.SecurityGroupId}
+			c.SecurityGroupId = ""
+		}
+	}
+
 	templates := map[string]*string{
 		"iam_instance_profile":    &c.IamInstanceProfile,
 		"instance_type":           &c.InstanceType,
 		"ssh_timeout":             &c.RawSSHTimeout,
-		"security_group_id":       &c.SecurityGroupId,
 		"ssh_username":            &c.SSHUsername,
 		"source_ami":              &c.SourceAmi,
 		"subnet_id":               &c.SubnetId,
@@ -93,6 +102,21 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		if err != nil {
 			errs = append(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	sliceTemplates := map[string][]string{
+		"security_group_ids": c.SecurityGroupIds,
+	}
+
+	for n, slice := range sliceTemplates {
+		for i, elem := range slice {
+			var err error
+			slice[i], err = t.Process(elem, nil)
+			if err != nil {
+				errs = append(
+					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
+			}
 		}
 	}
 

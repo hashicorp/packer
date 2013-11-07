@@ -225,9 +225,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
+	region_id := state.Get("region_id").(uint)
+
+	regionName, err := client.RegionName(region_id)
+	if err != nil {
+		return nil, err
+	}
+
 	artifact := &Artifact{
 		snapshotName: state.Get("snapshot_name").(string),
 		snapshotId:   state.Get("snapshot_image_id").(uint),
+		regionId:     region_id,
+		regionName:   regionName,
 		client:       client,
 	}
 
