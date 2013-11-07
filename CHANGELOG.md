@@ -2,8 +2,9 @@
 
 FEATURES:
 
-* QEMU builder. This builder builds a new VM compatible with KVM or Xen
-  using QEMU.
+* QEMU builder: builds a new VM compatible with KVM or Xen using QEMU.
+* Remote ESXi builder: builds a VMware VM using ESXi remotely using only
+  SSH to an ESXi machine directly.
 * Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
 
 IMPROVEMENTS:
