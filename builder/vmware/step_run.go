@@ -22,13 +22,6 @@ type stepRun struct {
 	vmxPath  string
 }
 
-type Inventory interface {
-	// Adds a VM to inventory specified by the path to the VMX given.
-	Register(string) error
-	// Removes a VM from inventory specified by the path to the VMX given.
-	Unregister(string) error
-}
-
 func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
@@ -49,8 +42,8 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 				"%s:%d", vncIp, vncPort))
 	}
 
-	if inv, ok := driver.(Inventory); ok {
-		if err := inv.Register(vmxPath); err != nil {
+	if remoteDriver, ok := driver.(RemoteDriver); ok {
+		if err := remoteDriver.Register(vmxPath); err != nil {
 			err := fmt.Errorf("Error registering VM: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -98,9 +91,9 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 			}
 		}
 
-		if inv, ok := driver.(Inventory); ok {
+		if remoteDriver, ok := driver.(RemoteDriver); ok {
 			ui.Say("Unregistering virtual machine...")
-			if err := inv.Unregister(s.vmxPath); err != nil {
+			if err := remoteDriver.Unregister(s.vmxPath); err != nil {
 				ui.Error(fmt.Sprintf("Error unregistering VM: %s", err))
 			}
 		}

@@ -395,6 +395,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
+		&stepRemoteUpload{
+			Key:     "iso_path",
+			Message: "Uploading ISO to remote machine...",
+		},
 		&stepCreateDisk{},
 		&stepCreateVMX{},
 		&stepHTTPServer{},

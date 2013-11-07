@@ -67,6 +67,25 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.datastorePath(vmxPathLocal))
 }
 
+func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
+	cacheRoot, _ := filepath.Abs(".")
+	targetFile, err := filepath.Rel(cacheRoot, localPath)
+	if err != nil {
+		return "", err
+	}
+
+	if err := d.MkdirAll(filepath.Dir(targetFile)); err != nil {
+		return "", err
+	}
+
+	finalPath := d.datastorePath(targetFile)
+	if err := d.upload(finalPath, localPath); err != nil {
+		return "", err
+	}
+
+	return finalPath, nil
+}
+
 func (d *ESX5Driver) ToolsIsoPath(string) string {
 	return ""
 }
@@ -179,33 +198,6 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 	state.Put("vm_address", address)
 	return address, nil
 }
-
-/*
-func (d *ESX5Driver) Download(*common.DownloadConfig, multistep.StateBag) (string, error, bool) {
-	config := state.Get("config").(*config)
-
-	cacheRoot, _ := filepath.Abs(".")
-	targetFile, err := filepath.Rel(cacheRoot, dconfig.TargetPath)
-	if err != nil {
-		return "", err, false
-	}
-
-	if err := d.MkdirAll(filepath.Dir(targetFile)); err != nil {
-		return "", err, false
-	}
-
-	path := d.datastorePath(targetFile)
-	if d.verifyChecksum(config.ISOChecksumType, config.ISOChecksum, path) {
-		log.Println("Initial checksum matched, no download needed.")
-		return path, nil, true
-	}
-
-	// TODO(dougm) progress and handle interrupt
-	err = d.sh("wget", dconfig.Url, "-O", path)
-
-	return path, err, true
-}
-*/
 
 func (d *ESX5Driver) DirExists(path string) (bool, error) {
 	err := d.sh("test", "-e", d.datastorePath(path))
