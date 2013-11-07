@@ -54,7 +54,6 @@ type config struct {
 	VMXTemplatePath   string            `mapstructure:"vmx_template_path"`
 	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
-	Description       string            `mapstructure:"description"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
@@ -138,10 +137,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.ToolsUploadPath == "" {
 		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
-	}
-	
-	if b.config.Description == "" {
-		b.config.Description = "<No Description>"
 	}
 
 	// Errors
