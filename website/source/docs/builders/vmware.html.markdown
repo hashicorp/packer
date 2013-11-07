@@ -136,6 +136,25 @@ Optional:
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
+* `remote_type` (string) - The type of remote machine that will be used to
+  build this VM rather than a local desktop product. The only value accepted
+  for this currently is "esx5". If this is not set, a desktop product will be
+  used. By default, this is not set.
+
+* `remote_datastore` (string) - The path to the datastore where the resulting
+  VM will be stored when it is built on the remote machine. By default this
+  is "datastore1". This only has an effect if `remote_type` is enabled.
+
+* `remote_host` (string) - The host of the remote machine used for access.
+  This is only required if `remote_type` is enabled.
+
+* `remote_password` (string) - The SSH password for the user used to
+  access the remote machine. By default this is empty. This only has an
+  effect if `remote_type` is enabled.
+
+* `remote_user` (string) - The username for the SSH user that will access
+  the remote machine. This is required if `remote_type` is enabled.
+
 * `skip_compaction` (bool) -  VMware-created disks are defragmented
   and compacted at the end of the build process using `vmware-vdiskmanager`.
   In certain rare cases, this might actually end up making the resulting disks
