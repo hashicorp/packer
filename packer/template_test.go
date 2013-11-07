@@ -489,6 +489,63 @@ func TestParseTemplate_variablesBadDefault(t *testing.T) {
 	}
 }
 
+func TestParseTemplate_descriptions(t *testing.T) {
+	data := `
+	{
+		"builders": [{"type": "something"}],
+		"descriptions": [{
+			"name": "something",
+			"description": "test description"
+		}]
+	}`
+	_, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestParseTemplate_multipleDescriptions(t *testing.T) {
+	data := `
+	{
+		"builders": [
+		{"type": "something"},
+		{"type": "something2"}
+		],
+		"descriptions": [
+		{
+			"name": "something",
+			"description": "test description"
+		},
+		{
+			"name": "something2",
+			"description": "test description2"
+		}
+		]
+	}`
+	_, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestParseTemplate_badDescription(t *testing.T) {
+	data := `
+	{
+		"builders": [{
+			"name": "builder1",
+			"type": "something"
+			}],
+		"descriptions": [{
+			"name": "non-existant",
+			"description": "test description"
+		}]
+	}`
+	_, err := ParseTemplate([]byte(data))
+	if err == nil {
+		t.Fatalf("There should be an error.")
+	}
+}
+
 func TestTemplate_BuildNames(t *testing.T) {
 	data := `
 	{
