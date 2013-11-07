@@ -11,7 +11,10 @@ supports building virtual machines on hosts running
 [VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X,
 [VMware Workstation](http://www.vmware.com/products/workstation/overview.html)
 for Linux and Windows, and
-[VMware Player](http://www.vmware.com/products/player/) on Linux.
+[VMware Player](http://www.vmware.com/products/player/) on Linux. It can
+also build machines directly on
+[VMware vSphere Hypervisor](http://www.vmware.com/products/vsphere-hypervisor/)
+using SSH as opposed to the vSphere API.
 
 The builder builds a virtual machine by creating a new virtual machine
 from scratch, booting it, installing an OS, provisioning software within
@@ -278,3 +281,31 @@ these variables isn't required, however.
 * `GuestOS` - The VMware-valid guest OS type.
 * `DiskName` - The filename (without the suffix) of the main virtual disk.
 * `ISOPath` - The path to the ISO to use for the OS installation.
+
+## Building on a Remote vSphere Hypervisor
+
+In addition to using the desktop products of VMware locally to build
+virtual machines, Packer can use a remote VMware Hypervisor to build
+the virtual machine.
+
+When using a remote VMware Hypervisor, the builder still downloads the
+ISO and various files locally, and uploads these to the remote machine.
+Packer currently uses SSH to communicate to the ESXi machine rather than
+the vSphere API. At some point, the vSphere API may be used.
+
+To use a remote VMware vSphere Hypervisor to build your virtual machine,
+fill in the required `remote_*` configurations:
+
+* `remote_type` - This must be set to "esx5".
+
+* `remote_host` - The host of the remote machine.
+
+Additionally, there are some optional configurations that you'll likely
+have to modify as well:
+
+* `remote_datastore` - The path to the datastore where the VM will be
+  stored on the ESXi machine.
+
+* `remote_user` - The SSH username used to access the remote machine.
+
+* `remote_password` - The SSH password for access to the remote machine.
