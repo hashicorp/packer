@@ -35,8 +35,6 @@ type StepDownload struct {
 
 	// A list of URLs to attempt to download this thing.
 	Url []string
-
-	Download func(*DownloadConfig, multistep.StateBag) (string, error, bool)
 }
 
 func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
@@ -54,11 +52,6 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
-
-	downloadFunc := s.Download
-	if downloadFunc == nil {
-		downloadFunc = s.download
-	}
 
 	var finalPath string
 	for _, url := range s.Url {
@@ -79,7 +72,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			Checksum:   checksum,
 		}
 
-		path, err, retry := downloadFunc(config, state)
+		path, err, retry := s.download(config, state)
 		if err != nil {
 			ui.Message(fmt.Sprintf("Error downloading: %s", err))
 		}

@@ -138,6 +138,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
+	if b.config.RemoteUser == "" {
+		b.config.RemoteUser = "root"
+	}
+
+	if b.config.RemoteDatastore == "" {
+		b.config.RemoteDatastore = "datastore1"
+	}
+
+	if b.config.RemotePort == 0 {
+		b.config.RemotePort = 22
+	}
+
 	if b.config.SSHPort == 0 {
 		b.config.SSHPort = 22
 	}
@@ -165,6 +177,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"shutdown_timeout":    &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":    &b.config.RawSSHWaitTimeout,
 		"vmx_template_path":   &b.config.VMXTemplatePath,
+		"remote_type":         &b.config.RemoteType,
 		"remote_host":         &b.config.RemoteHost,
 		"remote_datastore":    &b.config.RemoteDatastore,
 		"remote_user":         &b.config.RemoteUser,
@@ -338,6 +351,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
+	// Remote configuration validation
+	if b.config.RemoteType != "" {
+		if b.config.RemoteHost == "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("remote_host must be specified"))
+		}
+	}
+
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -353,20 +374,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Initialize the driver that will handle our interaction with VMware
-	var driver Driver
-	var err error
-	var sshAddressFunc func(multistep.StateBag) (string, error) = sshAddress
-	var downloadFunc func(*common.DownloadConfig, multistep.StateBag) (string, error, bool)
-
-	if b.config.RemoteType == "" {
-		driver, err = NewDriver()
-	} else {
-		driver, err = NewRemoteDriver(&b.config)
-		sshAddressFunc = driver.(RemoteDriver).SSHAddress()
-		downloadFunc = driver.(RemoteDriver).Download()
-	}
-
+	driver, err := NewDriver(&b.config)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
@@ -382,7 +390,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
-			Download:     downloadFunc,
 		},
 		&stepPrepareOutputDir{},
 		&common.StepCreateFloppy{
@@ -395,7 +402,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepRun{},
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
-			SSHAddress:     sshAddressFunc,
+			SSHAddress:     driver.SSHAddress,
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: b.config.sshWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
