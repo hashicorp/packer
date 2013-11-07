@@ -744,6 +744,34 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_Description(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	
+	// Test with no description field
+	config["description"] = ""
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if b.config.Description != "<No Description>" {
+		t.Fatalf("Wrong value: %s", b.config.Description)
+	}
+
+	// Test with a description field
+	config["description"] = "VM description"
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if b.config.Description != "VM description" {
+		t.Fatalf("Wrong value: %s", b.config.Description)
+	}
+}
+
 func TestBuilderPrepare_VMXData(t *testing.T) {
 	var b Builder
 	config := testConfig()

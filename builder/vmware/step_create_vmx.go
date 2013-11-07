@@ -90,6 +90,8 @@ func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set this so that no dialogs ever appear from Packer.
 	vmxData["msg.autoAnswer"] = "true"
+	// prints the template description into the "notes" field on VMWare
+	vmxData["annotation"] = config.Description
 
 	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
