@@ -93,3 +93,6 @@ This will run tests for Packer core along with all the core builders and command
 
 If you make any changes to the code, run `make format` in order to automatically
 format the code according to Go standards.
+
+When new dependencies are added to packer you can use `make updatedeps` to
+get the latest and subsequently use `make` to compile and generate the `packer` binary.

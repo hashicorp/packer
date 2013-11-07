@@ -11,9 +11,9 @@ import (
 )
 
 type StepSecurityGroup struct {
-	SecurityGroupId string
-	SSHPort         int
-	VpcId           string
+	SecurityGroupIds []string
+	SSHPort          int
+	VpcId            string
 
 	createdGroupId string
 }
@@ -22,9 +22,9 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.SecurityGroupId != "" {
-		log.Printf("Using specified security group: %s", s.SecurityGroupId)
-		state.Put("securityGroupId", s.SecurityGroupId)
+	if len(s.SecurityGroupIds) > 0 {
+		log.Printf("Using specified security groups: %v", s.SecurityGroupIds)
+		state.Put("securityGroupIds", s.SecurityGroupIds)
 		return multistep.ActionContinue
 	}
 
@@ -69,7 +69,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set some state data for use in future steps
-	state.Put("securityGroupId", s.createdGroupId)
+	state.Put("securityGroupIds", []string{s.createdGroupId})
 
 	return multistep.ActionContinue
 }
