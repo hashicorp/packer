@@ -201,7 +201,7 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 
 func (d *ESX5Driver) DirExists(path string) (bool, error) {
 	err := d.sh("test", "-e", d.datastorePath(path))
-	return err == nil, err
+	return err == nil, nil
 }
 
 func (d *ESX5Driver) MkdirAll(path string) error {
