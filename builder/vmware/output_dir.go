@@ -23,7 +23,7 @@ type localOutputDir struct {
 
 func (d *localOutputDir) DirExists() (bool, error) {
 	_, err := os.Stat(d.dir)
-	return err == nil, err
+	return err == nil, nil
 }
 
 func (d *localOutputDir) MkdirAll() error {
