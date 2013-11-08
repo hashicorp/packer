@@ -57,7 +57,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	vmxPath := d.datastorePath(vmxPathLocal)
-	if err := d.upload(vmxPathLocal, vmxPath); err != nil {
+	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
 	return d.sh("vim-cmd", "solo/registervm", vmxPath)
@@ -279,7 +279,7 @@ func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 	return nil
 }
 
-func (d *ESX5Driver) upload(src, dst string) error {
+func (d *ESX5Driver) upload(dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
