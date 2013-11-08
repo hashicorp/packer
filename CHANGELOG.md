@@ -14,6 +14,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* builder/amazon/chroot: Copying empty directories works. [GH-588]
 * builder/amazon/chroot: Chroot commands work with shell provisioners. [GH-581]
 * builder/vmware: VMX modifications are now case-insensitive. [GH-608]
 
