@@ -34,7 +34,7 @@ So if you use AWS for production and VMware (perhaps with [Vagrant](http://www.v
 for development, you can generate both an AMI and a VMware machine using
 Packer at the same time from the same template.
 
-Mix this in with the continous delivery use case above, and you have a pretty
+Mix this in with the continuous delivery use case above, and you have a pretty
 slick system for consistent work environments from development all the
 way through to production.
 
