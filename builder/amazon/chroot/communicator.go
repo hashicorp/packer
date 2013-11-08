@@ -21,7 +21,7 @@ type Communicator struct {
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("chroot %s %s", c.Chroot, cmd.Command))
+		fmt.Sprintf("chroot %s /bin/sh -c \"%s\"", c.Chroot, cmd.Command))
 	if err != nil {
 		return err
 	}
