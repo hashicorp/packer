@@ -9,24 +9,31 @@ import (
 // so that the output directory can be properly made on remote (ESXi) based
 // VMware products as well as local.
 type OutputDir interface {
-	DirExists(string) (bool, error)
-	MkdirAll(string) error
-	RemoveAll(string) error
+	DirExists() (bool, error)
+	MkdirAll() error
+	RemoveAll() error
+	SetOutputDir(string)
 }
 
 // localOutputDir is an OutputDir implementation where the directory
 // is on the local machine.
-type localOutputDir struct{}
+type localOutputDir struct {
+	dir string
+}
 
-func (localOutputDir) DirExists(path string) (bool, error) {
-	_, err := os.Stat(path)
+func (d *localOutputDir) DirExists() (bool, error) {
+	_, err := os.Stat(d.dir)
 	return err == nil, err
 }
 
-func (localOutputDir) MkdirAll(path string) error {
-	return os.MkdirAll(path, 0755)
+func (d *localOutputDir) MkdirAll() error {
+	return os.MkdirAll(d.dir, 0755)
 }
 
-func (localOutputDir) RemoveAll(path string) error {
-	return os.RemoveAll(path)
+func (d *localOutputDir) RemoveAll() error {
+	return os.RemoveAll(d.dir)
+}
+
+func (d *localOutputDir) SetOutputDir(path string) {
+	d.dir = path
 }
