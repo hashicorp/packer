@@ -20,6 +20,8 @@ import (
 type stepRun struct {
 	bootTime time.Time
 	vmxPath  string
+
+	registered bool
 }
 
 func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
@@ -27,6 +29,7 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
+	vncIp := state.Get("vnc_ip").(string)
 	vncPort := state.Get("vnc_port").(uint)
 
 	// Set the VMX path so that we know we started the machine
@@ -38,7 +41,18 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Message(fmt.Sprintf(
 			"The VM will be run headless, without a GUI. If you want to\n"+
 				"view the screen of the VM, connect via VNC without a password to\n"+
-				"127.0.0.1:%d", vncPort))
+				"%s:%d", vncIp, vncPort))
+	}
+
+	if remoteDriver, ok := driver.(RemoteDriver); ok {
+		if err := remoteDriver.Register(vmxPath); err != nil {
+			err := fmt.Errorf("Error registering VM: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		s.registered = true
 	}
 
 	if err := driver.Start(vmxPath, config.Headless); err != nil {
@@ -79,6 +93,15 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 			if err := driver.Stop(s.vmxPath); err != nil {
 				ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
 			}
+		}
+
+		if remoteDriver, ok := driver.(RemoteDriver); ok && s.registered {
+			ui.Say("Unregistering virtual machine...")
+			if err := remoteDriver.Unregister(s.vmxPath); err != nil {
+				ui.Error(fmt.Sprintf("Error unregistering VM: %s", err))
+			}
+
+			s.registered = false
 		}
 	}
 }

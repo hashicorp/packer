@@ -4,46 +4,74 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"os"
 	"time"
 )
 
-type stepPrepareOutputDir struct{}
+type stepPrepareOutputDir struct {
+	dir OutputDir
+}
 
-func (stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	ui := state.Get("ui").(packer.Ui)
 
-	if _, err := os.Stat(config.OutputDir); err == nil && config.PackerForce {
-		ui.Say("Deleting previous output directory...")
-		os.RemoveAll(config.OutputDir)
-	}
+	dir := s.outputDir(state)
+	dir.SetOutputDir(config.OutputDir)
 
-	if err := os.MkdirAll(config.OutputDir, 0755); err != nil {
+	exists, err := dir.DirExists()
+	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
+	if exists && config.PackerForce {
+		ui.Say("Deleting previous output directory...")
+		dir.RemoveAll()
+	}
+
+	if err := dir.MkdirAll(); err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	s.dir = dir
+
 	return multistep.ActionContinue
 }
 
-func (stepPrepareOutputDir) Cleanup(state multistep.StateBag) {
+func (s *stepPrepareOutputDir) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 
 	if cancelled || halted {
-		config := state.Get("config").(*config)
 		ui := state.Get("ui").(packer.Ui)
 
-		ui.Say("Deleting output directory...")
-		for i := 0; i < 5; i++ {
-			err := os.RemoveAll(config.OutputDir)
-			if err == nil {
-				break
-			}
+		if s.dir != nil {
+			ui.Say("Deleting output directory...")
+			for i := 0; i < 5; i++ {
+				err := s.dir.RemoveAll()
+				if err == nil {
+					break
+				}
 
-			log.Printf("Error removing output dir: %s", err)
-			time.Sleep(2 * time.Second)
+				log.Printf("Error removing output dir: %s", err)
+				time.Sleep(2 * time.Second)
+			}
 		}
 	}
+}
+
+func (s *stepPrepareOutputDir) outputDir(state multistep.StateBag) (dir OutputDir) {
+	driver := state.Get("driver").(Driver)
+
+	switch d := driver.(type) {
+	case OutputDir:
+		log.Printf("Using driver as the OutputDir implementation")
+		dir = d
+	default:
+		log.Printf("Using localOutputDir implementation")
+		dir = new(localOutputDir)
+	}
+
+	return
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"regexp"
 	"sort"
@@ -23,7 +24,8 @@ func ParseVMX(contents string) map[string]string {
 			continue
 		}
 
-		results[matches[1]] = matches[2]
+		key := strings.ToLower(matches[1])
+		results[key] = matches[2]
 	}
 
 	return results
@@ -51,6 +53,7 @@ func EncodeVMX(contents map[string]string) string {
 // WriteVMX takes a path to a VMX file and contents in the form of a
 // map and writes it out.
 func WriteVMX(path string, data map[string]string) (err error) {
+	log.Printf("Writing VMX to: %s", path)
 	f, err := os.Create(path)
 	if err != nil {
 		return
