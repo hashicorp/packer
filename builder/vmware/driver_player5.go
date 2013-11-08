@@ -114,6 +114,10 @@ func (d *Player5LinuxDriver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Player5LinuxDriver) SuppressMessages(vmxPath string) error {
+	return nil
+}
+
 func (d *Player5LinuxDriver) Verify() error {
 	if err := d.findApp(); err != nil {
 		return fmt.Errorf("VMware Player application ('vmplayer') not found in path.")

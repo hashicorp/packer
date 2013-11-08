@@ -68,6 +68,10 @@ func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "solo/registervm", vmxPath)
 }
 
+func (d *ESX5Driver) SuppressMessages(vmxPath string) error {
+	return nil
+}
+
 func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
 	return d.sh("vim-cmd", "vmsvc/unregister", vmxPath)
