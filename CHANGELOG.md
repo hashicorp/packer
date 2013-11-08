@@ -11,6 +11,8 @@ IMPROVEMENTS:
 
 * builder/amazon/all: Can now specify a list of multiple security group
   IDs to apply. [GH-499]
+* builder/amazon/all: AWS API requests are now retried when a temporary
+  network error occurs as well as 500 errors. [GH-559]
 
 BUG FIXES:
 
