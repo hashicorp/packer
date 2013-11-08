@@ -66,8 +66,10 @@ func (s *stepPrepareOutputDir) outputDir(state multistep.StateBag) (dir OutputDi
 
 	switch d := driver.(type) {
 	case OutputDir:
+		log.Printf("Using driver as the OutputDir implementation")
 		dir = d
 	default:
+		log.Printf("Using localOutputDir implementation")
 		dir = new(localOutputDir)
 	}
 
