@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 )
 
@@ -85,7 +87,22 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 		return err
 	}
 
-	return ShellCommand(cpCmd).Run()
+	var stderr bytes.Buffer
+	cmd := ShellCommand(cpCmd)
+	cmd.Env = append(cmd.Env, os.Environ()...)
+	cmd.Env = append(cmd.Env, "LANG=C")
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err == nil {
+		return err
+	}
+
+	if strings.Contains(stderr.String(), "No such file") {
+		// This just means that the directory was empty. Just ignore it.
+		return nil
+	}
+
+	return err
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
