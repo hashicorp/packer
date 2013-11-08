@@ -24,7 +24,8 @@ func ParseVMX(contents string) map[string]string {
 			continue
 		}
 
-		results[matches[1]] = matches[2]
+		key := strings.ToLower(matches[1])
+		results[key] = matches[2]
 	}
 
 	return results
