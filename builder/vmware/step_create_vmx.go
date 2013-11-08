@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type vmxTemplateData struct {
@@ -26,9 +27,11 @@ type vmxTemplateData struct {
 //
 // Produces:
 //   vmx_path string - The path to the VMX file.
-type stepCreateVMX struct{}
+type stepCreateVMX struct {
+	tempDir string
+}
 
-func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
@@ -77,6 +80,7 @@ func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 		log.Println("Setting custom VMX data...")
 		for k, v := range config.VMXData {
 			log.Printf("Setting VMX: '%s' = '%s'", k, v)
+			k = strings.ToLower(k)
 			vmxData[k] = v
 		}
 	}
@@ -84,14 +88,30 @@ func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
 		log.Println("Floppy path present, setting in VMX")
 		vmxData["floppy0.present"] = "TRUE"
-		vmxData["floppy0.fileType"] = "file"
-		vmxData["floppy0.fileName"] = floppyPathRaw.(string)
+		vmxData["floppy0.filetype"] = "file"
+		vmxData["floppy0.filename"] = floppyPathRaw.(string)
 	}
 
 	// Set this so that no dialogs ever appear from Packer.
-	vmxData["msg.autoAnswer"] = "true"
+	vmxData["msg.autoanswer"] = "true"
 
-	vmxPath := filepath.Join(config.OutputDir, config.VMName+".vmx")
+	vmxDir := config.OutputDir
+	if config.RemoteType != "" {
+		// For remote builds, we just put the VMX in a temporary
+		// directory since it just gets uploaded anyways.
+		vmxDir, err = ioutil.TempDir("", "packer-vmx")
+		if err != nil {
+			err := fmt.Errorf("Error preparing VMX template: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		// Set the tempDir so we clean it up
+		s.tempDir = vmxDir
+	}
+
+	vmxPath := filepath.Join(vmxDir, config.VMName+".vmx")
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error creating VMX file: %s", err)
 		state.Put("error", err)
@@ -104,7 +124,10 @@ func (stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (stepCreateVMX) Cleanup(multistep.StateBag) {
+func (s *stepCreateVMX) Cleanup(multistep.StateBag) {
+	if s.tempDir != "" {
+		os.RemoveAll(s.tempDir)
+	}
 }
 
 // This is the default VMX template used if no other template is given.
