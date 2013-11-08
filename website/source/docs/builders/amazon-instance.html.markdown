@@ -23,6 +23,13 @@ quite a bit.
 The builder does _not_ manage AMIs. Once it creates an AMI and stores it
 in your account, it is up to you to use, delete, etc. the AMI.
 
+<div class="alert alert-block alert-info">
+<strong>Note:</strong> This builder requires that the
+<a href="http://aws.amazon.com/developertools/368">Amazon EC2 AMI Tools</a>
+are installed onto the machine. This can be done within a provisioner, but
+must be done before the builder finishes running.
+</div>
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are

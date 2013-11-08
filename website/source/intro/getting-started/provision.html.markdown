@@ -83,7 +83,7 @@ With the provisioner configured, give it a pass once again through
 `packer validate` to verify everything is okay, then build it using
 `packer build example.json`. The output should look similar to when you
 built your first image, except this time there will be a new step where
-the provisoning is run.
+the provisioning is run.
 
 The output from the provisioner is too verbose to include in this
 guide, since it contains all the output from the shell scripts. But you
