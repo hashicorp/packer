@@ -33,7 +33,7 @@ func sshAddress(state multistep.StateBag) (string, error) {
 	var ok bool
 	macAddress := ""
 	if macAddress, ok = vmxData["ethernet0.address"]; !ok || macAddress == "" {
-		if macAddress, ok = vmxData["ethernet0.generatedAddress"]; !ok || macAddress == "" {
+		if macAddress, ok = vmxData["ethernet0.generatedaddress"]; !ok || macAddress == "" {
 			return "", errors.New("couldn't find MAC address in VMX")
 		}
 	}
