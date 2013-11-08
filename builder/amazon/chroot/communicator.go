@@ -92,7 +92,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, "LANG=C")
 	cmd.Stderr = &stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if err == nil {
 		return err
 	}
