@@ -100,6 +100,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.DiskTypeId == "" {
 		// Default is growable virtual disk split in 2GB files.
 		b.config.DiskTypeId = "1"
+
+		if b.config.RemoteType == "esx5" {
+			b.config.DiskTypeId = "zeroedthick"
+		}
 	}
 
 	if b.config.FloppyFiles == nil {
