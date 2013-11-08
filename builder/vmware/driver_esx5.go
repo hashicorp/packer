@@ -51,11 +51,13 @@ func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	return d.sh("vim-cmd", "vmsvc/power.on", d.datastorePath(vmxPathLocal))
+	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	return d.sh("vim-cmd", "vmsvc/power.on", vmxPath)
 }
 
 func (d *ESX5Driver) Stop(vmxPathLocal string) error {
-	return d.sh("vim-cmd", "vmsvc/power.off", d.datastorePath(vmxPathLocal))
+	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	return d.sh("vim-cmd", "vmsvc/power.off", vmxPath)
 }
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
