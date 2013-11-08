@@ -7,14 +7,18 @@ import (
 	"time"
 )
 
-type stepPrepareOutputDir struct{}
+type stepPrepareOutputDir struct {
+	dir OutputDir
+}
 
 func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	ui := state.Get("ui").(packer.Ui)
 
 	dir := s.outputDir(state)
-	exists, err := dir.DirExists(config.OutputDir)
+	dir.SetOutputDir(config.OutputDir)
+
+	exists, err := dir.DirExists()
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -22,13 +26,15 @@ func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepActio
 
 	if exists && config.PackerForce {
 		ui.Say("Deleting previous output directory...")
-		dir.RemoveAll(config.OutputDir)
+		dir.RemoveAll()
 	}
 
-	if err := dir.MkdirAll(config.OutputDir); err != nil {
+	if err := dir.MkdirAll(); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+
+	s.dir = dir
 
 	return multistep.ActionContinue
 }
@@ -38,19 +44,19 @@ func (s *stepPrepareOutputDir) Cleanup(state multistep.StateBag) {
 	_, halted := state.GetOk(multistep.StateHalted)
 
 	if cancelled || halted {
-		config := state.Get("config").(*config)
 		ui := state.Get("ui").(packer.Ui)
 
-		dir := s.outputDir(state)
-		ui.Say("Deleting output directory...")
-		for i := 0; i < 5; i++ {
-			err := dir.RemoveAll(config.OutputDir)
-			if err == nil {
-				break
-			}
+		if s.dir != nil {
+			ui.Say("Deleting output directory...")
+			for i := 0; i < 5; i++ {
+				err := s.dir.RemoveAll()
+				if err == nil {
+					break
+				}
 
-			log.Printf("Error removing output dir: %s", err)
-			time.Sleep(2 * time.Second)
+				log.Printf("Error removing output dir: %s", err)
+				time.Sleep(2 * time.Second)
+			}
 		}
 	}
 }

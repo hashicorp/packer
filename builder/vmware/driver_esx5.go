@@ -19,6 +19,8 @@ import (
 	"time"
 )
 
+// ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
+// virtual machines. This driver can only manage one machine at a time.
 type ESX5Driver struct {
 	Host      string
 	Port      uint
@@ -26,7 +28,8 @@ type ESX5Driver struct {
 	Password  string
 	Datastore string
 
-	comm packer.Communicator
+	comm      packer.Communicator
+	outputDir string
 }
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
@@ -56,7 +59,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
-	vmxPath := d.datastorePath(vmxPathLocal)
+	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
@@ -64,7 +67,8 @@ func (d *ESX5Driver) Register(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
-	return d.sh("vim-cmd", "vmsvc/unregister", d.datastorePath(vmxPathLocal))
+	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	return d.sh("vim-cmd", "vmsvc/unregister", vmxPath)
 }
 
 func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
@@ -74,7 +78,7 @@ func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
 		return "", err
 	}
 
-	if err := d.MkdirAll(filepath.Dir(targetFile)); err != nil {
+	if err := d.mkdir(filepath.Dir(targetFile)); err != nil {
 		return "", err
 	}
 
@@ -199,17 +203,21 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 	return address, nil
 }
 
-func (d *ESX5Driver) DirExists(path string) (bool, error) {
-	err := d.sh("test", "-e", d.datastorePath(path))
+func (d *ESX5Driver) DirExists() (bool, error) {
+	err := d.sh("test", "-e", d.outputDir)
 	return err == nil, nil
 }
 
-func (d *ESX5Driver) MkdirAll(path string) error {
-	return d.sh("mkdir", "-p", d.datastorePath(path))
+func (d *ESX5Driver) MkdirAll() error {
+	return d.mkdir(d.outputDir)
 }
 
-func (d *ESX5Driver) RemoveAll(path string) error {
-	return d.sh("rm", "-rf", d.datastorePath(path))
+func (d *ESX5Driver) RemoveAll() error {
+	return d.sh("rm", "-rf", d.outputDir)
+}
+
+func (d *ESX5Driver) SetOutputDir(path string) {
+	d.outputDir = d.datastorePath(path)
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
@@ -277,6 +285,10 @@ func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 	}
 
 	return nil
+}
+
+func (d *ESX5Driver) mkdir(path string) error {
+	return d.sh("mkdir", "-p", path)
 }
 
 func (d *ESX5Driver) upload(dst, src string) error {
