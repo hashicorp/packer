@@ -12,6 +12,10 @@ IMPROVEMENTS:
 * builder/amazon/all: Can now specify a list of multiple security group
   IDs to apply. [GH-499]
 
+BUG FIXES:
+
+* builder/vmware: VMX modifications are now case-insensitive. [GH-608]
+
 ## 0.3.11 (November 4, 2013)
 
 FEATURES:
