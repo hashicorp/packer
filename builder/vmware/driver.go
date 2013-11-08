@@ -3,6 +3,7 @@ package vmware
 import (
 	"bytes"
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"log"
 	"os/exec"
 	"runtime"
@@ -19,6 +20,10 @@ type Driver interface {
 
 	// Checks if the VMX file at the given path is running.
 	IsRunning(string) (bool, error)
+
+	// SSHAddress returns the SSH address for the VM that is being
+	// managed by this driver.
+	SSHAddress(multistep.StateBag) (string, error)
 
 	// Start starts a VM specified by the path to the VMX given.
 	Start(string, bool) error
@@ -41,27 +46,39 @@ type Driver interface {
 
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
-func NewDriver() (Driver, error) {
+func NewDriver(config *config) (Driver, error) {
 	drivers := []Driver{}
 
-	switch runtime.GOOS {
-	case "darwin":
+	if config.RemoteType != "" {
 		drivers = []Driver{
-			&Fusion5Driver{
-				AppPath: "/Applications/VMware Fusion.app",
+			&ESX5Driver{
+				Host:      config.RemoteHost,
+				Port:      config.RemotePort,
+				Username:  config.RemoteUser,
+				Password:  config.RemotePassword,
+				Datastore: config.RemoteDatastore,
 			},
 		}
-	case "linux":
-		drivers = []Driver{
-			new(Workstation9Driver),
-			new(Player5LinuxDriver),
+	} else {
+		switch runtime.GOOS {
+		case "darwin":
+			drivers = []Driver{
+				&Fusion5Driver{
+					AppPath: "/Applications/VMware Fusion.app",
+				},
+			}
+		case "linux":
+			drivers = []Driver{
+				new(Workstation9Driver),
+				new(Player5LinuxDriver),
+			}
+		case "windows":
+			drivers = []Driver{
+				new(Workstation9Driver),
+			}
+		default:
+			return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 		}
-	case "windows":
-		drivers = []Driver{
-			new(Workstation9Driver),
-		}
-	default:
-		return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 	}
 
 	errs := ""

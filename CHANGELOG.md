@@ -2,14 +2,23 @@
 
 FEATURES:
 
-* QEMU builder. This builder builds a new VM compatible with KVM or Xen
-  using QEMU.
+* QEMU builder: builds a new VM compatible with KVM or Xen using QEMU.
+* Remote ESXi builder: builds a VMware VM using ESXi remotely using only
+  SSH to an ESXi machine directly.
 * Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
 
 IMPROVEMENTS:
 
 * builder/amazon/all: Can now specify a list of multiple security group
   IDs to apply. [GH-499]
+* builder/amazon/all: AWS API requests are now retried when a temporary
+  network error occurs as well as 500 errors. [GH-559]
+
+BUG FIXES:
+
+* builder/amazon/chroot: Copying empty directories works. [GH-588]
+* builder/amazon/chroot: Chroot commands work with shell provisioners. [GH-581]
+* builder/vmware: VMX modifications are now case-insensitive. [GH-608]
 
 ## 0.3.11 (November 4, 2013)
 

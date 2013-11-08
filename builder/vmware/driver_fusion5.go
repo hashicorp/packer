@@ -2,6 +2,7 @@ package vmware
 
 import (
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -56,6 +57,10 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (d *Fusion5Driver) SSHAddress(state multistep.StateBag) (string, error) {
+	return sshAddress(state)
 }
 
 func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {
