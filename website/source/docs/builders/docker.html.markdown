@@ -38,4 +38,11 @@ All configuration options are currently required.
 
 ## Dockerfiles
 
-TODO
+This builder allows you to build Docker images _without_ Dockerfiles. If
+you have a Dockerfile already made, it is simple to just run `docker build`
+manually.
+
+With this builder, you can repeatably create Docker images without the use
+a Dockerfile. You don't need to know the syntax or semantics of Dockerfiles.
+Instead, you can just provide shell scripts, Chef recipes, Puppet manifests,
+etc. to provision your Docker container just like you would a regular machine.
