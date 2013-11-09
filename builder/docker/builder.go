@@ -37,8 +37,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	steps := []multistep.Step{
+		&StepTempDir{},
 		&StepPull{},
 		&StepRun{},
+		&StepProvision{},
 	}
 
 	// Setup the state bag and initial state for the steps
