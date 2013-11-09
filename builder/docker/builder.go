@@ -56,6 +56,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	// Setup the driver that will talk to Docker
+	state.Put("driver", &DockerDriver{
+		Ui: ui,
+	})
+
 	// Run!
 	if b.config.PackerDebug {
 		b.runner = &multistep.DebugRunner{
