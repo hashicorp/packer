@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"io"
 	"log"
 	"os/exec"
 	"strings"
@@ -11,6 +12,26 @@ import (
 
 type DockerDriver struct {
 	Ui packer.Ui
+}
+
+func (d *DockerDriver) Export(id string, dst io.Writer) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "export", id)
+	cmd.Stdout = dst
+	cmd.Stderr = &stderr
+
+	log.Printf("Exporting container: %s", id)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error exporting: %s\nStderr: %s",
+			err, stderr.String())
+		return err
+	}
+
+	return nil
 }
 
 func (d *DockerDriver) Pull(image string) error {

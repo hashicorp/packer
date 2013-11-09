@@ -1,18 +1,40 @@
 package docker
 
+import (
+	"io"
+)
+
 // MockDriver is a driver implementation that can be used for tests.
 type MockDriver struct {
-	PullError  error
-	StartID    string
-	StartError error
-	StopError  error
+	ExportReader io.Reader
+	ExportError  error
+	PullError    error
+	StartID      string
+	StartError   error
+	StopError    error
 
-	PullCalled  bool
-	PullImage   string
-	StartCalled bool
-	StartConfig *ContainerConfig
-	StopCalled  bool
-	StopID      string
+	ExportCalled bool
+	ExportID     string
+	PullCalled   bool
+	PullImage    string
+	StartCalled  bool
+	StartConfig  *ContainerConfig
+	StopCalled   bool
+	StopID       string
+}
+
+func (d *MockDriver) Export(id string, dst io.Writer) error {
+	d.ExportCalled = true
+	d.ExportID = id
+
+	if d.ExportReader != nil {
+		_, err := io.Copy(dst, d.ExportReader)
+		if err != nil {
+			return err
+		}
+	}
+
+	return d.ExportError
 }
 
 func (d *MockDriver) Pull(image string) error {
