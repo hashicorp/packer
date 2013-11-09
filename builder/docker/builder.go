@@ -25,8 +25,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	warnings := make([]string, 0)
+
+	// Validate the configuration
+	cwarns, cerrs := b.config.Prepare()
+	errs = packer.MultiErrorAppend(errs, cerrs...)
+	warnings = append(warnings, cwarns...)
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return warnings, errs
