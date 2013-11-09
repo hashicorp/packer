@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -20,21 +22,39 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
+	// Create a temporary file to store the output. Because of a bug in
+	// Docker, sometimes all the output doesn't properly show up. This
+	// file will capture ALL of the output, and we'll read that.
+	//
+	// https://github.com/dotcloud/docker/issues/2625
+	outputFile, err := ioutil.TempFile(c.HostDir, "cmd")
+	if err != nil {
+		return err
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	// This file will store the exit code of the command once it is complete.
+	exitCodePath := outputFile.Name() + "-exit"
+
+	// Modify the remote command so that all the output of the commands
+	// go to a single file and so that the exit code is redirected to
+	// a single file. This lets us determine both when the command
+	// is truly complete (because the file will have data), what the
+	// exit status is (because Docker loses it because of the pty, not
+	// Docker's fault), and get the output (Docker bug).
+	remoteCmd := fmt.Sprintf("(%s) >%s 2>&1; echo $? >%s",
+		remote.Command,
+		filepath.Join(c.ContainerDir, filepath.Base(outputFile.Name())),
+		filepath.Join(c.ContainerDir, filepath.Base(exitCodePath)))
+
 	cmd := exec.Command("docker", "attach", c.ContainerId)
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		return err
 	}
 
-	// TODO(mitchellh): We need to hijack the command to write the exit
-	// code to a temporary file in the shared folder so that we can read it
-	// out. Since we're going over a pty, we can't get the exit code another
-	// way.
-
-	cmd.Stdout = remote.Stdout
-	cmd.Stderr = remote.Stderr
-
-	log.Printf("Executing in container %s: %#v", c.ContainerId, remote.Command)
+	log.Printf("Executing in container %s: %#v", c.ContainerId, remoteCmd)
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -49,23 +69,68 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 		// https://github.com/dotcloud/docker/issues/2628
 		time.Sleep(2 * time.Second)
 
-		stdin_w.Write([]byte(remote.Command + "\n"))
+		stdin_w.Write([]byte(remoteCmd + "\n"))
 	}()
 
-	var exitStatus int = 0
 	err = cmd.Wait()
 	if exitErr, ok := err.(*exec.ExitError); ok {
-		exitStatus = 1
+		exitStatus := 1
 
 		// There is no process-independent way to get the REAL
 		// exit status so we just try to go deeper.
 		if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
 			exitStatus = status.ExitStatus()
 		}
+
+		// Say that we ended, since if Docker itself failed, then
+		// the command must've not run, or so we assume
+		remote.SetExited(exitStatus)
+		return nil
 	}
 
-	// Say that we ended!
-	remote.SetExited(exitStatus)
+	// Wait for the exit code to appear in our file...
+	log.Println("Waiting for exit code to appear for remote command...")
+	for {
+		fi, err := os.Stat(exitCodePath)
+		if err == nil && fi.Size() > 0 {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	// Read the exit code
+	exitRaw, err := ioutil.ReadFile(exitCodePath)
+	if err != nil {
+		return err
+	}
+
+	exitStatus, err := strconv.ParseInt(string(bytes.TrimSpace(exitRaw)), 10, 0)
+	if err != nil {
+		return err
+	}
+	log.Printf("Executed command exit status: %d", exitStatus)
+
+	// Read the output
+	f, err := os.Open(outputFile.Name())
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if remote.Stdout != nil {
+		io.Copy(remote.Stdout, f)
+	} else {
+		output, err := ioutil.ReadAll(f)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Command output: %s", string(output))
+	}
+
+	// Finally, we're done
+	remote.SetExited(int(exitStatus))
 
 	return nil
 }
