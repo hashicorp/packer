@@ -8,5 +8,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	Image string
+
 	tpl *packer.ConfigTemplate
 }
