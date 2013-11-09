@@ -78,7 +78,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	return nil, nil
+	// No errors, must've worked
+	artifact := &ExportArtifact{path: b.config.ExportPath}
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {
