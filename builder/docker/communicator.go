@@ -35,15 +35,17 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 		return err
 	}
 	outputFile.Close()
-	defer os.Remove(outputFile.Name())
 
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
-	defer os.Remove(exitCodePath)
 
 	cmd := exec.Command("docker", "attach", c.ContainerId)
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
+		// We have to do some cleanup since run was never called
+		os.Remove(outputFile.Name())
+		os.Remove(exitCodePath)
+
 		return err
 	}
 
@@ -102,6 +104,10 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 	// only supports single execution.
 	c.lock.Lock()
 	defer c.lock.Unlock()
+
+	// Clean up after ourselves by removing our temporary files
+	defer os.Remove(outputFile.Name())
+	defer os.Remove(exitCodePath)
 
 	// Modify the remote command so that all the output of the commands
 	// go to a single file and so that the exit code is redirected to
