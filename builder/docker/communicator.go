@@ -36,6 +36,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
+	defer os.Remove(exitCodePath)
 
 	// Modify the remote command so that all the output of the commands
 	// go to a single file and so that the exit code is redirected to
