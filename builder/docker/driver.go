@@ -1,9 +1,16 @@
 package docker
 
+import (
+	"io"
+)
+
 // Driver is the interface that has to be implemented to communicate with
 // Docker. The Driver interface also allows the steps to be tested since
 // a mock driver can be shimmed in.
 type Driver interface {
+	// Export exports the container with the given ID to the given writer.
+	Export(id string, dst io.Writer) error
+
 	// Pull should pull down the given image.
 	Pull(image string) error
 
