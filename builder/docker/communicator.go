@@ -41,7 +41,14 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 
 	go func() {
 		defer stdin_w.Close()
+
+		// This sleep needs to be here because of the issue linked to below.
+		// Basically, without it, Docker will hang on reading stdin forever,
+		// and won't see what we write, for some reason.
+		//
+		// https://github.com/dotcloud/docker/issues/2628
 		time.Sleep(2 * time.Second)
+
 		stdin_w.Write([]byte(remote.Command + "\n"))
 	}()
 
