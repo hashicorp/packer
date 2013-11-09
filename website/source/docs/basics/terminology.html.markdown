@@ -33,7 +33,7 @@ Packer in the form of plugins.
 
 <a class="term" id="term-command"></a>
 **Commands** are sub-commands for the `packer` program that perform some
-job. An example somecommand is "build", which is invoked as `packer build`.
+job. An example some command is "build", which is invoked as `packer build`.
 Packer ships with a set of commands out of the box in order to define
 its [command-line interface](#). Commands can also be created and added to
 Packer in the form of plugins.
