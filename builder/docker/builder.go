@@ -36,11 +36,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	steps := []multistep.Step{}
+	steps := []multistep.Step{
+		&StepPull{},
+	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
 
 	// Run!
 	if b.config.PackerDebug {
