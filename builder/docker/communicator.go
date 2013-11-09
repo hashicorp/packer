@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"syscall"
+	"time"
 )
 
 type Communicator struct {
@@ -34,6 +35,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 
 	go func() {
 		defer stdin_w.Close()
+		time.Sleep(2 * time.Second)
 		stdin_w.Write([]byte(remote.Command + "\n"))
 	}()
 
@@ -49,9 +51,8 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 		}
 	}
 
-	if exitStatus != 0 {
-		return fmt.Errorf("Exit status: %d", exitStatus)
-	}
+	// Say that we ended!
+	remote.SetExited(exitStatus)
 
 	return nil
 }
