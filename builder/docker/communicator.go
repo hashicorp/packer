@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
 	"time"
 )
@@ -24,6 +25,11 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO(mitchellh): We need to hijack the command to write the exit
+	// code to a temporary file in the shared folder so that we can read it
+	// out. Since we're going over a pty, we can't get the exit code another
+	// way.
 
 	cmd.Stdout = remote.Stdout
 	cmd.Stderr = remote.Stderr
@@ -74,7 +80,8 @@ func (c *Communicator) Upload(dst string, src io.Reader) error {
 
 	// TODO(mitchellh): Copy the file into place
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("cp %s %s", tempfile.Name(), dst),
+		Command: fmt.Sprintf("cp %s/%s %s", c.ContainerDir,
+			filepath.Base(tempfile.Name()), dst),
 	}
 
 	if err := c.Start(cmd); err != nil {
