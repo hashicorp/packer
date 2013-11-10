@@ -27,7 +27,10 @@ no provisioners are defined, but it will effectively repackage an image.
 
 ## Configuration Reference
 
-All configuration options are currently required.
+Configuration options are organized below into two categories: required and optional. Within
+each category, the available options are alphabetized and described.
+
+Required:
 
 * `export_path` (string) - The path where the final container will be exported
   as a tar file.
@@ -35,6 +38,12 @@ All configuration options are currently required.
 * `image` (string) - The base image for the Docker container that will
   be started. This image will be pulled from the Docker registry if it
   doesn't already exist.
+
+Optional:
+
+* `pull` (bool) - If true, the configured image will be pulled using
+  `docker pull` prior to use. Otherwise, it is assumed the image already
+  exists and can be used. This defaults to true if not set.
 
 ## Dockerfiles
 
