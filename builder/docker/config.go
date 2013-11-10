@@ -15,8 +15,19 @@ type Config struct {
 	tpl *packer.ConfigTemplate
 }
 
-func (c *Config) Prepare() ([]string, []error) {
-	errs := make([]error, 0)
+func NewConfig(raws ...interface{}) (*Config, []string, error) {
+	c := new(Config)
+	md, err := common.DecodeConfig(c, raws...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	c.tpl, err = packer.NewConfigTemplate()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
 		"export_path": &c.ExportPath,
@@ -27,18 +38,24 @@ func (c *Config) Prepare() ([]string, []error) {
 		var err error
 		*ptr, err = c.tpl.Process(*ptr, nil)
 		if err != nil {
-			errs = append(
+			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
 	}
 
 	if c.ExportPath == "" {
-		errs = append(errs, fmt.Errorf("export_path must be specified"))
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("export_path must be specified"))
 	}
 
 	if c.Image == "" {
-		errs = append(errs, fmt.Errorf("image must be specified"))
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("image must be specified"))
 	}
 
-	return nil, errs
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, nil, errs
+	}
+
+	return c, nil, nil
 }
