@@ -11,6 +11,7 @@ type Config struct {
 
 	ExportPath string `mapstructure:"export_path"`
 	Image      string
+	Pull       bool
 
 	tpl *packer.ConfigTemplate
 }
@@ -25,6 +26,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Default Pull if it wasn't set
+	hasPull := false
+	for _, k := range md.Keys {
+		if k == "Pull" {
+			hasPull = true
+			break
+		}
+	}
+
+	if !hasPull {
+		c.Pull = true
 	}
 
 	errs := common.CheckUnusedConfig(md)
