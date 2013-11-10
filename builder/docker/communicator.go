@@ -91,11 +91,87 @@ func (c *Communicator) Upload(dst string, src io.Reader) error {
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+	// Create the temporary directory that will store the contents of "src"
+	// for copying into the container.
+	td, err := ioutil.TempDir(c.HostDir, "dirupload")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(td)
+
+	walkFn := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relpath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		hostpath := filepath.Join(td, relpath)
+
+		// If it is a directory, just create it
+		if info.IsDir() {
+			return os.MkdirAll(hostpath, info.Mode())
+		}
+
+		// It is a file, copy it over, including mode.
+		src, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		dst, err := os.Create(hostpath)
+		if err != nil {
+			return err
+		}
+		defer dst.Close()
+
+		if _, err := io.Copy(dst, src); err != nil {
+			return err
+		}
+
+		si, err := src.Stat()
+		if err != nil {
+			return err
+		}
+
+		return dst.Chmod(si.Mode())
+	}
+
+	// Copy the entire directory tree to the temporary directory
+	if err := filepath.Walk(src, walkFn); err != nil {
+		return err
+	}
+
+	// Determine the destination directory
+	containerSrc := filepath.Join(c.ContainerDir, filepath.Base(td))
+	containerDst := dst
+	if src[len(src)-1] != '/' {
+		containerDst = filepath.Join(dst, filepath.Base(src))
+	}
+
+	// Make the directory, then copy into it
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("set -e; mkdir -p %s; cp -R %s/* %s",
+			containerDst, containerSrc, containerDst),
+	}
+	if err := c.Start(cmd); err != nil {
+		return err
+	}
+
+	// Wait for the copy to complete
+	cmd.Wait()
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Upload failed with non-zero exit status: %d", cmd.ExitStatus)
+	}
+
 	return nil
 }
 
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	return nil
+	panic("not implemented")
 }
 
 // Runs the given command and blocks until completion
