@@ -12,6 +12,7 @@ type MockDriver struct {
 	StartID      string
 	StartError   error
 	StopError    error
+	VerifyError  error
 
 	ExportCalled bool
 	ExportID     string
@@ -21,6 +22,7 @@ type MockDriver struct {
 	StartConfig  *ContainerConfig
 	StopCalled   bool
 	StopID       string
+	VerifyCalled bool
 }
 
 func (d *MockDriver) Export(id string, dst io.Writer) error {
@@ -53,4 +55,9 @@ func (d *MockDriver) StopContainer(id string) error {
 	d.StopCalled = true
 	d.StopID = id
 	return d.StopError
+}
+
+func (d *MockDriver) Verify() error {
+	d.VerifyCalled = true
+	return d.VerifyError
 }
