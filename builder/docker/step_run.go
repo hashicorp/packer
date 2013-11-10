@@ -44,10 +44,13 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+
 	// Kill the container. We don't handle errors because errors usually
 	// just mean that the container doesn't exist anymore, which isn't a
 	// big deal.
-	driver := state.Get("driver").(Driver)
+	ui.Say(fmt.Sprintf("Killing the container: %s", s.containerId))
 	driver.StopContainer(s.containerId)
 
 	// Reset the container ID so that we're idempotent
