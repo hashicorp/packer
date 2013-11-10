@@ -2,6 +2,8 @@
 
 FEATURES:
 
+* Docker builder: build and export Docker containers, easily provisioned
+  with any of the Packer built-in provisioners.
 * QEMU builder: builds a new VM compatible with KVM or Xen using QEMU.
 * Remote ESXi builder: builds a VMware VM using ESXi remotely using only
   SSH to an ESXi machine directly.
