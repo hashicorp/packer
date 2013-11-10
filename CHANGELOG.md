@@ -20,6 +20,7 @@ BUG FIXES:
 * builder/amazon/chroot: Chroot commands work with shell provisioners. [GH-581]
 * builder/vmware: VMX modifications are now case-insensitive. [GH-608]
 * builder/vmware: VMware Fusion won't ask for VM upgrade.
+* provisioner/chef-solo: Output is slightly prettier and more informative.
 
 ## 0.3.11 (November 4, 2013)
 

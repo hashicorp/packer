@@ -206,6 +206,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	ui.Say("Provisioning with chef-solo")
+
 	if !p.config.SkipInstall {
 		if err := p.installChef(ui, comm); err != nil {
 			return fmt.Errorf("Error installing Chef: %s", err)
