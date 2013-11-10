@@ -50,3 +50,24 @@ func TestStepPull_error(t *testing.T) {
 		t.Fatal("should have error")
 	}
 }
+
+func TestStepPull_noPull(t *testing.T) {
+	state := testState(t)
+	step := new(StepPull)
+	defer step.Cleanup(state)
+
+	config := state.Get("config").(*Config)
+	config.Pull = false
+
+	driver := state.Get("driver").(*MockDriver)
+
+	// run the step
+	if action := step.Run(state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// verify we did the right thing
+	if driver.PullCalled {
+		t.Fatal("shouldn't have pulled")
+	}
+}
