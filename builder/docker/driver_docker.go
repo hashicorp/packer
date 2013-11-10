@@ -67,6 +67,11 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 
 	log.Println("Waiting for container to finish starting")
 	if err := cmd.Wait(); err != nil {
+		if _, ok := err.(*exec.ExitError); ok {
+			err = fmt.Errorf("Docker exited with a non-zero exit status.\nStderr: %s",
+				stderr.String())
+		}
+
 		return "", err
 	}
 
