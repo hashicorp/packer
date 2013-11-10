@@ -10,33 +10,16 @@ import (
 const BuilderId = "packer.docker"
 
 type Builder struct {
-	config Config
+	config *Config
 	runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
-	if err != nil {
-		return nil, err
-	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-	warnings := make([]string, 0)
-
-	// Validate the configuration
-	cwarns, cerrs := b.config.Prepare()
-	errs = packer.MultiErrorAppend(errs, cerrs...)
-	warnings = append(warnings, cwarns...)
-
-	if errs != nil && len(errs.Errors) > 0 {
+	c, warnings, errs := NewConfig(raws...)
+	if errs != nil {
 		return warnings, errs
 	}
+	b.config = c
 
 	return warnings, nil
 }
@@ -52,7 +35,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", &b.config)
+	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 

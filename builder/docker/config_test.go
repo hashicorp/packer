@@ -1,67 +1,72 @@
 package docker
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
 )
 
-func testConfigStruct(t *testing.T) *Config {
-	tpl, err := packer.NewConfigTemplate()
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	return &Config{
-		ExportPath: "foo",
-		Image:      "bar",
-		tpl:        tpl,
+func testConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"export_path": "foo",
+		"image":       "bar",
 	}
 }
 
+func testConfigStruct(t *testing.T) *Config {
+	c, warns, errs := NewConfig(testConfig())
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", len(warns))
+	}
+	if errs != nil {
+		t.Fatalf("bad: %#v", errs)
+	}
+
+	return c
+}
+
 func TestConfigPrepare_exportPath(t *testing.T) {
-	c := testConfigStruct(t)
+	raw := testConfig()
 
 	// No export path
-	c.ExportPath = ""
-	warns, errs := c.Prepare()
+	delete(raw, "export_path")
+	_, warns, errs := NewConfig(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if len(errs) <= 0 {
-		t.Fatalf("bad: %#v", errs)
+	if errs == nil {
+		t.Fatal("should error")
 	}
 
 	// Good export path
-	c.ExportPath = "path"
-	warns, errs = c.Prepare()
+	raw["export_path"] = "good"
+	_, warns, errs = NewConfig(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if len(errs) > 0 {
-		t.Fatalf("bad: %#v", errs)
+	if errs != nil {
+		t.Fatalf("bad: %s", errs)
 	}
 }
 
 func TestConfigPrepare_image(t *testing.T) {
-	c := testConfigStruct(t)
+	raw := testConfig()
 
 	// No image
-	c.Image = ""
-	warns, errs := c.Prepare()
+	delete(raw, "image")
+	_, warns, errs := NewConfig(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if len(errs) <= 0 {
-		t.Fatalf("bad: %#v", errs)
+	if errs == nil {
+		t.Fatal("should error")
 	}
 
 	// Good image
-	c.Image = "path"
-	warns, errs = c.Prepare()
+	raw["image"] = "path"
+	_, warns, errs = NewConfig(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if len(errs) > 0 {
-		t.Fatalf("bad: %#v", errs)
+	if errs != nil {
+		t.Fatalf("bad: %s", errs)
 	}
 }
