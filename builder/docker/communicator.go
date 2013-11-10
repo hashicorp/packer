@@ -3,6 +3,7 @@ package docker
 import (
 	"bytes"
 	"fmt"
+	"github.com/ActiveState/tail"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
@@ -185,6 +186,19 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 	defer os.Remove(outputFile.Name())
 	defer os.Remove(exitCodePath)
 
+	// Tail the output file and send the data to the stdout listener
+	tail, err := tail.TailFile(outputFile.Name(), tail.Config{
+		Poll:   true,
+		ReOpen: true,
+		Follow: true,
+	})
+	if err != nil {
+		log.Printf("Error tailing output file: %s", err)
+		remote.SetExited(254)
+		return
+	}
+	defer tail.Stop()
+
 	// Modify the remote command so that all the output of the commands
 	// go to a single file and so that the exit code is redirected to
 	// a single file. This lets us determine both when the command
@@ -217,7 +231,18 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 		stdin_w.Write([]byte(remoteCmd + "\n"))
 	}()
 
-	err := cmd.Wait()
+	// Start a goroutine to read all the lines out of the logs
+	go func() {
+		for line := range tail.Lines {
+			if remote.Stdout != nil {
+				remote.Stdout.Write([]byte(line.Text + "\n"))
+			} else {
+				log.Printf("Command stdout: %#v", line.Text)
+			}
+		}
+	}()
+
+	err = cmd.Wait()
 	if exitErr, ok := err.(*exec.ExitError); ok {
 		exitStatus := 1
 
@@ -259,28 +284,6 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 		return
 	}
 	log.Printf("Executed command exit status: %d", exitStatus)
-
-	// Read the output
-	f, err := os.Open(outputFile.Name())
-	if err != nil {
-		log.Printf("Error executing: %s", err)
-		remote.SetExited(254)
-		return
-	}
-	defer f.Close()
-
-	if remote.Stdout != nil {
-		io.Copy(remote.Stdout, f)
-	} else {
-		output, err := ioutil.ReadAll(f)
-		if err != nil {
-			log.Printf("Error executing: %s", err)
-			remote.SetExited(254)
-			return
-		}
-
-		log.Printf("Command output: %s", string(output))
-	}
 
 	// Finally, we're done
 	remote.SetExited(int(exitStatus))
