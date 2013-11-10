@@ -20,6 +20,9 @@ type Driver interface {
 
 	// StopContainer forcibly stops a container.
 	StopContainer(id string) error
+
+	// Verify verifies that the driver can run
+	Verify() error
 }
 
 // ContainerConfig is the configuration used to start a container.
