@@ -42,7 +42,18 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 
 	if int64(config.bootWait) > 0 {
 		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.bootWait))
-		time.Sleep(config.bootWait)
+		wait := time.After(config.bootWait)
+	WAITLOOP:
+		for {
+			select {
+			case <-wait:
+				break WAITLOOP
+			case <-time.After(1 * time.Second):
+				if _, ok := state.GetOk(multistep.StateCancelled); ok {
+					return multistep.ActionHalt
+				}
+			}
+		}
 	}
 
 	return multistep.ActionContinue
