@@ -16,10 +16,16 @@ import (
 //
 // Produces:
 //   <nothing>
-type StepProvision struct{}
+type StepProvision struct {
+	Comm packer.Communicator
+}
 
-func (*StepProvision) Run(state multistep.StateBag) multistep.StepAction {
-	comm := state.Get("communicator").(packer.Communicator)
+func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
+	comm := s.Comm
+	if comm == nil {
+		comm = state.Get("communicator").(packer.Communicator)
+	}
+
 	hook := state.Get("hook").(packer.Hook)
 	ui := state.Get("ui").(packer.Ui)
 
