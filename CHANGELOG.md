@@ -23,6 +23,7 @@ BUG FIXES:
 * builder/virtualbox: Ctrl-C interrupts during waiting for boot. [GH-618]
 * builder/vmware: VMX modifications are now case-insensitive. [GH-608]
 * builder/vmware: VMware Fusion won't ask for VM upgrade.
+* builder/vmware: Ctrl-C interrupts during waiting for boot. [GH-618]
 * provisioner/chef-solo: Output is slightly prettier and more informative.
 
 ## 0.3.11 (November 4, 2013)
