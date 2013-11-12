@@ -64,7 +64,7 @@ array.
 {
   "type": "digitalocean",
   "api_key": "INSERT API KEY HERE",
-  "client_id": "INSERT CILENT ID HERE"
+  "client_id": "INSERT CLIENT ID HERE"
 }
 </pre>
 
