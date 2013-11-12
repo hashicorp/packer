@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -24,9 +25,14 @@ func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
-	if exists && config.PackerForce {
-		ui.Say("Deleting previous output directory...")
-		dir.RemoveAll()
+	if exists {
+		if config.PackerForce {
+			ui.Say("Deleting previous output directory...")
+			dir.RemoveAll()
+		} else {
+			state.Put("error", fmt.Errorf("Output directory '%s' already exists.", config.OutputDir))
+			return multistep.ActionHalt
+		}
 	}
 
 	if err := dir.MkdirAll(); err != nil {
