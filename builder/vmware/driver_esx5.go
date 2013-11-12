@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"bufio"
 	"bytes"
 	gossh "code.google.com/p/go.crypto/ssh"
 	"encoding/csv"
@@ -214,8 +215,35 @@ func (d *ESX5Driver) DirExists() (bool, error) {
 	return err == nil, nil
 }
 
+func (d *ESX5Driver) ListFiles() ([]string, error) {
+	stdout, err := d.ssh("ls -1p "+d.outputDir, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]string, 0, 10)
+	reader := bufio.NewReader(stdout)
+	for {
+		line, _, err := reader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if line[len(line)-1] == '/' {
+			continue
+		}
+
+		files = append(files, filepath.Join(d.outputDir, string(line)))
+	}
+
+	return files, nil
+}
+
 func (d *ESX5Driver) MkdirAll() error {
 	return d.mkdir(d.outputDir)
+}
+
+func (d *ESX5Driver) Remove(path string) error {
+	return d.sh("rm", path)
 }
 
 func (d *ESX5Driver) RemoveAll() error {
