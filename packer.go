@@ -82,6 +82,7 @@ func wrappedMain() int {
 		"Packer Version: %s %s %s",
 		packer.Version, packer.VersionPrerelease, packer.GitCommit)
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
+	log.Printf("Built with Go Version: %s", runtime.Version())
 
 	// Prepare stdin for plugin usage by switching it to a pipe
 	setupStdin()
