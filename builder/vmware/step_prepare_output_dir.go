@@ -36,6 +36,8 @@ func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepActio
 
 	s.dir = dir
 
+	state.Put("dir", dir)
+
 	return multistep.ActionContinue
 }
 
