@@ -20,6 +20,7 @@ BUG FIXES:
 
 * builder/amazon/chroot: Copying empty directories works. [GH-588]
 * builder/amazon/chroot: Chroot commands work with shell provisioners. [GH-581]
+* builder/virtualbox: Ctrl-C interrupts during waiting for boot. [GH-618]
 * builder/vmware: VMX modifications are now case-insensitive. [GH-608]
 * builder/vmware: VMware Fusion won't ask for VM upgrade.
 * provisioner/chef-solo: Output is slightly prettier and more informative.
