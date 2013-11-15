@@ -48,7 +48,7 @@ configuration is actually required, but at least `run_list` is recommended.
   These will be uploaded to the remote machine in the directory specified by the 
   `staging_directory`.  By default, this is empty.
 
-* `data_bags_path` (string) - The path to the "data_bags" directory on your local filesystem.
+* `data_bags_path` (string) - The path to the "data\_bags" directory on your local filesystem.
   These will be uploaded to the remote machine in the directory specified by the 
   `staging_directory`.  By default, this is empty.
 
