@@ -18,21 +18,21 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	ChefEnvironment        string   `mapstructure:"chef_environment"`
-	ConfigTemplate         string   `mapstructure:"config_template"`
-	CookbookPaths          []string `mapstructure:"cookbook_paths"`
-	RolesPath              string   `mapstructure:"roles_path"`
-	DataBagsPath           string   `mapstructure:"data_bags_path"`
-	EncryptedDataBagSecret string   `mapstructure:"encrypted_data_bag_secret"`
-	EnvironmentsPath       string   `mapstructure:"environments_path"`
-	ExecuteCommand         string   `mapstructure:"execute_command"`
-	InstallCommand         string   `mapstructure:"install_command"`
-	RemoteCookbookPaths    []string `mapstructure:"remote_cookbook_paths"`
-	Json                   map[string]interface{}
-	PreventSudo            bool     `mapstructure:"prevent_sudo"`
-	RunList                []string `mapstructure:"run_list"`
-	SkipInstall            bool     `mapstructure:"skip_install"`
-	StagingDir             string   `mapstructure:"staging_directory"`
+	ChefEnvironment            string   `mapstructure:"chef_environment"`
+	ConfigTemplate             string   `mapstructure:"config_template"`
+	CookbookPaths              []string `mapstructure:"cookbook_paths"`
+	RolesPath                  string   `mapstructure:"roles_path"`
+	DataBagsPath               string   `mapstructure:"data_bags_path"`
+	EncryptedDataBagSecretPath string   `mapstructure:"encrypted_data_bag_secret_path"`
+	EnvironmentsPath           string   `mapstructure:"environments_path"`
+	ExecuteCommand             string   `mapstructure:"execute_command"`
+	InstallCommand             string   `mapstructure:"install_command"`
+	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
+	Json                       map[string]interface{}
+	PreventSudo                bool     `mapstructure:"prevent_sudo"`
+	RunList                    []string `mapstructure:"run_list"`
+	SkipInstall                bool     `mapstructure:"skip_install"`
+	StagingDir                 string   `mapstructure:"staging_directory"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -42,20 +42,20 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	CookbookPaths          string
-	DataBagsPath           string
-	EncryptedDataBagSecret string
-	RolesPath              string
-	EnvironmentsPath       string
-	ChefEnvironment        string
+	CookbookPaths              string
+	DataBagsPath               string
+	EncryptedDataBagSecretPath string
+	RolesPath                  string
+	EnvironmentsPath           string
+	ChefEnvironment            string
 
 	// Templates don't support boolean statements until Go 1.2. In the
 	// mean time, we do this.
 	// TODO(mitchellh): Remove when Go 1.2 is released
-	HasDataBagsPath           bool
-	HasEncryptedDataBagSecret bool
-	HasRolesPath              bool
-	HasEnvironmentsPath       bool
+	HasDataBagsPath               bool
+	HasEncryptedDataBagSecretPath bool
+	HasRolesPath                  bool
+	HasEnvironmentsPath           bool
 }
 
 type ExecuteTemplate struct {
@@ -102,7 +102,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	templates := map[string]*string{
 		"config_template":           &p.config.ConfigTemplate,
 		"data_bags_path":            &p.config.DataBagsPath,
-		"encrypted_data_bag_secret": &p.config.EncryptedDataBagSecret,
+		"encrypted_data_bag_secret": &p.config.EncryptedDataBagSecretPath,
 		"roles_path":                &p.config.RolesPath,
 		"staging_dir":               &p.config.StagingDir,
 		"environments_path":         &p.config.EnvironmentsPath,
@@ -185,12 +185,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.EncryptedDataBagSecret != "" {
-		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecret)
+	if p.config.EncryptedDataBagSecretPath != "" {
+		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
 
 		if err != nil || pFileInfo.IsDir() {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecret, err))
+				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecretPath, err))
 		}
 	}
 
@@ -258,9 +258,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	encryptedDataBagSecret := ""
-	if p.config.EncryptedDataBagSecret != "" {
-		encryptedDataBagSecret = fmt.Sprintf("%s/encrypted_data_bag_secret", p.config.StagingDir)
-		if err := p.uploadFile(ui, comm, encryptedDataBagSecret, p.config.EncryptedDataBagSecret); err != nil {
+	if p.config.EncryptedDataBagSecretPath != "" {
+		encryptedDataBagSecretPath = fmt.Sprintf("%s/encrypted_data_bag_secret", p.config.StagingDir)
+		if err := p.uploadFile(ui, comm, encryptedDataBagSecretPath, p.config.EncryptedDataBagSecretPath); err != nil {
 			return fmt.Errorf("Error uploading encrypted data bag secret: %s", err)
 		}
 	}
@@ -273,7 +273,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath, encryptedDataBagSecret, environmentsPath, p.config.ChefEnvironment)
+	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath, encryptedDataBagSecretPath, environmentsPath, p.config.ChefEnvironment)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -320,7 +320,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst str
 	return comm.Upload(dst, f)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecret string, environmentsPath string, chefEnvironment string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecretPath string, environmentsPath string, chefEnvironment string) (string, error) {
 	ui.Message("Creating configuration file 'solo.rb'")
 
 	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
@@ -351,16 +351,16 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		CookbookPaths:             strings.Join(cookbook_paths, ","),
-		RolesPath:                 rolesPath,
-		DataBagsPath:              dataBagsPath,
-		EncryptedDataBagSecret:    encryptedDataBagSecret,
-		EnvironmentsPath:          environmentsPath,
-		HasRolesPath:              rolesPath != "",
-		HasDataBagsPath:           dataBagsPath != "",
-		HasEncryptedDataBagSecret: encryptedDataBagSecret != "",
-		HasEnvironmentsPath:       environmentsPath != "",
-		ChefEnvironment:           chefEnvironment,
+		CookbookPaths:                 strings.Join(cookbook_paths, ","),
+		RolesPath:                     rolesPath,
+		DataBagsPath:                  dataBagsPath,
+		EncryptedDataBagSecretPath:    encryptedDataBagSecretPath,
+		EnvironmentsPath:              environmentsPath,
+		HasRolesPath:                  rolesPath != "",
+		HasDataBagsPath:               dataBagsPath != "",
+		HasEncryptedDataBagSecretPath: encryptedDataBagSecretPath != "",
+		HasEnvironmentsPath:           environmentsPath != "",
+		ChefEnvironment:               chefEnvironment,
 	})
 	if err != nil {
 		return "", err
@@ -518,8 +518,8 @@ role_path		"{{.RolesPath}}"
 {{if .HasDataBagsPath}}
 data_bag_path	"{{.DataBagsPath}}"
 {{end}}
-{{if .HasEncryptedDataBagSecret}}
-encrypted_data_bag_secret "{{.EncryptedDataBagSecret}}"
+{{if .HasEncryptedDataBagSecretPath}}
+encrypted_data_bag_secret "{{.EncryptedDataBagSecretPath}}"
 {{end}}
 {{if .HasEnvironmentsPath}}
 environments_path "{{.EnvironmentsPath}}"
