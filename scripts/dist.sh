@@ -19,28 +19,6 @@ if [ ! -z $PREVERSION ]; then
     VERSIONDIR="${VERSIONDIR}-${PREVERSION}"
 fi
 
-echo "Version: ${VERSION} ${PREVERSION}"
-
-# Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
-XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
-
-echo "Arch: ${XC_ARCH}"
-echo "OS: ${XC_OS}"
-
-# This function builds whatever directory we're in...
-xc() {
-    goxc \
-        -arch="$XC_ARCH" \
-        -os="$XC_OS" \
-        -d="${DIR}/pkg" \
-        -pv="${VERSION}" \
-        -pr="${PREVERSION}" \
-        $XC_OPTS \
-        go-install \
-        xc
-}
-
 # This function waits for all background tasks to complete
 waitAll() {
     RESULT=0
@@ -56,28 +34,15 @@ waitAll() {
     fi
 }
 
+# Compile the main project
+./scripts/compile.sh
+
 # Make sure that if we're killed, we kill all our subprocseses
 trap "kill 0" SIGINT SIGTERM EXIT
 
-# Build our root project
-xc
-
-# Build all the plugins
-for PLUGIN in $(find ./plugin -mindepth 1 -maxdepth 1 -type d); do
-    PLUGIN_NAME=$(basename ${PLUGIN})
-    find ./pkg \
-        -type f \
-        -name ${PLUGIN_NAME} \
-        -execdir mv ${PLUGIN_NAME} packer-${PLUGIN_NAME} ';'
-    find ./pkg \
-        -type f \
-        -name ${PLUGIN_NAME}.exe \
-        -execdir mv ${PLUGIN_NAME}.exe packer-${PLUGIN_NAME}.exe ';'
-done
-
 # Zip all the packages
-mkdir -p ./pkg/${VERSIONDIR}/dist
-for PLATFORM in $(find ./pkg/${VERSIONDIR} -mindepth 1 -maxdepth 1 -type d); do
+mkdir -p ./pkg/dist
+for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
     PLATFORM_NAME=$(basename ${PLATFORM})
     ARCHIVE_NAME="${VERSIONDIR}_${PLATFORM_NAME}"
 
@@ -87,7 +52,7 @@ for PLATFORM in $(find ./pkg/${VERSIONDIR} -mindepth 1 -maxdepth 1 -type d); do
 
     (
     pushd ${PLATFORM}
-    zip ${DIR}/pkg/${VERSIONDIR}/dist/${ARCHIVE_NAME}.zip ./*
+    zip ${DIR}/pkg/dist/${ARCHIVE_NAME}.zip ./*
     popd
     ) &
 done
@@ -95,7 +60,7 @@ done
 waitAll
 
 # Make the checksums
-pushd ./pkg/${VERSIONDIR}/dist
+pushd ./pkg/dist
 shasum -a256 * > ./${VERSIONDIR}_SHA256SUMS
 popd
 
