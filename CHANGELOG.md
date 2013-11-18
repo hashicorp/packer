@@ -11,6 +11,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* Vagrant post-processor skips gzip compression when compression_level=0
 * builder/amazon/all: Can now specify a list of multiple security group
   IDs to apply. [GH-499]
 * builder/amazon/all: AWS API requests are now retried when a temporary
