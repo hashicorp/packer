@@ -52,13 +52,22 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 	}
 	defer dstF.Close()
 
-	gzipWriter, err := gzip.NewWriterLevel(dstF, level)
-	if err != nil {
-		return err
-	}
-	defer gzipWriter.Close()
+	var tarF io.Writer
 
-	tarWriter := tar.NewWriter(gzipWriter)
+	if level > 0 {
+		log.Printf("Compressing with gzip compression level %v", level)
+		gzipWriter, err := gzip.NewWriterLevel(dstF, level)
+		if err != nil {
+			return err
+		}
+		defer gzipWriter.Close()
+		tarF = gzipWriter
+	} else {
+		log.Printf("Skipping gzip compression")
+		tarF = dstF
+	}
+
+	tarWriter := tar.NewWriter(tarF)
 	defer tarWriter.Close()
 
 	// This is the walk func that tars each of the files in the dir
