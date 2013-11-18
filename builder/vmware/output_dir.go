@@ -2,6 +2,7 @@ package vmware
 
 import (
 	"os"
+	"path/filepath"
 )
 
 // OutputDir is an interface type that abstracts the creation and handling
@@ -10,7 +11,9 @@ import (
 // VMware products as well as local.
 type OutputDir interface {
 	DirExists() (bool, error)
+	ListFiles() ([]string, error)
 	MkdirAll() error
+	Remove(string) error
 	RemoveAll() error
 	SetOutputDir(string)
 }
@@ -26,8 +29,28 @@ func (d *localOutputDir) DirExists() (bool, error) {
 	return err == nil, nil
 }
 
+func (d *localOutputDir) ListFiles() ([]string, error) {
+	files := make([]string, 0, 10)
+
+	visit := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	}
+
+	return files, filepath.Walk(d.dir, visit)
+}
+
 func (d *localOutputDir) MkdirAll() error {
 	return os.MkdirAll(d.dir, 0755)
+}
+
+func (d *localOutputDir) Remove(path string) error {
+	return os.Remove(path)
 }
 
 func (d *localOutputDir) RemoveAll() error {
