@@ -257,7 +257,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	encryptedDataBagSecret := ""
+	encryptedDataBagSecretPath := ""
 	if p.config.EncryptedDataBagSecretPath != "" {
 		encryptedDataBagSecretPath = fmt.Sprintf("%s/encrypted_data_bag_secret", p.config.StagingDir)
 		if err := p.uploadFile(ui, comm, encryptedDataBagSecretPath, p.config.EncryptedDataBagSecretPath); err != nil {
