@@ -1,6 +1,7 @@
 package vmware
 
 import (
+	"bufio"
 	"bytes"
 	gossh "code.google.com/p/go.crypto/ssh"
 	"encoding/csv"
@@ -42,7 +43,7 @@ func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, typeId string
 }
 
 func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
-	vmxPath := d.datastorePath(vmxPathLocal)
+	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
 	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", vmxPath)
 	if err != nil {
 		return false, err
@@ -84,11 +85,11 @@ func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
 		return "", err
 	}
 
-	if err := d.mkdir(filepath.Dir(targetFile)); err != nil {
+	finalPath := d.datastorePath(targetFile)
+	if err := d.mkdir(filepath.Dir(finalPath)); err != nil {
 		return "", err
 	}
 
-	finalPath := d.datastorePath(targetFile)
 	if err := d.upload(finalPath, localPath); err != nil {
 		return "", err
 	}
@@ -214,8 +215,35 @@ func (d *ESX5Driver) DirExists() (bool, error) {
 	return err == nil, nil
 }
 
+func (d *ESX5Driver) ListFiles() ([]string, error) {
+	stdout, err := d.ssh("ls -1p "+d.outputDir, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]string, 0, 10)
+	reader := bufio.NewReader(stdout)
+	for {
+		line, _, err := reader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if line[len(line)-1] == '/' {
+			continue
+		}
+
+		files = append(files, filepath.Join(d.outputDir, string(line)))
+	}
+
+	return files, nil
+}
+
 func (d *ESX5Driver) MkdirAll() error {
 	return d.mkdir(d.outputDir)
+}
+
+func (d *ESX5Driver) Remove(path string) error {
+	return d.sh("rm", path)
 }
 
 func (d *ESX5Driver) RemoveAll() error {
