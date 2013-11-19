@@ -20,12 +20,12 @@ type Config struct {
 	Datacenter         string `mapstructure:"datacenter"`
 	Datastore          string `mapstructure:"datastore"`
 	Host               string `mapstructure:"host"`
-	VMNetwork          string `mapstructure:"vm_network"`
 	Password           string `mapstructure:"password"`
 	PathToResourcePool string `mapstructure:"path_to_resource_pool"`
 	Username           string `mapstructure:"username"`
 	VMFolder           string `mapstructure:"vm_folder"`
 	VMName             string `mapstructure:"vm_name"`
+	VMNetwork          string `mapstructure:"vm_network"`
 }
 
 type PostProcessor struct {
