@@ -7,6 +7,7 @@ FEATURES:
 * QEMU builder: builds a new VM compatible with KVM or Xen using QEMU.
 * Remote ESXi builder: builds a VMware VM using ESXi remotely using only
   SSH to an ESXi machine directly.
+* vSphere post-processor: Can upload VMware artifacts to vSphere
 * Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
 
 IMPROVEMENTS:
