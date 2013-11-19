@@ -1,4 +1,4 @@
----
+--e
 layout: "docs"
 ---
 
@@ -152,7 +152,7 @@ Optional:
   access the remote machine. By default this is empty. This only has an
   effect if `remote_type` is enabled.
 
-* `remote_user` (string) - The username for the SSH user that will access
+* `remote_username` (string) - The username for the SSH user that will access
   the remote machine. This is required if `remote_type` is enabled.
 
 * `skip_compaction` (bool) -  VMware-created disks are defragmented
