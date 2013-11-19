@@ -16,6 +16,8 @@ IMPROVEMENTS:
   IDs to apply. [GH-499]
 * builder/amazon/all: AWS API requests are now retried when a temporary
   network error occurs as well as 500 errors. [GH-559]
+* builder/virtualbox: Use VBOX\_INSTALL\_PATH env var on Windows to find
+  VBoxManage. [GH-628]
 * post-processor/vagrant: skips gzip compression when compression_level=0
 * provisioner/chef-solo: Encrypted data bag support [GH-625]
 

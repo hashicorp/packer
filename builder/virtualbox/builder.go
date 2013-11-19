@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -485,9 +486,29 @@ func (b *Builder) Cancel() {
 }
 
 func (b *Builder) newDriver() (Driver, error) {
-	vboxmanagePath, err := exec.LookPath("VBoxManage")
-	if err != nil {
-		return nil, err
+	var vboxmanagePath string
+
+	if runtime.GOOS == "windows" {
+		// On Windows, we check VBOX_INSTALL_PATH env var for the path
+		if installPath := os.Getenv("VBOX_INSTALL_PATH"); installPath != "" {
+			log.Printf("[DEBUG] builder/virtualbox: VBOX_INSTALL_PATH: %s",
+				installPath)
+			for _, path := range strings.Split(installPath, ";") {
+				path = filepath.Join(path, "VBoxManage.exe")
+				if _, err := os.Stat(path); err == nil {
+					vboxmanagePath = path
+					break
+				}
+			}
+		}
+	}
+
+	if vboxmanagePath == "" {
+		var err error
+		vboxmanagePath, err = exec.LookPath("VBoxManage")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Printf("VBoxManage path: %s", vboxmanagePath)
