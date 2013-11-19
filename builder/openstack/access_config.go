@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"github.com/rackspace/gophercloud"
+	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -14,6 +16,7 @@ type AccessConfig struct {
 	Project   string `mapstructure:"project"`
 	Provider  string `mapstructure:"provider"`
 	RawRegion string `mapstructure:"region"`
+	ProxyUrl  string `mapstructure:"proxy_url"`
 }
 
 // Auth returns a valid Auth object for access to openstack services, or
@@ -23,6 +26,7 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	password := c.Password
 	project := c.Project
 	provider := c.Provider
+	proxy := c.ProxyUrl
 
 	if username == "" {
 		username = os.Getenv("SDK_USERNAME")
@@ -45,6 +49,19 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 
 	if project != "" {
 		authoptions.TenantName = project
+	}
+
+	// For corporate networks it may be the case where we want our API calls
+	// to be sent through a separate HTTP proxy than external traffic.
+	if proxy != "" {
+		url, err := url.Parse(proxy)
+		if err != nil {
+			return nil, err
+		}
+
+		// The gophercloud.Context has a UseCustomClient method which
+		// would allow us to override with a new instance of http.Client.
+		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(url)}
 	}
 
 	return gophercloud.Authenticate(provider, authoptions)
