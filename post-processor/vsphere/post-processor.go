@@ -16,17 +16,16 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Insecure bool `mapstructure:"insecure"`
-
-	Datacenter        string `mapstructure:"datacenter"`
-	Datastore         string `mapstructure:"datastore"`
-	Host              string `mapstructure:"host"`
-	VMNetwork         string `mapstructure:"vm_network"`
-	Password          string `mapstructure:"password"`
-	PathToResoucePool string `mapstructure:"path_to_resouce_pool"`
-	Username          string `mapstructure:"username"`
-	VMFolder          string `mapstructure:"vm_folder"`
-	VMName            string `mapstructure:"vm_name"`
+	Insecure           bool   `mapstructure:"insecure"`
+	Datacenter         string `mapstructure:"datacenter"`
+	Datastore          string `mapstructure:"datastore"`
+	Host               string `mapstructure:"host"`
+	VMNetwork          string `mapstructure:"vm_network"`
+	Password           string `mapstructure:"password"`
+	PathToResourcePool string `mapstructure:"path_to_resource_pool"`
+	Username           string `mapstructure:"username"`
+	VMFolder           string `mapstructure:"vm_folder"`
+	VMName             string `mapstructure:"vm_name"`
 }
 
 type PostProcessor struct {
@@ -48,29 +47,27 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
-	program := "ovftool"
-	_, erro := exec.LookPath(program)
-	if erro != nil {
+	if _, err := exec.LookPath("ovftool"); err != nil {
 		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Error : %s not set", erro))
+			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
 	validates := map[string]*string{
-		"datacenter":           &p.config.Datacenter,
-		"datastore":            &p.config.Datastore,
-		"host":                 &p.config.Host,
-		"vm_network":           &p.config.VMNetwork,
-		"password":             &p.config.Password,
-		"path_to_resouce_pool": &p.config.PathToResoucePool,
-		"username":             &p.config.Username,
-		"vm_folder":            &p.config.VMFolder,
-		"vm_name":              &p.config.VMName,
+		"datacenter":            &p.config.Datacenter,
+		"datastore":             &p.config.Datastore,
+		"host":                  &p.config.Host,
+		"vm_network":            &p.config.VMNetwork,
+		"password":              &p.config.Password,
+		"path_to_resource_pool": &p.config.PathToResourcePool,
+		"username":              &p.config.Username,
+		"vm_folder":             &p.config.VMFolder,
+		"vm_name":               &p.config.VMName,
 	}
 
 	for n := range validates {
 		if *validates[n] == "" {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Argument %s: not set", n))
+				errs, fmt.Errorf("%s must be set", n))
 		}
 	}
 
@@ -82,8 +79,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	_, ok := builtins[artifact.BuilderId()]
-	if !ok {
+	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
@@ -91,6 +87,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	for _, path := range artifact.Files() {
 		if strings.HasSuffix(path, ".vmx") {
 			vmx = path
+			break
 		}
 	}
 
@@ -98,24 +95,28 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX file not found")
 	}
 
-	ui.Message(fmt.Sprintf("uploading %s to vSphere", vmx))
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 
-	program := "ovftool"
-	nossl := fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure)
-	accepteulas := "--acceptAllEulas"
-	name := "--name=" + p.config.VMName
-	datastore := "--datastore=" + p.config.Datastore
-	network := "--network=" + p.config.VMNetwork
-	vm_folder := "--vmFolder=" + p.config.VMFolder
-	url := "vi://" + p.config.Username + ":" + p.config.Password + "@" + p.config.Host + "/" + p.config.Datacenter + "/" + p.config.PathToResoucePool
-
-	cmd := exec.Command(program, nossl, accepteulas, name, datastore, network, vm_folder, vmx, url)
+	args := []string{
+		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
+		"--acceptAllEulas",
+		fmt.Sprintf("--name=%s", p.config.VMName),
+		fmt.Sprintf("--datastore=%s", p.config.Datastore),
+		fmt.Sprintf("--network=%s", p.config.VMNetwork),
+		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
+		fmt.Sprintf("vi://%s:%s@%s/%s/%s",
+			p.config.Username,
+			p.config.Password,
+			p.config.Host,
+			p.config.Datacenter,
+			p.config.PathToResourcePool),
+	}
 
 	var out bytes.Buffer
+	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
-	err_run := cmd.Run()
-	if err_run != nil {
-		return nil, false, fmt.Errorf("%s", out.String())
+	if err := cmd.Run(); err != nil {
+		return nil, false, fmt.Errorf("Failed: %s\nStdout: %s", err, out.String())
 	}
 
 	ui.Message(fmt.Sprintf("%s", out.String()))
