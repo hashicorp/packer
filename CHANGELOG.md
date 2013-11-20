@@ -1,6 +1,9 @@
 ## 0.4.1 (unreleased)
 
+BUG FIXES:
 
+* core: Don't change background color on CLI anymore, making things look
+  a tad nicer in some terminals.
 
 ## 0.4.0 (November 19, 2013)
 
