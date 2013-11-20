@@ -19,19 +19,19 @@ func TestColoredUi(t *testing.T) {
 
 	ui.Say("foo")
 	result := readWriter(bufferUi)
-	if result != "\033[1;33;40mfoo\033[0m\n" {
+	if result != "\033[1;33mfoo\033[0m\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
 
 	ui.Message("foo")
 	result = readWriter(bufferUi)
-	if result != "\033[0;33;40mfoo\033[0m\n" {
+	if result != "\033[0;33mfoo\033[0m\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
 
 	ui.Error("foo")
 	result = readWriter(bufferUi)
-	if result != "\033[1;31;40mfoo\033[0m\n" {
+	if result != "\033[1;31mfoo\033[0m\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
 }
