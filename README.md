@@ -77,6 +77,13 @@ For some additional dependencies, Go needs [Mercurial](http://mercurial.selenic.
 to be installed. Packer itself doesn't require this but a dependency of a
 dependency does.
 
+You'll also need [`gox`](https://github.com/mitchellh/packer)
+to compile packer. You can install that with:
+
+```
+$ go get -u github.com/mitchellh/gox
+```
+
 Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer` and
 then just type `make`. In a few moments, you'll have a working `packer` executable:
 
