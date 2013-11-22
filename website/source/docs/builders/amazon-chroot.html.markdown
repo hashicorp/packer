@@ -184,6 +184,33 @@ out of your AMI builds.
 Packer properly obtains a process lock for the parallelism-sensitive parts
 of its internals such as finding an available device.
 
+## Gotchas
+
+One of the difficulties with using the chroot builder is that your provisioning
+scripts must not leave any processes running or packer will be unable to unmount
+the filesystem.
+
+For debian based distributions you can setup a [policy-rc.d](http://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt) file which will
+prevent packages installed by your provisioners from starting services:
+
+<pre class="prettyprint">
+{
+  "type": "shell",
+  "inline": [
+    "echo '#!/bin/sh' > /usr/sbin/policy-rc.d",
+    "echo 'exit 101' >> /usr/sbin/policy-rc.d",
+    "chmod a+x /usr/sbin/policy-rc.d"
+  ]
+},
+# ...
+{
+  "type": "shell",
+  "inline": [
+    "rm -f /usr/sbin/policy-rc.d"
+  ]
+}
+</pre>
+
 ## Using an IAM Instance Profile
 
 If AWS keys are not specified in the template or through environment variables
