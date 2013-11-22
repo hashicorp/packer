@@ -74,8 +74,8 @@ installed (version 1.1+ is _required_). Make sure you have Go properly installed
 including setting up your [GOPATH](http://golang.org/doc/code.html#GOPATH).
 
 For some additional dependencies, Go needs [Mercurial](http://mercurial.selenic.com/)
-to be installed. Packer itself doesn't require this but a dependency of a
-dependency does.
+and [Bazaar](http://bazaar.canonical.com/en/) to be installed.
+Packer itself doesn't require these, but a dependency of a dependency does.
 
 Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer` and
 then just type `make`. In a few moments, you'll have a working `packer` executable:
