@@ -22,7 +22,7 @@ if [ -z $BINTRAY_API_KEY ]; then
     exit 1
 fi
 
-for ARCHIVE in ./pkg/${VERSION}/dist/*; do
+for ARCHIVE in ./pkg/dist/*; do
     ARCHIVE_NAME=$(basename ${ARCHIVE})
 
     echo Uploading: $ARCHIVE_NAME

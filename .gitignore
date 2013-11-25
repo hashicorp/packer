@@ -4,3 +4,5 @@
 /src
 /website/.sass-cache
 /website/build
+.vagrant
+Vagrantfile

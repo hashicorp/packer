@@ -31,6 +31,10 @@ type Driver interface {
 	// Stop stops a VM specified by the path to the VMX given.
 	Stop(string) error
 
+	// SuppressMessages modifies the VMX or surrounding directory so that
+	// VMware doesn't show any annoying messages.
+	SuppressMessages(string) error
+
 	// Get the path to the VMware ISO for the given flavor.
 	ToolsIsoPath(string) string
 

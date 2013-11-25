@@ -89,6 +89,10 @@ func (d *Workstation9Driver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Workstation9Driver) SuppressMessages(vmxPath string) error {
+	return nil
+}
+
 func (d *Workstation9Driver) Verify() error {
 	var err error
 	if d.AppPath == "" {
