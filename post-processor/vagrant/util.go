@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"archive/tar"
+	"compress/flate"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -52,13 +53,19 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 	}
 	defer dstF.Close()
 
-	gzipWriter, err := gzip.NewWriterLevel(dstF, level)
-	if err != nil {
-		return err
-	}
-	defer gzipWriter.Close()
+	var dstWriter io.Writer = dstF
+	if level != flate.NoCompression {
+		log.Printf("Compressing with gzip compression level: %d", level)
+		gzipWriter, err := gzip.NewWriterLevel(dstWriter, level)
+		if err != nil {
+			return err
+		}
+		defer gzipWriter.Close()
 
-	tarWriter := tar.NewWriter(gzipWriter)
+		dstWriter = gzipWriter
+	}
+
+	tarWriter := tar.NewWriter(dstWriter)
 	defer tarWriter.Close()
 
 	// This is the walk func that tars each of the files in the dir
