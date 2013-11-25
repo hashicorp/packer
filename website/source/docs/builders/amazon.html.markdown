@@ -30,3 +30,40 @@ AMI. Packer supports the following builders at the moment:
 <a href="/docs/builders/amazon-ebs.html">amazon-ebs builder</a>. It is
 much easier to use and Amazon generally recommends EBS-backed images nowadays.
 </div>
+
+## Using an IAM Instance Profile
+
+If AWS keys are not specified in the template or through environment variables
+Packer will use credentials provided by the instance's IAM profile, if it has one.
+
+The following policy document provides the minimal set permissions necessary for Packer to work:
+
+<pre class="prettyprint">
+{
+  "Statement": [{
+      "Effect": "Allow",
+      "Action" : [
+        "ec2:AttachVolume",
+        "ec2:CreateVolume",
+        "ec2:DeleteVolume",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume",
+
+        "ec2:DescribeInstances",
+
+        "ec2:CreateSnapshot",
+        "ec2:DeleteSnapshot",
+        "ec2:DescribeSnapshots",
+
+        "ec2:DescribeImages",
+        "ec2:RegisterImage",
+
+        "ec2:CreateTags"
+      ],
+      "Resource" : "*"
+  }]
+}
+</pre>
+
+Depending on what setting you use the following Actions might have to be allowed as well:
+* `ec2:ModifyImageAttribute` when using `ami_description`
