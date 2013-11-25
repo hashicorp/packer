@@ -311,7 +311,7 @@ func (p *Provisioner) uploadManifestDir(ui packer.Ui, comm packer.Communicator) 
 		return "", fmt.Errorf("Error uploading manifest dir: %s", err)
 	}
 
-	return p.config.ManifestDir, nil
+	return targetPath, nil
 }
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
