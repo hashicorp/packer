@@ -8,8 +8,9 @@ import (
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
 type Artifact struct {
-	dir string
-	f   []string
+	typeId string
+	dir       string
+	f         []string
 }
 
 func (*Artifact) TypeId() string {

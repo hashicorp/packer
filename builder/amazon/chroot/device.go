@@ -19,6 +19,14 @@ func AvailableDevice() (string, error) {
 
 	letters := "fghijklmnop"
 	for _, letter := range letters {
+		device := fmt.Sprintf("/dev/%s%c", prefix, letter)
+
+		// If the block device itself, i.e. /dev/sf, exists, then we
+		// can't use any of the numbers either.
+		if _, err := os.Stat(device); err == nil {
+			continue
+		}
+
 		for i := 1; i < 16; i++ {
 			device := fmt.Sprintf("/dev/%s%c%d", prefix, letter, i)
 			if _, err := os.Stat(device); err != nil {

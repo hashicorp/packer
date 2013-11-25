@@ -1,10 +1,20 @@
-## 0.4.0 (unreleased)
+## 0.4.1 (unreleased)
+
+BUG FIXES:
+
+* core: Don't change background color on CLI anymore, making things look
+  a tad nicer in some terminals.
+
+## 0.4.0 (November 19, 2013)
 
 FEATURES:
 
+* Docker builder: build and export Docker containers, easily provisioned
+  with any of the Packer built-in provisioners.
 * QEMU builder: builds a new VM compatible with KVM or Xen using QEMU.
 * Remote ESXi builder: builds a VMware VM using ESXi remotely using only
   SSH to an ESXi machine directly.
+* vSphere post-processor: Can upload VMware artifacts to vSphere
 * Vagrant post-processor can now make DigitalOcean provider boxes. [GH-504]
 
 IMPROVEMENTS:
@@ -13,12 +23,22 @@ IMPROVEMENTS:
   IDs to apply. [GH-499]
 * builder/amazon/all: AWS API requests are now retried when a temporary
   network error occurs as well as 500 errors. [GH-559]
+* builder/virtualbox: Use VBOX\_INSTALL\_PATH env var on Windows to find
+  VBoxManage. [GH-628]
+* post-processor/vagrant: skips gzip compression when compression_level=0
+* provisioner/chef-solo: Encrypted data bag support [GH-625]
 
 BUG FIXES:
 
 * builder/amazon/chroot: Copying empty directories works. [GH-588]
 * builder/amazon/chroot: Chroot commands work with shell provisioners. [GH-581]
+* builder/amazon/chroot: Don't choose a mount point that is a partition of
+  an already mounted device. [GH-635]
+* builder/virtualbox: Ctrl-C interrupts during waiting for boot. [GH-618]
 * builder/vmware: VMX modifications are now case-insensitive. [GH-608]
+* builder/vmware: VMware Fusion won't ask for VM upgrade.
+* builder/vmware: Ctrl-C interrupts during waiting for boot. [GH-618]
+* provisioner/chef-solo: Output is slightly prettier and more informative.
 
 ## 0.3.11 (November 4, 2013)
 
