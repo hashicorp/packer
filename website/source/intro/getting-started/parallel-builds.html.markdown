@@ -71,7 +71,7 @@ array.
 You'll also need to modify the `variables` section of the template
 to include the access keys for DigitalOcean.
 
-<pre>
+<pre class="prettyprint">
 "variables": {
   ...
   "do_api_key": "",
