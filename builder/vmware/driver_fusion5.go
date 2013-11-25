@@ -3,6 +3,7 @@ package vmware
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -86,6 +87,15 @@ func (d *Fusion5Driver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Fusion5Driver) SuppressMessages(vmxPath string) error {
+	dir := filepath.Dir(vmxPath)
+	base := filepath.Base(vmxPath)
+	base = strings.Replace(base, ".vmx", "", -1)
+
+	plistPath := filepath.Join(dir, base+".plist")
+	return ioutil.WriteFile(plistPath, []byte(fusionSuppressPlist), 0644)
+}
+
 func (d *Fusion5Driver) Verify() error {
 	if _, err := os.Stat(d.AppPath); err != nil {
 		if os.IsNotExist(err) {
@@ -129,3 +139,12 @@ func (d *Fusion5Driver) ToolsIsoPath(k string) string {
 func (d *Fusion5Driver) DhcpLeasesPath(device string) string {
 	return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
 }
+
+const fusionSuppressPlist = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>disallowUpgrade</key>
+	<true/>
+</dict>
+</plist>`

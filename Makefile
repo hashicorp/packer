@@ -7,7 +7,7 @@ DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 all: deps
 	@mkdir -p bin/
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
-	@bash --norc -i ./scripts/build.sh
+	@bash --norc -i ./scripts/devcompile.sh
 
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"

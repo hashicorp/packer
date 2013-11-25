@@ -44,13 +44,13 @@ configuration is actually required, but at least `run_list` is recommended.
   to the remote machine in the directory specified by the `staging_directory`.
   By default, this is empty.
 
-* `roles_path` (string) - The path to the "roles" directory on your local filesystem.
-  These will be uploaded to the remote machine in the directory specified by the 
+* `data_bags_path` (string) - The path to the "data\_bags" directory on your local filesystem.
+  These will be uploaded to the remote machine in the directory specified by the
   `staging_directory`.  By default, this is empty.
 
-* `data_bags_path` (string) - The path to the "data_bags" directory on your local filesystem.
-  These will be uploaded to the remote machine in the directory specified by the 
-  `staging_directory`.  By default, this is empty.
+* `encrypted_data_bag_secret_path` (string) - The path to the file containing
+  the secret for encrypted data bags. By default, this is empty, so no
+  secret will be available.
 
 * `execute_command` (string) - The command used to execute Chef. This has
   various [configuration template variables](/docs/templates/configuration-templates.html)
@@ -60,17 +60,21 @@ configuration is actually required, but at least `run_list` is recommended.
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
 
+* `json` (object) - An arbitrary mapping of JSON that will be available as
+  node attributes while running Chef.
+
 * `remote_cookbook_paths` (array of string) - A list of paths on the remote
   machine where cookbooks will already exist. These may exist from a previous
   provisioner or step. If specified, Chef will be configured to look for
   cookbooks here. By default, this is empty.
 
-* `json` (object) - An arbitrary mapping of JSON that will be available as
-  node attributes while running Chef.
-
 * `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to install and run Chef are executed with `sudo`. If this is true,
   then the sudo will be omitted.
+
+* `roles_path` (string) - The path to the "roles" directory on your local filesystem.
+  These will be uploaded to the remote machine in the directory specified by the
+  `staging_directory`.  By default, this is empty.
 
 * `run_list` (array of strings) - The [run list](http://docs.opscode.com/essentials_node_object_run_lists.html)
   for Chef. By default this is empty.
@@ -101,8 +105,14 @@ cookbook_path [{{.CookbookPaths}}]
 This template is a [configuration template](/docs/templates/configuration-templates.html)
 and has a set of variables available to use:
 
+* `ChefEnvironment` - The current enabled environment. Only non-empty
+  if the environment path is set.
 * `CookbookPaths` is the set of cookbook paths ready to embedded directly
   into a Ruby array to configure Chef.
+* `DataBagsPath` is the path to the data bags folder.
+* `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
+* `EnvironmentsPath` - The path to the environments folder.
+* `RolesPath` - The path the folders folder.
 
 ## Execute Command
 
@@ -121,6 +131,7 @@ As you can see from the default value above, the value of this configuration
 can contain various template variables, defined below:
 
 * `ConfigPath` - The path to the Chef configuration file.
+  file.
 * `JsonPath` - The path to the JSON attributes file for the node.
 * `Sudo` - A boolean of whether to `sudo` the command or not, depending on
   the value of the `prevent_sudo` configuration.
