@@ -85,8 +85,8 @@ func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Found available VNC port: %d", vncPort)
 
 	vmxData := ParseVMX(string(vmxBytes))
-	vmxData["RemoteDisplay.vnc.enabled"] = "TRUE"
-	vmxData["RemoteDisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
+	vmxData["remotedisplay.vnc.enabled"] = "TRUE"
+	vmxData["remotedisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
