@@ -31,6 +31,9 @@ type Config struct {
 	// The main manifest file to apply to kick off the entire thing.
 	ManifestFile string `mapstructure:"manifest_file"`
 
+	// The manifest dir, e.g. for includes
+	ManifestDir string `mapstructure:"manifest_dir"`
+
 	// If true, `sudo` will NOT be used to execute Puppet.
 	PreventSudo bool `mapstructure:"prevent_sudo"`
 
@@ -49,6 +52,8 @@ type ExecuteTemplate struct {
 	HieraConfigPath    string
 	ModulePath         string
 	ManifestFile       string
+	HasManifestDir     bool
+	ManifestDir        string
 	Sudo               bool
 }
 
@@ -72,6 +77,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.ExecuteCommand = "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
+			"{{if .HasManifestDir}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
 			"{{.ManifestFile}}"
 	}
@@ -84,6 +90,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	templates := map[string]*string{
 		"hiera_config_path": &p.config.HieraConfigPath,
 		"manifest_file":     &p.config.ManifestFile,
+		"manifest_dir":      &p.config.ManifestDir,
 		"staging_dir":       &p.config.StagingDir,
 	}
 
@@ -204,6 +211,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
+	// Upload manifest dir if set
+	remoteManifestDir := ""
+	if p.config.ManifestDir != "" {
+		var err error
+		remoteManifestDir, err = p.uploadManifestDir(ui, comm)
+		if err != nil {
+			return fmt.Errorf("Error uploading manifest dir: %s", err)
+		}
+	}
+
 	// Upload all modules
 	modulePaths := make([]string, 0, len(p.config.ModulePaths))
 	for i, path := range p.config.ModulePaths {
@@ -233,6 +250,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		FacterVars:         strings.Join(facterVars, " "),
 		HasHieraConfigPath: remoteHieraConfigPath != "",
 		HieraConfigPath:    remoteHieraConfigPath,
+		HasManifestDir:     remoteManifestDir != "",
+		ManifestDir:        remoteManifestDir,
 		ManifestFile:       remoteManifestFile,
 		ModulePath:         strings.Join(modulePaths, ":"),
 		Sudo:               !p.config.PreventSudo,
@@ -277,6 +296,22 @@ func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) 
 	}
 
 	return path, nil
+}
+
+func (p *Provisioner) uploadManifestDir(ui packer.Ui, comm packer.Communicator) (string, error) {
+	ui.Message("Uploading manifest dir...")
+	path, err := os.Open(p.config.ManifestDir)
+	if err != nil {
+		return "", err
+	}
+	defer path.Close()
+
+	targetPath := fmt.Sprintf("%s/manifests", p.config.StagingDir)
+	if err := p.uploadDirectory(ui, comm, targetPath, p.config.ManifestDir); err != nil {
+		return "", fmt.Errorf("Error uploading manifest dir: %s", err)
+	}
+
+	return p.config.ManifestDir, nil
 }
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
