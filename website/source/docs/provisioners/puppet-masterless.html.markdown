@@ -62,6 +62,9 @@ Optional parameters:
   directories on your local filesystem. These will be uploaded to the remote
   machine. By default, this is empty.
 
+* `manifest_dir` (string) - The path to a local directory with
+  manifests to be uploaded to the remote machine.
+
 * `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to run Puppet are executed with `sudo`. If this is true,
   then the sudo will be omitted.
@@ -83,6 +86,7 @@ for readability) to execute Puppet:
   --verbose \
   --modulepath='{{.ModulePath}}' \
   {{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
+  {{if .HasManifestDir}}--manifestdir='{{.ManifestDir}}' {{end}} \
   {{.ManifestFile}}
 ```
 
