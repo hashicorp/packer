@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/CpuID/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
@@ -18,7 +18,7 @@ type StepRunSourceInstance struct {
 	SourceAMI                string
 	IamInstanceProfile       string
 	SubnetId                 string
-	AssociatePublicIpAddress bool
+	AssociatePublicIpAddress string
 	AvailabilityZone         string
 	BlockDevices             BlockDevices
 

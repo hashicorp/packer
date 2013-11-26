@@ -22,7 +22,7 @@ type RunConfig struct {
 	SecurityGroupId          string   `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string `mapstructure:"security_group_ids"`
 	SubnetId                 string   `mapstructure:"subnet_id"`
-	AssociatePublicIpAddress bool     `mapstructure:"associate_public_ip_address"`
+	AssociatePublicIpAddress string   `mapstructure:"associate_public_ip_address"`
 	TemporaryKeyPairName     string   `mapstructure:"temporary_key_pair_name"`
 	VpcId                    string   `mapstructure:"vpc_id"`
 	AvailabilityZone         string   `mapstructure:"availability_zone"`
