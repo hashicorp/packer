@@ -18,7 +18,7 @@ type StepRunSourceInstance struct {
 	SourceAMI                string
 	IamInstanceProfile       string
 	SubnetId                 string
-	AssociatePublicIpAddress string
+	AssociatePublicIpAddress bool
 	AvailabilityZone         string
 	BlockDevices             BlockDevices
 
