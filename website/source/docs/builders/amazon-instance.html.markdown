@@ -150,6 +150,10 @@ Optional:
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
   "subnet-12345def", where Packer will launch the EC2 instance.
 
+* `associate_public_ip_address` (bool) - If using a non-default VPC, public
+  IP addresses are not provided by default. If this is toggled, your new
+	instance will get a Public IP.
+
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
 * `user_data` (string) - User data to apply when launching the instance.
