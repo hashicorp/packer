@@ -86,16 +86,16 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"iam_instance_profile":        &cc.IamInstanceProfile,
-		"instance_type":               &cc.InstanceType,
-		"ssh_timeout":                 &cc.RawSSHTimeout,
-		"ssh_username":                &cc.SSHUsername,
-		"source_ami":                  &cc.SourceAmi,
-		"subnet_id":                   &cc.SubnetId,
-		"associate_public_ip_address": &cc.AssociatePublicIpAddress,
-		"temporary_key_pair_name":     &cc.TemporaryKeyPairName,
-		"vpc_id":                      &cc.VpcId,
-		"availability_zone":           &cc.AvailabilityZone,
+		"iam_instance_profile":        &c.IamInstanceProfile,
+		"instance_type":               &c.InstanceType,
+		"ssh_timeout":                 &c.RawSSHTimeout,
+		"ssh_username":                &c.SSHUsername,
+		"source_ami":                  &c.SourceAmi,
+		"subnet_id":                   &c.SubnetId,
+		"associate_public_ip_address": &c.AssociatePublicIpAddress,
+		"temporary_key_pair_name":     &c.TemporaryKeyPairName,
+		"vpc_id":                      &c.VpcId,
+		"availability_zone":           &c.AvailabilityZone,
 	}
 
 	for n, ptr := range templates {
