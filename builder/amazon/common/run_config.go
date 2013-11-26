@@ -11,20 +11,21 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	SourceAmi            string   `mapstructure:"source_ami"`
-	IamInstanceProfile   string   `mapstructure:"iam_instance_profile"`
-	InstanceType         string   `mapstructure:"instance_type"`
-	UserData             string   `mapstructure:"user_data"`
-	UserDataFile         string   `mapstructure:"user_data_file"`
-	RawSSHTimeout        string   `mapstructure:"ssh_timeout"`
-	SSHUsername          string   `mapstructure:"ssh_username"`
-	SSHPort              int      `mapstructure:"ssh_port"`
-	SecurityGroupId      string   `mapstructure:"security_group_id"`
-	SecurityGroupIds     []string `mapstructure:"security_group_ids"`
-	SubnetId             string   `mapstructure:"subnet_id"`
-	TemporaryKeyPairName string   `mapstructure:"temporary_key_pair_name"`
-	VpcId                string   `mapstructure:"vpc_id"`
-	AvailabilityZone     string   `mapstructure:"availability_zone"`
+	SourceAmi                string   `mapstructure:"source_ami"`
+	IamInstanceProfile       string   `mapstructure:"iam_instance_profile"`
+	InstanceType             string   `mapstructure:"instance_type"`
+	UserData                 string   `mapstructure:"user_data"`
+	UserDataFile             string   `mapstructure:"user_data_file"`
+	RawSSHTimeout            string   `mapstructure:"ssh_timeout"`
+	SSHUsername              string   `mapstructure:"ssh_username"`
+	SSHPort                  int      `mapstructure:"ssh_port"`
+	SecurityGroupId          string   `mapstructure:"security_group_id"`
+	SecurityGroupIds         []string `mapstructure:"security_group_ids"`
+	SubnetId                 string   `mapstructure:"subnet_id"`
+	AssociatePublicIpAddress bool     `mapstructure:"associate_public_ip_address"`
+	TemporaryKeyPairName     string   `mapstructure:"temporary_key_pair_name"`
+	VpcId                    string   `mapstructure:"vpc_id"`
+	AvailabilityZone         string   `mapstructure:"availability_zone"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -85,15 +86,16 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"iam_instance_profile":    &c.IamInstanceProfile,
-		"instance_type":           &c.InstanceType,
-		"ssh_timeout":             &c.RawSSHTimeout,
-		"ssh_username":            &c.SSHUsername,
-		"source_ami":              &c.SourceAmi,
-		"subnet_id":               &c.SubnetId,
-		"temporary_key_pair_name": &c.TemporaryKeyPairName,
-		"vpc_id":                  &c.VpcId,
-		"availability_zone":       &c.AvailabilityZone,
+		"iam_instance_profile":        &cc.IamInstanceProfile,
+		"instance_type":               &cc.InstanceType,
+		"ssh_timeout":                 &cc.RawSSHTimeout,
+		"ssh_username":                &cc.SSHUsername,
+		"source_ami":                  &cc.SourceAmi,
+		"subnet_id":                   &cc.SubnetId,
+		"associate_public_ip_address": &cc.AssociatePublicIpAddress,
+		"temporary_key_pair_name":     &cc.TemporaryKeyPairName,
+		"vpc_id":                      &cc.VpcId,
+		"availability_zone":           &cc.AvailabilityZone,
 	}
 
 	for n, ptr := range templates {
