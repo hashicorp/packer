@@ -10,16 +10,17 @@ import (
 )
 
 type StepRunSourceInstance struct {
-	Debug              bool
-	ExpectedRootDevice string
-	InstanceType       string
-	UserData           string
-	UserDataFile       string
-	SourceAMI          string
-	IamInstanceProfile string
-	SubnetId           string
-	AvailabilityZone   string
-	BlockDevices       BlockDevices
+	Debug                    bool
+	ExpectedRootDevice       string
+	InstanceType             string
+	UserData                 string
+	UserDataFile             string
+	SourceAMI                string
+	IamInstanceProfile       string
+	SubnetId                 string
+	AssociatePublicIpAddress bool
+	AvailabilityZone         string
+	BlockDevices             BlockDevices
 
 	instance *ec2.Instance
 }
@@ -47,17 +48,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	runOpts := &ec2.RunInstances{
-		KeyName:            keyName,
-		ImageId:            s.SourceAMI,
-		InstanceType:       s.InstanceType,
-		UserData:           []byte(userData),
-		MinCount:           0,
-		MaxCount:           0,
-		SecurityGroups:     securityGroups,
-		IamInstanceProfile: s.IamInstanceProfile,
-		SubnetId:           s.SubnetId,
-		BlockDevices:       s.BlockDevices.BuildLaunchDevices(),
-		AvailZone:          s.AvailabilityZone,
+		KeyName:                  keyName,
+		ImageId:                  s.SourceAMI,
+		InstanceType:             s.InstanceType,
+		UserData:                 []byte(userData),
+		MinCount:                 0,
+		MaxCount:                 0,
+		SecurityGroups:           securityGroups,
+		IamInstanceProfile:       s.IamInstanceProfile,
+		SubnetId:                 s.SubnetId,
+		AssociatePublicIpAddress: s.AssociatePublicIpAddress,
+		BlockDevices:             s.BlockDevices.BuildLaunchDevices(),
+		AvailZone:                s.AvailabilityZone,
 	}
 
 	ui.Say("Launching a source AWS instance...")
