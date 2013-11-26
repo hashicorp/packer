@@ -225,6 +225,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Users:        b.config.AMIUsers,
 			Groups:       b.config.AMIGroups,
 			ProductCodes: b.config.AMIProductCodes,
+			Visibility:  b.config.AMIVisibility,
 		},
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,

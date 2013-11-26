@@ -15,6 +15,7 @@ type AMIConfig struct {
 	AMIProductCodes []string          `mapstructure:"ami_product_codes"`
 	AMIRegions      []string          `mapstructure:"ami_regions"`
 	AMITags         map[string]string `mapstructure:"tags"`
+	AMIVisibility	string			  `mapstructure:"ami_visibility"`
 }
 
 func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
@@ -29,6 +30,7 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 	templates := map[string]*string{
 		"ami_name":        &c.AMIName,
 		"ami_description": &c.AMIDescription,
+		"ami_visibility":  &c.AMIVisibility,
 	}
 
 	errs := make([]error, 0)
