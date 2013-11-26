@@ -22,7 +22,7 @@ type RunConfig struct {
 	SecurityGroupId          string   `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string `mapstructure:"security_group_ids"`
 	SubnetId                 string   `mapstructure:"subnet_id"`
-	AssociatePublicIpAddress string   `mapstructure:"associate_public_ip_address"`
+	AssociatePublicIpAddress bool     `mapstructure:"associate_public_ip_address"`
 	TemporaryKeyPairName     string   `mapstructure:"temporary_key_pair_name"`
 	VpcId                    string   `mapstructure:"vpc_id"`
 	AvailabilityZone         string   `mapstructure:"availability_zone"`
@@ -92,7 +92,6 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"ssh_username":                &c.SSHUsername,
 		"source_ami":                  &c.SourceAmi,
 		"subnet_id":                   &c.SubnetId,
-		"associate_public_ip_address": &c.AssociatePublicIpAddress,
 		"temporary_key_pair_name":     &c.TemporaryKeyPairName,
 		"vpc_id":                      &c.VpcId,
 		"availability_zone":           &c.AvailabilityZone,
