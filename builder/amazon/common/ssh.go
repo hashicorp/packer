@@ -4,7 +4,7 @@ import (
 	gossh "code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
-	"github.com/CpuID/goamz/ec2"
+	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"time"
