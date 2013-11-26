@@ -110,11 +110,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	s.instance = latestInstance.(*ec2.Instance)
-	log.Printf("Public IP: %s", s.instance.PublicIpAddress)
 
 	if s.Debug {
 		if s.instance.DNSName != "" {
 			ui.Message(fmt.Sprintf("Public DNS: %s", s.instance.DNSName))
+		}
+
+		if s.instance.PublicIpAddress != "" {
+			ui.Message(fmt.Sprintf("Public IP: %s", s.instance.PublicIpAddress))
 		}
 
 		if s.instance.PrivateIpAddress != "" {
