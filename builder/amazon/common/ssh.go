@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"time"
+	"log"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
@@ -20,7 +21,14 @@ func SSHAddress(e *ec2.EC2, port int) func(multistep.StateBag) (string, error) {
 			if i.DNSName != "" {
 				host = i.DNSName
 			} else if i.VpcId != "" {
-				host = i.PrivateIpAddress
+				log.Printf("public ip from SSHAddress: %s", i.PublicIpAddress)
+				if i.PublicIpAddress != "" {
+					log.Printf("using public ip in SSHAddress")
+					host = i.PublicIpAddress
+				} else {
+					log.Printf("using private ip in SSHAddress")
+					host = i.PrivateIpAddress
+				}
 			}
 
 			if host != "" {
