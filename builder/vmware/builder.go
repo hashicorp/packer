@@ -471,7 +471,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return &Artifact{
-		typeId: builderId,
+		typeId:    builderId,
 		dir:       b.config.OutputDir,
 		f:         files,
 	}, nil
