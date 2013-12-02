@@ -1,6 +1,6 @@
 // This package implements a provisioner for Packer that uses
 // Chef to provision the remote machine, specifically with chef-client (that is,
-// without a Chef server).
+// with a Chef server).
 package chefclient
 
 import (
