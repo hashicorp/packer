@@ -77,7 +77,7 @@ For some additional dependencies, Go needs [Mercurial](http://mercurial.selenic.
 and [Bazaar](http://bazaar.canonical.com/en/) to be installed.
 Packer itself doesn't require these, but a dependency of a dependency does.
 
-You'll also need [`gox`](https://github.com/mitchellh/packer)
+You'll also need [`gox`](https://github.com/mitchellh/gox)
 to compile packer. You can install that with:
 
 ```
