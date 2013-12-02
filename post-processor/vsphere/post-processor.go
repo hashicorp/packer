@@ -28,6 +28,8 @@ type Config struct {
 	VMFolder           string `mapstructure:"vm_folder"`
 	VMName             string `mapstructure:"vm_name"`
 	VMNetwork          string `mapstructure:"vm_network"`
+
+	tpl *packer.ConfigTemplate
 }
 
 type PostProcessor struct {
@@ -39,21 +41,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	
-	tpl, err := packer.NewConfigTemplate()
+
+	p.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}
-	tpl.UserVars = p.config.PackerUserVars
+	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	// Accumulate any errors
 	errs := new(packer.MultiError)
-	
-	if err := tpl.Validate(p.config.VMName); err != nil {
-			errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Error parsing output template: %s", err))
-	}
-	
+
 	if _, err := exec.LookPath("ovftool"); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("ovftool not found: %s", err))
@@ -103,25 +100,40 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX file not found")
 	}
 
+	vm_name, err := p.config.tpl.Process(p.config.VMName, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
+	username, err := p.config.tpl.Process(p.config.Username, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
+	password, err := p.config.tpl.Process(p.config.Password, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 
 	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=%s", p.config.VMName),
+		fmt.Sprintf("--name=%s", vm_name),
 		fmt.Sprintf("--datastore=%s", p.config.Datastore),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
 		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
-			p.config.Username,
-			p.config.Password,
+			username,
+			password,
 			p.config.Host,
 			p.config.Datacenter,
 			p.config.Cluster,
 			p.config.ResourcePool),
 	}
-	
+
 	if p.config.Debug {
 		ui.Message(fmt.Sprintf("DEBUG: %s", args))
 	}
