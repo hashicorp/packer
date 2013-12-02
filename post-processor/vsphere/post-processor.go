@@ -100,6 +100,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX file not found")
 	}
 
+	// Get user variables from template
 	vm_name, err := p.config.tpl.Process(p.config.VMName, p.config.PackerUserVars)
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed: %s", err)
@@ -115,13 +116,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed: %s", err)
 	}
 
+	datastore, err := p.config.tpl.Process(p.config.Datastore, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 
 	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
 		fmt.Sprintf("--name=%s", vm_name),
-		fmt.Sprintf("--datastore=%s", p.config.Datastore),
+		fmt.Sprintf("--datastore=%s", datastore),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
