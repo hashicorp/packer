@@ -11,9 +11,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
-	"os/exec"
 )
 
 type Config struct {
@@ -22,13 +22,13 @@ type Config struct {
 	ConfigTemplate      string   `mapstructure:"config_template"`
 	CookbookPaths       []string `mapstructure:"cookbook_paths"`
 	RolesPath           string   `mapstructure:"roles_path"`
-	NodeName	    string   `mapstructure:"node_name"`
-	ServerUrl	    string   `mapstructure:"chef_server_url"`
+	NodeName            string   `mapstructure:"node_name"`
+	ServerUrl           string   `mapstructure:"chef_server_url"`
 	DataBagsPath        string   `mapstructure:"data_bags_path"`
 	ExecuteCommand      string   `mapstructure:"execute_command"`
 	InstallCommand      string   `mapstructure:"install_command"`
-	ValidationCommand   string   `mapstructure:"validation_command"` 
-        ClientCommand	    string   `mapstructure:"client_command"`
+	ValidationCommand   string   `mapstructure:"validation_command"`
+	ClientCommand       string   `mapstructure:"client_command"`
 	RemoteCookbookPaths []string `mapstructure:"remote_cookbook_paths"`
 	Json                map[string]interface{}
 	PreventSudo         bool     `mapstructure:"prevent_sudo"`
@@ -93,9 +93,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ClientCommand == "" {
-               // p.config.ClientCommand = "{{if .Sudo}}sudo {{end}} mv /tmp/client.rb /etc/chef/client.rb"
-        }
-
+		// p.config.ClientCommand = "{{if .Sudo}}sudo {{end}} mv /tmp/client.rb /etc/chef/client.rb"
+	}
 
 	if p.config.RunList == nil {
 		p.config.RunList = make([]string, 0)
@@ -112,7 +111,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"config_template": &p.config.ConfigTemplate,
 		"data_bags_path":  &p.config.DataBagsPath,
 		"roles_path":      &p.config.RolesPath,
-		"node_name":	   &p.config.NodeName,
+		"node_name":       &p.config.NodeName,
 		"staging_dir":     &p.config.StagingDir,
 		"chef_server_url": &p.config.ServerUrl,
 	}
@@ -144,10 +143,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	validates := map[string]*string{
-		"execute_command": &p.config.ExecuteCommand,
-		"install_command": &p.config.InstallCommand,
+		"execute_command":    &p.config.ExecuteCommand,
+		"install_command":    &p.config.InstallCommand,
 		"validation_command": &p.config.ValidationCommand,
-		"client_command": &p.config.ClientCommand,
+		"client_command":     &p.config.ClientCommand,
 	}
 
 	for n, ptr := range validates {
@@ -185,7 +184,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				errs, fmt.Errorf("Bad roles path '%s': %s", p.config.RolesPath, err))
 		}
 	}
-	
+
 	if p.config.DataBagsPath != "" {
 		pFileInfo, err := os.Stat(p.config.DataBagsPath)
 
@@ -212,37 +211,36 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if !p.config.SkipInstall {
-                if err := p.installChef(ui, comm); err != nil {
-                        return fmt.Errorf("Error installing Chef: %s", err)
-                }
-        }
-	if err := p.moveClient(ui, comm);err != nil {
-                return fmt.Errorf("Error moving client.rb: %s",err)
-        }
-
+		if err := p.installChef(ui, comm); err != nil {
+			return fmt.Errorf("Error installing Chef: %s", err)
+		}
+	}
+	if err := p.moveClient(ui, comm); err != nil {
+		return fmt.Errorf("Error moving client.rb: %s", err)
+	}
 
 	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
 		return fmt.Errorf("Error creating staging directory: %s", err)
 	}
 
-	if err := p.createHints(ui, comm);err != nil {
+	if err := p.createHints(ui, comm); err != nil {
 		return fmt.Errorf("Error creating ohai hints file and directory: %s", err)
 	}
 
-        if err := p.moveValidation(ui, comm);err != nil {
-                return fmt.Errorf("Error moving validation.pem: %s", err)
-        }
+	if err := p.moveValidation(ui, comm); err != nil {
+		return fmt.Errorf("Error moving validation.pem: %s", err)
+	}
 
 	cookbookPaths := make([]string, 0, len(p.config.CookbookPaths))
 
 	nodeName := ""
 	if p.config.NodeName != "" {
-		nodeName = fmt.Sprintf("%s",p.config.NodeName)
+		nodeName = fmt.Sprintf("%s", p.config.NodeName)
 	}
 
 	serverUrl := ""
 	if p.config.ServerUrl != "" {
-		serverUrl = fmt.Sprintf("%s",p.config.ServerUrl)
+		serverUrl = fmt.Sprintf("%s", p.config.ServerUrl)
 	}
 
 	rolesPath := ""
@@ -272,13 +270,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if err := p.executeChef(ui, comm, configPath, jsonPath); err != nil {
-                if err2 := p.cleanNode(ui, comm, p.config.NodeName); err2 != nil {
-                        return fmt.Errorf("Error cleaning up chef node: %s", err2)
-                }
+		if err2 := p.cleanNode(ui, comm, p.config.NodeName); err2 != nil {
+			return fmt.Errorf("Error cleaning up chef node: %s", err2)
+		}
 
-                if err2 := p.cleanClient(ui, comm, p.config.NodeName); err2 != nil {
-                        return fmt.Errorf("Error cleaning up chef client: %s", err2)
-                }
+		if err2 := p.cleanClient(ui, comm, p.config.NodeName); err2 != nil {
+			return fmt.Errorf("Error cleaning up chef client: %s", err2)
+		}
 
 		return fmt.Errorf("Error executing Chef: %s", err)
 	}
@@ -352,11 +350,11 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 		CookbookPaths:   strings.Join(cookbook_paths, ","),
 		RolesPath:       rolesPath,
 		DataBagsPath:    dataBagsPath,
-		NodeName:	 nodeName,
-		ServerUrl:	 serverUrl,
+		NodeName:        nodeName,
+		ServerUrl:       serverUrl,
 		HasRolesPath:    rolesPath != "",
 		HasDataBagsPath: dataBagsPath != "",
-		HasNodeName:	 nodeName != "",
+		HasNodeName:     nodeName != "",
 	})
 	if err != nil {
 		return "", err
@@ -402,7 +400,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("sudo mkdir -p '%s' && sudo chown ubuntu '%s'", dir,dir),
+		Command: fmt.Sprintf("sudo mkdir -p '%s' && sudo chown ubuntu '%s'", dir, dir),
 	}
 
 	if err := cmd.StartWithUi(comm, ui); err != nil {
@@ -422,23 +420,23 @@ func (p *Provisioner) createHints(ui packer.Ui, comm packer.Communicator) error 
 		Command: fmt.Sprintf("mkdir -p /etc/chef/ohai/hints; echo '{}' > /etc/chef/ohai/hints/ec2.json"),
 	}
 
-	if err := cmd.StartWithUi(comm,ui); err != nil{
+	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string) error {
-        ui.Say("Cleaning up chef node...")
-        app := "knife node delete -y "+node
-        
+	ui.Say("Cleaning up chef node...")
+	app := "knife node delete -y " + node
+
 	cmd := exec.Command("sh", "-c", app)
-        out, err := cmd.Output()
+	out, err := cmd.Output()
 
-	ui.Message(fmt.Sprintf("%s",out))
+	ui.Message(fmt.Sprintf("%s", out))
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -447,31 +445,31 @@ func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node str
 
 func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string) error {
 	ui.Say("Cleaning up chef client...")
-	app := "knife client delete -y "+node
+	app := "knife client delete -y " + node
 
-        cmd := exec.Command("sh", "-c", app)
-        out, err := cmd.Output()
+	cmd := exec.Command("sh", "-c", app)
+	out, err := cmd.Output()
 
-	ui.Message(fmt.Sprintf("%s",out))
+	ui.Message(fmt.Sprintf("%s", out))
 
-        if err != nil {
-                return err
-        }
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
-	        cmd := &packer.RemoteCmd{
-                Command: fmt.Sprintf("sudo rm -rf %s",dir),
-        }
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("sudo rm -rf %s", dir),
+	}
 
-        if err := cmd.StartWithUi(comm,ui); err != nil{
-                return err
-        }
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
 
-        return nil
+	return nil
 }
 
 func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config string, json string) error {
@@ -525,49 +523,49 @@ func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error 
 }
 
 func (p *Provisioner) moveValidation(ui packer.Ui, comm packer.Communicator) error {
-        ui.Message("Moving validation.pem...")
+	ui.Message("Moving validation.pem...")
 
-        command, err := p.config.tpl.Process(p.config.ValidationCommand, &InstallChefTemplate{
-                Sudo: !p.config.PreventSudo,
-        })
-        if err != nil {
-                return err
-        }
+	command, err := p.config.tpl.Process(p.config.ValidationCommand, &InstallChefTemplate{
+		Sudo: !p.config.PreventSudo,
+	})
+	if err != nil {
+		return err
+	}
 
-        cmd := &packer.RemoteCmd{Command: command}
-        if err := cmd.StartWithUi(comm, ui); err != nil {
-                return err
-        }
+	cmd := &packer.RemoteCmd{Command: command}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
 
-        if cmd.ExitStatus != 0 {
-                return fmt.Errorf(
-                        "Move script exited with non-zero exit status %d", cmd.ExitStatus)
-        }
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf(
+			"Move script exited with non-zero exit status %d", cmd.ExitStatus)
+	}
 
-        return nil
+	return nil
 }
 
 func (p *Provisioner) moveClient(ui packer.Ui, comm packer.Communicator) error {
-        ui.Message("Moving client.rb...")
+	ui.Message("Moving client.rb...")
 
-        command, err := p.config.tpl.Process(p.config.ClientCommand, &InstallChefTemplate{
-                Sudo: !p.config.PreventSudo,
-        })
-        if err != nil {
-                return err
-        }
+	command, err := p.config.tpl.Process(p.config.ClientCommand, &InstallChefTemplate{
+		Sudo: !p.config.PreventSudo,
+	})
+	if err != nil {
+		return err
+	}
 
-        cmd := &packer.RemoteCmd{Command: command}
-        if err := cmd.StartWithUi(comm, ui); err != nil {
-                return err
-        }
+	cmd := &packer.RemoteCmd{Command: command}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
 
-        if cmd.ExitStatus != 0 {
-                return fmt.Errorf(
-                        "Move script exited with non-zero exit status %d", cmd.ExitStatus)
-        }
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf(
+			"Move script exited with non-zero exit status %d", cmd.ExitStatus)
+	}
 
-        return nil
+	return nil
 }
 
 func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
@@ -620,8 +618,6 @@ node_name "{{.NodeName}}"
 {{end}}
 `
 
-
-
 //cookbook_path 	[{{.CookbookPaths}}]
 //{{if .HasRolesPath}}
 //role_path		"{{.RolesPath}}"
@@ -630,4 +626,3 @@ node_name "{{.NodeName}}"
 //data_bag_path	"{{.DataBagsPath}}"
 //{{end}}
 //`
-
