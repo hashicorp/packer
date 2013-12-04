@@ -115,7 +115,7 @@ Optional:
   commands or kickstart type scripts must have proper adjustments for
   resulting device names. The Qemu builder uses "virtio" by default.
 
-* `format` (string) - Either "qcow2" or "img", this specifies the output
+* `format` (string) - Either "qcow2" or "raw", this specifies the output
   format of the virtual machine image. This defaults to "qcow2".
 
 * `headless` (bool) - Packer defaults to building virtual machines by
