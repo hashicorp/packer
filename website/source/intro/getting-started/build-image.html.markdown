@@ -46,10 +46,14 @@ briefly. Create a file `example.json` and fill it with the following contents:
 
 <pre class="prettyprint">
 {
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
   "builders": [{
     "type": "amazon-ebs",
-    "access_key": "YOUR KEY HERE",
-    "secret_key": "YOUR SECRET KEY HERE",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-de0d9eb7",
     "instance_type": "t1.micro",
@@ -59,9 +63,11 @@ briefly. Create a file `example.json` and fill it with the following contents:
 }
 </pre>
 
-Please fill in the `access_key` and `secret_key` with the proper values
-for your account. Your security credentials can be found on
-[this page](https://console.aws.amazon.com/iam/home?#security_credential).
+When building, you'll pass in the `aws_access_key` and `aws_access_key` as
+a [user variable](/docs/templates/user-variables.html), keeping your secret
+keys out of the template. You can create security credentials
+on [this page](https://console.aws.amazon.com/iam/home?#security_credential).
+An example IAM policy document can be found in the [Amazon EC2 builder docs](/docs/builders/amazon.html).
 
 This is a basic template that is ready-to-go. It should be immediately recognizable
 as a normal, basic JSON object. Within the object, the `builders` section
@@ -106,7 +112,10 @@ should look similar to below. Note that this process typically takes a
 few minutes.
 
 ```
-$ packer build example.json
+$ packer build \
+    -var 'aws_access_key=YOUR ACCESS KEY' \
+    -var 'aws_secret_key=YOUR SECRET KEY' \
+    example.json
 ==> amazon-ebs: amazon-ebs output will be in this color.
 
 ==> amazon-ebs: Creating temporary keypair for this instance...
