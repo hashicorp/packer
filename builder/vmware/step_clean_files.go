@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"os"
 	"path/filepath"
 )
 
@@ -48,8 +49,11 @@ func (stepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
 		if !keep {
 			ui.Message(fmt.Sprintf("Deleting: %s", path))
 			if err = dir.Remove(path); err != nil {
-				state.Put("error", err)
-				return multistep.ActionHalt
+				// Only report the error if the file still exists
+				if _, serr := os.Stat(path); serr == nil || os.IsNotExist(serr) {
+					state.Put("error", err)
+					return multistep.ActionHalt
+				}
 			}
 		}
 	}

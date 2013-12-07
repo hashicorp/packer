@@ -18,6 +18,8 @@ BUG FIXES:
   so that building AMIs works out of us-east-1 [GH-679]
 * builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
   get stuck with ISO. [GH-685]
+* builder/vmware: File cleanup is more resilient to file delete races
+  with the operating system. [GH-675]
 
 ## 0.4.0 (November 19, 2013)
 
