@@ -14,13 +14,8 @@ const LOCK_NB = 4
 const LOCK_UN = 8
 
 func lockFile(f *os.File) error {
-	err := syscall.Flock(int(f.Fd()), LOCK_EX|LOCK_NB)
+	err := syscall.Flock(int(f.Fd()), LOCK_EX)
 	if err != nil {
-		errno, ok := err.(syscall.Errno)
-		if ok && errno == syscall.EWOULDBLOCK {
-			return errors.New("file already locked")
-		}
-
 		return err
 	}
 
