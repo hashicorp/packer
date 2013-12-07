@@ -1,9 +1,16 @@
 ## 0.4.1 (unreleased)
 
+IMPROVEMENTS:
+
+* builder/openstack: A "proxy\_url" setting was added to define an HTTP
+  proxy to use when building with this builder. [GH-637]
+
 BUG FIXES:
 
 * core: Don't change background color on CLI anymore, making things look
   a tad nicer in some terminals.
+* builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
+  get stuck with ISO. [GH-685]
 
 ## 0.4.0 (November 19, 2013)
 
