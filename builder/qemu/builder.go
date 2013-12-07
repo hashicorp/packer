@@ -58,6 +58,7 @@ type config struct {
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
+	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
 	HTTPDir         string     `mapstructure:"http_directory"`
@@ -79,6 +80,7 @@ type config struct {
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
+	RunOnce         bool       `mapstructure:"run_once"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
@@ -150,8 +152,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VNCPortMax = 6000
 	}
 
-	if b.config.QemuArgs == nil {
-		b.config.QemuArgs = make([][]string, 0)
+	for i, args := range b.config.QemuArgs {
+		for j, arg := range args {
+			if err := b.config.tpl.Validate(arg); err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("Error processing qemu-system_x86-64[%d][%d]: %s", i, j, err))
+			}
+		}
 	}
 
 	if b.config.VMName == "" {
@@ -160,6 +167,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.Format == "" {
 		b.config.Format = "qcow2"
+	}
+
+	if b.config.FloppyFiles == nil {
+		b.config.FloppyFiles = make([]string, 0)
 	}
 
 	if b.config.NetDevice == "" {
@@ -212,6 +223,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err := b.config.tpl.Validate(command); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
+		}
+	}
+
+	for i, file := range b.config.FloppyFiles {
+		var err error
+		b.config.FloppyFiles[i], err = b.config.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing floppy_files[%d]: %s",
+					i, err))
 		}
 	}
 
@@ -336,13 +357,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
-	for i, args := range b.config.QemuArgs {
-		for j, arg := range args {
-			if err := b.config.tpl.Validate(arg); err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Error processing qemu-system_x86-64[%d][%d]: %s", i, j, err))
-			}
-		}
+	if b.config.QemuArgs == nil {
+		b.config.QemuArgs = make([][]string, 0)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -368,6 +384,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Url:          b.config.ISOUrls,
 		},
 		new(stepPrepareOutputDir),
+		&common.StepCreateFloppy{
+			Files: b.config.FloppyFiles,
+		},
 		new(stepCreateDisk),
 		new(stepHTTPServer),
 		new(stepForwardSSH),
@@ -376,15 +395,23 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootDrive: "d",
 			Message:   "Starting VM, booting from CD-ROM",
 		},
-		&stepBootWait{},
-		&stepTypeBootCommand{},
-		&stepWaitForShutdown{
-			Message: "Waiting for initial VM boot to shut down",
-		},
-		&stepRun{
-			BootDrive: "c",
-			Message:   "Starting VM, booting from hard disk",
-		},
+	}
+
+	if !b.config.RunOnce {
+		steps = append(steps,
+			&stepBootWait{},
+			&stepTypeBootCommand{},
+			&stepWaitForShutdown{
+				Message: "Waiting for initial VM boot to shut down",
+			},
+			&stepRun{
+				BootDrive: "c",
+				Message:   "Starting VM, booting from hard disk",
+			},
+		)
+	}
+
+	steps = append(steps,
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,
@@ -392,7 +419,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
-	}
+	)
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
