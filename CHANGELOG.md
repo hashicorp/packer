@@ -14,6 +14,8 @@ BUG FIXES:
 * core: multiple ISO URLs works properly in all builders. [GH-683]
 * builder/amazon/chroot: Block when obtaining file lock to allow
   parallel builds. [GH-689]
+* builder/amazon/instance: Add location flag to upload bundle command
+  so that building AMIs works out of us-east-1 [GH-679]
 * builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
   get stuck with ISO. [GH-685]
 
