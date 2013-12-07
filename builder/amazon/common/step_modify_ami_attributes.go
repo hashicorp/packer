@@ -13,7 +13,6 @@ type StepModifyAMIAttributes struct {
 	Groups       []string
 	ProductCodes []string
 	Description  string
-	Visibility   string
 }
 
 func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAction {
@@ -27,7 +26,6 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	valid = valid || (s.Users != nil && len(s.Users) > 0)
 	valid = valid || (s.Groups != nil && len(s.Groups) > 0)
 	valid = valid || (s.ProductCodes != nil && len(s.ProductCodes) > 0)
-	valid = valid || s.Visibility == "public"
 
 	if !valid {
 		return multistep.ActionContinue
@@ -58,14 +56,6 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	if len(s.ProductCodes) > 0 {
 		options["product codes"] = &ec2.ModifyImageAttribute{
 			ProductCodes: s.ProductCodes,
-		}
-	}
-
-	if s.Visibility == "public" {
-		group := make([]string, 1)
-		group[0] = "all"
-		options["public ami"] = &ec2.ModifyImageAttribute{
-			AddGroups: group,
 		}
 	}
 
