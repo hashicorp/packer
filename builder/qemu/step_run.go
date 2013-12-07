@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"path/filepath"
 	"strings"
 )
@@ -14,13 +15,27 @@ type stepRun struct {
 	Message   string
 }
 
+type qemuArgsTemplateData struct {
+	HTTPIP    string
+	HTTPPort  uint
+	HTTPDir   string
+	OutputDir string
+	Name      string
+}
+
 func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say(s.Message)
 
-	command := getCommandArgs(s.BootDrive, state)
+	command, err := getCommandArgs(s.BootDrive, state)
+	if err != nil {
+		err := fmt.Errorf("Error processing QemuArggs: %s", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	if err := driver.Qemu(command...); err != nil {
 		err := fmt.Errorf("Error launching VM: %s", err)
 		ui.Error(err.Error())
@@ -39,7 +54,7 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func getCommandArgs(bootDrive string, state multistep.StateBag) []string {
+func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
 	config := state.Get("config").(*config)
 	isoPath := state.Get("iso_path").(string)
 	vncPort := state.Get("vnc_port").(uint)
@@ -72,14 +87,34 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) []string {
 	defaultArgs["-redir"] = fmt.Sprintf("tcp:%v::22", sshHostPort)
 	defaultArgs["-vnc"] = vnc
 
+	// Determine if we have a floppy disk to attach
+	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
+		defaultArgs["-fda"] = floppyPathRaw.(string)
+	} else {
+		log.Println("Qemu Builder has no floppy files, not attaching a floppy.")
+	}
+
 	inArgs := make(map[string][]string)
 	if len(config.QemuArgs) > 0 {
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
-		// becuase qemu supports multiple appearances of the same
+		httpPort := state.Get("http_port").(uint)
+		tplData := qemuArgsTemplateData{
+			"10.0.2.2",
+			httpPort,
+			config.HTTPDir,
+			config.OutputDir,
+			config.VMName,
+		}
+		newQemuArgs, err := processArgs(config.QemuArgs, config.tpl, &tplData)
+		if err != nil {
+			return nil, err
+		}
+
+		// because qemu supports multiple appearances of the same
 		// switch, just different values, each key in the args hash
 		// will have an array of string values
-		for _, qemuArgs := range config.QemuArgs {
+		for _, qemuArgs := range newQemuArgs {
 			key := qemuArgs[0]
 			val := strings.Join(qemuArgs[1:], "")
 			if _, ok := inArgs[key]; !ok {
@@ -112,5 +147,27 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) []string {
 		}
 	}
 
-	return outArgs
+	return outArgs, nil
+}
+
+func processArgs(args [][]string, tpl *packer.ConfigTemplate, tplData *qemuArgsTemplateData) ([][]string, error) {
+	var err error
+
+	if args == nil {
+		return make([][]string, 0), err
+	}
+
+	newArgs := make([][]string, len(args))
+	for argsIdx, rowArgs := range args {
+		parms := make([]string, len(rowArgs))
+		newArgs[argsIdx] = parms
+		for i, parm := range rowArgs {
+			parms[i], err = tpl.Process(parm, &tplData)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return newArgs, err
 }
