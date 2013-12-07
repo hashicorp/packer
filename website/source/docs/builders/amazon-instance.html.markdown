@@ -273,6 +273,7 @@ sudo -n ec2-upload-bundle \
 	-s {{.SecretKey}} \
 	-d {{.BundleDirectory}} \
 	--batch \
+	--location {{.Region}} \
 	--retry
 ```
 
