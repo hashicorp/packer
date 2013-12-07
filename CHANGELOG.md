@@ -11,6 +11,7 @@ BUG FIXES:
 
 * core: Don't change background color on CLI anymore, making things look
   a tad nicer in some terminals.
+* core: multiple ISO URLs works properly in all builders. [GH-683]
 * builder/amazon/chroot: Block when obtaining file lock to allow
   parallel builds. [GH-689]
 * builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
