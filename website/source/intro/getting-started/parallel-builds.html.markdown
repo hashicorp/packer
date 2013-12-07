@@ -63,13 +63,23 @@ array.
 <pre class="prettyprint">
 {
   "type": "digitalocean",
-  "api_key": "INSERT API KEY HERE",
-  "client_id": "INSERT CLIENT ID HERE"
+  "api_key": "{{user `do_api_key`}}",
+  "client_id": "{{user `do_client_id`}}"
 }
 </pre>
 
-Fill in your `api_key` and `client_id` for DigitalOcean as necessary.
-The entire template should now [look like this](https://gist.github.com/mitchellh/51a447e38e7e496eb29c).
+You'll also need to modify the `variables` section of the template
+to include the access keys for DigitalOcean.
+
+<pre class="prettyprint">
+"variables": {
+  ...
+  "do_api_key": "",
+  "do_client_id": ""
+}
+</pre>
+
+The entire template should now [look like this](https://gist.github.com/pearkes/cc5f8505eee5403a43a6).
 
 Additional builders are simply added to the `builders` array in the template.
 This tells Packer to build multiple images. The builder `type` values don't
@@ -87,13 +97,18 @@ manual that contains a listing of all the available configuration options.
 
 ## Build
 
-Now run `packer build example.json`. The output is too verbose to include
+Now run `packer build` with your user variables. The output is too verbose to include
 all of it, but a portion of it is reproduced below. Note that the ordering
 and wording of the lines may be slightly different, but the effect is the
 same.
 
 ```
-$ packer build example.json
+$ packer build \
+    -var 'aws_access_key=YOUR ACCESS KEY' \
+    -var 'aws_secret_key=YOUR SECRET KEY' \
+    -var 'do_api_key=YOUR API KEY' \
+    -var 'do_client_id=YOUR CLIENT ID' \
+    example.json
 ==> amazon-ebs: amazon-ebs output will be in this color.
 ==> digitalocean: digitalocean output will be in this color.
 
