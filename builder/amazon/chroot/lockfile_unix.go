@@ -3,7 +3,6 @@
 package chroot
 
 import (
-	"errors"
 	"os"
 	"syscall"
 )
