@@ -2,6 +2,8 @@
 
 IMPROVEMENTS:
 
+* builder/amazon/ebs: New option allows associating a public IP with
+  non-default VPC instances. [GH-660]
 * builder/openstack: A "proxy\_url" setting was added to define an HTTP
   proxy to use when building with this builder. [GH-637]
 
