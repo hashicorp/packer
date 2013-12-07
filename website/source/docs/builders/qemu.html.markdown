@@ -118,6 +118,14 @@ Optional:
 * `format` (string) - Either "qcow2" or "img", this specifies the output
   format of the virtual machine image. This defaults to "qcow2".
 
+* `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that gets attached when Packer powers up the VM. This is most useful
+  for unattended Windows installs, which look for an `Autounattend.xml` file
+  on removable media. By default no floppy will be attached. All files
+  listed in this setting get placed into the root directory of the floppy
+  and teh floppy is attached as the first floppy device. Currently, no
+  support exists for sub-directories.
+
 * `headless` (bool) - Packer defaults to building virtual machines by
   launching a GUI that shows the console of the machine being built.
   When this value is set to true, the machine will start without a console.
@@ -190,6 +198,16 @@ Optional:
   is executed. This directory must not exist or be empty prior to running the builder.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
+
+* `run_once` (boolean) - When set to true, run_once causes the builder to run
+  Qemu only once, rather than twice. Normally (default false) the builder
+  will run Qemu once for an initial OS install, then switch the CDROM device
+  and boot device for a second run. In that case, Packer does not wait for
+  SSH connections until the second power up of the VM. This approach is often
+  necessary in Linux distribution installs. However, in many Windows unattended
+  installs, the setup handles reboots and dealing with the CDROM as the boot
+  device. With care, a power-down/power-up setting (run_once is set to false)
+  could work if the unattended install is set to restart into audit mode.
 
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
