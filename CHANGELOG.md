@@ -20,6 +20,8 @@ BUG FIXES:
   get stuck with ISO. [GH-685]
 * builder/vmware: File cleanup is more resilient to file delete races
   with the operating system. [GH-675]
+* provisioner/puppet-masterless: Check for hiera config path existence
+  properly. [GH-656]
 
 ## 0.4.0 (November 19, 2013)
 
