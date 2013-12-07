@@ -50,7 +50,7 @@ func (stepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Message(fmt.Sprintf("Deleting: %s", path))
 			if err = dir.Remove(path); err != nil {
 				// Only report the error if the file still exists
-				if _, serr := os.Stat(path); serr == nil || os.IsNotExist(serr) {
+				if _, serr := os.Stat(path); serr == nil || !os.IsNotExist(serr) {
 					state.Put("error", err)
 					return multistep.ActionHalt
 				}
