@@ -11,6 +11,7 @@ type uploadCmdData struct {
 	BucketName      string
 	BundleDirectory string
 	ManifestPath    string
+	Region          string
 	SecretKey       string
 }
 
@@ -23,12 +24,20 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 	manifestPath := state.Get("manifest_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	var err error
+	region, err := config.Region()
+	if err != nil {
+		err := fmt.Errorf("Error retrieving region: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	config.BundleUploadCommand, err = config.tpl.Process(config.BundleUploadCommand, uploadCmdData{
 		AccessKey:       config.AccessKey,
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
+		Region:          region.Name,
 		SecretKey:       config.SecretKey,
 	})
 	if err != nil {
