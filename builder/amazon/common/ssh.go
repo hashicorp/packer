@@ -20,7 +20,11 @@ func SSHAddress(e *ec2.EC2, port int) func(multistep.StateBag) (string, error) {
 			if i.DNSName != "" {
 				host = i.DNSName
 			} else if i.VpcId != "" {
-				host = i.PrivateIpAddress
+				if i.PublicIpAddress != "" {
+					host = i.PublicIpAddress
+				} else {
+					host = i.PrivateIpAddress
+				}
 			}
 
 			if host != "" {
