@@ -144,8 +144,8 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	for _, prefix := range []string{"", "file://"} {
 		// Nonexistent file
 		_, err = DownloadableURL(prefix + "i/dont/exist")
-		if err == nil {
-			t.Fatal("expected err")
+		if err != nil {
+			t.Fatalf("err: %s", err)
 		}
 
 		// Good file
