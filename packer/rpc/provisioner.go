@@ -71,7 +71,7 @@ func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *int
 	}
 
 	comm := Communicator(client)
-	ui := &Ui{client}
+	ui := &Ui{client: client}
 
 	if err := p.p.Provision(ui, comm); err != nil {
 		return NewBasicError(err)

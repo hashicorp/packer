@@ -51,7 +51,7 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 		return err
 	}
 
-	if err := h.hook.Run(args.Name, &Ui{client}, Communicator(client), args.Data); err != nil {
+	if err := h.hook.Run(args.Name, &Ui{client: client}, Communicator(client), args.Data); err != nil {
 		return NewBasicError(err)
 	}
 
