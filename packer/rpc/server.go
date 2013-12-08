@@ -1,73 +1,93 @@
 package rpc
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
+	"sync/atomic"
 )
+
+// This keeps track of the endpoint ID to use when registering artifacts.
+var endpointId uint64 = 0
 
 // Registers the appropriate endpoint on an RPC server to serve an
 // Artifact.
 func RegisterArtifact(s *rpc.Server, a packer.Artifact) {
-	s.RegisterName("Artifact", &ArtifactServer{a})
+	registerComponent(s, "Artifact", &ArtifactServer{a}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Build.
 func RegisterBuild(s *rpc.Server, b packer.Build) {
-	s.RegisterName("Build", &BuildServer{b})
+	registerComponent(s, "Build", &BuildServer{b}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Builder.
 func RegisterBuilder(s *rpc.Server, b packer.Builder) {
-	s.RegisterName("Builder", &BuilderServer{b})
+	registerComponent(s, "Builder", &BuilderServer{b}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Cache.
 func RegisterCache(s *rpc.Server, c packer.Cache) {
-	s.RegisterName("Cache", &CacheServer{c})
+	registerComponent(s, "Cache", &CacheServer{c}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Command.
 func RegisterCommand(s *rpc.Server, c packer.Command) {
-	s.RegisterName("Command", &CommandServer{c})
+	registerComponent(s, "Command", &CommandServer{c}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Communicator.
 func RegisterCommunicator(s *rpc.Server, c packer.Communicator) {
-	s.RegisterName("Communicator", &CommunicatorServer{c})
+	registerComponent(s, "Communicator", &CommunicatorServer{c}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Environment
 func RegisterEnvironment(s *rpc.Server, e packer.Environment) {
-	s.RegisterName("Environment", &EnvironmentServer{e})
+	registerComponent(s, "Environment", &EnvironmentServer{e}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Hook.
-func RegisterHook(s *rpc.Server, hook packer.Hook) {
-	s.RegisterName("Hook", &HookServer{hook})
+func RegisterHook(s *rpc.Server, h packer.Hook) {
+	registerComponent(s, "Hook", &HookServer{h}, false)
 }
 
 // Registers the appropriate endpoing on an RPC server to serve a
 // PostProcessor.
 func RegisterPostProcessor(s *rpc.Server, p packer.PostProcessor) {
-	s.RegisterName("PostProcessor", &PostProcessorServer{p})
+	registerComponent(s, "PostProcessor", &PostProcessorServer{p}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a packer.Provisioner
 func RegisterProvisioner(s *rpc.Server, p packer.Provisioner) {
-	s.RegisterName("Provisioner", &ProvisionerServer{p})
+	registerComponent(s, "Provisioner", &ProvisionerServer{p}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer UI
 func RegisterUi(s *rpc.Server, ui packer.Ui) {
-	s.RegisterName("Ui", &UiServer{ui})
+	registerComponent(s, "Ui", &UiServer{ui}, false)
+}
+
+// registerComponent registers a single Packer RPC component onto
+// the RPC server. If id is true, then a unique ID number will be appended
+// onto the end of the endpoint.
+//
+// The endpoint name is returned.
+func registerComponent(s *rpc.Server, name string, rcvr interface{}, id bool) string {
+	endpoint := name
+	if id {
+		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
+	}
+
+	s.RegisterName(endpoint, rcvr)
+	return endpoint
 }
 
 func serveSingleConn(s *rpc.Server) string {

@@ -107,7 +107,8 @@ func (b *BuildServer) Run(args *BuildRunArgs, reply *[]string) error {
 		return err
 	}
 
-	artifacts, err := b.build.Run(&Ui{client}, Cache(client))
+	ui := &Ui{client: client}
+	artifacts, err := b.build.Run(ui, Cache(client))
 	if err != nil {
 		return NewBasicError(err)
 	}

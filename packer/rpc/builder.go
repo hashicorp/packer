@@ -146,7 +146,7 @@ func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
 
 		cache := Cache(client)
 		hook := Hook(client)
-		ui := &Ui{client}
+		ui := &Ui{client: client}
 		artifact, responseErr := b.builder.Run(ui, hook, cache)
 		responseAddress := ""
 
