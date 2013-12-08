@@ -114,7 +114,7 @@ func (e *Environment) Ui() packer.Ui {
 		panic(err)
 	}
 
-	return &Ui{client}
+	return &Ui{client: client}
 }
 
 func (e *EnvironmentServer) Builder(name *string, reply *string) error {

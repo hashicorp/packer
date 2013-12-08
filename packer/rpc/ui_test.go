@@ -62,7 +62,7 @@ func TestUiRPC(t *testing.T) {
 		panic(err)
 	}
 
-	uiClient := &Ui{client}
+	uiClient := &Ui{client: client, endpoint: "Ui"}
 
 	// Basic error and say tests
 	result, err := uiClient.Ask("query")

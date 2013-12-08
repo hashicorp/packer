@@ -82,7 +82,7 @@ func (p *PostProcessorServer) PostProcess(address string, reply *PostProcessorPr
 
 	responseAddress := ""
 
-	artifact, keep, err := p.p.PostProcess(&Ui{client}, Artifact(client))
+	artifact, keep, err := p.p.PostProcess(&Ui{client: client}, Artifact(client))
 	if err == nil && artifact != nil {
 		server := rpc.NewServer()
 		RegisterArtifact(server, artifact)
