@@ -56,23 +56,20 @@ func TestMuxConn(t *testing.T) {
 
 	// When the server is done
 	doneCh := make(chan struct{})
-	readyCh := make(chan struct{})
 
 	// The server side
 	go func() {
 		defer close(doneCh)
 
-		s0, err := server.Stream(0)
+		s0, err := server.Accept(0)
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 
-		s1, err := server.Stream(1)
+		s1, err := server.Dial(1)
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
-
-		close(readyCh)
 
 		var wg sync.WaitGroup
 		wg.Add(2)
@@ -96,18 +93,15 @@ func TestMuxConn(t *testing.T) {
 		wg.Wait()
 	}()
 
-	s0, err := client.Stream(0)
+	s0, err := client.Dial(0)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	s1, err := client.Stream(1)
+	s1, err := client.Accept(1)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-
-	// Wait for the server to be ready
-	<-readyCh
 
 	if _, err := s0.Write([]byte("hello")); err != nil {
 		t.Fatalf("err: %s", err)
@@ -124,8 +118,9 @@ func TestMuxConn_clientClosesStreams(t *testing.T) {
 	client, server := testMux(t)
 	defer client.Close()
 	defer server.Close()
+	go server.Accept(0)
 
-	s0, err := client.Stream(0)
+	s0, err := client.Dial(0)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -146,8 +141,9 @@ func TestMuxConn_serverClosesStreams(t *testing.T) {
 	client, server := testMux(t)
 	defer client.Close()
 	defer server.Close()
+	go server.Accept(0)
 
-	s0, err := client.Stream(0)
+	s0, err := client.Dial(0)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
