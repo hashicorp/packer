@@ -12,6 +12,7 @@ import (
 type Client struct {
 	mux    *MuxConn
 	client *rpc.Client
+	server *rpc.Server
 }
 
 func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
@@ -20,14 +21,28 @@ func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
 	// remote RPC server. On the remote side Server.ServeConn also listens
 	// on this stream ID.
 	mux := NewMuxConn(rwc)
-	stream, err := mux.Dial(0)
+	clientConn, err := mux.Dial(0)
 	if err != nil {
+		mux.Close()
 		return nil, err
 	}
 
+	// Accept connection ID 1 which is what the remote end uses to
+	// be an RPC client back to us so we can even serve some objects.
+	serverConn, err := mux.Accept(1)
+	if err != nil {
+		mux.Close()
+		return nil, err
+	}
+
+	// Start our RPC server on this end
+	server := rpc.NewServer()
+	go server.ServeConn(serverConn)
+
 	return &Client{
 		mux:    mux,
-		client: rpc.NewClient(stream),
+		client: rpc.NewClient(clientConn),
+		server: server,
 	}, nil
 }
 
@@ -41,7 +56,8 @@ func (c *Client) Close() error {
 
 func (c *Client) Artifact() packer.Artifact {
 	return &artifact{
-		client: c.client,
+		client:   c.client,
+		endpoint: DefaultArtifactEndpoint,
 	}
 }
 
@@ -54,5 +70,6 @@ func (c *Client) Cache() packer.Cache {
 func (c *Client) PostProcessor() packer.PostProcessor {
 	return &postProcessor{
 		client: c.client,
+		server: c.server,
 	}
 }
