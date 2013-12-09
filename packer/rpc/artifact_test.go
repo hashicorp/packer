@@ -6,28 +6,6 @@ import (
 	"testing"
 )
 
-type testArtifact struct{}
-
-func (testArtifact) BuilderId() string {
-	return "bid"
-}
-
-func (testArtifact) Files() []string {
-	return []string{"a", "b"}
-}
-
-func (testArtifact) Id() string {
-	return "id"
-}
-
-func (testArtifact) String() string {
-	return "string"
-}
-
-func (testArtifact) Destroy() error {
-	return nil
-}
-
 func TestArtifactRPC(t *testing.T) {
 	// Create the interface to test
 	a := new(packer.MockArtifact)
