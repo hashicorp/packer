@@ -9,31 +9,35 @@ import (
 	"sync/atomic"
 )
 
+var endpointId uint64
+
+const (
+	DefaultArtifactEndpoint string = "Artifact"
+)
+
 // Server represents an RPC server for Packer. This must be paired on
 // the other side with a Client.
 type Server struct {
-	endpointId uint64
-	rpcServer  *rpc.Server
+	components map[string]interface{}
 }
 
 // NewServer returns a new Packer RPC server.
 func NewServer() *Server {
 	return &Server{
-		endpointId: 0,
-		rpcServer:  rpc.NewServer(),
+		components: make(map[string]interface{}),
 	}
 }
 
 func (s *Server) RegisterArtifact(a packer.Artifact) {
-	s.registerComponent("Artifact", &ArtifactServer{a}, false)
+	s.components[DefaultArtifactEndpoint] = a
 }
 
 func (s *Server) RegisterCache(c packer.Cache) {
-	s.registerComponent("Cache", &CacheServer{c}, false)
+	s.components["Cache"] = c
 }
 
 func (s *Server) RegisterPostProcessor(p packer.PostProcessor) {
-	s.registerComponent("PostProcessor", &PostProcessorServer{p}, false)
+	s.components["PostProcessor"] = p
 }
 
 // ServeConn serves a single connection over the RPC server. It is up
@@ -50,7 +54,42 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 		return
 	}
 
-	s.rpcServer.ServeConn(stream)
+	clientConn, err := mux.Dial(1)
+	if err != nil {
+		log.Printf("[ERR] Error connecting to client stream: %s", err)
+		return
+	}
+	client := rpc.NewClient(clientConn)
+
+	// Create the RPC server
+	server := rpc.NewServer()
+	for endpoint, iface := range s.components {
+		var endpointVal interface{}
+
+		switch v := iface.(type) {
+		case packer.Artifact:
+			endpointVal = &ArtifactServer{
+				artifact: v,
+			}
+		case packer.Cache:
+			endpointVal = &CacheServer{
+				cache: v,
+			}
+		case packer.PostProcessor:
+			endpointVal = &PostProcessorServer{
+				client: client,
+				server: server,
+				p: v,
+			}
+		default:
+			log.Printf("[ERR] Unknown component for endpoint: %s", endpoint)
+			return
+		}
+
+		registerComponent(server, endpoint, endpointVal, false)
+	}
+
+	server.ServeConn(stream)
 }
 
 // registerComponent registers a single Packer RPC component onto
@@ -58,12 +97,12 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 // onto the end of the endpoint.
 //
 // The endpoint name is returned.
-func (s *Server) registerComponent(name string, rcvr interface{}, id bool) string {
+func registerComponent(server *rpc.Server, name string, rcvr interface{}, id bool) string {
 	endpoint := name
 	if id {
-		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&s.endpointId, 1))
+		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
 	}
 
-	s.rpcServer.RegisterName(endpoint, rcvr)
+	server.RegisterName(endpoint, rcvr)
 	return endpoint
 }
