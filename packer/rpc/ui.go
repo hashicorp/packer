@@ -9,8 +9,7 @@ import (
 // An implementation of packer.Ui where the Ui is actually executed
 // over an RPC connection.
 type Ui struct {
-	client   *rpc.Client
-	endpoint string
+	client *rpc.Client
 }
 
 // UiServer wraps a packer.Ui implementation and makes it exportable
@@ -26,12 +25,12 @@ type UiMachineArgs struct {
 }
 
 func (u *Ui) Ask(query string) (result string, err error) {
-	err = u.client.Call(u.endpoint+".Ask", query, &result)
+	err = u.client.Call("Ui.Ask", query, &result)
 	return
 }
 
 func (u *Ui) Error(message string) {
-	if err := u.client.Call(u.endpoint+".Error", message, new(interface{})); err != nil {
+	if err := u.client.Call("Ui.Error", message, new(interface{})); err != nil {
 		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
@@ -42,19 +41,19 @@ func (u *Ui) Machine(t string, args ...string) {
 		Args:     args,
 	}
 
-	if err := u.client.Call(u.endpoint+".Machine", rpcArgs, new(interface{})); err != nil {
+	if err := u.client.Call("Ui.Machine", rpcArgs, new(interface{})); err != nil {
 		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
 
 func (u *Ui) Message(message string) {
-	if err := u.client.Call(u.endpoint+".Message", message, new(interface{})); err != nil {
+	if err := u.client.Call("Ui.Message", message, new(interface{})); err != nil {
 		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }
 
 func (u *Ui) Say(message string) {
-	if err := u.client.Call(u.endpoint+".Say", message, new(interface{})); err != nil {
+	if err := u.client.Call("Ui.Say", message, new(interface{})); err != nil {
 		log.Printf("Error in Ui RPC call: %s", err)
 	}
 }

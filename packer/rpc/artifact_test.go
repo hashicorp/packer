@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -31,19 +30,13 @@ func (testArtifact) Destroy() error {
 
 func TestArtifactRPC(t *testing.T) {
 	// Create the interface to test
-	a := new(testArtifact)
+	a := new(packer.MockArtifact)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterArtifact(server, a)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	aClient := Artifact(client)
+	server := NewServer()
+	server.RegisterArtifact(a)
+	client := testClient(t, server)
+	aClient := client.Artifact()
 
 	// Test
 	if aClient.BuilderId() != "bid" {

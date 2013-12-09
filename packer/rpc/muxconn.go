@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"sync"
+	"time"
 )
 
 // MuxConn is a connection that can be used bi-directionally for RPC. Normally,
@@ -20,15 +21,24 @@ import (
 // we decided to cut a lot of corners and make this easily usable for Packer.
 type MuxConn struct {
 	rwc     io.ReadWriteCloser
-	streams map[byte]io.WriteCloser
+	streams map[byte]*Stream
 	mu      sync.RWMutex
 	wlock   sync.Mutex
 }
 
+type muxPacketType byte
+
+const (
+	muxPacketSyn muxPacketType = iota
+	muxPacketAck
+	muxPacketFin
+	muxPacketData
+)
+
 func NewMuxConn(rwc io.ReadWriteCloser) *MuxConn {
 	m := &MuxConn{
 		rwc:     rwc,
-		streams: make(map[byte]io.WriteCloser),
+		streams: make(map[byte]*Stream),
 	}
 
 	go m.loop()
@@ -46,54 +56,138 @@ func (m *MuxConn) Close() error {
 	for _, w := range m.streams {
 		w.Close()
 	}
-	m.streams = make(map[byte]io.WriteCloser)
+	m.streams = make(map[byte]*Stream)
 
 	return m.rwc.Close()
 }
 
-// Stream returns a io.ReadWriteCloser that will only read/write to the
-// given stream ID. No handshake is done so if the remote end does not
-// have a stream open with the same ID, then the messages will simply
-// be dropped.
-//
-// This is one of those cases where we cut corners. Since Packer only does
-// local connections, we can assume that both ends are ready at a certain
-// point. In a real muxer, we'd probably want a handshake here.
-func (m *MuxConn) Stream(id byte) (io.ReadWriteCloser, error) {
-	m.mu.Lock()
+// Accept accepts a multiplexed connection with the given ID. This
+// will block until a request is made to connect.
+func (m *MuxConn) Accept(id byte) (io.ReadWriteCloser, error) {
+	stream, err := m.openStream(id)
+	if err != nil {
+		return nil, err
+	}
 
-	if _, ok := m.streams[id]; ok {
-		m.mu.Unlock()
-		return nil, fmt.Errorf("Stream %d already exists", id)
+	// If the stream isn't closed, then it is already open somehow
+	stream.mu.Lock()
+	if stream.state != streamStateSynRecv && stream.state != streamStateClosed {
+		stream.mu.Unlock()
+		return nil, fmt.Errorf("Stream already open in bad state: %d", stream.state)
+	}
+
+	if stream.state == streamStateSynRecv {
+		// Fast track establishing since we already got the syn
+		stream.setState(streamStateEstablished)
+		stream.mu.Unlock()
+	}
+
+	if stream.state != streamStateEstablished {
+		// Go into the listening state
+		stream.setState(streamStateListen)
+		stream.mu.Unlock()
+
+		// Wait for the connection to establish
+	ACCEPT_ESTABLISH_LOOP:
+		for {
+			time.Sleep(50 * time.Millisecond)
+			stream.mu.Lock()
+			switch stream.state {
+			case streamStateListen:
+				stream.mu.Unlock()
+			case streamStateEstablished:
+				stream.mu.Unlock()
+				break ACCEPT_ESTABLISH_LOOP
+			default:
+				defer stream.mu.Unlock()
+				return nil, fmt.Errorf("Stream went to bad state: %d", stream.state)
+			}
+		}
+	}
+
+	// Send the ack down
+	if _, err := m.write(stream.id, muxPacketAck, nil); err != nil {
+		return nil, err
+	}
+
+	return stream, nil
+}
+
+// Dial opens a connection to the remote end using the given stream ID.
+// An Accept on the remote end will only work with if the IDs match.
+func (m *MuxConn) Dial(id byte) (io.ReadWriteCloser, error) {
+	stream, err := m.openStream(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// If the stream isn't closed, then it is already open somehow
+	stream.mu.Lock()
+	if stream.state != streamStateClosed {
+		stream.mu.Unlock()
+		return nil, fmt.Errorf("Stream already open in bad state: %d", stream.state)
+	}
+
+	// Open a connection
+	if _, err := m.write(stream.id, muxPacketSyn, nil); err != nil {
+		return nil, err
+	}
+	stream.setState(streamStateSynSent)
+	stream.mu.Unlock()
+
+	for {
+		time.Sleep(50 * time.Millisecond)
+		stream.mu.Lock()
+		switch stream.state {
+		case streamStateSynSent:
+			stream.mu.Unlock()
+		case streamStateEstablished:
+			stream.mu.Unlock()
+			return stream, nil
+		default:
+			defer stream.mu.Unlock()
+			return nil, fmt.Errorf("Stream went to bad state: %d", stream.state)
+		}
+	}
+}
+
+func (m *MuxConn) openStream(id byte) (*Stream, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if stream, ok := m.streams[id]; ok {
+		return stream, nil
 	}
 
 	// Create the stream object and channel where data will be sent to
 	dataR, dataW := io.Pipe()
 
 	// Set the data channel so we can write to it.
-	m.streams[id] = dataW
-
-	// Unlock the lock so that the reader can access the stream writer.
-	m.mu.Unlock()
-
 	stream := &Stream{
 		id:     id,
 		mux:    m,
 		reader: dataR,
+		writer: dataW,
 	}
+	stream.setState(streamStateClosed)
 
-	return stream, nil
+	m.streams[id] = stream
+	return m.streams[id], nil
 }
 
 func (m *MuxConn) loop() {
 	defer m.Close()
 
+	var id byte
+	var packetType muxPacketType
+	var length int32
 	for {
-		var id byte
-		var length int32
-
 		if err := binary.Read(m.rwc, binary.BigEndian, &id); err != nil {
 			log.Printf("[ERR] Error reading stream ID: %s", err)
+			return
+		}
+		if err := binary.Read(m.rwc, binary.BigEndian, &packetType); err != nil {
+			log.Printf("[ERR] Error reading packet type: %s", err)
 			return
 		}
 		if err := binary.Read(m.rwc, binary.BigEndian, &length); err != nil {
@@ -103,44 +197,115 @@ func (m *MuxConn) loop() {
 
 		// TODO(mitchellh): probably would be better to re-use a buffer...
 		data := make([]byte, length)
-		if _, err := m.rwc.Read(data); err != nil {
-			log.Printf("[ERR] Error reading data: %s", err)
+		if length > 0 {
+			if _, err := m.rwc.Read(data); err != nil {
+				log.Printf("[ERR] Error reading data: %s", err)
+				return
+			}
+		}
+
+		stream, err := m.openStream(id)
+		if err != nil {
+			log.Printf("[ERR] Error opening stream %d: %s", id, err)
 			return
 		}
 
-		m.mu.RLock()
-		w, ok := m.streams[id]
-		if ok {
-			// Note that if this blocks, it'll block the whole read loop.
-			// Danger here... not sure how to handle it though.
-			w.Write(data)
+		switch packetType {
+		case muxPacketAck:
+			stream.mu.Lock()
+			if stream.state == streamStateSynSent {
+				stream.setState(streamStateEstablished)
+			} else {
+				log.Printf("[ERR] Ack received for stream in state: %d", stream.state)
+			}
+			stream.mu.Unlock()
+		case muxPacketSyn:
+			stream.mu.Lock()
+			switch stream.state {
+			case streamStateClosed:
+				stream.setState(streamStateSynRecv)
+			case streamStateListen:
+				stream.setState(streamStateEstablished)
+			default:
+				log.Printf("[ERR] Syn received for stream in state: %d", stream.state)
+			}
+			stream.mu.Unlock()
+		case muxPacketFin:
+			stream.mu.Lock()
+			stream.setState(streamStateClosed)
+			stream.writer.Close()
+			stream.mu.Unlock()
+
+			m.mu.Lock()
+			delete(m.streams, stream.id)
+			m.mu.Unlock()
+		case muxPacketData:
+			stream.mu.Lock()
+			if stream.state == streamStateEstablished {
+				stream.writer.Write(data)
+			} else {
+				log.Printf("[ERR] Data received for stream in state: %d", stream.state)
+			}
+			stream.mu.Unlock()
 		}
-		m.mu.RUnlock()
 	}
 }
 
-func (m *MuxConn) write(id byte, p []byte) (int, error) {
+func (m *MuxConn) write(id byte, dataType muxPacketType, p []byte) (int, error) {
 	m.wlock.Lock()
 	defer m.wlock.Unlock()
 
 	if err := binary.Write(m.rwc, binary.BigEndian, id); err != nil {
 		return 0, err
 	}
+	if err := binary.Write(m.rwc, binary.BigEndian, byte(dataType)); err != nil {
+		return 0, err
+	}
 	if err := binary.Write(m.rwc, binary.BigEndian, int32(len(p))); err != nil {
 		return 0, err
+	}
+	if len(p) == 0 {
+		return 0, nil
 	}
 	return m.rwc.Write(p)
 }
 
 // Stream is a single stream of data and implements io.ReadWriteCloser
 type Stream struct {
-	id     byte
-	mux    *MuxConn
-	reader io.Reader
+	id           byte
+	mux          *MuxConn
+	reader       io.Reader
+	writer       io.WriteCloser
+	state        streamState
+	stateUpdated time.Time
+	mu           sync.Mutex
 }
 
+type streamState byte
+
+const (
+	streamStateClosed streamState = iota
+	streamStateListen
+	streamStateSynRecv
+	streamStateSynSent
+	streamStateEstablished
+	streamStateFinWait
+)
+
 func (s *Stream) Close() error {
-	// Not functional yet, does it ever have to be?
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.state != streamStateEstablished {
+		return fmt.Errorf("Stream in bad state: %d", s.state)
+	}
+
+	if _, err := s.mux.write(s.id, muxPacketFin, nil); err != nil {
+		return err
+	}
+
+	s.setState(streamStateClosed)
+	s.writer.Close()
 	return nil
 }
 
@@ -149,5 +314,10 @@ func (s *Stream) Read(p []byte) (int, error) {
 }
 
 func (s *Stream) Write(p []byte) (int, error) {
-	return s.mux.write(s.id, p)
+	return s.mux.write(s.id, muxPacketData, p)
+}
+
+func (s *Stream) setState(state streamState) {
+	s.state = state
+	s.stateUpdated = time.Now().UTC()
 }
