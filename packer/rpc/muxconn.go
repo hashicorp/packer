@@ -13,14 +13,14 @@ import (
 // to actually act as a server as well.
 //
 // MuxConn works using a fairly dumb multiplexing technique of simply
-// prefixing each message with whether it is on stream 0 (the original)
-// or stream 1 (the client "server").
+// prefixing each message with what stream it is on along with the length
+// of the data.
 //
 // This can likely be abstracted to N streams, but by choosing only two
 // we decided to cut a lot of corners and make this easily usable for Packer.
 type MuxConn struct {
 	rwc     io.ReadWriteCloser
-	streams map[byte]io.Writer
+	streams map[byte]io.WriteCloser
 	mu      sync.RWMutex
 	wlock   sync.Mutex
 }
@@ -28,12 +28,27 @@ type MuxConn struct {
 func NewMuxConn(rwc io.ReadWriteCloser) *MuxConn {
 	m := &MuxConn{
 		rwc:     rwc,
-		streams: make(map[byte]io.Writer),
+		streams: make(map[byte]io.WriteCloser),
 	}
 
 	go m.loop()
 
 	return m
+}
+
+// Close closes the underlying io.ReadWriteCloser. This will also close
+// all streams that are open.
+func (m *MuxConn) Close() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Close all the streams
+	for _, w := range m.streams {
+		w.Close()
+	}
+	m.streams = make(map[byte]io.WriteCloser)
+
+	return m.rwc.Close()
 }
 
 // Stream returns a io.ReadWriteCloser that will only read/write to the
@@ -67,6 +82,8 @@ func (m *MuxConn) Stream(id byte) (io.ReadWriteCloser, error) {
 }
 
 func (m *MuxConn) loop() {
+	defer m.Close()
+
 	for {
 		var id byte
 		var length int32
