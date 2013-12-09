@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"testing"
 )
 
@@ -52,19 +51,14 @@ func TestCacheRPC(t *testing.T) {
 	c := new(testCache)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterCache(server, c)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	rpcClient, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("bad: %s", err)
-	}
-	client := Cache(rpcClient)
+	server := NewServer()
+	server.RegisterCache(c)
+	client := testClient(t, server)
+	defer client.Close()
+	cacheClient := client.Cache()
 
 	// Test Lock
-	client.Lock("foo")
+	cacheClient.Lock("foo")
 	if !c.lockCalled {
 		t.Fatal("should be called")
 	}
@@ -73,7 +67,7 @@ func TestCacheRPC(t *testing.T) {
 	}
 
 	// Test Unlock
-	client.Unlock("foo")
+	cacheClient.Unlock("foo")
 	if !c.unlockCalled {
 		t.Fatal("should be called")
 	}
@@ -82,7 +76,7 @@ func TestCacheRPC(t *testing.T) {
 	}
 
 	// Test RLock
-	client.RLock("foo")
+	cacheClient.RLock("foo")
 	if !c.rlockCalled {
 		t.Fatal("should be called")
 	}
@@ -91,7 +85,7 @@ func TestCacheRPC(t *testing.T) {
 	}
 
 	// Test RUnlock
-	client.RUnlock("foo")
+	cacheClient.RUnlock("foo")
 	if !c.runlockCalled {
 		t.Fatal("should be called")
 	}

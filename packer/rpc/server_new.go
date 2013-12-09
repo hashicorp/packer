@@ -28,6 +28,10 @@ func (s *Server) RegisterArtifact(a packer.Artifact) {
 	s.registerComponent("Artifact", &ArtifactServer{a}, false)
 }
 
+func (s *Server) RegisterCache(c packer.Cache) {
+	s.registerComponent("Cache", &CacheServer{c}, false)
+}
+
 // ServeConn serves a single connection over the RPC server. It is up
 // to the caller to obtain a proper io.ReadWriteCloser.
 func (s *Server) ServeConn(conn io.ReadWriteCloser) {
