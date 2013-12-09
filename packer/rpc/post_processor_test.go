@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var testPostProcessorArtifact = new(testArtifact)
+var testPostProcessorArtifact = new(packer.MockArtifact)
 
 type TestPostProcessor struct {
 	configCalled bool
@@ -62,7 +62,7 @@ func TestPostProcessorRPC(t *testing.T) {
 	}
 
 	// Test PostProcess
-	a := new(testArtifact)
+	a := new(packer.MockArtifact)
 	ui := new(testUi)
 	artifact, _, err := pClient.PostProcess(ui, a)
 	if err != nil {
