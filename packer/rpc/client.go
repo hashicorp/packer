@@ -50,3 +50,9 @@ func (c *Client) Cache() packer.Cache {
 		client: c.client,
 	}
 }
+
+func (c *Client) PostProcessor() packer.PostProcessor {
+	return &postProcessor{
+		client: c.client,
+	}
+}

@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -35,20 +34,15 @@ func TestPostProcessorRPC(t *testing.T) {
 	p := new(TestPostProcessor)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterPostProcessor(server, p)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("Error connecting to rpc: %s", err)
-	}
+	server := NewServer()
+	server.RegisterPostProcessor(p)
+	client := testClient(t, server)
+	defer client.Close()
+	ppClient := client.PostProcessor()
 
 	// Test Configure
 	config := 42
-	pClient := PostProcessor(client)
-	err = pClient.Configure(config)
+	err := ppClient.Configure(config)
 	if err != nil {
 		t.Fatalf("error: %s", err)
 	}
@@ -64,7 +58,7 @@ func TestPostProcessorRPC(t *testing.T) {
 	// Test PostProcess
 	a := new(packer.MockArtifact)
 	ui := new(testUi)
-	artifact, _, err := pClient.PostProcess(ui, a)
+	artifact, _, err := ppClient.PostProcess(ui, a)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
