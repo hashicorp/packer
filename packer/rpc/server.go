@@ -1,14 +1,9 @@
 package rpc
 
 import (
-	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"net/rpc"
-	"sync/atomic"
 )
-
-// This keeps track of the endpoint ID to use when registering artifacts.
-var endpointId uint64 = 0
 
 // Registers the appropriate endpoint on an RPC server to serve an
 // Artifact.
@@ -82,10 +77,6 @@ func RegisterUi(s *rpc.Server, ui packer.Ui) {
 // The endpoint name is returned.
 func registerComponent(s *rpc.Server, name string, rcvr interface{}, id bool) string {
 	endpoint := name
-	if id {
-		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
-	}
-
 	s.RegisterName(endpoint, rcvr)
 	return endpoint
 }
