@@ -9,7 +9,8 @@ import (
 // An implementation of packer.Ui where the Ui is actually executed
 // over an RPC connection.
 type Ui struct {
-	client *rpc.Client
+	client   *rpc.Client
+	endpoint string
 }
 
 // UiServer wraps a packer.Ui implementation and makes it exportable
