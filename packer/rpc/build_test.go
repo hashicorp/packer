@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var testBuildArtifact = &testArtifact{}
+var testBuildArtifact = &packer.MockArtifact{}
 
 type testBuild struct {
 	nameCalled      bool

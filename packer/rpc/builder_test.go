@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var testBuilderArtifact = &testArtifact{}
+var testBuilderArtifact = &packer.MockArtifact{}
 
 func builderRPCClient(t *testing.T) (*packer.MockBuilder, packer.Builder) {
 	b := new(packer.MockBuilder)
