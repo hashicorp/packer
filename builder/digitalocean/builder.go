@@ -16,7 +16,7 @@ import (
 )
 
 // The unique id for the builder
-const BuilderId = "pearkes.digitalocean"
+const TypeId = "pearkes.digitalocean"
 
 // Configuration tells the builder the credentials
 // to use while communicating with DO and describes the image

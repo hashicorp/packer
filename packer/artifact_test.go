@@ -5,7 +5,7 @@ type TestArtifact struct {
 	destroyCalled bool
 }
 
-func (*TestArtifact) BuilderId() string {
+func (*TestArtifact) TypeId() string {
 	return "bid"
 }
 

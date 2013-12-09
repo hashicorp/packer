@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const BuilderId = "transcend.qemu"
+const TypeId = "transcend.qemu"
 
 var netDevice = map[string]bool{
 	"ne2k_pci":   true,

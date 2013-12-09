@@ -11,8 +11,8 @@ type ExportArtifact struct {
 	path string
 }
 
-func (*ExportArtifact) BuilderId() string {
-	return BuilderId
+func (*ExportArtifact) TypeId() string {
+	return TypeId
 }
 
 func (a *ExportArtifact) Files() []string {

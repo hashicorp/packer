@@ -111,7 +111,7 @@ The `Run` method is expected to return an implementation of the
 implementation. The interface is very simple and the documentation on the
 interface is quite clear.
 
-The only part of an artifact that may be confusing is the `BuilderId`
+The only part of an artifact that may be confusing is the `TypeId`
 method. This method must return an absolutely unique ID for the builder.
 In general, I follow the practice of making the ID contain my GitHub username
 and then the platform it is building for. For example, the builder ID of

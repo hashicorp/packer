@@ -16,7 +16,7 @@ import (
 )
 
 // The unique ID for this builder
-const BuilderId = "mitchellh.amazonebs"
+const TypeId = "mitchellh.amazonebs"
 
 type config struct {
 	common.PackerConfig    `mapstructure:",squash"`
@@ -151,7 +151,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the artifact and return it
 	artifact := &awscommon.Artifact{
 		Amis:           state.Get("amis").(map[string]string),
-		BuilderIdValue: BuilderId,
+		TypeIdValue:    TypeId,
 		Conn:           ec2conn,
 	}
 

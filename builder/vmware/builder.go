@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const BuilderId = "mitchellh.vmware"
+const TypeId = "mitchellh.vmware"
 const BuilderIdESX = "mitchellh.vmware-esx"
 
 type Builder struct {
@@ -465,13 +465,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Set the proper builder ID
-	builderId := BuilderId
+	builderId := TypeId
 	if b.config.RemoteType != "" {
 		builderId = BuilderIdESX
 	}
 
 	return &Artifact{
-		builderId: builderId,
+		typeId:    builderId,
 		dir:       b.config.OutputDir,
 		f:         files,
 	}, nil

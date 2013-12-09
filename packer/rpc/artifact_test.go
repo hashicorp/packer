@@ -9,7 +9,7 @@ import (
 
 type testArtifact struct{}
 
-func (testArtifact) BuilderId() string {
+func (testArtifact) TypeId() string {
 	return "bid"
 }
 
@@ -46,8 +46,8 @@ func TestArtifactRPC(t *testing.T) {
 	aClient := Artifact(client)
 
 	// Test
-	if aClient.BuilderId() != "bid" {
-		t.Fatalf("bad: %s", aClient.BuilderId())
+	if aClient.TypeId() != "bid" {
+		t.Fatalf("bad: %s", aClient.TypeId())
 	}
 
 	if !reflect.DeepEqual(aClient.Files(), []string{"a", "b"}) {

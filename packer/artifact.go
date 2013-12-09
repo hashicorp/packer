@@ -9,7 +9,7 @@ type Artifact interface {
 	// This is the internal ID of the builder and should be unique to every
 	// builder. This can be used to identify what the contents of the
 	// artifact actually are.
-	BuilderId() string
+	TypeId() string
 
 	// Returns the set of files that comprise this artifact. If an
 	// artifact is not made up of files, then this will be empty.

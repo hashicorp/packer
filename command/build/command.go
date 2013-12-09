@@ -236,7 +236,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 				iStr := strconv.FormatInt(int64(i), 10)
 				if artifact != nil {
-					ui.Machine("artifact", iStr, "builder-id", artifact.BuilderId())
+					ui.Machine("artifact", iStr, "type-id", artifact.TypeId())
 					ui.Machine("artifact", iStr, "id", artifact.Id())
 					ui.Machine("artifact", iStr, "string", artifact.String())
 

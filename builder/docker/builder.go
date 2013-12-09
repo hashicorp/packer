@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-const BuilderId = "packer.docker"
+const TypeId = "packer.docker"
 
 type Builder struct {
 	config *Config

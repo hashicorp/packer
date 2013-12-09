@@ -79,8 +79,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+	if _, ok := builtins[artifact.TypeId()]; !ok {
+		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.TypeId())
 	}
 
 	vmx := ""

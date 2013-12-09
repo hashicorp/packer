@@ -17,7 +17,7 @@ import (
 )
 
 // The unique ID for this builder
-const BuilderId = "mitchellh.amazon.chroot"
+const TypeId = "mitchellh.amazon.chroot"
 
 // Config is the configuration that is chained through the steps and
 // settable from the template.
@@ -233,7 +233,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the artifact and return it
 	artifact := &awscommon.Artifact{
 		Amis:           state.Get("amis").(map[string]string),
-		BuilderIdValue: BuilderId,
+		TypeIdValue:    TypeId,
 		Conn:           ec2conn,
 	}
 
