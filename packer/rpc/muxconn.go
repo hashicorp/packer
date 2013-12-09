@@ -61,22 +61,26 @@ func (m *MuxConn) Close() error {
 // point. In a real muxer, we'd probably want a handshake here.
 func (m *MuxConn) Stream(id byte) (io.ReadWriteCloser, error) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	if _, ok := m.streams[id]; ok {
+		m.mu.Unlock()
 		return nil, fmt.Errorf("Stream %d already exists", id)
 	}
 
 	// Create the stream object and channel where data will be sent to
 	dataR, dataW := io.Pipe()
+
+	// Set the data channel so we can write to it.
+	m.streams[id] = dataW
+
+	// Unlock the lock so that the reader can access the stream writer.
+	m.mu.Unlock()
+
 	stream := &Stream{
 		id:     id,
 		mux:    m,
 		reader: dataR,
 	}
-
-	// Set the data channel so we can write to it.
-	m.streams[id] = dataW
 
 	return stream, nil
 }
