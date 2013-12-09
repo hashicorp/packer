@@ -34,8 +34,8 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 	mux := NewMuxConn(conn)
 	defer mux.Close()
 
-	// Get stream ID 0, which we always use as the stream for serving
-	// our RPC server on.
+	// Accept a connection on stream ID 0, which is always used for
+	// normal client to server connections.
 	stream, err := mux.Accept(0)
 	if err != nil {
 		log.Printf("[ERR] Error retrieving stream for serving: %s", err)
