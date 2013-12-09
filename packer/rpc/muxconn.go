@@ -14,11 +14,9 @@ import (
 // to actually act as a server as well.
 //
 // MuxConn works using a fairly dumb multiplexing technique of simply
-// prefixing each message with what stream it is on along with the length
-// of the data.
-//
-// This can likely be abstracted to N streams, but by choosing only two
-// we decided to cut a lot of corners and make this easily usable for Packer.
+// framing every piece of data sent into a prefix + data format. Streams
+// are established using a subset of the TCP protocol. Only a subset is
+// necessary since we assume ordering on the underlying RWC.
 type MuxConn struct {
 	rwc     io.ReadWriteCloser
 	streams map[byte]*Stream
