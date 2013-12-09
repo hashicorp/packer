@@ -32,6 +32,10 @@ func (s *Server) RegisterCache(c packer.Cache) {
 	s.registerComponent("Cache", &CacheServer{c}, false)
 }
 
+func (s *Server) RegisterPostProcessor(p packer.PostProcessor) {
+	s.registerComponent("PostProcessor", &PostProcessorServer{p}, false)
+}
+
 // ServeConn serves a single connection over the RPC server. It is up
 // to the caller to obtain a proper io.ReadWriteCloser.
 func (s *Server) ServeConn(conn io.ReadWriteCloser) {
