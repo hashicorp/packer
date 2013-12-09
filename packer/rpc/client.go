@@ -31,8 +31,22 @@ func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) Close() error {
+	if err := c.client.Close(); err != nil {
+		return err
+	}
+
+	return c.mux.Close()
+}
+
 func (c *Client) Artifact() packer.Artifact {
 	return &artifact{
+		client: c.client,
+	}
+}
+
+func (c *Client) Cache() packer.Cache {
+	return &cache{
 		client: c.client,
 	}
 }
