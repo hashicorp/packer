@@ -56,7 +56,9 @@ func TestPostProcessorRPC(t *testing.T) {
 	}
 
 	// Test PostProcess
-	a := new(packer.MockArtifact)
+	a := &packer.MockArtifact{
+		IdValue: "ppTestId",
+	}
 	ui := new(testUi)
 	artifact, _, err := ppClient.PostProcess(ui, a)
 	if err != nil {
@@ -67,12 +69,12 @@ func TestPostProcessorRPC(t *testing.T) {
 		t.Fatal("postprocess should be called")
 	}
 
-	if p.ppArtifact.BuilderId() != "bid" {
+	if p.ppArtifact.Id() != "ppTestId" {
 		t.Fatal("unknown artifact")
 	}
 
-	if artifact.BuilderId() != "bid" {
-		t.Fatal("unknown result artifact")
+	if artifact.Id() != "id" {
+		t.Fatalf("unknown artifact: %s", artifact.Id())
 	}
 }
 

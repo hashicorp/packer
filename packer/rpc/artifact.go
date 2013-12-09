@@ -8,7 +8,8 @@ import (
 // An implementation of packer.Artifact where the artifact is actually
 // available over an RPC connection.
 type artifact struct {
-	client *rpc.Client
+	client   *rpc.Client
+	endpoint string
 }
 
 // ArtifactServer wraps a packer.Artifact implementation and makes it
@@ -18,32 +19,32 @@ type ArtifactServer struct {
 }
 
 func Artifact(client *rpc.Client) *artifact {
-	return &artifact{client}
+	return &artifact{client: client}
 }
 
 func (a *artifact) BuilderId() (result string) {
-	a.client.Call("Artifact.BuilderId", new(interface{}), &result)
+	a.client.Call(a.endpoint+".BuilderId", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) Files() (result []string) {
-	a.client.Call("Artifact.Files", new(interface{}), &result)
+	a.client.Call(a.endpoint+".Files", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) Id() (result string) {
-	a.client.Call("Artifact.Id", new(interface{}), &result)
+	a.client.Call(a.endpoint+".Id", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) String() (result string) {
-	a.client.Call("Artifact.String", new(interface{}), &result)
+	a.client.Call(a.endpoint+".String", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) Destroy() error {
 	var result error
-	if err := a.client.Call("Artifact.Destroy", new(interface{}), &result); err != nil {
+	if err := a.client.Call(a.endpoint+".Destroy", new(interface{}), &result); err != nil {
 		return err
 	}
 

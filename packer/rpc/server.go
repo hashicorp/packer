@@ -56,7 +56,7 @@ func RegisterHook(s *rpc.Server, h packer.Hook) {
 // Registers the appropriate endpoing on an RPC server to serve a
 // PostProcessor.
 func RegisterPostProcessor(s *rpc.Server, p packer.PostProcessor) {
-	registerComponent(s, "PostProcessor", &PostProcessorServer{p}, false)
+	registerComponent(s, "PostProcessor", &PostProcessorServer{p: p}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a packer.Provisioner
@@ -68,17 +68,6 @@ func RegisterProvisioner(s *rpc.Server, p packer.Provisioner) {
 // Packer UI
 func RegisterUi(s *rpc.Server, ui packer.Ui) {
 	registerComponent(s, "Ui", &UiServer{ui}, false)
-}
-
-// registerComponent registers a single Packer RPC component onto
-// the RPC server. If id is true, then a unique ID number will be appended
-// onto the end of the endpoint.
-//
-// The endpoint name is returned.
-func registerComponent(s *rpc.Server, name string, rcvr interface{}, id bool) string {
-	endpoint := name
-	s.RegisterName(endpoint, rcvr)
-	return endpoint
 }
 
 func serveSingleConn(s *rpc.Server) string {

@@ -9,27 +9,36 @@ import (
 // executed over an RPC connection.
 type postProcessor struct {
 	client *rpc.Client
+	server *rpc.Server
 }
 
 // PostProcessorServer wraps a packer.PostProcessor implementation and makes it
 // exportable as part of a Golang RPC server.
 type PostProcessorServer struct {
-	p packer.PostProcessor
+	client *rpc.Client
+	server *rpc.Server
+	p      packer.PostProcessor
 }
 
 type PostProcessorConfigureArgs struct {
 	Configs []interface{}
 }
 
+type PostProcessorPostProcessArgs struct {
+	ArtifactEndpoint string
+	UiEndpoint       string
+}
+
 type PostProcessorProcessResponse struct {
-	Err        error
-	Keep       bool
-	RPCAddress string
+	Err              error
+	Keep             bool
+	ArtifactEndpoint string
 }
 
 func PostProcessor(client *rpc.Client) *postProcessor {
-	return &postProcessor{client}
+	return &postProcessor{client: client}
 }
+
 func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 	args := &PostProcessorConfigureArgs{Configs: raw}
 	if cerr := p.client.Call("PostProcessor.Configure", args, &err); cerr != nil {
@@ -40,12 +49,21 @@ func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 }
 
 func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
-	server := rpc.NewServer()
-	RegisterArtifact(server, a)
-	RegisterUi(server, ui)
+	artifactEndpoint := registerComponent(p.server, "Artifact", &ArtifactServer{
+		artifact: a,
+	}, true)
+
+	uiEndpoint := registerComponent(p.server, "Ui", &UiServer{
+		ui: ui,
+	}, true)
+
+	args := PostProcessorPostProcessArgs{
+		ArtifactEndpoint: artifactEndpoint,
+		UiEndpoint:       uiEndpoint,
+	}
 
 	var response PostProcessorProcessResponse
-	if err := p.client.Call("PostProcessor.PostProcess", serveSingleConn(server), &response); err != nil {
+	if err := p.client.Call("PostProcessor.PostProcess", &args, &response); err != nil {
 		return nil, false, err
 	}
 
@@ -53,16 +71,14 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 		return nil, false, response.Err
 	}
 
-	if response.RPCAddress == "" {
+	if response.ArtifactEndpoint == "" {
 		return nil, false, nil
 	}
 
-	client, err := rpcDial(response.RPCAddress)
-	if err != nil {
-		return nil, false, err
-	}
-
-	return Artifact(client), response.Keep, nil
+	return &artifact{
+		client:   p.client,
+		endpoint: response.ArtifactEndpoint,
+	}, response.Keep, nil
 }
 
 func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *error) error {
@@ -74,19 +90,23 @@ func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply 
 	return nil
 }
 
-func (p *PostProcessorServer) PostProcess(address string, reply *PostProcessorProcessResponse) error {
-	client, err := rpcDial(address)
-	if err != nil {
-		return err
+func (p *PostProcessorServer) PostProcess(args *PostProcessorPostProcessArgs, reply *PostProcessorProcessResponse) error {
+	artifact := &artifact{
+		client:   p.client,
+		endpoint: args.ArtifactEndpoint,
 	}
 
-	responseAddress := ""
+	ui := &Ui{
+		client:   p.client,
+		endpoint: args.UiEndpoint,
+	}
 
-	artifact, keep, err := p.p.PostProcess(&Ui{client: client}, Artifact(client))
-	if err == nil && artifact != nil {
-		server := rpc.NewServer()
-		RegisterArtifact(server, artifact)
-		responseAddress = serveSingleConn(server)
+	var artifactEndpoint string
+	artifactResult, keep, err := p.p.PostProcess(ui, artifact)
+	if err == nil && artifactResult != nil {
+		artifactEndpoint = registerComponent(p.server, "Artifact", &ArtifactServer{
+			artifact: artifactResult,
+		}, true)
 	}
 
 	if err != nil {
@@ -94,9 +114,9 @@ func (p *PostProcessorServer) PostProcess(address string, reply *PostProcessorPr
 	}
 
 	*reply = PostProcessorProcessResponse{
-		Err:        err,
-		Keep:       keep,
-		RPCAddress: responseAddress,
+		Err:              err,
+		Keep:             keep,
+		ArtifactEndpoint: artifactEndpoint,
 	}
 
 	return nil
