@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"net/rpc"
 	"os"
 	"os/exec"
 	"strings"
@@ -130,56 +129,56 @@ func (c *Client) Exited() bool {
 // Returns a builder implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Builder() (packer.Builder, error) {
-	client, err := c.rpcClient()
+	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return &cmdBuilder{packrpc.Builder(client), c}, nil
+	return &cmdBuilder{client.Builder(), c}, nil
 }
 
 // Returns a command implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Command() (packer.Command, error) {
-	client, err := c.rpcClient()
+	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return &cmdCommand{packrpc.Command(client), c}, nil
+	return &cmdCommand{client.Command(), c}, nil
 }
 
 // Returns a hook implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Hook() (packer.Hook, error) {
-	client, err := c.rpcClient()
+	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return &cmdHook{packrpc.Hook(client), c}, nil
+	return &cmdHook{client.Hook(), c}, nil
 }
 
 // Returns a post-processor implementation that is communicating over
 // this client. If the client hasn't been started, this will start it.
 func (c *Client) PostProcessor() (packer.PostProcessor, error) {
-	client, err := c.rpcClient()
+	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return &cmdPostProcessor{packrpc.PostProcessor(client), c}, nil
+	return &cmdPostProcessor{client.PostProcessor(), c}, nil
 }
 
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Provisioner() (packer.Provisioner, error) {
-	client, err := c.rpcClient()
+	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return &cmdProvisioner{packrpc.Provisioner(client), c}, nil
+	return &cmdProvisioner{client.Provisioner(), c}, nil
 }
 
 // End the executing subprocess (if it is running) and perform any cleanup
@@ -361,7 +360,7 @@ func (c *Client) logStderr(r io.Reader) {
 	close(c.doneLogging)
 }
 
-func (c *Client) rpcClient() (*rpc.Client, error) {
+func (c *Client) packrpcClient() (*packrpc.Client, error) {
 	address, err := c.Start()
 	if err != nil {
 		return nil, err
@@ -376,5 +375,11 @@ func (c *Client) rpcClient() (*rpc.Client, error) {
 	tcpConn := conn.(*net.TCPConn)
 	tcpConn.SetKeepAlive(true)
 
-	return rpc.NewClient(tcpConn), nil
+	client, err := packrpc.NewClient(tcpConn)
+	if err != nil {
+		tcpConn.Close()
+		return nil, err
+	}
+
+	return client, nil
 }
