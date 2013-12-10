@@ -58,6 +58,13 @@ func (c *Client) Communicator() packer.Communicator {
 	}
 }
 
+func (c *Client) Hook() packer.Hook {
+	return &hook{
+		client: c.client,
+		mux:    c.mux,
+	}
+}
+
 func (c *Client) PostProcessor() packer.PostProcessor {
 	return &postProcessor{
 		client: c.client,
