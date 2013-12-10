@@ -92,28 +92,19 @@ func Server() (*packrpc.Server, error) {
 		return nil, err
 	}
 
-	// Serve a single connection
-	log.Println("Serving a plugin connection...")
-	return packrpc.NewServer(conn), nil
-}
-
-// Registers a signal handler to swallow and count interrupts so that the
-// plugin isn't killed. The main host Packer process is responsible
-// for killing the plugins when interrupted.
-func countInterrupts() {
+	// Eat the interrupts
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
-
 	go func() {
+		var count int32 = 0
 		for {
 			<-ch
-			newCount := atomic.AddInt32(&Interrupts, 1)
+			newCount := atomic.AddInt32(&count, 1)
 			log.Printf("Received interrupt signal (count: %d). Ignoring.", newCount)
 		}
 	}()
-}
 
-// Tests whether or not the plugin was interrupted or not.
-func Interrupted() bool {
-	return atomic.LoadInt32(&Interrupts) > 0
+	// Serve a single connection
+	log.Println("Serving a plugin connection...")
+	return packrpc.NewServer(conn), nil
 }
