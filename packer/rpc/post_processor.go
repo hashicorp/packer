@@ -30,10 +30,6 @@ type PostProcessorProcessResponse struct {
 	StreamId uint32
 }
 
-func PostProcessor(client *rpc.Client) *postProcessor {
-	return &postProcessor{client: client}
-}
-
 func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 	args := &PostProcessorConfigureArgs{Configs: raw}
 	if cerr := p.client.Call("PostProcessor.Configure", args, &err); cerr != nil {

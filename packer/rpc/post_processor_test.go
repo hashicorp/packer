@@ -83,7 +83,7 @@ func TestPostProcessorRPC(t *testing.T) {
 
 func TestPostProcessor_Implements(t *testing.T) {
 	var raw interface{}
-	raw = PostProcessor(nil)
+	raw = new(postProcessor)
 	if _, ok := raw.(packer.PostProcessor); !ok {
 		t.Fatal("not a postprocessor")
 	}

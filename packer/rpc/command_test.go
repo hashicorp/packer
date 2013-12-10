@@ -59,11 +59,6 @@ func TestRPCCommand(t *testing.T) {
 		t.Fatal("runEnv should not be nil")
 	}
 
-	command.runEnv.Ui()
-	if !testEnv.uiCalled {
-		t.Fatal("ui should be called")
-	}
-
 	// Test Synopsis
 	synopsis := commClient.Synopsis()
 	if synopsis != "foo" {
