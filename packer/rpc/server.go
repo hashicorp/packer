@@ -71,7 +71,7 @@ func RegisterUi(s *rpc.Server, ui packer.Ui) {
 }
 
 func serveSingleConn(s *rpc.Server) string {
-	l := netListenerInRange(portRangeMin, portRangeMax)
+	l := NetListener()
 
 	// Accept a single connection in a goroutine and then exit
 	go func() {

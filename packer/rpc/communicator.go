@@ -59,24 +59,24 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 	args.Command = cmd.Command
 
 	if cmd.Stdin != nil {
-		stdinL := netListenerInRange(portRangeMin, portRangeMax)
+		stdinL := NetListener()
 		args.StdinAddress = stdinL.Addr().String()
 		go serveSingleCopy("stdin", stdinL, nil, cmd.Stdin)
 	}
 
 	if cmd.Stdout != nil {
-		stdoutL := netListenerInRange(portRangeMin, portRangeMax)
+		stdoutL := NetListener()
 		args.StdoutAddress = stdoutL.Addr().String()
 		go serveSingleCopy("stdout", stdoutL, cmd.Stdout, nil)
 	}
 
 	if cmd.Stderr != nil {
-		stderrL := netListenerInRange(portRangeMin, portRangeMax)
+		stderrL := NetListener()
 		args.StderrAddress = stderrL.Addr().String()
 		go serveSingleCopy("stderr", stderrL, cmd.Stderr, nil)
 	}
 
-	responseL := netListenerInRange(portRangeMin, portRangeMax)
+	responseL := NetListener()
 	args.ResponseAddress = responseL.Addr().String()
 
 	go func() {
@@ -108,7 +108,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 func (c *communicator) Upload(path string, r io.Reader) (err error) {
 	// We need to create a server that can proxy the reader data
 	// over because we can't simply gob encode an io.Reader
-	readerL := netListenerInRange(portRangeMin, portRangeMax)
+	readerL := NetListener()
 	if readerL == nil {
 		err = errors.New("couldn't allocate listener for upload reader")
 		return
@@ -148,7 +148,7 @@ func (c *communicator) UploadDir(dst string, src string, exclude []string) error
 func (c *communicator) Download(path string, w io.Writer) (err error) {
 	// We need to create a server that can proxy that data downloaded
 	// into the writer because we can't gob encode a writer directly.
-	writerL := netListenerInRange(portRangeMin, portRangeMax)
+	writerL := NetListener()
 	if writerL == nil {
 		err = errors.New("couldn't allocate listener for download writer")
 		return

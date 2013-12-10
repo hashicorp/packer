@@ -15,8 +15,8 @@ import (
 // Packer.
 const defaultConfig = `
 {
-	"plugin_min_port": 10000,
-	"plugin_max_port": 25000,
+	"min_port": 10000,
+	"max_port": 25000,
 
 	"builders": {
 		"amazon-ebs": "packer-builder-amazon-ebs",
@@ -54,8 +54,8 @@ const defaultConfig = `
 `
 
 type config struct {
-	PluginMinPort uint
-	PluginMaxPort uint
+	MinPort uint
+	MaxPort uint
 
 	Builders       map[string]string
 	Commands       map[string]string
@@ -166,7 +166,7 @@ func (c *config) pluginClient(path string) *plugin.Client {
 	var config plugin.ClientConfig
 	config.Cmd = exec.Command(path)
 	config.Managed = true
-	config.MinPort = c.PluginMinPort
-	config.MaxPort = c.PluginMaxPort
+	config.MinPort = c.MinPort
+	config.MaxPort = c.MaxPort
 	return plugin.NewClient(&config)
 }

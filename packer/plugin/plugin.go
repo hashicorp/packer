@@ -13,12 +13,10 @@ import (
 	"github.com/mitchellh/packer/packer"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"log"
-	"net"
 	"net/rpc"
 	"os"
 	"os/signal"
 	"runtime"
-	"strconv"
 	"sync/atomic"
 )
 
@@ -49,40 +47,10 @@ func serve(server *rpc.Server) (err error) {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
-	if err != nil {
-		return
-	}
-
-	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
-	if err != nil {
-		return
-	}
-
-	log.Printf("Plugin minimum port: %d\n", minPort)
-	log.Printf("Plugin maximum port: %d\n", maxPort)
-
-	// Set the RPC port range
-	packrpc.PortRange(int(minPort), int(maxPort))
-
-	var address string
-	var listener net.Listener
-	for port := minPort; port <= maxPort; port++ {
-		address = fmt.Sprintf("127.0.0.1:%d", port)
-		listener, err = net.Listen("tcp", address)
-		if err != nil {
-			err = nil
-			continue
-		}
-
-		break
-	}
-
+	listener := packrpc.NetListener()
 	defer listener.Close()
 
-	// Output the address to stdout
-	log.Printf("Plugin address: %s\n", address)
-	fmt.Printf("%s|%s\n", APIVersion, address)
+	fmt.Printf("%s|%s\n", APIVersion, listener.Addr())
 	os.Stdout.Sync()
 
 	// Accept a connection

@@ -61,7 +61,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	RegisterUi(server, ui)
 
 	// Create a server for the response
-	responseL := netListenerInRange(portRangeMin, portRangeMax)
+	responseL := NetListener()
 	runResponseCh := make(chan *BuilderRunResponse)
 	go func() {
 		defer responseL.Close()

@@ -2,26 +2,42 @@ package rpc
 
 import (
 	"fmt"
+	"log"
 	"net"
+	"os"
+	"strconv"
 )
 
-var portRangeMin int = 10000
-var portRangeMax int = 11000
+const (
+	defaultPortRangeMin uint16 = 10000
+	defaultPortRangeMax uint16 = 11000
+)
 
-// This sets the port range that the RPC stuff will use when creating
-// new temporary servers. Some RPC calls require the creation of temporary
-// RPC servers. These allow you to pick a range these bind to.
-func PortRange(min, max int) {
-	portRangeMin = min
-	portRangeMax = max
+// Get port from an envirionment variable or fallback to the default.
+func getPortFromEnvironment(env string, defaultPort uint16) uint16 {
+	if port, err := strconv.ParseUint(os.Getenv(env), 10, 16); err == nil {
+		return uint16(port)
+	}
+	return defaultPort
+}
+
+func NetListener() net.Listener {
+	minPort := getPortFromEnvironment("PACKER_MIN_PORT", defaultPortRangeMin)
+	maxPort := getPortFromEnvironment("PACKER_MAX_PORT", defaultPortRangeMax)
+	return NetListenerInRange(minPort, maxPort)
 }
 
 // This finds an open port in the given range and returns a listener
 // bound to that port.
-func netListenerInRange(min, max int) net.Listener {
+func NetListenerInRange(min, max uint16) net.Listener {
+	log.Printf("minimum port: %d\n", min)
+	log.Printf("maximum port: %d\n", max)
+
 	for port := min; port <= max; port++ {
-		l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+		address := fmt.Sprintf("127.0.0.1:%d", port)
+		l, err := net.Listen("tcp", address)
 		if err == nil {
+			log.Printf("Listener address: %s\n", address)
 			return l
 		}
 	}
