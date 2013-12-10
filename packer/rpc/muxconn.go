@@ -150,6 +150,8 @@ func (m *MuxConn) Dial(id uint32) (io.ReadWriteCloser, error) {
 			// and it closed all within the time period we wait above.
 			// This case will be fixed when we have edge-triggered checks.
 			fallthrough
+		case streamStateCloseWait:
+			fallthrough
 		case streamStateEstablished:
 			stream.mu.Unlock()
 			return stream, nil
@@ -274,7 +276,7 @@ func (m *MuxConn) loop() {
 			case streamStateSynSent:
 				stream.setState(streamStateEstablished)
 			case streamStateFinWait1:
-				stream.remoteClose()
+				stream.setState(streamStateFinWait2)
 			default:
 				log.Printf("[ERR] Ack received for stream in state: %d", stream.state)
 			}
@@ -294,9 +296,15 @@ func (m *MuxConn) loop() {
 			stream.mu.Lock()
 			switch stream.state {
 			case streamStateEstablished:
+				stream.setState(streamStateCloseWait)
 				m.write(id, muxPacketAck, nil)
-				fallthrough
+
+				// Close the writer on our end since we won't receive any
+				// more data.
+				stream.writeCh <- nil
 			case streamStateFinWait1:
+				fallthrough
+			case streamStateFinWait2:
 				stream.remoteClose()
 
 				// Remove this stream from being active so that it
@@ -364,34 +372,26 @@ const (
 	streamStateSynSent
 	streamStateEstablished
 	streamStateFinWait1
+	streamStateFinWait2
+	streamStateCloseWait
 )
 
 func (s *Stream) Close() error {
 	s.mu.Lock()
-	if s.state != streamStateEstablished {
-		s.mu.Unlock()
+	defer s.mu.Unlock()
+
+	if s.state != streamStateEstablished && s.state != streamStateCloseWait {
 		return fmt.Errorf("Stream in bad state: %d", s.state)
 	}
 
 	if _, err := s.mux.write(s.id, muxPacketFin, nil); err != nil {
 		return err
 	}
-	s.setState(streamStateFinWait1)
-	s.mu.Unlock()
 
-	for {
-		time.Sleep(50 * time.Millisecond)
-		s.mu.Lock()
-		switch s.state {
-		case streamStateFinWait1:
-			s.mu.Unlock()
-		case streamStateClosed:
-			s.mu.Unlock()
-			return nil
-		default:
-			defer s.mu.Unlock()
-			return fmt.Errorf("Stream %d went to bad state: %d", s.id, s.state)
-		}
+	if s.state == streamStateEstablished {
+		s.setState(streamStateFinWait1)
+	} else {
+		s.remoteClose()
 	}
 
 	return nil
