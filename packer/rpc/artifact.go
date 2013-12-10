@@ -18,10 +18,6 @@ type ArtifactServer struct {
 	artifact packer.Artifact
 }
 
-func Artifact(client *rpc.Client) *artifact {
-	return &artifact{client: client}
-}
-
 func (a *artifact) BuilderId() (result string) {
 	a.client.Call(a.endpoint+".BuilderId", new(interface{}), &result)
 	return

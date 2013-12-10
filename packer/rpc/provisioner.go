@@ -24,9 +24,6 @@ type ProvisionerPrepareArgs struct {
 	Configs []interface{}
 }
 
-func Provisioner(client *rpc.Client) *provisioner {
-	return &provisioner{client: client}
-}
 func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 	args := &ProvisionerPrepareArgs{configs}
 	if cerr := p.client.Call("Provisioner.Prepare", args, &err); cerr != nil {
