@@ -106,7 +106,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 func (c *communicator) Upload(path string, r io.Reader) (err error) {
 	// Pipe the reader through to the connection
 	streamId := c.mux.NextId()
-	go serveSingleCopy("uploadReader", c.mux, streamId, nil, r)
+	go serveSingleCopy("uploadData", c.mux, streamId, nil, r)
 
 	args := CommunicatorUploadArgs{
 		Path:           path,
