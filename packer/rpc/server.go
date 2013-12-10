@@ -50,7 +50,7 @@ func RegisterEnvironment(s *rpc.Server, e packer.Environment) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Hook.
 func RegisterHook(s *rpc.Server, h packer.Hook) {
-	registerComponent(s, "Hook", &HookServer{h}, false)
+	registerComponent(s, "Hook", &HookServer{hook: h}, false)
 }
 
 // Registers the appropriate endpoing on an RPC server to serve a
