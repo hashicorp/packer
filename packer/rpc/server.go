@@ -14,7 +14,7 @@ func RegisterArtifact(s *rpc.Server, a packer.Artifact) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Build.
 func RegisterBuild(s *rpc.Server, b packer.Build) {
-	registerComponent(s, "Build", &BuildServer{b}, false)
+	registerComponent(s, "Build", &BuildServer{build: b}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
