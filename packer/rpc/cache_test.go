@@ -51,10 +51,11 @@ func TestCacheRPC(t *testing.T) {
 	c := new(testCache)
 
 	// Start the server
-	server := NewServer()
-	server.RegisterCache(c)
-	client := testClient(t, server)
+	client, server := testClientServer(t)
 	defer client.Close()
+	defer server.Close()
+	server.RegisterCache(c)
+
 	cacheClient := client.Cache()
 
 	// Test Lock

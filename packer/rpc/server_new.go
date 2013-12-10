@@ -12,84 +12,68 @@ import (
 var endpointId uint64
 
 const (
-	DefaultArtifactEndpoint string = "Artifact"
+	DefaultArtifactEndpoint      string = "Artifact"
+	DefaultCacheEndpoint                = "Cache"
+	DefaultPostProcessorEndpoint        = "PostProcessor"
+	DefaultUiEndpoint                   = "Ui"
 )
 
 // Server represents an RPC server for Packer. This must be paired on
 // the other side with a Client.
 type Server struct {
-	components map[string]interface{}
+	mux    *MuxConn
+	server *rpc.Server
 }
 
 // NewServer returns a new Packer RPC server.
-func NewServer() *Server {
+func NewServer(conn io.ReadWriteCloser) *Server {
 	return &Server{
-		components: make(map[string]interface{}),
+		mux:    NewMuxConn(conn),
+		server: rpc.NewServer(),
 	}
 }
 
+func (s *Server) Close() error {
+	return s.mux.Close()
+}
+
 func (s *Server) RegisterArtifact(a packer.Artifact) {
-	s.components[DefaultArtifactEndpoint] = a
+	s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
+		artifact: a,
+	})
 }
 
 func (s *Server) RegisterCache(c packer.Cache) {
-	s.components["Cache"] = c
+	s.server.RegisterName(DefaultCacheEndpoint, &CacheServer{
+		cache: c,
+	})
 }
 
 func (s *Server) RegisterPostProcessor(p packer.PostProcessor) {
-	s.components["PostProcessor"] = p
+	s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
+		p: p,
+	})
+}
+
+func (s *Server) RegisterUi(ui packer.Ui) {
+	s.server.RegisterName(DefaultUiEndpoint, &UiServer{
+		ui: ui,
+	})
 }
 
 // ServeConn serves a single connection over the RPC server. It is up
 // to the caller to obtain a proper io.ReadWriteCloser.
-func (s *Server) ServeConn(conn io.ReadWriteCloser) {
-	mux := NewMuxConn(conn)
-	defer mux.Close()
-
+func (s *Server) Serve() {
 	// Accept a connection on stream ID 0, which is always used for
 	// normal client to server connections.
-	stream, err := mux.Accept(0)
+	stream, err := s.mux.Accept(0)
+	defer stream.Close()
 	if err != nil {
 		log.Printf("[ERR] Error retrieving stream for serving: %s", err)
 		return
 	}
 
-	clientConn, err := mux.Dial(1)
-	if err != nil {
-		log.Printf("[ERR] Error connecting to client stream: %s", err)
-		return
-	}
-	client := rpc.NewClient(clientConn)
-
-	// Create the RPC server
-	server := rpc.NewServer()
-	for endpoint, iface := range s.components {
-		var endpointVal interface{}
-
-		switch v := iface.(type) {
-		case packer.Artifact:
-			endpointVal = &ArtifactServer{
-				artifact: v,
-			}
-		case packer.Cache:
-			endpointVal = &CacheServer{
-				cache: v,
-			}
-		case packer.PostProcessor:
-			endpointVal = &PostProcessorServer{
-				client: client,
-				server: server,
-				p: v,
-			}
-		default:
-			log.Printf("[ERR] Unknown component for endpoint: %s", endpoint)
-			return
-		}
-
-		registerComponent(server, endpoint, endpointVal, false)
-	}
-
-	server.ServeConn(stream)
+	s.server.ServeConn(stream)
 }
 
 // registerComponent registers a single Packer RPC component onto
