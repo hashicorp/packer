@@ -21,15 +21,21 @@ const (
 // Server represents an RPC server for Packer. This must be paired on
 // the other side with a Client.
 type Server struct {
-	mux    *MuxConn
-	server *rpc.Server
+	mux      *MuxConn
+	streamId uint32
+	server   *rpc.Server
 }
 
 // NewServer returns a new Packer RPC server.
 func NewServer(conn io.ReadWriteCloser) *Server {
+	return NewServerWithMux(NewMuxConn(conn), 0)
+}
+
+func NewServerWithMux(mux *MuxConn, streamId uint32) *Server {
 	return &Server{
-		mux:    NewMuxConn(conn),
-		server: rpc.NewServer(),
+		mux:      mux,
+		streamId: streamId,
+		server:   rpc.NewServer(),
 	}
 }
 
@@ -51,7 +57,8 @@ func (s *Server) RegisterCache(c packer.Cache) {
 
 func (s *Server) RegisterPostProcessor(p packer.PostProcessor) {
 	s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
-		p: p,
+		mux: s.mux,
+		p:   p,
 	})
 }
 
@@ -66,7 +73,7 @@ func (s *Server) RegisterUi(ui packer.Ui) {
 func (s *Server) Serve() {
 	// Accept a connection on stream ID 0, which is always used for
 	// normal client to server connections.
-	stream, err := s.mux.Accept(0)
+	stream, err := s.mux.Accept(s.streamId)
 	defer stream.Close()
 	if err != nil {
 		log.Printf("[ERR] Error retrieving stream for serving: %s", err)
