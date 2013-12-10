@@ -105,21 +105,21 @@ func DownloadableURL(original string) (string, error) {
 			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 
-		if _, err := os.Stat(url.Path); err != nil {
-			return "", err
-		}
+		// Only do the filepath transformations if the file appears
+		// to actually exist.
+		if _, err := os.Stat(url.Path); err == nil {
+			url.Path, err = filepath.Abs(url.Path)
+			if err != nil {
+				return "", err
+			}
 
-		url.Path, err = filepath.Abs(url.Path)
-		if err != nil {
-			return "", err
-		}
+			url.Path, err = filepath.EvalSymlinks(url.Path)
+			if err != nil {
+				return "", err
+			}
 
-		url.Path, err = filepath.EvalSymlinks(url.Path)
-		if err != nil {
-			return "", err
+			url.Path = filepath.Clean(url.Path)
 		}
-
-		url.Path = filepath.Clean(url.Path)
 	}
 
 	// Make sure it is lowercased

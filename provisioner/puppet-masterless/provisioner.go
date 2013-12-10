@@ -152,7 +152,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Validation
 	if p.config.HieraConfigPath != "" {
-		info, err := os.Stat(p.config.ManifestFile)
+		info, err := os.Stat(p.config.HieraConfigPath)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("hiera_config_path is invalid: %s", err))

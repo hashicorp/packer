@@ -59,7 +59,7 @@ Optional:
 
 * `ssh_timeout` (string) - The time to wait for SSH to become available
   before timing out. The format of this value is a duration such as "5s"
-  or "5m". The default SSH timeout is "1m".
+  or "1m". The default SSH timeout is "5m".
 
 * `ssh_username` (string) - The username to use in order to communicate
   over SSH to the running server. The default is "root".

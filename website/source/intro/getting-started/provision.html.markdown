@@ -37,6 +37,7 @@ block below.
 
 <pre class="prettyprint">
 {
+  "variables": [...],
   "builders": [...],
 
   "provisioners": [{
