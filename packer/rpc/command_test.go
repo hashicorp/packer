@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -33,21 +32,14 @@ func TestRPCCommand(t *testing.T) {
 	command := new(TestCommand)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterCommand(server, command)
-	address := serveSingleConn(server)
-
-	// Create the command client over RPC and run some methods to verify
-	// we get the proper behavior.
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	clientComm := Command(client)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterCommand(command)
+	commClient := client.Command()
 
 	//Test Help
-	help := clientComm.Help()
+	help := commClient.Help()
 	if help != "bar" {
 		t.Fatalf("bad: %s", help)
 	}
@@ -55,7 +47,7 @@ func TestRPCCommand(t *testing.T) {
 	// Test run
 	runArgs := []string{"foo", "bar"}
 	testEnv := &testEnvironment{}
-	exitCode := clientComm.Run(testEnv, runArgs)
+	exitCode := commClient.Run(testEnv, runArgs)
 	if !reflect.DeepEqual(command.runArgs, runArgs) {
 		t.Fatalf("bad: %#v", command.runArgs)
 	}
@@ -73,7 +65,7 @@ func TestRPCCommand(t *testing.T) {
 	}
 
 	// Test Synopsis
-	synopsis := clientComm.Synopsis()
+	synopsis := commClient.Synopsis()
 	if synopsis != "foo" {
 		t.Fatalf("bad: %#v", synopsis)
 	}

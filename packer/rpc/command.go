@@ -9,12 +9,14 @@ import (
 // command is actually executed over an RPC connection.
 type command struct {
 	client *rpc.Client
+	mux *MuxConn
 }
 
 // A CommandServer wraps a packer.Command and makes it exportable as part
 // of a Golang RPC server.
 type CommandServer struct {
 	command packer.Command
+	mux *MuxConn
 }
 
 type CommandRunArgs struct {
@@ -25,7 +27,7 @@ type CommandRunArgs struct {
 type CommandSynopsisArgs byte
 
 func Command(client *rpc.Client) *command {
-	return &command{client}
+	return &command{client: client}
 }
 
 func (c *command) Help() (result string) {
