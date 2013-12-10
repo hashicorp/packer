@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -12,19 +11,14 @@ func TestProvisionerRPC(t *testing.T) {
 	p := new(packer.MockProvisioner)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterProvisioner(server, p)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterProvisioner(p)
+	pClient := client.Provisioner()
 
 	// Test Prepare
 	config := 42
-	pClient := Provisioner(client)
 	pClient.Prepare(config)
 	if !p.PrepCalled {
 		t.Fatal("should be called")
@@ -38,11 +32,6 @@ func TestProvisionerRPC(t *testing.T) {
 	comm := &packer.MockCommunicator{}
 	pClient.Provision(ui, comm)
 	if !p.ProvCalled {
-		t.Fatal("should be called")
-	}
-
-	p.ProvUi.Say("foo")
-	if !ui.sayCalled {
 		t.Fatal("should be called")
 	}
 
