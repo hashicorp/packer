@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -52,17 +51,12 @@ func TestUiRPC(t *testing.T) {
 	ui := new(testUi)
 
 	// Start the RPC server
-	server := rpc.NewServer()
-	RegisterUi(server, ui)
-	address := serveSingleConn(server)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterUi(ui)
 
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		panic(err)
-	}
-
-	uiClient := &Ui{client: client}
+	uiClient := client.Ui()
 
 	// Basic error and say tests
 	result, err := uiClient.Ask("query")

@@ -34,10 +34,11 @@ func TestPostProcessorRPC(t *testing.T) {
 	p := new(TestPostProcessor)
 
 	// Start the server
-	server := NewServer()
-	server.RegisterPostProcessor(p)
-	client := testClient(t, server)
+	client, server := testClientServer(t)
 	defer client.Close()
+	defer server.Close()
+	server.RegisterPostProcessor(p)
+
 	ppClient := client.PostProcessor()
 
 	// Test Configure
