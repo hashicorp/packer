@@ -118,18 +118,20 @@ func TestMuxConn_clientClosesStreams(t *testing.T) {
 	client, server := testMux(t)
 	defer client.Close()
 	defer server.Close()
-	go server.Accept(0)
+
+	go func() {
+		conn, err := server.Accept(0)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		conn.Close()
+	}()
 
 	s0, err := client.Dial(0)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	if err := client.Close(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	// This should block forever since we never write onto this stream.
 	var data [1024]byte
 	_, err = s0.Read(data[:])
 	if err != io.EOF {
