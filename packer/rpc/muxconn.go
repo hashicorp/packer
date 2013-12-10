@@ -21,7 +21,7 @@ type MuxConn struct {
 	curId   uint32
 	rwc     io.ReadWriteCloser
 	streams map[uint32]*Stream
-	mu      sync.RWMutex
+	mu      sync.Mutex
 	wlock   sync.Mutex
 }
 
