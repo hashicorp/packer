@@ -32,7 +32,7 @@ func RegisterCache(s *rpc.Server, c packer.Cache) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Command.
 func RegisterCommand(s *rpc.Server, c packer.Command) {
-	registerComponent(s, "Command", &CommandServer{c}, false)
+	registerComponent(s, "Command", &CommandServer{command: c}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a

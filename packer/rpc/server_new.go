@@ -14,6 +14,7 @@ var endpointId uint64
 const (
 	DefaultArtifactEndpoint      string = "Artifact"
 	DefaultCacheEndpoint                = "Cache"
+	DefaultCommandEndpoint              = "Command"
 	DefaultCommunicatorEndpoint         = "Communicator"
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
@@ -55,6 +56,13 @@ func (s *Server) RegisterArtifact(a packer.Artifact) {
 func (s *Server) RegisterCache(c packer.Cache) {
 	s.server.RegisterName(DefaultCacheEndpoint, &CacheServer{
 		cache: c,
+	})
+}
+
+func (s *Server) RegisterCommand(c packer.Command) {
+	s.server.RegisterName(DefaultCommandEndpoint, &CommandServer{
+		command: c,
+		mux:     s.mux,
 	})
 }
 
