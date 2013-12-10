@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeCommand(new(inspect.Command))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterCommand(new(inspect.Command))
+	server.Serve()
 }
