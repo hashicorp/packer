@@ -13,6 +13,7 @@ var endpointId uint64
 
 const (
 	DefaultArtifactEndpoint      string = "Artifact"
+	DefaultBuildEndpoint              = "Build"
 	DefaultBuilderEndpoint              = "Builder"
 	DefaultCacheEndpoint                = "Cache"
 	DefaultCommandEndpoint              = "Command"
@@ -52,6 +53,13 @@ func (s *Server) Close() error {
 func (s *Server) RegisterArtifact(a packer.Artifact) {
 	s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
 		artifact: a,
+	})
+}
+
+func (s *Server) RegisterBuild(b packer.Build) {
+	s.server.RegisterName(DefaultBuildEndpoint, &BuildServer{
+		build: b,
+		mux:   s.mux,
 	})
 }
 

@@ -45,6 +45,13 @@ func (c *Client) Artifact() packer.Artifact {
 	}
 }
 
+func (c *Client) Build() packer.Build {
+	return &build{
+		client: c.client,
+		mux:    c.mux,
+	}
+}
+
 func (c *Client) Builder() packer.Builder {
 	return &builder{
 		client: c.client,
