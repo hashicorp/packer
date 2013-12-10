@@ -20,8 +20,8 @@ type CommandServer struct {
 }
 
 type CommandRunArgs struct {
-	RPCAddress string
 	Args       []string
+	StreamId   uint32
 }
 
 type CommandSynopsisArgs byte
@@ -40,11 +40,15 @@ func (c *command) Help() (result string) {
 }
 
 func (c *command) Run(env packer.Environment, args []string) (result int) {
-	// Create and start the server for the Environment
-	server := rpc.NewServer()
-	RegisterEnvironment(server, env)
+	nextId := c.mux.NextId()
+	server := NewServerWithMux(c.mux, nextId)
+	server.RegisterEnvironment(env)
+	go server.Serve()
 
-	rpcArgs := &CommandRunArgs{serveSingleConn(server), args}
+	rpcArgs := &CommandRunArgs{
+		Args: args,
+		StreamId: nextId,
+	}
 	err := c.client.Call("Command.Run", rpcArgs, &result)
 	if err != nil {
 		panic(err)
@@ -68,14 +72,13 @@ func (c *CommandServer) Help(args *interface{}, reply *string) error {
 }
 
 func (c *CommandServer) Run(args *CommandRunArgs, reply *int) error {
-	client, err := rpcDial(args.RPCAddress)
+	client, err := NewClientWithMux(c.mux, args.StreamId)
 	if err != nil {
-		return err
+		return NewBasicError(err)
 	}
+	defer client.Close()
 
-	env := &Environment{client: client}
-
-	*reply = c.command.Run(env, args.Args)
+	*reply = c.command.Run(client.Environment(), args.Args)
 	return nil
 }
 
