@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"github.com/mitchellh/packer/packer"
 	"io"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -14,16 +13,11 @@ func TestCommunicatorRPC(t *testing.T) {
 	c := new(packer.MockCommunicator)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterCommunicator(server, c)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	remote := Communicator(client)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterCommunicator(c)
+	remote := client.Communicator()
 
 	// The remote command we'll use
 	stdin_r, stdin_w := io.Pipe()
@@ -42,7 +36,7 @@ func TestCommunicatorRPC(t *testing.T) {
 	c.StartExitStatus = 42
 
 	// Test Start
-	err = remote.Start(&cmd)
+	err := remote.Start(&cmd)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -74,7 +68,7 @@ func TestCommunicatorRPC(t *testing.T) {
 	stdin_w.Close()
 	cmd.Wait()
 	if c.StartStdin != "info\n" {
-		t.Fatalf("bad data: %s", data)
+		t.Fatalf("bad data: %s", c.StartStdin)
 	}
 
 	// Test that we can get the exit status properly

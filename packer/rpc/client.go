@@ -51,6 +51,13 @@ func (c *Client) Cache() packer.Cache {
 	}
 }
 
+func (c *Client) Communicator() packer.Communicator {
+	return &communicator{
+		client: c.client,
+		mux:    c.mux,
+	}
+}
+
 func (c *Client) PostProcessor() packer.PostProcessor {
 	return &postProcessor{
 		client: c.client,

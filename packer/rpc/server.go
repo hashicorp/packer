@@ -38,7 +38,7 @@ func RegisterCommand(s *rpc.Server, c packer.Command) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Communicator.
 func RegisterCommunicator(s *rpc.Server, c packer.Communicator) {
-	registerComponent(s, "Communicator", &CommunicatorServer{c}, false)
+	registerComponent(s, "Communicator", &CommunicatorServer{c: c}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
