@@ -407,7 +407,7 @@ func (s *Stream) Write(p []byte) (int, error) {
 	s.mu.Unlock()
 
 	if state != streamStateEstablished {
-		return 0, fmt.Errorf("Stream in bad state to send: %d", state)
+		return 0, fmt.Errorf("Stream %d in bad state to send: %d", s.id, state)
 	}
 
 	return s.mux.write(s.id, muxPacketData, p)
