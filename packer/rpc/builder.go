@@ -29,10 +29,6 @@ type BuilderPrepareResponse struct {
 	Error    error
 }
 
-func Builder(client *rpc.Client) *builder {
-	return &builder{client: client}
-}
-
 func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 	var resp BuilderPrepareResponse
 	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &resp)

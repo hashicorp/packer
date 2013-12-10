@@ -39,11 +39,7 @@ func (t *testCache) RUnlock(key string) {
 }
 
 func TestCache_Implements(t *testing.T) {
-	var raw interface{}
-	raw = Cache(nil)
-	if _, ok := raw.(packer.Cache); !ok {
-		t.Fatal("Cache must be a cache.")
-	}
+	var _ packer.Cache = new(cache)
 }
 
 func TestCacheRPC(t *testing.T) {

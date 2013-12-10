@@ -37,5 +37,5 @@ func TestArtifactRPC(t *testing.T) {
 }
 
 func TestArtifact_Implements(t *testing.T) {
-	var _ packer.Artifact = Artifact(nil)
+	var _ packer.Artifact = new(artifact)
 }

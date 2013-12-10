@@ -154,5 +154,5 @@ func TestBuildPrepare_Warnings(t *testing.T) {
 }
 
 func TestBuild_ImplementsBuild(t *testing.T) {
-	var _ packer.Build = Build(nil)
+	var _ packer.Build = new(build)
 }

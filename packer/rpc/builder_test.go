@@ -141,5 +141,5 @@ func TestBuilderCancel(t *testing.T) {
 }
 
 func TestBuilder_ImplementsBuilder(t *testing.T) {
-	var _ packer.Builder = Builder(nil)
+	var _ packer.Builder = new(builder)
 }
