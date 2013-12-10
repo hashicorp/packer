@@ -1,8 +1,6 @@
 package rpc
 
 import (
-	"encoding/gob"
-	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"net/rpc"
@@ -12,21 +10,18 @@ import (
 // over an RPC connection.
 type builder struct {
 	client *rpc.Client
+	mux *MuxConn
 }
 
 // BuilderServer wraps a packer.Builder implementation and makes it exportable
 // as part of a Golang RPC server.
 type BuilderServer struct {
 	builder packer.Builder
+	mux *MuxConn
 }
 
 type BuilderPrepareArgs struct {
 	Configs []interface{}
-}
-
-type BuilderRunArgs struct {
-	RPCAddress      string
-	ResponseAddress string
 }
 
 type BuilderPrepareResponse struct {
@@ -34,13 +29,8 @@ type BuilderPrepareResponse struct {
 	Error    error
 }
 
-type BuilderRunResponse struct {
-	Err        error
-	RPCAddress string
-}
-
 func Builder(client *rpc.Client) *builder {
-	return &builder{client}
+	return &builder{client: client}
 }
 
 func (b *builder) Prepare(config ...interface{}) ([]string, error) {
@@ -54,58 +44,28 @@ func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 }
 
 func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Create and start the server for the Build and UI
-	server := rpc.NewServer()
-	RegisterCache(server, cache)
-	RegisterHook(server, hook)
-	RegisterUi(server, ui)
+	nextId := b.mux.NextId()
+	server := NewServerWithMux(b.mux, nextId)
+	server.RegisterCache(cache)
+	server.RegisterHook(hook)
+	server.RegisterUi(ui)
+	go server.Serve()
 
-	// Create a server for the response
-	responseL := netListenerInRange(portRangeMin, portRangeMax)
-	runResponseCh := make(chan *BuilderRunResponse)
-	go func() {
-		defer responseL.Close()
-
-		var response BuilderRunResponse
-		defer func() { runResponseCh <- &response }()
-
-		conn, err := responseL.Accept()
-		if err != nil {
-			response.Err = err
-			return
-		}
-		defer conn.Close()
-
-		decoder := gob.NewDecoder(conn)
-		if err := decoder.Decode(&response); err != nil {
-			response.Err = fmt.Errorf("Error waiting for Run: %s", err)
-		}
-	}()
-
-	args := &BuilderRunArgs{
-		serveSingleConn(server),
-		responseL.Addr().String(),
-	}
-
-	if err := b.client.Call("Builder.Run", args, new(interface{})); err != nil {
+	var responseId uint32
+	if err := b.client.Call("Builder.Run", nextId, &responseId); err != nil {
 		return nil, err
 	}
 
-	response := <-runResponseCh
-	if response.Err != nil {
-		return nil, response.Err
-	}
-
-	if response.RPCAddress == "" {
+	if responseId == 0 {
 		return nil, nil
 	}
 
-	client, err := rpcDial(response.RPCAddress)
+	client, err := NewClientWithMux(b.mux, responseId)
 	if err != nil {
 		return nil, err
 	}
 
-	return Artifact(client), nil
+	return client.Artifact(), nil
 }
 
 func (b *builder) Cancel() {
@@ -127,45 +87,26 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareR
 	return nil
 }
 
-func (b *BuilderServer) Run(args *BuilderRunArgs, reply *interface{}) error {
-	client, err := rpcDial(args.RPCAddress)
+func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
+	client, err := NewClientWithMux(b.mux, streamId)
 	if err != nil {
-		return err
+		return NewBasicError(err)
+	}
+	defer client.Close()
+
+	artifact, err := b.builder.Run(client.Ui(), client.Hook(), client.Cache())
+	if err != nil {
+		return NewBasicError(err)
 	}
 
-	responseC, err := tcpDial(args.ResponseAddress)
-	if err != nil {
-		return err
+	*reply = 0
+	if artifact != nil {
+		streamId = b.mux.NextId()
+		server := NewServerWithMux(b.mux, streamId)
+		server.RegisterArtifact(artifact)
+		go server.Serve()
+		*reply = streamId
 	}
-
-	responseWriter := gob.NewEncoder(responseC)
-
-	// Run the build in a goroutine so we don't block the RPC connection
-	go func() {
-		defer responseC.Close()
-
-		cache := Cache(client)
-		hook := Hook(client)
-		ui := &Ui{client: client}
-		artifact, responseErr := b.builder.Run(ui, hook, cache)
-		responseAddress := ""
-
-		if responseErr == nil && artifact != nil {
-			// Wrap the artifact
-			server := rpc.NewServer()
-			RegisterArtifact(server, artifact)
-			responseAddress = serveSingleConn(server)
-		}
-
-		if responseErr != nil {
-			responseErr = NewBasicError(responseErr)
-		}
-
-		err := responseWriter.Encode(&BuilderRunResponse{responseErr, responseAddress})
-		if err != nil {
-			log.Printf("BuildServer.Run error: %s", err)
-		}
-	}()
 
 	return nil
 }
