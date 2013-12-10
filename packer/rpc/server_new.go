@@ -17,6 +17,7 @@ const (
 	DefaultCommunicatorEndpoint         = "Communicator"
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
+	DefaultProvisionerEndpoint          = "Provisioner"
 	DefaultUiEndpoint                   = "Ui"
 )
 
@@ -73,6 +74,13 @@ func (s *Server) RegisterHook(h packer.Hook) {
 
 func (s *Server) RegisterPostProcessor(p packer.PostProcessor) {
 	s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
+		mux: s.mux,
+		p:   p,
+	})
+}
+
+func (s *Server) RegisterProvisioner(p packer.Provisioner) {
+	s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
 		mux: s.mux,
 		p:   p,
 	})
