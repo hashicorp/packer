@@ -61,7 +61,7 @@ func RegisterPostProcessor(s *rpc.Server, p packer.PostProcessor) {
 
 // Registers the appropriate endpoint on an RPC server to serve a packer.Provisioner
 func RegisterProvisioner(s *rpc.Server, p packer.Provisioner) {
-	registerComponent(s, "Provisioner", &ProvisionerServer{p}, false)
+	registerComponent(s, "Provisioner", &ProvisionerServer{p: p}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
