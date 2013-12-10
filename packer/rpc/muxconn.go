@@ -266,7 +266,7 @@ func (m *MuxConn) loop() {
 			return
 		}
 
-		log.Printf("[DEBUG] Stream %d received packet %d", id, packetType)
+		//log.Printf("[DEBUG] Stream %d received packet %d", id, packetType)
 		switch packetType {
 		case muxPacketAck:
 			stream.mu.Lock()
