@@ -11,9 +11,11 @@ func TestArtifactRPC(t *testing.T) {
 	a := new(packer.MockArtifact)
 
 	// Start the server
-	server := NewServer()
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
 	server.RegisterArtifact(a)
-	client := testClient(t, server)
+
 	aClient := client.Artifact()
 
 	// Test
