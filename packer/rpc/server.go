@@ -1,88 +1,155 @@
 package rpc
 
 import (
+	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"io"
+	"log"
 	"net/rpc"
+	"sync/atomic"
 )
 
-// Registers the appropriate endpoint on an RPC server to serve an
-// Artifact.
-func RegisterArtifact(s *rpc.Server, a packer.Artifact) {
-	registerComponent(s, "Artifact", &ArtifactServer{a}, false)
+var endpointId uint64
+
+const (
+	DefaultArtifactEndpoint      string = "Artifact"
+	DefaultBuildEndpoint              = "Build"
+	DefaultBuilderEndpoint              = "Builder"
+	DefaultCacheEndpoint                = "Cache"
+	DefaultCommandEndpoint              = "Command"
+	DefaultCommunicatorEndpoint         = "Communicator"
+	DefaultEnvironmentEndpoint          = "Environment"
+	DefaultHookEndpoint                 = "Hook"
+	DefaultPostProcessorEndpoint        = "PostProcessor"
+	DefaultProvisionerEndpoint          = "Provisioner"
+	DefaultUiEndpoint                   = "Ui"
+)
+
+// Server represents an RPC server for Packer. This must be paired on
+// the other side with a Client.
+type Server struct {
+	mux      *MuxConn
+	streamId uint32
+	server   *rpc.Server
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer Build.
-func RegisterBuild(s *rpc.Server, b packer.Build) {
-	registerComponent(s, "Build", &BuildServer{build: b}, false)
+// NewServer returns a new Packer RPC server.
+func NewServer(conn io.ReadWriteCloser) *Server {
+	return NewServerWithMux(NewMuxConn(conn), 0)
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer Builder.
-func RegisterBuilder(s *rpc.Server, b packer.Builder) {
-	registerComponent(s, "Builder", &BuilderServer{builder: b}, false)
+func NewServerWithMux(mux *MuxConn, streamId uint32) *Server {
+	return &Server{
+		mux:      mux,
+		streamId: streamId,
+		server:   rpc.NewServer(),
+	}
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer Cache.
-func RegisterCache(s *rpc.Server, c packer.Cache) {
-	registerComponent(s, "Cache", &CacheServer{c}, false)
+func (s *Server) Close() error {
+	return s.mux.Close()
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer Command.
-func RegisterCommand(s *rpc.Server, c packer.Command) {
-	registerComponent(s, "Command", &CommandServer{command: c}, false)
+func (s *Server) RegisterArtifact(a packer.Artifact) {
+	s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
+		artifact: a,
+	})
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer Communicator.
-func RegisterCommunicator(s *rpc.Server, c packer.Communicator) {
-	registerComponent(s, "Communicator", &CommunicatorServer{c: c}, false)
+func (s *Server) RegisterBuild(b packer.Build) {
+	s.server.RegisterName(DefaultBuildEndpoint, &BuildServer{
+		build: b,
+		mux:   s.mux,
+	})
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer Environment
-func RegisterEnvironment(s *rpc.Server, e packer.Environment) {
-	registerComponent(s, "Environment", &EnvironmentServer{env: e}, false)
+func (s *Server) RegisterBuilder(b packer.Builder) {
+	s.server.RegisterName(DefaultBuilderEndpoint, &BuilderServer{
+		builder: b,
+		mux:     s.mux,
+	})
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Hook.
-func RegisterHook(s *rpc.Server, h packer.Hook) {
-	registerComponent(s, "Hook", &HookServer{hook: h}, false)
+func (s *Server) RegisterCache(c packer.Cache) {
+	s.server.RegisterName(DefaultCacheEndpoint, &CacheServer{
+		cache: c,
+	})
 }
 
-// Registers the appropriate endpoing on an RPC server to serve a
-// PostProcessor.
-func RegisterPostProcessor(s *rpc.Server, p packer.PostProcessor) {
-	registerComponent(s, "PostProcessor", &PostProcessorServer{p: p}, false)
+func (s *Server) RegisterCommand(c packer.Command) {
+	s.server.RegisterName(DefaultCommandEndpoint, &CommandServer{
+		command: c,
+		mux:     s.mux,
+	})
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a packer.Provisioner
-func RegisterProvisioner(s *rpc.Server, p packer.Provisioner) {
-	registerComponent(s, "Provisioner", &ProvisionerServer{p: p}, false)
+func (s *Server) RegisterCommunicator(c packer.Communicator) {
+	s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
+		c:   c,
+		mux: s.mux,
+	})
 }
 
-// Registers the appropriate endpoint on an RPC server to serve a
-// Packer UI
-func RegisterUi(s *rpc.Server, ui packer.Ui) {
-	registerComponent(s, "Ui", &UiServer{ui}, false)
+func (s *Server) RegisterEnvironment(b packer.Environment) {
+	s.server.RegisterName(DefaultEnvironmentEndpoint, &EnvironmentServer{
+		env: b,
+		mux: s.mux,
+	})
 }
 
-func serveSingleConn(s *rpc.Server) string {
-	l := netListenerInRange(portRangeMin, portRangeMax)
+func (s *Server) RegisterHook(h packer.Hook) {
+	s.server.RegisterName(DefaultHookEndpoint, &HookServer{
+		hook: h,
+		mux:  s.mux,
+	})
+}
 
-	// Accept a single connection in a goroutine and then exit
-	go func() {
-		defer l.Close()
-		conn, err := l.Accept()
-		if err != nil {
-			panic(err)
-		}
+func (s *Server) RegisterPostProcessor(p packer.PostProcessor) {
+	s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
+		mux: s.mux,
+		p:   p,
+	})
+}
 
-		s.ServeConn(conn)
-	}()
+func (s *Server) RegisterProvisioner(p packer.Provisioner) {
+	s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
+		mux: s.mux,
+		p:   p,
+	})
+}
 
-	return l.Addr().String()
+func (s *Server) RegisterUi(ui packer.Ui) {
+	s.server.RegisterName(DefaultUiEndpoint, &UiServer{
+		ui: ui,
+	})
+}
+
+// ServeConn serves a single connection over the RPC server. It is up
+// to the caller to obtain a proper io.ReadWriteCloser.
+func (s *Server) Serve() {
+	// Accept a connection on stream ID 0, which is always used for
+	// normal client to server connections.
+	stream, err := s.mux.Accept(s.streamId)
+	defer stream.Close()
+	if err != nil {
+		log.Printf("[ERR] Error retrieving stream for serving: %s", err)
+		return
+	}
+
+	s.server.ServeConn(stream)
+}
+
+// registerComponent registers a single Packer RPC component onto
+// the RPC server. If id is true, then a unique ID number will be appended
+// onto the end of the endpoint.
+//
+// The endpoint name is returned.
+func registerComponent(server *rpc.Server, name string, rcvr interface{}, id bool) string {
+	endpoint := name
+	if id {
+		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
+	}
+
+	server.RegisterName(endpoint, rcvr)
+	return endpoint
 }
