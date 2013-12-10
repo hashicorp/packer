@@ -72,6 +72,13 @@ func (c *Client) Communicator() packer.Communicator {
 	}
 }
 
+func (c *Client) Environment() packer.Environment {
+	return &Environment{
+		client: c.client,
+		mux:    c.mux,
+	}
+}
+
 func (c *Client) Hook() packer.Hook {
 	return &hook{
 		client: c.client,

@@ -17,6 +17,7 @@ const (
 	DefaultCacheEndpoint                = "Cache"
 	DefaultCommandEndpoint              = "Command"
 	DefaultCommunicatorEndpoint         = "Communicator"
+	DefaultEnvironmentEndpoint          = "Environment"
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
 	DefaultProvisionerEndpoint          = "Provisioner"
@@ -77,6 +78,13 @@ func (s *Server) RegisterCommand(c packer.Command) {
 func (s *Server) RegisterCommunicator(c packer.Communicator) {
 	s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c:   c,
+		mux: s.mux,
+	})
+}
+
+func (s *Server) RegisterEnvironment(b packer.Environment) {
+	s.server.RegisterName(DefaultEnvironmentEndpoint, &EnvironmentServer{
+		env: b,
 		mux: s.mux,
 	})
 }
