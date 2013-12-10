@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeProvisioner(new(ansiblelocal.Provisioner))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterProvisioner(new(ansiblelocal.Provisioner))
+	server.Serve()
 }

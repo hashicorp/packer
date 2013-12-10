@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeProvisioner(new(chefsolo.Provisioner))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterProvisioner(new(chefsolo.Provisioner))
+	server.Serve()
 }

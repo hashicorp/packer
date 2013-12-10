@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeProvisioner(new(file.Provisioner))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterProvisioner(new(file.Provisioner))
+	server.Serve()
 }
