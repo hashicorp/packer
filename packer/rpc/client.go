@@ -72,6 +72,13 @@ func (c *Client) PostProcessor() packer.PostProcessor {
 	}
 }
 
+func (c *Client) Provisioner() packer.Provisioner {
+	return &provisioner{
+		client: c.client,
+		mux:    c.mux,
+	}
+}
+
 func (c *Client) Ui() packer.Ui {
 	return &Ui{
 		client:   c.client,
