@@ -44,7 +44,7 @@ func RegisterCommunicator(s *rpc.Server, c packer.Communicator) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Environment
 func RegisterEnvironment(s *rpc.Server, e packer.Environment) {
-	registerComponent(s, "Environment", &EnvironmentServer{e}, false)
+	registerComponent(s, "Environment", &EnvironmentServer{env: e}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
