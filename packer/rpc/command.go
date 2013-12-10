@@ -26,10 +26,6 @@ type CommandRunArgs struct {
 
 type CommandSynopsisArgs byte
 
-func Command(client *rpc.Client) *command {
-	return &command{client: client}
-}
-
 func (c *command) Help() (result string) {
 	err := c.client.Call("Command.Help", new(interface{}), &result)
 	if err != nil {

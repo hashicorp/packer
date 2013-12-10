@@ -26,10 +26,6 @@ type HookRunArgs struct {
 	StreamId uint32
 }
 
-func Hook(client *rpc.Client) *hook {
-	return &hook{client: client}
-}
-
 func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
 	nextId := h.mux.NextId()
 	server := NewServerWithMux(h.mux, nextId)

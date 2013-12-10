@@ -67,5 +67,5 @@ func TestRPCCommand(t *testing.T) {
 }
 
 func TestCommand_Implements(t *testing.T) {
-	var _ packer.Command = Command(nil)
+	var _ packer.Command = new(command)
 }

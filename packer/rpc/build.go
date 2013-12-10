@@ -24,10 +24,6 @@ type BuildPrepareResponse struct {
 	Error    error
 }
 
-func Build(client *rpc.Client) *build {
-	return &build{client: client}
-}
-
 func (b *build) Name() (result string) {
 	b.client.Call("Build.Name", new(interface{}), &result)
 	return
