@@ -15,6 +15,7 @@ const (
 	DefaultArtifactEndpoint      string = "Artifact"
 	DefaultCacheEndpoint                = "Cache"
 	DefaultCommunicatorEndpoint         = "Communicator"
+	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
 	DefaultUiEndpoint                   = "Ui"
 )
@@ -60,6 +61,13 @@ func (s *Server) RegisterCommunicator(c packer.Communicator) {
 	s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c:   c,
 		mux: s.mux,
+	})
+}
+
+func (s *Server) RegisterHook(h packer.Hook) {
+	s.server.RegisterName(DefaultHookEndpoint, &HookServer{
+		hook: h,
+		mux:  s.mux,
 	})
 }
 
