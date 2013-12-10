@@ -20,7 +20,7 @@ func RegisterBuild(s *rpc.Server, b packer.Build) {
 // Registers the appropriate endpoint on an RPC server to serve a
 // Packer Builder.
 func RegisterBuilder(s *rpc.Server, b packer.Builder) {
-	registerComponent(s, "Builder", &BuilderServer{b}, false)
+	registerComponent(s, "Builder", &BuilderServer{builder: b}, false)
 }
 
 // Registers the appropriate endpoint on an RPC server to serve a
