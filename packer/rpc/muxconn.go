@@ -72,7 +72,7 @@ func (m *MuxConn) Accept(id uint32) (io.ReadWriteCloser, error) {
 	stream.mu.Lock()
 	if stream.state != streamStateSynRecv && stream.state != streamStateClosed {
 		stream.mu.Unlock()
-		return nil, fmt.Errorf("Stream already open in bad state: %d", stream.state)
+		return nil, fmt.Errorf("Stream %d already open in bad state: %d", id, stream.state)
 	}
 
 	if stream.state == streamStateSynRecv {
@@ -124,7 +124,7 @@ func (m *MuxConn) Dial(id uint32) (io.ReadWriteCloser, error) {
 	stream.mu.Lock()
 	if stream.state != streamStateClosed {
 		stream.mu.Unlock()
-		return nil, fmt.Errorf("Stream already open in bad state: %d", stream.state)
+		return nil, fmt.Errorf("Stream %d already open in bad state: %d", id, stream.state)
 	}
 
 	// Open a connection
@@ -157,11 +157,11 @@ func (m *MuxConn) NextId() uint32 {
 	defer m.mu.Unlock()
 
 	for {
-		if _, ok := m.streams[m.curId]; !ok {
-			return m.curId
-		}
-
+		result := m.curId
 		m.curId++
+		if _, ok := m.streams[result]; !ok {
+			return result
+		}
 	}
 }
 
