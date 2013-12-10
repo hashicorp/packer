@@ -1,9 +1,31 @@
-## 0.4.1 (unreleased)
+## 0.5.0 (unreleased)
+
+
+
+## 0.4.1 (December 7, 2013)
+
+IMPROVEMENTS:
+
+* builder/amazon/ebs: New option allows associating a public IP with
+  non-default VPC instances. [GH-660]
+* builder/openstack: A "proxy\_url" setting was added to define an HTTP
+  proxy to use when building with this builder. [GH-637]
 
 BUG FIXES:
 
 * core: Don't change background color on CLI anymore, making things look
   a tad nicer in some terminals.
+* core: multiple ISO URLs works properly in all builders. [GH-683]
+* builder/amazon/chroot: Block when obtaining file lock to allow
+  parallel builds. [GH-689]
+* builder/amazon/instance: Add location flag to upload bundle command
+  so that building AMIs works out of us-east-1 [GH-679]
+* builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
+  get stuck with ISO. [GH-685]
+* builder/vmware: File cleanup is more resilient to file delete races
+  with the operating system. [GH-675]
+* provisioner/puppet-masterless: Check for hiera config path existence
+  properly. [GH-656]
 
 ## 0.4.0 (November 19, 2013)
 

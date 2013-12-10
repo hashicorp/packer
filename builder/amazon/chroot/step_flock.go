@@ -39,7 +39,7 @@ func (s *StepFlock) Run(state multistep.StateBag) multistep.StepAction {
 
 	// LOCK!
 	if err := lockFile(f); err != nil {
-		err := fmt.Errorf("Error creating lock: %s", err)
+		err := fmt.Errorf("Error obtaining lock: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
