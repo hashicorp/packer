@@ -73,7 +73,7 @@ func (c *CommandServer) Run(args *CommandRunArgs, reply *int) error {
 		return err
 	}
 
-	env := &Environment{client}
+	env := &Environment{client: client}
 
 	*reply = c.command.Run(env, args.Args)
 	return nil
