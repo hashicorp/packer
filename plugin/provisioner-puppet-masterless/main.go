@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeProvisioner(new(puppetmasterless.Provisioner))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterProvisioner(new(puppetmasterless.Provisioner))
+	server.Serve()
 }

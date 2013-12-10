@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeBuilder(new(docker.Builder))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterBuilder(new(docker.Builder))
+	server.Serve()
 }
