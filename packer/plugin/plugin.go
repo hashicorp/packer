@@ -14,7 +14,6 @@ import (
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"log"
 	"net"
-	"net/rpc"
 	"os"
 	"os/signal"
 	"runtime"
@@ -35,13 +34,14 @@ const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d69
 // know how to speak it.
 const APIVersion = "1"
 
-// This serves a single RPC connection on the given RPC server on
-// a random port.
-func serve(server *rpc.Server) (err error) {
+// Server waits for a connection to this plugin and returns a Packer
+// RPC server that you can use to register components and serve them.
+func Server() (*packrpc.Server, error) {
 	log.Printf("Plugin build against Packer '%s'", packer.GitCommit)
 
 	if os.Getenv(MagicCookieKey) != MagicCookieValue {
-		return errors.New("Please do not execute plugins directly. Packer will execute these for you.")
+		return nil, errors.New(
+			"Please do not execute plugins directly. Packer will execute these for you.")
 	}
 
 	// If there is no explicit number of Go threads to use, then set it
@@ -51,12 +51,12 @@ func serve(server *rpc.Server) (err error) {
 
 	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	log.Printf("Plugin minimum port: %d\n", minPort)
@@ -77,7 +77,6 @@ func serve(server *rpc.Server) (err error) {
 
 		break
 	}
-
 	defer listener.Close()
 
 	// Output the address to stdout
@@ -90,13 +89,12 @@ func serve(server *rpc.Server) (err error) {
 	conn, err := listener.Accept()
 	if err != nil {
 		log.Printf("Error accepting connection: %s\n", err.Error())
-		return
+		return nil, err
 	}
 
 	// Serve a single connection
 	log.Println("Serving a plugin connection...")
-	server.ServeConn(conn)
-	return
+	return packrpc.NewServer(conn), nil
 }
 
 // Registers a signal handler to swallow and count interrupts so that the
@@ -113,76 +111,6 @@ func countInterrupts() {
 			log.Printf("Received interrupt signal (count: %d). Ignoring.", newCount)
 		}
 	}()
-}
-
-// Serves a builder from a plugin.
-func ServeBuilder(builder packer.Builder) {
-	log.Println("Preparing to serve a builder plugin...")
-
-	server := rpc.NewServer()
-	packrpc.RegisterBuilder(server, builder)
-
-	countInterrupts()
-	if err := serve(server); err != nil {
-		log.Printf("ERROR: %s", err)
-		os.Exit(1)
-	}
-}
-
-// Serves a command from a plugin.
-func ServeCommand(command packer.Command) {
-	log.Println("Preparing to serve a command plugin...")
-
-	server := rpc.NewServer()
-	packrpc.RegisterCommand(server, command)
-
-	countInterrupts()
-	if err := serve(server); err != nil {
-		log.Printf("ERROR: %s", err)
-		os.Exit(1)
-	}
-}
-
-// Serves a hook from a plugin.
-func ServeHook(hook packer.Hook) {
-	log.Println("Preparing to serve a hook plugin...")
-
-	server := rpc.NewServer()
-	packrpc.RegisterHook(server, hook)
-
-	countInterrupts()
-	if err := serve(server); err != nil {
-		log.Printf("ERROR: %s", err)
-		os.Exit(1)
-	}
-}
-
-// Serves a post-processor from a plugin.
-func ServePostProcessor(p packer.PostProcessor) {
-	log.Println("Preparing to serve a post-processor plugin...")
-
-	server := rpc.NewServer()
-	packrpc.RegisterPostProcessor(server, p)
-
-	countInterrupts()
-	if err := serve(server); err != nil {
-		log.Printf("ERROR: %s", err)
-		os.Exit(1)
-	}
-}
-
-// Serves a provisioner from a plugin.
-func ServeProvisioner(p packer.Provisioner) {
-	log.Println("Preparing to serve a provisioner plugin...")
-
-	server := rpc.NewServer()
-	packrpc.RegisterProvisioner(server, p)
-
-	countInterrupts()
-	if err := serve(server); err != nil {
-		log.Printf("ERROR: %s", err)
-		os.Exit(1)
-	}
 }
 
 // Tests whether or not the plugin was interrupted or not.
