@@ -159,3 +159,16 @@ func TestMuxConn_serverClosesStreams(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestMuxConnNextId(t *testing.T) {
+	client, server := testMux(t)
+	defer client.Close()
+	defer server.Close()
+
+	a := client.NextId()
+	b := client.NextId()
+
+	if a != 0 || b != 1 {
+		t.Fatalf("IDs should increment")
+	}
+}
