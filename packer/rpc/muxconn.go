@@ -197,7 +197,7 @@ func (m *MuxConn) openStream(id uint32) (*Stream, error) {
 
 	// Create the stream object and channel where data will be sent to
 	dataR, dataW := io.Pipe()
-	writeCh := make(chan []byte, 10)
+	writeCh := make(chan []byte, 256)
 
 	// Set the data channel so we can write to it.
 	stream := &Stream{
@@ -315,7 +315,7 @@ func (m *MuxConn) loop() {
 				select {
 				case stream.writeCh <- data:
 				default:
-					log.Printf("[ERR] Failed to write data, buffer full: %d", id)
+					panic(fmt.Sprintf("Failed to write data, buffer full for stream %d", id))
 				}
 			} else {
 				log.Printf("[ERR] Data received for stream in state: %d", stream.state)
