@@ -13,6 +13,7 @@ type TestPostProcessor struct {
 	configVal    []interface{}
 	ppCalled     bool
 	ppArtifact   packer.Artifact
+	ppArtifactId string
 	ppUi         packer.Ui
 }
 
@@ -25,6 +26,7 @@ func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
+	pp.ppArtifactId = a.Id()
 	pp.ppUi = ui
 	return testPostProcessorArtifact, false, nil
 }
@@ -70,8 +72,8 @@ func TestPostProcessorRPC(t *testing.T) {
 		t.Fatal("postprocess should be called")
 	}
 
-	if p.ppArtifact.Id() != "ppTestId" {
-		t.Fatal("unknown artifact")
+	if p.ppArtifactId != "ppTestId" {
+		t.Fatalf("unknown artifact: %s", p.ppArtifact.Id())
 	}
 
 	if artifact.Id() != "id" {

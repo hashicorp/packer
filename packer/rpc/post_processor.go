@@ -9,14 +9,14 @@ import (
 // executed over an RPC connection.
 type postProcessor struct {
 	client *rpc.Client
-	server *rpc.Server
+	mux    *MuxConn
 }
 
 // PostProcessorServer wraps a packer.PostProcessor implementation and makes it
 // exportable as part of a Golang RPC server.
 type PostProcessorServer struct {
 	client *rpc.Client
-	server *rpc.Server
+	mux    *MuxConn
 	p      packer.PostProcessor
 }
 
@@ -24,15 +24,10 @@ type PostProcessorConfigureArgs struct {
 	Configs []interface{}
 }
 
-type PostProcessorPostProcessArgs struct {
-	ArtifactEndpoint string
-	UiEndpoint       string
-}
-
 type PostProcessorProcessResponse struct {
-	Err              error
-	Keep             bool
-	ArtifactEndpoint string
+	Err      error
+	Keep     bool
+	StreamId uint32
 }
 
 func PostProcessor(client *rpc.Client) *postProcessor {
@@ -49,21 +44,14 @@ func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 }
 
 func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
-	artifactEndpoint := registerComponent(p.server, "Artifact", &ArtifactServer{
-		artifact: a,
-	}, true)
-
-	uiEndpoint := registerComponent(p.server, "Ui", &UiServer{
-		ui: ui,
-	}, true)
-
-	args := PostProcessorPostProcessArgs{
-		ArtifactEndpoint: artifactEndpoint,
-		UiEndpoint:       uiEndpoint,
-	}
+	nextId := p.mux.NextId()
+	server := NewServerWithMux(p.mux, nextId)
+	server.RegisterArtifact(a)
+	server.RegisterUi(ui)
+	go server.Serve()
 
 	var response PostProcessorProcessResponse
-	if err := p.client.Call("PostProcessor.PostProcess", &args, &response); err != nil {
+	if err := p.client.Call("PostProcessor.PostProcess", nextId, &response); err != nil {
 		return nil, false, err
 	}
 
@@ -71,14 +59,16 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 		return nil, false, response.Err
 	}
 
-	if response.ArtifactEndpoint == "" {
+	if response.StreamId == 0 {
 		return nil, false, nil
 	}
 
-	return &artifact{
-		client:   p.client,
-		endpoint: response.ArtifactEndpoint,
-	}, response.Keep, nil
+	client, err := NewClientWithMux(p.mux, response.StreamId)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return client.Artifact(), response.Keep, nil
 }
 
 func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *error) error {
@@ -90,23 +80,20 @@ func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply 
 	return nil
 }
 
-func (p *PostProcessorServer) PostProcess(args *PostProcessorPostProcessArgs, reply *PostProcessorProcessResponse) error {
-	artifact := &artifact{
-		client:   p.client,
-		endpoint: args.ArtifactEndpoint,
+func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorProcessResponse) error {
+	client, err := NewClientWithMux(p.mux, streamId)
+	if err != nil {
+		return NewBasicError(err)
 	}
+	defer client.Close()
 
-	ui := &Ui{
-		client:   p.client,
-		endpoint: args.UiEndpoint,
-	}
-
-	var artifactEndpoint string
-	artifactResult, keep, err := p.p.PostProcess(ui, artifact)
+	streamId = 0
+	artifactResult, keep, err := p.p.PostProcess(client.Ui(), client.Artifact())
 	if err == nil && artifactResult != nil {
-		artifactEndpoint = registerComponent(p.server, "Artifact", &ArtifactServer{
-			artifact: artifactResult,
-		}, true)
+		streamId = p.mux.NextId()
+		server := NewServerWithMux(p.mux, streamId)
+		server.RegisterArtifact(artifactResult)
+		go server.Serve()
 	}
 
 	if err != nil {
@@ -114,9 +101,9 @@ func (p *PostProcessorServer) PostProcess(args *PostProcessorPostProcessArgs, re
 	}
 
 	*reply = PostProcessorProcessResponse{
-		Err:              err,
-		Keep:             keep,
-		ArtifactEndpoint: artifactEndpoint,
+		Err:      err,
+		Keep:     keep,
+		StreamId: streamId,
 	}
 
 	return nil
