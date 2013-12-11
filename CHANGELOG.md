@@ -5,6 +5,8 @@ IMPROVEMENTS:
 * core: Plugins communicate over a single TCP connection per plugin now,
   instead of sometimes dozens. Performance around plugin communication
   dramatically increased.
+* provisioner/puppet-masterless: Can now specify a `manifest_dir` to
+  upload manifests to the remote machine for imports. [GH-655]
 
 ## 0.4.1 (December 7, 2013)
 
