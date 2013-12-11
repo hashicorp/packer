@@ -46,7 +46,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Description
 	if tpl.Description != "" {
 		ui.Say("Description:\n")
-		ui.Say(tpl.Description+"\n")
+		ui.Say(tpl.Description + "\n")
 	}
 
 	// Variables
