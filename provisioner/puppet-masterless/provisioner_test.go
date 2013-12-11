@@ -87,13 +87,13 @@ func TestProvisionerPrepare_manifestDir(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
-		t.Fatalf("error tempfile: %s", err)
+		t.Fatalf("error: %s", err)
 	}
-	defer os.Remove(tf.Name())
+	defer os.RemoveAll(td)
 
-	config["manifest_dir"] = tf.Name()
+	config["manifest_dir"] = td
 	p = new(Provisioner)
 	err = p.Prepare(config)
 	if err != nil {
