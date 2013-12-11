@@ -1,7 +1,6 @@
 package ssh
 
 import (
-	"log"
 	"net"
 	"time"
 )
