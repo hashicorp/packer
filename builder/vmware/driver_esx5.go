@@ -316,7 +316,7 @@ func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 	if record["IntValue"] != "1" {
 		return errors.New(
 			"GuestIPHack is required, enable by running this on the ESX machine:\n" +
-			"esxcli system settings advanced set -o /Net/GuestIPHack -i 1")
+				"esxcli system settings advanced set -o /Net/GuestIPHack -i 1")
 	}
 
 	return nil

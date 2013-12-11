@@ -13,7 +13,7 @@ var endpointId uint64
 
 const (
 	DefaultArtifactEndpoint      string = "Artifact"
-	DefaultBuildEndpoint              = "Build"
+	DefaultBuildEndpoint                = "Build"
 	DefaultBuilderEndpoint              = "Builder"
 	DefaultCacheEndpoint                = "Cache"
 	DefaultCommandEndpoint              = "Command"

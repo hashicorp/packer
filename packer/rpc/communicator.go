@@ -147,7 +147,7 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	return
 }
 
-func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface{}) (error) {
+func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface{}) error {
 	// Build the RemoteCmd on this side so that it all pipes over
 	// to the remote side.
 	var cmd packer.RemoteCmd
@@ -196,7 +196,6 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		toClose = append(toClose, conn)
 		cmd.Stderr = conn
 	}
-
 
 	// Connect to the response address so we can write our result to it
 	// when ready.
