@@ -49,11 +49,9 @@ type Provisioner struct {
 
 type ExecuteTemplate struct {
 	FacterVars         string
-	HasHieraConfigPath bool
 	HieraConfigPath    string
 	ModulePath         string
 	ManifestFile       string
-	HasManifestDir     bool
 	ManifestDir        string
 	Sudo               bool
 }
@@ -77,8 +75,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
-			"{{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
-			"{{if .HasManifestDir}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			"{{if .HieraConfigPath ne ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
+			"{{if .ManifestDir ne ""}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
 			"{{.ManifestFile}}"
 	}
@@ -262,9 +260,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	// Execute Puppet
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
 		FacterVars:         strings.Join(facterVars, " "),
-		HasHieraConfigPath: remoteHieraConfigPath != "",
 		HieraConfigPath:    remoteHieraConfigPath,
-		HasManifestDir:     remoteManifestDir != "",
 		ManifestDir:        remoteManifestDir,
 		ManifestFile:       remoteManifestFile,
 		ModulePath:         strings.Join(modulePaths, ":"),
