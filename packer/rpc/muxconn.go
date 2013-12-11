@@ -339,13 +339,18 @@ func (m *MuxConn) loop() {
 
 		case muxPacketData:
 			stream.mu.Lock()
-			if stream.state == streamStateEstablished {
+			switch stream.state {
+			case streamStateFinWait1:
+				fallthrough
+			case streamStateFinWait2:
+				fallthrough
+			case streamStateEstablished:
 				select {
 				case stream.writeCh <- data:
 				default:
 					panic(fmt.Sprintf("Failed to write data, buffer full for stream %d", id))
 				}
-			} else {
+			default:
 				log.Printf("[ERR] Data received for stream in state: %d", stream.state)
 			}
 			stream.mu.Unlock()
