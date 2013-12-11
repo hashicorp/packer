@@ -241,7 +241,9 @@ func (m *MuxConn) loop() {
 		m.mu.Lock()
 		defer m.mu.Unlock()
 		for _, w := range m.streams {
+			w.mu.Lock()
 			w.remoteClose()
+			w.mu.Unlock()
 		}
 	}()
 
