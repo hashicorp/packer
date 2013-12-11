@@ -48,12 +48,12 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
-	FacterVars         string
-	HieraConfigPath    string
-	ModulePath         string
-	ManifestFile       string
-	ManifestDir        string
-	Sudo               bool
+	FacterVars      string
+	HieraConfigPath string
+	ModulePath      string
+	ManifestFile    string
+	ManifestDir     string
+	Sudo            bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -259,12 +259,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
-		FacterVars:         strings.Join(facterVars, " "),
-		HieraConfigPath:    remoteHieraConfigPath,
-		ManifestDir:        remoteManifestDir,
-		ManifestFile:       remoteManifestFile,
-		ModulePath:         strings.Join(modulePaths, ":"),
-		Sudo:               !p.config.PreventSudo,
+		FacterVars:      strings.Join(facterVars, " "),
+		HieraConfigPath: remoteHieraConfigPath,
+		ManifestDir:     remoteManifestDir,
+		ManifestFile:    remoteManifestFile,
+		ModulePath:      strings.Join(modulePaths, ":"),
+		Sudo:            !p.config.PreventSudo,
 	})
 	if err != nil {
 		return err
