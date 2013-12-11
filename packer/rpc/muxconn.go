@@ -234,7 +234,13 @@ func (m *MuxConn) openStream(id uint32) (*Stream, error) {
 }
 
 func (m *MuxConn) loop() {
-	defer m.Close()
+	defer func() {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		for _, w := range m.streams {
+			w.remoteClose()
+		}
+	}()
 
 	var id uint32
 	var packetType muxPacketType
@@ -384,16 +390,13 @@ func (s *Stream) Close() error {
 		return fmt.Errorf("Stream in bad state: %d", s.state)
 	}
 
-	if _, err := s.mux.write(s.id, muxPacketFin, nil); err != nil {
-		return err
-	}
-
 	if s.state == streamStateEstablished {
 		s.setState(streamStateFinWait1)
 	} else {
 		s.remoteClose()
 	}
 
+	s.mux.write(s.id, muxPacketFin, nil)
 	return nil
 }
 
