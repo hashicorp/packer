@@ -20,8 +20,12 @@ func TestClient(t *testing.T) {
 		t.Fatalf("err should be nil, got %s", err)
 	}
 
-	if addr != ":1234" {
-		t.Fatalf("incorrect addr %s", addr)
+	if addr.Network() != "tcp" {
+		t.Fatalf("bad: %#v", addr)
+	}
+
+	if addr.String() != ":1234" {
+		t.Fatalf("bad: %#v", addr)
 	}
 
 	// Test that it exits properly if killed

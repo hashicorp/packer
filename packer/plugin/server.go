@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -32,7 +33,7 @@ const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d69
 // The APIVersion is outputted along with the RPC address. The plugin
 // client validates this API version and will show an error if it doesn't
 // know how to speak it.
-const APIVersion = "1"
+const APIVersion = "2"
 
 // Server waits for a connection to this plugin and returns a Packer
 // RPC server that you can use to register components and serve them.
@@ -62,23 +63,19 @@ func Server() (*packrpc.Server, error) {
 	log.Printf("Plugin minimum port: %d\n", minPort)
 	log.Printf("Plugin maximum port: %d\n", maxPort)
 
-	var address string
-	var listener net.Listener
-	for port := minPort; port <= maxPort; port++ {
-		address = fmt.Sprintf("127.0.0.1:%d", port)
-		listener, err = net.Listen("tcp", address)
-		if err != nil {
-			err = nil
-			continue
-		}
-
-		break
+	listener, err := serverListener(minPort, maxPort)
+	if err != nil {
+		return nil, err
 	}
 	defer listener.Close()
 
 	// Output the address to stdout
-	log.Printf("Plugin address: %s\n", address)
-	fmt.Printf("%s|%s\n", APIVersion, address)
+	log.Printf("Plugin address: %s %s\n",
+		listener.Addr().Network(), listener.Addr().String())
+	fmt.Printf("%s|%s|%s\n",
+		APIVersion,
+		listener.Addr().Network(),
+		listener.Addr().String())
 	os.Stdout.Sync()
 
 	// Accept a connection
@@ -104,4 +101,43 @@ func Server() (*packrpc.Server, error) {
 	// Serve a single connection
 	log.Println("Serving a plugin connection...")
 	return packrpc.NewServer(conn), nil
+}
+
+func serverListener(minPort, maxPort int64) (net.Listener, error) {
+	if runtime.GOOS == "windows" {
+		return serverListener_tcp(minPort, maxPort)
+	}
+
+	return serverListener_unix()
+}
+
+func serverListener_tcp(minPort, maxPort int64) (net.Listener, error) {
+	for port := minPort; port <= maxPort; port++ {
+		address := fmt.Sprintf("127.0.0.1:%d", port)
+		listener, err := net.Listen("tcp", address)
+		if err == nil {
+			return listener, nil
+		}
+	}
+
+	return nil, errors.New("Couldn't bind plugin TCP listener")
+}
+
+func serverListener_unix() (net.Listener, error) {
+	tf, err := ioutil.TempFile("", "packer-plugin")
+	if err != nil {
+		return nil, err
+	}
+	path := tf.Name()
+
+	// Close the file and remove it because it has to not exist for
+	// the domain socket.
+	if err := tf.Close(); err != nil {
+		return nil, err
+	}
+	if err := os.Remove(path); err != nil {
+		return nil, err
+	}
+
+	return net.Listen("unix", path)
 }
