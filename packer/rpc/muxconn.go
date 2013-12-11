@@ -48,8 +48,8 @@ func NewMuxConn(rwc io.ReadWriteCloser) *MuxConn {
 // Close closes the underlying io.ReadWriteCloser. This will also close
 // all streams that are open.
 func (m *MuxConn) Close() error {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	// Close all the streams
 	for _, w := range m.streams {
