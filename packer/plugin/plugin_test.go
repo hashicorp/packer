@@ -54,20 +54,50 @@ func TestHelperProcess(*testing.T) {
 		fmt.Printf("%s1|:1234\n", APIVersion)
 		<-make(chan int)
 	case "builder":
-		ServeBuilder(new(packer.MockBuilder))
+		server, err := Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.RegisterBuilder(new(packer.MockBuilder))
+		server.Serve()
 	case "command":
-		ServeCommand(new(helperCommand))
+		server, err := Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.RegisterCommand(new(helperCommand))
+		server.Serve()
 	case "hook":
-		ServeHook(new(packer.MockHook))
+		server, err := Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.RegisterHook(new(packer.MockHook))
+		server.Serve()
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
 	case "mock":
 		fmt.Printf("%s|:1234\n", APIVersion)
 		<-make(chan int)
 	case "post-processor":
-		ServePostProcessor(new(helperPostProcessor))
+		server, err := Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.RegisterPostProcessor(new(helperPostProcessor))
+		server.Serve()
 	case "provisioner":
-		ServeProvisioner(new(packer.MockProvisioner))
+		server, err := Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.RegisterProvisioner(new(packer.MockProvisioner))
+		server.Serve()
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)
