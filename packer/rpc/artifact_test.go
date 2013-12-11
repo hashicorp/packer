@@ -2,48 +2,21 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
 
-type testArtifact struct{}
-
-func (testArtifact) BuilderId() string {
-	return "bid"
-}
-
-func (testArtifact) Files() []string {
-	return []string{"a", "b"}
-}
-
-func (testArtifact) Id() string {
-	return "id"
-}
-
-func (testArtifact) String() string {
-	return "string"
-}
-
-func (testArtifact) Destroy() error {
-	return nil
-}
-
 func TestArtifactRPC(t *testing.T) {
 	// Create the interface to test
-	a := new(testArtifact)
+	a := new(packer.MockArtifact)
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterArtifact(server, a)
-	address := serveSingleConn(server)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterArtifact(a)
 
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	aClient := Artifact(client)
+	aClient := client.Artifact()
 
 	// Test
 	if aClient.BuilderId() != "bid" {
@@ -64,5 +37,5 @@ func TestArtifactRPC(t *testing.T) {
 }
 
 func TestArtifact_Implements(t *testing.T) {
-	var _ packer.Artifact = Artifact(nil)
+	var _ packer.Artifact = new(artifact)
 }

@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
@@ -69,16 +68,11 @@ func TestEnvironmentRPC(t *testing.T) {
 	e := &testEnvironment{}
 
 	// Start the server
-	server := rpc.NewServer()
-	RegisterEnvironment(server, e)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	eClient := &Environment{client}
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterEnvironment(e)
+	eClient := client.Environment()
 
 	// Test Builder
 	builder, _ := eClient.Builder("foo")

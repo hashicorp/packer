@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"net/rpc"
 )
 
@@ -9,12 +10,14 @@ import (
 // where the actual environment is executed over an RPC connection.
 type Environment struct {
 	client *rpc.Client
+	mux    *MuxConn
 }
 
 // A EnvironmentServer wraps a packer.Environment and makes it exportable
 // as part of a Golang RPC server.
 type EnvironmentServer struct {
 	env packer.Environment
+	mux *MuxConn
 }
 
 type EnvironmentCliArgs struct {
@@ -22,33 +25,32 @@ type EnvironmentCliArgs struct {
 }
 
 func (e *Environment) Builder(name string) (b packer.Builder, err error) {
-	var reply string
-	err = e.client.Call("Environment.Builder", name, &reply)
+	var streamId uint32
+	err = e.client.Call("Environment.Builder", name, &streamId)
 	if err != nil {
 		return
 	}
 
-	client, err := rpcDial(reply)
+	client, err := NewClientWithMux(e.mux, streamId)
 	if err != nil {
-		return
+		return nil, err
 	}
-
-	b = Builder(client)
+	b = client.Builder()
 	return
 }
 
 func (e *Environment) Cache() packer.Cache {
-	var reply string
-	if err := e.client.Call("Environment.Cache", new(interface{}), &reply); err != nil {
+	var streamId uint32
+	if err := e.client.Call("Environment.Cache", new(interface{}), &streamId); err != nil {
 		panic(err)
 	}
 
-	client, err := rpcDial(reply)
+	client, err := NewClientWithMux(e.mux, streamId)
 	if err != nil {
-		panic(err)
+		log.Printf("[ERR] Error getting cache client: %s", err)
+		return nil
 	}
-
-	return Cache(client)
+	return client.Cache()
 }
 
 func (e *Environment) Cli(args []string) (result int, err error) {
@@ -58,85 +60,81 @@ func (e *Environment) Cli(args []string) (result int, err error) {
 }
 
 func (e *Environment) Hook(name string) (h packer.Hook, err error) {
-	var reply string
-	err = e.client.Call("Environment.Hook", name, &reply)
+	var streamId uint32
+	err = e.client.Call("Environment.Hook", name, &streamId)
 	if err != nil {
 		return
 	}
 
-	client, err := rpcDial(reply)
+	client, err := NewClientWithMux(e.mux, streamId)
 	if err != nil {
-		return
+		return nil, err
 	}
-
-	h = Hook(client)
-	return
+	return client.Hook(), nil
 }
 
 func (e *Environment) PostProcessor(name string) (p packer.PostProcessor, err error) {
-	var reply string
-	err = e.client.Call("Environment.PostProcessor", name, &reply)
+	var streamId uint32
+	err = e.client.Call("Environment.PostProcessor", name, &streamId)
 	if err != nil {
 		return
 	}
 
-	client, err := rpcDial(reply)
+	client, err := NewClientWithMux(e.mux, streamId)
 	if err != nil {
-		return
+		return nil, err
 	}
-
-	p = PostProcessor(client)
+	p = client.PostProcessor()
 	return
 }
 
 func (e *Environment) Provisioner(name string) (p packer.Provisioner, err error) {
-	var reply string
-	err = e.client.Call("Environment.Provisioner", name, &reply)
+	var streamId uint32
+	err = e.client.Call("Environment.Provisioner", name, &streamId)
 	if err != nil {
 		return
 	}
 
-	client, err := rpcDial(reply)
+	client, err := NewClientWithMux(e.mux, streamId)
 	if err != nil {
-		return
+		return nil, err
 	}
-
-	p = Provisioner(client)
+	p = client.Provisioner()
 	return
 }
 
 func (e *Environment) Ui() packer.Ui {
-	var reply string
-	e.client.Call("Environment.Ui", new(interface{}), &reply)
+	var streamId uint32
+	e.client.Call("Environment.Ui", new(interface{}), &streamId)
 
-	client, err := rpcDial(reply)
+	client, err := NewClientWithMux(e.mux, streamId)
 	if err != nil {
-		panic(err)
+		log.Printf("[ERR] Error connecting to Ui: %s", err)
+		return nil
 	}
-
-	return &Ui{client}
+	return client.Ui()
 }
 
-func (e *EnvironmentServer) Builder(name *string, reply *string) error {
-	builder, err := e.env.Builder(*name)
+func (e *EnvironmentServer) Builder(name string, reply *uint32) error {
+	builder, err := e.env.Builder(name)
 	if err != nil {
-		return err
+		return NewBasicError(err)
 	}
 
-	// Wrap it
-	server := rpc.NewServer()
-	RegisterBuilder(server, builder)
-
-	*reply = serveSingleConn(server)
+	*reply = e.mux.NextId()
+	server := NewServerWithMux(e.mux, *reply)
+	server.RegisterBuilder(builder)
+	go server.Serve()
 	return nil
 }
 
-func (e *EnvironmentServer) Cache(args *interface{}, reply *string) error {
+func (e *EnvironmentServer) Cache(args *interface{}, reply *uint32) error {
 	cache := e.env.Cache()
 
-	server := rpc.NewServer()
-	RegisterCache(server, cache)
-	*reply = serveSingleConn(server)
+	*reply = e.mux.NextId()
+	server := NewServerWithMux(e.mux, *reply)
+	server.RegisterCache(cache)
+	go server.Serve()
 	return nil
 }
 
@@ -145,53 +143,51 @@ func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) (err error
 	return
 }
 
-func (e *EnvironmentServer) Hook(name *string, reply *string) error {
-	hook, err := e.env.Hook(*name)
+func (e *EnvironmentServer) Hook(name string, reply *uint32) error {
+	hook, err := e.env.Hook(name)
 	if err != nil {
-		return err
+		return NewBasicError(err)
 	}
 
-	// Wrap it
-	server := rpc.NewServer()
-	RegisterHook(server, hook)
-
-	*reply = serveSingleConn(server)
+	*reply = e.mux.NextId()
+	server := NewServerWithMux(e.mux, *reply)
+	server.RegisterHook(hook)
+	go server.Serve()
 	return nil
 }
 
-func (e *EnvironmentServer) PostProcessor(name *string, reply *string) error {
-	pp, err := e.env.PostProcessor(*name)
+func (e *EnvironmentServer) PostProcessor(name string, reply *uint32) error {
+	pp, err := e.env.PostProcessor(name)
 	if err != nil {
-		return err
+		return NewBasicError(err)
 	}
 
-	server := rpc.NewServer()
-	RegisterPostProcessor(server, pp)
-
-	*reply = serveSingleConn(server)
+	*reply = e.mux.NextId()
+	server := NewServerWithMux(e.mux, *reply)
+	server.RegisterPostProcessor(pp)
+	go server.Serve()
 	return nil
 }
 
-func (e *EnvironmentServer) Provisioner(name *string, reply *string) error {
-	prov, err := e.env.Provisioner(*name)
+func (e *EnvironmentServer) Provisioner(name string, reply *uint32) error {
+	prov, err := e.env.Provisioner(name)
 	if err != nil {
-		return err
+		return NewBasicError(err)
 	}
 
-	server := rpc.NewServer()
-	RegisterProvisioner(server, prov)
-
-	*reply = serveSingleConn(server)
+	*reply = e.mux.NextId()
+	server := NewServerWithMux(e.mux, *reply)
+	server.RegisterProvisioner(prov)
+	go server.Serve()
 	return nil
 }
 
-func (e *EnvironmentServer) Ui(args *interface{}, reply *string) error {
+func (e *EnvironmentServer) Ui(args *interface{}, reply *uint32) error {
 	ui := e.env.Ui()
 
-	// Wrap it
-	server := rpc.NewServer()
-	RegisterUi(server, ui)
-
-	*reply = serveSingleConn(server)
+	*reply = e.mux.NextId()
+	server := NewServerWithMux(e.mux, *reply)
+	server.RegisterUi(ui)
+	go server.Serve()
 	return nil
 }

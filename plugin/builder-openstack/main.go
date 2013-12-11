@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeBuilder(new(openstack.Builder))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterBuilder(new(openstack.Builder))
+	server.Serve()
 }
