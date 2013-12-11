@@ -1,5 +1,12 @@
 ## 0.5.0 (unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+* provisioner/puppet-masterless: The `execute_command` no longer has
+  the `Has*` variables, since the templating language now supports
+  comparison operations. See the Go documentation for more info:
+  http://golang.org/pkg/text/template/
+
 IMPROVEMENTS:
 
 * core: Plugins communicate over a single TCP connection per plugin now,
