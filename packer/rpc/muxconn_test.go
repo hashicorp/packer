@@ -114,6 +114,32 @@ func TestMuxConn(t *testing.T) {
 	<-doneCh
 }
 
+func TestMuxConn_socketClose(t *testing.T) {
+	client, server := testMux(t)
+	defer client.Close()
+	defer server.Close()
+
+	go func() {
+		_, err := server.Accept(0)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		server.rwc.Close()
+	}()
+
+	s0, err := client.Dial(0)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	var data [1024]byte
+	_, err = s0.Read(data[:])
+	if err != io.EOF {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestMuxConn_clientClosesStreams(t *testing.T) {
 	client, server := testMux(t)
 	defer client.Close()
