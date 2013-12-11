@@ -51,7 +51,7 @@ func TestHelperProcess(*testing.T) {
 	cmd, args := args[0], args[1:]
 	switch cmd {
 	case "bad-version":
-		fmt.Printf("%s1|:1234\n", APIVersion)
+		fmt.Printf("%s1|tcp|:1234\n", APIVersion)
 		<-make(chan int)
 	case "builder":
 		server, err := Server()
@@ -80,7 +80,7 @@ func TestHelperProcess(*testing.T) {
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
 	case "mock":
-		fmt.Printf("%s|:1234\n", APIVersion)
+		fmt.Printf("%s|tcp|:1234\n", APIVersion)
 		<-make(chan int)
 	case "post-processor":
 		server, err := Server()
@@ -102,11 +102,11 @@ func TestHelperProcess(*testing.T) {
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)
 	case "stderr":
-		fmt.Printf("%s|:1234\n", APIVersion)
+		fmt.Printf("%s|tcp|:1234\n", APIVersion)
 		log.Println("HELLO")
 		log.Println("WORLD")
 	case "stdin":
-		fmt.Printf("%s|:1234\n", APIVersion)
+		fmt.Printf("%s|tcp|:1234\n", APIVersion)
 		data := make([]byte, 5)
 		if _, err := os.Stdin.Read(data); err != nil {
 			log.Printf("stdin read error: %s", err)
