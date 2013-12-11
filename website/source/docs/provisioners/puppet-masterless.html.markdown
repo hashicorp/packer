@@ -58,12 +58,13 @@ Optional parameters:
   configuration to be uploaded to the remote machine. Hiera data directories
   must be uploaded using the file provisioner separately.
 
+* `manifest_dir` (string) - The path to a local directory with manifests
+  to be uploaded to the remote machine. This is useful if your main
+  manifest file uses imports.
+
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote
   machine. By default, this is empty.
-
-* `manifest_dir` (string) - The path to a local directory with
-  manifests to be uploaded to the remote machine.
 
 * `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to run Puppet are executed with `sudo`. If this is true,

@@ -31,7 +31,8 @@ type Config struct {
 	// The main manifest file to apply to kick off the entire thing.
 	ManifestFile string `mapstructure:"manifest_file"`
 
-	// The manifest dir, e.g. for includes
+	// A directory of manifest files that will be uploaded to the remote
+	// machine.
 	ManifestDir string `mapstructure:"manifest_dir"`
 
 	// If true, `sudo` will NOT be used to execute Puppet.
@@ -214,8 +215,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	// Upload manifest dir if set
 	remoteManifestDir := ""
 	if p.config.ManifestDir != "" {
-		var err error
-		remoteManifestDir, err = p.uploadManifestDir(ui, comm)
+		ui.Message(fmt.Sprintf(
+			"Uploading manifest directory from: %s", p.config.ManifestDir))
+		remoteManifestDir = fmt.Sprintf("%s/manifests", p.config.StagingDir)
+		err := p.uploadDirectory(ui, comm, remoteManifestDir, p.config.ManifestDir)
 		if err != nil {
 			return fmt.Errorf("Error uploading manifest dir: %s", err)
 		}
@@ -296,22 +299,6 @@ func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) 
 	}
 
 	return path, nil
-}
-
-func (p *Provisioner) uploadManifestDir(ui packer.Ui, comm packer.Communicator) (string, error) {
-	ui.Message("Uploading manifest dir...")
-	path, err := os.Open(p.config.ManifestDir)
-	if err != nil {
-		return "", err
-	}
-	defer path.Close()
-
-	targetPath := fmt.Sprintf("%s/manifests", p.config.StagingDir)
-	if err := p.uploadDirectory(ui, comm, targetPath, p.config.ManifestDir); err != nil {
-		return "", fmt.Errorf("Error uploading manifest dir: %s", err)
-	}
-
-	return targetPath, nil
 }
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
