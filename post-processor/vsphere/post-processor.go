@@ -16,18 +16,17 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Insecure           bool   `mapstructure:"insecure"`
-	Cluster            string `mapstructure:"cluster"`
-	Datacenter         string `mapstructure:"datacenter"`
-	Datastore          string `mapstructure:"datastore"`
-	Debug              bool   `mapstructure:"debug"`
-	Host               string `mapstructure:"host"`
-	Password           string `mapstructure:"password"`
-	ResourcePool       string `mapstructure:"resource_pool"`
-	Username           string `mapstructure:"username"`
-	VMFolder           string `mapstructure:"vm_folder"`
-	VMName             string `mapstructure:"vm_name"`
-	VMNetwork          string `mapstructure:"vm_network"`
+	Insecure     bool   `mapstructure:"insecure"`
+	Cluster      string `mapstructure:"cluster"`
+	Datacenter   string `mapstructure:"datacenter"`
+	Datastore    string `mapstructure:"datastore"`
+	Host         string `mapstructure:"host"`
+	Password     string `mapstructure:"password"`
+	ResourcePool string `mapstructure:"resource_pool"`
+	Username     string `mapstructure:"username"`
+	VMFolder     string `mapstructure:"vm_folder"`
+	VMName       string `mapstructure:"vm_name"`
+	VMNetwork    string `mapstructure:"vm_network"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -56,23 +55,29 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
-	validates := map[string]*string{
-		"cluster":      &p.config.Cluster,
-		"datacenter":   &p.config.Datacenter,
-		"datastore":    &p.config.Datastore,
-		"host":         &p.config.Host,
-		"vm_network":   &p.config.VMNetwork,
-		"password":     &p.config.Password,
+	templates := map[string]*string{
+		"cluster":       &p.config.Cluster,
+		"datacenter":    &p.config.Datacenter,
+		"datastore":     &p.config.Datastore,
+		"host":          &p.config.Host,
+		"vm_network":    &p.config.VMNetwork,
+		"password":      &p.config.Password,
 		"resource_pool": &p.config.ResourcePool,
-		"username":     &p.config.Username,
-		"vm_folder":    &p.config.VMFolder,
-		"vm_name":      &p.config.VMName,
+		"username":      &p.config.Username,
+		"vm_folder":     &p.config.VMFolder,
+		"vm_name":       &p.config.VMName,
 	}
 
-	for n := range validates {
-		if *validates[n] == "" {
+	for key, ptr := range templates {
+		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("%s must be set", n))
+				errs, fmt.Errorf("%s must be set", key))
+		}
+
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", key, err))
 		}
 	}
 
@@ -100,50 +105,24 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX file not found")
 	}
 
-	// Get user variables from template
-	vm_name, err := p.config.tpl.Process(p.config.VMName, p.config.PackerUserVars)
-	if err != nil {
-		return nil, false, fmt.Errorf("Failed: %s", err)
-	}
-
-	username, err := p.config.tpl.Process(p.config.Username, p.config.PackerUserVars)
-	if err != nil {
-		return nil, false, fmt.Errorf("Failed: %s", err)
-	}
-
-	password, err := p.config.tpl.Process(p.config.Password, p.config.PackerUserVars)
-	if err != nil {
-		return nil, false, fmt.Errorf("Failed: %s", err)
-	}
-
-	datastore, err := p.config.tpl.Process(p.config.Datastore, p.config.PackerUserVars)
-	if err != nil {
-		return nil, false, fmt.Errorf("Failed: %s", err)
-	}
-
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
-
 	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=%s", vm_name),
-		fmt.Sprintf("--datastore=%s", datastore),
+		fmt.Sprintf("--name=%s", p.config.VMName),
+		fmt.Sprintf("--datastore=%s", p.config.Datastore),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
 		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
-			username,
-			password,
+			p.config.Username,
+			p.config.Password,
 			p.config.Host,
 			p.config.Datacenter,
 			p.config.Cluster,
 			p.config.ResourcePool),
 	}
 
-	if p.config.Debug {
-		ui.Message(fmt.Sprintf("DEBUG: %s", args))
-	}
-
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
