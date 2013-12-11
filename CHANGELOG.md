@@ -1,6 +1,10 @@
 ## 0.5.0 (unreleased)
 
+IMPROVEMENTS:
 
+* core: Plugins communicate over a single TCP connection per plugin now,
+  instead of sometimes dozens. Performance around plugin communication
+  dramatically increased.
 
 ## 0.4.1 (December 7, 2013)
 
