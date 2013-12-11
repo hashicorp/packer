@@ -3,12 +3,11 @@ package rpc
 import (
 	"errors"
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"testing"
 )
 
-var testBuildArtifact = &testArtifact{}
+var testBuildArtifact = &packer.MockArtifact{}
 
 type testBuild struct {
 	nameCalled      bool
@@ -60,25 +59,13 @@ func (b *testBuild) Cancel() {
 	b.cancelCalled = true
 }
 
-func buildRPCClient(t *testing.T) (*testBuild, packer.Build) {
-	// Create the interface to test
-	b := new(testBuild)
-
-	// Start the server
-	server := rpc.NewServer()
-	RegisterBuild(server, b)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	return b, Build(client)
-}
-
 func TestBuild(t *testing.T) {
-	b, bClient := buildRPCClient(t)
+	b := new(testBuild)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterBuild(b)
+	bClient := client.Build()
 
 	// Test Name
 	bClient.Name()
@@ -120,23 +107,6 @@ func TestBuild(t *testing.T) {
 		t.Fatalf("bad: %#v", artifacts)
 	}
 
-	// Test the UI given to run, which should be fully functional
-	if b.runCalled {
-		b.runCache.Lock("foo")
-		if !cache.lockCalled {
-			t.Fatal("lock shuld be called")
-		}
-
-		b.runUi.Say("format")
-		if !ui.sayCalled {
-			t.Fatal("say should be called")
-		}
-
-		if ui.sayMessage != "format" {
-			t.Fatalf("bad: %#v", ui.sayMessage)
-		}
-	}
-
 	// Test run with an error
 	b.errRunResult = true
 	_, err = bClient.Run(ui, cache)
@@ -164,7 +134,12 @@ func TestBuild(t *testing.T) {
 }
 
 func TestBuildPrepare_Warnings(t *testing.T) {
-	b, bClient := buildRPCClient(t)
+	b := new(testBuild)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterBuild(b)
+	bClient := client.Build()
 
 	expected := []string{"foo"}
 	b.prepareWarnings = expected
@@ -179,5 +154,5 @@ func TestBuildPrepare_Warnings(t *testing.T) {
 }
 
 func TestBuild_ImplementsBuild(t *testing.T) {
-	var _ packer.Build = Build(nil)
+	var _ packer.Build = new(build)
 }

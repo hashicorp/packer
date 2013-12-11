@@ -17,10 +17,6 @@ type CacheServer struct {
 	cache packer.Cache
 }
 
-func Cache(client *rpc.Client) *cache {
-	return &cache{client}
-}
-
 type CacheRLockResponse struct {
 	Path   string
 	Exists bool

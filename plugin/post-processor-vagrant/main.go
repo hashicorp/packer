@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServePostProcessor(new(vagrant.PostProcessor))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterPostProcessor(new(vagrant.PostProcessor))
+	server.Serve()
 }

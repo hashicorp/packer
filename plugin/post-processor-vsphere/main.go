@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServePostProcessor(new(vsphere.PostProcessor))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterPostProcessor(new(vsphere.PostProcessor))
+	server.Serve()
 }

@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	plugin.ServeBuilder(new(qemu.Builder))
+	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterBuilder(new(qemu.Builder))
+	server.Serve()
 }

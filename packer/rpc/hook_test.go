@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"net/rpc"
 	"reflect"
 	"sync"
 	"testing"
@@ -14,17 +13,11 @@ func TestHookRPC(t *testing.T) {
 	h := new(packer.MockHook)
 
 	// Serve
-	server := rpc.NewServer()
-	RegisterHook(server, h)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	hClient := Hook(client)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterHook(h)
+	hClient := client.Hook()
 
 	// Test Run
 	ui := &testUi{}
@@ -60,17 +53,11 @@ func TestHook_cancelWhileRun(t *testing.T) {
 	}
 
 	// Serve
-	server := rpc.NewServer()
-	RegisterHook(server, h)
-	address := serveSingleConn(server)
-
-	// Create the client over RPC and run some methods to verify it works
-	client, err := rpc.Dial("tcp", address)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	hClient := Hook(client)
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterHook(h)
+	hClient := client.Hook()
 
 	// Start the run
 	finished := make(chan struct{})
