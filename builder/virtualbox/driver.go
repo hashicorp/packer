@@ -20,6 +20,9 @@ type Driver interface {
 	// Create a SATA controller.
 	CreateSATAController(vm string, controller string) error
 
+	// Create a Disk.
+	CreateDisk(path string, size string, format string) error
+
 	// Checks if the VM with the given name is running.
 	IsRunning(string) (bool, error)
 
@@ -65,6 +68,27 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
 		portCountArg, "1",
 	}
 
+	return d.VBoxManage(command...)
+}
+
+func (d *VBox42Driver) CreateDisk(path string, size string, format string) error {
+	version, err := d.Version()
+	if err != nil {
+		return err
+	}
+
+	variant := "Standard"
+	if strings.HasPrefix(version, "4.3") {
+		variant = "Standard"
+	}
+
+	command := []string{
+         	"createhd",
+         	"--filename", path,
+         	"--size", size,
+         	"--format", format,
+         	"--variant", variant,
+ 	}
 	return d.VBoxManage(command...)
 }
 

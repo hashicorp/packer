@@ -20,7 +20,8 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	vmName := state.Get("vmName").(string)
 
 	format := "VDI"
-	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName, strings.ToLower(format)))
+        disk   := 1
+	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s%d.%s", config.VMName, disk ,strings.ToLower(format)))
 
 	command := []string{
 		"createhd",
@@ -79,6 +80,33 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	// This step create and attach the additional disks.
+	// This funtion will work only if controller is sata
+
+	if config.HardDriveInterface == "sata" {
+		ui.Say("Creating additional hard drives...")
+		for _, additionalsize := range config.AdditionalDiskSize  {
+			port := strconv.FormatUint(uint64(disk), 10)
+			disk++
+			additionalpath := filepath.Join(config.OutputDir, fmt.Sprintf("%s%d.%s", config.VMName, disk ,strings.ToLower(format)))
+        		size := strconv.FormatUint(uint64(additionalsize), 10)
+			if err := driver.CreateDisk(additionalpath, size, format); err != nil {
+				err := fmt.Errorf("Error creating hard drive: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+	 		err := driver.VBoxManage("storageattach", vmName, "--storagectl", controllerName, "--port", port, "--device", "0", "--type", "hdd", "--medium", additionalpath)
+             		if err != nil {
+			err := fmt.Errorf("Error attaching hard drive: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+			}
+		}
+	}
+        
 
 	return multistep.ActionContinue
 }
