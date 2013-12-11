@@ -20,6 +20,10 @@ A template is a JSON object that has a set of keys configuring various
 components of Packer. The available keys within a template are listed below.
 Along with each key, it is noted whether it is required or not.
 
+* `description` (optional) is a string providing a description of what
+  the template does. This output is used only in the
+  [inspect command](/docs/command-line/inspect.html).
+
 * `builders` (_required_) is an array of one or more objects that defines
   the builders that will be used to create machine images for this template,
   and configures each of those builders. For more information on how to define
