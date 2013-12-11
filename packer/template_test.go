@@ -111,6 +111,26 @@ func TestParseTemplate_Basic(t *testing.T) {
 	}
 }
 
+func TestParseTemplate_Description(t *testing.T) {
+	data := `
+	{
+		"description": "Foo",
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if result == nil {
+		t.Fatal("should have result")
+	}
+	if result.Description != "Foo" {
+		t.Fatalf("bad: %#v", result.Description)
+	}
+}
+
 func TestParseTemplate_Invalid(t *testing.T) {
 	// Note there is an extra comma below for a purposeful
 	// syntax error in the JSON.
