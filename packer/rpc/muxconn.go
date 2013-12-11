@@ -9,9 +9,13 @@ import (
 	"time"
 )
 
-// MuxConn is a connection that can be used bi-directionally for RPC. Normally,
-// Go RPC only allows client-to-server connections. This allows the client
-// to actually act as a server as well.
+// MuxConn is able to multiplex multiple streams on top of any
+// io.ReadWriteCloser. These streams act like TCP connections (Dial, Accept,
+// Close, full duplex, etc.).
+//
+// The underlying io.ReadWriteCloser is expected to guarantee delivery
+// and ordering, such as TCP. Congestion control and such aren't implemented
+// by the streams, so that is also up to the underlying connection.
 //
 // MuxConn works using a fairly dumb multiplexing technique of simply
 // framing every piece of data sent into a prefix + data format. Streams
@@ -34,6 +38,7 @@ const (
 	muxPacketData
 )
 
+// Create a new MuxConn around any io.ReadWriteCloser.
 func NewMuxConn(rwc io.ReadWriteCloser) *MuxConn {
 	m := &MuxConn{
 		rwc:     rwc,
@@ -57,6 +62,8 @@ func (m *MuxConn) Close() error {
 	}
 	m.streams = make(map[uint32]*Stream)
 
+	// Close the actual connection. This will also force the loop
+	// to end since it'll read EOF or closed connection.
 	return m.rwc.Close()
 }
 
@@ -237,6 +244,8 @@ func (m *MuxConn) openStream(id uint32) (*Stream, error) {
 }
 
 func (m *MuxConn) loop() {
+	// Force close every stream that we know about when we exit so
+	// that they all read EOF and don't block forever.
 	defer func() {
 		m.mu.Lock()
 		defer m.mu.Unlock()
@@ -363,7 +372,8 @@ func (m *MuxConn) write(id uint32, dataType muxPacketType, p []byte) (int, error
 	return m.rwc.Write(p)
 }
 
-// Stream is a single stream of data and implements io.ReadWriteCloser
+// Stream is a single stream of data and implements io.ReadWriteCloser.
+// A Stream is full-duplex so you can write data as well as read data.
 type Stream struct {
 	id           uint32
 	mux          *MuxConn
