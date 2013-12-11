@@ -7,6 +7,11 @@ BACKWARDS INCOMPATIBILITIES:
   comparison operations. See the Go documentation for more info:
   http://golang.org/pkg/text/template/
 
+FEATURES:
+
+* "description" field in templates: write a human-readable description
+  of what a template does. This will be shown in `packer inspect`.
+
 IMPROVEMENTS:
 
 * core: Plugins communicate over a single TCP connection per plugin now,
