@@ -114,6 +114,51 @@ func TestMuxConn(t *testing.T) {
 	<-doneCh
 }
 
+// This tests that even when the client end is closed, data can be
+// read from the server.
+func TestMuxConn_clientCloseRead(t *testing.T) {
+	client, server := testMux(t)
+	defer client.Close()
+	defer server.Close()
+
+	// This channel will be closed when we close
+	waitCh := make(chan struct{})
+
+	go func() {
+		conn, err := server.Accept(0)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		<-waitCh
+
+		_, err = conn.Write([]byte("foo"))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		conn.Close()
+	}()
+
+	s0, err := client.Dial(0)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := s0.Close(); err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+
+	// Close this to continue on on the server-side
+	close(waitCh)
+
+	var data [1024]byte
+	n, err := s0.Read(data[:])
+	if string(data[:n]) != "foo" {
+		t.Fatalf("bad: %#v", string(data[:n]))
+	}
+}
+
 func TestMuxConn_socketClose(t *testing.T) {
 	client, server := testMux(t)
 	defer client.Close()
