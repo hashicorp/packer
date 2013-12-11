@@ -2,6 +2,9 @@
 
 BACKWARDS INCOMPATIBILITIES:
 
+* post-processor/vsphere: Some available configuration options were
+  changed. Running your template through `packer fix` should resolve
+  this.
 * provisioner/puppet-masterless: The `execute_command` no longer has
   the `Has*` variables, since the templating language now supports
   comparison operations. See the Go documentation for more info:
@@ -19,6 +22,11 @@ IMPROVEMENTS:
   dramatically increased.
 * provisioner/puppet-masterless: Can now specify a `manifest_dir` to
   upload manifests to the remote machine for imports. [GH-655]
+
+BUG FIXES:
+
+* post-processor/vsphere: Uploads VM properly. [GH-694]
+* post-processor/vsphere: Process user variables.
 
 ## 0.4.1 (December 7, 2013)
 
