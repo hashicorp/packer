@@ -34,7 +34,7 @@ type Client struct {
 	exited      bool
 	doneLogging chan struct{}
 	l           sync.Mutex
-	address     string
+	address     net.Addr
 }
 
 // ClientConfig is the configuration used to initialize a new
@@ -206,11 +206,11 @@ func (c *Client) Kill() {
 // This method is safe to call multiple times. Subsequent calls have no effect.
 // Once a client has been started once, it cannot be started again, even if
 // it was killed.
-func (c *Client) Start() (address string, err error) {
+func (c *Client) Start() (addr net.Addr, err error) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
-	if c.address != "" {
+	if c.address != nil {
 		return c.address, nil
 	}
 
@@ -320,8 +320,8 @@ func (c *Client) Start() (address string, err error) {
 		// Trim the line and split by "|" in order to get the parts of
 		// the output.
 		line := strings.TrimSpace(string(lineBytes))
-		parts := strings.SplitN(line, "|", 2)
-		if len(parts) < 2 {
+		parts := strings.SplitN(line, "|", 3)
+		if len(parts) < 3 {
 			err = fmt.Errorf("Unrecognized remote plugin message: %s", line)
 			return
 		}
@@ -333,10 +333,17 @@ func (c *Client) Start() (address string, err error) {
 			return
 		}
 
-		c.address = parts[1]
-		address = c.address
+		switch parts[1] {
+		case "tcp":
+			addr, err = net.ResolveTCPAddr("tcp", parts[2])
+		case "unix":
+			addr, err = net.ResolveUnixAddr("unix", parts[2])
+		default:
+			err = fmt.Errorf("Unknown address type: %s", parts[1])
+		}
 	}
 
+	c.address = addr
 	return
 }
 
@@ -361,23 +368,24 @@ func (c *Client) logStderr(r io.Reader) {
 }
 
 func (c *Client) packrpcClient() (*packrpc.Client, error) {
-	address, err := c.Start()
+	addr, err := c.Start()
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := net.Dial("tcp", address)
+	conn, err := net.Dial(addr.Network(), addr.String())
 	if err != nil {
 		return nil, err
 	}
 
-	// Make sure to set keep alive so that the connection doesn't die
-	tcpConn := conn.(*net.TCPConn)
-	tcpConn.SetKeepAlive(true)
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		// Make sure to set keep alive so that the connection doesn't die
+		tcpConn.SetKeepAlive(true)
+	}
 
-	client, err := packrpc.NewClient(tcpConn)
+	client, err := packrpc.NewClient(conn)
 	if err != nil {
-		tcpConn.Close()
+		conn.Close()
 		return nil, err
 	}
 
