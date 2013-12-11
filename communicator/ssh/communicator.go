@@ -118,6 +118,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	go func() {
 		failures := 0
 		for {
+			log.Printf("[DEBUG] Background SSH connection checker is testing")
 			dummy, err := c.config.Connection()
 			if err == nil {
 				failures = 0
