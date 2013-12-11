@@ -5,7 +5,7 @@ page_title: "vSphere Post-Processor"
 
 # vSphere Post-Processor
 
-Type: `vsphere-upload`
+Type: `vsphere`
 
 The vSphere post-processor takes an artifact from the VMware builder
 and uploads it to a vSphere endpoint.
