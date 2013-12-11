@@ -17,15 +17,19 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Insecure           bool   `mapstructure:"insecure"`
+	Cluster            string `mapstructure:"cluster"`
 	Datacenter         string `mapstructure:"datacenter"`
 	Datastore          string `mapstructure:"datastore"`
+	Debug              bool   `mapstructure:"debug"`
 	Host               string `mapstructure:"host"`
 	Password           string `mapstructure:"password"`
-	PathToResourcePool string `mapstructure:"path_to_resource_pool"`
+	ResourcePool       string `mapstructure:"resource_pool"`
 	Username           string `mapstructure:"username"`
 	VMFolder           string `mapstructure:"vm_folder"`
 	VMName             string `mapstructure:"vm_name"`
 	VMNetwork          string `mapstructure:"vm_network"`
+
+	tpl *packer.ConfigTemplate
 }
 
 type PostProcessor struct {
@@ -38,11 +42,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	tpl, err := packer.NewConfigTemplate()
+	p.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return err
 	}
-	tpl.UserVars = p.config.PackerUserVars
+	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	// Accumulate any errors
 	errs := new(packer.MultiError)
@@ -53,15 +57,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	validates := map[string]*string{
-		"datacenter":            &p.config.Datacenter,
-		"datastore":             &p.config.Datastore,
-		"host":                  &p.config.Host,
-		"vm_network":            &p.config.VMNetwork,
-		"password":              &p.config.Password,
-		"path_to_resource_pool": &p.config.PathToResourcePool,
-		"username":              &p.config.Username,
-		"vm_folder":             &p.config.VMFolder,
-		"vm_name":               &p.config.VMName,
+		"cluster":      &p.config.Cluster,
+		"datacenter":   &p.config.Datacenter,
+		"datastore":    &p.config.Datastore,
+		"host":         &p.config.Host,
+		"vm_network":   &p.config.VMNetwork,
+		"password":     &p.config.Password,
+		"resource_pool": &p.config.ResourcePool,
+		"username":     &p.config.Username,
+		"vm_folder":    &p.config.VMFolder,
+		"vm_name":      &p.config.VMName,
 	}
 
 	for n := range validates {
@@ -95,21 +100,48 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX file not found")
 	}
 
+	// Get user variables from template
+	vm_name, err := p.config.tpl.Process(p.config.VMName, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
+	username, err := p.config.tpl.Process(p.config.Username, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
+	password, err := p.config.tpl.Process(p.config.Password, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
+	datastore, err := p.config.tpl.Process(p.config.Datastore, p.config.PackerUserVars)
+	if err != nil {
+		return nil, false, fmt.Errorf("Failed: %s", err)
+	}
+
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 
 	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=%s", p.config.VMName),
-		fmt.Sprintf("--datastore=%s", p.config.Datastore),
+		fmt.Sprintf("--name=%s", vm_name),
+		fmt.Sprintf("--datastore=%s", datastore),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
-		fmt.Sprintf("vi://%s:%s@%s/%s/%s",
-			p.config.Username,
-			p.config.Password,
+		fmt.Sprintf("%s", vmx),
+		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
+			username,
+			password,
 			p.config.Host,
 			p.config.Datacenter,
-			p.config.PathToResourcePool),
+			p.config.Cluster,
+			p.config.ResourcePool),
+	}
+
+	if p.config.Debug {
+		ui.Message(fmt.Sprintf("DEBUG: %s", args))
 	}
 
 	var out bytes.Buffer
