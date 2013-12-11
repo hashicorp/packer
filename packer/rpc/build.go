@@ -9,7 +9,7 @@ import (
 // over an RPC connection.
 type build struct {
 	client *rpc.Client
-	mux *MuxConn
+	mux    *MuxConn
 }
 
 // BuildServer wraps a packer.Build implementation and makes it exportable
