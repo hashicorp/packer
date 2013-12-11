@@ -86,8 +86,8 @@ for readability) to execute Puppet:
 {{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
-  {{if .HasHieraConfigPath}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
-  {{if .HasManifestDir}}--manifestdir='{{.ManifestDir}}' {{end}} \
+  {{if .HieraConfigPath ne ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
+  {{if .ManifestDir ne ""}}--manifestdir='{{.ManifestDir}}' {{end}} \
   {{.ManifestFile}}
 ```
 
@@ -97,7 +97,6 @@ can contain various template variables, defined below:
 
 * `FacterVars` - Shell-friendly string of environmental variables used
   to set custom facts configured for this provisioner.
-* `HasHieraConfigPath` - Boolean true if there is a hiera config path set.
 * `HieraConfigPath` - The path to a hiera configuration file.
 * `ManifestFile` - The path on the remote machine to the manifest file
   for Puppet to use.
