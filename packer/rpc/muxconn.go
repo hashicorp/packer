@@ -300,10 +300,14 @@ func (m *MuxConn) loop() {
 			case streamStateFinWait2:
 				stream.remoteClose()
 
-				// Remove this stream from being active so that it
-				// can be re-used
 				m.mu.Lock()
 				delete(m.streams, stream.id)
+
+				// Make sure we attempt to use the next biggest stream ID
+				if stream.id >= m.curId {
+					m.curId = stream.id + 1
+				}
+
 				m.mu.Unlock()
 			default:
 				log.Printf("[ERR] Fin received for stream %d in state: %d", id, stream.state)
