@@ -3,6 +3,7 @@ package rpc
 import (
 	"github.com/mitchellh/packer/packer"
 	"io"
+	"log"
 	"net/rpc"
 )
 
@@ -10,12 +11,19 @@ import (
 // Establishing a connection is up to the user, the Client can just
 // communicate over any ReadWriteCloser.
 type Client struct {
-	mux    *MuxConn
-	client *rpc.Client
+	mux      *MuxConn
+	client   *rpc.Client
+	closeMux bool
 }
 
 func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
-	return NewClientWithMux(NewMuxConn(rwc), 0)
+	result, err := NewClientWithMux(NewMuxConn(rwc), 0)
+	if err != nil {
+		return nil, err
+	}
+
+	result.closeMux = true
+	return result, err
 }
 
 func NewClientWithMux(mux *MuxConn, streamId uint32) (*Client, error) {
@@ -25,14 +33,20 @@ func NewClientWithMux(mux *MuxConn, streamId uint32) (*Client, error) {
 	}
 
 	return &Client{
-		mux:    mux,
-		client: rpc.NewClient(clientConn),
+		mux:      mux,
+		client:   rpc.NewClient(clientConn),
+		closeMux: false,
 	}, nil
 }
 
 func (c *Client) Close() error {
 	if err := c.client.Close(); err != nil {
 		return err
+	}
+
+	if c.closeMux {
+		log.Printf("[WARN] Client is closing mux")
+		return c.mux.Close()
 	}
 
 	return nil
