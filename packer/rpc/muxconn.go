@@ -430,7 +430,7 @@ func (s *Stream) Write(p []byte) (int, error) {
 	state := s.state
 	s.mu.Unlock()
 
-	if state != streamStateEstablished {
+	if state != streamStateEstablished && state != streamStateCloseWait {
 		return 0, fmt.Errorf("Stream %d in bad state to send: %d", s.id, state)
 	}
 
