@@ -31,11 +31,14 @@ type Server struct {
 	mux      *MuxConn
 	streamId uint32
 	server   *rpc.Server
+	closeMux bool
 }
 
 // NewServer returns a new Packer RPC server.
 func NewServer(conn io.ReadWriteCloser) *Server {
-	return NewServerWithMux(NewMuxConn(conn), 0)
+	result := NewServerWithMux(NewMuxConn(conn), 0)
+	result.closeMux = true
+	return result
 }
 
 func NewServerWithMux(mux *MuxConn, streamId uint32) *Server {
@@ -43,11 +46,17 @@ func NewServerWithMux(mux *MuxConn, streamId uint32) *Server {
 		mux:      mux,
 		streamId: streamId,
 		server:   rpc.NewServer(),
+		closeMux: false,
 	}
 }
 
 func (s *Server) Close() error {
-	return s.mux.Close()
+	if s.closeMux {
+		log.Printf("[WARN] Shutting down mux conn in Server")
+		return s.mux.Close()
+	}
+
+	return nil
 }
 
 func (s *Server) RegisterArtifact(a packer.Artifact) {
