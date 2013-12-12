@@ -11,7 +11,7 @@ teardown() {
     aws_ami_cleanup
 }
 
-@test "build minimal.json" {
+@test "amazon-ebs: build minimal.json" {
     run packer build $FIXTURE_ROOT/minimal.json
     [ "$status" -eq 0 ]
 }
