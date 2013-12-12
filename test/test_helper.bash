@@ -1,5 +1,5 @@
 # Let's verify that the tools we need are installed
-declare -a required=(aws jq)
+declare -a required=(aws)
 for cmd in "${required[@]}"; do
     command -v $cmd >/dev/null 2>&1 || {
         echo "'$cmd' must be installed" >&2
@@ -40,8 +40,8 @@ fixtures() {
 # This deletes any AMIs with a tag "packer-test" of "true"
 aws_ami_cleanup() {
     local region=${1:-us-east-1}
-    aws ec2 describe-images --region ${region} --owners self --output json \
+    aws ec2 describe-images --region ${region} --owners self --output text \
         --filters 'Name=tag:packer-test,Values=true' \
-        | jq -r -M '.Images[]["ImageId"]' \
+        --query 'Images[*].ImageId' \
         | xargs -n1 aws ec2 deregister-image --region ${region} --image-id
 }
