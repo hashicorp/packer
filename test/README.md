@@ -20,7 +20,6 @@ running on Mac OS X, most of these are available with `brew`:
 * [Bats](https://github.com/sstephenson/bats)
 
 * [AWS cli](http://aws.amazon.com/cli/)
-* [jq](http://stedolan.github.io/jq/)
 
 ## Configuring Tests
 
