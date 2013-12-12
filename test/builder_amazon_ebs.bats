@@ -8,9 +8,7 @@ load test_helper
 fixtures amazon-ebs
 
 teardown() {
-    aws ec2 describe-images --owners self --output json --filters 'Name=tag:packer-test,Values=true' \
-        | jq -r -M '.Images[]["ImageId"]' \
-        | xargs -n1 aws ec2 deregister-image --image-id
+    aws_ami_cleanup
 }
 
 @test "build minimal.json" {
