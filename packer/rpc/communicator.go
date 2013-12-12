@@ -253,9 +253,10 @@ func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *int
 }
 
 func serveSingleCopy(name string, mux *MuxConn, id uint32, dst io.Writer, src io.Reader) {
+	log.Printf("[DEBUG] %s: Connecting to stream %d", name, id)
 	conn, err := mux.Accept(id)
 	if err != nil {
-		log.Printf("'%s' accept error: %s", name, err)
+		log.Printf("[ERR] '%s' accept error: %s", name, err)
 		return
 	}
 
@@ -271,8 +272,8 @@ func serveSingleCopy(name string, mux *MuxConn, id uint32, dst io.Writer, src io
 	}
 
 	written, err := io.Copy(dst, src)
-	log.Printf("%d bytes written for '%s'", written, name)
+	log.Printf("[INFO] %d bytes written for '%s'", written, name)
 	if err != nil {
-		log.Printf("'%s' copy error: %s", name, err)
+		log.Printf("[ERR] '%s' copy error: %s", name, err)
 	}
 }
