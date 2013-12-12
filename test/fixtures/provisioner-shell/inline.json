@@ -1,0 +1,21 @@
+{
+    "builders": [{
+        "type": "amazon-ebs",
+        "ami_name": "packer-test {{timestamp}}",
+        "instance_type": "m1.small",
+        "region": "us-east-1",
+        "ssh_username": "ubuntu",
+        "source_ami": "ami-0568456c",
+        "tags": {
+            "packer-test": "true"
+        }
+    }],
+
+    "provisioners": [{
+        "type": "shell",
+        "inline": [
+            "bash -c 'echo HELLO I AM `whoami`'",
+            "echo AND ANOTHER"
+        ]
+    }]
+}
