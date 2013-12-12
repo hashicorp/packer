@@ -163,6 +163,11 @@ func (m *MuxConn) openStream(id uint32) (*Stream, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	// Make sure we attempt to use the next biggest stream ID
+	if id >= m.curId {
+		m.curId = id + 1
+	}
+
 	// We have to check this again because there is a time period
 	// above where we couldn't lost this lock.
 	if stream, ok := m.streams[id]; ok {
@@ -302,12 +307,6 @@ func (m *MuxConn) loop() {
 
 				m.mu.Lock()
 				delete(m.streams, stream.id)
-
-				// Make sure we attempt to use the next biggest stream ID
-				if stream.id >= m.curId {
-					m.curId = stream.id + 1
-				}
-
 				m.mu.Unlock()
 			default:
 				log.Printf("[ERR] Fin received for stream %d in state: %d", id, stream.state)
