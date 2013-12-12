@@ -29,6 +29,8 @@ BUG FIXES:
 
 * post-processor/vsphere: Uploads VM properly. [GH-694]
 * post-processor/vsphere: Process user variables.
+* provisioner/ansible-local: playbook paths are properly validated
+  as directories, not files. [GH-710]
 
 ## 0.4.1 (December 7, 2013)
 
