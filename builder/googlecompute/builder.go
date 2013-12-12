@@ -14,7 +14,7 @@ import (
 )
 
 // The unique ID for this builder.
-const BuilderId = "kelseyhightower.googlecompute"
+const BuilderId = "packer.googlecompute"
 
 // Builder represents a Packer Builder.
 type Builder struct {
