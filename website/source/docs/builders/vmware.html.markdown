@@ -326,6 +326,6 @@ have to modify as well:
 * `remote_datastore` - The path to the datastore where the VM will be
   stored on the ESXi machine.
 
-* `remote_user` - The SSH username used to access the remote machine.
+* `remote_username` - The SSH username used to access the remote machine.
 
 * `remote_password` - The SSH password for access to the remote machine.
