@@ -39,7 +39,9 @@ fixtures() {
 
 # This deletes any AMIs with a tag "packer-test" of "true"
 aws_ami_cleanup() {
-    aws ec2 describe-images --owners self --output json --filters 'Name=tag:packer-test,Values=true' \
+    local region=${1:-us-east-1}
+    aws ec2 describe-images --region ${region} --owners self --output json \
+        --filters 'Name=tag:packer-test,Values=true' \
         | jq -r -M '.Images[]["ImageId"]' \
-        | xargs -n1 aws ec2 deregister-image --image-id
+        | xargs -n1 aws ec2 deregister-image --region ${region} --image-id
 }
