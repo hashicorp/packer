@@ -72,7 +72,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 	for _, path := range p.config.PlaybookPaths {
-		err := validateFileConfig(path, "playbook_paths", false)
+		err := validateDirConfig(path, "playbook_paths")
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
