@@ -3,6 +3,7 @@ package common
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func testAMIConfig() *AMIConfig {
@@ -43,5 +44,28 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	expected := []string{"us-east-1", "us-west-1"}
 	if !reflect.DeepEqual(c.AMIRegions, expected) {
 		t.Fatalf("bad: %#v", c.AMIRegions)
+	}
+}
+
+func TestAMIConfigPrepare_amiCopyTimeout(t *testing.T) {
+	c := testAMIConfig()
+	c.RawAMICopyTimeout = ""
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
+
+	c.RawAMICopyTimeout = "30mm"
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("should have error")
+	}
+
+	c.RawAMICopyTimeout = "30m"
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+
+	expected, _ := time.ParseDuration("30m")
+	if !reflect.DeepEqual(c.AMICopyTimeout(), expected) {
+		t.Fatalf("bad: %#v", c.AMICopyTimeout())
 	}
 }
