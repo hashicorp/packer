@@ -22,6 +22,10 @@ IMPROVEMENTS:
   dramatically increased.
 * builder/amazon/all: Copying AMIs to multiple regions now happens
   in parallel. [GH-495]
+* builder/qemu: Floppy files are supported. [GH-686]
+* builder/qemu: Next `run_once` option tells Qemu to run only once,
+  which is useful for Windows installs that handle reboots for you.
+  [GH-687]
 * provisioner/puppet-masterless: Can now specify a `manifest_dir` to
   upload manifests to the remote machine for imports. [GH-655]
 
@@ -50,6 +54,7 @@ BUG FIXES:
   parallel builds. [GH-689]
 * builder/amazon/instance: Add location flag to upload bundle command
   so that building AMIs works out of us-east-1 [GH-679]
+* builder/qemu: Qemu arguments are templated. [GH-688]
 * builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
   get stuck with ISO. [GH-685]
 * builder/vmware: File cleanup is more resilient to file delete races
