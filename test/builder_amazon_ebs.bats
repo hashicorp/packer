@@ -9,7 +9,7 @@ fixtures amazon-ebs
 
 teardown() {
     aws ec2 describe-images --owners self --output json --filters 'Name=tag:packer-test,Values=true' \
-        | jq -r -M '.Images[]["ImageId"]'
+        | jq -r -M '.Images[]["ImageId"]' \
         | xargs -n1 aws ec2 deregister-image --image-id
 }
 
