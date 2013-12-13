@@ -141,7 +141,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 
 	errCh := make(chan error, 1)
-	go waitForState(errCh, "DONE", d.refreshZoneOp(op))
+	go waitForState(errCh, "DONE", d.refreshZoneOp(zone.Name, op))
 	return errCh, nil
 }
 
@@ -162,9 +162,9 @@ func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
 	return
 }
 
-func (d *driverGCE) refreshZoneOp(op *compute.Operation) stateRefreshFunc {
+func (d *driverGCE) refreshZoneOp(zone string, op *compute.Operation) stateRefreshFunc {
 	return func() (string, error) {
-		newOp, err := d.service.ZoneOperations.Get(d.projectId, op.Zone, op.Name).Do()
+		newOp, err := d.service.ZoneOperations.Get(d.projectId, zone, op.Name).Do()
 		if err != nil {
 			return "", err
 		}
