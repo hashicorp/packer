@@ -19,7 +19,7 @@ type stepUpdateGsutil int
 // prompt to update gsutil if a newer version is available.
 func (s *stepUpdateGsutil) Run(state multistep.StateBag) multistep.StepAction {
 	var (
-		config     = state.Get("config").(config)
+		config     = state.Get("config").(*Config)
 		comm       = state.Get("communicator").(packer.Communicator)
 		sudoPrefix = ""
 		ui         = state.Get("ui").(packer.Ui)

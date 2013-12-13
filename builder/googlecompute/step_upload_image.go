@@ -13,7 +13,7 @@ type stepUploadImage int
 // Run executes the Packer build step that uploads a GCE machine image.
 func (s *stepUploadImage) Run(state multistep.StateBag) multistep.StepAction {
 	var (
-		config        = state.Get("config").(config)
+		config        = state.Get("config").(*Config)
 		comm          = state.Get("communicator").(packer.Communicator)
 		sudoPrefix    = ""
 		ui            = state.Get("ui").(packer.Ui)

@@ -14,7 +14,7 @@ type stepRegisterImage int
 func (s *stepRegisterImage) Run(state multistep.StateBag) multistep.StepAction {
 	var (
 		client = state.Get("client").(*GoogleComputeClient)
-		config = state.Get("config").(config)
+		config = state.Get("config").(*Config)
 		ui     = state.Get("ui").(packer.Ui)
 	)
 	ui.Say("Adding image to the project...")
