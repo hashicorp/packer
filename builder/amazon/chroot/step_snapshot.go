@@ -37,7 +37,6 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Wait for the snapshot to be ready
 	stateChange := awscommon.StateChangeConf{
-		Conn:      ec2conn,
 		Pending:   []string{"pending"},
 		StepState: state,
 		Target:    "completed",

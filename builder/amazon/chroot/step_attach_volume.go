@@ -46,7 +46,6 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Wait for the volume to become attached
 	stateChange := awscommon.StateChangeConf{
-		Conn:      ec2conn,
 		Pending:   []string{"attaching"},
 		StepState: state,
 		Target:    "attached",
@@ -102,7 +101,6 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 
 	// Wait for the volume to detach
 	stateChange := awscommon.StateChangeConf{
-		Conn:      ec2conn,
 		Pending:   []string{"attaching", "attached", "detaching"},
 		StepState: state,
 		Target:    "detached",
