@@ -50,9 +50,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		new(StepCreateSSHKey),
 		new(StepCreateInstance),
+		new(StepInstanceInfo),
 	}
 	/*
-		new(stepInstanceInfo),
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,

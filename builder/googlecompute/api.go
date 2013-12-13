@@ -66,18 +66,6 @@ func New(projectId string, zone string, c *clientSecrets, pemKey []byte) (*Googl
 	return googleComputeClient, nil
 }
 
-// InstanceStatus returns a string representing the status of the named instance.
-// Status will be one of: "PROVISIONING", "STAGING", "RUNNING", "STOPPING",
-// "STOPPED", "TERMINATED".
-func (g *GoogleComputeClient) InstanceStatus(zone, name string) (string, error) {
-	instanceGetCall := g.Service.Instances.Get(g.ProjectId, zone, name)
-	instance, err := instanceGetCall.Do()
-	if err != nil {
-		return "", err
-	}
-	return instance.Status, nil
-}
-
 // CreateImage registers a GCE Image with a project.
 func (g *GoogleComputeClient) CreateImage(name, description, sourceURL string) (*compute.Operation, error) {
 	imageRawDisk := &compute.ImageRawDisk{
@@ -96,26 +84,6 @@ func (g *GoogleComputeClient) CreateImage(name, description, sourceURL string) (
 		return nil, err
 	}
 	return operation, nil
-}
-
-// GetNatIp returns the public IPv4 address for named GCE instance.
-func (g *GoogleComputeClient) GetNatIP(zone, name string) (string, error) {
-	instanceGetCall := g.Service.Instances.Get(g.ProjectId, zone, name)
-	instance, err := instanceGetCall.Do()
-	if err != nil {
-		return "", err
-	}
-	for _, ni := range instance.NetworkInterfaces {
-		if ni.AccessConfigs == nil {
-			continue
-		}
-		for _, ac := range ni.AccessConfigs {
-			if ac.NatIP != "" {
-				return ac.NatIP, nil
-			}
-		}
-	}
-	return "", nil
 }
 
 // ZoneOperationStatus returns the status for the named zone operation.
