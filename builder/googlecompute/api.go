@@ -20,6 +20,7 @@ type GoogleComputeClient struct {
 
 // InstanceConfig represents a GCE instance configuration.
 // Used for creating machine instances.
+/*
 type InstanceConfig struct {
 	Description       string
 	Image             string
@@ -30,6 +31,7 @@ type InstanceConfig struct {
 	ServiceAccounts   []*compute.ServiceAccount
 	Tags              *compute.Tags
 }
+*/
 
 // New initializes and returns a *GoogleComputeClient.
 //
@@ -41,7 +43,7 @@ func New(projectId string, zone string, c *clientSecrets, pemKey []byte) (*Googl
 		Zone:      zone,
 	}
 	// Get the access token.
-	t := jwt.NewToken(c.Web.ClientEmail, scopes(), pemKey)
+	t := jwt.NewToken(c.Web.ClientEmail, "", pemKey)
 	t.ClaimSet.Aud = c.Web.TokenURI
 	httpClient := &http.Client{}
 	token, err := t.Assert(httpClient)
@@ -50,7 +52,7 @@ func New(projectId string, zone string, c *clientSecrets, pemKey []byte) (*Googl
 	}
 	config := &oauth.Config{
 		ClientId: c.Web.ClientId,
-		Scope:    scopes(),
+		Scope:    "",
 		TokenURL: c.Web.TokenURI,
 		AuthURL:  c.Web.AuthURI,
 	}
@@ -62,83 +64,6 @@ func New(projectId string, zone string, c *clientSecrets, pemKey []byte) (*Googl
 	}
 	googleComputeClient.Service = s
 	return googleComputeClient, nil
-}
-
-// GetZone returns a *compute.Zone representing the named zone.
-func (g *GoogleComputeClient) GetZone(name string) (*compute.Zone, error) {
-	zoneGetCall := g.Service.Zones.Get(g.ProjectId, name)
-	zone, err := zoneGetCall.Do()
-	if err != nil {
-		return nil, err
-	}
-	return zone, nil
-}
-
-// GetMachineType returns a *compute.MachineType representing the named machine type.
-func (g *GoogleComputeClient) GetMachineType(name, zone string) (*compute.MachineType, error) {
-	machineTypesGetCall := g.Service.MachineTypes.Get(g.ProjectId, zone, name)
-	machineType, err := machineTypesGetCall.Do()
-	if err != nil {
-		return nil, err
-	}
-	if machineType.Deprecated == nil {
-		return machineType, nil
-	}
-	return nil, errors.New("Machine Type does not exist: " + name)
-}
-
-// GetImage returns a *compute.Image representing the named image.
-func (g *GoogleComputeClient) GetImage(name string) (*compute.Image, error) {
-	var err error
-	var image *compute.Image
-	projects := []string{g.ProjectId, "debian-cloud", "centos-cloud"}
-	for _, project := range projects {
-		imagesGetCall := g.Service.Images.Get(project, name)
-		image, err = imagesGetCall.Do()
-		if image != nil {
-			break
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	if image != nil {
-		if image.SelfLink != "" {
-			return image, nil
-		}
-	}
-	return nil, errors.New("Image does not exist: " + name)
-}
-
-// GetNetwork returns a *compute.Network representing the named network.
-func (g *GoogleComputeClient) GetNetwork(name string) (*compute.Network, error) {
-	networkGetCall := g.Service.Networks.Get(g.ProjectId, name)
-	network, err := networkGetCall.Do()
-	if err != nil {
-		return nil, err
-	}
-	return network, nil
-}
-
-// CreateInstance creates an instance in Google Compute Engine based on the
-// supplied instanceConfig.
-func (g *GoogleComputeClient) CreateInstance(zone string, instanceConfig *InstanceConfig) (*compute.Operation, error) {
-	instance := &compute.Instance{
-		Description:       instanceConfig.Description,
-		Image:             instanceConfig.Image,
-		MachineType:       instanceConfig.MachineType,
-		Metadata:          instanceConfig.Metadata,
-		Name:              instanceConfig.Name,
-		NetworkInterfaces: instanceConfig.NetworkInterfaces,
-		ServiceAccounts:   instanceConfig.ServiceAccounts,
-		Tags:              instanceConfig.Tags,
-	}
-	instanceInsertCall := g.Service.Instances.Insert(g.ProjectId, zone, instance)
-	operation, err := instanceInsertCall.Do()
-	if err != nil {
-		return nil, err
-	}
-	return operation, nil
 }
 
 // InstanceStatus returns a string representing the status of the named instance.
@@ -255,60 +180,4 @@ func (g *GoogleComputeClient) DeleteInstance(zone, name string) (*compute.Operat
 		return nil, err
 	}
 	return operation, nil
-}
-
-// NewNetworkInterface returns a *compute.NetworkInterface based on the data provided.
-func NewNetworkInterface(network *compute.Network, public bool) *compute.NetworkInterface {
-	accessConfigs := make([]*compute.AccessConfig, 0)
-	if public {
-		c := &compute.AccessConfig{
-			Name: "AccessConfig created by Packer",
-			Type: "ONE_TO_ONE_NAT",
-		}
-		accessConfigs = append(accessConfigs, c)
-	}
-	return &compute.NetworkInterface{
-		AccessConfigs: accessConfigs,
-		Network:       network.SelfLink,
-	}
-}
-
-// NewServiceAccount returns a *compute.ServiceAccount with permissions required
-// for creating GCE machine images.
-func NewServiceAccount(email string) *compute.ServiceAccount {
-	return &compute.ServiceAccount{
-		Email: email,
-		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/compute",
-			"https://www.googleapis.com/auth/devstorage.full_control",
-		},
-	}
-}
-
-// MapToMetadata converts a map[string]string to a *compute.Metadata.
-func MapToMetadata(metadata map[string]string) *compute.Metadata {
-	items := make([]*compute.MetadataItems, len(metadata))
-	for k, v := range metadata {
-		items = append(items, &compute.MetadataItems{k, v})
-	}
-	return &compute.Metadata{
-		Items: items,
-	}
-}
-
-// SliceToTags converts a []string to a *compute.Tags.
-func SliceToTags(tags []string) *compute.Tags {
-	return &compute.Tags{
-		Items: tags,
-	}
-}
-
-// scopes return a space separated list of scopes.
-func scopes() string {
-	s := []string{
-		"https://www.googleapis.com/auth/compute",
-		"https://www.googleapis.com/auth/devstorage.full_control",
-	}
-	return strings.Join(s, " ")
 }
