@@ -23,7 +23,6 @@ type StateRefreshFunc func() (result interface{}, state string, err error)
 
 // StateChangeConf is the configuration struct used for `WaitForState`.
 type StateChangeConf struct {
-	Conn      *ec2.EC2
 	Pending   []string
 	Refresh   StateRefreshFunc
 	StepState multistep.StateBag
