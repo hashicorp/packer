@@ -40,12 +40,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		log.Println("Failed to create the Google Compute Engine client.")
 		return nil, err
 	}
+
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+
 	// Build the steps.
 	steps := []multistep.Step{
 		new(stepCreateSSHKey),
@@ -62,6 +64,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepUploadImage),
 		new(stepRegisterImage),
 	}
+
 	// Run the steps.
 	if b.config.PackerDebug {
 		b.runner = &multistep.DebugRunner{
@@ -72,6 +75,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.runner = &multistep.BasicRunner{Steps: steps}
 	}
 	b.runner.Run(state)
+
 	// Report any errors.
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
@@ -80,6 +84,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		log.Println("Failed to find image_name in state. Bug?")
 		return nil, nil
 	}
+
 	artifact := &Artifact{
 		imageName: state.Get("image_name").(string),
 		client:    client,
@@ -88,4 +93,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 }
 
 // Cancel.
-func (b *Builder) Cancel() {}
+func (b *Builder) Cancel() {
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
+}
