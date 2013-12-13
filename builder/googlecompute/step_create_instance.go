@@ -68,27 +68,28 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	if s.instanceName == "" {
 		return
 	}
-	/*
-		var (
-			client = state.Get("client").(*GoogleComputeClient)
-			config = state.Get("config").(*Config)
-			ui     = state.Get("ui").(packer.Ui)
-		)
-		ui.Say("Destroying instance...")
-		operation, err := client.DeleteInstance(config.Zone, s.instanceName)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error destroying instance. Please destroy it manually: %v", s.instanceName))
+
+	config := state.Get("config").(*Config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+
+	ui.Say("Deleting instance...")
+	errCh, err := driver.DeleteInstance(config.Zone, s.instanceName)
+	if err == nil {
+		select {
+		case err = <-errCh:
+		case <-time.After(config.stateTimeout):
+			err = errors.New("time out while waiting for instance to delete")
 		}
-		ui.Say("Waiting for the instance to be deleted...")
-		for {
-			status, err := client.ZoneOperationStatus(config.Zone, operation.Name)
-			if err != nil {
-				ui.Error(fmt.Sprintf("Error destroying instance. Please destroy it manually: %v", s.instanceName))
-			}
-			if status == "DONE" {
-				break
-			}
-		}
-	*/
+	}
+
+	if err != nil {
+		ui.Error(fmt.Sprintf(
+			"Error deleting instance. Please delete it manually.\n\n"+
+				"Name: %s\n"+
+				"Error: %s", s.instanceName, err))
+	}
+
+	s.instanceName = ""
 	return
 }

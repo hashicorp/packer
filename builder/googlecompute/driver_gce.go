@@ -59,6 +59,17 @@ func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) 
 	}, nil
 }
 
+func (d *driverGCE) DeleteInstance(zone, name string) (<-chan error, error) {
+	op, err := d.service.Instances.Delete(d.projectId, zone, name).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "DONE", d.refreshZoneOp(zone, op))
+	return errCh, nil
+}
+
 func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Get the zone
 	d.ui.Message(fmt.Sprintf("Loading zone: %s", c.Zone))
