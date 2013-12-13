@@ -6,19 +6,54 @@ layout: "docs"
 
 Type: `googlecompute`
 
-The `googlecompute` builder is able to create new [images](https://developers.google.com/compute/docs/images)
-for use with [Google Compute Engine](https://cloud.google.com/products/compute-engine).
+The `googlecompute` builder is able to create
+[images](https://developers.google.com/compute/docs/images)
+for use with [Google Compute Engine](https://cloud.google.com/products/compute-engine)
+(GCE) based on existing images. Google Compute Engine doesn't allow the creation
+of images from scratch.
+
+## Setting Up API Access
+
+There is a small setup step required in order to obtain the credentials
+that Packer needs to use Google Compute Engine. This needs to be done only
+once if you intend to share the credentials.
+
+In order for Packer to talk to Google Compute Engine, it will need
+a _client secrets_ JSON file and a _client private key_. Both of these are
+obtained from the [Google Cloud Console](https://cloud.google.com/console).
+
+Follow the steps below:
+
+1. Log into the [Google Cloud Console](https://cloud.google.com/console)
+2. Click on the project you want to use Packer with (or create one if you
+   don't have one yet).
+3. Click "APIs & auth" in the left sidebar
+4. Click "Registered apps" in the left sidebar
+5. Click "Register App" and register a "Web Application". Choose any
+   name you'd like.
+6. After creating the application, click "OAuth 2.0 Client ID" then
+   click "Download JSON". This is your _client secrets_ JSON file.
+7. Next, click "Certificate" (below the OAuth 2.0 Client ID section),
+   and click "Generate Certificate". You should be prompted to download
+   a private key. Note the password for the private key! This private key
+   is your _client private key_.
+
+These two files you downloaded are necessary for Packer to talk to
+Google Compute Engine.
 
 ## Basic Example
 
-Below is a fully functioning example. It doesn't do anything useful, since no provisioners are defined, but it will effectively repackage an GCE image.
+Below is a fully functioning example. It doesn't do anything useful,
+since no provisioners are defined, but it will effectively repackage an
+existing GCE image. The client secrets file and private key file are the
+files obtained in the previous section.
 
 <pre class="prettyprint">
 {
   "type": "googlecompute",
   "bucket_name": "packer-images",
-  "client_secrets_file": "client_secret_XXXXXX-XXXXXX.apps.googleusercontent.com.json",
-  "private_key_file": "XXXXXX-privatekey.pem",
+  "client_secrets_file": "client_secret.json",
+  "private_key_file": "XXXXXX-privatekey.p12",
   "project_id": "my-project",
   "source_image": "debian-7-wheezy-v20131014",
   "zone": "us-central1-a"
@@ -32,24 +67,48 @@ each category, the available options are alphabetized and described.
 
 Required:
 
-* `bucket_name` (string) - The Google Cloud Storage bucket to store images.
-* `client_secrets_file` (string) - The client secrets file.
-* `private_key_file` (string) - The service account private key.
-* `project_id` (string) - The GCE project id.
-* `source_image` (string) - The source image. Example `debian-7-wheezy-v20131014`.
-* `zone` (string) - The GCE zone.
+* `bucket_name` (string) - The Google Cloud Storage bucket to store the
+  images that are created.
+
+* `client_secrets_file` (string) - The client secrets JSON file that
+  was set up in the section above.
+
+* `private_key_file` (string) - The client private key file that was
+  generated in the section above.
+
+* `project_id` (string) - The project ID that will be used to launch instances
+  and store images.
+
+* `source_image` (string) - The source image to use to create the new image
+  from. Example: "debian-7"
+
+* `zone` (string) - The zone in which to launch the instance used to create
+  the image. Example: "us-central1-a"
 
 Optional:
 
-* `image_name` (string) - The unique name of the resulting image. Defaults to `packer-{{timestamp}}`.
+* `image_name` (string) - The unique name of the resulting image.
+  Defaults to `packer-{{timestamp}}`.
+
 * `image_description` (string) - The description of the resulting image.
+
 * `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
-* `network` (string) - The Google Compute network. Defaults to `default`.
-* `passphrase` (string) - The passphrase to use if the `private_key_file` is encrypted.
-* `ssh_port` (int) - The SSH port. Defaults to `22`.
-* `ssh_timeout` (string) - The time to wait for SSH to become available. Defaults to `1m`.
-* `ssh_username` (string) - The SSH username. Defaults to `root`.
-* `state_timeout` (string) - The time to wait for instance state changes. Defaults to `5m`.
+
+* `network` (string) - The Google Compute network to use for the launched
+  instance. Defaults to `default`.
+
+* `passphrase` (string) - The passphrase to use if the `private_key_file`
+  is encrypted.
+
+* `ssh_port` (int) - The SSH port. Defaults to 22.
+
+* `ssh_timeout` (string) - The time to wait for SSH to become available.
+  Defaults to "1m".
+
+* `ssh_username` (string) - The SSH username. Defaults to "root".
+
+* `state_timeout` (string) - The time to wait for instance state changes.
+  Defaults to "5m".
 
 ## Gotchas
 
