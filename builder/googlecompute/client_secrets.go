@@ -22,9 +22,11 @@ func loadClientSecrets(path string) (*clientSecrets, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	err = json.Unmarshal(secretBytes, &cs)
 	if err != nil {
 		return nil, err
 	}
+
 	return cs, nil
 }
