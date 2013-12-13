@@ -39,6 +39,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	})
 
 	if err == nil {
+		ui.Message("Waiting for creation operation to complete...")
 		select {
 		case err = <-errCh:
 		case <-time.After(config.stateTimeout):
