@@ -4,6 +4,9 @@ package googlecompute
 // with GCE. The Driver interface exists mostly to allow a mock implementation
 // to be used to test the steps.
 type Driver interface {
+	// DeleteInstance deletes the given instance.
+	DeleteInstance(zone, name string) (<-chan error, error)
+
 	// RunInstance takes the given config and launches an instance.
 	RunInstance(*InstanceConfig) (<-chan error, error)
 }
