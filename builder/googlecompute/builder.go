@@ -33,17 +33,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // Run executes a googlecompute Packer build and returns a packer.Artifact
 // representing a GCE machine image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Initialize the Google Compute Engine API.
-	client, err := New(b.config.ProjectId, b.config.Zone, b.config.clientSecrets, b.config.privateKeyBytes)
+	driver, err := NewDriverGCE(
+		ui, b.config.ProjectId, b.config.clientSecrets, b.config.privateKeyBytes)
 	if err != nil {
-		log.Println("Failed to create the Google Compute Engine client.")
 		return nil, err
 	}
 
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
-	state.Put("client", client)
+	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -88,7 +87,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	artifact := &Artifact{
 		imageName: state.Get("image_name").(string),
-		client:    client,
+		driver:    driver,
 	}
 	return artifact, nil
 }
