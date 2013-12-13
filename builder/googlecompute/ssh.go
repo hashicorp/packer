@@ -10,14 +10,14 @@ import (
 
 // sshAddress returns the ssh address.
 func sshAddress(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(config)
+	config := state.Get("config").(*Config)
 	ipAddress := state.Get("instance_ip").(string)
 	return fmt.Sprintf("%s:%d", ipAddress, config.SSHPort), nil
 }
 
 // sshConfig returns the ssh configuration.
 func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
-	config := state.Get("config").(config)
+	config := state.Get("config").(*Config)
 	privateKey := state.Get("ssh_private_key").(string)
 
 	keyring := new(ssh.SimpleKeychain)

@@ -18,7 +18,7 @@ type stepCreateInstance struct {
 func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
 	var (
 		client = state.Get("client").(*GoogleComputeClient)
-		config = state.Get("config").(config)
+		config = state.Get("config").(*Config)
 		ui     = state.Get("ui").(packer.Ui)
 	)
 	ui.Say("Creating instance...")
@@ -106,7 +106,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	var (
 		client = state.Get("client").(*GoogleComputeClient)
-		config = state.Get("config").(config)
+		config = state.Get("config").(*Config)
 		ui     = state.Get("ui").(packer.Ui)
 	)
 	if s.instanceName == "" {

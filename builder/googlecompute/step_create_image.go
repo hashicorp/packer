@@ -18,7 +18,7 @@ type stepCreateImage int
 // command on the running GCE instance.
 func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	var (
-		config     = state.Get("config").(config)
+		config     = state.Get("config").(*Config)
 		comm       = state.Get("communicator").(packer.Communicator)
 		sudoPrefix = ""
 		ui         = state.Get("ui").(packer.Ui)
