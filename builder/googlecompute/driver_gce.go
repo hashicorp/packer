@@ -70,6 +70,27 @@ func (d *driverGCE) DeleteInstance(zone, name string) (<-chan error, error) {
 	return errCh, nil
 }
 
+func (d *driverGCE) GetNatIP(zone, name string) (string, error) {
+	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
+	if err != nil {
+		return "", err
+	}
+
+	for _, ni := range instance.NetworkInterfaces {
+		if ni.AccessConfigs == nil {
+			continue
+		}
+
+		for _, ac := range ni.AccessConfigs {
+			if ac.NatIP != "" {
+				return ac.NatIP, nil
+			}
+		}
+	}
+
+	return "", nil
+}
+
 func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Get the zone
 	d.ui.Message(fmt.Sprintf("Loading zone: %s", c.Zone))
@@ -156,6 +177,12 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	return errCh, nil
 }
 
+func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, state, d.refreshInstanceState(zone, name))
+	return errCh
+}
+
 func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
 	projects := []string{d.projectId, "debian-cloud", "centos-cloud"}
 	for _, project := range projects {
@@ -171,6 +198,16 @@ func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
 	}
 
 	return
+}
+
+func (d *driverGCE) refreshInstanceState(zone, name string) stateRefreshFunc {
+	return func() (string, error) {
+		instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
+		if err != nil {
+			return "", err
+		}
+		return instance.Status, nil
+	}
 }
 
 func (d *driverGCE) refreshZoneOp(zone string, op *compute.Operation) stateRefreshFunc {
