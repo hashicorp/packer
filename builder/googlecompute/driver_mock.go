@@ -8,9 +8,19 @@ type DriverMock struct {
 	DeleteInstanceErrCh <-chan error
 	DeleteInstanceErr   error
 
+	GetNatIPZone   string
+	GetNatIPName   string
+	GetNatIPResult string
+	GetNatIPErr    error
+
 	RunInstanceConfig *InstanceConfig
 	RunInstanceErrCh  <-chan error
 	RunInstanceErr    error
+
+	WaitForInstanceState string
+	WaitForInstanceZone  string
+	WaitForInstanceName  string
+	WaitForInstanceErrCh <-chan error
 }
 
 func (d *DriverMock) DeleteInstance(zone, name string) (<-chan error, error) {
@@ -27,6 +37,12 @@ func (d *DriverMock) DeleteInstance(zone, name string) (<-chan error, error) {
 	return resultCh, d.DeleteInstanceErr
 }
 
+func (d *DriverMock) GetNatIP(zone, name string) (string, error) {
+	d.GetNatIPZone = zone
+	d.GetNatIPName = name
+	return d.GetNatIPResult, d.GetNatIPErr
+}
+
 func (d *DriverMock) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	d.RunInstanceConfig = c
 
@@ -38,4 +54,19 @@ func (d *DriverMock) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 
 	return resultCh, d.RunInstanceErr
+}
+
+func (d *DriverMock) WaitForInstance(state, zone, name string) <-chan error {
+	d.WaitForInstanceState = state
+	d.WaitForInstanceZone = zone
+	d.WaitForInstanceName = name
+
+	resultCh := d.WaitForInstanceErrCh
+	if resultCh == nil {
+		ch := make(chan error)
+		close(ch)
+		resultCh = ch
+	}
+
+	return resultCh
 }
