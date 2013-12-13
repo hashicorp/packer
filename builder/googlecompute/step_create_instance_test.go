@@ -18,14 +18,28 @@ func TestStepCreateInstance(t *testing.T) {
 
 	state.Put("ssh_public_key", "key")
 
+	config := state.Get("config").(*Config)
+	driver := state.Get("driver").(*DriverMock)
+
 	// run the step
 	if action := step.Run(state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
 	// Verify state
-	if _, ok := state.GetOk("instance_name"); !ok {
+	nameRaw, ok := state.GetOk("instance_name")
+	if !ok {
 		t.Fatal("should have instance name")
+	}
+
+	// cleanup
+	step.Cleanup(state)
+
+	if driver.DeleteInstanceName != nameRaw.(string) {
+		t.Fatal("should've deleted instance")
+	}
+	if driver.DeleteInstanceZone != config.Zone {
+		t.Fatal("bad zone: %#v", driver.DeleteInstanceZone)
 	}
 }
 
