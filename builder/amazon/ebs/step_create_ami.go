@@ -40,7 +40,6 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
-		Conn:      ec2conn,
 		Pending:   []string{"pending"},
 		Target:    "available",
 		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, createResp.ImageId),

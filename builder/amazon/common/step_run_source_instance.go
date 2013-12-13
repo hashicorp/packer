@@ -95,7 +95,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
 	stateChange := StateChangeConf{
-		Conn:      ec2conn,
 		Pending:   []string{"pending"},
 		Target:    "running",
 		Refresh:   InstanceStateRefreshFunc(ec2conn, s.instance),
@@ -145,7 +144,6 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	stateChange := StateChangeConf{
-		Conn:    ec2conn,
 		Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
 		Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
 		Target:  "terminated",

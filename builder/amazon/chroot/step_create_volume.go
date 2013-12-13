@@ -65,7 +65,6 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Wait for the volume to become ready
 	stateChange := awscommon.StateChangeConf{
-		Conn:      ec2conn,
 		Pending:   []string{"creating"},
 		StepState: state,
 		Target:    "available",

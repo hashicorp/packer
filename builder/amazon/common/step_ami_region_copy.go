@@ -83,7 +83,6 @@ func amiRegionCopy(state multistep.StateBag, auth aws.Auth, imageId string,
 	}
 
 	stateChange := StateChangeConf{
-		Conn:      regionconn,
 		Pending:   []string{"pending"},
 		Target:    "available",
 		Refresh:   AMIStateRefreshFunc(regionconn, resp.ImageId),
