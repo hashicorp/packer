@@ -287,7 +287,7 @@ func (m *MuxConn) loop() {
 			return
 		}
 
-		log.Printf("[TRACE] Stream %d received packet %d", id, packetType)
+		//log.Printf("[TRACE] Stream %d received packet %d", id, packetType)
 		switch packetType {
 		case muxPacketSyn:
 			stream.mu.Lock()
@@ -452,7 +452,7 @@ func (s *Stream) closeWriter() {
 }
 
 func (s *Stream) setState(state streamState) {
-	log.Printf("[TRACE] Stream %d went to state %d", s.id, state)
+	//log.Printf("[TRACE] Stream %d went to state %d", s.id, state)
 	s.state = state
 	s.stateUpdated = time.Now().UTC()
 	for ch, _ := range s.stateChange {
