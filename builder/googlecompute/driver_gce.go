@@ -2,6 +2,7 @@ package googlecompute
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -23,6 +24,11 @@ const DriverScopes string = "https://www.googleapis.com/auth/compute " +
 	"https://www.googleapis.com/auth/devstorage.full_control"
 
 func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) (Driver, error) {
+	log.Printf("[INFO] Requesting token...")
+	log.Printf("[INFO]   -- Email: %s", c.Web.ClientEmail)
+	log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
+	log.Printf("[INFO]   -- Private Key Length: %d", len(key))
+	log.Printf("[INFO]   -- Token URL: %s", c.Web.TokenURI)
 	jwtTok := jwt.NewToken(c.Web.ClientEmail, DriverScopes, key)
 	jwtTok.ClaimSet.Aud = c.Web.TokenURI
 	token, err := jwtTok.Assert(new(http.Client))
@@ -40,6 +46,7 @@ func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) 
 		Token: token,
 	}
 
+	log.Printf("[INFO] Instantiating client...")
 	service, err := compute.New(transport.Client())
 	if err != nil {
 		return nil, err
