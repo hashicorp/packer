@@ -38,8 +38,17 @@ Follow the steps below:
    a private key. Note the password for the private key! This private key
    is your _client private key_.
 
-These two files you downloaded are necessary for Packer to talk to
-Google Compute Engine.
+Finally, one last step, you'll have to convert the `p12` file you
+got from Google into the PEM format. You can do this with OpenSSL, which
+is installed standard on most Unixes:
+
+```
+$ openssl pkcs12 -in <path to .p12> -nocerts -passin pass:notasecret \
+    -nodes -out private_key.pem
+```
+
+The client secrets JSON you downloaded along with the new "private\_key.pem"
+file are the two files you need to configure Packer with to talk to GCE.
 
 ## Basic Example
 
