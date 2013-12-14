@@ -57,9 +57,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: 5 * time.Minute,
 		},
+		new(common.StepProvision),
 	}
 	/*
-		new(common.StepProvision),
 		new(stepUpdateGsutil),
 		new(stepCreateImage),
 		new(stepUploadImage),
