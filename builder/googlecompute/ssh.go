@@ -24,9 +24,11 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 	if err := keyring.AddPEMKey(privateKey); err != nil {
 		return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 	}
+
 	sshConfig := &gossh.ClientConfig{
 		User: config.SSHUsername,
 		Auth: []gossh.ClientAuth{gossh.ClientAuthKeyring(keyring)},
 	}
+
 	return sshConfig, nil
 }
