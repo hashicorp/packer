@@ -12,6 +12,9 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+* **New builder:** Google Compute Engine. You can now build images for
+  use in Google Compute Engine. See the documentation for more information.
+  [GH-715]
 * "description" field in templates: write a human-readable description
   of what a template does. This will be shown in `packer inspect`.
 
