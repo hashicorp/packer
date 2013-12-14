@@ -6,3 +6,4 @@
 /website/build
 .vagrant
 Vagrantfile
+test/.env
