@@ -24,7 +24,7 @@ USER_VARS="${USER_VARS} -var project_id=${GC_PROJECT_ID}"
 # This tests if GCE has an image that contains the given parameter.
 gc_has_image() {
     gcutil --format=names --project=${GC_PROJECT_ID} listimages \
-        | grep $1
+        | grep $1 | wc -l
 }
 
 teardown() {
@@ -36,5 +36,5 @@ teardown() {
 @test "googlecompute: build minimal.json" {
     run packer build ${USER_VARS} $FIXTURE_ROOT/minimal.json
     [ "$status" -eq 0 ]
-    [ "$(gc_has_image "packerbats-minimal")" -eq 0 ]
+    [ "$(gc_has_image "packerbats-minimal")" -eq 1 ]
 }
