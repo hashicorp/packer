@@ -19,14 +19,8 @@ func (*Artifact) BuilderId() string {
 // Destroy destroys the GCE image represented by the artifact.
 func (a *Artifact) Destroy() error {
 	log.Printf("Destroying image: %s", a.imageName)
-	/*
-		// Ignore the operation result as we are not waiting until it completes.
-		_, err := a.client.DeleteImage(a.imageName)
-		if err != nil {
-			return err
-		}
-	*/
-	return nil
+	errCh := a.driver.DeleteImage(a.imageName)
+	return <-errCh
 }
 
 // Files returns the files represented by the artifact.

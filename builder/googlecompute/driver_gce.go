@@ -81,6 +81,18 @@ func (d *driverGCE) CreateImage(name, description, url string) <-chan error {
 	return errCh
 }
 
+func (d *driverGCE) DeleteImage(name string) <-chan error {
+	errCh := make(chan error, 1)
+	op, err := d.service.Images.Delete(d.projectId, name).Do()
+	if err != nil {
+		errCh <- err
+	} else {
+		go waitForState(errCh, "DONE", d.refreshGlobalOp(op))
+	}
+
+	return errCh
+}
+
 func (d *driverGCE) DeleteInstance(zone, name string) (<-chan error, error) {
 	op, err := d.service.Instances.Delete(d.projectId, zone, name).Do()
 	if err != nil {

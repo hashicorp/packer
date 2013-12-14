@@ -8,6 +8,9 @@ type DriverMock struct {
 	CreateImageURL   string
 	CreateImageErrCh <-chan error
 
+	DeleteImageName  string
+	DeleteImageErrCh <-chan error
+
 	DeleteInstanceZone  string
 	DeleteInstanceName  string
 	DeleteInstanceErrCh <-chan error
@@ -34,6 +37,19 @@ func (d *DriverMock) CreateImage(name, description, url string) <-chan error {
 	d.CreateImageURL = url
 
 	resultCh := d.CreateImageErrCh
+	if resultCh == nil {
+		ch := make(chan error)
+		close(ch)
+		resultCh = ch
+	}
+
+	return resultCh
+}
+
+func (d *DriverMock) DeleteImage(name string) <-chan error {
+	d.DeleteImageName = name
+
+	resultCh := d.DeleteImageErrCh
 	if resultCh == nil {
 		ch := make(chan error)
 		close(ch)
