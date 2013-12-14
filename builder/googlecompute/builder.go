@@ -4,6 +4,7 @@ package googlecompute
 
 import (
 	"log"
+	"time"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
@@ -51,13 +52,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(StepCreateSSHKey),
 		new(StepCreateInstance),
 		new(StepInstanceInfo),
-	}
-	/*
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,
 			SSHWaitTimeout: 5 * time.Minute,
 		},
+	}
+	/*
 		new(common.StepProvision),
 		new(stepUpdateGsutil),
 		new(stepCreateImage),
