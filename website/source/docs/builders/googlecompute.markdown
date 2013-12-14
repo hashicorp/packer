@@ -31,10 +31,11 @@ Follow the steps below:
 4. Click "Registered apps" in the left sidebar
 5. Click "Register App" and register a "Web Application". Choose any
    name you'd like.
-6. After creating the application, click "OAuth 2.0 Client ID" then
-   click "Download JSON". This is your _client secrets_ JSON file.
-7. Next, click "Certificate" (below the OAuth 2.0 Client ID section),
-   and click "Generate Certificate". You should be prompted to download
+7. After creating the app, click "Certificate" (below the OAuth 2.0 Client
+   ID section), and click "Download JSON". This is your _client secrets JSON_
+   file. Make sure you didn't download the JSON from the "OAuth 2.0" section!
+   This is a common mistake and will cause the builder to not work.
+8. Next, click "Generate Certificate". You should be prompted to download
    a private key. Note the password for the private key! This private key
    is your _client private key_.
 
