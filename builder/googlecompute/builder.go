@@ -59,9 +59,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(StepUpdateGsutil),
+		new(StepCreateImage),
 	}
 	/*
-		new(stepCreateImage),
 		new(stepUploadImage),
 		new(stepRegisterImage),
 	}*/
