@@ -1,0 +1,20 @@
+{
+    "variables": {
+        "bucket_name": null,
+        "client_secrets_file": null,
+        "private_key_file": null,
+        "project_id": null
+    },
+
+    "builders": [{
+        "type": "googlecompute",
+        "bucket_name": "{{user `bucket_name`}}",
+        "client_secrets_file": "{{user `client_secrets_file`}}",
+        "private_key_file": "{{user `private_key_file`}}",
+        "project_id": "{{user `project_id`}}",
+
+        "image_name": "packerbats-minimal-{{timestamp}}",
+        "source_image": "debian-7-wheezy-v20131120",
+        "zone": "us-central1-a"
+    }]
+}

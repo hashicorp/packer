@@ -21,7 +21,11 @@ running on Mac OS X, most of these are available with `brew`:
 
 * [Bats](https://github.com/sstephenson/bats)
 
-* [AWS cli](http://aws.amazon.com/cli/)
+* [AWS cli](http://aws.amazon.com/cli/) for AWS tests as well as most
+  of the components.
+
+* [gcutil](https://developers.google.com/compute/docs/gcutil/#install) for
+  Google Compute Engine tests.
 
 ### Configuring Tests
 
@@ -31,6 +35,15 @@ Set the following self-explanatory environmental variables:
 
 * `AWS_ACCESS_KEY_ID`
 * `AWS_SECRET_ACCESS_KEY`
+
+**For tests that test Google Compute Engine:**
+
+Set the following environmental variables:
+
+* `GC_BUCKET_NAME`
+* `GC_CLIENT_SECRETS_FILE`
+* `GC_PRIVATE_KEY_FILE`
+* `GC_PROJECT_ID`
 
 ### Running
 
