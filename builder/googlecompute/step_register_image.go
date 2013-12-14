@@ -1,42 +1,46 @@
 package googlecompute
 
 import (
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
-// stepRegisterImage represents a Packer build step that registers GCE machine images.
-type stepRegisterImage int
+// StepRegisterImage represents a Packer build step that registers GCE machine images.
+type StepRegisterImage int
 
 // Run executes the Packer build step that registers a GCE machine image.
-func (s *stepRegisterImage) Run(state multistep.StateBag) multistep.StepAction {
-	var (
-		client = state.Get("client").(*GoogleComputeClient)
-		config = state.Get("config").(*Config)
-		ui     = state.Get("ui").(packer.Ui)
-	)
-	ui.Say("Adding image to the project...")
-	imageURL := fmt.Sprintf("https://storage.cloud.google.com/%s/%s.tar.gz", config.BucketName, config.ImageName)
-	operation, err := client.CreateImage(config.ImageName, config.ImageDescription, imageURL)
+func (s *StepRegisterImage) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+
+	var err error
+	imageURL := fmt.Sprintf(
+		"https://storage.cloud.google.com/%s/%s.tar.gz",
+		config.BucketName, config.ImageName)
+
+	ui.Say("Registering image...")
+	errCh := driver.CreateImage(config.ImageName, config.ImageDescription, imageURL)
+	select {
+	case err = <-errCh:
+	case <-time.After(config.stateTimeout):
+		err = errors.New("time out while waiting for image to register")
+	}
+
 	if err != nil {
-		err := fmt.Errorf("Error creating image: %s", err)
+		err := fmt.Errorf("Error waiting for image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	ui.Say("Waiting for image to become available...")
-	err = waitForGlobalOperationState("DONE", operation.Name, client, config.stateTimeout)
-	if err != nil {
-		err := fmt.Errorf("Error creating image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+
 	state.Put("image_name", config.ImageName)
 	return multistep.ActionContinue
 }
 
 // Cleanup.
-func (s *stepRegisterImage) Cleanup(state multistep.StateBag) {}
+func (s *StepRegisterImage) Cleanup(state multistep.StateBag) {}
