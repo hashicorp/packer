@@ -163,19 +163,23 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	c.stateTimeout = stateTimeout
 
-	// Load the client secrets file.
-	cs, err := loadClientSecrets(c.ClientSecretsFile)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing client secrets file: %s", err))
+	if c.ClientSecretsFile != "" {
+		// Load the client secrets file.
+		cs, err := loadClientSecrets(c.ClientSecretsFile)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing client secrets file: %s", err))
+		}
+		c.clientSecrets = cs
 	}
-	c.clientSecrets = cs
 
-	// Load the private key.
-	c.privateKeyBytes, err = processPrivateKeyFile(c.PrivateKeyFile, c.Passphrase)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed loading private key file: %s", err))
+	if c.PrivateKeyFile != "" {
+		// Load the private key.
+		c.privateKeyBytes, err = processPrivateKeyFile(c.PrivateKeyFile, c.Passphrase)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed loading private key file: %s", err))
+		}
 	}
 
 	// Check for any errors.
