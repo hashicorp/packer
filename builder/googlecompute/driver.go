@@ -7,6 +7,9 @@ type Driver interface {
 	// CreateImage creates an image with the given URL in Google Storage.
 	CreateImage(name, description, url string) <-chan error
 
+	// DeleteImage deletes the image with the given name.
+	DeleteImage(name string) <-chan error
+
 	// DeleteInstance deletes the given instance.
 	DeleteInstance(zone, name string) (<-chan error, error)
 
