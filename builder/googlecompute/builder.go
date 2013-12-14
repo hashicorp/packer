@@ -61,10 +61,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(StepUpdateGsutil),
 		new(StepCreateImage),
 		new(StepUploadImage),
+		new(StepRegisterImage),
 	}
-	/*
-		new(stepRegisterImage),
-	}*/
 
 	// Run the steps.
 	if b.config.PackerDebug {

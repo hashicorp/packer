@@ -59,6 +59,28 @@ func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) 
 	}, nil
 }
 
+func (d *driverGCE) CreateImage(name, description, url string) <-chan error {
+	image := &compute.Image{
+		Description: description,
+		Name:        name,
+		RawDisk: &compute.ImageRawDisk{
+			ContainerType: "TAR",
+			Source:        url,
+		},
+		SourceType: "RAW",
+	}
+
+	errCh := make(chan error, 1)
+	op, err := d.service.Images.Insert(d.projectId, image).Do()
+	if err != nil {
+		errCh <- err
+	} else {
+		go waitForState(errCh, "DONE", d.refreshGlobalOp(op))
+	}
+
+	return errCh
+}
+
 func (d *driverGCE) DeleteInstance(zone, name string) (<-chan error, error) {
 	op, err := d.service.Instances.Delete(d.projectId, zone, name).Do()
 	if err != nil {
@@ -207,6 +229,27 @@ func (d *driverGCE) refreshInstanceState(zone, name string) stateRefreshFunc {
 			return "", err
 		}
 		return instance.Status, nil
+	}
+}
+
+func (d *driverGCE) refreshGlobalOp(op *compute.Operation) stateRefreshFunc {
+	return func() (string, error) {
+		newOp, err := d.service.GlobalOperations.Get(d.projectId, op.Name).Do()
+		if err != nil {
+			return "", err
+		}
+
+		// If the op is done, check for errors
+		err = nil
+		if newOp.Status == "DONE" {
+			if newOp.Error != nil {
+				for _, e := range newOp.Error.Errors {
+					err = packer.MultiErrorAppend(err, fmt.Errorf(e.Message))
+				}
+			}
+		}
+
+		return newOp.Status, err
 	}
 }
 
