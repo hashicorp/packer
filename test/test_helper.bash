@@ -22,6 +22,9 @@ save_function run old_run
 run() {
     old_run $@
 
+    # Output the command we ran
+    echo "Executing: " $@
+
     # "$output" gets rid of newlines. This will bring them back.
     for line in "${lines[@]}"; do
         echo $line
