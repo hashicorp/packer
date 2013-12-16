@@ -110,6 +110,11 @@ func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 }
 
 func (u *ColoredUi) supportsColors() bool {
+	// Never use colors if we have this environmental variable
+	if os.Getenv("PACKER_NO_COLOR") != "" {
+		return false
+	}
+
 	// For now, on non-Windows machine, just assume it does
 	if runtime.GOOS != "windows" {
 		return true
