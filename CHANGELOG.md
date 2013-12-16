@@ -34,6 +34,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: No colored output in machine-readable output. [GH-684]
 * post-processor/vsphere: Uploads VM properly. [GH-694]
 * post-processor/vsphere: Process user variables.
 * provisioner/ansible-local: playbook paths are properly validated
