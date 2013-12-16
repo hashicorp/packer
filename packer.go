@@ -133,6 +133,13 @@ func wrappedMain() int {
 		envConfig.Ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
+
+		// Set this so that we don't get colored output in our machine-
+		// readable UI.
+		if err := os.Setenv("PACKER_NO_COLOR", "1"); err != nil {
+			fmt.Fprintf(os.Stderr, "Packer failed to initialize UI: %s\n", err)
+			return 1
+		}
 	}
 
 	env, err := packer.NewEnvironment(envConfig)
