@@ -19,22 +19,18 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	ConfigTemplate      string   `mapstructure:"config_template"`
-	CookbookPaths       []string `mapstructure:"cookbook_paths"`
-	RolesPath           string   `mapstructure:"roles_path"`
-	NodeName            string   `mapstructure:"node_name"`
-	ServerUrl           string   `mapstructure:"chef_server_url"`
-	DataBagsPath        string   `mapstructure:"data_bags_path"`
-	ExecuteCommand      string   `mapstructure:"execute_command"`
-	InstallCommand      string   `mapstructure:"install_command"`
-	ValidationCommand   string   `mapstructure:"validation_command"`
-	ClientCommand       string   `mapstructure:"client_command"`
-	RemoteCookbookPaths []string `mapstructure:"remote_cookbook_paths"`
-	Json                map[string]interface{}
-	PreventSudo         bool     `mapstructure:"prevent_sudo"`
-	RunList             []string `mapstructure:"run_list"`
-	SkipInstall         bool     `mapstructure:"skip_install"`
-	StagingDir          string   `mapstructure:"staging_directory"`
+	ConfigTemplate    string `mapstructure:"config_template"`
+	NodeName          string `mapstructure:"node_name"`
+	ServerUrl         string `mapstructure:"chef_server_url"`
+	ExecuteCommand    string `mapstructure:"execute_command"`
+	InstallCommand    string `mapstructure:"install_command"`
+	ValidationCommand string `mapstructure:"validation_command"`
+	ClientCommand     string `mapstructure:"client_command"`
+	Json              map[string]interface{}
+	PreventSudo       bool     `mapstructure:"prevent_sudo"`
+	RunList           []string `mapstructure:"run_list"`
+	SkipInstall       bool     `mapstructure:"skip_install"`
+	StagingDir        string   `mapstructure:"staging_directory"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -44,18 +40,13 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	CookbookPaths string
-	DataBagsPath  string
-	RolesPath     string
-	NodeName      string
-	ServerUrl     string
+	NodeName  string
+	ServerUrl string
 
 	// Templates don't support boolean statements until Go 1.2. In the
 	// mean time, we do this.
 	// TODO(mitchellh): Remove when Go 1.2 is released
-	HasDataBagsPath bool
-	HasRolesPath    bool
-	HasNodeName     bool
+	HasNodeName bool
 }
 
 type ExecuteTemplate struct {
@@ -109,8 +100,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	templates := map[string]*string{
 		"config_template": &p.config.ConfigTemplate,
-		"data_bags_path":  &p.config.DataBagsPath,
-		"roles_path":      &p.config.RolesPath,
 		"node_name":       &p.config.NodeName,
 		"staging_dir":     &p.config.StagingDir,
 		"chef_server_url": &p.config.ServerUrl,
@@ -126,9 +115,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	sliceTemplates := map[string][]string{
-		"cookbook_paths":        p.config.CookbookPaths,
-		"remote_cookbook_paths": p.config.RemoteCookbookPaths,
-		"run_list":              p.config.RunList,
+		"run_list": p.config.RunList,
 	}
 
 	for n, slice := range sliceTemplates {
@@ -164,33 +151,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		} else if fi.IsDir() {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Config template path must be a file: %s", err))
-		}
-	}
-
-	for _, path := range p.config.CookbookPaths {
-		pFileInfo, err := os.Stat(path)
-
-		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad cookbook path '%s': %s", path, err))
-		}
-	}
-
-	if p.config.RolesPath != "" {
-		pFileInfo, err := os.Stat(p.config.RolesPath)
-
-		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad roles path '%s': %s", p.config.RolesPath, err))
-		}
-	}
-
-	if p.config.DataBagsPath != "" {
-		pFileInfo, err := os.Stat(p.config.DataBagsPath)
-
-		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad data bags path '%s': %s", p.config.DataBagsPath, err))
 		}
 	}
 
@@ -231,8 +191,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error moving validation.pem: %s", err)
 	}
 
-	cookbookPaths := make([]string, 0, len(p.config.CookbookPaths))
-
 	nodeName := ""
 	if p.config.NodeName != "" {
 		nodeName = fmt.Sprintf("%s", p.config.NodeName)
@@ -243,23 +201,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		serverUrl = fmt.Sprintf("%s", p.config.ServerUrl)
 	}
 
-	rolesPath := ""
-	if p.config.RolesPath != "" {
-		rolesPath = fmt.Sprintf("%s/roles", p.config.StagingDir)
-		if err := p.uploadDirectory(ui, comm, rolesPath, p.config.RolesPath); err != nil {
-			return fmt.Errorf("Error uploading roles: %s", err)
-		}
-	}
-
-	dataBagsPath := ""
-	if p.config.DataBagsPath != "" {
-		dataBagsPath = fmt.Sprintf("%s/data_bags", p.config.StagingDir)
-		if err := p.uploadDirectory(ui, comm, dataBagsPath, p.config.DataBagsPath); err != nil {
-			return fmt.Errorf("Error uploading data bags: %s", err)
-		}
-	}
-
-	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath, nodeName, serverUrl)
+	configPath, err := p.createConfig(ui, comm, nodeName, serverUrl)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -316,18 +258,8 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, nodeName string, serverUrl string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string) (string, error) {
 	ui.Message("Creating configuration file 'client.rb'")
-
-	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
-	for i, path := range p.config.RemoteCookbookPaths {
-		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
-	}
-
-	for i, path := range localCookbooks {
-		i = len(p.config.RemoteCookbookPaths) + i
-		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
-	}
 
 	// Read the template
 	tpl := DefaultConfigTemplate
@@ -347,14 +279,9 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		CookbookPaths:   strings.Join(cookbook_paths, ","),
-		RolesPath:       rolesPath,
-		DataBagsPath:    dataBagsPath,
-		NodeName:        nodeName,
-		ServerUrl:       serverUrl,
-		HasRolesPath:    rolesPath != "",
-		HasDataBagsPath: dataBagsPath != "",
-		HasNodeName:     nodeName != "",
+		NodeName:    nodeName,
+		ServerUrl:   serverUrl,
+		HasNodeName: nodeName != "",
 	})
 	if err != nil {
 		return "", err
@@ -617,12 +544,3 @@ validation_client_name "chef-validator"
 node_name "{{.NodeName}}"
 {{end}}
 `
-
-//cookbook_path 	[{{.CookbookPaths}}]
-//{{if .HasRolesPath}}
-//role_path		"{{.RolesPath}}"
-//{{end}}
-//{{if .HasDataBagsPath}}
-//data_bag_path	"{{.DataBagsPath}}"
-//{{end}}
-//`
