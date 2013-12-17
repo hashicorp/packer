@@ -23,6 +23,8 @@ IMPROVEMENTS:
 * core: Plugins communicate over a single TCP connection per plugin now,
   instead of sometimes dozens. Performance around plugin communication
   dramatically increased.
+* builder/amazon/all: Launched EC2 instances now have a name of
+  "Packer Builder" so that they are easily recognizable. [GH-642]
 * builder/amazon/all: Copying AMIs to multiple regions now happens
   in parallel. [GH-495]
 * builder/qemu: Floppy files are supported. [GH-686]
