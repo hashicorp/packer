@@ -2,6 +2,7 @@ package packer
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 )
@@ -32,6 +33,34 @@ func TestColoredUi(t *testing.T) {
 	ui.Error("foo")
 	result = readWriter(bufferUi)
 	if result != "\033[1;31mfoo\033[0m\n" {
+		t.Fatalf("invalid output: %s", result)
+	}
+}
+
+func TestColoredUi_noColorEnv(t *testing.T) {
+	bufferUi := testUi()
+	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi}
+
+	// Set the env var to get rid of the color
+	oldenv := os.Getenv("PACKER_NO_COLOR")
+	os.Setenv("PACKER_NO_COLOR", "1")
+	defer os.Setenv("PACKER_NO_COLOR", oldenv)
+
+	ui.Say("foo")
+	result := readWriter(bufferUi)
+	if result != "foo\n" {
+		t.Fatalf("invalid output: %s", result)
+	}
+
+	ui.Message("foo")
+	result = readWriter(bufferUi)
+	if result != "foo\n" {
+		t.Fatalf("invalid output: %s", result)
+	}
+
+	ui.Error("foo")
+	result = readWriter(bufferUi)
+	if result != "foo\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
 }
