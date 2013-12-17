@@ -30,7 +30,8 @@ func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepActio
 			ui.Say("Deleting previous output directory...")
 			dir.RemoveAll()
 		} else {
-			state.Put("error", fmt.Errorf("Output directory '%s' already exists.", config.OutputDir))
+			state.Put("error", fmt.Errorf(
+				"Output directory '%s' already exists.", config.OutputDir))
 			return multistep.ActionHalt
 		}
 	}
@@ -41,9 +42,7 @@ func (s *stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepActio
 	}
 
 	s.dir = dir
-
 	state.Put("dir", dir)
-
 	return multistep.ActionContinue
 }
 
