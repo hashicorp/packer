@@ -31,6 +31,8 @@ IMPROVEMENTS:
 * builder/qemu: Next `run_once` option tells Qemu to run only once,
   which is useful for Windows installs that handle reboots for you.
   [GH-687]
+* builder/virtualbox: Nice errors if Packer can't write to
+  the output directory.
 * provisioner/puppet-masterless: Can now specify a `manifest_dir` to
   upload manifests to the remote machine for imports. [GH-655]
 
