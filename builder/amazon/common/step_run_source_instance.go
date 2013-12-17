@@ -6,7 +6,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
-	"log"
 )
 
 type StepRunSourceInstance struct {
@@ -91,7 +90,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	s.instance = &runResp.Instances[0]
-	log.Printf("instance id: %s", s.instance.InstanceId)
+	ui.Message(fmt.Sprintf("Instance ID: %s", s.instance.InstanceId))
+
+	_, err = ec2conn.CreateTags(
+		[]string{s.instance.InstanceId}, []ec2.Tag{{"Name", "Packer Builder"}})
+	if err != nil {
+		ui.Message(
+			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))
+	}
 
 	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
 	stateChange := StateChangeConf{
