@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"sort"
 	"strings"
@@ -49,8 +50,14 @@ func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 // If you need extra configuration for mapstructure, you should configure
 // it manually and not use this helper function.
 func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metadata, error) {
+	decodeHook, err := decodeConfigHook(raws)
+	if err != nil {
+		return nil, err
+	}
+
 	var md mapstructure.Metadata
 	decoderConfig := &mapstructure.DecoderConfig{
+		DecodeHook:       decodeHook,
 		Metadata:         &md,
 		Result:           target,
 		WeaklyTypedInput: true,
@@ -148,4 +155,42 @@ func DownloadableURL(original string) (string, error) {
 	}
 
 	return url.String(), nil
+}
+
+// This returns a mapstructure.DecodeHookFunc that automatically template
+// processes any configuration values that aren't strings but have been
+// provided as strings.
+//
+// For example: "image_id" wants an int and the user uses a string with
+// a user variable like "{{user `image_id`}}". This decode hook makes that
+// work.
+func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
+	// First thing we do is decode PackerConfig so that we can have access
+	// to the user variables so that we can process some templates.
+	var pc PackerConfig
+	for _, raw := range raws {
+		if err := mapstructure.Decode(raw, &pc); err != nil {
+			return nil, err
+		}
+	}
+
+	tpl, err := packer.NewConfigTemplate()
+	if err != nil {
+		return nil, err
+	}
+	tpl.UserVars = pc.PackerUserVars
+
+	return func(f reflect.Kind, t reflect.Kind, v interface{}) (interface{}, error) {
+		if t != reflect.String {
+			if sv, ok := v.(string); ok {
+				var err error
+				v, err = tpl.Process(sv, nil)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		return v, nil
+	}, nil
 }

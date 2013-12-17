@@ -66,6 +66,32 @@ func TestDecodeConfig(t *testing.T) {
 	}
 }
 
+// This test tests the case that a user var is used for an integer
+// configuration.
+func TestDecodeConfig_userVarConversion(t *testing.T) {
+	type Local struct {
+		Val int
+	}
+
+	raw := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": "42",
+		},
+
+		"val": "{{user `foo`}}",
+	}
+
+	var result Local
+	_, err := DecodeConfig(&result, raw)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Val != 42 {
+		t.Fatalf("invalid: %#v", result.Val)
+	}
+}
+
 func TestDownloadableURL(t *testing.T) {
 	// Invalid URL: has hex code in host
 	_, err := DownloadableURL("http://what%20.com")
