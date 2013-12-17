@@ -88,8 +88,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.ImageID == 0 {
-		// Default to base image "Ubuntu 12.04 x64 Server (id: 284203)"
-		b.config.ImageID = 284203
+		// Default to base image "Ubuntu 12.04.3 x64 Server (id: 1505447)"
+		b.config.ImageID = 1505447
 	}
 
 	if b.config.SnapshotName == "" {
