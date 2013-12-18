@@ -522,7 +522,7 @@ data_bag_path	"{{.DataBagsPath}}"
 encrypted_data_bag_secret "{{.EncryptedDataBagSecretPath}}"
 {{end}}
 {{if .HasEnvironmentsPath}}
-environments_path "{{.EnvironmentsPath}}"
-chef_environment "{{.ChefEnvironment}}"
+environment_path "{{.EnvironmentsPath}}"
+environment "{{.ChefEnvironment}}"
 {{end}}
 `
