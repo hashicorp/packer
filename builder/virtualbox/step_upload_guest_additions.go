@@ -19,7 +19,6 @@ func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
-	guestAdditionsPath := state.Get("guest_additions_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	// If we're attaching then don't do this, since we attached.
@@ -27,6 +26,9 @@ func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 		log.Println("Not uploading guest additions since mode is not upload")
 		return multistep.ActionContinue
 	}
+
+	// Get the guest additions path since we're doing it
+	guestAdditionsPath := state.Get("guest_additions_path").(string)
 
 	version, err := driver.Version()
 	if err != nil {
