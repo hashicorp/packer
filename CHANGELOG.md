@@ -44,6 +44,7 @@ BUG FIXES:
 * post-processor/vsphere: Process user variables.
 * provisioner/ansible-local: playbook paths are properly validated
   as directories, not files. [GH-710]
+* provisioner/chef-solo: Environments are recognized. [GH-726]
 
 ## 0.4.1 (December 7, 2013)
 
