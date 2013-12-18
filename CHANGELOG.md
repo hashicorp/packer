@@ -40,6 +40,7 @@ BUG FIXES:
 
 * core: No colored output in machine-readable output. [GH-684]
 * core: User variables can now be used for non-string fields. [GH-598]
+* builder/virtualbox: don't download guest additions if disabled. [GH-731]
 * post-processor/vsphere: Uploads VM properly. [GH-694]
 * post-processor/vsphere: Process user variables.
 * provisioner/ansible-local: playbook paths are properly validated
