@@ -25,7 +25,6 @@ type stepAttachGuestAdditions struct {
 func (s *stepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
-	guestAdditionsPath := state.Get("guest_additions_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
@@ -34,6 +33,9 @@ func (s *stepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 		log.Println("Not attaching guest additions since we're uploading.")
 		return multistep.ActionContinue
 	}
+
+	// Get the guest additions path since we're doing it
+	guestAdditionsPath := state.Get("guest_additions_path").(string)
 
 	// Attach the guest additions to the computer
 	log.Println("Attaching guest additions ISO onto IDE controller...")
