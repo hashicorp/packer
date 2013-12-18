@@ -35,6 +35,12 @@ func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*config)
 
+	// If we've disabled guest additions, don't download
+	if config.GuestAdditionsMode == GuestAdditionsModeDisable {
+		log.Println("Not downloading guest additions since it is disabled.")
+		return multistep.ActionContinue
+	}
+
 	// Get VBox version
 	version, err := driver.Version()
 	if err != nil {
