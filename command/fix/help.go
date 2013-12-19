@@ -11,6 +11,11 @@ Usage: packer fix [options] TEMPLATE
 
 Fixes that are run:
 
-  iso-md5         Replaces "iso_md5" in builders with newer "iso_checksum"
+  iso-md5             Replaces "iso_md5" in builders with newer "iso_checksum"
+  createtime          Replaces ".CreateTime" in builder configs with "{{timestamp}}"
+  virtualbox-gaattach Updates VirtualBox builders using "guest_additions_attach"
+                      to use "guest_additions_mode"
+  pp-vagrant-override Replaces old-style provider overrides for the Vagrant
+                      post-processor to new-style as of Packer 0.5.0.
 
 `

@@ -13,14 +13,6 @@ import (
 	"path/filepath"
 )
 
-// OutputPathTemplate is the structure that is availalable within the
-// OutputPath variables.
-type OutputPathTemplate struct {
-	ArtifactId string
-	BuildName  string
-	Provider   string
-}
-
 // Copies a file by copying the contents of the file to another place.
 func CopyContents(dst, src string) error {
 	srcF, err := os.Open(src)
