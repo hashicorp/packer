@@ -106,6 +106,9 @@ func (d *VBox42Driver) Stop(name string) error {
 		return err
 	}
 
+	// We sleep here for a little bit to let the session "unlock"
+	time.Sleep(2 * time.Second)
+
 	return nil
 }
 
