@@ -34,21 +34,8 @@ type Config struct {
 	tpl *packer.ConfigTemplate
 }
 
-// OutputPathTemplate is the structure that is availalable within the
-// OutputPath variables.
-type OutputPathTemplate struct {
-	ArtifactId string
-	BuildName  string
-	Provider   string
-}
-
 type PostProcessor struct {
 	config Config
-}
-
-type VagrantfileTemplate struct {
-	ProviderVagrantfile string
-	CustomVagrantfile   string
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -117,7 +104,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &OutputPathTemplate{
+	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &outputPathTemplate{
 		ArtifactId: artifact.Id(),
 		BuildName:  p.config.PackerBuildName,
 		Provider:   name,
@@ -173,7 +160,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	t := template.Must(template.New("root").Parse(boxVagrantfileContents))
-	err = t.Execute(f, &VagrantfileTemplate{
+	err = t.Execute(f, &vagrantfileTemplate{
 		ProviderVagrantfile: vagrantfile,
 		CustomVagrantfile:   customVagrantfile,
 	})
@@ -197,6 +184,19 @@ func providerForName(name string) Provider {
 	default:
 		return nil
 	}
+}
+
+// OutputPathTemplate is the structure that is availalable within the
+// OutputPath variables.
+type outputPathTemplate struct {
+	ArtifactId string
+	BuildName  string
+	Provider   string
+}
+
+type vagrantfileTemplate struct {
+	ProviderVagrantfile string
+	CustomVagrantfile   string
 }
 
 const boxVagrantfileContents string = `
