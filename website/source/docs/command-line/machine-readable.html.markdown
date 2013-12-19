@@ -36,7 +36,7 @@ with the `-machine-readable` flag to see!
 
 ## Format
 
-The machine readable format is a line-oriented, comma-delimeted text
+The machine readable format is a line-oriented, comma-delimited text
 format. This makes it extremely easy to parse using standard Unix tools such
 as awk or grep in addition to full programming languages like Ruby or
 Python.

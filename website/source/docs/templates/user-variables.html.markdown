@@ -20,7 +20,7 @@ page first.
 
 User variables must first be defined in a `variables` section within your
 template. Even if you want a variable to default to an empty string, it
-must be defined. This explicitivity makes it easy for newcomers to your
+must be defined. This explicivity makes it easy for newcomers to your
 template to understand what can be modified using variables in your template.
 
 The `variables` section is a simple key/value mapping of the variable
