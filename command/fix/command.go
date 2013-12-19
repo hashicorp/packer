@@ -49,15 +49,8 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Close the file since we're done with that
 	tplF.Close()
 
-	// Run the template through the various fixers
-	fixers := []string{
-		"iso-md5",
-		"createtime",
-		"virtualbox-gaattach",
-	}
-
 	input := templateData
-	for _, name := range fixers {
+	for _, name := range FixerOrder {
 		var err error
 		fixer, ok := Fixers[name]
 		if !ok {
