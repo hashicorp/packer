@@ -60,7 +60,7 @@ func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 		"--medium", "none",
 	}
 
-	if err := driver.VBoxManage(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error unregistering ISO: %s", err))
-	}
+	// Remove the ISO. Note that this will probably fail since
+	// stepRemoveDevices does this as well. No big deal.
+	driver.VBoxManage(command...)
 }

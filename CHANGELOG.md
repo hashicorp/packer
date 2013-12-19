@@ -33,6 +33,7 @@ IMPROVEMENTS:
   [GH-687]
 * builder/virtualbox: Nice errors if Packer can't write to
   the output directory.
+* builder/virtualbox: ISO is ejected prior to export.
 * provisioner/puppet-masterless: Can now specify a `manifest_dir` to
   upload manifests to the remote machine for imports. [GH-655]
 
