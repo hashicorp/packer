@@ -10,11 +10,7 @@ func testConfig() map[string]interface{} {
 }
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var raw interface{}
-	raw = &PostProcessor{}
-	if _, ok := raw.(packer.PostProcessor); !ok {
-		t.Fatalf("AWS PostProcessor should be a PostProcessor")
-	}
+	var _ packer.PostProcessor = new(PostProcessor)
 }
 
 func TestBuilderPrepare_OutputPath(t *testing.T) {
@@ -36,14 +32,12 @@ func TestBuilderPrepare_OutputPath(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_PPConfig(t *testing.T) {
-	var p PostProcessor
+func TestProviderForName(t *testing.T) {
+	if v, ok := providerForName("virtualbox").(*VBoxProvider); !ok {
+		t.Fatalf("bad: %#v", v)
+	}
 
-	// Default
-	c := testConfig()
-	c["aws"] = map[string]interface{}{}
-	err := p.Configure(c)
-	if err != nil {
-		t.Fatalf("err: %s", err)
+	if providerForName("nope") != nil {
+		t.Fatal("should be nil if bad provider")
 	}
 }
