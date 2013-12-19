@@ -18,9 +18,10 @@ import (
 type VBoxBoxConfig struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	OutputPath          string `mapstructure:"output"`
-	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
-	CompressionLevel    int    `mapstructure:"compression_level"`
+	Include             []string `mapstructure:"include"`
+	OutputPath          string   `mapstructure:"output"`
+	VagrantfileTemplate string   `mapstructure:"vagrantfile_template"`
+	CompressionLevel    int      `mapstructure:"compression_level"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -101,6 +102,16 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 	}
 	defer os.RemoveAll(dir)
 
+	// Copy all of the includes files into the temporary directory
+	for _, src := range p.config.Include {
+		ui.Message(fmt.Sprintf("Copying from include: %s", src))
+		dst := filepath.Join(dir, filepath.Base(src))
+		if err := CopyContents(dst, src); err != nil {
+			err = fmt.Errorf("Error copying include file: %s\n\n%s", src, err)
+			return nil, false, err
+		}
+	}
+
 	// Copy all of the original contents into the temporary directory
 	for _, path := range artifact.Files() {
 
@@ -112,7 +123,7 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 				return nil, false, err
 			}
 		} else {
-			ui.Message(fmt.Sprintf("Copying: %s", path))
+			ui.Message(fmt.Sprintf("Copying from artifact: %s", path))
 			dstPath := filepath.Join(dir, filepath.Base(path))
 			if err := CopyContents(dstPath, path); err != nil {
 				return nil, false, err
@@ -136,6 +147,8 @@ func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifac
 
 	vagrantfileContents := defaultVBoxVagrantfile
 	if p.config.VagrantfileTemplate != "" {
+		ui.Message(fmt.Sprintf(
+			"Using Vagrantfile template: %s", p.config.VagrantfileTemplate))
 		f, err := os.Open(p.config.VagrantfileTemplate)
 		if err != nil {
 			return nil, false, err
