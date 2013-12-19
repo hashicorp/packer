@@ -2,16 +2,26 @@ package packer
 
 // MockArtifact is an implementation of Artifact that can be used for tests.
 type MockArtifact struct {
-	IdValue       string
-	DestroyCalled bool
+	BuilderIdValue string
+	FilesValue     []string
+	IdValue        string
+	DestroyCalled  bool
 }
 
-func (*MockArtifact) BuilderId() string {
-	return "bid"
+func (a *MockArtifact) BuilderId() string {
+	if a.BuilderIdValue == "" {
+		return "bid"
+	}
+
+	return a.BuilderIdValue
 }
 
-func (*MockArtifact) Files() []string {
-	return []string{"a", "b"}
+func (a *MockArtifact) Files() []string {
+	if a.FilesValue == nil {
+		return []string{"a", "b"}
+	}
+
+	return a.FilesValue
 }
 
 func (a *MockArtifact) Id() string {

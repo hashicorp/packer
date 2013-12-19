@@ -18,7 +18,7 @@ documentation on [using post-processors](/docs/templates/post-processors.html)
 in templates. This knowledge will be expected for the remainder of
 this document.
 
-Because Vagrant boxes are [provider-specific](#),
+Because Vagrant boxes are [provider-specific](http://docs.vagrantup.com/v2/boxes/format.html),
 the Vagrant post-processor is hardcoded to understand how to convert
 the artifacts of certain builders into proper boxes for their
 respective providers.
@@ -27,6 +27,7 @@ Currently, the Vagrant post-processor can create boxes for the following
 providers.
 
 * AWS
+* DigitalOcean
 * VirtualBox
 * VMware
 
@@ -47,82 +48,52 @@ However, if you want to configure things a bit more, the post-processor
 does expose some configuration options. The available options are listed
 below, with more details about certain options in following sections.
 
+* `compression_level` (integer) - An integer repesenting the
+  compression level to use when creating the Vagrant box.  Valid
+  values range from 0 to 9, with 0 being no compression and 9 being
+  the best compression. By default, compression is enabled at level 1.
+
+* `include` (array of strings) - Paths to files to include in the
+  Vagrant box. These files will each be copied into the top level directory
+  of the Vagrant box (regardless of their paths). They can then be used
+  from the Vagrantfile.
+
 * `output` (string) - The full path to the box file that will be created
   by this post-processor. This is a
   [configuration template](/docs/templates/configuration-templates.html).
   The variable `Provider` is replaced by the Vagrant provider the box is for.
   The variable `ArtifactId` is replaced by the ID of the input artifact.
+  The variable `BuildName` is replaced with the name of the build.
   By default, the value of this config is `packer_{{.BuildName}}_{{.Provider}}.box`.
 
-* `aws`, `virtualbox`, or `vmware` (objects) - These are used to configure
-  the specific options for certain providers. A reference of available
-  configuration parameters for each is in the section below.
-
-### AWS Provider
-
-The AWS provider itself can be configured with specific options:
-
 * `vagrantfile_template` (string) - Path to a template to use for the
-  Vagrantfile that is packaged with the box. The contents of the file must be a valid Go
-  [text template](http://golang.org/pkg/text/template). By default
-  this is a template that simply sets the AMIs for the various regions
-  of the AWS build.
+  Vagrantfile that is packaged with the box.
 
-* `compression_level` (integer) - An integer repesenting the
-  compression level to use when creating the Vagrant box.  Valid
-  values range from 0 to 9, with 0 being no compression and 9 being
-  the best compression.
+## Provider-Specific Overrides
 
-The `vagrantfile_template` has the `Images` variable which is a map
-of region (string) to AMI ID (string). An example Vagrantfile template for
-AWS is shown below. The example simply sets the AMI for each region.
+If you have a Packer template with multiple builder types within it,
+you may want to configure the box creation for each type a little differently.
+For example, the contents of the Vagrantfile for a Vagrant box for AWS might
+be different from the contents of the Vagrantfile you want for VMware.
+The post-processor lets you do this.
 
-```
-Vagrant.configure("2") do |config|
-  config.vm.provider "aws" do |aws|
-    {{ range $region, $ami := .Images }}
-	aws.region_config "{{ $region }}", ami: "{{ $ami }}"
-	{{ end }}
-  end
-end
-```
+Specify overrides within the `override` configuration by provider name:
 
-### VirtualBox Provider
+```json
+{
+    "type": "vagrant",
 
-The VirtualBox provider itself can be configured with specific options:
-
-* `vagrantfile_template` (string) - Path to a template to use for the
-  Vagrantfile that is packaged with the box. The contents of the file must be a valid Go
-  [text template](http://golang.org/pkg/text/template). By default this is
-  a template that just sets the base MAC address so that networking works.
-
-* `compression_level` (integer) - An integer repesenting the
-  compression level to use when creating the Vagrant box.  Valid
-  values range from 0 to 9, with 0 being no compression and 9 being
-  the best compression.
-
-The `vagrantfile_template` has the `BaseMACAddress` variable which is a string
-containing the MAC address of the first network interface. This must be set
-in the Vagrantfile for networking to work properly with Vagrant. An example
-Vagrantfile template is shown below:
-
-```
-Vagrant.configure("2") do |config|
-  config.vm.base_mac = "{{ .BaseMacAddress }}"
-end
+    "compression_level": 1,
+    "override": {
+        "vmware": {
+            "compression_level": 0
+        }
+    }
+}
 ```
 
-### VMware Provider
+In the example above, the compression level will be set to 1 except for
+VMware, where it will be set to 0.
 
-The VMware provider itself can be configured with specific options:
-
-* `vagrantfile_template` (string) - Path to a template to use for the
-  Vagrantfile that is packaged with the box. The contents of the file must be a valid Go
-  [text template](http://golang.org/pkg/text/template). By default no
-  Vagrantfile is packaged with the box. Note that currently no variables
-  are available in the template, but this may change in the future.
-
-* `compression_level` (integer) - An integer repesenting the
-  compression level to use when creating the Vagrant box.  Valid
-  values range from 0 to 9, with 0 being no compression and 9 being
-  the best compression.
+The available provider names are: `aws`, `digitalocean`, `virtualbox`,
+and `vmware`.
