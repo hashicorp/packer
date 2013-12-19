@@ -2,6 +2,9 @@
 
 BACKWARDS INCOMPATIBILITIES:
 
+* post-processor/vagrant: Syntax for overriding by provider has changed.
+  See the documentation for more information. Running your template
+  through `packer fix` should resolve this.
 * post-processor/vsphere: Some available configuration options were
   changed. Running your template through `packer fix` should resolve
   this.
