@@ -419,6 +419,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepUploadGuestAdditions),
 		new(common.StepProvision),
 		new(stepShutdown),
+		new(stepRemoveDevices),
 		new(stepExport),
 	}
 
