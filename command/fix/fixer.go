@@ -22,6 +22,7 @@ func init() {
 	Fixers = map[string]Fixer{
 		"iso-md5":             new(FixerISOMD5),
 		"createtime":          new(FixerCreateTime),
+		"pp-vagrant-override": new(FixerVagrantPPOverride),
 		"virtualbox-gaattach": new(FixerVirtualBoxGAAttach),
 	}
 
@@ -29,5 +30,6 @@ func init() {
 		"iso-md5",
 		"createtime",
 		"virtualbox-gaattach",
+		"pp-vagrant-override",
 	}
 }
