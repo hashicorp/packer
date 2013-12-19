@@ -17,6 +17,8 @@ FEATURES:
   [GH-715]
 * "description" field in templates: write a human-readable description
   of what a template does. This will be shown in `packer inspect`.
+* Vagrant post-processor now accepts a list of files to include in the
+  box.
 
 IMPROVEMENTS:
 
