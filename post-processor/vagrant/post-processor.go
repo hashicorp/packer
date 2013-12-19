@@ -26,64 +26,37 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	CompressionLevel    int      `mapstructure:"compression_level"`
 	Include             []string `mapstructure:"include"`
 	OutputPath          string   `mapstructure:"output"`
-	VagrantfileTemplate string   `mapstructure:"vagrantfile_template"`
-	CompressionLevel    int      `mapstructure:"compression_level"`
+	Override            map[string]interface{}
+	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
 
 	tpl *packer.ConfigTemplate
 }
 
 type PostProcessor struct {
-	config Config
+	configs map[string]*Config
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
-	if err != nil {
+	p.configs = make(map[string]*Config)
+	p.configs[""] = new(Config)
+	if err := p.configureSingle(p.configs[""], raws...); err != nil {
 		return err
 	}
 
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
+	// Go over any of the provider-specific overrides and load those up.
+	for name, override := range p.configs[""].Override {
+		subRaws := make([]interface{}, len(raws)+1)
+		copy(subRaws, raws)
+		subRaws[len(raws)] = override
 
-	// Defaults
-	if p.config.OutputPath == "" {
-		p.config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
-	}
-
-	found := false
-	for _, k := range md.Keys {
-		if k == "compression_level" {
-			found = true
-			break
+		config := new(Config)
+		p.configs[name] = config
+		if err := p.configureSingle(config, subRaws...); err != nil {
+			return fmt.Errorf("Error configuring %s: %s", name, err)
 		}
-	}
-
-	if !found {
-		p.config.CompressionLevel = flate.DefaultCompression
-	}
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	validates := map[string]*string{
-		"output":               &p.config.OutputPath,
-		"vagrantfile_template": &p.config.VagrantfileTemplate,
-	}
-
-	for n, ptr := range validates {
-		if err := p.config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
-		}
-	}
-
-	if errs != nil && len(errs.Errors) > 0 {
-		return errs
 	}
 
 	return nil
@@ -102,11 +75,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		panic(fmt.Sprintf("bad provider name: %s", name))
 	}
 
+	config := p.configs[""]
+	if specificConfig, ok := p.configs[name]; ok {
+		config = specificConfig
+	}
+
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &outputPathTemplate{
+	outputPath, err := config.tpl.Process(config.OutputPath, &outputPathTemplate{
 		ArtifactId: artifact.Id(),
-		BuildName:  p.config.PackerBuildName,
+		BuildName:  config.PackerBuildName,
 		Provider:   name,
 	})
 	if err != nil {
@@ -121,7 +99,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	defer os.RemoveAll(dir)
 
 	// Copy all of the includes files into the temporary directory
-	for _, src := range p.config.Include {
+	for _, src := range config.Include {
 		ui.Message(fmt.Sprintf("Copying from include: %s", src))
 		dst := filepath.Join(dir, filepath.Base(src))
 		if err := CopyContents(dst, src); err != nil {
@@ -143,10 +121,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Write our Vagrantfile
 	var customVagrantfile string
-	if p.config.VagrantfileTemplate != "" {
+	if config.VagrantfileTemplate != "" {
 		ui.Message(fmt.Sprintf(
-			"Using custom Vagrantfile: %s", p.config.VagrantfileTemplate))
-		customBytes, err := ioutil.ReadFile(p.config.VagrantfileTemplate)
+			"Using custom Vagrantfile: %s", config.VagrantfileTemplate))
+		customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
 		if err != nil {
 			return nil, false, err
 		}
@@ -170,11 +148,62 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Create the box
-	if err := DirToBox(outputPath, dir, ui, p.config.CompressionLevel); err != nil {
+	if err := DirToBox(outputPath, dir, ui, config.CompressionLevel); err != nil {
 		return nil, false, err
 	}
 
 	return nil, false, nil
+}
+
+func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) error {
+	md, err := common.DecodeConfig(config, raws...)
+	if err != nil {
+		return err
+	}
+
+	config.tpl, err = packer.NewConfigTemplate()
+	if err != nil {
+		return err
+	}
+	config.tpl.UserVars = config.PackerUserVars
+
+	// Defaults
+	if config.OutputPath == "" {
+		config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
+	}
+
+	found := false
+	for _, k := range md.Keys {
+		if k == "compression_level" {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		config.CompressionLevel = flate.DefaultCompression
+	}
+
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
+
+	validates := map[string]*string{
+		"output":               &config.OutputPath,
+		"vagrantfile_template": &config.VagrantfileTemplate,
+	}
+
+	for n, ptr := range validates {
+		if err := config.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
+	}
+
+	return nil
 }
 
 func providerForName(name string) Provider {
