@@ -2,10 +2,8 @@ package vagrant
 
 import (
 	"archive/tar"
-	"compress/flate"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
@@ -15,183 +13,49 @@ import (
 	"regexp"
 )
 
-type VBoxBoxConfig struct {
-	common.PackerConfig `mapstructure:",squash"`
+type VBoxProvider struct{}
 
-	Include             []string `mapstructure:"include"`
-	OutputPath          string   `mapstructure:"output"`
-	VagrantfileTemplate string   `mapstructure:"vagrantfile_template"`
-	CompressionLevel    int      `mapstructure:"compression_level"`
-
-	tpl *packer.ConfigTemplate
-}
-
-type VBoxVagrantfileTemplate struct {
-	BaseMacAddress string
-}
-
-type VBoxBoxPostProcessor struct {
-	config VBoxBoxConfig
-}
-
-func (p *VBoxBoxPostProcessor) Configure(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
-	if err != nil {
-		return err
-	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
-
-	// Defaults
-	found := false
-	for _, k := range md.Keys {
-		println(k)
-		if k == "compression_level" {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		p.config.CompressionLevel = flate.DefaultCompression
-	}
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	validates := map[string]*string{
-		"output":               &p.config.OutputPath,
-		"vagrantfile_template": &p.config.VagrantfileTemplate,
-	}
-
-	for n, ptr := range validates {
-		if err := p.config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
-		}
-	}
-
-	if errs != nil && len(errs.Errors) > 0 {
-		return errs
-	}
-
-	return nil
-}
-
-func (p *VBoxBoxPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	var err error
-
-	// Compile the output path
-	outputPath, err := p.config.tpl.Process(p.config.OutputPath, &OutputPathTemplate{
-		ArtifactId: artifact.Id(),
-		BuildName:  p.config.PackerBuildName,
-		Provider:   "virtualbox",
-	})
-	if err != nil {
-		return nil, false, err
-	}
-
-	// Create a temporary directory for us to build the contents of the box in
-	dir, err := ioutil.TempDir("", "packer")
-	if err != nil {
-		return nil, false, err
-	}
-	defer os.RemoveAll(dir)
-
-	// Copy all of the includes files into the temporary directory
-	for _, src := range p.config.Include {
-		ui.Message(fmt.Sprintf("Copying from include: %s", src))
-		dst := filepath.Join(dir, filepath.Base(src))
-		if err := CopyContents(dst, src); err != nil {
-			err = fmt.Errorf("Error copying include file: %s\n\n%s", src, err)
-			return nil, false, err
-		}
-	}
+func (p *VBoxProvider) Process(ui packer.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
+	// Create the metadata
+	metadata = map[string]interface{}{"provider": "virtualbox"}
 
 	// Copy all of the original contents into the temporary directory
 	for _, path := range artifact.Files() {
-
 		// We treat OVA files specially, we unpack those into the temporary
 		// directory so we can get the resulting disk and OVF.
 		if extension := filepath.Ext(path); extension == ".ova" {
 			ui.Message(fmt.Sprintf("Unpacking OVA: %s", path))
-			if err := DecompressOva(dir, path); err != nil {
-				return nil, false, err
+			if err = DecompressOva(dir, path); err != nil {
+				return
 			}
 		} else {
 			ui.Message(fmt.Sprintf("Copying from artifact: %s", path))
 			dstPath := filepath.Join(dir, filepath.Base(path))
-			if err := CopyContents(dstPath, path); err != nil {
-				return nil, false, err
+			if err = CopyContents(dstPath, path); err != nil {
+				return
 			}
 		}
 
 	}
 
-	// Create the Vagrantfile from the template
-	tplData := &VBoxVagrantfileTemplate{}
-	tplData.BaseMacAddress, err = p.findBaseMacAddress(dir)
-	if err != nil {
-		return nil, false, err
-	}
-
-	vf, err := os.Create(filepath.Join(dir, "Vagrantfile"))
-	if err != nil {
-		return nil, false, err
-	}
-	defer vf.Close()
-
-	vagrantfileContents := defaultVBoxVagrantfile
-	if p.config.VagrantfileTemplate != "" {
-		ui.Message(fmt.Sprintf(
-			"Using Vagrantfile template: %s", p.config.VagrantfileTemplate))
-		f, err := os.Open(p.config.VagrantfileTemplate)
-		if err != nil {
-			return nil, false, err
-		}
-		defer f.Close()
-
-		contents, err := ioutil.ReadAll(f)
-		if err != nil {
-			return nil, false, err
-		}
-
-		vagrantfileContents = string(contents)
-	}
-
-	vagrantfileContents, err = p.config.tpl.Process(vagrantfileContents, tplData)
-	if err != nil {
-		return nil, false, fmt.Errorf("Error writing Vagrantfile: %s", err)
-	}
-	vf.Write([]byte(vagrantfileContents))
-	vf.Close()
-
-	// Create the metadata
-	metadata := map[string]string{"provider": "virtualbox"}
-	if err := WriteMetadata(dir, metadata); err != nil {
-		return nil, false, err
-	}
-
 	// Rename the OVF file to box.ovf, as required by Vagrant
 	ui.Message("Renaming the OVF to box.ovf...")
-	if err := p.renameOVF(dir); err != nil {
-		return nil, false, err
+	if err = p.renameOVF(dir); err != nil {
+		return
 	}
 
-	// Compress the directory to the given output path
-	ui.Message(fmt.Sprintf("Compressing box..."))
-	if err := DirToBox(outputPath, dir, ui, p.config.CompressionLevel); err != nil {
-		return nil, false, err
+	// Create the Vagrantfile from the template
+	var baseMacAddress string
+	baseMacAddress, err = p.findBaseMacAddress(dir)
+	if err != nil {
+		return
 	}
 
-	return NewArtifact("virtualbox", outputPath), false, nil
+	vagrantfile = fmt.Sprintf(vboxVagrantfile, baseMacAddress)
+	return
 }
 
-func (p *VBoxBoxPostProcessor) findOvf(dir string) (string, error) {
+func (p *VBoxProvider) findOvf(dir string) (string, error) {
 	log.Println("Looking for OVF in artifact...")
 	file_matches, err := filepath.Glob(filepath.Join(dir, "*.ovf"))
 	if err != nil {
@@ -209,7 +73,7 @@ func (p *VBoxBoxPostProcessor) findOvf(dir string) (string, error) {
 	return file_matches[0], err
 }
 
-func (p *VBoxBoxPostProcessor) renameOVF(dir string) error {
+func (p *VBoxProvider) renameOVF(dir string) error {
 	log.Println("Looking for OVF to rename...")
 	ovf, err := p.findOvf(dir)
 	if err != nil {
@@ -220,7 +84,7 @@ func (p *VBoxBoxPostProcessor) renameOVF(dir string) error {
 	return os.Rename(ovf, filepath.Join(dir, "box.ovf"))
 }
 
-func (p *VBoxBoxPostProcessor) findBaseMacAddress(dir string) (string, error) {
+func (p *VBoxProvider) findBaseMacAddress(dir string) (string, error) {
 	log.Println("Looking for OVF for base mac address...")
 	ovf, err := p.findOvf(dir)
 	if err != nil {
@@ -295,8 +159,8 @@ func DecompressOva(dir, src string) error {
 	return nil
 }
 
-var defaultVBoxVagrantfile = `
+var vboxVagrantfile = `
 Vagrant.configure("2") do |config|
-config.vm.base_mac = "{{ .BaseMacAddress }}"
+  config.vm.base_mac = "%s"
 end
 `
