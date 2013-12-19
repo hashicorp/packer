@@ -49,7 +49,6 @@ func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
 	command := []string{
