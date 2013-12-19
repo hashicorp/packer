@@ -15,10 +15,19 @@ type Fixer interface {
 // Fixers is the map of all available fixers, by name.
 var Fixers map[string]Fixer
 
+// FixerOrder is the default order the fixers should be run.
+var FixerOrder []string
+
 func init() {
 	Fixers = map[string]Fixer{
 		"iso-md5":             new(FixerISOMD5),
 		"createtime":          new(FixerCreateTime),
 		"virtualbox-gaattach": new(FixerVirtualBoxGAAttach),
+	}
+
+	FixerOrder = []string{
+		"iso-md5",
+		"createtime",
+		"virtualbox-gaattach",
 	}
 }
