@@ -42,8 +42,9 @@ func TestPostProcessorPrepare_compressionLevel(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.CompressionLevel != flate.DefaultCompression {
-		t.Fatalf("bad: %#v", p.config.CompressionLevel)
+	config := p.configs[""]
+	if config.CompressionLevel != flate.DefaultCompression {
+		t.Fatalf("bad: %#v", config.CompressionLevel)
 	}
 
 	// Set
@@ -53,8 +54,9 @@ func TestPostProcessorPrepare_compressionLevel(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.CompressionLevel != 7 {
-		t.Fatalf("bad: %#v", p.config.CompressionLevel)
+	config = p.configs[""]
+	if config.CompressionLevel != 7 {
+		t.Fatalf("bad: %#v", config.CompressionLevel)
 	}
 }
 
@@ -74,6 +76,40 @@ func TestPostProcessorPrepare_outputPath(t *testing.T) {
 	err = p.Configure(c)
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestPostProcessorPrepare_subConfigs(t *testing.T) {
+	var p PostProcessor
+
+	// Default
+	c := testConfig()
+	c["compression_level"] = 42
+	c["vagrantfile_template"] = "foo"
+	c["override"] = map[string]interface{}{
+		"aws": map[string]interface{}{
+			"compression_level": 7,
+		},
+	}
+	err := p.Configure(c)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.configs[""].CompressionLevel != 42 {
+		t.Fatalf("bad: %#v", p.configs[""].CompressionLevel)
+	}
+
+	if p.configs[""].VagrantfileTemplate != "foo" {
+		t.Fatalf("bad: %#v", p.configs[""].VagrantfileTemplate)
+	}
+
+	if p.configs["aws"].CompressionLevel != 7 {
+		t.Fatalf("bad: %#v", p.configs["aws"].CompressionLevel)
+	}
+
+	if p.configs["aws"].VagrantfileTemplate != "foo" {
+		t.Fatalf("bad: %#v", p.configs["aws"].VagrantfileTemplate)
 	}
 }
 

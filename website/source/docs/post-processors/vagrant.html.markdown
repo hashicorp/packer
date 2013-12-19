@@ -68,3 +68,32 @@ below, with more details about certain options in following sections.
 
 * `vagrantfile_template` (string) - Path to a template to use for the
   Vagrantfile that is packaged with the box.
+
+## Provider-Specific Overrides
+
+If you have a Packer template with multiple builder types within it,
+you may want to configure the box creation for each type a little differently.
+For example, the contents of the Vagrantfile for a Vagrant box for AWS might
+be different from the contents of the Vagrantfile you want for VMware.
+The post-processor lets you do this.
+
+Specify overrides within the `override` configuration by provider name:
+
+```json
+{
+    "type": "vagrant",
+
+    "compression_level": 1,
+    "override": {
+        "vmware": {
+            "compression_level": 0
+        }
+    }
+}
+```
+
+In the example above, the compression level will be set to 1 except for
+VMware, where it will be set to 0.
+
+The available provider names are: `aws`, `digitalocean`, `virtualbox`,
+and `vmware`.
