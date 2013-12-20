@@ -17,7 +17,7 @@ type Client struct {
 }
 
 func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
-	result, err := newClientWithMux(NewMuxConn(rwc, 0), 0)
+	result, err := newClientWithMux(NewMuxConn(rwc), 0)
 	if err != nil {
 		return nil, err
 	}
