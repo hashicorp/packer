@@ -37,7 +37,7 @@ func (c *command) Help() (result string) {
 
 func (c *command) Run(env packer.Environment, args []string) (result int) {
 	nextId := c.mux.NextId()
-	server := NewServerWithMux(c.mux, nextId)
+	server := newServerWithMux(c.mux, nextId)
 	server.RegisterEnvironment(env)
 	go server.Serve()
 
@@ -68,7 +68,7 @@ func (c *CommandServer) Help(args *interface{}, reply *string) error {
 }
 
 func (c *CommandServer) Run(args *CommandRunArgs, reply *int) error {
-	client, err := NewClientWithMux(c.mux, args.StreamId)
+	client, err := newClientWithMux(c.mux, args.StreamId)
 	if err != nil {
 		return NewBasicError(err)
 	}

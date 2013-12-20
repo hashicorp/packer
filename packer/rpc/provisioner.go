@@ -35,7 +35,7 @@ func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 
 func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	nextId := p.mux.NextId()
-	server := NewServerWithMux(p.mux, nextId)
+	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)
 	server.RegisterUi(ui)
 	go server.Serve()
@@ -60,7 +60,7 @@ func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) 
 }
 
 func (p *ProvisionerServer) Provision(streamId uint32, reply *interface{}) error {
-	client, err := NewClientWithMux(p.mux, streamId)
+	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}

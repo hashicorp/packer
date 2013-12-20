@@ -41,7 +41,7 @@ func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 
 func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
 	nextId := p.mux.NextId()
-	server := NewServerWithMux(p.mux, nextId)
+	server := newServerWithMux(p.mux, nextId)
 	server.RegisterArtifact(a)
 	server.RegisterUi(ui)
 	go server.Serve()
@@ -59,7 +59,7 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 		return nil, false, nil
 	}
 
-	client, err := NewClientWithMux(p.mux, response.StreamId)
+	client, err := newClientWithMux(p.mux, response.StreamId)
 	if err != nil {
 		return nil, false, err
 	}
@@ -77,7 +77,7 @@ func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply 
 }
 
 func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorProcessResponse) error {
-	client, err := NewClientWithMux(p.mux, streamId)
+	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
@@ -87,7 +87,7 @@ func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorP
 	artifactResult, keep, err := p.p.PostProcess(client.Ui(), client.Artifact())
 	if err == nil && artifactResult != nil {
 		streamId = p.mux.NextId()
-		server := NewServerWithMux(p.mux, streamId)
+		server := newServerWithMux(p.mux, streamId)
 		server.RegisterArtifact(artifactResult)
 		go server.Serve()
 	}
