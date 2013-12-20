@@ -72,15 +72,16 @@ func (f *FileCache) RUnlock(key string) {
 }
 
 func (f *FileCache) cachePath(key string, hashKey string) string {
-	suffix := ""
-	endIndex := strings.Index(key, "?")
-	if endIndex == -1 {
-		endIndex = len(key)
+	if endIndex := strings.Index(key, "?"); endIndex > -1 {
+		key = key[:endIndex]
 	}
 
-	dotIndex := strings.LastIndex(key[0:endIndex], ".")
+	suffix := ""
+	dotIndex := strings.LastIndex(key, ".")
 	if dotIndex > -1 {
-		suffix = key[dotIndex:endIndex]
+		if slashIndex := strings.LastIndex(key, "/"); slashIndex <= dotIndex {
+			suffix = key[dotIndex:]
+		}
 	}
 
 	return filepath.Join(f.CacheDir, hashKey+suffix)
