@@ -41,7 +41,7 @@ func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 
 func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	nextId := b.mux.NextId()
-	server := NewServerWithMux(b.mux, nextId)
+	server := newServerWithMux(b.mux, nextId)
 	server.RegisterCache(cache)
 	server.RegisterHook(hook)
 	server.RegisterUi(ui)
@@ -56,7 +56,7 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
-	client, err := NewClientWithMux(b.mux, responseId)
+	client, err := newClientWithMux(b.mux, responseId)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareR
 }
 
 func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
-	client, err := NewClientWithMux(b.mux, streamId)
+	client, err := newClientWithMux(b.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
@@ -98,7 +98,7 @@ func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
 	*reply = 0
 	if artifact != nil {
 		streamId = b.mux.NextId()
-		server := NewServerWithMux(b.mux, streamId)
+		server := newServerWithMux(b.mux, streamId)
 		server.RegisterArtifact(artifact)
 		go server.Serve()
 		*reply = streamId

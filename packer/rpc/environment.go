@@ -31,7 +31,7 @@ func (e *Environment) Builder(name string) (b packer.Builder, err error) {
 		return
 	}
 
-	client, err := NewClientWithMux(e.mux, streamId)
+	client, err := newClientWithMux(e.mux, streamId)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (e *Environment) Cache() packer.Cache {
 		panic(err)
 	}
 
-	client, err := NewClientWithMux(e.mux, streamId)
+	client, err := newClientWithMux(e.mux, streamId)
 	if err != nil {
 		log.Printf("[ERR] Error getting cache client: %s", err)
 		return nil
@@ -66,7 +66,7 @@ func (e *Environment) Hook(name string) (h packer.Hook, err error) {
 		return
 	}
 
-	client, err := NewClientWithMux(e.mux, streamId)
+	client, err := newClientWithMux(e.mux, streamId)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (e *Environment) PostProcessor(name string) (p packer.PostProcessor, err er
 		return
 	}
 
-	client, err := NewClientWithMux(e.mux, streamId)
+	client, err := newClientWithMux(e.mux, streamId)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (e *Environment) Provisioner(name string) (p packer.Provisioner, err error)
 		return
 	}
 
-	client, err := NewClientWithMux(e.mux, streamId)
+	client, err := newClientWithMux(e.mux, streamId)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (e *Environment) Ui() packer.Ui {
 	var streamId uint32
 	e.client.Call("Environment.Ui", new(interface{}), &streamId)
 
-	client, err := NewClientWithMux(e.mux, streamId)
+	client, err := newClientWithMux(e.mux, streamId)
 	if err != nil {
 		log.Printf("[ERR] Error connecting to Ui: %s", err)
 		return nil
@@ -122,7 +122,7 @@ func (e *EnvironmentServer) Builder(name string, reply *uint32) error {
 	}
 
 	*reply = e.mux.NextId()
-	server := NewServerWithMux(e.mux, *reply)
+	server := newServerWithMux(e.mux, *reply)
 	server.RegisterBuilder(builder)
 	go server.Serve()
 	return nil
@@ -132,7 +132,7 @@ func (e *EnvironmentServer) Cache(args *interface{}, reply *uint32) error {
 	cache := e.env.Cache()
 
 	*reply = e.mux.NextId()
-	server := NewServerWithMux(e.mux, *reply)
+	server := newServerWithMux(e.mux, *reply)
 	server.RegisterCache(cache)
 	go server.Serve()
 	return nil
@@ -150,7 +150,7 @@ func (e *EnvironmentServer) Hook(name string, reply *uint32) error {
 	}
 
 	*reply = e.mux.NextId()
-	server := NewServerWithMux(e.mux, *reply)
+	server := newServerWithMux(e.mux, *reply)
 	server.RegisterHook(hook)
 	go server.Serve()
 	return nil
@@ -163,7 +163,7 @@ func (e *EnvironmentServer) PostProcessor(name string, reply *uint32) error {
 	}
 
 	*reply = e.mux.NextId()
-	server := NewServerWithMux(e.mux, *reply)
+	server := newServerWithMux(e.mux, *reply)
 	server.RegisterPostProcessor(pp)
 	go server.Serve()
 	return nil
@@ -176,7 +176,7 @@ func (e *EnvironmentServer) Provisioner(name string, reply *uint32) error {
 	}
 
 	*reply = e.mux.NextId()
-	server := NewServerWithMux(e.mux, *reply)
+	server := newServerWithMux(e.mux, *reply)
 	server.RegisterProvisioner(prov)
 	go server.Serve()
 	return nil
@@ -186,7 +186,7 @@ func (e *EnvironmentServer) Ui(args *interface{}, reply *uint32) error {
 	ui := e.env.Ui()
 
 	*reply = e.mux.NextId()
-	server := NewServerWithMux(e.mux, *reply)
+	server := newServerWithMux(e.mux, *reply)
 	server.RegisterUi(ui)
 	go server.Serve()
 	return nil
