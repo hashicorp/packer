@@ -36,7 +36,7 @@ type Server struct {
 
 // NewServer returns a new Packer RPC server.
 func NewServer(conn io.ReadWriteCloser) *Server {
-	result := NewServerWithMux(NewMuxConn(conn), 0)
+	result := NewServerWithMux(NewMuxConn(conn, 1), 0)
 	result.closeMux = true
 	return result
 }

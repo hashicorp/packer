@@ -41,11 +41,12 @@ const (
 )
 
 // Create a new MuxConn around any io.ReadWriteCloser.
-func NewMuxConn(rwc io.ReadWriteCloser) *MuxConn {
+func NewMuxConn(rwc io.ReadWriteCloser, startId uint32) *MuxConn {
 	m := &MuxConn{
 		rwc:     rwc,
 		streams: make(map[uint32]*Stream),
 		doneCh:  make(chan struct{}),
+		curId:   startId,
 	}
 
 	go m.cleaner()
@@ -145,7 +146,7 @@ func (m *MuxConn) NextId() uint32 {
 
 	for {
 		result := m.curId
-		m.curId++
+		m.curId += 2
 		if _, ok := m.streams[result]; !ok {
 			return result
 		}

@@ -33,7 +33,7 @@ func testMux(t *testing.T) (client *MuxConn, server *MuxConn) {
 			t.Fatalf("err: %s", err)
 		}
 
-		server = NewMuxConn(conn)
+		server = NewMuxConn(conn, 1)
 	}()
 
 	// Client side
@@ -41,7 +41,7 @@ func testMux(t *testing.T) (client *MuxConn, server *MuxConn) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	client = NewMuxConn(conn)
+	client = NewMuxConn(conn, 0)
 
 	// Wait for the server
 	<-doneCh
@@ -241,7 +241,14 @@ func TestMuxConnNextId(t *testing.T) {
 	a := client.NextId()
 	b := client.NextId()
 
-	if a != 0 || b != 1 {
+	if a != 0 || b != 2 {
 		t.Fatalf("IDs should increment")
+	}
+
+	a = server.NextId()
+	b = server.NextId()
+
+	if a != 1 || b != 3 {
+		t.Fatalf("IDs should increment: %d %d", a, b)
 	}
 }
