@@ -13,6 +13,7 @@ import (
 type AccessConfig struct {
 	Username  string `mapstructure:"username"`
 	Password  string `mapstructure:"password"`
+	ApiKey    string `mapstructure:"apiKey"`
 	Project   string `mapstructure:"project"`
 	Provider  string `mapstructure:"provider"`
 	RawRegion string `mapstructure:"region"`
@@ -24,6 +25,7 @@ type AccessConfig struct {
 func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	username := c.Username
 	password := c.Password
+	apiKey := c.ApiKey
 	project := c.Project
 	provider := c.Provider
 	proxy := c.ProxyUrl
@@ -33,6 +35,9 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	}
 	if password == "" {
 		password = os.Getenv("SDK_PASSWORD")
+	}
+	if apiKey == "" {
+		apiKey = os.Getenv("SDK_API_KEY")
 	}
 	if project == "" {
 		project = os.Getenv("SDK_PROJECT")
@@ -44,6 +49,7 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	authoptions := gophercloud.AuthOptions{
 		Username:    username,
 		Password:    password,
+		ApiKey:      apiKey,
 		AllowReauth: true,
 	}
 
@@ -83,6 +89,7 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	templates := map[string]*string{
 		"username": &c.Username,
 		"password": &c.Password,
+		"apiKey":   &c.ApiKey,
 		"provider": &c.Provider,
 	}
 
