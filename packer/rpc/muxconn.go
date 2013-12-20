@@ -200,11 +200,11 @@ func (m *MuxConn) NextId() uint32 {
 
 func (m *MuxConn) cleaner() {
 	checks := []struct {
-		Map  map[uint32]*Stream
+		Map  *map[uint32]*Stream
 		Lock *sync.RWMutex
 	}{
-		{m.streamsAccept, &m.muAccept},
-		{m.streamsDial, &m.muDial},
+		{&m.streamsAccept, &m.muAccept},
+		{&m.streamsDial, &m.muDial},
 	}
 
 	for {
@@ -217,7 +217,7 @@ func (m *MuxConn) cleaner() {
 
 		for _, check := range checks {
 			check.Lock.Lock()
-			for id, s := range check.Map {
+			for id, s := range *check.Map {
 				s.mu.Lock()
 
 				if done && s.state != streamStateClosed {
@@ -229,7 +229,7 @@ func (m *MuxConn) cleaner() {
 					// for a certain amount of time.
 					since := time.Now().UTC().Sub(s.stateUpdated)
 					if since > 2*time.Second {
-						delete(check.Map, id)
+						delete(*check.Map, id)
 					}
 				}
 
