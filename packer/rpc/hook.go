@@ -28,7 +28,7 @@ type HookRunArgs struct {
 
 func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
 	nextId := h.mux.NextId()
-	server := NewServerWithMux(h.mux, nextId)
+	server := newServerWithMux(h.mux, nextId)
 	server.RegisterCommunicator(comm)
 	server.RegisterUi(ui)
 	go server.Serve()
@@ -50,7 +50,7 @@ func (h *hook) Cancel() {
 }
 
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
-	client, err := NewClientWithMux(h.mux, args.StreamId)
+	client, err := newClientWithMux(h.mux, args.StreamId)
 	if err != nil {
 		return NewBasicError(err)
 	}

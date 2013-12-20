@@ -40,7 +40,7 @@ func (b *build) Prepare(v map[string]string) ([]string, error) {
 
 func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
 	nextId := b.mux.NextId()
-	server := NewServerWithMux(b.mux, nextId)
+	server := newServerWithMux(b.mux, nextId)
 	server.RegisterCache(cache)
 	server.RegisterUi(ui)
 	go server.Serve()
@@ -52,7 +52,7 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error)
 
 	artifacts := make([]packer.Artifact, len(result))
 	for i, streamId := range result {
-		client, err := NewClientWithMux(b.mux, streamId)
+		client, err := newClientWithMux(b.mux, streamId)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (b *BuildServer) Prepare(v map[string]string, resp *BuildPrepareResponse) e
 }
 
 func (b *BuildServer) Run(streamId uint32, reply *[]uint32) error {
-	client, err := NewClientWithMux(b.mux, streamId)
+	client, err := newClientWithMux(b.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
@@ -110,7 +110,7 @@ func (b *BuildServer) Run(streamId uint32, reply *[]uint32) error {
 	*reply = make([]uint32, len(artifacts))
 	for i, artifact := range artifacts {
 		streamId := b.mux.NextId()
-		server := NewServerWithMux(b.mux, streamId)
+		server := newServerWithMux(b.mux, streamId)
 		server.RegisterArtifact(artifact)
 		go server.Serve()
 
