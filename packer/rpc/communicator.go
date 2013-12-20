@@ -164,7 +164,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		}
 	}()
 
-	if args.StdinStreamId > 0 {
+	if args.StdinStreamId >= 0 {
 		conn, err := c.mux.Dial(args.StdinStreamId)
 		if err != nil {
 			close(doneCh)
@@ -175,7 +175,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		cmd.Stdin = conn
 	}
 
-	if args.StdoutStreamId > 0 {
+	if args.StdoutStreamId >= 0 {
 		conn, err := c.mux.Dial(args.StdoutStreamId)
 		if err != nil {
 			close(doneCh)
@@ -186,7 +186,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		cmd.Stdout = conn
 	}
 
-	if args.StderrStreamId > 0 {
+	if args.StderrStreamId >= 0 {
 		conn, err := c.mux.Dial(args.StderrStreamId)
 		if err != nil {
 			close(doneCh)
@@ -253,7 +253,6 @@ func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *int
 }
 
 func serveSingleCopy(name string, mux *MuxConn, id uint32, dst io.Writer, src io.Reader) {
-	log.Printf("[DEBUG] %s: Connecting to stream %d", name, id)
 	conn, err := mux.Accept(id)
 	if err != nil {
 		log.Printf("[ERR] '%s' accept error: %s", name, err)
