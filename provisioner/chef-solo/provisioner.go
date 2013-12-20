@@ -10,9 +10,11 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -33,6 +35,12 @@ type Config struct {
 	RunList                    []string `mapstructure:"run_list"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
+
+	// The amount of time to wait before attempting to start the provisioner
+	// This can be used if you know the previous provisioner caused a reboot
+	RawStartWait string `mapstructure:"start_wait"`
+
+	startWait time.Duration
 
 	tpl *packer.ConfigTemplate
 }
@@ -96,6 +104,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = "/tmp/packer-chef-solo"
 	}
 
+	if p.config.RawStartWait == "" {
+		p.config.RawStartWait = "0s"
+	}
+
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
@@ -107,6 +119,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"staging_dir":               &p.config.StagingDir,
 		"environments_path":         &p.config.EnvironmentsPath,
 		"chef_environment":          &p.config.ChefEnvironment,
+		"start_wait":                &p.config.RawStartWait,
 	}
 
 	for n, ptr := range templates {
@@ -211,6 +224,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
 	}
 
+	if p.config.RawStartWait != "" {
+		p.config.startWait, err = time.ParseDuration(p.config.RawStartWait)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing start_wait: %s", err))
+		}
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -220,6 +241,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with chef-solo")
+
+	// Wait to start the provisioning step if start_wait is specified
+	if p.config.startWait > 0 {
+		log.Printf("Sleeping %v before starting chef-solo provisioner", p.config.startWait)
+		time.Sleep(p.config.startWait)
+	}
 
 	if !p.config.SkipInstall {
 		if err := p.installChef(ui, comm); err != nil {
