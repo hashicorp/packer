@@ -51,6 +51,12 @@ type config struct {
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
+	// The amount of time to wait before attempting to start the provisioner
+	// This can be used if you know the previous provisioner caused a reboot
+	RawStartWait string `mapstructure:"start_wait"`
+
+	startWait time.Duration
+
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
 	// This can be set high to allow for reboots.
@@ -96,6 +102,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.InlineShebang = "/bin/sh"
 	}
 
+	if p.config.RawStartWait == "" {
+		p.config.RawStartWait = "0s"
+	}
+
 	if p.config.RawStartRetryTimeout == "" {
 		p.config.RawStartRetryTimeout = "5m"
 	}
@@ -124,6 +134,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	templates := map[string]*string{
 		"inline_shebang":      &p.config.InlineShebang,
 		"script":              &p.config.Script,
+		"start_wait":          &p.config.RawStartWait,
 		"start_retry_timeout": &p.config.RawStartRetryTimeout,
 		"remote_path":         &p.config.RemotePath,
 	}
@@ -175,6 +186,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
+		}
+	}
+
+	if p.config.RawStartWait != "" {
+		p.config.startWait, err = time.ParseDuration(p.config.RawStartWait)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing start_wait: %s", err))
 		}
 	}
 
@@ -251,6 +270,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		})
 		if err != nil {
 			return fmt.Errorf("Error processing command: %s", err)
+		}
+
+		// Wait to start the provisioning step if start_wait is specified
+		if p.config.startWait > 0 {
+			log.Printf("Sleeping %v before starting shell provisioner", p.config.startWait)
+			time.Sleep(p.config.startWait)
 		}
 
 		// Upload the file and run the command. Do this in the context of
