@@ -51,7 +51,8 @@ const defaultConfig = `
 		"file": "packer-provisioner-file",
 		"puppet-masterless": "packer-provisioner-puppet-masterless",
 		"shell": "packer-provisioner-shell",
-		"salt-masterless": "packer-provisioner-salt-masterless"
+		"salt-masterless": "packer-provisioner-salt-masterless",
+		"windows-chef-solo": "packer-provisioner-windows-chef-solo"
 	}
 }
 `
