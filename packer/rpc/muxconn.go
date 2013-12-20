@@ -26,7 +26,6 @@ type MuxConn struct {
 	rwc           io.ReadWriteCloser
 	streamsAccept map[uint32]*Stream
 	streamsDial   map[uint32]*Stream
-	mu            sync.RWMutex
 	muAccept      sync.RWMutex
 	muDial        sync.RWMutex
 	wlock         sync.Mutex
@@ -78,8 +77,10 @@ func NewMuxConn(rwc io.ReadWriteCloser) *MuxConn {
 // Close closes the underlying io.ReadWriteCloser. This will also close
 // all streams that are open.
 func (m *MuxConn) Close() error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.muAccept.Lock()
+	m.muDial.Lock()
+	defer m.muAccept.Unlock()
+	defer m.muDial.Unlock()
 
 	// Close all the streams
 	for _, w := range m.streamsAccept {
