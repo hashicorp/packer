@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 )
 
 func testTemplateComponentFinder() *ComponentFinder {
@@ -442,6 +443,38 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 	}
 	if result.Provisioners[0].RawConfig == nil {
 		t.Fatal("should have raw config")
+	}
+}
+
+func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
+	data := `
+	{
+		"builders": [{"type": "foo"}],
+
+		"provisioners": [
+			{
+				"type": "shell",
+				"pause_before": "10s"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatal("err: %s", err)
+	}
+	if result == nil {
+		t.Fatal("should have result")
+	}
+	if len(result.Provisioners) != 1 {
+		t.Fatalf("bad: %#v", result.Provisioners)
+	}
+	if result.Provisioners[0].Type != "shell" {
+		t.Fatalf("bad: %#v", result.Provisioners[0].Type)
+	}
+	if result.Provisioners[0].pauseBefore != 10 * time.Second {
+		t.Fatalf("bad: %s", result.Provisioners[0].pauseBefore)
 	}
 }
 
