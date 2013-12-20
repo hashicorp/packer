@@ -35,6 +35,7 @@ type config struct {
 
 	BootCommand          []string   `mapstructure:"boot_command"`
 	DiskSize             uint       `mapstructure:"disk_size"`
+	AdditionalDiskSize   []uint     `mapstructure:"additionaldisk_size"`
 	FloppyFiles          []string   `mapstructure:"floppy_files"`
 	Format               string     `mapstructure:"format"`
 	GuestAdditionsMode   string     `mapstructure:"guest_additions_mode"`
