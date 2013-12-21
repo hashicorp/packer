@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -457,26 +458,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	// Compile the artifact list
-	files := make([]string, 0, 5)
-	visit := func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			files = append(files, path)
-		}
-
-		return err
-	}
-
-	if err := filepath.Walk(b.config.OutputDir, visit); err != nil {
-		return nil, err
-	}
-
-	artifact := &Artifact{
-		dir: b.config.OutputDir,
-		f:   files,
-	}
-
-	return artifact, nil
+	return vboxcommon.NewArtifact(b.config.OutputDir)
 }
 
 func (b *Builder) Cancel() {
