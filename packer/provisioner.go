@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -105,6 +106,7 @@ func (p *PausedProvisioner) Provision(ui Ui, comm Communicator) error {
 	}()
 
 	// Use a select to determine if we get cancelled during the wait
+	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
 	select {
 	case <-time.After(p.PauseBefore):
 	case <-cancelCh:
