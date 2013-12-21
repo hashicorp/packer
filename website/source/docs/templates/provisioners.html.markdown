@@ -112,3 +112,26 @@ JSON object where the key is the name of a [builder definition](/docs/templates/
 The value of this is in turn another JSON object. This JSON object simply
 contains the provisioner configuration as normal. This configuration is merged
 into the default provisioner configuration.
+
+## Pausing Before Running
+
+With certain provisioners it is sometimes desirable to pause for some period
+of time before running it. Specifically, in cases where a provisioner reboots
+the machine, you may want to wait for some period of time before starting
+the next provisioner.
+
+Every provisioner definition in a Packer template can take a special
+configuration `pause_before` that is the amount of time to pause before
+running that provisioner. By default, there is no pause. An example
+is shown below:
+
+<pre class="prettyprint">
+{
+  "type": "shell",
+  "script": "script.sh",
+  "pause_before": "10s"
+}
+</pre>
+
+For the above provisioner, Packer will wait 10 seconds before uploading
+and executing the shell script.

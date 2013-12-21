@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 )
 
 func testTemplateComponentFinder() *ComponentFinder {
@@ -442,6 +443,38 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 	}
 	if result.Provisioners[0].RawConfig == nil {
 		t.Fatal("should have raw config")
+	}
+}
+
+func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
+	data := `
+	{
+		"builders": [{"type": "foo"}],
+
+		"provisioners": [
+			{
+				"type": "shell",
+				"pause_before": "10s"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatal("err: %s", err)
+	}
+	if result == nil {
+		t.Fatal("should have result")
+	}
+	if len(result.Provisioners) != 1 {
+		t.Fatalf("bad: %#v", result.Provisioners)
+	}
+	if result.Provisioners[0].Type != "shell" {
+		t.Fatalf("bad: %#v", result.Provisioners[0].Type)
+	}
+	if result.Provisioners[0].pauseBefore != 10*time.Second {
+		t.Fatalf("bad: %s", result.Provisioners[0].pauseBefore)
 	}
 }
 
@@ -1275,6 +1308,70 @@ func TestTemplate_Build_ProvisionerOverrideBad(t *testing.T) {
 	_, err := ParseTemplate([]byte(data))
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestTemplateBuild_ProvisionerPauseBefore(t *testing.T) {
+	data := `
+	{
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"pause_before": "5s"
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	builder := new(MockBuilder)
+	builderMap := map[string]Builder{
+		"test-builder": builder,
+	}
+
+	provisioner := &MockProvisioner{}
+	provisionerMap := map[string]Provisioner{
+		"test-prov": provisioner,
+	}
+
+	builderFactory := func(n string) (Builder, error) { return builderMap[n], nil }
+	provFactory := func(n string) (Provisioner, error) { return provisionerMap[n], nil }
+	components := &ComponentFinder{
+		Builder:     builderFactory,
+		Provisioner: provFactory,
+	}
+
+	// Get the build, verifying we can get it without issue, but also
+	// that the proper builder was looked up and used for the build.
+	build, err := template.Build("test1", components)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	coreBuild, ok := build.(*coreBuild)
+	if !ok {
+		t.Fatal("should be okay")
+	}
+	if len(coreBuild.provisioners) != 1 {
+		t.Fatalf("bad: %#v", coreBuild.provisioners)
+	}
+	if pp, ok := coreBuild.provisioners[0].provisioner.(*PausedProvisioner); !ok {
+		t.Fatalf("should be paused provisioner")
+	} else {
+		if pp.PauseBefore != 5*time.Second {
+			t.Fatalf("bad: %#v", pp.PauseBefore)
+		}
 	}
 }
 

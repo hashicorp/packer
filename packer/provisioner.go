@@ -1,7 +1,9 @@
 package packer
 
 import (
+	"fmt"
 	"sync"
+	"time"
 )
 
 // A provisioner is responsible for installing and configuring software
@@ -64,4 +66,81 @@ func (h *ProvisionHook) Cancel() {
 	if h.runningProvisioner != nil {
 		h.runningProvisioner.Cancel()
 	}
+}
+
+// PausedProvisioner is a Provisioner implementation that pauses before
+// the provisioner is actually run.
+type PausedProvisioner struct {
+	PauseBefore time.Duration
+	Provisioner Provisioner
+
+	cancelCh chan struct{}
+	doneCh   chan struct{}
+	lock     sync.Mutex
+}
+
+func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
+	return p.Provisioner.Prepare(raws...)
+}
+
+func (p *PausedProvisioner) Provision(ui Ui, comm Communicator) error {
+	p.lock.Lock()
+	cancelCh := make(chan struct{})
+	p.cancelCh = cancelCh
+
+	// Setup the done channel, which is trigger when we're done
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+	p.doneCh = doneCh
+	p.lock.Unlock()
+
+	defer func() {
+		p.lock.Lock()
+		defer p.lock.Unlock()
+		if p.cancelCh == cancelCh {
+			p.cancelCh = nil
+		}
+		if p.doneCh == doneCh {
+			p.doneCh = nil
+		}
+	}()
+
+	// Use a select to determine if we get cancelled during the wait
+	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
+	select {
+	case <-time.After(p.PauseBefore):
+	case <-cancelCh:
+		return nil
+	}
+
+	provDoneCh := make(chan error, 1)
+	go p.provision(provDoneCh, ui, comm)
+
+	select {
+	case err := <-provDoneCh:
+		return err
+	case <-cancelCh:
+		p.Provisioner.Cancel()
+		return <-provDoneCh
+	}
+}
+
+func (p *PausedProvisioner) Cancel() {
+	var doneCh chan struct{}
+
+	p.lock.Lock()
+	if p.cancelCh != nil {
+		close(p.cancelCh)
+		p.cancelCh = nil
+	}
+	if p.doneCh != nil {
+		doneCh = p.doneCh
+	}
+	p.lock.Unlock()
+
+	<-doneCh
+}
+
+func (p *PausedProvisioner) provision(result chan<- error, ui Ui, comm Communicator) {
+	result <- p.Provisioner.Provision(ui, comm)
 }

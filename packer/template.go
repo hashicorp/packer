@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"time"
 )
 
 // The rawTemplate struct represents the structure of a template read
@@ -63,10 +64,13 @@ type RawPostProcessorConfig struct {
 type RawProvisionerConfig struct {
 	TemplateOnlyExcept `mapstructure:",squash"`
 
-	Type     string
-	Override map[string]interface{}
+	Type           string
+	Override       map[string]interface{}
+	RawPauseBefore string `mapstructure:"pause_before"`
 
 	RawConfig interface{}
+
+	pauseBefore time.Duration
 }
 
 // RawVariable represents a variable configuration within a template.
@@ -289,6 +293,19 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			}
 		}
 
+		// Setup the pause settings
+		if raw.RawPauseBefore != "" {
+			duration, err := time.ParseDuration(raw.RawPauseBefore)
+			if err != nil {
+				errors = append(
+					errors, fmt.Errorf(
+						"provisioner %d: pause_before invalid: %s",
+						i+1, err))
+			}
+
+			raw.pauseBefore = duration
+		}
+
 		raw.RawConfig = v
 	}
 
@@ -495,6 +512,13 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		if rawProvisioner.Override != nil {
 			if override, ok := rawProvisioner.Override[name]; ok {
 				configs = append(configs, override)
+			}
+		}
+
+		if rawProvisioner.pauseBefore > 0 {
+			provisioner = &PausedProvisioner{
+				PauseBefore: rawProvisioner.pauseBefore,
+				Provisioner: provisioner,
 			}
 		}
 
