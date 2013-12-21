@@ -189,6 +189,12 @@ func (m *MuxConn) NextId() uint32 {
 	m.muAccept.Lock()
 	defer m.muAccept.Unlock()
 
+	// We never use stream ID 0 because 0 is the zero value of a uint32
+	// and we want to reserve that for "not in use"
+	if m.curId == 0 {
+		m.curId = 1
+	}
+
 	for {
 		result := m.curId
 		m.curId += 1
