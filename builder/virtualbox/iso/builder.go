@@ -393,7 +393,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
 		},
-		new(stepPrepareOutputDir),
+		&vboxcommon.StepOutputDir{
+			Force: b.config.PackerForce,
+			Path:  b.config.OutputDir,
+		},
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
