@@ -117,7 +117,8 @@ func (m *MuxConn) Accept(id uint32) (io.ReadWriteCloser, error) {
 
 	// If the stream isn't closed, then it is already open somehow
 	if stream.state != streamStateSynRecv && stream.state != streamStateClosed {
-		return nil, fmt.Errorf("Stream %d already open in bad state: %d", id, stream.state)
+		panic(fmt.Sprintf(
+			"Stream %d already open in bad state: %d", id, stream.state))
 	}
 
 	if stream.state == streamStateClosed {
@@ -151,8 +152,9 @@ func (m *MuxConn) Dial(id uint32) (io.ReadWriteCloser, error) {
 	// reaper should clear out old streams once in awhile.
 	if stream, ok := m.streamsDial[id]; ok {
 		m.muDial.Unlock()
-		return nil, fmt.Errorf(
-			"Stream %d already open for dial. State: %d", id, stream.state)
+		panic(fmt.Sprintf(
+			"Stream %d already open for dial. State: %d",
+			id, stream.state))
 	}
 
 	// Create the new stream and put it in our list. We can then
