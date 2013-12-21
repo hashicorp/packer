@@ -86,7 +86,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.MountPath == "" {
-		b.config.MountPath = "packer-amazon-chroot-volumes/{{.Device}}"
+		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
 	}
 
 	// Accumulate any errors
