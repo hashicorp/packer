@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -16,7 +17,7 @@ type stepCreateVM struct {
 
 func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	name := config.VMName
@@ -60,7 +61,7 @@ func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Unregistering and deleting virtual machine...")
