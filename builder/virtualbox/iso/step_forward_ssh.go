@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"math/rand"
@@ -19,7 +20,7 @@ type stepForwardSSH struct{}
 
 func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 

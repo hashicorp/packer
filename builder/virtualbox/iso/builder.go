@@ -9,9 +9,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -382,7 +379,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
-	driver, err := b.newDriver()
+	driver, err := vboxcommon.NewDriver()
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VirtualBox driver: %s", err)
 	}
@@ -466,39 +463,4 @@ func (b *Builder) Cancel() {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
 	}
-}
-
-func (b *Builder) newDriver() (Driver, error) {
-	var vboxmanagePath string
-
-	if runtime.GOOS == "windows" {
-		// On Windows, we check VBOX_INSTALL_PATH env var for the path
-		if installPath := os.Getenv("VBOX_INSTALL_PATH"); installPath != "" {
-			log.Printf("[DEBUG] builder/virtualbox: VBOX_INSTALL_PATH: %s",
-				installPath)
-			for _, path := range strings.Split(installPath, ";") {
-				path = filepath.Join(path, "VBoxManage.exe")
-				if _, err := os.Stat(path); err == nil {
-					vboxmanagePath = path
-					break
-				}
-			}
-		}
-	}
-
-	if vboxmanagePath == "" {
-		var err error
-		vboxmanagePath, err = exec.LookPath("VBoxManage")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	log.Printf("VBoxManage path: %s", vboxmanagePath)
-	driver := &VBox42Driver{vboxmanagePath}
-	if err := driver.Verify(); err != nil {
-		return nil, err
-	}
-
-	return driver, nil
 }

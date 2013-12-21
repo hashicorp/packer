@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -15,7 +16,7 @@ type stepUploadVersion struct{}
 func (s *stepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*config)
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	if config.VBoxVersionFile == "" {
