@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io"
@@ -31,7 +32,7 @@ type stepDownloadGuestAdditions struct{}
 
 func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*config)
 
