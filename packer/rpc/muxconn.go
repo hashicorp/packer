@@ -152,7 +152,7 @@ func (m *MuxConn) Dial(id uint32) (io.ReadWriteCloser, error) {
 	if stream, ok := m.streamsDial[id]; ok {
 		m.muDial.Unlock()
 		return nil, fmt.Errorf(
-			"Stream %d already open for dial. State: %d", stream.state)
+			"Stream %d already open for dial. State: %d", id, stream.state)
 	}
 
 	// Create the new stream and put it in our list. We can then
