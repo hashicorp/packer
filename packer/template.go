@@ -515,6 +515,13 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 			}
 		}
 
+		if rawProvisioner.pauseBefore > 0 {
+			provisioner = &PausedProvisioner{
+				PauseBefore: rawProvisioner.pauseBefore,
+				Provisioner: provisioner,
+			}
+		}
+
 		coreProv := coreBuildProvisioner{provisioner, configs}
 		provisioners = append(provisioners, coreProv)
 	}
