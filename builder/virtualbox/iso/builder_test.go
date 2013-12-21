@@ -1,4 +1,4 @@
-package virtualbox
+package iso
 
 import (
 	"github.com/mitchellh/packer/packer"
