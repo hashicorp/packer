@@ -22,6 +22,9 @@ FEATURES:
   of what a template does. This will be shown in `packer inspect`.
 * Vagrant post-processor now accepts a list of files to include in the
   box.
+* All provisioners can now have a "pause\_before" parameter to wait
+  some period of time before running that provisioner. This is useful
+  for reboots. [GH-737]
 
 IMPROVEMENTS:
 
