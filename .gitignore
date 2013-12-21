@@ -4,6 +4,7 @@
 /src
 /website/.sass-cache
 /website/build
+.DS_Store
 .vagrant
 Vagrantfile
 test/.env
