@@ -241,14 +241,14 @@ func TestMuxConnNextId(t *testing.T) {
 	a := client.NextId()
 	b := client.NextId()
 
-	if a != 0 || b != 1 {
+	if a != 1 || b != 2 {
 		t.Fatalf("IDs should increment")
 	}
 
 	a = server.NextId()
 	b = server.NextId()
 
-	if a != 0 || b != 1 {
+	if a != 1 || b != 2 {
 		t.Fatalf("IDs should increment: %d %d", a, b)
 	}
 }
