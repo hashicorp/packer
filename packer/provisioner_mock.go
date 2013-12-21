@@ -5,11 +5,12 @@ package packer
 type MockProvisioner struct {
 	ProvFunc func() error
 
-	PrepCalled   bool
-	PrepConfigs  []interface{}
-	ProvCalled   bool
-	ProvUi       Ui
-	CancelCalled bool
+	PrepCalled       bool
+	PrepConfigs      []interface{}
+	ProvCalled       bool
+	ProvCommunicator Communicator
+	ProvUi           Ui
+	CancelCalled     bool
 }
 
 func (t *MockProvisioner) Prepare(configs ...interface{}) error {
@@ -20,6 +21,7 @@ func (t *MockProvisioner) Prepare(configs ...interface{}) error {
 
 func (t *MockProvisioner) Provision(ui Ui, comm Communicator) error {
 	t.ProvCalled = true
+	t.ProvCommunicator = comm
 	t.ProvUi = ui
 
 	if t.ProvFunc == nil {

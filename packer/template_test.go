@@ -473,7 +473,7 @@ func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
 	if result.Provisioners[0].Type != "shell" {
 		t.Fatalf("bad: %#v", result.Provisioners[0].Type)
 	}
-	if result.Provisioners[0].pauseBefore != 10 * time.Second {
+	if result.Provisioners[0].pauseBefore != 10*time.Second {
 		t.Fatalf("bad: %s", result.Provisioners[0].pauseBefore)
 	}
 }
