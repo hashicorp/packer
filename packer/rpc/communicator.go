@@ -164,7 +164,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		}
 	}()
 
-	if args.StdinStreamId >= 0 {
+	if args.StdinStreamId > 0 {
 		conn, err := c.mux.Dial(args.StdinStreamId)
 		if err != nil {
 			close(doneCh)
@@ -175,7 +175,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		cmd.Stdin = conn
 	}
 
-	if args.StdoutStreamId >= 0 {
+	if args.StdoutStreamId > 0 {
 		conn, err := c.mux.Dial(args.StdoutStreamId)
 		if err != nil {
 			close(doneCh)
@@ -186,7 +186,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		cmd.Stdout = conn
 	}
 
-	if args.StderrStreamId >= 0 {
+	if args.StderrStreamId > 0 {
 		conn, err := c.mux.Dial(args.StderrStreamId)
 		if err != nil {
 			close(doneCh)
