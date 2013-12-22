@@ -28,6 +28,7 @@ type Builder struct {
 
 type config struct {
 	common.PackerConfig         `mapstructure:",squash"`
+	vboxcommon.ExportConfig     `mapstructure:",squash"`
 	vboxcommon.FloppyConfig     `mapstructure:",squash"`
 	vboxcommon.OutputConfig     `mapstructure:",squash"`
 	vboxcommon.RunConfig        `mapstructure:",squash"`
@@ -37,7 +38,6 @@ type config struct {
 
 	BootCommand          []string `mapstructure:"boot_command"`
 	DiskSize             uint     `mapstructure:"disk_size"`
-	Format               string   `mapstructure:"format"`
 	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
 	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
@@ -72,6 +72,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
@@ -116,10 +117,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
-	if b.config.Format == "" {
-		b.config.Format = "ovf"
-	}
-
 	// Errors
 	templates := map[string]*string{
 		"guest_additions_mode":    &b.config.GuestAdditionsMode,
@@ -132,7 +129,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_url":                 &b.config.RawSingleISOUrl,
 		"virtualbox_version_file": &b.config.VBoxVersionFile,
 		"vm_name":                 &b.config.VMName,
-		"format":                  &b.config.Format,
 	}
 
 	for n, ptr := range templates {
@@ -170,11 +166,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
-	}
-
-	if !(b.config.Format == "ovf" || b.config.Format == "ova") {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid format, only 'ovf' or 'ova' are allowed"))
 	}
 
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" {
@@ -317,7 +308,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 		},
 		new(vboxcommon.StepRemoveDevices),
-		new(stepExport),
+		&vboxcommon.StepExport{
+			Format:    b.config.Format,
+			OutputDir: b.config.OutputDir,
+		},
 	}
 
 	// Setup the state bag
