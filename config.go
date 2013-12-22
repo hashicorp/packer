@@ -27,7 +27,7 @@ const defaultConfig = `
 		"googlecompute": "packer-builder-googlecompute",
 		"openstack": "packer-builder-openstack",
 		"qemu": "packer-builder-qemu",
-		"virtualbox": "packer-builder-virtualbox",
+		"virtualbox-iso": "packer-builder-virtualbox-iso",
 		"virtualbox-ovf": "packer-builder-virtualbox-ovf",
 		"vmware": "packer-builder-vmware"
 	},
