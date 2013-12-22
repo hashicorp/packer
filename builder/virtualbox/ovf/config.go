@@ -8,10 +8,11 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig     `mapstructure:",squash"`
-	vboxcommon.FloppyConfig `mapstructure:",squash"`
-	vboxcommon.OutputConfig `mapstructure:",squash"`
-	vboxcommon.SSHConfig    `mapstructure:",squash"`
+	common.PackerConfig         `mapstructure:",squash"`
+	vboxcommon.FloppyConfig     `mapstructure:",squash"`
+	vboxcommon.OutputConfig     `mapstructure:",squash"`
+	vboxcommon.SSHConfig        `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -34,6 +35,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
 
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
