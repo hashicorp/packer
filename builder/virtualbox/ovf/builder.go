@@ -75,8 +75,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			new(stepUploadGuestAdditions),
 		*/
 		new(common.StepProvision),
+		&vboxcommon.StepShutdown{
+			Command: b.config.ShutdownCommand,
+			Timeout: b.config.ShutdownTimeout,
+		},
 		/*
-			new(stepShutdown),
 			new(stepRemoveDevices),
 			new(stepExport),
 		*/
