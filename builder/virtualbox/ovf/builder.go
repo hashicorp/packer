@@ -47,10 +47,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Path:  b.config.OutputDir,
 		},
 		new(vboxcommon.StepSuppressMessages),
+		&common.StepCreateFloppy{
+			Files: b.config.FloppyFiles,
+		},
 		/*
-			&common.StepCreateFloppy{
-				Files: b.config.FloppyFiles,
-			},
 			new(stepAttachGuestAdditions),
 			new(stepAttachFloppy),
 			new(stepForwardSSH),
