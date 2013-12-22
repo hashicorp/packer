@@ -28,6 +28,7 @@ const defaultConfig = `
 		"openstack": "packer-builder-openstack",
 		"qemu": "packer-builder-qemu",
 		"virtualbox": "packer-builder-virtualbox",
+		"virtualbox-ovf": "packer-builder-virtualbox-ovf",
 		"vmware": "packer-builder-vmware"
 	},
 
