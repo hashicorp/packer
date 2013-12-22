@@ -18,6 +18,8 @@ type Config struct {
 	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
+	SourcePath string `mapstructure:"source_path"`
+
 	tpl *packer.ConfigTemplate
 }
 

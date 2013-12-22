@@ -36,6 +36,20 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
 	return d.VBoxManage(command...)
 }
 
+func (d *VBox42Driver) Delete(name string) error {
+	return d.VBoxManage("unregistervm", name, "--delete")
+}
+
+func (d *VBox42Driver) Import(name, path string) error {
+	args := []string{
+		"import", path,
+		"--vsys", "0",
+		"--vmname", name,
+	}
+
+	return d.VBoxManage(args...)
+}
+
 func (d *VBox42Driver) IsRunning(name string) (bool, error) {
 	var stdout bytes.Buffer
 
