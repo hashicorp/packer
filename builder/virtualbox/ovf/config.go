@@ -12,6 +12,7 @@ type Config struct {
 	vboxcommon.FloppyConfig     `mapstructure:",squash"`
 	vboxcommon.OutputConfig     `mapstructure:",squash"`
 	vboxcommon.SSHConfig        `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
@@ -37,10 +38,18 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
 
-	// Check for any errors.
-	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+	// Warnings
+	var warnings []string
+	if c.ShutdownCommand == "" {
+		warnings = append(warnings,
+			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
+				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
 
-	return c, nil, nil
+	// Check for any errors.
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, warnings, errs
+	}
+
+	return c, warnings, nil
 }

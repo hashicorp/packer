@@ -532,47 +532,6 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_ShutdownCommand(t *testing.T) {
-	var b Builder
-	config := testConfig()
-	delete(config, "shutdown_command")
-
-	warns, err := b.Prepare(config)
-	if err != nil {
-		t.Fatalf("bad: %s", err)
-	}
-
-	if len(warns) != 1 {
-		t.Fatalf("bad: %#v", warns)
-	}
-}
-
-func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test with a bad value
-	config["shutdown_timeout"] = "this is not good"
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test with a good one
-	config["shutdown_timeout"] = "5s"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_VBoxVersionFile(t *testing.T) {
 	var b Builder
 	config := testConfig()
