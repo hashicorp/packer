@@ -28,31 +28,31 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig     `mapstructure:",squash"`
-	vboxcommon.FloppyConfig `mapstructure:",squash"`
-	vboxcommon.OutputConfig `mapstructure:",squash"`
-	vboxcommon.SSHConfig    `mapstructure:",squash"`
+	common.PackerConfig         `mapstructure:",squash"`
+	vboxcommon.FloppyConfig     `mapstructure:",squash"`
+	vboxcommon.OutputConfig     `mapstructure:",squash"`
+	vboxcommon.SSHConfig        `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
 
-	BootCommand          []string   `mapstructure:"boot_command"`
-	DiskSize             uint       `mapstructure:"disk_size"`
-	Format               string     `mapstructure:"format"`
-	GuestAdditionsMode   string     `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string     `mapstructure:"guest_additions_url"`
-	GuestAdditionsSHA256 string     `mapstructure:"guest_additions_sha256"`
-	GuestOSType          string     `mapstructure:"guest_os_type"`
-	HardDriveInterface   string     `mapstructure:"hard_drive_interface"`
-	Headless             bool       `mapstructure:"headless"`
-	HTTPDir              string     `mapstructure:"http_directory"`
-	HTTPPortMin          uint       `mapstructure:"http_port_min"`
-	HTTPPortMax          uint       `mapstructure:"http_port_max"`
-	ISOChecksum          string     `mapstructure:"iso_checksum"`
-	ISOChecksumType      string     `mapstructure:"iso_checksum_type"`
-	ISOUrls              []string   `mapstructure:"iso_urls"`
-	ShutdownCommand      string     `mapstructure:"shutdown_command"`
-	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
-	VBoxManage           [][]string `mapstructure:"vboxmanage"`
-	VMName               string     `mapstructure:"vm_name"`
+	BootCommand          []string `mapstructure:"boot_command"`
+	DiskSize             uint     `mapstructure:"disk_size"`
+	Format               string   `mapstructure:"format"`
+	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
+	GuestOSType          string   `mapstructure:"guest_os_type"`
+	HardDriveInterface   string   `mapstructure:"hard_drive_interface"`
+	Headless             bool     `mapstructure:"headless"`
+	HTTPDir              string   `mapstructure:"http_directory"`
+	HTTPPortMin          uint     `mapstructure:"http_port_min"`
+	HTTPPortMax          uint     `mapstructure:"http_port_max"`
+	ISOChecksum          string   `mapstructure:"iso_checksum"`
+	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
+	ISOUrls              []string `mapstructure:"iso_urls"`
+	ShutdownCommand      string   `mapstructure:"shutdown_command"`
+	VBoxVersionFile      string   `mapstructure:"virtualbox_version_file"`
+	VMName               string   `mapstructure:"vm_name"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
@@ -81,6 +81,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
@@ -113,10 +114,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.RawBootWait == "" {
 		b.config.RawBootWait = "10s"
-	}
-
-	if b.config.VBoxManage == nil {
-		b.config.VBoxManage = make([][]string, 0)
 	}
 
 	if b.config.VBoxVersionFile == "" {
@@ -277,15 +274,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
 
-	for i, args := range b.config.VBoxManage {
-		for j, arg := range args {
-			if err := b.config.tpl.Validate(arg); err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Error processing vboxmanage[%d][%d]: %s", i, j, err))
-			}
-		}
-	}
-
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -335,7 +323,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HostPortMin: b.config.SSHHostPortMin,
 			HostPortMax: b.config.SSHHostPortMax,
 		},
-		new(stepVBoxManage),
+		&vboxcommon.StepVBoxManage{
+			Commands: b.config.VBoxManage,
+		},
 		new(stepRun),
 		new(stepTypeBootCommand),
 		&common.StepConnectSSH{

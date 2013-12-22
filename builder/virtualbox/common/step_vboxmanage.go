@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"strings"
 )
@@ -16,17 +15,22 @@ type commandTemplate struct {
 // template.
 //
 // Uses:
+//   driver Driver
+//   ui packer.Ui
+//   vmName string
 //
 // Produces:
-type stepVBoxManage struct{}
+type StepVBoxManage struct {
+	Commands [][]string
+	Tpl      *packer.ConfigTemplate
+}
 
-func (s *stepVBoxManage) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepVBoxManage) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	if len(config.VBoxManage) > 0 {
+	if len(s.Commands) > 0 {
 		ui.Say("Executing custom VBoxManage commands...")
 	}
 
@@ -34,13 +38,13 @@ func (s *stepVBoxManage) Run(state multistep.StateBag) multistep.StepAction {
 		Name: vmName,
 	}
 
-	for _, originalCommand := range config.VBoxManage {
+	for _, originalCommand := range s.Commands {
 		command := make([]string, len(originalCommand))
 		copy(command, originalCommand)
 
 		for i, arg := range command {
 			var err error
-			command[i], err = config.tpl.Process(arg, tplData)
+			command[i], err = s.Tpl.Process(arg, tplData)
 			if err != nil {
 				err := fmt.Errorf("Error preparing vboxmanage command: %s", err)
 				state.Put("error", err)
@@ -61,4 +65,4 @@ func (s *stepVBoxManage) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepVBoxManage) Cleanup(state multistep.StateBag) {}
+func (s *StepVBoxManage) Cleanup(state multistep.StateBag) {}
