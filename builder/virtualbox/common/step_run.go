@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"time"
 )
@@ -11,21 +10,26 @@ import (
 // This step starts the virtual machine.
 //
 // Uses:
+//   driver Driver
+//   ui packer.Ui
+//   vmName string
 //
 // Produces:
-type stepRun struct {
+type StepRun struct {
+	BootWait time.Duration
+	Headless bool
+
 	vmName string
 }
 
-func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
 	ui.Say("Starting the virtual machine...")
 	guiArgument := "gui"
-	if config.Headless == true {
+	if s.Headless == true {
 		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
 			"In headless mode, errors during the boot sequence or OS setup\n" +
 			"won't be easily visible. Use at your own discretion.")
@@ -41,9 +45,9 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 
 	s.vmName = vmName
 
-	if int64(config.bootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.bootWait))
-		wait := time.After(config.bootWait)
+	if int64(s.BootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.BootWait))
+		wait := time.After(s.BootWait)
 	WAITLOOP:
 		for {
 			select {
@@ -60,12 +64,12 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepRun) Cleanup(state multistep.StateBag) {
+func (s *StepRun) Cleanup(state multistep.StateBag) {
 	if s.vmName == "" {
 		return
 	}
 
-	driver := state.Get("driver").(vboxcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	if running, _ := driver.IsRunning(s.vmName); running {
