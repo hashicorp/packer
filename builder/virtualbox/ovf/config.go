@@ -1,6 +1,7 @@
 package ovf
 
 import (
+	"fmt"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
@@ -19,6 +20,7 @@ type Config struct {
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	SourcePath string `mapstructure:"source_path"`
+	VMName     string `mapstructure:"vm_name"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -36,6 +38,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	c.tpl.UserVars = c.PackerUserVars
 
+	// Defaults
+	if c.VMName == "" {
+		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
+	}
+
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(c.tpl)...)
@@ -45,6 +52,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
+
+	templates := map[string]*string{
+		"vm_name": &c.VMName,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = c.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
 
 	// Warnings
 	var warnings []string
