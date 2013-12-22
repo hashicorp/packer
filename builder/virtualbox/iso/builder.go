@@ -27,14 +27,14 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig         `mapstructure:",squash"`
-	vboxcommon.ExportConfig     `mapstructure:",squash"`
-	vboxcommon.FloppyConfig     `mapstructure:",squash"`
-	vboxcommon.OutputConfig     `mapstructure:",squash"`
-	vboxcommon.RunConfig        `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
-	vboxcommon.SSHConfig        `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
+	common.PackerConfig          `mapstructure:",squash"`
+	vboxcommon.ExportConfig      `mapstructure:",squash"`
+	vboxcommon.FloppyConfig      `mapstructure:",squash"`
+	vboxcommon.OutputConfig      `mapstructure:",squash"`
+	vboxcommon.RunConfig         `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
+	vboxcommon.SSHConfig         `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
