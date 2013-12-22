@@ -8,7 +8,6 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"os"
 	"strings"
 	"time"
 )
@@ -32,6 +31,7 @@ type config struct {
 	common.PackerConfig     `mapstructure:",squash"`
 	vboxcommon.FloppyConfig `mapstructure:",squash"`
 	vboxcommon.OutputConfig `mapstructure:",squash"`
+	vboxcommon.SSHConfig    `mapstructure:",squash"`
 
 	BootCommand          []string   `mapstructure:"boot_command"`
 	DiskSize             uint       `mapstructure:"disk_size"`
@@ -50,12 +50,6 @@ type config struct {
 	ISOChecksumType      string     `mapstructure:"iso_checksum_type"`
 	ISOUrls              []string   `mapstructure:"iso_urls"`
 	ShutdownCommand      string     `mapstructure:"shutdown_command"`
-	SSHHostPortMin       uint       `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax       uint       `mapstructure:"ssh_host_port_max"`
-	SSHKeyPath           string     `mapstructure:"ssh_key_path"`
-	SSHPassword          string     `mapstructure:"ssh_password"`
-	SSHPort              uint       `mapstructure:"ssh_port"`
-	SSHUser              string     `mapstructure:"ssh_username"`
 	VBoxVersionFile      string     `mapstructure:"virtualbox_version_file"`
 	VBoxManage           [][]string `mapstructure:"vboxmanage"`
 	VMName               string     `mapstructure:"vm_name"`
@@ -63,11 +57,9 @@ type config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
-	sshWaitTimeout  time.Duration ``
 	tpl             *packer.ConfigTemplate
 }
 
@@ -85,8 +77,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
@@ -121,18 +115,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RawBootWait = "10s"
 	}
 
-	if b.config.SSHHostPortMin == 0 {
-		b.config.SSHHostPortMin = 2222
-	}
-
-	if b.config.SSHHostPortMax == 0 {
-		b.config.SSHHostPortMax = 4444
-	}
-
-	if b.config.SSHPort == 0 {
-		b.config.SSHPort = 22
-	}
-
 	if b.config.VBoxManage == nil {
 		b.config.VBoxManage = make([][]string, 0)
 	}
@@ -160,15 +142,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_checksum_type":       &b.config.ISOChecksumType,
 		"iso_url":                 &b.config.RawSingleISOUrl,
 		"shutdown_command":        &b.config.ShutdownCommand,
-		"ssh_key_path":            &b.config.SSHKeyPath,
-		"ssh_password":            &b.config.SSHPassword,
-		"ssh_username":            &b.config.SSHUser,
 		"virtualbox_version_file": &b.config.VBoxVersionFile,
 		"vm_name":                 &b.config.VMName,
 		"format":                  &b.config.Format,
 		"boot_wait":               &b.config.RawBootWait,
 		"shutdown_timeout":        &b.config.RawShutdownTimeout,
-		"ssh_wait_timeout":        &b.config.RawSSHWaitTimeout,
 	}
 
 	for n, ptr := range templates {
@@ -293,40 +271,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RawShutdownTimeout = "5m"
 	}
 
-	if b.config.RawSSHWaitTimeout == "" {
-		b.config.RawSSHWaitTimeout = "20m"
-	}
-
 	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
-	if b.config.SSHKeyPath != "" {
-		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToKeyring(b.config.SSHKeyPath); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		}
-	}
-
-	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
-	}
-
-	if b.config.SSHUser == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("An ssh_username must be specified."))
-	}
-
-	b.config.sshWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
 	for i, args := range b.config.VBoxManage {
@@ -382,14 +330,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepAttachISO),
 		new(stepAttachGuestAdditions),
 		new(vboxcommon.StepAttachFloppy),
-		new(stepForwardSSH),
+		&vboxcommon.StepForwardSSH{
+			GuestPort:   b.config.SSHPort,
+			HostPortMin: b.config.SSHHostPortMin,
+			HostPortMax: b.config.SSHHostPortMax,
+		},
 		new(stepVBoxManage),
 		new(stepRun),
 		new(stepTypeBootCommand),
 		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
+			SSHAddress:     vboxcommon.SSHAddress,
+			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHWaitTimeout: b.config.SSHWaitTimeout,
 		},
 		new(stepUploadVersion),
 		new(stepUploadGuestAdditions),

@@ -11,6 +11,7 @@ type Config struct {
 	common.PackerConfig     `mapstructure:",squash"`
 	vboxcommon.FloppyConfig `mapstructure:",squash"`
 	vboxcommon.OutputConfig `mapstructure:",squash"`
+	vboxcommon.SSHConfig    `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -30,7 +31,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
