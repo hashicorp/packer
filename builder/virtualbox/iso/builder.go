@@ -31,6 +31,7 @@ type config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	vboxcommon.FloppyConfig     `mapstructure:",squash"`
 	vboxcommon.OutputConfig     `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
 	vboxcommon.SSHConfig        `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
 
@@ -50,17 +51,14 @@ type config struct {
 	ISOChecksum          string   `mapstructure:"iso_checksum"`
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
 	ISOUrls              []string `mapstructure:"iso_urls"`
-	ShutdownCommand      string   `mapstructure:"shutdown_command"`
 	VBoxVersionFile      string   `mapstructure:"virtualbox_version_file"`
 	VMName               string   `mapstructure:"vm_name"`
 
-	RawBootWait        string `mapstructure:"boot_wait"`
-	RawSingleISOUrl    string `mapstructure:"iso_url"`
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
+	RawBootWait     string `mapstructure:"boot_wait"`
+	RawSingleISOUrl string `mapstructure:"iso_url"`
 
-	bootWait        time.Duration ``
-	shutdownTimeout time.Duration ``
-	tpl             *packer.ConfigTemplate
+	bootWait time.Duration ``
+	tpl      *packer.ConfigTemplate
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -138,12 +136,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_checksum":            &b.config.ISOChecksum,
 		"iso_checksum_type":       &b.config.ISOChecksumType,
 		"iso_url":                 &b.config.RawSingleISOUrl,
-		"shutdown_command":        &b.config.ShutdownCommand,
 		"virtualbox_version_file": &b.config.VBoxVersionFile,
 		"vm_name":                 &b.config.VMName,
 		"format":                  &b.config.Format,
 		"boot_wait":               &b.config.RawBootWait,
-		"shutdown_timeout":        &b.config.RawShutdownTimeout,
 	}
 
 	for n, ptr := range templates {
@@ -264,16 +260,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 	}
 
-	if b.config.RawShutdownTimeout == "" {
-		b.config.RawShutdownTimeout = "5m"
-	}
-
-	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -336,7 +322,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepUploadVersion),
 		new(stepUploadGuestAdditions),
 		new(common.StepProvision),
-		new(stepShutdown),
+		&vboxcommon.StepShutdown{
+			Command: b.config.ShutdownCommand,
+			Timeout: b.config.ShutdownTimeout,
+		},
 		new(stepRemoveDevices),
 		new(stepExport),
 	}
