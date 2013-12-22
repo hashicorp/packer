@@ -401,7 +401,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		new(stepHTTPServer),
-		new(stepSuppressMessages),
+		new(vboxcommon.StepSuppressMessages),
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		new(stepAttachISO),
