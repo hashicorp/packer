@@ -59,8 +59,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HostPortMin: b.config.SSHHostPortMin,
 			HostPortMax: b.config.SSHHostPortMax,
 		},
+		&vboxcommon.StepVBoxManage{
+			Commands: b.config.VBoxManage,
+		},
 		/*
-			new(stepVBoxManage),
 			new(stepRun),
 		*/
 		&common.StepConnectSSH{
@@ -71,7 +73,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		/*
 			new(stepUploadVersion),
 			new(stepUploadGuestAdditions),
-			new(common.StepProvision),
+		*/
+		new(common.StepProvision),
+		/*
 			new(stepShutdown),
 			new(stepRemoveDevices),
 			new(stepExport),

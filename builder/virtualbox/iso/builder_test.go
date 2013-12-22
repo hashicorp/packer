@@ -2,8 +2,6 @@ package iso
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"io/ioutil"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -572,47 +570,6 @@ func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestBuilderPrepare_VBoxManage(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test with empty
-	delete(config, "vboxmanage")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if !reflect.DeepEqual(b.config.VBoxManage, [][]string{}) {
-		t.Fatalf("bad: %#v", b.config.VBoxManage)
-	}
-
-	// Test with a good one
-	config["vboxmanage"] = [][]interface{}{
-		[]interface{}{"foo", "bar", "baz"},
-	}
-
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	expected := [][]string{
-		[]string{"foo", "bar", "baz"},
-	}
-
-	if !reflect.DeepEqual(b.config.VBoxManage, expected) {
-		t.Fatalf("bad: %#v", b.config.VBoxManage)
 	}
 }
 
