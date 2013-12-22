@@ -54,16 +54,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			new(stepAttachGuestAdditions),
 		*/
 		new(vboxcommon.StepAttachFloppy),
+		&vboxcommon.StepForwardSSH{
+			GuestPort:   b.config.SSHPort,
+			HostPortMin: b.config.SSHHostPortMin,
+			HostPortMax: b.config.SSHHostPortMax,
+		},
 		/*
-			new(stepForwardSSH),
 			new(stepVBoxManage),
 			new(stepRun),
-			new(stepTypeBootCommand),
-			&common.StepConnectSSH{
-				SSHAddress:     sshAddress,
-				SSHConfig:      sshConfig,
-				SSHWaitTimeout: b.config.sshWaitTimeout,
-			},
+		*/
+		&common.StepConnectSSH{
+			SSHAddress:     vboxcommon.SSHAddress,
+			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHWaitTimeout: b.config.SSHWaitTimeout,
+		},
+		/*
 			new(stepUploadVersion),
 			new(stepUploadGuestAdditions),
 			new(common.StepProvision),

@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"math/rand"
@@ -14,30 +13,37 @@ import (
 // on the guest machine.
 //
 // Uses:
+//   driver Driver
+//   ui packer.Ui
+//   vmName string
 //
 // Produces:
-type stepForwardSSH struct{}
+type StepForwardSSH struct {
+	GuestPort   uint
+	HostPortMin uint
+	HostPortMax uint
+}
 
-func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	log.Printf("Looking for available SSH port between %d and %d", config.SSHHostPortMin, config.SSHHostPortMax)
+	log.Printf("Looking for available SSH port between %d and %d",
+		s.HostPortMin, s.HostPortMax)
 	var sshHostPort uint
 	var offset uint = 0
 
-	portRange := int(config.SSHHostPortMax - config.SSHHostPortMin)
+	portRange := int(s.HostPortMax - s.HostPortMin)
 	if portRange > 0 {
 		// Have to check if > 0 to avoid a panic
 		offset = uint(rand.Intn(portRange))
 	}
 
 	for {
-		sshHostPort = offset + config.SSHHostPortMin
+		sshHostPort = offset + s.HostPortMin
 		log.Printf("Trying port: %d", sshHostPort)
-		l, err := net.Listen("tcp", fmt.Sprintf(":%d", sshHostPort))
+		l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", sshHostPort))
 		if err == nil {
 			defer l.Close()
 			break
@@ -49,7 +55,7 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	command := []string{
 		"modifyvm", vmName,
 		"--natpf1",
-		fmt.Sprintf("packerssh,tcp,127.0.0.1,%d,,%d", sshHostPort, config.SSHPort),
+		fmt.Sprintf("packerssh,tcp,127.0.0.1,%d,,%d", sshHostPort, s.GuestPort),
 	}
 	if err := driver.VBoxManage(command...); err != nil {
 		err := fmt.Errorf("Error creating port forwarding rule: %s", err)
@@ -64,4 +70,4 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepForwardSSH) Cleanup(state multistep.StateBag) {}
+func (s *StepForwardSSH) Cleanup(state multistep.StateBag) {}
