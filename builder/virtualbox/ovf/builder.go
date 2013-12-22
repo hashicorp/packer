@@ -1,7 +1,13 @@
 package ovf
 
 import (
-	"github.com/mitchellh/packer/builder/virtualbox/common"
+	"errors"
+	"log"
+
+	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 // Builder implements packer.Builder and builds the actual VirtualBox
@@ -33,38 +39,36 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps.
 	steps := []multistep.Step{
-	/*
-		new(stepDownloadGuestAdditions),
-	*/
-	/*
+		/*
+			new(stepDownloadGuestAdditions),
+		*/
 		&vboxcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
-	*/
-	/*
-		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
-		},
-		new(stepSuppressMessages),
-		new(stepAttachGuestAdditions),
-		new(stepAttachFloppy),
-		new(stepForwardSSH),
-		new(stepVBoxManage),
-		new(stepRun),
-		new(stepTypeBootCommand),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
-		},
-		new(stepUploadVersion),
-		new(stepUploadGuestAdditions),
-		new(common.StepProvision),
-		new(stepShutdown),
-		new(stepRemoveDevices),
-		new(stepExport),
-	*/
+		new(vboxcommon.StepSuppressMessages),
+		/*
+			&common.StepCreateFloppy{
+				Files: b.config.FloppyFiles,
+			},
+			new(stepAttachGuestAdditions),
+			new(stepAttachFloppy),
+			new(stepForwardSSH),
+			new(stepVBoxManage),
+			new(stepRun),
+			new(stepTypeBootCommand),
+			&common.StepConnectSSH{
+				SSHAddress:     sshAddress,
+				SSHConfig:      sshConfig,
+				SSHWaitTimeout: b.config.sshWaitTimeout,
+			},
+			new(stepUploadVersion),
+			new(stepUploadGuestAdditions),
+			new(common.StepProvision),
+			new(stepShutdown),
+			new(stepRemoveDevices),
+			new(stepExport),
+		*/
 	}
 
 	// Run the steps.
@@ -92,11 +96,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	artifact := &Artifact{
-		imageName: state.Get("image_name").(string),
-		driver:    driver,
-	}
-	return artifact, nil
+	return vboxcommon.NewArtifact(b.config.OutputDir)
 }
 
 // Cancel.
