@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"path/filepath"
@@ -16,11 +15,13 @@ import (
 //
 // Produces:
 //   exportPath string - The path to the resulting export.
-type stepExport struct{}
+type StepExport struct {
+	Format    string
+	OutputDir string
+}
 
-func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
@@ -42,7 +43,7 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Export the VM to an OVF
-	outputPath := filepath.Join(config.OutputDir, vmName+"."+config.Format)
+	outputPath := filepath.Join(s.OutputDir, vmName+"."+s.Format)
 
 	command = []string{
 		"export",
@@ -65,4 +66,4 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepExport) Cleanup(state multistep.StateBag) {}
+func (s *StepExport) Cleanup(state multistep.StateBag) {}

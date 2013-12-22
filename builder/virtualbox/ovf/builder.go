@@ -81,9 +81,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 		},
 		new(vboxcommon.StepRemoveDevices),
-		/*
-			new(stepExport),
-		*/
+		&vboxcommon.StepExport{
+			Format:    b.config.Format,
+			OutputDir: b.config.OutputDir,
+		},
 	}
 
 	// Run the steps.
