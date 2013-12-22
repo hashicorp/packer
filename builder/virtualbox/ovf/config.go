@@ -8,14 +8,14 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig         `mapstructure:",squash"`
-	vboxcommon.ExportConfig     `mapstructure:",squash"`
-	vboxcommon.FloppyConfig     `mapstructure:",squash"`
-	vboxcommon.OutputConfig     `mapstructure:",squash"`
-	vboxcommon.RunConfig        `mapstructure:",squash"`
-	vboxcommon.SSHConfig        `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
+	common.PackerConfig          `mapstructure:",squash"`
+	vboxcommon.ExportConfig      `mapstructure:",squash"`
+	vboxcommon.FloppyConfig      `mapstructure:",squash"`
+	vboxcommon.OutputConfig      `mapstructure:",squash"`
+	vboxcommon.RunConfig         `mapstructure:",squash"`
+	vboxcommon.SSHConfig         `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
