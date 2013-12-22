@@ -299,43 +299,6 @@ func TestBuilderPrepare_HTTPPort(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_Format(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Bad
-	config["format"] = "illegal value"
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Good
-	config["format"] = "ova"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Good
-	config["format"] = "ovf"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
 	config := testConfig()
