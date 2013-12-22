@@ -9,6 +9,15 @@ type DriverMock struct {
 	CreateSATAControllerController string
 	CreateSATAControllerErr        error
 
+	DeleteCalled bool
+	DeleteName   string
+	DeleteErr    error
+
+	ImportCalled bool
+	ImportName   string
+	ImportPath   string
+	ImportErr    error
+
 	IsRunningName   string
 	IsRunningReturn bool
 	IsRunningErr    error
@@ -34,6 +43,19 @@ func (d *DriverMock) CreateSATAController(vm string, controller string) error {
 	d.CreateSATAControllerVM = vm
 	d.CreateSATAControllerController = vm
 	return d.CreateSATAControllerErr
+}
+
+func (d *DriverMock) Delete(name string) error {
+	d.DeleteCalled = true
+	d.DeleteName = name
+	return d.DeleteErr
+}
+
+func (d *DriverMock) Import(name, path string) error {
+	d.ImportCalled = true
+	d.ImportName = name
+	d.ImportPath = path
+	return d.ImportErr
 }
 
 func (d *DriverMock) IsRunning(name string) (bool, error) {
