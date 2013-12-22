@@ -35,6 +35,7 @@ type config struct {
 	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
 	vboxcommon.SSHConfig        `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
 	DiskSize             uint     `mapstructure:"disk_size"`
@@ -50,7 +51,6 @@ type config struct {
 	ISOChecksum          string   `mapstructure:"iso_checksum"`
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
 	ISOUrls              []string `mapstructure:"iso_urls"`
-	VBoxVersionFile      string   `mapstructure:"virtualbox_version_file"`
 	VMName               string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
@@ -79,6 +79,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
@@ -109,26 +110,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.HTTPPortMax = 9000
 	}
 
-	if b.config.VBoxVersionFile == "" {
-		b.config.VBoxVersionFile = ".vbox_version"
-	}
-
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
 	// Errors
 	templates := map[string]*string{
-		"guest_additions_mode":    &b.config.GuestAdditionsMode,
-		"guest_additions_sha256":  &b.config.GuestAdditionsSHA256,
-		"guest_os_type":           &b.config.GuestOSType,
-		"hard_drive_interface":    &b.config.HardDriveInterface,
-		"http_directory":          &b.config.HTTPDir,
-		"iso_checksum":            &b.config.ISOChecksum,
-		"iso_checksum_type":       &b.config.ISOChecksumType,
-		"iso_url":                 &b.config.RawSingleISOUrl,
-		"virtualbox_version_file": &b.config.VBoxVersionFile,
-		"vm_name":                 &b.config.VMName,
+		"guest_additions_mode":   &b.config.GuestAdditionsMode,
+		"guest_additions_sha256": &b.config.GuestAdditionsSHA256,
+		"guest_os_type":          &b.config.GuestOSType,
+		"hard_drive_interface":   &b.config.HardDriveInterface,
+		"http_directory":         &b.config.HTTPDir,
+		"iso_checksum":           &b.config.ISOChecksum,
+		"iso_checksum_type":      &b.config.ISOChecksumType,
+		"iso_url":                &b.config.RawSingleISOUrl,
+		"vm_name":                &b.config.VMName,
 	}
 
 	for n, ptr := range templates {
@@ -300,7 +296,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 		},
-		new(stepUploadVersion),
+		&vboxcommon.StepUploadVersion{
+			Path: b.config.VBoxVersionFile,
+		},
 		new(stepUploadGuestAdditions),
 		new(common.StepProvision),
 		&vboxcommon.StepShutdown{

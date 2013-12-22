@@ -454,37 +454,3 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.ISOUrls)
 	}
 }
-
-func TestBuilderPrepare_VBoxVersionFile(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test empty
-	delete(config, "virtualbox_version_file")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if b.config.VBoxVersionFile != ".vbox_version" {
-		t.Fatalf("bad value: %s", b.config.VBoxVersionFile)
-	}
-
-	// Test with a good one
-	config["virtualbox_version_file"] = "foo"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.VBoxVersionFile != "foo" {
-		t.Fatalf("bad value: %s", b.config.VBoxVersionFile)
-	}
-}
