@@ -52,7 +52,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		/*
 			new(stepAttachGuestAdditions),
-			new(stepAttachFloppy),
+		*/
+		new(vboxcommon.StepAttachFloppy),
+		/*
 			new(stepForwardSSH),
 			new(stepVBoxManage),
 			new(stepRun),
