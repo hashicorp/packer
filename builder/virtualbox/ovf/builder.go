@@ -61,6 +61,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
+			Tpl:      b.config.tpl,
 		},
 		&vboxcommon.StepRun{
 			BootWait: b.config.BootWait,
