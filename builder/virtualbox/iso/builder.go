@@ -29,7 +29,8 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig `mapstructure:",squash"`
+	common.PackerConfig     `mapstructure:",squash"`
+	vboxcommon.OutputConfig `mapstructure:",squash"`
 
 	BootCommand          []string   `mapstructure:"boot_command"`
 	DiskSize             uint       `mapstructure:"disk_size"`
@@ -48,7 +49,6 @@ type config struct {
 	ISOChecksum          string     `mapstructure:"iso_checksum"`
 	ISOChecksumType      string     `mapstructure:"iso_checksum_type"`
 	ISOUrls              []string   `mapstructure:"iso_urls"`
-	OutputDir            string     `mapstructure:"output_directory"`
 	ShutdownCommand      string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin       uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax       uint       `mapstructure:"ssh_host_port_max"`
@@ -85,6 +85,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(
+		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
@@ -117,10 +119,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.HTTPPortMax == 0 {
 		b.config.HTTPPortMax = 9000
-	}
-
-	if b.config.OutputDir == "" {
-		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
 	if b.config.RawBootWait == "" {
@@ -165,7 +163,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_checksum":            &b.config.ISOChecksum,
 		"iso_checksum_type":       &b.config.ISOChecksumType,
 		"iso_url":                 &b.config.RawSingleISOUrl,
-		"output_directory":        &b.config.OutputDir,
 		"shutdown_command":        &b.config.ShutdownCommand,
 		"ssh_key_path":            &b.config.SSHKeyPath,
 		"ssh_password":            &b.config.SSHPassword,
@@ -298,14 +295,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.GuestAdditionsSHA256 != "" {
 		b.config.GuestAdditionsSHA256 = strings.ToLower(b.config.GuestAdditionsSHA256)
-	}
-
-	if !b.config.PackerForce {
-		if _, err := os.Stat(b.config.OutputDir); err == nil {
-			errs = packer.MultiErrorAppend(
-				errs,
-				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
-		}
 	}
 
 	b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
