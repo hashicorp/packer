@@ -16,6 +16,7 @@ type Config struct {
 	vboxcommon.SSHConfig        `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -41,6 +42,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
 
 	// Warnings
 	var warnings []string

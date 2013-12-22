@@ -1,25 +1,25 @@
-package iso
+package common
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
 
 // This step uploads a file containing the VirtualBox version, which
 // can be useful for various provisioning reasons.
-type stepUploadVersion struct{}
+type StepUploadVersion struct {
+	Path string
+}
 
-func (s *stepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	if config.VBoxVersionFile == "" {
+	if s.Path == "" {
 		log.Println("VBoxVersionFile is empty. Not uploading.")
 		return multistep.ActionContinue
 	}
@@ -33,7 +33,7 @@ func (s *stepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Uploading VirtualBox version info (%s)", version))
 	var data bytes.Buffer
 	data.WriteString(version)
-	if err := comm.Upload(config.VBoxVersionFile, &data); err != nil {
+	if err := comm.Upload(s.Path, &data); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading VirtualBox version: %s", err))
 		return multistep.ActionHalt
 	}
@@ -41,4 +41,4 @@ func (s *stepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepUploadVersion) Cleanup(state multistep.StateBag) {}
+func (s *StepUploadVersion) Cleanup(state multistep.StateBag) {}

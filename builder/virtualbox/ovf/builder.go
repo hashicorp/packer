@@ -71,8 +71,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 		},
+		&vboxcommon.StepUploadVersion{
+			Path: b.config.VBoxVersionFile,
+		},
 		/*
-			new(stepUploadVersion),
 			new(stepUploadGuestAdditions),
 		*/
 		new(common.StepProvision),
