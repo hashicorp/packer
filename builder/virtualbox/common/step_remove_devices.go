@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -11,12 +10,15 @@ import (
 // machine that we may have added.
 //
 // Uses:
+//   driver Driver
+//   ui packer.Ui
+//   vmName string
 //
 // Produces:
-type stepRemoveDevices struct{}
+type StepRemoveDevices struct{}
 
-func (s *stepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
@@ -56,5 +58,5 @@ func (s *stepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepRemoveDevices) Cleanup(state multistep.StateBag) {
+func (s *StepRemoveDevices) Cleanup(state multistep.StateBag) {
 }
