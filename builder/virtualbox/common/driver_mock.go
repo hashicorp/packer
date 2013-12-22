@@ -1,6 +1,10 @@
 package common
 
+import "sync"
+
 type DriverMock struct {
+	sync.Mutex
+
 	CreateSATAControllerVM         string
 	CreateSATAControllerController string
 	CreateSATAControllerErr        error
@@ -33,6 +37,9 @@ func (d *DriverMock) CreateSATAController(vm string, controller string) error {
 }
 
 func (d *DriverMock) IsRunning(name string) (bool, error) {
+	d.Lock()
+	defer d.Unlock()
+
 	d.IsRunningName = name
 	return d.IsRunningReturn, d.IsRunningErr
 }
