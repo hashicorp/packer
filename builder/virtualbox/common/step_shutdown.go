@@ -58,7 +58,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			default:
-				time.Sleep(1 * time.Second)
+				time.Sleep(500 * time.Millisecond)
 			}
 		}
 	} else {
