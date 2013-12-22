@@ -62,9 +62,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
 		},
-		/*
-			new(stepRun),
-		*/
+		&vboxcommon.StepRun{
+			BootWait: b.config.BootWait,
+			Headless: b.config.Headless,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,
 			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),

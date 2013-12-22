@@ -9,7 +9,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
-	"time"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -31,6 +30,7 @@ type config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	vboxcommon.FloppyConfig     `mapstructure:",squash"`
 	vboxcommon.OutputConfig     `mapstructure:",squash"`
+	vboxcommon.RunConfig        `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig   `mapstructure:",squash"`
 	vboxcommon.SSHConfig        `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig `mapstructure:",squash"`
@@ -44,7 +44,6 @@ type config struct {
 	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
 	GuestOSType          string   `mapstructure:"guest_os_type"`
 	HardDriveInterface   string   `mapstructure:"hard_drive_interface"`
-	Headless             bool     `mapstructure:"headless"`
 	HTTPDir              string   `mapstructure:"http_directory"`
 	HTTPPortMin          uint     `mapstructure:"http_port_min"`
 	HTTPPortMax          uint     `mapstructure:"http_port_max"`
@@ -54,11 +53,9 @@ type config struct {
 	VBoxVersionFile      string   `mapstructure:"virtualbox_version_file"`
 	VMName               string   `mapstructure:"vm_name"`
 
-	RawBootWait     string `mapstructure:"boot_wait"`
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
-	bootWait time.Duration ``
-	tpl      *packer.ConfigTemplate
+	tpl *packer.ConfigTemplate
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -78,6 +75,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
@@ -110,10 +108,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.HTTPPortMax = 9000
 	}
 
-	if b.config.RawBootWait == "" {
-		b.config.RawBootWait = "10s"
-	}
-
 	if b.config.VBoxVersionFile == "" {
 		b.config.VBoxVersionFile = ".vbox_version"
 	}
@@ -139,7 +133,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"virtualbox_version_file": &b.config.VBoxVersionFile,
 		"vm_name":                 &b.config.VMName,
 		"format":                  &b.config.Format,
-		"boot_wait":               &b.config.RawBootWait,
 	}
 
 	for n, ptr := range templates {
@@ -254,12 +247,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.GuestAdditionsSHA256 = strings.ToLower(b.config.GuestAdditionsSHA256)
 	}
 
-	b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
-	}
-
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -312,7 +299,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
 		},
-		new(stepRun),
+		&vboxcommon.StepRun{
+			BootWait: b.config.BootWait,
+			Headless: b.config.Headless,
+		},
 		new(stepTypeBootCommand),
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,
