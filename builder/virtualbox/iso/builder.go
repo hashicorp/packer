@@ -30,11 +30,11 @@ type Builder struct {
 
 type config struct {
 	common.PackerConfig     `mapstructure:",squash"`
+	vboxcommon.FloppyConfig `mapstructure:",squash"`
 	vboxcommon.OutputConfig `mapstructure:",squash"`
 
 	BootCommand          []string   `mapstructure:"boot_command"`
 	DiskSize             uint       `mapstructure:"disk_size"`
-	FloppyFiles          []string   `mapstructure:"floppy_files"`
 	Format               string     `mapstructure:"format"`
 	GuestAdditionsMode   string     `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath   string     `mapstructure:"guest_additions_path"`
@@ -91,10 +91,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
-	}
-
-	if b.config.FloppyFiles == nil {
-		b.config.FloppyFiles = make([]string, 0)
 	}
 
 	if b.config.GuestAdditionsMode == "" {
@@ -209,16 +205,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err := b.config.tpl.Validate(command); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
-		}
-	}
-
-	for i, file := range b.config.FloppyFiles {
-		var err error
-		b.config.FloppyFiles[i], err = b.config.tpl.Process(file, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing floppy_files[%d]: %s",
-					i, err))
 		}
 	}
 

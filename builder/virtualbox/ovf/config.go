@@ -9,6 +9,7 @@ import (
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig     `mapstructure:",squash"`
+	vboxcommon.FloppyConfig `mapstructure:",squash"`
 	vboxcommon.OutputConfig `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
