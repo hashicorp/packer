@@ -41,6 +41,9 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 	// Track the path so that we can unregister it from VirtualBox later
 	s.diskPath = isoPath
 
+	// Set some state so we know to remove
+	state.Put("attachedIso", true)
+
 	return multistep.ActionContinue
 }
 
