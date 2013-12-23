@@ -57,7 +57,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	templates := map[string]*string{
 		"source_path": &c.SourcePath,
-		"vm_name": &c.VMName,
+		"vm_name":     &c.VMName,
 	}
 
 	for n, ptr := range templates {
