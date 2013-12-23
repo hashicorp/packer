@@ -5,10 +5,8 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type vmxTemplateData struct {
@@ -75,26 +73,6 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	vmxData := ParseVMX(vmxContents)
-	if config.VMXData != nil {
-		log.Println("Setting custom VMX data...")
-		for k, v := range config.VMXData {
-			log.Printf("Setting VMX: '%s' = '%s'", k, v)
-			k = strings.ToLower(k)
-			vmxData[k] = v
-		}
-	}
-
-	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
-		log.Println("Floppy path present, setting in VMX")
-		vmxData["floppy0.present"] = "TRUE"
-		vmxData["floppy0.filetype"] = "file"
-		vmxData["floppy0.filename"] = floppyPathRaw.(string)
-	}
-
-	// Set this so that no dialogs ever appear from Packer.
-	vmxData["msg.autoanswer"] = "true"
-
 	vmxDir := config.OutputDir
 	if config.RemoteType != "" {
 		// For remote builds, we just put the VMX in a temporary
@@ -112,7 +90,7 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vmxPath := filepath.Join(vmxDir, config.VMName+".vmx")
-	if err := WriteVMX(vmxPath, vmxData); err != nil {
+	if err := WriteVMX(vmxPath, ParseVMX(vmxContents)); err != nil {
 		err := fmt.Errorf("Error creating VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
