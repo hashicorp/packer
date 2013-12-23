@@ -2,6 +2,8 @@ package ovf
 
 import (
 	"fmt"
+	"os"
+
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
@@ -54,6 +56,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
+		"source_path": &c.SourcePath,
 		"vm_name": &c.VMName,
 	}
 
@@ -63,6 +66,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	if c.SourcePath == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
+	} else {
+		if _, err := os.Stat(c.SourcePath); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("source_path is invalid: %s", err))
 		}
 	}
 
