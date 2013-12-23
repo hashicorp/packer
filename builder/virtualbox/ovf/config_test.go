@@ -1,14 +1,14 @@
 package ovf
 
 import (
-	"testing"
 	"io/ioutil"
 	"os"
+	"testing"
 )
 
 func testConfig(t *testing.T) map[string]interface{} {
 	return map[string]interface{}{
-		"ssh_username": "foo",
+		"ssh_username":     "foo",
 		"shutdown_command": "foo",
 	}
 }
@@ -30,7 +30,6 @@ func testConfigOk(t *testing.T, warns []string, err error) {
 		t.Fatalf("bad: %s", err)
 	}
 }
-
 
 func TestNewConfig_sourcePath(t *testing.T) {
 	// Bad
@@ -58,4 +57,3 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	_, warns, errs = NewConfig(c)
 	testConfigOk(t, warns, errs)
 }
-
