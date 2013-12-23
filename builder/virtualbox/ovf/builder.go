@@ -2,6 +2,7 @@ package ovf
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/mitchellh/multistep"
@@ -31,9 +32,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // Run executes a Packer build and returns a packer.Artifact representing
 // a VirtualBox appliance.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	// Create the driver that we'll use to communicate with VirtualBox
+	driver, err := vboxcommon.NewDriver()
+	if err != nil {
+		return nil, fmt.Errorf("Failed creating VirtualBox driver: %s", err)
+	}
+
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
+	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
