@@ -40,19 +40,21 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	command := []string{
-		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "0",
-		"--device", "1",
-		"--medium", "none",
-	}
+	if _, ok := state.GetOk("attachedIso"); ok {
+		command := []string{
+			"storageattach", vmName,
+			"--storagectl", "IDE Controller",
+			"--port", "0",
+			"--device", "1",
+			"--medium", "none",
+		}
 
-	if err := driver.VBoxManage(command...); err != nil {
-		err := fmt.Errorf("Error detaching ISO: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		if err := driver.VBoxManage(command...); err != nil {
+			err := fmt.Errorf("Error detaching ISO: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue
