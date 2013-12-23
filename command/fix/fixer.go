@@ -24,6 +24,7 @@ func init() {
 		"createtime":          new(FixerCreateTime),
 		"pp-vagrant-override": new(FixerVagrantPPOverride),
 		"virtualbox-gaattach": new(FixerVirtualBoxGAAttach),
+		"virtualbox-rename":   new(FixerVirtualBoxRename),
 	}
 
 	FixerOrder = []string{
@@ -31,5 +32,6 @@ func init() {
 		"createtime",
 		"virtualbox-gaattach",
 		"pp-vagrant-override",
+		"virtualbox-rename",
 	}
 }
