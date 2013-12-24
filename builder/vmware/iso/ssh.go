@@ -1,4 +1,4 @@
-package vmware
+package iso
 
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
