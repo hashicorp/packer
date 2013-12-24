@@ -395,6 +395,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepSuppressMessages{},
 		&stepHTTPServer{},
 		&stepConfigureVNC{},
+		&StepRegister{},
 		&stepRun{},
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
