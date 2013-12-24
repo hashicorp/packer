@@ -2,11 +2,13 @@ package iso
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 )
 
 // Player5LinuxDriver is a driver that can run VMware Player 5 on Linux.
@@ -15,6 +17,9 @@ type Player5LinuxDriver struct {
 	VdiskManagerPath string
 	QemuImgPath      string
 	VmrunPath        string
+
+	// SSHConfig are the SSH settings for the Fusion VM
+	SSHConfig *vmwcommon.SSHConfig
 }
 
 func (d *Player5LinuxDriver) CompactDisk(diskPath string) error {
@@ -88,7 +93,7 @@ func (d *Player5LinuxDriver) IsRunning(vmxPath string) (bool, error) {
 }
 
 func (d *Player5LinuxDriver) SSHAddress(state multistep.StateBag) (string, error) {
-	return sshAddress(state)
+	return vmwcommon.SSHAddressFunc(d.SSHConfig)(state)
 }
 
 func (d *Player5LinuxDriver) Start(vmxPath string, headless bool) error {

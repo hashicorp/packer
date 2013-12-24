@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"time"
 )
@@ -26,7 +27,7 @@ type stepRun struct {
 
 func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 	vncIp := state.Get("vnc_ip").(string)
@@ -84,7 +85,7 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepRun) Cleanup(state multistep.StateBag) {
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	// If we started the machine... stop it.

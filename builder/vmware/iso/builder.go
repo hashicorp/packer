@@ -399,7 +399,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
 			SSHAddress:     driver.SSHAddress,
-			SSHConfig:      sshConfig,
+			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
