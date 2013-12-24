@@ -346,6 +346,25 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
+	// Determine the output dir implementation
+	var dir OutputDir
+	switch d := driver.(type) {
+	case OutputDir:
+		dir = d
+	default:
+		dir = new(vmwcommon.LocalOutputDir)
+	}
+	dir.SetOutputDir(b.config.OutputDir)
+
+	// Setup the state bag
+	state := new(multistep.BasicStateBag)
+	state.Put("cache", cache)
+	state.Put("config", &b.config)
+	state.Put("dir", dir)
+	state.Put("driver", driver)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
+
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -358,7 +377,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
 		},
-		&stepPrepareOutputDir{},
+		&vmwcommon.StepOutputDir{
+			Force: b.config.PackerForce,
+		},
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
@@ -389,14 +410,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCleanVMX{},
 		&stepCompactDisk{},
 	}
-
-	// Setup the state bag
-	state := new(multistep.BasicStateBag)
-	state.Put("cache", cache)
-	state.Put("config", &b.config)
-	state.Put("driver", driver)
-	state.Put("hook", hook)
-	state.Put("ui", ui)
 
 	// Run!
 	if b.config.PackerDebug {
