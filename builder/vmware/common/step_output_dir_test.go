@@ -13,7 +13,10 @@ func testOutputDir(t *testing.T) *LocalOutputDir {
 		t.Fatalf("err: %s", err)
 	}
 	os.RemoveAll(td)
-	return &LocalOutputDir{Dir: td}
+
+	result := new(LocalOutputDir)
+	result.SetOutputDir(td)
+	return result
 }
 
 func TestStepOutputDir_impl(t *testing.T) {
@@ -34,13 +37,13 @@ func TestStepOutputDir(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.Dir); err != nil {
+	if _, err := os.Stat(dir.dir); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test the cleanup
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.Dir); err != nil {
+	if _, err := os.Stat(dir.dir); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
@@ -53,7 +56,7 @@ func TestStepOutputDir_existsNoForce(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Make sure the dir exists
-	if err := os.MkdirAll(dir.Dir, 0755); err != nil {
+	if err := os.MkdirAll(dir.dir, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -67,7 +70,7 @@ func TestStepOutputDir_existsNoForce(t *testing.T) {
 
 	// Test the cleanup
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.Dir); err != nil {
+	if _, err := os.Stat(dir.dir); err != nil {
 		t.Fatal("should not delete dir")
 	}
 }
@@ -81,7 +84,7 @@ func TestStepOutputDir_existsForce(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Make sure the dir exists
-	if err := os.MkdirAll(dir.Dir, 0755); err != nil {
+	if err := os.MkdirAll(dir.dir, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -92,7 +95,7 @@ func TestStepOutputDir_existsForce(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.Dir); err != nil {
+	if _, err := os.Stat(dir.dir); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
@@ -111,14 +114,14 @@ func TestStepOutputDir_cancel(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.Dir); err != nil {
+	if _, err := os.Stat(dir.dir); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test cancel/halt
 	state.Put(multistep.StateCancelled, true)
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.Dir); err == nil {
+	if _, err := os.Stat(dir.dir); err == nil {
 		t.Fatal("directory should not exist")
 	}
 }
@@ -137,14 +140,14 @@ func TestStepOutputDir_halt(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.Dir); err != nil {
+	if _, err := os.Stat(dir.dir); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test cancel/halt
 	state.Put(multistep.StateHalted, true)
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.Dir); err == nil {
+	if _, err := os.Stat(dir.dir); err == nil {
 		t.Fatal("directory should not exist")
 	}
 }
