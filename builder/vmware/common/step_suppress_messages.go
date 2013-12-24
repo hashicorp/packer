@@ -1,18 +1,17 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
 
 // This step suppresses any messages that VMware product might show.
-type stepSuppressMessages struct{}
+type StepSuppressMessages struct{}
 
-func (s *stepSuppressMessages) Run(state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(vmwcommon.Driver)
+func (s *StepSuppressMessages) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
@@ -27,4 +26,4 @@ func (s *stepSuppressMessages) Run(state multistep.StateBag) multistep.StepActio
 	return multistep.ActionContinue
 }
 
-func (s *stepSuppressMessages) Cleanup(state multistep.StateBag) {}
+func (s *StepSuppressMessages) Cleanup(state multistep.StateBag) {}
