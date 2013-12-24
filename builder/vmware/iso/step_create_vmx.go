@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
@@ -90,7 +91,7 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vmxPath := filepath.Join(vmxDir, config.VMName+".vmx")
-	if err := WriteVMX(vmxPath, ParseVMX(vmxContents)); err != nil {
+	if err := vmwcommon.WriteVMX(vmxPath, vmwcommon.ParseVMX(vmxContents)); err != nil {
 		err := fmt.Errorf("Error creating VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

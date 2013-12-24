@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -66,7 +67,7 @@ func (s stepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Rewrite the VMX
-	if err := WriteVMX(vmxPath, vmxData); err != nil {
+	if err := vmwcommon.WriteVMX(vmxPath, vmxData); err != nil {
 		state.Put("error", fmt.Errorf("Error writing VMX: %s", err))
 		return multistep.ActionHalt
 	}
@@ -88,5 +89,5 @@ func (stepCleanVMX) readVMX(vmxPath string) (map[string]string, error) {
 		return nil, err
 	}
 
-	return ParseVMX(string(vmxBytes)), nil
+	return vmwcommon.ParseVMX(string(vmxBytes)), nil
 }
