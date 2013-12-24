@@ -12,7 +12,7 @@ import (
 	"github.com/mitchellh/packer/communicator/ssh"
 )
 
-func sshAddress(config *SSHConfig) func(multistep.StateBag) (string, error) {
+func SSHAddressFunc(config *SSHConfig) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		driver := state.Get("driver").(Driver)
 		vmxPath := state.Get("vmx_path").(string)
@@ -61,7 +61,7 @@ func sshAddress(config *SSHConfig) func(multistep.StateBag) (string, error) {
 	}
 }
 
-func sshConfig(config *SSHConfig) func(multistep.StateBag) (*gossh.ClientConfig, error) {
+func SSHConfigFunc(config *SSHConfig) func(multistep.StateBag) (*gossh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*gossh.ClientConfig, error) {
 		auth := []gossh.ClientAuth{
 			gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),

@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -22,7 +23,7 @@ type stepCompactDisk struct{}
 
 func (stepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
-	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	full_disk_path := state.Get("full_disk_path").(string)
 

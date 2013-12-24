@@ -1,7 +1,11 @@
 package iso
 
+import (
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
+)
+
 type RemoteDriver interface {
-	Driver
+	vmwcommon.Driver
 
 	// UploadISO uploads a local ISO to the remote side and returns the
 	// new path that should be used in the VMX along with an error if it
