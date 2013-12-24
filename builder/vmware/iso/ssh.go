@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"io/ioutil"
 	"log"
@@ -28,7 +29,7 @@ func sshAddress(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	vmxData := ParseVMX(string(vmxBytes))
+	vmxData := vmwcommon.ParseVMX(string(vmxBytes))
 
 	var ok bool
 	macAddress := ""

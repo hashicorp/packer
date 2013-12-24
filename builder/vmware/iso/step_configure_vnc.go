@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
@@ -84,11 +85,11 @@ func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 
 	log.Printf("Found available VNC port: %d", vncPort)
 
-	vmxData := ParseVMX(string(vmxBytes))
+	vmxData := vmwcommon.ParseVMX(string(vmxBytes))
 	vmxData["remotedisplay.vnc.enabled"] = "TRUE"
 	vmxData["remotedisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
 
-	if err := WriteVMX(vmxPath, vmxData); err != nil {
+	if err := vmwcommon.WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
