@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
@@ -405,7 +406,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepCreateDisk{},
 		&stepCreateVMX{},
-		&StepConfigureVMX{
+		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXData,
 		},
 		&stepSuppressMessages{},
