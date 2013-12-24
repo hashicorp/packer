@@ -1,6 +1,6 @@
 // +build windows
 
-package vmware
+package iso
 
 import (
 	"log"

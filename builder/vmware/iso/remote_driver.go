@@ -1,4 +1,4 @@
-package vmware
+package iso
 
 type RemoteDriver interface {
 	Driver
