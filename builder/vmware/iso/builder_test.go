@@ -9,36 +9,6 @@ import (
 	"time"
 )
 
-var testPem = `
------BEGIN RSA PRIVATE KEY-----
-MIIEpQIBAAKCAQEAxd4iamvrwRJvtNDGQSIbNvvIQN8imXTRWlRY62EvKov60vqu
-hh+rDzFYAIIzlmrJopvOe0clqmi3mIP9dtkjPFrYflq52a2CF5q+BdwsJXuRHbJW
-LmStZUwW1khSz93DhvhmK50nIaczW63u4EO/jJb3xj+wxR1Nkk9bxi3DDsYFt8SN
-AzYx9kjlEYQ/+sI4/ATfmdV9h78SVotjScupd9KFzzi76gWq9gwyCBLRynTUWlyD
-2UOfJRkOvhN6/jKzvYfVVwjPSfA9IMuooHdScmC4F6KBKJl/zf/zETM0XyzIDNmH
-uOPbCiljq2WoRM+rY6ET84EO0kVXbfx8uxUsqQIDAQABAoIBAQCkPj9TF0IagbM3
-5BSs/CKbAWS4dH/D4bPlxx4IRCNirc8GUg+MRb04Xz0tLuajdQDqeWpr6iLZ0RKV
-BvreLF+TOdV7DNQ4XE4gSdJyCtCaTHeort/aordL3l0WgfI7mVk0L/yfN1PEG4YG
-E9q1TYcyrB3/8d5JwIkjabxERLglCcP+geOEJp+QijbvFIaZR/n2irlKW4gSy6ko
-9B0fgUnhkHysSg49ChHQBPQ+o5BbpuLrPDFMiTPTPhdfsvGGcyCGeqfBA56oHcSF
-K02Fg8OM+Bd1lb48LAN9nWWY4WbwV+9bkN3Ym8hO4c3a/Dxf2N7LtAQqWZzFjvM3
-/AaDvAgBAoGBAPLD+Xn1IYQPMB2XXCXfOuJewRY7RzoVWvMffJPDfm16O7wOiW5+
-2FmvxUDayk4PZy6wQMzGeGKnhcMMZTyaq2g/QtGfrvy7q1Lw2fB1VFlVblvqhoJa
-nMJojjC4zgjBkXMHsRLeTmgUKyGs+fdFbfI6uejBnnf+eMVUMIdJ+6I9AoGBANCn
-kWO9640dttyXURxNJ3lBr2H3dJOkmD6XS+u+LWqCSKQe691Y/fZ/ZL0Oc4Mhy7I6
-hsy3kDQ5k2V0fkaNODQIFJvUqXw2pMewUk8hHc9403f4fe9cPrL12rQ8WlQw4yoC
-v2B61vNczCCUDtGxlAaw8jzSRaSI5s6ax3K7enbdAoGBAJB1WYDfA2CoAQO6y9Sl
-b07A/7kQ8SN5DbPaqrDrBdJziBQxukoMJQXJeGFNUFD/DXFU5Fp2R7C86vXT7HIR
-v6m66zH+CYzOx/YE6EsUJms6UP9VIVF0Rg/RU7teXQwM01ZV32LQ8mswhTH20o/3
-uqMHmxUMEhZpUMhrfq0isyApAoGAe1UxGTXfj9AqkIVYylPIq2HqGww7+jFmVEj1
-9Wi6S6Sq72ffnzzFEPkIQL/UA4TsdHMnzsYKFPSbbXLIWUeMGyVTmTDA5c0e5XIR
-lPhMOKCAzv8w4VUzMnEkTzkFY5JqFCD/ojW57KvDdNZPVB+VEcdxyAW6aKELXMAc
-eHLc1nkCgYEApm/motCTPN32nINZ+Vvywbv64ZD+gtpeMNP3CLrbe1X9O+H52AXa
-1jCoOldWR8i2bs2NVPcKZgdo6fFULqE4dBX7Te/uYEIuuZhYLNzRO1IKU/YaqsXG
-3bfQ8hKYcSnTfE0gPtLDnqCIxTocaGLSHeG3TH9fTw+dA8FvWpUztI4=
------END RSA PRIVATE KEY-----
-`
-
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"iso_checksum":      "foo",
@@ -188,8 +158,8 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
 
-	if b.config.sshWaitTimeout != (20 * time.Minute) {
-		t.Errorf("bad wait timeout: %s", b.config.sshWaitTimeout)
+	if b.config.SSHWaitTimeout != (20 * time.Minute) {
+		t.Errorf("bad wait timeout: %s", b.config.SSHWaitTimeout)
 	}
 
 	if b.config.VMName != "packer-foo" {
@@ -450,151 +420,6 @@ func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 
 	// Test with a good one
 	config["shutdown_timeout"] = "5s"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestBuilderPrepare_sshKeyPath(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	config["ssh_key_path"] = ""
-	b = Builder{}
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	config["ssh_key_path"] = "/i/dont/exist"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test bad contents
-	tf, err := ioutil.TempFile("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.Remove(tf.Name())
-	defer tf.Close()
-
-	if _, err := tf.Write([]byte("HELLO!")); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	config["ssh_key_path"] = tf.Name()
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test good contents
-	tf.Seek(0, 0)
-	tf.Truncate(0)
-	tf.Write([]byte(testPem))
-	config["ssh_key_path"] = tf.Name()
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-}
-
-func TestBuilderPrepare_SSHUser(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	config["ssh_username"] = ""
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	config["ssh_username"] = "exists"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestBuilderPrepare_SSHPort(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test with a bad value
-	delete(config, "ssh_port")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("bad err: %s", err)
-	}
-
-	if b.config.SSHPort != 22 {
-		t.Fatalf("bad ssh port: %d", b.config.SSHPort)
-	}
-
-	// Test with a good one
-	config["ssh_port"] = 44
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.SSHPort != 44 {
-		t.Fatalf("bad ssh port: %d", b.config.SSHPort)
-	}
-}
-
-func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test with a bad value
-	config["ssh_wait_timeout"] = "this is not good"
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test with a good one
-	config["ssh_wait_timeout"] = "5s"
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {

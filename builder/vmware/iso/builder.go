@@ -26,6 +26,7 @@ type Builder struct {
 
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig `mapstructure:",squash"`
 
 	DiskName          string            `mapstructure:"vmdk_name"`
 	DiskSize          uint              `mapstructure:"disk_size"`
@@ -44,11 +45,6 @@ type config struct {
 	BootCommand       []string          `mapstructure:"boot_command"`
 	SkipCompaction    bool              `mapstructure:"skip_compaction"`
 	ShutdownCommand   string            `mapstructure:"shutdown_command"`
-	SSHUser           string            `mapstructure:"ssh_username"`
-	SSHKeyPath        string            `mapstructure:"ssh_key_path"`
-	SSHPassword       string            `mapstructure:"ssh_password"`
-	SSHPort           uint              `mapstructure:"ssh_port"`
-	SSHSkipRequestPty bool              `mapstructure:"ssh_skip_request_pty"`
 	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
 	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
 	VMXData           map[string]string `mapstructure:"vmx_data"`
@@ -66,11 +62,9 @@ type config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
-	sshWaitTimeout  time.Duration ``
 	tpl             *packer.ConfigTemplate
 }
 
@@ -88,6 +82,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskName == "" {
@@ -155,10 +150,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RemotePort = 22
 	}
 
-	if b.config.SSHPort == 0 {
-		b.config.SSHPort = 22
-	}
-
 	if b.config.ToolsUploadPath == "" {
 		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
 	}
@@ -173,14 +164,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_url":             &b.config.RawSingleISOUrl,
 		"output_directory":    &b.config.OutputDir,
 		"shutdown_command":    &b.config.ShutdownCommand,
-		"ssh_key_path":        &b.config.SSHKeyPath,
-		"ssh_password":        &b.config.SSHPassword,
-		"ssh_username":        &b.config.SSHUser,
 		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
 		"vm_name":             &b.config.VMName,
 		"boot_wait":           &b.config.RawBootWait,
 		"shutdown_timeout":    &b.config.RawShutdownTimeout,
-		"ssh_wait_timeout":    &b.config.RawSSHWaitTimeout,
 		"vmx_template_path":   &b.config.VMXTemplatePath,
 		"remote_type":         &b.config.RemoteType,
 		"remote_host":         &b.config.RemoteHost,
@@ -295,21 +282,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.SSHKeyPath != "" {
-		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToKeyring(b.config.SSHKeyPath); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		}
-	}
-
-	if b.config.SSHUser == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("An ssh_username must be specified."))
-	}
-
 	if b.config.RawBootWait != "" {
 		b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
 		if err != nil {
@@ -326,16 +298,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
-	if b.config.RawSSHWaitTimeout == "" {
-		b.config.RawSSHWaitTimeout = "20m"
-	}
-
-	b.config.sshWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
 	if _, err := template.New("path").Parse(b.config.ToolsUploadPath); err != nil {
@@ -417,7 +379,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepConnectSSH{
 			SSHAddress:     driver.SSHAddress,
 			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
+			SSHWaitTimeout: b.config.SSHWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
 		&stepUploadTools{},
