@@ -8,11 +8,11 @@ import (
 // LocalOutputDir is an OutputDir implementation where the directory
 // is on the local machine.
 type LocalOutputDir struct {
-	Dir string
+	dir string
 }
 
 func (d *LocalOutputDir) DirExists() (bool, error) {
-	_, err := os.Stat(d.Dir)
+	_, err := os.Stat(d.dir)
 	return err == nil, nil
 }
 
@@ -29,11 +29,11 @@ func (d *LocalOutputDir) ListFiles() ([]string, error) {
 		return nil
 	}
 
-	return files, filepath.Walk(d.Dir, visit)
+	return files, filepath.Walk(d.dir, visit)
 }
 
 func (d *LocalOutputDir) MkdirAll() error {
-	return os.MkdirAll(d.Dir, 0755)
+	return os.MkdirAll(d.dir, 0755)
 }
 
 func (d *LocalOutputDir) Remove(path string) error {
@@ -41,13 +41,13 @@ func (d *LocalOutputDir) Remove(path string) error {
 }
 
 func (d *LocalOutputDir) RemoveAll() error {
-	return os.RemoveAll(d.Dir)
+	return os.RemoveAll(d.dir)
 }
 
 func (d *LocalOutputDir) SetOutputDir(path string) {
-	d.Dir = path
+	d.dir = path
 }
 
 func (d *LocalOutputDir) String() string {
-	return d.Dir
+	return d.dir
 }
