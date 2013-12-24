@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 )
 
 // Interface to help find the IP address of a running virtual machine.
@@ -19,7 +21,7 @@ type GuestIPFinder interface {
 // lease information from the VMware network devices.
 type DHCPLeaseGuestLookup struct {
 	// Driver that is being used (to find leases path)
-	Driver Driver
+	Driver vmwcommon.Driver
 
 	// Device that the guest is connected to.
 	Device string
