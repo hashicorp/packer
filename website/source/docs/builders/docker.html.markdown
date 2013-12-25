@@ -40,8 +40,9 @@ no provisioners are defined, but it will effectively repackage an image.
 
 ## Configuration Reference
 
-Configuration options are organized below into two categories: required and optional. Within
-each category, the available options are alphabetized and described.
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
 
 Required:
 
@@ -60,13 +61,16 @@ Optional:
 
 ## Using the generated artifact
 
-Once the tar artifact has been generated, you will likely want to import, tag, and push it to a container repository.Until packer supports management of the docker image metadata, this process is manual. For example, the following will import mycontainer-123456789.tar as the repository registry.mydomain.com/mycontainer, tagged with 'latest':
+Once the tar artifact has been generated, you will likely want to import, tag,
+and push it to a container repository. Until packer supports management of the
+docker image metadata, this process is manual. For example, the following will
+import `mycontainer-123456789.tar` to the repository
+`registry.mydomain.com/mycontainer`, tagged with `latest`:
 
-<pre class="prettyprint">
-sudo docker import - registry.mydomain.com/mycontainer:latest < mycontainer-123456789.tar
-</pre>
+    sudo docker import - registry.mydomain.com/mycontainer:latest < mycontainer-123456789.tar
 
-You can then add additional tags and push the image as usual with docker tag and docker push, respectively.
+You can then add additional tags and push the image as usual with `docker tag`
+and `docker push`, respectively.
 
 ## Dockerfiles
 
