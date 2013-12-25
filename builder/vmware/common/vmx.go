@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -67,4 +68,14 @@ func WriteVMX(path string, data map[string]string) (err error) {
 	}
 
 	return
+}
+
+// ReadVMX takes a path to a VMX file and reads it into a k/v mapping.
+func ReadVMX(path string) (map[string]string, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseVMX(string(data)), nil
 }
