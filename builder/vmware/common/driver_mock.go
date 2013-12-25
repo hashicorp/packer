@@ -1,10 +1,14 @@
 package common
 
 import (
+	"sync"
+
 	"github.com/mitchellh/multistep"
 )
 
 type DriverMock struct {
+	sync.Mutex
+
 	CompactDiskCalled bool
 	CompactDiskPath   string
 	CompactDiskErr    error
@@ -65,6 +69,9 @@ func (d *DriverMock) CreateDisk(output string, size string, typeId string) error
 }
 
 func (d *DriverMock) IsRunning(path string) (bool, error) {
+	d.Lock()
+	defer d.Unlock()
+
 	d.IsRunningCalled = true
 	d.IsRunningPath = path
 	return d.IsRunningResult, d.IsRunningErr
