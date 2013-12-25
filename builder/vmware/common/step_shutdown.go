@@ -1,11 +1,10 @@
-package iso
+package common
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"regexp"
@@ -19,30 +18,32 @@ import (
 //
 // Uses:
 //   communicator packer.Communicator
-//   config *config
+//   dir OutputDir
 //   driver Driver
 //   ui     packer.Ui
 //   vmx_path string
 //
 // Produces:
 //   <nothing>
-type stepShutdown struct{}
+type StepShutdown struct {
+	Command string
+	Timeout time.Duration
+}
 
-func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
-	config := state.Get("config").(*config)
-	dir := state.Get("dir").(vmwcommon.OutputDir)
-	driver := state.Get("driver").(vmwcommon.Driver)
+	dir := state.Get("dir").(OutputDir)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	if config.ShutdownCommand != "" {
+	if s.Command != "" {
 		ui.Say("Gracefully halting virtual machine...")
-		log.Printf("Executing shutdown command: %s", config.ShutdownCommand)
+		log.Printf("Executing shutdown command: %s", s.Command)
 
 		var stdout, stderr bytes.Buffer
 		cmd := &packer.RemoteCmd{
-			Command: config.ShutdownCommand,
+			Command: s.Command,
 			Stdout:  &stdout,
 			Stderr:  &stderr,
 		}
@@ -68,8 +69,8 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		log.Printf("Shutdown stderr: %s", stderr.String())
 
 		// Wait for the machine to actually shut down
-		log.Printf("Waiting max %s for shutdown to complete", config.shutdownTimeout)
-		shutdownTimer := time.After(config.shutdownTimeout)
+		log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
+		shutdownTimer := time.After(s.Timeout)
 		for {
 			running, _ := driver.IsRunning(vmxPath)
 			if !running {
@@ -83,7 +84,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			default:
-				time.Sleep(1 * time.Second)
+				time.Sleep(150 * time.Millisecond)
 			}
 		}
 	} else {
@@ -101,7 +102,9 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 LockWaitLoop:
 	for {
 		files, err := dir.ListFiles()
-		if err == nil {
+		if err != nil {
+			log.Printf("Error listing files in outputdir: %s", err)
+		} else {
 			var locks []string
 			for _, file := range files {
 				if lockRegex.MatchString(file) {
@@ -126,7 +129,7 @@ LockWaitLoop:
 		case <-timer:
 			log.Println("Reached timeout on waiting for clean VMware. Assuming clean.")
 			break LockWaitLoop
-		case <-time.After(1 * time.Second):
+		case <-time.After(150 * time.Millisecond):
 		}
 	}
 
@@ -141,4 +144,4 @@ LockWaitLoop:
 	return multistep.ActionContinue
 }
 
-func (s *stepShutdown) Cleanup(state multistep.StateBag) {}
+func (s *StepShutdown) Cleanup(state multistep.StateBag) {}
