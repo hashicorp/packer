@@ -2,14 +2,13 @@ package iso
 
 import (
 	"fmt"
-	"os"
 )
 
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
 type Artifact struct {
 	builderId string
-	dir       string
+	dir       OutputDir
 	f         []string
 }
 
@@ -30,5 +29,5 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) Destroy() error {
-	return os.RemoveAll(a.dir)
+	return a.dir.RemoveAll()
 }
