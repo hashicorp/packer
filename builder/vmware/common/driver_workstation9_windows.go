@@ -1,6 +1,6 @@
 // +build windows
 
-package iso
+package common
 
 import (
 	"log"
