@@ -36,15 +36,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
+	// Setup the directory
+	dir := new(vmwcommon.LocalOutputDir)
+	dir.SetOutputDir(b.config.OutputDir)
+
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
+	state.Put("dir", dir)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	// Build the steps.
-	steps := []multistep.Step{}
+	steps := []multistep.Step{
+		&vmwcommon.StepOutputDir{
+			Force: b.config.PackerForce,
+		},
+	}
 
 	// Run the steps.
 	if b.config.PackerDebug {

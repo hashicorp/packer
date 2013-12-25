@@ -10,8 +10,9 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	vmwcommon.SSHConfig `mapstructure:",squash"`
+	common.PackerConfig    `mapstructure:",squash"`
+	vmwcommon.OutputConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig    `mapstructure:",squash"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -33,6 +34,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{}
