@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 )
 
 // Workstation9Driver is a driver that can run VMware Workstation 9
@@ -20,7 +19,7 @@ type Workstation9Driver struct {
 	VmrunPath        string
 
 	// SSHConfig are the SSH settings for the Fusion VM
-	SSHConfig *vmwcommon.SSHConfig
+	SSHConfig *SSHConfig
 }
 
 func (d *Workstation9Driver) CompactDisk(diskPath string) error {
@@ -68,7 +67,7 @@ func (d *Workstation9Driver) IsRunning(vmxPath string) (bool, error) {
 }
 
 func (d *Workstation9Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return vmwcommon.SSHAddressFunc(d.SSHConfig)(state)
+	return SSHAddressFunc(d.SSHConfig)(state)
 }
 
 func (d *Workstation9Driver) Start(vmxPath string, headless bool) error {
