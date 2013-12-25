@@ -8,7 +8,7 @@ import (
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
-	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -31,6 +31,7 @@ type stepShutdown struct{}
 func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*config)
+	dir := state.Get("dir").(vmwcommon.OutputDir)
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
@@ -95,12 +96,19 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Message("Waiting for VMware to clean up after itself...")
-	lockPattern := filepath.Join(config.OutputDir, "*.lck")
+	lockRegex := regexp.MustCompile(`(?i)\.lck$`)
 	timer := time.After(15 * time.Second)
 LockWaitLoop:
 	for {
-		locks, err := filepath.Glob(lockPattern)
+		files, err := dir.ListFiles()
 		if err == nil {
+			var locks []string
+			for _, file := range files {
+				if lockRegex.MatchString(file) {
+					locks = append(locks, file)
+				}
+			}
+
 			if len(locks) == 0 {
 				log.Println("No more lock files found. VMware is clean.")
 				break
