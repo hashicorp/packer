@@ -24,8 +24,9 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	vmwcommon.SSHConfig `mapstructure:",squash"`
+	common.PackerConfig    `mapstructure:",squash"`
+	vmwcommon.OutputConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig    `mapstructure:",squash"`
 
 	DiskName          string            `mapstructure:"vmdk_name"`
 	DiskSize          uint              `mapstructure:"disk_size"`
@@ -36,7 +37,6 @@ type config struct {
 	ISOChecksumType   string            `mapstructure:"iso_checksum_type"`
 	ISOUrls           []string          `mapstructure:"iso_urls"`
 	VMName            string            `mapstructure:"vm_name"`
-	OutputDir         string            `mapstructure:"output_directory"`
 	Headless          bool              `mapstructure:"headless"`
 	HTTPDir           string            `mapstructure:"http_directory"`
 	HTTPPortMin       uint              `mapstructure:"http_port_min"`
@@ -81,6 +81,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs,
+		b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
@@ -133,10 +135,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VNCPortMax = 6000
 	}
 
-	if b.config.OutputDir == "" {
-		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
-	}
-
 	if b.config.RemoteUser == "" {
 		b.config.RemoteUser = "root"
 	}
@@ -161,7 +159,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_checksum":        &b.config.ISOChecksum,
 		"iso_checksum_type":   &b.config.ISOChecksumType,
 		"iso_url":             &b.config.RawSingleISOUrl,
-		"output_directory":    &b.config.OutputDir,
 		"shutdown_command":    &b.config.ShutdownCommand,
 		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
 		"vm_name":             &b.config.VMName,
@@ -270,14 +267,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
-		}
-	}
-
-	if !b.config.PackerForce {
-		if _, err := os.Stat(b.config.OutputDir); err == nil {
-			errs = packer.MultiErrorAppend(
-				errs,
-				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
 		}
 	}
 
