@@ -58,6 +58,16 @@ Optional:
   `docker pull` prior to use. Otherwise, it is assumed the image already
   exists and can be used. This defaults to true if not set.
 
+## Using the generated artifact
+
+Once the tar artifact has been generated, you will likely want to import, tag, and push it to a container repository.Until packer supports management of the docker image metadata, this process is manual. For example, the following will import mycontainer-123456789.tar as the repository registry.mydomain.com/mycontainer, tagged with 'latest':
+
+<pre class="prettyprint">
+sudo docker import - registry.mydomain.com/mycontainer:latest < mycontainer-123456789.tar
+</pre>
+
+You can then add additional tags and push the image as usual with docker tag and docker push, respectively.
+
 ## Dockerfiles
 
 This builder allows you to build Docker images _without_ Dockerfiles.
