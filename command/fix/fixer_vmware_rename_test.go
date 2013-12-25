@@ -14,7 +14,6 @@ func TestFixerVMwareRename_Fix(t *testing.T) {
 		Input    map[string]interface{}
 		Expected map[string]interface{}
 	}{
-		// No attach field
 		{
 			Input: map[string]interface{}{
 				"type": "vmware",
