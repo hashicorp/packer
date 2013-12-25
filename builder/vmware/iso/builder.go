@@ -413,7 +413,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepShutdown{},
 		&vmwcommon.StepCleanFiles{},
 		&vmwcommon.StepCleanVMX{},
-		&stepCompactDisk{},
+		&vmwcommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
+		},
 	}
 
 	// Run!
