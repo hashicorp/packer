@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"fmt"
@@ -21,9 +21,9 @@ var KeepFileExtensions = []string{".nvram", ".vmdk", ".vmsd", ".vmx", ".vmxf"}
 //
 // Produces:
 //   <nothing>
-type stepCleanFiles struct{}
+type StepCleanFiles struct{}
 
-func (stepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
+func (StepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -49,7 +49,9 @@ func (stepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
 		if !keep {
 			ui.Message(fmt.Sprintf("Deleting: %s", path))
 			if err = dir.Remove(path); err != nil {
-				// Only report the error if the file still exists
+				// Only report the error if the file still exists. We do this
+				// because sometimes the files naturally get removed on their
+				// own as VMware does its own cleanup.
 				if _, serr := os.Stat(path); serr == nil || !os.IsNotExist(serr) {
 					state.Put("error", err)
 					return multistep.ActionHalt
@@ -61,4 +63,4 @@ func (stepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (stepCleanFiles) Cleanup(multistep.StateBag) {}
+func (StepCleanFiles) Cleanup(multistep.StateBag) {}
