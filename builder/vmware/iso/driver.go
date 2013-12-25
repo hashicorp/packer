@@ -31,17 +31,24 @@ func NewDriver(config *config) (vmwcommon.Driver, error) {
 		case "darwin":
 			drivers = []vmwcommon.Driver{
 				&Fusion5Driver{
-					AppPath: "/Applications/VMware Fusion.app",
+					AppPath:   "/Applications/VMware Fusion.app",
+					SSHConfig: &config.SSHConfig,
 				},
 			}
 		case "linux":
 			drivers = []vmwcommon.Driver{
-				new(Workstation9Driver),
-				new(Player5LinuxDriver),
+				&Workstation9Driver{
+					SSHConfig: &config.SSHConfig,
+				},
+				&Player5LinuxDriver{
+					SSHConfig: &config.SSHConfig,
+				},
 			}
 		case "windows":
 			drivers = []vmwcommon.Driver{
-				new(Workstation9Driver),
+				&Workstation9Driver{
+					SSHConfig: &config.SSHConfig,
+				},
 			}
 		default:
 			return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
