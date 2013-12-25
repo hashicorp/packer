@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 )
 
 // Fusion5Driver is a driver that can run VMWare Fusion 5.
@@ -18,7 +17,7 @@ type Fusion5Driver struct {
 	AppPath string
 
 	// SSHConfig are the SSH settings for the Fusion VM
-	SSHConfig *vmwcommon.SSHConfig
+	SSHConfig *SSHConfig
 }
 
 func (d *Fusion5Driver) CompactDisk(diskPath string) error {
@@ -66,7 +65,7 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 }
 
 func (d *Fusion5Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return vmwcommon.SSHAddressFunc(d.SSHConfig)(state)
+	return SSHAddressFunc(d.SSHConfig)(state)
 }
 
 func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {
