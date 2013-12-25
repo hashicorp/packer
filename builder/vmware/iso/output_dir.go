@@ -60,3 +60,7 @@ func (d *localOutputDir) RemoveAll() error {
 func (d *localOutputDir) SetOutputDir(path string) {
 	d.dir = path
 }
+
+func (d *localOutputDir) String() string {
+	return d.dir
+}
