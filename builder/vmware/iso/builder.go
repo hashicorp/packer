@@ -396,7 +396,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepHTTPServer{},
 		&stepConfigureVNC{},
 		&StepRegister{},
-		&stepRun{},
+		&vmwcommon.StepRun{
+			BootWait:           b.config.bootWait,
+			DurationBeforeStop: 5 * time.Second,
+			Headless:           b.config.Headless,
+		},
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
 			SSHAddress:     driver.SSHAddress,
