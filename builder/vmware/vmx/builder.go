@@ -58,6 +58,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Path:      b.config.SourcePath,
 			VMName:    b.config.VMName,
 		},
+		&vmwcommon.StepConfigureVMX{
+			CustomData: b.config.VMXData,
+		},
+		&vmwcommon.StepSuppressMessages{},
 	}
 
 	// Run the steps.
