@@ -1,12 +1,10 @@
 package vmx
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 )
 
 func TestStepCloneVMX_impl(t *testing.T) {
@@ -14,24 +12,13 @@ func TestStepCloneVMX_impl(t *testing.T) {
 }
 
 func TestStepCloneVMX(t *testing.T) {
-	// Setup some state
-	td, err := ioutil.TempDir("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.RemoveAll(td)
-
-	// Create the source
-	sourcePath := filepath.Join(td, "source.vmx")
-	if err := ioutil.WriteFile(sourcePath, []byte("foo"), 0644); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
 	state := testState(t)
 	step := new(StepCloneVMX)
-	step.OutputDir = td
-	step.Path = sourcePath
+	step.OutputDir = "/foo"
+	step.Path = "/bar/bar.vmx"
 	step.VMName = "foo"
+
+	driver := state.Get("driver").(*vmwcommon.DriverMock)
 
 	// Test the run
 	if action := step.Run(state); action != multistep.ActionContinue {
@@ -41,16 +28,7 @@ func TestStepCloneVMX(t *testing.T) {
 		t.Fatal("should NOT have error")
 	}
 
-	// Test we have our VMX
-	if _, err := os.Stat(filepath.Join(td, "foo.vmx")); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	data, err := ioutil.ReadFile(filepath.Join(td, "foo.vmx"))
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if string(data) != "foo" {
-		t.Fatalf("bad: %#v", string(data))
+	if !driver.CloneCalled {
+		t.Fatal("clone should be called")
 	}
 }

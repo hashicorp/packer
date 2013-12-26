@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,6 +19,10 @@ type Fusion5Driver struct {
 
 	// SSHConfig are the SSH settings for the Fusion VM
 	SSHConfig *SSHConfig
+}
+
+func (d *Fusion5Driver) Clone(dst, src string) error {
+	return errors.New("Cloning is not supported with Fusion 5. Please use Fusion 6+.")
 }
 
 func (d *Fusion5Driver) CompactDisk(diskPath string) error {
@@ -111,7 +116,8 @@ func (d *Fusion5Driver) Verify() error {
 
 	if _, err := os.Stat(d.vmrunPath()); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("Critical application 'vmrun' not found at path: %s", d.vmrunPath())
+			return fmt.Errorf(
+				"Critical application 'vmrun' not found at path: %s", d.vmrunPath())
 		}
 
 		return err
@@ -119,7 +125,9 @@ func (d *Fusion5Driver) Verify() error {
 
 	if _, err := os.Stat(d.vdiskManagerPath()); err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("Critical application vdisk manager not found at path: %s", d.vdiskManagerPath())
+			return fmt.Errorf(
+				"Critical application vdisk manager not found at path: %s",
+				d.vdiskManagerPath())
 		}
 
 		return err

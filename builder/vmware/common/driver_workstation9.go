@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,6 +21,10 @@ type Workstation9Driver struct {
 
 	// SSHConfig are the SSH settings for the Fusion VM
 	SSHConfig *SSHConfig
+}
+
+func (d *Workstation9Driver) Clone(dst, src string) error {
+	return errors.New("Cloning is not supported with WS 9. Please use WS 10+.")
 }
 
 func (d *Workstation9Driver) CompactDisk(diskPath string) error {
