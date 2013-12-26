@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -18,7 +17,15 @@ type Fusion6Driver struct {
 }
 
 func (d *Fusion6Driver) Clone(dst, src string) error {
-	return errors.New("Cloning is not supported with Fusion 5. Please use Fusion 6+.")
+	cmd := exec.Command(d.vmrunPath(),
+		"-T", "fusion",
+		"clone", src, dst,
+		"full")
+	if _, _, err := runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Fusion6Driver) Verify() error {
