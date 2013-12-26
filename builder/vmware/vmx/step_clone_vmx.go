@@ -1,6 +1,7 @@
 package vmx
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 
@@ -25,12 +26,25 @@ func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
-
 	if err := driver.Clone(vmxPath, s.Path); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
+	vmxData, err := vmwcommon.ReadVMX(vmxPath)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	diskName, ok := vmxData["scsi0:0.filename"]
+	if !ok {
+		err := fmt.Errorf("Root disk filename could not be found!")
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	state.Put("full_disk_path", filepath.Join(s.OutputDir, diskName))
 	state.Put("vmx_path", vmxPath)
 	return multistep.ActionContinue
 }
