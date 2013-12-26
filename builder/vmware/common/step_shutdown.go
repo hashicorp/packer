@@ -88,6 +88,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			}
 		}
 	} else {
+		ui.Say("Forcibly halting virtual machine...")
 		if err := driver.Stop(vmxPath); err != nil {
 			err := fmt.Errorf("Error stopping VM: %s", err)
 			state.Put("error", err)
