@@ -2,6 +2,7 @@ package vmx
 
 import (
 	"fmt"
+	"os"
 
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/common"
@@ -13,6 +14,9 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	vmwcommon.OutputConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig    `mapstructure:",squash"`
+
+	SourcePath string `mapstructure:"source_path"`
+	VMName     string `mapstructure:"vm_name"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -31,13 +35,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.tpl.UserVars = c.PackerUserVars
 
 	// Defaults
+	if c.VMName == "" {
+		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
+	}
 
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 
-	templates := map[string]*string{}
+	templates := map[string]*string{
+		"source_path": &c.SourcePath,
+		"vm_name":     &c.VMName,
+	}
 
 	for n, ptr := range templates {
 		var err error
@@ -45,6 +55,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	if c.SourcePath == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
+	} else {
+		if _, err := os.Stat(c.SourcePath); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("source_path is invalid: %s", err))
 		}
 	}
 

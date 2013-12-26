@@ -2,6 +2,7 @@ package common
 
 import (
 	"testing"
+	"time"
 )
 
 func testShutdownConfig() *ShutdownConfig {
@@ -37,5 +38,8 @@ func TestShutdownConfigPrepare_ShutdownTimeout(t *testing.T) {
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
+	}
+	if c.ShutdownTimeout != 5*time.Second {
+		t.Fatalf("bad: %s", c.ShutdownTimeout)
 	}
 }
