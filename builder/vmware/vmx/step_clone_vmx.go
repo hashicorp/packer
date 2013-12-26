@@ -1,12 +1,11 @@
 package vmx
 
 import (
-	"io"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -18,29 +17,16 @@ type StepCloneVMX struct {
 }
 
 func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	vmxPath := filepath.Join(s.OutputDir, s.VMName+".vmx")
 
-	ui.Say("Cloning VMX...")
+	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
 
-	from, err := os.Open(s.Path)
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-	defer from.Close()
-
-	to, err := os.Create(vmxPath)
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-	defer to.Close()
-
-	if _, err := io.Copy(to, from); err != nil {
+	if err := driver.Clone(vmxPath, s.Path); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
