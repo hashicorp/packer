@@ -14,6 +14,7 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	vmwcommon.OutputConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig    `mapstructure:",squash"`
+	vmwcommon.VMXConfig    `mapstructure:",squash"`
 
 	SourcePath string `mapstructure:"source_path"`
 	VMName     string `mapstructure:"vm_name"`
@@ -43,6 +44,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
 		"source_path": &c.SourcePath,
