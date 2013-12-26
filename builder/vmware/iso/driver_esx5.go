@@ -33,6 +33,10 @@ type ESX5Driver struct {
 	outputDir string
 }
 
+func (d *ESX5Driver) Clone(dst, src string) error {
+	return errors.New("Cloning is not supported with the ESX driver.")
+}
+
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
 	return nil
 }
