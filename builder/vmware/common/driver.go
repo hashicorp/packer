@@ -13,6 +13,11 @@ import (
 
 // A driver is able to talk to VMware, control virtual machines, etc.
 type Driver interface {
+	// Clone clones the VMX and the disk to the destination path. The
+	// destination is a path to the VMX file. The disk will be copied
+	// to that same directory.
+	Clone(dst string, src string) error
+
 	// CompactDisk compacts a virtual disk.
 	CompactDisk(string) error
 

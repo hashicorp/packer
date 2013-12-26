@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -19,6 +20,10 @@ type Player5LinuxDriver struct {
 
 	// SSHConfig are the SSH settings for the Fusion VM
 	SSHConfig *SSHConfig
+}
+
+func (d *Player5LinuxDriver) Clone(dst, src string) error {
+	return errors.New("Cloning is not supported with Player 5. Please use Player 6+.")
 }
 
 func (d *Player5LinuxDriver) CompactDisk(diskPath string) error {

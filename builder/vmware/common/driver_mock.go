@@ -9,6 +9,11 @@ import (
 type DriverMock struct {
 	sync.Mutex
 
+	CloneCalled bool
+	CloneDst    string
+	CloneSrc    string
+	CloneErr    error
+
 	CompactDiskCalled bool
 	CompactDiskPath   string
 	CompactDiskErr    error
@@ -52,6 +57,13 @@ type DriverMock struct {
 
 	VerifyCalled bool
 	VerifyErr    error
+}
+
+func (d *DriverMock) Clone(dst string, src string) error {
+	d.CloneCalled = true
+	d.CloneDst = dst
+	d.CloneSrc = src
+	return d.CloneErr
 }
 
 func (d *DriverMock) CompactDisk(path string) error {
