@@ -24,11 +24,12 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig    `mapstructure:",squash"`
-	vmwcommon.OutputConfig `mapstructure:",squash"`
-	vmwcommon.RunConfig    `mapstructure:",squash"`
-	vmwcommon.SSHConfig    `mapstructure:",squash"`
-	vmwcommon.VMXConfig    `mapstructure:",squash"`
+	common.PackerConfig      `mapstructure:",squash"`
+	vmwcommon.OutputConfig   `mapstructure:",squash"`
+	vmwcommon.RunConfig      `mapstructure:",squash"`
+	vmwcommon.ShutdownConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	DiskName          string   `mapstructure:"vmdk_name"`
 	DiskSize          uint     `mapstructure:"disk_size"`
@@ -44,7 +45,6 @@ type config struct {
 	HTTPPortMax       uint     `mapstructure:"http_port_max"`
 	BootCommand       []string `mapstructure:"boot_command"`
 	SkipCompaction    bool     `mapstructure:"skip_compaction"`
-	ShutdownCommand   string   `mapstructure:"shutdown_command"`
 	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
 	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
 	VMXTemplatePath   string   `mapstructure:"vmx_template_path"`
@@ -58,11 +58,9 @@ type config struct {
 	RemoteUser      string `mapstructure:"remote_username"`
 	RemotePassword  string `mapstructure:"remote_password"`
 
-	RawSingleISOUrl    string `mapstructure:"iso_url"`
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
+	RawSingleISOUrl string `mapstructure:"iso_url"`
 
-	shutdownTimeout time.Duration ``
-	tpl             *packer.ConfigTemplate
+	tpl *packer.ConfigTemplate
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -82,6 +80,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
@@ -155,10 +154,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"iso_checksum":        &b.config.ISOChecksum,
 		"iso_checksum_type":   &b.config.ISOChecksumType,
 		"iso_url":             &b.config.RawSingleISOUrl,
-		"shutdown_command":    &b.config.ShutdownCommand,
 		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
 		"vm_name":             &b.config.VMName,
-		"shutdown_timeout":    &b.config.RawShutdownTimeout,
 		"vmx_template_path":   &b.config.VMXTemplatePath,
 		"remote_type":         &b.config.RemoteType,
 		"remote_host":         &b.config.RemoteHost,
@@ -242,16 +239,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
 		}
-	}
-
-	if b.config.RawShutdownTimeout == "" {
-		b.config.RawShutdownTimeout = "5m"
-	}
-
-	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
 
 	if _, err := template.New("path").Parse(b.config.ToolsUploadPath); err != nil {
@@ -366,7 +353,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
-			Timeout: b.config.shutdownTimeout,
+			Timeout: b.config.ShutdownTimeout,
 		},
 		&vmwcommon.StepCleanFiles{},
 		&vmwcommon.StepCleanVMX{},

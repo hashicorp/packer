@@ -11,11 +11,12 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig    `mapstructure:",squash"`
-	vmwcommon.OutputConfig `mapstructure:",squash"`
-	vmwcommon.RunConfig    `mapstructure:",squash"`
-	vmwcommon.SSHConfig    `mapstructure:",squash"`
-	vmwcommon.VMXConfig    `mapstructure:",squash"`
+	common.PackerConfig      `mapstructure:",squash"`
+	vmwcommon.OutputConfig   `mapstructure:",squash"`
+	vmwcommon.RunConfig      `mapstructure:",squash"`
+	vmwcommon.ShutdownConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	SourcePath string `mapstructure:"source_path"`
 	VMName     string `mapstructure:"vm_name"`
@@ -45,6 +46,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
 
@@ -73,6 +75,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Warnings
 	var warnings []string
+	if c.ShutdownCommand == "" {
+		warnings = append(warnings,
+			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
+				"will forcibly halt the virtual machine, which may result in data loss.")
+	}
 
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
