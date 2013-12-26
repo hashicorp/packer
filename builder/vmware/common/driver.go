@@ -62,6 +62,12 @@ func NewDriver(config *SSHConfig) (Driver, error) {
 	switch runtime.GOOS {
 	case "darwin":
 		drivers = []Driver{
+			&Fusion6Driver{
+				Fusion5Driver: Fusion5Driver{
+					AppPath:   "/Applications/VMware Fusion.app",
+					SSHConfig: config,
+				},
+			},
 			&Fusion5Driver{
 				AppPath:   "/Applications/VMware Fusion.app",
 				SSHConfig: config,
