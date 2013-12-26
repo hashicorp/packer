@@ -80,6 +80,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
+		&vmwcommon.StepCleanFiles{},
+		&vmwcommon.StepCleanVMX{},
 	}
 
 	// Run the steps.
@@ -107,7 +109,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return nil, nil
+	return vmwcommon.NewLocalArtifact(b.config.OutputDir)
 }
 
 // Cancel.
