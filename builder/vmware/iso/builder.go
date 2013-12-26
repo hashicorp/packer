@@ -27,29 +27,29 @@ type config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	vmwcommon.OutputConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig    `mapstructure:",squash"`
+	vmwcommon.VMXConfig    `mapstructure:",squash"`
 
-	DiskName          string            `mapstructure:"vmdk_name"`
-	DiskSize          uint              `mapstructure:"disk_size"`
-	DiskTypeId        string            `mapstructure:"disk_type_id"`
-	FloppyFiles       []string          `mapstructure:"floppy_files"`
-	GuestOSType       string            `mapstructure:"guest_os_type"`
-	ISOChecksum       string            `mapstructure:"iso_checksum"`
-	ISOChecksumType   string            `mapstructure:"iso_checksum_type"`
-	ISOUrls           []string          `mapstructure:"iso_urls"`
-	VMName            string            `mapstructure:"vm_name"`
-	Headless          bool              `mapstructure:"headless"`
-	HTTPDir           string            `mapstructure:"http_directory"`
-	HTTPPortMin       uint              `mapstructure:"http_port_min"`
-	HTTPPortMax       uint              `mapstructure:"http_port_max"`
-	BootCommand       []string          `mapstructure:"boot_command"`
-	SkipCompaction    bool              `mapstructure:"skip_compaction"`
-	ShutdownCommand   string            `mapstructure:"shutdown_command"`
-	ToolsUploadFlavor string            `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string            `mapstructure:"tools_upload_path"`
-	VMXData           map[string]string `mapstructure:"vmx_data"`
-	VMXTemplatePath   string            `mapstructure:"vmx_template_path"`
-	VNCPortMin        uint              `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint              `mapstructure:"vnc_port_max"`
+	DiskName          string   `mapstructure:"vmdk_name"`
+	DiskSize          uint     `mapstructure:"disk_size"`
+	DiskTypeId        string   `mapstructure:"disk_type_id"`
+	FloppyFiles       []string `mapstructure:"floppy_files"`
+	GuestOSType       string   `mapstructure:"guest_os_type"`
+	ISOChecksum       string   `mapstructure:"iso_checksum"`
+	ISOChecksumType   string   `mapstructure:"iso_checksum_type"`
+	ISOUrls           []string `mapstructure:"iso_urls"`
+	VMName            string   `mapstructure:"vm_name"`
+	Headless          bool     `mapstructure:"headless"`
+	HTTPDir           string   `mapstructure:"http_directory"`
+	HTTPPortMin       uint     `mapstructure:"http_port_min"`
+	HTTPPortMax       uint     `mapstructure:"http_port_max"`
+	BootCommand       []string `mapstructure:"boot_command"`
+	SkipCompaction    bool     `mapstructure:"skip_compaction"`
+	ShutdownCommand   string   `mapstructure:"shutdown_command"`
+	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
+	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
+	VMXTemplatePath   string   `mapstructure:"vmx_template_path"`
+	VNCPortMin        uint     `mapstructure:"vnc_port_min"`
+	VNCPortMax        uint     `mapstructure:"vnc_port_max"`
 
 	RemoteType      string `mapstructure:"remote_type"`
 	RemoteDatastore string `mapstructure:"remote_datastore"`
@@ -84,6 +84,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskName == "" {
@@ -206,27 +207,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 					i, err))
 		}
 	}
-
-	newVMXData := make(map[string]string)
-	for k, v := range b.config.VMXData {
-		k, err = b.config.tpl.Process(k, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing VMX data key %s: %s", k, err))
-			continue
-		}
-
-		v, err = b.config.tpl.Process(v, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing VMX data value '%s': %s", v, err))
-			continue
-		}
-
-		newVMXData[k] = v
-	}
-
-	b.config.VMXData = newVMXData
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
 		errs = packer.MultiErrorAppend(

@@ -568,25 +568,3 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
-
-func TestBuilderPrepare_VMXData(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	config["vmx_data"] = map[interface{}]interface{}{
-		"one": "foo",
-		"two": "bar",
-	}
-
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if len(b.config.VMXData) != 2 {
-		t.Fatal("should have two items in VMXData")
-	}
-}
