@@ -76,6 +76,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
 		&common.StepProvision{},
+		&vmwcommon.StepShutdown{
+			Command: b.config.ShutdownCommand,
+			Timeout: b.config.ShutdownTimeout,
+		},
 	}
 
 	// Run the steps.
