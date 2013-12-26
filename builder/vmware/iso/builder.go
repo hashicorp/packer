@@ -26,6 +26,7 @@ type Builder struct {
 type config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	vmwcommon.OutputConfig `mapstructure:",squash"`
+	vmwcommon.RunConfig    `mapstructure:",squash"`
 	vmwcommon.SSHConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig    `mapstructure:",squash"`
 
@@ -38,7 +39,6 @@ type config struct {
 	ISOChecksumType   string   `mapstructure:"iso_checksum_type"`
 	ISOUrls           []string `mapstructure:"iso_urls"`
 	VMName            string   `mapstructure:"vm_name"`
-	Headless          bool     `mapstructure:"headless"`
 	HTTPDir           string   `mapstructure:"http_directory"`
 	HTTPPortMin       uint     `mapstructure:"http_port_min"`
 	HTTPPortMax       uint     `mapstructure:"http_port_max"`
@@ -58,11 +58,9 @@ type config struct {
 	RemoteUser      string `mapstructure:"remote_username"`
 	RemotePassword  string `mapstructure:"remote_password"`
 
-	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 
-	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	tpl             *packer.ConfigTemplate
 }
@@ -83,6 +81,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
@@ -124,10 +123,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.HTTPPortMax = 9000
 	}
 
-	if b.config.RawBootWait == "" {
-		b.config.RawBootWait = "10s"
-	}
-
 	if b.config.VNCPortMin == 0 {
 		b.config.VNCPortMin = 5900
 	}
@@ -163,7 +158,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"shutdown_command":    &b.config.ShutdownCommand,
 		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
 		"vm_name":             &b.config.VMName,
-		"boot_wait":           &b.config.RawBootWait,
 		"shutdown_timeout":    &b.config.RawShutdownTimeout,
 		"vmx_template_path":   &b.config.VMXTemplatePath,
 		"remote_type":         &b.config.RemoteType,
@@ -247,14 +241,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
-		}
-	}
-
-	if b.config.RawBootWait != "" {
-		b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
 	}
 
@@ -365,7 +351,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepConfigureVNC{},
 		&StepRegister{},
 		&vmwcommon.StepRun{
-			BootWait:           b.config.bootWait,
+			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
