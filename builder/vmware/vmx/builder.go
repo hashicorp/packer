@@ -54,7 +54,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Force: b.config.PackerForce,
 		},
 		&StepCloneVMX{
-			Path: b.config.SourcePath,
+			OutputDir: b.config.OutputDir,
+			Path:      b.config.SourcePath,
+			VMName:    b.config.VMName,
 		},
 	}
 
