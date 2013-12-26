@@ -13,6 +13,7 @@ import (
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	vmwcommon.OutputConfig `mapstructure:",squash"`
+	vmwcommon.RunConfig    `mapstructure:",squash"`
 	vmwcommon.SSHConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig    `mapstructure:",squash"`
 
@@ -43,6 +44,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
 

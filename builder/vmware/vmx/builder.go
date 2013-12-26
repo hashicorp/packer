@@ -3,11 +3,13 @@ package vmx
 import (
 	"errors"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // Builder implements packer.Builder and builds the actual VirtualBox
@@ -62,6 +64,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
+		&vmwcommon.StepRun{
+			BootWait:           b.config.BootWait,
+			DurationBeforeStop: 5 * time.Second,
+			Headless:           b.config.Headless,
+		},
 	}
 
 	// Run the steps.
