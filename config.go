@@ -29,7 +29,8 @@ const defaultConfig = `
 		"qemu": "packer-builder-qemu",
 		"virtualbox-iso": "packer-builder-virtualbox-iso",
 		"virtualbox-ovf": "packer-builder-virtualbox-ovf",
-		"vmware-iso": "packer-builder-vmware-iso"
+		"vmware-iso": "packer-builder-vmware-iso",
+		"vmware-vmx": "packer-builder-vmware-vmx"
 	},
 
 	"commands": {
