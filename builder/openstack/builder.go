@@ -4,7 +4,7 @@
 package openstack
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
@@ -81,7 +81,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&StepKeyPair{},
+		&StepKeyPair{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
+        },
 		&StepRunSourceServer{
 			Name:        b.config.ImageName,
 			Flavor:      b.config.Flavor,
