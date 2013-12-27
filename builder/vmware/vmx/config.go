@@ -12,6 +12,7 @@ import (
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
+	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
@@ -45,6 +46,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
