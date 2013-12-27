@@ -49,6 +49,17 @@ func TestConfigTemplateProcess_timestamp(t *testing.T) {
 	if math.Abs(float64(currentTime-val)) > 10 {
 		t.Fatalf("val: %d (current: %d)", val, currentTime)
 	}
+
+	time.Sleep(2 * time.Second)
+
+	result2, err := tpl.Process(`{{timestamp}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != result2 {
+		t.Fatalf("bad: %#v %#v", result, result2)
+	}
 }
 
 func TestConfigTemplateProcess_user(t *testing.T) {
