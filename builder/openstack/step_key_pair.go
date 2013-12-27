@@ -7,8 +7,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/rackspace/gophercloud"
 	"log"
-    "os"
-    "runtime"
+	"os"
+	"runtime"
 )
 
 type StepKeyPair struct {
