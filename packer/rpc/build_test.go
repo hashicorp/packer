@@ -12,7 +12,6 @@ var testBuildArtifact = &packer.MockArtifact{}
 type testBuild struct {
 	nameCalled      bool
 	prepareCalled   bool
-	prepareVars     map[string]string
 	prepareWarnings []string
 	runCalled       bool
 	runCache        packer.Cache
@@ -29,9 +28,8 @@ func (b *testBuild) Name() string {
 	return "name"
 }
 
-func (b *testBuild) Prepare(v map[string]string) ([]string, error) {
+func (b *testBuild) Prepare() ([]string, error) {
 	b.prepareCalled = true
-	b.prepareVars = v
 	return b.prepareWarnings, nil
 }
 
@@ -74,17 +72,9 @@ func TestBuild(t *testing.T) {
 	}
 
 	// Test Prepare
-	bClient.Prepare(map[string]string{"foo": "bar"})
+	bClient.Prepare()
 	if !b.prepareCalled {
 		t.Fatal("prepare should be called")
-	}
-
-	if len(b.prepareVars) != 1 {
-		t.Fatalf("bad vars: %#v", b.prepareVars)
-	}
-
-	if b.prepareVars["foo"] != "bar" {
-		t.Fatalf("bad vars: %#v", b.prepareVars)
 	}
 
 	// Test Run
@@ -144,7 +134,7 @@ func TestBuildPrepare_Warnings(t *testing.T) {
 	expected := []string{"foo"}
 	b.prepareWarnings = expected
 
-	warnings, err := bClient.Prepare(nil)
+	warnings, err := bClient.Prepare()
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
