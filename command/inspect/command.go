@@ -142,5 +142,9 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		}
 	}
 
+	ui.Say("\nNote: If your build names contain user variables or template\n" +
+		"functions such as 'timestamp', these are processed at build time,\n" +
+		"and therefore only show in their raw form here.")
+
 	return 0
 }

@@ -688,6 +688,48 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 	}
 }
 
+func TestTemplateBuild_names(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": null
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2-{{user \"foo\"}}",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{"foo": "bar"})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b, err := template.Build("test1", testComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if b.Name() != "test1" {
+		t.Fatalf("bad: %#v", b.Name())
+	}
+
+	b, err = template.Build("test2-{{user \"foo\"}}", testComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if b.Name() != "test2-bar" {
+		t.Fatalf("bad: %#v", b.Name())
+	}
+}
+
 func TestTemplate_Build_NilBuilderFunc(t *testing.T) {
 	data := `
 	{
