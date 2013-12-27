@@ -317,6 +317,10 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 			raw.pauseBefore = duration
 		}
 
+		// Remove the pause_before setting if it is there so that we don't
+		// get template validation errors later.
+		delete(v, "pause_before")
+
 		raw.RawConfig = v
 	}
 

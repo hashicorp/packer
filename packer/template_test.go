@@ -1479,6 +1479,11 @@ func TestTemplateBuild_ProvisionerPauseBefore(t *testing.T) {
 			t.Fatalf("bad: %#v", pp.PauseBefore)
 		}
 	}
+
+	config := coreBuild.provisioners[0].config[0].(map[string]interface{})
+	if _, ok := config["pause_before"]; ok {
+		t.Fatal("pause_before should be removed")
+	}
 }
 
 func TestTemplateBuild_variables(t *testing.T) {
