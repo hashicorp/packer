@@ -24,7 +24,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
 
 <pre class="prettyprint">
 {
-  "type": "virtualbox",
+  "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
   "iso_checksum": "2cbe868812a871242cdcdd8f2fd6feb9",

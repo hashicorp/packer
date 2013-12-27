@@ -1,6 +1,6 @@
 ---
 layout: "docs"
-page_title: "Amazon AMI Builder"
+page_title: "VirtualBox Builder"
 ---
 
 # VirtualBox Builder
