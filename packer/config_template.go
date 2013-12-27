@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+// InitTime is the UTC time when this package was initialized. It is
+// used as the timestamp for all configuration templates so that they
+// match for a single build.
+var InitTime time.Time
+
+func init() {
+	InitTime = time.Now().UTC()
+}
+
 // ConfigTemplate processes string data as a text/template with some common
 // elements and functions available. Plugin creators should process as
 // many fields as possible through this.
@@ -89,7 +98,7 @@ func templateISOTime() string {
 }
 
 func templateTimestamp() string {
-	return strconv.FormatInt(time.Now().UTC().Unix(), 10)
+	return strconv.FormatInt(InitTime.Unix(), 10)
 }
 
 func templateUuid() string {

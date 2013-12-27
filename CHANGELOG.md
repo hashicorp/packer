@@ -61,6 +61,8 @@ BUG FIXES:
 * core: User variables can now be used for non-string fields. [GH-598]
 * core: Fix bad download paths if the download URL contained a "."
   before a "/" [GH-716]
+* core: "{{timestamp}}" values will always be the same for the entire
+  duration of a build. [GH-744]
 * builder/virtualbox: don't download guest additions if disabled. [GH-731]
 * post-processor/vsphere: Uploads VM properly. [GH-694]
 * post-processor/vsphere: Process user variables.
