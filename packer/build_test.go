@@ -22,7 +22,7 @@ func testBuild() *coreBuild {
 				coreBuildPostProcessor{&TestPostProcessor{artifactId: "pp"}, "testPP", make(map[string]interface{}), true},
 			},
 		},
-		variables: make(map[string]coreBuildVariable),
+		variables: make(map[string]string),
 	}
 }
 
@@ -48,7 +48,7 @@ func TestBuild_Prepare(t *testing.T) {
 	build := testBuild()
 	builder := build.builder.(*MockBuilder)
 
-	build.Prepare(nil)
+	build.Prepare()
 	if !builder.PrepareCalled {
 		t.Fatal("should be called")
 	}
@@ -77,7 +77,7 @@ func TestBuild_Prepare(t *testing.T) {
 
 func TestBuild_Prepare_Twice(t *testing.T) {
 	build := testBuild()
-	warn, err := build.Prepare(nil)
+	warn, err := build.Prepare()
 	if len(warn) > 0 {
 		t.Fatalf("bad: %#v", warn)
 	}
@@ -96,7 +96,7 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 		}
 	}()
 
-	build.Prepare(nil)
+	build.Prepare()
 }
 
 func TestBuildPrepare_BuilderWarniings(t *testing.T) {
@@ -106,7 +106,7 @@ func TestBuildPrepare_BuilderWarniings(t *testing.T) {
 	builder := build.builder.(*MockBuilder)
 	builder.PrepareWarnings = expected
 
-	warn, err := build.Prepare(nil)
+	warn, err := build.Prepare()
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -123,7 +123,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	builder := build.builder.(*MockBuilder)
 
 	build.SetDebug(true)
-	build.Prepare(nil)
+	build.Prepare()
 	if !builder.PrepareCalled {
 		t.Fatalf("should be called")
 	}
@@ -148,10 +148,10 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 	}
 
 	build := testBuild()
-	build.variables["foo"] = coreBuildVariable{Default: "bar"}
+	build.variables["foo"] = "bar"
 	builder := build.builder.(*MockBuilder)
 
-	warn, err := build.Prepare(nil)
+	warn, err := build.Prepare()
 	if len(warn) > 0 {
 		t.Fatalf("bad: %#v", warn)
 	}
@@ -165,70 +165,6 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 
 	if !reflect.DeepEqual(builder.PrepareConfig[1], packerConfig) {
 		t.Fatalf("prepare bad: %#v", builder.PrepareConfig[1])
-	}
-}
-
-func TestBuildPrepare_variables_nonexist(t *testing.T) {
-	build := testBuild()
-	build.variables["foo"] = coreBuildVariable{Default: "bar"}
-
-	warn, err := build.Prepare(map[string]string{"bar": "baz"})
-	if len(warn) > 0 {
-		t.Fatalf("bad: %#v", warn)
-	}
-	if err == nil {
-		t.Fatal("should have had error")
-	}
-}
-
-func TestBuildPrepare_variables_override(t *testing.T) {
-	packerConfig := testDefaultPackerConfig()
-	packerConfig[UserVariablesConfigKey] = map[string]string{
-		"foo": "baz",
-	}
-
-	build := testBuild()
-	build.variables["foo"] = coreBuildVariable{Default: "bar"}
-	builder := build.builder.(*MockBuilder)
-
-	warn, err := build.Prepare(map[string]string{"foo": "baz"})
-	if len(warn) > 0 {
-		t.Fatalf("bad: %#v", warn)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if !builder.PrepareCalled {
-		t.Fatal("prepare should be called")
-	}
-
-	if !reflect.DeepEqual(builder.PrepareConfig[1], packerConfig) {
-		t.Fatalf("prepare bad: %#v", builder.PrepareConfig[1])
-	}
-}
-
-func TestBuildPrepare_variablesRequired(t *testing.T) {
-	build := testBuild()
-	build.variables["foo"] = coreBuildVariable{Required: true}
-
-	warn, err := build.Prepare(map[string]string{})
-	if len(warn) > 0 {
-		t.Fatalf("bad: %#v", warn)
-	}
-	if err == nil {
-		t.Fatal("should have had error")
-	}
-
-	// Test with setting the value
-	build = testBuild()
-	build.variables["foo"] = coreBuildVariable{Required: true}
-	warn, err = build.Prepare(map[string]string{"foo": ""})
-	if len(warn) > 0 {
-		t.Fatalf("bad: %#v", warn)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
 	}
 }
 
@@ -237,7 +173,7 @@ func TestBuild_Run(t *testing.T) {
 	ui := testUi()
 
 	build := testBuild()
-	build.Prepare(nil)
+	build.Prepare()
 	artifacts, err := build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -287,7 +223,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build := testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{}
 
-	build.Prepare(nil)
+	build.Prepare()
 	artifacts, err := build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -312,7 +248,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare(nil)
+	build.Prepare()
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -340,7 +276,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare(nil)
+	build.Prepare()
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -370,7 +306,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare(nil)
+	build.Prepare()
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -397,7 +333,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 		},
 	}
 
-	build.Prepare(nil)
+	build.Prepare()
 	artifacts, err = build.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("err: %s", err)

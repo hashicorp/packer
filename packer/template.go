@@ -75,8 +75,10 @@ type RawProvisionerConfig struct {
 
 // RawVariable represents a variable configuration within a template.
 type RawVariable struct {
-	Default  string
-	Required bool
+	Default  string // The default value for this variable
+	Required bool   // If the variable is required or not
+	Value    string // The set value for this variable
+	HasValue bool   // True if the value was set
 }
 
 // ParseTemplate takes a byte slice and parses a Template from it, returning
@@ -84,7 +86,9 @@ type RawVariable struct {
 // could potentially be a MultiError, representing multiple errors. Knowing
 // and checking for this can be useful, if you wish to format it in a certain
 // way.
-func ParseTemplate(data []byte) (t *Template, err error) {
+//
+// The second parameter, vars, are the values for a set of user variables.
+func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error) {
 	var rawTplInterface interface{}
 	err = jsonutil.Unmarshal(data, &rawTplInterface)
 	if err != nil {
@@ -150,6 +154,13 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 			errors = append(errors,
 				fmt.Errorf("Error decoding default value for user var '%s': %s", k, err))
 			continue
+		}
+
+		// Set the value of this variable if we have it
+		if val, ok := vars[k]; ok {
+			variable.HasValue = true
+			variable.Value = val
+			delete(vars, k)
 		}
 
 		t.Variables[k] = variable
@@ -313,6 +324,11 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 		errors = append(errors, fmt.Errorf("No builders are defined in the template."))
 	}
 
+	// Verify that all the variable sets were for real variables.
+	for k, _ := range vars {
+		errors = append(errors, fmt.Errorf("Unknown user variables: %s", k))
+	}
+
 	// If there were errors, we put it into a MultiError and return
 	if len(errors) > 0 {
 		err = &MultiError{errors}
@@ -325,7 +341,7 @@ func ParseTemplate(data []byte) (t *Template, err error) {
 
 // ParseTemplateFile takes the given template file and parses it into
 // a single template.
-func ParseTemplateFile(path string) (*Template, error) {
+func ParseTemplateFile(path string, vars map[string]string) (*Template, error) {
 	var data []byte
 
 	if path == "-" {
@@ -345,7 +361,7 @@ func ParseTemplateFile(path string) (*Template, error) {
 		}
 	}
 
-	return ParseTemplate(data)
+	return ParseTemplate(data, vars)
 }
 
 func parsePostProcessor(i int, rawV interface{}) (result []map[string]interface{}, errors []error) {
@@ -527,12 +543,24 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	}
 
 	// Prepare the variables
-	variables := make(map[string]coreBuildVariable)
+	var varErrors []error
+	variables := make(map[string]string)
 	for k, v := range t.Variables {
-		variables[k] = coreBuildVariable{
-			Default:  v.Default,
-			Required: v.Required,
+		if v.Required && !v.HasValue {
+			varErrors = append(varErrors,
+				fmt.Errorf("Required user variable '%s' not set", k))
 		}
+
+		var val string = v.Default
+		if v.HasValue {
+			val = v.Value
+		}
+
+		variables[k] = val
+	}
+
+	if len(varErrors) > 0 {
+		return nil, &MultiError{varErrors}
 	}
 
 	b = &coreBuild{
