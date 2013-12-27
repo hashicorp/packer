@@ -315,6 +315,13 @@ func (m *MuxConn) loop() {
 			panic(fmt.Sprintf("Unknown stream direction: %d", from))
 		}
 
+		if stream == nil && packetType != muxPacketSyn {
+			log.Printf(
+				"[WARN] %p: Non-existent stream %d (%s) received packer %d",
+				m, id, from, packetType)
+			continue
+		}
+
 		//log.Printf("[TRACE] %p: Stream %d (%s) received packet %d", m, id, from, packetType)
 		switch packetType {
 		case muxPacketSyn:
