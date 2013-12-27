@@ -17,7 +17,7 @@ func testTemplate() (*packer.Template, *packer.ComponentFinder) {
 	]
 }`
 
-	tpl, err := packer.ParseTemplate([]byte(tplData))
+	tpl, err := packer.ParseTemplate([]byte(tplData), nil)
 	if err != nil {
 		panic(err)
 	}

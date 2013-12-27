@@ -50,7 +50,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	// Parse the template into a machine-usable format
 	log.Printf("Reading template: %s", args[0])
-	tpl, err := packer.ParseTemplateFile(args[0])
+	tpl, err := packer.ParseTemplateFile(args[0], userVars)
 	if err != nil {
 		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
@@ -82,7 +82,7 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	// Check the configuration of all builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		warns, err := b.Prepare(userVars)
+		warns, err := b.Prepare()
 		if len(warns) > 0 {
 			warnings[b.Name()] = warns
 		}
