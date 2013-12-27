@@ -43,6 +43,8 @@ IMPROVEMENTS:
   "Packer Builder" so that they are easily recognizable. [GH-642]
 * builder/amazon/all: Copying AMIs to multiple regions now happens
   in parallel. [GH-495]
+* builder/openstack: In debug mode, the generated SSH keypair is saved
+  so you can SSH into the machine. [GH-746]
 * builder/qemu: Floppy files are supported. [GH-686]
 * builder/qemu: Next `run_once` option tells Qemu to run only once,
   which is useful for Windows installs that handle reboots for you.
