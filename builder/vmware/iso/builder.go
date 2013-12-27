@@ -25,6 +25,7 @@ type Builder struct {
 
 type config struct {
 	common.PackerConfig      `mapstructure:",squash"`
+	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
@@ -77,6 +78,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+	errs = packer.MultiErrorAppend(errs, b.config.DriverConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
