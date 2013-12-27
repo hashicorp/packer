@@ -402,10 +402,13 @@ func (m *MuxConn) loop() {
 			case streamStateFinWait2:
 				fallthrough
 			case streamStateEstablished:
-				select {
-				case stream.writeCh <- data:
-				default:
-					panic(fmt.Sprintf("Failed to write data, buffer full for stream %d", id))
+				if len(data) > 0 {
+					select {
+					case stream.writeCh <- data:
+					default:
+						panic(fmt.Sprintf(
+							"Failed to write data, buffer full for stream %d", id))
+					}
 				}
 			default:
 				log.Printf("[ERR] Data received for stream in state: %d", stream.state)
@@ -469,7 +472,7 @@ const (
 func newStream(from muxPacketFrom, id uint32, m *MuxConn) *Stream {
 	// Create the stream object and channel where data will be sent to
 	dataR, dataW := io.Pipe()
-	writeCh := make(chan []byte, 256)
+	writeCh := make(chan []byte, 4096)
 
 	// Set the data channel so we can write to it.
 	stream := &Stream{
