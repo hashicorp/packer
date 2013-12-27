@@ -46,6 +46,9 @@ Optional:
 * `size_id` (int) - The ID of the droplet size to use. This defaults to "66,"
   which is the 512MB droplet.
 
+* `private_networking` (bool) - Set to `true` to enable private networking
+  for the droplet being created. This defaults to `false`, or not enabled.
+
 * `snapshot_name` (string) - The name of the resulting snapshot that will
   appear in your account. This must be unique.
   To help make this unique, use a function like `timestamp` (see
