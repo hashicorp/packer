@@ -5,28 +5,28 @@ import (
 	"testing"
 )
 
-func TestFixerVirtualBoxRename_impl(t *testing.T) {
-	var _ Fixer = new(FixerVirtualBoxRename)
+func TestFixerVMwareRename_impl(t *testing.T) {
+	var _ Fixer = new(FixerVMwareRename)
 }
 
-func TestFixerVirtualBoxRename_Fix(t *testing.T) {
+func TestFixerVMwareRename_Fix(t *testing.T) {
 	cases := []struct {
 		Input    map[string]interface{}
 		Expected map[string]interface{}
 	}{
 		{
 			Input: map[string]interface{}{
-				"type": "virtualbox",
+				"type": "vmware",
 			},
 
 			Expected: map[string]interface{}{
-				"type": "virtualbox-iso",
+				"type": "vmware-iso",
 			},
 		},
 	}
 
 	for _, tc := range cases {
-		var f FixerVirtualBoxRename
+		var f FixerVMwareRename
 
 		input := map[string]interface{}{
 			"builders": []map[string]interface{}{tc.Input},
