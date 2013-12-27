@@ -56,7 +56,7 @@ type Driver interface {
 
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
-func NewDriver(config *SSHConfig) (Driver, error) {
+func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 	drivers := []Driver{}
 
 	switch runtime.GOOS {
@@ -64,12 +64,12 @@ func NewDriver(config *SSHConfig) (Driver, error) {
 		drivers = []Driver{
 			&Fusion6Driver{
 				Fusion5Driver: Fusion5Driver{
-					AppPath:   "/Applications/VMware Fusion.app",
+					AppPath:   dconfig.FusionAppPath,
 					SSHConfig: config,
 				},
 			},
 			&Fusion5Driver{
-				AppPath:   "/Applications/VMware Fusion.app",
+				AppPath:   dconfig.FusionAppPath,
 				SSHConfig: config,
 			},
 		}

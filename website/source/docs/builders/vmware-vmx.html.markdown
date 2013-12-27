@@ -64,6 +64,10 @@ Optional:
   be attached. The files listed in this configuration will all be put
   into the root directory of the floppy disk; sub-directories are not supported.
 
+* `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this
+  is "/Applications/VMware Fusion.app" but this setting allows you to
+  customize this.
+
 * `headless` (bool) - Packer defaults to building VMware
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will

@@ -99,6 +99,10 @@ Optional:
   be attached. The files listed in this configuration will all be put
   into the root directory of the floppy disk; sub-directories are not supported.
 
+* `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this
+  is "/Applications/VMware Fusion.app" but this setting allows you to
+  customize this.
+
 * `guest_os_type` (string) - The guest OS type being installed. This will be
   set in the VMware VMX. By default this is "other". By specifying a more specific
   OS type, VMware may perform some optimizations or virtual hardware changes
