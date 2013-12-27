@@ -66,6 +66,8 @@ BUG FIXES:
 * builder/virtualbox: don't download guest additions if disabled. [GH-731]
 * post-processor/vsphere: Uploads VM properly. [GH-694]
 * post-processor/vsphere: Process user variables.
+* provisioner/ansible-local: all configurations are processed as templates
+  [GH-749]
 * provisioner/ansible-local: playbook paths are properly validated
   as directories, not files. [GH-710]
 * provisioner/chef-solo: Environments are recognized. [GH-726]
