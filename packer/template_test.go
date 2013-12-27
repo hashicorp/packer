@@ -50,7 +50,7 @@ func TestParseTemplateFile_basic(t *testing.T) {
 	tf.Write([]byte(data))
 	tf.Close()
 
-	result, err := ParseTemplateFile(tf.Name())
+	result, err := ParseTemplateFile(tf.Name(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -83,7 +83,7 @@ func TestParseTemplateFile_stdin(t *testing.T) {
 	defer func() { os.Stdin = oldStdin }()
 	os.Stdin = tf
 
-	result, err := ParseTemplateFile("-")
+	result, err := ParseTemplateFile("-", nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -100,7 +100,7 @@ func TestParseTemplate_Basic(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -120,7 +120,7 @@ func TestParseTemplate_Description(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -141,7 +141,7 @@ func TestParseTemplate_Invalid(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("shold have error")
 	}
@@ -160,7 +160,7 @@ func TestParseTemplate_InvalidKeys(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -176,7 +176,7 @@ func TestParseTemplate_BuilderWithoutType(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -191,7 +191,7 @@ func TestParseTemplate_BuilderWithNonStringType(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -208,7 +208,7 @@ func TestParseTemplate_BuilderWithoutName(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -240,7 +240,7 @@ func TestParseTemplate_BuilderWithName(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -289,7 +289,7 @@ func TestParseTemplate_BuilderWithConflictingName(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -307,7 +307,7 @@ func TestParseTemplate_Hooks(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -342,7 +342,7 @@ func TestParseTemplate_PostProcessors(t *testing.T) {
 	}
 	`
 
-	tpl, err := ParseTemplate([]byte(data))
+	tpl, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("error parsing: %s", err)
 	}
@@ -392,7 +392,7 @@ func TestParseTemplate_ProvisionerWithoutType(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("err should not be nil")
 	}
@@ -409,7 +409,7 @@ func TestParseTemplate_ProvisionerWithNonStringType(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -428,7 +428,7 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatal("err: %s", err)
 	}
@@ -460,7 +460,7 @@ func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatal("err: %s", err)
 	}
@@ -491,7 +491,9 @@ func TestParseTemplate_Variables(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), map[string]string{
+		"bar": "bar",
+	})
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -503,17 +505,24 @@ func TestParseTemplate_Variables(t *testing.T) {
 	if result.Variables["foo"].Default != "bar" {
 		t.Fatal("foo default is not right")
 	}
-
 	if result.Variables["foo"].Required {
 		t.Fatal("foo should not be required")
+	}
+	if result.Variables["foo"].HasValue {
+		t.Fatal("foo should not have value")
 	}
 
 	if result.Variables["bar"].Default != "" {
 		t.Fatal("default should be empty")
 	}
-
 	if !result.Variables["bar"].Required {
 		t.Fatal("bar should be required")
+	}
+	if !result.Variables["bar"].HasValue {
+		t.Fatal("bar should have value")
+	}
+	if result.Variables["bar"].Value != "bar" {
+		t.Fatal("bad value")
 	}
 
 	if result.Variables["baz"].Default != "27" {
@@ -522,6 +531,61 @@ func TestParseTemplate_Variables(t *testing.T) {
 
 	if result.Variables["baz"].Required {
 		t.Fatal("baz should not be required")
+	}
+}
+
+func TestParseTemplate_variablesSet(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": "bar"
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{
+		"foo": "value",
+	})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(template.Variables) != 1 {
+		t.Fatalf("bad vars: %#v", template.Variables)
+	}
+	if template.Variables["foo"].Value != "value" {
+		t.Fatalf("bad: %#v", template.Variables["foo"])
+	}
+}
+
+func TestParseTemplate_variablesSetUnknown(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": "bar"
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	_, err := ParseTemplate([]byte(data), map[string]string{
+		"what": "value",
+	})
+	if err == nil {
+		t.Fatal("should error")
 	}
 }
 
@@ -536,7 +600,7 @@ func TestParseTemplate_variablesBadDefault(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -558,7 +622,7 @@ func TestTemplate_BuildNames(t *testing.T) {
 	}
 	`
 
-	result, err := ParseTemplate([]byte(data))
+	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -582,7 +646,7 @@ func TestTemplate_BuildUnknown(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("bad: %s", err)
 	}
@@ -608,7 +672,7 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -642,7 +706,7 @@ func TestTemplate_Build_NilBuilderFunc(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -679,7 +743,7 @@ func TestTemplate_Build_NilProvisionerFunc(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -714,7 +778,7 @@ func TestTemplate_Build_NilProvisionerFunc_WithNoProvisioners(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -754,7 +818,7 @@ func TestTemplate_Build(t *testing.T) {
 		"type": "test-builder",
 	}
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -851,7 +915,7 @@ func TestTemplateBuild_exceptOnlyPP(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -881,7 +945,7 @@ func TestTemplateBuild_exceptOnlyProv(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -910,7 +974,7 @@ func TestTemplateBuild_exceptPPInvalid(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -939,7 +1003,7 @@ func TestTemplateBuild_exceptPP(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -990,7 +1054,7 @@ func TestTemplateBuild_exceptProvInvalid(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -1019,7 +1083,7 @@ func TestTemplateBuild_exceptProv(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1070,7 +1134,7 @@ func TestTemplateBuild_onlyPPInvalid(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -1099,7 +1163,7 @@ func TestTemplateBuild_onlyPP(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1150,7 +1214,7 @@ func TestTemplateBuild_onlyProvInvalid(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -1179,7 +1243,7 @@ func TestTemplateBuild_onlyProv(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1229,7 +1293,7 @@ func TestTemplate_Build_ProvisionerOverride(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1305,7 +1369,7 @@ func TestTemplate_Build_ProvisionerOverrideBad(t *testing.T) {
 	}
 	`
 
-	_, err := ParseTemplate([]byte(data))
+	_, err := ParseTemplate([]byte(data), nil)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -1330,7 +1394,7 @@ func TestTemplateBuild_ProvisionerPauseBefore(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1391,7 +1455,7 @@ func TestTemplateBuild_variables(t *testing.T) {
 	}
 	`
 
-	template, err := ParseTemplate([]byte(data))
+	template, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1406,7 +1470,35 @@ func TestTemplateBuild_variables(t *testing.T) {
 		t.Fatalf("couldn't convert!")
 	}
 
-	if len(coreBuild.variables) != 1 {
+	expected := map[string]string{"foo": "bar"}
+	if !reflect.DeepEqual(coreBuild.variables, expected) {
 		t.Fatalf("bad vars: %#v", coreBuild.variables)
+	}
+}
+
+func TestTemplateBuild_variablesRequiredNotSet(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": null
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, err = template.Build("test1", testComponentFinder())
+	if err == nil {
+		t.Fatal("should error")
 	}
 }
