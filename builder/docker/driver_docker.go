@@ -11,7 +11,8 @@ import (
 )
 
 type DockerDriver struct {
-	Ui packer.Ui
+	Ui  packer.Ui
+	Tpl *packer.ConfigTemplate
 }
 
 func (d *DockerDriver) Export(id string, dst io.Writer) error {
@@ -40,19 +41,29 @@ func (d *DockerDriver) Pull(image string) error {
 }
 
 func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
-	// Args that we're going to pass to Docker
-	args := []string{"run", "-d", "-i", "-t"}
-
+	// Build up the template data
+	var tplData startContainerTemplate
+	tplData.Image = config.Image
 	if len(config.Volumes) > 0 {
 		volumes := make([]string, 0, len(config.Volumes))
 		for host, guest := range config.Volumes {
 			volumes = append(volumes, fmt.Sprintf("%s:%s", host, guest))
 		}
 
-		args = append(args, "-v", strings.Join(volumes, ","))
+		tplData.Volumes = strings.Join(volumes, ",")
 	}
 
-	args = append(args, config.Image, "/bin/bash")
+	// Args that we're going to pass to Docker
+	args := config.RunCommand
+	for i, v := range args {
+		var err error
+		args[i], err = d.Tpl.Process(v, &tplData)
+		if err != nil {
+			return "", err
+		}
+	}
+	d.Ui.Message(fmt.Sprintf(
+		"Run command: docker %s", strings.Join(args, " ")))
 
 	// Start the container
 	var stdout, stderr bytes.Buffer
