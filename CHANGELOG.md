@@ -39,6 +39,8 @@ IMPROVEMENTS:
 * core: Plugins communicate over a single TCP connection per plugin now,
   instead of sometimes dozens. Performance around plugin communication
   dramatically increased.
+* core: Build names are now template processed so you can use things
+  like user variables in them. [GH-744]
 * builder/amazon/all: Launched EC2 instances now have a name of
   "Packer Builder" so that they are easily recognizable. [GH-642]
 * builder/amazon/all: Copying AMIs to multiple regions now happens

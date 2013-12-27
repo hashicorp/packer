@@ -446,6 +446,39 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
+	// Prepare the variables
+	var varErrors []error
+	variables := make(map[string]string)
+	for k, v := range t.Variables {
+		if v.Required && !v.HasValue {
+			varErrors = append(varErrors,
+				fmt.Errorf("Required user variable '%s' not set", k))
+		}
+
+		var val string = v.Default
+		if v.HasValue {
+			val = v.Value
+		}
+
+		variables[k] = val
+	}
+
+	if len(varErrors) > 0 {
+		return nil, &MultiError{varErrors}
+	}
+
+	// Process the name
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		return nil, err
+	}
+	tpl.UserVars = variables
+
+	name, err = tpl.Process(name, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	// Gather the Hooks
 	hooks := make(map[string][]Hook)
 	for tplEvent, tplHooks := range t.Hooks {
@@ -540,27 +573,6 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 
 		coreProv := coreBuildProvisioner{provisioner, configs}
 		provisioners = append(provisioners, coreProv)
-	}
-
-	// Prepare the variables
-	var varErrors []error
-	variables := make(map[string]string)
-	for k, v := range t.Variables {
-		if v.Required && !v.HasValue {
-			varErrors = append(varErrors,
-				fmt.Errorf("Required user variable '%s' not set", k))
-		}
-
-		var val string = v.Default
-		if v.HasValue {
-			val = v.Value
-		}
-
-		variables[k] = val
-	}
-
-	if len(varErrors) > 0 {
-		return nil, &MultiError{varErrors}
 	}
 
 	b = &coreBuild{
