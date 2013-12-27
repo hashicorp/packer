@@ -30,10 +30,11 @@ type config struct {
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
 
-	SnapshotName string `mapstructure:"snapshot_name"`
-	DropletName  string `mapstructure:"droplet_name"`
-	SSHUsername  string `mapstructure:"ssh_username"`
-	SSHPort      uint   `mapstructure:"ssh_port"`
+	PrivateNetworking bool   `mapstructure:"private_networking"`
+	SnapshotName      string `mapstructure:"snapshot_name"`
+	DropletName       string `mapstructure:"droplet_name"`
+	SSHUsername       string `mapstructure:"ssh_username"`
+	SSHPort           uint   `mapstructure:"ssh_port"`
 
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawStateTimeout string `mapstructure:"state_timeout"`
