@@ -1,28 +1,26 @@
-package ovf
+package vmx
 
 import (
 	"fmt"
 	"os"
 
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 )
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig          `mapstructure:",squash"`
-	vboxcommon.ExportConfig      `mapstructure:",squash"`
-	vboxcommon.FloppyConfig      `mapstructure:",squash"`
-	vboxcommon.OutputConfig      `mapstructure:",squash"`
-	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.SSHConfig         `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
+	common.PackerConfig      `mapstructure:",squash"`
+	vmwcommon.OutputConfig   `mapstructure:",squash"`
+	vmwcommon.RunConfig      `mapstructure:",squash"`
+	vmwcommon.ShutdownConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	SourcePath string `mapstructure:"source_path"`
-	VMName     string `mapstructure:"vm_name"`
+	SkipCompaction bool   `mapstructure:"skip_compaction"`
+	SourcePath     string `mapstructure:"source_path"`
+	VMName         string `mapstructure:"vm_name"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -47,13 +45,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
 		"source_path": &c.SourcePath,

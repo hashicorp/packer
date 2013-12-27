@@ -1,4 +1,4 @@
-package ovf
+package vmx
 
 import (
 	"io/ioutil"

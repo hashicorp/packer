@@ -208,8 +208,14 @@ func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) err
 
 func providerForName(name string) Provider {
 	switch name {
+	case "aws":
+		return new(AWSProvider)
+	case "digitalocean":
+		return new(DigitalOceanProvider)
 	case "virtualbox":
 		return new(VBoxProvider)
+	case "vmware":
+		return new(VMwareProvider)
 	default:
 		return nil
 	}
