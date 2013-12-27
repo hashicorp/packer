@@ -17,13 +17,14 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	runConfig := ContainerConfig{
-		Image: config.Image,
+		Image:      config.Image,
+		RunCommand: config.RunCommand,
 		Volumes: map[string]string{
 			tempDir: "/packer-files",
 		},
 	}
 
-	ui.Say("Starting docker container with /bin/bash")
+	ui.Say("Starting docker container...")
 	containerId, err := driver.StartContainer(&runConfig)
 	if err != nil {
 		err := fmt.Errorf("Error running container: %s", err)

@@ -59,6 +59,11 @@ Optional:
   `docker pull` prior to use. Otherwise, it is assumed the image already
   exists and can be used. This defaults to true if not set.
 
+* `run_command` (array of strings) - An array of arguments to pass to
+  `docker` in order to run the container. By default this is set to
+  `["run", "-d", "-i", "-t", "-v", "{{.Volumes}}", "{{.Image}}", "/bin/bash"]`.
+  As you can see, you have a couple template variables to customize, as well.
+
 ## Using the generated artifact
 
 Once the tar artifact has been generated, you will likely want to import, tag,
