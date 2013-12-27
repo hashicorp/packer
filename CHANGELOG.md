@@ -4,6 +4,8 @@ BACKWARDS INCOMPATIBILITIES:
 
 * "virtualbox" builder has been renamed to "virtualbox-iso". Running your
    template through `packer fix` will resolve this.
+* "vmware" builder has been renamed to "vmware-iso". Running your template
+  through `packer fix` will resolve this.
 * post-processor/vagrant: Syntax for overriding by provider has changed.
   See the documentation for more information. Running your template
   through `packer fix` should resolve this.
@@ -22,6 +24,8 @@ FEATURES:
   [GH-715]
 * **New builder:** "virtualbox-ovf" can build VirtualBox images from
   an existing OVF or OVA. [GH-201]
+* **New builder:** "vmware-vmx" can build VMware images from an existing
+  VMX. [GH-201]
 * "description" field in templates: write a human-readable description
   of what a template does. This will be shown in `packer inspect`.
 * Vagrant post-processor now accepts a list of files to include in the
