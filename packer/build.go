@@ -40,7 +40,7 @@ type Build interface {
 	// Prepare configures the various components of this build and reports
 	// any errors in doing so (such as syntax errors, validation errors, etc.).
 	// It also reports any warnings.
-	Prepare(v map[string]string) ([]string, error)
+	Prepare() ([]string, error)
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
@@ -78,7 +78,7 @@ type coreBuild struct {
 	hooks          map[string][]Hook
 	postProcessors [][]coreBuildPostProcessor
 	provisioners   []coreBuildProvisioner
-	variables      map[string]coreBuildVariable
+	variables      map[string]string
 
 	debug         bool
 	force         bool
@@ -102,12 +102,6 @@ type coreBuildProvisioner struct {
 	config      []interface{}
 }
 
-// A user-variable that is part of a single build.
-type coreBuildVariable struct {
-	Default  string
-	Required bool
-}
-
 // Returns the name of the build.
 func (b *coreBuild) Name() string {
 	return b.name
@@ -116,7 +110,7 @@ func (b *coreBuild) Name() string {
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
-func (b *coreBuild) Prepare(userVars map[string]string) (warn []string, err error) {
+func (b *coreBuild) Prepare() (warn []string, err error) {
 	b.l.Lock()
 	defer b.l.Unlock()
 
@@ -126,46 +120,12 @@ func (b *coreBuild) Prepare(userVars map[string]string) (warn []string, err erro
 
 	b.prepareCalled = true
 
-	// Compile the variables
-	varErrs := make([]error, 0)
-	variables := make(map[string]string)
-	for k, v := range b.variables {
-		variables[k] = v.Default
-
-		if v.Required {
-			if _, ok := userVars[k]; !ok {
-				varErrs = append(varErrs,
-					fmt.Errorf("Required user variable '%s' not set", k))
-			}
-		}
-	}
-
-	if userVars != nil {
-		for k, v := range userVars {
-			if _, ok := variables[k]; !ok {
-				varErrs = append(
-					varErrs, fmt.Errorf("Unknown user variable: %s", k))
-				continue
-			}
-
-			variables[k] = v
-		}
-	}
-
-	// If there were any problem with variables, return an error right
-	// away because we can't be certain anything else will actually work.
-	if len(varErrs) > 0 {
-		return nil, &MultiError{
-			Errors: varErrs,
-		}
-	}
-
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey:     b.name,
 		BuilderTypeConfigKey:   b.builderType,
 		DebugConfigKey:         b.debug,
 		ForceConfigKey:         b.force,
-		UserVariablesConfigKey: variables,
+		UserVariablesConfigKey: b.variables,
 	}
 
 	// Prepare the builder
