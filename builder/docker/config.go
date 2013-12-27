@@ -12,6 +12,7 @@ type Config struct {
 	ExportPath string `mapstructure:"export_path"`
 	Image      string
 	Pull       bool
+	RunCommand []string `mapstructure:"run_command"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -26,6 +27,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Defaults
+	if len(c.RunCommand) == 0 {
+		c.RunCommand = []string{
+			"run",
+			"-d", "-i", "-t",
+			"-v", "{{.Volumes}}",
+			"{{.Image}}",
+			"/bin/bash",
+		}
 	}
 
 	// Default Pull if it wasn't set

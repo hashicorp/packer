@@ -27,6 +27,13 @@ type Driver interface {
 
 // ContainerConfig is the configuration used to start a container.
 type ContainerConfig struct {
+	Image      string
+	RunCommand []string
+	Volumes    map[string]string
+}
+
+// This is the template that is used for the RunCommand in the ContainerConfig.
+type startContainerTemplate struct {
 	Image   string
-	Volumes map[string]string
+	Volumes string
 }
