@@ -208,6 +208,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
+			Tags:                     b.config.RunTags,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     awscommon.SSHAddress(ec2conn, b.config.SSHPort),

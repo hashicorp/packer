@@ -9,17 +9,18 @@ import (
 )
 
 type StepRunSourceInstance struct {
-	Debug                    bool
-	ExpectedRootDevice       string
-	InstanceType             string
-	UserData                 string
-	UserDataFile             string
-	SourceAMI                string
-	IamInstanceProfile       string
-	SubnetId                 string
 	AssociatePublicIpAddress bool
 	AvailabilityZone         string
 	BlockDevices             BlockDevices
+	Debug                    bool
+	ExpectedRootDevice       string
+	InstanceType             string
+	IamInstanceProfile       string
+	SourceAMI                string
+	SubnetId                 string
+	Tags                     map[string]string
+	UserData                 string
+	UserDataFile             string
 
 	instance *ec2.Instance
 }
@@ -92,8 +93,13 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	s.instance = &runResp.Instances[0]
 	ui.Message(fmt.Sprintf("Instance ID: %s", s.instance.InstanceId))
 
-	_, err = ec2conn.CreateTags(
-		[]string{s.instance.InstanceId}, []ec2.Tag{{"Name", "Packer Builder"}})
+	ec2Tags := make([]ec2.Tag, 1, len(s.Tags)+1)
+	ec2Tags[0] = ec2.Tag{"Name", "Packer Builder"}
+	for k, v := range s.Tags {
+		ec2Tags = append(ec2Tags, ec2.Tag{k, v})
+	}
+
+	_, err = ec2conn.CreateTags([]string{s.instance.InstanceId}, ec2Tags)
 	if err != nil {
 		ui.Message(
 			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))

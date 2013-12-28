@@ -47,6 +47,8 @@ IMPROVEMENTS:
   "Packer Builder" so that they are easily recognizable. [GH-642]
 * builder/amazon/all: Copying AMIs to multiple regions now happens
   in parallel. [GH-495]
+* builder/amazon/all: Ability to specify "run\_tags" to tag the instance
+  while running. [GH-722]
 * builder/digitalocean: Private networking support. [GH-698]
 * builder/docker: A "run\_command" can be specified, configuring how
   the container is started. [GH-648]
