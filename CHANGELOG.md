@@ -41,6 +41,8 @@ IMPROVEMENTS:
   dramatically increased.
 * core: Build names are now template processed so you can use things
   like user variables in them. [GH-744]
+* core: New "pwd" function available globally that returns the working
+  directory. [GH-762]
 * builder/amazon/all: Launched EC2 instances now have a name of
   "Packer Builder" so that they are easily recognizable. [GH-642]
 * builder/amazon/all: Copying AMIs to multiple regions now happens
