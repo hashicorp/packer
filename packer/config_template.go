@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mitchellh/packer/common/uuid"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -36,6 +37,7 @@ func NewConfigTemplate() (*ConfigTemplate, error) {
 
 	result.root = template.New("configTemplateRoot")
 	result.root.Funcs(template.FuncMap{
+		"pwd":       templatePwd,
 		"isotime":   templateISOTime,
 		"timestamp": templateTimestamp,
 		"user":      result.templateUser,
@@ -95,6 +97,10 @@ func (t *ConfigTemplate) templateUser(n string) (string, error) {
 
 func templateISOTime() string {
 	return time.Now().UTC().Format(time.RFC3339)
+}
+
+func templatePwd() (string, error) {
+	return os.Getwd()
 }
 
 func templateTimestamp() string {
