@@ -61,7 +61,17 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say("Authorizing SSH access on the temporary security group...")
-	if _, err := ec2conn.AuthorizeSecurityGroup(groupResp.SecurityGroup, perms); err != nil {
+	for i := 0; i < 5; i++ {
+		_, err = ec2conn.AuthorizeSecurityGroup(groupResp.SecurityGroup, perms)
+		if err == nil {
+			break
+		}
+
+		log.Printf("Error authorizing. Will sleep and retry. %s", err)
+		time.Sleep((time.Duration(i) * time.Second) + 1)
+	}
+
+	if err != nil {
 		err := fmt.Errorf("Error creating temporary security group: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
