@@ -8,6 +8,18 @@ import (
 	"time"
 )
 
+func TestConfigTemplateProcess_env(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, err = tpl.Process(`{{env "foo"}}`, nil)
+	if err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func TestConfigTemplateProcess_isotime(t *testing.T) {
 	tpl, err := NewConfigTemplate()
 	if err != nil {

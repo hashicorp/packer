@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"text/template"
 	"time"
 )
 
@@ -450,6 +451,18 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
+	// Prepare the variable template processor, which is a bit unique
+	// because we don't allow user variable usage and we add a function
+	// to read from the environment.
+	varTpl, err := NewConfigTemplate()
+	if err != nil {
+		return nil, err
+	}
+	varTpl.Funcs(template.FuncMap{
+		"env":  templateEnv,
+		"user": templateDisableUser,
+	})
+
 	// Prepare the variables
 	var varErrors []error
 	variables := make(map[string]string)
@@ -459,9 +472,15 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 				fmt.Errorf("Required user variable '%s' not set", k))
 		}
 
-		var val string = v.Default
+		var val string
 		if v.HasValue {
 			val = v.Value
+		} else {
+			val, err = varTpl.Process(v.Default, nil)
+			if err != nil {
+				varErrors = append(varErrors,
+					fmt.Errorf("Error processing user variable '%s': %s'", k, err))
+			}
 		}
 
 		variables[k] = val
