@@ -688,6 +688,47 @@ func TestTemplate_BuildUnknownBuilder(t *testing.T) {
 	}
 }
 
+func TestTemplateBuild_envInVars(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": "{{env \"foo\"}}"
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	defer os.Setenv("foo", os.Getenv("foo"))
+	if err := os.Setenv("foo", "bar"); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	template, err := ParseTemplate([]byte(data), map[string]string{})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b, err := template.Build("test1", testComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	coreBuild, ok := b.(*coreBuild)
+	if !ok {
+		t.Fatal("should be ok")
+	}
+
+	if coreBuild.variables["foo"] != "bar" {
+		t.Fatalf("bad: %#v", coreBuild.variables)
+	}
+}
+
 func TestTemplateBuild_names(t *testing.T) {
 	data := `
 	{

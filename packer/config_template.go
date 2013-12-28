@@ -37,6 +37,7 @@ func NewConfigTemplate() (*ConfigTemplate, error) {
 
 	result.root = template.New("configTemplateRoot")
 	result.root.Funcs(template.FuncMap{
+		"env":       templateDisableEnv,
 		"pwd":       templatePwd,
 		"isotime":   templateISOTime,
 		"timestamp": templateTimestamp,
@@ -93,6 +94,20 @@ func (t *ConfigTemplate) templateUser(n string) (string, error) {
 	}
 
 	return result, nil
+}
+
+func templateDisableEnv(n string) (string, error) {
+	return "", fmt.Errorf(
+		"Environmental variables can only be used as default values for user variables.")
+}
+
+func templateDisableUser(n string) (string, error) {
+	return "", fmt.Errorf(
+		"User variable can't be used within a default value for a user variable: %s", n)
+}
+
+func templateEnv(n string) string {
+	return os.Getenv(n)
 }
 
 func templateISOTime() string {
