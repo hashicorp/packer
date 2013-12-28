@@ -54,7 +54,10 @@ Required:
   checksum is specified with `iso_checksum_type`, documented below.
 
 * `iso_checksum_type` (string) - The type of the checksum specified in
-  `iso_checksum`. Valid values are "md5", "sha1", "sha256", or "sha512" currently.
+  `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
+  "sha512" currently. While "none" will skip checksumming, this is not
+  recommended since ISO files are generally large and corruption does happen
+  from time to time.
 
 * `iso_url` (string) - A URL to the ISO containing the installation image.
   This URL can be either an HTTP URL or a file URL (or path to a file).

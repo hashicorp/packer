@@ -187,10 +187,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("The iso_checksum_type must be specified."))
 	} else {
 		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
-		if h := common.HashForType(b.config.ISOChecksumType); h == nil {
-			errs = packer.MultiErrorAppend(
-				errs,
-				fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
+		if b.config.ISOChecksumType != "none" {
+			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
+				errs = packer.MultiErrorAppend(
+					errs,
+					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
+			}
 		}
 	}
 
@@ -236,6 +238,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Warnings
+	if b.config.ISOChecksumType == "none" {
+		warnings = append(warnings,
+			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
+				"a checksum is highly recommended.")
+	}
+
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
