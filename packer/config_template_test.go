@@ -2,6 +2,7 @@ package packer
 
 import (
 	"math"
+	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -26,6 +27,27 @@ func TestConfigTemplateProcess_isotime(t *testing.T) {
 	currentTime := time.Now().UTC()
 	if currentTime.Sub(val) > 2*time.Second {
 		t.Fatalf("val: %d (current: %d)", val, currentTime)
+	}
+}
+
+func TestConfigTemplateProcess_pwd(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	result, err := tpl.Process(`{{pwd}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != pwd {
+		t.Fatalf("err: %s", result)
 	}
 }
 
