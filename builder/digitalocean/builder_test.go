@@ -356,6 +356,39 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 
 }
 
+func TestBuilderPrepare_PrivateNetworking(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.PrivateNetworking != false {
+		t.Errorf("invalid: %s", b.config.PrivateNetworking)
+	}
+
+	// Test set
+	config["private_networking"] = true
+	b = Builder{}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.PrivateNetworking != true {
+		t.Errorf("invalid: %s", b.config.PrivateNetworking)
+	}
+}
+
 func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	var b Builder
 	config := testConfig()

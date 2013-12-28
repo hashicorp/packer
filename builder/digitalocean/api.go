@@ -90,13 +90,14 @@ func (d DigitalOceanClient) DestroyKey(id uint) error {
 }
 
 // Creates a droplet and returns it's id
-func (d DigitalOceanClient) CreateDroplet(name string, size uint, image uint, region uint, keyId uint) (uint, error) {
+func (d DigitalOceanClient) CreateDroplet(name string, size uint, image uint, region uint, keyId uint, privateNetworking bool) (uint, error) {
 	params := url.Values{}
 	params.Set("name", name)
 	params.Set("size_id", fmt.Sprintf("%v", size))
 	params.Set("image_id", fmt.Sprintf("%v", image))
 	params.Set("region_id", fmt.Sprintf("%v", region))
 	params.Set("ssh_key_ids", fmt.Sprintf("%v", keyId))
+	params.Set("private_networking", fmt.Sprintf("%v", privateNetworking))
 
 	body, err := NewRequest(d, "droplets/new", params)
 	if err != nil {
