@@ -64,7 +64,9 @@ IMPROVEMENTS:
 * builder/virtualbox: Nice errors if Packer can't write to
   the output directory.
 * builder/virtualbox: ISO is ejected prior to export.
+* builder/virtualbox: Checksum type can be "none" [GH-471]
 * builder/vmware: Can now specify path to the Fusion application. [GH-677]
+* builder/vmware: Checksum type can be "none" [GH-471]
 * provisioner/puppet-masterless: Can now specify a `manifest_dir` to
   upload manifests to the remote machine for imports. [GH-655]
 
