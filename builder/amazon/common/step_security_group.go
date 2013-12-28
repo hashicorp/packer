@@ -60,6 +60,9 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 		},
 	}
 
+	// We loop and retry this a few times because sometimes the security
+	// group isn't available immediately because AWS resources are eventaully
+	// consistent.
 	ui.Say("Authorizing SSH access on the temporary security group...")
 	for i := 0; i < 5; i++ {
 		_, err = ec2conn.AuthorizeSecurityGroup(groupResp.SecurityGroup, perms)
