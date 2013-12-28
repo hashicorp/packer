@@ -26,6 +26,9 @@ FEATURES:
   an existing OVF or OVA. [GH-201]
 * **New builder:** "vmware-vmx" can build VMware images from an existing
   VMX. [GH-201]
+* Environmental variables can now be accessed as default values for
+  user variables using the "env" function. See the documentation for more
+  information.
 * "description" field in templates: write a human-readable description
   of what a template does. This will be shown in `packer inspect`.
 * Vagrant post-processor now accepts a list of files to include in the
