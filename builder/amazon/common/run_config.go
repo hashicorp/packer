@@ -11,21 +11,22 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	AssociatePublicIpAddress bool     `mapstructure:"associate_public_ip_address"`
-	AvailabilityZone         string   `mapstructure:"availability_zone"`
-	IamInstanceProfile       string   `mapstructure:"iam_instance_profile"`
-	InstanceType             string   `mapstructure:"instance_type"`
-	SourceAmi                string   `mapstructure:"source_ami"`
-	RawSSHTimeout            string   `mapstructure:"ssh_timeout"`
-	SSHUsername              string   `mapstructure:"ssh_username"`
-	SSHPort                  int      `mapstructure:"ssh_port"`
-	SecurityGroupId          string   `mapstructure:"security_group_id"`
-	SecurityGroupIds         []string `mapstructure:"security_group_ids"`
-	SubnetId                 string   `mapstructure:"subnet_id"`
-	TemporaryKeyPairName     string   `mapstructure:"temporary_key_pair_name"`
-	UserData                 string   `mapstructure:"user_data"`
-	UserDataFile             string   `mapstructure:"user_data_file"`
-	VpcId                    string   `mapstructure:"vpc_id"`
+	AssociatePublicIpAddress bool              `mapstructure:"associate_public_ip_address"`
+	AvailabilityZone         string            `mapstructure:"availability_zone"`
+	IamInstanceProfile       string            `mapstructure:"iam_instance_profile"`
+	InstanceType             string            `mapstructure:"instance_type"`
+	RunTags                  map[string]string `mapstructure:"run_tags"`
+	SourceAmi                string            `mapstructure:"source_ami"`
+	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
+	SSHUsername              string            `mapstructure:"ssh_username"`
+	SSHPort                  int               `mapstructure:"ssh_port"`
+	SecurityGroupId          string            `mapstructure:"security_group_id"`
+	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
+	SubnetId                 string            `mapstructure:"subnet_id"`
+	TemporaryKeyPairName     string            `mapstructure:"temporary_key_pair_name"`
+	UserData                 string            `mapstructure:"user_data"`
+	UserDataFile             string            `mapstructure:"user_data_file"`
+	VpcId                    string            `mapstructure:"vpc_id"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -120,6 +121,27 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 			}
 		}
 	}
+
+	newTags := make(map[string]string)
+	for k, v := range c.RunTags {
+		k, err := t.Process(k, nil)
+		if err != nil {
+			errs = append(errs,
+				fmt.Errorf("Error processing tag key %s: %s", k, err))
+			continue
+		}
+
+		v, err := t.Process(v, nil)
+		if err != nil {
+			errs = append(errs,
+				fmt.Errorf("Error processing tag value '%s': %s", v, err))
+			continue
+		}
+
+		newTags[k] = v
+	}
+
+	c.RunTags = newTags
 
 	c.sshTimeout, err = time.ParseDuration(c.RawSSHTimeout)
 	if err != nil {

@@ -91,6 +91,10 @@ Optional:
   block device mappings to the launch instance. The block device mappings are
   the same as `ami_block_device_mappings` above.
 
+* `run_tags` (object of key/value strings) - Tags to apply to the instance
+  that is _launched_ to create the AMI. These tags are _not_ applied to
+  the resulting AMI unless they're duplicated in `tags`.
+
 * `security_group_id` (string) - The ID (_not_ the name) of the security
   group to assign to the instance. By default this is not set and Packer
   will automatically create a new temporary security group to allow SSH
