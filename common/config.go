@@ -194,3 +194,12 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 		return v, nil
 	}, nil
 }
+
+func CoalesceVals(vals ...string) string {
+    for _, el := range vals {
+        if el != "" {
+            return el
+        }
+    }
+    return ""
+}
