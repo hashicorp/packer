@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/rackspace/gophercloud"
 	"net/http"
@@ -22,39 +23,26 @@ type AccessConfig struct {
 // Auth returns a valid Auth object for access to openstack services, or
 // an error if the authentication couldn't be resolved.
 func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
-	username := c.Username
-	password := c.Password
-	project := c.Project
-	provider := c.Provider
-	proxy := c.ProxyUrl
-
-	if username == "" {
-		username = os.Getenv("SDK_USERNAME")
-	}
-	if password == "" {
-		password = os.Getenv("SDK_PASSWORD")
-	}
-	if project == "" {
-		project = os.Getenv("SDK_PROJECT")
-	}
-	if provider == "" {
-		provider = os.Getenv("SDK_PROVIDER")
-	}
+	c.Username = common.CoalesceVals(c.Username, os.Getenv("SDK_USERNAME"), os.Getenv("OS_USERNAME"))
+	c.Password = common.CoalesceVals(c.Password, os.Getenv("SDK_PASSWORD"), os.Getenv("OS_PASSWORD"))
+	c.Project = common.CoalesceVals(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
+	c.Provider = common.CoalesceVals(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
+	c.RawRegion = common.CoalesceVals(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
 
 	authoptions := gophercloud.AuthOptions{
-		Username:    username,
-		Password:    password,
+		Username:    c.Username,
+		Password:    c.Password,
 		AllowReauth: true,
 	}
 
-	if project != "" {
-		authoptions.TenantName = project
+	if c.Project != "" {
+		authoptions.TenantName = c.Project
 	}
 
 	// For corporate networks it may be the case where we want our API calls
 	// to be sent through a separate HTTP proxy than external traffic.
-	if proxy != "" {
-		url, err := url.Parse(proxy)
+	if c.ProxyUrl != "" {
+		url, err := url.Parse(c.ProxyUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -64,11 +52,11 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(url)}
 	}
 
-	return gophercloud.Authenticate(provider, authoptions)
+	return gophercloud.Authenticate(c.Provider, authoptions)
 }
 
 func (c *AccessConfig) Region() string {
-	return c.RawRegion
+	return common.CoalesceVals(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
 }
 
 func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
