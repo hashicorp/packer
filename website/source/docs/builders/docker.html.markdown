@@ -17,7 +17,7 @@ containers with portable scripts or configuration management systems
 that are not tied to Docker in any way. It also has a simpler mental model:
 you provision containers much the same way you provision a normal virtualized
 or dedicated server. For more information, read the section on
-[Dockerfiles](#toc_3).
+[Dockerfiles](#toc_4).
 
 The Docker builder must run on a machine that has Docker installed. Therefore
 the builder only works on machines that support Docker (modern Linux machines).
