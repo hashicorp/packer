@@ -13,7 +13,7 @@ import (
 type AccessConfig struct {
 	Username  string `mapstructure:"username"`
 	Password  string `mapstructure:"password"`
-	ApiKey    string `mapstructure:"apiKey"`
+	ApiKey    string `mapstructure:"api_key"`
 	Project   string `mapstructure:"project"`
 	Provider  string `mapstructure:"provider"`
 	RawRegion string `mapstructure:"region"`
