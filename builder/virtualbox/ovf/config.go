@@ -51,6 +51,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
