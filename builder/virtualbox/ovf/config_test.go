@@ -13,6 +13,19 @@ func testConfig(t *testing.T) map[string]interface{} {
 	}
 }
 
+func getTempFile(t *testing.T) *os.File {
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Close()
+
+	// don't forget to cleanup the file downstream:
+	// defer os.Remove(tf.Name())
+
+	return tf
+}
+
 func testConfigErr(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
@@ -45,15 +58,28 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	testConfigErr(t, warns, errs)
 
 	// Good
-	tf, err := ioutil.TempFile("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	tf.Close()
+	tf := getTempFile(t)
 	defer os.Remove(tf.Name())
 
 	c = testConfig(t)
 	c["source_path"] = tf.Name()
+	_, warns, errs = NewConfig(c)
+	testConfigOk(t, warns, errs)
+}
+
+func TestNewConfig_shutdown_timeout(t *testing.T) {
+	c := testConfig(t)
+	tf := getTempFile(t)
+	defer os.Remove(tf.Name())
+
+	// Expect this to fail
+	c["source_path"] = tf.Name()
+	c["shutdown_timeout"] = "NaN"
+	_, warns, errs := NewConfig(c)
+	testConfigErr(t, warns, errs)
+
+	// Passes when given a valid time duration
+	c["shutdown_timeout"] = "10s"
 	_, warns, errs = NewConfig(c)
 	testConfigOk(t, warns, errs)
 }
