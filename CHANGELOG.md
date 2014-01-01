@@ -3,6 +3,7 @@
 BUG FIXES:
 
 * core: If a stream ID loops around, don't let it use stream ID 0 [GH-767]
+* builders/virtualbox-ovf: `shutdown_timeout` config works. [GH-772]
 
 ## 0.5.0 (12/30/2013)
 
