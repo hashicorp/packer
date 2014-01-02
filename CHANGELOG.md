@@ -3,6 +3,8 @@
 BUG FIXES:
 
 * core: If a stream ID loops around, don't let it use stream ID 0 [GH-767]
+* core: Fix issue where large writes to plugins would result in stream
+  corruption. [GH-727]
 * builders/virtualbox-ovf: `shutdown_timeout` config works. [GH-772]
 * builders/vmware-iso: Remote driver works properly again. [GH-773]
 
