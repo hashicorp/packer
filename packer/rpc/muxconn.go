@@ -100,7 +100,7 @@ func (m *MuxConn) Close() error {
 // Accept accepts a multiplexed connection with the given ID. This
 // will block until a request is made to connect.
 func (m *MuxConn) Accept(id uint32) (io.ReadWriteCloser, error) {
-	log.Printf("[TRACE] %p: Accept on stream ID: %d", m, id)
+	//log.Printf("[TRACE] %p: Accept on stream ID: %d", m, id)
 
 	// Get the stream. It is okay if it is already in the list of streams
 	// because we may have prematurely received a syn for it.
@@ -146,7 +146,7 @@ func (m *MuxConn) Accept(id uint32) (io.ReadWriteCloser, error) {
 // Dial opens a connection to the remote end using the given stream ID.
 // An Accept on the remote end will only work with if the IDs match.
 func (m *MuxConn) Dial(id uint32) (io.ReadWriteCloser, error) {
-	log.Printf("[TRACE] %p: Dial on stream ID: %d", m, id)
+	//log.Printf("[TRACE] %p: Dial on stream ID: %d", m, id)
 
 	m.muDial.Lock()
 
@@ -293,9 +293,6 @@ func (m *MuxConn) loop() {
 				return
 			} else {
 				n += n2
-				if n < int(length) {
-					log.Printf("[TRACE] %p: Stream %d read %d/%d bytes", m, id, n, length)
-				}
 			}
 		}
 
@@ -330,7 +327,7 @@ func (m *MuxConn) loop() {
 			continue
 		}
 
-		log.Printf("[TRACE] %p: Stream %d (%s) received packet %d", m, id, from, packetType)
+		//log.Printf("[TRACE] %p: Stream %d (%s) received packet %d", m, id, from, packetType)
 		switch packetType {
 		case muxPacketSyn:
 			// If the stream is nil, this is the only case where we'll
@@ -450,9 +447,6 @@ func (m *MuxConn) write(from muxPacketFrom, id uint32, dataType muxPacketType, p
 		var n2 int
 		n2, err = m.rwc.Write(p)
 		n += n2
-		if n < len(p) {
-			log.Printf("[TRACE] %p: Stream %d (%s) write %d/%d bytes", m, id, from, n, len(p))
-		}
 		if err != nil {
 			log.Printf("[ERR] %p: Stream %d (%s) write error: %s", m, id, from, err)
 			break
@@ -568,7 +562,7 @@ func (s *Stream) closeWriter() {
 }
 
 func (s *Stream) setState(state streamState) {
-	log.Printf("[TRACE] %p: Stream %d (%s) went to state %d", s.mux, s.id, s.from, state)
+	//log.Printf("[TRACE] %p: Stream %d (%s) went to state %d", s.mux, s.id, s.from, state)
 	s.state = state
 	s.stateUpdated = time.Now().UTC()
 	for ch, _ := range s.stateChange {
