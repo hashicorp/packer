@@ -100,7 +100,7 @@ func (m *MuxConn) Close() error {
 // Accept accepts a multiplexed connection with the given ID. This
 // will block until a request is made to connect.
 func (m *MuxConn) Accept(id uint32) (io.ReadWriteCloser, error) {
-	//log.Printf("[TRACE] %p: Accept on stream ID: %d", m, id)
+	log.Printf("[TRACE] %p: Accept on stream ID: %d", m, id)
 
 	// Get the stream. It is okay if it is already in the list of streams
 	// because we may have prematurely received a syn for it.
@@ -322,7 +322,7 @@ func (m *MuxConn) loop() {
 			continue
 		}
 
-		//log.Printf("[TRACE] %p: Stream %d (%s) received packet %d", m, id, from, packetType)
+		log.Printf("[TRACE] %p: Stream %d (%s) received packet %d", m, id, from, packetType)
 		switch packetType {
 		case muxPacketSyn:
 			// If the stream is nil, this is the only case where we'll
@@ -546,7 +546,7 @@ func (s *Stream) closeWriter() {
 }
 
 func (s *Stream) setState(state streamState) {
-	//log.Printf("[TRACE] %p: Stream %d (%s) went to state %d", s.mux, s.id, s.from, state)
+	log.Printf("[TRACE] %p: Stream %d (%s) went to state %d", s.mux, s.id, s.from, state)
 	s.state = state
 	s.stateUpdated = time.Now().UTC()
 	for ch, _ := range s.stateChange {
