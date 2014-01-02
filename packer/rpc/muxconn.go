@@ -146,6 +146,8 @@ func (m *MuxConn) Accept(id uint32) (io.ReadWriteCloser, error) {
 // Dial opens a connection to the remote end using the given stream ID.
 // An Accept on the remote end will only work with if the IDs match.
 func (m *MuxConn) Dial(id uint32) (io.ReadWriteCloser, error) {
+	log.Printf("[TRACE] %p: Dial on stream ID: %d", m, id)
+
 	m.muDial.Lock()
 
 	// If we have any streams with this ID, then it is a failure. The
