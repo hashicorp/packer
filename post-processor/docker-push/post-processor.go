@@ -129,5 +129,5 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
-	return nil, true, nil
+	return nil, false, nil
 }
