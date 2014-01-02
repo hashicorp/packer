@@ -214,6 +214,10 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 	return address, nil
 }
 
+//-------------------------------------------------------------------
+// OutputDir implementation
+//-------------------------------------------------------------------
+
 func (d *ESX5Driver) DirExists() (bool, error) {
 	err := d.sh("test", "-e", d.outputDir)
 	return err == nil, nil
@@ -256,6 +260,10 @@ func (d *ESX5Driver) RemoveAll() error {
 
 func (d *ESX5Driver) SetOutputDir(path string) {
 	d.outputDir = d.datastorePath(path)
+}
+
+func (d *ESX5Driver) String() string {
+	return d.outputDir
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
