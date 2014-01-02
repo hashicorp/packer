@@ -284,10 +284,13 @@ func (m *MuxConn) loop() {
 
 		// TODO(mitchellh): probably would be better to re-use a buffer...
 		data := make([]byte, length)
-		if length > 0 {
-			if _, err := m.rwc.Read(data); err != nil {
+		n := 0
+		for n < int(length) {
+			if n2, err := m.rwc.Read(data); err != nil {
 				log.Printf("[ERR] Error reading data: %s", err)
 				return
+			} else {
+				n += n2
 			}
 		}
 
@@ -434,10 +437,20 @@ func (m *MuxConn) write(from muxPacketFrom, id uint32, dataType muxPacketType, p
 	if err := binary.Write(m.rwc, binary.BigEndian, int32(len(p))); err != nil {
 		return 0, err
 	}
-	if len(p) == 0 {
-		return 0, nil
+
+	// Write all the bytes. If we don't write all the bytes, report an error
+	var err error = nil
+	n := 0
+	for n < len(p) {
+		var n2 int
+		n2, err = m.rwc.Write(p)
+		n += n2
+		if err != nil {
+			break
+		}
 	}
-	return m.rwc.Write(p)
+
+	return n, err
 }
 
 // Stream is a single stream of data and implements io.ReadWriteCloser.
