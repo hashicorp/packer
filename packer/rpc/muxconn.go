@@ -448,6 +448,7 @@ func (m *MuxConn) write(from muxPacketFrom, id uint32, dataType muxPacketType, p
 		n2, err = m.rwc.Write(p)
 		n += n2
 		if err != nil {
+			log.Printf("[ERR] %p: Stream %d (%s) write error: %s", m, id, from, err)
 			break
 		}
 	}
