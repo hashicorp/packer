@@ -288,11 +288,14 @@ func (m *MuxConn) loop() {
 		data := make([]byte, length)
 		n := 0
 		for n < int(length) {
-			if n2, err := m.rwc.Read(data); err != nil {
+			if n2, err := m.rwc.Read(data[n:]); err != nil {
 				log.Printf("[ERR] Error reading data: %s", err)
 				return
 			} else {
 				n += n2
+				if n < int(length) {
+					log.Printf("[TRACE] %p: Stream %d read %d/%d bytes", m, id, n, length)
+				}
 			}
 		}
 
@@ -447,7 +450,9 @@ func (m *MuxConn) write(from muxPacketFrom, id uint32, dataType muxPacketType, p
 		var n2 int
 		n2, err = m.rwc.Write(p)
 		n += n2
-		log.Printf("[TRACE] %p: Stream %d (%s) write %d/%d bytes", m, id, from, n, len(p))
+		if n < len(p) {
+			log.Printf("[TRACE] %p: Stream %d (%s) write %d/%d bytes", m, id, from, n, len(p))
+		}
 		if err != nil {
 			log.Printf("[ERR] %p: Stream %d (%s) write error: %s", m, id, from, err)
 			break
