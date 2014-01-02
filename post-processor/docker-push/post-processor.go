@@ -1,7 +1,6 @@
-package docker
+package dockerpush
 
 import (
-	"bytes"
 	"errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/packer"
@@ -38,18 +37,38 @@ func (p *PostProcessor) Configure(raw ...interface{}) error {
 
 	return nil
 }
+
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	id := artifact.Id()
-	ui.Say("Pushing imgage: " + id)
+	ui.Say("Pushing image: " + id)
 
-	// TODO: docker login
+	if p.config.Email == "" {
+		cmd := exec.Command("docker", "login",
+			"-u=\""+p.config.Username+"\"",
+			"-p=\""+p.config.Password+"\"")
 
-	stdout := new(bytes.Buffer)
+		if err := cmd.Run(); err != nil {
+			ui.Say("Login to the registry " + p.config.Registry + " failed")
+			return nil, false, err
+		}
+
+	} else {
+		cmd := exec.Command("docker",
+			"login",
+			"-u=\""+p.config.Username+"\"",
+			"-p=\""+p.config.Password+"\"",
+			"-e=\""+p.config.Email+"\"")
+
+		if err := cmd.Run(); err != nil {
+			ui.Say("Login to the registry " + p.config.Registry + " failed")
+			return nil, false, err
+		}
+
+	}
 	cmd := exec.Command("docker", "push", id)
-	cmd.Stdout = stdout
 	if err := cmd.Run(); err != nil {
 		ui.Say("Failed to push image: " + id)
-		return nil, true, err
+		return nil, false, err
 	}
 
 	return nil, true, nil

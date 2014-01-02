@@ -43,7 +43,7 @@ const defaultConfig = `
 	"post-processors": {
 		"vagrant": "packer-post-processor-vagrant",
 		"vsphere": "packer-post-processor-vsphere",
-                "docker": "packer-post-processor-docker"
+                "docker-push": "packer-post-processor-docker-push"
 	},
 
 	"provisioners": {

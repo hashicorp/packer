@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/mitchellh/packer/packer/plugin"
-	"github.com/mitchellh/packer/post-processor/docker"
+	"github.com/mitchellh/packer/post-processor/docker-push"
 )
 
 func main() {
@@ -10,6 +10,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterPostProcessor(new(docker.PostProcessor))
+	server.RegisterPostProcessor(new(dockerpush.PostProcessor))
 	server.Serve()
 }
