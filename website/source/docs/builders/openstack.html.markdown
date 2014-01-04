@@ -37,7 +37,8 @@ Required:
 
 * `provider` (string) - The provider used to connect to the OpenStack service.
   If not specified, Packer will attempt to read this from the
-  `SDK_PROVIDER` environment variable.
+  `SDK_PROVIDER` environment variable. For Rackspace this should be `rackspace-us`
+  or `rackspace-uk`.
 
 * `region` (string) - The name of the region, such as "DFW", in which
   to launch the server to create the AMI.
@@ -74,7 +75,7 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "type": "openstack",
   "username": "",
   "password": "",
-  "provider": "",
+  "provider": "rackspace-us",
   "region": "DFW",
   "ssh_username": "root",
   "image_name": "Test image",
