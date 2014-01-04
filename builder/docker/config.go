@@ -29,6 +29,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, err
 	}
 
+	c.tpl.UserVars = c.PackerUserVars
+
 	// Defaults
 	if len(c.RunCommand) == 0 {
 		c.RunCommand = []string{
