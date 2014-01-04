@@ -1,6 +1,8 @@
 ## 0.5.2 (unreleased)
 
+BUG FIXES:
 
+* builders/docker: user variables work properly. [GH-777]
 
 ## 0.5.1 (01/02/2014)
 
