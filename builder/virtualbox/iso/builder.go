@@ -175,19 +175,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
-	if b.config.ISOChecksum == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-	} else {
-		b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
-	}
-
 	if b.config.ISOChecksumType == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("The iso_checksum_type must be specified."))
 	} else {
 		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
 		if b.config.ISOChecksumType != "none" {
+			if b.config.ISOChecksum == "" {
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
+			} else {
+				b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
+			}
+
 			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
 				errs = packer.MultiErrorAppend(
 					errs,
