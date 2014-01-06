@@ -3,6 +3,8 @@
 BUG FIXES:
 
 * builders/docker: user variables work properly. [GH-777]
+* builder/virtualbox,vmware: iso\_checksum is not required if the
+  checksum type is "none"
 
 ## 0.5.1 (01/02/2014)
 
