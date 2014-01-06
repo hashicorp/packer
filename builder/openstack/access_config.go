@@ -15,6 +15,7 @@ import (
 type AccessConfig struct {
 	Username  string `mapstructure:"username"`
 	Password  string `mapstructure:"password"`
+	ApiKey    string `mapstructure:"api_key"`
 	Project   string `mapstructure:"project"`
 	Provider  string `mapstructure:"provider"`
 	RawRegion string `mapstructure:"region"`
@@ -26,6 +27,7 @@ type AccessConfig struct {
 func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	c.Username = common.CoalesceVals(c.Username, os.Getenv("SDK_USERNAME"), os.Getenv("OS_USERNAME"))
 	c.Password = common.CoalesceVals(c.Password, os.Getenv("SDK_PASSWORD"), os.Getenv("OS_PASSWORD"))
+	c.ApiKey = common.CoalesceVals(c.ApiKey, os.Getenv("SDK_API_KEY"))
 	c.Project = common.CoalesceVals(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
 	c.Provider = common.CoalesceVals(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
 	c.RawRegion = common.CoalesceVals(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
@@ -40,6 +42,7 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	authoptions := gophercloud.AuthOptions{
 		Username:    c.Username,
 		Password:    c.Password,
+		ApiKey:      c.ApiKey,
 		AllowReauth: true,
 	}
 
@@ -79,6 +82,7 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	templates := map[string]*string{
 		"username": &c.Username,
 		"password": &c.Password,
+		"apiKey":   &c.ApiKey,
 		"provider": &c.Provider,
 	}
 
