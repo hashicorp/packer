@@ -36,14 +36,14 @@ Required:
 Optional:
 
 * `image_id` (int) - The ID of the base image to use. This is the image that
-  will be used to launch a new droplet and provision it. Defaults to "284203",
-  which happens to be "Ubuntu 12.04 x64 Server."
+  will be used to launch a new droplet and provision it. Defaults to "1505447",
+  which happens to be "Ubuntu 12.04.3 x64 Server."
 
 * `region_id` (int) - The ID of the region to launch the droplet in. Consequently,
   this is the region where the snapshot will be available. This defaults to
-  "1", which is "New York."
+  "1", which is "New York 1."
 
-* `size_id` (int) - The ID of the droplet size to use. This defaults to "66,"
+* `size_id` (int) - The ID of the droplet size to use. This defaults to "66",
   which is the 512MB droplet.
 
 * `private_networking` (bool) - Set to `true` to enable private networking
