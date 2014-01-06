@@ -67,6 +67,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	id := artifact.Id()
 	ui.Say("Importing image: " + id)
 
+	// TODO Set artifact ID so that docker-push can use it
+
 	if p.config.Tag == "" {
 
 		cmd := exec.Command("docker",
@@ -142,39 +144,76 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Process Dockerfile if provided
 	if p.config.Dockerfile != "" {
 
-		cmd := exec.Command("docker", "build", id)
+		if p.config.Tag != "" {
 
-		stdin, err := cmd.StdinPipe()
+			cmd := exec.Command("docker", "build", "-t="+p.config.Repository+":"+p.config.Tag, "-")
 
-		if err != nil {
-			return nil, false, err
+			stdin, err := cmd.StdinPipe()
+
+			if err != nil {
+				return nil, false, err
+			}
+
+			// open Dockerfile
+			file, err := os.Open(p.config.Dockerfile)
+
+			if err != nil {
+				ui.Say("Could not open Dockerfile: " + p.config.Dockerfile)
+				return nil, false, err
+			}
+
+			ui.Say(id)
+
+			defer file.Close()
+
+			if err := cmd.Start(); err != nil {
+				ui.Say("Failed to build image: " + id)
+				return nil, false, err
+			}
+
+			go func() {
+				io.Copy(stdin, file)
+				// close stdin so that program will exit
+				stdin.Close()
+			}()
+
+			cmd.Wait()
+
+		} else {
+
+			cmd := exec.Command("docker", "build", "-t="+p.config.Repository, "-")
+
+			stdin, err := cmd.StdinPipe()
+
+			if err != nil {
+				return nil, false, err
+			}
+
+			// open Dockerfile
+			file, err := os.Open(p.config.Dockerfile)
+
+			if err != nil {
+				ui.Say("Could not open Dockerfile: " + p.config.Dockerfile)
+				return nil, false, err
+			}
+
+			ui.Say(id)
+
+			defer file.Close()
+
+			if err := cmd.Start(); err != nil {
+				ui.Say("Failed to build image: " + id)
+				return nil, false, err
+			}
+
+			go func() {
+				io.Copy(stdin, file)
+				// close stdin so that program will exit
+				stdin.Close()
+			}()
+
+			cmd.Wait()
 		}
-
-		// open Dockerfile
-		file, err := os.Open(p.config.Dockerfile)
-
-		if err != nil {
-			ui.Say("Could not open Dockerfile: " + p.config.Dockerfile)
-			return nil, false, err
-		}
-
-		defer file.Close()
-
-		if err := cmd.Start(); err != nil {
-			ui.Say("Failed to build image: " + id)
-			return nil, false, err
-		}
-
-		go func() {
-			io.Copy(stdin, file)
-			// close stdin so that program will exit
-			stdin.Close()
-		}()
-
-		cmd.Wait()
-
-		// TODO make sure we re-tag instead of create new image
-		// automatically use previous image as base of new image
 
 	}
 	return nil, false, nil
