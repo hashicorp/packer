@@ -173,6 +173,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		cmd.Wait()
 
+		// TODO make sure we re-tag instead of create new image
+		// automatically use previous image as base of new image
+
 	}
 	return nil, false, nil
 }
