@@ -143,12 +143,35 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if p.config.Dockerfile != "" {
 
 		cmd := exec.Command("docker", "build", id)
-		if err := cmd.Run(); err != nil {
+
+		stdin, err := cmd.StdinPipe()
+
+		if err != nil {
+			return nil, false, err
+		}
+
+		// open Dockerfile
+		file, err := os.Open(p.config.Dockerfile)
+
+		if err != nil {
+			ui.Say("Could not open Dockerfile: " + p.config.Dockerfile)
+			return nil, false, err
+		}
+
+		defer file.Close()
+
+		if err := cmd.Start(); err != nil {
 			ui.Say("Failed to build image: " + id)
 			return nil, false, err
 		}
 
-		// TODO implement dockerfile provisioning
+		go func() {
+			io.Copy(stdin, file)
+			// close stdin so that program will exit
+			stdin.Close()
+		}()
+
+		cmd.Wait()
 
 	}
 	return nil, false, nil
