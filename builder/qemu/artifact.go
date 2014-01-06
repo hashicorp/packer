@@ -8,8 +8,9 @@ import (
 // Artifact is the result of running the Qemu builder, namely a set
 // of files associated with the resulting machine.
 type Artifact struct {
-	dir string
-	f   []string
+	dir  string
+	f    []string
+	state map[string]interface{}
 }
 
 func (*Artifact) BuilderId() string {
@@ -29,7 +30,7 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	return a.state[name]
 }
 
 func (a *Artifact) Destroy() error {
