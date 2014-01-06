@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 // AccessConfig is for common configuration related to openstack access
@@ -28,6 +29,13 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	c.Project = common.CoalesceVals(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
 	c.Provider = common.CoalesceVals(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
 	c.RawRegion = common.CoalesceVals(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
+
+	// OpenStack's auto-generated openrc.sh files do not append the suffix
+	// /tokens to the authentication URL. This ensures it is present when
+	// specifying the URL.
+	if strings.Contains(c.Provider, "://") && !strings.HasSuffix(c.Provider, "/tokens") {
+		c.Provider += "/tokens"
+	}
 
 	authoptions := gophercloud.AuthOptions{
 		Username:    c.Username,
@@ -84,7 +92,7 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
-	if c.RawRegion == "" {
+	if c.Region() == "" {
 		errs = append(errs, fmt.Errorf("region must be specified"))
 	}
 
