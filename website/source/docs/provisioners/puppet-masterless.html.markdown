@@ -88,6 +88,7 @@ for readability) to execute Puppet:
   --modulepath='{{.ModulePath}}' \
   {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
   {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}} \
+  --detailed-exitcodes \
   {{.ManifestFile}}
 ```
 
