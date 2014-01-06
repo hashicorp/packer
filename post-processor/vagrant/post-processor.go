@@ -23,6 +23,7 @@ var builtins = map[string]string{
 	"pearkes.digitalocean":      "digitalocean",
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",
+	"transcend.qemu":            "libvirt",
 }
 
 type Config struct {
@@ -223,6 +224,8 @@ func providerForName(name string) Provider {
 		return new(ParallelsProvider)
 	case "hyperv":
 		return new(HypervProvider)
+	case "libvirt":
+		return new(LibVirtProvider)
 	default:
 		return nil
 	}
