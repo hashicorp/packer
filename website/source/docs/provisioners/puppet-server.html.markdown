@@ -1,9 +1,9 @@
 ---
 layout: "docs"
-page_title: "Puppet Provisioner"
+page_title: "Puppet Server Provisioner"
 ---
 
-# Puppet Provisioner
+# Puppet Server Provisioner
 
 Type: `puppet-server`
 

@@ -23,10 +23,17 @@ type Config struct {
 	// A path to a directory containing the client private keys
 	ClientPrivateKeyPath string `mapstructure:"client_private_key_path"`
 
-	PuppetNode   string `mapstructure:"puppet_node"`
-	PuppetServer string `mapstructure:"puppet_server"`
-	Options      string `mapstructure:"options"`
+	// The hostname of the Puppet node.
+	PuppetNode string `mapstructure:"puppet_node"`
 
+	// The hostname of the Puppet server.
+	PuppetServer string `mapstructure:"puppet_server"`
+
+	// Additional options to be passed to `puppet agent`.
+	Options string `mapstructure:"options"`
+
+	// The directory where files will be uploaded. Packer requires write
+	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_dir"`
 }
 
