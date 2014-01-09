@@ -32,6 +32,9 @@ type Config struct {
 	// Additional options to be passed to `puppet agent`.
 	Options string `mapstructure:"options"`
 
+	// If true, `sudo` will NOT be used to execute Puppet.
+	PreventSudo bool `mapstructure:"prevent_sudo"`
+
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_dir"`
@@ -48,6 +51,7 @@ type ExecuteTemplate struct {
 	PuppetNode           string
 	PuppetServer         string
 	Options              string
+	Sudo                 bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -182,6 +186,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		PuppetNode:           p.config.PuppetNode,
 		PuppetServer:         p.config.PuppetServer,
 		Options:              p.config.Options,
+		Sudo:                 !p.config.PreventSudo,
 	})
 	if err != nil {
 		return err
@@ -240,7 +245,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 }
 
 func (p *Provisioner) commandTemplate() string {
-	return "{{.FacterVars}} " +
+	return "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 		"puppet agent --onetime --no-daemonize " +
 		"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
 		"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
