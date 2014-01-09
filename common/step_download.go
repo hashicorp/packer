@@ -70,6 +70,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
+			UserAgent:  packer.VersionString(),
 		}
 
 		path, err, retry := s.download(config, state)
