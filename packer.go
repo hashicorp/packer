@@ -99,7 +99,7 @@ func wrappedMain() int {
 	// defaults to putting the cache in the HOME directory
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {
-		cacheDir = os.Getenv("HOME") + "packer_cache"
+		cacheDir = os.Getenv("HOME") + "./packer_cache"
 	}
 
 	cacheDir, err = filepath.Abs(cacheDir)
