@@ -5,7 +5,7 @@ page_title: "VirtualBox Builder (from an ISO)"
 
 # VirtualBox Builder (from an ISO)
 
-Type: `virtualbox`
+Type: `virtualbox-iso`
 
 The VirtualBox builder is able to create [VirtualBox](https://www.virtualbox.org/)
 virtual machines and export them in the OVF format, starting from an
