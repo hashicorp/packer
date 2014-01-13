@@ -15,9 +15,9 @@ import (
 const KeyLeftShift uint32 = 0xFFE1
 
 type bootCommandTemplateData struct {
-	HTTPIP   string
+	HTTPIP	 string
 	HTTPPort uint
-	Name     string
+	Name	 string
 }
 
 // This step "types" the boot command into the VM over VNC.
@@ -118,16 +118,16 @@ func scancodes(message string) []string {
 	special["<f10>"] = []string{"44", "c4"}
 	special["<return>"] = []string{"1c", "9c"}
 	special["<tab>"] = []string{"0f", "8f"}
-        special["<up>"] = []string{"48", "c8"}
-        special["<down>"] = []string{"50", "d0"}
-        special["<left>"] = []string{"4b", "cb"}
-        special["<right>"] = []string{"4d", "cd"}
-        special["<spacebar>"] = []string{"39", "b9"}
-        special["<insert>"] = []string{"52", "d2"}
-        special["<home>"] = []string{"47", "c7"}
-        special["<end>"] = []string{"4f", "cf"}
-        special["<pageUp>"] = []string{"49", "c9"}
-        special["<pageDown>"] = []string{"51", "d1"}
+	special["<up>"] = []string{"48", "c8"}
+	special["<down>"] = []string{"50", "d0"}
+	special["<left>"] = []string{"4b", "cb"}
+	special["<right>"] = []string{"4d", "cd"}
+	special["<spacebar>"] = []string{"39", "b9"}
+	special["<insert>"] = []string{"52", "d2"}
+	special["<home>"] = []string{"47", "c7"}
+	special["<end>"] = []string{"4f", "cf"}
+	special["<pageUp>"] = []string{"49", "c9"}
+	special["<pageDown>"] = []string{"51", "d1"}
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
