@@ -10,10 +10,12 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Registry string `mapstructure:"registry"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
-	Email    string `mapstructure:"email"`
+	Repository string `mapstructure:"repository"`
+	Tag        string `mapstructure:"tag"`
+	Registry   string `mapstructure:"registry"`
+	Username   string `mapstructure:"username"`
+	Password   string `mapstructure:"password"`
+	Email      string `mapstructure:"email"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -38,8 +40,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	errs := new(packer.MultiError)
 
 	templates := map[string]*string{
-		"username": &p.config.Username,
-		"password": &p.config.Password,
+		"username":   &p.config.Username,
+		"password":   &p.config.Password,
+		"repository": &p.config.Repository,
 	}
 
 	for key, ptr := range templates {
@@ -123,10 +126,22 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 	}
 
-	cmd := exec.Command("docker", "push", id)
-	if err := cmd.Run(); err != nil {
-		ui.Say("Failed to push image: " + id)
-		return nil, false, err
+	if p.config.Tag != "" {
+
+		cmd := exec.Command("docker", "push", p.config.Repository+":"+p.config.Tag)
+		if err := cmd.Run(); err != nil {
+			ui.Say("Failed to push image: " + id)
+			return nil, false, err
+		}
+
+	} else {
+
+		cmd := exec.Command("docker", "push", p.config.Repository)
+		if err := cmd.Run(); err != nil {
+			ui.Say("Failed to push image: " + id)
+			return nil, false, err
+		}
+
 	}
 
 	return nil, false, nil
