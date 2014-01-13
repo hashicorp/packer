@@ -95,11 +95,16 @@ func wrappedMain() int {
 
 	log.Printf("Packer config: %+v", config)
 
+	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	// Checks for packer cache environment variable,
 	// defaults to putting the cache in the HOME directory
-	cacheDir := os.Getenv("PACKER_CACHE_DIR")
+	// Places the cache in %TEMP% on windows
 	if cacheDir == "" {
-		cacheDir = os.Getenv("HOME") + "./packer_cache"
+		if runtime.GOOS == "windows" {
+			cacheDir = filepath.Join(os.Getenv("TEMP"),"packer_cache")
+		} else {
+			cacheDir = filepath.Join(os.Getenv("HOME"),".packer_cache")
+		}
 	}
 
 	cacheDir, err = filepath.Abs(cacheDir)
