@@ -67,8 +67,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	id := artifact.Id()
 	ui.Say("Importing image: " + id)
 
-	// TODO Set artifact ID so that docker-push can use it
-
 	if p.config.Tag == "" {
 
 		cmd := exec.Command("docker",
