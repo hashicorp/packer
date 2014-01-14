@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"sort"
 	"text/template"
 	"time"
@@ -91,7 +92,9 @@ type RawVariable struct {
 // The second parameter, vars, are the values for a set of user variables.
 func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error) {
 	var rawTplInterface interface{}
-	err = jsonutil.Unmarshal(data, &rawTplInterface)
+	re := regexp.MustCompile("(?s)//.*?\n|/\\*.*?\\*/")
+	filteredData := re.ReplaceAll(data, nil)
+	err = jsonutil.Unmarshal(filteredData, &rawTplInterface)
 	if err != nil {
 		return
 	}
