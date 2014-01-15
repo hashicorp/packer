@@ -15,66 +15,65 @@ import (
 // The unique ID for this builder
 const BuilderId = "mitchellh.openstack"
 
-type config struct {
+type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	AccessConfig        `mapstructure:",squash"`
 	ImageConfig         `mapstructure:",squash"`
 	RunConfig           `mapstructure:",squash"`
 
-	tpl *packer.ConfigTemplate
+	Tpl *packer.ConfigTemplate
 }
 
 type Builder struct {
-	config config
-	runner multistep.Runner
+	Config Config
+	Runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	md, err := common.DecodeConfig(&b.Config, raws...)
 	if err != nil {
 		return nil, err
 	}
 
-	b.config.tpl, err = packer.NewConfigTemplate()
+	b.Config.Tpl, err = packer.NewConfigTemplate()
 	if err != nil {
 		return nil, err
 	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
+	b.Config.Tpl.UserVars = b.Config.PackerUserVars
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ImageConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.Config.AccessConfig.Prepare(b.Config.Tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.Config.ImageConfig.Prepare(b.Config.Tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.Config.RunConfig.Prepare(b.Config.Tpl)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.Password))
+	log.Println(common.ScrubConfig(b.Config, b.Config.Password))
 	return nil, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	auth, err := b.config.AccessConfig.Auth()
+	auth, err := b.Config.AccessConfig.Auth()
 	if err != nil {
 		return nil, err
 	}
 	api := &gophercloud.ApiCriteria{
-		Name:      "cloudServersOpenStack",
-		Region:    b.config.AccessConfig.Region(),
-		VersionId: "2",
+		Region:    b.Config.AccessConfig.Region(),
 		UrlChoice: gophercloud.PublicURL,
 	}
+	
 	csp, err := gophercloud.ServersApi(auth, *api)
 	if err != nil {
-		log.Printf("Region: %s", b.config.AccessConfig.Region())
+		log.Printf("Region: %s", b.Config.AccessConfig.Region())
 		return nil, err
 	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", b.Config)
 	state.Put("csp", csp)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -82,34 +81,34 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&StepKeyPair{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
+			Debug:        b.Config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.Config.PackerBuildName),
 		},
 		&StepRunSourceServer{
-			Name:        b.config.ImageName,
-			Flavor:      b.config.Flavor,
-			SourceImage: b.config.SourceImage,
+			Name:        b.Config.ImageName,
+			Flavor:      b.Config.Flavor,
+			SourceImage: b.Config.SourceImage,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(csp, b.config.SSHPort),
-			SSHConfig:      SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
+			SSHAddress:     SSHAddress(csp, b.Config.SSHPort),
+			SSHConfig:      SSHConfig(b.Config.SSHUsername),
+			SSHWaitTimeout: b.Config.SSHTimeout(),
 		},
 		&common.StepProvision{},
-		&stepCreateImage{},
+		&StepCreateImage{},
 	}
 
 	// Run!
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
+	if b.Config.PackerDebug {
+		b.Runner = &multistep.DebugRunner{
 			Steps:   steps,
 			PauseFn: common.MultistepDebugFn(ui),
 		}
 	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
+		b.Runner = &multistep.BasicRunner{Steps: steps}
 	}
 
-	b.runner.Run(state)
+	b.Runner.Run(state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -132,8 +131,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 }
 
 func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
+	if b.Runner != nil {
+		log.Println("Cancelling the step Runner...")
+		b.Runner.Cancel()
 	}
 }

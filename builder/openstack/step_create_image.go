@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-type stepCreateImage struct{}
+type StepCreateImage struct{}
 
-func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	csp := state.Get("csp").(gophercloud.CloudServersProvider)
-	config := state.Get("config").(config)
+	config := state.Get("config").(Config)
 	server := state.Get("server").(*gophercloud.Server)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -46,7 +46,7 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateImage) Cleanup(multistep.StateBag) {
+func (s *StepCreateImage) Cleanup(multistep.StateBag) {
 	// No cleanup...
 }
 

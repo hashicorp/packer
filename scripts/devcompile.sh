@@ -56,4 +56,14 @@ export XC_OS=$(go env GOOS)
 ./scripts/compile.sh
 
 # Move all the compiled things to the PATH
+
 cp pkg/${XC_OS}_${XC_ARCH}/* ${GOPATH}/bin
+case $(uname) in
+    CYGWIN*)
+        GOPATH="$(cygpath $GOPATH)"
+        ;;
+esac
+
+IFS=: MAIN_GOPATH=( $GOPATH )
+cp pkg/${XC_OS}_${XC_ARCH}/* ${MAIN_GOPATH}/bin
+
