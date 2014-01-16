@@ -28,16 +28,10 @@ Follow the steps below:
 2. Click on the project you want to use Packer with (or create one if you
    don't have one yet).
 3. Click "APIs & auth" in the left sidebar
-4. Click "Registered apps" in the left sidebar
-5. Click "Register App" and register a "Web Application". Choose any
-   name you'd like.
-7. After creating the app, click "Certificate" (below the OAuth 2.0 Client
-   ID section), and click "Download JSON". This is your _client secrets JSON_
-   file. Make sure you didn't download the JSON from the "OAuth 2.0" section!
-   This is a common mistake and will cause the builder to not work.
-8. Next, click "Generate Certificate". You should be prompted to download
-   a private key. Note the password for the private key! This private key
-   is your _client private key_.
+4. Click "Credentials" in the left sidebar
+5. Click "Create New Client ID" and choose "Service Account"
+6. A private key will be downloaded for you. Note the password for the private key! This private key is your _client private key_.
+7. After creating the account, click "Download JSON". This is your _client secrets JSON_ file. Make sure you didn't download the JSON from the "OAuth 2.0" section! This is a common mistake and will cause the builder to not work.
 
 Finally, one last step, you'll have to convert the `p12` file you
 got from Google into the PEM format. You can do this with OpenSSL, which
