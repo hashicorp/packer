@@ -88,9 +88,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepRunSourceServer{
-			Name:        b.config.ImageName,
-			Flavor:      b.config.Flavor,
-			SourceImage: b.config.SourceImage,
+			Name:           b.config.ImageName,
+			Flavor:         b.config.Flavor,
+			SourceImage:    b.config.SourceImage,
+			SecurityGroups: b.config.SecurityGroups,
 		},
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
