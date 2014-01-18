@@ -137,7 +137,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 		for _, src := range p.config.PlaybookPaths {
 			dst := filepath.Join(p.config.StagingDir, "playbooks", filepath.Base(src))
-			if err := p.uploadFile(ui, comm, dst, src); err != nil {
+			if err := p.uploadDir(ui, comm, dst, src); err != nil {
 				return fmt.Errorf("Error uploading playbooks: %s", err)
 			}
 		}
