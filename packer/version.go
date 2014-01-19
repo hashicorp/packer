@@ -39,6 +39,9 @@ func (versionCommand) Synopsis() string {
 	return "print Packer version"
 }
 
+// VersionString returns the Packer version in human-readable
+// form complete with pre-release and git commit info if it is
+// available.
 func VersionString() string {
 	var versionString bytes.Buffer
 	fmt.Fprintf(&versionString, "Packer v%s", Version)
