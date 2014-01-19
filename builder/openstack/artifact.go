@@ -35,6 +35,10 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("An image was created: %v", a.ImageId)
 }
 
+func (a *Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *Artifact) Destroy() error {
 	log.Printf("Destroying image: %d", a.ImageId)
 	return a.Conn.DeleteImageById(a.ImageId)
