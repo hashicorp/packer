@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -38,6 +40,91 @@ func TestDownloadClient_VerifyChecksum(t *testing.T) {
 
 	if !result {
 		t.Fatal("didn't verify")
+	}
+}
+
+func TestDownloadClientUsesDefaultUserAgent(t *testing.T) {
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("tempfile error: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	defaultUserAgent := ""
+	asserted := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if defaultUserAgent == "" {
+			defaultUserAgent = r.UserAgent()
+		} else {
+			incomingUserAgent := r.UserAgent()
+			if incomingUserAgent != defaultUserAgent {
+				t.Fatalf("Expected user agent %s, got: %s", defaultUserAgent, incomingUserAgent)
+			}
+
+			asserted = true
+		}
+	}))
+
+	req, err := http.NewRequest("GET", server.URL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
+
+	_, err = httpClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	config := &DownloadConfig{
+		Url:        server.URL,
+		TargetPath: tf.Name(),
+	}
+
+	client := NewDownloadClient(config)
+	_, err = client.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !asserted {
+		t.Fatal("User-Agent never observed")
+	}
+}
+
+func TestDownloadClientSetsUserAgent(t *testing.T) {
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("tempfile error: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	asserted := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		asserted = true
+		if r.UserAgent() != "fancy user agent" {
+			t.Fatalf("Expected useragent fancy user agent, got: %s", r.UserAgent())
+		}
+	}))
+	config := &DownloadConfig{
+		Url:        server.URL,
+		TargetPath: tf.Name(),
+		UserAgent:  "fancy user agent",
+	}
+
+	client := NewDownloadClient(config)
+	_, err = client.Get()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !asserted {
+		t.Fatal("HTTP request never made")
 	}
 }
 

@@ -31,6 +31,15 @@ func (versionCommand) Run(env Environment, args []string) int {
 	env.Ui().Machine("version-prelease", VersionPrerelease)
 	env.Ui().Machine("version-commit", GitCommit)
 
+	env.Ui().Say(VersionString())
+	return 0
+}
+
+func (versionCommand) Synopsis() string {
+	return "print Packer version"
+}
+
+func VersionString() string {
 	var versionString bytes.Buffer
 	fmt.Fprintf(&versionString, "Packer v%s", Version)
 	if VersionPrerelease != "" {
@@ -41,10 +50,5 @@ func (versionCommand) Run(env Environment, args []string) int {
 		}
 	}
 
-	env.Ui().Say(versionString.String())
-	return 0
-}
-
-func (versionCommand) Synopsis() string {
-	return "print Packer version"
+  return versionString.String()
 }
