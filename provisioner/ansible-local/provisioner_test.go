@@ -121,25 +121,25 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	config["group_vars"] = []string{playbook_file.Name()}
+	config["group_vars"] = playbook_file.Name()
 	err = p.Prepare(config)
-	if err != nil {
+	if err == nil {
 		t.Fatalf("should error if group_vars path is not a dir")
 	}
 
-	config["group_vars"] = []string{os.TempDir()}
+	config["group_vars"] = os.TempDir()
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	config["host_vars"] = []string{playbook_file.Name()}
+	config["host_vars"] = playbook_file.Name()
 	err = p.Prepare(config)
-	if err != nil {
+	if err == nil {
 		t.Fatalf("should error if host_vars path is not a dir")
 	}
 
-	config["host_vars"] = []string{os.TempDir()}
+	config["host_vars"] = os.TempDir()
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
