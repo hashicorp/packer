@@ -2,6 +2,7 @@
 
 BUG FIXES:
 
+* core: Fix crash case if blank parameters are given to Packer. [GH-832]
 * builders/docker: user variables work properly. [GH-777]
 * builder/virtualbox,vmware: iso\_checksum is not required if the
   checksum type is "none"

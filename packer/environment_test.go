@@ -198,7 +198,14 @@ func TestEnvironment_Cli_CallsRun(t *testing.T) {
 func TestEnvironment_DefaultCli_Empty(t *testing.T) {
 	defaultEnv := testEnvironment()
 
+	// Test with no args
 	exitCode, _ := defaultEnv.Cli([]string{})
+	if exitCode != 1 {
+		t.Fatalf("bad: %d", exitCode)
+	}
+
+	// Test with only blank args
+	exitCode, _ = defaultEnv.Cli([]string{""})
 	if exitCode != 1 {
 		t.Fatalf("bad: %d", exitCode)
 	}
