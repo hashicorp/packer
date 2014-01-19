@@ -1,5 +1,9 @@
 ## 0.5.2 (unreleased)
 
+IMPROVEMENTS:
+
+* core: Most downloads made by Packer now use a custom user agent. [GH-803]
+
 BUG FIXES:
 
 * core: Fix crash case if blank parameters are given to Packer. [GH-832]
