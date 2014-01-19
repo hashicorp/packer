@@ -52,6 +52,10 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
 }
 
+func (a *Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *Artifact) Destroy() error {
 	errors := make([]error, 0)
 

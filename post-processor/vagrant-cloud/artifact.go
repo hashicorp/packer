@@ -34,6 +34,10 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("'%s': %s", a.Provider, a.Tag)
 }
 
+func (*Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *Artifact) Destroy() error {
 	return nil
 }

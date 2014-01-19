@@ -56,6 +56,10 @@ func (a *localArtifact) String() string {
 	return fmt.Sprintf("VM files in directory: %s", a.dir)
 }
 
+func (a *localArtifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *localArtifact) Destroy() error {
 	return os.RemoveAll(a.dir)
 }
