@@ -37,6 +37,10 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("A snapshot was created: '%v' in region '%v'", a.snapshotName, a.regionName)
 }
 
+func (a *Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *Artifact) Destroy() error {
 	log.Printf("Destroying image: %d (%s)", a.snapshotId, a.snapshotName)
 	return a.client.DestroyImage(a.snapshotId)

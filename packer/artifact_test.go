@@ -2,6 +2,7 @@ package packer
 
 type TestArtifact struct {
 	id            string
+	state         map[string]interface{}
 	destroyCalled bool
 }
 
@@ -24,6 +25,11 @@ func (a *TestArtifact) Id() string {
 
 func (*TestArtifact) String() string {
 	return "string"
+}
+
+func (a *TestArtifact) State(name string) interface{} {
+	value, _ := a.state[name]
+	return value
 }
 
 func (a *TestArtifact) Destroy() error {
