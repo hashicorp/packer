@@ -24,6 +24,12 @@ type Config struct {
 	// An array of local paths of roles to upload.
 	RolePaths []string `mapstructure:"role_paths"`
 
+	// Path to group_vars directory
+	GroupVars string `mapstructure:"group_vars"`
+
+	// Path to host_vars directory
+	HostVars string `mapstructure:"host_vars"`
+
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
@@ -69,6 +75,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"playbook_file": &p.config.PlaybookFile,
 		"staging_dir":   &p.config.StagingDir,
 		"command":       &p.config.Command,
+		"group_vars":    &p.config.GroupVars,
+		"host_vars":     &p.config.HostVars,
 	}
 
 	for n, ptr := range templates {
@@ -113,6 +121,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
+
+	// Check that the group_vars directory exists, if configured
+	if len(p.config.GroupVars) > 0 {
+		if err := validateDirConfig(p.config.GroupVars, "group_vars"); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	// Check that the host_vars directory exists, if configured
+	if len(p.config.HostVars) > 0 {
+		if err := validateDirConfig(p.config.HostVars, "host_vars"); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -132,6 +154,26 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	dst := filepath.Join(p.config.StagingDir, filepath.Base(src))
 	if err := p.uploadFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
+	}
+
+	// Upload group_vars
+	if len(p.config.GroupVars) > 0 {
+		ui.Message("Uploading group_vars directory...")
+		src := p.config.GroupVars
+		dst := filepath.Join(p.config.StagingDir, "group_vars")
+		if err := p.uploadDir(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading group_vars directory: %s", err)
+		}
+	}
+
+	// Upload host_vars
+	if len(p.config.HostVars) > 0 {
+		ui.Message("Uploading host_vars directory...")
+		src := p.config.HostVars
+		dst := filepath.Join(p.config.StagingDir, "host_vars")
+		if err := p.uploadDir(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading host_vars directory: %s", err)
+		}
 	}
 
 	if len(p.config.RolePaths) > 0 {
