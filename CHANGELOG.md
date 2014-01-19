@@ -6,6 +6,8 @@ BUG FIXES:
 * builders/docker: user variables work properly. [GH-777]
 * builder/virtualbox,vmware: iso\_checksum is not required if the
   checksum type is "none"
+* builder/virtualbox,vmware/qemu: Support for additional scancodes for
+  `boot_command` such as `<up>`, `<left>`, `<insert>`, etc. [GH-808]
 * provisioners/ansible-local: Properly upload custom playbooks. [GH-829]
 
 ## 0.5.1 (01/02/2014)
