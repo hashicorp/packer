@@ -62,8 +62,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	templates := map[string]*string{
 		"playbook_file": &p.config.PlaybookFile,
 		"staging_dir":   &p.config.StagingDir,
-		"group_vars":   &p.config.GroupVars,
-		"host_vars":	&p.config.HostVars,
+		"group_vars":    &p.config.GroupVars,
+		"host_vars":     &p.config.HostVars,
 	}
 
 	for n, ptr := range templates {
@@ -93,7 +93,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	varTemplates := map[string]*string{
 		"group_vars": &p.config.GroupVars,
-		"host_vars": &p.config.HostVars,
+		"host_vars":  &p.config.HostVars,
 	}
 	for n, ptr := range varTemplates {
 		var err error
