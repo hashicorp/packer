@@ -1,18 +1,22 @@
 package dockerimport
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 )
+
+const BuilderId = "packer.post-processor.docker-import"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Dockerfile string `mapstructure:"dockerfile"`
 	Repository string `mapstructure:"repository"`
 	Tag        string `mapstructure:"tag"`
 
@@ -39,7 +43,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	errs := new(packer.MultiError)
 
 	templates := map[string]*string{
-		"dockerfile": &p.config.Dockerfile,
 		"repository": &p.config.Repository,
 		"tag":        &p.config.Tag,
 	}
@@ -71,7 +74,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		importRepo += ":" + p.config.Tag
 	}
 
+	var stdout bytes.Buffer
 	cmd := exec.Command("docker", "import", "-", importRepo)
+	cmd.Stdout = &stdout
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, false, err
@@ -96,38 +101,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		io.Copy(stdin, file)
 	}()
 
-	cmd.Wait()
-
-	// Process Dockerfile if provided
-	if p.config.Dockerfile != "" {
-		cmd := exec.Command("docker", "build", "-t="+importRepo, "-")
-
-		stdin, err := cmd.StdinPipe()
-		if err != nil {
-			return nil, false, err
-		}
-
-		// open Dockerfile
-		file, err := os.Open(p.config.Dockerfile)
-		if err != nil {
-			err = fmt.Errorf("Couldn't open Dockerfile: %s", err)
-			return nil, false, err
-		}
-		defer file.Close()
-
-		ui.Message("Running docker build with Dockerfile: " + p.config.Dockerfile)
-		if err := cmd.Start(); err != nil {
-			err = fmt.Errorf("Failed to start docker build: %s", err)
-			return nil, false, err
-		}
-
-		go func() {
-			defer stdin.Close()
-			io.Copy(stdin, file)
-		}()
-
-		cmd.Wait()
-
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error importing container: %s", err)
+		return nil, false, err
 	}
-	return nil, false, nil
+
+	id := strings.TrimSpace(stdout.String())
+	ui.Message("Imported ID: " + id)
+
+	// Build the artifact
+	driver := &docker.DockerDriver{Tpl: p.config.tpl, Ui: ui}
+	artifact = &docker.ImportArtifact{
+		BuilderIdValue: BuilderId,
+		Driver:         driver,
+		IdValue:        id,
+	}
+
+	return artifact, false, nil
 }
