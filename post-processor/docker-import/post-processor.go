@@ -91,7 +91,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	artifact = &docker.ImportArtifact{
 		BuilderIdValue: BuilderId,
 		Driver:         driver,
-		IdValue:        id,
+		IdValue:        importRepo,
 	}
 
 	return artifact, false, nil
