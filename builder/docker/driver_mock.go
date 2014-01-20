@@ -6,6 +6,10 @@ import (
 
 // MockDriver is a driver implementation that can be used for tests.
 type MockDriver struct {
+	DeleteImageCalled bool
+	DeleteImageId     string
+	DeleteImageErr    error
+
 	ExportReader io.Reader
 	ExportError  error
 	PullError    error
@@ -23,6 +27,12 @@ type MockDriver struct {
 	StopCalled   bool
 	StopID       string
 	VerifyCalled bool
+}
+
+func (d *MockDriver) DeleteImage(id string) error {
+	d.DeleteImageCalled = true
+	d.DeleteImageId = id
+	return d.DeleteImageErr
 }
 
 func (d *MockDriver) Export(id string, dst io.Writer) error {
