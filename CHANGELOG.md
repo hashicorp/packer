@@ -1,5 +1,12 @@
 ## 0.5.2 (unreleased)
 
+FEATURES:
+
+* **New post-processor:** `docker-import` - Import a Docker image
+  and give it a specific repository/tag.
+* **New post-processor:** `docker-push` - Push an imported image to
+  a registry.
+
 IMPROVEMENTS:
 
 * core: Most downloads made by Packer now use a custom user agent. [GH-803]
