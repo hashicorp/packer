@@ -8,6 +8,9 @@ import (
 // Docker. The Driver interface also allows the steps to be tested since
 // a mock driver can be shimmed in.
 type Driver interface {
+	// Delete an image that is imported into Docker
+	DeleteImage(id string) error
+
 	// Export exports the container with the given ID to the given writer.
 	Export(id string, dst io.Writer) error
 

@@ -15,6 +15,25 @@ type DockerDriver struct {
 	Tpl *packer.ConfigTemplate
 }
 
+func (d *DockerDriver) DeleteImage(id string) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "rmi", id)
+	cmd.Stderr = &stderr
+
+	log.Printf("Deleting image: %s", id)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error deleting image: %s\nStderr: %s",
+			err, stderr.String())
+		return err
+	}
+
+	return nil
+}
+
 func (d *DockerDriver) Export(id string, dst io.Writer) error {
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", "export", id)
