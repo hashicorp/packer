@@ -78,7 +78,11 @@ the created image:
 {
     "post-processors": [
 		[
-			{ "type": "docker-import", "repository": "mitchellh/packer", "tag": "0.7" },
+			{
+				"type": "docker-import",
+				"repository": "mitchellh/packer",
+				"tag": "0.7"
+			},
 			"docker-push"
 		]
 	]
