@@ -15,9 +15,9 @@ import (
 const KeyLeftShift uint32 = 0xFFE1
 
 type bootCommandTemplateData struct {
-	HTTPIP	 string
+	HTTPIP   string
 	HTTPPort uint
-	Name	 string
+	Name     string
 }
 
 // This step "types" the boot command into the VM over VNC.
