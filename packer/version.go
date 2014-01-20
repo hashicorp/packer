@@ -53,5 +53,5 @@ func VersionString() string {
 		}
 	}
 
-  return versionString.String()
+	return versionString.String()
 }
