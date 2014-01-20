@@ -14,6 +14,9 @@ type Driver interface {
 	// Export exports the container with the given ID to the given writer.
 	Export(id string, dst io.Writer) error
 
+	// Import imports a container from a tar file
+	Import(path, repo string) (string, error)
+
 	// Pull should pull down the given image.
 	Pull(image string) error
 
