@@ -10,6 +10,12 @@ type MockDriver struct {
 	DeleteImageId     string
 	DeleteImageErr    error
 
+	ImportCalled bool
+	ImportPath   string
+	ImportRepo   string
+	ImportId     string
+	ImportErr    error
+
 	ExportReader io.Reader
 	ExportError  error
 	PullError    error
@@ -47,6 +53,13 @@ func (d *MockDriver) Export(id string, dst io.Writer) error {
 	}
 
 	return d.ExportError
+}
+
+func (d *MockDriver) Import(path, repo string) (string, error) {
+	d.ImportCalled = true
+	d.ImportPath = path
+	d.ImportRepo = repo
+	return d.ImportId, d.ImportErr
 }
 
 func (d *MockDriver) Pull(image string) error {

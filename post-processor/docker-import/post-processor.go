@@ -1,15 +1,10 @@
 package dockerimport
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"io"
-	"os"
-	"os/exec"
-	"strings"
 )
 
 const BuilderId = "packer.post-processor.docker-import"
@@ -74,43 +69,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		importRepo += ":" + p.config.Tag
 	}
 
-	var stdout bytes.Buffer
-	cmd := exec.Command("docker", "import", "-", importRepo)
-	cmd.Stdout = &stdout
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return nil, false, err
-	}
-
-	// There should be only one artifact of the Docker builder
-	file, err := os.Open(artifact.Files()[0])
-	if err != nil {
-		return nil, false, err
-	}
-	defer file.Close()
+	driver := &docker.DockerDriver{Tpl: p.config.tpl, Ui: ui}
 
 	ui.Message("Importing image: " + artifact.Id())
 	ui.Message("Repository: " + importRepo)
-
-	if err := cmd.Start(); err != nil {
+	id, err := driver.Import(artifact.Files()[0], importRepo)
+	if err != nil {
 		return nil, false, err
 	}
 
-	go func() {
-		defer stdin.Close()
-		io.Copy(stdin, file)
-	}()
-
-	if err := cmd.Wait(); err != nil {
-		err = fmt.Errorf("Error importing container: %s", err)
-		return nil, false, err
-	}
-
-	id := strings.TrimSpace(stdout.String())
 	ui.Message("Imported ID: " + id)
 
 	// Build the artifact
-	driver := &docker.DockerDriver{Tpl: p.config.tpl, Ui: ui}
 	artifact = &docker.ImportArtifact{
 		BuilderIdValue: BuilderId,
 		Driver:         driver,
