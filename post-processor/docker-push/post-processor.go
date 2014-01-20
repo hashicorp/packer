@@ -2,20 +2,15 @@ package dockerpush
 
 import (
 	"fmt"
+	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"os/exec"
+	"github.com/mitchellh/packer/post-processor/docker-import"
+	"strings"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-
-	Repository string `mapstructure:"repository"`
-	Tag        string `mapstructure:"tag"`
-	Registry   string `mapstructure:"registry"`
-	Username   string `mapstructure:"username"`
-	Password   string `mapstructure:"password"`
-	Email      string `mapstructure:"email"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -38,26 +33,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Accumulate any errors
 	errs := new(packer.MultiError)
-
-	templates := map[string]*string{
-		"username":   &p.config.Username,
-		"password":   &p.config.Password,
-		"repository": &p.config.Repository,
-	}
-
-	for key, ptr := range templates {
-		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("%s must be set", key))
-		}
-
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", key, err))
-		}
-	}
-
 	if len(errs.Errors) > 0 {
 		return errs
 	}
@@ -67,81 +42,25 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	id := artifact.Id()
-	ui.Say("Pushing image: " + id)
-
-	if p.config.Registry == "" {
-
-		if p.config.Email == "" {
-			cmd := exec.Command("docker",
-				"login",
-				"-u="+p.config.Username,
-				"-p="+p.config.Password)
-
-			if err := cmd.Run(); err != nil {
-				ui.Say("Login to the registry " + p.config.Registry + " failed")
-				return nil, false, err
-			}
-
-		} else {
-			cmd := exec.Command("docker",
-				"login",
-				"-u="+p.config.Username,
-				"-p="+p.config.Password,
-				"-e="+p.config.Email)
-
-			if err := cmd.Run(); err != nil {
-				ui.Say("Login to the registry " + p.config.Registry + " failed")
-				return nil, false, err
-			}
-
-		}
-
-	} else {
-		if p.config.Email == "" {
-			cmd := exec.Command("docker",
-				"login",
-				"-u="+p.config.Username,
-				"-p="+p.config.Password,
-				p.config.Registry)
-
-			if err := cmd.Run(); err != nil {
-				ui.Say("Login to the registry " + p.config.Registry + " failed")
-				return nil, false, err
-			}
-
-		} else {
-			cmd := exec.Command("docker",
-				"login",
-				"-u="+p.config.Username,
-				"-p="+p.config.Password,
-				"-e="+p.config.Email,
-				p.config.Registry)
-
-			if err := cmd.Run(); err != nil {
-				ui.Say("Login to the registry " + p.config.Registry + " failed")
-				return nil, false, err
-			}
-
-		}
+	if artifact.BuilderId() != dockerimport.BuilderId {
+		err := fmt.Errorf(
+			"Unknown artifact type: %s\nCan only import from docker-import artifacts.",
+			artifact.BuilderId())
+		return nil, false, err
 	}
 
-	if p.config.Tag != "" {
+	driver := &docker.DockerDriver{Tpl: p.config.tpl, Ui: ui}
 
-		cmd := exec.Command("docker", "push", p.config.Repository+":"+p.config.Tag)
-		if err := cmd.Run(); err != nil {
-			ui.Say("Failed to push image: " + id)
-			return nil, false, err
-		}
+	// Get the name. We strip off any tags from the name because the
+	// push doesn't use those.
+	name := artifact.Id()
+	if i := strings.Index(name, ":"); i >= 0 {
+		name = name[:i]
+	}
 
-	} else {
-
-		cmd := exec.Command("docker", "push", p.config.Repository)
-		if err := cmd.Run(); err != nil {
-			ui.Say("Failed to push image: " + id)
-			return nil, false, err
-		}
-
+	ui.Message("Pushing: " + name)
+	if err := driver.Push(name); err != nil {
+		return nil, false, err
 	}
 
 	return nil, false, nil
