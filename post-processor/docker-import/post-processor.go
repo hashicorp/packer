@@ -64,6 +64,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+	if artifact.BuilderId() != docker.BuilderId {
+		err := fmt.Errorf(
+			"Unknown artifact type: %s\nCan only import from Docker builder artifacts.",
+			artifact.BuilderId())
+		return nil, false, err
+	}
+
 	importRepo := p.config.Repository
 	if p.config.Tag != "" {
 		importRepo += ":" + p.config.Tag
