@@ -20,6 +20,9 @@ type Driver interface {
 	// Pull should pull down the given image.
 	Pull(image string) error
 
+	// Push pushes an image to a Docker index/registry.
+	Push(name string) error
+
 	// StartContainer starts a container and returns the ID for that container,
 	// along with a potential error.
 	StartContainer(*ContainerConfig) (string, error)

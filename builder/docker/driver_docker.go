@@ -93,6 +93,11 @@ func (d *DockerDriver) Pull(image string) error {
 	return runAndStream(cmd, d.Ui)
 }
 
+func (d *DockerDriver) Push(name string) error {
+	cmd := exec.Command("docker", "push", name)
+	return runAndStream(cmd, d.Ui)
+}
+
 func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
