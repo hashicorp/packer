@@ -16,6 +16,10 @@ type MockDriver struct {
 	ImportId     string
 	ImportErr    error
 
+	PushCalled bool
+	PushName   string
+	PushErr    error
+
 	ExportReader io.Reader
 	ExportError  error
 	PullError    error
@@ -66,6 +70,12 @@ func (d *MockDriver) Pull(image string) error {
 	d.PullCalled = true
 	d.PullImage = image
 	return d.PullError
+}
+
+func (d *MockDriver) Push(name string) error {
+	d.PushCalled = true
+	d.PushName = name
+	return d.PushErr
 }
 
 func (d *MockDriver) StartContainer(config *ContainerConfig) (string, error) {
