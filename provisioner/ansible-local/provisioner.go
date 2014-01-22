@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
@@ -26,6 +27,12 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
+
+	// The command to run ansible
+	Command string
+
+	// Extra options to pass to the ansible command
+	ExtraArguments []string `mapstructure:"extra_arguments"`
 }
 
 type Provisioner struct {
@@ -48,14 +55,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
+	// Defaults
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = DefaultStagingDir
+	}
+
+	if p.config.Command == "" {
+		p.config.Command = "ansible-playbook"
 	}
 
 	// Templates
 	templates := map[string]*string{
 		"playbook_file": &p.config.PlaybookFile,
 		"staging_dir":   &p.config.StagingDir,
+		"command":       &p.config.Command,
 	}
 
 	for n, ptr := range templates {
@@ -68,8 +81,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	sliceTemplates := map[string][]string{
-		"playbook_paths": p.config.PlaybookPaths,
-		"role_paths":     p.config.RolePaths,
+		"playbook_paths":  p.config.PlaybookPaths,
+		"role_paths":      p.config.RolePaths,
+		"extra_arguments": p.config.ExtraArguments,
 	}
 
 	for n, slice := range sliceTemplates {
@@ -161,7 +175,13 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	// The inventory must be set to "127.0.0.1,".  The comma is important
 	// as its the only way to override the ansible inventory when dealing
 	// with a single host.
-	command := fmt.Sprintf("ansible-playbook %s -c local -i %s", playbook, `"127.0.0.1,"`)
+	var command string
+	if len(p.config.ExtraArguments) > 0 {
+		command = fmt.Sprintf("%s %s %s -c local -i \"127.0.0.1,\"", p.config.Command,
+			playbook, strings.Join(p.config.ExtraArguments, " "))
+	} else {
+		command = fmt.Sprintf("%s %s -c local -i \"127.0.0.1,\"", p.config.Command, playbook)
+	}
 
 	ui.Message(fmt.Sprintf("Executing Ansible: %s", command))
 	cmd := &packer.RemoteCmd{
