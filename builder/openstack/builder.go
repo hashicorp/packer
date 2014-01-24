@@ -61,9 +61,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	api := &gophercloud.ApiCriteria{
-		Name:      "cloudServersOpenStack",
-		Region:    b.config.AccessConfig.Region(),
-		VersionId: "2",
+		//Name:      "cloudServersOpenStack",
+		Region:    b.Config.AccessConfig.Region(),
+		//VersionId: "2",
 		UrlChoice: gophercloud.PublicURL,
 	}
 	csp, err := gophercloud.ServersApi(auth, *api)
