@@ -91,10 +91,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	varTemplates := map[string]*string{
-		"group_vars": &p.config.GroupVars,
-		"host_vars":  &p.config.HostVars,
-	}
 	for n, ptr := range varTemplates {
 		var err error
 		*ptr, err = p.config.tpl.Process(*ptr, nil)
