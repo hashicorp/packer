@@ -13,7 +13,7 @@ import (
 // StepCreateInstance represents a Packer build step that creates GCE instances.
 type StepCreateInstance struct {
 	instanceName string
-  Debug        bool
+	Debug        bool
 }
 
 // Run executes the Packer build step that creates a GCE instance.
@@ -57,11 +57,11 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	ui.Message("Instance has been created!")
 
-    if s.Debug {
-      if name != "" {
-        ui.Message(fmt.Sprintf("Instance: %s started in %s", name, config.Zone))
-      }
-    }
+	if s.Debug {
+		if name != "" {
+			ui.Message(fmt.Sprintf("Instance: %s started in %s", name, config.Zone))
+		}
+	}
 
 	// Things succeeded, store the name so we can remove it later
 	state.Put("instance_name", name)
