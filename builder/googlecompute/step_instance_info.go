@@ -10,7 +10,10 @@ import (
 )
 
 // stepInstanceInfo represents a Packer build step that gathers GCE instance info.
-type StepInstanceInfo int
+type StepInstanceInfo struct {
+  info  int
+  Debug bool
+}
 
 // Run executes the Packer build step that gathers GCE instance info.
 func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
@@ -43,6 +46,12 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+    if s.Debug {
+      if ip != "" {
+        ui.Message(fmt.Sprintf("Public IP: %s", ip))
+      }
+    }
 
 	ui.Message(fmt.Sprintf("IP: %s", ip))
 	state.Put("instance_ip", ip)

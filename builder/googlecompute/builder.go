@@ -5,7 +5,7 @@ package googlecompute
 import (
 	"log"
 	"time"
-
+    "fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
@@ -48,21 +48,28 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	// Build the steps.
-	steps := []multistep.Step{
-		new(StepCreateSSHKey),
-		new(StepCreateInstance),
-		new(StepInstanceInfo),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: 5 * time.Minute,
-		},
-		new(common.StepProvision),
-		new(StepUpdateGsutil),
-		new(StepCreateImage),
-		new(StepUploadImage),
-		new(StepRegisterImage),
-	}
+    steps := []multistep.Step{
+      &StepCreateSSHKey{
+        Debug:        b.config.PackerDebug,
+        DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+      },
+      &StepCreateInstance{
+        Debug:        b.config.PackerDebug,
+      },
+      &StepInstanceInfo{
+        Debug:        b.config.PackerDebug,
+      },
+      &common.StepConnectSSH{
+        SSHAddress:     sshAddress,
+        SSHConfig:      sshConfig,
+        SSHWaitTimeout: 5 * time.Minute,
+      },
+      new(common.StepProvision),
+      new(StepUpdateGsutil),
+      new(StepCreateImage),
+      new(StepUploadImage),
+      new(StepRegisterImage),
+    }
 
 	// Run the steps.
 	if b.config.PackerDebug {
