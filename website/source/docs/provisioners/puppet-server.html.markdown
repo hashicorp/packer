@@ -20,8 +20,8 @@ Puppet provisioner to do this.
 
 ## Basic Example
 
-The example below is fully functional and expects the configured manifest
-file to exist relative to your working directory:
+The example below is fully functional and expects a Puppet server to be accessible
+from your network.:
 
 <pre class="prettyprint">
 {
