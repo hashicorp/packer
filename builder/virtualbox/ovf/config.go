@@ -23,6 +23,7 @@ type Config struct {
 
 	SourcePath string `mapstructure:"source_path"`
 	VMName     string `mapstructure:"vm_name"`
+	ImportOpts string `mapstructure:"import_opts"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -59,6 +60,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	templates := map[string]*string{
 		"source_path": &c.SourcePath,
 		"vm_name":     &c.VMName,
+		"import_opts": &c.ImportOpts,
 	}
 
 	for n, ptr := range templates {
