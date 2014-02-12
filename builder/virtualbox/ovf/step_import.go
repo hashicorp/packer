@@ -11,6 +11,7 @@ import (
 type StepImport struct {
 	Name       string
 	SourcePath string
+	ImportOpts string
 
 	vmName string
 }
@@ -20,7 +21,7 @@ func (s *StepImport) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say(fmt.Sprintf("Importing VM: %s", s.SourcePath))
-	if err := driver.Import(s.Name, s.SourcePath); err != nil {
+	if err := driver.Import(s.Name, s.SourcePath, s.ImportOpts); err != nil {
 		err := fmt.Errorf("Error importing VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
