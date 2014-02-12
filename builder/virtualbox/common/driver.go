@@ -23,7 +23,7 @@ type Driver interface {
 	Delete(string) error
 
 	// Import a VM
-	Import(string, string) error
+	Import(string, string, string) error
 
 	// Checks if the VM with the given name is running.
 	IsRunning(string) (bool, error)
