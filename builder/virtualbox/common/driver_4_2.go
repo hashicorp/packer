@@ -40,11 +40,12 @@ func (d *VBox42Driver) Delete(name string) error {
 	return d.VBoxManage("unregistervm", name, "--delete")
 }
 
-func (d *VBox42Driver) Import(name, path string) error {
+func (d *VBox42Driver) Import(name, path, opts string) error {
 	args := []string{
 		"import", path,
 		"--vsys", "0",
 		"--vmname", name,
+		"--options", opts,
 	}
 
 	return d.VBoxManage(args...)

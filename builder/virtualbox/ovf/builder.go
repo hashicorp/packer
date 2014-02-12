@@ -58,6 +58,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepImport{
 			Name:       b.config.VMName,
 			SourcePath: b.config.SourcePath,
+			ImportOpts: b.config.ImportOpts,
 		},
 		/*
 			new(stepAttachGuestAdditions),
