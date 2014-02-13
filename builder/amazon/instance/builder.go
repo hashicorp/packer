@@ -74,7 +74,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"-s {{.SecretKey}} " +
 			"-d {{.BundleDirectory}} " +
 			"--batch " +
-			"--location {{.Region}} " +
+			"--url https://s3-{{.Region}}.amazonaws.com " +
 			"--retry"
 	}
 
