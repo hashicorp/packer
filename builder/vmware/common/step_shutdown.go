@@ -134,6 +134,30 @@ LockWaitLoop:
 		}
 	}
 
+	// Wait for the VMX file to contain a cleanshutdown flag
+	vmxTimer := time.After(15 * time.Second)
+VMXLockWaitLoop:
+	for {
+		vmxData, err := ReadVMX(vmxPath)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error reading VMX: %s", err))
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		if vmxData["cleanshutdown"] == "TRUE" {
+			log.Println("VMX cleanShutdown detected.")
+			break
+		}
+
+		select {
+		case <-vmxTimer:
+			log.Println("Reached timeout on waiting for clean VMX. Assuming clean.")
+			break VMXLockWaitLoop
+		case <-time.After(150 * time.Millisecond):
+		}
+	}
+
 	if runtime.GOOS == "windows" {
 		// Windows takes a while to yield control of the files when the
 		// process is exiting. We just sleep here. In the future, it'd be
