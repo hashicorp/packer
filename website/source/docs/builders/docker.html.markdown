@@ -64,15 +64,35 @@ Optional:
   `["run", "-d", "-i", "-t", "-v", "{{.Volumes}}", "{{.Image}}", "/bin/bash"]`.
   As you can see, you have a couple template variables to customize, as well.
 
-## Using the generated artifact
+## Using the Artifact
 
 Once the tar artifact has been generated, you will likely want to import, tag,
-and push it to a container repository. Until packer supports management of the
-docker image metadata, this process is manual. For example, the following will
-import `mycontainer-123456789.tar` to the repository
-`registry.mydomain.com/mycontainer`, tagged with `latest`:
+and push it to a container repository. Packer can do this for you automatically
+with the [docker-import](/docs/post-processors/docker-import.html) and
+[docker-push](/docs/post-processors/docker-push.html) post-processors.
 
-    sudo docker import - registry.mydomain.com/mycontainer:latest < mycontainer-123456789.tar
+The example below shows a full configuration that would import and push
+the created image:
+
+<pre class="prettyprint">
+{
+    "post-processors": [
+		[
+			{
+				"type": "docker-import",
+				"repository": "mitchellh/packer",
+				"tag": "0.7"
+			},
+			"docker-push"
+		]
+	]
+}
+</pre>
+
+If you want to do this manually, however, perhaps from a script, you can
+import the image using the process below:
+
+    docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
 
 You can then add additional tags and push the image as usual with `docker tag`
 and `docker push`, respectively.
@@ -103,8 +123,3 @@ by Packer in the future:
   volumes, and other metadata. Packer builds a raw Docker container image
   that has none of this metadata. You can pass in much of this metadata
   at runtime with `docker run`.
-
-* Images made without dockerfiles are missing critical metadata that
-  make them easily pushable to the Docker registry. You can work around
-  this by using a metadata-only Dockerfile with the exported image and
-  building that. A future Packer version will automatically do this for you.

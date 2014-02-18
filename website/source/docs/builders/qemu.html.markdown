@@ -8,7 +8,7 @@ Type: `qemu`
 
 The Qemu builder is able to create [KVM](http://www.linux-kvm.org)
 and [Xen](http://www.xenproject.org) virtual machine images. Support
-for Xen is experimanetal at this time.
+for Xen is experimental at this time.
 
 The builder builds a virtual machine by creating a new virtual machine
 from scratch, booting it, installing an OS, rebooting the machine with the
