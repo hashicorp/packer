@@ -91,15 +91,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	for n, ptr := range varTemplates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
 	// Validation
 	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 	if err != nil {
