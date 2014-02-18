@@ -92,6 +92,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func vncSendString(c *vnc.ClientConn, original string) {
+	// Scancodes reference: https://github.com/qemu/qemu/blob/master/ui/vnc_keysym.h
 	special := make(map[string]uint32)
 	special["<bs>"] = 0xFF08
 	special["<del>"] = 0xFFFF
@@ -111,6 +112,16 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	special["<f12>"] = 0xFFC9
 	special["<return>"] = 0xFF0D
 	special["<tab>"] = 0xFF09
+	special["<up>"] = 0xFF52
+	special["<down>"] = 0xFF54
+	special["<left>"] = 0xFF51
+	special["<right>"] = 0xFF53
+	special["<spacebar>"] = 0x020
+	special["<insert>"] = 0xFF63
+	special["<home>"] = 0xFF50
+	special["<end>"] = 0xFF57
+	special["<pageUp>"] = 0xFF55
+	special["<pageDown>"] = 0xFF56
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 

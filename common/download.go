@@ -43,6 +43,10 @@ type DownloadConfig struct {
 	// for the downloader will be used to verify with this checksum after
 	// it is downloaded.
 	Checksum []byte
+
+	// What to use for the user agent for HTTP requests. If set to "", use the
+	// default user agent provided by Go.
+	UserAgent string
 }
 
 // A DownloadClient helps download, verify checksums, etc.
@@ -73,8 +77,8 @@ func HashForType(t string) hash.Hash {
 func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 	if c.DownloaderMap == nil {
 		c.DownloaderMap = map[string]Downloader{
-			"http":  new(HTTPDownloader),
-			"https": new(HTTPDownloader),
+			"http":  &HTTPDownloader{userAgent: c.UserAgent},
+			"https": &HTTPDownloader{userAgent: c.UserAgent},
 		}
 	}
 
@@ -182,8 +186,9 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 // HTTPDownloader is an implementation of Downloader that downloads
 // files over HTTP.
 type HTTPDownloader struct {
-	progress uint
-	total    uint
+	progress  uint
+	total     uint
+	userAgent string
 }
 
 func (*HTTPDownloader) Cancel() {
@@ -195,6 +200,10 @@ func (d *HTTPDownloader) Download(dst io.Writer, src *url.URL) error {
 	req, err := http.NewRequest("GET", src.String(), nil)
 	if err != nil {
 		return err
+	}
+
+	if d.userAgent != "" {
+		req.Header.Set("User-Agent", d.userAgent)
 	}
 
 	httpClient := &http.Client{

@@ -221,7 +221,7 @@ func (e *coreEnvironment) Cli(args []string) (result int, err error) {
 
 	// Trim up to the command name
 	for i, v := range args {
-		if v[0] != '-' {
+		if len(v) > 0 && v[0] != '-' {
 			args = args[i:]
 			break
 		}
