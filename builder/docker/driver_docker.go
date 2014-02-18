@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -13,6 +14,25 @@ import (
 type DockerDriver struct {
 	Ui  packer.Ui
 	Tpl *packer.ConfigTemplate
+}
+
+func (d *DockerDriver) DeleteImage(id string) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "rmi", id)
+	cmd.Stderr = &stderr
+
+	log.Printf("Deleting image: %s", id)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error deleting image: %s\nStderr: %s",
+			err, stderr.String())
+		return err
+	}
+
+	return nil
 }
 
 func (d *DockerDriver) Export(id string, dst io.Writer) error {
@@ -35,8 +55,46 @@ func (d *DockerDriver) Export(id string, dst io.Writer) error {
 	return nil
 }
 
+func (d *DockerDriver) Import(path string, repo string) (string, error) {
+	var stdout bytes.Buffer
+	cmd := exec.Command("docker", "import", "-", repo)
+	cmd.Stdout = &stdout
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return "", err
+	}
+
+	// There should be only one artifact of the Docker builder
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	if err := cmd.Start(); err != nil {
+		return "", err
+	}
+
+	go func() {
+		defer stdin.Close()
+		io.Copy(stdin, file)
+	}()
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error importing container: %s", err)
+		return "", err
+	}
+
+	return strings.TrimSpace(stdout.String()), nil
+}
+
 func (d *DockerDriver) Pull(image string) error {
 	cmd := exec.Command("docker", "pull", image)
+	return runAndStream(cmd, d.Ui)
+}
+
+func (d *DockerDriver) Push(name string) error {
+	cmd := exec.Command("docker", "push", name)
 	return runAndStream(cmd, d.Ui)
 }
 

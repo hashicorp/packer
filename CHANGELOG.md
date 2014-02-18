@@ -1,10 +1,25 @@
 ## 0.5.2 (unreleased)
 
+FEATURES:
+
+* **New post-processor:** `docker-import` - Import a Docker image
+  and give it a specific repository/tag.
+* **New post-processor:** `docker-push` - Push an imported image to
+  a registry.
+
+IMPROVEMENTS:
+
+* core: Most downloads made by Packer now use a custom user agent. [GH-803]
+
 BUG FIXES:
 
+* core: Fix crash case if blank parameters are given to Packer. [GH-832]
 * builders/docker: user variables work properly. [GH-777]
 * builder/virtualbox,vmware: iso\_checksum is not required if the
   checksum type is "none"
+* builder/virtualbox,vmware/qemu: Support for additional scancodes for
+  `boot_command` such as `<up>`, `<left>`, `<insert>`, etc. [GH-808]
+* provisioners/ansible-local: Properly upload custom playbooks. [GH-829]
 
 ## 0.5.1 (01/02/2014)
 

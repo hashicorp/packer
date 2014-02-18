@@ -63,7 +63,7 @@ briefly. Create a file `example.json` and fill it with the following contents:
 }
 </pre>
 
-When building, you'll pass in the `aws_access_key` and `aws_access_key` as
+When building, you'll pass in the `aws_access_key` and `aws_secret_key` as
 a [user variable](/docs/templates/user-variables.html), keeping your secret
 keys out of the template. You can create security credentials
 on [this page](https://console.aws.amazon.com/iam/home?#security_credential).
