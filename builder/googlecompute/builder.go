@@ -3,12 +3,12 @@
 package googlecompute
 
 import (
-	"log"
-	"time"
-
+	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"log"
+	"time"
 )
 
 // The unique ID for this builder.
@@ -49,9 +49,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps.
 	steps := []multistep.Step{
-		new(StepCreateSSHKey),
-		new(StepCreateInstance),
-		new(StepInstanceInfo),
+		&StepCreateSSHKey{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+		},
+		&StepCreateInstance{
+			Debug: b.config.PackerDebug,
+		},
+		&StepInstanceInfo{
+			Debug: b.config.PackerDebug,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,
