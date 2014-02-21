@@ -1590,3 +1590,29 @@ func TestTemplateBuild_variablesRequiredNotSet(t *testing.T) {
 		t.Fatal("should error")
 	}
 }
+
+func TestTemplateBuild_commentsIgnored(t *testing.T) {
+	data := `
+	{
+        // we null the foo
+		"variables": {
+			"foo": null
+		},
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			}
+		]
+	}
+	`
+
+	result, err := ParseTemplate([]byte(data), map[string]string{})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Variables == nil || len(result.Variables) != 1 {
+		t.Fatalf("bad vars: %#v", result.Variables)
+	}
+}
