@@ -20,6 +20,7 @@ BUG FIXES:
   checksum type is "none"
 * builder/virtualbox,vmware/qemu: Support for additional scancodes for
   `boot_command` such as `<up>`, `<left>`, `<insert>`, etc. [GH-808]
+* communicator/ssh: Send TCP keep-alives on connections. [GH-872]
 * provisioners/ansible-local: Properly upload custom playbooks. [GH-829]
 
 ## 0.5.1 (01/02/2014)
