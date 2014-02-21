@@ -400,6 +400,8 @@ func (m *MuxConn) loop() {
 			stream.mu.Unlock()
 
 		case muxPacketData:
+			unlocked := false
+
 			stream.mu.Lock()
 			switch stream.state {
 			case streamStateFinWait1:
@@ -408,17 +410,25 @@ func (m *MuxConn) loop() {
 				fallthrough
 			case streamStateEstablished:
 				if len(data) > 0 {
-					select {
-					case stream.writeCh <- data:
-					default:
-						panic(fmt.Sprintf(
-							"Failed to write data, buffer full for stream %d", id))
-					}
+					// Get a reference to the write channel while we have
+					// the lock because otherwise the field might change.
+					// We unlock early here because the write might block
+					// for a long time.
+					writeCh := stream.writeCh
+					stream.mu.Unlock()
+					unlocked = true
+
+					// Blocked write, this provides some backpressure on
+					// the connection if there is a lot of data incoming.
+					writeCh <- data
 				}
 			default:
 				log.Printf("[ERR] Data received for stream in state: %d", stream.state)
 			}
-			stream.mu.Unlock()
+
+			if !unlocked {
+				stream.mu.Unlock()
+			}
 		}
 	}
 }

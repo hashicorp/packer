@@ -114,6 +114,52 @@ func TestMuxConn(t *testing.T) {
 	<-doneCh
 }
 
+func TestMuxConn_lotsOfData(t *testing.T) {
+	client, server := testMux(t)
+	defer client.Close()
+	defer server.Close()
+
+	// When the server is done
+	doneCh := make(chan struct{})
+
+	// The server side
+	go func() {
+		defer close(doneCh)
+
+		s0, err := server.Accept(0)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			data := readStream(t, s0)
+			if data != "hello" {
+				t.Fatalf("bad: %#v", data)
+			}
+		}()
+
+		wg.Wait()
+	}()
+
+	s0, err := client.Dial(0)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	for i := 0; i < 4096 * 4; i++ {
+		if _, err := s0.Write([]byte("hello")); err != nil {
+			t.Fatalf("err: %s", err)
+		}
+	}
+
+	// Wait for the server to be done
+	<-doneCh
+}
+
 // This tests that even when the client end is closed, data can be
 // read from the server.
 func TestMuxConn_clientCloseRead(t *testing.T) {
