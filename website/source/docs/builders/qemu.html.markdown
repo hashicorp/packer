@@ -192,6 +192,11 @@ Optional:
     qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
+* `qemu_binary` (string) - The name of the Qemu binary to look for.  This
+  defaults to "qemu-system-x86_64", but may need to be changed for some
+  platforms.  For example "qemu-kvm", or "qemu-system-i386" may be a better
+  choice for some systems.
+
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`
