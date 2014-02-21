@@ -97,3 +97,13 @@ VMware, where it will be set to 0.
 
 The available provider names are: `aws`, `digitalocean`, `virtualbox`,
 and `vmware`.
+
+## Input Artifacts
+
+By default, Packer will delete the original input artifact, assuming
+you only want the final Vagrant box as the result. If you wish to keep the
+input artifact (the raw virtual machine, for example), then you must
+configure Packer to keep it.
+
+Please see the [documentation on input artifacts](/docs/templates/post-processors.html#toc_2)
+for more information.
