@@ -20,9 +20,9 @@ func TestESX5Driver_implRemoteDriver(t *testing.T) {
 }
 
 func TestESX5Driver_HostIP(t *testing.T) {
-        expected_host := "127.0.0.1"
+	expected_host := "127.0.0.1"
 
-        //create mock SSH server
+	//create mock SSH server
 	listen, _ := net.Listen("tcp", fmt.Sprintf("%s:0", expected_host))
 	port := listen.Addr().(*net.TCPAddr).Port
 	defer listen.Close()
