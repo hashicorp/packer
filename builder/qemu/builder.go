@@ -392,23 +392,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
 		&stepRun{
-			BootDrive: "d",
+			BootDrive: "once=d",
 			Message:   "Starting VM, booting from CD-ROM",
 		},
-	}
-
-	if !b.config.RunOnce {
-		steps = append(steps,
-			&stepBootWait{},
-			&stepTypeBootCommand{},
-			&stepWaitForShutdown{
-				Message: "Waiting for initial VM boot to shut down",
-			},
-			&stepRun{
-				BootDrive: "c",
-				Message:   "Starting VM, booting from hard disk",
-			},
-		)
+		&stepBootWait{},
+		&stepTypeBootCommand{},
+		
+		
 	}
 
 	steps = append(steps,
