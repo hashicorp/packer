@@ -12,8 +12,9 @@ import (
 
 // StepCreateInstance represents a Packer build step that creates GCE instances.
 type StepCreateInstance struct {
+	Debug bool
+
 	instanceName string
-	Debug        bool
 }
 
 // Run executes the Packer build step that creates a GCE instance.

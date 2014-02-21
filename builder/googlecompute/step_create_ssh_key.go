@@ -14,7 +14,6 @@ import (
 
 // StepCreateSSHKey represents a Packer build step that generates SSH key pairs.
 type StepCreateSSHKey struct {
-	key          int
 	Debug        bool
 	DebugKeyPath string
 }
@@ -50,14 +49,19 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
-		f, err := os.OpenFile(s.DebugKeyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
+
 		// Write out the key
-		pem.Encode(f, &priv_blk)
+		err = pem.Encode(f, &priv_blk)
 		f.Close()
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
+			return multistep.ActionHalt
+		}
 	}
 	return multistep.ActionContinue
 }
