@@ -13,7 +13,7 @@ import (
 type StepInstanceInfo struct {
 	Debug bool
 
-	info  int
+	info int
 }
 
 // Run executes the Packer build step that gathers GCE instance info.

@@ -150,7 +150,7 @@ func TestMuxConn_lotsOfData(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	for i := 0; i < 4096 * 4; i++ {
+	for i := 0; i < 4096*4; i++ {
 		if _, err := s0.Write([]byte("hello")); err != nil {
 			t.Fatalf("err: %s", err)
 		}
