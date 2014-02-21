@@ -34,6 +34,11 @@ Required:
 
 Optional:
 
+* `command` (string) - The command to invoke ansible. Defaults to "ansible-playbook".
+
+* `extra_arguments` (array of strings) - An array of extra arguments to pass to the
+  ansible command. By default, this is empty.
+
 * `playbook_paths` (array of strings) - An array of paths to playbook files on
   your local system. These will be uploaded to the remote machine under
   `staging_directory`/playbooks. By default, this is empty.
