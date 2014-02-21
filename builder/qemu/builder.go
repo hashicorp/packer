@@ -55,7 +55,6 @@ type config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Accelerator     string     `mapstructure:"accelerator"`
-	QemuBinary      string     `mapstructure:"qemu_binary"`
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
@@ -71,6 +70,7 @@ type config struct {
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
+	QemuBinary      string     `mapstructure:"qemu_binary"`
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
@@ -111,10 +111,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
-	if b.config.QemuBinary == "" {
-		b.config.QemuBinary = "qemu-system-x86_64"
-	}
-
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
 	}
@@ -133,6 +129,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
+	}
+
+	if b.config.QemuBinary == "" {
+		b.config.QemuBinary = "qemu-system-x86_64"
 	}
 
 	if b.config.RawBootWait == "" {
