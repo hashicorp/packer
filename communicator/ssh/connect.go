@@ -10,6 +10,13 @@ import (
 // is suitable for use with the SSH communicator configuration.
 func ConnectFunc(network, addr string) func() (net.Conn, error) {
 	return func() (net.Conn, error) {
-		return net.DialTimeout(network, addr, 15*time.Second)
+		c, err := net.DialTimeout(network, addr, 15*time.Second)
+		if err != nil {
+			return nil, err
+		}
+
+		if tcpConn, ok := c.(*net.TCPConn); ok {
+			tcpConn.SetKeepAlive(true)
+		}
 	}
 }
