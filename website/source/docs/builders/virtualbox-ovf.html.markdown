@@ -147,6 +147,10 @@ Optional:
   exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is
   the name of the build.
 
+* `import_opts` (string) - Additional options to pass to the `VBoxManage import`.
+  This can be useful for passing "keepallmacs" or "keepnatmacs" options for existing
+  ovf images.
+
 ## Guest Additions
 
 Packer will automatically download the proper guest additions for the
