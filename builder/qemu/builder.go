@@ -55,6 +55,7 @@ type config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Accelerator     string     `mapstructure:"accelerator"`
+	QemuBinary      string     `mapstructure:"qemu_binary"`
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
@@ -109,6 +110,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+
+	if b.config.QemuBinary == "" {
+		b.config.QemuBinary = "qemu-system-x86_64"
+	}
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -372,7 +377,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with Qemu
-	driver, err := b.newDriver()
+	driver, err := b.newDriver(b.config.QemuBinary)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating Qemu driver: %s", err)
 	}
@@ -471,8 +476,8 @@ func (b *Builder) Cancel() {
 	}
 }
 
-func (b *Builder) newDriver() (Driver, error) {
-	qemuPath, err := exec.LookPath("qemu-system-x86_64")
+func (b *Builder) newDriver(qemuBinary string) (Driver, error) {
+	qemuPath, err := exec.LookPath(qemuBinary)
 	if err != nil {
 		return nil, err
 	}
