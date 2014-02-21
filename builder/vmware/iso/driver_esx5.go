@@ -126,27 +126,14 @@ func (d *ESX5Driver) Verify() error {
 }
 
 func (d *ESX5Driver) HostIP() (string, error) {
-	ip := net.ParseIP(d.Host)
-	interfaces, err := net.Interfaces()
+	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", d.Host, d.Port))
+	defer conn.Close()
 	if err != nil {
 		return "", err
 	}
 
-	for _, dev := range interfaces {
-		addrs, err := dev.Addrs()
-		if err != nil {
-			continue
-		}
-		for _, addr := range addrs {
-			if ipnet, ok := addr.(*net.IPNet); ok {
-				if ipnet.Contains(ip) {
-					return ipnet.IP.String(), nil
-				}
-			}
-		}
-	}
-
-	return "", errors.New("Unable to determine Host IP")
+	host, _, err := net.SplitHostPort(conn.LocalAddr().String())
+	return host, err
 }
 
 func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
