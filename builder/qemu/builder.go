@@ -80,6 +80,8 @@ type config struct {
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
+
+	// TODO(mitchellh): deprecate
 	RunOnce         bool       `mapstructure:"run_once"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
@@ -397,11 +399,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepBootWait{},
 		&stepTypeBootCommand{},
-		
-		
-	}
-
-	steps = append(steps,
 		&common.StepConnectSSH{
 			SSHAddress:     sshAddress,
 			SSHConfig:      sshConfig,
@@ -409,7 +406,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
-	)
+	}
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
