@@ -19,7 +19,8 @@ BUG FIXES:
 
 * core: Fix crash case if blank parameters are given to Packer. [GH-832]
 * core: Fix crash if big file uploads are done. [GH-897]
-* builders/docker: user variables work properly. [GH-777]
+* builder/docker: user variables work properly. [GH-777]
+* builder/qemu: reboots are now possible in provisioners. [GH-864]
 * builder/virtualbox,vmware: iso\_checksum is not required if the
   checksum type is "none"
 * builder/virtualbox,vmware/qemu: Support for additional scancodes for
