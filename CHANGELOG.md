@@ -10,6 +10,8 @@ FEATURES:
 IMPROVEMENTS:
 
 * core: Most downloads made by Packer now use a custom user agent. [GH-803]
+* builder/virtualbox-ovf: Can specify import options such as "keepallmacs".
+  [GH-883]
 
 BUG FIXES:
 
