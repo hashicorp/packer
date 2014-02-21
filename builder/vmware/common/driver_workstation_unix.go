@@ -1,5 +1,5 @@
 // +build !windows
-
+// These functions are compatible with WS 9 and 10 on *NIX
 package common
 
 import (
