@@ -277,7 +277,7 @@ sudo -n ec2-upload-bundle \
 	-s {{.SecretKey}} \
 	-d {{.BundleDirectory}} \
 	--batch \
-	--location {{.Region}} \
+	--url https://s3-{{.Region}}.amazonaws.com \
 	--retry
 ```
 
