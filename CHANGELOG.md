@@ -12,6 +12,7 @@ IMPROVEMENTS:
 * core: Most downloads made by Packer now use a custom user agent. [GH-803]
 * builder/googlecompute: SSH private key will be saved to disk if `-debug`
   is specified. [GH-867]
+* builder/qemu: Can specify the name of the qemu binary. [GH-854]
 * builder/virtualbox-ovf: Can specify import options such as "keepallmacs".
   [GH-883]
 
