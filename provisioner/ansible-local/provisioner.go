@@ -15,6 +15,18 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	tpl                 *packer.ConfigTemplate
 
+	// The command to run ansible
+	Command string
+
+	// Extra options to pass to the ansible command
+	ExtraArguments []string `mapstructure:"extra_arguments"`
+
+	// Path to group_vars directory
+	GroupVars string `mapstructure:"group_vars"`
+
+	// Path to host_vars directory
+	HostVars string `mapstructure:"host_vars"`
+
 	// The main playbook file to execute.
 	PlaybookFile string `mapstructure:"playbook_file"`
 
@@ -24,21 +36,9 @@ type Config struct {
 	// An array of local paths of roles to upload.
 	RolePaths []string `mapstructure:"role_paths"`
 
-	// Path to group_vars directory
-	GroupVars string `mapstructure:"group_vars"`
-
-	// Path to host_vars directory
-	HostVars string `mapstructure:"host_vars"`
-
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
-
-	// The command to run ansible
-	Command string
-
-	// Extra options to pass to the ansible command
-	ExtraArguments []string `mapstructure:"extra_arguments"`
 }
 
 type Provisioner struct {
@@ -62,21 +62,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	// Defaults
-	if p.config.StagingDir == "" {
-		p.config.StagingDir = DefaultStagingDir
-	}
-
 	if p.config.Command == "" {
 		p.config.Command = "ansible-playbook"
 	}
 
+	if p.config.StagingDir == "" {
+		p.config.StagingDir = DefaultStagingDir
+	}
+
 	// Templates
 	templates := map[string]*string{
-		"playbook_file": &p.config.PlaybookFile,
-		"staging_dir":   &p.config.StagingDir,
 		"command":       &p.config.Command,
 		"group_vars":    &p.config.GroupVars,
 		"host_vars":     &p.config.HostVars,
+		"playbook_file": &p.config.PlaybookFile,
+		"staging_dir":   &p.config.StagingDir,
 	}
 
 	for n, ptr := range templates {
@@ -89,9 +89,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	sliceTemplates := map[string][]string{
+		"extra_arguments": p.config.ExtraArguments,
 		"playbook_paths":  p.config.PlaybookPaths,
 		"role_paths":      p.config.RolePaths,
-		"extra_arguments": p.config.ExtraArguments,
 	}
 
 	for n, slice := range sliceTemplates {
@@ -110,17 +110,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
-	for _, path := range p.config.PlaybookPaths {
-		err := validateDirConfig(path, "playbook_paths")
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
-		}
-	}
-	for _, path := range p.config.RolePaths {
-		if err := validateDirConfig(path, "role_paths"); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
-		}
-	}
 
 	// Check that the group_vars directory exists, if configured
 	if len(p.config.GroupVars) > 0 {
@@ -135,6 +124,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
+
+	for _, path := range p.config.PlaybookPaths {
+		err := validateDirConfig(path, "playbook_paths")
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+	for _, path := range p.config.RolePaths {
+		if err := validateDirConfig(path, "role_paths"); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -156,7 +158,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
 	}
 
-	// Upload group_vars
 	if len(p.config.GroupVars) > 0 {
 		ui.Message("Uploading group_vars directory...")
 		src := p.config.GroupVars
@@ -166,7 +167,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	// Upload host_vars
 	if len(p.config.HostVars) > 0 {
 		ui.Message("Uploading host_vars directory...")
 		src := p.config.HostVars
@@ -217,14 +217,13 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	// The inventory must be set to "127.0.0.1,".  The comma is important
 	// as its the only way to override the ansible inventory when dealing
 	// with a single host.
-	var command string
+	extraArgs := ""
 	if len(p.config.ExtraArguments) > 0 {
-		command = fmt.Sprintf("%s %s %s -c local -i \"127.0.0.1,\"", p.config.Command,
-			playbook, strings.Join(p.config.ExtraArguments, " "))
-	} else {
-		command = fmt.Sprintf("%s %s -c local -i \"127.0.0.1,\"", p.config.Command, playbook)
+		extraArgs = " " + strings.Join(p.config.ExtraArguments, " ")
 	}
 
+	command := fmt.Sprintf("%s %s%s -c local -i \"127.0.0.1,\"",
+		p.config.Command, playbook, extraArgs)
 	ui.Message(fmt.Sprintf("Executing Ansible: %s", command))
 	cmd := &packer.RemoteCmd{
 		Command: command,
