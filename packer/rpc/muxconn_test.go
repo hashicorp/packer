@@ -76,6 +76,7 @@ func TestMuxConn(t *testing.T) {
 
 		go func() {
 			defer wg.Done()
+			defer s1.Close()
 			data := readStream(t, s1)
 			if data != "another" {
 				t.Fatalf("bad: %#v", data)
@@ -84,6 +85,7 @@ func TestMuxConn(t *testing.T) {
 
 		go func() {
 			defer wg.Done()
+			defer s0.Close()
 			data := readStream(t, s0)
 			if data != "hello" {
 				t.Fatalf("bad: %#v", data)
@@ -110,6 +112,9 @@ func TestMuxConn(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	s0.Close()
+	s1.Close()
+
 	// Wait for the server to be done
 	<-doneCh
 }
@@ -131,18 +136,20 @@ func TestMuxConn_lotsOfData(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 
-		var wg sync.WaitGroup
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-			data := readStream(t, s0)
-			if data != "hello" {
-				t.Fatalf("bad: %#v", data)
+		var data [1024]byte
+		for {
+			n, err := s0.Read(data[:])
+			if err == io.EOF {
+				break
 			}
-		}()
 
-		wg.Wait()
+			dataString := string(data[0:n])
+			if dataString != "hello" {
+				t.Fatalf("bad: %#v", dataString)
+			}
+		}
+
+		s0.Close()
 	}()
 
 	s0, err := client.Dial(0)
@@ -154,6 +161,10 @@ func TestMuxConn_lotsOfData(t *testing.T) {
 		if _, err := s0.Write([]byte("hello")); err != nil {
 			t.Fatalf("err: %s", err)
 		}
+	}
+
+	if err := s0.Close(); err != nil {
+		t.Fatalf("err: %s", err)
 	}
 
 	// Wait for the server to be done
