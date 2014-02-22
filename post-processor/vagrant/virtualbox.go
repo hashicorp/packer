@@ -15,6 +15,10 @@ import (
 
 type VBoxProvider struct{}
 
+func (p *VBoxProvider) KeepInputArtifact() bool {
+	return false
+}
+
 func (p *VBoxProvider) Process(ui packer.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
 	// Create the metadata
 	metadata = map[string]interface{}{"provider": "virtualbox"}
