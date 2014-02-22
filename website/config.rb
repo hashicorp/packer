@@ -12,7 +12,7 @@ $packer_os = []
 if !ENV["PACKER_DISABLE_DOWNLOAD_FETCH"]
   raise "BINTRAY_API_KEY must be set." if !ENV["BINTRAY_API_KEY"]
   http = Net::HTTP.new("dl.bintray.com", 80)
-  req = Net::HTTP::Get.new("/mitchellh/packer")
+  req = Net::HTTP::Get.new("/mitchellh/packer/")
   req.basic_auth "mitchellh", ENV["BINTRAY_API_KEY"]
   response = http.request(req)
 
