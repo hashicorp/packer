@@ -7,10 +7,27 @@ import (
 	"testing"
 )
 
+// This reads the output from the bytes.Buffer in our test object
+// and then resets the buffer.
+func readWriter(ui *BasicUi) (result string) {
+	buffer := ui.Writer.(*bytes.Buffer)
+	result = buffer.String()
+	buffer.Reset()
+	return
+}
+
+func readErrorWriter(ui *BasicUi) (result string) {
+	buffer := ui.ErrorWriter.(*bytes.Buffer)
+	result = buffer.String()
+	buffer.Reset()
+	return
+}
+
 func testUi() *BasicUi {
 	return &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
+		ErrorWriter: new(bytes.Buffer),
 	}
 }
 
@@ -32,6 +49,11 @@ func TestColoredUi(t *testing.T) {
 
 	ui.Error("foo")
 	result = readWriter(bufferUi)
+	if result != "" {
+		t.Fatalf("invalid output: %s", result)
+	}
+
+	result = readErrorWriter(bufferUi)
 	if result != "\033[1;31mfoo\033[0m\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
@@ -59,7 +81,7 @@ func TestColoredUi_noColorEnv(t *testing.T) {
 	}
 
 	ui.Error("foo")
-	result = readWriter(bufferUi)
+	result = readErrorWriter(bufferUi)
 	if result != "foo\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
@@ -88,7 +110,7 @@ func TestTargettedUi(t *testing.T) {
 	}
 
 	targettedUi.Error("bar")
-	actual = readWriter(bufferUi)
+	actual = readErrorWriter(bufferUi)
 	expected = "==> foo: bar\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
@@ -131,12 +153,13 @@ func TestBasicUi_Error(t *testing.T) {
 
 	var actual, expected string
 	bufferUi.Error("foo")
-	actual = readWriter(bufferUi)
+	actual = readErrorWriter(bufferUi)
 	expected = "foo\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
+	bufferUi.ErrorWriter = nil
 	bufferUi.Error("5")
 	actual = readWriter(bufferUi)
 	expected = "5\n"
@@ -213,13 +236,4 @@ func TestMachineReadableUi(t *testing.T) {
 	if data != expected {
 		t.Fatalf("bad: %#v", data)
 	}
-}
-
-// This reads the output from the bytes.Buffer in our test object
-// and then resets the buffer.
-func readWriter(ui *BasicUi) (result string) {
-	buffer := ui.Writer.(*bytes.Buffer)
-	result = buffer.String()
-	buffer.Reset()
-	return
 }
