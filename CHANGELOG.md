@@ -20,6 +20,8 @@ BUG FIXES:
 
 * core: Fix crash case if blank parameters are given to Packer. [GH-832]
 * core: Fix crash if big file uploads are done. [GH-897]
+* core: Fix crash if machine-readable output is going to a closed
+  pipe. [GH-875]
 * builder/docker: user variables work properly. [GH-777]
 * builder/qemu: reboots are now possible in provisioners. [GH-864]
 * builder/virtualbox,vmware: iso\_checksum is not required if the

@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 	"unicode"
 )
@@ -282,6 +283,11 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 
 	_, err := fmt.Fprintf(u.Writer, "%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
 	if err != nil {
-		panic(err)
+		if err == syscall.EPIPE {
+			// Ignore epipe errors because that just means that the file
+			// is probably closed or going to /dev/null or something.
+		} else {
+			panic(err)
+		}
 	}
 }
