@@ -25,8 +25,8 @@ func readErrorWriter(ui *BasicUi) (result string) {
 
 func testUi() *BasicUi {
 	return &BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
+		Reader:      new(bytes.Buffer),
+		Writer:      new(bytes.Buffer),
 		ErrorWriter: new(bytes.Buffer),
 	}
 }
