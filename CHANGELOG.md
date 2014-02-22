@@ -32,6 +32,8 @@ BUG FIXES:
 * post-processor/vagrant: AWS/DigitalOcean keep input artifacts by
   default. [GH-55]
 * provisioners/ansible-local: Properly upload custom playbooks. [GH-829]
+* provisioners/ansible-local: Better error if ansible isn't installed.
+  [GH-836]
 
 ## 0.5.1 (01/02/2014)
 
