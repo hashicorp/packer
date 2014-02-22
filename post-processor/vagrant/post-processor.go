@@ -152,7 +152,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
-	return NewArtifact(name, outputPath), false, nil
+	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
 }
 
 func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) error {
