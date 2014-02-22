@@ -83,7 +83,7 @@ type config struct {
 	VMName          string     `mapstructure:"vm_name"`
 
 	// TODO(mitchellh): deprecate
-	RunOnce         bool       `mapstructure:"run_once"`
+	RunOnce bool `mapstructure:"run_once"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
