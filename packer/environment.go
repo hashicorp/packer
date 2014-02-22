@@ -83,6 +83,7 @@ func DefaultEnvironmentConfig() *EnvironmentConfig {
 	config.Ui = &BasicUi{
 		Reader: os.Stdin,
 		Writer: os.Stdout,
+		ErrorWriter: os.Stderr,
 	}
 
 	return config

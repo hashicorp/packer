@@ -61,6 +61,7 @@ type TargettedUi struct {
 type BasicUi struct {
 	Reader      io.Reader
 	Writer      io.Writer
+	ErrorWriter io.Writer
 	l           sync.Mutex
 	interrupted bool
 }
@@ -235,8 +236,13 @@ func (rw *BasicUi) Error(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
+	writer := rw.ErrorWriter
+	if writer == nil {
+		writer = rw.Writer
+	}
+
 	log.Printf("ui error: %s", message)
-	_, err := fmt.Fprint(rw.Writer, message+"\n")
+	_, err := fmt.Fprint(writer, message+"\n")
 	if err != nil {
 		log.Printf("[ERR] Failed to write to UI: %s", err)
 	}

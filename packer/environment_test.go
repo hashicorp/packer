@@ -32,6 +32,7 @@ func testEnvironment() Environment {
 	config.Ui = &BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
+		ErrorWriter: new(bytes.Buffer),
 	}
 
 	env, err := NewEnvironment(config)
