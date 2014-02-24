@@ -1,5 +1,9 @@
 ## 0.5.3 (unreleased)
 
+IMPROVEMENTS:
+
+* builder/vmware: Workstation 10 support for Linux. [GH-900]
+
 BUG FIXES:
 
 * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
