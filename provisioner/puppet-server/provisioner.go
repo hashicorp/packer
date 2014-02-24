@@ -109,7 +109,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 		newFacts[k] = v
 	}
-
 	p.config.Facter = newFacts
 
 	if p.config.ClientCertPath != "" {

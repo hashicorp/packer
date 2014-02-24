@@ -7,8 +7,8 @@ page_title: "Puppet Server Provisioner"
 
 Type: `puppet-server`
 
-The Puppet provisioner configures Puppet to run on the machines
-communicating with a Puppet master.
+The `puppet-server` provisioner provisions Packer machines with Puppet
+by connecting to a Puppet master.
 
 <div class="alert alert-info alert-block">
 <strong>Note that Puppet will <em>not</em> be installed automatically
