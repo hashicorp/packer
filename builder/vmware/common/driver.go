@@ -75,11 +75,11 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 		}
 	case "linux":
 		drivers = []Driver{
-                        &Workstation10Driver {
-                                Workstation9Driver: Workstation9Driver {
-                                        SSHConfig: config,
-                                },
-                        },
+			&Workstation10Driver{
+				Workstation9Driver: Workstation9Driver{
+					SSHConfig: config,
+				},
+			},
 			&Workstation9Driver{
 				SSHConfig: config,
 			},
