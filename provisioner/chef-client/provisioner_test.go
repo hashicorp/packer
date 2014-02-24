@@ -9,7 +9,9 @@ import (
 )
 
 func testConfig() map[string]interface{} {
-	return map[string]interface{}{}
+	return map[string]interface{}{
+		"server_url": "foo",
+	}
 }
 
 func TestProvisioner_Impl(t *testing.T) {
@@ -67,7 +69,6 @@ func TestProvisionerPrepare_commands(t *testing.T) {
 	commands := []string{
 		"execute_command",
 		"install_command",
-		"validation_command",
 	}
 
 	for _, command := range commands {
@@ -96,5 +97,25 @@ func TestProvisionerPrepare_commands(t *testing.T) {
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
+	}
+}
+
+func TestProvisionerPrepare_serverUrl(t *testing.T) {
+	var p Provisioner
+
+	// Test not set
+	config := testConfig()
+	delete(config, "server_url")
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should error")
+	}
+
+	// Test set
+	config = testConfig()
+	config["server_url"] = "foo"
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }
