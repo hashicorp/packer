@@ -25,14 +25,14 @@ type Config struct {
 	InstallCommand    string `mapstructure:"install_command"`
 	Json              map[string]interface{}
 	NodeName          string   `mapstructure:"node_name"`
-	RunList           []string `mapstructure:"run_list"`
 	PreventSudo       bool     `mapstructure:"prevent_sudo"`
-	ServerUrl         string   `mapstructure:"chef_server_url"`
+	RunList           []string `mapstructure:"run_list"`
+	ServerUrl         string   `mapstructure:"server_url"`
 	SkipCleanClient   bool     `mapstructure:"skip_clean_client"`
 	SkipCleanNode     bool     `mapstructure:"skip_clean_node"`
 	SkipInstall       bool     `mapstructure:"skip_install"`
 	StagingDir        string   `mapstructure:"staging_directory"`
-	ValidationCommand string   `mapstructure:"validation_command"`
+	ValidationKeyPath string   `mapstructure:"validation_key_path"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -42,8 +42,9 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	NodeName  string
-	ServerUrl string
+	NodeName          string
+	ServerUrl         string
+	ValidationKeyPath string
 }
 
 type ExecuteTemplate struct {
@@ -77,11 +78,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.InstallCommand = "curl -L " +
 			"https://www.opscode.com/chef/install.sh | " +
 			"{{if .Sudo}}sudo {{end}}bash"
-	}
-
-	if p.config.ValidationCommand == "" {
-		p.config.ValidationCommand = "{{if .Sudo}}sudo {{end}} mv " +
-			"/tmp/validation.pem /etc/chef/validation.pem"
 	}
 
 	if p.config.RunList == nil {
@@ -127,9 +123,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	validates := map[string]*string{
-		"execute_command":    &p.config.ExecuteCommand,
-		"install_command":    &p.config.InstallCommand,
-		"validation_command": &p.config.ValidationCommand,
+		"execute_command": &p.config.ExecuteCommand,
+		"install_command": &p.config.InstallCommand,
 	}
 
 	for n, ptr := range validates {
@@ -150,6 +145,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if p.config.ServerUrl == "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("server_url must be set"))
+	}
+
 	// Process the user variables within the JSON and set the JSON.
 	// Do this early so that we can validate and show errors.
 	p.config.Json, err = p.processJsonUserVars()
@@ -166,6 +166,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	nodeName := p.config.NodeName
+	remoteValidationKeyPath := ""
+	serverUrl := p.config.ServerUrl
+
 	if !p.config.SkipInstall {
 		if err := p.installChef(ui, comm); err != nil {
 			return fmt.Errorf("Error installing Chef: %s", err)
@@ -176,14 +180,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error creating staging directory: %s", err)
 	}
 
-	if err := p.moveValidation(ui, comm); err != nil {
-		return fmt.Errorf("Error moving validation.pem: %s", err)
+	if p.config.ValidationKeyPath != "" {
+		remoteValidationKeyPath = fmt.Sprintf("%s/validation.pem", p.config.StagingDir)
+		if err := p.copyValidationKey(ui, comm, remoteValidationKeyPath); err != nil {
+			return fmt.Errorf("Error copying validation key: %s", err)
+		}
 	}
 
-	nodeName := p.config.NodeName
-	serverUrl := p.config.ServerUrl
-
-	configPath, err := p.createConfig(ui, comm, nodeName, serverUrl)
+	configPath, err := p.createConfig(
+		ui, comm, nodeName, serverUrl, remoteValidationKeyPath)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -237,7 +242,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, remoteKeyPath string) (string, error) {
 	ui.Message("Creating configuration file 'client.rb'")
 
 	// Read the template
@@ -258,8 +263,9 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		NodeName:  nodeName,
-		ServerUrl: serverUrl,
+		NodeName:          nodeName,
+		ServerUrl:         serverUrl,
+		ValidationKeyPath: remoteKeyPath,
 	})
 	if err != nil {
 		return "", err
@@ -414,24 +420,18 @@ func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error 
 	return nil
 }
 
-func (p *Provisioner) moveValidation(ui packer.Ui, comm packer.Communicator) error {
-	ui.Message("Moving validation.pem...")
+func (p *Provisioner) copyValidationKey(ui packer.Ui, comm packer.Communicator, remotePath string) error {
+	ui.Message("Uploading validation key...")
 
-	command, err := p.config.tpl.Process(p.config.ValidationCommand, &InstallChefTemplate{
-		Sudo: !p.config.PreventSudo,
-	})
+	// First upload the validation key to a writable location
+	f, err := os.Open(p.config.ValidationKeyPath)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	cmd := &packer.RemoteCmd{Command: command}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := comm.Upload(remotePath, f); err != nil {
 		return err
-	}
-
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf(
-			"Move script exited with non-zero exit status %d", cmd.ExitStatus)
 	}
 
 	return nil
@@ -482,6 +482,9 @@ log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
 validation_client_name "chef-validator"
+{{if ne .ValidationKeyPath ""}}
+validation_key "{{.ValidationKeyPath}}"
+{{end}}
 {{if ne .NodeName ""}}
 node_name "{{.NodeName}}"
 {{end}}
