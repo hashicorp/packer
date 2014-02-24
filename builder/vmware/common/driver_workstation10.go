@@ -1,48 +1,47 @@
 package common
 
 import (
-        "os/exec"
-        "bytes"
-        "regexp"
-        "fmt"
-        "log"
-        "strings"
-        "runtime"
+	"bytes"
+	"fmt"
+	"log"
+	"os/exec"
+	"regexp"
+	"runtime"
+	"strings"
 )
 
 // Workstation10Driver is a driver that can run VMware Workstation 10
 // installations. Current only tested for UNIX
 
 type Workstation10Driver struct {
-        Workstation9Driver
+	Workstation9Driver
 }
 
 func (d *Workstation10Driver) Clone(dst, src string) error {
-        cmd := exec.Command(d.Workstation9Driver.VmrunPath,
-                "-T", "ws",
-                "clone", src, dst,
-                "full")
+	cmd := exec.Command(d.Workstation9Driver.VmrunPath,
+		"-T", "ws",
+		"clone", src, dst,
+		"full")
 
-        if _, _, err := runAndLog(cmd); err != nil {
-                return err
-        }
+	if _, _, err := runAndLog(cmd); err != nil {
+		return err
+	}
 
-        return nil
+	return nil
 }
 
 func (d *Workstation10Driver) Verify() error {
-        if runtime.GOOS != "linux" {
-                return fmt.Errorf("can't used driver WS 10 not yet supported on: %s", runtime.GOOS)
-        }
+	if runtime.GOOS != "linux" {
+		return fmt.Errorf("WS10 driver is only supported on Linux at the moment. Your OS: %s", runtime.GOOS)
+	}
 
-        if err := d.Workstation9Driver.Verify(); err != nil {
-                return err
-        }
+	if err := d.Workstation9Driver.Verify(); err != nil {
+		return err
+	}
 
-
-        //TODO(pmyjavec) there is a better way to find this, how?
-        //the default will suffice for now.
-        vmxpath := "/usr/lib/vmware/bin/vmware-vmx"
+	//TODO(pmyjavec) there is a better way to find this, how?
+	//the default will suffice for now.
+	vmxpath := "/usr/lib/vmware/bin/vmware-vmx"
 
 	var stderr bytes.Buffer
 	cmd := exec.Command(vmxpath, "-v")
@@ -64,5 +63,5 @@ func (d *Workstation10Driver) Verify() error {
 			"WS 10 not detected. Got version: %s", matches[1])
 	}
 
-        return  nil
+	return nil
 }

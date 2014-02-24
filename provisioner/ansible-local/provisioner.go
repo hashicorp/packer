@@ -233,7 +233,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	}
 	if cmd.ExitStatus != 0 {
 		if cmd.ExitStatus == 127 {
-			return fmt.Errorf("%s could not be found. Verify that it is available on the\n" +
+			return fmt.Errorf("%s could not be found. Verify that it is available on the\n"+
 				"PATH after connecting to the machine.",
 				p.config.Command)
 		}
