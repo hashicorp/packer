@@ -7,30 +7,32 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	ConfigTemplate    string `mapstructure:"config_template"`
-	NodeName          string `mapstructure:"node_name"`
-	ServerUrl         string `mapstructure:"chef_server_url"`
 	ExecuteCommand    string `mapstructure:"execute_command"`
 	InstallCommand    string `mapstructure:"install_command"`
-	ValidationCommand string `mapstructure:"validation_command"`
-	ClientCommand     string `mapstructure:"client_command"`
 	Json              map[string]interface{}
-	PreventSudo       bool     `mapstructure:"prevent_sudo"`
+	NodeName          string   `mapstructure:"node_name"`
 	RunList           []string `mapstructure:"run_list"`
+	PreventSudo       bool     `mapstructure:"prevent_sudo"`
+	ServerUrl         string   `mapstructure:"chef_server_url"`
+	SkipCleanClient   bool     `mapstructure:"skip_clean_client"`
+	SkipCleanNode     bool     `mapstructure:"skip_clean_node"`
 	SkipInstall       bool     `mapstructure:"skip_install"`
 	StagingDir        string   `mapstructure:"staging_directory"`
+	ValidationCommand string   `mapstructure:"validation_command"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -42,11 +44,6 @@ type Provisioner struct {
 type ConfigTemplate struct {
 	NodeName  string
 	ServerUrl string
-
-	// Templates don't support boolean statements until Go 1.2. In the
-	// mean time, we do this.
-	// TODO(mitchellh): Remove when Go 1.2 is released
-	HasNodeName bool
 }
 
 type ExecuteTemplate struct {
@@ -72,19 +69,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}"
+		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}chef-client " +
+			"--no-color -c {{.ConfigPath}} -j {{.JsonPath}}"
 	}
 
 	if p.config.InstallCommand == "" {
-		p.config.InstallCommand = "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash  -s -- -v 10.26.0"
+		p.config.InstallCommand = "curl -L " +
+			"https://www.opscode.com/chef/install.sh | " +
+			"{{if .Sudo}}sudo {{end}}bash"
 	}
 
 	if p.config.ValidationCommand == "" {
-		p.config.ValidationCommand = "{{if .Sudo}}sudo {{end}} mv /tmp/validation.pem /etc/chef/validation.pem"
-	}
-
-	if p.config.ClientCommand == "" {
-		// p.config.ClientCommand = "{{if .Sudo}}sudo {{end}} mv /tmp/client.rb /etc/chef/client.rb"
+		p.config.ValidationCommand = "{{if .Sudo}}sudo {{end}} mv " +
+			"/tmp/validation.pem /etc/chef/validation.pem"
 	}
 
 	if p.config.RunList == nil {
@@ -133,7 +130,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"execute_command":    &p.config.ExecuteCommand,
 		"install_command":    &p.config.InstallCommand,
 		"validation_command": &p.config.ValidationCommand,
-		"client_command":     &p.config.ClientCommand,
 	}
 
 	for n, ptr := range validates {
@@ -175,31 +171,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error installing Chef: %s", err)
 		}
 	}
-	if err := p.moveClient(ui, comm); err != nil {
-		return fmt.Errorf("Error moving client.rb: %s", err)
-	}
 
 	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
 		return fmt.Errorf("Error creating staging directory: %s", err)
-	}
-
-	if err := p.createHints(ui, comm); err != nil {
-		return fmt.Errorf("Error creating ohai hints file and directory: %s", err)
 	}
 
 	if err := p.moveValidation(ui, comm); err != nil {
 		return fmt.Errorf("Error moving validation.pem: %s", err)
 	}
 
-	nodeName := ""
-	if p.config.NodeName != "" {
-		nodeName = fmt.Sprintf("%s", p.config.NodeName)
-	}
-
-	serverUrl := ""
-	if p.config.ServerUrl != "" {
-		serverUrl = fmt.Sprintf("%s", p.config.ServerUrl)
-	}
+	nodeName := p.config.NodeName
+	serverUrl := p.config.ServerUrl
 
 	configPath, err := p.createConfig(ui, comm, nodeName, serverUrl)
 	if err != nil {
@@ -211,24 +193,21 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error creating JSON attributes: %s", err)
 	}
 
-	if err := p.executeChef(ui, comm, configPath, jsonPath); err != nil {
-		if err2 := p.cleanNode(ui, comm, p.config.NodeName); err2 != nil {
+	err = p.executeChef(ui, comm, configPath, jsonPath)
+	if !p.config.SkipCleanNode {
+		if err2 := p.cleanNode(ui, comm, nodeName); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef node: %s", err2)
 		}
+	}
 
-		if err2 := p.cleanClient(ui, comm, p.config.NodeName); err2 != nil {
+	if !p.config.SkipCleanClient {
+		if err2 := p.cleanClient(ui, comm, serverUrl); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef client: %s", err2)
 		}
+	}
 
+	if err != nil {
 		return fmt.Errorf("Error executing Chef: %s", err)
-	}
-
-	if err := p.cleanNode(ui, comm, p.config.NodeName); err != nil {
-		return fmt.Errorf("Error cleaning up chef node: %s", err)
-	}
-
-	if err := p.cleanClient(ui, comm, p.config.NodeName); err != nil {
-		return fmt.Errorf("Error cleaning up chef client: %s", err)
 	}
 
 	if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
@@ -279,9 +258,8 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		NodeName:    nodeName,
-		ServerUrl:   serverUrl,
-		HasNodeName: nodeName != "",
+		NodeName:  nodeName,
+		ServerUrl: serverUrl,
 	})
 	if err != nil {
 		return "", err
@@ -336,19 +314,6 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 
 	if cmd.ExitStatus != 0 {
 		return fmt.Errorf("Non-zero exit status.")
-	}
-
-	return nil
-}
-
-func (p *Provisioner) createHints(ui packer.Ui, comm packer.Communicator) error {
-	ui.Message(fmt.Sprintf("Creating directory: /etc/chef/ohai/hints"))
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p /etc/chef/ohai/hints; echo '{}' > /etc/chef/ohai/hints/ec2.json"),
-	}
-
-	if err := cmd.StartWithUi(comm, ui); err != nil {
-		return err
 	}
 
 	return nil
@@ -472,29 +437,6 @@ func (p *Provisioner) moveValidation(ui packer.Ui, comm packer.Communicator) err
 	return nil
 }
 
-func (p *Provisioner) moveClient(ui packer.Ui, comm packer.Communicator) error {
-	ui.Message("Moving client.rb...")
-
-	command, err := p.config.tpl.Process(p.config.ClientCommand, &InstallChefTemplate{
-		Sudo: !p.config.PreventSudo,
-	})
-	if err != nil {
-		return err
-	}
-
-	cmd := &packer.RemoteCmd{Command: command}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
-		return err
-	}
-
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf(
-			"Move script exited with non-zero exit status %d", cmd.ExitStatus)
-	}
-
-	return nil
-}
-
 func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 	jsonBytes, err := json.Marshal(p.config.Json)
 	if err != nil {
@@ -540,7 +482,7 @@ log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
 validation_client_name "chef-validator"
-{{if .HasNodeName}}
+{{if ne .NodeName ""}}
 node_name "{{.NodeName}}"
 {{end}}
 `
