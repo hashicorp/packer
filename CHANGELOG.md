@@ -1,5 +1,10 @@
 ## 0.5.3 (unreleased)
 
+FEATURES:
+
+* **New provisioner:** `chef-client` - Provision using a the `chef-client`
+  command, which talks to a Chef Server. [GH-855]
+
 IMPROVEMENTS:
 
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
