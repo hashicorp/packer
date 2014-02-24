@@ -43,12 +43,13 @@ const defaultConfig = `
 	"post-processors": {
 		"vagrant": "packer-post-processor-vagrant",
 		"vsphere": "packer-post-processor-vsphere",
-    "docker-push": "packer-post-processor-docker-push",
-    "docker-import": "packer-post-processor-docker-import"
+		"docker-push": "packer-post-processor-docker-push",
+		"docker-import": "packer-post-processor-docker-import"
 	},
 
 	"provisioners": {
 		"ansible-local": "packer-provisioner-ansible-local",
+		"chef-client": "packer-provisioner-chef-client",
 		"chef-solo": "packer-provisioner-chef-solo",
 		"file": "packer-provisioner-file",
 		"puppet-masterless": "packer-provisioner-puppet-masterless",
