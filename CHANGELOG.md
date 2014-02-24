@@ -4,6 +4,8 @@ FEATURES:
 
 * **New provisioner:** `chef-client` - Provision using a the `chef-client`
   command, which talks to a Chef Server. [GH-855]
+* **New provisioner:** `puppet-server` - Provision using Puppet by
+  communicating to a Puppet master. [GH-796]
 
 IMPROVEMENTS:
 
