@@ -7,30 +7,44 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/rackspace/gophercloud"
-	"time"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(multistep.StateBag) (string, error) {
+func SSHAddress(csp gophercloud.CloudServersProvider, port int,
+	specify_ip_pool string) func(multistep.StateBag) (string, error) {
+
 	return func(state multistep.StateBag) (string, error) {
-		for j := 0; j < 2; j++ {
-			s := state.Get("server").(*gophercloud.Server)
-			if s.AccessIPv4 != "" {
-				return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
-			}
-			if s.AccessIPv6 != "" {
-				return fmt.Sprintf("[%s]:%d", s.AccessIPv6, port), nil
-			}
-			serverState, err := csp.ServerById(s.Id)
-
-			if err != nil {
-				return "", err
-			}
-
-			state.Put("server", serverState)
-			time.Sleep(1 * time.Second)
+		s := state.Get("server").(*gophercloud.Server)
+		ip_pools, err := s.AllAddressPools()
+		if err != nil {
+			return "", errors.New("Error parsing SSH addresses")
 		}
+		for pool, addresses := range ip_pools {
+			if specify_ip_pool != "" {
+				if pool == specify_ip_pool {
+					for _, address := range addresses {
+						if address.Addr != "" {
+							return fmt.Sprintf("%s:%d", address.Addr, port), nil
+						}
+					}
+				}
+			} else if pool != "" {
+				for _, address := range addresses {
+					if address.Addr != "" {
+						return fmt.Sprintf("%s:%d", address.Addr, port), nil
+					}
+				}
+			}
+		}
+
+		serverState, err := csp.ServerById(s.Id)
+
+		if err != nil {
+			return "", err
+		}
+
+		state.Put("server", serverState)
 
 		return "", errors.New("couldn't determine IP address for server")
 	}
