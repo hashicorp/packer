@@ -15,6 +15,8 @@ BUG FIXES:
 
 * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
   which works for every region. [GH-904]
+* builder/virtualbox-iso: Retry unregister a few times to deal with
+  VBoxManage randomness. [GH-915]
 
 ## 0.5.2 (02/21/2014)
 
