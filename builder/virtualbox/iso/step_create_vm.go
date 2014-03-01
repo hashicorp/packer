@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/multistep"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
+	"time"
 )
 
 // This step creates the actual virtual machine.
@@ -65,7 +66,17 @@ func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Unregistering and deleting virtual machine...")
-	if err := driver.VBoxManage("unregistervm", s.vmName, "--delete"); err != nil {
+	var err error = nil
+	for i := 0; i < 5; i++ {
+		err = driver.VBoxManage("unregistervm", s.vmName, "--delete")
+		if err == nil {
+			break
+		}
+
+		time.Sleep(1 * time.Second * time.Duration(i))
+	}
+
+	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting virtual machine: %s", err))
 	}
 }
