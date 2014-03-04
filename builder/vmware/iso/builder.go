@@ -34,6 +34,7 @@ type config struct {
 
 	DiskName          string   `mapstructure:"vmdk_name"`
 	DiskSize          uint     `mapstructure:"disk_size"`
+  AdditionalDiskSize   []uint     `mapstructure:"additionaldisk_size"`
 	DiskTypeId        string   `mapstructure:"disk_type_id"`
 	FloppyFiles       []string `mapstructure:"floppy_files"`
 	GuestOSType       string   `mapstructure:"guest_os_type"`
