@@ -35,6 +35,7 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
+	AdditionalDiskSize []uint `mapstructure:"additionaldisk_size"`
 	DiskName        string   `mapstructure:"vmdk_name"`
 	DiskSize        uint     `mapstructure:"disk_size"`
 	DiskTypeId      string   `mapstructure:"disk_type_id"`
