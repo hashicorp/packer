@@ -21,8 +21,8 @@ type vmxTemplateData struct {
 }
 
 type additionalDiskTemplateData struct {
-	DiskNumber	int
-	DiskName	string
+	DiskNumber int
+	DiskName   string
 }
 
 // This step creates the VMX file for the VM.
@@ -75,22 +75,22 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 		vmxTemplate = string(rawBytes)
 	}
-	
+
 	if len(config.AdditionalDiskSize) > 0 {
 		for i, _ := range config.AdditionalDiskSize {
 			data := &additionalDiskTemplateData{
-				DiskNumber: 	i+1,
-				DiskName: 		config.DiskName,
+				DiskNumber: i + 1,
+				DiskName:   config.DiskName,
 			}
-			
-			diskTemplate, err := config.tpl.Process(DefaultAdditionalDiskTemplate,data)
+
+			diskTemplate, err := config.tpl.Process(DefaultAdditionalDiskTemplate, data)
 			if err != nil {
 				err := fmt.Errorf("Error preparing VMX template for additional disk: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-			
+
 			vmxTemplate += diskTemplate
 		}
 	}
