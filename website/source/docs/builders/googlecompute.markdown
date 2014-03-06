@@ -55,7 +55,7 @@ files obtained in the previous section.
 <pre class="prettyprint">
 {
   "type": "googlecompute",
-  "bucket_name": "packer-images",
+  "bucket_name": "my-project-packer-images",
   "client_secrets_file": "client_secret.json",
   "private_key_file": "XXXXXX-privatekey.p12",
   "project_id": "my-project",
@@ -72,7 +72,7 @@ each category, the available options are alphabetized and described.
 Required:
 
 * `bucket_name` (string) - The Google Cloud Storage bucket to store the
-  images that are created.
+  images that are created. The bucket must already exist in your project.
 
 * `client_secrets_file` (string) - The client secrets JSON file that
   was set up in the section above.
