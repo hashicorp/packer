@@ -33,6 +33,7 @@ func TestStepShutdown_command(t *testing.T) {
 	step := new(StepShutdown)
 	step.Command = "foo"
 	step.Timeout = 10 * time.Second
+	step.Testing = true
 
 	comm := state.Get("communicator").(*packer.MockCommunicator)
 	driver := state.Get("driver").(*DriverMock)
@@ -116,6 +117,7 @@ func TestStepShutdown_noCommand(t *testing.T) {
 func TestStepShutdown_locks(t *testing.T) {
 	state := testStepShutdownState(t)
 	step := new(StepShutdown)
+	step.Testing = true
 
 	dir := state.Get("dir").(*LocalOutputDir)
 	comm := state.Get("communicator").(*packer.MockCommunicator)

@@ -28,6 +28,9 @@ import (
 type StepShutdown struct {
 	Command string
 	Timeout time.Duration
+
+	// Set this to true if we're testing
+	Testing bool
 }
 
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
@@ -134,7 +137,7 @@ LockWaitLoop:
 		}
 	}
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && !s.Testing {
 		// Windows takes a while to yield control of the files when the
 		// process is exiting. We just sleep here. In the future, it'd be
 		// nice to find a better solution to this.
