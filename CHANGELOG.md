@@ -10,6 +10,8 @@ FEATURES:
 IMPROVEMENTS:
 
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
+* builder/virtualbox: Support an `export_opts` option which allows
+  specifying arbitrary arguments when exporting the VM.
 
 BUG FIXES:
 

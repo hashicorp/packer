@@ -13,6 +13,7 @@ import (
 type Config struct {
 	common.PackerConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig      `mapstructure:",squash"`
+	vboxcommon.ExportOpts        `mapstructure:",squash"`
 	vboxcommon.FloppyConfig      `mapstructure:",squash"`
 	vboxcommon.OutputConfig      `mapstructure:",squash"`
 	vboxcommon.RunConfig         `mapstructure:",squash"`
@@ -49,6 +50,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ExportOpts.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)

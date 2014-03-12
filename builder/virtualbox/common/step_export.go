@@ -16,8 +16,9 @@ import (
 // Produces:
 //   exportPath string - The path to the resulting export.
 type StepExport struct {
-	Format    string
-	OutputDir string
+	Format     string
+	OutputDir  string
+	ExportOpts string
 }
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
@@ -50,6 +51,7 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 		vmName,
 		"--output",
 		outputPath,
+		s.ExportOpts,
 	}
 
 	ui.Say("Exporting virtual machine...")
