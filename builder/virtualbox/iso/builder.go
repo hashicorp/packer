@@ -29,6 +29,7 @@ type Builder struct {
 type config struct {
 	common.PackerConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig      `mapstructure:",squash"`
+	vboxcommon.ExportOpts        `mapstructure:",squash"`
 	vboxcommon.FloppyConfig      `mapstructure:",squash"`
 	vboxcommon.OutputConfig      `mapstructure:",squash"`
 	vboxcommon.RunConfig         `mapstructure:",squash"`
@@ -73,6 +74,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors and warnings
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportOpts.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
@@ -317,8 +319,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(vboxcommon.StepRemoveDevices),
 		&vboxcommon.StepExport{
-			Format:    b.config.Format,
-			OutputDir: b.config.OutputDir,
+			Format:     b.config.Format,
+			OutputDir:  b.config.OutputDir,
+			ExportOpts: b.config.ExportOpts.ExportOpts,
 		},
 	}
 
