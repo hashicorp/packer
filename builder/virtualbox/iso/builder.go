@@ -27,16 +27,17 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig          `mapstructure:",squash"`
-	vboxcommon.ExportConfig      `mapstructure:",squash"`
-	vboxcommon.ExportOpts        `mapstructure:",squash"`
-	vboxcommon.FloppyConfig      `mapstructure:",squash"`
-	vboxcommon.OutputConfig      `mapstructure:",squash"`
-	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
-	vboxcommon.SSHConfig         `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
+	common.PackerConfig             `mapstructure:",squash"`
+	vboxcommon.ExportConfig         `mapstructure:",squash"`
+	vboxcommon.ExportOpts           `mapstructure:",squash"`
+	vboxcommon.FloppyConfig         `mapstructure:",squash"`
+	vboxcommon.OutputConfig         `mapstructure:",squash"`
+	vboxcommon.RunConfig            `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
+	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
+	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
 	DiskSize             uint     `mapstructure:"disk_size"`
@@ -82,6 +83,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
@@ -318,6 +320,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 		},
 		new(vboxcommon.StepRemoveDevices),
+		&vboxcommon.StepVBoxManage{
+			Commands: b.config.VBoxManagePost,
+			Tpl:      b.config.tpl,
+		},
 		&vboxcommon.StepExport{
 			Format:     b.config.Format,
 			OutputDir:  b.config.OutputDir,
