@@ -18,6 +18,7 @@ BUG FIXES:
 * builder/virtualbox-iso: Retry unregister a few times to deal with
   VBoxManage randomness. [GH-915]
 * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
+* post-processor/docker-push: Allow repositories with ports. [GH-923]
 
 ## 0.5.2 (02/21/2014)
 
