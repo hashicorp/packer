@@ -108,7 +108,7 @@ Optional:
   the default is 10 seconds.
 
 * `disk_size` (int) - The size, in megabytes, of the hard disk to create
-  for the VM. By default, this is 40000 (40 GB).
+  for the VM. By default, this is 40000 (about 40 GB).
 
 * `disk_interface` (string) - The interface to use for the disk. Allowed
   values include any of "ide," "scsi" or "virtio." Note also that any boot
