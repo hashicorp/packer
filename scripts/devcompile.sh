@@ -15,7 +15,7 @@ verify_go () {
         return 0
     fi
     local IFS=.
-    local i ver1="$1" ver2="$2"
+    local i ver1=($1) ver2=($2)
 
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
     do
