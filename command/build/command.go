@@ -23,12 +23,14 @@ func (Command) Help() string {
 func (c Command) Run(env packer.Environment, args []string) int {
 	var cfgDebug bool
 	var cfgForce bool
+	var cfgParallel bool
 	buildOptions := new(cmdcommon.BuildOptions)
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
 	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
+	cmdFlags.BoolVar(&cfgParallel, "parallel", true, "enable/disable parallelization")
 	cmdcommon.BuildOptionFlags(cmdFlags, buildOptions)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
@@ -173,6 +175,11 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 		if cfgDebug {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
+			wg.Wait()
+		}
+
+		if !cfgParallel {
+			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
 
