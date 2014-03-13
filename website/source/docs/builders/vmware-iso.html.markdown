@@ -86,7 +86,7 @@ Optional:
 * `disk_size` (int) - The size of the hard disk for the VM in megabytes.
   The builder uses expandable, not fixed-size virtual hard disks, so the
   actual file representing the disk will not use the full size unless it is full.
-  By default this is set to 40,000 (40 GB).
+  By default this is set to 40,000 (about 40 GB).
 
 * `disk_type_id` (string) - The type of VMware virtual disk to create.
   The default is "1", which corresponds to a growable virtual disk split in

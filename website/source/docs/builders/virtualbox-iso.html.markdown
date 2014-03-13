@@ -83,7 +83,7 @@ Optional:
   the default is 10 seconds.
 
 * `disk_size` (int) - The size, in megabytes, of the hard disk to create
-  for the VM. By default, this is 40000 (40 GB).
+  for the VM. By default, this is 40000 (about 40 GB).
 
 * `floppy_files` (array of strings) - A list of files to put onto a floppy
   disk that is attached when the VM is booted for the first time. This is
