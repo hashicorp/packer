@@ -9,6 +9,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
 * command/build: Added '-parallel' flag so you can disable parallelization
   with `-no-parallel`. [GH-924]
