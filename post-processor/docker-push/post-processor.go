@@ -16,6 +16,8 @@ type Config struct {
 }
 
 type PostProcessor struct {
+	Driver docker.Driver
+
 	config Config
 }
 
@@ -38,7 +40,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	return nil
-
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
@@ -49,13 +50,22 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
-	driver := &docker.DockerDriver{Tpl: p.config.tpl, Ui: ui}
+	driver := p.Driver
+	if driver == nil {
+		// If no driver is set, then we use the real driver
+		driver = &docker.DockerDriver{Tpl: p.config.tpl, Ui: ui}
+	}
 
 	// Get the name. We strip off any tags from the name because the
 	// push doesn't use those.
 	name := artifact.Id()
-	if i := strings.Index(name, ":"); i >= 0 {
-		name = name[:i]
+
+	if i := strings.Index(name, "/"); i >= 0 {
+		// This should always be true because the / is required. But we have
+		// to get the index to this so we don't accidentally strip off the port
+		if j := strings.Index(name[i:], ":"); j >= 0 {
+			name = name[:i+j]
+		}
 	}
 
 	ui.Message("Pushing: " + name)
