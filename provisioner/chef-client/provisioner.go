@@ -311,7 +311,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("sudo mkdir -p '%s' && sudo chown ubuntu '%s'", dir, dir),
+		Command: fmt.Sprintf("sudo mkdir -p '%s'", dir),
 	}
 
 	if err := cmd.StartWithUi(comm, ui); err != nil {
