@@ -17,6 +17,7 @@ BUG FIXES:
   which works for every region. [GH-904]
 * builder/virtualbox-iso: Retry unregister a few times to deal with
   VBoxManage randomness. [GH-915]
+* provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
 
 ## 0.5.2 (02/21/2014)
 
