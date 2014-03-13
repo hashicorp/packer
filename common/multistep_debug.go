@@ -23,7 +23,7 @@ func MultistepDebugFn(ui packer.Ui) multistep.DebugPauseFn {
 		}
 
 		message := fmt.Sprintf(
-			"Pausing %s step '%s'. Press any key to continue.",
+			"Pausing %s step '%s'. Press enter to continue.",
 			locationString, name)
 
 		result := make(chan string, 1)
