@@ -10,6 +10,8 @@ FEATURES:
 IMPROVEMENTS:
 
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
+* command/build: Added '-parallel' flag so you can disable parallelization
+  with `-no-parallel`. [GH-924]
 
 BUG FIXES:
 
