@@ -13,6 +13,7 @@ Options:
   -machine-readable          Machine-readable output
   -except=foo,bar,baz        Build all builds other than these
   -only=foo,bar,baz          Only build the given builds by name
+  -parallel=false            Disable parallelization (on by default)
   -var 'key=value'           Variable for templates, can be used multiple times.
   -var-file=path             JSON file containing user variables.
 `
