@@ -10,7 +10,9 @@ func TestExportOptsPrepare_BootWait(t *testing.T) {
 
 	// Good
 	c = new(ExportOpts)
-	c.ExportOpts = "ovf"
+	c.ExportOpts = []string{
+		"--options",
+	}
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
