@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -51,8 +52,9 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 		vmName,
 		"--output",
 		outputPath,
-		s.ExportOpts,
 	}
+
+	command = append(command, strings.Fields(s.ExportOpts)...)
 
 	ui.Say("Exporting virtual machine...")
 	err := driver.VBoxManage(command...)
