@@ -6,8 +6,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
