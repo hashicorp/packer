@@ -6,20 +6,20 @@ import (
 )
 
 type ExportOpts struct {
-	ExportOpts string `mapstructure:"export_opts"`
+	ExportOpts []string `mapstructure:"export_opts"`
 }
 
 func (c *ExportOpts) Prepare(t *packer.ConfigTemplate) []error {
-	templates := map[string]*string{
-		"export_opts": &c.ExportOpts,
+	if c.ExportOpts == nil {
+		c.ExportOpts = make([]string, 0)
 	}
 
 	errs := make([]error, 0)
-	for n, ptr := range templates {
+	for _, str := range c.ExportOpts {
 		var err error
-		*ptr, err = t.Process(*ptr, nil)
+		str, err = t.Process(str, nil)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
+			errs = append(errs, fmt.Errorf("Error processing %s: %s", "export_opts", err))
 		}
 	}
 
