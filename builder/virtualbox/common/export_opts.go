@@ -15,9 +15,9 @@ func (c *ExportOpts) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	errs := make([]error, 0)
-	for _, str := range c.ExportOpts {
+	for i, str := range c.ExportOpts {
 		var err error
-		str, err = t.Process(str, nil)
+		c.ExportOpts[i], err = t.Process(str, nil)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Error processing %s: %s", "export_opts", err))
 		}
