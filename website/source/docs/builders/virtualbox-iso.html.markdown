@@ -211,7 +211,7 @@ Optional:
   machine, without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
 
-* `export_opts` (string) - Additional options to pass to the `VBoxManage export`.
+* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
   This can be useful for passing product information to include in the resulting
   appliance file.
 
