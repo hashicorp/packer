@@ -7,6 +7,7 @@ import (
 	"log"
 	"path/filepath"
 	"time"
+	"strings"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
@@ -56,6 +57,7 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	command = append(command, s.ExportOpts...)
 
 	ui.Say("Exporting virtual machine...")
+	ui.Message(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
 	err := driver.VBoxManage(command...)
 	if err != nil {
 		err := fmt.Errorf("Error exporting virtual machine: %s", err)
