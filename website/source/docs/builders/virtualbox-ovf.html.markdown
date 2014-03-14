@@ -151,7 +151,7 @@ Optional:
   This can be useful for passing "keepallmacs" or "keepnatmacs" options for existing
   ovf images.
 
-* `export_opts` (string) - Additional options to pass to the `VBoxManage export`.
+* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
   This can be useful for passing product information to include in the resulting
   appliance file.
 
