@@ -187,17 +187,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Required configurations that will display errors if not set
 	if b.config.APIURL == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("a API URL must be specified"))
+			errs, errors.New("CLOUDSTACK_API_URL in env (APIURL in json) must be specified"))
 	}
 
 	if b.config.APIKey == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("an api_key must be specified"))
+			errs, errors.New("CLOUDSTACK_API_KEY in env (APIKey in json) must be specified"))
 	}
 
 	if b.config.Secret == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("a secret must be specified"))
+			errs, errors.New("CLOUDSTACK_SECRET in env (Secret in json) must be specified"))
 	}
 
 	sshTimeout, err := time.ParseDuration(b.config.RawSSHTimeout)
