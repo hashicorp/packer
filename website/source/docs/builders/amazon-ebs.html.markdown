@@ -148,7 +148,7 @@ Here is a basic example. It is completely valid except for the access keys:
   "source_ami": "ami-de0d9eb7",
   "instance_type": "t1.micro",
   "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{timestamp}}",
+  "ami_name": "packer-quick-start {{timestamp}}"
 }
 </pre>
 
