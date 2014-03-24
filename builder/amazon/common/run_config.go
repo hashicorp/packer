@@ -19,6 +19,7 @@ type RunConfig struct {
 	SourceAmi                string            `mapstructure:"source_ami"`
 	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
 	SSHUsername              string            `mapstructure:"ssh_username"`
+	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
 	SSHPort                  int               `mapstructure:"ssh_port"`
 	SecurityGroupId          string            `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
@@ -91,6 +92,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"instance_type":           &c.InstanceType,
 		"ssh_timeout":             &c.RawSSHTimeout,
 		"ssh_username":            &c.SSHUsername,
+		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
 		"source_ami":              &c.SourceAmi,
 		"subnet_id":               &c.SubnetId,
 		"temporary_key_pair_name": &c.TemporaryKeyPairName,
