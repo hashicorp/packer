@@ -16,6 +16,7 @@ type SSHConfig struct {
 	SSHPort           uint   `mapstructure:"ssh_port"`
 	SSHUser           string `mapstructure:"ssh_username"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
+	SSHSkipNatMapping bool   `mapstructure:"ssh_skip_nat_mapping"`
 
 	SSHWaitTimeout time.Duration
 }
