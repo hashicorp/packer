@@ -126,6 +126,10 @@ Optional:
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as the virtual machine is booted.
 
+* `ssh_skip_nat_mapping` (bool) - Defaults to false. When enabled, Packer does
+  not setup forwarded port mapping for SSH requests and uses `ssh_port` on the
+  host to communicate to the virtual machine
+
 * `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
   execute in order to further customize the virtual machine being created.
   The value of this is an array of commands to execute. The commands are executed
