@@ -55,6 +55,12 @@ func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
 	return strings.Contains(state, "Powered on"), nil
 }
 
+func (d *ESX5Driver) Reset(vmxPathLocal string, headless bool) error {
+	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	// see http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2012964
+	return d.sh("vim-cmd", "vmsvc/power.reset", vmxPath)
+}
+
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
 	return d.sh("vim-cmd", "vmsvc/power.on", vmxPath)
