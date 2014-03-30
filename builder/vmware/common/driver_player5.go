@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/multistep"
 )
@@ -94,6 +95,18 @@ func (d *Player5LinuxDriver) IsRunning(vmxPath string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (d *Player5LinuxDriver) Reset(vmxPath string, headless bool) error {
+	err := d.Stop(vmxPath)
+	if err != nil {
+		return err
+	}
+
+	// We sleep here for a little bit to let the session "unlock"
+	time.Sleep(2 * time.Second)
+
+	return d.Start(vmxPath, headless)
 }
 
 func (d *Player5LinuxDriver) SSHAddress(state multistep.StateBag) (string, error) {

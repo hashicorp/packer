@@ -29,6 +29,11 @@ type DriverMock struct {
 	IsRunningResult bool
 	IsRunningErr    error
 
+	ResetCalled   bool
+	ResetPath     string
+	ResetHeadless bool
+	ResetErr      error
+
 	SSHAddressCalled bool
 	SSHAddressState  multistep.StateBag
 	SSHAddressResult string
@@ -87,6 +92,13 @@ func (d *DriverMock) IsRunning(path string) (bool, error) {
 	d.IsRunningCalled = true
 	d.IsRunningPath = path
 	return d.IsRunningResult, d.IsRunningErr
+}
+
+func (d *DriverMock) Reset(path string, headless bool) error {
+	d.ResetCalled = true
+	d.ResetPath = path
+	d.ResetHeadless = headless
+	return d.ResetErr
 }
 
 func (d *DriverMock) SSHAddress(state multistep.StateBag) (string, error) {

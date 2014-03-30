@@ -9,6 +9,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* builder/virtualbox,vmware: add ability to reset (reboot) a VM [GH-989]
 * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
 * command/build: Added '-parallel' flag so you can disable parallelization

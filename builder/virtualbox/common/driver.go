@@ -28,6 +28,9 @@ type Driver interface {
 	// Checks if the VM with the given name is running.
 	IsRunning(string) (bool, error)
 
+	// Reset a running machine, forcefully.
+	Reset(string, bool) error
+
 	// Stop stops a running machine, forcefully.
 	Stop(string) error
 
