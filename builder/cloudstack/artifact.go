@@ -22,7 +22,7 @@ func (*Artifact) BuilderId() string {
 }
 
 func (*Artifact) Files() []string {
-	// No files with CloudStack
+	// No local files created with Cloudstack.
 	return nil
 }
 

@@ -1,5 +1,5 @@
 // The cloudstack package contains a packer.Builder implementation
-// that builds CloudStack images (templates).
+// that builds Cloudstack images (templates).
 
 package cloudstack
 
@@ -19,7 +19,7 @@ import (
 const BuilderId = "mindjiver.cloudstack"
 
 // Configuration tells the builder the credentials to use while
-// communicating with CloudStack and describes the template you are
+// communicating with Cloudstack and describes the template you are
 // creating
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -44,8 +44,8 @@ type config struct {
 	HTTPPortMin uint   `mapstructure:"http_port_min"`
 	HTTPPortMax uint   `mapstructure:"http_port_max"`
 
-	// Neccessary settings for CloudStack to be able to spin up
-	// Virtual Machine eith with template or a ISO.
+	// Neccessary settings for Cloudstack to be able to spin up
+	// Virtual Machine with either template or a ISO.
 	ServiceOfferingId string   `mapstructure:"service_offering_id"`
 	TemplateId        string   `mapstructure:"template_id"`
 	ZoneId            string   `mapstructure:"zone_id"`
@@ -54,7 +54,7 @@ type config struct {
 	UserData          string   `mapstructure:"user_data"`
 	Hypervisor        string   `mapstructure:"hypervisor"`
 
-	// Tell CloudStack under which name, description to save the
+	// Tell Cloudstack under which name, description to save the
 	// template.
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDisplayText string `mapstructure:"template_display_text"`
@@ -223,7 +223,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Initialize the CloudStack API client
+	// Initialize the Cloudstack API client
 	client := gopherstack.CloudStackClient{}.New(b.config.APIURL, b.config.APIKey, b.config.Secret)
 
 	// Set up the state
