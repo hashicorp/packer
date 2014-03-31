@@ -74,8 +74,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tpl:      b.config.tpl,
 		},
 		&vboxcommon.StepRun{
-			BootWait: b.config.BootWait,
-			Headless: b.config.Headless,
+			BootWait:    b.config.BootWait,
+			Headless:    b.config.Headless,
+                        Vrde:        b.config.Vrde,
+                        VrdeAddress: b.config.VrdeAddress,
+                        VrdePort:    b.config.VrdePort,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,

@@ -18,6 +18,9 @@ import (
 type StepRun struct {
 	BootWait time.Duration
 	Headless bool
+        Vrde        bool
+        VrdeAddress string
+        VrdePort    uint
 
 	vmName string
 }
@@ -26,6 +29,21 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
+
+        if s.Vrde == true {
+                ui.Message("NOTE: Virtual Remote Desktop Extension enabled.")
+                vrdeargument := ""
+                if s.VrdePort > 0 {
+                        vrdeargument = fmt.Sprintf("--vrdeport %d", s.VrdePort)
+                }
+                command := []string{"modifyvm", vmName, "--vrde", "on", "--vrdeaddress", s.VrdeAddress, vrdeargument}
+                if err := driver.VBoxManage(command...); err != nil {
+                        err := fmt.Errorf("Error enabling the Virtual Remote Desktop Extension: %s", err)
+                        state.Put("error", err)
+                        ui.Error(err.Error())
+                        return multistep.ActionHalt
+                }
+        }
 
 	ui.Say("Starting the virtual machine...")
 	guiArgument := "gui"
