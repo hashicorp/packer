@@ -31,6 +31,8 @@ type config struct {
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawStateTimeout string `mapstructure:"state_timeout"`
 
+	InsecureSkipVerify bool `mapstructure:"insecure_skip_verify"`
+
 	SSHUsername string `mapstructure:"ssh_username"`
 	SSHPort     uint   `mapstructure:"ssh_port"`
 	SSHKeyPath  string `mapstructure:"ssh_key_path"`
@@ -223,8 +225,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Initialize the Cloudstack API client
-	client := gopherstack.CloudStackClient{}.New(b.config.APIURL, b.config.APIKey, b.config.Secret)
+	// Initialize the CloudStack API client
+	client := gopherstack.CloudStackClient{}.New(b.config.APIURL, b.config.APIKey,
+		b.config.Secret, b.config.InsecureSkipVerify)
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
