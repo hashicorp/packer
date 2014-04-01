@@ -23,6 +23,11 @@ type DriverMock struct {
 	IsRunningReturn bool
 	IsRunningErr    error
 
+	ResetCalled   bool
+	ResetPath     string
+	ResetHeadless bool
+	ResetErr      error
+
 	StopName string
 	StopErr  error
 
@@ -66,6 +71,13 @@ func (d *DriverMock) IsRunning(name string) (bool, error) {
 
 	d.IsRunningName = name
 	return d.IsRunningReturn, d.IsRunningErr
+}
+
+func (d *DriverMock) Reset(path string, headless bool) error {
+	d.ResetCalled = true
+	d.ResetPath = path
+	d.ResetHeadless = headless
+	return d.ResetErr
 }
 
 func (d *DriverMock) Stop(name string) error {

@@ -280,6 +280,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
+		new(stepHTTPResetHandler),
 		new(stepHTTPServer),
 		new(vboxcommon.StepSuppressMessages),
 		new(stepCreateVM),

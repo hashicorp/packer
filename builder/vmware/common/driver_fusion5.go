@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/multistep"
 )
@@ -67,6 +68,18 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (d *Fusion5Driver) Reset(vmxPath string, headless bool) error {
+	err := d.Stop(vmxPath)
+	if err != nil {
+		return err
+	}
+
+	// We sleep here for a little bit to let the session "unlock"
+	time.Sleep(2 * time.Second)
+
+	return d.Start(vmxPath, headless)
 }
 
 func (d *Fusion5Driver) SSHAddress(state multistep.StateBag) (string, error) {

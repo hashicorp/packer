@@ -84,6 +84,14 @@ func (d *VBox42Driver) IsRunning(name string) (bool, error) {
 	return false, nil
 }
 
+func (d *VBox42Driver) Reset(name string, dummy bool) error {
+	if err := d.VBoxManage("controlvm", name, "reset"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *VBox42Driver) Stop(name string) error {
 	if err := d.VBoxManage("controlvm", name, "poweroff"); err != nil {
 		return err

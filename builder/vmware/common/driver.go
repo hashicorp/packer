@@ -27,6 +27,9 @@ type Driver interface {
 	// Checks if the VMX file at the given path is running.
 	IsRunning(string) (bool, error)
 
+	// Reset resets (reboots) a VM specified by the path to the VMX given.
+	Reset(string, bool) error
+
 	// SSHAddress returns the SSH address for the VM that is being
 	// managed by this driver.
 	SSHAddress(multistep.StateBag) (string, error)
