@@ -78,11 +78,11 @@ func (s *stepCreateSSHKeyPair) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*gopherstack.CloudStackClient)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deleting temporary ssh key...")
+	ui.Say("Deleting temporary SSH key...")
 	_, err := client.DeleteSSHKeyPair(s.keyName)
 	if err != nil {
-		log.Printf("Error cleaning up ssh key: %v", err.Error())
+		log.Printf("Error cleaning up SSH key: %v", err.Error())
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up ssh key. Please delete the key manually."))
+			"Error cleaning up SSH key. Please delete the key manually."))
 	}
 }

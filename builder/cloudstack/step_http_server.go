@@ -29,12 +29,15 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	var httpPort uint = 0
 	if config.HTTPDir == "" {
-		state.Put("http_port", httpPort)
+		// Save some dummy data to enable templating of
+		// userdata work even if we are not running a web
+		// server.
+		state.Put("http_ip", "0.0.0.0")
+		state.Put("http_port", "0")
 		return multistep.ActionContinue
 	}
 
 	httpIP := ipAddressToListenOn()
-	// check nil or fix a err
 
 	// Find an available TCP port for our HTTP server
 	var httpAddr string
@@ -44,7 +47,8 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 		var offset uint = 0
 
 		if portRange > 0 {
-			// Intn will panic if portRange == 0, so we do a check.
+			// Intn will panic if portRange == 0, so we
+			// calculate an offset.
 			offset = uint(rand.Intn(portRange))
 		}
 
@@ -80,7 +84,6 @@ func (s *stepHTTPServer) Cleanup(multistep.StateBag) {
 
 func ipAddressToListenOn() *net.IPNet {
 	addrs, _ := net.InterfaceAddrs()
-	// TODO: Fix this hack
 	var ip *net.IPNet
 	for _, addr := range addrs {
 		if ipnet, ok := addr.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {

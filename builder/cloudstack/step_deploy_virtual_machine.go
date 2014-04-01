@@ -85,6 +85,13 @@ func processTemplatedUserdata(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 
+	// If there is no userdata to process we just save back an
+	// empty string.
+	if c.UserData == "" {
+		state.Put("user_data", "")
+		return multistep.ActionContinue
+	}
+
 	httpIP := state.Get("http_ip").(string)
 	httpPort := state.Get("http_port").(string)
 
