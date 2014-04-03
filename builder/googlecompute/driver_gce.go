@@ -8,7 +8,7 @@ import (
 
 	"code.google.com/p/goauth2/oauth"
 	"code.google.com/p/goauth2/oauth/jwt"
-	"code.google.com/p/google-api-go-client/compute/v1beta16"
+	"code.google.com/p/google-api-go-client/compute/v1"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -168,7 +168,18 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
-		Image:       image.SelfLink,
+		Disks: []*compute.AttachedDisk{
+			&compute.AttachedDisk{
+				Type: "PERSISTENT",
+				Mode: "READ_WRITE",
+				Kind: "compute#attachedDisk",
+				Boot: true,
+				AutoDelete: true,
+				InitializeParams: &compute.AttachedDiskInitializeParams{
+					SourceImage: image.SelfLink,	
+				},
+			},
+		},
 		MachineType: machineType.SelfLink,
 		Metadata: &compute.Metadata{
 			Items: metadata,
