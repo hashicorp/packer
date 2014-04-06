@@ -53,7 +53,7 @@ func workstationVmnetnatConfPath() string {
 
 func workstationVerifyVersion(version string) error {
 	if runtime.GOOS != "linux" {
-		return fmt.Errorf("The VMWare WS %s driver is only supported on Linux, and Windows, at the moment. Your OS: %s", version, runtime.GOOS)
+		return fmt.Errorf("The VMWare WS version %s driver is only supported on Linux, and Windows, at the moment. Your OS: %s", version, runtime.GOOS)
 	}
 
 	//TODO(pmyjavec) there is a better way to find this, how?
