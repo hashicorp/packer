@@ -17,7 +17,7 @@ type stepCreateSSHKeyPair struct {
 }
 
 func (s *stepCreateSSHKeyPair) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*gopherstack.CloudStackClient)
+	client := state.Get("client").(*gopherstack.CloudstackClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 
@@ -45,7 +45,7 @@ func (s *stepCreateSSHKeyPair) Run(state multistep.StateBag) multistep.StepActio
 
 	ui.Say("Creating temporary SSH key for virtual machine...")
 
-	// The name of the public key on CloudStack
+	// The name of the public key on Cloudstack
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
@@ -75,7 +75,7 @@ func (s *stepCreateSSHKeyPair) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*gopherstack.CloudStackClient)
+	client := state.Get("client").(*gopherstack.CloudstackClient)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting temporary SSH key...")

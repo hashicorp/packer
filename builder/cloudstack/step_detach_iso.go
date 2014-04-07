@@ -11,7 +11,7 @@ import (
 type stepDetachIso struct{}
 
 func (s *stepDetachIso) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*gopherstack.CloudStackClient)
+	client := state.Get("client").(*gopherstack.CloudstackClient)
 	c := state.Get("config").(config)
 	ui := state.Get("ui").(packer.Ui)
 	id := state.Get("virtual_machine_id").(string)

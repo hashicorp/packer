@@ -14,7 +14,7 @@ type Artifact struct {
 	templateId string
 
 	// The client for making API calls
-	client *gopherstack.CloudStackClient
+	client *gopherstack.CloudstackClient
 }
 
 func (*Artifact) BuilderId() string {

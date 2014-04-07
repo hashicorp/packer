@@ -230,8 +230,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Initialize the CloudStack API client
-	client := gopherstack.CloudStackClient{}.New(b.config.APIURL, b.config.APIKey,
+	// Initialize the Cloudstack API client
+	client := gopherstack.CloudstackClient{}.New(b.config.APIURL, b.config.APIKey,
 		b.config.Secret, b.config.InsecureSkipVerify)
 
 	// Set up the state

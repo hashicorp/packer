@@ -18,7 +18,7 @@ type bootCommandTemplateData struct {
 }
 
 func (s *stepDeployVirtualMachine) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*gopherstack.CloudStackClient)
+	client := state.Get("client").(*gopherstack.CloudstackClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 	sshKeyName := state.Get("ssh_key_name").(string)
@@ -65,7 +65,7 @@ func (s *stepDeployVirtualMachine) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*gopherstack.CloudStackClient)
+	client := state.Get("client").(*gopherstack.CloudstackClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 

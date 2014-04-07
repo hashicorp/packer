@@ -11,7 +11,7 @@ import (
 type stepVirtualMachineState struct{}
 
 func (s *stepVirtualMachineState) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*gopherstack.CloudStackClient)
+	client := state.Get("client").(*gopherstack.CloudstackClient)
 	ui := state.Get("ui").(packer.Ui)
 	id := state.Get("virtual_machine_id").(string)
 
