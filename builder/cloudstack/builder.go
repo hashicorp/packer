@@ -275,6 +275,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	// If we were interrupted or cancelled, then just exit.
+	if _, ok := state.GetOk(multistep.StateCancelled); ok {
+		return nil, errors.New("Build was cancelled.")
+	}
+
+	if _, ok := state.GetOk(multistep.StateHalted); ok {
+		return nil, errors.New("Build was halted.")
+	}
+
 	if _, ok := state.GetOk("template_name"); !ok {
 		log.Println("Failed to find template_name in state. Bug?")
 		return nil, nil
