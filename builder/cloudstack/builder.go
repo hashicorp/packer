@@ -86,17 +86,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs := common.CheckUnusedConfig(md)
 
 	if b.config.APIURL == "" {
+		// Default to environment variable for API URL
 		b.config.APIURL = os.Getenv("CLOUDSTACK_API_URL")
 	}
 
-	// Optional configuration with defaults
 	if b.config.APIKey == "" {
-		// Default to environment variable for api_key, if it exists
+		// Default to environment variable for API key
 		b.config.APIKey = os.Getenv("CLOUDSTACK_API_KEY")
 	}
 
 	if b.config.Secret == "" {
-		// Default to environment variable for client_id, if it exists
+		// Default to environment variable for API secret
 		b.config.Secret = os.Getenv("CLOUDSTACK_SECRET")
 	}
 
@@ -106,22 +106,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.HTTPPortMax == 0 {
 		b.config.HTTPPortMax = 9000
-	}
-
-	if b.config.ServiceOfferingId == "" {
-		b.config.ServiceOfferingId = "62fc8ae5-06ac-4021-bed6-90dfdca6b6b5"
-	}
-
-	if b.config.TemplateId == "" {
-		b.config.TemplateId = "26de0a07-eee6-4b00-9c4f-fdb7b29f6ba2"
-	}
-
-	if b.config.ZoneId == "" {
-		b.config.ZoneId = "489e5147-85ba-4f28-a78d-226bf03db47c"
-	}
-
-	if len(b.config.NetworkIds) < 1 {
-		b.config.NetworkIds = []string{"9ab9719e-1f03-40d1-bfbe-b5dbf598e27f"}
 	}
 
 	if b.config.TemplateName == "" {
@@ -140,7 +124,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.SSHUsername == "" {
 		// Default to "root". You can override this if your
-		// SourceImage has a different user account then the DO default
+		// source template has a different user account.
 		b.config.SSHUsername = "root"
 	}
 
@@ -155,8 +139,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.RawStateTimeout == "" {
-		// Default to 5 minute timeouts waiting for
-		// desired state. i.e waiting for virtual machine to become active
+		// Default to 5 minute timeouts waiting for desired
+		// state. i.e waiting for virtual machine to become
+		// active
 		b.config.RawStateTimeout = "5m"
 	}
 
@@ -200,6 +185,26 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.Secret == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("CLOUDSTACK_SECRET in env (Secret in json) must be specified"))
+	}
+
+	if b.config.ServiceOfferingId == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("service_offering_id must be specified"))
+	}
+
+	if b.config.TemplateId == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("template_id must be specified"))
+	}
+
+	if b.config.ZoneId == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("zone_id must be specified"))
+	}
+
+	if len(b.config.NetworkIds) < 1 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("network_ids must be specified"))
 	}
 
 	sshTimeout, err := time.ParseDuration(b.config.RawSSHTimeout)
