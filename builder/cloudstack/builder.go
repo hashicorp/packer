@@ -31,6 +31,10 @@ type config struct {
 	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
 	RawStateTimeout string `mapstructure:"state_timeout"`
 
+	// Time to wait before issuing the API call to detach the
+	// bootstrap/installation ISO from the virtual machine.
+	RawDetachISOWait string `mapstructure:"detach_iso_wait"`
+
 	InsecureSkipVerify bool `mapstructure:"insecure_skip_verify"`
 
 	SSHUsername string `mapstructure:"ssh_username"`
@@ -39,8 +43,9 @@ type config struct {
 
 	// These are unexported since they're set by other fields
 	// being set.
-	sshTimeout   time.Duration
-	stateTimeout time.Duration
+	sshTimeout       time.Duration
+	stateTimeout     time.Duration
+	detachISOWait    time.Duration
 
 	HTTPDir     string `mapstructure:"http_directory"`
 	HTTPPortMin uint   `mapstructure:"http_port_min"`
@@ -145,16 +150,23 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RawStateTimeout = "5m"
 	}
 
+	if b.config.RawDetachISOWait == "" {
+		// Default to wait 10 seconds before detaching the ISO
+		// from the started virtual machine.
+		b.config.RawDetachISOWait = "10s"
+	}
+
 	templates := map[string]*string{
-		"api_url":        &b.config.APIURL,
-		"api_key":        &b.config.APIKey,
-		"secret":         &b.config.Secret,
-		"template_name":  &b.config.TemplateName,
-		"ssh_username":   &b.config.SSHUsername,
-		"ssh_timeout":    &b.config.RawSSHTimeout,
-		"ssh_key_path":   &b.config.SSHKeyPath,
-		"state_timeout":  &b.config.RawStateTimeout,
-		"http_directory": &b.config.HTTPDir,
+		"api_url":         &b.config.APIURL,
+		"api_key":         &b.config.APIKey,
+		"secret":          &b.config.Secret,
+		"template_name":   &b.config.TemplateName,
+		"ssh_username":    &b.config.SSHUsername,
+		"ssh_timeout":     &b.config.RawSSHTimeout,
+		"ssh_key_path":    &b.config.SSHKeyPath,
+		"state_timeout":   &b.config.RawStateTimeout,
+		"http_directory":  &b.config.HTTPDir,
+		"detach_iso_wait": &b.config.RawDetachISOWait,
 	}
 
 	for n, ptr := range templates {
@@ -213,6 +225,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
 	}
 	b.config.sshTimeout = sshTimeout
+
+	detachISOWait, err := time.ParseDuration(b.config.RawDetachISOWait)
+	if err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing iso_detach_wait: %s", err))
+	}
+	b.config.detachISOWait = detachISOWait
 
 	stateTimeout, err := time.ParseDuration(b.config.RawStateTimeout)
 	if err != nil {
