@@ -20,7 +20,6 @@ func testStepShutdownState(t *testing.T) multistep.StateBag {
 	state := testState(t)
 	state.Put("communicator", new(packer.MockCommunicator))
 	state.Put("dir", dir)
-	state.Put("vmx_path", "foo")
 	state.Put("vm_id", "1")
 	return state
 }

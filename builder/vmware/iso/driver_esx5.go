@@ -67,10 +67,11 @@ func (d *ESX5Driver) Register(vmxPathLocal string) (string, error) {
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return "", err
 	}
-        vmId, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
+        r, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
 	if err != nil {
 		return "", err
 	}
+        vmId := strings.TrimRight(r, "\n")
 	return vmId, nil
 }
 
@@ -168,35 +169,18 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return address.(string), nil
 	}
 
-	r, err := d.esxcli("network", "vm", "list")
+	vmId := state.Get("vm_id").(string)
+
+	ipAddress, err := d.run(nil, "vim-cmd", "vmsvc/get.guest", vmId, " | grep -m 1 ipAddress | awk -F'\"' '{print $2}'")
 	if err != nil {
 		return "", err
 	}
 
-	record, err := r.find("Name", config.VMName)
-	if err != nil {
-		return "", err
-	}
-	wid := record["WorldID"]
-	if wid == "" {
-		return "", errors.New("VM WorldID not found")
-	}
-
-	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
-	if err != nil {
-		return "", err
-	}
-
-	record, err = r.read()
-	if err != nil {
-		return "", err
-	}
-
-	if record["IPAddress"] == "0.0.0.0" {
+	if ipAddress == "0.0.0.0" {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
+	address := fmt.Sprintf("%s:%d", ipAddress, config.SSHPort)
 	state.Put("vm_address", address)
 	return address, nil
 }
