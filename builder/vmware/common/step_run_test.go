@@ -14,7 +14,7 @@ func TestStepRun(t *testing.T) {
 	state := testState(t)
 	step := new(StepRun)
 
-	state.Put("vmx_path", "foo")
+	state.Put("vm_id", "1")
 
 	driver := state.Get("driver").(*DriverMock)
 
@@ -30,8 +30,8 @@ func TestStepRun(t *testing.T) {
 	if !driver.StartCalled {
 		t.Fatal("start should be called")
 	}
-	if driver.StartPath != "foo" {
-		t.Fatalf("bad: %#v", driver.StartPath)
+	if driver.StartVmId != "1" {
+		t.Fatalf("bad: %#v", driver.StartVmId)
 	}
 	if driver.StartHeadless {
 		t.Fatal("bad")
@@ -48,7 +48,7 @@ func TestStepRun_cleanupRunning(t *testing.T) {
 	state := testState(t)
 	step := new(StepRun)
 
-	state.Put("vmx_path", "foo")
+	state.Put("vm_id", "1")
 
 	driver := state.Get("driver").(*DriverMock)
 
@@ -64,8 +64,8 @@ func TestStepRun_cleanupRunning(t *testing.T) {
 	if !driver.StartCalled {
 		t.Fatal("start should be called")
 	}
-	if driver.StartPath != "foo" {
-		t.Fatalf("bad: %#v", driver.StartPath)
+	if driver.StartVmId != "1" {
+		t.Fatalf("bad: %#v", driver.StartVmId)
 	}
 	if driver.StartHeadless {
 		t.Fatal("bad")

@@ -46,40 +46,40 @@ func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, typeId string
 	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", "lsilogic", diskPath)
 }
 
-func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", vmxPath)
+func (d *ESX5Driver) IsRunning(vmId string) (bool, error) {
+	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", vmId)
 	if err != nil {
 		return false, err
 	}
 	return strings.Contains(state, "Powered on"), nil
 }
 
-func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/power.on", vmxPath)
+func (d *ESX5Driver) Start(vmId string, headless bool) error {
+	return d.sh("vim-cmd", "vmsvc/power.on", vmId)
 }
 
-func (d *ESX5Driver) Stop(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/power.off", vmxPath)
+func (d *ESX5Driver) Stop(vmId string) error {
+	return d.sh("vim-cmd", "vmsvc/power.off", vmId)
 }
 
-func (d *ESX5Driver) Register(vmxPathLocal string) error {
+func (d *ESX5Driver) Register(vmxPathLocal string) (string, error) {
 	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
-		return err
+		return "", err
 	}
-	return d.sh("vim-cmd", "solo/registervm", vmxPath)
+        vmId, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
+	if err != nil {
+		return "", err
+	}
+	return vmId, nil
 }
 
 func (d *ESX5Driver) SuppressMessages(vmxPath string) error {
 	return nil
 }
 
-func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/unregister", vmxPath)
+func (d *ESX5Driver) Unregister(vmId string) error {
+	return d.sh("vim-cmd", "vmsvc/unregister", vmId)
 }
 
 func (d *ESX5Driver) UploadISO(localPath string) (string, error) {

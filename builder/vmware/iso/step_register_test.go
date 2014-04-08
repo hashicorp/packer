@@ -34,6 +34,7 @@ func TestStepRegister_remoteDriver(t *testing.T) {
 	driver := new(RemoteDriverMock)
 	state.Put("driver", driver)
 	state.Put("vmx_path", "foo")
+	state.Put("vm_id", "1")
 
 	// Test the run
 	if action := step.Run(state); action != multistep.ActionContinue {
@@ -59,7 +60,7 @@ func TestStepRegister_remoteDriver(t *testing.T) {
 	if !driver.UnregisterCalled {
 		t.Fatal("unregister should be called")
 	}
-	if driver.UnregisterPath != "foo" {
-		t.Fatal("should unregister proper path")
+	if driver.UnregisterVmId != "1" {
+		t.Fatal("should unregister proper vmId")
 	}
 }
