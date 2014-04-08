@@ -18,8 +18,8 @@ import (
 type StepRun struct {
 	BootWait time.Duration
 	Headless bool
-
-	vmName string
+	vmName 	 string
+	Vrde     bool
 }
 
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
@@ -29,10 +29,16 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Starting the virtual machine...")
 	guiArgument := "gui"
-	if s.Headless == true {
+	if s.Headless == true && s.Vrde == false {
 		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
 			"In headless mode, errors during the boot sequence or OS setup\n" +
 			"won't be easily visible. Use at your own discretion.")
+		guiArgument = "headless"
+	} else if s.Headless == true && s.Vrde == true {
+		ui.Message("Vrde is set to enabled. You may use software compliant with Remote Desktop\n" +
+		"Protocol to interact with the local or remote virtual machine.\n" +
+		"Configure the softare to bind to the ip address or hostname of \n" +
+		"the host operating system at port 3899")
 		guiArgument = "headless"
 	}
 	command := []string{"startvm", vmName, "--type", guiArgument}

@@ -52,6 +52,8 @@ type config struct {
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
 	ISOUrls              []string `mapstructure:"iso_urls"`
 	VMName               string   `mapstructure:"vm_name"`
+	Vrde			 	 bool 	  `mapstructure:"vrde"`
+	CleanVrde			 bool 	  `mapstructure:"clean_vrde"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
@@ -292,6 +294,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HostPortMin: b.config.SSHHostPortMin,
 			HostPortMax: b.config.SSHHostPortMax,
 		},
+		new(stepSetVrde),
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
 			Tpl:      b.config.tpl,
@@ -299,6 +302,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepRun{
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
+			Vrde:	  b.config.Vrde,
 		},
 		new(stepTypeBootCommand),
 		&common.StepConnectSSH{
@@ -315,6 +319,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
+		new(stepCleanVrde),
 		new(vboxcommon.StepRemoveDevices),
 		&vboxcommon.StepExport{
 			Format:    b.config.Format,
