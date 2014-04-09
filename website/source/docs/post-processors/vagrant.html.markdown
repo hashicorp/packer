@@ -30,6 +30,7 @@ providers.
 * DigitalOcean
 * VirtualBox
 * VMware
+* Parallels
 
 <div class="alert alert-block alert-info">
 <strong>Support for additional providers</strong> is planned. If the
