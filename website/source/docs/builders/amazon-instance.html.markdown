@@ -87,6 +87,10 @@ Optional:
   (bool), "no\_device" (bool), and "iops" (int).
   See [amazon-ebs](/docs/builders/amazon-ebs.html) for an example template.
 
+* `ami_virtualization_type` (string) - The type of virtualization for the AMI
+  you are building. This option is required to register HVM images. Can be
+  "paravirtual" (default) or "hvm".
+
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
