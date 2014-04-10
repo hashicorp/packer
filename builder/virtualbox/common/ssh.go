@@ -16,19 +16,19 @@ func SSHAddress(state multistep.StateBag) (string, error) {
 
 func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*gossh.ClientConfig, error) {
-		auth := []gossh.ClientAuth{
-			gossh.ClientAuthPassword(ssh.Password(config.SSHPassword)),
-			gossh.ClientAuthKeyboardInteractive(
+		auth := []gossh.AuthMethod{
+			gossh.Password(config.SSHPassword),
+			gossh.KeyboardInteractive(
 				ssh.PasswordKeyboardInteractive(config.SSHPassword)),
 		}
 
 		if config.SSHKeyPath != "" {
-			keyring, err := sshKeyToKeyring(config.SSHKeyPath)
+			signer, err := sshKeyToSigner(config.SSHKeyPath)
 			if err != nil {
 				return nil, err
 			}
-
-			auth = append(auth, gossh.ClientAuthKeyring(keyring))
+	
+			auth = append(auth, gossh.PublicKeys(signer))
 		}
 
 		return &gossh.ClientConfig{
@@ -38,7 +38,7 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConf
 	}
 }
 
-func sshKeyToKeyring(path string) (gossh.ClientKeyring, error) {
+func sshKeyToSigner(path string) (gossh.Signer, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -50,10 +50,10 @@ func sshKeyToKeyring(path string) (gossh.ClientKeyring, error) {
 		return nil, err
 	}
 
-	keyring := new(ssh.SimpleKeychain)
-	if err := keyring.AddPEMKey(string(keyBytes)); err != nil {
-		return nil, err
+	signer, err := gossh.ParsePrivateKey(keyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 	}
 
-	return keyring, nil
+	return signer, nil
 }
