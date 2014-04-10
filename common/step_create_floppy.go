@@ -89,7 +89,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Go over each file and copy it.
 	for _, filename := range s.Files {
-		ui.Message(fmt.Sprintf("Copying: %s", filepath.Base(filename)))
+		ui.Message(fmt.Sprintf("Copying: %s", filename))
 		if s.addSingleFile(rootDir, filename); err != nil {
 			state.Put("error", fmt.Errorf("Error adding file to floppy: %s", err))
 			return multistep.ActionHalt
@@ -110,6 +110,19 @@ func (s *StepCreateFloppy) Cleanup(multistep.StateBag) {
 }
 
 func (s *StepCreateFloppy) addSingleFile(dir fs.Directory, src string) error {
+	finfo, err := os.Stat(src)
+	if err != nil {
+		matches, err2 := filepath.Glob(src)
+		if err2 != nil {
+			return err
+		}
+		return s.addFiles(dir, matches)
+	}
+
+	if finfo.IsDir() {
+		return s.addDirectory(dir, src)
+	}
+
 	log.Printf("Adding file to floppy: %s", src)
 
 	inputF, err := os.Open(src)
@@ -130,6 +143,40 @@ func (s *StepCreateFloppy) addSingleFile(dir fs.Directory, src string) error {
 
 	if _, err := io.Copy(fatFile, inputF); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *StepCreateFloppy) addDirectory(dir fs.Directory, src string) error {
+	log.Printf("Adding directory to floppy: %s", src)
+
+	walkFn := func(path string, info os.FileInfo, err error) error {
+		if path == src {
+			return nil
+		}
+
+		stat, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+
+		if stat.IsDir() {
+			return s.addDirectory(dir, path)
+		}
+
+		return s.addSingleFile(dir, path)
+	}
+
+	return filepath.Walk(src, walkFn)
+}
+
+func (s *StepCreateFloppy) addFiles(dir fs.Directory, files []string) error {
+	for _, file := range files {
+		err := s.addSingleFile(dir, file)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
