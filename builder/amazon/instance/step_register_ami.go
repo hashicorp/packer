@@ -21,6 +21,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		ImageLocation: manifestPath,
 		Name:          config.AMIName,
 		BlockDevices:  config.BlockDevices.BuildAMIDevices(),
+		VirtType:      config.AMIVirtType,
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
