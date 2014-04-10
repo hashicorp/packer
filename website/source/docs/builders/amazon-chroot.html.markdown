@@ -78,6 +78,10 @@ Required:
 
 Optional:
 
+* `ami_virtualization_type` (string) - The type of virtualization for the AMI
+  you are building. This option is required to register HVM images. Can be
+  "paravirtual" (default) or "hvm".
+
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
@@ -115,7 +119,7 @@ Optional:
   defaults to "{{.Command}}". This may be useful to set if you want to set
   environmental variables or perhaps run it with `sudo` or so on. This is a
   configuration template where the `.Command` variable is replaced with the
-  command to be run..
+  command to be run.
 
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
