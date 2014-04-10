@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 // StepCreateFloppy will create a floppy disk with the given files.
@@ -89,8 +90,8 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Go over each file and copy it.
 	for _, filename := range s.Files {
-		ui.Message(fmt.Sprintf("Copying: %s", filepath.Base(filename)))
-		if s.addSingleFile(rootDir, filename); err != nil {
+		ui.Message(fmt.Sprintf("Copying: %s", filename))
+		if s.addFilespec(rootDir, filename); err != nil {
 			state.Put("error", fmt.Errorf("Error adding file to floppy: %s", err))
 			return multistep.ActionHalt
 		}
@@ -107,6 +108,61 @@ func (s *StepCreateFloppy) Cleanup(multistep.StateBag) {
 		log.Printf("Deleting floppy disk: %s", s.floppyPath)
 		os.Remove(s.floppyPath)
 	}
+}
+
+func (s *StepCreateFloppy) addFilespec(dir fs.Directory, src string) error {
+	re := regexp.MustCompile("[*?[]")
+	if re.FindString(src) != "" {
+		matches, err := filepath.Glob(src)
+		if err != nil {
+			return err
+		}
+		return s.addFiles(dir, matches)
+	}
+
+	finfo, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	if finfo.IsDir() {
+		return s.addDirectory(dir, src)
+	}
+
+	return s.addSingleFile(dir, src)
+}
+
+func (s *StepCreateFloppy) addFiles(dir fs.Directory, files []string) error {
+	for _, file := range files {
+		err := s.addFilespec(dir, file)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *StepCreateFloppy) addDirectory(dir fs.Directory, src string) error {
+	log.Printf("Adding directory to floppy: %s", src)
+
+	walkFn := func(path string, finfo os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if path == src {
+			return nil
+		}
+
+		if finfo.IsDir() {
+			return s.addDirectory(dir, path)
+		}
+
+		return s.addSingleFile(dir, path)
+	}
+
+	return filepath.Walk(src, walkFn)
 }
 
 func (s *StepCreateFloppy) addSingleFile(dir fs.Directory, src string) error {
