@@ -338,7 +338,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToKeyring(b.config.SSHKeyPath); err != nil {
+		} else if _, err := sshKeyToSigner(b.config.SSHKeyPath); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
