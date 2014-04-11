@@ -3,7 +3,7 @@ package ssh
 import (
 	"bufio"
 	"bytes"
-	"code.google.com/p/go.crypto/ssh"
+	"code.google.com/p/gosshold/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
