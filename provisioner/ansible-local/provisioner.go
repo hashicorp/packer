@@ -16,7 +16,7 @@ type Config struct {
 	tpl                 *packer.ConfigTemplate
 
 	// The command to run ansible
-	Command string
+	Command string `mapstructure:"command"`
 
 	// Extra options to pass to the ansible command
 	ExtraArguments []string `mapstructure:"extra_arguments"`
