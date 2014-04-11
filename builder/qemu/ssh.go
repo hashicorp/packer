@@ -1,7 +1,7 @@
 package qemu
 
 import (
-	gossh "code.google.com/p/go.crypto/ssh"
+	gossh "code.google.com/p/gosshold/ssh"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"

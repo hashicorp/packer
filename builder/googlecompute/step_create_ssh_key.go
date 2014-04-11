@@ -1,7 +1,7 @@
 package googlecompute
 
 import (
-	"code.google.com/p/go.crypto/ssh"
+	"code.google.com/p/gosshold/ssh"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
