@@ -5,6 +5,7 @@ package ssh
 import (
 	"bytes"
 	"code.google.com/p/go.crypto/ssh"
+	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"net"
 	"testing"
@@ -39,65 +40,57 @@ gqnBycHj6AhEycjda75cs+0zybZvN4x65KZHOGW/O/7OAWEcZP5TPb3zf9ned3Hl
 NsZoFj52ponUM6+99A2CmezFCN16c4mbA//luWF+k3VVqR6BpkrhKw==
 -----END RSA PRIVATE KEY-----`
 
-// password implements the ClientPassword interface
-type password string
-
-func (p password) Password(user string) (string, error) {
-	return string(p), nil
-}
-
 var serverConfig = &ssh.ServerConfig{
-	PasswordCallback: func(c *ssh.ServerConn, user, pass string) bool {
-		return user == "user" && pass == "pass"
+	PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
+		if c.User() == "user" && string(pass) == "pass" {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("password rejected for %q", c.User())
 	},
 }
 
 func init() {
-	// Set the private key of the server, required to accept connections
-	if err := serverConfig.SetRSAPrivateKey([]byte(testServerPrivateKey)); err != nil {
-		panic("unable to set private key: " + err.Error())
+	// Parse and set the private key of the server, required to accept connections
+	signer, err := ssh.ParsePrivateKey([]byte(testServerPrivateKey))
+	if err != nil {
+		panic("unable to parse private key: " + err.Error())
 	}
+	serverConfig.AddHostKey(signer)
 }
 
 func newMockLineServer(t *testing.T) string {
-	l, err := ssh.Listen("tcp", "127.0.0.1:0", serverConfig)
+	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		t.Fatalf("unable to newMockAuthServer: %s", err)
+		t.Fatalf("Unable to listen for connection: %s", err)
 	}
+
 	go func() {
 		defer l.Close()
 		c, err := l.Accept()
 		if err != nil {
-			t.Errorf("Unable to accept incoming connection: %v", err)
-			return
+			t.Errorf("Unable to accept incoming connection: %s", err)
 		}
-
-		if err := c.Handshake(); err != nil {
-			// not Errorf because this is expected to
-			// fail for some tests.
-			t.Logf("Handshaking error: %v", err)
-			return
-		}
-
-		t.Log("Accepted SSH connection")
 		defer c.Close()
-
-		channel, err := c.Accept()
+		conn, chans, _, err := ssh.NewServerConn(c, serverConfig)
 		if err != nil {
-			t.Errorf("Unable to accept a channel: %s", err)
-			return
+			t.Logf("Handshaking error: %v", err)
 		}
+		t.Log("Accepted SSH connection")
+		for newChannel := range chans {
+			channel, _, err := newChannel.Accept()
+			if err != nil {
+				t.Errorf("Unable to accept channel.")
+			}
+			t.Log("Accepted channel")
 
-		// Just go in a loop now accepting things... we need to
-		// do this to handle packets for SSH.
-		go func() {
-			c.Accept()
-		}()
-
-		channel.Accept()
-		t.Log("Accepted channel")
-		defer channel.Close()
+			go func() {
+				defer channel.Close()
+				conn.OpenChannel(newChannel.ChannelType(), nil)
+			}()
+		}
+		conn.Close()
 	}()
+
 	return l.Addr().String()
 }
 
@@ -112,15 +105,16 @@ func TestCommIsCommunicator(t *testing.T) {
 func TestNew_Invalid(t *testing.T) {
 	clientConfig := &ssh.ClientConfig{
 		User: "user",
-		Auth: []ssh.ClientAuth{
-			ssh.ClientAuthPassword(password("i-am-invalid")),
+		Auth: []ssh.AuthMethod{
+			ssh.Password("i-am-invalid"),
 		},
 	}
 
+	address := newMockLineServer(t)
 	conn := func() (net.Conn, error) {
-		conn, err := net.Dial("tcp", newMockLineServer(t))
+		conn, err := net.Dial("tcp", address)
 		if err != nil {
-			t.Fatalf("unable to dial to remote side: %s", err)
+			t.Errorf("Unable to accept incoming connection: %v", err)
 		}
 		return conn, err
 	}
@@ -130,7 +124,7 @@ func TestNew_Invalid(t *testing.T) {
 		SSHConfig:  clientConfig,
 	}
 
-	_, err := New(config)
+	_, err := New(address, config)
 	if err == nil {
 		t.Fatal("should have had an error connecting")
 	}
@@ -139,13 +133,14 @@ func TestNew_Invalid(t *testing.T) {
 func TestStart(t *testing.T) {
 	clientConfig := &ssh.ClientConfig{
 		User: "user",
-		Auth: []ssh.ClientAuth{
-			ssh.ClientAuthPassword(password("pass")),
+		Auth: []ssh.AuthMethod{
+			ssh.Password("pass"),
 		},
 	}
 
+	address := newMockLineServer(t)
 	conn := func() (net.Conn, error) {
-		conn, err := net.Dial("tcp", newMockLineServer(t))
+		conn, err := net.Dial("tcp", address)
 		if err != nil {
 			t.Fatalf("unable to dial to remote side: %s", err)
 		}
@@ -157,7 +152,7 @@ func TestStart(t *testing.T) {
 		SSHConfig:  clientConfig,
 	}
 
-	client, err := New(config)
+	client, err := New(address, config)
 	if err != nil {
 		t.Fatalf("error connecting to SSH: %s", err)
 	}
