@@ -16,6 +16,7 @@ type SSHConfig struct {
 	SSHPort           uint   `mapstructure:"ssh_port"`
 	SSHUser           string `mapstructure:"ssh_username"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
+	SSHSkipNatMapping bool   `mapstructure:"ssh_skip_nat_mapping"`
 
 	SSHWaitTimeout time.Duration
 }
@@ -56,7 +57,7 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if c.SSHKeyPath != "" {
 		if _, err := os.Stat(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToKeyring(c.SSHKeyPath); err != nil {
+		} else if _, err := sshKeyToSigner(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
 	}

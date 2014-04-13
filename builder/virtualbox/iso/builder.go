@@ -288,9 +288,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepAttachGuestAdditions),
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
-			GuestPort:   b.config.SSHPort,
-			HostPortMin: b.config.SSHHostPortMin,
-			HostPortMax: b.config.SSHHostPortMax,
+			GuestPort:      b.config.SSHPort,
+			HostPortMin:    b.config.SSHHostPortMin,
+			HostPortMax:    b.config.SSHHostPortMax,
+			SkipNatMapping: b.config.SSHSkipNatMapping,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
@@ -317,8 +318,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(vboxcommon.StepRemoveDevices),
 		&vboxcommon.StepExport{
-			Format:    b.config.Format,
-			OutputDir: b.config.OutputDir,
+			Format:         b.config.Format,
+			OutputDir:      b.config.OutputDir,
+			SkipNatMapping: b.config.SSHSkipNatMapping,
 		},
 	}
 
