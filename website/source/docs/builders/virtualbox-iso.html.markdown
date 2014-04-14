@@ -154,6 +154,10 @@ Optional:
   must point to the same file (same checksum). By default this is empty
   and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+* `keep_failed_builds` (bool) - Packer defaults to removing the `output_directory`
+  for failed, or cancelled, builds. When this value is set to true, Packer
+  will not delete the `output_directory`.
+
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`

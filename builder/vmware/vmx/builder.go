@@ -53,7 +53,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps.
 	steps := []multistep.Step{
 		&vmwcommon.StepOutputDir{
-			Force: b.config.PackerForce,
+			Force:            b.config.PackerForce,
+			KeepFailedBuilds: b.config.KeepFailedBuilds,
 		},
 		&StepCloneVMX{
 			OutputDir: b.config.OutputDir,

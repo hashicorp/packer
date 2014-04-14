@@ -21,9 +21,10 @@ type Config struct {
 	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
-	SourcePath string `mapstructure:"source_path"`
-	VMName     string `mapstructure:"vm_name"`
-	ImportOpts string `mapstructure:"import_opts"`
+	SourcePath       string `mapstructure:"source_path"`
+	VMName           string `mapstructure:"vm_name"`
+	ImportOpts       string `mapstructure:"import_opts"`
+	KeepFailedBuilds bool   `mapstructure:"keep_failed_builds"`
 
 	tpl *packer.ConfigTemplate
 }
