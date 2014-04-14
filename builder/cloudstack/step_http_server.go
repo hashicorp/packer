@@ -61,7 +61,7 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", httpPort))
+	ui.Say(fmt.Sprintf("Starting HTTP server on %v", httpAddr))
 
 	// Start the HTTP server and run it in the background
 	fileServer := http.FileServer(http.Dir(config.HTTPDir))
