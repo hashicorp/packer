@@ -48,9 +48,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps.
 	steps := []multistep.Step{
 		&vboxcommon.StepOutputDir{
-			Force:            b.config.PackerForce,
-			Path:             b.config.OutputDir,
-			KeepFailedBuilds: b.config.KeepFailedBuilds,
+			Force:           b.config.PackerForce,
+			Path:            b.config.OutputDir,
+			KeepFailedBuild: b.config.KeepFailedBuild,
 		},
 		new(vboxcommon.StepSuppressMessages),
 		&common.StepCreateFloppy{

@@ -51,7 +51,7 @@ type config struct {
 	ISOChecksum          string   `mapstructure:"iso_checksum"`
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
 	ISOUrls              []string `mapstructure:"iso_urls"`
-	KeepFailedBuilds     bool     `mapstructure:"keep_failed_builds"`
+	KeepFailedBuild      bool     `mapstructure:"keep_failed_build"`
 	VMName               string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
@@ -275,9 +275,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Url:          b.config.ISOUrls,
 		},
 		&vboxcommon.StepOutputDir{
-			Force:            b.config.PackerForce,
-			Path:             b.config.OutputDir,
-			KeepFailedBuilds: b.config.KeepFailedBuilds,
+			Force:           b.config.PackerForce,
+			Path:            b.config.OutputDir,
+			KeepFailedBuild: b.config.KeepFailedBuild,
 		},
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,

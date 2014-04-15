@@ -51,7 +51,7 @@ type config struct {
 	VMXTemplatePath   string   `mapstructure:"vmx_template_path"`
 	VNCPortMin        uint     `mapstructure:"vnc_port_min"`
 	VNCPortMax        uint     `mapstructure:"vnc_port_max"`
-	KeepFailedBuilds  bool     `mapstructure:"keep_failed_builds"`
+	KeepFailedBuild   bool     `mapstructure:"keep_failed_build"`
 
 	RemoteType      string `mapstructure:"remote_type"`
 	RemoteDatastore string `mapstructure:"remote_datastore"`
@@ -330,8 +330,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Url:          b.config.ISOUrls,
 		},
 		&vmwcommon.StepOutputDir{
-			Force:            b.config.PackerForce,
-			KeepFailedBuilds: b.config.KeepFailedBuilds,
+			Force:           b.config.PackerForce,
+			KeepFailedBuild: b.config.KeepFailedBuild,
 		},
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,

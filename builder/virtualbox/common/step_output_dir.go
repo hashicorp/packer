@@ -15,9 +15,9 @@ import (
 // not exist, deleting it if it does exist and we're forcing, and cleaning
 // it up when we're done with it.
 type StepOutputDir struct {
-	Force            bool
-	KeepFailedBuilds bool
-	Path             string
+	Force           bool
+	KeepFailedBuild bool
+	Path            string
 }
 
 func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
@@ -48,7 +48,7 @@ func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepOutputDir) Cleanup(state multistep.StateBag) {
-	if s.KeepFailedBuilds {
+	if s.KeepFailedBuild {
 		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Keeping output directory")
 		return

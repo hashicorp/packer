@@ -154,7 +154,7 @@ Optional:
   must point to the same file (same checksum). By default this is empty
   and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
-* `keep_failed_builds` (bool) - Packer defaults to removing the `output_directory`
+* `keep_failed_build` (bool) - Packer defaults to removing the `output_directory`
   for failed, or cancelled, builds. When this value is set to true, Packer
   will not delete the `output_directory`.
 

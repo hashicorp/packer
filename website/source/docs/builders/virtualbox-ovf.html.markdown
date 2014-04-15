@@ -89,6 +89,10 @@ Optional:
   machine being built. When this value is set to true, the machine will
   start without a console.
 
+* `keep_failed_build` (bool) - Packer defaults to removing the `output_directory`
+  for failed, or cancelled, builds. When this value is set to true, Packer
+  will not delete the `output_directory`.
+
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`
