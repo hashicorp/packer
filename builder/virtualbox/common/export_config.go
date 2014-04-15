@@ -8,6 +8,13 @@ import (
 
 type ExportConfig struct {
 	Format string `mapstruture:"format"`
+	Product string `mapstruture:"product"`
+	ProductUrl string `mapstructure:"product-url"`
+	Vendor string `mapstruture:"vendor"`
+	VendorUrl string `mapstruture:"vendor-url"`
+	Version string `mapstruture:"version"`
+	EULA string `mapstruture:"eula"`
+	EULAFile string `mapstruture:"eula-file-path"`
 }
 
 func (c *ExportConfig) Prepare(t *packer.ConfigTemplate) []error {
