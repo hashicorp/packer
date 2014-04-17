@@ -16,6 +16,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+* core: Errors are properly shown when adding bad floppy files. [GH-1043]
 * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
   which works for every region. [GH-904]
 * builder/digitalocean: updated default image_id [GH-1032]
