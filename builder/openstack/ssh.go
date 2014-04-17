@@ -1,7 +1,7 @@
 package openstack
 
 import (
-	gossh "code.google.com/p/go.crypto/ssh"
+	gossh "code.google.com/p/gosshold/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
