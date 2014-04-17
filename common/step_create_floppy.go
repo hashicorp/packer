@@ -66,7 +66,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 		Label:   "packer",
 		OEMName: "packer",
 	}
-	if fat.FormatSuperFloppy(device, formatConfig); err != nil {
+	if err := fat.FormatSuperFloppy(device, formatConfig); err != nil {
 		state.Put("error", fmt.Errorf("Error creating floppy: %s", err))
 		return multistep.ActionHalt
 	}
@@ -90,7 +90,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Go over each file and copy it.
 	for _, filename := range s.Files {
 		ui.Message(fmt.Sprintf("Copying: %s", filepath.Base(filename)))
-		if s.addSingleFile(rootDir, filename); err != nil {
+		if err := s.addSingleFile(rootDir, filename); err != nil {
 			state.Put("error", fmt.Errorf("Error adding file to floppy: %s", err))
 			return multistep.ActionHalt
 		}
