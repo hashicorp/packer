@@ -3,7 +3,7 @@ package googlecompute
 import (
 	"fmt"
 
-	gossh "code.google.com/p/go.crypto/ssh"
+	gossh "code.google.com/p/gosshold/ssh"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 )

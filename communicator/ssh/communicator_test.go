@@ -4,7 +4,7 @@ package ssh
 
 import (
 	"bytes"
-	"code.google.com/p/go.crypto/ssh"
+	"code.google.com/p/gosshold/ssh"
 	"github.com/mitchellh/packer/packer"
 	"net"
 	"testing"
