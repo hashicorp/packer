@@ -23,6 +23,7 @@ BUG FIXES:
 * builder/openstack: Return proper error on invalid instance states [GH-1018]
 * builder/virtualbox-iso: Retry unregister a few times to deal with
   VBoxManage randomness. [GH-915]
+* provisioner/ansible: set cwd to staging directory [GH-1016]
 * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
 * post-processor/docker-push: Allow repositories with ports. [GH-923]
 
