@@ -344,6 +344,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
+		&stepHTTPFileHandler{},
 		&stepHTTPServer{},
 		&stepConfigureVNC{},
 		&StepRegister{},

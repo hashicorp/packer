@@ -57,8 +57,7 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", httpPort))
 
 	// Start the HTTP server and run it in the background
-	fileServer := http.FileServer(http.Dir(config.HTTPDir))
-	server := &http.Server{Addr: httpAddr, Handler: fileServer}
+	server := &http.Server{Addr: httpAddr}
 	go server.Serve(s.l)
 
 	// Save the address into the state so it can be accessed in the future
