@@ -187,6 +187,10 @@ func (d *Player5LinuxDriver) ToolsIsoPath(flavor string) string {
 	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
 }
 
+func (d *Player5LinuxDriver) ToolsInstall() error {
+	return nil
+}
+
 func (d *Player5LinuxDriver) DhcpLeasesPath(device string) string {
 	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
 }
