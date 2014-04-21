@@ -39,6 +39,9 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
+
+	// The optional inventory file
+	InventoryFile string `mapstructure:"inventory_file"`
 }
 
 type Provisioner struct {
@@ -72,11 +75,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Templates
 	templates := map[string]*string{
-		"command":       &p.config.Command,
-		"group_vars":    &p.config.GroupVars,
-		"host_vars":     &p.config.HostVars,
-		"playbook_file": &p.config.PlaybookFile,
-		"staging_dir":   &p.config.StagingDir,
+		"command":        &p.config.Command,
+		"group_vars":     &p.config.GroupVars,
+		"host_vars":      &p.config.HostVars,
+		"playbook_file":  &p.config.PlaybookFile,
+		"staging_dir":    &p.config.StagingDir,
+		"inventory_file": &p.config.InventoryFile,
 	}
 
 	for n, ptr := range templates {
@@ -109,6 +113,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	// Check that the inventory file exists, if configured
+	if len(p.config.InventoryFile) > 0 {
+		err = validateFileConfig(p.config.InventoryFile, "inventory_file", true)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	// Check that the group_vars directory exists, if configured
@@ -156,6 +168,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	dst := filepath.Join(p.config.StagingDir, filepath.Base(src))
 	if err := p.uploadFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
+	}
+
+	if len(p.config.InventoryFile) > 0 {
+		ui.Message("Uploading inventory file...")
+		src := p.config.InventoryFile
+		dst := filepath.Join(p.config.StagingDir, filepath.Base(src))
+		if err := p.uploadFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading inventory file: %s", err)
+		}
 	}
 
 	if len(p.config.GroupVars) > 0 {
@@ -217,13 +238,18 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	// The inventory must be set to "127.0.0.1,".  The comma is important
 	// as its the only way to override the ansible inventory when dealing
 	// with a single host.
+	inventory := "\"127.0.0.1,\""
+	if len(p.config.InventoryFile) > 0 {
+		inventory = filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile))
+	}
+
 	extraArgs := ""
 	if len(p.config.ExtraArguments) > 0 {
 		extraArgs = " " + strings.Join(p.config.ExtraArguments, " ")
 	}
 
-	command := fmt.Sprintf("%s %s%s -c local -i \"127.0.0.1,\"",
-		p.config.Command, playbook, extraArgs)
+	command := fmt.Sprintf("%s %s%s -c local -i %s",
+		p.config.Command, playbook, extraArgs, inventory)
 	ui.Message(fmt.Sprintf("Executing Ansible: %s", command))
 	cmd := &packer.RemoteCmd{
 		Command: command,
