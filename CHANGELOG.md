@@ -9,6 +9,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+* builder/amazon: Added `ssh_private_key_file` option [GH-971]
 * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
 * builder/vmware: add cloning support on Windows [GH-824]
