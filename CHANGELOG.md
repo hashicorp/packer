@@ -20,6 +20,7 @@ BUG FIXES:
 * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
   which works for every region. [GH-904]
 * builder/digitalocean: updated default image_id [GH-1032]
+* builder/openstack: Return proper error on invalid instance states [GH-1018]
 * builder/virtualbox-iso: Retry unregister a few times to deal with
   VBoxManage randomness. [GH-915]
 * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
