@@ -25,7 +25,7 @@ type DriverMock struct {
 	CreateDiskErr    error
 
 	IsRunningCalled bool
-	IsRunningPath   string
+	IsRunningVmId   string
 	IsRunningResult bool
 	IsRunningErr    error
 
@@ -35,12 +35,12 @@ type DriverMock struct {
 	SSHAddressErr    error
 
 	StartCalled   bool
-	StartPath     string
+	StartVmId     string
 	StartHeadless bool
 	StartErr      error
 
 	StopCalled bool
-	StopPath   string
+	StopVmId   string
 	StopErr    error
 
 	SuppressMessagesCalled bool
@@ -80,12 +80,12 @@ func (d *DriverMock) CreateDisk(output string, size string, typeId string) error
 	return d.CreateDiskErr
 }
 
-func (d *DriverMock) IsRunning(path string) (bool, error) {
+func (d *DriverMock) IsRunning(vmId string) (bool, error) {
 	d.Lock()
 	defer d.Unlock()
 
 	d.IsRunningCalled = true
-	d.IsRunningPath = path
+	d.IsRunningVmId = vmId
 	return d.IsRunningResult, d.IsRunningErr
 }
 
@@ -95,16 +95,16 @@ func (d *DriverMock) SSHAddress(state multistep.StateBag) (string, error) {
 	return d.SSHAddressResult, d.SSHAddressErr
 }
 
-func (d *DriverMock) Start(path string, headless bool) error {
+func (d *DriverMock) Start(vmId string, headless bool) error {
 	d.StartCalled = true
-	d.StartPath = path
+	d.StartVmId = vmId
 	d.StartHeadless = headless
 	return d.StartErr
 }
 
-func (d *DriverMock) Stop(path string) error {
+func (d *DriverMock) Stop(vmId string) error {
 	d.StopCalled = true
-	d.StopPath = path
+	d.StopVmId = vmId
 	return d.StopErr
 }
 

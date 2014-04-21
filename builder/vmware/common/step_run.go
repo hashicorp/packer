@@ -12,7 +12,7 @@ import (
 // Uses:
 //   driver Driver
 //   ui     packer.Ui
-//   vmx_path string
+//   vm_id  string
 //
 // Produces:
 //   <nothing>
@@ -22,17 +22,17 @@ type StepRun struct {
 	Headless           bool
 
 	bootTime time.Time
-	vmxPath  string
+	vmId     string
 }
 
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	vmxPath := state.Get("vmx_path").(string)
+	vmId := state.Get("vm_id").(string)
 
 	// Set the VMX path so that we know we started the machine
 	s.bootTime = time.Now()
-	s.vmxPath = vmxPath
+	s.vmId = vmId
 
 	ui.Say("Starting virtual machine...")
 	if s.Headless {
@@ -54,7 +54,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	if err := driver.Start(vmxPath, s.Headless); err != nil {
+	if err := driver.Start(vmId, s.Headless); err != nil {
 		err := fmt.Errorf("Error starting VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -87,7 +87,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	// If we started the machine... stop it.
-	if s.vmxPath != "" {
+	if s.vmId != "" {
 		// If we started it less than 5 seconds ago... wait.
 		sinceBootTime := time.Since(s.bootTime)
 		waitBootTime := s.DurationBeforeStop
@@ -99,10 +99,10 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 		}
 
 		// See if it is running
-		running, _ := driver.IsRunning(s.vmxPath)
+		running, _ := driver.IsRunning(s.vmId)
 		if running {
 			ui.Say("Stopping virtual machine...")
-			if err := driver.Stop(s.vmxPath); err != nil {
+			if err := driver.Stop(s.vmId); err != nil {
 				ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
 			}
 		}

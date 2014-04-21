@@ -21,7 +21,7 @@ import (
 //   dir OutputDir
 //   driver Driver
 //   ui     packer.Ui
-//   vmx_path string
+//   vm_id string
 //
 // Produces:
 //   <nothing>
@@ -38,7 +38,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	vmxPath := state.Get("vmx_path").(string)
+	vmId := state.Get("vm_id").(string)
 
 	if s.Command != "" {
 		ui.Say("Gracefully halting virtual machine...")
@@ -75,7 +75,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
 		shutdownTimer := time.After(s.Timeout)
 		for {
-			running, _ := driver.IsRunning(vmxPath)
+			running, _ := driver.IsRunning(vmId)
 			if !running {
 				break
 			}
@@ -92,7 +92,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	} else {
 		ui.Say("Forcibly halting virtual machine...")
-		if err := driver.Stop(vmxPath); err != nil {
+		if err := driver.Stop(vmId); err != nil {
 			err := fmt.Errorf("Error stopping VM: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
