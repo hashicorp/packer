@@ -5,19 +5,36 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"os"
 	"runtime"
 )
 
 type StepKeyPair struct {
-	Debug        bool
-	DebugKeyPath string
-	KeyPairName  string
+	Debug          bool
+	DebugKeyPath   string
+	KeyPairName    string
+	PrivateKeyFile string
 
 	keyName string
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+	if s.PrivateKeyFile != "" {
+		s.keyName = ""
+
+		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error loading configured private key file: %s", err))
+			return multistep.ActionHalt
+		}
+
+		state.Put("keyPair", "")
+		state.Put("privateKey", string(privateKeyBytes))
+
+		return multistep.ActionContinue
+	}
+
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
