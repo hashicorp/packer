@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -16,8 +17,9 @@ import (
 // Produces:
 //   exportPath string - The path to the resulting export.
 type StepExport struct {
-	Format    string
-	OutputDir string
+	Format     string
+	OutputDir  string
+	ExportOpts []string
 }
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
@@ -52,7 +54,10 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 		outputPath,
 	}
 
+	command = append(command, s.ExportOpts...)
+
 	ui.Say("Exporting virtual machine...")
+	ui.Message(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
 	err := driver.VBoxManage(command...)
 	if err != nil {
 		err := fmt.Errorf("Error exporting virtual machine: %s", err)

@@ -13,6 +13,8 @@ IMPROVEMENTS:
 
 * builder/amazon: Added `ssh_private_key_file` option [GH-971]
 * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
+* builder/virtualbox: Support an `export_opts` option which allows
+  specifying arbitrary arguments when exporting the VM. [GH-945]
 * builder/vmware: Workstation 10 support for Linux. [GH-900]
 * builder/vmware: add cloning support on Windows [GH-824]
 * command/build: Added '-parallel' flag so you can disable parallelization
@@ -30,7 +32,7 @@ BUG FIXES:
 * builder/openstack: Return proper error on invalid instance states [GH-1018]
 * builder/virtualbox-iso: Retry unregister a few times to deal with
   VBoxManage randomness. [GH-915]
-* provisioner/ansible: Fix paths when provisioning Linux from 
+* provisioner/ansible: Fix paths when provisioning Linux from
   Windows [GH-963]
 * provisioner/ansible: set cwd to staging directory [GH-1016]
 * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
