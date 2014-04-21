@@ -149,6 +149,10 @@ func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
 	return workstationToolsIsoPath(flavor)
 }
 
+func (d *Workstation9Driver) ToolsInstall() error {
+	return nil
+}
+
 func (d *Workstation9Driver) DhcpLeasesPath(device string) string {
 	return workstationDhcpLeasesPath(device)
 }
