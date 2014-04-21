@@ -3,7 +3,12 @@ OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
+UNAME := $(shell uname -s)
+ifeq ($(UNAME),Darwin)
+ECHO=echo
+else
 ECHO=/bin/echo -e
+endif
 
 all: deps
 	@mkdir -p bin/
