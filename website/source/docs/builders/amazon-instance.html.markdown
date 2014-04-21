@@ -147,6 +147,9 @@ Optional:
 * `ssh_port` (int) - The port that SSH will be available on. This defaults
   to port 22.
 
+* `ssh_private_key_file` - Use this ssh private key file instead of a generated
+  ssh key pair for connecting to the instance.
+
 * `ssh_timeout` (string) - The time to wait for SSH to become available
   before timing out. The format of this value is a duration such as "5s"
   or "5m". The default SSH timeout is "5m", or five minutes.
