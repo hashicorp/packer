@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"os"
 )
 
@@ -15,6 +16,15 @@ type stepUploadTools struct{}
 
 func (*stepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
+	driver := state.Get("driver").(vmwcommon.Driver)
+
+	if config.RemoteType == "esx5" {
+		if err := driver.ToolsInstall(); err != nil {
+			state.Put("error", fmt.Errorf("Couldn't mount VMware tools ISO."))
+		}
+		return multistep.ActionContinue
+	}
+
 	if config.ToolsUploadFlavor == "" {
 		return multistep.ActionContinue
 	}
