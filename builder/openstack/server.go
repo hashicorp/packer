@@ -75,8 +75,7 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 		}
 
 		if !found {
-			fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
-			return
+			return nil, fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
 		}
 
 		log.Printf("Waiting for state to become: %s currently %s (%d%%)", conf.Target, currentState, currentProgress)
