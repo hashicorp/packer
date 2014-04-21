@@ -222,8 +222,8 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 		extraArgs = " " + strings.Join(p.config.ExtraArguments, " ")
 	}
 
-	command := fmt.Sprintf("%s %s%s -c local -i \"127.0.0.1,\"",
-		p.config.Command, playbook, extraArgs)
+	command := fmt.Sprintf("cd %s && %s %s%s -c local -i \"127.0.0.1,\"",
+		p.config.StagingDir, p.config.Command, playbook, extraArgs)
 	ui.Message(fmt.Sprintf("Executing Ansible: %s", command))
 	cmd := &packer.RemoteCmd{
 		Command: command,
