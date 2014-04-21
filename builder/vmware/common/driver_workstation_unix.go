@@ -4,10 +4,14 @@
 package common
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"runtime"
 )
 
 func workstationCheckLicense() error {
@@ -45,4 +49,31 @@ func workstationToolsIsoPath(flavor string) string {
 
 func workstationVmnetnatConfPath() string {
 	return ""
+}
+
+func workstationVerifyVersion(version string) error {
+	if runtime.GOOS != "linux" {
+		return fmt.Errorf("The VMWare WS version %s driver is only supported on Linux, and Windows, at the moment. Your OS: %s", version, runtime.GOOS)
+	}
+
+	//TODO(pmyjavec) there is a better way to find this, how?
+	//the default will suffice for now.
+	vmxpath := "/usr/lib/vmware/bin/vmware-vmx"
+
+	var stderr bytes.Buffer
+	cmd := exec.Command(vmxpath, "-v")
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	versionRe := regexp.MustCompile(`(?i)VMware Workstation (\d+)\.`)
+	matches := versionRe.FindStringSubmatch(stderr.String())
+	if matches == nil {
+		return fmt.Errorf(
+			"Could not find VMWare WS version in output: %s", stderr.String())
+	}
+	log.Printf("Detected VMWare WS version: %s", matches[1])
+
+	return compareVersions(matches[1], version)
 }
