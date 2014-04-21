@@ -165,7 +165,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	ui.Message("Uploading main Playbook file...")
 	src := p.config.PlaybookFile
-	dst := filepath.Join(p.config.StagingDir, filepath.Base(src))
+	dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
 	if err := p.uploadFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
 	}
@@ -182,7 +182,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if len(p.config.GroupVars) > 0 {
 		ui.Message("Uploading group_vars directory...")
 		src := p.config.GroupVars
-		dst := filepath.Join(p.config.StagingDir, "group_vars")
+		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, "group_vars"))
 		if err := p.uploadDir(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Error uploading group_vars directory: %s", err)
 		}
@@ -191,7 +191,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if len(p.config.HostVars) > 0 {
 		ui.Message("Uploading host_vars directory...")
 		src := p.config.HostVars
-		dst := filepath.Join(p.config.StagingDir, "host_vars")
+		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, "host_vars"))
 		if err := p.uploadDir(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Error uploading host_vars directory: %s", err)
 		}
@@ -200,7 +200,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if len(p.config.RolePaths) > 0 {
 		ui.Message("Uploading role directories...")
 		for _, src := range p.config.RolePaths {
-			dst := filepath.Join(p.config.StagingDir, "roles", filepath.Base(src))
+			dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, "roles", filepath.Base(src)))
 			if err := p.uploadDir(ui, comm, dst, src); err != nil {
 				return fmt.Errorf("Error uploading roles: %s", err)
 			}
@@ -209,11 +209,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	if len(p.config.PlaybookPaths) > 0 {
 		ui.Message("Uploading additional Playbooks...")
-		if err := p.createDir(ui, comm, filepath.Join(p.config.StagingDir, "playbooks")); err != nil {
+		playbookDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, "playbooks"))
+		if err := p.createDir(ui, comm, playbookDir); err != nil {
 			return fmt.Errorf("Error creating playbooks directory: %s", err)
 		}
 		for _, src := range p.config.PlaybookPaths {
-			dst := filepath.Join(p.config.StagingDir, "playbooks", filepath.Base(src))
+			dst := filepath.ToSlash(filepath.Join(playbookDir, filepath.Base(src)))
 			if err := p.uploadDir(ui, comm, dst, src); err != nil {
 				return fmt.Errorf("Error uploading playbooks: %s", err)
 			}
@@ -233,7 +234,7 @@ func (p *Provisioner) Cancel() {
 }
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
-	playbook := filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile))
+	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
 
 	// The inventory must be set to "127.0.0.1,".  The comma is important
 	// as its the only way to override the ansible inventory when dealing
