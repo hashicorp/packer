@@ -20,7 +20,7 @@ func testStepShutdownState(t *testing.T) multistep.StateBag {
 	state := testState(t)
 	state.Put("communicator", new(packer.MockCommunicator))
 	state.Put("dir", dir)
-	state.Put("vmx_path", "foo")
+	state.Put("vm_id", "1")
 	return state
 }
 
@@ -105,8 +105,8 @@ func TestStepShutdown_noCommand(t *testing.T) {
 	if !driver.StopCalled {
 		t.Fatal("stop should be called")
 	}
-	if driver.StopPath != "foo" {
-		t.Fatal("should call with right path")
+	if driver.StopVmId != "1" {
+		t.Fatal("should call with right vmId")
 	}
 
 	if comm.StartCalled {
@@ -166,8 +166,8 @@ func TestStepShutdown_locks(t *testing.T) {
 	if !driver.StopCalled {
 		t.Fatal("stop should be called")
 	}
-	if driver.StopPath != "foo" {
-		t.Fatal("should call with right path")
+	if driver.StopVmId != "1" {
+		t.Fatal("should call with right vmId")
 	}
 
 	if comm.StartCalled {

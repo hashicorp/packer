@@ -17,7 +17,7 @@ type RemoteDriverMock struct {
 	RegisterErr    error
 
 	UnregisterCalled bool
-	UnregisterPath   string
+	UnregisterVmId   string
 	UnregisterErr    error
 }
 
@@ -27,14 +27,14 @@ func (d *RemoteDriverMock) UploadISO(path string) (string, error) {
 	return d.UploadISOResult, d.UploadISOErr
 }
 
-func (d *RemoteDriverMock) Register(path string) error {
+func (d *RemoteDriverMock) Register(path string) (string, error) {
 	d.RegisterCalled = true
 	d.RegisterPath = path
-	return d.RegisterErr
+	return "1", d.RegisterErr
 }
 
-func (d *RemoteDriverMock) Unregister(path string) error {
+func (d *RemoteDriverMock) Unregister(vmId string) error {
 	d.UnregisterCalled = true
-	d.UnregisterPath = path
+	d.UnregisterVmId = vmId
 	return d.UnregisterErr
 }

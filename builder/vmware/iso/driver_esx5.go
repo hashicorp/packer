@@ -46,40 +46,41 @@ func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, typeId string
 	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", "lsilogic", diskPath)
 }
 
-func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", vmxPath)
+func (d *ESX5Driver) IsRunning(vmId string) (bool, error) {
+	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", vmId)
 	if err != nil {
 		return false, err
 	}
 	return strings.Contains(state, "Powered on"), nil
 }
 
-func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/power.on", vmxPath)
+func (d *ESX5Driver) Start(vmId string, headless bool) error {
+	return d.sh("vim-cmd", "vmsvc/power.on", vmId)
 }
 
-func (d *ESX5Driver) Stop(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/power.off", vmxPath)
+func (d *ESX5Driver) Stop(vmId string) error {
+	return d.sh("vim-cmd", "vmsvc/power.off", vmId)
 }
 
-func (d *ESX5Driver) Register(vmxPathLocal string) error {
+func (d *ESX5Driver) Register(vmxPathLocal string) (string, error) {
 	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
-		return err
+		return "", err
 	}
-	return d.sh("vim-cmd", "solo/registervm", vmxPath)
+        r, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
+	if err != nil {
+		return "", err
+	}
+        vmId := strings.TrimRight(r, "\n")
+	return vmId, nil
 }
 
 func (d *ESX5Driver) SuppressMessages(vmxPath string) error {
 	return nil
 }
 
-func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/unregister", vmxPath)
+func (d *ESX5Driver) Unregister(vmId string) error {
+	return d.sh("vim-cmd", "vmsvc/unregister", vmId)
 }
 
 func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
@@ -168,35 +169,18 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return address.(string), nil
 	}
 
-	r, err := d.esxcli("network", "vm", "list")
+	vmId := state.Get("vm_id").(string)
+
+	ipAddress, err := d.run(nil, "vim-cmd", "vmsvc/get.guest", vmId, " | grep -m 1 ipAddress | awk -F'\"' '{print $2}'")
 	if err != nil {
 		return "", err
 	}
 
-	record, err := r.find("Name", config.VMName)
-	if err != nil {
-		return "", err
-	}
-	wid := record["WorldID"]
-	if wid == "" {
-		return "", errors.New("VM WorldID not found")
-	}
-
-	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
-	if err != nil {
-		return "", err
-	}
-
-	record, err = r.read()
-	if err != nil {
-		return "", err
-	}
-
-	if record["IPAddress"] == "0.0.0.0" {
+	if ipAddress == "0.0.0.0" {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
+	address := fmt.Sprintf("%s:%d", ipAddress, config.SSHPort)
 	state.Put("vm_address", address)
 	return address, nil
 }

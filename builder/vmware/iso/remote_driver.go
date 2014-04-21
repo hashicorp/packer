@@ -13,7 +13,7 @@ type RemoteDriver interface {
 	UploadISO(string) (string, error)
 
 	// Adds a VM to inventory specified by the path to the VMX given.
-	Register(string) error
+	Register(string) (string, error)
 
 	// Removes a VM from inventory specified by the path to the VMX given.
 	Unregister(string) error
