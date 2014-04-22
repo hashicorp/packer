@@ -12,6 +12,7 @@ FEATURES:
 IMPROVEMENTS:
 
 * builder/amazon: Added `ssh_private_key_file` option [GH-971]
+* builder/amazon: Added `ami_virtualization_type` option [GH-1021]
 * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
 * builder/virtualbox: Support an `export_opts` option which allows
   specifying arbitrary arguments when exporting the VM. [GH-945]
