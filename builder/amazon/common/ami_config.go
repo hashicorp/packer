@@ -10,6 +10,7 @@ import (
 type AMIConfig struct {
 	AMIName         string            `mapstructure:"ami_name"`
 	AMIDescription  string            `mapstructure:"ami_description"`
+	AMIVirtType     string            `mapstructure:"ami_virtualization_type"`
 	AMIUsers        []string          `mapstructure:"ami_users"`
 	AMIGroups       []string          `mapstructure:"ami_groups"`
 	AMIProductCodes []string          `mapstructure:"ami_product_codes"`
@@ -27,8 +28,9 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"ami_name":        &c.AMIName,
-		"ami_description": &c.AMIDescription,
+		"ami_name":                &c.AMIName,
+		"ami_description":         &c.AMIDescription,
+		"ami_virtualization_type": &c.AMIVirtType,
 	}
 
 	errs := make([]error, 0)
