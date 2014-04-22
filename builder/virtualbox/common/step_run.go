@@ -18,6 +18,8 @@ import (
 type StepRun struct {
 	BootWait time.Duration
 	Headless bool
+        Vcp bool
+        VcpFile string
 
 	vmName string
 }
@@ -26,6 +28,17 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
+
+        if s.Vcp == true {
+                ui.Message("NOTE: Video Capturing enabled.")
+                command := []string{"modifyvm", vmName, "--vcpenabled", "on", "--vcpfile", s.VcpFile}
+                if err := driver.VBoxManage(command...); err != nil {
+                        err := fmt.Errorf("Error enabling Video Capturing: %s", err)
+                        state.Put("error", err)
+                        ui.Error(err.Error())
+                        return multistep.ActionHalt
+                }
+        }
 
 	ui.Say("Starting the virtual machine...")
 	guiArgument := "gui"

@@ -37,6 +37,7 @@ type config struct {
 	vboxcommon.SSHConfig         `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
+        vboxcommon.VcpConfig         `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
 	DiskSize             uint     `mapstructure:"disk_size"`
@@ -301,6 +302,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepRun{
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
+                        Vcp:      b.config.Vcp,
+                        VcpFile:  b.config.VcpFile,
 		},
 		new(stepTypeBootCommand),
 		&common.StepConnectSSH{
