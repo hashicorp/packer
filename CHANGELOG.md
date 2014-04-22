@@ -13,6 +13,8 @@ IMPROVEMENTS:
 
   * builder/amazon: Added `ssh_private_key_file` option [GH-971]
   * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
+  * builder/openstack: Support for conventional OpenStack environmental
+      variables such as `OS_USERNAME`, `OS_PASSWORD`, etc. [GH-768]
   * builder/openstack: Support `openstack_provider` option to automatically
       fill defaults for different OpenStack variants. [GH-912]
   * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
