@@ -20,6 +20,7 @@ type Config struct {
 	Cluster      string `mapstructure:"cluster"`
 	Datacenter   string `mapstructure:"datacenter"`
 	Datastore    string `mapstructure:"datastore"`
+	DiskMode     string `mapstructure:"diskmode"`
 	Host         string `mapstructure:"host"`
 	Password     string `mapstructure:"password"`
 	ResourcePool string `mapstructure:"resource_pool"`
@@ -47,6 +48,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
+	// Defaults
+	if p.config.DiskMode == "" {
+		p.config.DiskMode = "thick"
+	}
+
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
@@ -59,6 +65,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"cluster":       &p.config.Cluster,
 		"datacenter":    &p.config.Datacenter,
 		"datastore":     &p.config.Datastore,
+		"diskmode":      &p.config.DiskMode,
 		"host":          &p.config.Host,
 		"vm_network":    &p.config.VMNetwork,
 		"password":      &p.config.Password,
@@ -110,6 +117,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		"--acceptAllEulas",
 		fmt.Sprintf("--name=%s", p.config.VMName),
 		fmt.Sprintf("--datastore=%s", p.config.Datastore),
+		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
