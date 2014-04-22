@@ -2,42 +2,44 @@
 
 FEATURES:
 
-* **New builder:** `null` - The null builder does not produce any
-  artifacts, but is useful for debugging provisioning scripts. [GH-970]
-* **New provisioner:** `chef-client` - Provision using a the `chef-client`
-  command, which talks to a Chef Server. [GH-855]
-* **New provisioner:** `puppet-server` - Provision using Puppet by
-  communicating to a Puppet master. [GH-796]
+  * **New builder:** `null` - The null builder does not produce any
+    artifacts, but is useful for debugging provisioning scripts. [GH-970]
+  * **New provisioner:** `chef-client` - Provision using a the `chef-client`
+    command, which talks to a Chef Server. [GH-855]
+  * **New provisioner:** `puppet-server` - Provision using Puppet by
+    communicating to a Puppet master. [GH-796]
 
 IMPROVEMENTS:
 
-* builder/amazon: Added `ssh_private_key_file` option [GH-971]
-* builder/amazon: Added `ami_virtualization_type` option [GH-1021]
-* builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
-* builder/virtualbox: Support an `export_opts` option which allows
-  specifying arbitrary arguments when exporting the VM. [GH-945]
-* builder/vmware: Workstation 10 support for Linux. [GH-900]
-* builder/vmware: add cloning support on Windows [GH-824]
-* command/build: Added '-parallel' flag so you can disable parallelization
-  with `-no-parallel`. [GH-924]
-* provisioner/ansible: Add inventory_file option [GH-1006]
+  * builder/amazon: Added `ssh_private_key_file` option [GH-971]
+  * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
+  * builder/openstack: Support `openstack_provider` option to automatically
+      fill defaults for different OpenStack variants. [GH-912]
+  * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
+  * builder/virtualbox: Support an `export_opts` option which allows
+      specifying arbitrary arguments when exporting the VM. [GH-945]
+  * builder/vmware: Workstation 10 support for Linux. [GH-900]
+  * builder/vmware: add cloning support on Windows [GH-824]
+  * command/build: Added '-parallel' flag so you can disable parallelization
+    with `-no-parallel`. [GH-924]
+  * provisioner/ansible: Add inventory_file option [GH-1006]
 
 BUG FIXES:
 
-* core: Errors are properly shown when adding bad floppy files. [GH-1043]
-* builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
-  which works for every region. [GH-904]
-* builder/digitalocean: updated default image_id [GH-1032]
-* builder/googlecompute: Create persistent disk as boot disk via
-  API v1 [GH-1001]
-* builder/openstack: Return proper error on invalid instance states [GH-1018]
-* builder/virtualbox-iso: Retry unregister a few times to deal with
-  VBoxManage randomness. [GH-915]
-* provisioner/ansible: Fix paths when provisioning Linux from
-  Windows [GH-963]
-* provisioner/ansible: set cwd to staging directory [GH-1016]
-* provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
-* post-processor/docker-push: Allow repositories with ports. [GH-923]
+  * core: Errors are properly shown when adding bad floppy files. [GH-1043]
+  * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
+      which works for every region. [GH-904]
+  * builder/digitalocean: updated default image_id [GH-1032]
+  * builder/googlecompute: Create persistent disk as boot disk via
+      API v1 [GH-1001]
+  * builder/openstack: Return proper error on invalid instance states [GH-1018]
+  * builder/virtualbox-iso: Retry unregister a few times to deal with
+      VBoxManage randomness. [GH-915]
+  * provisioner/ansible: Fix paths when provisioning Linux from
+      Windows [GH-963]
+  * provisioner/ansible: set cwd to staging directory [GH-1016]
+  * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
+  * post-processor/docker-push: Allow repositories with ports. [GH-923]
 
 ## 0.5.2 (02/21/2014)
 
