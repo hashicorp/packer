@@ -41,10 +41,32 @@ Optional:
 
 * `region_id` (int) - The ID of the region to launch the droplet in. Consequently,
   this is the region where the snapshot will be available. This defaults to
-  "1", which is "New York 1".
+  "1", which is "New York 1", but since this region is full you'll have to use
+  one of the other ones. **Making this setting mandatory.**
+
+  | region_id | Region                      |
+  |-----------|-----------------------------|
+  | 1         | New York 1 (not available)  |
+  | 2         | Amsterdam 1 (not available) |
+  | 3         | San Francisco 1             |
+  | 4         | New York 2                  |
+  | 5         | Amsterdam 2                 |
+  | 6         | Singapore 1                 |
 
 * `size_id` (int) - The ID of the droplet size to use. This defaults to "66",
   which is the 512MB droplet.
+
+  | size_id | Size  |
+  |---------|-------|
+  | 66      | 512MB |
+  | 63      | 1GB   |
+  | 62      | 2GB   |
+  | 64      | 4GB   |
+  | 65      | 8GB   |
+  | 61      | 16GB  |
+  | 60      | 32GB  |
+  | 70      | 48GB  |
+  | 69      | 64GB  |
 
 * `private_networking` (bool) - Set to `true` to enable private networking
   for the droplet being created. This defaults to `false`, or not enabled.
