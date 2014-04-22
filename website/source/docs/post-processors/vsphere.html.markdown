@@ -45,5 +45,8 @@ Required:
 
 Optional:
 
+* `disk_mode` (string) - Target disk format. See `ovftool` manual for
+  available options. By default, "thick" will be used.
+
 * `insecure` (bool) - Whether or not the connection to vSphere can be done
   over an insecure connection. By default this is false.

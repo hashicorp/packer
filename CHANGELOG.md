@@ -22,7 +22,8 @@ IMPROVEMENTS:
   * builder/vmware: add cloning support on Windows [GH-824]
   * command/build: Added '-parallel' flag so you can disable parallelization
     with `-no-parallel`. [GH-924]
-  * provisioner/ansible: Add inventory_file option [GH-1006]
+  * post-processors/vsphere: `disk_mode` option. [GH-778]
+  * provisioner/ansible: Add `inventory_file` option [GH-1006]
 
 BUG FIXES:
 
