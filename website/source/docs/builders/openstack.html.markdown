@@ -52,6 +52,10 @@ Required:
 
 Optional:
 
+* `openstack_provider` (string) - A name of a provider that has a slightly
+  different API model. Currently supported values are "openstack" (default),
+  and "rackspace".
+
 * `project` (string) - The project name to boot the instance into. Some
   OpenStack installations require this. By default this is empty.
 
