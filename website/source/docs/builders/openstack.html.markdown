@@ -54,6 +54,10 @@ Required:
 
 Optional:
 
+* `api_key` (string) - The API key used to access OpenStack. Some OpenStack
+  installations require this. If not specified, Packer will attempt to
+  read this from the `SDK_API_KEY` environmental variable.
+
 * `project` (string) - The project name to boot the instance into. Some
   OpenStack installations require this. If not specified, Packer will attempt
   to read this from the `SDK_PROJECT` or `OS_TENANT_NAME` environmental
