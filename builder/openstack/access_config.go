@@ -25,12 +25,12 @@ type AccessConfig struct {
 // Auth returns a valid Auth object for access to openstack services, or
 // an error if the authentication couldn't be resolved.
 func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
-	c.Username = common.CoalesceVals(c.Username, os.Getenv("SDK_USERNAME"), os.Getenv("OS_USERNAME"))
-	c.Password = common.CoalesceVals(c.Password, os.Getenv("SDK_PASSWORD"), os.Getenv("OS_PASSWORD"))
-	c.ApiKey = common.CoalesceVals(c.ApiKey, os.Getenv("SDK_API_KEY"))
-	c.Project = common.CoalesceVals(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
-	c.Provider = common.CoalesceVals(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
-	c.RawRegion = common.CoalesceVals(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
+	c.Username = common.ChooseString(c.Username, os.Getenv("SDK_USERNAME"), os.Getenv("OS_USERNAME"))
+	c.Password = common.ChooseString(c.Password, os.Getenv("SDK_PASSWORD"), os.Getenv("OS_PASSWORD"))
+	c.ApiKey = common.ChooseString(c.ApiKey, os.Getenv("SDK_API_KEY"))
+	c.Project = common.ChooseString(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
+	c.Provider = common.ChooseString(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
+	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
 
 	// OpenStack's auto-generated openrc.sh files do not append the suffix
 	// /tokens to the authentication URL. This ensures it is present when
@@ -67,7 +67,7 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 }
 
 func (c *AccessConfig) Region() string {
-	return common.CoalesceVals(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
+	return common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
 }
 
 func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
