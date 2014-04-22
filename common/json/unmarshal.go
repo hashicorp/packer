@@ -4,12 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	yaml "launchpad.net/goyaml"
+	"errors"
 )
 
 // Unmarshal is wrapper around json.Unmarshal that returns user-friendly
 // errors when there are syntax errors.
 func Unmarshal(data []byte, i interface{}) error {
-	err := json.Unmarshal(data, i)
+	err := errors.New("")
+	if len(data) >= 3 && bytes.Equal(data[:3], []byte{'-', '-', '-'}) {
+		err = yaml.Unmarshal(data, i)
+	} else {
+		err = json.Unmarshal(data, i)
+	}
 	if err != nil {
 		syntaxErr, ok := err.(*json.SyntaxError)
 		if !ok {
