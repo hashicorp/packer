@@ -101,15 +101,20 @@ func DownloadableURL(original string) (string, error) {
 	}
 
 	if url.Scheme == "file" {
-		// For Windows absolute file paths, remove leading / prior to processing
-		// since net/url turns "C:/" into "/C:/"
-		if runtime.GOOS == "windows" && url.Path[0] == '/' {
-			url.Path = url.Path[1:len(url.Path)]
+		// Windows file handling is all sorts of tricky...
+		if runtime.GOOS == "windows" {
+			// If the path is using Windows-style slashes, URL parses
+			// it into the host field.
+			if url.Path == "" && strings.Contains(url.Host, `\`) {
+				url.Path = url.Host
+				url.Host = ""
+			}
 
-			// Also replace all backslashes with forwardslashes since Windows
-			// users are likely to do this but the URL should actually only
-			// contain forward slashes.
-			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
+			// For Windows absolute file paths, remove leading / prior to processing
+			// since net/url turns "C:/" into "/C:/"
+			if len(url.Path) > 0 && url.Path[0] == '/' {
+				url.Path = url.Path[1:len(url.Path)]
+			}
 		}
 
 		// Only do the filepath transformations if the file appears
@@ -126,6 +131,13 @@ func DownloadableURL(original string) (string, error) {
 			}
 
 			url.Path = filepath.Clean(url.Path)
+		}
+
+		if runtime.GOOS == "windows" {
+			// Also replace all backslashes with forwardslashes since Windows
+			// users are likely to do this but the URL should actually only
+			// contain forward slashes.
+			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 	}
 
@@ -195,11 +207,13 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 	}, nil
 }
 
-func CoalesceVals(vals ...string) string {
+// ChooseString returns the first non-empty value.
+func ChooseString(vals ...string) string {
     for _, el := range vals {
         if el != "" {
             return el
         }
     }
+
     return ""
 }
