@@ -45,6 +45,17 @@ func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 	return nil
 }
 
+// ChooseString returns the first non-empty value.
+func ChooseString(vals ...string) string {
+    for _, el := range vals {
+        if el != "" {
+            return el
+        }
+    }
+
+    return ""
+}
+
 // DecodeConfig is a helper that handles decoding raw configuration using
 // mapstructure. It returns the metadata and any errors that may happen.
 // If you need extra configuration for mapstructure, you should configure
@@ -205,15 +216,4 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 
 		return v, nil
 	}, nil
-}
-
-// ChooseString returns the first non-empty value.
-func ChooseString(vals ...string) string {
-    for _, el := range vals {
-        if el != "" {
-            return el
-        }
-    }
-
-    return ""
 }

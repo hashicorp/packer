@@ -29,6 +29,33 @@ func TestCheckUnusedConfig(t *testing.T) {
 	}
 }
 
+func TestChooseString(t *testing.T) {
+	cases := []struct {
+		Input []string
+		Output string
+	}{
+		{
+			[]string{"", "foo", ""},
+			"foo",
+		},
+		{
+			[]string{"", "foo", "bar"},
+			"foo",
+		},
+		{
+			[]string{"", "", ""},
+			"",
+		},
+	}
+
+	for _, tc := range cases {
+		result := ChooseString(tc.Input...)
+		if result != tc.Output {
+			t.Fatalf("bad: %#v", tc.Input)
+		}
+	}
+}
+
 func TestDecodeConfig(t *testing.T) {
 	type Local struct {
 		Foo string
