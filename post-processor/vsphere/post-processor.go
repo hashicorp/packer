@@ -20,7 +20,7 @@ type Config struct {
 	Cluster      string `mapstructure:"cluster"`
 	Datacenter   string `mapstructure:"datacenter"`
 	Datastore    string `mapstructure:"datastore"`
-	DiskMode     string `mapstructure:"diskmode"`
+	DiskMode     string `mapstructure:"disk_mode"`
 	Host         string `mapstructure:"host"`
 	Password     string `mapstructure:"password"`
 	ResourcePool string `mapstructure:"resource_pool"`
