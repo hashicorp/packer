@@ -74,8 +74,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tpl:      b.config.tpl,
 		},
 		&vboxcommon.StepRun{
-			BootWait: b.config.BootWait,
-			Headless: b.config.Headless,
+			BootWait:    b.config.BootWait,
+			Headless:    b.config.Headless,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,

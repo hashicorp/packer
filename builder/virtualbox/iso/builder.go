@@ -36,6 +36,7 @@ type config struct {
 	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
 	vboxcommon.SSHConfig         `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
+        vboxcommon.VrdeConfig        `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
@@ -299,8 +300,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tpl:      b.config.tpl,
 		},
 		&vboxcommon.StepRun{
-			BootWait: b.config.BootWait,
-			Headless: b.config.Headless,
+			BootWait:    b.config.BootWait,
+			Headless:    b.config.Headless,
+                        Vrde:        b.config.Vrde,
+                        VrdeAddress: b.config.VrdeAddress,
+                        VrdePort:    b.config.VrdePort,
 		},
 		new(stepTypeBootCommand),
 		&common.StepConnectSSH{
