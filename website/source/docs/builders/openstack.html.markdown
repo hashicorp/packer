@@ -33,7 +33,7 @@ Required:
 
 * `password` (string) - The password used to connect to the OpenStack service.
   If not specified, Packer will attempt to read this from the
-  `SDK_PASSWORD` environment variable.
+  `SDK_PASSWORD` or `OS_PASSWORD` environment variable.
 
 * `provider` (string) - The provider used to connect to the OpenStack service.
   If not specified, Packer will attempt to read this from the
@@ -41,23 +41,28 @@ Required:
   or `rackspace-uk`.
 
 * `region` (string) - The name of the region, such as "DFW", in which
-  to launch the server to create the AMI.
+  to launch the server to create the AMI. If not specified, Packer will
+  attempt to read this from the `SDK_REGION` or `OS_REGION_NAME` environmental
+  variables.
 
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
 
 * `username` (string) - The username used to connect to the OpenStack service.
   If not specified, Packer will attempt to read this from the
-  `SDK_USERNAME` environment variable.
+  `SDK_USERNAME` or `OS_USERNAME` environment variable.
 
 Optional:
 
-* `openstack_provider` (string) - A name of a provider that has a slightly
-  different API model. Currently supported values are "openstack" (default),
-  and "rackspace".
-
 * `project` (string) - The project name to boot the instance into. Some
-  OpenStack installations require this. By default this is empty.
+  OpenStack installations require this. If not specified, Packer will attempt
+  to read this from the `SDK_PROJECT` or `OS_TENANT_NAME` environmental
+  variables.
+
+* `provider` (string) - A name of a provider that has a slightly
+  different API model. Currently supported values are "openstack" (default),
+  and "rackspace". If not specified, Packer will attempt to read this from
+  the `SDK_PROVIDER` or `OS_AUTH_URL` environmental variables.
 
 * `ssh_port` (int) - The port that SSH will be available on. Defaults to port
   22.
