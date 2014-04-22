@@ -29,7 +29,7 @@ func extpackStatus() string {
 	}
 	var extpacksInstalled bool = reExtpacksInstalled.MatchString(extpacksOutString)
 	if extpacksInstalled == false {
-		var returnString string = "Oracle VM VirtualBox Extension Pack is is not installed. Vrde may not " +
+		var returnString string = "Oracle VM VirtualBox Extension Pack is not installed. Vrde may not " +
 		"work as expected."
 		return returnString
 	}
