@@ -44,6 +44,7 @@ BUG FIXES:
   * provisioner/ansible: set cwd to staging directory [GH-1016]
   * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
   * post-processor/docker-push: Allow repositories with ports. [GH-923]
+  * post-processor/vagrant: Create parent directories for `output` path [GH-1059]
 
 ## 0.5.2 (02/21/2014)
 
