@@ -1,11 +1,10 @@
 package openstack
 
 import (
-	gossh "code.google.com/p/gosshold/ssh"
+	"code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/rackspace/gophercloud"
 	"time"
 )
@@ -39,19 +38,19 @@ func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(multistep.S
 // SSHConfig returns a function that can be used for the SSH communicator
 // config for connecting to the instance created over SSH using the generated
 // private key.
-func SSHConfig(username string) func(multistep.StateBag) (*gossh.ClientConfig, error) {
-	return func(state multistep.StateBag) (*gossh.ClientConfig, error) {
+func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		privateKey := state.Get("privateKey").(string)
 
-		keyring := new(ssh.SimpleKeychain)
-		if err := keyring.AddPEMKey(privateKey); err != nil {
+		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+		if err != nil {
 			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 		}
 
-		return &gossh.ClientConfig{
+		return &ssh.ClientConfig{
 			User: username,
-			Auth: []gossh.ClientAuth{
-				gossh.ClientAuthKeyring(keyring),
+			Auth: []ssh.AuthMethod{
+				ssh.PublicKeys(signer),
 			},
 		}, nil
 	}
