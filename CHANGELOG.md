@@ -13,6 +13,7 @@ IMPROVEMENTS:
 
   * builder/amazon: Added `ssh_private_key_file` option [GH-971]
   * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
+  * builder/googlecompute: Configurable instance name. [GH-1065]
   * builder/openstack: Support for conventional OpenStack environmental
       variables such as `OS_USERNAME`, `OS_PASSWORD`, etc. [GH-768]
   * builder/openstack: Support `openstack_provider` option to automatically
