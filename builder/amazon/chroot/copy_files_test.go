@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"testing"
 )
 
 func TestCopyFile(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+
 	first, err := ioutil.TempFile("", "copy_files_test")
 	if err != nil {
 		t.Fatalf("couldn't create temp file.")
