@@ -191,8 +191,17 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 	// First thing we do is decode PackerConfig so that we can have access
 	// to the user variables so that we can process some templates.
 	var pc PackerConfig
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		Result:           &pc,
+		WeaklyTypedInput: true,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return nil, err
+	}
 	for _, raw := range raws {
-		if err := mapstructure.Decode(raw, &pc); err != nil {
+		if err := decoder.Decode(raw); err != nil {
 			return nil, err
 		}
 	}
