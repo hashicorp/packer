@@ -51,6 +51,9 @@ type DriverMock struct {
 	ToolsIsoPathFlavor string
 	ToolsIsoPathResult string
 
+	ToolsInstallCalled bool
+	ToolsInstallErr    error
+
 	DhcpLeasesPathCalled bool
 	DhcpLeasesPathDevice string
 	DhcpLeasesPathResult string
@@ -118,6 +121,11 @@ func (d *DriverMock) ToolsIsoPath(flavor string) string {
 	d.ToolsIsoPathCalled = true
 	d.ToolsIsoPathFlavor = flavor
 	return d.ToolsIsoPathResult
+}
+
+func (d *DriverMock) ToolsInstall() error {
+	d.ToolsInstallCalled = true
+	return d.ToolsInstallErr
 }
 
 func (d *DriverMock) DhcpLeasesPath(device string) string {

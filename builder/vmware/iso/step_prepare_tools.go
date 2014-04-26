@@ -13,6 +13,10 @@ func (*stepPrepareTools) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(vmwcommon.Driver)
 
+	if config.RemoteType == "esx5" {
+		return multistep.ActionContinue
+	}
+
 	if config.ToolsUploadFlavor == "" {
 		return multistep.ActionContinue
 	}
