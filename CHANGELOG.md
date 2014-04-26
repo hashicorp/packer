@@ -27,6 +27,7 @@ IMPROVEMENTS:
     with `-no-parallel`. [GH-924]
   * post-processors/vsphere: `disk_mode` option. [GH-778]
   * provisioner/ansible: Add `inventory_file` option [GH-1006]
+  * provisioner/chef-client: Add `validation_client_name` option. [GH-1056]
 
 BUG FIXES:
 
