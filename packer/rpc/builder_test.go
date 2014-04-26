@@ -30,8 +30,9 @@ func TestBuilderPrepare(t *testing.T) {
 		t.Fatal("should be called")
 	}
 
-	if !reflect.DeepEqual(b.PrepareConfig, []interface{}{42}) {
-		t.Fatalf("bad: %#v", b.PrepareConfig)
+	expected := []interface{}{int64(42)}
+	if !reflect.DeepEqual(b.PrepareConfig, expected) {
+		t.Fatalf("bad: %#v != %#v", b.PrepareConfig, expected)
 	}
 }
 
