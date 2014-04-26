@@ -54,7 +54,8 @@ func TestPostProcessorRPC(t *testing.T) {
 		t.Fatal("config should be called")
 	}
 
-	if !reflect.DeepEqual(p.configVal, []interface{}{42}) {
+	expected := []interface{}{int64(42)}
+	if !reflect.DeepEqual(p.configVal, expected) {
 		t.Fatalf("unknown config value: %#v", p.configVal)
 	}
 

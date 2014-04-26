@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
+	"github.com/ugorji/go/codec"
 	"io"
 	"log"
 	"net/rpc"
@@ -32,9 +33,12 @@ func newClientWithMux(mux *MuxConn, streamId uint32) (*Client, error) {
 		return nil, err
 	}
 
+	var h codec.MsgpackHandle
+	clientCodec := codec.GoRpc.ClientCodec(clientConn, &h)
+
 	return &Client{
 		mux:      mux,
-		client:   rpc.NewClient(clientConn),
+		client:   rpc.NewClientWithCodec(clientCodec),
 		closeMux: false,
 	}, nil
 }
