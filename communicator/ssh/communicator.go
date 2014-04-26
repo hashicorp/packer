@@ -18,9 +18,10 @@ import (
 )
 
 type comm struct {
-	client *ssh.ClientConn
-	config *Config
-	conn   net.Conn
+	client  *ssh.Client
+	config  *Config
+	conn    net.Conn
+	address string
 }
 
 // Config is the structure used to configure the SSH communicator.
@@ -39,10 +40,11 @@ type Config struct {
 
 // Creates a new packer.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
-func New(config *Config) (result *comm, err error) {
+func New(address string, config *Config) (result *comm, err error) {
 	// Establish an initial connection and connect
 	result = &comm{
-		config: config,
+		config:  config,
+		address: address,
 	}
 
 	if err = result.reconnect(); err != nil {
@@ -253,9 +255,12 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	log.Printf("handshaking with SSH")
-	c.client, err = ssh.Client(c.conn, c.config.SSHConfig)
+	sshConn, sshChan, req, err := ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
 	if err != nil {
 		log.Printf("handshake error: %s", err)
+	}
+	if sshConn != nil {
+		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
 
 	return
