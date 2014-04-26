@@ -45,6 +45,9 @@ type Driver interface {
 	// Get the path to the VMware ISO for the given flavor.
 	ToolsIsoPath(string) string
 
+	// Attach the VMware tools ISO
+	ToolsInstall() error
+
 	// Get the path to the DHCP leases file for the given device.
 	DhcpLeasesPath(string) string
 
