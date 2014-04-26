@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 )
@@ -19,6 +20,7 @@ type Config struct {
 	ClientSecretsFile string            `mapstructure:"client_secrets_file"`
 	ImageName         string            `mapstructure:"image_name"`
 	ImageDescription  string            `mapstructure:"image_description"`
+	InstanceName      string            `mapstructure:"instance_name"`
 	MachineType       string            `mapstructure:"machine_type"`
 	Metadata          map[string]string `mapstructure:"metadata"`
 	Network           string            `mapstructure:"network"`
@@ -68,6 +70,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.ImageName == "" {
 		c.ImageName = "packer-{{timestamp}}"
+	}
+
+	if c.InstanceName == "" {
+		c.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
 	if c.MachineType == "" {
