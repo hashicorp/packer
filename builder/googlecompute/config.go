@@ -102,6 +102,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		"client_secrets_file": &c.ClientSecretsFile,
 		"image_name":          &c.ImageName,
 		"image_description":   &c.ImageDescription,
+		"instance_name":       &c.InstanceName,
 		"machine_type":        &c.MachineType,
 		"network":             &c.Network,
 		"passphrase":          &c.Passphrase,

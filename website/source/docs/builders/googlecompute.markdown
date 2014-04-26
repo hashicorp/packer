@@ -96,6 +96,9 @@ Optional:
 
 * `image_description` (string) - The description of the resulting image.
 
+* `instance_name` (string) - A name to give the launched instance. Beware
+  that this must be unique. Defaults to "packer-{{uuid}}".
+
 * `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
 
 * `network` (string) - The Google Compute network to use for the launched
