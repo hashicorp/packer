@@ -94,6 +94,9 @@ $ bin/packer
 ...
 ```
 
+If you need to cross-compile Packer for other platforms, take a look at
+`scripts/dist.sh`.
+
 You can run tests by typing `make test`.
 
 This will run tests for Packer core along with all the core builders and commands and such that come with Packer.
