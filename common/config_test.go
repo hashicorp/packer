@@ -31,7 +31,7 @@ func TestCheckUnusedConfig(t *testing.T) {
 
 func TestChooseString(t *testing.T) {
 	cases := []struct {
-		Input []string
+		Input  []string
 		Output string
 	}{
 		{

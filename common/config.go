@@ -47,13 +47,13 @@ func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 
 // ChooseString returns the first non-empty value.
 func ChooseString(vals ...string) string {
-    for _, el := range vals {
-        if el != "" {
-            return el
-        }
-    }
+	for _, el := range vals {
+		if el != "" {
+			return el
+		}
+	}
 
-    return ""
+	return ""
 }
 
 // DecodeConfig is a helper that handles decoding raw configuration using

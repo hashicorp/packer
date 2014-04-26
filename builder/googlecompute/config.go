@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 

@@ -27,7 +27,7 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConf
 			if err != nil {
 				return nil, err
 			}
-	
+
 			auth = append(auth, gossh.PublicKeys(signer))
 		}
 
