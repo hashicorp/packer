@@ -249,9 +249,9 @@ func (d *ESX5Driver) datastorePath(path string) string {
 func (d *ESX5Driver) connect() error {
 	address := fmt.Sprintf("%s:%d", d.Host, d.Port)
 
-	auth := []gossh.ClientAuth{
-		gossh.ClientAuthPassword(ssh.Password(d.Password)),
-		gossh.ClientAuthKeyboardInteractive(
+	auth := []gossh.AuthMethod{
+		gossh.Password(d.Password),
+		gossh.KeyboardInteractive(
 			ssh.PasswordKeyboardInteractive(d.Password)),
 	}
 
@@ -265,7 +265,7 @@ func (d *ESX5Driver) connect() error {
 		NoPty: true,
 	}
 
-	comm, err := ssh.New(sshConfig)
+	comm, err := ssh.New(address, sshConfig)
 	if err != nil {
 		return err
 	}

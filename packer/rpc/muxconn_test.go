@@ -18,7 +18,7 @@ func readStream(t *testing.T, s io.Reader) string {
 }
 
 func testMux(t *testing.T) (client *MuxConn, server *MuxConn) {
-	l, err := net.Listen("tcp", ":0")
+	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
