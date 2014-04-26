@@ -1,7 +1,7 @@
 package null
 
 import (
-	gossh "code.google.com/p/gosshold/ssh"
+	gossh "code.google.com/p/go.crypto/ssh"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
@@ -31,15 +31,15 @@ func SSHConfig(username string, password string, privateKeyFile string) func(mul
 			}
 			privateKey := string(bytes)
 
-			keyring := new(ssh.SimpleKeychain)
-			if err := keyring.AddPEMKey(privateKey); err != nil {
+			signer, err := gossh.ParsePrivateKey([]byte(privateKey))
+			if err != nil {
 				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 			}
 
 			return &gossh.ClientConfig{
 				User: username,
-				Auth: []gossh.ClientAuth{
-					gossh.ClientAuthKeyring(keyring),
+				Auth: []gossh.AuthMethod{
+					gossh.PublicKeys(signer),
 				},
 			}, nil
 		} else {
@@ -47,9 +47,10 @@ func SSHConfig(username string, password string, privateKeyFile string) func(mul
 
 			return &gossh.ClientConfig{
 				User: username,
-				Auth: []gossh.ClientAuth{
-					gossh.ClientAuthPassword(ssh.Password(password)),
-					gossh.ClientAuthKeyboardInteractive(ssh.PasswordKeyboardInteractive(password)),
+				Auth: []gossh.AuthMethod{
+					gossh.Password(password),
+					gossh.KeyboardInteractive(
+						ssh.PasswordKeyboardInteractive(password)),
 				},
 			}, nil
 		}
