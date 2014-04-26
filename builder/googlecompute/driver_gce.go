@@ -170,13 +170,13 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		Description: c.Description,
 		Disks: []*compute.AttachedDisk{
 			&compute.AttachedDisk{
-				Type: "PERSISTENT",
-				Mode: "READ_WRITE",
-				Kind: "compute#attachedDisk",
-				Boot: true,
+				Type:       "PERSISTENT",
+				Mode:       "READ_WRITE",
+				Kind:       "compute#attachedDisk",
+				Boot:       true,
 				AutoDelete: true,
 				InitializeParams: &compute.AttachedDiskInitializeParams{
-					SourceImage: image.SelfLink,	
+					SourceImage: image.SelfLink,
 				},
 			},
 		},

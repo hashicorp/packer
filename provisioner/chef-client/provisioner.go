@@ -20,19 +20,19 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	ConfigTemplate    string `mapstructure:"config_template"`
-	ExecuteCommand    string `mapstructure:"execute_command"`
-	InstallCommand    string `mapstructure:"install_command"`
-	Json              map[string]interface{}
-	NodeName          string   `mapstructure:"node_name"`
-	PreventSudo       bool     `mapstructure:"prevent_sudo"`
-	RunList           []string `mapstructure:"run_list"`
-	ServerUrl         string   `mapstructure:"server_url"`
-	SkipCleanClient   bool     `mapstructure:"skip_clean_client"`
-	SkipCleanNode     bool     `mapstructure:"skip_clean_node"`
-	SkipInstall       bool     `mapstructure:"skip_install"`
-	StagingDir        string   `mapstructure:"staging_directory"`
-	ValidationKeyPath string   `mapstructure:"validation_key_path"`
+	ConfigTemplate       string `mapstructure:"config_template"`
+	ExecuteCommand       string `mapstructure:"execute_command"`
+	InstallCommand       string `mapstructure:"install_command"`
+	Json                 map[string]interface{}
+	NodeName             string   `mapstructure:"node_name"`
+	PreventSudo          bool     `mapstructure:"prevent_sudo"`
+	RunList              []string `mapstructure:"run_list"`
+	ServerUrl            string   `mapstructure:"server_url"`
+	SkipCleanClient      bool     `mapstructure:"skip_clean_client"`
+	SkipCleanNode        bool     `mapstructure:"skip_clean_node"`
+	SkipInstall          bool     `mapstructure:"skip_install"`
+	StagingDir           string   `mapstructure:"staging_directory"`
+	ValidationKeyPath    string   `mapstructure:"validation_key_path"`
 	ValidationClientName string   `mapstructure:"validation_client_name"`
 
 	tpl *packer.ConfigTemplate
@@ -43,9 +43,9 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	NodeName          string
-	ServerUrl         string
-	ValidationKeyPath string
+	NodeName             string
+	ServerUrl            string
+	ValidationKeyPath    string
 	ValidationClientName string
 }
 
@@ -265,9 +265,9 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 	}
 
 	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
-		NodeName:          nodeName,
-		ServerUrl:         serverUrl,
-		ValidationKeyPath: remoteKeyPath,
+		NodeName:             nodeName,
+		ServerUrl:            serverUrl,
+		ValidationKeyPath:    remoteKeyPath,
 		ValidationClientName: validationClientName,
 	})
 	if err != nil {

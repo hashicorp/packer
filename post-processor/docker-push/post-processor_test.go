@@ -37,7 +37,7 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 	p := &PostProcessor{Driver: driver}
 	artifact := &packer.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
-		IdValue: "foo/bar",
+		IdValue:        "foo/bar",
 	}
 
 	result, keep, err := p.PostProcess(testUi(), artifact)
@@ -64,7 +64,7 @@ func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 	p := &PostProcessor{Driver: driver}
 	artifact := &packer.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
-		IdValue: "localhost:5000/foo/bar",
+		IdValue:        "localhost:5000/foo/bar",
 	}
 
 	result, keep, err := p.PostProcess(testUi(), artifact)
@@ -91,7 +91,7 @@ func TestPostProcessor_PostProcess_tags(t *testing.T) {
 	p := &PostProcessor{Driver: driver}
 	artifact := &packer.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
-		IdValue: "hashicorp/ubuntu:precise",
+		IdValue:        "hashicorp/ubuntu:precise",
 	}
 
 	result, keep, err := p.PostProcess(testUi(), artifact)
