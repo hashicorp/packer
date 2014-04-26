@@ -58,11 +58,13 @@ Save these values somewhere, you'll need them in a second.
 
 We now have to modify the template to add DigitalOcean to it. Modify the
 template we've been using and add the following JSON object to the `builders`
-array.
+array. You have to enter the `region_id` since the default region is fully
+booked. We'll use 3 for this example, which is San Francisco 1.
 
 <pre class="prettyprint">
 {
   "type": "digitalocean",
+  "region_id": 3
   "api_key": "{{user `do_api_key`}}",
   "client_id": "{{user `do_client_id`}}"
 }
