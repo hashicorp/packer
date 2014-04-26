@@ -3,6 +3,7 @@ package rpc
 import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"github.com/ugorji/go/codec"
 	"io"
 	"log"
 	"net/rpc"
@@ -145,7 +146,9 @@ func (s *Server) Serve() {
 		return
 	}
 
-	s.server.ServeConn(stream)
+	var h codec.MsgpackHandle
+	rpcCodec := codec.GoRpc.ServerCodec(stream, &h)
+	s.server.ServeCodec(rpcCodec)
 }
 
 // registerComponent registers a single Packer RPC component onto

@@ -33,7 +33,7 @@ const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d69
 // The APIVersion is outputted along with the RPC address. The plugin
 // client validates this API version and will show an error if it doesn't
 // know how to speak it.
-const APIVersion = "2"
+const APIVersion = "3"
 
 // Server waits for a connection to this plugin and returns a Packer
 // RPC server that you can use to register components and serve them.
