@@ -33,6 +33,7 @@ type Config struct {
 	SkipInstall       bool     `mapstructure:"skip_install"`
 	StagingDir        string   `mapstructure:"staging_directory"`
 	ValidationKeyPath string   `mapstructure:"validation_key_path"`
+	ValidationClientName string   `mapstructure:"validation_client_name"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -45,6 +46,7 @@ type ConfigTemplate struct {
 	NodeName          string
 	ServerUrl         string
 	ValidationKeyPath string
+	ValidationClientName string
 }
 
 type ExecuteTemplate struct {
@@ -188,7 +190,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	configPath, err := p.createConfig(
-		ui, comm, nodeName, serverUrl, remoteValidationKeyPath)
+		ui, comm, nodeName, serverUrl, remoteValidationKeyPath, p.config.ValidationClientName)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -242,7 +244,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, remoteKeyPath string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, remoteKeyPath string, validationClientName string) (string, error) {
 	ui.Message("Creating configuration file 'client.rb'")
 
 	// Read the template
@@ -266,6 +268,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 		NodeName:          nodeName,
 		ServerUrl:         serverUrl,
 		ValidationKeyPath: remoteKeyPath,
+		ValidationClientName: validationClientName,
 	})
 	if err != nil {
 		return "", err
@@ -481,7 +484,11 @@ var DefaultConfigTemplate = `
 log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
+{{if ne .ValidationClientName ""}}
+validation_client_name "{{.ValidationClientName}}"
+{{else}}
 validation_client_name "chef-validator"
+{{end}}
 {{if ne .ValidationKeyPath ""}}
 validation_key "{{.ValidationKeyPath}}"
 {{end}}
