@@ -11,6 +11,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * core: RPC transport between plugins switched to MessagePack
   * builder/amazon: Added `ssh_private_key_file` option [GH-971]
   * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
   * builder/googlecompute: Configurable instance name. [GH-1065]
@@ -45,6 +46,7 @@ BUG FIXES:
       Windows [GH-963]
   * provisioner/ansible: set cwd to staging directory [GH-1016]
   * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
+  * provisioners/shell: Env var values can have equal signs. [GH-1045]
   * post-processor/docker-push: Allow repositories with ports. [GH-923]
   * post-processor/vagrant: Create parent directories for `output` path [GH-1059]
 
