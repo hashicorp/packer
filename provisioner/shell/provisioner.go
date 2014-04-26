@@ -171,7 +171,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
 	for _, kv := range p.config.Vars {
-		vs := strings.Split(kv, "=")
+		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
