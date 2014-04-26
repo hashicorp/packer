@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -25,7 +24,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating instance...")
-	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	name := config.InstanceName
 
 	errCh, err := driver.RunInstance(&InstanceConfig{
 		Description: "New instance created by Packer",
