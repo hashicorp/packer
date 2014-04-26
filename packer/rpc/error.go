@@ -9,6 +9,10 @@ type BasicError struct {
 }
 
 func NewBasicError(err error) *BasicError {
+	if err == nil {
+		return nil
+	}
+
 	return &BasicError{err.Error()}
 }
 

@@ -26,7 +26,7 @@ type BuilderPrepareArgs struct {
 
 type BuilderPrepareResponse struct {
 	Warnings []string
-	Error    error
+	Error    *BasicError
 }
 
 func (b *builder) Prepare(config ...interface{}) ([]string, error) {
@@ -35,8 +35,12 @@ func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 	if cerr != nil {
 		return nil, cerr
 	}
+	var err error = nil
+	if resp.Error != nil {
+		err = resp.Error
+	}
 
-	return resp.Warnings, resp.Error
+	return resp.Warnings, err
 }
 
 func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
@@ -72,13 +76,9 @@ func (b *builder) Cancel() {
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareResponse) error {
 	warnings, err := b.builder.Prepare(args.Configs...)
-	if err != nil {
-		err = NewBasicError(err)
-	}
-
 	*reply = BuilderPrepareResponse{
 		Warnings: warnings,
-		Error:    err,
+		Error:    NewBasicError(err),
 	}
 	return nil
 }
