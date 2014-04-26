@@ -3,7 +3,7 @@ package iso
 import (
 	"bufio"
 	"bytes"
-	gossh "code.google.com/p/gosshold/ssh"
+	gossh "code.google.com/p/go.crypto/ssh"
 	"encoding/csv"
 	"errors"
 	"fmt"
