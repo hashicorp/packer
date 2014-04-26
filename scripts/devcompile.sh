@@ -60,3 +60,4 @@ case $(uname) in
 esac
 IFS=: MAIN_GOPATH=( $GOPATH )
 cp pkg/${XC_OS}_${XC_ARCH}/* ${MAIN_GOPATH}/bin
+cp pkg/${XC_OS}_${XC_ARCH}/* ./bin
