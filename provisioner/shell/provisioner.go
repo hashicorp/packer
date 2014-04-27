@@ -273,6 +273,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
+			cmd = &packer.RemoteCmd{
+				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+			}
+			if err := comm.Start(cmd); err != nil {
+				return fmt.Errorf(
+					"Error chmodding script file to 0777 in remote "+
+						"machine: %s", err)
+			}
+			cmd.Wait()
+
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
 		})
