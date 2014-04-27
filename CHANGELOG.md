@@ -14,6 +14,9 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: RPC transport between plugins switched to MessagePack
+  * core: Templates array values can now be comma separated strings.
+      Most importantly, this allows for user variables to fill
+      array configurations. [GH-950]
   * builder/amazon: Added `ssh_private_key_file` option [GH-971]
   * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
   * builder/googlecompute: Configurable instance name. [GH-1065]

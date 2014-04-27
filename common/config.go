@@ -68,7 +68,10 @@ func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metada
 
 	var md mapstructure.Metadata
 	decoderConfig := &mapstructure.DecoderConfig{
-		DecodeHook:       decodeHook,
+		DecodeHook:       mapstructure.ComposeDecodeHookFunc(
+			decodeHook,
+			mapstructure.StringToSliceHookFunc(","),
+		),
 		Metadata:         &md,
 		Result:           target,
 		WeaklyTypedInput: true,
