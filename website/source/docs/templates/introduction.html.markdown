@@ -43,6 +43,12 @@ Along with each key, it is noted whether it is required or not.
   information on what post-processors do and how they're defined, read the
   sub-section on [configuring post-processors in templates](/docs/templates/post-processors.html).
 
+* `min_packer_version` (optional) is a string that has a minimum Packer
+  version that is required to parse the template. This can be used to
+  ensure that proper versions of Packer are used with the template. A
+  max version can't be specified because Packer retains backwards
+  compatibility with `packer fix`.
+
 ## Example Template
 
 Below is an example of a basic template that is nearly fully functional. It is just
