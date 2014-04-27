@@ -60,6 +60,69 @@ func TestParseTemplateFile_basic(t *testing.T) {
 	}
 }
 
+func TestParseTemplateFile_minPackerVersionBad(t *testing.T) {
+	data := `
+	{
+		"min_packer_version": "27.0.0",
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Write([]byte(data))
+	tf.Close()
+
+	_, err = ParseTemplateFile(tf.Name(), nil)
+	if err == nil {
+		t.Fatal("expects error")
+	}
+}
+
+func TestParseTemplateFile_minPackerVersionFormat(t *testing.T) {
+	data := `
+	{
+		"min_packer_version": "NOPE NOPE NOPE",
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Write([]byte(data))
+	tf.Close()
+
+	_, err = ParseTemplateFile(tf.Name(), nil)
+	if err == nil {
+		t.Fatal("expects error")
+	}
+}
+
+func TestParseTemplateFile_minPackerVersionGood(t *testing.T) {
+	data := `
+	{
+		"min_packer_version": "0.1",
+		"builders": [{"type": "something"}]
+	}
+	`
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Write([]byte(data))
+	tf.Close()
+
+	_, err = ParseTemplateFile(tf.Name(), nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestParseTemplateFile_stdin(t *testing.T) {
 	data := `
 	{
