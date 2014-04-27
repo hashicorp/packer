@@ -3,6 +3,8 @@ package packer
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"log"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -82,6 +84,13 @@ func (f *FileCache) cachePath(key string, hashKey string) string {
 		if slashIndex := strings.LastIndex(key, "/"); slashIndex <= dotIndex {
 			suffix = key[dotIndex:]
 		}
+	}
+
+	// Make the cache directory. We ignore errors here, but
+	// log them in case something happens.
+	if err := os.MkdirAll(f.CacheDir, 0755); err != nil {
+		log.Printf(
+			"[ERR] Error making cacheDir: %s %s", f.CacheDir, err)
 	}
 
 	return filepath.Join(f.CacheDir, hashKey+suffix)
