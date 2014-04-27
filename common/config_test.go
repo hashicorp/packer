@@ -97,6 +97,33 @@ func TestDecodeConfig(t *testing.T) {
 
 // This test tests the case that a user var is used for an integer
 // configuration.
+func TestDecodeConfig_stringToSlice(t *testing.T) {
+	type Local struct {
+		Val []string
+	}
+
+	raw := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": "bar",
+		},
+
+		"val": "foo,{{user `foo`}}",
+	}
+
+	var result Local
+	_, err := DecodeConfig(&result, raw)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := []string{"foo", "bar"}
+	if !reflect.DeepEqual(result.Val, expected) {
+		t.Fatalf("invalid: %#v", result.Val)
+	}
+}
+
+// This test tests the case that a user var is used for an integer
+// configuration.
 func TestDecodeConfig_userVarConversion(t *testing.T) {
 	type Local struct {
 		Val int
