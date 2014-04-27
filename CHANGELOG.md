@@ -8,6 +8,8 @@ FEATURES:
     command, which talks to a Chef Server. [GH-855]
   * **New provisioner:** `puppet-server` - Provision using Puppet by
     communicating to a Puppet master. [GH-796]
+  * `min_packer_version` can be specified in a Packer template to force
+    a minimum version. [GH-487]
 
 IMPROVEMENTS:
 
