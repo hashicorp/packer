@@ -148,6 +148,32 @@ func TestDecodeConfig_userVarConversion(t *testing.T) {
 	}
 }
 
+// This tests the way MessagePack decodes strings (into []uint8) and
+// that we can still decode into the proper types.
+func TestDecodeConfig_userVarConversionUInt8(t *testing.T) {
+	type Local struct {
+		Val int
+	}
+
+	raw := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": "42",
+		},
+
+		"val": []uint8("{{user `foo`}}"),
+	}
+
+	var result Local
+	_, err := DecodeConfig(&result, raw)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Val != 42 {
+		t.Fatalf("invalid: %#v", result.Val)
+	}
+}
+
 func TestDownloadableURL(t *testing.T) {
 	// Invalid URL: has hex code in host
 	_, err := DownloadableURL("http://what%20.com")

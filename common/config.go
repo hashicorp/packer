@@ -217,6 +217,15 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 
 	return func(f reflect.Kind, t reflect.Kind, v interface{}) (interface{}, error) {
 		if t != reflect.String {
+			if f == reflect.Slice {
+				dataVal  := reflect.ValueOf(v)
+				dataType := dataVal.Type()
+				elemKind := dataType.Elem().Kind()
+				if elemKind == reflect.Uint8 {
+					v = string(dataVal.Interface().([]uint8))
+				}
+			}
+
 			if sv, ok := v.(string); ok {
 				var err error
 				v, err = tpl.Process(sv, nil)
