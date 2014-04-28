@@ -17,6 +17,10 @@ func SSHAddressFunc(config *SSHConfig) func(multistep.StateBag) (string, error) 
 		driver := state.Get("driver").(Driver)
 		vmxPath := state.Get("vmx_path").(string)
 
+		if config.SSHHost != "" {
+			return fmt.Sprintf("%s:%d", config.SSHHost, config.SSHPort), nil
+		}
+
 		log.Println("Lookup up IP information...")
 		f, err := os.Open(vmxPath)
 		if err != nil {
