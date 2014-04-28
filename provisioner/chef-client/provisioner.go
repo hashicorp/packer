@@ -208,7 +208,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if !p.config.SkipCleanClient {
-		if err2 := p.cleanClient(ui, comm, serverUrl); err2 != nil {
+		if err2 := p.cleanClient(ui, comm, nodeName); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef client: %s", err2)
 		}
 	}
