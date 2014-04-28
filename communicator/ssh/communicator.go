@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 )
 
 type comm struct {
@@ -115,45 +114,6 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 		close(doneCh)
-	}()
-
-	go func() {
-		failures := 0
-		for {
-			log.Printf("[DEBUG] Background SSH connection checker is testing")
-			dummy, err := c.config.Connection()
-			if err == nil {
-				failures = 0
-				dummy.Close()
-			}
-
-			select {
-			case <-doneCh:
-				return
-			default:
-			}
-
-			if err != nil {
-				log.Printf("background SSH connection checker failure: %s", err)
-				failures += 1
-			}
-
-			if failures < 5 {
-				time.Sleep(5 * time.Second)
-				continue
-			}
-
-			// Acquire a lock in order to modify session state
-			sessionLock.Lock()
-			defer sessionLock.Unlock()
-
-			// Kill the connection and mark that we timed out.
-			log.Printf("Too many SSH connection failures. Killing it!")
-			c.conn.Close()
-			timedOut = true
-
-			return
-		}
 	}()
 
 	return
