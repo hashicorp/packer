@@ -217,6 +217,9 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 
 	return func(f reflect.Kind, t reflect.Kind, v interface{}) (interface{}, error) {
 		if t != reflect.String {
+			// We need to convert []uint8 to string. We have to do this
+			// because internally Packer uses MsgPack for RPC and the MsgPack
+			// codec turns strings into []uint8
 			if f == reflect.Slice {
 				dataVal  := reflect.ValueOf(v)
 				dataType := dataVal.Type()
