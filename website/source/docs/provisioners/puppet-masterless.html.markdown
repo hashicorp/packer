@@ -60,7 +60,9 @@ Optional parameters:
 
 * `manifest_dir` (string) - The path to a local directory with manifests
   to be uploaded to the remote machine. This is useful if your main
-  manifest file uses imports.
+  manifest file uses imports. This directory doesn't necessarily contain
+  the `manifest_file`. It is a separate directory that will be set as
+  the "manifestdir" setting on Puppet.
 
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote
