@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -13,6 +14,7 @@ type SSHConfig struct {
 	SSHUser           string `mapstructure:"ssh_username"`
 	SSHKeyPath        string `mapstructure:"ssh_key_path"`
 	SSHPassword       string `mapstructure:"ssh_password"`
+	SSHHost           string `mapstructure:"ssh_host"`
 	SSHPort           uint   `mapstructure:"ssh_port"`
 	SSHSkipRequestPty bool   `mapstructure:"ssh_skip_request_pty"`
 	RawSSHWaitTimeout string `mapstructure:"ssh_wait_timeout"`
@@ -50,6 +52,14 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		} else if _, err := sshKeyToSigner(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
+		}
+	}
+
+	if c.SSHHost != "" {
+		if ip := net.ParseIP(c.SSHHost); ip == nil {
+			if _, err := net.LookupHost(c.SSHHost); err != nil {
+				errs = append(errs, errors.New("ssh_host is an invalid IP or hostname"))
+			}
 		}
 	}
 

@@ -185,6 +185,9 @@ Optional:
   The associated public key is expected to already be configured on the
   VM being prepared by some other process (kickstart, etc.).
 
+* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
+  is used to connect to the host and this field is not used. 
+
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
