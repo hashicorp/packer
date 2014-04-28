@@ -25,14 +25,14 @@ type PostProcessorConfigureArgs struct {
 }
 
 type PostProcessorProcessResponse struct {
-	Err      error
+	Err      *BasicError
 	Keep     bool
 	StreamId uint32
 }
 
 func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 	args := &PostProcessorConfigureArgs{Configs: raw}
-	if cerr := p.client.Call("PostProcessor.Configure", args, &err); cerr != nil {
+	if cerr := p.client.Call("PostProcessor.Configure", args, new(interface{})); cerr != nil {
 		err = cerr
 	}
 
@@ -67,13 +67,9 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 	return client.Artifact(), response.Keep, nil
 }
 
-func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *error) error {
-	*reply = p.p.Configure(args.Configs...)
-	if *reply != nil {
-		*reply = NewBasicError(*reply)
-	}
-
-	return nil
+func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *interface{}) error {
+	err := p.p.Configure(args.Configs...)
+	return err
 }
 
 func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorProcessResponse) error {
@@ -92,12 +88,8 @@ func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorP
 		go server.Serve()
 	}
 
-	if err != nil {
-		err = NewBasicError(err)
-	}
-
 	*reply = PostProcessorProcessResponse{
-		Err:      err,
+		Err:      NewBasicError(err),
 		Keep:     keep,
 		StreamId: streamId,
 	}

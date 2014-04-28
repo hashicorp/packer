@@ -21,7 +21,7 @@ type BuildServer struct {
 
 type BuildPrepareResponse struct {
 	Warnings []string
-	Error    error
+	Error    *BasicError
 }
 
 func (b *build) Name() (result string) {
@@ -34,8 +34,12 @@ func (b *build) Prepare() ([]string, error) {
 	if cerr := b.client.Call("Build.Prepare", new(interface{}), &resp); cerr != nil {
 		return nil, cerr
 	}
+	var err error = nil
+	if resp.Error != nil {
+		err = resp.Error
+	}
 
-	return resp.Warnings, resp.Error
+	return resp.Warnings, err
 }
 
 func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
@@ -90,7 +94,7 @@ func (b *BuildServer) Prepare(args *interface{}, resp *BuildPrepareResponse) err
 	warnings, err := b.build.Prepare()
 	*resp = BuildPrepareResponse{
 		Warnings: warnings,
-		Error:    err,
+		Error:    NewBasicError(err),
 	}
 	return nil
 }
