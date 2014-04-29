@@ -14,7 +14,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	OutputPath string `mapstructure:"output_path"`
+	OutputPath string `mapstructure:"output"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -33,6 +33,7 @@ func (self *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+	self.config.tpl.UserVars = self.config.PackerUserVars
 
 	templates := map[string]*string{
 		"output_path": &self.config.OutputPath,
