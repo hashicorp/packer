@@ -499,6 +499,8 @@ func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{},
 		}
 
 		return val, nil
+	case []uint8:
+		return string(c), nil
 	case map[interface{}]interface{}:
 		val := make(map[string]interface{})
 		for k, v := range c {
