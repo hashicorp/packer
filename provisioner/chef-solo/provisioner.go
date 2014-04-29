@@ -529,7 +529,7 @@ func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{},
 	case string:
 		return c, nil
 	default:
-		return nil, fmt.Errorf("Unknown type for key: '%s'", key)
+		return nil, fmt.Errorf("Unknown type for key '%s': %T", key, current)
 	}
 }
 
