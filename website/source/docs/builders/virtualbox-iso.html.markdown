@@ -201,6 +201,10 @@ Optional:
   where the `Name` variable is replaced with the VM name. More details on how
   to use `VBoxManage` are below.
 
+* `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
 * `virtualbox_version_file` (string) - The path within the virtual machine
   to upload a file that contains the VirtualBox version that was used to
   create the machine. This information can be useful for provisioning.

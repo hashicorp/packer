@@ -11,16 +11,17 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig          `mapstructure:",squash"`
-	vboxcommon.ExportConfig      `mapstructure:",squash"`
-	vboxcommon.ExportOpts        `mapstructure:",squash"`
-	vboxcommon.FloppyConfig      `mapstructure:",squash"`
-	vboxcommon.OutputConfig      `mapstructure:",squash"`
-	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.SSHConfig         `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
+	common.PackerConfig             `mapstructure:",squash"`
+	vboxcommon.ExportConfig         `mapstructure:",squash"`
+	vboxcommon.ExportOpts           `mapstructure:",squash"`
+	vboxcommon.FloppyConfig         `mapstructure:",squash"`
+	vboxcommon.OutputConfig         `mapstructure:",squash"`
+	vboxcommon.RunConfig            `mapstructure:",squash"`
+	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
+	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
 	SourcePath string `mapstructure:"source_path"`
 	VMName     string `mapstructure:"vm_name"`
@@ -57,6 +58,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
