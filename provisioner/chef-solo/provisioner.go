@@ -499,16 +499,6 @@ func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{},
 		}
 
 		return val, nil
-	case bool:
-		return c, nil
-	case int:
-		return c, nil
-	case uint:
-		return c, nil
-	case float32:
-		return c, nil
-	case float64:
-		return c, nil
 	case map[interface{}]interface{}:
 		val := make(map[string]interface{})
 		for k, v := range c {
@@ -526,10 +516,8 @@ func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{},
 		}
 
 		return val, nil
-	case string:
-		return c, nil
 	default:
-		return nil, fmt.Errorf("Unknown type for key '%s': %T", key, current)
+		return current, nil
 	}
 }
 
