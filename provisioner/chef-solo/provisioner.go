@@ -203,12 +203,24 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	// Process the user variables within the JSON and set the JSON.
-	// Do this early so that we can validate and show errors.
-	p.config.Json, err = p.processJsonUserVars()
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
+	jsonValid := true
+	for k, v := range p.config.Json {
+		p.config.Json[k], err = p.deepJsonFix(k, v)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing JSON: %s", err))
+			jsonValid = false
+		}
+	}
+
+	if jsonValid {
+		// Process the user variables within the JSON and set the JSON.
+		// Do this early so that we can validate and show errors.
+		p.config.Json, err = p.processJsonUserVars()
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -468,6 +480,57 @@ func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error 
 	}
 
 	return nil
+}
+
+func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{}, error) {
+	if current == nil {
+		return nil, nil
+	}
+
+	switch c := current.(type) {
+	case []interface{}:
+		val := make([]interface{}, len(c))
+		for i, v := range c {
+			var err error
+			val[i], err = p.deepJsonFix(fmt.Sprintf("%s[%d]", key, i), v)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return val, nil
+	case bool:
+		return c, nil
+	case int:
+		return c, nil
+	case uint:
+		return c, nil
+	case float32:
+		return c, nil
+	case float64:
+		return c, nil
+	case map[interface{}]interface{}:
+		val := make(map[string]interface{})
+		for k, v := range c {
+			ks, ok := k.(string)
+			if !ok {
+				return nil, fmt.Errorf("%s: key is not string", key)
+			}
+
+			var err error
+			val[ks], err = p.deepJsonFix(
+				fmt.Sprintf("%s.%s", key, ks), v)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return val, nil
+	case string:
+		return c, nil
+	default:
+		return nil, fmt.Errorf("Unknown type for key: '%s'", key)
+	}
 }
 
 func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {

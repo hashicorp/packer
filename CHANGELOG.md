@@ -52,6 +52,7 @@ BUG FIXES:
       Windows [GH-963]
   * provisioner/ansible: set cwd to staging directory [GH-1016]
   * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
+  * provisioners/chef-solo: Deeply nested JSON works properly. [GH-1076]
   * provisioners/shell: Env var values can have equal signs. [GH-1045]
   * provisioners/shell: chmod the uploaded script file to 0777. [GH-994]
   * post-processor/docker-push: Allow repositories with ports. [GH-923]
