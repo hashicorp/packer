@@ -26,7 +26,7 @@ type ProvisionerPrepareArgs struct {
 
 func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 	args := &ProvisionerPrepareArgs{configs}
-	if cerr := p.client.Call("Provisioner.Prepare", args, &err); cerr != nil {
+	if cerr := p.client.Call("Provisioner.Prepare", args, new(interface{})); cerr != nil {
 		err = cerr
 	}
 
@@ -50,13 +50,8 @@ func (p *provisioner) Cancel() {
 	}
 }
 
-func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *error) error {
-	*reply = p.p.Prepare(args.Configs...)
-	if *reply != nil {
-		*reply = NewBasicError(*reply)
-	}
-
-	return nil
+func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *interface{}) error {
+	return p.p.Prepare(args.Configs...)
 }
 
 func (p *ProvisionerServer) Provision(streamId uint32, reply *interface{}) error {
