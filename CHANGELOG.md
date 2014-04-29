@@ -25,12 +25,18 @@ IMPROVEMENTS:
   * builder/openstack: Support `openstack_provider` option to automatically
       fill defaults for different OpenStack variants. [GH-912]
   * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
+  * builder/qemu: Floppy disk files list can also include globs
+      and directories. [GH-1086]
   * builder/virtualbox: Support an `export_opts` option which allows
       specifying arbitrary arguments when exporting the VM. [GH-945]
   * builder/virtualbox: Added `vboxmanage_post` option to run vboxmanage
       commands just before exporting [GH-664]
+  * builder/virtualbox: Floppy disk files list can also include globs
+      and directories. [GH-1086]
   * builder/vmware: Workstation 10 support for Linux. [GH-900]
   * builder/vmware: add cloning support on Windows [GH-824]
+  * builder/vmware: Floppy disk files list can also include globs
+      and directories. [GH-1086]
   * command/build: Added `-parallel` flag so you can disable parallelization
     with `-no-parallel`. [GH-924]
   * post-processors/vsphere: `disk_mode` option. [GH-778]
