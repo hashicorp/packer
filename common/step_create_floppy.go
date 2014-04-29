@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // StepCreateFloppy will create a floppy disk with the given files.
@@ -20,6 +21,8 @@ type StepCreateFloppy struct {
 	Files []string
 
 	floppyPath string
+
+	FilesAdded map[string]bool
 }
 
 func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
@@ -27,6 +30,8 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue
 	}
+
+	s.FilesAdded = make(map[string]bool)
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating floppy disk...")
@@ -43,7 +48,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Set the path so we can remove it later
 	s.floppyPath = floppyF.Name()
 
-	log.Printf("Floppy path: %s", floppyF.Name())
+	log.Printf("Floppy path: %s", s.floppyPath)
 
 	// Set the size of the file to be a floppy sized
 	if err := floppyF.Truncate(1440 * 1024); err != nil {
@@ -89,8 +94,8 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Go over each file and copy it.
 	for _, filename := range s.Files {
-		ui.Message(fmt.Sprintf("Copying: %s", filepath.Base(filename)))
-		if err := s.addSingleFile(rootDir, filename); err != nil {
+		ui.Message(fmt.Sprintf("Copying: %s", filename))
+		if err := s.addFilespec(rootDir, filename); err != nil {
 			state.Put("error", fmt.Errorf("Error adding file to floppy: %s", err))
 			return multistep.ActionHalt
 		}
@@ -107,6 +112,61 @@ func (s *StepCreateFloppy) Cleanup(multistep.StateBag) {
 		log.Printf("Deleting floppy disk: %s", s.floppyPath)
 		os.Remove(s.floppyPath)
 	}
+}
+
+func (s *StepCreateFloppy) addFilespec(dir fs.Directory, src string) error {
+	// same as http://golang.org/src/pkg/path/filepath/match.go#L308
+	if strings.IndexAny(src, "*?[") >= 0 {
+		matches, err := filepath.Glob(src)
+		if err != nil {
+			return err
+		}
+		return s.addFiles(dir, matches)
+	}
+
+	finfo, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	if finfo.IsDir() {
+		return s.addDirectory(dir, src)
+	}
+
+	return s.addSingleFile(dir, src)
+}
+
+func (s *StepCreateFloppy) addFiles(dir fs.Directory, files []string) error {
+	for _, file := range files {
+		err := s.addFilespec(dir, file)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *StepCreateFloppy) addDirectory(dir fs.Directory, src string) error {
+	log.Printf("Adding directory to floppy: %s", src)
+
+	walkFn := func(path string, finfo os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if path == src {
+			return nil
+		}
+
+		if finfo.IsDir() {
+			return s.addDirectory(dir, path)
+		}
+
+		return s.addSingleFile(dir, path)
+	}
+
+	return filepath.Walk(src, walkFn)
 }
 
 func (s *StepCreateFloppy) addSingleFile(dir fs.Directory, src string) error {
@@ -131,6 +191,8 @@ func (s *StepCreateFloppy) addSingleFile(dir fs.Directory, src string) error {
 	if _, err := io.Copy(fatFile, inputF); err != nil {
 		return err
 	}
+
+	s.FilesAdded[src] = true
 
 	return nil
 }

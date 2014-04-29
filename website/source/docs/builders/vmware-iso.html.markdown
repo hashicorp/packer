@@ -95,12 +95,15 @@ Optional:
   [Virtual Disk Manager User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf)
   for desktop VMware clients. For ESXi, refer to the proper ESXi documentation.
 
-* `floppy_files` (array of strings) - A list of files to put onto a floppy
-  disk that is attached when the VM is booted for the first time. This is
-  most useful for unattended Windows installs, which look for an
-  `Autounattend.xml` file on removable media. By default no floppy will
-  be attached. The files listed in this configuration will all be put
-  into the root directory of the floppy disk; sub-directories are not supported.
+* `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that is attached when the VM is booted. This is most useful
+  for unattended Windows installs, which look for an `Autounattend.xml` file
+  on removable media. By default, no floppy will be attached. All files
+  listed in this setting get placed into the root directory of the floppy
+  and the floppy is attached as the first floppy device. Currently, no
+  support exists for creating sub-directories on the floppy. Wildcard
+  characters (*, ?, and []) are allowed. Directory names are also allowed,
+  which will add all the files found in the directory to the floppy.
 
 * `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this
   is "/Applications/VMware Fusion.app" but this setting allows you to
@@ -186,7 +189,7 @@ Optional:
   VM being prepared by some other process (kickstart, etc.).
 
 * `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
-  is used to connect to the host and this field is not used. 
+  is used to connect to the host and this field is not used.
 
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.

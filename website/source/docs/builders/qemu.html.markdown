@@ -119,12 +119,14 @@ Optional:
   format of the virtual machine image. This defaults to "qcow2".
 
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
-  disk that gets attached when Packer powers up the VM. This is most useful
+  disk that is attached when the VM is booted. This is most useful
   for unattended Windows installs, which look for an `Autounattend.xml` file
-  on removable media. By default no floppy will be attached. All files
+  on removable media. By default, no floppy will be attached. All files
   listed in this setting get placed into the root directory of the floppy
-  and teh floppy is attached as the first floppy device. Currently, no
-  support exists for sub-directories.
+  and the floppy is attached as the first floppy device. Currently, no
+  support exists for creating sub-directories on the floppy. Wildcard
+  characters (*, ?, and []) are allowed. Directory names are also allowed,
+  which will add all the files found in the directory to the floppy.
 
 * `headless` (bool) - Packer defaults to building virtual machines by
   launching a GUI that shows the console of the machine being built.
