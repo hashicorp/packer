@@ -46,7 +46,7 @@ func TestStepCreateFloppy(t *testing.T) {
 	ext := ".tmp"
 
 	for i := 0; i < expected; i++ {
-		files[i] = path.Join(dir, prefix + strconv.Itoa(i) + ext)
+		files[i] = path.Join(dir, prefix+strconv.Itoa(i)+ext)
 
 		_, err := os.Create(files[i])
 		if err != nil {
@@ -108,7 +108,7 @@ func xxxTestStepCreateFloppy_missing(t *testing.T) {
 	prefix := "missing"
 
 	for i := 0; i < count; i++ {
-		files[i] = path.Join(dir, prefix + strconv.Itoa(i))
+		files[i] = path.Join(dir, prefix+strconv.Itoa(i))
 	}
 
 	lists := [][]string{
@@ -153,7 +153,7 @@ func xxxTestStepCreateFloppy_notfound(t *testing.T) {
 	prefix := "notfound"
 
 	for i := 0; i < count; i++ {
-		files[i] = path.Join(dir, prefix + strconv.Itoa(i))
+		files[i] = path.Join(dir, prefix+strconv.Itoa(i))
 	}
 
 	lists := [][]string{
