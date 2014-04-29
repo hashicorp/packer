@@ -27,10 +27,11 @@ IMPROVEMENTS:
   * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
   * builder/virtualbox: Support an `export_opts` option which allows
       specifying arbitrary arguments when exporting the VM. [GH-945]
-  * builder/virtualbox: Run vboxmanage commands just before exporting [GH-664]
+  * builder/virtualbox: Added `vboxmanage_post` option to run vboxmanage
+      commands just before exporting [GH-664]
   * builder/vmware: Workstation 10 support for Linux. [GH-900]
   * builder/vmware: add cloning support on Windows [GH-824]
-  * command/build: Added '-parallel' flag so you can disable parallelization
+  * command/build: Added `-parallel` flag so you can disable parallelization
     with `-no-parallel`. [GH-924]
   * post-processors/vsphere: `disk_mode` option. [GH-778]
   * provisioner/ansible: Add `inventory_file` option [GH-1006]
