@@ -35,16 +35,30 @@ Required:
 
 Optional:
 
+* `image` (string) - The name (or slug) of the base image to use. This is the
+  image that will be used to launch a new droplet and provision it. This
+  defaults to 'ubuntu-12-04-x64' which is the slug for "Ubuntu 12.04.4 x64".
+  See https://developers.digitalocean.com/images/ for the accepted image names/slugs.
+
 * `image_id` (int) - The ID of the base image to use. This is the image that
-  will be used to launch a new droplet and provision it. Defaults to "3101045",
-  which happens to be "Ubuntu 12.04.4 x64".
+  will be used to launch a new droplet and provision it.
+  This setting is deprecated. Use `image` instead.
+
+* `region` (string) - The name (or slug) of the region to launch the droplet in.
+  Consequently, this is the region where the snapshot will be available.
+  This defaults to "nyc1", which the slug for "New York 1".
+  See https://developers.digitalocean.com/regions/ for the accepted region names/slugs.
 
 * `region_id` (int) - The ID of the region to launch the droplet in. Consequently,
-  this is the region where the snapshot will be available. This defaults to
-  "1", which is "New York 1".
+  this is the region where the snapshot will be available.
+  This setting is deprecated. Use `region` instead.
 
-* `size_id` (int) - The ID of the droplet size to use. This defaults to "66",
-  which is the 512MB droplet.
+* `size` (string) - The name (or slug) of the droplet size to use.
+  This defaults to "512mb", which is the slug for "512MB".
+  See https://developers.digitalocean.com/sizes/ for the accepted size names/slugs.
+
+* `size_id` (int) - The ID of the droplet size to use.
+  This setting is deprecated. Use `size` instead.
 
 * `private_networking` (bool) - Set to `true` to enable private networking
   for the droplet being created. This defaults to `false`, or not enabled.

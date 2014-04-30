@@ -19,7 +19,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Creating droplet...")
 
 	// Create the droplet based on configuration
-	dropletId, err := client.CreateDroplet(c.DropletName, c.SizeID, c.ImageID, c.RegionID, sshKeyId, c.PrivateNetworking)
+	dropletId, err := client.CreateDroplet(c.DropletName, c.Size, c.Image, c.Region, sshKeyId, c.PrivateNetworking)
 
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)

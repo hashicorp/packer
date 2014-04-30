@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,6 +23,7 @@ const DIGITALOCEAN_API_URL = "https://api.digitalocean.com"
 type Image struct {
 	Id           uint
 	Name         string
+	Slug         string
 	Distribution string
 }
 
@@ -32,10 +34,21 @@ type ImagesResp struct {
 type Region struct {
 	Id   uint
 	Name string
+	Slug string
 }
 
 type RegionsResp struct {
 	Regions []Region
+}
+
+type Size struct {
+	Id   uint
+	Name string
+	Slug string
+}
+
+type SizesResp struct {
+	Sizes []Size
 }
 
 type DigitalOceanClient struct {
@@ -90,12 +103,28 @@ func (d DigitalOceanClient) DestroyKey(id uint) error {
 }
 
 // Creates a droplet and returns it's id
-func (d DigitalOceanClient) CreateDroplet(name string, size uint, image uint, region uint, keyId uint, privateNetworking bool) (uint, error) {
+func (d DigitalOceanClient) CreateDroplet(name string, size string, image string, region string, keyId uint, privateNetworking bool) (uint, error) {
 	params := url.Values{}
 	params.Set("name", name)
-	params.Set("size_id", fmt.Sprintf("%v", size))
-	params.Set("image_id", fmt.Sprintf("%v", image))
-	params.Set("region_id", fmt.Sprintf("%v", region))
+
+	found_size, err := d.Size(size)
+	if err != nil {
+		return 0, fmt.Errorf("Invalid size or lookup failure: '%s': %s", size, err)
+	}
+
+	found_image, err := d.Image(image)
+	if err != nil {
+		return 0, fmt.Errorf("Invalid image or lookup failure: '%s': %s", image, err)
+	}
+
+	found_region, err := d.Region(region)
+	if err != nil {
+		return 0, fmt.Errorf("Invalid region or lookup failure: '%s': %s", region, err)
+	}
+
+	params.Set("size_slug", found_size.Slug)
+	params.Set("image_slug", found_image.Slug)
+	params.Set("region_slug", found_region.Slug)
 	params.Set("ssh_key_ids", fmt.Sprintf("%v", keyId))
 	params.Set("private_networking", fmt.Sprintf("%v", privateNetworking))
 
@@ -263,6 +292,38 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 	return nil, lastErr
 }
 
+func (d DigitalOceanClient) Image(slug_or_name_or_id string) (Image, error) {
+	images, err := d.Images()
+	if err != nil {
+		return Image{}, err
+	}
+
+	for _, image := range images {
+		if strings.EqualFold(image.Slug, slug_or_name_or_id) {
+			return image, nil
+		}
+	}
+
+	for _, image := range images {
+		if strings.EqualFold(image.Name, slug_or_name_or_id) {
+			return image, nil
+		}
+	}
+
+	for _, image := range images {
+		id, err := strconv.Atoi(slug_or_name_or_id)
+		if err == nil {
+			if image.Id == uint(id) {
+				return image, nil
+			}
+		}
+	}
+
+	err = errors.New(fmt.Sprintf("Unknown image '%v'", slug_or_name_or_id))
+
+	return Image{}, err
+}
+
 // Returns all available regions.
 func (d DigitalOceanClient) Regions() ([]Region, error) {
 	resp, err := NewRequest(d, "regions", url.Values{})
@@ -278,19 +339,81 @@ func (d DigitalOceanClient) Regions() ([]Region, error) {
 	return result.Regions, nil
 }
 
-func (d DigitalOceanClient) RegionName(region_id uint) (string, error) {
+func (d DigitalOceanClient) Region(slug_or_name_or_id string) (Region, error) {
 	regions, err := d.Regions()
 	if err != nil {
-		return "", err
+		return Region{}, err
 	}
 
 	for _, region := range regions {
-		if region.Id == region_id {
-			return region.Name, nil
+		if strings.EqualFold(region.Slug, slug_or_name_or_id) {
+			return region, nil
 		}
 	}
 
-	err = errors.New(fmt.Sprintf("Unknown region id %v", region_id))
+	for _, region := range regions {
+		if strings.EqualFold(region.Name, slug_or_name_or_id) {
+			return region, nil
+		}
+	}
 
-	return "", err
+	for _, region := range regions {
+		id, err := strconv.Atoi(slug_or_name_or_id)
+		if err == nil {
+			if region.Id == uint(id) {
+				return region, nil
+			}
+		}
+	}
+
+	err = errors.New(fmt.Sprintf("Unknown region '%v'", slug_or_name_or_id))
+
+	return Region{}, err
+}
+
+// Returns all available sizes.
+func (d DigitalOceanClient) Sizes() ([]Size, error) {
+	resp, err := NewRequest(d, "sizes", url.Values{})
+	if err != nil {
+		return nil, err
+	}
+
+	var result SizesResp
+	if err := mapstructure.Decode(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return result.Sizes, nil
+}
+
+func (d DigitalOceanClient) Size(slug_or_name_or_id string) (Size, error) {
+	sizes, err := d.Sizes()
+	if err != nil {
+		return Size{}, err
+	}
+
+	for _, size := range sizes {
+		if strings.EqualFold(size.Slug, slug_or_name_or_id) {
+			return size, nil
+		}
+	}
+
+	for _, size := range sizes {
+		if strings.EqualFold(size.Name, slug_or_name_or_id) {
+			return size, nil
+		}
+	}
+
+	for _, size := range sizes {
+		id, err := strconv.Atoi(slug_or_name_or_id)
+		if err == nil {
+			if size.Id == uint(id) {
+				return size, nil
+			}
+		}
+	}
+
+	err = errors.New(fmt.Sprintf("Unknown size '%v'", slug_or_name_or_id))
+
+	return Size{}, err
 }

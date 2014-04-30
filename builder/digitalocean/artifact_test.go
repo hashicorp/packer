@@ -14,7 +14,7 @@ func TestArtifact_Impl(t *testing.T) {
 }
 
 func TestArtifactString(t *testing.T) {
-	a := &Artifact{"packer-foobar", 42, "San Francisco", 3, nil}
+	a := &Artifact{"packer-foobar", 42, "San Francisco", nil}
 	expected := "A snapshot was created: 'packer-foobar' in region 'San Francisco'"
 
 	if a.String() != expected {
