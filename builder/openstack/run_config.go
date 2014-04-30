@@ -16,6 +16,9 @@ type RunConfig struct {
 	SSHUsername       string `mapstructure:"ssh_username"`
 	SSHPort           int    `mapstructure:"ssh_port"`
 	OpenstackProvider string `mapstructure:"openstack_provider"`
+	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
+	FloatingIpPool    string `mapstructure:"floating_ip_pool"`
+	FloatingIp        string `mapstructure:"floating_ip"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -41,6 +44,10 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	if c.RawSSHTimeout == "" {
 		c.RawSSHTimeout = "5m"
+	}
+
+	if c.UseFloatingIp && c.FloatingIpPool == "" {
+		c.FloatingIpPool = "public"
 	}
 
 	// Validation
