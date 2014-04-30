@@ -65,6 +65,8 @@ BUG FIXES:
   * provisioners/shell: chmod the uploaded script file to 0777. [GH-994]
   * post-processor/docker-push: Allow repositories with ports. [GH-923]
   * post-processor/vagrant: Create parent directories for `output` path [GH-1059]
+  * post-processor/vsphere: datastore, network, and folder are no longer
+      required. [GH-1091]
 
 ## 0.5.2 (02/21/2014)
 
