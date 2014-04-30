@@ -21,6 +21,14 @@ func CopyContents(dst, src string) error {
 	}
 	defer srcF.Close()
 
+	dstDir, _ := filepath.Split(dst)
+	if dstDir != "" {
+		err := os.MkdirAll(dstDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
 	dstF, err := os.Create(dst)
 	if err != nil {
 		return err
