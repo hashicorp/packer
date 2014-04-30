@@ -64,14 +64,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	templates := map[string]*string{
 		"cluster":       &p.config.Cluster,
 		"datacenter":    &p.config.Datacenter,
-		"datastore":     &p.config.Datastore,
 		"diskmode":      &p.config.DiskMode,
 		"host":          &p.config.Host,
-		"vm_network":    &p.config.VMNetwork,
 		"password":      &p.config.Password,
 		"resource_pool": &p.config.ResourcePool,
 		"username":      &p.config.Username,
-		"vm_folder":     &p.config.VMFolder,
 		"vm_name":       &p.config.VMName,
 	}
 
@@ -80,7 +77,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
 
+	templates ["datastore"] = &p.config.Datastore
+	templates ["vm_network"] = &p.config.VMNetwork
+	templates ["vm_folder"] = &p.config.VMFolder
+
+	for key, ptr := range templates {
 		*ptr, err = p.config.tpl.Process(*ptr, nil)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
