@@ -15,9 +15,6 @@ type Artifact struct {
 	// The name of the region
 	regionName string
 
-	// The ID of the region
-	regionId uint
-
 	// The client for making API calls
 	client *DigitalOceanClient
 }
