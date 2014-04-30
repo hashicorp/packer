@@ -58,6 +58,13 @@ Optional:
   installations require this. If not specified, Packer will attempt to
   read this from the `SDK_API_KEY` environmental variable.
 
+* `floating_ip` (string) - A specific floating IP to assign to this instance.
+  `use_floating_ip` must also be set to true for this to have an affect.
+
+* `floating_ip_pool` (string) - The name of the floating IP pool to use
+  to allocate a floating IP. `use_floating_ip` must also be set to true
+  for this to have an affect.
+
 * `project` (string) - The project name to boot the instance into. Some
   OpenStack installations require this. If not specified, Packer will attempt
   to read this from the `SDK_PROJECT` or `OS_TENANT_NAME` environmental
@@ -77,6 +84,9 @@ Optional:
 
 * `ssh_username` (string) - The username to use in order to communicate
   over SSH to the running server. The default is "root".
+
+* `use_floating_ip` (bool) - Whether or not to use a floating IP for
+  the instance.
 
 ## Basic Example
 
