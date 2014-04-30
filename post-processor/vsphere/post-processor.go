@@ -61,6 +61,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
+	// First define all our templatable parameters that are _required_
 	templates := map[string]*string{
 		"cluster":       &p.config.Cluster,
 		"datacenter":    &p.config.Datacenter,
@@ -71,7 +72,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"username":      &p.config.Username,
 		"vm_name":       &p.config.VMName,
 	}
-
 	for key, ptr := range templates {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
@@ -79,10 +79,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	templates ["datastore"] = &p.config.Datastore
-	templates ["vm_network"] = &p.config.VMNetwork
-	templates ["vm_folder"] = &p.config.VMFolder
+	// Then define the ones that are optional
+	templates["datastore"] = &p.config.Datastore
+	templates["vm_network"] = &p.config.VMNetwork
+	templates["vm_folder"] = &p.config.VMFolder
 
+	// Template process
 	for key, ptr := range templates {
 		*ptr, err = p.config.tpl.Process(*ptr, nil)
 		if err != nil {
