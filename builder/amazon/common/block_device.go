@@ -6,14 +6,14 @@ import (
 
 // BlockDevice
 type BlockDevice struct {
-	DeviceName          string `mapstructure:"device_name"`
-	VirtualName         string `mapstructure:"virtual_name"`
-	SnapshotId          string `mapstructure:"snapshot_id"`
-	VolumeType          string `mapstructure:"volume_type"`
-	VolumeSize          int64  `mapstructure:"volume_size"`
 	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
+	DeviceName          string `mapstructure:"device_name"`
 	IOPS                int64  `mapstructure:"iops"`
 	NoDevice            bool   `mapstructure:"no_device"`
+	SnapshotId          string `mapstructure:"snapshot_id"`
+	VirtualName         string `mapstructure:"virtual_name"`
+	VolumeType          string `mapstructure:"volume_type"`
+	VolumeSize          int64  `mapstructure:"volume_size"`
 }
 
 type BlockDevices struct {
