@@ -46,7 +46,7 @@ Optional:
 
 * `region` (string) - The name (or slug) of the region to launch the droplet in.
   Consequently, this is the region where the snapshot will be available.
-  This defaults to "nyc1", which the slug for "New York 1".
+  This defaults to "nyc1", which is the slug for "New York 1".
   See https://developers.digitalocean.com/regions/ for the accepted region names/slugs.
 
 * `region_id` (int) - The ID of the region to launch the droplet in. Consequently,
