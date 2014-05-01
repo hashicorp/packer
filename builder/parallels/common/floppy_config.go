@@ -7,7 +7,7 @@ import (
 )
 
 // FloppyConfig is configuration related to created floppy disks and attaching
-// them to a VirtualBox machine.
+// them to a Parallels virtual machine.
 type FloppyConfig struct {
 	FloppyFiles []string `mapstructure:"floppy_files"`
 }

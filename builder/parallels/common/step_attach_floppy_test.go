@@ -66,6 +66,6 @@ func TestStepAttachFloppy_noFloppy(t *testing.T) {
 	}
 
 	if len(driver.PrlctlCalls) > 0 {
-		t.Fatal("should not call vboxmanage")
+		t.Fatal("should not call prlctl")
 	}
 }
