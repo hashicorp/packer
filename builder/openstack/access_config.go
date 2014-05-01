@@ -81,10 +81,14 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"username": &c.Username,
-		"password": &c.Password,
-		"apiKey":   &c.ApiKey,
-		"provider": &c.Provider,
+		"username":  &c.Username,
+		"password":  &c.Password,
+		"api_key":   &c.ApiKey,
+		"provider":  &c.Provider,
+		"project":   &c.Project,
+		"tenant_id": &c.TenantId,
+		"region":    &c.RawRegion,
+		"proxy_url": &c.ProxyUrl,
 	}
 
 	errs := make([]error, 0)
