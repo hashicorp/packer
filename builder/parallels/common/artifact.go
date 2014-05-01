@@ -9,7 +9,7 @@ import (
 )
 
 // This is the common builder ID to all of these artifacts.
-const BuilderId = "rickard-von-essen.parallels"
+const BuilderId = "packer.parallels"
 
 // These are the extensions of files and directories that are unnecessary for the function
 // of a Parallels virtual machine.
