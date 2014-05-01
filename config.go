@@ -31,6 +31,8 @@ const defaultConfig = `
 		"virtualbox-ovf": "packer-builder-virtualbox-ovf",
 		"vmware-iso": "packer-builder-vmware-iso",
 		"vmware-vmx": "packer-builder-vmware-vmx",
+		"parallels-iso": "packer-builder-parallels-iso",
+		"parallels-pvm": "packer-builder-parallels-pvm",
 		"null": "packer-builder-null"
 	},
 

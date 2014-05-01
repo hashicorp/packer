@@ -30,6 +30,7 @@ providers.
 * DigitalOcean
 * VirtualBox
 * VMware
+* Parallels
 
 <div class="alert alert-block alert-info">
 <strong>Support for additional providers</strong> is planned. If the
@@ -96,7 +97,7 @@ In the example above, the compression level will be set to 1 except for
 VMware, where it will be set to 0.
 
 The available provider names are: `aws`, `digitalocean`, `virtualbox`,
-and `vmware`.
+`vmware`, and `parallels`.
 
 ## Input Artifacts
 
