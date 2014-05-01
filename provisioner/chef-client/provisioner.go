@@ -342,7 +342,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 
 func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string) error {
 	ui.Say("Cleaning up chef node...")
-	app := "knife node delete -y " + node
+	app := fmt.Sprintf("knife node delete %s -y", node)
 
 	cmd := exec.Command("sh", "-c", app)
 	out, err := cmd.Output()
@@ -358,7 +358,7 @@ func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node str
 
 func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string) error {
 	ui.Say("Cleaning up chef client...")
-	app := "knife client delete -y " + node
+	app := fmt.Sprintf("knife client delete %s -y", node)
 
 	cmd := exec.Command("sh", "-c", app)
 	out, err := cmd.Output()
