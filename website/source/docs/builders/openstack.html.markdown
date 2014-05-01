@@ -85,6 +85,9 @@ Optional:
 * `ssh_username` (string) - The username to use in order to communicate
   over SSH to the running server. The default is "root".
 
+* `tenant_id` (string) - Tenant ID for accessing OpenStack if your
+  installation requires this.
+
 * `use_floating_ip` (bool) - Whether or not to use a floating IP for
   the instance.
 
