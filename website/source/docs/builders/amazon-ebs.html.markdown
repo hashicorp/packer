@@ -128,6 +128,9 @@ Optional:
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
+* `temporary_key_pair_name` (string) - The name of the temporary keypair
+  to generate. By default, Packer generates a name with a UUID.
+
 * `user_data` (string) - User data to apply when launching the instance.
   Note that you need to be careful about escaping characters due to the
   templates being JSON. It is often more convenient to use `user_data_file`,
