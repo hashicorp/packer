@@ -20,6 +20,7 @@ type AccessConfig struct {
 	Provider  string `mapstructure:"provider"`
 	RawRegion string `mapstructure:"region"`
 	ProxyUrl  string `mapstructure:"proxy_url"`
+	TenantId  string `mapstructure:"tenant_id"`
 }
 
 // Auth returns a valid Auth object for access to openstack services, or
@@ -31,6 +32,7 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	c.Project = common.ChooseString(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
 	c.Provider = common.ChooseString(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
 	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
+	c.TenantId = common.ChooseString(c.TenantId, os.Getenv("OS_TENANT_ID"))
 
 	// OpenStack's auto-generated openrc.sh files do not append the suffix
 	// /tokens to the authentication URL. This ensures it is present when
@@ -40,14 +42,13 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 	}
 
 	authoptions := gophercloud.AuthOptions{
-		Username:    c.Username,
-		Password:    c.Password,
-		ApiKey:      c.ApiKey,
 		AllowReauth: true,
-	}
 
-	if c.Project != "" {
-		authoptions.TenantName = c.Project
+		ApiKey:     c.ApiKey,
+		TenantId:   c.TenantId,
+		TenantName: c.Project,
+		Username:   c.Username,
+		Password:   c.Password,
 	}
 
 	// For corporate networks it may be the case where we want our API calls
