@@ -279,11 +279,11 @@ func TestProvisionerPrepare_jsonNested(t *testing.T) {
 		},
 
 		"bFalse": false,
-		"bTrue": true,
-		"bNil": nil,
-		"bStr": []uint8("bar"),
+		"bTrue":  true,
+		"bNil":   nil,
+		"bStr":   []uint8("bar"),
 
-		"bInt": 1,
+		"bInt":   1,
 		"bFloat": 4.5,
 	}
 

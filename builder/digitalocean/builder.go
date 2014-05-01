@@ -17,7 +17,7 @@ import (
 
 // see https://api.digitalocean.com/images/?client_id=[client_id]&api_key=[api_key]
 // name="Ubuntu 12.04.4 x64", id=3101045,
-const DefaultImage  = "ubuntu-12-04-x64"
+const DefaultImage = "ubuntu-12-04-x64"
 
 // see https://api.digitalocean.com/regions/?client_id=[client_id]&api_key=[api_key]
 // name="New York", id=1
@@ -25,7 +25,7 @@ const DefaultRegion = "nyc1"
 
 // see https://api.digitalocean.com/sizes/?client_id=[client_id]&api_key=[api_key]
 // name="512MB", id=66 (the smallest droplet size)
-const DefaultSize   = "512mb"
+const DefaultSize = "512mb"
 
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
@@ -42,9 +42,9 @@ type config struct {
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
 
-	Region   string `mapstructure:"region"`
-	Size     string `mapstructure:"size"`
-	Image    string `mapstructure:"image"`
+	Region string `mapstructure:"region"`
+	Size   string `mapstructure:"size"`
+	Image  string `mapstructure:"image"`
 
 	PrivateNetworking bool   `mapstructure:"private_networking"`
 	SnapshotName      string `mapstructure:"snapshot_name"`

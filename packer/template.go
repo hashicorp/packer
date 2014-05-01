@@ -131,8 +131,8 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 
 		if vCur.LessThan(vReq) {
 			return nil, fmt.Errorf(
-				"Template requires Packer version %s. " +
-				"Running version is %s.",
+				"Template requires Packer version %s. "+
+					"Running version is %s.",
 				vReq, vCur)
 		}
 	}
