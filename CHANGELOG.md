@@ -4,6 +4,8 @@ FEATURES:
 
   * **New builder:** `null` - The null builder does not produce any
     artifacts, but is useful for debugging provisioning scripts. [GH-970]
+  * **New builder:** `parallels-iso` and `parallels-pvm` - These can be
+    used to build Parallels virtual machines. [GH-1101]
   * **New provisioner:** `chef-client` - Provision using a the `chef-client`
     command, which talks to a Chef Server. [GH-855]
   * **New provisioner:** `puppet-server` - Provision using Puppet by
