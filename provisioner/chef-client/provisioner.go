@@ -152,12 +152,24 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("server_url must be set"))
 	}
 
-	// Process the user variables within the JSON and set the JSON.
-	// Do this early so that we can validate and show errors.
-	p.config.Json, err = p.processJsonUserVars()
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
+	jsonValid := true
+	for k, v := range p.config.Json {
+		p.config.Json[k], err = p.deepJsonFix(k, v)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing JSON: %s", err))
+			jsonValid = false
+		}
+	}
+
+	if jsonValid {
+		// Process the user variables within the JSON and set the JSON.
+		// Do this early so that we can validate and show errors.
+		p.config.Json, err = p.processJsonUserVars()
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -438,6 +450,47 @@ func (p *Provisioner) copyValidationKey(ui packer.Ui, comm packer.Communicator, 
 	}
 
 	return nil
+}
+
+func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{}, error) {
+	if current == nil {
+		return nil, nil
+	}
+
+	switch c := current.(type) {
+	case []interface{}:
+		val := make([]interface{}, len(c))
+		for i, v := range c {
+			var err error
+			val[i], err = p.deepJsonFix(fmt.Sprintf("%s[%d]", key, i), v)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return val, nil
+	case []uint8:
+		return string(c), nil
+	case map[interface{}]interface{}:
+		val := make(map[string]interface{})
+		for k, v := range c {
+			ks, ok := k.(string)
+			if !ok {
+				return nil, fmt.Errorf("%s: key is not string", key)
+			}
+
+			var err error
+			val[ks], err = p.deepJsonFix(
+				fmt.Sprintf("%s.%s", key, ks), v)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return val, nil
+	default:
+		return current, nil
+	}
 }
 
 func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
