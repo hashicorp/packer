@@ -10,15 +10,16 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	SourceImage       string `mapstructure:"source_image"`
-	Flavor            string `mapstructure:"flavor"`
-	RawSSHTimeout     string `mapstructure:"ssh_timeout"`
-	SSHUsername       string `mapstructure:"ssh_username"`
-	SSHPort           int    `mapstructure:"ssh_port"`
-	OpenstackProvider string `mapstructure:"openstack_provider"`
-	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
-	FloatingIpPool    string `mapstructure:"floating_ip_pool"`
-	FloatingIp        string `mapstructure:"floating_ip"`
+	SourceImage       string   `mapstructure:"source_image"`
+	Flavor            string   `mapstructure:"flavor"`
+	RawSSHTimeout     string   `mapstructure:"ssh_timeout"`
+	SSHUsername       string   `mapstructure:"ssh_username"`
+	SSHPort           int      `mapstructure:"ssh_port"`
+	OpenstackProvider string   `mapstructure:"openstack_provider"`
+	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
+	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
+	FloatingIp        string   `mapstructure:"floating_ip"`
+	SecurityGroups    []string `mapstructure:"security_groups"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -76,8 +77,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		var err error
 		*ptr, err = t.Process(*ptr, nil)
 		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
+			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
 	}
 
