@@ -28,6 +28,7 @@ IMPROVEMENTS:
       variables such as `OS_USERNAME`, `OS_PASSWORD`, etc. [GH-768]
   * builder/openstack: Support `openstack_provider` option to automatically
       fill defaults for different OpenStack variants. [GH-912]
+  * builder/openstack: Support security groups. [GH-848]
   * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
   * builder/qemu: Floppy disk files list can also include globs
       and directories. [GH-1086]
