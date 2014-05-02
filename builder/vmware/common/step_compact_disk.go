@@ -36,6 +36,18 @@ func (s StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", fmt.Errorf("Error compacting disk: %s", err))
 		return multistep.ActionHalt
 	}
+	
+	if state.Get("additional_disk_paths") != nil {
+		if moreDisks := state.Get("additional_disk_paths").([]string); len(moreDisks) > 0 {
+			for i, path := range moreDisks {
+				ui.Say(fmt.Sprintf("Compacting additional disk image %d",i+1))
+				if err := driver.CompactDisk(path); err != nil {
+					state.Put("error", fmt.Errorf("Error compacting additional disk %d: %s", i+1, err))
+					return multistep.ActionHalt
+				}
+			}
+		}
+	}
 
 	return multistep.ActionContinue
 }

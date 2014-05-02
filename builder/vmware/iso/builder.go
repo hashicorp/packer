@@ -32,25 +32,26 @@ type config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	DiskName          string   `mapstructure:"vmdk_name"`
-	DiskSize          uint     `mapstructure:"disk_size"`
-	DiskTypeId        string   `mapstructure:"disk_type_id"`
-	FloppyFiles       []string `mapstructure:"floppy_files"`
-	GuestOSType       string   `mapstructure:"guest_os_type"`
-	ISOChecksum       string   `mapstructure:"iso_checksum"`
-	ISOChecksumType   string   `mapstructure:"iso_checksum_type"`
-	ISOUrls           []string `mapstructure:"iso_urls"`
-	VMName            string   `mapstructure:"vm_name"`
-	HTTPDir           string   `mapstructure:"http_directory"`
-	HTTPPortMin       uint     `mapstructure:"http_port_min"`
-	HTTPPortMax       uint     `mapstructure:"http_port_max"`
-	BootCommand       []string `mapstructure:"boot_command"`
-	SkipCompaction    bool     `mapstructure:"skip_compaction"`
-	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
-	VMXTemplatePath   string   `mapstructure:"vmx_template_path"`
-	VNCPortMin        uint     `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint     `mapstructure:"vnc_port_max"`
+	DiskName           string   `mapstructure:"vmdk_name"`
+	DiskSize           uint     `mapstructure:"disk_size"`
+	AdditionalDiskSize []uint   `mapstructure:"additionaldisk_size"`
+	DiskTypeId         string   `mapstructure:"disk_type_id"`
+	FloppyFiles        []string `mapstructure:"floppy_files"`
+	GuestOSType        string   `mapstructure:"guest_os_type"`
+	ISOChecksum        string   `mapstructure:"iso_checksum"`
+	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
+	ISOUrls            []string `mapstructure:"iso_urls"`
+	VMName             string   `mapstructure:"vm_name"`
+	HTTPDir            string   `mapstructure:"http_directory"`
+	HTTPPortMin        uint     `mapstructure:"http_port_min"`
+	HTTPPortMax        uint     `mapstructure:"http_port_max"`
+	BootCommand        []string `mapstructure:"boot_command"`
+	SkipCompaction     bool     `mapstructure:"skip_compaction"`
+	ToolsUploadFlavor  string   `mapstructure:"tools_upload_flavor"`
+	ToolsUploadPath    string   `mapstructure:"tools_upload_path"`
+	VMXTemplatePath    string   `mapstructure:"vmx_template_path"`
+	VNCPortMin         uint     `mapstructure:"vnc_port_min"`
+	VNCPortMax         uint     `mapstructure:"vnc_port_max"`
 
 	RemoteType      string `mapstructure:"remote_type"`
 	RemoteDatastore string `mapstructure:"remote_datastore"`
