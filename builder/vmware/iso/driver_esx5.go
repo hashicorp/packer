@@ -174,18 +174,35 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return address.(string), nil
 	}
 
-	r, err := d.run(nil, "vim-cmd", "vmsvc/get.guest", d.vmId, " | grep -m 1 ipAddress | awk -F'\"' '{print $2}'")
+	r, err := d.esxcli("network", "vm", "list")
 	if err != nil {
 		return "", err
 	}
 
-	ipAddress := strings.TrimRight(r, "\n")
+	record, err := r.find("Name", config.VMName)
+	if err != nil {
+		return "", err
+	}
+	wid := record["WorldID"]
+	if wid == "" {
+		return "", errors.New("VM WorldID not found")
+	}
 
-	if ipAddress == "" {
+	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
+	if err != nil {
+		return "", err
+	}
+
+	record, err = r.read()
+	if err != nil {
+		return "", err
+	}
+
+	if record["IPAddress"] == "0.0.0.0" {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", ipAddress, config.SSHPort)
+	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
 	state.Put("vm_address", address)
 	return address, nil
 }
