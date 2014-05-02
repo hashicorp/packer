@@ -21,7 +21,7 @@ var builtins = map[string]string{
 	"mitchellh.virtualbox":        "virtualbox",
 	"mitchellh.vmware":            "vmware",
 	"pearkes.digitalocean":        "digitalocean",
-	"rickard-von-essen.parallels": "parallels",
+	"packer.parallels":            "parallels",
 }
 
 type Config struct {
