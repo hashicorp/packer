@@ -75,6 +75,9 @@ Optional:
   and "rackspace". If not specified, Packer will attempt to read this from
   the `SDK_PROVIDER` or `OS_AUTH_URL` environmental variables.
 
+* `security_groups` (array of strings) - A list of security groups by name
+  to add to this instance.
+
 * `ssh_port` (int) - The port that SSH will be available on. Defaults to port
   22.
 
