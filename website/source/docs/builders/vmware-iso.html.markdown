@@ -323,6 +323,16 @@ In addition to using the desktop products of VMware locally to build
 virtual machines, Packer can use a remote VMware Hypervisor to build
 the virtual machine.
 
+<div class="alert alert-block alert-info">
+Note: Packer supports ESXi 5.1 and above.
+</div>
+
+Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by running the following command:
+
+```
+esxcli system settings advanced set -o /Net/GuestIPHack -i 1
+```
+
 When using a remote VMware Hypervisor, the builder still downloads the
 ISO and various files locally, and uploads these to the remote machine.
 Packer currently uses SSH to communicate to the ESXi machine rather than
