@@ -335,6 +335,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		&stepRemoteUpload{
+			Key:     "floppy_path",
+			Message: "Uploading Floppy to remote machine...",
+		},
+		&stepRemoteUpload{
 			Key:     "iso_path",
 			Message: "Uploading ISO to remote machine...",
 		},
