@@ -48,14 +48,17 @@ func TestStepRemoveDevices_attachedIso(t *testing.T) {
 		t.Fatal("should NOT have error")
 	}
 
-	// Test that ISO was removed
+	// Test that ISO was detached
 	if len(driver.PrlctlCalls) != 1 {
 		t.Fatalf("bad: %#v", driver.PrlctlCalls)
 	}
-	if driver.PrlctlCalls[0][2] != "--device-del" {
+	if driver.PrlctlCalls[0][2] != "--device-set" {
 		t.Fatalf("bad: %#v", driver.PrlctlCalls)
 	}
 	if driver.PrlctlCalls[0][3] != "cdrom0" {
+		t.Fatalf("bad: %#v", driver.PrlctlCalls)
+	}
+	if driver.PrlctlCalls[0][5] != "Default CD/DVD-ROM" {
 		t.Fatalf("bad: %#v", driver.PrlctlCalls)
 	}
 }

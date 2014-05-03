@@ -35,7 +35,11 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if _, ok := state.GetOk("attachedIso"); ok {
-		command := []string{"set", vmName, "--device-del", "cdrom0"}
+		command := []string{
+			"set", vmName,
+			"--device-set", "cdrom0",
+			"--device", "Default CD/DVD-ROM",
+		}
 
 		if err := driver.Prlctl(command...); err != nil {
 			err := fmt.Errorf("Error detaching ISO: %s", err)
