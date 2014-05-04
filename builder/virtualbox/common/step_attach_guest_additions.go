@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 )
@@ -19,18 +18,18 @@ import (
 //   vmName string
 //
 // Produces:
-type stepAttachGuestAdditions struct {
-	attachedPath string
+type StepAttachGuestAdditions struct {
+	attachedPath       string
+	GuestAdditionsMode string
 }
 
-func (s *stepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
 	// If we're not attaching the guest additions then just return
-	if config.GuestAdditionsMode != GuestAdditionsModeAttach {
+	if s.GuestAdditionsMode != GuestAdditionsModeAttach {
 		log.Println("Not attaching guest additions since we're uploading.")
 		return multistep.ActionContinue
 	}
@@ -61,12 +60,12 @@ func (s *stepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	return multistep.ActionContinue
 }
 
-func (s *stepAttachGuestAdditions) Cleanup(state multistep.StateBag) {
+func (s *StepAttachGuestAdditions) Cleanup(state multistep.StateBag) {
 	if s.attachedPath == "" {
 		return
 	}
 
-	driver := state.Get("driver").(vboxcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 

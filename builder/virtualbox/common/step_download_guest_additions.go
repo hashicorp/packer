@@ -1,10 +1,9 @@
-package iso
+package common
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"io"
@@ -28,16 +27,20 @@ type guestAdditionsUrlTemplate struct {
 //
 // Produces:
 //   guest_additions_path string - Path to the guest additions.
-type stepDownloadGuestAdditions struct{}
+type StepDownloadGuestAdditions struct {
+	GuestAdditionsMode   string
+	GuestAdditionsURL    string
+	GuestAdditionsSHA256 string
+	Tpl                  *packer.ConfigTemplate
+}
 
-func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
-	driver := state.Get("driver").(vboxcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*config)
 
 	// If we've disabled guest additions, don't download
-	if config.GuestAdditionsMode == GuestAdditionsModeDisable {
+	if s.GuestAdditionsMode == GuestAdditionsModeDisable {
 		log.Println("Not downloading guest additions since it is disabled.")
 		return multistep.ActionContinue
 	}
@@ -59,8 +62,8 @@ func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	// Use provided version or get it from virtualbox.org
 	var checksum string
 
-	if config.GuestAdditionsSHA256 != "" {
-		checksum = config.GuestAdditionsSHA256
+	if s.GuestAdditionsSHA256 != "" {
+		checksum = s.GuestAdditionsSHA256
 	} else {
 		checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
 		if action != multistep.ActionContinue {
@@ -69,13 +72,13 @@ func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	}
 
 	// Use the provided source (URL or file path) or generate it
-	url := config.GuestAdditionsURL
+	url := s.GuestAdditionsURL
 	if url != "" {
 		tplData := &guestAdditionsUrlTemplate{
 			Version: version,
 		}
 
-		url, err = config.tpl.Process(url, tplData)
+		url, err = s.Tpl.Process(url, tplData)
 		if err != nil {
 			err := fmt.Errorf("Error preparing guest additions url: %s", err)
 			state.Put("error", err)
@@ -110,9 +113,9 @@ func (s *stepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	return downStep.Run(state)
 }
 
-func (s *stepDownloadGuestAdditions) Cleanup(state multistep.StateBag) {}
+func (s *StepDownloadGuestAdditions) Cleanup(state multistep.StateBag) {}
 
-func (s *stepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
+func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
 	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf(

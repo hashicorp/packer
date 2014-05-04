@@ -1,6 +1,7 @@
 package iso
 
 import (
+	"github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"reflect"
 	"testing"
@@ -37,7 +38,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.GuestAdditionsMode != GuestAdditionsModeUpload {
+	if b.config.GuestAdditionsMode != common.GuestAdditionsModeUpload {
 		t.Errorf("bad guest additions mode: %s", b.config.GuestAdditionsMode)
 	}
 
@@ -111,7 +112,7 @@ func TestBuilderPrepare_GuestAdditionsMode(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.GuestAdditionsMode != GuestAdditionsModeAttach {
+	if b.config.GuestAdditionsMode != common.GuestAdditionsModeAttach {
 		t.Fatalf("bad: %s", b.config.GuestAdditionsMode)
 	}
 
