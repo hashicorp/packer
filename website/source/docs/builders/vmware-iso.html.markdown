@@ -105,9 +105,6 @@ each category, the available options are alphabetized and described.
   characters (*, ?, and []) are allowed. Directory names are also allowed,
   which will add all the files found in the directory to the floppy.
 
-* `floppy_path` (string) - Remote path to upload floppy file to.
-  This is required if `remote_type` is enabled, and `floppy_files` is used.
-
 * `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this
   is "/Applications/VMware Fusion.app" but this setting allows you to
   customize this.
@@ -138,9 +135,6 @@ each category, the available options are alphabetized and described.
   port in this range to run the HTTP server. If you want to force the HTTP
   server to be on one port, make this minimum and maximum port the same.
   By default the values are 8000 and 9000, respectively.
-
-* `iso_path` (string) - Remote path to upload iso file to.
-  This is required if `remote_type` is enabled.
 
 * `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
   Packer will try these in order. If anything goes wrong attempting to download
