@@ -63,14 +63,14 @@ configuration is actually required, but at least `run_list` is recommended.
 * `json` (object) - An arbitrary mapping of JSON that will be available as
   node attributes while running Chef.
 
-* `remote_cookbook_paths` (array of string) - A list of paths on the remote
-  machine where cookbooks will already exist. These may exist from a previous
-  provisioner or step. If specified, Chef will be configured to look for
-  cookbooks here. By default, this is empty.
-
 * `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to install and run Chef are executed with `sudo`. If this is true,
   then the sudo will be omitted.
+
+* `remote_cookbook_paths` (array of strings) - A list of paths on the remote
+  machine where cookbooks will already exist. These may exist from a previous
+  provisioner or step. If specified, Chef will be configured to look for
+  cookbooks here. By default, this is empty.
 
 * `roles_path` (string) - The path to the "roles" directory on your local filesystem.
   These will be uploaded to the remote machine in the directory specified by the

@@ -47,7 +47,7 @@ There are many configuration options available for the Parallels builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
@@ -68,7 +68,7 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
@@ -83,22 +83,18 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (int) - The size, in megabytes, of the hard disk to create
+* `disk_size` (integer) - The size, in megabytes, of the hard disk to create
   for the VM. By default, this is 40000 (about 40 GB).
 
-* `floppy_files` (array of strings) - A list of files to put onto a floppy
-  disk that is attached when the VM is booted for the first time. This is
-  most useful for unattended Windows installs, which look for an
-  `Autounattend.xml` file on removable media. By default no floppy will
-  be attached. The files listed in this configuration will all be put
-  into the root directory of the floppy disk; sub-directories are not supported.
-
-* `guest_os_type` (string) - The guest OS type being installed. By default
-  this is "other", but you can get _dramatic_ performance improvements by
-  setting this to the proper value. To view all available values for this
-  run `prlctl create x --ostype list`. Setting the correct value hints to
-  Parallels Desktop how to optimize the virtual hardware to work best with
-  that operating system.
+* `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that is attached when the VM is booted. This is most useful
+  for unattended Windows installs, which look for an `Autounattend.xml` file
+  on removable media. By default, no floppy will be attached. All files
+  listed in this setting get placed into the root directory of the floppy
+  and the floppy is attached as the first floppy device. Currently, no
+  support exists for creating sub-directories on the floppy. Wildcard
+  characters (*, ?, and []) are allowed. Directory names are also allowed,
+  which will add all the files found in the directory to the floppy.
 
 * `guest_os_distribution` (string) - The guest OS distribution being
   installed. By default this is "other", but you can get dramatic
@@ -106,6 +102,13 @@ Optional:
   view all available values for this run `prlctl create x --distribution list`.
   Setting the correct value hints to Parallels how to optimize the virtual
   hardware to work best with that operating system.
+
+* `guest_os_type` (string) - The guest OS type being installed. By default
+  this is "other", but you can get _dramatic_ performance improvements by
+  setting this to the proper value. To view all available values for this
+  run `prlctl create x --ostype list`. Setting the correct value hints to
+  Parallels Desktop how to optimize the virtual hardware to work best with
+  that operating system.
 
 * `hard_drive_interface` (string) - The type of controller that the
   hard drives are attached to, defaults to "sata". Valid options are
@@ -119,7 +122,7 @@ Optional:
   available as variables in `boot_command`. This is covered in more detail
   below.
 
-* `http_port_min` and `http_port_max` (int) - These are the minimum and
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
   maximum port to use for the HTTP server started to serve the `http_directory`.
   Because Packer often runs in parallel, Packer will choose a randomly available
   port in this range to run the HTTP server. If you want to force the HTTP
@@ -139,21 +142,6 @@ Optional:
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `prlctl` (array of array of strings) - Custom `prlctl` commands to execute in
-  order to further customize the virtual machine being created. The value of
-  this is an array of commands to execute. The commands are executed in the order
-  defined in the template. For each command, the command is defined itself as an
-  array of strings, where each string represents a single argument on the
-  command-line to `prlctl` (but excluding `prlctl` itself). Each arg is treated
-  as a [configuration template](/docs/templates/configuration-templates.html),
-  where the `Name` variable is replaced with the VM name. More details on how
-  to use `prlctl` are below.
-
-* `parallels_tools_mode` (string) - The method by which Parallels tools are
-  made available to the guest for installation. Valid options are "upload",
-  "attach", or "disable". The functions of each of these should be
-  self-explanatory. The default value is "upload".
-
 * `parallels_tools_guest_path` (string) - The path on the guest virtual machine
   where the Parallels tools ISO will be uploaded. By default this is
   "prl-tools.iso" which should upload into the login directory of the user.
@@ -164,6 +152,21 @@ Optional:
   upload. By default the Parallels builder will use the "other" OS tools ISO from
   the Parallels installation:
   "/Applications/Parallels Desktop.app/Contents/Resources/Tools/prl-tools-other.iso"
+
+* `parallels_tools_mode` (string) - The method by which Parallels tools are
+  made available to the guest for installation. Valid options are "upload",
+  "attach", or "disable". The functions of each of these should be
+  self-explanatory. The default value is "upload".
+
+* `prlctl` (array of array of strings) - Custom `prlctl` commands to execute in
+  order to further customize the virtual machine being created. The value of
+  this is an array of commands to execute. The commands are executed in the order
+  defined in the template. For each command, the command is defined itself as an
+  array of strings, where each string represents a single argument on the
+  command-line to `prlctl` (but excluding `prlctl` itself). Each arg is treated
+  as a [configuration template](/docs/templates/configuration-templates.html),
+  where the `Name` variable is replaced with the VM name. More details on how
+  to use `prlctl` are below.
 
 * `prlctl_version_file` (string) - The path within the virtual machine to upload
   a file that contains the `prlctl` version that was used to create the machine.
@@ -187,7 +190,7 @@ Optional:
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will be listening on in the guest
+* `ssh_port` (integer) - The port that SSH will be listening on in the guest
   virtual machine. By default this is 22.
 
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become

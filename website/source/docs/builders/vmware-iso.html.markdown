@@ -47,7 +47,7 @@ There are many configuration options available for the VMware builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
@@ -68,7 +68,7 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is firsted booted. The goal of these commands should
@@ -83,7 +83,7 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (int) - The size of the hard disk for the VM in megabytes.
+* `disk_size` (integer) - The size of the hard disk for the VM in megabytes.
   The builder uses expandable, not fixed-size virtual hard disks, so the
   actual file representing the disk will not use the full size unless it is full.
   By default this is set to 40,000 (about 40 GB).
@@ -114,7 +114,7 @@ Optional:
   OS type, VMware may perform some optimizations or virtual hardware changes
   to better support the operating system running in the virtual machine.
 
-* `headless` (bool) - Packer defaults to building VMware
+* `headless` (boolean) - Packer defaults to building VMware
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console. For VMware machines, Packer will output VNC
@@ -129,7 +129,7 @@ Optional:
   available as variables in `boot_command`. This is covered in more detail
   below.
 
-* `http_port_min` and `http_port_max` (int) - These are the minimum and
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
   maximum port to use for the HTTP server started to serve the `http_directory`.
   Because Packer often runs in parallel, Packer will choose a randomly available
   port in this range to run the HTTP server. If you want to force the HTTP
@@ -149,11 +149,6 @@ Optional:
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `remote_type` (string) - The type of remote machine that will be used to
-  build this VM rather than a local desktop product. The only value accepted
-  for this currently is "esx5". If this is not set, a desktop product will be
-  used. By default, this is not set.
-
 * `remote_datastore` (string) - The path to the datastore where the resulting
   VM will be stored when it is built on the remote machine. By default this
   is "datastore1". This only has an effect if `remote_type` is enabled.
@@ -165,14 +160,13 @@ Optional:
   access the remote machine. By default this is empty. This only has an
   effect if `remote_type` is enabled.
 
+* `remote_type` (string) - The type of remote machine that will be used to
+  build this VM rather than a local desktop product. The only value accepted
+  for this currently is "esx5". If this is not set, a desktop product will be
+  used. By default, this is not set.
+
 * `remote_username` (string) - The username for the SSH user that will access
   the remote machine. This is required if `remote_type` is enabled.
-
-* `skip_compaction` (bool) -  VMware-created disks are defragmented
-  and compacted at the end of the build process using `vmware-vdiskmanager`.
-  In certain rare cases, this might actually end up making the resulting disks
-  slightly larger. If you find this to be the case, you can disable compaction
-  using this configuration value.
 
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
@@ -183,21 +177,27 @@ Optional:
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
+* `skip_compaction` (boolean) -  VMware-created disks are defragmented
+  and compacted at the end of the build process using `vmware-vdiskmanager`.
+  In certain rare cases, this might actually end up making the resulting disks
+  slightly larger. If you find this to be the case, you can disable compaction
+  using this configuration value.
+
+* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
+  is used to connect to the host and this field is not used.
+
 * `ssh_key_path` (string) - Path to a private key to use for authenticating
   with SSH. By default this is not set (key-based auth won't be used).
   The associated public key is expected to already be configured on the
   VM being prepared by some other process (kickstart, etc.).
 
-* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
-  is used to connect to the host and this field is not used.
-
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will listen on within the virtual
+* `ssh_port` (integer) - The port that SSH will listen on within the virtual
   machine. By default this is 22.
 
-* `ssh_skip_request_pty` (bool) - If true, a pty will not be requested as
+* `ssh_skip_request_pty` (boolean) - If true, a pty will not be requested as
   part of the SSH connection. By default, this is "false", so a pty
   _will_ be requested.
 
@@ -223,15 +223,9 @@ Optional:
 * `vmdk_name` (string) - The filename of the virtual disk that'll be created,
   without the extension. This defaults to "packer".
 
-* `vmx_data` (object, string keys and string values) - Arbitrary key/values
+* `vmx_data` (object of key/value strings) - Arbitrary key/values
   to enter into the virtual machine VMX file. This is for advanced users
   who want to set properties such as memory, CPU, etc.
-
-* `vnc_port_min` and `vnc_port_max` (int) - The minimum and maximum port to
-  use for VNC access to the virtual machine. The builder uses VNC to type
-  the initial `boot_command`. Because Packer generally runs in parallel, Packer
-  uses a randomly chosen port in this range that appears available. By default
-  this is 5900 to 6000. The minimum and maximum ports are inclusive.
 
 * `vmx_template_path` (string) - Path to a
   [configuration template](/docs/templates/configuration-templates.html) that
@@ -239,6 +233,12 @@ Optional:
   for **advanced users only** as this can render the virtual machine
   non-functional. See below for more information. For basic VMX modifications,
   try `vmx_data` first.
+
+* `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port to
+  use for VNC access to the virtual machine. The builder uses VNC to type
+  the initial `boot_command`. Because Packer generally runs in parallel, Packer
+  uses a randomly chosen port in this range that appears available. By default
+  this is 5900 to 6000. The minimum and maximum ports are inclusive.
 
 ## Boot Command
 

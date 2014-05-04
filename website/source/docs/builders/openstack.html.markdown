@@ -24,7 +24,7 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-Required:
+### Required:
 
 * `flavor` (string) - The ID or full URL for the desired flavor for the
   server to be created.
@@ -32,31 +32,32 @@ Required:
 * `image_name` (string) - The name of the resulting image.
 
 * `password` (string) - The password used to connect to the OpenStack service.
-  If not specified, Packer will attempt to read this from the
-  `SDK_PASSWORD` or `OS_PASSWORD` environment variable.
+  If not specified, Packer will use the environment variables
+  `SDK_PASSWORD` or `OS_PASSWORD` (in that order), if set.
 
 * `provider` (string) - The provider used to connect to the OpenStack service.
-  If not specified, Packer will attempt to read this from the
-  `SDK_PROVIDER` environment variable. For Rackspace this should be `rackspace-us`
-  or `rackspace-uk`.
+  If not specified, Packer will use the environment variable
+  `SDK_PROVIDER`, if set.
+  For Rackspace this should be `rackspace-us` or `rackspace-uk`.
 
 * `region` (string) - The name of the region, such as "DFW", in which
-  to launch the server to create the AMI. If not specified, Packer will
-  attempt to read this from the `SDK_REGION` or `OS_REGION_NAME` environmental
-  variables.
+  to launch the server to create the AMI.
+  If not specified, Packer will use the environment variables
+  `SDK_REGION` or `OS_REGION_NAME` (in that order), if set.
 
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
 
 * `username` (string) - The username used to connect to the OpenStack service.
-  If not specified, Packer will attempt to read this from the
-  `SDK_USERNAME` or `OS_USERNAME` environment variable.
+  If not specified, Packer will use the environment variables
+  `SDK_USERNAME` or `OS_USERNAME` (in that order), if set.
 
-Optional:
+### Optional:
 
 * `api_key` (string) - The API key used to access OpenStack. Some OpenStack
-  installations require this. If not specified, Packer will attempt to
-  read this from the `SDK_API_KEY` environmental variable.
+  installations require this.
+  If not specified, Packer will use the environment variables
+  `SDK_API_KEY`, if set.
 
 * `floating_ip` (string) - A specific floating IP to assign to this instance.
   `use_floating_ip` must also be set to true for this to have an affect.
@@ -65,20 +66,31 @@ Optional:
   to allocate a floating IP. `use_floating_ip` must also be set to true
   for this to have an affect.
 
+* `openstack_provider` (string)
+<!---
+@todo document me
+-->
+
 * `project` (string) - The project name to boot the instance into. Some
-  OpenStack installations require this. If not specified, Packer will attempt
-  to read this from the `SDK_PROJECT` or `OS_TENANT_NAME` environmental
-  variables.
+  OpenStack installations require this.
+  If not specified, Packer will use the environment variables
+  `SDK_PROJECT` or `OS_TENANT_NAME` (in that order), if set.
 
 * `provider` (string) - A name of a provider that has a slightly
   different API model. Currently supported values are "openstack" (default),
-  and "rackspace". If not specified, Packer will attempt to read this from
-  the `SDK_PROVIDER` or `OS_AUTH_URL` environmental variables.
+  and "rackspace".
+  If not specified, Packer will use the environment variables
+  `SDK_PROVIDER` or `OS_AUTH_URL` (in that order), if set.
+
+* `proxy_url` (string)
+<!---
+@todo document me
+-->
 
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
 
-* `ssh_port` (int) - The port that SSH will be available on. Defaults to port
+* `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
   22.
 
 * `ssh_timeout` (string) - The time to wait for SSH to become available
@@ -91,8 +103,8 @@ Optional:
 * `tenant_id` (string) - Tenant ID for accessing OpenStack if your
   installation requires this.
 
-* `use_floating_ip` (bool) - Whether or not to use a floating IP for
-  the instance.
+* `use_floating_ip` (boolean) - Whether or not to use a floating IP for
+  the instance. Defaults to false.
 
 ## Basic Example
 

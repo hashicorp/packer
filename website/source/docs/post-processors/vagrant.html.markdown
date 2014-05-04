@@ -59,6 +59,9 @@ below, with more details about certain options in following sections.
   of the Vagrant box (regardless of their paths). They can then be used
   from the Vagrantfile.
 
+* `keep_input_artifact` (boolean) - If set to true, do not delete the
+  `output_directory` on a successful build. Defaults to false.
+
 * `output` (string) - The full path to the box file that will be created
   by this post-processor. This is a
   [configuration template](/docs/templates/configuration-templates.html).

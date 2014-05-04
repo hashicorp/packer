@@ -42,7 +42,7 @@ There are many configuration options available for the VirtualBox builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `source_path` (string) - The path to an OVF or OVA file that acts as
   the source of this build.
@@ -50,7 +50,11 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
+
+* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
+  This can be useful for passing product information to include in the resulting
+  appliance file.
 
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
   disk that is attached when the VM is booted. This is most useful
@@ -87,10 +91,14 @@ Optional:
   By default the VirtualBox builder will go and download the proper
   guest additions ISO from the internet.
 
-* `headless` (bool) - Packer defaults to building VirtualBox
+* `headless` (boolean) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console.
+
+* `import_opts` (string) - Additional options to pass to the `VBoxManage import`.
+  This can be useful for passing "keepallmacs" or "keepnatmacs" options for existing
+  ovf images.
 
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
@@ -108,7 +116,7 @@ Optional:
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
-* `ssh_host_port_min` and `ssh_host_port_max` (uint) - The minimum and
+* `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
   maximum port to use for the SSH port on the host machine which is forwarded
   to the SSH port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the
@@ -122,7 +130,7 @@ Optional:
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will be listening on in the guest
+* `ssh_port` (integer) - The port that SSH will be listening on in the guest
   virtual machine. By default this is 22.
 
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
@@ -146,21 +154,13 @@ Optional:
 * `virtualbox_version_file` (string) - The path within the virtual machine
   to upload a file that contains the VirtualBox version that was used to
   create the machine. This information can be useful for provisioning.
-  By default this is ".vbox_version", which will generally upload it into
+  By default this is ".vbox_version", which will generally be upload it into
   the home directory.
 
 * `vm_name` (string) - This is the name of the virtual machine when it is
   imported as well as the name of the OVF file when the virtual machine is
   exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is
   the name of the build.
-
-* `import_opts` (string) - Additional options to pass to the `VBoxManage import`.
-  This can be useful for passing "keepallmacs" or "keepnatmacs" options for existing
-  ovf images.
-
-* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
-  This can be useful for passing product information to include in the resulting
-  appliance file.
 
 ## Guest Additions
 

@@ -69,7 +69,7 @@ files obtained in the previous section.
 Configuration options are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `bucket_name` (string) - The Google Cloud Storage bucket to store the
   images that are created. The bucket must already exist in your project.
@@ -89,7 +89,7 @@ Required:
 * `zone` (string) - The zone in which to launch the instance used to create
   the image. Example: "us-central1-a"
 
-Optional:
+### Optional:
 
 * `image_name` (string) - The unique name of the resulting image.
   Defaults to `packer-{{timestamp}}`.
@@ -99,6 +99,11 @@ Optional:
 * `instance_name` (string) - A name to give the launched instance. Beware
   that this must be unique. Defaults to "packer-{{uuid}}".
 
+* `metadata` (object of key/value strings)
+<!---
+@todo document me
+-->
+
 * `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
 
 * `network` (string) - The Google Compute network to use for the launched
@@ -107,7 +112,7 @@ Optional:
 * `passphrase` (string) - The passphrase to use if the `private_key_file`
   is encrypted.
 
-* `ssh_port` (int) - The SSH port. Defaults to 22.
+* `ssh_port` (integer) - The SSH port. Defaults to 22.
 
 * `ssh_timeout` (string) - The time to wait for SSH to become available.
   Defaults to "1m".
@@ -116,6 +121,11 @@ Optional:
 
 * `state_timeout` (string) - The time to wait for instance state changes.
   Defaults to "5m".
+
+* `tags` (array of strings)
+<!---
+@todo document me
+-->
 
 ## Gotchas
 

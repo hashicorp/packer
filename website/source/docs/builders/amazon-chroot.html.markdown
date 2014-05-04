@@ -51,11 +51,11 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-Required:
+### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
-  If not specified, Packer will attempt to read this from environmental
-  variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order).
+  If not specified, Packer will use the environment variables
+  `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
   If the environmental variables aren't set and Packer is running on
   an EC2 instance, Packer will check the instance metadata for IAM role
   keys.
@@ -66,8 +66,8 @@ Required:
   [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
 * `secret_key` (string) - The secret key used to communicate with AWS.
-  If not specified, Packer will attempt to read this from environmental
-  variables `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order).
+  If not specified, Packer will use the environment variables
+  `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
   If the environmental variables aren't set and Packer is running on
   an EC2 instance, Packer will check the instance metadata for IAM role
   keys.
@@ -76,37 +76,43 @@ Required:
   and provisioned on the currently running instance. This must be an
   EBS-backed AMI with a root volume snapshot that you have access to.
 
-Optional:
+### Optional:
+
+* `ami_description` (string) - The description to set for the resulting
+  AMI(s). By default this description is empty.
+
+* `ami_groups` (array of strings) - A list of groups that have access
+  to launch the resulting AMI(s). By default no groups have permission
+  to launch the AMI. `all` will make the AMI publicly accessible.
+
+* `ami_product_codes` (array of strings) - A list of product codes to
+  associate with the AMI. By default no product codes are associated with
+  the AMI.
+
+* `ami_regions` (array of strings) - A list of regions to copy the AMI to.
+  Tags and attributes are copied along with the AMI. AMI copying takes time
+  depending on the size of the AMI, but will generally take many minutes.
+
+* `ami_users` (array of strings) - A list of account IDs that have access
+  to launch the resulting AMI(s). By default no additional users other than the user
+  creating the AMI has permissions to launch it.
 
 * `ami_virtualization_type` (string) - The type of virtualization for the AMI
   you are building. This option is required to register HVM images. Can be
   "paravirtual" (default) or "hvm".
 
-* `ami_description` (string) - The description to set for the resulting
-  AMI(s). By default this description is empty.
-
-* `ami_groups` (array of string) - A list of groups that have access
-  to launch the resulting AMI(s). By default no groups have permission
-  to launch the AMI. `all` will make the AMI publicly accessible.
-
-* `ami_product_codes` (array of string) - A list of product codes to
-  associate with the AMI. By default no product codes are associated with
-  the AMI.
-
-* `ami_regions` (array of string) - A list of regions to copy the AMI to.
-  Tags and attributes are copied along with the AMI. AMI copying takes time
-  depending on the size of the AMI, but will generally take many minutes.
-
-* `ami_users` (array of string) - A list of account IDs that have access
-  to launch the resulting AMI(s). By default no additional users other than the user
-  creating the AMI has permissions to launch it.
-
-* `chroot_mounts` (list of list of strings) - This is a list of additional
+* `chroot_mounts` (array of array of strings) - This is a list of additional
   devices to mount into the chroot environment. This configuration parameter
   requires some additional documentation which is in the "Chroot Mounts" section
   below. Please read that section for more information on how to use this.
 
-* `copy_files` (list of strings) - Paths to files on the running EC2 instance
+* `command_wrapper` (string) - How to run shell commands. This
+  defaults to "{{.Command}}". This may be useful to set if you want to set
+  environmental variables or perhaps run it with `sudo` or so on. This is a
+  configuration template where the `.Command` variable is replaced with the
+  command to be run.
+
+* `copy_files` (array of strings) - Paths to files on the running EC2 instance
   that will be copied into the chroot environment prior to provisioning.
   This is useful, for example, to copy `/etc/resolv.conf` so that DNS lookups
   work.
@@ -114,12 +120,6 @@ Optional:
 * `device_path` (string) - The path to the device where the root volume
   of the source AMI will be attached. This defaults to "" (empty string),
   which forces Packer to find an open device automatically.
-
-* `command_wrapper` (string) - How to run shell commands. This
-  defaults to "{{.Command}}". This may be useful to set if you want to set
-  environmental variables or perhaps run it with `sudo` or so on. This is a
-  configuration template where the `.Command` variable is replaced with the
-  command to be run.
 
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to

@@ -70,7 +70,7 @@ There are many configuration options available for the Qemu builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
@@ -88,7 +88,7 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
 
 * `accelerator` (string) - The accelerator type to use when running the VM.
   This may have a value of either "kvm" or "xen" and you must have that
@@ -107,16 +107,13 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (int) - The size, in megabytes, of the hard disk to create
+* `disk_size` (integer) - The size, in megabytes, of the hard disk to create
   for the VM. By default, this is 40000 (about 40 GB).
 
 * `disk_interface` (string) - The interface to use for the disk. Allowed
   values include any of "ide," "scsi" or "virtio." Note also that any boot
   commands or kickstart type scripts must have proper adjustments for
   resulting device names. The Qemu builder uses "virtio" by default.
-
-* `format` (string) - Either "qcow2" or "raw", this specifies the output
-  format of the virtual machine image. This defaults to "qcow2".
 
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
   disk that is attached when the VM is booted. This is most useful
@@ -128,7 +125,10 @@ Optional:
   characters (*, ?, and []) are allowed. Directory names are also allowed,
   which will add all the files found in the directory to the floppy.
 
-* `headless` (bool) - Packer defaults to building virtual machines by
+* `format` (string) - Either "qcow2" or "raw", this specifies the output
+  format of the virtual machine image. This defaults to "qcow2".
+
+* `headless` (boolean) - Packer defaults to building virtual machines by
   launching a GUI that shows the console of the machine being built.
   When this value is set to true, the machine will start without a console.
 
@@ -140,7 +140,7 @@ Optional:
   available as variables in `boot_command`. This is covered in more detail
   below.
 
-* `http_port_min` and `http_port_max` (int) - These are the minimum and
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
   maximum port to use for the HTTP server started to serve the `http_directory`.
   Because Packer often runs in parallel, Packer will choose a randomly available
   port in this range to run the HTTP server. If you want to force the HTTP
@@ -156,6 +156,13 @@ Optional:
 * `net_device` (string) - The driver to use for the network interface. Allowed
   values "ne2k_pci," "i82551," "i82557b," "i82559er," "rtl8139," "e1000,"
   "pcnet" or "virtio." The Qemu builder uses "virtio" by default.
+
+* `output_directory` (string) - This is the path to the directory where the
+  resulting virtual machine will be created. This may be relative or absolute.
+  If relative, the path is relative to the working directory when `packer`
+  is executed. This directory must not exist or be empty prior to running the builder.
+  By default this is "output-BUILDNAME" where "BUILDNAME" is the name
+  of the build.
 
 * `qemuargs` (array of array of strings) - Allows complete control over
   the qemu command line (though not, at this time, qemu-img). Each array
@@ -194,13 +201,6 @@ Optional:
     qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
-* `output_directory` (string) - This is the path to the directory where the
-  resulting virtual machine will be created. This may be relative or absolute.
-  If relative, the path is relative to the working directory when `packer`
-  is executed. This directory must not exist or be empty prior to running the builder.
-  By default this is "output-BUILDNAME" where "BUILDNAME" is the name
-  of the build.
-
 * `qemu_binary` (string) - The name of the Qemu binary to look for.  This
   defaults to "qemu-system-x86_64", but may need to be changed for some
   platforms.  For example "qemu-kvm", or "qemu-system-i386" may be a better
@@ -229,7 +229,7 @@ Optional:
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will be listening on in the guest
+* `ssh_port` (integer) - The port that SSH will be listening on in the guest
   virtual machine. By default this is 22. The Qemu builder will map, via
   port forward, a port on the host machine to the port listed here so
   machines outside the installing VM can access the VM.
@@ -241,6 +241,12 @@ Optional:
 * `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
   the new virtual machine, without the file extension. By default this is
   "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
+
+* `vnc_port_min` and `vnc_port_max` (integer) - The minimum and
+  maximum port to use for the VNC port on the host machine which is forwarded
+  to the VNC port on the guest machine. Because Packer often runs in parallel,
+  Packer will choose a randomly available port in this range to use as the
+  host port.
 
 ## Boot Command
 

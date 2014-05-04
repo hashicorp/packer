@@ -25,7 +25,7 @@ The format of the configuration file is basic JSON.
 Below is the list of all available configuration parameters for the core
 configuration file. None of these are required, since all have sane defaults.
 
-* `plugin_min_port` and `plugin_max_port` (int) - These are the minimum and
+* `plugin_min_port` and `plugin_max_port` (integer) - These are the minimum and
   maximum ports that Packer uses for communication with plugins, since
   plugin communication happens over TCP connections on your local host.
   By default these are 10,000 and 25,000, respectively. Be sure to set a fairly
