@@ -99,12 +99,12 @@ each category, the available options are alphabetized and described.
 * `instance_name` (string) - A name to give the launched instance. Beware
   that this must be unique. Defaults to "packer-{{uuid}}".
 
+* `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
+
 * `metadata` (object of key/value strings)
 <!---
 @todo document me
 -->
-
-* `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
 
 * `network` (string) - The Google Compute network to use for the launched
   instance. Defaults to `default`.
