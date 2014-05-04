@@ -24,8 +24,12 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
+	path, ok := state.Get(s.Key).(string)
+	if !ok {
+		return multistep.ActionContinue
+	}
+
 	ui.Say(s.Message)
-	path := state.Get(s.Key).(string)
 	log.Printf("Remote uploading: %s", path)
 	newPath, err := remote.UploadISO(path)
 	if err != nil {
