@@ -13,14 +13,6 @@ import (
 
 const BuilderId = "mitchellh.virtualbox"
 
-// These are the different valid mode values for "guest_additions_mode" which
-// determine how guest additions are delivered to the guest.
-const (
-	GuestAdditionsModeDisable string = "disable"
-	GuestAdditionsModeAttach         = "attach"
-	GuestAdditionsModeUpload         = "upload"
-)
-
 type Builder struct {
 	config config
 	runner multistep.Runner
@@ -220,9 +212,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	validMode := false
 	validModes := []string{
-		GuestAdditionsModeDisable,
-		GuestAdditionsModeAttach,
-		GuestAdditionsModeUpload,
+		vboxcommon.GuestAdditionsModeDisable,
+		vboxcommon.GuestAdditionsModeAttach,
+		vboxcommon.GuestAdditionsModeUpload,
 	}
 
 	for _, mode := range validModes {
@@ -269,7 +261,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps := []multistep.Step{
-		new(stepDownloadGuestAdditions),
+		&vboxcommon.StepDownloadGuestAdditions{
+			GuestAdditionsMode:   b.config.GuestAdditionsMode,
+			GuestAdditionsURL:    b.config.GuestAdditionsURL,
+			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
+			Tpl:                  b.config.tpl,
+		},
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
@@ -289,7 +286,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		new(stepAttachISO),
-		new(stepAttachGuestAdditions),
+		&vboxcommon.StepAttachGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
 			GuestPort:   b.config.SSHPort,
@@ -313,7 +312,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepUploadVersion{
 			Path: b.config.VBoxVersionFile,
 		},
-		new(stepUploadGuestAdditions),
+		&vboxcommon.StepUploadGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsPath: b.config.GuestAdditionsPath,
+			Tpl:                b.config.tpl,
+		},
 		new(common.StepProvision),
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,

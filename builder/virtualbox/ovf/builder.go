@@ -42,6 +42,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("driver", driver)
+	state.Put("cache", cache)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -55,14 +56,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
+		&vboxcommon.StepDownloadGuestAdditions{
+			GuestAdditionsMode:   b.config.GuestAdditionsMode,
+			GuestAdditionsURL:    b.config.GuestAdditionsURL,
+			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
+			Tpl:                  b.config.tpl,
+		},
 		&StepImport{
 			Name:       b.config.VMName,
 			SourcePath: b.config.SourcePath,
 			ImportOpts: b.config.ImportOpts,
 		},
-		/*
-			new(stepAttachGuestAdditions),
-		*/
+		&vboxcommon.StepAttachGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
 			GuestPort:   b.config.SSHPort,
@@ -85,9 +92,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepUploadVersion{
 			Path: b.config.VBoxVersionFile,
 		},
-		/*
-			new(stepUploadGuestAdditions),
-		*/
+		&vboxcommon.StepUploadGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsPath: b.config.GuestAdditionsPath,
+			Tpl:                b.config.tpl,
+		},
 		new(common.StepProvision),
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
