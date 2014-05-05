@@ -4,6 +4,7 @@ BUG FIXES:
 
   * builder/parallels: Do not delete entire CDROM device. 
   * builder/virtualbox-ovf: Supports guest additions options. [GH-1120]
+  * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
 
 ## 0.6.0 (May 2, 2014)
 
