@@ -28,9 +28,9 @@ providers.
 
 * AWS
 * DigitalOcean
+* Parallels
 * VirtualBox
 * VMware
-* Parallels
 
 <div class="alert alert-block alert-info">
 <strong>Support for additional providers</strong> is planned. If the
@@ -52,7 +52,7 @@ below, with more details about certain options in following sections.
 * `compression_level` (integer) - An integer repesenting the
   compression level to use when creating the Vagrant box.  Valid
   values range from 0 to 9, with 0 being no compression and 9 being
-  the best compression. By default, compression is enabled at level 1.
+  the best compression. By default, compression is enabled at level 6.
 
 * `include` (array of strings) - Paths to files to include in the
   Vagrant box. These files will each be copied into the top level directory
