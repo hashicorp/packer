@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
@@ -21,6 +22,7 @@ type AccessConfig struct {
 	RawRegion string `mapstructure:"region"`
 	ProxyUrl  string `mapstructure:"proxy_url"`
 	TenantId  string `mapstructure:"tenant_id"`
+	Insecure  bool   `mapstructure:"insecure"`
 }
 
 // Auth returns a valid Auth object for access to openstack services, or
@@ -51,6 +53,14 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 		Password:   c.Password,
 	}
 
+	default_transport := &http.Transport{}
+
+	if c.Insecure {
+		cfg := new(tls.Config)
+		cfg.InsecureSkipVerify = true
+		default_transport.TLSClientConfig = cfg
+	}
+
 	// For corporate networks it may be the case where we want our API calls
 	// to be sent through a separate HTTP proxy than external traffic.
 	if c.ProxyUrl != "" {
@@ -61,7 +71,11 @@ func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
 
 		// The gophercloud.Context has a UseCustomClient method which
 		// would allow us to override with a new instance of http.Client.
-		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(url)}
+		default_transport.Proxy = http.ProxyURL(url)
+	}
+
+	if c.Insecure || c.ProxyUrl != "" {
+		http.DefaultTransport = default_transport
 	}
 
 	return gophercloud.Authenticate(c.Provider, authoptions)
