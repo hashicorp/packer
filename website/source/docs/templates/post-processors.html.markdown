@@ -142,7 +142,7 @@ and `except` will only affect that single post-processor in the sequence.
 <pre class="prettyprint">
 {
   "type": "vagrant",
-  "only": ["virtualbox"]
+  "only": ["virtualbox-iso"]
 }
 </pre>
 
