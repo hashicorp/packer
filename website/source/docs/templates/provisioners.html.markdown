@@ -68,7 +68,7 @@ is effectively the same:
 {
   "type": "shell",
   "script": "script.sh",
-  "only": ["virtualbox"]
+  "only": ["virtualbox-iso"]
 }
 </pre>
 
@@ -100,7 +100,7 @@ This example is shown below:
   "script": "script.sh",
 
   "override": {
-    "vmware": {
+    "vmware-iso": {
       "execute_command": "echo 'password' | sudo -S bash {{.Path}}"
     }
   }
