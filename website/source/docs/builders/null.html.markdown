@@ -19,8 +19,8 @@ no provisioners are defined, but it will connect to the specified host via ssh.
 {
   "type":     "null",
   "host":     "127.0.0.1",
-  "username": "foo",
-  "password": "bar"
+  "ssh_username": "foo",
+  "ssh_password": "bar"
 }
 </pre>
 
