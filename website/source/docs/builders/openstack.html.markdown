@@ -66,6 +66,9 @@ each category, the available configuration keys are alphabetized.
   to allocate a floating IP. `use_floating_ip` must also be set to true
   for this to have an affect.
 
+* `insecure` (boolean) - Whether or not the connection to OpenStack can be done
+  over an insecure connection. By default this is false.
+
 * `openstack_provider` (string)
 <!---
 @todo document me
