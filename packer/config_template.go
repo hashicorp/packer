@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/packer/common/uuid"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -43,6 +44,8 @@ func NewConfigTemplate() (*ConfigTemplate, error) {
 		"timestamp": templateTimestamp,
 		"user":      result.templateUser,
 		"uuid":      templateUuid,
+		"upper":     strings.ToUpper,
+		"lower":     strings.ToLower,
 	})
 
 	return result, nil
