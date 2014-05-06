@@ -110,8 +110,16 @@ func templateEnv(n string) string {
 	return os.Getenv(n)
 }
 
-func templateISOTime() string {
-	return time.Now().UTC().Format(time.RFC3339)
+func templateISOTime(timeFormat ...string) (string, error) {
+	if len(timeFormat) == 0 {
+		return time.Now().UTC().Format(time.RFC3339), nil
+	}
+	
+	if len(timeFormat) > 1 {
+		return "", fmt.Errorf("too many values, 1 needed: %v", timeFormat)
+	}
+	
+	return time.Now().UTC().Format(timeFormat[0]), nil
 }
 
 func templatePwd() (string, error) {
