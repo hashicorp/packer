@@ -1,5 +1,9 @@
 ## 0.6.1 (unreleased)
 
+IMPROVEMENTS:
+
+  * builder/openstack: skip certificate verification [GH-1121]
+
 BUG FIXES:
 
   * builder/parallels: Do not delete entire CDROM device. [GH-1115]
