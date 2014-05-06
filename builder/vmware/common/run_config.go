@@ -2,14 +2,16 @@ package common
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/packer/packer"
 )
 
 type RunConfig struct {
-	Headless    bool   `mapstructure:"headless"`
-	RawBootWait string `mapstructure:"boot_wait"`
+	CommunicatorType string `mapstructure:"communicator_type"`
+	Headless         bool   `mapstructure:"headless"`
+	RawBootWait      string `mapstructure:"boot_wait"`
 
 	BootWait time.Duration ``
 }
@@ -17,6 +19,12 @@ type RunConfig struct {
 func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"
+	}
+
+	if c.CommunicatorType == "" {
+		c.CommunicatorType = "ssh"
+	} else {
+		c.CommunicatorType = strings.ToLower(c.CommunicatorType)
 	}
 
 	templates := map[string]*string{
@@ -38,6 +46,11 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 			errs = append(
 				errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
+	}
+
+	if c.CommunicatorType != "winrm" && c.CommunicatorType != "ssh" {
+		errs = append(
+			errs, fmt.Errorf("Invalid communicator type: %s, expected ssh or winrm", c.CommunicatorType))
 	}
 
 	return errs

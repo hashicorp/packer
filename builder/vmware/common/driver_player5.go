@@ -17,9 +17,6 @@ type Player5LinuxDriver struct {
 	VdiskManagerPath string
 	QemuImgPath      string
 	VmrunPath        string
-
-	// SSHConfig are the SSH settings for the Fusion VM
-	SSHConfig *SSHConfig
 }
 
 func (d *Player5LinuxDriver) Clone(dst, src string) error {
@@ -96,8 +93,8 @@ func (d *Player5LinuxDriver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Player5LinuxDriver) SSHAddress(state multistep.StateBag) (string, error) {
-	return SSHAddressFunc(d.SSHConfig)(state)
+func (d *Player5LinuxDriver) IPAddress(state multistep.StateBag) (string, error) {
+	return IPAddressFunc()(state)
 }
 
 func (d *Player5LinuxDriver) Start(vmxPath string, headless bool) error {

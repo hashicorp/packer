@@ -31,6 +31,7 @@ type config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	vmwcommon.WinRMConfig    `mapstructure:",squash"`
 
 	DiskName        string   `mapstructure:"vmdk_name"`
 	DiskSize        uint     `mapstructure:"disk_size"`
@@ -81,9 +82,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
+
+	if b.config.RunConfig.CommunicatorType == "winrm" {
+		errs = packer.MultiErrorAppend(errs, b.config.WinRMConfig.Prepare(b.config.tpl)...)
+	} else {
+		errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
+	}
+
 	warnings := make([]string, 0)
 
 	if b.config.DiskName == "" {
@@ -308,6 +315,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
+	var connectStep multistep.Step
+
+	if b.config.RunConfig.CommunicatorType == "winrm" {
+		connectStep = &common.StepConnectWinRM{
+			WinRMAddress:     vmwcommon.WinRMAddressFunc(&b.config.WinRMConfig, driver),
+			WinRMUser:        b.config.WinRMConfig.WinRMUser,
+			WinRMPassword:    b.config.WinRMConfig.WinRMPassword,
+			WinRMWaitTimeout: b.config.WinRMConfig.WinRMWaitTimeout,
+		}
+	} else {
+		connectStep = &common.StepConnectSSH{
+			SSHAddress:     vmwcommon.SSHAddressFunc(&b.config.SSHConfig, driver),
+			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
+			SSHWaitTimeout: b.config.SSHWaitTimeout,
+			NoPty:          b.config.SSHSkipRequestPty,
+		}
+	}
+
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
 			RemoteType:        b.config.RemoteType,
@@ -349,12 +374,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless:           b.config.Headless,
 		},
 		&stepTypeBootCommand{},
-		&common.StepConnectSSH{
-			SSHAddress:     driver.SSHAddress,
-			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
-			SSHWaitTimeout: b.config.SSHWaitTimeout,
-			NoPty:          b.config.SSHSkipRequestPty,
-		},
+		connectStep,
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,

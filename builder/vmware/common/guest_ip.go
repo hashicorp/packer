@@ -2,6 +2,8 @@ package common
 
 import (
 	"errors"
+	"fmt"
+	"github.com/mitchellh/multistep"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,6 +28,60 @@ type DHCPLeaseGuestLookup struct {
 
 	// MAC address of the guest.
 	MACAddress string
+}
+
+func IPAddressFunc() func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		return LookupGuestIPAddress(state)
+	}
+}
+
+// Finds the Guest IP address from VMWare
+func LookupGuestIPAddress(state multistep.StateBag) (string, error) {
+	driver := state.Get("driver").(Driver)
+	vmxPath := state.Get("vmx_path").(string)
+
+	log.Println("Lookup up IP information...")
+	f, err := os.Open(vmxPath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	vmxBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	vmxData := ParseVMX(string(vmxBytes))
+
+	var ok bool
+	macAddress := ""
+	if macAddress, ok = vmxData["ethernet0.address"]; !ok || macAddress == "" {
+		if macAddress, ok = vmxData["ethernet0.generatedaddress"]; !ok || macAddress == "" {
+			return "", errors.New("couldn't find MAC address in VMX")
+		}
+	}
+
+	ipLookup := &DHCPLeaseGuestLookup{
+		Driver:     driver,
+		Device:     "vmnet8",
+		MACAddress: macAddress,
+	}
+
+	ipAddress, err := ipLookup.GuestIP()
+	if err != nil {
+		log.Printf("IP lookup failed: %s", err)
+		return "", fmt.Errorf("IP lookup failed: %s", err)
+	}
+
+	if ipAddress == "" {
+		log.Println("IP is blank, no IP yet.")
+		return "", errors.New("IP is blank")
+	}
+
+	log.Printf("Detected IP: %s", ipAddress)
+	return ipAddress, nil
 }
 
 func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {

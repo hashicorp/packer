@@ -77,7 +77,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless:           b.config.Headless,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     driver.SSHAddress,
+			SSHAddress:     vmwcommon.SSHAddressFunc(&b.config.SSHConfig, driver),
 			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
