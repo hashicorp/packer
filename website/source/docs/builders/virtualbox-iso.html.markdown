@@ -121,8 +121,9 @@ each category, the available options are alphabetized and described.
 
 * `guest_additions_url` (string) - The URL to the guest additions ISO
   to upload. This can also be a file URL if the ISO is at a local path.
-  By default the VirtualBox builder will go and download the proper
-  guest additions ISO from the internet.
+  By default, the VirtualBox builder will attempt to find the guest additions
+  ISO on the local file system. If it is not available locally, the builder
+  will download the proper guest additions ISO from the internet.
 
 * `guest_os_type` (string) - The guest OS type being installed. By default
   this is "other", but you can get _dramatic_ performance improvements by

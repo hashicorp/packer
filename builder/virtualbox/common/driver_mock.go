@@ -19,6 +19,9 @@ type DriverMock struct {
 	ImportOpts   string
 	ImportErr    error
 
+	IsoCalled bool
+	IsoErr    error
+
 	IsRunningName   string
 	IsRunningReturn bool
 	IsRunningErr    error
@@ -58,6 +61,11 @@ func (d *DriverMock) Import(name, path, opts string) error {
 	d.ImportPath = path
 	d.ImportOpts = opts
 	return d.ImportErr
+}
+
+func (d *DriverMock) Iso() (string, error) {
+	d.IsoCalled = true
+	return "", d.IsoErr
 }
 
 func (d *DriverMock) IsRunning(name string) (bool, error) {

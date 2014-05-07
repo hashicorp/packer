@@ -40,6 +40,35 @@ func (d *VBox42Driver) Delete(name string) error {
 	return d.VBoxManage("unregistervm", name, "--delete")
 }
 
+func (d *VBox42Driver) Iso() (string, error) {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "list", "systemproperties")
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	DefaultGuestAdditionsRe := regexp.MustCompile("Default Guest Additions ISO:(.*)")
+
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		// Need to trim off CR character when running in windows
+		line = strings.TrimRight(line, "\r")
+
+		matches := DefaultGuestAdditionsRe.FindStringSubmatch(line)
+		if matches == nil {
+			continue
+		}
+
+		isoname := strings.Trim(matches[1], " \r\n")
+		log.Printf("Found Default Guest Additions ISO: %s", isoname)
+
+		return isoname, nil
+	}
+
+	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output")
+}
+
 func (d *VBox42Driver) Import(name, path, opts string) error {
 	args := []string{
 		"import", path,

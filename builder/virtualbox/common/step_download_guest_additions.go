@@ -62,14 +62,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	// Use provided version or get it from virtualbox.org
 	var checksum string
 
-	if s.GuestAdditionsSHA256 != "" {
-		checksum = s.GuestAdditionsSHA256
-	} else {
-		checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
-		if action != multistep.ActionContinue {
-			return action
-		}
-	}
+	checksumType := "sha256"
 
 	// Use the provided source (URL or file path) or generate it
 	url := s.GuestAdditionsURL
@@ -86,10 +79,28 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 			return multistep.ActionHalt
 		}
 	} else {
-		url = fmt.Sprintf(
-			"http://download.virtualbox.org/virtualbox/%s/%s",
-			version,
-			additionsName)
+		url, err = driver.Iso()
+
+		if err == nil {
+			checksumType = "none"
+		} else {
+			ui.Error(err.Error())
+			url = fmt.Sprintf(
+				"http://download.virtualbox.org/virtualbox/%s/%s",
+				version,
+				additionsName)
+		}
+	}
+
+	if checksumType != "none" {
+		if s.GuestAdditionsSHA256 != "" {
+			checksum = s.GuestAdditionsSHA256
+		} else {
+			checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
+			if action != multistep.ActionContinue {
+				return action
+			}
+		}
 	}
 
 	url, err = common.DownloadableURL(url)
@@ -104,7 +115,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 
 	downStep := &common.StepDownload{
 		Checksum:     checksum,
-		ChecksumType: "sha256",
+		ChecksumType: checksumType,
 		Description:  "Guest additions",
 		ResultKey:    "guest_additions_path",
 		Url:          []string{url},
