@@ -99,7 +99,8 @@ func TestDecodeConfig(t *testing.T) {
 // configuration.
 func TestDecodeConfig_stringToSlice(t *testing.T) {
 	type Local struct {
-		Val []string
+		Val      []string
+		EmptyVal []string
 	}
 
 	raw := map[string]interface{}{
@@ -107,7 +108,8 @@ func TestDecodeConfig_stringToSlice(t *testing.T) {
 			"foo": "bar",
 		},
 
-		"val": "foo,{{user `foo`}}",
+		"val":      "foo,{{user `foo`}}",
+		"emptyval": "",
 	}
 
 	var result Local
@@ -119,6 +121,9 @@ func TestDecodeConfig_stringToSlice(t *testing.T) {
 	expected := []string{"foo", "bar"}
 	if !reflect.DeepEqual(result.Val, expected) {
 		t.Fatalf("invalid: %#v", result.Val)
+	}
+	if len(result.EmptyVal) > 0 {
+		t.Fatalf("invalid: %#v", result.EmptyVal)
 	}
 }
 
