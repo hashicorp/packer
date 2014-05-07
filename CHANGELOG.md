@@ -3,6 +3,8 @@
 IMPROVEMENTS:
 
   * builder/openstack: skip certificate verification [GH-1121]
+  * builder/virtualbox/all: Attempt to use local guest additions ISO
+      before downloading from internet. [GH-1123]
 
 BUG FIXES:
 
