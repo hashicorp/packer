@@ -19,9 +19,10 @@ type Config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	SkipCompaction bool   `mapstructure:"skip_compaction"`
-	SourcePath     string `mapstructure:"source_path"`
-	VMName         string `mapstructure:"vm_name"`
+	FloppyFiles    []string `mapstructure:"floppy_files"`
+	SkipCompaction bool     `mapstructure:"skip_compaction"`
+	SourcePath     string   `mapstructure:"source_path"`
+	VMName         string   `mapstructure:"vm_name"`
 
 	tpl *packer.ConfigTemplate
 }
