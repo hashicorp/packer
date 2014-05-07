@@ -33,17 +33,21 @@ the appropriate [documentation page within the documentation section](/docs).
 * ***Amazon EC2 (AMI)***. Both EBS-backed and instance-store AMIs within EC2,
   optionally distributed to multiple regions.
 
-* ***DigitalOcean***. Snapshots for [DigitalOcean](http://www.digitalocean.com)
+* ***DigitalOcean***. Snapshots for [DigitalOcean](http://www.digitalocean.com/)
   that can be used to start a pre-configured DigitalOcean instance of any size.
 
-* ***Docker***. Snapshots for [Docker](http://www.docker.io)
+* ***Docker***. Snapshots for [Docker](http://www.docker.io/)
   that can be used to start a pre-configured Docker instance.
 
 * ***Google Compute Engine***. Snapshots for [Google Compute Engine](https://cloud.google.com/products/compute-engine)
   that can be used to start a pre-configured Google Compute Engine instance.
 
-* ***OpenStack***. Images for [OpenStack](http://www.openstack.org)
+* ***OpenStack***. Images for [OpenStack](http://www.openstack.org/)
   that can be used to start pre-configured OpenStack servers.
+
+* ***Parallels (PVM)***. Exported virtual machines for Parallels, including
+  virtual machine metadata such as RAM, CPUs, etc. These virtual machines are
+  portable and can be started on any platform Parallels runs on.
 
 * ***QEMU***. Images for [KVM](http://www.linux-kvm.org/) or [Xen](http://www.xenproject.org/)
   that can be used to start pre-configured KVM or Xen instances.
