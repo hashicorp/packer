@@ -81,6 +81,32 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 	}
 }
 
+// SpotRequestStateRefreshFunc returns a StateRefreshFunc that is used to watch
+// a spot request for state changes.
+func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := conn.DescribeSpotRequests([]string{spotRequestId}, ec2.NewFilter())
+		if err != nil {
+			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidSpotInstanceRequestID.NotFound" {
+				// Set this to nil as if we didn't find anything.
+				resp = nil
+			} else {
+				log.Printf("Error on SpotRequestStateRefresh: %s", err)
+				return nil, "", err
+			}
+		}
+
+		if resp == nil || len(resp.SpotRequestResults) == 0 {
+			// Sometimes AWS has consistency issues and doesn't see the
+			// SpotRequest. Return an empty state.
+			return nil, "", nil
+		}
+
+		i := resp.SpotRequestResults[0]
+		return i, i.State, nil
+	}
+}
+
 // WaitForState watches an object and waits for it to achieve a certain
 // state.
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
