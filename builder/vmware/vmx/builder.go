@@ -55,6 +55,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 		},
+		&common.StepCreateFloppy{
+			Files: b.config.FloppyFiles,
+		},
 		&StepCloneVMX{
 			OutputDir: b.config.OutputDir,
 			Path:      b.config.SourcePath,
