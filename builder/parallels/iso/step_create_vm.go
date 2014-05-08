@@ -25,7 +25,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	name := config.VMName
 	path := filepath.Join(".", config.OutputDir)
 
-	commands := make([][]string, 9)
+	commands := make([][]string, 8)
 	commands[0] = []string{
 		"create", name,
 		"--ostype", config.GuestOSType,
@@ -39,8 +39,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	commands[4] = []string{"set", name, "--on-shutdown", "close"}
 	commands[5] = []string{"set", name, "--on-window-close", "keep-running"}
 	commands[6] = []string{"set", name, "--auto-share-camera", "off"}
-	commands[7] = []string{"set", name, "--device-del", "sound0"}
-	commands[8] = []string{"set", name, "--smart-guard", "off"}
+	commands[7] = []string{"set", name, "--smart-guard", "off"}
 
 	ui.Say("Creating virtual machine...")
 	for _, command := range commands {
