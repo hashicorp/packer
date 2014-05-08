@@ -34,11 +34,10 @@ func (f *IfconfigIPFinder) HostIP() (string, error) {
 		stdout := new(bytes.Buffer)
 
 		cmd := exec.Command(ifconfigPath, device)
-		cmd.Env = append(cmd.Env, os.Environ()...)
-
 		// Force LANG=C so that the output is what we expect it to be
 		// despite the locale.
 		cmd.Env = append(cmd.Env, "LANG=C")
+		cmd.Env = append(cmd.Env, os.Environ()...)
 
 		cmd.Stdout = stdout
 		cmd.Stderr = new(bytes.Buffer)

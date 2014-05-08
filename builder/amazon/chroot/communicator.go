@@ -89,8 +89,8 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 	var stderr bytes.Buffer
 	cmd := ShellCommand(cpCmd)
-	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, "LANG=C")
+	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Stderr = &stderr
 	err = cmd.Run()
 	if err == nil {
