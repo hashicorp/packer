@@ -19,6 +19,8 @@ type Config struct {
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
 
+	DisableSudo bool `mapstructure:"disable_sudo"`
+
 	// Local path to the minion config
 	MinionConfig string `mapstructure:"minion_config"`
 
@@ -108,7 +110,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
-			Command: fmt.Sprintf("wget -O - http://bootstrap.saltstack.org | sudo sh -s %s", p.config.BootstrapArgs),
+			Command: fmt.Sprintf("wget -O - http://bootstrap.saltstack.org | %s %s", p.sudo("sh -s"), p.config.BootstrapArgs),
 		}
 		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
@@ -133,7 +135,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		ui.Message(fmt.Sprintf("Moving %s/minion to /etc/salt/minion", p.config.TempConfigDir))
-		cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/minion /etc/salt/minion", p.config.TempConfigDir)}
+		cmd = &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("mv %s/minion /etc/salt/minion", p.config.TempConfigDir))}
 		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 			if err == nil {
 				err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -150,7 +152,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Moving %s/states to /srv/salt", p.config.TempConfigDir))
-	cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/states /srv/salt", p.config.TempConfigDir)}
+	cmd = &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("mv %s/states /srv/salt", p.config.TempConfigDir))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -167,7 +169,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		ui.Message(fmt.Sprintf("Moving %s/pillar to /srv/pillar", p.config.TempConfigDir))
-		cmd = &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s/pillar /srv/pillar", p.config.TempConfigDir)}
+		cmd = &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("mv %s/pillar /srv/pillar", p.config.TempConfigDir))}
 		if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 			if err == nil {
 				err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -178,7 +180,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd = &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info"}
+	cmd = &packer.RemoteCmd{Command: p.sudo("salt-call --local state.highstate -l info")}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -194,6 +196,15 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+// Prepends sudo to supplied command if config says to
+func (p *Provisioner) sudo(cmd string) string {
+	if p.config.DisableSudo {
+		return cmd
+	}
+
+	return "sudo " + cmd
 }
 
 func uploadMinionConfig(comm packer.Communicator, dst string, src string) error {
