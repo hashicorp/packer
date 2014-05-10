@@ -17,9 +17,11 @@ type Config struct {
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	FloppyFiles    []string `mapstructure:"floppy_files"`
+	RemoteType     string   `mapstructure:"remote_type"`
 	SkipCompaction bool     `mapstructure:"skip_compaction"`
 	SourcePath     string   `mapstructure:"source_path"`
 	VMName         string   `mapstructure:"vm_name"`
@@ -52,9 +54,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
+		"remote_type": &c.RemoteType,
 		"source_path": &c.SourcePath,
 		"vm_name":     &c.VMName,
 	}
