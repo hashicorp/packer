@@ -111,7 +111,7 @@ func templateEnv(n string) string {
 }
 
 func templateISOTime() string {
-	return time.Now().UTC().Format(time.RFC3339)
+	return InitTime.Format(time.RFC3339)
 }
 
 func templatePwd() (string, error) {

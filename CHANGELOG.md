@@ -10,6 +10,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * core: `isotime` is the same time during the entire build. [GH-1153]
   * builder/parallels: Do not delete entire CDROM device. [GH-1115]
   * builder/virtualbox-ovf: Supports guest additions options. [GH-1120]
   * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
