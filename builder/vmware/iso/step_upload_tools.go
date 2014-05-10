@@ -50,7 +50,7 @@ func (*stepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if err := comm.Upload(config.ToolsUploadPath, f); err != nil {
+	if err := comm.Upload(config.ToolsUploadPath, f, nil); err != nil {
 		err := fmt.Errorf("Error uploading VMware Tools: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

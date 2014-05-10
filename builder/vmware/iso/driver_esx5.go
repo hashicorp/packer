@@ -340,7 +340,7 @@ func (d *ESX5Driver) upload(dst, src string) error {
 		return err
 	}
 	defer f.Close()
-	return d.comm.Upload(dst, f)
+	return d.comm.Upload(dst, f, nil)
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {

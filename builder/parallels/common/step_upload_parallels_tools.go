@@ -56,7 +56,7 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	}
 
 	ui.Say("Uploading Parallels Tools ISO...")
-	if err := comm.Upload(s.ParallelsToolsGuestPath, f); err != nil {
+	if err := comm.Upload(s.ParallelsToolsGuestPath, f, nil); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading Parallels Tools: %s", err))
 		return multistep.ActionHalt
 	}

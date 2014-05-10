@@ -287,7 +287,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 	}
 
 	remotePath := filepath.Join(p.config.StagingDir, "client.rb")
-	if err := comm.Upload(remotePath, bytes.NewReader([]byte(configString))); err != nil {
+	if err := comm.Upload(remotePath, bytes.NewReader([]byte(configString)), nil); err != nil {
 		return "", err
 	}
 
@@ -316,7 +316,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 
 	// Upload the bytes
 	remotePath := filepath.Join(p.config.StagingDir, "first-boot.json")
-	if err := comm.Upload(remotePath, bytes.NewReader(jsonBytes)); err != nil {
+	if err := comm.Upload(remotePath, bytes.NewReader(jsonBytes), nil); err != nil {
 		return "", err
 	}
 
@@ -445,7 +445,7 @@ func (p *Provisioner) copyValidationKey(ui packer.Ui, comm packer.Communicator, 
 	}
 	defer f.Close()
 
-	if err := comm.Upload(remotePath, f); err != nil {
+	if err := comm.Upload(remotePath, f, nil); err != nil {
 		return err
 	}
 
