@@ -260,10 +260,8 @@ func (d *ESX5Driver) String() string {
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
-	if filepath.IsAbs(path) {
-		return filepath.Join("/vmfs/volumes", d.Datastore, strings.Replace(path, "/", "", 1))
-	}
-	return filepath.Join("/vmfs/volumes", d.Datastore, path)
+	baseDir := filepath.Base(filepath.Dir(path))
+	return filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path))
 }
 
 func (d *ESX5Driver) connect() error {
