@@ -5,6 +5,8 @@ IMPROVEMENTS:
   * builder/openstack: skip certificate verification [GH-1121]
   * builder/virtualbox/all: Attempt to use local guest additions ISO
       before downloading from internet. [GH-1123]
+  * builder/vmware/all: Add `vmx_data_post` for modifying VMX data
+      after shutdown. [GH-1149]
 
 BUG FIXES:
 
