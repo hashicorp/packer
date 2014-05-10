@@ -7,7 +7,7 @@ import (
 )
 
 type VMXConfig struct {
-	VMXData map[string]string `mapstructure:"vmx_data"`
+	VMXData     map[string]string `mapstructure:"vmx_data"`
 	VMXDataPost map[string]string `mapstructure:"vmx_data_post"`
 }
 
