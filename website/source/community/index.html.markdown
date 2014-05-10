@@ -71,7 +71,14 @@ Ross is an open source enthusist, published author, and freelance consultant.</p
 		</div>
 	</div>
 
-
+	<div class="person">
+		<img class="pull-left" src="http://www.gravatar.com/avatar/c9f6bf7b5b865012be5eded656ebed7d.png?s=125">
+		<div class="bio">
+			<h3>Rickard von Essen<br/>(<a href="https://github.com/rickard-von-essen" target="_blank">@rickard-von-essen</a>)</h3>
+			<p>
+Rickard von Essen maintains our Parallels Desktop builder. Rickard is an polyglot programmer and consults on Continuous Delivery.</p>
+		</div>
+	</div>
 
 	<div class="clearfix"></div>
 </div>
