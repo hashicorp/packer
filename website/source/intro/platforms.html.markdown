@@ -45,15 +45,15 @@ the appropriate [documentation page within the documentation section](/docs).
 * ***OpenStack***. Images for [OpenStack](http://www.openstack.org/)
   that can be used to start pre-configured OpenStack servers.
 
-* ***Parallels (PVM)***. Exported virtual machines for [Parallels](http://www.parallels.com/downloads/desktop/)
-  , including virtual machine metadata such as RAM, CPUs, etc. These virtual
+* ***Parallels (PVM)***. Exported virtual machines for [Parallels](http://www.parallels.com/downloads/desktop/),
+  including virtual machine metadata such as RAM, CPUs, etc. These virtual
   machines are portable and can be started on any platform Parallels runs on.
 
 * ***QEMU***. Images for [KVM](http://www.linux-kvm.org/) or [Xen](http://www.xenproject.org/)
   that can be used to start pre-configured KVM or Xen instances.
 
-* ***VirtualBox (OVF)***. Exported virtual machines for [VirtualBox](https://www.virtualbox.org/)
-  , including virtual machine metadata such as RAM, CPUs, etc. These virtual
+* ***VirtualBox (OVF)***. Exported virtual machines for [VirtualBox](https://www.virtualbox.org/),
+  including virtual machine metadata such as RAM, CPUs, etc. These virtual
   machines are portable and can be started on any platform VirtualBox runs on.
 
 * ***VMware (VMX)***. Exported virtual machines for [VMware](http://www.vmware.com/)
