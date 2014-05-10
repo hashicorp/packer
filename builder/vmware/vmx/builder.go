@@ -53,9 +53,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps.
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
-			RemoteType: b.config.RemoteType,
+			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
-			ToolsUploadPath: b.config.ToolsUploadPath,
+			ToolsUploadPath:   b.config.ToolsUploadPath,
 		},
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,
@@ -84,10 +84,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
 		&vmwcommon.StepUploadTools{
-			RemoteType: b.config.RemoteType,
+			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
-			ToolsUploadPath: b.config.ToolsUploadPath,
-			Tpl: b.config.tpl,
+			ToolsUploadPath:   b.config.ToolsUploadPath,
+			Tpl:               b.config.tpl,
 		},
 		&common.StepProvision{},
 		&vmwcommon.StepShutdown{
