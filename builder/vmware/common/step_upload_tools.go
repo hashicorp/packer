@@ -12,9 +12,9 @@ type toolsUploadPathTemplate struct {
 }
 
 type StepUploadTools struct {
-	RemoteType        string `mapstructure:"remote_type"`
-	ToolsUploadFlavor string `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string `mapstructure:"tools_upload_path"`
+	RemoteType        string
+	ToolsUploadFlavor string
+	ToolsUploadPath   string
 	Tpl               *packer.ConfigTemplate
 }
 
