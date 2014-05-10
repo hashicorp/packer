@@ -227,6 +227,10 @@ each category, the available options are alphabetized and described.
   to enter into the virtual machine VMX file. This is for advanced users
   who want to set properties such as memory, CPU, etc.
 
+* `vmx_data_post` (object of key/value strings) - Identical to `vmx_data`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
 * `vmx_template_path` (string) - Path to a
   [configuration template](/docs/templates/configuration-templates.html) that
   defines the contents of the virtual machine VMX file for VMware. This is
