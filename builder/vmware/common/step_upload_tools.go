@@ -11,11 +11,11 @@ type toolsUploadPathTemplate struct {
 	Flavor string
 }
 
-type StepUploadTools struct{
+type StepUploadTools struct {
 	RemoteType        string `mapstructure:"remote_type"`
-	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
-	Tpl *packer.ConfigTemplate
+	ToolsUploadFlavor string `mapstructure:"tools_upload_flavor"`
+	ToolsUploadPath   string `mapstructure:"tools_upload_path"`
+	Tpl               *packer.ConfigTemplate
 }
 
 func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {

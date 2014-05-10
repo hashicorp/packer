@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-type StepPrepareTools struct{
+type StepPrepareTools struct {
 	RemoteType        string `mapstructure:"remote_type"`
-	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
+	ToolsUploadFlavor string `mapstructure:"tools_upload_flavor"`
+	ToolsUploadPath   string `mapstructure:"tools_upload_path"`
 }
 
 func (c *StepPrepareTools) Run(state multistep.StateBag) multistep.StepAction {

@@ -8,8 +8,8 @@ import (
 )
 
 type ToolsConfig struct {
-	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
+	ToolsUploadFlavor string `mapstructure:"tools_upload_flavor"`
+	ToolsUploadPath   string `mapstructure:"tools_upload_path"`
 }
 
 func (c *ToolsConfig) Prepare(t *packer.ConfigTemplate) []error {
