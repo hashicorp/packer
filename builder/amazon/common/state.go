@@ -151,8 +151,8 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			}
 
 			if !found {
-				fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
-				return
+				err := fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
+				return nil, err
 			}
 		}
 
