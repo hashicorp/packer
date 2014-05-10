@@ -55,7 +55,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepPrepareTools{
 			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
-			ToolsUploadPath:   b.config.ToolsUploadPath,
 		},
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,

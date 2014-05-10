@@ -2,14 +2,14 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"os"
+
+	"github.com/mitchellh/multistep"
 )
 
 type StepPrepareTools struct {
-	RemoteType        string `mapstructure:"remote_type"`
-	ToolsUploadFlavor string `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string `mapstructure:"tools_upload_path"`
+	RemoteType        string
+	ToolsUploadFlavor string
 }
 
 func (c *StepPrepareTools) Run(state multistep.StateBag) multistep.StepAction {
