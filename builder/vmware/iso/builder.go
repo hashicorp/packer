@@ -12,7 +12,6 @@ import (
 	"math/rand"
 	"os"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -30,27 +29,26 @@ type config struct {
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	DiskName          string   `mapstructure:"vmdk_name"`
-	DiskSize          uint     `mapstructure:"disk_size"`
-	DiskTypeId        string   `mapstructure:"disk_type_id"`
-	FloppyFiles       []string `mapstructure:"floppy_files"`
-	GuestOSType       string   `mapstructure:"guest_os_type"`
-	ISOChecksum       string   `mapstructure:"iso_checksum"`
-	ISOChecksumType   string   `mapstructure:"iso_checksum_type"`
-	ISOUrls           []string `mapstructure:"iso_urls"`
-	VMName            string   `mapstructure:"vm_name"`
-	HTTPDir           string   `mapstructure:"http_directory"`
-	HTTPPortMin       uint     `mapstructure:"http_port_min"`
-	HTTPPortMax       uint     `mapstructure:"http_port_max"`
-	BootCommand       []string `mapstructure:"boot_command"`
-	SkipCompaction    bool     `mapstructure:"skip_compaction"`
-	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
-	VMXTemplatePath   string   `mapstructure:"vmx_template_path"`
-	VNCPortMin        uint     `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint     `mapstructure:"vnc_port_max"`
+	DiskName        string   `mapstructure:"vmdk_name"`
+	DiskSize        uint     `mapstructure:"disk_size"`
+	DiskTypeId      string   `mapstructure:"disk_type_id"`
+	FloppyFiles     []string `mapstructure:"floppy_files"`
+	GuestOSType     string   `mapstructure:"guest_os_type"`
+	ISOChecksum     string   `mapstructure:"iso_checksum"`
+	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
+	ISOUrls         []string `mapstructure:"iso_urls"`
+	VMName          string   `mapstructure:"vm_name"`
+	HTTPDir         string   `mapstructure:"http_directory"`
+	HTTPPortMin     uint     `mapstructure:"http_port_min"`
+	HTTPPortMax     uint     `mapstructure:"http_port_max"`
+	BootCommand     []string `mapstructure:"boot_command"`
+	SkipCompaction  bool     `mapstructure:"skip_compaction"`
+	VMXTemplatePath string   `mapstructure:"vmx_template_path"`
+	VNCPortMin      uint     `mapstructure:"vnc_port_min"`
+	VNCPortMax      uint     `mapstructure:"vnc_port_max"`
 
 	RemoteType      string `mapstructure:"remote_type"`
 	RemoteDatastore string `mapstructure:"remote_datastore"`
@@ -84,6 +82,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
@@ -144,26 +143,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RemotePort = 22
 	}
 
-	if b.config.ToolsUploadPath == "" {
-		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
-	}
-
 	// Errors
 	templates := map[string]*string{
-		"disk_name":           &b.config.DiskName,
-		"guest_os_type":       &b.config.GuestOSType,
-		"http_directory":      &b.config.HTTPDir,
-		"iso_checksum":        &b.config.ISOChecksum,
-		"iso_checksum_type":   &b.config.ISOChecksumType,
-		"iso_url":             &b.config.RawSingleISOUrl,
-		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
-		"vm_name":             &b.config.VMName,
-		"vmx_template_path":   &b.config.VMXTemplatePath,
-		"remote_type":         &b.config.RemoteType,
-		"remote_host":         &b.config.RemoteHost,
-		"remote_datastore":    &b.config.RemoteDatastore,
-		"remote_user":         &b.config.RemoteUser,
-		"remote_password":     &b.config.RemotePassword,
+		"disk_name":         &b.config.DiskName,
+		"guest_os_type":     &b.config.GuestOSType,
+		"http_directory":    &b.config.HTTPDir,
+		"iso_checksum":      &b.config.ISOChecksum,
+		"iso_checksum_type": &b.config.ISOChecksumType,
+		"iso_url":           &b.config.RawSingleISOUrl,
+		"vm_name":           &b.config.VMName,
+		"vmx_template_path": &b.config.VMXTemplatePath,
+		"remote_type":       &b.config.RemoteType,
+		"remote_host":       &b.config.RemoteHost,
+		"remote_datastore":  &b.config.RemoteDatastore,
+		"remote_user":       &b.config.RemoteUser,
+		"remote_password":   &b.config.RemotePassword,
 	}
 
 	for n, ptr := range templates {
@@ -245,11 +239,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if _, err := template.New("path").Parse(b.config.ToolsUploadPath); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("tools_upload_path invalid: %s", err))
-	}
-
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -320,7 +309,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	steps := []multistep.Step{
-		&stepPrepareTools{},
+		&vmwcommon.StepPrepareTools{
+			RemoteType:        b.config.RemoteType,
+			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
+			ToolsUploadPath:   b.config.ToolsUploadPath,
+		},
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
@@ -363,7 +356,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
-		&stepUploadTools{},
+		&vmwcommon.StepUploadTools{
+			RemoteType:        b.config.RemoteType,
+			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
+			ToolsUploadPath:   b.config.ToolsUploadPath,
+			Tpl:               b.config.tpl,
+		},
 		&common.StepProvision{},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
