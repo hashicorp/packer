@@ -22,8 +22,8 @@ type StepRunSourceInstance struct {
 	Tags                     map[string]string
 	UserData                 string
 	UserDataFile             string
-
-	instance *ec2.Instance
+	spotRequest              *ec2.SpotRequestResult
+	instance                 *ec2.Instance
 }
 
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -92,7 +92,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			return multistep.ActionHalt
 		}
 		instanceId = []string{runResp.Instances[0].InstanceId}
-
 	} else {
 		runOpts := &ec2.RequestSpotInstances{
 			SpotPrice:                s.SpotPrice,
@@ -136,7 +135,8 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		instanceId = []string{spotResp.SpotRequestResults[0].InstanceId}
+		s.spotRequest = &spotResp.SpotRequestResults[0]
+		instanceId = []string{s.spotRequest.InstanceId}
 	}
 
 	instanceResp, err := ec2conn.Instances(instanceId, nil)
@@ -198,24 +198,41 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 }
 
 func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
-	if s.instance == nil {
-		return
-	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Terminating the source AWS instance...")
-	if _, err := ec2conn.TerminateInstances([]string{s.instance.InstanceId}); err != nil {
-		ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
-		return
+	// Cancel the spot request if it exists
+	if s.spotRequest != nil {
+		ui.Say("Cancelling the spot request...")
+		if _, err := ec2conn.CancelSpotRequests([]string{s.spotRequest.SpotRequestId}); err != nil {
+			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
+			return
+		}
+		stateChange := StateChangeConf{
+			Pending: []string{"active", "open"},
+			Refresh: SpotRequestStateRefreshFunc(ec2conn, s.spotRequest.SpotRequestId),
+			Target:  "cancelled",
+		}
+
+		WaitForState(&stateChange)
+
 	}
 
-	stateChange := StateChangeConf{
-		Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-		Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
-		Target:  "terminated",
-	}
+	// Terminate the source instance if it exists
+	if s.instance != nil {
 
-	WaitForState(&stateChange)
+		ui.Say("Terminating the source AWS instance...")
+		if _, err := ec2conn.TerminateInstances([]string{s.instance.InstanceId}); err != nil {
+			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
+			return
+		}
+		stateChange := StateChangeConf{
+			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
+			Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
+			Target:  "terminated",
+		}
+
+		WaitForState(&stateChange)
+	}
 }
