@@ -78,19 +78,7 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 			},
 		}
 	case "linux":
-		drivers = []Driver{
-			&Workstation10Driver{
-				Workstation9Driver: Workstation9Driver{
-					SSHConfig: config,
-				},
-			},
-			&Workstation9Driver{
-				SSHConfig: config,
-			},
-			&Player5LinuxDriver{
-				SSHConfig: config,
-			},
-		}
+		fallthrough
 	case "windows":
 		drivers = []Driver{
 			&Workstation10Driver{
@@ -99,6 +87,14 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 				},
 			},
 			&Workstation9Driver{
+				SSHConfig: config,
+			},
+			&Player6Driver{
+				Player5Driver: Player5Driver{
+					SSHConfig: config,
+				},
+			},
+			&Player5Driver{
 				SSHConfig: config,
 			},
 		}
