@@ -134,7 +134,7 @@ func (d *Workstation9Driver) Verify() error {
 	}
 
 	if _, err := os.Stat(d.VdiskManagerPath); err != nil {
-		return fmt.Errorf("'vmrun' application not found: %s", d.VdiskManagerPath)
+		return fmt.Errorf("'vmware-vdiskmanager' application not found: %s", d.VdiskManagerPath)
 	}
 
 	// Check to see if it APPEARS to be licensed.
