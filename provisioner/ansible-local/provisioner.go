@@ -27,6 +27,9 @@ type Config struct {
 	// Path to host_vars directory
 	HostVars string `mapstructure:"host_vars"`
 
+	// The playbook dir to upload.
+	PlaybookDir string `mapstructure:"playbook_dir"`
+	
 	// The main playbook file to execute.
 	PlaybookFile string `mapstructure:"playbook_file"`
 
@@ -79,6 +82,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"group_vars":     &p.config.GroupVars,
 		"host_vars":      &p.config.HostVars,
 		"playbook_file":  &p.config.PlaybookFile,
+		"playbook_dir":   &p.config.PlaybookDir,
 		"staging_dir":    &p.config.StagingDir,
 		"inventory_file": &p.config.InventoryFile,
 	}
@@ -123,6 +127,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	// Check that the playbook_dir directory exists, if configured
+	if len(p.config.PlaybookDir) > 0 {
+		if err := validateDirConfig(p.config.PlaybookDir, "playbook_dir"); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+	
 	// Check that the group_vars directory exists, if configured
 	if len(p.config.GroupVars) > 0 {
 		if err := validateDirConfig(p.config.GroupVars, "group_vars"); err != nil {
@@ -158,9 +169,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
 
-	ui.Message("Creating Ansible staging directory...")
-	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
-		return fmt.Errorf("Error creating staging directory: %s", err)
+	if len(p.config.PlaybookDir) > 0 {
+		ui.Message("Uploading Playbook directory to Ansible staging directory...")
+		if err := p.uploadDir(ui, comm, p.config.StagingDir, p.config.PlaybookDir); err != nil {
+			return fmt.Errorf("Error uploading playbook_dir directory: %s", err)
+		}
+	} else {
+		ui.Message("Creating Ansible staging directory...")
+		if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error creating staging directory: %s", err)
+		}
 	}
 
 	ui.Message("Uploading main Playbook file...")
