@@ -40,8 +40,11 @@ func newClientWithMux(mux *muxBroker, streamId uint32) (*Client, error) {
 		return nil, err
 	}
 
-	var h codec.MsgpackHandle
-	clientCodec := codec.GoRpc.ClientCodec(clientConn, &h)
+	h := &codec.MsgpackHandle{
+		RawToString: true,
+		WriteExt:    true,
+	}
+	clientCodec := codec.GoRpc.ClientCodec(clientConn, h)
 
 	return &Client{
 		mux:      mux,
