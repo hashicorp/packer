@@ -114,6 +114,12 @@ each category, the available options are alphabetized and described.
   hard drives are attached to, defaults to "sata". Valid options are
   "sata", "ide", and "scsi".
 
+* `host_interfaces` (array of strings) - A list of which interfaces on the
+  host should be searched for a IP address. The first IP address found on
+  one of these will be used as `{{ .HTTPIP }}` in the `boot_command`.
+  Defaults to ["en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7", "en8",
+  "en9", "ppp0", "ppp1", "ppp2"].
+
 * `http_directory` (string) - Path to a directory to serve using an HTTP
   server. The files in this directory will be available over HTTP that will
   be requestable from the virtual machine. This is useful for hosting
