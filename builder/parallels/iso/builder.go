@@ -36,6 +36,7 @@ type config struct {
 	GuestOSType             string   `mapstructure:"guest_os_type"`
 	GuestOSDistribution     string   `mapstructure:"guest_os_distribution"`
 	HardDriveInterface      string   `mapstructure:"hard_drive_interface"`
+	HostInterfaces          []string `mapstructure:"host_interfaces"`
 	HTTPDir                 string   `mapstructure:"http_directory"`
 	HTTPPortMin             uint     `mapstructure:"http_port_min"`
 	HTTPPortMax             uint     `mapstructure:"http_port_max"`
@@ -108,6 +109,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.HTTPPortMax == 0 {
 		b.config.HTTPPortMax = 9000
+	}
+
+	if len(b.config.HostInterfaces) == 0 {
+		b.config.HostInterfaces = []string{"en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7",
+			"en8", "en9", "ppp0", "ppp1", "ppp2"}
 	}
 
 	if b.config.VMName == "" {
