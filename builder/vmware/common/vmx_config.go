@@ -51,7 +51,7 @@ func (c *VMXConfig) Prepare(t *packer.ConfigTemplate) []error {
 			continue
 		}
 
-		newVMXData[k] = v
+		newVMXDataPost[k] = v
 	}
 	c.VMXDataPost = newVMXDataPost
 
