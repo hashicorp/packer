@@ -113,7 +113,8 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		spotRequestId := runSpotResp.SpotRequestResults[0].SpotRequestId
+		s.spotRequest = &runSpotResp.SpotRequestResults[0]
+		spotRequestId := s.spotRequest.SpotRequestId
 		ui.Say(fmt.Sprintf("Waiting for spot request (%s) to become ready...", spotRequestId))
 		stateChange := StateChangeConf{
 			Pending:   []string{"open"},
@@ -135,8 +136,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		s.spotRequest = &spotResp.SpotRequestResults[0]
-		instanceId = []string{s.spotRequest.InstanceId}
+		instanceId = []string{spotResp.SpotRequestResults[0].InstanceId}
 	}
 
 	instanceResp, err := ec2conn.Instances(instanceId, nil)
