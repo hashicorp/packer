@@ -127,6 +127,14 @@ each category, the available options are alphabetized and described.
   exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is
   the name of the build.
 
+## Parallels Tools
+After the virtual machine is up and the operating system is installed, Packer
+uploads the Parallels Tools into the virtual machine. The path where they are
+uploaded is controllable by `parallels_tools_path`, and defaults to
+"prl-tools.iso". Without an absolute path, it is uploaded to the home directory
+of the SSH user. Parallels Tools ISO's can be found in:
+"/Applications/Parallels Desktop.app/Contents/Resources/Tools/"
+
 ## prlctl Commands
 In order to perform extra customization of the virtual machine, a template can
 define extra calls to `prlctl` to perform.
