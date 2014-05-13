@@ -24,13 +24,14 @@ type Config struct {
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	SourcePath           string `mapstructure:"source_path"`
-	GuestAdditionsMode   string `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath   string `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string `mapstructure:"guest_additions_url"`
-	GuestAdditionsSHA256 string `mapstructure:"guest_additions_sha256"`
-	VMName               string `mapstructure:"vm_name"`
-	ImportOpts           string `mapstructure:"import_opts"`
+	BootCommand          []string `mapstructure:"boot_command"`
+	SourcePath           string   `mapstructure:"source_path"`
+	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
+	VMName               string   `mapstructure:"vm_name"`
+	ImportOpts           string   `mapstructure:"import_opts"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -96,6 +97,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if _, err := os.Stat(c.SourcePath); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("source_path is invalid: %s", err))
+		}
+	}
+
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
 	}
 
