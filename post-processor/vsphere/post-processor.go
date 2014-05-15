@@ -3,6 +3,7 @@ package vsphere
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
@@ -137,6 +138,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
