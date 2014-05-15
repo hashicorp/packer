@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"strings"
+	"net/url"
 )
 
 var builtins = map[string]string{
@@ -128,7 +129,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
 		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
-			p.config.Username,
+			url.QueryEscape(p.config.Username),
 			p.config.Password,
 			p.config.Host,
 			p.config.Datacenter,
