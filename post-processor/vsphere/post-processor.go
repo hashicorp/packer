@@ -3,10 +3,12 @@ package vsphere
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"strings"
+	"net/url"
 )
 
 var builtins = map[string]string{
@@ -127,7 +129,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
 		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
-			p.config.Username,
+			url.QueryEscape(p.config.Username),
 			p.config.Password,
 			p.config.Host,
 			p.config.Datacenter,
@@ -137,6 +139,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
