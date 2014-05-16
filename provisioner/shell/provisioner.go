@@ -33,7 +33,7 @@ type guestOsConfig struct {
 
 var guestOsConfigs = map[string]guestOsConfig{
 	unixOsType: guestOsConfig{
-		hasChmod:		true,
+		hasChmod:       true,
 		envVarJoiner:   " ",
 		executeCommand: "chmod +x {{.Path}}; {{.Vars}} {{.Path}}",
 		inlinePrefix:   "%!",
@@ -42,7 +42,7 @@ var guestOsConfigs = map[string]guestOsConfig{
 		remotePath:     "/tmp/script.sh",
 	},
 	windowsOsType: guestOsConfig{
-		hasChmod:		false,
+		hasChmod:       false,
 		envVarJoiner:   " & ",
 		executeCommand: "{{.Vars}} & {{.Path}}",
 		inlinePrefix:   "",
