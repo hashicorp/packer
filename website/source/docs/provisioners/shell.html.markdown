@@ -65,7 +65,7 @@ Optional parameters:
   When `guest_os_type` is `windows`, this defaults to `{{ .Vars }} & {{ .Path }}`.
 
 * `guest_os_type` (string) - The type of the guest OS, either `unix`, and `windows`.
-  Currently, `unix` can be used for any unix-like OS, including OSX.
+  Currently, `unix` should be used for any unix-like OS, including Cygwin, and OSX.
   This defaults to `unix`.
 
 * `inline_shebang` (string) - The
