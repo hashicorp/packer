@@ -8,7 +8,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepCreateAMI struct{}
+type stepCreateAMI struct {
+	image *ec2.Image
+}
 
 func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(config)
@@ -33,6 +35,14 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the AMI ID in the state
+	imagesResp, err := ec2conn.Images([]string{createResp.ImageId}, nil)
+	if err != nil {
+		err := fmt.Errorf("Error searching for AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	s.image = &imagesResp.Images[0]
 	ui.Message(fmt.Sprintf("AMI: %s", createResp.ImageId))
 	amis := make(map[string]string)
 	amis[ec2conn.Region.Name] = createResp.ImageId
@@ -57,6 +67,20 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateAMI) Cleanup(multistep.StateBag) {
-	// No cleanup...
+func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
+	if s.image == nil {
+		return
+	}
+
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+
+	ui.Say("Deregistering the AMI ...")
+	if resp, err := ec2conn.DeregisterImage(s.image.Id); err != nil {
+		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+		return
+	} else if resp.Return == false {
+		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", resp.Return))
+		return
+	}
 }
