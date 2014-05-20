@@ -24,17 +24,19 @@ type StepCompactDisk struct {
 func (s StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	full_disk_path := state.Get("full_disk_path").(string)
+	full_disk_paths := state.Get("full_disk_paths").([]string)
 
 	if s.Skip {
 		log.Println("Skipping disk compaction step...")
 		return multistep.ActionContinue
 	}
 
-	ui.Say("Compacting the disk image")
-	if err := driver.CompactDisk(full_disk_path); err != nil {
-		state.Put("error", fmt.Errorf("Error compacting disk: %s", err))
-		return multistep.ActionHalt
+	ui.Say("Compacting the disk image(s)")
+	for i, disk := range full_disk_paths {
+		if err := driver.CompactDisk(disk); err != nil {
+			state.Put("error", fmt.Errorf("Error compacting disk[%d]: %s", i, err))
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue

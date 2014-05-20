@@ -14,7 +14,9 @@ func TestStepCompactDisk(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
 
-	state.Put("full_disk_path", "foo")
+	full_disk_paths := make([]string, 0)
+	full_disk_paths = append(full_disk_paths, "foo", "bar")
+	state.Put("full_disk_paths", full_disk_paths)
 
 	driver := state.Get("driver").(*DriverMock)
 
@@ -30,7 +32,7 @@ func TestStepCompactDisk(t *testing.T) {
 	if !driver.CompactDiskCalled {
 		t.Fatal("should've called")
 	}
-	if driver.CompactDiskPath != "foo" {
+	if driver.CompactDiskPath[0] != "foo" && driver.CompactDiskPath[1] != "bar" {
 		t.Fatal("should call with right path")
 	}
 }
@@ -40,7 +42,9 @@ func TestStepCompactDisk_skip(t *testing.T) {
 	step := new(StepCompactDisk)
 	step.Skip = true
 
-	state.Put("full_disk_path", "foo")
+	full_disk_paths := make([]string, 0)
+	full_disk_paths = append(full_disk_paths, "foo", "bar")
+	state.Put("full_disk_paths", full_disk_paths)
 
 	driver := state.Get("driver").(*DriverMock)
 

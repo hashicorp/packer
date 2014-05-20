@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/multistep"
@@ -18,6 +19,7 @@ import (
 //   vmx_path string
 type StepConfigureVMX struct {
 	CustomData map[string]string
+	NewDisks   [][]string
 }
 
 func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
@@ -47,6 +49,17 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 		if addrRegex.MatchString(k) {
 			delete(vmxData, k)
 		}
+	}
+
+	// set additional disks
+	for i, disk := range s.NewDisks {
+		k1 := "scsi0:" + strconv.Itoa(i+1) + ".fileName"
+		v1 := disk[0] + ".vmdk"
+		log.Printf("Setting VMX: '%s' = '%s'", k1, v1)
+		k2 := "scsi0:" + strconv.Itoa(i+1) + ".present"
+		v2 := "TRUE"
+		vmxData[k1] = v1
+		vmxData[k2] = v2
 	}
 
 	// Set custom data
