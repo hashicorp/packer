@@ -43,11 +43,14 @@ var guestOsConfigs = map[string]guestOsConfig{
 	},
 	windowsOsType: guestOsConfig{
 		hasChmod:       false,
-		envVarJoiner:   " & ",
-		executeCommand: "{{.Vars}} & {{.Path}}",
+		// a leading space here will create vars with trailing spaces
+		envVarJoiner:   "& ",
+		// a leading space here will create a var with a trailing space
+		executeCommand: "{{.Vars}}& {{.Path}}",
 		inlinePrefix:   "",
 		inlineShebang:  "",
 		newline:        "\r\n",
+		// leave off C:, as Autounattend.xml may define a different drive
 		remotePath:     "\\packer_temp.cmd",
 	},
 }
