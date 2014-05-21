@@ -55,6 +55,9 @@ since it will allow the provisioner to clean up the node/client.
   Server. This is optional and by defalt is empty. If you don't set this,
   Packer can't clean up the node from the Chef Server using knife.
 
+* `chef_environment` (string) - The name of the chef_environment sent to the
+  Chef server. By default this is empty and will not use an environment.
+
 * `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to install and run Chef are executed with `sudo`. If this is true,
   then the sudo will be omitted.
