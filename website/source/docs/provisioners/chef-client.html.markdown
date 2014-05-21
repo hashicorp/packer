@@ -33,6 +33,9 @@ The reference of available configuration options is listed below. No
 configuration is actually required, but `node_name` is recommended
 since it will allow the provisioner to clean up the node/client.
 
+* `chef_environment` (string) - The name of the chef_environment sent to the
+  Chef server. By default this is empty and will not use an environment.
+
 * `config_template` (string) - Path to a template that will be used for
   the Chef configuration file. By default Packer only sets configuration
   it needs to match the settings set in the provisioner configuration. If
@@ -54,9 +57,6 @@ since it will allow the provisioner to clean up the node/client.
 * `node_name` (string) - The name of the node to register with the Chef
   Server. This is optional and by defalt is empty. If you don't set this,
   Packer can't clean up the node from the Chef Server using knife.
-
-* `chef_environment` (string) - The name of the chef_environment sent to the
-  Chef server. By default this is empty and will not use an environment.
 
 * `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to install and run Chef are executed with `sudo`. If this is true,
