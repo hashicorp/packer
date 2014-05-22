@@ -84,7 +84,7 @@ each category, the available configuration keys are alphabetized.
   device mappings to the AMI. The block device mappings allow for keys:
   "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
   "volume\_type" (string), "volume\_size" (integer), "delete\_on\_termination"
-  (boolean), "no\_device" (boolean), and "iops" (integer).
+  (boolean), "encrypted" (boolean), "no\_device" (boolean), and "iops" (integer).
   See [amazon-ebs](/docs/builders/amazon-ebs.html) for an example template.
 
 * `ami_description` (string) - The description to set for the resulting
