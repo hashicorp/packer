@@ -2,6 +2,7 @@
 
 IMPROVEMENTS:
 
+  * builder/amazon-ebs: Support encrypted EBS volumes [GH-1194]
   * builder/ansible: Add `playbook_dir` option. [GH-1000]
   * builder/openstack: Skip certificate verification. [GH-1121]
   * builder/virtualbox/all: Attempt to use local guest additions ISO
