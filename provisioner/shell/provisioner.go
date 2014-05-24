@@ -36,7 +36,7 @@ var guestOsConfigs = map[string]guestOsConfig{
 		hasChmod:       true,
 		envVarJoiner:   " ",
 		executeCommand: "chmod +x {{.Path}}; {{.Vars}} {{.Path}}",
-		inlinePrefix:   "%!",
+		inlinePrefix:   "#!",
 		inlineShebang:  "/bin/sh",
 		newline:        "\n",
 		remotePath:     "/tmp/script.sh",
