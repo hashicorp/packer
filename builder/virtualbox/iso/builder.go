@@ -44,6 +44,7 @@ type config struct {
 	HTTPPortMax          uint     `mapstructure:"http_port_max"`
 	ISOChecksum          string   `mapstructure:"iso_checksum"`
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
+	ISOInterface         string   `mapstructure:"iso_interface"`
 	ISOUrls              []string `mapstructure:"iso_urls"`
 	VMName               string   `mapstructure:"vm_name"`
 
@@ -107,6 +108,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.HTTPPortMax = 9000
 	}
 
+	if b.config.ISOInterface == "" {
+		b.config.ISOInterface = "ide"
+	}
+
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
@@ -120,6 +125,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"http_directory":         &b.config.HTTPDir,
 		"iso_checksum":           &b.config.ISOChecksum,
 		"iso_checksum_type":      &b.config.ISOChecksumType,
+		"iso_interface":          &b.config.ISOInterface,
 		"iso_url":                &b.config.RawSingleISOUrl,
 		"vm_name":                &b.config.VMName,
 	}
@@ -190,6 +196,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
 			}
 		}
+	}
+
+	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("iso_interface can only be ide or sata"))
 	}
 
 	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
