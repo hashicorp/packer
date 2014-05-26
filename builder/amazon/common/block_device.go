@@ -8,6 +8,7 @@ import (
 type BlockDevice struct {
 	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
 	DeviceName          string `mapstructure:"device_name"`
+	Encrypted           bool   `mapstructure:"encrypted"`
 	IOPS                int64  `mapstructure:"iops"`
 	NoDevice            bool   `mapstructure:"no_device"`
 	SnapshotId          string `mapstructure:"snapshot_id"`
@@ -34,6 +35,7 @@ func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
 			DeleteOnTermination: blockDevice.DeleteOnTermination,
 			IOPS:                blockDevice.IOPS,
 			NoDevice:            blockDevice.NoDevice,
+			Encrypted:           blockDevice.Encrypted,
 		})
 	}
 	return blockDevices
