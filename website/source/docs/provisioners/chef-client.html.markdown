@@ -76,7 +76,7 @@ since it will allow the provisioner to clean up the node/client.
   on the machine using the Opscode omnibus installers.
 
 * `staging_directory` (string) - This is the directory where all the configuration
-  of Chef by Packer will be placed. By default this is "/tmp/packer-chef-solo".
+  of Chef by Packer will be placed. By default this is "/tmp/packer-chef-client".
   This directory doesn't need to exist but must have proper permissions so that
   the SSH user that Packer uses is able to create directories and write into
   this folder. If the permissions are not correct, use a shell provisioner
