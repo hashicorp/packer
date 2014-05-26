@@ -155,6 +155,13 @@ each category, the available configuration keys are alphabetized.
   described above. Note that if this is specified, you must omit the
   security_group_id.
 
+* `spot_price` (string) - The maximum hourly price to launch a spot instance
+  to create the AMI. It is a type of instances that EC2 starts when the maximum
+  price that you specify exceeds the current spot price. Spot price will be
+  updated based on available spot instance capacity and current spot Instance
+  requests. It may save you some costs. For example, it takes only "0.001" to
+  launch a spot "m3.medium" instance while "0.07" needed for on-demand.
+
 * `ssh_port` (integer) - The port that SSH will be available on. This defaults
   to port 22.
 
