@@ -1,13 +1,18 @@
 package winrm
 
 import (
+  "fmt"
+  "io"
+  "log"
+  "strings"
+  "time"
+
 	isotime "github.com/mitchellh/packer/common/time"
 	"github.com/mitchellh/packer/packer"
 	"github.com/sneal/go-winrm"
-	"io"
-	"log"
-	"time"
 )
+
+const elevatedShellScriptPath = "C:/Windows/Temp/packer-elevated-shell.ps1"
 
 type comm struct {
 	client   *winrm.Client
@@ -63,7 +68,7 @@ func (c *comm) StartElevated(cmd *packer.RemoteCmd) (err error) {
 		return err
 	}
 
-	elevatedCmd, err := tpl.Process(ElevatedShellTemplate, &elevatedShellOptions{
+	elevatedScript, err := tpl.Process(ElevatedShellTemplate, &elevatedShellOptions{
 		Command:  cmd.Command,
 		User:     c.user,
 		Password: c.password,
@@ -72,7 +77,15 @@ func (c *comm) StartElevated(cmd *packer.RemoteCmd) (err error) {
 		return err
 	}
 
-	return c.runCommand(winrm.Powershell(elevatedCmd), cmd)
+  // Upload the script which creates and manages the scheduled task
+  err = c.Upload(elevatedShellScriptPath, strings.NewReader(elevatedScript))
+  if err != nil {
+    return err
+  }
+
+  // Run the script that was uploaded
+  command := fmt.Sprintf("powershell -executionpolicy bypass -file %s", elevatedShellScriptPath)
+	return c.runCommand(command, cmd)
 }
 
 func (c *comm) StartUnelevated(cmd *packer.RemoteCmd) (err error) {
@@ -147,12 +160,12 @@ func (c *comm) Download(string, io.Writer) error {
 }
 
 const ElevatedShellTemplate = `
-$command = "{{.Command}}"
+$command = "{{.Command}}" + '; exit $LASTEXITCODE'
 $user = '{{.User}}'
 $password = '{{.Password}}'
 
 $task_name = "WinRM_Elevated_Shell"
-$out_file = "$env:SystemRoot\Temp\WinRM_Elevated_Shell.log"
+$out_file = "$env:SystemRoot\Temp\packer-elevated-shell.log"
 
 if (Test-Path $out_file) {
   del $out_file
