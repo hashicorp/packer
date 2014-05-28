@@ -79,8 +79,17 @@ func (c *Communicator) Upload(dst string, r io.Reader) error {
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+	// If src ends with a trailing "/", copy from "src/." so that
+	// directory contents (including hidden files) are copied, but the
+	// directory "src" is omitted.  BSD does this automatically when
+	// the source contains a trailing slash, but linux does not.
+	if src[len(src)-1] == '/' {
+		src = src + "."
+	}
+
 	// TODO: remove any file copied if it appears in `exclude`
 	chrootDest := filepath.Join(c.Chroot, dst)
+
 	log.Printf("Uploading directory '%s' to '%s'", src, chrootDest)
 	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp -R '%s' %s", src, chrootDest))
 	if err != nil {
