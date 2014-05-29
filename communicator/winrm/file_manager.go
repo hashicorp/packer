@@ -34,7 +34,11 @@ func (f *fileManager) UploadFile(dst string, src string) error {
 }
 
 func (f *fileManager) Upload(dst string, input io.Reader) error {
-	guestFilePath := fmt.Sprintf("C:\\Windows\\Temp\\winrm-upload-%s.tmp", uuid.TimeOrderedUUID())
+	guestFileName := fmt.Sprintf("winrm-upload-%s.tmp", uuid.TimeOrderedUUID())
+
+	// Paths to the file, one for cmd.exe and the other for PowerShell
+	cmdGuestFilePath := fmt.Sprintf("%%TEMP%%\\%s", guestFileName)
+	psGuestFilePath := fmt.Sprintf("$env:TEMP\\%s", guestFileName)
 
 	// Upload the file in chunks to get around the Windows command line size limit
 	bytes, err := ioutil.ReadAll(input)
@@ -42,8 +46,8 @@ func (f *fileManager) Upload(dst string, input io.Reader) error {
 		return err
 	}
 
-	for _, chunk := range encodeChunks(bytes, 8000-len(guestFilePath)) {
-		err = f.runCommand(fmt.Sprintf("echo %s >> \"%s\"", chunk, guestFilePath))
+	for _, chunk := range encodeChunks(bytes, 8000-len(cmdGuestFilePath)) {
+		err = f.runCommand(fmt.Sprintf("echo %s >> \"%s\"", chunk, cmdGuestFilePath))
 		if err != nil {
 			return err
 		}
@@ -51,8 +55,8 @@ func (f *fileManager) Upload(dst string, input io.Reader) error {
 
 	// Move the file to its permanent location and decode
 	err = f.runCommand(winrm.Powershell(fmt.Sprintf(`
-    $tmp_file_path = [System.IO.Path]::GetFullPath('%s')
-    $dest_file_path = [System.IO.Path]::GetFullPath('%s')
+    $tmp_file_path = [System.IO.Path]::GetFullPath("%s")
+    $dest_file_path = [System.IO.Path]::GetFullPath("%s")
 
     if (Test-Path $dest_file_path) {
       rm $dest_file_path
@@ -71,7 +75,7 @@ func (f *fileManager) Upload(dst string, input io.Reader) error {
     } else {
     	echo $null > $dest_file_path
     }
-  `, guestFilePath, dst)))
+  `, psGuestFilePath, dst)))
 
 	return err
 }

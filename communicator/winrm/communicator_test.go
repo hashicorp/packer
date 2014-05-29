@@ -11,12 +11,20 @@ import (
 	"time"
 )
 
+func TestCommIsCommunicator(t *testing.T) {
+	var raw interface{}
+	raw = &comm{}
+	if _, ok := raw.(packer.Communicator); !ok {
+		t.Fatalf("comm must be a communicator")
+	}
+}
+
 func TestStart(t *testing.T) {
 	// This test hits an already running Windows VM
 	// You can comment this line out temporarily during development
 	t.Skip()
 
-	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1) * time.Minute)
+	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1)*time.Minute)
 	if err != nil {
 		t.Fatalf("error connecting to WinRM: %s", err)
 	}
@@ -51,7 +59,7 @@ func TestStartElevated(t *testing.T) {
 	// You can comment this line out temporarily during development
 	t.Skip()
 
-	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1) * time.Minute)
+	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1)*time.Minute)
 	if err != nil {
 		t.Fatalf("error connecting to WinRM: %s", err)
 	}
@@ -59,7 +67,7 @@ func TestStartElevated(t *testing.T) {
 	var cmd packer.RemoteCmd
 	var outWriter, errWriter bytes.Buffer
 
-	cmd.Command = "(New-Object System.Net.WebClient).DownloadFile('http://www.getchef.com/chef/install.msi', 'C:/Windows/Temp/chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait"
+	cmd.Command = "dir"
 	cmd.Stdout = &outWriter
 	cmd.Stderr = &errWriter
 
@@ -86,7 +94,7 @@ func TestUpload(t *testing.T) {
 	// You can comment this line out temporarily during development
 	t.Skip()
 
-	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1) * time.Minute)
+	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1)*time.Minute)
 	if err != nil {
 		t.Fatalf("error connecting to WinRM: %s", err)
 	}
@@ -108,7 +116,7 @@ func TestUploadDir(t *testing.T) {
 	// You can comment this line out temporarily during development
 	t.Skip()
 
-	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1) * time.Minute)
+	comm, err := New("localhost:5985", "vagrant", "vagrant", time.Duration(1)*time.Minute)
 	if err != nil {
 		t.Fatalf("error connecting to WinRM: %s", err)
 	}
