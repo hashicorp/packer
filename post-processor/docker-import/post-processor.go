@@ -12,8 +12,10 @@ const BuilderId = "packer.post-processor.docker-import"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Repository string `mapstructure:"repository"`
-	Tag        string `mapstructure:"tag"`
+	Repository string   `mapstructure:"repository"`
+	Tag        string   `mapstructure:"tag"`
+	Cmd        string   `mapstructure:"cmd"`
+	Expose     []string `mapstructure:"expose"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -86,6 +88,39 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	ui.Message("Imported ID: " + id)
+
+	// Gather EXPOSE lines for Dockerfile
+	exposeStr := ""
+	if len(p.config.Expose) > 0 {
+		for _, exposeItem := range p.config.Expose {
+			exposeStr += "EXPOSE " + exposeItem + "\n"
+		}
+	}
+
+	// CMD?
+	cmdStr := ""
+	if "" != p.config.Cmd {
+		cmdStr = "CMD " + p.config.Cmd
+	}
+
+	if "" != exposeStr || "" != p.config.Cmd {
+		// Use Dockerfile
+		dockerfile := fmt.Sprintf(`FROM %s
+# EXPOSE
+%s
+# CMD
+%s`,
+			importRepo,
+			exposeStr,
+			cmdStr)
+		ui.Message("Updating with Dockerfile:")
+		ui.Message(dockerfile)
+		err := driver.BuildFromStdin(dockerfile, importRepo)
+
+		if err != nil {
+			return nil, false, err
+		}
+	}
 
 	// Build the artifact
 	artifact = &docker.ImportArtifact{

@@ -39,6 +39,10 @@ type MockDriver struct {
 	VerifyCalled bool
 }
 
+func (d *MockDriver) BuildFromStdin(dockerfile, repo string) error {
+	return nil
+}
+
 func (d *MockDriver) DeleteImage(id string) error {
 	d.DeleteImageCalled = true
 	d.DeleteImageId = id
