@@ -59,7 +59,7 @@ files obtained in the previous section.
   "client_secrets_file": "client_secret.json",
   "private_key_file": "XXXXXX-privatekey.p12",
   "project_id": "my-project",
-  "source_image": "debian-7-wheezy-v20131014",
+  "source_image": "debian-7-wheezy-v20140415",
   "zone": "us-central1-a"
 }
 </pre>
