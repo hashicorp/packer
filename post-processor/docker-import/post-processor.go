@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"strings"
 )
 
 const BuilderId = "packer.post-processor.docker-import"
@@ -12,10 +13,9 @@ const BuilderId = "packer.post-processor.docker-import"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Repository string   `mapstructure:"repository"`
-	Tag        string   `mapstructure:"tag"`
-	Cmd        string   `mapstructure:"cmd"`
-	Expose     []string `mapstructure:"expose"`
+	Repository      string   `mapstructure:"repository"`
+	Tag             string   `mapstructure:"tag"`
+	DockerfileLines []string `mapstructure:"dockerfile_lines"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -89,30 +89,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message("Imported ID: " + id)
 
-	// Gather EXPOSE lines for Dockerfile
-	exposeStr := ""
-	if len(p.config.Expose) > 0 {
-		for _, exposeItem := range p.config.Expose {
-			exposeStr += "EXPOSE " + exposeItem + "\n"
-		}
-	}
-
-	// CMD?
-	cmdStr := ""
-	if "" != p.config.Cmd {
-		cmdStr = "CMD " + p.config.Cmd
-	}
-
-	if "" != exposeStr || "" != p.config.Cmd {
+	if len(p.config.DockerfileLines) > 0 {
 		// Use Dockerfile
-		dockerfile := fmt.Sprintf(`FROM %s
-# EXPOSE
-%s
-# CMD
-%s`,
-			importRepo,
-			exposeStr,
-			cmdStr)
+		dockerfile := "FROM " + importRepo + "\n" +
+			strings.Join(p.config.DockerfileLines, "\n")
+
 		ui.Message("Updating with Dockerfile:")
 		ui.Message(dockerfile)
 		err := driver.BuildFromStdin(dockerfile, importRepo)
