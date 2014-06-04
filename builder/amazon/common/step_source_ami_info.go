@@ -1,7 +1,8 @@
-package chroot
+package common
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -12,15 +13,17 @@ import (
 //
 // Produces:
 //   source_image *ec2.Image - the source AMI info
-type StepSourceAMIInfo struct{}
+type StepSourceAMIInfo struct {
+	SourceAmi          string
+	EnhancedNetworking bool
+}
 
 func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Inspecting the source AMI...")
-	imageResp, err := ec2conn.Images([]string{config.SourceAmi}, ec2.NewFilter())
+	imageResp, err := ec2conn.Images([]string{s.SourceAmi}, ec2.NewFilter())
 	if err != nil {
 		err := fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
@@ -29,7 +32,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if len(imageResp.Images) == 0 {
-		err := fmt.Errorf("Source AMI '%s' was not found!", config.SourceAmi)
+		err := fmt.Errorf("Source AMI '%s' was not found!", s.SourceAmi)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -37,9 +40,10 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	image := &imageResp.Images[0]
 
-	// It must be EBS-backed otherwise the build won't work
-	if image.RootDeviceType != "ebs" {
-		err := fmt.Errorf("The root device of the source AMI must be EBS-backed.")
+	// Enhanced Networking (SriovNetSupport) can only be enabled on HVM AMIs.
+	// See http://goo.gl/icuXh5
+	if s.EnhancedNetworking && image.VirtualizationType != "hvm" {
+		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
