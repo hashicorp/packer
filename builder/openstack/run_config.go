@@ -67,7 +67,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"flavlor":      &c.Flavor,
+		"flavor":       &c.Flavor,
 		"ssh_timeout":  &c.RawSSHTimeout,
 		"ssh_username": &c.SSHUsername,
 		"source_image": &c.SourceImage,
