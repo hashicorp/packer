@@ -66,8 +66,12 @@ func (c *comm) StartElevated(cmd *packer.RemoteCmd) (err error) {
 		return err
 	}
 
+  // The command gets put into an interpolated string in the PS script,
+  // so we need to escape any embedded quotes.
+  escapedCmd := strings.Replace(cmd.Command, "\"", "`\"", -1)
+
 	elevatedScript, err := tpl.Process(ElevatedShellTemplate, &elevatedShellOptions{
-		Command:  cmd.Command,
+		Command:  escapedCmd,
 		User:     c.user,
 		Password: c.password,
 	})
