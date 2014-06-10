@@ -43,8 +43,8 @@ var guestOsConfigs = map[string]guestOsConfig{
 	},
 	windowsOsType: guestOsConfig{
 		hasChmod:       false,
-		envVarFormat:   "$env:%s='%s'; ",
-		executeCommand: "& { {{.Vars}}; {{.Path}} }",
+		envVarFormat:   "`$env:%s='%s'; ",
+		executeCommand: "& { {{.Vars}}{{.Path}} }",
 		inlinePrefix:   "",
 		inlineShebang:  "",
 		newline:        "\r\n",

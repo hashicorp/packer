@@ -276,7 +276,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
-	if flattenedEnvVars != "$env:PACKER_BUILD_NAME='vmware'; $env:PACKER_BUILDER_TYPE='iso'; " {
+	if flattenedEnvVars != "`$env:PACKER_BUILD_NAME='vmware'; `$env:PACKER_BUILDER_TYPE='iso'; " {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 
@@ -287,7 +287,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
-	if flattenedEnvVars != "$env:PACKER_BUILD_NAME='vmware'; $env:PACKER_BUILDER_TYPE='iso'; $env:foo='bar'; " {
+	if flattenedEnvVars != "`$env:PACKER_BUILD_NAME='vmware'; `$env:PACKER_BUILDER_TYPE='iso'; `$env:foo='bar'; " {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 
@@ -298,7 +298,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
-	if flattenedEnvVars != "$env:PACKER_BUILD_NAME='vmware'; $env:PACKER_BUILDER_TYPE='iso'; $env:foo='bar'; $env:baz='qux'; " {
+	if flattenedEnvVars != "`$env:PACKER_BUILD_NAME='vmware'; `$env:PACKER_BUILDER_TYPE='iso'; `$env:foo='bar'; `$env:baz='qux'; " {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 }
