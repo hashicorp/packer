@@ -16,7 +16,44 @@ import (
 	"time"
 )
 
-const DefaultRemotePath = "/tmp/script.sh"
+const unixOsType = "unix"
+const windowsOsType = "windows"
+
+const defaultOsType = unixOsType
+
+type guestOsConfig struct {
+	hasChmod       bool
+	envVarJoiner   string
+	executeCommand string
+	inlinePrefix   string
+	inlineShebang  string
+	newline        string
+	remotePath     string
+}
+
+var guestOsConfigs = map[string]guestOsConfig{
+	unixOsType: guestOsConfig{
+		hasChmod:       true,
+		envVarJoiner:   " ",
+		executeCommand: "chmod +x {{.Path}}; {{.Vars}} {{.Path}}",
+		inlinePrefix:   "#!",
+		inlineShebang:  "/bin/sh",
+		newline:        "\n",
+		remotePath:     "/tmp/script.sh",
+	},
+	windowsOsType: guestOsConfig{
+		hasChmod:       false,
+		// a leading space here will create vars with trailing spaces
+		envVarJoiner:   "& ",
+		// a leading space here will create a var with a trailing space
+		executeCommand: "{{.Vars}}& {{.Path}}",
+		inlinePrefix:   "",
+		inlineShebang:  "",
+		newline:        "\r\n",
+		// leave off C:, as Autounattend.xml may define a different drive
+		remotePath:     "\\packer_temp.cmd",
+	},
+}
 
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -24,6 +61,9 @@ type config struct {
 	// If true, the script contains binary and line endings will not be
 	// converted from Windows to Unix-style.
 	Binary bool
+
+	// The type of OS the guest is running: unix or windows
+	GuestOsType string `mapstructure:"guest_os_type"`
 
 	// An inline script to execute. Multiple strings are all executed
 	// in the context of a single shell.
@@ -84,8 +124,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
+	if p.config.GuestOsType == "" {
+		p.config.GuestOsType = defaultOsType
+	}
+
+	p.config.GuestOsType = strings.ToLower(p.config.GuestOsType)
+
+	guestOsConfig, ok := guestOsConfigs[p.config.GuestOsType]
+
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOsType)
+	}
+
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
+		p.config.ExecuteCommand = guestOsConfig.executeCommand
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -93,7 +145,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh"
+		p.config.InlineShebang = guestOsConfig.inlineShebang
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
@@ -101,7 +153,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = DefaultRemotePath
+		p.config.RemotePath = guestOsConfig.remotePath
 	}
 
 	if p.config.Scripts == nil {
@@ -197,6 +249,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
+	guestOsConfig, _ := guestOsConfigs[p.config.GuestOsType]
+
 	// If we have an inline script, then turn that into a temporary
 	// shell script and use that.
 	if p.config.Inline != nil {
@@ -211,9 +265,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
-		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
+
+		sheBang := guestOsConfig.inlinePrefix + p.config.InlineShebang + guestOsConfig.newline
+
+		writer.WriteString(sheBang)
 		for _, command := range p.config.Inline {
-			if _, err := writer.WriteString(command + "\n"); err != nil {
+			if _, err := writer.WriteString(command + guestOsConfig.newline); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
@@ -231,6 +288,18 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
 	copy(envVars[2:], p.config.Vars)
 
+	if p.config.GuestOsType == windowsOsType {
+		for i, envVar := range envVars {
+			// see http://www.robvanderwoude.com/escapechars.php
+			for _, rune := range "^&<>|" {
+				old := string(rune)
+				new := "^" + old
+				envVar = strings.Replace(envVar, old, new, -1)
+			}
+			envVars[i] = "SET " + envVar
+		}
+	}
+
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
 
@@ -242,7 +311,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		defer f.Close()
 
 		// Flatten the environment variables
-		flattendVars := strings.Join(envVars, " ")
+		flattendVars := strings.Join(envVars, guestOsConfig.envVarJoiner)
 
 		// Compile the command
 		command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
@@ -273,15 +342,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
-			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+			if guestOsConfig.hasChmod {
+				cmd = &packer.RemoteCmd{
+					Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+				}
+				if err := comm.Start(cmd); err != nil {
+					return fmt.Errorf(
+						"Error chmodding script file to 0777 in remote "+
+							"machine: %s", err)
+				}
+				cmd.Wait()
 			}
-			if err := comm.Start(cmd); err != nil {
-				return fmt.Errorf(
-					"Error chmodding script file to 0777 in remote "+
-						"machine: %s", err)
-			}
-			cmd.Wait()
 
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
