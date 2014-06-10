@@ -211,3 +211,94 @@ func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
+
+func TestProvisioner_createFlattenedEnvVars_unix(t *testing.T) {
+	config := testConfig()
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error preparing config: %s", err)
+	}
+
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
+
+	// no user env var
+	flattenedEnvVars, err := p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != "PACKER_BUILD_NAME=vmware PACKER_BUILDER_TYPE=iso " {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// single user env var
+	p.config.Vars = []string{"foo=bar"}
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != "PACKER_BUILD_NAME=vmware PACKER_BUILDER_TYPE=iso foo=bar " {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// multiple user env vars
+	p.config.Vars = []string{"foo=bar", "baz=qux"}
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != "PACKER_BUILD_NAME=vmware PACKER_BUILDER_TYPE=iso foo=bar baz=qux " {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+}
+
+func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
+	config := testConfig()
+	config["guest_os_type"] = "windows"
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error preparing config: %s", err)
+	}
+
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
+
+	// no user env var
+	flattenedEnvVars, err := p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != "$env:PACKER_BUILD_NAME='vmware'; $env:PACKER_BUILDER_TYPE='iso'; " {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// single user env var
+	p.config.Vars = []string{"foo=bar"}
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != "$env:PACKER_BUILD_NAME='vmware'; $env:PACKER_BUILDER_TYPE='iso'; $env:foo='bar'; " {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// multiple user env vars
+	p.config.Vars = []string{"foo=bar", "baz=qux"}
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != "$env:PACKER_BUILD_NAME='vmware'; $env:PACKER_BUILDER_TYPE='iso'; $env:foo='bar'; $env:baz='qux'; " {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+}

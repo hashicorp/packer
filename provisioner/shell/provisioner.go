@@ -23,7 +23,7 @@ const defaultOsType = unixOsType
 
 type guestOsConfig struct {
 	hasChmod       bool
-	envVarJoiner   string
+	envVarFormat   string
 	executeCommand string
 	inlinePrefix   string
 	inlineShebang  string
@@ -34,7 +34,7 @@ type guestOsConfig struct {
 var guestOsConfigs = map[string]guestOsConfig{
 	unixOsType: guestOsConfig{
 		hasChmod:       true,
-		envVarJoiner:   " ",
+		envVarFormat:   "%s=%s ",
 		executeCommand: "chmod +x {{.Path}}; {{.Vars}} {{.Path}}",
 		inlinePrefix:   "#!",
 		inlineShebang:  "/bin/sh",
@@ -43,15 +43,12 @@ var guestOsConfigs = map[string]guestOsConfig{
 	},
 	windowsOsType: guestOsConfig{
 		hasChmod:       false,
-		// a leading space here will create vars with trailing spaces
-		envVarJoiner:   "& ",
-		// a leading space here will create a var with a trailing space
-		executeCommand: "{{.Vars}}& {{.Path}}",
+		envVarFormat:   "$env:%s='%s'; ",
+		executeCommand: "& { {{.Vars}}; {{.Path}} }",
 		inlinePrefix:   "",
 		inlineShebang:  "",
 		newline:        "\r\n",
-		// leave off C:, as Autounattend.xml may define a different drive
-		remotePath:     "\\packer_temp.cmd",
+		remotePath:     "C:/Windows/Temp/packer-shell.ps1",
 	},
 }
 
@@ -101,7 +98,8 @@ type config struct {
 }
 
 type Provisioner struct {
-	config config
+	config        config
+	guestOsConfig guestOsConfig
 }
 
 type ExecuteCommandTemplate struct {
@@ -130,14 +128,15 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	p.config.GuestOsType = strings.ToLower(p.config.GuestOsType)
 
-	guestOsConfig, ok := guestOsConfigs[p.config.GuestOsType]
+	var ok bool
+	p.guestOsConfig, ok = guestOsConfigs[p.config.GuestOsType]
 
 	if !ok {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOsType)
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = guestOsConfig.executeCommand
+		p.config.ExecuteCommand = p.guestOsConfig.executeCommand
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -145,7 +144,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = guestOsConfig.inlineShebang
+		p.config.InlineShebang = p.guestOsConfig.inlineShebang
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
@@ -153,7 +152,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = guestOsConfig.remotePath
+		p.config.RemotePath = p.guestOsConfig.remotePath
 	}
 
 	if p.config.Scripts == nil {
@@ -249,8 +248,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
-	guestOsConfig, _ := guestOsConfigs[p.config.GuestOsType]
-
 	// If we have an inline script, then turn that into a temporary
 	// shell script and use that.
 	if p.config.Inline != nil {
@@ -266,11 +263,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
 
-		sheBang := guestOsConfig.inlinePrefix + p.config.InlineShebang + guestOsConfig.newline
+		sheBang := p.guestOsConfig.inlinePrefix + p.config.InlineShebang + p.guestOsConfig.newline
 
 		writer.WriteString(sheBang)
 		for _, command := range p.config.Inline {
-			if _, err := writer.WriteString(command + guestOsConfig.newline); err != nil {
+			if _, err := writer.WriteString(command + p.guestOsConfig.newline); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
@@ -282,22 +279,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		tf.Close()
 	}
 
-	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = "PACKER_BUILD_NAME=" + p.config.PackerBuildName
-	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
-	copy(envVars[2:], p.config.Vars)
-
-	if p.config.GuestOsType == windowsOsType {
-		for i, envVar := range envVars {
-			// see http://www.robvanderwoude.com/escapechars.php
-			for _, rune := range "^&<>|" {
-				old := string(rune)
-				new := "^" + old
-				envVar = strings.Replace(envVar, old, new, -1)
-			}
-			envVars[i] = "SET " + envVar
-		}
+	// Create environment variables to set before executing the command
+	flattendVars, err := p.createFlattenedEnvVars()
+	if err != nil {
+		return err
 	}
 
 	for _, path := range scripts {
@@ -309,9 +294,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error opening shell script: %s", err)
 		}
 		defer f.Close()
-
-		// Flatten the environment variables
-		flattendVars := strings.Join(envVars, guestOsConfig.envVarJoiner)
 
 		// Compile the command
 		command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
@@ -342,7 +324,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
-			if guestOsConfig.hasChmod {
+			if p.guestOsConfig.hasChmod {
 				cmd = &packer.RemoteCmd{
 					Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
 				}
@@ -376,6 +358,32 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
+	flattened = ""
+	envVars := make(map[string]string)
+
+	// Always available Packer provided env vars
+	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
+	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
+
+	// Split vars into key/value components
+	for _, envVar := range p.config.Vars {
+		keyValue := strings.Split(envVar, "=")
+		if len(keyValue) != 2 {
+			err = errors.New("Shell provisioner environment variables must be in key=value format")
+			return
+		}
+		envVars[keyValue[0]] = keyValue[1]
+	}
+
+	// Re-assemble vars using OS specific format pattern and flatten
+	for key, value := range envVars {
+		flattened += fmt.Sprintf(p.guestOsConfig.envVarFormat, key, value)
+	}
+
+	return
 }
 
 // retryable will retry the given function over and over until a
