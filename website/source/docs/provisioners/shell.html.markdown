@@ -62,24 +62,26 @@ Optional parameters:
   the path to the script to run, and `Vars`, which is the list of
   `environment_vars`, if configured.
   When `guest_os_type` is `unix`, this defaults to `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`.
-  When `guest_os_type` is `windows`, this defaults to `{{ .Vars }} & {{ .Path }}`.
+  When `guest_os_type` is `windows`, this defaults to `& { {{.Vars}}{{.Path}} }`.
 
 * `guest_os_type` (string) - The type of the guest OS, either `unix`, and `windows`.
-  Currently, `unix` should be used for any unix-like OS, including Cygwin, and OSX.
-  This defaults to `unix`.
+  Currently `unix` should be used for any unix-like OS, for example: Ubuntu,
+  Cygwin, and OSX. This defaults to `unix`.
 
 * `inline_shebang` (string) - The
   [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
   running commands specified by `inline`.
   If you're not using `inline`, then this configuration has no effect.
   When `guest_os_type` is `unix`, this defaults to `/bin/sh`.
-  When `guest_os_type` is `windows`, this defaults to an empty string.
+  When `guest_os_type` is `windows`, this defaults to an empty string. All
+  Windows scripts are run from PowerShell.
 
 * `remote_path` (string) - The path where the script will be uploaded to
   in the machine. This value must be
   a writable location and any parent directories must already exist.
   When `guest_os_type` is `unix`, this defaults to `/tmp/script.sh`.
-  When `guest_os_type` is `windows`, this defaults to `\packer_temp.cmd`.
+  When `guest_os_type` is `windows`, this defaults to
+  `C:/Windows/Temp/packer-shell.ps1`.
 
 * `start_retry_timeout` (string) - The amount of time to attempt to
   _start_ the remote process. By default this is "5m" or 5 minutes. This
