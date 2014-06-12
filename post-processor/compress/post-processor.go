@@ -4,11 +4,10 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
-	"io"
-	"os"
-
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"io"
+	"os"
 )
 
 type Config struct {
@@ -36,7 +35,7 @@ func (self *PostProcessor) Configure(raws ...interface{}) error {
 	self.config.tpl.UserVars = self.config.PackerUserVars
 
 	templates := map[string]*string{
-		"output_path": &self.config.OutputPath,
+		"output": &self.config.OutputPath,
 	}
 
 	errs := new(packer.MultiError)
