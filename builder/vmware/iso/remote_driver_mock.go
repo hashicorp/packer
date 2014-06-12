@@ -21,7 +21,7 @@ type RemoteDriverMock struct {
 	UnregisterErr    error
 }
 
-func (d *RemoteDriverMock) UploadISO(path string) (string, error) {
+func (d *RemoteDriverMock) UploadISO(path string, checksum string, checksumType string) (string, error) {
 	d.UploadISOCalled = true
 	d.UploadISOPath = path
 	return d.UploadISOResult, d.UploadISOErr
