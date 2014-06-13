@@ -10,13 +10,13 @@ Type: `vmware-vmx`
 This VMware builder is able to create VMware virtual machines from an
 existing VMware virtual machine (a VMX file). It currently
 supports building virtual machines on hosts running
-[VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X,
+[VMware Fusion Professional](http://www.vmware.com/products/fusion-professional/) for OS X,
 [VMware Workstation](http://www.vmware.com/products/workstation/overview.html)
 for Linux and Windows, and
 [VMware Player](http://www.vmware.com/products/player/) on Linux.
 
 The builder builds a virtual machine by cloning the VMX file using
-the clone capabilities introduced in VMware Fusion 6, Workstation 10,
+the clone capabilities introduced in VMware Fusion Professional 6, Workstation 10,
 and Player 6. After cloning the VM, it provisions software within the
 new machine, shuts it down, and compacts the disks. The resulting folder
 contains a new VMware virtual machine.
