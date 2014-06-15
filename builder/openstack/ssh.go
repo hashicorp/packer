@@ -26,7 +26,7 @@ func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(multistep.S
 		for pool, addresses := range ip_pools {
 			if pool != "" {
 				for _, address := range addresses {
-					if address.Addr != "" {
+					if address.Addr != "" && address.Version == 4 {
 						return fmt.Sprintf("%s:%d", address.Addr, port), nil
 					}
 				}
