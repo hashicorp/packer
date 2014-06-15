@@ -89,6 +89,8 @@ each category, the available configuration keys are alphabetized.
 <!---
 @todo document me
 -->
+* `networks` (array of strings) - A list of networks by UUID to attach
+  to this instance.
 
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
