@@ -69,6 +69,9 @@ each category, the available configuration keys are alphabetized.
 * `insecure` (boolean) - Whether or not the connection to OpenStack can be done
   over an insecure connection. By default this is false.
 
+* `networks` (array of strings) - A list of networks by UUID to attach
+  to this instance.
+
 * `openstack_provider` (string)
 <!---
 @todo document me
@@ -89,9 +92,6 @@ each category, the available configuration keys are alphabetized.
 <!---
 @todo document me
 -->
-* `networks` (array of strings) - A list of networks by UUID to attach
-  to this instance.
-
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
 
