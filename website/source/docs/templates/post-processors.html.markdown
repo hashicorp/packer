@@ -81,7 +81,7 @@ compressed then uploaded, but the compressed result is not kept.
   "post-processors": [
     [
       "compress",
-      { "type": "upload", "endpoint": "http://fake.com" }
+      { "type": "upload", "endpoint": "http://example.com" }
     ]
   ]
 }
