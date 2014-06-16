@@ -1,11 +1,11 @@
-package vagrant
+package vagrantcloud
 
 import (
 	"fmt"
 	"os"
 )
 
-const BuilderId = "mitchellh.post-processor.vagrant"
+const BuilderId = "pearkes.post-processor.vagrant-cloud"
 
 type Artifact struct {
 	Path     string
@@ -28,7 +28,7 @@ func (a *Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.Provider
+	return ""
 }
 
 func (a *Artifact) String() string {
