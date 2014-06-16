@@ -92,8 +92,6 @@ func (s *StepConnectWinRM) Cleanup(multistep.StateBag) {
 }
 
 func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan struct{}) (packer.Communicator, error) {
-	handshakeAttempts := 0
-
 	var comm packer.Communicator
 	for {
 		select {
@@ -112,15 +110,8 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 		log.Println("Attempting WinRM connection...")
 		comm, err = winrm.New(address, s.WinRMUser, s.WinRMPassword, s.WinRMWaitTimeout)
 		if err != nil {
-			log.Printf("WinRM handshake err: %s", err)
-
-			handshakeAttempts += 1
-			if handshakeAttempts < 20 {
-				// Try to connect via WinRM a handful of times
-				continue
-			}
-
-			return nil, err
+			log.Printf("WinRM connection err: %s", err)
+			continue
 		}
 
 		break
