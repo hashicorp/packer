@@ -315,24 +315,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	var connectStep multistep.Step
-
-	if b.config.RunConfig.CommunicatorType == "winrm" {
-		connectStep = &common.StepConnectWinRM{
-			WinRMAddress:     vmwcommon.WinRMAddressFunc(&b.config.WinRMConfig, driver),
-			WinRMUser:        b.config.WinRMConfig.WinRMUser,
-			WinRMPassword:    b.config.WinRMConfig.WinRMPassword,
-			WinRMWaitTimeout: b.config.WinRMConfig.WinRMWaitTimeout,
-		}
-	} else {
-		connectStep = &common.StepConnectSSH{
-			SSHAddress:     vmwcommon.SSHAddressFunc(&b.config.SSHConfig, driver),
-			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
-			SSHWaitTimeout: b.config.SSHWaitTimeout,
-			NoPty:          b.config.SSHSkipRequestPty,
-		}
-	}
-
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
 			RemoteType:        b.config.RemoteType,
@@ -374,7 +356,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless:           b.config.Headless,
 		},
 		&stepTypeBootCommand{},
-		connectStep,
+		vmwcommon.NewConnectStep(
+			b.config.RunConfig.CommunicatorType,
+			driver,
+			&b.config.SSHConfig,
+			&b.config.WinRMConfig),
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
