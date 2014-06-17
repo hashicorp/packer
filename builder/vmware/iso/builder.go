@@ -85,7 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
 
-	if b.config.RunConfig.CommunicatorType == "winrm" {
+	if b.config.RunConfig.CommunicatorType == packer.WinRMCommunicatorType {
 		errs = packer.MultiErrorAppend(errs, b.config.WinRMConfig.Prepare(b.config.tpl)...)
 	} else {
 		errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)

@@ -7,6 +7,9 @@ import (
 	"sync"
 )
 
+const WinRMCommunicatorType = "winrm"
+const SSHCommunicatorType = "ssh"
+
 // RemoteCmd represents a remote command being prepared or run.
 type RemoteCmd struct {
 	// Command is the command to run remotely. This is executed as if

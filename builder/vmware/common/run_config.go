@@ -22,7 +22,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	if c.CommunicatorType == "" {
-		c.CommunicatorType = "ssh"
+		c.CommunicatorType = packer.SSHCommunicatorType
 	} else {
 		c.CommunicatorType = strings.ToLower(c.CommunicatorType)
 	}
@@ -48,9 +48,10 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
-	if c.CommunicatorType != "winrm" && c.CommunicatorType != "ssh" {
+	if c.CommunicatorType != packer.WinRMCommunicatorType && c.CommunicatorType != packer.SSHCommunicatorType {
 		errs = append(
-			errs, fmt.Errorf("Invalid communicator type: %s, expected ssh or winrm", c.CommunicatorType))
+			errs, fmt.Errorf("Invalid communicator type: %s, expected %s or %s",
+				c.CommunicatorType, packer.WinRMCommunicatorType, packer.SSHCommunicatorType))
 	}
 
 	return errs
