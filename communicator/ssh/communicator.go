@@ -3,7 +3,7 @@ package ssh
 import (
 	"bufio"
 	"bytes"
-	"code.google.com/p/gosshold/ssh"
+	"code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
@@ -14,13 +14,13 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 )
 
 type comm struct {
-	client *ssh.ClientConn
-	config *Config
-	conn   net.Conn
+	client  *ssh.Client
+	config  *Config
+	conn    net.Conn
+	address string
 }
 
 // Config is the structure used to configure the SSH communicator.
@@ -39,10 +39,11 @@ type Config struct {
 
 // Creates a new packer.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
-func New(config *Config) (result *comm, err error) {
+func New(address string, config *Config) (result *comm, err error) {
 	// Establish an initial connection and connect
 	result = &comm{
-		config: config,
+		config:  config,
+		address: address,
 	}
 
 	if err = result.reconnect(); err != nil {
@@ -113,45 +114,6 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 		close(doneCh)
-	}()
-
-	go func() {
-		failures := 0
-		for {
-			log.Printf("[DEBUG] Background SSH connection checker is testing")
-			dummy, err := c.config.Connection()
-			if err == nil {
-				failures = 0
-				dummy.Close()
-			}
-
-			select {
-			case <-doneCh:
-				return
-			default:
-			}
-
-			if err != nil {
-				log.Printf("background SSH connection checker failure: %s", err)
-				failures += 1
-			}
-
-			if failures < 5 {
-				time.Sleep(5 * time.Second)
-				continue
-			}
-
-			// Acquire a lock in order to modify session state
-			sessionLock.Lock()
-			defer sessionLock.Unlock()
-
-			// Kill the connection and mark that we timed out.
-			log.Printf("Too many SSH connection failures. Killing it!")
-			c.conn.Close()
-			timedOut = true
-
-			return
-		}
 	}()
 
 	return
@@ -253,9 +215,12 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	log.Printf("handshaking with SSH")
-	c.client, err = ssh.Client(c.conn, c.config.SSHConfig)
+	sshConn, sshChan, req, err := ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
 	if err != nil {
 		log.Printf("handshake error: %s", err)
+	}
+	if sshConn != nil {
+		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
 
 	return

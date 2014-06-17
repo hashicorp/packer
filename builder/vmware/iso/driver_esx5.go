@@ -3,7 +3,7 @@ package iso
 import (
 	"bufio"
 	"bytes"
-	gossh "code.google.com/p/gosshold/ssh"
+	gossh "code.google.com/p/go.crypto/ssh"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -31,6 +31,7 @@ type ESX5Driver struct {
 
 	comm      packer.Communicator
 	outputDir string
+	vmId      string
 }
 
 func (d *ESX5Driver) Clone(dst, src string) error {
@@ -46,9 +47,8 @@ func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, typeId string
 	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", "lsilogic", diskPath)
 }
 
-func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", vmxPath)
+func (d *ESX5Driver) IsRunning(string) (bool, error) {
+	state, err := d.run(nil, "vim-cmd", "vmsvc/power.getstate", d.vmId)
 	if err != nil {
 		return false, err
 	}
@@ -56,13 +56,11 @@ func (d *ESX5Driver) IsRunning(vmxPathLocal string) (bool, error) {
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/power.on", vmxPath)
+	return d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
 }
 
 func (d *ESX5Driver) Stop(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/power.off", vmxPath)
+	return d.sh("vim-cmd", "vmsvc/power.off", d.vmId)
 }
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
@@ -70,7 +68,12 @@ func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
-	return d.sh("vim-cmd", "solo/registervm", vmxPath)
+	r, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
+	if err != nil {
+		return err
+	}
+	d.vmId = strings.TrimRight(r, "\n")
+	return nil
 }
 
 func (d *ESX5Driver) SuppressMessages(vmxPath string) error {
@@ -78,8 +81,7 @@ func (d *ESX5Driver) SuppressMessages(vmxPath string) error {
 }
 
 func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
-	return d.sh("vim-cmd", "vmsvc/unregister", vmxPath)
+	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
 }
 
 func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
@@ -103,6 +105,10 @@ func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
 
 func (d *ESX5Driver) ToolsIsoPath(string) string {
 	return ""
+}
+
+func (d *ESX5Driver) ToolsInstall() error {
+	return d.sh("vim-cmd", "vmsvc/tools.install", d.vmId)
 }
 
 func (d *ESX5Driver) DhcpLeasesPath(string) string {
@@ -254,15 +260,16 @@ func (d *ESX5Driver) String() string {
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
-	return filepath.Join("/vmfs/volumes", d.Datastore, path)
+	baseDir := filepath.Base(filepath.Dir(path))
+	return filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path))
 }
 
 func (d *ESX5Driver) connect() error {
 	address := fmt.Sprintf("%s:%d", d.Host, d.Port)
 
-	auth := []gossh.ClientAuth{
-		gossh.ClientAuthPassword(ssh.Password(d.Password)),
-		gossh.ClientAuthKeyboardInteractive(
+	auth := []gossh.AuthMethod{
+		gossh.Password(d.Password),
+		gossh.KeyboardInteractive(
 			ssh.PasswordKeyboardInteractive(d.Password)),
 	}
 
@@ -276,7 +283,7 @@ func (d *ESX5Driver) connect() error {
 		NoPty: true,
 	}
 
-	comm, err := ssh.New(sshConfig)
+	comm, err := ssh.New(address, sshConfig)
 	if err != nil {
 		return err
 	}

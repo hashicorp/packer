@@ -10,11 +10,17 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	SourceImage   string `mapstructure:"source_image"`
-	Flavor        string `mapstructure:"flavor"`
-	RawSSHTimeout string `mapstructure:"ssh_timeout"`
-	SSHUsername   string `mapstructure:"ssh_username"`
-	SSHPort       int    `mapstructure:"ssh_port"`
+	SourceImage       string   `mapstructure:"source_image"`
+	Flavor            string   `mapstructure:"flavor"`
+	RawSSHTimeout     string   `mapstructure:"ssh_timeout"`
+	SSHUsername       string   `mapstructure:"ssh_username"`
+	SSHPort           int      `mapstructure:"ssh_port"`
+	OpenstackProvider string   `mapstructure:"openstack_provider"`
+	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
+	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
+	FloatingIp        string   `mapstructure:"floating_ip"`
+	SecurityGroups    []string `mapstructure:"security_groups"`
+	Networks          []string `mapstructure:"networks"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -42,6 +48,10 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		c.RawSSHTimeout = "5m"
 	}
 
+	if c.UseFloatingIp && c.FloatingIpPool == "" {
+		c.FloatingIpPool = "public"
+	}
+
 	// Validation
 	var err error
 	errs := make([]error, 0)
@@ -58,7 +68,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"flavlor":      &c.Flavor,
+		"flavor":       &c.Flavor,
 		"ssh_timeout":  &c.RawSSHTimeout,
 		"ssh_username": &c.SSHUsername,
 		"source_image": &c.SourceImage,
@@ -68,8 +78,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		var err error
 		*ptr, err = t.Process(*ptr, nil)
 		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
+			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
 	}
 

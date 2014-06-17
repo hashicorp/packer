@@ -28,6 +28,7 @@ providers.
 
 * AWS
 * DigitalOcean
+* Parallels
 * VirtualBox
 * VMware
 
@@ -51,12 +52,15 @@ below, with more details about certain options in following sections.
 * `compression_level` (integer) - An integer repesenting the
   compression level to use when creating the Vagrant box.  Valid
   values range from 0 to 9, with 0 being no compression and 9 being
-  the best compression. By default, compression is enabled at level 1.
+  the best compression. By default, compression is enabled at level 6.
 
 * `include` (array of strings) - Paths to files to include in the
   Vagrant box. These files will each be copied into the top level directory
   of the Vagrant box (regardless of their paths). They can then be used
   from the Vagrantfile.
+
+* `keep_input_artifact` (boolean) - If set to true, do not delete the
+  `output_directory` on a successful build. Defaults to false.
 
 * `output` (string) - The full path to the box file that will be created
   by this post-processor. This is a
@@ -96,7 +100,7 @@ In the example above, the compression level will be set to 1 except for
 VMware, where it will be set to 0.
 
 The available provider names are: `aws`, `digitalocean`, `virtualbox`,
-and `vmware`.
+`vmware`, and `parallels`.
 
 ## Input Artifacts
 

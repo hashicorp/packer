@@ -23,7 +23,8 @@ func TestProvisionerRPC(t *testing.T) {
 	if !p.PrepCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(p.PrepConfigs, []interface{}{42}) {
+	expected := []interface{}{int64(42)}
+	if !reflect.DeepEqual(p.PrepConfigs, expected) {
 		t.Fatalf("bad: %#v", p.PrepConfigs)
 	}
 

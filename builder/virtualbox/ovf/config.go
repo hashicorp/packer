@@ -3,6 +3,7 @@ package ovf
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
@@ -11,19 +12,25 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig          `mapstructure:",squash"`
-	vboxcommon.ExportConfig      `mapstructure:",squash"`
-	vboxcommon.FloppyConfig      `mapstructure:",squash"`
-	vboxcommon.OutputConfig      `mapstructure:",squash"`
-	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.SSHConfig         `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
+	common.PackerConfig             `mapstructure:",squash"`
+	vboxcommon.ExportConfig         `mapstructure:",squash"`
+	vboxcommon.ExportOpts           `mapstructure:",squash"`
+	vboxcommon.FloppyConfig         `mapstructure:",squash"`
+	vboxcommon.OutputConfig         `mapstructure:",squash"`
+	vboxcommon.RunConfig            `mapstructure:",squash"`
+	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
+	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	SourcePath string `mapstructure:"source_path"`
-	VMName     string `mapstructure:"vm_name"`
-	ImportOpts string `mapstructure:"import_opts"`
+	SourcePath           string `mapstructure:"source_path"`
+	GuestAdditionsMode   string `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath   string `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL    string `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256 string `mapstructure:"guest_additions_sha256"`
+	VMName               string `mapstructure:"vm_name"`
+	ImportOpts           string `mapstructure:"import_opts"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -42,6 +49,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.tpl.UserVars = c.PackerUserVars
 
 	// Defaults
+	if c.GuestAdditionsMode == "" {
+		c.GuestAdditionsMode = "upload"
+	}
+
+	if c.GuestAdditionsPath == "" {
+		c.GuestAdditionsPath = "VBoxGuestAdditions.iso"
+	}
 	if c.VMName == "" {
 		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
 	}
@@ -49,18 +63,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Prepare the errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ExportOpts.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
-		"source_path": &c.SourcePath,
-		"vm_name":     &c.VMName,
-		"import_opts": &c.ImportOpts,
+		"guest_additions_mode":   &c.GuestAdditionsMode,
+		"guest_additions_sha256": &c.GuestAdditionsSHA256,
+		"source_path":            &c.SourcePath,
+		"vm_name":                &c.VMName,
+		"import_opts":            &c.ImportOpts,
 	}
 
 	for n, ptr := range templates {
@@ -79,6 +97,41 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("source_path is invalid: %s", err))
 		}
+	}
+
+	validates := map[string]*string{
+		"guest_additions_path": &c.GuestAdditionsPath,
+		"guest_additions_url":  &c.GuestAdditionsURL,
+	}
+
+	for n, ptr := range validates {
+		if err := c.tpl.Validate(*ptr); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+		}
+	}
+
+	validMode := false
+	validModes := []string{
+		vboxcommon.GuestAdditionsModeDisable,
+		vboxcommon.GuestAdditionsModeAttach,
+		vboxcommon.GuestAdditionsModeUpload,
+	}
+
+	for _, mode := range validModes {
+		if c.GuestAdditionsMode == mode {
+			validMode = true
+			break
+		}
+	}
+
+	if !validMode {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("guest_additions_mode is invalid. Must be one of: %v", validModes))
+	}
+
+	if c.GuestAdditionsSHA256 != "" {
+		c.GuestAdditionsSHA256 = strings.ToLower(c.GuestAdditionsSHA256)
 	}
 
 	// Warnings

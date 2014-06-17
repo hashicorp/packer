@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -24,6 +26,33 @@ func TestCheckUnusedConfig(t *testing.T) {
 	err = CheckUnusedConfig(md)
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestChooseString(t *testing.T) {
+	cases := []struct {
+		Input  []string
+		Output string
+	}{
+		{
+			[]string{"", "foo", ""},
+			"foo",
+		},
+		{
+			[]string{"", "foo", "bar"},
+			"foo",
+		},
+		{
+			[]string{"", "", ""},
+			"",
+		},
+	}
+
+	for _, tc := range cases {
+		result := ChooseString(tc.Input...)
+		if result != tc.Output {
+			t.Fatalf("bad: %#v", tc.Input)
+		}
 	}
 }
 
@@ -68,6 +97,38 @@ func TestDecodeConfig(t *testing.T) {
 
 // This test tests the case that a user var is used for an integer
 // configuration.
+func TestDecodeConfig_stringToSlice(t *testing.T) {
+	type Local struct {
+		Val      []string
+		EmptyVal []string
+	}
+
+	raw := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": "bar",
+		},
+
+		"val":      "foo,{{user `foo`}}",
+		"emptyval": "",
+	}
+
+	var result Local
+	_, err := DecodeConfig(&result, raw)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := []string{"foo", "bar"}
+	if !reflect.DeepEqual(result.Val, expected) {
+		t.Fatalf("invalid: %#v", result.Val)
+	}
+	if len(result.EmptyVal) > 0 {
+		t.Fatalf("invalid: %#v", result.EmptyVal)
+	}
+}
+
+// This test tests the case that a user var is used for an integer
+// configuration.
 func TestDecodeConfig_userVarConversion(t *testing.T) {
 	type Local struct {
 		Val int
@@ -79,6 +140,32 @@ func TestDecodeConfig_userVarConversion(t *testing.T) {
 		},
 
 		"val": "{{user `foo`}}",
+	}
+
+	var result Local
+	_, err := DecodeConfig(&result, raw)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Val != 42 {
+		t.Fatalf("invalid: %#v", result.Val)
+	}
+}
+
+// This tests the way MessagePack decodes strings (into []uint8) and
+// that we can still decode into the proper types.
+func TestDecodeConfig_userVarConversionUInt8(t *testing.T) {
+	type Local struct {
+		Val int
+	}
+
+	raw := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": "42",
+		},
+
+		"val": []uint8("{{user `foo`}}"),
 	}
 
 	var result Local
@@ -141,6 +228,11 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 
 	tfPath = filepath.Clean(tfPath)
 
+	filePrefix := "file://"
+	if runtime.GOOS == "windows" {
+		filePrefix += "/"
+	}
+
 	// Relative filepath. We run this test in a func so that
 	// the defers run right away.
 	func() {
@@ -161,8 +253,11 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 
-		if u != fmt.Sprintf("file://%s", tfPath) {
-			t.Fatalf("unexpected: %s", u)
+		expected := fmt.Sprintf("%s%s",
+			filePrefix,
+			strings.Replace(tfPath, `\`, `/`, -1))
+		if u != expected {
+			t.Fatalf("unexpected: %#v != %#v", u, expected)
 		}
 	}()
 
@@ -180,8 +275,11 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 
-		if u != fmt.Sprintf("file://%s", tfPath) {
-			t.Fatalf("unexpected: %s", u)
+		expected := fmt.Sprintf("%s%s",
+			filePrefix,
+			strings.Replace(tfPath, `\`, `/`, -1))
+		if u != expected {
+			t.Fatalf("unexpected: %s != %s", u, expected)
 		}
 	}
 }

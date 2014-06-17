@@ -46,7 +46,7 @@ There are many configuration options available for the VirtualBox builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
@@ -67,7 +67,7 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
@@ -82,15 +82,22 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (int) - The size, in megabytes, of the hard disk to create
+* `disk_size` (integer) - The size, in megabytes, of the hard disk to create
   for the VM. By default, this is 40000 (about 40 GB).
 
-* `floppy_files` (array of strings) - A list of files to put onto a floppy
-  disk that is attached when the VM is booted for the first time. This is
-  most useful for unattended Windows installs, which look for an
-  `Autounattend.xml` file on removable media. By default no floppy will
-  be attached. The files listed in this configuration will all be put
-  into the root directory of the floppy disk; sub-directories are not supported.
+* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
+  This can be useful for passing product information to include in the resulting
+  appliance file.
+
+* `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that is attached when the VM is booted. This is most useful
+  for unattended Windows installs, which look for an `Autounattend.xml` file
+  on removable media. By default, no floppy will be attached. All files
+  listed in this setting get placed into the root directory of the floppy
+  and the floppy is attached as the first floppy device. Currently, no
+  support exists for creating sub-directories on the floppy. Wildcard
+  characters (*, ?, and []) are allowed. Directory names are also allowed,
+  which will add all the files found in the directory to the floppy.
 
 * `format` (string) - Either "ovf" or "ova", this specifies the output
   format of the exported virtual machine. This defaults to "ovf".
@@ -114,8 +121,9 @@ Optional:
 
 * `guest_additions_url` (string) - The URL to the guest additions ISO
   to upload. This can also be a file URL if the ISO is at a local path.
-  By default the VirtualBox builder will go and download the proper
-  guest additions ISO from the internet.
+  By default, the VirtualBox builder will attempt to find the guest additions
+  ISO on the local file system. If it is not available locally, the builder
+  will download the proper guest additions ISO from the internet.
 
 * `guest_os_type` (string) - The guest OS type being installed. By default
   this is "other", but you can get _dramatic_ performance improvements by
@@ -128,7 +136,7 @@ Optional:
   hard drive is attached to, defaults to "ide".  When set to "sata", the
   drive is attached to an AHCI SATA controller.
 
-* `headless` (bool) - Packer defaults to building VirtualBox
+* `headless` (boolean) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console.
@@ -141,7 +149,7 @@ Optional:
   available as variables in `boot_command`. This is covered in more detail
   below.
 
-* `http_port_min` and `http_port_max` (int) - These are the minimum and
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
   maximum port to use for the HTTP server started to serve the `http_directory`.
   Because Packer often runs in parallel, Packer will choose a randomly available
   port in this range to run the HTTP server. If you want to force the HTTP
@@ -170,7 +178,7 @@ Optional:
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
-* `ssh_host_port_min` and `ssh_host_port_max` (uint) - The minimum and
+* `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
   maximum port to use for the SSH port on the host machine which is forwarded
   to the SSH port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the
@@ -184,7 +192,7 @@ Optional:
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will be listening on in the guest
+* `ssh_port` (integer) - The port that SSH will be listening on in the guest
   virtual machine. By default this is 22.
 
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
@@ -201,10 +209,14 @@ Optional:
   where the `Name` variable is replaced with the VM name. More details on how
   to use `VBoxManage` are below.
 
+* `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
 * `virtualbox_version_file` (string) - The path within the virtual machine
   to upload a file that contains the VirtualBox version that was used to
   create the machine. This information can be useful for provisioning.
-  By default this is ".vbox_version", which will generally upload it into
+  By default this is ".vbox_version", which will generally be upload it into
   the home directory.
 
 * `vm_name` (string) - This is the name of the OVF file for the new virtual

@@ -52,8 +52,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps.
 	steps := []multistep.Step{
+		&vmwcommon.StepPrepareTools{
+			RemoteType:        b.config.RemoteType,
+			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
+		},
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,
+		},
+		&common.StepCreateFloppy{
+			Files: b.config.FloppyFiles,
 		},
 		&StepCloneVMX{
 			OutputDir: b.config.OutputDir,
@@ -75,6 +82,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
+		&vmwcommon.StepUploadTools{
+			RemoteType:        b.config.RemoteType,
+			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
+			ToolsUploadPath:   b.config.ToolsUploadPath,
+			Tpl:               b.config.tpl,
+		},
 		&common.StepProvision{},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
@@ -82,6 +95,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepCleanFiles{},
 		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepConfigureVMX{
+			CustomData: b.config.VMXDataPost,
+		},
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
 		},

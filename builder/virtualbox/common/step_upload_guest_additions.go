@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
@@ -14,16 +13,19 @@ type guestAdditionsPathTemplate struct {
 }
 
 // This step uploads the guest additions ISO to the VM.
-type stepUploadGuestAdditions struct{}
+type StepUploadGuestAdditions struct {
+	GuestAdditionsMode string
+	GuestAdditionsPath string
+	Tpl                *packer.ConfigTemplate
+}
 
-func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	// If we're attaching then don't do this, since we attached.
-	if config.GuestAdditionsMode != GuestAdditionsModeUpload {
+	if s.GuestAdditionsMode != GuestAdditionsModeUpload {
 		log.Println("Not uploading guest additions since mode is not upload")
 		return multistep.ActionContinue
 	}
@@ -47,7 +49,7 @@ func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 		Version: version,
 	}
 
-	config.GuestAdditionsPath, err = config.tpl.Process(config.GuestAdditionsPath, tplData)
+	s.GuestAdditionsPath, err = s.Tpl.Process(s.GuestAdditionsPath, tplData)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions path: %s", err)
 		state.Put("error", err)
@@ -56,7 +58,7 @@ func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	}
 
 	ui.Say("Uploading VirtualBox guest additions ISO...")
-	if err := comm.Upload(config.GuestAdditionsPath, f); err != nil {
+	if err := comm.Upload(s.GuestAdditionsPath, f); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading guest additions: %s", err))
 		return multistep.ActionHalt
 	}
@@ -64,4 +66,4 @@ func (s *stepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	return multistep.ActionContinue
 }
 
-func (s *stepUploadGuestAdditions) Cleanup(state multistep.StateBag) {}
+func (s *StepUploadGuestAdditions) Cleanup(state multistep.StateBag) {}

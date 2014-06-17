@@ -106,11 +106,6 @@ func wrappedMain() int {
 		return 1
 	}
 
-	if err := os.MkdirAll(cacheDir, 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
-		return 1
-	}
-
 	log.Printf("Setting cache directory: %s", cacheDir)
 	cache := &packer.FileCache{CacheDir: cacheDir}
 

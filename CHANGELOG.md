@@ -1,29 +1,100 @@
-## 0.5.3 (unreleased)
-
-FEATURES:
-
-* **New provisioner:** `chef-client` - Provision using a the `chef-client`
-  command, which talks to a Chef Server. [GH-855]
-* **New provisioner:** `puppet-server` - Provision using Puppet by
-  communicating to a Puppet master. [GH-796]
+## 0.6.1 (unreleased)
 
 IMPROVEMENTS:
 
-* builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
-* builder/vmware: Workstation 10 support for Linux. [GH-900]
-* command/build: Added '-parallel' flag so you can disable parallelization
-  with `-no-parallel`. [GH-924]
+  * builder/amazon-ebs: Support encrypted EBS volumes [GH-1194]
+  * builder/ansible: Add `playbook_dir` option. [GH-1000]
+  * builder/openstack: Add ability to configure networks. [GH-1261]
+  * builder/openstack: Skip certificate verification. [GH-1121]
+  * builder/virtualbox/all: Attempt to use local guest additions ISO
+      before downloading from internet. [GH-1123]
+  * builder/vmware/all: Add `vmx_data_post` for modifying VMX data
+      after shutdown. [GH-1149]
+  * builder/vmware/vmx: Supports tools uploading. [GH-1154]
 
 BUG FIXES:
 
-* core: Errors are properly shown when adding bad floppy files. [GH-1043]
-* builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
-  which works for every region. [GH-904]
-* builder/digitalocean: updated default image_id [GH-1032]
-* builder/virtualbox-iso: Retry unregister a few times to deal with
-  VBoxManage randomness. [GH-915]
-* provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
-* post-processor/docker-push: Allow repositories with ports. [GH-923]
+  * core: `isotime` is the same time during the entire build. [GH-1153]
+  * builder/openstack: Force IPv4 addresses from address pools [GH-1258]
+  * builder/parallels: Do not delete entire CDROM device. [GH-1115]
+  * builder/virtualbox-ovf: Supports guest additions options. [GH-1120]
+  * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
+  * post-processor/vsphere: Accept DOMAIN\account usernames [GH-1178]
+
+## 0.6.0 (May 2, 2014)
+
+FEATURES:
+
+  * **New builder:** `null` - The null builder does not produce any
+    artifacts, but is useful for debugging provisioning scripts. [GH-970]
+  * **New builder:** `parallels-iso` and `parallels-pvm` - These can be
+    used to build Parallels virtual machines. [GH-1101]
+  * **New provisioner:** `chef-client` - Provision using a the `chef-client`
+    command, which talks to a Chef Server. [GH-855]
+  * **New provisioner:** `puppet-server` - Provision using Puppet by
+    communicating to a Puppet master. [GH-796]
+  * `min_packer_version` can be specified in a Packer template to force
+    a minimum version. [GH-487]
+
+IMPROVEMENTS:
+
+  * core: RPC transport between plugins switched to MessagePack
+  * core: Templates array values can now be comma separated strings.
+      Most importantly, this allows for user variables to fill
+      array configurations. [GH-950]
+  * builder/amazon: Added `ssh_private_key_file` option [GH-971]
+  * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
+  * builder/digitalocean: Regions, image names, and sizes can be
+      names that are looked up for their valid ID. [GH-960]
+  * builder/googlecompute: Configurable instance name. [GH-1065]
+  * builder/openstack: Support for conventional OpenStack environmental
+      variables such as `OS_USERNAME`, `OS_PASSWORD`, etc. [GH-768]
+  * builder/openstack: Support `openstack_provider` option to automatically
+      fill defaults for different OpenStack variants. [GH-912]
+  * builder/openstack: Support security groups. [GH-848]
+  * builder/qemu: User variable expansion in `ssh_key_path` [GH-918]
+  * builder/qemu: Floppy disk files list can also include globs
+      and directories. [GH-1086]
+  * builder/virtualbox: Support an `export_opts` option which allows
+      specifying arbitrary arguments when exporting the VM. [GH-945]
+  * builder/virtualbox: Added `vboxmanage_post` option to run vboxmanage
+      commands just before exporting [GH-664]
+  * builder/virtualbox: Floppy disk files list can also include globs
+      and directories. [GH-1086]
+  * builder/vmware: Workstation 10 support for Linux. [GH-900]
+  * builder/vmware: add cloning support on Windows [GH-824]
+  * builder/vmware: Floppy disk files list can also include globs
+      and directories. [GH-1086]
+  * command/build: Added `-parallel` flag so you can disable parallelization
+    with `-no-parallel`. [GH-924]
+  * post-processors/vsphere: `disk_mode` option. [GH-778]
+  * provisioner/ansible: Add `inventory_file` option [GH-1006]
+  * provisioner/chef-client: Add `validation_client_name` option. [GH-1056]
+
+BUG FIXES:
+
+  * core: Errors are properly shown when adding bad floppy files. [GH-1043]
+  * core: Fix some URL parsing issues on Windows.
+  * core: Create Cache directory only when it is needed. [GH-367]
+  * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
+      which works for every region. [GH-904]
+  * builder/digitalocean: updated default image_id [GH-1032]
+  * builder/googlecompute: Create persistent disk as boot disk via
+      API v1 [GH-1001]
+  * builder/openstack: Return proper error on invalid instance states [GH-1018]
+  * builder/virtualbox-iso: Retry unregister a few times to deal with
+      VBoxManage randomness. [GH-915]
+  * provisioner/ansible: Fix paths when provisioning Linux from
+      Windows [GH-963]
+  * provisioner/ansible: set cwd to staging directory [GH-1016]
+  * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
+  * provisioners/chef-solo: Deeply nested JSON works properly. [GH-1076]
+  * provisioners/shell: Env var values can have equal signs. [GH-1045]
+  * provisioners/shell: chmod the uploaded script file to 0777. [GH-994]
+  * post-processor/docker-push: Allow repositories with ports. [GH-923]
+  * post-processor/vagrant: Create parent directories for `output` path [GH-1059]
+  * post-processor/vsphere: datastore, network, and folder are no longer
+      required. [GH-1091]
 
 ## 0.5.2 (02/21/2014)
 

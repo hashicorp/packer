@@ -54,15 +54,15 @@ required. They are listed below:
 * `options` (string) - Additional command line options to pass
   to `puppet agent` when Puppet is ran.
 
+* `prevent_sudo` (boolean) - By default, the configured commands that are
+  executed to run Puppet are executed with `sudo`. If this is true,
+  then the sudo will be omitted.
+
 * `puppet_node` (string) - The name of the node. If this isn't set,
    the fully qualified domain name will be used.
 
 * `puppet_server` (string) - Hostname of the Puppet server. By default
   "puppet" will be used.
-
-* `prevent_sudo` (boolean) - By default, the configured commands that are
-  executed to run Puppet are executed with `sudo`. If this is true,
-  then the sudo will be omitted.
 
 * `staging_directory` (string) - This is the directory where all the configuration
   of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-server".

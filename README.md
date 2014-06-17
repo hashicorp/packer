@@ -9,9 +9,18 @@ from a single source configuration.
 
 Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel.
-Packer comes out of the box with support for creating AMIs (EC2), VMware
-images, and VirtualBox images. Support for more platforms can be added via
-plugins.
+Packer comes out of the box with support for the following platforms:
+* Amazon EC2 (AMI). Both EBS-backed and instance-store AMIs
+* DigitalOcean
+* Docker
+* Google Compute Engine
+* OpenStack
+* Parallels
+* QEMU. Both KVM and Xen images.
+* VirtualBox
+* VMware
+
+Support for other platforms can be added via plugins.
 
 The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
@@ -93,6 +102,9 @@ $ make
 $ bin/packer
 ...
 ```
+
+If you need to cross-compile Packer for other platforms, take a look at
+`scripts/dist.sh`.
 
 You can run tests by typing `make test`.
 

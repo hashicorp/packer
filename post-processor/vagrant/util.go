@@ -21,6 +21,14 @@ func CopyContents(dst, src string) error {
 	}
 	defer srcF.Close()
 
+	dstDir, _ := filepath.Split(dst)
+	if dstDir != "" {
+		err := os.MkdirAll(dstDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
 	dstF, err := os.Create(dst)
 	if err != nil {
 		return err
@@ -39,6 +47,13 @@ func CopyContents(dst, src string) error {
 // actually a proper box. This is an expected precondition.
 func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 	log.Printf("Turning dir into box: %s => %s", dir, dst)
+
+	// Make the containing directory, if it does not already exist
+	err := os.MkdirAll(filepath.Dir(dst), 0755)
+	if err != nil {
+		return err
+	}
+
 	dstF, err := os.Create(dst)
 	if err != nil {
 		return err

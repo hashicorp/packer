@@ -148,6 +148,10 @@ func (d *Fusion5Driver) ToolsIsoPath(k string) string {
 	return filepath.Join(d.AppPath, "Contents", "Library", "isoimages", k+".iso")
 }
 
+func (d *Fusion5Driver) ToolsInstall() error {
+	return nil
+}
+
 func (d *Fusion5Driver) DhcpLeasesPath(device string) string {
 	return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
 }

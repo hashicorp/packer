@@ -3,6 +3,7 @@ package packer
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/mapstructure"
 	jsonutil "github.com/mitchellh/packer/common/json"
 	"io"
@@ -18,12 +19,14 @@ import (
 // "interface{}" pointers since we actually don't know what their contents
 // are until we read the "type" field.
 type rawTemplate struct {
+	MinimumPackerVersion string `mapstructure:"min_packer_version"`
+
 	Description    string
-	Variables      map[string]interface{}
 	Builders       []map[string]interface{}
 	Hooks          map[string][]string
-	Provisioners   []map[string]interface{}
 	PostProcessors []interface{} `mapstructure:"post-processors"`
+	Provisioners   []map[string]interface{}
+	Variables      map[string]interface{}
 }
 
 // The Template struct represents a parsed template, parsed into the most
@@ -113,6 +116,25 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 	err = decoder.Decode(rawTplInterface)
 	if err != nil {
 		return
+	}
+
+	if rawTpl.MinimumPackerVersion != "" {
+		vCur, err := version.NewVersion(Version)
+		if err != nil {
+			panic(err)
+		}
+		vReq, err := version.NewVersion(rawTpl.MinimumPackerVersion)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"'minimum_packer_version' error: %s", err)
+		}
+
+		if vCur.LessThan(vReq) {
+			return nil, fmt.Errorf(
+				"Template requires Packer version %s. "+
+					"Running version is %s.",
+				vReq, vCur)
+		}
 	}
 
 	errors := make([]error, 0)

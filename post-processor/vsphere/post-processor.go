@@ -3,10 +3,12 @@ package vsphere
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"strings"
+	"net/url"
 )
 
 var builtins = map[string]string{
@@ -20,6 +22,7 @@ type Config struct {
 	Cluster      string `mapstructure:"cluster"`
 	Datacenter   string `mapstructure:"datacenter"`
 	Datastore    string `mapstructure:"datastore"`
+	DiskMode     string `mapstructure:"disk_mode"`
 	Host         string `mapstructure:"host"`
 	Password     string `mapstructure:"password"`
 	ResourcePool string `mapstructure:"resource_pool"`
@@ -47,6 +50,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
+	// Defaults
+	if p.config.DiskMode == "" {
+		p.config.DiskMode = "thick"
+	}
+
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
@@ -55,25 +63,31 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
+	// First define all our templatable parameters that are _required_
 	templates := map[string]*string{
 		"cluster":       &p.config.Cluster,
 		"datacenter":    &p.config.Datacenter,
-		"datastore":     &p.config.Datastore,
+		"diskmode":      &p.config.DiskMode,
 		"host":          &p.config.Host,
-		"vm_network":    &p.config.VMNetwork,
 		"password":      &p.config.Password,
 		"resource_pool": &p.config.ResourcePool,
 		"username":      &p.config.Username,
-		"vm_folder":     &p.config.VMFolder,
 		"vm_name":       &p.config.VMName,
 	}
-
 	for key, ptr := range templates {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
 
+	// Then define the ones that are optional
+	templates["datastore"] = &p.config.Datastore
+	templates["vm_network"] = &p.config.VMNetwork
+	templates["vm_folder"] = &p.config.VMFolder
+
+	// Template process
+	for key, ptr := range templates {
 		*ptr, err = p.config.tpl.Process(*ptr, nil)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
@@ -110,11 +124,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		"--acceptAllEulas",
 		fmt.Sprintf("--name=%s", p.config.VMName),
 		fmt.Sprintf("--datastore=%s", p.config.Datastore),
+		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
 		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
-			p.config.Username,
+			url.QueryEscape(p.config.Username),
 			p.config.Password,
 			p.config.Host,
 			p.config.Datacenter,
@@ -124,6 +139,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {

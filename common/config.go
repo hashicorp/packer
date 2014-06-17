@@ -45,6 +45,17 @@ func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 	return nil
 }
 
+// ChooseString returns the first non-empty value.
+func ChooseString(vals ...string) string {
+	for _, el := range vals {
+		if el != "" {
+			return el
+		}
+	}
+
+	return ""
+}
+
 // DecodeConfig is a helper that handles decoding raw configuration using
 // mapstructure. It returns the metadata and any errors that may happen.
 // If you need extra configuration for mapstructure, you should configure
@@ -57,7 +68,10 @@ func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metada
 
 	var md mapstructure.Metadata
 	decoderConfig := &mapstructure.DecoderConfig{
-		DecodeHook:       decodeHook,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			decodeHook,
+			mapstructure.StringToSliceHookFunc(","),
+		),
 		Metadata:         &md,
 		Result:           target,
 		WeaklyTypedInput: true,
@@ -101,15 +115,20 @@ func DownloadableURL(original string) (string, error) {
 	}
 
 	if url.Scheme == "file" {
-		// For Windows absolute file paths, remove leading / prior to processing
-		// since net/url turns "C:/" into "/C:/"
-		if runtime.GOOS == "windows" && url.Path[0] == '/' {
-			url.Path = url.Path[1:len(url.Path)]
+		// Windows file handling is all sorts of tricky...
+		if runtime.GOOS == "windows" {
+			// If the path is using Windows-style slashes, URL parses
+			// it into the host field.
+			if url.Path == "" && strings.Contains(url.Host, `\`) {
+				url.Path = url.Host
+				url.Host = ""
+			}
 
-			// Also replace all backslashes with forwardslashes since Windows
-			// users are likely to do this but the URL should actually only
-			// contain forward slashes.
-			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
+			// For Windows absolute file paths, remove leading / prior to processing
+			// since net/url turns "C:/" into "/C:/"
+			if len(url.Path) > 0 && url.Path[0] == '/' {
+				url.Path = url.Path[1:len(url.Path)]
+			}
 		}
 
 		// Only do the filepath transformations if the file appears
@@ -126,6 +145,13 @@ func DownloadableURL(original string) (string, error) {
 			}
 
 			url.Path = filepath.Clean(url.Path)
+		}
+
+		if runtime.GOOS == "windows" {
+			// Also replace all backslashes with forwardslashes since Windows
+			// users are likely to do this but the URL should actually only
+			// contain forward slashes.
+			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 	}
 
@@ -168,8 +194,17 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 	// First thing we do is decode PackerConfig so that we can have access
 	// to the user variables so that we can process some templates.
 	var pc PackerConfig
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		Result:           &pc,
+		WeaklyTypedInput: true,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return nil, err
+	}
 	for _, raw := range raws {
-		if err := mapstructure.Decode(raw, &pc); err != nil {
+		if err := decoder.Decode(raw); err != nil {
 			return nil, err
 		}
 	}
@@ -182,6 +217,18 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 
 	return func(f reflect.Kind, t reflect.Kind, v interface{}) (interface{}, error) {
 		if t != reflect.String {
+			// We need to convert []uint8 to string. We have to do this
+			// because internally Packer uses MsgPack for RPC and the MsgPack
+			// codec turns strings into []uint8
+			if f == reflect.Slice {
+				dataVal := reflect.ValueOf(v)
+				dataType := dataVal.Type()
+				elemKind := dataType.Elem().Kind()
+				if elemKind == reflect.Uint8 {
+					v = string(dataVal.Interface().([]uint8))
+				}
+			}
+
 			if sv, ok := v.(string); ok {
 				var err error
 				v, err = tpl.Process(sv, nil)

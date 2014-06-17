@@ -44,7 +44,7 @@ Configuration options are organized below into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
-Required:
+### Required:
 
 * `export_path` (string) - The path where the final container will be exported
   as a tar file.
@@ -53,9 +53,9 @@ Required:
   be started. This image will be pulled from the Docker registry if it
   doesn't already exist.
 
-Optional:
+### Optional:
 
-* `pull` (bool) - If true, the configured image will be pulled using
+* `pull` (boolean) - If true, the configured image will be pulled using
   `docker pull` prior to use. Otherwise, it is assumed the image already
   exists and can be used. This defaults to true if not set.
 

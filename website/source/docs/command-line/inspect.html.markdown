@@ -36,7 +36,7 @@ Builders:
 
   amazon-ebs
   amazon-instance
-  virtualbox
+  virtualbox-iso
 
 Provisioners:
 

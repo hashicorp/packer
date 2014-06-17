@@ -13,7 +13,6 @@ import (
 )
 
 // Workstation9Driver is a driver that can run VMware Workstation 9
-// on non-Windows platforms.
 type Workstation9Driver struct {
 	AppPath          string
 	VdiskManagerPath string
@@ -24,7 +23,7 @@ type Workstation9Driver struct {
 }
 
 func (d *Workstation9Driver) Clone(dst, src string) error {
-	return errors.New("Cloning is not supported with WS 9. Please use WS 10+.")
+	return errors.New("Cloning is not supported with VMWare WS version 9. Please use VMWare WS version 10, or greater.")
 }
 
 func (d *Workstation9Driver) CompactDisk(diskPath string) error {
@@ -135,7 +134,7 @@ func (d *Workstation9Driver) Verify() error {
 	}
 
 	if _, err := os.Stat(d.VdiskManagerPath); err != nil {
-		return fmt.Errorf("'vmrun' application not found: %s", d.VdiskManagerPath)
+		return fmt.Errorf("'vmware-vdiskmanager' application not found: %s", d.VdiskManagerPath)
 	}
 
 	// Check to see if it APPEARS to be licensed.
@@ -148,6 +147,10 @@ func (d *Workstation9Driver) Verify() error {
 
 func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
 	return workstationToolsIsoPath(flavor)
+}
+
+func (d *Workstation9Driver) ToolsInstall() error {
+	return nil
 }
 
 func (d *Workstation9Driver) DhcpLeasesPath(device string) string {

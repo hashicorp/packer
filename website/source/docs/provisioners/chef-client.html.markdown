@@ -76,11 +76,15 @@ since it will allow the provisioner to clean up the node/client.
   on the machine using the Opscode omnibus installers.
 
 * `staging_directory` (string) - This is the directory where all the configuration
-  of Chef by Packer will be placed. By default this is "/tmp/packer-chef-solo".
+  of Chef by Packer will be placed. By default this is "/tmp/packer-chef-client".
   This directory doesn't need to exist but must have proper permissions so that
   the SSH user that Packer uses is able to create directories and write into
   this folder. If the permissions are not correct, use a shell provisioner
   prior to this to configure it properly.
+
+* `validation_client_name` (string) - Name of the validation client. If
+  not set, this won't be set in the configuration and the default that Chef
+  uses will be used.
 
 * `validation_key_path` (string) - Path to the validation key for communicating
   with the Chef Server. This will be uploaded to the remote machine. If this

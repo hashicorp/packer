@@ -60,13 +60,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err != nil {
 		return nil, err
 	}
-	api := &gophercloud.ApiCriteria{
-		Name:      "cloudServersOpenStack",
-		Region:    b.config.AccessConfig.Region(),
-		VersionId: "2",
-		UrlChoice: gophercloud.PublicURL,
+	//fetches the api requisites from gophercloud for the appropriate
+	//openstack variant
+	api, err := gophercloud.PopulateApi(b.config.RunConfig.OpenstackProvider)
+	if err != nil {
+		return nil, err
 	}
-	csp, err := gophercloud.ServersApi(auth, *api)
+	api.Region = b.config.AccessConfig.Region()
+
+	csp, err := gophercloud.ServersApi(auth, api)
 	if err != nil {
 		log.Printf("Region: %s", b.config.AccessConfig.Region())
 		return nil, err
@@ -86,9 +88,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepRunSourceServer{
-			Name:        b.config.ImageName,
-			Flavor:      b.config.Flavor,
-			SourceImage: b.config.SourceImage,
+			Name:           b.config.ImageName,
+			Flavor:         b.config.Flavor,
+			SourceImage:    b.config.SourceImage,
+			SecurityGroups: b.config.SecurityGroups,
+			Networks:       b.config.Networks,
+		},
+		&StepAllocateIp{
+			FloatingIpPool: b.config.FloatingIpPool,
+			FloatingIp:     b.config.FloatingIp,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     SSHAddress(csp, b.config.SSHPort),

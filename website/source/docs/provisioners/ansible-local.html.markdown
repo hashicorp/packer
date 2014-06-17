@@ -39,6 +39,39 @@ Optional:
 * `extra_arguments` (array of strings) - An array of extra arguments to pass to the
   ansible command. By default, this is empty.
 
+* `inventory_file` (string) - The inventory file to be used by ansible.
+  This file must exist on your local system and will be uploaded to the
+  remote machine.
+
+  When using an inventory file, it's also required to `--limit` the hosts to
+  the specified host you're buiding. The `--limit` argument can be provided in
+  the `extra_arguments` option.
+
+  An example inventory file may look like:
+  <pre class="prettyprint">
+  [chi-dbservers]
+  db-01 ansible_connection=local
+  db-02 ansible_connection=local
+
+  [chi-appservers]
+  app-01 ansible_connection=local
+  app-02 ansible_connection=local
+
+  [chi:children]
+  chi-dbservers
+  chi-appservers
+
+  [dbservers:children]
+  chi-dbservers
+
+  [appservers:children]
+  chi-appservers
+  </pre>
+
+* `playbook_dir` (string) - a path to the complete ansible directory
+  structure on your local system to be copied to the remote machine
+  as the `staging_directory` before all other files and directories.
+
 * `playbook_paths` (array of strings) - An array of paths to playbook files on
   your local system. These will be uploaded to the remote machine under
   `staging_directory`/playbooks. By default, this is empty.

@@ -15,6 +15,18 @@ import (
 	"time"
 )
 
+// see https://api.digitalocean.com/images/?client_id=[client_id]&api_key=[api_key]
+// name="Ubuntu 12.04.4 x64", id=3101045,
+const DefaultImage = "ubuntu-12-04-x64"
+
+// see https://api.digitalocean.com/regions/?client_id=[client_id]&api_key=[api_key]
+// name="New York", id=1
+const DefaultRegion = "nyc1"
+
+// see https://api.digitalocean.com/sizes/?client_id=[client_id]&api_key=[api_key]
+// name="512MB", id=66 (the smallest droplet size)
+const DefaultSize = "512mb"
+
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
 
@@ -29,6 +41,10 @@ type config struct {
 	RegionID uint   `mapstructure:"region_id"`
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
+
+	Region string `mapstructure:"region"`
+	Size   string `mapstructure:"size"`
+	Image  string `mapstructure:"image"`
 
 	PrivateNetworking bool   `mapstructure:"private_networking"`
 	SnapshotName      string `mapstructure:"snapshot_name"`
@@ -78,19 +94,28 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.ClientID = os.Getenv("DIGITALOCEAN_CLIENT_ID")
 	}
 
-	if b.config.RegionID == 0 {
-		// Default to Region "New York"
-		b.config.RegionID = 1
+	if b.config.Region == "" {
+		if b.config.RegionID != 0 {
+			b.config.Region = fmt.Sprintf("%v", b.config.RegionID)
+		} else {
+			b.config.Region = DefaultRegion
+		}
 	}
 
-	if b.config.SizeID == 0 {
-		// Default to 512mb, the smallest droplet size
-		b.config.SizeID = 66
+	if b.config.Size == "" {
+		if b.config.SizeID != 0 {
+			b.config.Size = fmt.Sprintf("%v", b.config.SizeID)
+		} else {
+			b.config.Size = DefaultSize
+		}
 	}
 
-	if b.config.ImageID == 0 {
-		// Default to base image "Ubuntu 12.04.4 x64 (id: 3101045)"
-		b.config.ImageID = 3101045
+	if b.config.Image == "" {
+		if b.config.ImageID != 0 {
+			b.config.Image = fmt.Sprintf("%v", b.config.ImageID)
+		} else {
+			b.config.Image = DefaultImage
+		}
 	}
 
 	if b.config.SnapshotName == "" {
@@ -226,9 +251,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
-	region_id := state.Get("region_id").(uint)
+	sregion := state.Get("region")
 
-	regionName, err := client.RegionName(region_id)
+	var region string
+
+	if sregion != nil {
+		region = sregion.(string)
+	} else {
+		region = fmt.Sprintf("%v", state.Get("region_id").(uint))
+	}
+
+	found_region, err := client.Region(region)
+
 	if err != nil {
 		return nil, err
 	}
@@ -236,8 +270,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		snapshotName: state.Get("snapshot_name").(string),
 		snapshotId:   state.Get("snapshot_image_id").(uint),
-		regionId:     region_id,
-		regionName:   regionName,
+		regionName:   found_region.Name,
 		client:       client,
 	}
 

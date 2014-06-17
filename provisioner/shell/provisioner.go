@@ -171,7 +171,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
 	for _, kv := range p.config.Vars {
-		vs := strings.Split(kv, "=")
+		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
@@ -272,6 +272,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			if err := comm.Upload(p.config.RemotePath, r); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
+
+			cmd = &packer.RemoteCmd{
+				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+			}
+			if err := comm.Start(cmd); err != nil {
+				return fmt.Errorf(
+					"Error chmodding script file to 0777 in remote "+
+						"machine: %s", err)
+			}
+			cmd.Wait()
 
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)

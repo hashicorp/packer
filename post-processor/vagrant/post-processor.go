@@ -21,6 +21,7 @@ var builtins = map[string]string{
 	"mitchellh.virtualbox":      "virtualbox",
 	"mitchellh.vmware":          "vmware",
 	"pearkes.digitalocean":      "digitalocean",
+	"packer.parallels":          "parallels",
 }
 
 type Config struct {
@@ -63,6 +64,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+
 	name, ok := builtins[artifact.BuilderId()]
 	if !ok {
 		return nil, false, fmt.Errorf(
@@ -216,6 +218,8 @@ func providerForName(name string) Provider {
 		return new(VBoxProvider)
 	case "vmware":
 		return new(VMwareProvider)
+	case "parallels":
+		return new(ParallelsProvider)
 	default:
 		return nil
 	}

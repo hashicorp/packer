@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/multistep"
@@ -43,6 +44,9 @@ type Driver interface {
 
 	// Get the path to the VMware ISO for the given flavor.
 	ToolsIsoPath(string) string
+
+	// Attach the VMware tools ISO
+	ToolsInstall() error
 
 	// Get the path to the DHCP leases file for the given device.
 	DhcpLeasesPath(string) string
@@ -89,6 +93,11 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 		}
 	case "windows":
 		drivers = []Driver{
+			&Workstation10Driver{
+				Workstation9Driver: Workstation9Driver{
+					SSHConfig: config,
+				},
+			},
 			&Workstation9Driver{
 				SSHConfig: config,
 			},
@@ -136,4 +145,33 @@ func runAndLog(cmd *exec.Cmd) (string, string, error) {
 	returnStderr := strings.Replace(stderr.String(), "\r\n", "\n", -1)
 
 	return returnStdout, returnStderr, err
+}
+
+func normalizeVersion(version string) (string, error) {
+	i, err := strconv.Atoi(version)
+	if err != nil {
+		return "", fmt.Errorf(
+			"VMWare version '%s' is not numeric", version)
+	}
+
+	return fmt.Sprintf("%02d", i), nil
+}
+
+func compareVersions(versionFound string, versionWanted string) error {
+	found, err := normalizeVersion(versionFound)
+	if err != nil {
+		return err
+	}
+
+	wanted, err := normalizeVersion(versionWanted)
+	if err != nil {
+		return err
+	}
+
+	if found < wanted {
+		return fmt.Errorf(
+			"VMWare WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
+	}
+
+	return nil
 }

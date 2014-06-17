@@ -1,7 +1,7 @@
 package common
 
 import (
-	gossh "code.google.com/p/gosshold/ssh"
+	gossh "code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -137,7 +137,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		}
 
 		log.Println("Attempting SSH connection...")
-		comm, err = ssh.New(config)
+		comm, err = ssh.New(address, config)
 		if err != nil {
 			log.Printf("SSH handshake err: %s", err)
 
