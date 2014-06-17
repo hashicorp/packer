@@ -92,6 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Flavor:         b.config.Flavor,
 			SourceImage:    b.config.SourceImage,
 			SecurityGroups: b.config.SecurityGroups,
+			Networks:       b.config.Networks,
 		},
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
