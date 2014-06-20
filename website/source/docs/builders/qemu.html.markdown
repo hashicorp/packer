@@ -27,8 +27,8 @@ paths to files, URLS for ISOs and checksums.
   [
     {
       "type": "qemu",
-      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.4-x86_64-minimal.iso",
-      "iso_checksum": "4a5fa01c81cc300f4729136e28ebe600",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
       "ssh_wait_timeout": "30s",
