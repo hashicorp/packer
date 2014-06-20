@@ -60,7 +60,7 @@ paths to files, URLS for ISOs and checksums.
 </pre>
 
 A working CentOS 6.x kickstart file can be found
-[at this URL](https://gist.github.com/mitchellh/7328271/raw/c91e0c4fa19c171a40b016c6c8f251f90d2ad0ba/centos6-ks.cfg), adapted from an unknown source.
+[at this URL](https://gist.github.com/mitchellh/7328271/#file-centos6-ks-cfg), adapted from an unknown source.
 Place this file in the http directory with the proper name. For the
 example above, it should go into "httpdir" with a name of "centos6-ks.cfg".
 
