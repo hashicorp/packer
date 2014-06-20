@@ -81,6 +81,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	config := p.config
 
+	fmt.Println(artifact)
+
 	// Only accepts input from the vagrant post-processor
 	if artifact.BuilderId() != "mitchellh.post-processor.vagrant" {
 		return nil, false, fmt.Errorf(
@@ -89,7 +91,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// The name of the provider for vagrant cloud, and vagrant
 	provider := providerFromBuilderName(artifact.Id())
-	version := p.config.Version
 	tag := p.config.Tag
 
 	// create the HTTP client
@@ -108,7 +109,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
-	ui.Say(fmt.Sprintf("Creating Version %s", version))
+	ui.Say(fmt.Sprintf("Creating Version %s", p.config.Version))
+
+	// Create the new version for the box
+	version := Version{Version: p.config.Version}
+	if ok, err := version.Create(); !ok {
+		return nil, false, err
+	}
+
 	ui.Say(fmt.Sprintf("Creating Provider %s", version))
 	ui.Say(fmt.Sprintf("Uploading Box %s", version))
 	ui.Say(fmt.Sprintf("Verifying upload %s", version))
@@ -120,6 +128,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 // Runs a cleanup if the post processor fails to upload
 func (p *PostProcessor) Cleanup() {
 	// Delete the version
+
 }
 
 // converts a packer builder name to the corresponding vagrant
