@@ -49,10 +49,10 @@ paths to files, URLS for ISOs and checksums.
       "vm_name": "tdhtest",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
+      "boot_wait": "5s",
       "boot_command":
       [
-        "<tab><wait>",
-        " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"
       ]
     }
   ]
