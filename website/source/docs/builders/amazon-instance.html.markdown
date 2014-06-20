@@ -153,7 +153,7 @@ each category, the available configuration keys are alphabetized.
 
 * `security_group_ids` (array of strings) - A list of security groups as
   described above. Note that if this is specified, you must omit the
-  security_group_id.
+  `security_group_id`.
 
 * `ssh_port` (integer) - The port that SSH will be available on. This defaults
   to port 22.
