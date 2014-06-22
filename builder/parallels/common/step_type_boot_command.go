@@ -169,7 +169,7 @@ func scancodes(message string) []string {
 	scancodeIndex["!@#$%^&*()_+"] = 0x02
 	scancodeIndex["qwertyuiop[]"] = 0x10
 	scancodeIndex["QWERTYUIOP{}"] = 0x10
-	scancodeIndex["asdfghjkl;´`"] = 0x1e
+	scancodeIndex["asdfghjkl;'`"] = 0x1e
 	scancodeIndex[`ASDFGHJKL:"~`] = 0x1e
 	scancodeIndex["\\zxcvbnm,./"] = 0x2b
 	scancodeIndex["|ZXCVBNM<>?"] = 0x2b
