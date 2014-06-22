@@ -43,6 +43,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("http_port", uint(0))
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -69,6 +70,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&parallelscommon.StepRun{
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
+		},
+		&parallelscommon.StepTypeBootCommand{
+			BootCommand:    b.config.BootCommand,
+			HostInterfaces: []string{},
+			VMName:         b.config.VMName,
+			Tpl:            b.config.tpl,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     parallelscommon.SSHAddress,
