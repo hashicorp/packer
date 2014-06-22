@@ -19,12 +19,12 @@ type Config struct {
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 
-	ParallelsToolsMode      string `mapstructure:"parallels_tools_mode"`
-	ParallelsToolsGuestPath string `mapstructure:"parallels_tools_guest_path"`
-	ParallelsToolsHostPath  string `mapstructure:"parallels_tools_host_path"`
-
-	SourcePath string `mapstructure:"source_path"`
-	VMName     string `mapstructure:"vm_name"`
+	BootCommand             []string `mapstructure:"boot_command"`
+	ParallelsToolsMode      string   `mapstructure:"parallels_tools_mode"`
+	ParallelsToolsGuestPath string   `mapstructure:"parallels_tools_guest_path"`
+	ParallelsToolsHostPath  string   `mapstructure:"parallels_tools_host_path"`
+	SourcePath              string   `mapstructure:"source_path"`
+	VMName                  string   `mapstructure:"vm_name"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -83,6 +83,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
 	}
 

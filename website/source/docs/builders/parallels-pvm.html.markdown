@@ -53,6 +53,19 @@ each category, the available options are alphabetized and described.
 
 ### Optional:
 
+* `boot_command` (array of strings) - This is an array of commands to type
+  when the virtual machine is first booted. The goal of these commands should
+  be to type just enough to initialize the operating system installer. Special
+  keys can be typed as well, and are covered in the section below on the boot
+  command. If this is not specified, it is assumed the installer will start
+  itself.
+
+* `boot_wait` (string) - The time to wait after booting the initial virtual
+  machine before typing the `boot_command`. The value of this should be
+  a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
+  five seconds and one minute 30 seconds, respectively. If this isn't specified,
+  the default is 10 seconds.
+
 * `floppy_files` (array of strings) - A list of files to put onto a floppy
   disk that is attached when the VM is booted for the first time. This is
   most useful for unattended Windows installs, which look for an
@@ -134,6 +147,34 @@ uploaded is controllable by `parallels_tools_path`, and defaults to
 "prl-tools.iso". Without an absolute path, it is uploaded to the home directory
 of the SSH user. Parallels Tools ISO's can be found in:
 "/Applications/Parallels Desktop.app/Contents/Resources/Tools/"
+
+## Boot Command
+
+The `boot_command` specifies the keys to type when the virtual machine is first booted. This command is typed after `boot_wait`.
+
+As documented above, the `boot_command` is an array of strings. The
+strings are all typed in sequence. It is an array only to improve readability
+within the template.
+
+The boot command is "typed" character for character using the `prltype` (part
+of prl-utils, see [Parallels Builder](/docs/builders/parallels.html))
+command connected to the machine, simulating a human actually typing the
+keyboard. There are a set of special keys available. If these are in your
+boot command, they will be replaced by the proper key:
+
+* `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
+
+* `<esc>` - Simulates pressing the escape key.
+
+* `<tab>` - Simulates pressing the tab key.
+
+* `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending
+  any additional keys. This is useful if you have to generally wait for the UI
+  to update before typing more.
+
+In addition to the special keys, each command to type is treated as a
+[configuration template](/docs/templates/configuration-templates.html).
+The available variables are:
 
 ## prlctl Commands
 In order to perform extra customization of the virtual machine, a template can
