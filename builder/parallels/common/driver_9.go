@@ -79,6 +79,8 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 		return false, err
 	}
 
+	log.Printf("Checking VM state: %s\n", strings.TrimSpace(stdout.String()))
+
 	for _, line := range strings.Split(stdout.String(), "\n") {
 		if line == "running" {
 			return true, nil
@@ -88,6 +90,9 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 			return true, nil
 		}
 		if line == "paused" {
+			return true, nil
+		}
+		if line == "stopping" {
 			return true, nil
 		}
 	}
