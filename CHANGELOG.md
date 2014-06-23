@@ -6,8 +6,12 @@ IMPROVEMENTS:
   * builder/ansible: Add `playbook_dir` option. [GH-1000]
   * builder/openstack: Add ability to configure networks. [GH-1261]
   * builder/openstack: Skip certificate verification. [GH-1121]
+  * builder/parallels/all: Add ability to select interface to connect to.
+  * builder/parallels/pvm: Support `boot_command`. [GH-1082]
   * builder/virtualbox/all: Attempt to use local guest additions ISO
       before downloading from internet. [GH-1123]
+  * builder/virtualbox/ovf: Supports `guest_additions_mode` [GH-1035]
+  * builder/vmware/all: Increase cleanup timeout to 120 seconds [GH-1167]
   * builder/vmware/all: Add `vmx_data_post` for modifying VMX data
       after shutdown. [GH-1149]
   * builder/vmware/vmx: Supports tools uploading. [GH-1154]
@@ -17,6 +21,8 @@ BUG FIXES:
   * core: `isotime` is the same time during the entire build. [GH-1153]
   * builder/openstack: Force IPv4 addresses from address pools [GH-1258]
   * builder/parallels: Do not delete entire CDROM device. [GH-1115]
+  * builder/parallels: Errors while creating floppy disk. [GH-1225]
+  * builder/parallels: Errors while removing floppy drive. [GH-1226]
   * builder/virtualbox-ovf: Supports guest additions options. [GH-1120]
   * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
   * post-processor/vsphere: Accept DOMAIN\account usernames [GH-1178]

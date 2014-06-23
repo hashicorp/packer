@@ -298,7 +298,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless, // TODO: migth work on Enterprise Ed.
 		},
-		new(stepTypeBootCommand),
+		&parallelscommon.StepTypeBootCommand{
+			BootCommand:    b.config.BootCommand,
+			HostInterfaces: b.config.HostInterfaces,
+			VMName:         b.config.VMName,
+			Tpl:            b.config.tpl,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     parallelscommon.SSHAddress,
 			SSHConfig:      parallelscommon.SSHConfigFunc(b.config.SSHConfig),
