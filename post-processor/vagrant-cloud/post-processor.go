@@ -5,11 +5,13 @@ package vagrantcloud
 
 import (
 	"fmt"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
-const VAGRANT_CLOUD_URL = "https://vagrantcloud.com"
+const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -26,6 +28,7 @@ type Config struct {
 type PostProcessor struct {
 	config Config
 	client *VagrantCloudClient
+	runner multistep.Runner
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -79,56 +82,61 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	config := p.config
-
-	fmt.Println(artifact)
-
 	// Only accepts input from the vagrant post-processor
 	if artifact.BuilderId() != "mitchellh.post-processor.vagrant" {
 		return nil, false, fmt.Errorf(
 			"Unknown artifact type, requires box from vagrant post-processor: %s", artifact.BuilderId())
 	}
 
-	// The name of the provider for vagrant cloud, and vagrant
-	provider := providerFromBuilderName(artifact.Id())
-	tag := p.config.Tag
-
 	// create the HTTP client
 	p.client = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken)
 
-	ui.Say(fmt.Sprintf("Verifying box is accessible: %s", tag))
+	// Set up the state
+	state := new(multistep.BasicStateBag)
+	state.Put("config", p.config)
+	state.Put("client", p.client)
+	state.Put("artifact", artifact)
+	state.Put("ui", ui)
 
-	box, err := p.client.Box(tag)
-
-	if err != nil {
-		return nil, false, err
+	// Build the steps
+	steps := []multistep.Step{
+		new(stepVerifyBox),
+		new(stepCreateVersion),
+		new(stepCreateProvider),
+		new(stepPrepareUpload),
+		new(stepUpload),
+		new(stepVerifyUpload),
 	}
 
-	if box.Tag != tag {
-		ui.Say(fmt.Sprintf("Could not verify box is correct: %s", tag))
-		return nil, false, err
+	// Run the steps
+	if p.config.PackerDebug {
+		p.runner = &multistep.DebugRunner{
+			Steps:   steps,
+			PauseFn: common.MultistepDebugFn(ui),
+		}
+	} else {
+		p.runner = &multistep.BasicRunner{Steps: steps}
 	}
 
-	ui.Say(fmt.Sprintf("Creating Version %s", p.config.Version))
+	p.runner.Run(state)
 
-	// Create the new version for the box
-	version := Version{Version: p.config.Version}
-	if ok, err := version.Create(); !ok {
-		return nil, false, err
+	// If there was an error, return that
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, false, rawErr.(error)
 	}
 
-	ui.Say(fmt.Sprintf("Creating Provider %s", version))
-	ui.Say(fmt.Sprintf("Uploading Box %s", version))
-	ui.Say(fmt.Sprintf("Verifying upload %s", version))
-	ui.Say(fmt.Sprintf("Releasing version %s", version))
+	// // The name of the provider for vagrant cloud, and vagrant
+	provider := providerFromBuilderName(artifact.Id())
 
-	return NewArtifact(provider, config.Tag), true, nil
+	return NewArtifact(provider, p.config.Tag), true, nil
 }
 
 // Runs a cleanup if the post processor fails to upload
-func (p *PostProcessor) Cleanup() {
-	// Delete the version
-
+func (p *PostProcessor) Cancel() {
+	if p.runner != nil {
+		log.Println("Cancelling the step runner...")
+		p.runner.Cancel()
+	}
 }
 
 // converts a packer builder name to the corresponding vagrant
