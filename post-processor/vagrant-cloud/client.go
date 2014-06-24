@@ -147,8 +147,6 @@ func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response,
 
 	encBody, err := encodeBody(body)
 
-	log.Println(encBody)
-
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding body for request: %s", err)
 	}
