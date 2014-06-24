@@ -7,7 +7,17 @@ import (
 )
 
 type Box struct {
-	Tag string `json:"tag"`
+	Tag      string     `json:"tag"`
+	Versions []*Version `json:"versions"`
+}
+
+func (b *Box) HasVersion(version string) (bool, *Version) {
+	for _, v := range b.Versions {
+		if v.Version == version {
+			return true, v
+		}
+	}
+	return false, nil
 }
 
 type stepVerifyBox struct {
