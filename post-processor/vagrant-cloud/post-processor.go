@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"strings"
 )
 
 const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
@@ -88,15 +89,26 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			"Unknown artifact type, requires box from vagrant post-processor: %s", artifact.BuilderId())
 	}
 
+	// We assume that there is only one .box file to upload
+	if !strings.HasSuffix(artifact.Files()[0], ".box") {
+		return nil, false, fmt.Errorf(
+			"Unknown files in artifact from vagrant post-processor: %s", artifact.Files())
+	}
+
 	// create the HTTP client
 	p.client = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken)
+
+	// The name of the provider for vagrant cloud, and vagrant
+	providerName := providerFromBuilderName(artifact.Id())
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
 	state.Put("config", p.config)
 	state.Put("client", p.client)
 	state.Put("artifact", artifact)
+	state.Put("artifactFilePath", artifact.Files()[0])
 	state.Put("ui", ui)
+	state.Put("providerName", providerName)
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -106,6 +118,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		new(stepPrepareUpload),
 		new(stepUpload),
 		new(stepVerifyUpload),
+		new(stepReleaseVersion),
 	}
 
 	// Run the steps
@@ -125,10 +138,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, rawErr.(error)
 	}
 
-	// // The name of the provider for vagrant cloud, and vagrant
-	provider := providerFromBuilderName(artifact.Id())
-
-	return NewArtifact(provider, p.config.Tag), true, nil
+	return NewArtifact(providerName, p.config.Tag), true, nil
 }
 
 // Runs a cleanup if the post processor fails to upload
