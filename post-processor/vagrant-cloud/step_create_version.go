@@ -7,9 +7,9 @@ import (
 )
 
 type Version struct {
-	Version string `json:"version"`
-    Description  string   `json:"description,omitempty"`
-    Number  uint   `json:"number,omitempty"`
+	Version     string `json:"version"`
+	Description string `json:"description,omitempty"`
+	Number      uint   `json:"number,omitempty"`
 }
 
 type stepCreateVersion struct {
@@ -22,8 +22,10 @@ func (s *stepCreateVersion) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	box := state.Get("box").(*Box)
 
+	ui.Say(fmt.Sprintf("Creating version: %s", config.Version))
+
 	if hasVersion, v := box.HasVersion(config.Version); hasVersion {
-		ui.Say(fmt.Sprintf("Version exists: %s", config.Version))
+		ui.Message(fmt.Sprintf("Version exists, skipping creation"))
 		state.Put("version", v)
 		return multistep.ActionContinue
 	}
@@ -35,8 +37,6 @@ func (s *stepCreateVersion) Run(state multistep.StateBag) multistep.StepAction {
 	// Wrap the version in a version object for the API
 	wrapper := make(map[string]interface{})
 	wrapper["version"] = version
-
-	ui.Say(fmt.Sprintf("Creating version: %s", config.Version))
 
 	resp, err := client.Post(path, wrapper)
 
@@ -61,9 +61,15 @@ func (s *stepCreateVersion) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepCreateVersion) Cleanup(state multistep.StateBag) {
+	client := state.Get("client").(*VagrantCloudClient)
+	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(Config)
+	box := state.Get("box").(*Box)
+
 	// If we didn't save the version number, it likely doesn't exist or
 	// already existed
 	if s.number == 0 {
+		ui.Message("Version was not created or previously existed, not deleting")
 		return
 	}
 
@@ -76,11 +82,10 @@ func (s *stepCreateVersion) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*VagrantCloudClient)
-	ui := state.Get("ui").(packer.Ui)
-	box := state.Get("box").(*Box)
-
 	path := fmt.Sprintf("box/%s/version/%v", box.Tag, s.number)
+
+	ui.Say("Cleaning up version")
+	ui.Message(fmt.Sprintf("Deleting version: %s", config.Version))
 
 	// No need for resp from the cleanup DELETE
 	_, err := client.Delete(path)

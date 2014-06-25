@@ -66,6 +66,9 @@ access to on Vagrant Cloud, as well as authentication and version information.
 on Vagrant Cloud, making it active. You can manually release the version
 via the API or Web UI. Defaults to false.
 
+* `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud. This
+is useful if you're using Vagrant Private Cloud in your own network. Defaults
+to `https://vagrantcloud.com/api/v1`
 
 ## Use with Vagrant Post-Processor
 

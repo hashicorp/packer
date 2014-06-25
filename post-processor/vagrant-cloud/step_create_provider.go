@@ -56,8 +56,15 @@ func (s *stepCreateProvider) Run(state multistep.StateBag) multistep.StepAction 
 }
 
 func (s *stepCreateProvider) Cleanup(state multistep.StateBag) {
+	client := state.Get("client").(*VagrantCloudClient)
+	ui := state.Get("ui").(packer.Ui)
+	box := state.Get("box").(*Box)
+	version := state.Get("version").(*Version)
+
 	// If we didn't save the provider name, it likely doesn't exist
 	if s.name == "" {
+		ui.Say("Cleaning up provider")
+		ui.Message("Provider was not created, not deleting")
 		return
 	}
 
@@ -70,10 +77,8 @@ func (s *stepCreateProvider) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*VagrantCloudClient)
-	ui := state.Get("ui").(packer.Ui)
-	box := state.Get("box").(*Box)
-	version := state.Get("version").(*Version)
+	ui.Say("Cleaning up provider")
+	ui.Message(fmt.Sprintf("Deleting provider: %s", s.name))
 
 	path := fmt.Sprintf("box/%s/version/%v/provider/%s", box.Tag, version.Number, s.name)
 

@@ -16,14 +16,14 @@ func (s *stepReleaseVersion) Run(state multistep.StateBag) multistep.StepAction 
 	version := state.Get("version").(*Version)
 	config := state.Get("config").(Config)
 
+	ui.Say(fmt.Sprintf("Releasing version: %s", version.Version))
+
 	if config.NoRelease {
-		ui.Say(fmt.Sprintf("Not releasing version due to configuration: %s", version.Version))
+		ui.Message("Not releasing version due to configuration")
 		return multistep.ActionContinue
 	}
 
 	path := fmt.Sprintf("box/%s/version/%v/release", box.Tag, version.Number)
-
-	ui.Say(fmt.Sprintf("Releasing version: %s", version.Version))
 
 	resp, err := client.Put(path)
 
@@ -33,6 +33,8 @@ func (s *stepReleaseVersion) Run(state multistep.StateBag) multistep.StepAction 
 		state.Put("error", fmt.Errorf("Error releasing version: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}
+
+	ui.Message(fmt.Sprintf("Version successfully released and available"))
 
 	return multistep.ActionContinue
 }
