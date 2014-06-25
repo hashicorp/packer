@@ -93,8 +93,7 @@ the execution order.
           "type": "vagrant-cloud",
           "box_tag": "hashicorp/precise64",
           "access_token": "{{user `cloud_token`}}",
-          "version": "{{user `version`}}",
-          "version_description": "- added rabbitmq\n- modified db config\n- compacted log files"
+          "version": "{{user `version`}}"
       }]
     ]
 }
