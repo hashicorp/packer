@@ -21,7 +21,7 @@ func (s *stepUpload) Run(state multistep.StateBag) multistep.StepAction {
 	resp, err := client.Upload(artifactFilePath, url)
 
 	if err != nil || (resp.StatusCode != 200) {
-		state.Put("error", fmt.Errorf("Error uploading Box: %s", resp.Body))
+		state.Put("error", fmt.Errorf("Error uploading Box: %s", err))
 		return multistep.ActionHalt
 	}
 
