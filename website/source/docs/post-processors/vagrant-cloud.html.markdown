@@ -87,7 +87,7 @@ the execution order.
           "type": "vagrant",
           "include": ["image.iso"],
           "vagrantfile_template": "vagrantfile.tpl",
-          "output": "proxycore_{{.Provider}}.box",
+          "output": "proxycore_{{.Provider}}.box"
       },
       {
           "type": "vagrant-cloud",
