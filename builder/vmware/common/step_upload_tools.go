@@ -23,7 +23,7 @@ func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
 
 	if c.RemoteType == "esx5" {
 		if err := driver.ToolsInstall(); err != nil {
-			state.Put("error", fmt.Errorf("Couldn't mount VMware tools ISO."))
+			state.Put("error", fmt.Errorf("Couldn't mount VMware tools ISO. Please check the 'guest_os_type' in your template.json."))
 		}
 		return multistep.ActionContinue
 	}
