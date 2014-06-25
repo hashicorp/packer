@@ -6,17 +6,35 @@ import (
 	"testing"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{}
+func testGoodConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"access_token":        "foo",
+		"version_description": "bar",
+		"box_tag":             "hashicorp/precise64",
+		"version":             "0.5",
+	}
 }
 
-func testPP(t *testing.T) *PostProcessor {
+func testBadConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"access_token":        "foo",
+		"box_tag":             "baz",
+		"version_description": "bar",
+	}
+}
+
+func TestPostProcessor_Configure_Good(t *testing.T) {
 	var p PostProcessor
-	if err := p.Configure(testConfig()); err != nil {
+	if err := p.Configure(testGoodConfig()); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+}
 
-	return &p
+func TestPostProcessor_Configure_Bad(t *testing.T) {
+	var p PostProcessor
+	if err := p.Configure(testBadConfig()); err == nil {
+		t.Fatalf("should have err")
+	}
 }
 
 func testUi() *packer.BasicUi {
