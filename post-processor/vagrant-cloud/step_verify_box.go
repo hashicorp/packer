@@ -33,8 +33,10 @@ func (s *stepVerifyBox) Run(state multistep.StateBag) multistep.StepAction {
 	path := fmt.Sprintf("box/%s", config.Tag)
 	resp, err := client.Get(path)
 
-	if err != nil {
-		state.Put("error", fmt.Errorf("Error retrieving box: %s", err))
+	if err != nil || (resp.StatusCode != 200) {
+		cloudErrors := &VagrantCloudErrors{}
+		err = decodeBody(resp, cloudErrors)
+		state.Put("error", fmt.Errorf("Error retrieving box: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}
 
@@ -46,7 +48,7 @@ func (s *stepVerifyBox) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if box.Tag != config.Tag {
-		state.Put("error", fmt.Errorf("Could not verify box: %s", err))
+		state.Put("error", fmt.Errorf("Could not verify box: %s", config.Tag))
 		return multistep.ActionHalt
 	}
 
