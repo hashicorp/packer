@@ -17,8 +17,10 @@ const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Tag     string `mapstructure:"box_tag"`
-	Version string `mapstructure:"version"`
+	Tag                string `mapstructure:"box_tag"`
+	Version            string `mapstructure:"version"`
+	VersionDescription string `mapstructure:"version_description"`
+	NoRelease          bool   `mapstructure:"no_release"`
 
 	AccessToken     string `mapstructure:"access_token"`
 	VagrantCloudUrl string `mapstructure:"vagrant_cloud_url"`

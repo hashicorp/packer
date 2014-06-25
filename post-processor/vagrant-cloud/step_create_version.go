@@ -8,7 +8,8 @@ import (
 
 type Version struct {
 	Version string `json:"version"`
-	Number  uint   `json:"number,omitempty"`
+    Description  string   `json:"description,omitempty"`
+    Number  uint   `json:"number,omitempty"`
 }
 
 type stepCreateVersion struct {
@@ -29,7 +30,7 @@ func (s *stepCreateVersion) Run(state multistep.StateBag) multistep.StepAction {
 
 	path := fmt.Sprintf("box/%s/versions", box.Tag)
 
-	version := &Version{Version: config.Version}
+	version := &Version{Version: config.Version, Description: config.VersionDescription}
 
 	// Wrap the version in a version object for the API
 	wrapper := make(map[string]interface{})
