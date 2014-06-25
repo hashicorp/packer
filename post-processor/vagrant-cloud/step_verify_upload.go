@@ -78,6 +78,7 @@ func (s *stepVerifyUpload) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}()
 
+	ui.Message("Waiting for upload token match")
 	log.Printf("Waiting for up to 600 seconds for provider hosted token to match %s", upload.Token)
 
 	select {
@@ -87,7 +88,9 @@ func (s *stepVerifyUpload) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
+		ui.Message(fmt.Sprintf("Upload succesfully verified with token %s", providerCheck.HostedToken))
 		log.Printf("Box succesfully verified %s == %s", upload.Token, providerCheck.HostedToken)
+
 		return multistep.ActionContinue
 	case <-time.After(600 * time.Second):
 		state.Put("error", fmt.Errorf("Timeout while waiting to for upload to verify token '%s'", upload.Token))

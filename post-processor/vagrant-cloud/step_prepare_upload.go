@@ -41,6 +41,8 @@ func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	ui.Message(fmt.Sprintf("Box upload prepared with token %s", upload.Token))
+
 	// Save the upload details to the state
 	state.Put("upload", upload)
 

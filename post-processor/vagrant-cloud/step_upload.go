@@ -18,12 +18,16 @@ func (s *stepUpload) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Uploading box: %s", artifactFilePath))
 
+	ui.Message("Depending on your internet connection and the size of the box, this may take some time")
+
 	resp, err := client.Upload(artifactFilePath, url)
 
 	if err != nil || (resp.StatusCode != 200) {
 		state.Put("error", fmt.Errorf("Error uploading Box: %s", err))
 		return multistep.ActionHalt
 	}
+
+	ui.Message("Box succesfully uploaded")
 
 	return multistep.ActionContinue
 }

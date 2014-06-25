@@ -52,6 +52,8 @@ func (s *stepVerifyBox) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	ui.Message("Box accessible and matches tag")
+
 	// Keep the box in state for later
 	state.Put("box", box)
 
