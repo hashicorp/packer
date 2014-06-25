@@ -14,6 +14,12 @@ func (s *stepReleaseVersion) Run(state multistep.StateBag) multistep.StepAction 
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)
 	version := state.Get("version").(*Version)
+	config := state.Get("config").(Config)
+
+	if config.NoRelease {
+		ui.Say(fmt.Sprintf("Not releasing version due to configuration: %s", version.Version))
+		return multistep.ActionContinue
+	}
 
 	path := fmt.Sprintf("box/%s/version/%v/release", box.Tag, version.Number)
 
