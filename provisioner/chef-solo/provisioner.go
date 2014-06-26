@@ -62,6 +62,7 @@ type ExecuteTemplate struct {
 	ConfigPath string
 	JsonPath   string
 	Sudo       bool
+	Version    string
 }
 
 type InstallChefTemplate struct {
@@ -85,7 +86,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InstallCommand == "" {
-		p.config.InstallCommand = "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash"
+		p.config.InstallCommand = "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash {{if .Version}}-s -- -v {{.Version}}{{end}}"
 	}
 
 	if p.config.RunList == nil {
