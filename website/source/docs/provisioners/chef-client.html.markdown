@@ -141,6 +141,7 @@ can contain various template variables, defined below:
 * `JsonPath` - The path to the JSON attributes file for the node.
 * `Sudo` - A boolean of whether to `sudo` the command or not, depending on
   the value of the `prevent_sudo` configuration.
+* `Version` - The chef version.
 
 ## Install Command
 
@@ -150,7 +151,8 @@ to install Chef in another way.
 
 ```
 curl -L https://www.opscode.com/chef/install.sh | \
-  {{if .Sudo}}sudo{{end}} bash
+  {{if .Sudo}}sudo{{end}} bash \
+  {{if .Version}}-s -- -v {{.Version}}{{end}}
 ```
 
 This command can be customized using the `install_command` configuration.
