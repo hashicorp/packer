@@ -30,15 +30,25 @@ type StateChangeConf struct {
 }
 
 // ServerStateRefreshFunc returns a StateRefreshFunc that is used to watch
-// an openstacn server.
+// an openstack server.
 func ServerStateRefreshFunc(csp gophercloud.CloudServersProvider, s *gophercloud.Server) StateRefreshFunc {
 	return func() (interface{}, string, int, error) {
-		resp, err := csp.ServerById(s.Id)
+		servers, err := csp.ListServers()
 		if err != nil {
 			log.Printf("Error on ServerStateRefresh: %s", err)
 			return nil, "", 0, err
 		}
-
+		var resp *gophercloud.Server
+		found := false
+		for _, server := range servers {
+			if server.Id == s.Id {
+				found = true
+				resp = &server
+			}
+		}
+		if found == false {
+			return nil, "DELETED", 0, nil
+		}
 		return resp, resp.Status, resp.Progress, nil
 	}
 }
