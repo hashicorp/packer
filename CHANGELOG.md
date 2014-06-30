@@ -2,7 +2,6 @@
 
 IMPROVEMENTS:
 
-  * builder/amazon-common: Sort AMI strings before outputting [GH-1305]
   * builder/amazon-ebs: Support encrypted EBS volumes [GH-1194]
   * builder/ansible: Add `playbook_dir` option. [GH-1000]
   * builder/openstack: Add ability to configure networks. [GH-1261]
@@ -19,7 +18,9 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * builder/amazon-common: Sort AMI strings before outputting [GH-1305]
   * core: `isotime` is the same time during the entire build. [GH-1153]
+  * builder/openstack: Workaround for gophercloud.ServerById crashing [GH-1257]
   * builder/openstack: Force IPv4 addresses from address pools [GH-1258]
   * builder/parallels: Do not delete entire CDROM device. [GH-1115]
   * builder/parallels: Errors while creating floppy disk. [GH-1225]
