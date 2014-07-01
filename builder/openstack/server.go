@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"github.com/racker/perigee"
 	"github.com/rackspace/gophercloud"
 	"log"
 	"time"
@@ -33,21 +34,17 @@ type StateChangeConf struct {
 // an openstack server.
 func ServerStateRefreshFunc(csp gophercloud.CloudServersProvider, s *gophercloud.Server) StateRefreshFunc {
 	return func() (interface{}, string, int, error) {
-		servers, err := csp.ListServers()
+		resp, err := csp.ServerById(s.Id)
 		if err != nil {
-			log.Printf("Error on ServerStateRefresh: %s", err)
-			return nil, "", 0, err
-		}
-		var resp *gophercloud.Server
-		found := false
-		for _, server := range servers {
-			if server.Id == s.Id {
-				found = true
-				resp = &server
+			urce, ok := err.(*perigee.UnexpectedResponseCodeError)
+			if ok && (urce.Actual == 404) {
+				log.Printf("404 on ServerStateRefresh, returning DELETED")
+
+				return nil, "DELETED", 0, nil
+			} else {
+				log.Printf("Error on ServerStateRefresh: %s", err)
+				return nil, "", 0, err
 			}
-		}
-		if found == false {
-			return nil, "DELETED", 0, nil
 		}
 		return resp, resp.Status, resp.Progress, nil
 	}
