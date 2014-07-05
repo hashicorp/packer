@@ -26,6 +26,7 @@ BUG FIXES:
   * builder/parallels: Errors while creating floppy disk. [GH-1225]
   * builder/parallels: Errors while removing floppy drive. [GH-1226]
   * builder/virtualbox-ovf: Supports guest additions options. [GH-1120]
+  * builder/vmware-iso: Fix esx5 path separator in windows. [GH-1316]
   * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
   * post-processor/vsphere: Accept DOMAIN\account usernames [GH-1178]
 
