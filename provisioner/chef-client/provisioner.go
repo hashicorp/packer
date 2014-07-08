@@ -71,6 +71,29 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 	p.config.tpl.UserVars = p.config.PackerUserVars
 
+	// Accumulate any errors
+	errs := common.CheckUnusedConfig(md)
+
+	templates := map[string]*string{
+		"config_template":        &p.config.ConfigTemplate,
+		"node_name":              &p.config.NodeName,
+		"staging_dir":            &p.config.StagingDir,
+		"chef_server_url":        &p.config.ServerUrl,
+		"execute_command":        &p.config.ExecuteCommand,
+		"install_command":        &p.config.InstallCommand,
+		"validation_key_path":    &p.config.ValidationKeyPath,
+		"validation_client_name": &p.config.ValidationClientName,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = p.config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}chef-client " +
 			"--no-color -c {{.ConfigPath}} -j {{.JsonPath}}"
@@ -88,25 +111,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = "/tmp/packer-chef-client"
-	}
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	templates := map[string]*string{
-		"config_template": &p.config.ConfigTemplate,
-		"node_name":       &p.config.NodeName,
-		"staging_dir":     &p.config.StagingDir,
-		"chef_server_url": &p.config.ServerUrl,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
 	}
 
 	sliceTemplates := map[string][]string{
