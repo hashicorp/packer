@@ -66,7 +66,30 @@ each category, the available options are alphabetized and described.
   runs.
 
 * `ssh_username` (string) - The username to use to SSH into the machine
-  once the OS is installed.
+  once the OS is installed. This is ignored if communicator_type is set to
+  "winrm".
+
+### Windows Only:
+
+* `communicator_type` (string) - The communicator type that Packer will use to
+  connect to the guest. This can be either "ssh" or "winrm", this defaults to
+  "ssh". Change this to 'winrm' for Windows guests.
+
+* `winrm_username` (string) - The username to connect to WinRM once the OS is
+  installed. This is required.
+
+* `winrm_password` (string) - The password for `winrm_username` to use to
+  authenticate with WinRM. By default this is the empty string.
+
+* `winrm_host` (string) - Hostname or IP address of the host. By default,
+  DHCP is used to connect to the host and this field is not used.
+
+* `winrm_port` (int) - The port that WinRM will listen on within the virtual
+  machine. By default this is 5985.
+
+* `winrm_wait_timeout` (string) - The duration to wait for WinRM to become
+  available. By default this is "20m", or 20 minutes. Note that this should
+  be quite long since the timer begins as soon as the virtual machine is booted.
 
 ### Optional:
 
