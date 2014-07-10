@@ -1,20 +1,19 @@
-package vagrant
+package vagrantcloud
 
 import (
 	"fmt"
-	"os"
 )
 
-const BuilderId = "mitchellh.post-processor.vagrant"
+const BuilderId = "pearkes.post-processor.vagrant-cloud"
 
 type Artifact struct {
-	Path     string
+	Tag      string
 	Provider string
 }
 
-func NewArtifact(provider, path string) *Artifact {
+func NewArtifact(provider, tag string) *Artifact {
 	return &Artifact{
-		Path:     path,
+		Tag:      tag,
 		Provider: provider,
 	}
 }
@@ -24,17 +23,17 @@ func (*Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Files() []string {
-	return []string{a.Path}
+	return nil
 }
 
 func (a *Artifact) Id() string {
-	return a.Provider
+	return ""
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("'%s' provider box: %s", a.Provider, a.Path)
+	return fmt.Sprintf("'%s': %s", a.Provider, a.Tag)
 }
 
 func (a *Artifact) Destroy() error {
-	return os.Remove(a.Path)
+	return nil
 }
