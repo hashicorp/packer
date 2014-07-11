@@ -59,9 +59,6 @@ access to on Vagrant Cloud, as well as authentication and version information.
 
 ### Optional:
 
-* `version_description` (string) - Optionally markdown text used as a full-length
-  and in-depth description of the version, typically for denoting changes introduced
-
 * `no_release` (string) - If set to true, does not release the version
 on Vagrant Cloud, making it active. You can manually release the version
 via the API or Web UI. Defaults to false.
@@ -69,6 +66,9 @@ via the API or Web UI. Defaults to false.
 * `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud. This
 is useful if you're using Vagrant Private Cloud in your own network. Defaults
 to `https://vagrantcloud.com/api/v1`
+
+* `version_description` (string) - Optionally markdown text used as a full-length
+  and in-depth description of the version, typically for denoting changes introduced
 
 ## Use with Vagrant Post-Processor
 
