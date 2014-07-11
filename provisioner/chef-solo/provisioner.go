@@ -378,7 +378,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 		return "", err
 	}
 
-	remotePath := filepath.Join(p.config.StagingDir, "solo.rb")
+	remotePath := filepath.ToSlash(filepath.Join(p.config.StagingDir, "solo.rb"))
 	if err := comm.Upload(remotePath, bytes.NewReader([]byte(configString))); err != nil {
 		return "", err
 	}
@@ -407,7 +407,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 	}
 
 	// Upload the bytes
-	remotePath := filepath.Join(p.config.StagingDir, "node.json")
+	remotePath := filepath.ToSlash(filepath.Join(p.config.StagingDir, "node.json"))
 	if err := comm.Upload(remotePath, bytes.NewReader(jsonBytes)); err != nil {
 		return "", err
 	}
