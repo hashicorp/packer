@@ -29,6 +29,7 @@ BUG FIXES:
   * builder/vmware-iso: Fix esx5 path separator in windows. [GH-1316]
   * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
   * post-processor/vsphere: Accept DOMAIN\account usernames [GH-1178]
+  * provisioner/chef-*: Fix remotePaths for Windows [GH-394]
 
 ## 0.6.0 (May 2, 2014)
 
