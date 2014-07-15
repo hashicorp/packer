@@ -20,11 +20,17 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
+	BootCommand    []string `mapstructure:"boot_command"`
 	FloppyFiles    []string `mapstructure:"floppy_files"`
 	RemoteType     string   `mapstructure:"remote_type"`
 	SkipCompaction bool     `mapstructure:"skip_compaction"`
 	SourcePath     string   `mapstructure:"source_path"`
 	VMName         string   `mapstructure:"vm_name"`
+	HTTPDir        string   `mapstructure:"http_directory"`
+	HTTPPortMin    uint     `mapstructure:"http_port_min"`
+	HTTPPortMax    uint     `mapstructure:"http_port_max"`
+	VNCPortMin     uint     `mapstructure:"vnc_port_min"`
+	VNCPortMax     uint     `mapstructure:"vnc_port_max"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -69,6 +75,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
 	}
 
