@@ -46,6 +46,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	if b.config.HTTPPortMin == 0 {
+		b.config.HTTPPortMin = 8000
+	}
+
+	if b.config.HTTPPortMax == 0 {
+		b.config.HTTPPortMax = 9000
+	}
+
 	// Build the steps.
 	steps := []multistep.Step{
 		&vboxcommon.StepOutputDir{
@@ -55,6 +63,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(vboxcommon.StepSuppressMessages),
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
+		},
+		&vboxcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vboxcommon.StepDownloadGuestAdditions{
 			GuestAdditionsMode:   b.config.GuestAdditionsMode,
@@ -83,6 +96,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepRun{
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
+		},
+		&vboxcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			VMName:      b.config.VMName,
+			Tpl:         b.config.tpl,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,

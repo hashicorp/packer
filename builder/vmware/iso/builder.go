@@ -340,15 +340,26 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
-		&stepHTTPServer{},
-		&stepConfigureVNC{},
+		&vmwcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&vmwcommon.StepConfigureVNC{
+			VNCPortMin: b.config.VNCPortMin,
+			VNCPortMax: b.config.VNCPortMax,
+		},
 		&StepRegister{},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
-		&stepTypeBootCommand{},
+		&vmwcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			VMName:      b.config.VMName,
+			Tpl:         b.config.tpl,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     driver.SSHAddress,
 			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
