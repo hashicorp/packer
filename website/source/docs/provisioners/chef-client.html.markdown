@@ -23,7 +23,7 @@ remote machine and run Chef client.
 <pre class="prettyprint">
 {
   "type": "chef-client",
-  "server_url": "http://mychefserver.com:4000/"
+  "server_url": "https://mychefserver.com/"
 }
 </pre>
 
