@@ -29,7 +29,7 @@ type Config struct {
 
 	// The playbook dir to upload.
 	PlaybookDir string `mapstructure:"playbook_dir"`
-	
+
 	// The main playbook file to execute.
 	PlaybookFile string `mapstructure:"playbook_file"`
 
@@ -133,7 +133,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
-	
+
 	// Check that the group_vars directory exists, if configured
 	if len(p.config.GroupVars) > 0 {
 		if err := validateDirConfig(p.config.GroupVars, "group_vars"); err != nil {
