@@ -90,7 +90,7 @@ func (t *ConfigTemplate) nextTemplateName() string {
 func (t *ConfigTemplate) templateUser(n string) (string, error) {
 	result, ok := t.UserVars[n]
 	if !ok {
-		return "", fmt.Errorf("uknown user var: %s", n)
+		return "", fmt.Errorf("unknown user var: %s", n)
 	}
 
 	return result, nil
