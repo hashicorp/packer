@@ -61,6 +61,7 @@ type config struct {
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
+	DiskImage       bool       `mapstructure:"disk_image"`
 	HTTPDir         string     `mapstructure:"http_directory"`
 	HTTPPortMin     uint       `mapstructure:"http_port_min"`
 	HTTPPortMax     uint       `mapstructure:"http_port_max"`
@@ -396,6 +397,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		new(stepCreateDisk),
+		new(stepCopyDisk),
+		new(stepResizeDisk),
 		new(stepHTTPServer),
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
