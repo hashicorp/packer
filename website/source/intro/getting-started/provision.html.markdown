@@ -61,7 +61,7 @@ of time to initialize. The sleep makes sure that the OS properly initializes.
 Hopefully it is obvious, but the `builders` section shouldn't actually
 contain "...", it should be the contents setup in the previous page
 of the getting started guide. Also note the comma after the `"builders": [...]`
-array, which was not necessary in the previous lesson.
+section, which was not present in the previous lesson.
 
 To configure the provisioners, we add a new section `provisioners` to the
 template, alongside the `builders` configuration. The provisioners section
