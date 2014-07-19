@@ -95,6 +95,9 @@ each category, the available configuration keys are alphabetized.
 * `availability_zone` (string) - Destination availability zone to launch instance in.
   Leave this empty to allow Amazon to auto-assign.
 
+* `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
+  HVM-compatible AMIs.
+
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
