@@ -2,6 +2,7 @@ package chroot
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -36,6 +37,11 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		RamdiskId:      image.RamdiskId,
 		RootDeviceName: image.RootDeviceName,
 		BlockDevices:   blockDevices,
+	}
+
+	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
+	if config.AMIEnhancedNetworking {
+		registerOpts.SriovNetSupport = "simple"
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
