@@ -28,6 +28,7 @@ providers.
 
 * AWS
 * DigitalOcean
+* Hyper-V
 * Parallels
 * VirtualBox
 * VMware
