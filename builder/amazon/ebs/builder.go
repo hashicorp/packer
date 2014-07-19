@@ -7,12 +7,13 @@ package ebs
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // The unique ID for this builder
@@ -82,6 +83,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepSourceAMIInfo{
+			SourceAmi:          b.config.SourceAmi,
+			EnhancedNetworking: b.config.AMIEnhancedNetworking,
+		},
 		&awscommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
@@ -114,6 +119,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&stepStopInstance{},
+		&stepModifyInstance{},
 		&stepCreateAMI{},
 		&awscommon.StepAMIRegionCopy{
 			Regions: b.config.AMIRegions,
