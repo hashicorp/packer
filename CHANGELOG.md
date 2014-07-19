@@ -8,6 +8,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * builder/amazon: Support for enhanced networking on HVM images. [GH-1228]
   * builder/amazon-ebs: Support encrypted EBS volumes [GH-1194]
   * builder/ansible: Add `playbook_dir` option. [GH-1000]
   * builder/openstack: Add ability to configure networks. [GH-1261]
