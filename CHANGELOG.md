@@ -28,6 +28,7 @@ BUG FIXES:
   * core: `isotime` is the same time during the entire build. [GH-1153]
   * builder/amazon-common: Sort AMI strings before outputting [GH-1305]
   * builder/amazon: User data can use templates/variables. [GH-1343]
+  * builder/amazon: Can now build AMIs in GovCloud.
   * builder/null: SSH info can use templates/variables. [GH-1343]
   * builder/openstack: Workaround for gophercloud.ServerById crashing [GH-1257]
   * builder/openstack: Force IPv4 addresses from address pools [GH-1258]
