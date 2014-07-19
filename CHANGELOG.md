@@ -33,6 +33,8 @@ BUG FIXES:
   * builder/virtualbox-ovf: Supports guest additions options. [GH-1120]
   * builder/vmware-iso: Fix esx5 path separator in windows. [GH-1316]
   * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
+  * builder/vmware: Remote ESXi builder no longer re-uploads ISO every
+      time. [GH-1244]
   * post-processor/vsphere: Accept DOMAIN\account usernames [GH-1178]
   * provisioner/chef-*: Fix remotePaths for Windows [GH-394]
 
