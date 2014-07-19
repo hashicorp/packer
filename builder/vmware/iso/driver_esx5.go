@@ -84,7 +84,7 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
 }
 
-func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
 	cacheRoot, _ := filepath.Abs(".")
 	targetFile, err := filepath.Rel(cacheRoot, localPath)
 	if err != nil {
@@ -94,6 +94,12 @@ func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
 	finalPath := d.datastorePath(targetFile)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
+	}
+
+	log.Printf("Verifying checksum of %s", finalPath)
+	if d.verifyChecksum(checksumType, checksum, finalPath) {
+		log.Println("Initial checksum matched, no upload needed.")
+		return finalPath, nil
 	}
 
 	if err := d.upload(finalPath, localPath); err != nil {

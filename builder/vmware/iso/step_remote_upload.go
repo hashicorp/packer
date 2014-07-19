@@ -29,9 +29,13 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
+	config := state.Get("config").(*config)
+	checksum := config.ISOChecksum
+	checksumType := config.ISOChecksumType
+
 	ui.Say(s.Message)
 	log.Printf("Remote uploading: %s", path)
-	newPath, err := remote.UploadISO(path)
+	newPath, err := remote.UploadISO(path, checksum, checksumType)
 	if err != nil {
 		err := fmt.Errorf("Error uploading file: %s", err)
 		state.Put("error", err)
