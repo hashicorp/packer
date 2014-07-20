@@ -25,6 +25,11 @@ type MockDriver struct {
 	PushName   string
 	PushErr    error
 
+	TagImageCalled  bool
+	TagImageImageId string
+	TagImageRepo    string
+	TagImageErr     error
+
 	ExportReader io.Reader
 	ExportError  error
 	PullError    error
@@ -99,6 +104,13 @@ func (d *MockDriver) StopContainer(id string) error {
 	d.StopCalled = true
 	d.StopID = id
 	return d.StopError
+}
+
+func (d *MockDriver) TagImage(id string, repo string) error {
+	d.TagImageCalled = true
+	d.TagImageImageId = id
+	d.TagImageRepo = repo
+	return d.TagImageErr
 }
 
 func (d *MockDriver) Verify() error {
