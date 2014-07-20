@@ -33,6 +33,9 @@ type Driver interface {
 	// StopContainer forcibly stops a container.
 	StopContainer(id string) error
 
+	// TagImage tags the image with the given ID
+	TagImage(id string, repo string) error
+
 	// Verify verifies that the driver can run
 	Verify() error
 }
