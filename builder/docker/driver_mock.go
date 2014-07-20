@@ -6,6 +6,11 @@ import (
 
 // MockDriver is a driver implementation that can be used for tests.
 type MockDriver struct {
+	CommitCalled      bool
+	CommitContainerId string
+	CommitImageId     string
+	CommitErr         error
+
 	DeleteImageCalled bool
 	DeleteImageId     string
 	DeleteImageErr    error
@@ -37,6 +42,12 @@ type MockDriver struct {
 	StopCalled   bool
 	StopID       string
 	VerifyCalled bool
+}
+
+func (d *MockDriver) Commit(id string) (string, error) {
+	d.CommitCalled = true
+	d.CommitContainerId = id
+	return d.CommitImageId, d.CommitErr
 }
 
 func (d *MockDriver) DeleteImage(id string) error {
