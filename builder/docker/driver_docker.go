@@ -115,6 +115,26 @@ func (d *DockerDriver) Push(name string) error {
 	return runAndStream(cmd, d.Ui)
 }
 
+func (d *DockerDriver) SaveImage(id string, dst io.Writer) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "save", id)
+	cmd.Stdout = dst
+	cmd.Stderr = &stderr
+
+	log.Printf("Exporting image: %s", id)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error exporting: %s\nStderr: %s",
+			err, stderr.String())
+		return err
+	}
+
+	return nil
+}
+
 func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
