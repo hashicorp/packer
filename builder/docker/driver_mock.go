@@ -25,6 +25,11 @@ type MockDriver struct {
 	PushName   string
 	PushErr    error
 
+	SaveImageCalled bool
+	SaveImageId     string
+	SaveImageReader io.Reader
+	SaveImageError  error
+
 	TagImageCalled  bool
 	TagImageImageId string
 	TagImageRepo    string
@@ -92,6 +97,20 @@ func (d *MockDriver) Push(name string) error {
 	d.PushCalled = true
 	d.PushName = name
 	return d.PushErr
+}
+
+func (d *MockDriver) SaveImage(id string, dst io.Writer) error {
+	d.SaveImageCalled = true
+	d.SaveImageId = id
+
+	if d.SaveImageReader != nil {
+		_, err := io.Copy(dst, d.SaveImageReader)
+		if err != nil {
+			return err
+		}
+	}
+
+	return d.SaveImageError
 }
 
 func (d *MockDriver) StartContainer(config *ContainerConfig) (string, error) {

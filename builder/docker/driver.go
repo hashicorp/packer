@@ -26,6 +26,9 @@ type Driver interface {
 	// Push pushes an image to a Docker index/registry.
 	Push(name string) error
 
+	// Save an image with the given ID to the given writer.
+	SaveImage(id string, dst io.Writer) error
+
 	// StartContainer starts a container and returns the ID for that container,
 	// along with a potential error.
 	StartContainer(*ContainerConfig) (string, error)
