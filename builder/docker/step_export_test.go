@@ -34,6 +34,7 @@ func TestStepExport(t *testing.T) {
 
 	config := state.Get("config").(*Config)
 	config.ExportPath = tf.Name()
+	config.Export = true
 	driver := state.Get("driver").(*MockDriver)
 	driver.ExportReader = bytes.NewReader([]byte("data!"))
 
@@ -61,6 +62,26 @@ func TestStepExport(t *testing.T) {
 	}
 }
 
+func TestStepExport_skip(t *testing.T) {
+	state := testStepExportState(t)
+	step := new(StepExport)
+	defer step.Cleanup(state)
+
+	config := state.Get("config").(*Config)
+	config.Export = false
+	driver := state.Get("driver").(*MockDriver)
+
+	// run the step
+	if action := step.Run(state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// verify we did the right thing
+	if driver.ExportCalled {
+		t.Fatal("shouldn't have exported")
+	}
+}
+
 func TestStepExport_error(t *testing.T) {
 	state := testStepExportState(t)
 	step := new(StepExport)
@@ -79,6 +100,7 @@ func TestStepExport_error(t *testing.T) {
 
 	config := state.Get("config").(*Config)
 	config.ExportPath = tf.Name()
+	config.Export = true
 	driver := state.Get("driver").(*MockDriver)
 	driver.ExportError = errors.New("foo")
 
