@@ -5,14 +5,6 @@ page_title: "Vagrant Cloud Post-Processor"
 
 # Vagrant Cloud Post-Processor
 
-<div class="alert alert-block alert-warn">
-<p>
-<strong>This is an unreleased feature.</strong> To use it now,
-please build Packer from source. A release is scheduled for the week
-of 07/14/2014.
-</p>
-</div>
-
 Type: `vagrant-cloud`
 
 The Vagrant Cloud post-processor recieves a Vagrant box from the `vagrant`
