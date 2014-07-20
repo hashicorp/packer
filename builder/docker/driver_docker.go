@@ -169,6 +169,21 @@ func (d *DockerDriver) StopContainer(id string) error {
 	return exec.Command("docker", "kill", id).Run()
 }
 
+func (d *DockerDriver) TagImage(id string, repo string) error {
+	cmd := exec.Command("docker", "tag", id, repo)
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error tagging image: %s", err)
+		return err
+	}
+
+	return nil
+}
+
 func (d *DockerDriver) Verify() error {
 	if _, err := exec.LookPath("docker"); err != nil {
 		return err
