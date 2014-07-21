@@ -37,15 +37,19 @@ func (d *DockerDriver) DeleteImage(id string) error {
 
 func (d *DockerDriver) Commit(id string) (string, error) {
 	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
 	cmd := exec.Command("docker", "commit", id)
 	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	if err := cmd.Start(); err != nil {
 		return "", err
 	}
 
 	if err := cmd.Wait(); err != nil {
-		err = fmt.Errorf("Error committing container: %s", err)
+		err = fmt.Errorf("Error committing container: %s\nStderr: %s",
+			err, stderr.String())
 		return "", err
 	}
 
@@ -190,14 +194,17 @@ func (d *DockerDriver) StopContainer(id string) error {
 }
 
 func (d *DockerDriver) TagImage(id string, repo string) error {
+	var stderr bytes.Buffer
 	cmd := exec.Command("docker", "tag", id, repo)
+	cmd.Stderr = &stderr
 
 	if err := cmd.Start(); err != nil {
 		return err
 	}
 
 	if err := cmd.Wait(); err != nil {
-		err = fmt.Errorf("Error tagging image: %s", err)
+		err = fmt.Errorf("Error tagging image: %s\nStderr: %s",
+			err, stderr.String())
 		return err
 	}
 
