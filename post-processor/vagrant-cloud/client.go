@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -113,13 +111,8 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 	defer file.Close()
 
 	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file", filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
 
-	_, err = io.Copy(part, file)
+	_, err = io.Copy(body, file)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error uploading file: %s", err)
