@@ -101,7 +101,7 @@ and `docker push`, respectively.
 
 This builder allows you to build Docker images _without_ Dockerfiles.
 
-With this builder, you can repeatably create Docker images without the use
+With this builder, you can repeatably create Docker images without the use of
 a Dockerfile. You don't need to know the syntax or semantics of Dockerfiles.
 Instead, you can just provide shell scripts, Chef recipes, Puppet manifests,
 etc. to provision your Docker container just like you would a regular
