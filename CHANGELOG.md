@@ -1,6 +1,8 @@
 ## 0.6.2 (unreleased)
 
+BUG FIXES:
 
+  * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
 
 ## 0.6.1 (July 20, 2014)
 
