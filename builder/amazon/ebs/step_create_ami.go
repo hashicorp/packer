@@ -34,15 +34,6 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	imagesResp, err := ec2conn.Images([]string{createResp.ImageId}, nil)
-	if err != nil {
-		err := fmt.Errorf("Error searching for AMI: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	s.image = &imagesResp.Images[0]
-
 	// Set the AMI ID in the state
 	ui.Message(fmt.Sprintf("AMI: %s", createResp.ImageId))
 	amis := make(map[string]string)
@@ -65,11 +56,20 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	imagesResp, err := ec2conn.Images([]string{createResp.ImageId}, nil)
+	if err != nil {
+		err := fmt.Errorf("Error searching for AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	s.image = &imagesResp.Images[0]
+
 	return multistep.ActionContinue
 }
 
 func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
-	if s.image == nil {
+	if s.image == nil || s.image.State == "available" {
 		return
 	}
 
