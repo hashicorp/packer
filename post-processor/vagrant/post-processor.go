@@ -101,16 +101,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 	defer os.RemoveAll(dir)
 
-	// Copy all of the includes files into the temporary directory
-	for _, src := range config.Include {
-		ui.Message(fmt.Sprintf("Copying from include: %s", src))
-		dst := filepath.Join(dir, filepath.Base(src))
-		if err := CopyContents(dst, src); err != nil {
-			err = fmt.Errorf("Error copying include file: %s\n\n%s", src, err)
-			return nil, false, err
-		}
-	}
-
 	// Run the provider processing step
 	vagrantfile, metadata, err := provider.Process(ui, artifact, dir)
 	if err != nil {
@@ -120,6 +110,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Write the metadata we got
 	if err := WriteMetadata(dir, metadata); err != nil {
 		return nil, false, err
+	}
+
+	// Copy all of the includes files into the temporary directory
+	for _, src := range config.Include {
+		ui.Message(fmt.Sprintf("Copying from include: %s", src))
+		dst := filepath.Join(dir, filepath.Base(src))
+		if err := CopyContents(dst, src); err != nil {
+			err = fmt.Errorf("Error copying include file: %s\n\n%s", src, err)
+			return nil, false, err
+		}
 	}
 
 	// Write our Vagrantfile
