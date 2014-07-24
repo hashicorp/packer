@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -17,7 +18,9 @@ type bundleCmdData struct {
 	PrivatePath  string
 }
 
-type StepBundleVolume struct{}
+type StepBundleVolume struct {
+	Debug bool
+}
 
 func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
@@ -48,6 +51,11 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Bundling the volume...")
 	cmd := new(packer.RemoteCmd)
 	cmd.Command = config.BundleVolCommand
+
+	if s.Debug {
+		ui.Say(fmt.Sprintf("Running: %s", config.BundleVolCommand))
+	}
+
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		state.Put("error", fmt.Errorf("Error bundling volume: %s", err))
 		ui.Error(state.Get("error").(error).Error())
