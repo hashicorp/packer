@@ -22,6 +22,7 @@ const defaultConfig = `
 		"amazon-ebs": "packer-builder-amazon-ebs",
 		"amazon-chroot": "packer-builder-amazon-chroot",
 		"amazon-instance": "packer-builder-amazon-instance",
+		"outscale-ebs": "packer-builder-outscale-ebs",
 		"digitalocean": "packer-builder-digitalocean",
 		"docker": "packer-builder-docker",
 		"googlecompute": "packer-builder-googlecompute",
