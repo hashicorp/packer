@@ -191,7 +191,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if len(p.config.InventoryFile) > 0 {
 		ui.Message("Uploading inventory file...")
 		src := p.config.InventoryFile
-		dst := filepath.Join(p.config.StagingDir, filepath.Base(src))
+		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
 		if err := p.uploadFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Error uploading inventory file: %s", err)
 		}
@@ -259,7 +259,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	// with a single host.
 	inventory := "\"127.0.0.1,\""
 	if len(p.config.InventoryFile) > 0 {
-		inventory = filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile))
+		inventory = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 	}
 
 	extraArgs := ""
