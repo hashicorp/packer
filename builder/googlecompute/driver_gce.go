@@ -229,7 +229,7 @@ func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
 }
 
 func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
-	projects := []string{d.projectId, "debian-cloud", "centos-cloud"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "windows-cloud"}
 	for _, project := range projects {
 		image, err = d.service.Images.Get(project, name).Do()
 		if err == nil && image != nil && image.SelfLink != "" {
@@ -238,10 +238,7 @@ func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
 		image = nil
 	}
 
-	if err == nil {
-		err = fmt.Errorf("Image could not be found: %s", name)
-	}
-
+	err = fmt.Errorf("Image %s could not be found in any of these projects: %s", name, projects)
 	return
 }
 
