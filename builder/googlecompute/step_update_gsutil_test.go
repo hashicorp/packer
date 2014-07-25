@@ -32,7 +32,7 @@ func TestStepUpdateGsutil(t *testing.T) {
 	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
 		t.Fatal("should not sudo")
 	}
-	if !strings.Contains(comm.StartCmd.Command, "gsutil update") {
+	if !strings.Contains(comm.StartCmd.Command, "gcloud -q components update") {
 		t.Fatalf("bad command: %#v", comm.StartCmd.Command)
 	}
 }
@@ -79,7 +79,7 @@ func TestStepUpdateGsutil_nonRoot(t *testing.T) {
 	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
 		t.Fatal("should sudo")
 	}
-	if !strings.Contains(comm.StartCmd.Command, "gsutil update") {
+	if !strings.Contains(comm.StartCmd.Command, "gcloud -q components update") {
 		t.Fatalf("bad command: %#v", comm.StartCmd.Command)
 	}
 }

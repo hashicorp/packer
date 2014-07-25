@@ -28,18 +28,18 @@ func (s *StepUpdateGsutil) Run(state multistep.StateBag) multistep.StepAction {
 		sudoPrefix = "sudo "
 	}
 
-	gsutilUpdateCmd := "/usr/local/bin/gsutil update -n -f"
+	gsutilUpdateCmd := "/usr/local/bin/gcloud -q components update"
 	cmd := new(packer.RemoteCmd)
 	cmd.Command = fmt.Sprintf("%s%s", sudoPrefix, gsutilUpdateCmd)
 
-	ui.Say("Updating gsutil...")
+	ui.Say("Updating gcloud components...")
 	err := cmd.StartWithUi(comm, ui)
 	if err == nil && cmd.ExitStatus != 0 {
 		err = fmt.Errorf(
-			"gsutil update exited with non-zero exit status: %d", cmd.ExitStatus)
+			"gcloud components update exited with non-zero exit status: %d", cmd.ExitStatus)
 	}
 	if err != nil {
-		err := fmt.Errorf("Error updating gsutil: %s", err)
+		err := fmt.Errorf("Error updating gcloud components: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
