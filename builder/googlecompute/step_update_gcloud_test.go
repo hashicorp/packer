@@ -8,13 +8,13 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-func TestStepUpdateGsutil_impl(t *testing.T) {
-	var _ multistep.Step = new(StepUpdateGsutil)
+func TestStepUpdateGcloud_impl(t *testing.T) {
+	var _ multistep.Step = new(StepUpdateGcloud)
 }
 
-func TestStepUpdateGsutil(t *testing.T) {
+func TestStepUpdateGcloud(t *testing.T) {
 	state := testState(t)
-	step := new(StepUpdateGsutil)
+	step := new(StepUpdateGcloud)
 	defer step.Cleanup(state)
 
 	comm := new(packer.MockCommunicator)
@@ -37,9 +37,9 @@ func TestStepUpdateGsutil(t *testing.T) {
 	}
 }
 
-func TestStepUpdateGsutil_badExitStatus(t *testing.T) {
+func TestStepUpdateGcloud_badExitStatus(t *testing.T) {
 	state := testState(t)
-	step := new(StepUpdateGsutil)
+	step := new(StepUpdateGcloud)
 	defer step.Cleanup(state)
 
 	comm := new(packer.MockCommunicator)
@@ -56,9 +56,9 @@ func TestStepUpdateGsutil_badExitStatus(t *testing.T) {
 	}
 }
 
-func TestStepUpdateGsutil_nonRoot(t *testing.T) {
+func TestStepUpdateGcloud_nonRoot(t *testing.T) {
 	state := testState(t)
-	step := new(StepUpdateGsutil)
+	step := new(StepUpdateGcloud)
 	defer step.Cleanup(state)
 
 	comm := new(packer.MockCommunicator)
