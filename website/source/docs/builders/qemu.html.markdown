@@ -91,8 +91,8 @@ each category, the available options are alphabetized and described.
 ### Optional:
 
 * `accelerator` (string) - The accelerator type to use when running the VM.
-  This may have a value of either "kvm" or "xen" and you must have that
-  support in on the machine on which you run the builder.
+  This may have a value of either "kvm", "xen" or "tcg" and you must have that
+  support on the machine on which you run the builder. By default "kvm" is used.
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
