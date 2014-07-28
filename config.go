@@ -23,6 +23,7 @@ const defaultConfig = `
 		"amazon-chroot": "packer-builder-amazon-chroot",
 		"amazon-instance": "packer-builder-amazon-instance",
 		"outscale-ebs": "packer-builder-outscale-ebs",
+                "outscale-chroot": "packer-builder-outscale-chroot",
 		"digitalocean": "packer-builder-digitalocean",
 		"docker": "packer-builder-docker",
 		"googlecompute": "packer-builder-googlecompute",
