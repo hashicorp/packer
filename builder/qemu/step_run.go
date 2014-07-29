@@ -61,7 +61,6 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	sshHostPort := state.Get("sshHostPort").(uint)
 	ui := state.Get("ui").(packer.Ui)
 
-	guiArgument := "sdl"
 	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	vmName := config.VMName
 	imgPath := filepath.Join(config.OutputDir,
@@ -71,13 +70,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
 			"In headless mode, errors during the boot sequence or OS setup\n" +
 			"won't be easily visible. Use at your own discretion.")
-		guiArgument = "none"
 	}
 
 	defaultArgs := make(map[string]string)
 	defaultArgs["-name"] = vmName
-	defaultArgs["-machine"] = fmt.Sprintf("type=pc-1.0,accel=%s", config.Accelerator)
-	defaultArgs["-display"] = guiArgument
+	// defaultArgs["-machine"] = fmt.Sprintf("type=pc,accel=%s", config.Accelerator)
+	// defaultArgs["-machine"] = "type=pc"
 	defaultArgs["-netdev"] = "user,id=user.0"
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s", imgPath, config.DiskInterface)
