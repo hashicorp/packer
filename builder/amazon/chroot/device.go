@@ -28,7 +28,7 @@ func AvailableDevice() (string, error) {
 		}
 
 		// To be able to build both Paravirtual and HVM images, the unnumbered
-		// device and the first numbered one must be available. 
+		// device and the first numbered one must be available.
 		// E.g. /dev/xvdf  and  /dev/xvdf1
 		numbered_device := fmt.Sprintf("%s%d", device, 1)
 		if _, err := os.Stat(numbered_device); err != nil {
