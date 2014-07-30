@@ -3,6 +3,7 @@ package chroot
 import (
 	"bytes"
 	"fmt"
+	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"log"
@@ -26,6 +27,7 @@ type StepMountDevice struct {
 func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
+	image := state.Get("source_image").(*ec2.Image)
 	device := state.Get("device").(string)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
@@ -57,10 +59,17 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	log.Printf("Source image virtualization type is: %s", image.VirtualizationType)
+	deviceMount := device
+	if image.VirtualizationType == "hvm" {
+		deviceMount = fmt.Sprintf("%s%d", device, 1)
+	}
+	state.Put("deviceMount", deviceMount)
+
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
 	mountCommand, err := wrappedCommand(
-		fmt.Sprintf("mount %s %s", device, mountPath))
+		fmt.Sprintf("mount %s %s", deviceMount, mountPath))
 	if err != nil {
 		err := fmt.Errorf("Error creating mount command: %s", err)
 		state.Put("error", err)
