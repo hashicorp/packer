@@ -1,12 +1,8 @@
 package chroot
 
 import (
-	"fmt"
 	"testing"
-
-	"github.com/kr/pretty"
 	"github.com/mitchellh/goamz/ec2"
-	//  awscommon "github.com/mitchellh/packer/builder/amazon/common"
 )
 
 func testImage() ec2.Image {
@@ -29,9 +25,6 @@ func TestStepRegisterAmi_buildRegisterOpts_pv(t *testing.T) {
 	blockDevices := []ec2.BlockDeviceMapping{}
 
 	opts := buildRegisterOpts(&config, &image, blockDevices)
-
-	fmt.Println("******** PAS ********")
-	fmt.Printf("%# v", pretty.Formatter(opts))
 
 	expected := config.AMIVirtType
 	if opts.VirtType != expected {
@@ -61,9 +54,6 @@ func TestStepRegisterAmi_buildRegisterOpts_hvm(t *testing.T) {
 	blockDevices := []ec2.BlockDeviceMapping{}
 
 	opts := buildRegisterOpts(&config, &image, blockDevices)
-
-	fmt.Println("******** PAS ********")
-	fmt.Printf("%# v", pretty.Formatter(opts))
 
 	expected := config.AMIVirtType
 	if opts.VirtType != expected {
