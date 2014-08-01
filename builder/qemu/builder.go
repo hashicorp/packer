@@ -70,6 +70,7 @@ type config struct {
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
+	DeleteQemuArgs  []string   `mapstructure:"delete_qemuargs"`
 	QemuBinary      string     `mapstructure:"qemu_binary"`
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
