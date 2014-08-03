@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
+	"time"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -341,6 +342,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	// Run
 	if b.config.PackerDebug {

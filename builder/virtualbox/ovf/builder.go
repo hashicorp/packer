@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/mitchellh/multistep"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
@@ -45,6 +46,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("cache", cache)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	// Build the steps.
 	steps := []multistep.Step{
