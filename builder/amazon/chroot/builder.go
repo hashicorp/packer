@@ -7,13 +7,14 @@ package chroot
 import (
 	"errors"
 	"fmt"
+	"log"
+	"runtime"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"runtime"
 )
 
 // The unique ID for this builder
@@ -182,7 +183,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&StepInstanceInfo{},
-		&StepSourceAMIInfo{},
+		&awscommon.StepSourceAMIInfo{
+			SourceAmi:          b.config.SourceAmi,
+			EnhancedNetworking: b.config.AMIEnhancedNetworking,
+		},
+		&StepCheckRootDevice{},
 		&StepFlock{},
 		&StepPrepareDevice{},
 		&StepCreateVolume{},

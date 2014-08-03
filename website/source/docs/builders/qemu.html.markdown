@@ -27,8 +27,8 @@ paths to files, URLS for ISOs and checksums.
   [
     {
       "type": "qemu",
-      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.4-x86_64-minimal.iso",
-      "iso_checksum": "4a5fa01c81cc300f4729136e28ebe600",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
       "ssh_wait_timeout": "30s",
@@ -49,10 +49,10 @@ paths to files, URLS for ISOs and checksums.
       "vm_name": "tdhtest",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
+      "boot_wait": "5s",
       "boot_command":
       [
-        "<tab><wait>",
-        " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"
       ]
     }
   ]
@@ -60,7 +60,7 @@ paths to files, URLS for ISOs and checksums.
 </pre>
 
 A working CentOS 6.x kickstart file can be found
-[at this URL](https://gist.github.com/mitchellh/7328271/raw/c91e0c4fa19c171a40b016c6c8f251f90d2ad0ba/centos6-ks.cfg), adapted from an unknown source.
+[at this URL](https://gist.github.com/mitchellh/7328271/#file-centos6-ks-cfg), adapted from an unknown source.
 Place this file in the http directory with the proper name. For the
 example above, it should go into "httpdir" with a name of "centos6-ks.cfg".
 

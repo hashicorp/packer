@@ -8,13 +8,13 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-func TestStepUpdateGsutil_impl(t *testing.T) {
-	var _ multistep.Step = new(StepUpdateGsutil)
+func TestStepUpdateGcloud_impl(t *testing.T) {
+	var _ multistep.Step = new(StepUpdateGcloud)
 }
 
-func TestStepUpdateGsutil(t *testing.T) {
+func TestStepUpdateGcloud(t *testing.T) {
 	state := testState(t)
-	step := new(StepUpdateGsutil)
+	step := new(StepUpdateGcloud)
 	defer step.Cleanup(state)
 
 	comm := new(packer.MockCommunicator)
@@ -32,14 +32,14 @@ func TestStepUpdateGsutil(t *testing.T) {
 	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
 		t.Fatal("should not sudo")
 	}
-	if !strings.Contains(comm.StartCmd.Command, "gsutil update") {
+	if !strings.Contains(comm.StartCmd.Command, "gcloud -q components update") {
 		t.Fatalf("bad command: %#v", comm.StartCmd.Command)
 	}
 }
 
-func TestStepUpdateGsutil_badExitStatus(t *testing.T) {
+func TestStepUpdateGcloud_badExitStatus(t *testing.T) {
 	state := testState(t)
-	step := new(StepUpdateGsutil)
+	step := new(StepUpdateGcloud)
 	defer step.Cleanup(state)
 
 	comm := new(packer.MockCommunicator)
@@ -56,9 +56,9 @@ func TestStepUpdateGsutil_badExitStatus(t *testing.T) {
 	}
 }
 
-func TestStepUpdateGsutil_nonRoot(t *testing.T) {
+func TestStepUpdateGcloud_nonRoot(t *testing.T) {
 	state := testState(t)
-	step := new(StepUpdateGsutil)
+	step := new(StepUpdateGcloud)
 	defer step.Cleanup(state)
 
 	comm := new(packer.MockCommunicator)
@@ -79,7 +79,7 @@ func TestStepUpdateGsutil_nonRoot(t *testing.T) {
 	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
 		t.Fatal("should sudo")
 	}
-	if !strings.Contains(comm.StartCmd.Command, "gsutil update") {
+	if !strings.Contains(comm.StartCmd.Command, "gcloud -q components update") {
 		t.Fatalf("bad command: %#v", comm.StartCmd.Command)
 	}
 }

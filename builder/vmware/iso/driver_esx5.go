@@ -64,7 +64,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
 }
 
-func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
 	cacheRoot, _ := filepath.Abs(".")
 	targetFile, err := filepath.Rel(cacheRoot, localPath)
 	if err != nil {
@@ -92,8 +92,14 @@ func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
 	}
 
 	finalPath := d.datastorePath(targetFile)
-	if err := d.mkdir(filepath.Dir(finalPath)); err != nil {
+	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
+	}
+
+	log.Printf("Verifying checksum of %s", finalPath)
+	if d.verifyChecksum(checksumType, checksum, finalPath) {
+		log.Println("Initial checksum matched, no upload needed.")
+		return finalPath, nil
 	}
 
 	if err := d.upload(finalPath, localPath); err != nil {
@@ -233,7 +239,7 @@ func (d *ESX5Driver) ListFiles() ([]string, error) {
 			continue
 		}
 
-		files = append(files, filepath.Join(d.outputDir, string(line)))
+		files = append(files, filepath.ToSlash(filepath.Join(d.outputDir, string(line))))
 	}
 
 	return files, nil
@@ -261,7 +267,7 @@ func (d *ESX5Driver) String() string {
 
 func (d *ESX5Driver) datastorePath(path string) string {
 	baseDir := filepath.Base(filepath.Dir(path))
-	return filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path))
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) connect() error {

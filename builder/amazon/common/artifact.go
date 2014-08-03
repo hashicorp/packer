@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"sort"
 	"strings"
 )
 
@@ -46,6 +47,7 @@ func (a *Artifact) String() string {
 		amiStrings = append(amiStrings, single)
 	}
 
+	sort.Sort(sort.StringSlice(amiStrings))
 	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
 }
 

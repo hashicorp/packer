@@ -98,6 +98,8 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"temporary_key_pair_name": &c.TemporaryKeyPairName,
 		"vpc_id":                  &c.VpcId,
 		"availability_zone":       &c.AvailabilityZone,
+		"user_data":               &c.UserData,
+		"user_data_file":          &c.UserDataFile,
 	}
 
 	for n, ptr := range templates {

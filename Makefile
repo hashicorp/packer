@@ -18,6 +18,7 @@ all: deps
 deps:
 	@$(ECHO) "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
 	@go get -d -v ./...
+	@go get github.com/mitchellh/gox
 	@echo $(DEPS) | xargs -n1 go get -d
 
 updatedeps:
