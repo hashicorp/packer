@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 )
