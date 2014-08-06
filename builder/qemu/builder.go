@@ -26,6 +26,7 @@ var netDevice = map[string]bool{
 	"pcnet":      true,
 	"virtio":     true,
 	"virtio-net": true,
+	"virtio-net-pci": true,
 	"usb-net":    true,
 	"i82559a":    true,
 	"i82559b":    true,
