@@ -12,6 +12,7 @@ type uploadCmdData struct {
 	BundleDirectory string
 	ManifestPath    string
 	S3Endpoint      string
+	Region          string
 	SecretKey       string
 }
 
@@ -38,6 +39,7 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
 		S3Endpoint:      region.S3Endpoint,
+		Region:          region.Name,
 		SecretKey:       config.SecretKey,
 	})
 	if err != nil {
