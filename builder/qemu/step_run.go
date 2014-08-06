@@ -66,16 +66,23 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	imgPath := filepath.Join(config.OutputDir,
 		fmt.Sprintf("%s.%s", vmName, strings.ToLower(config.Format)))
 
+	defaultArgs := make(map[string]string)
+
 	if config.Headless == true {
 		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
 			"In headless mode, errors during the boot sequence or OS setup\n" +
 			"won't be easily visible. Use at your own discretion.")
+	} else {
+		defaultArgs["-display"] = "sdl"
 	}
 
-	defaultArgs := make(map[string]string)
 	defaultArgs["-name"] = vmName
-	// defaultArgs["-machine"] = fmt.Sprintf("type=pc,accel=%s", config.Accelerator)
-	// defaultArgs["-machine"] = "type=pc"
+	if config.Accelerator != "none" {
+		defaultArgs["-machine"] = fmt.Sprintf("type=pc,accel=%s", config.Accelerator)
+	} else {
+		ui.Message("WARNING: The VM will be started with no hardware acceleration.\n" +
+		"The installation will take considerably longer to finish\n")
+	}
 	defaultArgs["-netdev"] = "user,id=user.0"
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s", imgPath, config.DiskInterface)
