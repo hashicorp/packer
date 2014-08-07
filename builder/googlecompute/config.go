@@ -18,6 +18,7 @@ type Config struct {
 
 	BucketName        string            `mapstructure:"bucket_name"`
 	ClientSecretsFile string            `mapstructure:"client_secrets_file"`
+	DiskSizeGb        int64             `mapstructure:"disk_size"`
 	ImageName         string            `mapstructure:"image_name"`
 	ImageDescription  string            `mapstructure:"image_description"`
 	InstanceName      string            `mapstructure:"instance_name"`
@@ -62,6 +63,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Set defaults.
 	if c.Network == "" {
 		c.Network = "default"
+	}
+
+	if c.DiskSizeGb == 0 {
+		c.DiskSizeGb = 10
 	}
 
 	if c.ImageDescription == "" {
