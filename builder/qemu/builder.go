@@ -250,9 +250,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("invalid format, only 'qcow2' or 'raw' are allowed"))
 	}
 
-	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen") {
+	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen" || b.config.Accelerator == "none") {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid format, only 'kvm' or 'xen' are allowed"))
+			errs, errors.New("invalid format, only 'kvm' or 'xen' or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {
