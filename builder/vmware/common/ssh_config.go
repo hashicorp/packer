@@ -32,6 +32,7 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
+		"ssh_host":         &c.SSHHost,
 		"ssh_key_path":     &c.SSHKeyPath,
 		"ssh_password":     &c.SSHPassword,
 		"ssh_username":     &c.SSHUser,
