@@ -74,7 +74,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.LocalStateTree != "" {
+	// require a salt state tree
+	if p.config.LocalStateTree == "" {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("local_state_tree must be supplied"))
+	} else {
 		if _, err := os.Stat(p.config.LocalStateTree); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				errors.New("local_state_tree must exist and be accessible"))
