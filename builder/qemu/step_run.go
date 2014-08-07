@@ -77,12 +77,14 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	}
 
 	defaultArgs["-name"] = vmName
+	accelMethod := ""
 	if config.Accelerator != "none" {
-		defaultArgs["-machine"] = fmt.Sprintf("type=pc,accel=%s", config.Accelerator)
+		accelMethod = fmt.Sprintf(",accel=%s", config.Accelerator)
 	} else {
 		ui.Message("WARNING: The VM will be started with no hardware acceleration.\n" +
-		"The installation will take considerably longer to finish\n")
+		"The installation may take considerably longer to finish\n")
 	}
+	defaultArgs["-machine"] = fmt.Sprintf("type=pc%s", accelMethod)
 	defaultArgs["-netdev"] = "user,id=user.0"
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s", imgPath, config.DiskInterface)
