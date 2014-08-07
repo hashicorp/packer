@@ -28,6 +28,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	errCh, err := driver.RunInstance(&InstanceConfig{
 		Description: "New instance created by Packer",
+		DiskSizeGb:  config.DiskSizeGb,
 		Image:       config.SourceImage,
 		MachineType: config.MachineType,
 		Metadata: map[string]string{
