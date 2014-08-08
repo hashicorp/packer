@@ -25,6 +25,7 @@ type Driver interface {
 
 type InstanceConfig struct {
 	Description string
+	DiskSizeGb  int64
 	Image       string
 	MachineType string
 	Metadata    map[string]string

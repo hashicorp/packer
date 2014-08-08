@@ -177,6 +177,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				AutoDelete: true,
 				InitializeParams: &compute.AttachedDiskInitializeParams{
 					SourceImage: image.SelfLink,
+					DiskSizeGb:  c.DiskSizeGb,
 				},
 			},
 		},
