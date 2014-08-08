@@ -91,6 +91,9 @@ each category, the available options are alphabetized and described.
 
 ### Optional:
 
+* `disk_size` (integer) - The size of the disk in GB.
+  This defaults to 10, which is 10GB.
+
 * `image_name` (string) - The unique name of the resulting image.
   Defaults to `packer-{{timestamp}}`.
 

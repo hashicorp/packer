@@ -31,8 +31,8 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Creating image...")
 	cmd := new(packer.RemoteCmd)
-	cmd.Command = fmt.Sprintf("%s%s --output_file_name %s",
-		sudoPrefix, imageBundleCmd, imageFilename)
+	cmd.Command = fmt.Sprintf("%s%s --output_file_name %s --fssize %d",
+		sudoPrefix, imageBundleCmd, imageFilename, config.DiskSizeGb*1024*1024*1024)
 	err := cmd.StartWithUi(comm, ui)
 	if err == nil && cmd.ExitStatus != 0 {
 		err = fmt.Errorf(
