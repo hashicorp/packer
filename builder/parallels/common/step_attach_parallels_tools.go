@@ -34,7 +34,7 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	}
 
 	// Attach the guest additions to the computer
-	log.Println("Attaching Parallels Tools ISO onto IDE controller...")
+	ui.Say("Attaching Parallels Tools ISO onto IDE controller...")
 	command := []string{
 		"set", vmName,
 		"--device-add", "cdrom",
@@ -53,4 +53,23 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	return multistep.ActionContinue
 }
 
-func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {}
+func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
+	if _, ok := state.GetOk("attachedToolsIso"); !ok {
+		return
+	}
+
+	driver := state.Get("driver").(Driver)
+	vmName := state.Get("vmName").(string)
+
+	log.Println("Detaching Parallels Tools ISO...")
+	cdDevice := "cdrom0"
+	if _, ok := state.GetOk("attachedIso"); ok {
+		cdDevice = "cdrom1"
+	}
+
+	command := []string{
+		"set", vmName,
+		"--device-del", cdDevice,
+	}
+	driver.Prlctl(command...)
+}
