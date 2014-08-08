@@ -44,7 +44,7 @@ func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	}
 	ui.Say("Attaching floppy disk...")
 
-	// Create the floppy disk controller
+	// Attaching the floppy disk
 	add_command := []string{
 		"set", vmName,
 		"--device-add", "fdd",
@@ -62,4 +62,18 @@ func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {}
+func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
+	driver := state.Get("driver").(Driver)
+	vmName := state.Get("vmName").(string)
+
+	if s.floppyPath == "" {
+		return
+	}
+
+	log.Println("Detaching floppy disk...")
+	command := []string{
+		"set", vmName,
+		"--device-del", "fdd0",
+	}
+	driver.Prlctl(command...)
+}
