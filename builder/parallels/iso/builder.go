@@ -33,7 +33,6 @@ type config struct {
 	ParallelsToolsMode      string   `mapstructure:"parallels_tools_mode"`
 	ParallelsToolsGuestPath string   `mapstructure:"parallels_tools_guest_path"`
 	ParallelsToolsHostPath  string   `mapstructure:"parallels_tools_host_path"`
-	GuestOSType             string   `mapstructure:"guest_os_type"`
 	GuestOSDistribution     string   `mapstructure:"guest_os_distribution"`
 	HardDriveInterface      string   `mapstructure:"hard_drive_interface"`
 	HostInterfaces          []string `mapstructure:"host_interfaces"`
@@ -46,6 +45,9 @@ type config struct {
 	VMName                  string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
+
+	// Deprecated parameters
+	GuestOSType string `mapstructure:"guest_os_type"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -95,10 +97,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.HardDriveInterface = "sata"
 	}
 
-	if b.config.GuestOSType == "" {
-		b.config.GuestOSType = "other"
-	}
-
 	if b.config.GuestOSDistribution == "" {
 		b.config.GuestOSDistribution = "other"
 	}
@@ -125,7 +123,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"parallels_tools_mode":       &b.config.ParallelsToolsMode,
 		"parallels_tools_host_path":  &b.config.ParallelsToolsHostPath,
 		"parallels_tools_guest_path": &b.config.ParallelsToolsGuestPath,
-		"guest_os_type":              &b.config.GuestOSType,
 		"guest_os_distribution":      &b.config.GuestOSDistribution,
 		"hard_drive_interface":       &b.config.HardDriveInterface,
 		"http_directory":             &b.config.HTTPDir,
