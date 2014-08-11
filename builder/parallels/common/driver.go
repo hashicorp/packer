@@ -45,6 +45,11 @@ type Driver interface {
 func NewDriver() (Driver, error) {
 	var prlctlPath string
 
+	if runtime.GOOS != "darwin" {
+		return nil, fmt.Errorf(
+			"Parallels builder works only on \"darwin\" platform!")
+	}
+
 	if prlctlPath == "" {
 		var err error
 		prlctlPath, err = exec.LookPath("prlctl")
