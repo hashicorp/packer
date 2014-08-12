@@ -16,7 +16,7 @@ import (
 // extremely specific.
 type Driver interface {
 	// Import a VM
-	Import(string, string, string) error
+	Import(string, string, string, bool) error
 
 	// Checks if the VM with the given name is running.
 	IsRunning(string) (bool, error)
