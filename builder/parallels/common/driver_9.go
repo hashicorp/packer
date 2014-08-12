@@ -19,7 +19,7 @@ type Parallels9Driver struct {
 	PrlctlPath string
 }
 
-func (d *Parallels9Driver) Import(name, srcPath, dstDir string) error {
+func (d *Parallels9Driver) Import(name, srcPath, dstDir string, reassignMac bool) error {
 
 	err := d.Prlctl("register", srcPath, "--preserve-uuid")
 	if err != nil {
@@ -31,9 +31,12 @@ func (d *Parallels9Driver) Import(name, srcPath, dstDir string) error {
 		return err
 	}
 
-	srcMac, err := getFirtsMacAddress(srcPath)
-	if err != nil {
-		return err
+	srcMac := "auto"
+	if !reassignMac {
+		srcMac, err = getFirtsMacAddress(srcPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = d.Prlctl("clone", srcId, "--name", name, "--dst", dstDir)
