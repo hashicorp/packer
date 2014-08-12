@@ -67,6 +67,7 @@ type config struct {
 	ISOChecksum     string     `mapstructure:"iso_checksum"`
 	ISOChecksumType string     `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string   `mapstructure:"iso_urls"`
+	MachineType     string     `mapstructure:"machine_type"`
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
@@ -125,6 +126,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.HTTPPortMax == 0 {
 		b.config.HTTPPortMax = 9000
+	}
+
+	if b.config.MachineType == "" {
+		b.config.MachineType = "pc-1.0"
 	}
 
 	if b.config.OutputDir == "" {
@@ -205,6 +210,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"shutdown_timeout":  &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":  &b.config.RawSSHWaitTimeout,
 		"accelerator":       &b.config.Accelerator,
+		"machine_type":      &b.config.MachineType,
 		"net_device":        &b.config.NetDevice,
 		"disk_interface":    &b.config.DiskInterface,
 	}
