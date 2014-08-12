@@ -76,7 +76,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	defaultArgs := make(map[string]string)
 	defaultArgs["-name"] = vmName
-	defaultArgs["-machine"] = fmt.Sprintf("type=pc-1.0,accel=%s", config.Accelerator)
+	defaultArgs["-machine"] = fmt.Sprintf("type=%s,accel=%s", config.MachineType, config.Accelerator)
 	defaultArgs["-display"] = guiArgument
 	defaultArgs["-netdev"] = "user,id=user.0"
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
