@@ -2,10 +2,11 @@ package pvm
 
 import (
 	"fmt"
+	"os"
+
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"os"
 )
 
 // Config is the configuration structure for the builder.
@@ -23,6 +24,7 @@ type Config struct {
 	BootCommand []string `mapstructure:"boot_command"`
 	SourcePath  string   `mapstructure:"source_path"`
 	VMName      string   `mapstructure:"vm_name"`
+	ReassignMac bool     `mapstructure:"reassign_mac"`
 
 	tpl *packer.ConfigTemplate
 }
