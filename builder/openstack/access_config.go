@@ -115,10 +115,6 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
-	if c.Region() == "" {
-		errs = append(errs, fmt.Errorf("region must be specified"))
-	}
-
 	if len(errs) > 0 {
 		return errs
 	}
