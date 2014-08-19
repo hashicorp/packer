@@ -148,7 +148,7 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
+func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
 	// TODO(dougm) use esxcli network ip connection list
 	for port := portMin; port <= portMax; port++ {
@@ -170,7 +170,13 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
 		}
 	}
 
-	return d.Host, vncPort
+	if vncPort == 0 {
+		err := fmt.Errorf("Unable to find available VNC port between %d and %d",
+			portMin, portMax)
+		return d.Host, vncPort, err
+	}
+
+	return d.Host, vncPort, nil
 }
 
 func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
