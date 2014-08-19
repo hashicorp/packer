@@ -24,10 +24,10 @@ import (
 type stepConfigureVNC struct{}
 
 type VNCAddressFinder interface {
-	VNCAddress(uint, uint) (string, uint)
+	VNCAddress(uint, uint) (string, uint, error)
 }
 
-func (stepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint) {
+func (stepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	// Find an open VNC port. Note that this can still fail later on
 	// because we have to release the port at some point. But this does its
 	// best.
@@ -47,7 +47,7 @@ func (stepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint) {
 			break
 		}
 	}
-	return "127.0.0.1", vncPort
+	return "127.0.0.1", vncPort, nil
 }
 
 func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
@@ -79,10 +79,8 @@ func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 		vncFinder = s
 	}
 	log.Printf("Looking for available port between %d and %d", config.VNCPortMin, config.VNCPortMax)
-	vncIp, vncPort := vncFinder.VNCAddress(config.VNCPortMin, config.VNCPortMax)
-	if vncPort == 0 {
-		err := fmt.Errorf("Unable to find available VNC port between %d and %d",
-			config.VNCPortMin, config.VNCPortMax)
+	vncIp, vncPort, err := vncFinder.VNCAddress(config.VNCPortMin, config.VNCPortMax)
+	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
