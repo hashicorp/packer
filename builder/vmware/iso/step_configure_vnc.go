@@ -34,7 +34,12 @@ func (stepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint) {
 	var vncPort uint
 	portRange := int(portMax - portMin)
 	for {
-		vncPort = uint(rand.Intn(portRange)) + portMin
+		if portRange > 0 {
+			vncPort = uint(rand.Intn(portRange)) + portMin
+		} else {
+			vncPort = portMin
+		}
+
 		log.Printf("Trying port: %d", vncPort)
 		l, err := net.Listen("tcp", fmt.Sprintf(":%d", vncPort))
 		if err == nil {
