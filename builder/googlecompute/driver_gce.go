@@ -134,7 +134,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 
 	// Get the image
-	d.ui.Message(fmt.Sprintf("Loading image: %s", c.Image))
+	d.ui.Message(fmt.Sprintf("Loading image: %s in project %s", c.Image.Name, c.Image.ProjectId))
 	image, err := d.getImage(c.Image)
 	if err != nil {
 		return nil, err
@@ -229,17 +229,17 @@ func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
 	return errCh
 }
 
-func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "windows-cloud"}
+func (d *driverGCE) getImage(img Image) (image *compute.Image, err error) {
+	projects := []string{img.ProjectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "windows-cloud"}
 	for _, project := range projects {
-		image, err = d.service.Images.Get(project, name).Do()
+		image, err = d.service.Images.Get(project, img.Name).Do()
 		if err == nil && image != nil && image.SelfLink != "" {
 			return
 		}
 		image = nil
 	}
 
-	err = fmt.Errorf("Image %s could not be found in any of these projects: %s", name, projects)
+	err = fmt.Errorf("Image %s could not be found in any of these projects: %s", img.Name, projects)
 	return
 }
 
