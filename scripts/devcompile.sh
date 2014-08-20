@@ -14,6 +14,10 @@ verify_go () {
         return 0
     fi
 
+    if [[ "$2" == "devel" ]]; then
+        return 0
+    fi
+
     local IFS=.
     local i ver1=($1) ver2=($2)
 
