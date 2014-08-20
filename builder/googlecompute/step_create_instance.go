@@ -16,6 +16,14 @@ type StepCreateInstance struct {
 	instanceName string
 }
 
+func (config *Config) getImage() (Image) {
+	project := config.ProjectId
+	if config.SourceImageProjectId != "" {
+		project = config.SourceImageProjectId
+	}
+	return Image{Name: config.SourceImage, ProjectId: project}
+}
+
 // Run executes the Packer build step that creates a GCE instance.
 func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
@@ -29,7 +37,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	errCh, err := driver.RunInstance(&InstanceConfig{
 		Description: "New instance created by Packer",
 		DiskSizeGb:  config.DiskSizeGb,
-		Image:       config.SourceImage,
+		Image:       config.getImage(),
 		MachineType: config.MachineType,
 		Metadata: map[string]string{
 			"sshKeys": fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey),
