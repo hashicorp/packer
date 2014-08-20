@@ -13,7 +13,6 @@ import (
 	"github.com/going/toolkit/xmlpath"
 )
 
-// Driver supporting Parallels Desktop for Mac v. 9 & 10
 type Parallels9Driver struct {
 	// This is the path to the "prlctl" application.
 	PrlctlPath string
@@ -70,6 +69,20 @@ func getConfigValueFromXpath(path, xpath string) (string, error) {
 	}
 	value, _ := xpathComp.String(root)
 	return value, nil
+}
+
+// Finds an application bundle by identifier (for "darwin" platform only)
+func getAppPath(bundleId string) (string, error) {
+	cmd := exec.Command("mdfind", "kMDItemCFBundleIdentifier ==", bundleId)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	if string(out) == "" {
+		return "", fmt.Errorf(
+			"Could not detect Parallels Desktop! Make sure it is properly installed.")
+	}
+	return string(out), nil
 }
 
 func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
@@ -136,32 +149,24 @@ func (d *Parallels9Driver) Prlctl(args ...string) error {
 }
 
 func (d *Parallels9Driver) Verify() error {
-	version, _ := d.Version()
-	if !(strings.HasPrefix(version, "9.") || strings.HasPrefix(version, "10.")) {
-		return fmt.Errorf("The packer-parallels builder plugin only supports Parallels Desktop v. 9 & 10. You have: %s!\n", version)
-	}
 	return nil
 }
 
 func (d *Parallels9Driver) Version() (string, error) {
-	var stdout bytes.Buffer
-
-	cmd := exec.Command(d.PrlctlPath, "--version")
-	cmd.Stdout = &stdout
-	if err := cmd.Run(); err != nil {
+	out, err := exec.Command(d.PrlctlPath, "--version").Output()
+	if err != nil {
 		return "", err
 	}
 
-	versionOutput := strings.TrimSpace(stdout.String())
-	re := regexp.MustCompile("prlctl version ([0-9\\.]+)")
-	verMatch := re.FindAllStringSubmatch(versionOutput, 1)
-
-	if len(verMatch) != 1 {
-		return "", fmt.Errorf("prlctl version not found!\n")
+	versionRe := regexp.MustCompile(`prlctl version (\d+\.\d+.\d+)`)
+	matches := versionRe.FindStringSubmatch(string(out))
+	if matches == nil {
+		return "", fmt.Errorf(
+			"Could not find Parallels Desktop version in output:\n%s", string(out))
 	}
 
-	version := verMatch[0][1]
-	log.Printf("prlctl version: %s\n", version)
+	version := matches[1]
+	log.Printf("Parallels Desktop version: %s", version)
 	return version, nil
 }
 
