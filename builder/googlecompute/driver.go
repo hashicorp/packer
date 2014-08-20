@@ -23,10 +23,15 @@ type Driver interface {
 	WaitForInstance(state, zone, name string) <-chan error
 }
 
+type Image struct {
+	Name      string
+	ProjectId string
+}
+
 type InstanceConfig struct {
 	Description string
 	DiskSizeGb  int64
-	Image       string
+	Image       Image
 	MachineType string
 	Metadata    map[string]string
 	Name        string
