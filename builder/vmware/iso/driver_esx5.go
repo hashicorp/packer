@@ -169,14 +169,13 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	}
 
 	for port := portMin; port <= portMax; port++ {
-		if _, ok := listenPorts[string(port)]; ok {
+		if _, ok := listenPorts[fmt.Sprintf("%d", port)]; ok {
 			log.Printf("Port %d in use", port)
 			continue
 		}
 		address := fmt.Sprintf("%s:%d", d.Host, port)
 		log.Printf("Trying address: %s...", address)
 		l, err := net.DialTimeout("tcp", address, 1*time.Second)
-		log.Printf("Dial complete address: %s...", address)
 
 		if err != nil {
 			if e, ok := err.(*net.OpError); ok {
