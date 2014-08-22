@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Google Compute Builder"
 ---
 
 # Google Compute Builder
