@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Fusion6Driver is a driver that can run VMWare Fusion 5.
+// Fusion6Driver is a driver that can run VMware Fusion 5.
 type Fusion6Driver struct {
 	Fusion5Driver
 }
