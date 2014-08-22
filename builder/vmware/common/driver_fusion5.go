@@ -12,7 +12,7 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-// Fusion5Driver is a driver that can run VMWare Fusion 5.
+// Fusion5Driver is a driver that can run VMware Fusion 5.
 type Fusion5Driver struct {
 	// This is the path to the "VMware Fusion.app"
 	AppPath string

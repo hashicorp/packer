@@ -151,7 +151,7 @@ func normalizeVersion(version string) (string, error) {
 	i, err := strconv.Atoi(version)
 	if err != nil {
 		return "", fmt.Errorf(
-			"VMWare version '%s' is not numeric", version)
+			"VMware version '%s' is not numeric", version)
 	}
 
 	return fmt.Sprintf("%02d", i), nil
@@ -170,7 +170,7 @@ func compareVersions(versionFound string, versionWanted string) error {
 
 	if found < wanted {
 		return fmt.Errorf(
-			"VMWare WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
+			"VMware WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
 	}
 
 	return nil
