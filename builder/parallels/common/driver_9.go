@@ -3,15 +3,17 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/going/toolkit/xmlpath"
 	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/going/toolkit/xmlpath"
 )
 
+// Driver supporting Parallels Desktop for Mac v. 9 & 10
 type Parallels9Driver struct {
 	// This is the path to the "prlctl" application.
 	PrlctlPath string
@@ -135,8 +137,8 @@ func (d *Parallels9Driver) Prlctl(args ...string) error {
 
 func (d *Parallels9Driver) Verify() error {
 	version, _ := d.Version()
-	if !strings.HasPrefix(version, "9.") {
-		return fmt.Errorf("The packer-parallels builder plugin only supports Parallels Desktop v. 9. You have: %s!\n", version)
+	if !(strings.HasPrefix(version, "9.") || strings.HasPrefix(version, "10.")) {
+		return fmt.Errorf("The packer-parallels builder plugin only supports Parallels Desktop v. 9 & 10. You have: %s!\n", version)
 	}
 	return nil
 }
