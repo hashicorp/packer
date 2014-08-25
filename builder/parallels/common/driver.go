@@ -1,8 +1,11 @@
 package common
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
+	"runtime"
+	"strings"
 )
 
 // A driver is able to talk to Parallels and perform certain
@@ -43,7 +46,14 @@ type Driver interface {
 }
 
 func NewDriver() (Driver, error) {
+	var drivers map[string]Driver
 	var prlctlPath string
+	var supportedVersions []string
+
+	if runtime.GOOS != "darwin" {
+		return nil, fmt.Errorf(
+			"Parallels builder works only on \"darwin\" platform!")
+	}
 
 	if prlctlPath == "" {
 		var err error
@@ -54,10 +64,27 @@ func NewDriver() (Driver, error) {
 	}
 
 	log.Printf("prlctl path: %s", prlctlPath)
-	driver := &Parallels9Driver{prlctlPath}
-	if err := driver.Verify(); err != nil {
-		return nil, err
+
+	drivers = map[string]Driver{
+		"10": &Parallels10Driver{
+			Parallels9Driver: Parallels9Driver{
+				PrlctlPath: prlctlPath,
+			},
+		},
+		"9": &Parallels9Driver{
+			PrlctlPath: prlctlPath,
+		},
 	}
 
-	return driver, nil
+	for v, d := range drivers {
+		version, _ := d.Version()
+		if strings.HasPrefix(version, v) {
+			return d, nil
+		}
+		supportedVersions = append(supportedVersions, v)
+	}
+
+	return nil, fmt.Errorf(
+		"Unable to initialize any driver. Supported Parallels Desktop versions: "+
+			"%s\n", strings.Join(supportedVersions, ", "))
 }
