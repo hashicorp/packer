@@ -42,8 +42,8 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad parallels tools mode: %s", b.config.ParallelsToolsMode)
 	}
 
-	if b.config.GuestOSType != "other" {
-		t.Errorf("bad guest OS type: %s", b.config.GuestOSType)
+	if b.config.GuestOSDistribution != "other" {
+		t.Errorf("bad guest OS distribution: %s", b.config.GuestOSDistribution)
 	}
 
 	if b.config.VMName != "packer-foo" {
