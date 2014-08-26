@@ -4,6 +4,8 @@ BUG FIXES:
 
   * builder/googlecompute: add `disk_size` option. [GH-1397]
   * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
+  * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
+  * builder/parallels/all: Added some navigation keys [GH-1442]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
 
 ## 0.6.1 (July 20, 2014)
