@@ -15,7 +15,7 @@ type DriverMock struct {
 	CloneErr    error
 
 	CompactDiskCalled bool
-	CompactDiskPath   string
+	CompactDiskPath   []string
 	CompactDiskErr    error
 
 	CreateDiskCalled bool
@@ -71,7 +71,7 @@ func (d *DriverMock) Clone(dst string, src string) error {
 
 func (d *DriverMock) CompactDisk(path string) error {
 	d.CompactDiskCalled = true
-	d.CompactDiskPath = path
+	d.CompactDiskPath = append(d.CompactDiskPath, path)
 	return d.CompactDiskErr
 }
 

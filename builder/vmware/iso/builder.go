@@ -31,6 +31,7 @@ type config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	AddDisksConfig           `mapstructure:",squash"`
 
 	DiskName        string   `mapstructure:"vmdk_name"`
 	DiskSize        uint     `mapstructure:"disk_size"`
@@ -84,6 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AddDisksConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskName == "" {
@@ -304,6 +306,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("full_disk_paths", make([]string, 0))
 
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -335,9 +338,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Message: "Uploading ISO to remote machine...",
 		},
 		&stepCreateDisk{},
+		&stepAddDisks{},
 		&stepCreateVMX{},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXData,
+			NewDisks:   b.config.AddDisksConfig.NewDisks,
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&stepHTTPServer{},
