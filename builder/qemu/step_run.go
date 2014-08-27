@@ -135,6 +135,17 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	}
 
+  // remove any arguments specified in the delete qemu args setting
+  if len(config.DeleteQemuArgs) > 0 {
+    ui.Say("Removing Qemu arguments...")
+
+    for x := range config.DeleteQemuArgs {
+      key := config.DeleteQemuArgs[x]
+      ui.Say("Removing " + key)
+      delete(inArgs, key)
+    }
+  }
+  
 	// Flatten to array of strings
 	outArgs := make([]string, 0)
 	for key, values := range inArgs {

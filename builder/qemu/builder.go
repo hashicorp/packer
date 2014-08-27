@@ -26,6 +26,7 @@ var netDevice = map[string]bool{
 	"pcnet":      true,
 	"virtio":     true,
 	"virtio-net": true,
+	"virtio-net-pci": true,
 	"usb-net":    true,
 	"i82559a":    true,
 	"i82559b":    true,
@@ -70,6 +71,7 @@ type config struct {
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
+	DeleteQemuArgs  []string   `mapstructure:"delete_qemuargs"`
 	QemuBinary      string     `mapstructure:"qemu_binary"`
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
