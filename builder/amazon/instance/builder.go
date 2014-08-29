@@ -204,7 +204,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
-			ExpectedRootDevice:       "instance-store",
 			InstanceType:             b.config.InstanceType,
 			IamInstanceProfile:       b.config.IamInstanceProfile,
 			UserData:                 b.config.UserData,
