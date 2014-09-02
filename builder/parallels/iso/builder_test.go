@@ -38,8 +38,8 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.GuestOSDistribution != "other" {
-		t.Errorf("bad guest OS distribution: %s", b.config.GuestOSDistribution)
+	if b.config.GuestOSType != "other" {
+		t.Errorf("bad guest OS type: %s", b.config.GuestOSType)
 	}
 
 	if b.config.VMName != "packer-foo" {
@@ -76,6 +76,25 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 60000 {
 		t.Fatalf("bad size: %s", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_GuestOSType(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "guest_os_distribution")
+
+	// Test deprecated parameter
+	config["guest_os_distribution"] = "bolgenos"
+	warns, err := b.Prepare(config)
+	if len(warns) == 0 {
+		t.Fatalf("should have warning")
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if b.config.GuestOSType != "bolgenos" {
+		t.Fatalf("bad: %s", b.config.GuestOSType)
 	}
 }
 
