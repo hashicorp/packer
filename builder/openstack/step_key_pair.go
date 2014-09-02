@@ -29,6 +29,10 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
+	if keyResp.PrivateKey == "" {
+		state.Put("error", fmt.Errorf("The temporary keypair returned was blank"))
+		return multistep.ActionHalt
+	}
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
