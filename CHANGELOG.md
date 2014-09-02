@@ -22,6 +22,7 @@ BUG FIXES:
   * builder/qemu: If headless, sdl display won't be used. [GH-1395]
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
+  * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
   * post-processor/vagrant: Can supply your own metadata.json. [GH-1143]
   * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
