@@ -67,6 +67,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	api.Region = b.config.AccessConfig.Region()
+	api.Name = ""
+	api.Type = "compute"
 
 	csp, err := gophercloud.ServersApi(auth, api)
 	if err != nil {
