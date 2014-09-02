@@ -7,6 +7,7 @@ IMPROVEMENTS:
   * builder/parallels/all Path to tools ISO is calculated automatically. [GH-1455]
   * builder/qemu: Can specify "none" acceleration type. [GH-1395]
   * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]
+  * builder/virtualbox/all: `iso_interface` option to mount ISO with SATA. [GH-1200]
 
 BUG FIXES:
 
