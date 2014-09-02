@@ -16,29 +16,36 @@ import (
 
 const BuilderId = "transcend.qemu"
 
+var accels = map[string]struct{}{
+	"none": struct{}{},
+	"kvm":  struct{}{},
+	"tcg":  struct{}{},
+	"xen":  struct{}{},
+}
+
 var netDevice = map[string]bool{
-	"ne2k_pci":   true,
-	"i82551":     true,
-	"i82557b":    true,
-	"i82559er":   true,
-	"rtl8139":    true,
-	"e1000":      true,
-	"pcnet":      true,
-	"virtio":     true,
-	"virtio-net": true,
+	"ne2k_pci":       true,
+	"i82551":         true,
+	"i82557b":        true,
+	"i82559er":       true,
+	"rtl8139":        true,
+	"e1000":          true,
+	"pcnet":          true,
+	"virtio":         true,
+	"virtio-net":     true,
 	"virtio-net-pci": true,
-	"usb-net":    true,
-	"i82559a":    true,
-	"i82559b":    true,
-	"i82559c":    true,
-	"i82550":     true,
-	"i82562":     true,
-	"i82557a":    true,
-	"i82557c":    true,
-	"i82801":     true,
-	"vmxnet3":    true,
-	"i82558a":    true,
-	"i82558b":    true,
+	"usb-net":        true,
+	"i82559a":        true,
+	"i82559b":        true,
+	"i82559c":        true,
+	"i82550":         true,
+	"i82562":         true,
+	"i82557a":        true,
+	"i82557c":        true,
+	"i82801":         true,
+	"vmxnet3":        true,
+	"i82558a":        true,
+	"i82558b":        true,
 }
 
 var diskInterface = map[string]bool{
@@ -256,9 +263,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("invalid format, only 'qcow2' or 'raw' are allowed"))
 	}
 
-	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen" || b.config.Accelerator == "none") {
+	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid format, only 'kvm' or 'xen' or 'none' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {
