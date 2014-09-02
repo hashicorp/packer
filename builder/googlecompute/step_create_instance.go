@@ -16,7 +16,7 @@ type StepCreateInstance struct {
 	instanceName string
 }
 
-func (config *Config) getImage() (Image) {
+func (config *Config) getImage() Image {
 	project := config.ProjectId
 	if config.SourceImageProjectId != "" {
 		project = config.SourceImageProjectId

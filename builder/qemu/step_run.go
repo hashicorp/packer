@@ -92,7 +92,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		defaultArgs["-machine"] += fmt.Sprintf(",accel=%s", config.Accelerator)
 	} else {
 		ui.Message("WARNING: The VM will be started with no hardware acceleration.\n" +
-		"The installation may take considerably longer to finish.\n")
+			"The installation may take considerably longer to finish.\n")
 	}
 
 	// Determine if we have a floppy disk to attach

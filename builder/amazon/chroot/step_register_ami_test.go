@@ -1,8 +1,8 @@
 package chroot
 
 import (
-	"testing"
 	"github.com/mitchellh/goamz/ec2"
+	"testing"
 )
 
 func testImage() ec2.Image {
