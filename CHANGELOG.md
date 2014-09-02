@@ -18,6 +18,7 @@ BUG FIXES:
   * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
   * builder/parallels/all: Added some navigation keys [GH-1442]
   * builder/qemu: If headless, sdl display won't be used. [GH-1395]
+  * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
 
