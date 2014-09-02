@@ -92,7 +92,7 @@ each category, the available options are alphabetized and described.
 ### Optional:
 
 * `accelerator` (string) - The accelerator type to use when running the VM.
-  This may have a value of either "kvm" or "xen" and you must have that
+  This may have a value of either "none", "kvm", or "xen" and you must have that
   support in on the machine on which you run the builder.
 
 * `boot_command` (array of strings) - This is an array of commands to type
