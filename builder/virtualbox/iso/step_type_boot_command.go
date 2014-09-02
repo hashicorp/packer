@@ -56,20 +56,23 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 			return multistep.ActionHalt
 		}
 
-		for _, code := range scancodes(command) {
-			if code == "wait" {
-				time.Sleep(1 * time.Second)
-				continue
-			}
+		for _, codes := range scancodes(command) {
+			if len(codes) == 1 {
+				code := codes[0]
+				if code == "wait" {
+					time.Sleep(1 * time.Second)
+					continue
+				}
 
-			if code == "wait5" {
-				time.Sleep(5 * time.Second)
-				continue
-			}
+				if code == "wait5" {
+					time.Sleep(5 * time.Second)
+					continue
+				}
 
-			if code == "wait10" {
-				time.Sleep(10 * time.Second)
-				continue
+				if code == "wait10" {
+					time.Sleep(10 * time.Second)
+					continue
+				}
 			}
 
 			// Since typing is sometimes so slow, we check for an interrupt
@@ -78,7 +81,9 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 				return multistep.ActionHalt
 			}
 
-			if err := driver.VBoxManage("controlvm", vmName, "keyboardputscancode", code); err != nil {
+			args := []string{"controlvm", vmName, "keyboardputscancode"}
+			args = append(args, codes...)
+			if err := driver.VBoxManage(args...); err != nil {
 				err := fmt.Errorf("Error sending boot command: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
@@ -92,7 +97,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
-func scancodes(message string) []string {
+func scancodes(message string) [][]string {
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 	//
 	// Scancodes represent raw keyboard output and are fed to the VM by the
@@ -153,7 +158,7 @@ func scancodes(message string) []string {
 		}
 	}
 
-	result := make([]string, 0, len(message)*2)
+	result := make([][]string, 0, len(message))
 	for len(message) > 0 {
 		var scancode []string
 
@@ -207,7 +212,7 @@ func scancodes(message string) []string {
 			log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
 		}
 
-		result = append(result, scancode...)
+		result = append(result, scancode)
 	}
 
 	return result
