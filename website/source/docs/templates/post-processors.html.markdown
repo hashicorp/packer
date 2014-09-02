@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Templates: Post-Processors"
 ---
 
 # Templates: Post-Processors

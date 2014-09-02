@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Custom Command Development"
 ---
 
 # Custom Command Development

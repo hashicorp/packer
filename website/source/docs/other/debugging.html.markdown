@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Debugging Packer"
 ---
 
 # Debugging Packer
