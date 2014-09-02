@@ -83,7 +83,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s", imgPath, config.DiskInterface)
 	defaultArgs["-cdrom"] = isoPath
 	defaultArgs["-boot"] = bootDrive
-	defaultArgs["-m"] = "512m"
+	defaultArgs["-m"] = "512M"
 	defaultArgs["-redir"] = fmt.Sprintf("tcp:%v::22", sshHostPort)
 	defaultArgs["-vnc"] = vnc
 
