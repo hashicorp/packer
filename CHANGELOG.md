@@ -1,5 +1,9 @@
 ## 0.6.2 (unreleased)
 
+IMPROVEMENTS:
+
+  * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
+
 BUG FIXES:
 
   * builder/googlecompute: add `disk_size` option. [GH-1397]
