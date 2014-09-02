@@ -1,5 +1,9 @@
 ## 0.6.2 (unreleased)
 
+FEATURES:
+
+  * builder/vmware: VMware Player 6 is now supported. [GH-1168]
+
 IMPROVEMENTS:
 
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
