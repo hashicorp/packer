@@ -42,6 +42,32 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
+	templates := map[string]*string{
+		"iam_instance_profile":    &c.IamInstanceProfile,
+		"instance_type":           &c.InstanceType,
+		"ssh_timeout":             &c.RawSSHTimeout,
+		"ssh_username":            &c.SSHUsername,
+		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
+		"source_ami":              &c.SourceAmi,
+		"subnet_id":               &c.SubnetId,
+		"temporary_key_pair_name": &c.TemporaryKeyPairName,
+		"vpc_id":                  &c.VpcId,
+		"availability_zone":       &c.AvailabilityZone,
+		"user_data":               &c.UserData,
+		"user_data_file":          &c.UserDataFile,
+		"security_group_id":       &c.SecurityGroupId,
+	}
+
+	errs := make([]error, 0)
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = t.Process(*ptr, nil)
+		if err != nil {
+			errs = append(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
 	// Defaults
 	if c.SSHPort == 0 {
 		c.SSHPort = 22
@@ -57,7 +83,6 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	// Validation
 	var err error
-	errs := make([]error, 0)
 	if c.SourceAmi == "" {
 		errs = append(errs, errors.New("A source_ami must be specified"))
 	}
