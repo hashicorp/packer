@@ -5,6 +5,7 @@ IMPROVEMENTS:
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
   * builder/digitalocean: Can set API URL endpoint. [GH-1448]
   * builder/parallels/all Path to tools ISO is calculated automatically. [GH-1455]
+  * builder/qemu: Can specify "none" acceleration type. [GH-1395]
 
 BUG FIXES:
 
@@ -15,6 +16,7 @@ BUG FIXES:
   * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
   * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
   * builder/parallels/all: Added some navigation keys [GH-1442]
+  * builder/qemu: If headless, sdl display won't be used. [GH-1395]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
 
