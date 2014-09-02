@@ -222,8 +222,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
-		&StepBundleVolume{},
-		&StepUploadBundle{},
+		&StepBundleVolume{
+			Debug: b.config.PackerDebug,
+		},
+		&StepUploadBundle{
+			Debug: b.config.PackerDebug,
+		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
 			Regions: b.config.AMIRegions,
