@@ -156,6 +156,10 @@ each category, the available options are alphabetized and described.
   server to be on one port, make this minimum and maximum port the same.
   By default the values are 8000 and 9000, respectively.
 
+* `iso_interface` (string) - The type of controller that the ISO is attached
+  to, defaults to "ide".  When set to "sata", the drive is attached to an
+  AHCI SATA controller.
+
 * `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
   Packer will try these in order. If anything goes wrong attempting to download
   or while downloading a single URL, it will move on to the next. All URLs
