@@ -12,14 +12,21 @@ import (
 // Establishing a connection is up to the user, the Client can just
 // communicate over any ReadWriteCloser.
 type Client struct {
-	mux      *MuxConn
+	mux      *muxBroker
 	client   *rpc.Client
 	closeMux bool
 }
 
 func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
-	result, err := newClientWithMux(NewMuxConn(rwc), 0)
+	mux, err := newMuxBrokerClient(rwc)
 	if err != nil {
+		return nil, err
+	}
+	go mux.Run()
+
+	result, err := newClientWithMux(mux, 0)
+	if err != nil {
+		mux.Close()
 		return nil, err
 	}
 
@@ -27,7 +34,7 @@ func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
 	return result, err
 }
 
-func newClientWithMux(mux *MuxConn, streamId uint32) (*Client, error) {
+func newClientWithMux(mux *muxBroker, streamId uint32) (*Client, error) {
 	clientConn, err := mux.Dial(streamId)
 	if err != nil {
 		return nil, err

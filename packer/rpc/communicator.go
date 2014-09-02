@@ -12,14 +12,14 @@ import (
 // executed over an RPC connection.
 type communicator struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 }
 
 // CommunicatorServer wraps a packer.Communicator implementation and makes
 // it exportable as part of a Golang RPC server.
 type CommunicatorServer struct {
 	c   packer.Communicator
-	mux *MuxConn
+	mux *muxBroker
 }
 
 type CommandFinished struct {
@@ -252,7 +252,7 @@ func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *int
 	return
 }
 
-func serveSingleCopy(name string, mux *MuxConn, id uint32, dst io.Writer, src io.Reader) {
+func serveSingleCopy(name string, mux *muxBroker, id uint32, dst io.Writer, src io.Reader) {
 	conn, err := mux.Accept(id)
 	if err != nil {
 		log.Printf("[ERR] '%s' accept error: %s", name, err)
