@@ -23,6 +23,7 @@ BUG FIXES:
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
+  * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
 
 ## 0.6.1 (July 20, 2014)
 
