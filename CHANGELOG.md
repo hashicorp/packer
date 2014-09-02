@@ -1,4 +1,4 @@
-## 0.6.2 (unreleased)
+## 0.7.0 (unreleased)
 
 FEATURES:
 
