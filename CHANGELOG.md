@@ -12,6 +12,7 @@ IMPROVEMENTS:
   * builder/qemu: Can specify "none" acceleration type. [GH-1395]
   * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]
   * builder/virtualbox/all: `iso_interface` option to mount ISO with SATA. [GH-1200]
+  * builder/vmware-vmx: Proper `floppy_files` support. [GH-1057]
 
 BUG FIXES:
 
