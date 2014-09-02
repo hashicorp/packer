@@ -72,6 +72,16 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
+	for i, file := range c.FloppyFiles {
+		var err error
+		c.FloppyFiles[i], err = c.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing floppy_files[%d]: %s",
+					i, err))
+		}
+	}
+
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	} else {
