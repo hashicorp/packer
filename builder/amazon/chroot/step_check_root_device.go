@@ -12,7 +12,7 @@ import (
 type StepCheckRootDevice struct{}
 
 func (s *StepCheckRootDevice) Run(state multistep.StateBag) multistep.StepAction {
-	image := state.Get("ec2").(*ec2.Image)
+	image := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Checking the root device on source AMI...")
