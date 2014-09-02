@@ -10,6 +10,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * builder/amazon-chroot: Can properly build HVM images now. [GH-1360]
   * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
       [GH-1424]
