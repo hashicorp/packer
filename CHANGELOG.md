@@ -10,6 +10,7 @@ BUG FIXES:
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
       [GH-1424]
   * builder/googlecompute: add `disk_size` option. [GH-1397]
+  * builder/openstack: Region is not required. [GH-1418]
   * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
   * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
   * builder/parallels/all: Added some navigation keys [GH-1442]
