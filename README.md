@@ -1,3 +1,5 @@
+[ ![Codeship Status for raniemi/packer](https://www.codeship.io/projects/328ab920-fc19-0131-d6f8-5a73486b8860/status)](https://www.codeship.io/projects/29322)
+
 # Packer
 
 * Website: http://www.packer.io

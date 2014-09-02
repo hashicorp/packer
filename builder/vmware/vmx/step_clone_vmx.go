@@ -7,6 +7,7 @@ import (
 
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -20,15 +21,29 @@ type StepCloneVMX struct {
 func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
-
+        src := s.Path
 	vmxPath := filepath.Join(s.OutputDir, s.VMName+".vmx")
 
 	ui.Say("Cloning source VM...")
-	log.Printf("Cloning from: %s", s.Path)
+
+        vagrant_box := common.NewVagrantBox(src)
+        if vagrant_box != nil {
+                var err error
+                src, err = vagrant_box.Expand(".vmx")
+                defer vagrant_box.Clean()
+                if err != nil {
+                        err := fmt.Errorf("Error expanding Vagrant Box: %s", err)
+                        state.Put("error", err)
+                        ui.Error(err.Error())
+                        return multistep.ActionHalt
+                }
+        }
+
+	log.Printf("Cloning from: %s", src)
 	log.Printf("Cloning to: %s", vmxPath)
-	if err := driver.Clone(vmxPath, s.Path); err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
+	if err := driver.Clone(vmxPath, src); err != nil {
+	         state.Put("error", err)
+	         return multistep.ActionHalt
 	}
 
 	vmxData, err := vmwcommon.ReadVMX(vmxPath)
