@@ -2,67 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/mitchellh/osext"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
 	"io"
 	"log"
 	"os/exec"
 	"path/filepath"
+	"strings"
+
+	"github.com/mitchellh/osext"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/packer/plugin"
 )
-
-// This is the default, built-in configuration that ships with
-// Packer.
-const defaultConfig = `
-{
-	"plugin_min_port": 10000,
-	"plugin_max_port": 25000,
-
-	"builders": {
-		"amazon-ebs": "packer-builder-amazon-ebs",
-		"amazon-chroot": "packer-builder-amazon-chroot",
-		"amazon-instance": "packer-builder-amazon-instance",
-		"digitalocean": "packer-builder-digitalocean",
-		"docker": "packer-builder-docker",
-		"googlecompute": "packer-builder-googlecompute",
-		"openstack": "packer-builder-openstack",
-		"qemu": "packer-builder-qemu",
-		"virtualbox-iso": "packer-builder-virtualbox-iso",
-		"virtualbox-ovf": "packer-builder-virtualbox-ovf",
-		"vmware-iso": "packer-builder-vmware-iso",
-		"vmware-vmx": "packer-builder-vmware-vmx",
-		"parallels-iso": "packer-builder-parallels-iso",
-		"parallels-pvm": "packer-builder-parallels-pvm",
-		"null": "packer-builder-null"
-	},
-
-	"commands": {
-		"build": "packer-command-build",
-		"fix": "packer-command-fix",
-		"inspect": "packer-command-inspect",
-		"validate": "packer-command-validate"
-	},
-
-	"post-processors": {
-		"vagrant": "packer-post-processor-vagrant",
-		"vsphere": "packer-post-processor-vsphere",
-		"docker-push": "packer-post-processor-docker-push",
-		"docker-import": "packer-post-processor-docker-import",
-		"vagrant-cloud": "packer-post-processor-vagrant-cloud"
-	},
-
-	"provisioners": {
-		"ansible-local": "packer-provisioner-ansible-local",
-		"chef-client": "packer-provisioner-chef-client",
-		"chef-solo": "packer-provisioner-chef-solo",
-		"file": "packer-provisioner-file",
-		"puppet-masterless": "packer-provisioner-puppet-masterless",
-		"puppet-server": "packer-provisioner-puppet-server",
-		"shell": "packer-provisioner-shell",
-		"salt-masterless": "packer-provisioner-salt-masterless"
-	}
-}
-`
 
 type config struct {
 	PluginMinPort uint
@@ -79,6 +28,30 @@ type config struct {
 func decodeConfig(r io.Reader, c *config) error {
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(c)
+}
+
+// Discover discovers plugins.
+//
+// This looks in the directory of the executable and the CWD, in that
+// order for priority.
+func (c *config) Discover() error {
+	// Look in the cwd.
+	if err := c.discover("."); err != nil {
+		return err
+	}
+
+	// Next, look in the same directory as the executable. Any conflicts
+	// will overwrite those found in our current directory.
+	exePath, err := osext.Executable()
+	if err != nil {
+		log.Printf("[ERR] Error loading exe directory: %s", err)
+	} else {
+		if err := c.discover(filepath.Dir(exePath)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Returns an array of defined command names.
@@ -147,6 +120,64 @@ func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
 	}
 
 	return c.pluginClient(bin).Provisioner()
+}
+
+func (c *config) discover(path string) error {
+	var err error
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-builder-*"), &c.Builders)
+	if err != nil {
+		return err
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-command-*"), &c.Commands)
+	if err != nil {
+		return err
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-post-processor-*"), &c.PostProcessors)
+	if err != nil {
+		return err
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-provisioner-*"), &c.Provisioners)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *config) discoverSingle(glob string, m *map[string]string) error {
+	matches, err := filepath.Glob(glob)
+	if err != nil {
+		return err
+	}
+
+	if *m == nil {
+		*m = make(map[string]string)
+	}
+
+	prefix := filepath.Base(glob)
+	prefix = prefix[:strings.Index(prefix, "*")]
+	for _, match := range matches {
+		file := filepath.Base(match)
+
+		// If the filename has a ".", trim up to there
+		if idx := strings.Index(file, "."); idx >= 0 {
+			file = file[:idx]
+		}
+
+		// Look for foo-bar-baz. The plugin name is "baz"
+		plugin := file[len(prefix):]
+		log.Printf("[DEBUG] Discoverd plugin: %s = %s", plugin, match)
+		(*m)[plugin] = match
+	}
+
+	return nil
 }
 
 func (c *config) pluginClient(path string) *plugin.Client {
