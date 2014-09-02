@@ -6,13 +6,14 @@ package digitalocean
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"os"
-	"time"
 )
 
 // see https://api.digitalocean.com/images/?client_id=[client_id]&api_key=[api_key]
@@ -38,6 +39,7 @@ type config struct {
 
 	ClientID string `mapstructure:"client_id"`
 	APIKey   string `mapstructure:"api_key"`
+	APIURL   string `mapstructure:"api_url"`
 	RegionID uint   `mapstructure:"region_id"`
 	SizeID   uint   `mapstructure:"size_id"`
 	ImageID  uint   `mapstructure:"image_id"`
@@ -92,6 +94,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.ClientID == "" {
 		// Default to environment variable for client_id, if it exists
 		b.config.ClientID = os.Getenv("DIGITALOCEAN_CLIENT_ID")
+	}
+
+	if b.config.APIURL == "" {
+		// Default to environment variable for api_url, if it exists
+		b.config.APIURL = os.Getenv("DIGITALOCEAN_API_URL")
 	}
 
 	if b.config.Region == "" {
@@ -153,6 +160,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	templates := map[string]*string{
 		"client_id":     &b.config.ClientID,
 		"api_key":       &b.config.APIKey,
+		"api_url":       &b.config.APIURL,
 		"snapshot_name": &b.config.SnapshotName,
 		"droplet_name":  &b.config.DropletName,
 		"ssh_username":  &b.config.SSHUsername,
@@ -173,6 +181,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.ClientID == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a client_id must be specified"))
+	}
+
+	if b.config.APIURL == "" {
+		b.config.APIURL = "https://api.digitalocean.com"
 	}
 
 	if b.config.APIKey == "" {
@@ -204,7 +216,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Initialize the DO API client
-	client := DigitalOceanClient{}.New(b.config.ClientID, b.config.APIKey)
+	client := DigitalOceanClient{}.New(b.config.ClientID, b.config.APIKey, b.config.APIURL)
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
