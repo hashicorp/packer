@@ -8,8 +8,9 @@ import (
 
 func testConfig(t *testing.T) map[string]interface{} {
 	return map[string]interface{}{
-		"ssh_username":     "foo",
-		"shutdown_command": "foo",
+		"ssh_username":           "foo",
+		"shutdown_command":       "foo",
+		"parallels_tools_flavor": "lin",
 	}
 }
 
