@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Environmental Variables for Packer"
 ---
 
 # Environmental Variables for Packer

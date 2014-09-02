@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Packer Documentation"
 ---
 
 # Packer Documentation
