@@ -7,19 +7,19 @@ import (
 	"log"
 )
 
-// This step attaches the Parallels Tools as a inserted CD onto
+// This step attaches the Parallels Tools as an inserted CD onto
 // the virtual machine.
 //
 // Uses:
 //   driver Driver
-//   toolsPath string
+//   parallels_tools_path string
 //   ui packer.Ui
 //   vmName string
 //
 // Produces:
+//   attachedToolsIso boolean
 type StepAttachParallelsTools struct {
-	ParallelsToolsHostPath string
-	ParallelsToolsMode     string
+	ParallelsToolsMode string
 }
 
 func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
@@ -33,12 +33,15 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionContinue
 	}
 
+	// Get the Paralells Tools path on the host machine
+	parallelsToolsPath := state.Get("parallels_tools_path").(string)
+
 	// Attach the guest additions to the computer
 	ui.Say("Attaching Parallels Tools ISO onto IDE controller...")
 	command := []string{
 		"set", vmName,
 		"--device-add", "cdrom",
-		"--image", s.ParallelsToolsHostPath,
+		"--image", parallelsToolsPath,
 	}
 	if err := driver.Prlctl(command...); err != nil {
 		err := fmt.Errorf("Error attaching Parallels Tools: %s", err)
@@ -59,6 +62,7 @@ func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
 	log.Println("Detaching Parallels Tools ISO...")
@@ -71,5 +75,8 @@ func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 		"set", vmName,
 		"--device-del", cdDevice,
 	}
-	driver.Prlctl(command...)
+
+	if err := driver.Prlctl(command...); err != nil {
+		ui.Error(fmt.Sprintf("Error detaching Parallels Tools ISO: %s", err))
+	}
 }

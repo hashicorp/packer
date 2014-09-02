@@ -248,8 +248,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateDisk),
 		new(stepAttachISO),
 		&parallelscommon.StepAttachParallelsTools{
-			ParallelsToolsHostPath: b.config.ParallelsToolsHostPath,
-			ParallelsToolsMode:     b.config.ParallelsToolsMode,
+			ParallelsToolsMode: b.config.ParallelsToolsMode,
 		},
 		new(parallelscommon.StepAttachFloppy),
 		&parallelscommon.StepPrlctl{
@@ -275,8 +274,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Path: b.config.PrlctlVersionFile,
 		},
 		&parallelscommon.StepUploadParallelsTools{
+			ParallelsToolsFlavor:    b.config.ParallelsToolsFlavor,
 			ParallelsToolsGuestPath: b.config.ParallelsToolsGuestPath,
-			ParallelsToolsHostPath:  b.config.ParallelsToolsHostPath,
 			ParallelsToolsMode:      b.config.ParallelsToolsMode,
 			Tpl:                     b.config.tpl,
 		},
