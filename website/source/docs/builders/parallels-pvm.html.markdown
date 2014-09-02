@@ -25,6 +25,7 @@ the settings here.
 <pre class="prettyprint">
 {
   "type": "parallels-pvm",
+  "parallels_tools_flavor": "lin"
   "source_path": "source.pvm",
   "ssh_username": "packer",
   "ssh_password": "packer",
@@ -50,6 +51,10 @@ each category, the available options are alphabetized and described.
 
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
+
+* `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
+  install into the VM. Valid values are "win", "lin", "mac", "os2" and "other".
+  This can be ommited only if `parallels_tools_mode` is "disable".
 
 ### Optional:
 
@@ -80,18 +85,14 @@ each category, the available options are alphabetized and described.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `parallels_tools_guest_path` (string) - The path on the guest virtual machine
-  where the Parallels tools ISO will be uploaded. By default this is
-  "prl-tools.iso" which should upload into the login directory of the user.
-  This is a configuration template where the `Version` variable is replaced
-  with the prlctl version.
+* `parallels_tools_guest_path` (string) - The path in the VM to upload Parallels
+  Tools. This only takes effect if `parallels_tools_mode` is not "disable".
+  This is a [configuration template](/docs/templates/configuration-templates.html)
+  that has a single valid variable: `Flavor`, which will be the value of
+  `parallels_tools_flavor`. By default the upload path is set to
+  `prl-tools-{{.Flavor}}.iso`.
 
-* `parallels_tools_host_path` (string) - The path to the Parallels Tools ISO to
-  upload. By default the Parallels builder will use the "other" OS tools ISO from
-  the Parallels installation:
-  "/Applications/Parallels Desktop.app/Contents/Resources/Tools/prl-tools-other.iso"
-
-* `parallels_tools_mode` (string) - The method by which Parallels tools are
+* `parallels_tools_mode` (string) - The method by which Parallels Tools are
   made available to the guest for installation. Valid options are "upload",
   "attach", or "disable". The functions of each of these should be
   self-explanatory. The default value is "upload".
@@ -179,9 +180,9 @@ The available variables are:
 ## prlctl Commands
 In order to perform extra customization of the virtual machine, a template can
 define extra calls to `prlctl` to perform.
-[prlctl](http://download.parallels.com/desktop/v4/wl/docs/en/Parallels_Command_Line_Reference_Guide/)
-is the command-line interface to Parallels. It can be used to do things such as
-set RAM, CPUs, etc.
+[prlctl](http://download.parallels.com/desktop/v9/ga/docs/en_US/Parallels%20Command%20Line%20Reference%20Guide.pdf)
+is the command-line interface to Parallels Desktop. It can be used to configure
+the virtual machine, such as set RAM, CPUs, etc.
 
 Extra `prlctl` commands are defined in the template in the `prlctl` section.
 An example is shown below that sets the memory and number of CPUs within the

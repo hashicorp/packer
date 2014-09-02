@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -73,16 +74,21 @@ func getConfigValueFromXpath(path, xpath string) (string, error) {
 
 // Finds an application bundle by identifier (for "darwin" platform only)
 func getAppPath(bundleId string) (string, error) {
+	var stdout bytes.Buffer
+
 	cmd := exec.Command("mdfind", "kMDItemCFBundleIdentifier ==", bundleId)
-	out, err := cmd.Output()
-	if err != nil {
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
 		return "", err
 	}
-	if string(out) == "" {
+
+	pathOutput := strings.TrimSpace(stdout.String())
+	if pathOutput == "" {
 		return "", fmt.Errorf(
 			"Could not detect Parallels Desktop! Make sure it is properly installed.")
 	}
-	return string(out), nil
+
+	return pathOutput, nil
 }
 
 func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
@@ -250,4 +256,15 @@ func (d *Parallels9Driver) IpAddress(mac string) (string, error) {
 	ip := ipMatch[0][1]
 	log.Printf("Found IP lease: %s for MAC address %s\n", ip, mac)
 	return ip, nil
+}
+
+func (d *Parallels9Driver) ToolsIsoPath(k string) (string, error) {
+	appPath, err := getAppPath("com.parallels.desktop.console")
+	if err != nil {
+		return "", err
+	}
+
+	toolsPath := filepath.Join(appPath, "Contents", "Resources", "Tools", "prl-tools-"+k+".iso")
+	log.Printf("Parallels Tools path: '%s'", toolsPath)
+	return toolsPath, nil
 }

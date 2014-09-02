@@ -22,32 +22,31 @@ type config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
 	parallelscommon.FloppyConfig        `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
-	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
-	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
+	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 
-	BootCommand             []string `mapstructure:"boot_command"`
-	DiskSize                uint     `mapstructure:"disk_size"`
-	ParallelsToolsMode      string   `mapstructure:"parallels_tools_mode"`
-	ParallelsToolsGuestPath string   `mapstructure:"parallels_tools_guest_path"`
-	ParallelsToolsHostPath  string   `mapstructure:"parallels_tools_host_path"`
-	GuestOSDistribution     string   `mapstructure:"guest_os_distribution"`
-	HardDriveInterface      string   `mapstructure:"hard_drive_interface"`
-	HostInterfaces          []string `mapstructure:"host_interfaces"`
-	HTTPDir                 string   `mapstructure:"http_directory"`
-	HTTPPortMin             uint     `mapstructure:"http_port_min"`
-	HTTPPortMax             uint     `mapstructure:"http_port_max"`
-	ISOChecksum             string   `mapstructure:"iso_checksum"`
-	ISOChecksumType         string   `mapstructure:"iso_checksum_type"`
-	ISOUrls                 []string `mapstructure:"iso_urls"`
-	VMName                  string   `mapstructure:"vm_name"`
+	BootCommand        []string `mapstructure:"boot_command"`
+	DiskSize           uint     `mapstructure:"disk_size"`
+	GuestOSType        string   `mapstructure:"guest_os_type"`
+	HardDriveInterface string   `mapstructure:"hard_drive_interface"`
+	HostInterfaces     []string `mapstructure:"host_interfaces"`
+	HTTPDir            string   `mapstructure:"http_directory"`
+	HTTPPortMin        uint     `mapstructure:"http_port_min"`
+	HTTPPortMax        uint     `mapstructure:"http_port_max"`
+	ISOChecksum        string   `mapstructure:"iso_checksum"`
+	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
+	ISOUrls            []string `mapstructure:"iso_urls"`
+	VMName             string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
 	// Deprecated parameters
-	GuestOSType string `mapstructure:"guest_os_type"`
+	GuestOSDistribution    string `mapstructure:"guest_os_distribution"`
+	ParallelsToolsHostPath string `mapstructure:"parallels_tools_host_path"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -71,34 +70,33 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlVersionConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
 	}
 
-	if b.config.ParallelsToolsMode == "" {
-		b.config.ParallelsToolsMode = "upload"
-	}
-
-	if b.config.ParallelsToolsGuestPath == "" {
-		b.config.ParallelsToolsGuestPath = "prl-tools.iso"
-	}
-
-	if b.config.ParallelsToolsHostPath == "" {
-		b.config.ParallelsToolsHostPath = "/Applications/Parallels Desktop.app/Contents/Resources/Tools/prl-tools-other.iso"
-	}
-
 	if b.config.HardDriveInterface == "" {
 		b.config.HardDriveInterface = "sata"
 	}
 
-	if b.config.GuestOSDistribution == "" {
-		b.config.GuestOSDistribution = "other"
+	if b.config.GuestOSType == "" {
+		b.config.GuestOSType = "other"
+	}
+
+	if b.config.GuestOSDistribution != "" {
+		// Compatibility with older templates:
+		// Use value of 'guest_os_distribution' if it is defined.
+		b.config.GuestOSType = b.config.GuestOSDistribution
+		warnings = append(warnings,
+			"A 'guest_os_distribution' has been completely replaced with 'guest_os_type'\n"+
+				"It is recommended to remove it and assign the previous value to 'guest_os_type'.\n"+
+				"Run it to see all available values: `prlctl create x -d list` ")
 	}
 
 	if b.config.HTTPPortMin == 0 {
@@ -120,16 +118,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Errors
 	templates := map[string]*string{
-		"parallels_tools_mode":       &b.config.ParallelsToolsMode,
-		"parallels_tools_host_path":  &b.config.ParallelsToolsHostPath,
-		"parallels_tools_guest_path": &b.config.ParallelsToolsGuestPath,
-		"guest_os_distribution":      &b.config.GuestOSDistribution,
-		"hard_drive_interface":       &b.config.HardDriveInterface,
-		"http_directory":             &b.config.HTTPDir,
-		"iso_checksum":               &b.config.ISOChecksum,
-		"iso_checksum_type":          &b.config.ISOChecksumType,
-		"iso_url":                    &b.config.RawSingleISOUrl,
-		"vm_name":                    &b.config.VMName,
+		"guest_os_type":        &b.config.GuestOSType,
+		"hard_drive_interface": &b.config.HardDriveInterface,
+		"http_directory":       &b.config.HTTPDir,
+		"iso_checksum":         &b.config.ISOChecksum,
+		"iso_checksum_type":    &b.config.ISOChecksumType,
+		"iso_url":              &b.config.RawSingleISOUrl,
+		"vm_name":              &b.config.VMName,
 	}
 
 	for n, ptr := range templates {
@@ -147,17 +142,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing iso_urls[%d]: %s", i, err))
-		}
-	}
-
-	validates := map[string]*string{
-		"parallels_tools_guest_path": &b.config.ParallelsToolsGuestPath,
-	}
-
-	for n, ptr := range validates {
-		if err := b.config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
 		}
 	}
 
@@ -217,25 +201,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	validMode := false
-	validModes := []string{
-		parallelscommon.ParallelsToolsModeDisable,
-		parallelscommon.ParallelsToolsModeAttach,
-		parallelscommon.ParallelsToolsModeUpload,
-	}
-
-	for _, mode := range validModes {
-		if b.config.ParallelsToolsMode == mode {
-			validMode = true
-			break
-		}
-	}
-
-	if !validMode {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("parallels_tools_mode is invalid. Must be one of: %v", validModes))
-	}
-
 	// Warnings
 	if b.config.ISOChecksumType == "none" {
 		warnings = append(warnings,
@@ -247,6 +212,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
+	}
+
+	if b.config.ParallelsToolsHostPath != "" {
+		warnings = append(warnings,
+			"A 'parallels_tools_host_path' has been deprecated and not in use anymore\n"+
+				"You can remove it from your Packer template.")
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -264,6 +235,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps := []multistep.Step{
+		&parallelscommon.StepPrepareParallelsTools{
+			ParallelsToolsFlavor: b.config.ParallelsToolsFlavor,
+			ParallelsToolsMode:   b.config.ParallelsToolsMode,
+		},
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
@@ -283,8 +258,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateDisk),
 		new(stepAttachISO),
 		&parallelscommon.StepAttachParallelsTools{
-			ParallelsToolsHostPath: b.config.ParallelsToolsHostPath,
-			ParallelsToolsMode:     b.config.ParallelsToolsMode,
+			ParallelsToolsMode: b.config.ParallelsToolsMode,
 		},
 		new(parallelscommon.StepAttachFloppy),
 		&parallelscommon.StepPrlctl{
@@ -310,8 +284,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Path: b.config.PrlctlVersionFile,
 		},
 		&parallelscommon.StepUploadParallelsTools{
+			ParallelsToolsFlavor:    b.config.ParallelsToolsFlavor,
 			ParallelsToolsGuestPath: b.config.ParallelsToolsGuestPath,
-			ParallelsToolsHostPath:  b.config.ParallelsToolsHostPath,
 			ParallelsToolsMode:      b.config.ParallelsToolsMode,
 			Tpl:                     b.config.tpl,
 		},
