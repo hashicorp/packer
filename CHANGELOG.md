@@ -3,6 +3,7 @@
 IMPROVEMENTS:
 
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
+  * builder/digitalocean: Can set API URL endpoint. [GH-1448]
 
 BUG FIXES:
 
