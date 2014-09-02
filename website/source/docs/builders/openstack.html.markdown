@@ -124,6 +124,7 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "api_key": "",
   "openstack_provider": "rackspace",
   "provider": "rackspace-us",
+  "openstack_provider":"rackspace",
   "region": "DFW",
   "ssh_username": "root",
   "image_name": "Test image",
