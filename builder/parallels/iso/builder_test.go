@@ -1,7 +1,6 @@
 package iso
 
 import (
-	"github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
 	"reflect"
 	"testing"
@@ -36,10 +35,6 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ParallelsToolsMode != common.ParallelsToolsModeUpload {
-		t.Errorf("bad parallels tools mode: %s", b.config.ParallelsToolsMode)
 	}
 
 	if b.config.GuestOSDistribution != "other" {
@@ -80,107 +75,6 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 60000 {
 		t.Fatalf("bad size: %s", b.config.DiskSize)
-	}
-}
-
-func TestBuilderPrepare_ParallelsToolsMode(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// test default mode
-	delete(config, "parallels_tools_mode")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("bad err: %s", err)
-	}
-
-	// Test another mode
-	config["parallels_tools_mode"] = "attach"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ParallelsToolsMode != common.ParallelsToolsModeAttach {
-		t.Fatalf("bad: %s", b.config.ParallelsToolsMode)
-	}
-
-	// Test bad mode
-	config["parllels_tools_mode"] = "teleport"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should error")
-	}
-}
-
-func TestBuilderPrepare_ParallelsToolsGuestPath(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	delete(config, "parallesl_tools_guest_path")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("bad err: %s", err)
-	}
-
-	if b.config.ParallelsToolsGuestPath != "prl-tools.iso" {
-		t.Fatalf("bad: %s", b.config.ParallelsToolsGuestPath)
-	}
-
-	config["parallels_tools_guest_path"] = "foo"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ParallelsToolsGuestPath != "foo" {
-		t.Fatalf("bad size: %s", b.config.ParallelsToolsGuestPath)
-	}
-}
-
-func TestBuilderPrepare_ParallelsToolsHostPath(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	config["parallels_tools_host_path"] = ""
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if b.config.ParallelsToolsHostPath != "/Applications/Parallels Desktop.app/Contents/Resources/Tools/prl-tools-other.iso" {
-		t.Fatalf("bad: %s", b.config.ParallelsToolsHostPath)
-	}
-
-	config["parallels_tools_host_path"] = "./prl-tools-lin.iso"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Errorf("should not have error: %s", err)
 	}
 }
 
@@ -432,5 +326,21 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
 		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_ParallelsToolsHostPath(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "parallels_tools_host_path")
+
+	// Test that it is deprecated
+	config["parallels_tools_host_path"] = "/path/to/iso"
+	warns, err := b.Prepare(config)
+	if len(warns) == 0 {
+		t.Fatalf("should have warning")
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 }
