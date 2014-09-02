@@ -10,6 +10,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
       [GH-1424]
   * builder/googlecompute: add `disk_size` option. [GH-1397]
