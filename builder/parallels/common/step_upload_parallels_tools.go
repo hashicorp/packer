@@ -8,13 +8,21 @@ import (
 	"os"
 )
 
+// This step uploads the Parallels Tools ISO to the virtual machine.
+//
+// Uses:
+//   communicator packer.Communicator
+//   parallels_tools_path string
+//   ui packer.Ui
+//
+// Produces:
 type toolsPathTemplate struct {
-	Version string
+	Flavor string
 }
 
 // This step uploads the guest additions ISO to the VM.
 type StepUploadParallelsTools struct {
-	ParallelsToolsHostPath  string
+	ParallelsToolsFlavor    string
 	ParallelsToolsGuestPath string
 	ParallelsToolsMode      string
 	Tpl                     *packer.ConfigTemplate
@@ -22,7 +30,6 @@ type StepUploadParallelsTools struct {
 
 func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
-	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	// If we're attaching then don't do this, since we attached.
@@ -31,20 +38,18 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionContinue
 	}
 
-	version, err := driver.Version()
-	if err != nil {
-		state.Put("error", fmt.Errorf("Error reading version for Parallels Tools upload: %s", err))
-		return multistep.ActionHalt
-	}
+	// Get the Paralells Tools path on the host machine
+	parallelsToolsPath := state.Get("parallels_tools_path").(string)
 
-	f, err := os.Open(s.ParallelsToolsHostPath)
+	f, err := os.Open(parallelsToolsPath)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error opening Parallels Tools ISO: %s", err))
 		return multistep.ActionHalt
 	}
+	defer f.Close()
 
 	tplData := &toolsPathTemplate{
-		Version: version,
+		Flavor: s.ParallelsToolsFlavor,
 	}
 
 	s.ParallelsToolsGuestPath, err = s.Tpl.Process(s.ParallelsToolsGuestPath, tplData)
@@ -55,9 +60,12 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Uploading Parallels Tools ISO...")
+	ui.Say(fmt.Sprintf("Uploading Parallels Tools for '%s' to path: '%s'",
+		s.ParallelsToolsFlavor, s.ParallelsToolsGuestPath))
 	if err := comm.Upload(s.ParallelsToolsGuestPath, f); err != nil {
-		state.Put("error", fmt.Errorf("Error uploading Parallels Tools: %s", err))
+		err := fmt.Errorf("Error uploading Parallels Tools: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

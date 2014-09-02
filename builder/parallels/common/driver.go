@@ -27,6 +27,9 @@ type Driver interface {
 	// Prlctl executes the given Prlctl command
 	Prlctl(...string) error
 
+	// Get the path to the Parallels Tools ISO for the given flavor.
+	ToolsIsoPath(string) (string, error)
+
 	// Verify checks to make sure that this driver should function
 	// properly. If there is any indication the driver can't function,
 	// this will return an error.
