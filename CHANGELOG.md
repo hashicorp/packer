@@ -2,6 +2,9 @@
 
 FEATURES:
 
+  * core: Plugins are automatically discovered if they're named properly.
+      Packer will look in the PWD and the directory with `packer` for
+      binaries named `packer-TYPE-NAME`.
   * builder/vmware: VMware Player 6 is now supported. [GH-1168]
 
 IMPROVEMENTS:
