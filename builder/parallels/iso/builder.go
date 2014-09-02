@@ -29,23 +29,23 @@ type config struct {
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 
-	BootCommand         []string `mapstructure:"boot_command"`
-	DiskSize            uint     `mapstructure:"disk_size"`
-	GuestOSDistribution string   `mapstructure:"guest_os_distribution"`
-	HardDriveInterface  string   `mapstructure:"hard_drive_interface"`
-	HostInterfaces      []string `mapstructure:"host_interfaces"`
-	HTTPDir             string   `mapstructure:"http_directory"`
-	HTTPPortMin         uint     `mapstructure:"http_port_min"`
-	HTTPPortMax         uint     `mapstructure:"http_port_max"`
-	ISOChecksum         string   `mapstructure:"iso_checksum"`
-	ISOChecksumType     string   `mapstructure:"iso_checksum_type"`
-	ISOUrls             []string `mapstructure:"iso_urls"`
-	VMName              string   `mapstructure:"vm_name"`
+	BootCommand        []string `mapstructure:"boot_command"`
+	DiskSize           uint     `mapstructure:"disk_size"`
+	GuestOSType        string   `mapstructure:"guest_os_type"`
+	HardDriveInterface string   `mapstructure:"hard_drive_interface"`
+	HostInterfaces     []string `mapstructure:"host_interfaces"`
+	HTTPDir            string   `mapstructure:"http_directory"`
+	HTTPPortMin        uint     `mapstructure:"http_port_min"`
+	HTTPPortMax        uint     `mapstructure:"http_port_max"`
+	ISOChecksum        string   `mapstructure:"iso_checksum"`
+	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
+	ISOUrls            []string `mapstructure:"iso_urls"`
+	VMName             string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
 	// Deprecated parameters
-	GuestOSType            string `mapstructure:"guest_os_type"`
+	GuestOSDistribution    string `mapstructure:"guest_os_distribution"`
 	ParallelsToolsHostPath string `mapstructure:"parallels_tools_host_path"`
 
 	tpl *packer.ConfigTemplate
@@ -85,8 +85,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.HardDriveInterface = "sata"
 	}
 
-	if b.config.GuestOSDistribution == "" {
-		b.config.GuestOSDistribution = "other"
+	if b.config.GuestOSType == "" {
+		b.config.GuestOSType = "other"
+	}
+
+	if b.config.GuestOSDistribution != "" {
+		// Compatibility with older templates:
+		// Use value of 'guest_os_distribution' if it is defined.
+		b.config.GuestOSType = b.config.GuestOSDistribution
+		warnings = append(warnings,
+			"A 'guest_os_distribution' has been completely replaced with 'guest_os_type'\n"+
+				"It is recommended to remove it and assign the previous value to 'guest_os_type'.\n"+
+				"Run it to see all available values: `prlctl create x -d list` ")
 	}
 
 	if b.config.HTTPPortMin == 0 {
@@ -108,13 +118,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Errors
 	templates := map[string]*string{
-		"guest_os_distribution": &b.config.GuestOSDistribution,
-		"hard_drive_interface":  &b.config.HardDriveInterface,
-		"http_directory":        &b.config.HTTPDir,
-		"iso_checksum":          &b.config.ISOChecksum,
-		"iso_checksum_type":     &b.config.ISOChecksumType,
-		"iso_url":               &b.config.RawSingleISOUrl,
-		"vm_name":               &b.config.VMName,
+		"guest_os_type":        &b.config.GuestOSType,
+		"hard_drive_interface": &b.config.HardDriveInterface,
+		"http_directory":       &b.config.HTTPDir,
+		"iso_checksum":         &b.config.ISOChecksum,
+		"iso_checksum_type":    &b.config.ISOChecksumType,
+		"iso_url":              &b.config.RawSingleISOUrl,
+		"vm_name":              &b.config.VMName,
 	}
 
 	for n, ptr := range templates {
