@@ -8,6 +8,7 @@ IMPROVEMENTS:
 
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
   * builder/digitalocean: Can set API URL endpoint. [GH-1448]
+  * builder/digitalocean: Region supports variables. [GH-1452]
   * builder/parallels/all Path to tools ISO is calculated automatically. [GH-1455]
   * builder/qemu: Can specify "none" acceleration type. [GH-1395]
   * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]

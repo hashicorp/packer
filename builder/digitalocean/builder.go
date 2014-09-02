@@ -158,6 +158,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	templates := map[string]*string{
+		"region":        &b.config.Region,
+		"size":          &b.config.Size,
+		"image":         &b.config.Image,
 		"client_id":     &b.config.ClientID,
 		"api_key":       &b.config.APIKey,
 		"api_url":       &b.config.APIURL,
