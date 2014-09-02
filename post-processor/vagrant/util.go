@@ -140,5 +140,6 @@ func WriteMetadata(dir string, contents interface{}) error {
 		enc := json.NewEncoder(f)
 		return enc.Encode(contents)
 	}
+
 	return nil
 }
