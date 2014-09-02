@@ -130,12 +130,15 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 
 // WriteMetadata writes the "metadata.json" file for a Vagrant box.
 func WriteMetadata(dir string, contents interface{}) error {
-	f, err := os.Create(filepath.Join(dir, "metadata.json"))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+	if _, err := os.Stat(filepath.Join(dir, "metadata.json")); os.IsNotExist(err) {
+		f, err := os.Create(filepath.Join(dir, "metadata.json"))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
 
-	enc := json.NewEncoder(f)
-	return enc.Encode(contents)
+		enc := json.NewEncoder(f)
+		return enc.Encode(contents)
+	}
+	return nil
 }
