@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "Google Compute Builder"
 ---
 
 # Google Compute Builder
@@ -59,7 +60,7 @@ files obtained in the previous section.
   "client_secrets_file": "client_secret.json",
   "private_key_file": "XXXXXX-privatekey.p12",
   "project_id": "my-project",
-  "source_image": "debian-7-wheezy-v20131014",
+  "source_image": "debian-7-wheezy-v20140718",
   "zone": "us-central1-a"
 }
 </pre>
@@ -90,6 +91,9 @@ each category, the available options are alphabetized and described.
   the image. Example: "us-central1-a"
 
 ### Optional:
+
+* `disk_size` (integer) - The size of the disk in GB.
+  This defaults to 10, which is 10GB.
 
 * `image_name` (string) - The unique name of the resulting image.
   Defaults to `packer-{{timestamp}}`.

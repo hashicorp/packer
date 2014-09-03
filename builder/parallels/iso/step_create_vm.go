@@ -28,8 +28,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	commands := make([][]string, 8)
 	commands[0] = []string{
 		"create", name,
-		"--ostype", config.GuestOSType,
-		"--distribution", config.GuestOSDistribution,
+		"--distribution", config.GuestOSType,
 		"--dst", path,
 		"--vmtype", "vm",
 	}

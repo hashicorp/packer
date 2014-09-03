@@ -78,40 +78,44 @@ http://www.packer.io/docs
 
 ## Developing Packer
 
-If you wish to work on Packer itself, you'll first need [Go](http://golang.org)
-installed (version 1.2+ is _required_). Make sure you have Go properly installed,
-including setting up your [GOPATH](http://golang.org/doc/code.html#GOPATH).
+If you wish to work on Packer itself or any of its built-in providers,
+you'll first need [Go](http://www.golang.org) installed (version 1.2+ is
+_required_). Make sure Go is properly installed, including setting up
+a [GOPATH](http://golang.org/doc/code.html#GOPATH).
 
-For some additional dependencies, Go needs [Mercurial](http://mercurial.selenic.com/)
-and [Bazaar](http://bazaar.canonical.com/en/) to be installed.
-Packer itself doesn't require these, but a dependency of a dependency does.
+Next, install the following software packages, which are needed for some dependencies:
 
-You'll also need [`gox`](https://github.com/mitchellh/gox)
-to compile packer. You can install that with:
+- [Bazaar](http://bazaar.canonical.com/en/)
+- [Git](http://git-scm.com/)
+- [Mercurial](http://mercurial.selenic.com/)
 
-```
-$ go get -u github.com/mitchellh/gox
-```
+Then, install [Gox](https://github.com/mitchellh/gox), which is used
+as a compilation tool on top of Go:
 
-Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer` and
-then just type `make`. In a few moments, you'll have a working `packer` executable:
+    $ go get -u github.com/mitchellh/gox
 
-```
-$ make
-...
-$ bin/packer
-...
-```
+Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer`.
+Install the necessary dependencies by running `make updatedeps` and then just
+type `make`. This will compile some more dependencies and then run the tests. If
+this exits with exit status 0, then everything is working!
 
-If you need to cross-compile Packer for other platforms, take a look at
-`scripts/dist.sh`.
+    $ make updatedeps
+    ...
+    $ make
+    ...
 
-You can run tests by typing `make test`.
+To compile a development version of Packer and the built-in plugins,
+run `make dev`. This will put Packer binaries in the `bin` folder:
 
-This will run tests for Packer core along with all the core builders and commands and such that come with Packer.
+    $ make dev
+    ...
+    $ bin/packer
+    ...
 
-If you make any changes to the code, run `make format` in order to automatically
-format the code according to Go standards.
 
-When new dependencies are added to packer you can use `make updatedeps` to
-get the latest and subsequently use `make` to compile and generate the `packer` binary.
+If you're developing a specific package, you can run tests for just that
+package by specifying the `TEST` variable. For example below, only
+`packer` package tests will be run.
+
+    $ make test TEST=./packer
+    ...

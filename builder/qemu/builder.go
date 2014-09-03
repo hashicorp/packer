@@ -16,28 +16,36 @@ import (
 
 const BuilderId = "transcend.qemu"
 
+var accels = map[string]struct{}{
+	"none": struct{}{},
+	"kvm":  struct{}{},
+	"tcg":  struct{}{},
+	"xen":  struct{}{},
+}
+
 var netDevice = map[string]bool{
-	"ne2k_pci":   true,
-	"i82551":     true,
-	"i82557b":    true,
-	"i82559er":   true,
-	"rtl8139":    true,
-	"e1000":      true,
-	"pcnet":      true,
-	"virtio":     true,
-	"virtio-net": true,
-	"usb-net":    true,
-	"i82559a":    true,
-	"i82559b":    true,
-	"i82559c":    true,
-	"i82550":     true,
-	"i82562":     true,
-	"i82557a":    true,
-	"i82557c":    true,
-	"i82801":     true,
-	"vmxnet3":    true,
-	"i82558a":    true,
-	"i82558b":    true,
+	"ne2k_pci":       true,
+	"i82551":         true,
+	"i82557b":        true,
+	"i82559er":       true,
+	"rtl8139":        true,
+	"e1000":          true,
+	"pcnet":          true,
+	"virtio":         true,
+	"virtio-net":     true,
+	"virtio-net-pci": true,
+	"usb-net":        true,
+	"i82559a":        true,
+	"i82559b":        true,
+	"i82559c":        true,
+	"i82550":         true,
+	"i82562":         true,
+	"i82557a":        true,
+	"i82557c":        true,
+	"i82801":         true,
+	"vmxnet3":        true,
+	"i82558a":        true,
+	"i82558b":        true,
 }
 
 var diskInterface = map[string]bool{
@@ -67,6 +75,7 @@ type config struct {
 	ISOChecksum     string     `mapstructure:"iso_checksum"`
 	ISOChecksumType string     `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string   `mapstructure:"iso_urls"`
+	MachineType     string     `mapstructure:"machine_type"`
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
@@ -125,6 +134,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.HTTPPortMax == 0 {
 		b.config.HTTPPortMax = 9000
+	}
+
+	if b.config.MachineType == "" {
+		b.config.MachineType = "pc-1.0"
 	}
 
 	if b.config.OutputDir == "" {
@@ -205,6 +218,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"shutdown_timeout":  &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":  &b.config.RawSSHWaitTimeout,
 		"accelerator":       &b.config.Accelerator,
+		"machine_type":      &b.config.MachineType,
 		"net_device":        &b.config.NetDevice,
 		"disk_interface":    &b.config.DiskInterface,
 	}
@@ -249,9 +263,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("invalid format, only 'qcow2' or 'raw' are allowed"))
 	}
 
-	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen") {
+	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid format, only 'kvm' or 'xen' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {

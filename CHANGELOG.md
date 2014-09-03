@@ -1,8 +1,42 @@
-## 0.6.2 (unreleased)
+## 0.7.0 (unreleased)
+
+FEATURES:
+
+  * core: Plugins are automatically discovered if they're named properly.
+      Packer will look in the PWD and the directory with `packer` for
+      binaries named `packer-TYPE-NAME`.
+  * builder/vmware: VMware Player 6 is now supported. [GH-1168]
+
+IMPROVEMENTS:
+
+  * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
+  * builder/digitalocean: Can set API URL endpoint. [GH-1448]
+  * builder/digitalocean: Region supports variables. [GH-1452]
+  * builder/parallels/all Path to tools ISO is calculated automatically. [GH-1455]
+  * builder/qemu: Can specify "none" acceleration type. [GH-1395]
+  * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]
+  * builder/virtualbox/all: `iso_interface` option to mount ISO with SATA. [GH-1200]
+  * builder/vmware-vmx: Proper `floppy_files` support. [GH-1057]
 
 BUG FIXES:
 
+  * builder/amazon-chroot: Can properly build HVM images now. [GH-1360]
+  * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
+  * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
+      [GH-1424]
+  * builder/googlecompute: add `disk_size` option. [GH-1397]
+  * builder/openstack: Region is not required. [GH-1418]
+  * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
+  * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
+  * builder/parallels/all: Added some navigation keys [GH-1442]
+  * builder/qemu: If headless, sdl display won't be used. [GH-1395]
+  * builder/qemu: Use `512M` as `-m` default. [GH-1444]
+  * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
+  * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
+  * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
+  * post-processor/vagrant: Can supply your own metadata.json. [GH-1143]
+  * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
 
 ## 0.6.1 (July 20, 2014)
 

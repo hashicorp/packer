@@ -78,19 +78,7 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 			},
 		}
 	case "linux":
-		drivers = []Driver{
-			&Workstation10Driver{
-				Workstation9Driver: Workstation9Driver{
-					SSHConfig: config,
-				},
-			},
-			&Workstation9Driver{
-				SSHConfig: config,
-			},
-			&Player5LinuxDriver{
-				SSHConfig: config,
-			},
-		}
+		fallthrough
 	case "windows":
 		drivers = []Driver{
 			&Workstation10Driver{
@@ -99,6 +87,14 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 				},
 			},
 			&Workstation9Driver{
+				SSHConfig: config,
+			},
+			&Player6Driver{
+				Player5Driver: Player5Driver{
+					SSHConfig: config,
+				},
+			},
+			&Player5Driver{
 				SSHConfig: config,
 			},
 		}
@@ -151,7 +147,7 @@ func normalizeVersion(version string) (string, error) {
 	i, err := strconv.Atoi(version)
 	if err != nil {
 		return "", fmt.Errorf(
-			"VMWare version '%s' is not numeric", version)
+			"VMware version '%s' is not numeric", version)
 	}
 
 	return fmt.Sprintf("%02d", i), nil
@@ -170,7 +166,7 @@ func compareVersions(versionFound string, versionWanted string) error {
 
 	if found < wanted {
 		return fmt.Errorf(
-			"VMWare WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
+			"VMware WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
 	}
 
 	return nil

@@ -75,7 +75,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"-s {{.SecretKey}} " +
 			"-d {{.BundleDirectory}} " +
 			"--batch " +
-			"--url {{.S3Endpoint}} " +
+			"--region {{.Region}} " +
 			"--retry"
 	}
 
@@ -204,7 +204,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
-			ExpectedRootDevice:       "instance-store",
 			InstanceType:             b.config.InstanceType,
 			IamInstanceProfile:       b.config.IamInstanceProfile,
 			UserData:                 b.config.UserData,
@@ -223,8 +222,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
-		&StepBundleVolume{},
-		&StepUploadBundle{},
+		&StepBundleVolume{
+			Debug: b.config.PackerDebug,
+		},
+		&StepUploadBundle{
+			Debug: b.config.PackerDebug,
+		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
 			Regions: b.config.AMIRegions,
