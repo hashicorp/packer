@@ -35,12 +35,12 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	c.AMIRegions = []string{"us-east-1", "eu-west-1a"}
+	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-1"}
 	if err := c.Prepare(nil); err != nil {
 		t.Fatalf("bad: %s", err)
 	}
 
-	expected := []string{"us-east-1", "eu-west-1a"}
+	expected := []string{"us-east-1", "us-west-1"}
 	if !reflect.DeepEqual(c.AMIRegions, expected) {
 		t.Fatalf("bad: %#v", c.AMIRegions)
 	}
