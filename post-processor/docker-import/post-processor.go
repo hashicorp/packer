@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"strings"
 )
 
 const BuilderId = "packer.post-processor.docker-import"
@@ -12,8 +13,9 @@ const BuilderId = "packer.post-processor.docker-import"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Repository string `mapstructure:"repository"`
-	Tag        string `mapstructure:"tag"`
+	Repository      string   `mapstructure:"repository"`
+	Tag             string   `mapstructure:"tag"`
+	DockerfileLines []string `mapstructure:"dockerfile_lines"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -86,6 +88,20 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	ui.Message("Imported ID: " + id)
+
+	if len(p.config.DockerfileLines) > 0 {
+		// Use Dockerfile
+		dockerfile := "FROM " + importRepo + "\n" +
+			strings.Join(p.config.DockerfileLines, "\n")
+
+		ui.Message("Updating with Dockerfile:")
+		ui.Message(dockerfile)
+		err := driver.BuildFromStdin(dockerfile, importRepo)
+
+		if err != nil {
+			return nil, false, err
+		}
+	}
 
 	// Build the artifact
 	artifact = &docker.ImportArtifact{

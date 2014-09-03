@@ -16,6 +16,32 @@ type DockerDriver struct {
 	Tpl *packer.ConfigTemplate
 }
 
+func (d *DockerDriver) BuildFromStdin(dockerfile, repo string) error {
+	var stdout bytes.Buffer
+	cmd := exec.Command("docker", "build", "-t", repo, "-")
+	cmd.Stdout = &stdout
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	go func() {
+		defer stdin.Close()
+		io.WriteString(stdin, dockerfile)
+	}()
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error building container with CMD: %s", err)
+		return err
+	}
+
+	return nil
+}
+
 func (d *DockerDriver) DeleteImage(id string) error {
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", "rmi", id)

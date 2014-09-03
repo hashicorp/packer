@@ -8,6 +8,9 @@ import (
 // Docker. The Driver interface also allows the steps to be tested since
 // a mock driver can be shimmed in.
 type Driver interface {
+	// Build docker image from stdin
+	BuildFromStdin(dockerfile, repo string) error
+
 	// Delete an image that is imported into Docker
 	DeleteImage(id string) error
 
