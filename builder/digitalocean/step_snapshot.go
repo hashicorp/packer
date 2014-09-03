@@ -3,15 +3,16 @@ package digitalocean
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 type stepSnapshot struct{}
 
 func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 	dropletId := state.Get("droplet_id").(uint)
