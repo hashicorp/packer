@@ -16,7 +16,7 @@ type Artifact struct {
 	regionName string
 
 	// The client for making API calls
-	client *DigitalOceanClient
+	client DigitalOceanClient
 }
 
 func (*Artifact) BuilderId() string {

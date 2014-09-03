@@ -2,16 +2,17 @@ package digitalocean
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 type stepShutdown struct{}
 
 func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(uint)
 
