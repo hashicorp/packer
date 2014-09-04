@@ -33,6 +33,8 @@ BUG FIXES:
   * builder/parallels/all: Added some navigation keys [GH-1442]
   * builder/qemu: If headless, sdl display won't be used. [GH-1395]
   * builder/qemu: Use `512M` as `-m` default. [GH-1444]
+  * builder/virtualbox/all: Search `VBOX_MSI_INSTALL_PATH` for path to
+      `VBoxManage` on Windows. [GH-1337]
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
   * builder/virtualbox/all: Better error if guest additions URL couldn't be
       detected. [GH-1439]
