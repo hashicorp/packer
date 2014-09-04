@@ -369,7 +369,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepCleanFiles{},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
-			SkipFloppy:  true,
+			SkipFloppy: true,
 		},
 		&vmwcommon.StepCleanVMX{},
 		&vmwcommon.StepCompactDisk{
