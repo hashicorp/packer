@@ -3,15 +3,17 @@ package qemu
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	commonssh "github.com/mitchellh/packer/common/ssh"
+	"github.com/mitchellh/packer/packer"
 )
 
 const BuilderId = "transcend.qemu"
@@ -352,7 +354,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToSigner(b.config.SSHKeyPath); err != nil {
+		} else if _, err := commonssh.FileSigner(b.config.SSHKeyPath); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
