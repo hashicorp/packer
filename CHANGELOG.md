@@ -34,6 +34,8 @@ BUG FIXES:
   * builder/qemu: If headless, sdl display won't be used. [GH-1395]
   * builder/qemu: Use `512M` as `-m` default. [GH-1444]
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
+  * builder/virtualbox/all: Better error if guest additions URL couldn't be
+      detected. [GH-1439]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
