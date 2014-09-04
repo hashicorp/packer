@@ -17,6 +17,7 @@ func ConnectFunc(network, addr string) func() (net.Conn, error) {
 
 		if tcpConn, ok := c.(*net.TCPConn); ok {
 			tcpConn.SetKeepAlive(true)
+			tcpConn.SetKeepAlivePeriod(5 * time.Second)
 		}
 
 		return c, nil
