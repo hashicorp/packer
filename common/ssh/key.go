@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -19,6 +20,19 @@ func FileSigner(path string) (ssh.Signer, error) {
 	keyBytes, err := ioutil.ReadAll(f)
 	if err != nil {
 		return nil, err
+	}
+
+	// We parse the private key on our own first so that we can
+	// show a nicer error if the private key has a password.
+	block, _ := pem.Decode(keyBytes)
+	if block == nil {
+		return nil, fmt.Errorf(
+			"Failed to read key '%s': no key found", path)
+	}
+	if block.Headers["Proc-Type"] == "4,ENCRYPTED" {
+		return nil, fmt.Errorf(
+			"Failed to read key '%s': password protected keys are\n"+
+				"not supported. Please decrypt the key prior to use.", path)
 	}
 
 	signer, err := ssh.ParsePrivateKey(keyBytes)
