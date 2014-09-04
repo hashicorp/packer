@@ -55,15 +55,16 @@ func NewDriver() (Driver, error) {
 
 	// On Windows, we check VBOX_INSTALL_PATH env var for the path
 	if runtime.GOOS == "windows" {
-		if installPath := os.Getenv("VBOX_INSTALL_PATH"); installPath != "" {
-			log.Printf("[DEBUG] builder/virtualbox: VBOX_INSTALL_PATH: %s",
-				installPath)
-			for _, path := range strings.Split(installPath, ";") {
-				path = filepath.Join(path, "VBoxManage.exe")
-				if _, err := os.Stat(path); err == nil {
-					vboxmanagePath = path
-					break
-				}
+		vars := []string{"VBOX_INSTALL_PATH", "VBOX_MSI_INSTALL_PATH"}
+		for _, key := range vars {
+			value := os.Getenv(key)
+			if value != "" {
+				log.Printf(
+					"[DEBUG] builder/virtualbox: %s = %s", key, value)
+				vboxmanagePath = findVBoxManageWindows(value)
+			}
+			if vboxmanagePath != "" {
+				break
 			}
 		}
 	}
@@ -83,4 +84,15 @@ func NewDriver() (Driver, error) {
 	}
 
 	return driver, nil
+}
+
+func findVBoxManageWindows(paths string) string {
+	for _, path := range strings.Split(paths, ";") {
+		path = filepath.Join(path, "VBoxManage.exe")
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+
+	return ""
 }
