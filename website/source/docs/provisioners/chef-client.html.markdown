@@ -27,6 +27,9 @@ remote machine and run Chef client.
 }
 </pre>
 
+Note: to properly clean up the Chef node and client, you must have
+`knife` on your path and properly configured.
+
 ## Configuration Reference
 
 The reference of available configuration options is listed below. No
