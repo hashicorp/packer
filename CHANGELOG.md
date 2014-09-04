@@ -36,6 +36,8 @@ BUG FIXES:
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
   * builder/virtualbox/all: Better error if guest additions URL couldn't be
       detected. [GH-1439]
+  * builder/virtualbox/iso: Append timestamp to default name for parallel
+      builds. [GH-1365]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
