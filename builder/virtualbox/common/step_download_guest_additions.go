@@ -96,7 +96,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 			"Please specify `guest_additions_url` manually.")
 		state.Put("error", err)
 		ui.Error(err.Error())
-		return multi.ActionHalt
+		return multistep.ActionHalt
 	}
 
 	if checksumType != "none" {
