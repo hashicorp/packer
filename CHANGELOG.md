@@ -22,6 +22,7 @@ BUG FIXES:
 
   * core: nicer error message if an encrypted private key is used for
       SSH. [GH-1445]
+  * core: Fix crash that could happen with a well timed double Ctrl-C. [GH-1328]
   * builder/amazon-chroot: Can properly build HVM images now. [GH-1360]
   * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
