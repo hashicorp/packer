@@ -18,7 +18,7 @@ import (
 //   vmx_path string
 type StepConfigureVMX struct {
 	CustomData map[string]string
-	SkipFloppy  bool
+	SkipFloppy bool
 }
 
 func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
@@ -58,7 +58,7 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set a floppy disk, but only if we should
-	if ! s.SkipFloppy {
+	if !s.SkipFloppy {
 		// Set a floppy disk if we have one
 		if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
 			log.Println("Floppy path present, setting in VMX")
