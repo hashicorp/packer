@@ -91,6 +91,13 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 				additionsName)
 		}
 	}
+	if url == "" {
+		err := fmt.Errorf("Couldn't detect guest additions URL.\n" +
+			"Please specify `guest_additions_url` manually.")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multi.ActionHalt
+	}
 
 	if checksumType != "none" {
 		if s.GuestAdditionsSHA256 != "" {
