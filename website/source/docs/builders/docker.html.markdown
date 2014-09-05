@@ -95,6 +95,10 @@ described.
   `["run", "-d", "-i", "-t", "-v", "{{.Volumes}}", "{{.Image}}", "/bin/bash"]`.
   As you can see, you have a couple template variables to customize, as well.
 
+* `volumes` (map of strings to strings) - A mapping of additional volumes
+   to mount into this container. The key of the object is the host path,
+   the value is the container path.
+
 ## Using the Artifact: Export
 
 Once the tar artifact has been generated, you will likely want to import, tag,

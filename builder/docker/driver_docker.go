@@ -185,23 +185,19 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
 	tplData.Image = config.Image
-	if len(config.Volumes) > 0 {
-		volumes := make([]string, 0, len(config.Volumes))
-		for host, guest := range config.Volumes {
-			volumes = append(volumes, fmt.Sprintf("%s:%s", host, guest))
-		}
-
-		tplData.Volumes = strings.Join(volumes, ",")
-	}
 
 	// Args that we're going to pass to Docker
-	args := config.RunCommand
-	for i, v := range args {
-		var err error
-		args[i], err = d.Tpl.Process(v, &tplData)
+	args := []string{"run"}
+	for host, guest := range config.Volumes {
+		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
+	}
+	for _, v := range config.RunCommand {
+		v, err := d.Tpl.Process(v, &tplData)
 		if err != nil {
 			return "", err
 		}
+
+		args = append(args, v)
 	}
 	d.Ui.Message(fmt.Sprintf(
 		"Run command: docker %s", strings.Join(args, " ")))
