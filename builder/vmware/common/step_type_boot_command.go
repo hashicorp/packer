@@ -2,9 +2,6 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-vnc"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"net"
 	"runtime"
@@ -12,6 +9,10 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/mitchellh/go-vnc"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
