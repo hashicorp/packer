@@ -164,6 +164,9 @@ each category, the available configuration keys are alphabetized.
 * `ssh_private_key_file` (string) - Use this ssh private key file instead of
   a generated ssh key pair for connecting to the instance.
 
+* `ssh_private_ip` (bool) - If true, then SSH will always use the private
+  IP if available.
+
 * `ssh_timeout` (string) - The time to wait for SSH to become available
   before timing out. The format of this value is a duration such as "5s"
   or "5m". The default SSH timeout is "5m", or five minutes.
