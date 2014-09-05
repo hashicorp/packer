@@ -41,11 +41,6 @@ each category, the available configuration keys are alphabetized.
   `SDK_PROVIDER`, if set.
   For Rackspace this should be `rackspace-us` or `rackspace-uk`.
 
-* `region` (string) - The name of the region, such as "DFW", in which
-  to launch the server to create the AMI.
-  If not specified, Packer will use the environment variables
-  `SDK_REGION` or `OS_REGION_NAME` (in that order), if set.
-
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
 
@@ -95,6 +90,14 @@ each category, the available configuration keys are alphabetized.
 -->
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
+
+* `region` (string) - The name of the region, such as "DFW", in which
+  to launch the server to create the AMI.
+  If not specified, Packer will use the environment variables
+  `SDK_REGION` or `OS_REGION_NAME` (in that order), if set.
+  For a `provider` of "rackspace", it is required to specify a region,
+  either using this option or with an environment variable. For other
+  providers, including a private cloud, specifying a region is optional.
 
 * `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
   22.
