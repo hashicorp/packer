@@ -85,6 +85,21 @@ each category, the available options are alphabetized and described.
   connection information in case you need to connect to the console to
   debug the build process.
 
+* `http_directory` (string) - Path to a directory to serve using an HTTP
+  server. The files in this directory will be available over HTTP that will
+  be requestable from the virtual machine. This is useful for hosting
+  kickstart files and so on. By default this is "", which means no HTTP
+  server will be started. The address and port of the HTTP server will be
+  available as variables in `boot_command`. This is covered in more detail
+  below.
+
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
+  maximum port to use for the HTTP server started to serve the `http_directory`.
+  Because Packer often runs in parallel, Packer will choose a randomly available
+  port in this range to run the HTTP server. If you want to force the HTTP
+  server to be on one port, make this minimum and maximum port the same.
+  By default the values are 8000 and 9000, respectively.
+
 * `output_directory` (string) - This is the path to the directory where the
   resulting virtual machine will be created. This may be relative or absolute.
   If relative, the path is relative to the working directory when `packer`
@@ -137,3 +152,9 @@ each category, the available options are alphabetized and described.
 * `vmx_data_post` (object of key/value strings) - Identical to `vmx_data`,
   except that it is run after the virtual machine is shutdown, and before the
   virtual machine is exported.
+
+* `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port to
+  use for VNC access to the virtual machine. The builder uses VNC to type
+  the initial `boot_command`. Because Packer generally runs in parallel, Packer
+  uses a randomly chosen port in this range that appears available. By default
+  this is 5900 to 6000. The minimum and maximum ports are inclusive.
