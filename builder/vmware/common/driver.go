@@ -129,7 +129,12 @@ func runAndLog(cmd *exec.Cmd) (string, string, error) {
 	stderrString := strings.TrimSpace(stderr.String())
 
 	if _, ok := err.(*exec.ExitError); ok {
-		err = fmt.Errorf("VMware error: %s", stderrString)
+		message := stderrString
+		if message == "" {
+			message = stdoutString
+		}
+
+		err = fmt.Errorf("VMware error: %s", message)
 	}
 
 	log.Printf("stdout: %s", stdoutString)
