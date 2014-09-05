@@ -220,5 +220,10 @@ func (d *DockerDriver) Verify() error {
 		return err
 	}
 
+	if v := os.Getenv("DOCKER_HOST"); v != "" {
+		return fmt.Errorf(
+			"DOCKER_HOST cannot be set with the Packer Docker builder.")
+	}
+
 	return nil
 }
