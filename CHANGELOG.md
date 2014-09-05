@@ -28,6 +28,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * core: `isotime` function can take a format. [GH-1126]
   * builder/amazon/all: `AWS_SECURITY_TOKEN` is read and can also be
       set with the `token` configuration. [GH-1236]
   * builder/amazon/all: Can force SSH on the private IP address with
