@@ -15,8 +15,6 @@ FEATURES:
       Packer will look in the PWD and the directory with `packer` for
       binaries named `packer-TYPE-NAME`.
   * builder/docker: Images can now be committed instead of exported. [GH-1198]
-  * builder/docker: Can now specify login credentials to pull images.
-  * builder/docker: Support mounting additional volumes. [GH-1430]
   * builder/virtualbox-ovf: New `import_flags` setting can be used to add
       new command line flags to `VBoxManage import` to allow things such
       as EULAs to be accepted. [GH-1383]
@@ -25,7 +23,6 @@ FEATURES:
   * builder/vmware: VMware Player 6 is now supported. [GH-1168]
   * builder/vmware-vmx: Boot commands and the HTTP server are supported.
       [GH-1169]
-  * post-processor/docker-push: Can now specify login credentials. [GH-1243]
 
 IMPROVEMENTS:
 
@@ -37,6 +34,8 @@ IMPROVEMENTS:
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
   * builder/digitalocean: Can set API URL endpoint. [GH-1448]
   * builder/digitalocean: Region supports variables. [GH-1452]
+  * builder/docker: Can now specify login credentials to pull images.
+  * builder/docker: Support mounting additional volumes. [GH-1430]
   * builder/parallels/all: Path to tools ISO is calculated automatically. [GH-1455]
   * builder/parallels-pvm: `reassign_mac` option to choose wehther or not
       to generate a new MAC address. [GH-1461]
@@ -44,6 +43,8 @@ IMPROVEMENTS:
   * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]
   * builder/virtualbox/all: `iso_interface` option to mount ISO with SATA. [GH-1200]
   * builder/vmware-vmx: Proper `floppy_files` support. [GH-1057]
+  * command/build: Add `-color=false` flag to disable color. [GH-1433]
+  * post-processor/docker-push: Can now specify login credentials. [GH-1243]
 
 BUG FIXES:
 
