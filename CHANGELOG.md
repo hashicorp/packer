@@ -85,6 +85,8 @@ BUG FIXES:
   * builder/vmware-iso: Fix crash when `vnc_port_min` and max were the
       same value. [GH-1288]
   * builder/vmware-iso: Finding an available VNC port on Windows works. [GH-1372]
+  * builder/vmware-vmx: Nice error if Clone is not supported (not VMware
+      Fusion Pro). [GH-787]
   * post-processor/vagrant: Can supply your own metadata.json. [GH-1143]
   * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
 
