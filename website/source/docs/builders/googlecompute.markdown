@@ -13,38 +13,27 @@ for use with [Google Compute Engine](https://cloud.google.com/products/compute-e
 (GCE) based on existing images. Google Compute Engine doesn't allow the creation
 of images from scratch.
 
-## Setting Up API Access
+## Authentication
 
-There is a small setup step required in order to obtain the credentials
-that Packer needs to use Google Compute Engine. This needs to be done only
-once if you intend to share the credentials.
+Authenticating with Google Cloud services requires two separate JSON
+files: one which we call the _account file_ and the _client secrets file_.
 
-In order for Packer to talk to Google Compute Engine, it will need
-a _client secrets_ JSON file and a _client private key_. Both of these are
-obtained from the [Google Cloud Console](https://cloud.google.com/console).
+Both of these files are downloaded directly from the
+[Google Developers Console](https://console.developers.google.com). To make
+the process more straightforwarded, it is documented here.
 
-Follow the steps below:
+1. Log into the [Google Developers Console](https://console.developers.google.com)
+   and select a project.
 
-1. Log into the [Google Cloud Console](https://cloud.google.com/console)
-2. Click on the project you want to use Packer with (or create one if you
-   don't have one yet).
-3. Click "APIs & auth" in the left sidebar
-4. Click "Credentials" in the left sidebar
-5. Click "Create New Client ID" and choose "Service Account"
-6. A private key will be downloaded for you. Note the password for the private key! This private key is your _client private key_.
-7. After creating the account, click "Download JSON". This is your _client secrets JSON_ file. Make sure you didn't download the JSON from the "OAuth 2.0" section! This is a common mistake and will cause the builder to not work.
+2. Under the "APIs & Auth" section, click "Credentials."
 
-Finally, one last step, you'll have to convert the `p12` file you
-got from Google into the PEM format. You can do this with OpenSSL, which
-is installed standard on most Unixes:
+3. Click the "Download JSON" button under the "Compute Engine and App Engine"
+   account in the OAuth section. The file should start with "client\_secrets".
+   This is your _client secrets file_.
 
-```
-$ openssl pkcs12 -in <path to .p12> -nocerts -passin pass:notasecret \
-    -nodes -out private_key.pem
-```
-
-The client secrets JSON you downloaded along with the new "private\_key.pem"
-file are the two files you need to configure Packer with to talk to GCE.
+4. Create a new OAuth client ID and select "Service Account" as the type
+   of account. Once created, a JSON file should be downloaded. This is your
+   _account file_.
 
 ## Basic Example
 
@@ -57,8 +46,8 @@ files obtained in the previous section.
 {
   "type": "googlecompute",
   "bucket_name": "my-project-packer-images",
+  "account_file": "account.json",
   "client_secrets_file": "client_secret.json",
-  "private_key_file": "XXXXXX-privatekey.p12",
   "project_id": "my-project",
   "source_image": "debian-7-wheezy-v20140718",
   "zone": "us-central1-a"
@@ -71,6 +60,9 @@ Configuration options are organized below into two categories: required and opti
 each category, the available options are alphabetized and described.
 
 ### Required:
+
+* `account_file` (string) - The JSON file containing your account credentials.
+     Instructions for how to retrieve these are above.
 
 * `bucket_name` (string) - The Google Cloud Storage bucket to store the
   images that are created. The bucket must already exist in your project.
@@ -112,9 +104,6 @@ each category, the available options are alphabetized and described.
 
 * `network` (string) - The Google Compute network to use for the launched
   instance. Defaults to `default`.
-
-* `passphrase` (string) - The passphrase to use if the `private_key_file`
-  is encrypted.
 
 * `ssh_port` (integer) - The SSH port. Defaults to 22.
 
