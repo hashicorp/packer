@@ -23,7 +23,7 @@ type Driver interface {
 	Delete(string) error
 
 	// Import a VM
-	Import(string, string, string) error
+	Import(string, string, []string) error
 
 	// The complete path to the Guest Additions ISO
 	Iso() (string, error)

@@ -68,9 +68,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tpl:                  b.config.tpl,
 		},
 		&StepImport{
-			Name:       b.config.VMName,
-			SourcePath: b.config.SourcePath,
-			ImportOpts: b.config.ImportOpts,
+			Name:        b.config.VMName,
+			SourcePath:  b.config.SourcePath,
+			ImportFlags: b.config.ImportFlags,
 		},
 		&vboxcommon.StepAttachGuestAdditions{
 			GuestAdditionsMode: b.config.GuestAdditionsMode,
