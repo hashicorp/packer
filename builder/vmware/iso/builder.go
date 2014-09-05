@@ -41,9 +41,6 @@ type config struct {
 	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string `mapstructure:"iso_urls"`
 	VMName          string   `mapstructure:"vm_name"`
-	HTTPDir         string   `mapstructure:"http_directory"`
-	HTTPPortMin     uint     `mapstructure:"http_port_min"`
-	HTTPPortMax     uint     `mapstructure:"http_port_max"`
 	BootCommand     []string `mapstructure:"boot_command"`
 	SkipCompaction  bool     `mapstructure:"skip_compaction"`
 	VMXTemplatePath string   `mapstructure:"vmx_template_path"`
@@ -115,14 +112,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
-	if b.config.HTTPPortMin == 0 {
-		b.config.HTTPPortMin = 8000
-	}
-
-	if b.config.HTTPPortMax == 0 {
-		b.config.HTTPPortMax = 9000
-	}
-
 	if b.config.VNCPortMin == 0 {
 		b.config.VNCPortMin = 5900
 	}
@@ -147,7 +136,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	templates := map[string]*string{
 		"disk_name":         &b.config.DiskName,
 		"guest_os_type":     &b.config.GuestOSType,
-		"http_directory":    &b.config.HTTPDir,
 		"iso_checksum":      &b.config.ISOChecksum,
 		"iso_checksum_type": &b.config.ISOChecksumType,
 		"iso_url":           &b.config.RawSingleISOUrl,
@@ -193,11 +181,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				fmt.Errorf("Error processing floppy_files[%d]: %s",
 					i, err))
 		}
-	}
-
-	if b.config.HTTPPortMin > b.config.HTTPPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
 	if b.config.ISOChecksumType == "" {
@@ -340,7 +323,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
-		&stepHTTPServer{},
+		&vmwcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		&stepConfigureVNC{},
 		&StepRegister{},
 		&vmwcommon.StepRun{

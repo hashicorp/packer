@@ -62,6 +62,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
+		&vmwcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		&StepCloneVMX{
 			OutputDir: b.config.OutputDir,
 			Path:      b.config.SourcePath,
