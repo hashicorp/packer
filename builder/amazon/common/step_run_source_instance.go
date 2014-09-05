@@ -10,6 +10,7 @@ import (
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress bool
+	SpotPrice                string
 	AvailabilityZone         string
 	BlockDevices             BlockDevices
 	Debug                    bool
@@ -21,8 +22,8 @@ type StepRunSourceInstance struct {
 	Tags                     map[string]string
 	UserData                 string
 	UserDataFile             string
-
-	instance *ec2.Instance
+	spotRequest              *ec2.SpotRequestResult
+	instance                 *ec2.Instance
 }
 
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -47,21 +48,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		securityGroups[n] = ec2.SecurityGroup{Id: securityGroupId}
 	}
 
-	runOpts := &ec2.RunInstances{
-		KeyName:                  keyName,
-		ImageId:                  s.SourceAMI,
-		InstanceType:             s.InstanceType,
-		UserData:                 []byte(userData),
-		MinCount:                 0,
-		MaxCount:                 0,
-		SecurityGroups:           securityGroups,
-		IamInstanceProfile:       s.IamInstanceProfile,
-		SubnetId:                 s.SubnetId,
-		AssociatePublicIpAddress: s.AssociatePublicIpAddress,
-		BlockDevices:             s.BlockDevices.BuildLaunchDevices(),
-		AvailZone:                s.AvailabilityZone,
-	}
-
 	ui.Say("Launching a source AWS instance...")
 	imageResp, err := ec2conn.Images([]string{s.SourceAMI}, ec2.NewFilter())
 	if err != nil {
@@ -82,15 +68,85 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
-	runResp, err := ec2conn.RunInstances(runOpts)
+	var instanceId []string
+	if s.SpotPrice == "" {
+		runOpts := &ec2.RunInstances{
+			KeyName:                  keyName,
+			ImageId:                  s.SourceAMI,
+			InstanceType:             s.InstanceType,
+			UserData:                 []byte(userData),
+			MinCount:                 0,
+			MaxCount:                 0,
+			SecurityGroups:           securityGroups,
+			IamInstanceProfile:       s.IamInstanceProfile,
+			SubnetId:                 s.SubnetId,
+			AssociatePublicIpAddress: s.AssociatePublicIpAddress,
+			BlockDevices:             s.BlockDevices.BuildLaunchDevices(),
+			AvailZone:                s.AvailabilityZone,
+		}
+		runResp, err := ec2conn.RunInstances(runOpts)
+		if err != nil {
+			err := fmt.Errorf("Error launching source instance: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		instanceId = []string{runResp.Instances[0].InstanceId}
+	} else {
+		runOpts := &ec2.RequestSpotInstances{
+			SpotPrice:                s.SpotPrice,
+			KeyName:                  keyName,
+			ImageId:                  s.SourceAMI,
+			InstanceType:             s.InstanceType,
+			UserData:                 []byte(userData),
+			SecurityGroups:           securityGroups,
+			IamInstanceProfile:       s.IamInstanceProfile,
+			SubnetId:                 s.SubnetId,
+			AssociatePublicIpAddress: s.AssociatePublicIpAddress,
+			BlockDevices:             s.BlockDevices.BuildLaunchDevices(),
+			AvailZone:                s.AvailabilityZone,
+		}
+		runSpotResp, err := ec2conn.RequestSpotInstances(runOpts)
+		if err != nil {
+			err := fmt.Errorf("Error launching source spot instance: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		s.spotRequest = &runSpotResp.SpotRequestResults[0]
+		spotRequestId := s.spotRequest.SpotRequestId
+		ui.Say(fmt.Sprintf("Waiting for spot request (%s) to become ready...", spotRequestId))
+		stateChange := StateChangeConf{
+			Pending:   []string{"open"},
+			Target:    "active",
+			Refresh:   SpotRequestStateRefreshFunc(ec2conn, spotRequestId),
+			StepState: state,
+		}
+		_, err = WaitForState(&stateChange)
+		if err != nil {
+			err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", spotRequestId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		spotResp, err := ec2conn.DescribeSpotRequests([]string{spotRequestId}, nil)
+		if err != nil {
+			err := fmt.Errorf("Error finding spot request (%s): %s", spotRequestId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		instanceId = []string{spotResp.SpotRequestResults[0].InstanceId}
+	}
+
+	instanceResp, err := ec2conn.Instances(instanceId, nil)
 	if err != nil {
-		err := fmt.Errorf("Error launching source instance: %s", err)
+		err := fmt.Errorf("Error finding source instance (%s): %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	s.instance = &runResp.Instances[0]
+	s.instance = &instanceResp.Reservations[0].Instances[0]
 	ui.Message(fmt.Sprintf("Instance ID: %s", s.instance.InstanceId))
 
 	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
@@ -142,24 +198,41 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 }
 
 func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
-	if s.instance == nil {
-		return
-	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Terminating the source AWS instance...")
-	if _, err := ec2conn.TerminateInstances([]string{s.instance.InstanceId}); err != nil {
-		ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
-		return
+	// Cancel the spot request if it exists
+	if s.spotRequest != nil {
+		ui.Say("Cancelling the spot request...")
+		if _, err := ec2conn.CancelSpotRequests([]string{s.spotRequest.SpotRequestId}); err != nil {
+			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
+			return
+		}
+		stateChange := StateChangeConf{
+			Pending: []string{"active", "open"},
+			Refresh: SpotRequestStateRefreshFunc(ec2conn, s.spotRequest.SpotRequestId),
+			Target:  "cancelled",
+		}
+
+		WaitForState(&stateChange)
+
 	}
 
-	stateChange := StateChangeConf{
-		Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-		Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
-		Target:  "terminated",
-	}
+	// Terminate the source instance if it exists
+	if s.instance != nil {
 
-	WaitForState(&stateChange)
+		ui.Say("Terminating the source AWS instance...")
+		if _, err := ec2conn.TerminateInstances([]string{s.instance.InstanceId}); err != nil {
+			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
+			return
+		}
+		stateChange := StateChangeConf{
+			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
+			Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
+			Target:  "terminated",
+		}
+
+		WaitForState(&stateChange)
+	}
 }
