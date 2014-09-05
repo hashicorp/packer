@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -148,29 +147,57 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
+func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
-	// TODO(dougm) use esxcli network ip connection list
+
+	//Process ports ESXi is listening on to determine which are available
+	r, err := d.esxcli("network", "ip", "connection", "list")
+	if err != nil {
+		err = fmt.Errorf("Could not retrieve network information for ESXi: %v", err)
+		return "", 0, err
+	}
+
+	listenPorts := make(map[string]bool)
+	for record, err := r.read(); record != nil && err == nil; record, err = r.read() {
+		if record["State"] == "LISTEN" {
+			splitAddress := strings.Split(record["LocalAddress"], ":")
+			log.Print(splitAddress)
+			port := splitAddress[len(splitAddress)-1]
+			log.Printf("ESXi Listening on: %s", port)
+			listenPorts[port] = true
+		}
+	}
+
 	for port := portMin; port <= portMax; port++ {
+		if _, ok := listenPorts[fmt.Sprintf("%d", port)]; ok {
+			log.Printf("Port %d in use", port)
+			continue
+		}
 		address := fmt.Sprintf("%s:%d", d.Host, port)
 		log.Printf("Trying address: %s...", address)
 		l, err := net.DialTimeout("tcp", address, 1*time.Second)
 
-		if err == nil {
-			log.Printf("%s in use", address)
-			l.Close()
-		} else if e, ok := err.(*net.OpError); ok {
-			if e.Err == syscall.ECONNREFUSED {
-				// then port should be available for listening
-				vncPort = port
-				break
-			} else if e.Timeout() {
-				log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+		if err != nil {
+			if e, ok := err.(*net.OpError); ok {
+				if e.Timeout() {
+					log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+				} else {
+					vncPort = port
+					break
+				}
 			}
+		} else {
+			defer l.Close()
 		}
 	}
 
-	return d.Host, vncPort
+	if vncPort == 0 {
+		err := fmt.Errorf("Unable to find available VNC port between %d and %d",
+			portMin, portMax)
+		return d.Host, vncPort, err
+	}
+
+	return d.Host, vncPort, nil
 }
 
 func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
