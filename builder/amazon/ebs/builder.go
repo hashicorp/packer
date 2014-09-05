@@ -113,7 +113,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tags:                     b.config.RunTags,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     awscommon.SSHAddress(ec2conn, b.config.SSHPort),
+			SSHAddress: awscommon.SSHAddress(
+				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
 			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},

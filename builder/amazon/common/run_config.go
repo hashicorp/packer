@@ -20,6 +20,7 @@ type RunConfig struct {
 	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
 	SSHUsername              string            `mapstructure:"ssh_username"`
 	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
+	SSHPrivateIp             bool              `mapstructure:"ssh_private_ip"`
 	SSHPort                  int               `mapstructure:"ssh_port"`
 	SecurityGroupId          string            `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
