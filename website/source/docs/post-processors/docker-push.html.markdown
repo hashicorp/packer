@@ -11,12 +11,6 @@ The Docker push post-processor takes an artifact from the
 [docker-import](/docs/post-processors/docker-import.html) post-processor
 and pushes it to a Docker registry.
 
-<div class="alert alert-info alert-block">
-<strong>Before you use this,</strong> you must manually <code>docker login</code>
-to the proper repository. A future version of Packer will automate this
-for you, but for now you must manually do this.
-</div>
-
 ## Configuration
 
 This post-processor has only optional configuration:
@@ -31,6 +25,12 @@ This post-processor has only optional configuration:
 * `login_password` (string) - The password to use to authenticate to login.
 
 * `login_server` (string) - The server address to login to.
+
+<div class="alert alert-info alert-block">
+<strong>Note:</strong> If you login using the credentials above, the
+post-processor will automatically log you out afterwards (just the server
+specified).
+</div>
 
 ## Example
 
