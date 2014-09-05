@@ -20,10 +20,11 @@ type Driver interface {
 	// Import imports a container from a tar file
 	Import(path, repo string) (string, error)
 
-	// Login
+	// Login. This will lock the driver from performing another Login
+	// until Logout is called. Therefore, any users MUST call Logout.
 	Login(repo, email, username, password string) error
 
-	// Logout
+	// Logout. This can only be called if Login succeeded.
 	Logout(repo string) error
 
 	// Pull should pull down the given image.
