@@ -81,6 +81,9 @@ BUG FIXES:
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
+  * builder/vmware-iso: Fix crash when `vnc_port_min` and max were the
+      same value. [GH-1288]
+  * builder/vmware-iso: Finding an available VNC port on Windows works. [GH-1372]
   * post-processor/vagrant: Can supply your own metadata.json. [GH-1143]
   * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
 
