@@ -3,9 +3,11 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"time"
+
+	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/packer"
 )
 
 // RunConfig contains configuration for running an instance from a source
@@ -81,7 +83,8 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	if c.TemporaryKeyPairName == "" {
-		c.TemporaryKeyPairName = "packer {{uuid}}"
+		c.TemporaryKeyPairName = fmt.Sprintf(
+			"packer %s", uuid.TimeOrderedUUID())
 	}
 
 	// Validation
