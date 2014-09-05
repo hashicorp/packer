@@ -12,6 +12,11 @@ type StepExport struct{}
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
+
+	if !config.Export {
+		return multistep.ActionContinue
+	}
+
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
 	ui := state.Get("ui").(packer.Ui)
