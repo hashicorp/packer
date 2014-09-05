@@ -157,6 +157,13 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 		err = fmt.Errorf("VBoxManage error: %s", stderrString)
 	}
 
+	if err == nil {
+		m, _ := regexp.MatchString("VBoxManage([.a-z]+?): error:", stderrString)
+		if m {
+			err = fmt.Errorf("VBoxManage error: %s", stderrString)
+		}
+	}
+
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
