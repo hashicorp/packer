@@ -35,6 +35,27 @@ func (d *DockerDriver) DeleteImage(id string) error {
 	return nil
 }
 
+func (d *DockerDriver) Commit(id string) (string, error) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command("docker", "commit", id)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Start(); err != nil {
+		return "", err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error committing container: %s\nStderr: %s",
+			err, stderr.String())
+		return "", err
+	}
+
+	return strings.TrimSpace(stdout.String()), nil
+}
+
 func (d *DockerDriver) Export(id string, dst io.Writer) error {
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", "export", id)
@@ -98,6 +119,26 @@ func (d *DockerDriver) Push(name string) error {
 	return runAndStream(cmd, d.Ui)
 }
 
+func (d *DockerDriver) SaveImage(id string, dst io.Writer) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "save", id)
+	cmd.Stdout = dst
+	cmd.Stderr = &stderr
+
+	log.Printf("Exporting image: %s", id)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error exporting: %s\nStderr: %s",
+			err, stderr.String())
+		return err
+	}
+
+	return nil
+}
+
 func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
@@ -154,6 +195,24 @@ func (d *DockerDriver) StopContainer(id string) error {
 	}
 
 	return exec.Command("docker", "rm", id).Run()
+}
+
+func (d *DockerDriver) TagImage(id string, repo string) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "tag", id, repo)
+	cmd.Stderr = &stderr
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error tagging image: %s\nStderr: %s",
+			err, stderr.String())
+		return err
+	}
+
+	return nil
 }
 
 func (d *DockerDriver) Verify() error {

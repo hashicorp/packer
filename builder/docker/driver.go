@@ -8,6 +8,9 @@ import (
 // Docker. The Driver interface also allows the steps to be tested since
 // a mock driver can be shimmed in.
 type Driver interface {
+	// Commit the container to a tag
+	Commit(id string) (string, error)
+
 	// Delete an image that is imported into Docker
 	DeleteImage(id string) error
 
@@ -23,12 +26,18 @@ type Driver interface {
 	// Push pushes an image to a Docker index/registry.
 	Push(name string) error
 
+	// Save an image with the given ID to the given writer.
+	SaveImage(id string, dst io.Writer) error
+
 	// StartContainer starts a container and returns the ID for that container,
 	// along with a potential error.
 	StartContainer(*ContainerConfig) (string, error)
 
 	// StopContainer forcibly stops a container.
 	StopContainer(id string) error
+
+	// TagImage tags the image with the given ID
+	TagImage(id string, repo string) error
 
 	// Verify verifies that the driver can run
 	Verify() error
