@@ -21,6 +21,8 @@ FEATURES:
   * builder/virtualbox-ovf: Boot commands and the HTTP server are supported.
       [GH-1169]
   * builder/vmware: VMware Player 6 is now supported. [GH-1168]
+  * builder/vmware-vmx: Boot commands and the HTTP server are supported.
+      [GH-1169]
 
 IMPROVEMENTS:
 

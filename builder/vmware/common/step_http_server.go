@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"fmt"
@@ -15,28 +15,30 @@ import (
 // template.
 //
 // Uses:
-//   config *config
 //   ui     packer.Ui
 //
 // Produces:
 //   http_port int - The port the HTTP server started on.
-type stepHTTPServer struct {
+type StepHTTPServer struct {
+	HTTPDir     string
+	HTTPPortMin uint
+	HTTPPortMax uint
+
 	l net.Listener
 }
 
-func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var httpPort uint = 0
-	if config.HTTPDir == "" {
+	if s.HTTPDir == "" {
 		state.Put("http_port", httpPort)
 		return multistep.ActionContinue
 	}
 
 	// Find an available TCP port for our HTTP server
 	var httpAddr string
-	portRange := int(config.HTTPPortMax - config.HTTPPortMin)
+	portRange := int(s.HTTPPortMax - s.HTTPPortMin)
 	for {
 		var err error
 		var offset uint = 0
@@ -46,7 +48,7 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 			offset = uint(rand.Intn(portRange))
 		}
 
-		httpPort = offset + config.HTTPPortMin
+		httpPort = offset + s.HTTPPortMin
 		httpAddr = fmt.Sprintf(":%d", httpPort)
 		log.Printf("Trying port: %d", httpPort)
 		s.l, err = net.Listen("tcp", httpAddr)
@@ -58,7 +60,7 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", httpPort))
 
 	// Start the HTTP server and run it in the background
-	fileServer := http.FileServer(http.Dir(config.HTTPDir))
+	fileServer := http.FileServer(http.Dir(s.HTTPDir))
 	server := &http.Server{Addr: httpAddr, Handler: fileServer}
 	go server.Serve(s.l)
 
@@ -68,7 +70,7 @@ func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepHTTPServer) Cleanup(multistep.StateBag) {
+func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 	if s.l != nil {
 		// Close the listener so that the HTTP server stops
 		s.l.Close()
