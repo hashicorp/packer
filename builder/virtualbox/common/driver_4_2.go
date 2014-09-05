@@ -158,6 +158,8 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 	}
 
 	if err == nil {
+		// Sometimes VBoxManage gives us an error with a zero exit code,
+		// so we also regexp match an error string.
 		m, _ := regexp.MatchString("VBoxManage([.a-z]+?): error:", stderrString)
 		if m {
 			err = fmt.Errorf("VBoxManage error: %s", stderrString)
