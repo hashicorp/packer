@@ -15,6 +15,9 @@ FEATURES:
       Packer will look in the PWD and the directory with `packer` for
       binaries named `packer-TYPE-NAME`.
   * builder/docker: Images can now be committed instead of exported. [GH-1198]
+  * builder/virtualbox-ovf: New `import_flags` setting can be used to add
+      new command line flags to `VBoxManage import` to allow things such
+      as EULAs to be accepted. [GH-1383]
   * builder/vmware: VMware Player 6 is now supported. [GH-1168]
 
 IMPROVEMENTS:

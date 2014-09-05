@@ -96,6 +96,10 @@ each category, the available options are alphabetized and described.
   machine being built. When this value is set to true, the machine will
   start without a console.
 
+* `import_flags` (array of strings) - Additional flags to pass to
+    `VBoxManage import`. This can be used to add additional command-line flags
+    such as `--eula-accept` to accept a EULA in the OVF.
+
 * `import_opts` (string) - Additional options to pass to the `VBoxManage import`.
   This can be useful for passing "keepallmacs" or "keepnatmacs" options for existing
   ovf images.

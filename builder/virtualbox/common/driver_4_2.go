@@ -69,13 +69,13 @@ func (d *VBox42Driver) Iso() (string, error) {
 	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output")
 }
 
-func (d *VBox42Driver) Import(name, path, opts string) error {
+func (d *VBox42Driver) Import(name string, path string, flags []string) error {
 	args := []string{
 		"import", path,
 		"--vsys", "0",
 		"--vmname", name,
-		"--options", opts,
 	}
+	args = append(args, flags...)
 
 	return d.VBoxManage(args...)
 }
