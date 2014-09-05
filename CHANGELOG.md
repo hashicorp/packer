@@ -55,6 +55,7 @@ BUG FIXES:
   * builder/amazon/all: Fix race condition on setting tags. [GH-1367]
   * builder/amazon/all: More desctriptive error messages if Amazon only
       sends an error code. [GH-1189]
+  * builder/docker: Error if `DOCKER_HOST` is set.
   * builder/docker: Remove the container during cleanup. [GH-1206]
   * builder/docker: Fix case where not all output would show up from
       provisioners.
