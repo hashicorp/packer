@@ -130,6 +130,42 @@ func TestConfigTemplateProcess_uuid(t *testing.T) {
 	}
 }
 
+func TestConfigTemplateProcess_upper(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tpl.UserVars["foo"] = "bar"
+
+	result, err := tpl.Process(`{{user "foo" | upper}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != "BAR" {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestConfigTemplateProcess_lower(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tpl.UserVars["foo"] = "BAR"
+
+	result, err := tpl.Process(`{{user "foo" | lower}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != "bar" {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
 func TestConfigTemplateValidate(t *testing.T) {
 	tpl, err := NewConfigTemplate()
 	if err != nil {
