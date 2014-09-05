@@ -8,12 +8,20 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepStopInstance struct{}
+type stepStopInstance struct {
+	SpotPrice string
+}
 
 func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
+
+	// Skip when it is a spot instance
+	if s.SpotPrice != "" {
+		ui.Say(fmt.Sprintf("This is a spot instance, no need to stop for the AMI"))
+		return multistep.ActionContinue
+	}
 
 	// Stop the instance so we can create an AMI from it
 	ui.Say("Stopping the source instance...")
