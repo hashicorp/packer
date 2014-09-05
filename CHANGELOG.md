@@ -39,6 +39,9 @@ BUG FIXES:
   * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
       [GH-1424]
+  * builder/amazon-instance: Add `--no-filter` to the `ec2-bundle-vol`
+      command by default to avoid corrupting data by removing package
+      manager certs. [GH-1137]
   * builder/amazon/all: `delete_on_termination` set to false will work.
   * builder/amazon/all: Fix race condition on setting tags. [GH-1367]
   * builder/amazon/all: More desctriptive error messages if Amazon only
