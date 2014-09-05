@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"bufio"
@@ -8,8 +8,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 )
 
 // VMnetNatConfIPFinder finds the IP address of the host machine by
@@ -18,7 +16,7 @@ import (
 type VMnetNatConfIPFinder struct{}
 
 func (*VMnetNatConfIPFinder) HostIP() (string, error) {
-	driver := &vmwcommon.Workstation9Driver{}
+	driver := &Workstation9Driver{}
 
 	vmnetnat := driver.VmnetnatConfPath()
 	if vmnetnat == "" {
