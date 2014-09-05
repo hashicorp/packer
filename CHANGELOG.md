@@ -23,6 +23,7 @@ FEATURES:
   * builder/vmware: VMware Player 6 is now supported. [GH-1168]
   * builder/vmware-vmx: Boot commands and the HTTP server are supported.
       [GH-1169]
+  * post-processor/docker-push: Can now specify login credentials. [GH-1243]
 
 IMPROVEMENTS:
 

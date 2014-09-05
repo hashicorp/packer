@@ -32,9 +32,11 @@ sudo apt-get install -y curl git-core zip
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "chef/ubuntu-14.04"
+  config.vm.box = "chef/ubuntu-12.04"
 
   config.vm.provision "shell", inline: $script
+
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   ["vmware_fusion", "vmware_workstation"].each do |p|
     config.vm.provider "p" do |v|
