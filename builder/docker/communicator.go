@@ -232,20 +232,42 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 		stdin_w.Write([]byte(remoteCmd + "\n"))
 	}()
 
-	// Start a goroutine to read all the lines out of the logs
+	// Start a goroutine to read all the lines out of the logs. These channels
+	// allow us to stop the go-routine and wait for it to be stopped.
+	stopTailCh := make(chan struct{})
+	doneCh := make(chan struct{})
 	go func() {
-		for line := range tail.Lines {
-			if remote.Stdout != nil {
-				remote.Stdout.Write([]byte(line.Text + "\n"))
-			} else {
-				log.Printf("Command stdout: %#v", line.Text)
+		defer close(doneCh)
+
+		for {
+			select {
+			case <-tail.Dead():
+				return
+			case line := <-tail.Lines:
+				if remote.Stdout != nil {
+					remote.Stdout.Write([]byte(line.Text + "\n"))
+				} else {
+					log.Printf("Command stdout: %#v", line.Text)
+				}
+			case <-time.After(2 * time.Second):
+				// If we're done, then return. Otherwise, keep grabbing
+				// data. This gives us a chance to flush all the lines
+				// out of the tailed file.
+				select {
+				case <-stopTailCh:
+					return
+				default:
+				}
 			}
 		}
 	}()
 
+	var exitRaw []byte
+	var exitStatus int
+	var exitStatusRaw int64
 	err = cmd.Wait()
 	if exitErr, ok := err.(*exec.ExitError); ok {
-		exitStatus := 1
+		exitStatus = 1
 
 		// There is no process-independent way to get the REAL
 		// exit status so we just try to go deeper.
@@ -255,8 +277,7 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 
 		// Say that we ended, since if Docker itself failed, then
 		// the command must've not run, or so we assume
-		remote.SetExited(exitStatus)
-		return
+		goto REMOTE_EXIT
 	}
 
 	// Wait for the exit code to appear in our file...
@@ -271,21 +292,27 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 	}
 
 	// Read the exit code
-	exitRaw, err := ioutil.ReadFile(exitCodePath)
+	exitRaw, err = ioutil.ReadFile(exitCodePath)
 	if err != nil {
 		log.Printf("Error executing: %s", err)
-		remote.SetExited(254)
-		return
+		exitStatus = 254
+		goto REMOTE_EXIT
 	}
 
-	exitStatus, err := strconv.ParseInt(string(bytes.TrimSpace(exitRaw)), 10, 0)
+	exitStatusRaw, err = strconv.ParseInt(string(bytes.TrimSpace(exitRaw)), 10, 0)
 	if err != nil {
 		log.Printf("Error executing: %s", err)
-		remote.SetExited(254)
-		return
+		exitStatus = 254
+		goto REMOTE_EXIT
 	}
+	exitStatus = int(exitStatusRaw)
 	log.Printf("Executed command exit status: %d", exitStatus)
 
-	// Finally, we're done
-	remote.SetExited(int(exitStatus))
+REMOTE_EXIT:
+	// Wait for the tail to finish
+	close(stopTailCh)
+	<-doneCh
+
+	// Set the exit status which triggers waiters
+	remote.SetExited(exitStatus)
 }
