@@ -268,7 +268,8 @@ sudo -n ec2-bundle-vol \
 	-e {{.PrivatePath}}/* \
 	-d {{.Destination}} \
 	-p {{.Prefix}} \
-	--batch
+	--batch \
+	--no-filter
 ```
 
 The available template variables should be self-explanatory based on the
