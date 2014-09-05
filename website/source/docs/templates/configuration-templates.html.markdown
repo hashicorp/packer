@@ -53,10 +53,12 @@ While some configuration settings have local variables specific to only that
 configuration, a set of functions are available globally for use in _any string_
 in Packer templates. These are listed below for reference.
 
-* `pwd` - The working directory while executing Packer.
 * `isotime` - UTC time in RFC-3339 format.
+* `lower` - Lowercases the string.
+* `pwd` - The working directory while executing Packer.
 * `timestamp` - The current Unix timestamp in UTC.
 * `uuid` - Returns a random UUID.
+* `upper` - Uppercases the string.
 
 ## Amazon Specific Functions
 
