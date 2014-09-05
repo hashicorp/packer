@@ -1,5 +1,11 @@
 ## 0.7.0 (unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * The authentication configuration for Google Compute Engine has changed.
+      The new method is much simpler, but is not backwards compatible.
+      `packer fix` will _not_ fix this. Please read the updated GCE docs.
+
 FEATURES:
 
   * **New Post-Processor: `docker-save`** - Save an image. This is similar to
@@ -50,6 +56,8 @@ BUG FIXES:
   * builder/docker: Fix case where not all output would show up from
       provisioners.
   * builder/googlecompute: add `disk_size` option. [GH-1397]
+  * builder/googlecompute: Auth works with latest formats on Google Cloud
+      Console. [GH-1344]
   * builder/openstack: Region is not required. [GH-1418]
   * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
   * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
