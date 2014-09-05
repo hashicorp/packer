@@ -44,8 +44,6 @@ type config struct {
 	BootCommand     []string `mapstructure:"boot_command"`
 	SkipCompaction  bool     `mapstructure:"skip_compaction"`
 	VMXTemplatePath string   `mapstructure:"vmx_template_path"`
-	VNCPortMin      uint     `mapstructure:"vnc_port_min"`
-	VNCPortMax      uint     `mapstructure:"vnc_port_max"`
 
 	RemoteType      string `mapstructure:"remote_type"`
 	RemoteDatastore string `mapstructure:"remote_datastore"`
@@ -110,14 +108,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
-	}
-
-	if b.config.VNCPortMin == 0 {
-		b.config.VNCPortMin = 5900
-	}
-
-	if b.config.VNCPortMax == 0 {
-		b.config.VNCPortMax = 6000
 	}
 
 	if b.config.RemoteUser == "" {
@@ -230,11 +220,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	}
 
-	if b.config.VNCPortMin > b.config.VNCPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
-	}
-
 	// Remote configuration validation
 	if b.config.RemoteType != "" {
 		if b.config.RemoteHost == "" {
@@ -328,7 +313,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
-		&stepConfigureVNC{},
+		&vmwcommon.StepConfigureVNC{
+			VNCPortMin: b.config.VNCPortMin,
+			VNCPortMax: b.config.VNCPortMax,
+		},
 		&StepRegister{},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
