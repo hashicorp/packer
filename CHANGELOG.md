@@ -45,6 +45,7 @@ IMPROVEMENTS:
   * builder/vmware-vmx: Proper `floppy_files` support. [GH-1057]
   * command/build: Add `-color=false` flag to disable color. [GH-1433]
   * post-processor/docker-push: Can now specify login credentials. [GH-1243]
+  * provisioner/chef-client: Support `chef_environment`. [GH-1190]
 
 BUG FIXES:
 
