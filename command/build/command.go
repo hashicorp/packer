@@ -21,13 +21,12 @@ func (Command) Help() string {
 }
 
 func (c Command) Run(env packer.Environment, args []string) int {
-	var cfgDebug bool
-	var cfgForce bool
-	var cfgParallel bool
+	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
 	buildOptions := new(cmdcommon.BuildOptions)
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
+	cmdFlags.BoolVar(&cfgColor, "color", true, "enable or disable color")
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
 	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
 	cmdFlags.BoolVar(&cfgParallel, "parallel", true, "enable/disable parallelization")
@@ -95,9 +94,13 @@ func (c Command) Run(env packer.Environment, args []string) int {
 
 	buildUis := make(map[string]packer.Ui)
 	for i, b := range builds {
-		ui := &packer.ColoredUi{
-			Color: colors[i%len(colors)],
-			Ui:    env.Ui(),
+		var ui packer.Ui
+		ui = env.Ui()
+		if cfgColor {
+			ui = &packer.ColoredUi{
+				Color: colors[i%len(colors)],
+				Ui:    env.Ui(),
+			}
 		}
 
 		buildUis[b.Name()] = ui
