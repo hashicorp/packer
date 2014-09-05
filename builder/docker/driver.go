@@ -20,6 +20,12 @@ type Driver interface {
 	// Import imports a container from a tar file
 	Import(path, repo string) (string, error)
 
+	// Login
+	Login(repo, email, username, password string) error
+
+	// Logout
+	Logout(repo string) error
+
 	// Pull should pull down the given image.
 	Pull(image string) error
 

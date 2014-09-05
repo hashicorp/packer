@@ -109,6 +109,35 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 	return strings.TrimSpace(stdout.String()), nil
 }
 
+func (d *DockerDriver) Login(repo, email, user, pass string) error {
+	args := []string{"login"}
+	if email != "" {
+		args = append(args, "-e", email)
+	}
+	if user != "" {
+		args = append(args, "-u", user)
+	}
+	if pass != "" {
+		args = append(args, "-p", pass)
+	}
+	if repo != "" {
+		args = append(args, repo)
+	}
+
+	cmd := exec.Command("docker", args...)
+	return runAndStream(cmd, d.Ui)
+}
+
+func (d *DockerDriver) Logout(repo string) error {
+	args := []string{"logout"}
+	if repo != "" {
+		args = append(args, repo)
+	}
+
+	cmd := exec.Command("docker", args...)
+	return runAndStream(cmd, d.Ui)
+}
+
 func (d *DockerDriver) Pull(image string) error {
 	cmd := exec.Command("docker", "pull", image)
 	return runAndStream(cmd, d.Ui)
