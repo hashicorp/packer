@@ -35,6 +35,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepPull{},
 		&StepRun{},
 		&StepProvision{},
+		&StepCommit{},
 		&StepExport{},
 	}
 
@@ -64,8 +65,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	var artifact packer.Artifact
 	// No errors, must've worked
-	artifact := &ExportArtifact{path: b.config.ExportPath}
+	if b.config.Export {
+		artifact = &ExportArtifact{path: b.config.ExportPath}
+	} else {
+		artifact = &ImportArtifact{
+			IdValue:        state.Get("image_id").(string),
+			BuilderIdValue: "packer.post-processor.docker-import",
+			Driver:         driver,
+		}
+	}
 	return artifact, nil
 }
 
