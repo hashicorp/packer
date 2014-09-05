@@ -32,6 +32,7 @@ BUG FIXES:
   * builder/amazon/all: `delete_on_termination` set to false will work.
   * builder/amazon/all: More desctriptive error messages if Amazon only
       sends an error code. [GH-1189]
+  * builder/docker: Remove the container during cleanup. [GH-1206]
   * builder/googlecompute: add `disk_size` option. [GH-1397]
   * builder/openstack: Region is not required. [GH-1418]
   * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
