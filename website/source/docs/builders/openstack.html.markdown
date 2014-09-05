@@ -111,7 +111,7 @@ each category, the available configuration keys are alphabetized.
 * `use_floating_ip` (boolean) - Whether or not to use a floating IP for
   the instance. Defaults to false.
 
-## Basic Example
+## Basic Example: Rackspace public cloud
 
 Here is a basic example. This is a working example to build a
 Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
@@ -130,6 +130,31 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "flavor": "2"
 }
 </pre>
+
+## Basic Example: Private OpenStack cloud
+
+This example builds an Ubuntu 14.04 image on a private OpenStack cloud,
+powered by Metacloud.
+
+<pre class="prettyprint">
+{
+  "type": "openstack",
+  "ssh_username": "monkey",
+  "image_name": "ubuntu1404_packer_test_1",
+  "source_image": "91d9c168-d1e5-49ca-a775-3bfdbb6c97f1",
+  "flavor": "2"
+}
+</pre>
+
+In this case, the connection information for connecting to OpenStack
+doesn't appear in the template. That is because I source a standard
+OpenStack script with environment variables set before I run this. This
+script is setting environment variables like:
+
+- OS_AUTH_URL
+- OS_TENANT_ID
+- OS_USERNAME
+- OS_PASSWORD
 
 ## Troubleshooting
 
