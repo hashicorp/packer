@@ -76,6 +76,8 @@ BUG FIXES:
       with a zero exit code. [GH-1119]
   * builder/virtualbox/iso: Append timestamp to default name for parallel
       builds. [GH-1365]
+  * builder/vmware/all: No more error when Packer stops an already-stopped
+      VM. [GH-1300]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
