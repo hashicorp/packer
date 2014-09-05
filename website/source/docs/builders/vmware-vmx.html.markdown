@@ -51,6 +51,19 @@ each category, the available options are alphabetized and described.
 
 ### Optional:
 
+* `boot_command` (array of strings) - This is an array of commands to type
+  when the virtual machine is firsted booted. The goal of these commands should
+  be to type just enough to initialize the operating system installer. Special
+  keys can be typed as well, and are covered in the section below on the boot
+  command. If this is not specified, it is assumed the installer will start
+  itself.
+
+* `boot_wait` (string) - The time to wait after booting the initial virtual
+  machine before typing the `boot_command`. The value of this should be
+  a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
+  five seconds and one minute 30 seconds, respectively. If this isn't specified,
+  the default is 10 seconds.
+
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
   disk that is attached when the VM is booted. This is most useful
   for unattended Windows installs, which look for an `Autounattend.xml` file
