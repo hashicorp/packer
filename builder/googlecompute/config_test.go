@@ -7,7 +7,7 @@ import (
 
 func testConfig(t *testing.T) map[string]interface{} {
 	return map[string]interface{}{
-		"account_file": testAccountFile(t),
+		"account_file":        testAccountFile(t),
 		"bucket_name":         "foo",
 		"client_secrets_file": testClientSecretsFile(t),
 		"project_id":          "hashicorp",
