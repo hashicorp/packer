@@ -15,6 +15,12 @@ type Config struct {
 	Pull       bool
 	RunCommand []string `mapstructure:"run_command"`
 
+	Login         bool
+	LoginEmail    string `mapstructure:"login_email"`
+	LoginUsername string `mapstructure:"login_username"`
+	LoginPassword string `mapstructure:"login_password"`
+	LoginServer   string `mapstructure:"login_server"`
+
 	tpl *packer.ConfigTemplate
 }
 
@@ -59,8 +65,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
-		"export_path": &c.ExportPath,
-		"image":       &c.Image,
+		"export_path":    &c.ExportPath,
+		"image":          &c.Image,
+		"login_email":    &c.LoginEmail,
+		"login_username": &c.LoginUsername,
+		"login_password": &c.LoginPassword,
+		"login_server":   &c.LoginServer,
 	}
 
 	for n, ptr := range templates {
