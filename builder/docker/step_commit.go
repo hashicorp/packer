@@ -12,14 +12,9 @@ type StepCommit struct {
 }
 
 func (s *StepCommit) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
 	ui := state.Get("ui").(packer.Ui)
-
-	if config.Export {
-		return multistep.ActionContinue
-	}
 
 	ui.Say("Committing the container")
 	imageId, err := driver.Commit(containerId)

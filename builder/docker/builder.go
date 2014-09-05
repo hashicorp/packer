@@ -8,6 +8,7 @@ import (
 )
 
 const BuilderId = "packer.docker"
+const BuilderIdImport = "packer.post-processor.docker-import"
 
 type Builder struct {
 	config *Config
@@ -35,8 +36,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepPull{},
 		&StepRun{},
 		&StepProvision{},
-		&StepCommit{},
-		&StepExport{},
+	}
+
+	if b.config.Commit {
+		steps = append(steps, new(StepCommit))
+	} else {
+		steps = append(steps, new(StepExport))
 	}
 
 	// Setup the state bag and initial state for the steps
@@ -67,14 +72,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var artifact packer.Artifact
 	// No errors, must've worked
-	if b.config.Export {
-		artifact = &ExportArtifact{path: b.config.ExportPath}
-	} else {
+	if b.config.Commit {
 		artifact = &ImportArtifact{
 			IdValue:        state.Get("image_id").(string),
-			BuilderIdValue: "packer.post-processor.docker-import",
+			BuilderIdValue: BuilderIdImport,
 			Driver:         driver,
 		}
+	} else {
+		artifact = &ExportArtifact{path: b.config.ExportPath}
 	}
 	return artifact, nil
 }

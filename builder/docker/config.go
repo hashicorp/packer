@@ -9,8 +9,8 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	Commit     bool
 	ExportPath string `mapstructure:"export_path"`
-	Export     bool
 	Image      string
 	Pull       bool
 	RunCommand []string `mapstructure:"run_command"`
@@ -72,11 +72,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	c.Export = c.ExportPath != ""
-
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("image must be specified"))
+	}
+
+	if c.ExportPath != "" && c.Commit {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("both commit and export_path cannot be set"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
