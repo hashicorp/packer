@@ -3,17 +3,21 @@ package docker
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 type DockerDriver struct {
 	Ui  packer.Ui
 	Tpl *packer.ConfigTemplate
+
+	l sync.Mutex
 }
 
 func (d *DockerDriver) DeleteImage(id string) error {
@@ -110,6 +114,8 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 }
 
 func (d *DockerDriver) Login(repo, email, user, pass string) error {
+	d.l.Lock()
+
 	args := []string{"login"}
 	if email != "" {
 		args = append(args, "-e", email)
@@ -125,7 +131,12 @@ func (d *DockerDriver) Login(repo, email, user, pass string) error {
 	}
 
 	cmd := exec.Command("docker", args...)
-	return runAndStream(cmd, d.Ui)
+	err := runAndStream(cmd, d.Ui)
+	if err != nil {
+		d.l.Unlock()
+	}
+
+	return err
 }
 
 func (d *DockerDriver) Logout(repo string) error {
@@ -135,7 +146,9 @@ func (d *DockerDriver) Logout(repo string) error {
 	}
 
 	cmd := exec.Command("docker", args...)
-	return runAndStream(cmd, d.Ui)
+	err := runAndStream(cmd, d.Ui)
+	d.l.Unlock()
+	return err
 }
 
 func (d *DockerDriver) Pull(image string) error {
