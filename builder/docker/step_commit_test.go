@@ -21,8 +21,6 @@ func TestStepCommit(t *testing.T) {
 	step := new(StepCommit)
 	defer step.Cleanup(state)
 
-	config := state.Get("config").(*Config)
-	config.Export = false
 	driver := state.Get("driver").(*MockDriver)
 	driver.CommitImageId = "bar"
 
@@ -48,38 +46,11 @@ func TestStepCommit(t *testing.T) {
 	}
 }
 
-func TestStepCommit_skip(t *testing.T) {
-	state := testStepCommitState(t)
-	step := new(StepCommit)
-	defer step.Cleanup(state)
-
-	config := state.Get("config").(*Config)
-	config.Export = true
-	driver := state.Get("driver").(*MockDriver)
-
-	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
-		t.Fatalf("bad action: %#v", action)
-	}
-
-	// verify we did the right thing
-	if driver.CommitCalled {
-		t.Fatal("shouldn't have called")
-	}
-
-	// verify the ID is not saved
-	if _, ok := state.GetOk("image_id"); ok {
-		t.Fatal("shouldn't save image ID")
-	}
-}
-
 func TestStepCommit_error(t *testing.T) {
 	state := testStepCommitState(t)
 	step := new(StepCommit)
 	defer step.Cleanup(state)
 
-	config := state.Get("config").(*Config)
-	config.Export = false
 	driver := state.Get("driver").(*MockDriver)
 	driver.CommitErr = errors.New("foo")
 
