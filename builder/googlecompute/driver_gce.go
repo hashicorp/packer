@@ -23,22 +23,27 @@ type driverGCE struct {
 const DriverScopes string = "https://www.googleapis.com/auth/compute " +
 	"https://www.googleapis.com/auth/devstorage.full_control"
 
-func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) (Driver, error) {
-	log.Printf("[INFO] Requesting token...")
-	log.Printf("[INFO]   -- Email: %s", c.Web.ClientEmail)
+func NewDriverGCE(ui packer.Ui, p string, a *accountFile, c *clientSecretsFile) (Driver, error) {
+	// Get the token for use in our requests
+	log.Printf("[INFO] Requesting Google token...")
+	log.Printf("[INFO]   -- Email: %s", a.ClientEmail)
 	log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-	log.Printf("[INFO]   -- Private Key Length: %d", len(key))
+	log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
 	log.Printf("[INFO]   -- Token URL: %s", c.Web.TokenURI)
-	jwtTok := jwt.NewToken(c.Web.ClientEmail, DriverScopes, key)
+	jwtTok := jwt.NewToken(
+		a.ClientEmail,
+		DriverScopes,
+		[]byte(a.PrivateKey))
 	jwtTok.ClaimSet.Aud = c.Web.TokenURI
 	token, err := jwtTok.Assert(new(http.Client))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error retrieving auth token: %s", err)
 	}
 
+	// Instantiate the transport to communicate to Google
 	transport := &oauth.Transport{
 		Config: &oauth.Config{
-			ClientId: c.Web.ClientId,
+			ClientId: a.ClientId,
 			Scope:    DriverScopes,
 			TokenURL: c.Web.TokenURI,
 			AuthURL:  c.Web.AuthURI,
@@ -46,14 +51,14 @@ func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) 
 		Token: token,
 	}
 
-	log.Printf("[INFO] Instantiating client...")
+	log.Printf("[INFO] Instantiating GCE client...")
 	service, err := compute.New(transport.Client())
 	if err != nil {
 		return nil, err
 	}
 
 	return &driverGCE{
-		projectId: projectId,
+		projectId: p,
 		service:   service,
 		ui:        ui,
 	}, nil
