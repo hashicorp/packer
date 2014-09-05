@@ -93,18 +93,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	s.instance = &runResp.Instances[0]
 	ui.Message(fmt.Sprintf("Instance ID: %s", s.instance.InstanceId))
 
-	ec2Tags := make([]ec2.Tag, 1, len(s.Tags)+1)
-	ec2Tags[0] = ec2.Tag{"Name", "Packer Builder"}
-	for k, v := range s.Tags {
-		ec2Tags = append(ec2Tags, ec2.Tag{k, v})
-	}
-
-	_, err = ec2conn.CreateTags([]string{s.instance.InstanceId}, ec2Tags)
-	if err != nil {
-		ui.Message(
-			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))
-	}
-
 	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", s.instance.InstanceId))
 	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
@@ -121,6 +109,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	s.instance = latestInstance.(*ec2.Instance)
+
+	ec2Tags := make([]ec2.Tag, 1, len(s.Tags)+1)
+	ec2Tags[0] = ec2.Tag{"Name", "Packer Builder"}
+	for k, v := range s.Tags {
+		ec2Tags = append(ec2Tags, ec2.Tag{k, v})
+	}
+
+	_, err = ec2conn.CreateTags([]string{s.instance.InstanceId}, ec2Tags)
+	if err != nil {
+		ui.Message(
+			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))
+	}
 
 	if s.Debug {
 		if s.instance.DNSName != "" {
