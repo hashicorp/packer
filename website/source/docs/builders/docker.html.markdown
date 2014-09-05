@@ -91,8 +91,8 @@ described.
   exists and can be used. This defaults to true if not set.
 
 * `run_command` (array of strings) - An array of arguments to pass to
-  `docker` in order to run the container. By default this is set to
-  `["run", "-d", "-i", "-t", "-v", "{{.Volumes}}", "{{.Image}}", "/bin/bash"]`.
+  `docker run` in order to run the container. By default this is set to
+  `["-d", "-i", "-t", "{{.Image}}", "/bin/bash"]`.
   As you can see, you have a couple template variables to customize, as well.
 
 * `volumes` (map of strings to strings) - A mapping of additional volumes
