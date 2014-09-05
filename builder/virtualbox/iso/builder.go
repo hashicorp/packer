@@ -42,9 +42,6 @@ type config struct {
 	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
 	GuestOSType          string   `mapstructure:"guest_os_type"`
 	HardDriveInterface   string   `mapstructure:"hard_drive_interface"`
-	HTTPDir              string   `mapstructure:"http_directory"`
-	HTTPPortMin          uint     `mapstructure:"http_port_min"`
-	HTTPPortMax          uint     `mapstructure:"http_port_max"`
 	ISOChecksum          string   `mapstructure:"iso_checksum"`
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
 	ISOInterface         string   `mapstructure:"iso_interface"`
@@ -103,14 +100,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.GuestOSType = "Other"
 	}
 
-	if b.config.HTTPPortMin == 0 {
-		b.config.HTTPPortMin = 8000
-	}
-
-	if b.config.HTTPPortMax == 0 {
-		b.config.HTTPPortMax = 9000
-	}
-
 	if b.config.ISOInterface == "" {
 		b.config.ISOInterface = "ide"
 	}
@@ -125,7 +114,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"guest_additions_sha256": &b.config.GuestAdditionsSHA256,
 		"guest_os_type":          &b.config.GuestOSType,
 		"hard_drive_interface":   &b.config.HardDriveInterface,
-		"http_directory":         &b.config.HTTPDir,
 		"iso_checksum":           &b.config.ISOChecksum,
 		"iso_checksum_type":      &b.config.ISOChecksumType,
 		"iso_interface":          &b.config.ISOInterface,
@@ -173,11 +161,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("hard_drive_interface can only be ide or sata"))
-	}
-
-	if b.config.HTTPPortMin > b.config.HTTPPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
 	if b.config.ISOChecksumType == "" {
@@ -298,7 +281,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
-		new(stepHTTPServer),
+		&vboxcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		new(vboxcommon.StepSuppressMessages),
 		new(stepCreateVM),
 		new(stepCreateDisk),
