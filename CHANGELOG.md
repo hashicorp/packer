@@ -30,6 +30,7 @@ IMPROVEMENTS:
       set with the `token` configuration. [GH-1236]
   * builder/amazon/all: Can force SSH on the private IP address with
       `ssh_private_ip`. [GH-1229]
+  * builder/amazon/all: String fields in device mappings can use variables. [GH-1090]
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
   * builder/digitalocean: Can set API URL endpoint. [GH-1448]
   * builder/digitalocean: Region supports variables. [GH-1452]

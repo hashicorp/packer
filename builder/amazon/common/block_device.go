@@ -1,7 +1,10 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/packer/packer"
 )
 
 // BlockDevice
@@ -39,6 +42,51 @@ func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
 		})
 	}
 	return blockDevices
+}
+
+func (b *BlockDevices) Prepare(t *packer.ConfigTemplate) []error {
+	if t == nil {
+		var err error
+		t, err = packer.NewConfigTemplate()
+		if err != nil {
+			return []error{err}
+		}
+	}
+
+	lists := map[string][]BlockDevice{
+		"ami_block_device_mappings":    b.AMIMappings,
+		"launch_block_device_mappings": b.LaunchMappings,
+	}
+
+	var errs []error
+	for outer, bds := range lists {
+		for i, bd := range bds {
+			templates := map[string]*string{
+				"device_name":  &bd.DeviceName,
+				"snapshot_id":  &bd.SnapshotId,
+				"virtual_name": &bd.VirtualName,
+				"volume_type":  &bd.VolumeType,
+			}
+
+			errs := make([]error, 0)
+			for n, ptr := range templates {
+				var err error
+				*ptr, err = t.Process(*ptr, nil)
+				if err != nil {
+					errs = append(
+						errs, fmt.Errorf(
+							"Error processing %s[%d].%s: %s",
+							outer, i, n, err))
+				}
+			}
+		}
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return nil
 }
 
 func (b *BlockDevices) BuildAMIDevices() []ec2.BlockDeviceMapping {
