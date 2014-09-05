@@ -37,6 +37,7 @@ func (a *Artifact) Id() string {
 		parts = append(parts, fmt.Sprintf("%s:%s", region, amiId))
 	}
 
+	sort.Strings(parts)
 	return strings.Join(parts, ",")
 }
 
@@ -47,7 +48,7 @@ func (a *Artifact) String() string {
 		amiStrings = append(amiStrings, single)
 	}
 
-	sort.Sort(sort.StringSlice(amiStrings))
+	sort.Strings(amiStrings)
 	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
 }
 
