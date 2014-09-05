@@ -93,6 +93,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		}
 		instanceId = []string{runResp.Instances[0].InstanceId}
 	} else {
+		ui.Message(fmt.Sprintf(
+			"Requesting spot instance '%s' for: %s",
+			s.InstanceType, s.SpotPrice))
+
 		runOpts := &ec2.RequestSpotInstances{
 			SpotPrice:                s.SpotPrice,
 			KeyName:                  keyName,
@@ -113,9 +117,11 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+
 		s.spotRequest = &runSpotResp.SpotRequestResults[0]
+
 		spotRequestId := s.spotRequest.SpotRequestId
-		ui.Say(fmt.Sprintf("Waiting for spot request (%s) to become ready...", spotRequestId))
+		ui.Message(fmt.Sprintf("Waiting for spot request (%s) to become active...", spotRequestId))
 		stateChange := StateChangeConf{
 			Pending:   []string{"open"},
 			Target:    "active",

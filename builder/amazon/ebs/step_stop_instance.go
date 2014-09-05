@@ -19,7 +19,6 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Skip when it is a spot instance
 	if s.SpotPrice != "" {
-		ui.Say(fmt.Sprintf("This is a spot instance, no need to stop for the AMI"))
 		return multistep.ActionContinue
 	}
 
