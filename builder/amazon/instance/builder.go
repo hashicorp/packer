@@ -88,7 +88,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"-e {{.PrivatePath}}/* " +
 			"-d {{.Destination}} " +
 			"-p {{.Prefix}} " +
-			"--batch"
+			"--batch " +
+			"--no-filter"
 	}
 
 	if b.config.X509UploadPath == "" {
