@@ -17,6 +17,7 @@ type RunConfig struct {
 	InstanceType             string            `mapstructure:"instance_type"`
 	RunTags                  map[string]string `mapstructure:"run_tags"`
 	SourceAmi                string            `mapstructure:"source_ami"`
+	SpotPrice                string            `mapstructure:"spot_price"`
 	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
 	SSHUsername              string            `mapstructure:"ssh_username"`
 	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
@@ -46,6 +47,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	templates := map[string]*string{
 		"iam_instance_profile":    &c.IamInstanceProfile,
 		"instance_type":           &c.InstanceType,
+		"spot_price":              &c.SpotPrice,
 		"ssh_timeout":             &c.RawSSHTimeout,
 		"ssh_username":            &c.SSHUsername,
 		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
