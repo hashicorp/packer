@@ -16,6 +16,8 @@ FEATURES:
   * core: Plugins are automatically discovered if they're named properly.
       Packer will look in the PWD and the directory with `packer` for
       binaries named `packer-TYPE-NAME`.
+  * builder/amazon: Spot instances can now be used to build EBS backed and
+      instance store images. [GH-1139]
   * builder/docker: Images can now be committed instead of exported. [GH-1198]
   * builder/virtualbox-ovf: New `import_flags` setting can be used to add
       new command line flags to `VBoxManage import` to allow things such
