@@ -45,7 +45,7 @@ type DriverMock struct {
 	IpAddressError  error
 }
 
-func (d *DriverMock) Import(name, srcPath, dstPath string) error {
+func (d *DriverMock) Import(name, srcPath, dstPath string, reassignMac bool) error {
 	d.ImportCalled = true
 	d.ImportName = name
 	d.ImportSrcPath = srcPath
