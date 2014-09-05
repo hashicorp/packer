@@ -21,6 +21,17 @@ type MockDriver struct {
 	ImportId     string
 	ImportErr    error
 
+	LoginCalled   bool
+	LoginEmail    string
+	LoginUsername string
+	LoginPassword string
+	LoginRepo     string
+	LoginErr      error
+
+	LogoutCalled bool
+	LogoutRepo   string
+	LogoutErr    error
+
 	PushCalled bool
 	PushName   string
 	PushErr    error
@@ -85,6 +96,21 @@ func (d *MockDriver) Import(path, repo string) (string, error) {
 	d.ImportPath = path
 	d.ImportRepo = repo
 	return d.ImportId, d.ImportErr
+}
+
+func (d *MockDriver) Login(r, e, u, p string) error {
+	d.LoginCalled = true
+	d.LoginRepo = r
+	d.LoginEmail = e
+	d.LoginUsername = u
+	d.LoginPassword = p
+	return d.LoginErr
+}
+
+func (d *MockDriver) Logout(r string) error {
+	d.LogoutCalled = true
+	d.LogoutRepo = r
+	return d.LogoutErr
 }
 
 func (d *MockDriver) Pull(image string) error {
