@@ -109,6 +109,21 @@ each category, the available options are alphabetized and described.
   machine being built. When this value is set to true, the machine will
   start without a console.
 
+* `http_directory` (string) - Path to a directory to serve using an HTTP
+  server. The files in this directory will be available over HTTP that will
+  be requestable from the virtual machine. This is useful for hosting
+  kickstart files and so on. By default this is "", which means no HTTP
+  server will be started. The address and port of the HTTP server will be
+  available as variables in `boot_command`. This is covered in more detail
+  below.
+
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
+  maximum port to use for the HTTP server started to serve the `http_directory`.
+  Because Packer often runs in parallel, Packer will choose a randomly available
+  port in this range to run the HTTP server. If you want to force the HTTP
+  server to be on one port, make this minimum and maximum port the same.
+  By default the values are 8000 and 9000, respectively.
+
 * `import_flags` (array of strings) - Additional flags to pass to
     `VBoxManage import`. This can be used to add additional command-line flags
     such as `--eula-accept` to accept a EULA in the OVF.

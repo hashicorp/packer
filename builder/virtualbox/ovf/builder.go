@@ -61,6 +61,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
+		&vboxcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		&vboxcommon.StepDownloadGuestAdditions{
 			GuestAdditionsMode:   b.config.GuestAdditionsMode,
 			GuestAdditionsURL:    b.config.GuestAdditionsURL,
