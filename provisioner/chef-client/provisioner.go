@@ -20,6 +20,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	ChefEnvironment      string `mapstructure:"chef_environment"`
 	ConfigTemplate       string `mapstructure:"config_template"`
 	ExecuteCommand       string `mapstructure:"execute_command"`
 	InstallCommand       string `mapstructure:"install_command"`
@@ -47,6 +48,7 @@ type ConfigTemplate struct {
 	ServerUrl            string
 	ValidationKeyPath    string
 	ValidationClientName string
+	ChefEnvironment      string
 }
 
 type ExecuteTemplate struct {
@@ -75,6 +77,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
+		"chef_environment":       &p.config.ChefEnvironment,
 		"config_template":        &p.config.ConfigTemplate,
 		"node_name":              &p.config.NodeName,
 		"staging_dir":            &p.config.StagingDir,
@@ -206,7 +209,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	configPath, err := p.createConfig(
-		ui, comm, nodeName, serverUrl, remoteValidationKeyPath, p.config.ValidationClientName)
+		ui, comm, nodeName, serverUrl, remoteValidationKeyPath, p.config.ValidationClientName, p.config.ChefEnvironment)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -260,7 +263,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, remoteKeyPath string, validationClientName string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, remoteKeyPath string, validationClientName string, chefEnvironment string) (string, error) {
 	ui.Message("Creating configuration file 'client.rb'")
 
 	// Read the template
@@ -285,6 +288,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 		ServerUrl:            serverUrl,
 		ValidationKeyPath:    remoteKeyPath,
 		ValidationClientName: validationClientName,
+		ChefEnvironment:      chefEnvironment,
 	})
 	if err != nil {
 		return "", err
@@ -551,5 +555,8 @@ validation_key "{{.ValidationKeyPath}}"
 {{end}}
 {{if ne .NodeName ""}}
 node_name "{{.NodeName}}"
+{{end}}
+{{if ne .ChefEnvironment ""}}
+environment "{{.ChefEnvironment}}"
 {{end}}
 `
