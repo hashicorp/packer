@@ -22,6 +22,12 @@ func (d *Fusion6Driver) Clone(dst, src string) error {
 		"clone", src, dst,
 		"full")
 	if _, _, err := runAndLog(cmd); err != nil {
+		if strings.Contains(err.Error(), "parameters was invalid") {
+			return fmt.Errorf(
+				"Clone is not supported with your version of Fusion. Packer " +
+				"only works with Fusion 6 Professional. Please verify your version.")
+		}
+
 		return err
 	}
 
