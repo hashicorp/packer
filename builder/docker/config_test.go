@@ -46,13 +46,19 @@ func TestConfigPrepare_exportPath(t *testing.T) {
 
 	// No export path
 	delete(raw, "export_path")
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
+	c, warns, errs := NewConfig(raw)
+	testConfigOk(t, warns, errs)
+	if c.Export {
+		t.Fatal("should not export")
+	}
 
 	// Good export path
 	raw["export_path"] = "good"
-	_, warns, errs = NewConfig(raw)
+	c, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
+	if !c.Export {
+		t.Fatal("should export")
+	}
 }
 
 func TestConfigPrepare_image(t *testing.T) {

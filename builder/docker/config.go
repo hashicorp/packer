@@ -10,6 +10,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	ExportPath string `mapstructure:"export_path"`
+	Export     bool
 	Image      string
 	Pull       bool
 	RunCommand []string `mapstructure:"run_command"`
@@ -71,10 +72,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.ExportPath == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("export_path must be specified"))
-	}
+	c.Export = c.ExportPath != ""
 
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(errs,
