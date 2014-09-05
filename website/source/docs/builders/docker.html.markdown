@@ -9,7 +9,7 @@ Type: `docker`
 
 The Docker builder builds [Docker](http://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within
-this container, then exports the container for re-use.
+this container, then exports the container for reuse or commits the image.
 
 Packer builds Docker containers _without_ the use of
 [Dockerfiles](http://docs.docker.io/en/latest/use/builder/).
@@ -26,7 +26,7 @@ If you want to use Packer to build Docker containers on another platform,
 use [Vagrant](http://www.vagrantup.com) to start a Linux environment, then
 run Packer within that environment.
 
-## Basic Example
+## Basic Example: Export
 
 Below is a fully functioning example. It doesn't do anything useful, since
 no provisioners are defined, but it will effectively repackage an image.
@@ -39,6 +39,21 @@ no provisioners are defined, but it will effectively repackage an image.
 }
 </pre>
 
+## Basic Example: Commit
+
+Below is another example, the same as above but instead of exporting the
+running container, this one commits the container to an image. The image
+can then be more easily tagged, pushed, etc.
+
+<pre class="prettyprint">
+{
+  "type": "docker",
+  "image": "ubuntu",
+  "commit": true
+}
+</pre>
+
+
 ## Configuration Reference
 
 Configuration options are organized below into two categories: required and
@@ -47,8 +62,11 @@ described.
 
 ### Required:
 
+* `commit` (boolean) - If true, the container will be committed to an
+  image rather than exported. This cannot be set if `export_path` is set.
+
 * `export_path` (string) - The path where the final container will be exported
-  as a tar file.
+  as a tar file. This cannot be set if `commit` is set to true.
 
 * `image` (string) - The base image for the Docker container that will
   be started. This image will be pulled from the Docker registry if it
@@ -65,12 +83,16 @@ described.
   `["run", "-d", "-i", "-t", "-v", "{{.Volumes}}", "{{.Image}}", "/bin/bash"]`.
   As you can see, you have a couple template variables to customize, as well.
 
-## Using the Artifact
+## Using the Artifact: Export
 
 Once the tar artifact has been generated, you will likely want to import, tag,
 and push it to a container repository. Packer can do this for you automatically
 with the [docker-import](/docs/post-processors/docker-import.html) and
 [docker-push](/docs/post-processors/docker-push.html) post-processors.
+
+**Note:** This section is covering how to use an artifact that has been
+_exported_. More specifically, if you set `export_path` in your configuration.
+If you set `commit`, see the next section.
 
 The example below shows a full configuration that would import and push
 the created image:
@@ -97,6 +119,27 @@ import the image using the process below:
 
 You can then add additional tags and push the image as usual with `docker tag`
 and `docker push`, respectively.
+
+## Using the Artifact: Committed
+
+If you committed your container to an image, you probably want to tag,
+save, push, etc. Packer can do this automatically for you. An example is
+shown below which tags and pushes the image:
+
+<pre class="prettyprint">
+{
+    "post-processors": [
+		[
+			{
+				"type": "docker-tag",
+				"repository": "mitchellh/packer",
+				"tag": "0.7"
+			},
+			"docker-push"
+		]
+	]
+}
+</pre>
 
 ## Dockerfiles
 
