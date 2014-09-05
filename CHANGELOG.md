@@ -2,9 +2,13 @@
 
 FEATURES:
 
+  * **New Post-Processor: `docker-save`** - Save an image. This is similar to
+      export, but preserves the image hierarchy.
+  * **New Post-Processor: `docker-tag`** - Tag a created image.
   * core: Plugins are automatically discovered if they're named properly.
       Packer will look in the PWD and the directory with `packer` for
       binaries named `packer-TYPE-NAME`.
+  * builder/docker: Images can now be committed instead of exported. [GH-1198]
   * builder/vmware: VMware Player 6 is now supported. [GH-1168]
 
 IMPROVEMENTS:
