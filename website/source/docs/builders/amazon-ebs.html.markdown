@@ -138,6 +138,11 @@ each category, the available configuration keys are alphabetized.
 * `temporary_key_pair_name` (string) - The name of the temporary keypair
   to generate. By default, Packer generates a name with a UUID.
 
+* `token` (string) - The access token to use. This is different from
+  the access key and secret key. If you're not sure what this is, then you
+  probably don't need it. This will also be read from the `AWS_SECURITY_TOKEN`
+  environmental variable.
+
 * `user_data` (string) - User data to apply when launching the instance.
   Note that you need to be careful about escaping characters due to the
   templates being JSON. It is often more convenient to use `user_data_file`,
