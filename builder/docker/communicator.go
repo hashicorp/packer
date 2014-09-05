@@ -3,8 +3,6 @@ package docker
 import (
 	"bytes"
 	"fmt"
-	"github.com/ActiveState/tail"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +13,9 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/ActiveState/tail"
+	"github.com/mitchellh/packer/packer"
 )
 
 type Communicator struct {
