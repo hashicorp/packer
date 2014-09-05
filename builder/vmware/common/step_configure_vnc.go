@@ -1,33 +1,35 @@
-package iso
+package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
 	"os"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step configures the VM to enable the VNC server.
 //
 // Uses:
-//   config *config
 //   ui     packer.Ui
 //   vmx_path string
 //
 // Produces:
 //   vnc_port uint - The port that VNC is configured to listen on.
-type stepConfigureVNC struct{}
+type StepConfigureVNC struct{
+	VNCPortMin      uint
+	VNCPortMax      uint
+}
 
 type VNCAddressFinder interface {
 	VNCAddress(uint, uint) (string, uint, error)
 }
 
-func (stepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint, error) {
+func (StepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	// Find an open VNC port. Note that this can still fail later on
 	// because we have to release the port at some point. But this does its
 	// best.
@@ -50,9 +52,8 @@ func (stepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint, error) 
 	return "127.0.0.1", vncPort, nil
 }
 
-func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vmwcommon.Driver)
+func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
@@ -78,8 +79,8 @@ func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	} else {
 		vncFinder = s
 	}
-	log.Printf("Looking for available port between %d and %d", config.VNCPortMin, config.VNCPortMax)
-	vncIp, vncPort, err := vncFinder.VNCAddress(config.VNCPortMin, config.VNCPortMax)
+	log.Printf("Looking for available port between %d and %d", s.VNCPortMin, s.VNCPortMax)
+	vncIp, vncPort, err := vncFinder.VNCAddress(s.VNCPortMin, s.VNCPortMax)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -88,11 +89,11 @@ func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 
 	log.Printf("Found available VNC port: %d", vncPort)
 
-	vmxData := vmwcommon.ParseVMX(string(vmxBytes))
+	vmxData := ParseVMX(string(vmxBytes))
 	vmxData["remotedisplay.vnc.enabled"] = "TRUE"
 	vmxData["remotedisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
 
-	if err := vmwcommon.WriteVMX(vmxPath, vmxData); err != nil {
+	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -105,5 +106,5 @@ func (s *stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (stepConfigureVNC) Cleanup(multistep.StateBag) {
+func (StepConfigureVNC) Cleanup(multistep.StateBag) {
 }
