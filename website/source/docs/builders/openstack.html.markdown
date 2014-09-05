@@ -141,7 +141,7 @@ powered by Metacloud.
 <pre class="prettyprint">
 {
   "type": "openstack",
-  "ssh_username": "monkey",
+  "ssh_username": "root",
   "image_name": "ubuntu1404_packer_test_1",
   "source_image": "91d9c168-d1e5-49ca-a775-3bfdbb6c97f1",
   "flavor": "2"
@@ -153,10 +153,10 @@ doesn't appear in the template. That is because I source a standard
 OpenStack script with environment variables set before I run this. This
 script is setting environment variables like:
 
-- OS_AUTH_URL
-- OS_TENANT_ID
-- OS_USERNAME
-- OS_PASSWORD
+* `OS_AUTH_URL`
+* `OS_TENANT_ID`
+* `OS_USERNAME`
+* `OS_PASSWORD`
 
 ## Troubleshooting
 
