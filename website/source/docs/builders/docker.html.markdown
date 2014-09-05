@@ -74,6 +74,18 @@ described.
 
 ### Optional:
 
+* `login` (boolean) - Defaults to false. If true, the builder will
+    login in order to pull the image. The builder only logs in for the
+    duration of the pull. It always logs out afterwards.
+
+* `login_email` (string) - The email to use to authenticate to login.
+
+* `login_username` (string) - The username to use to authenticate to login.
+
+* `login_password` (string) - The password to use to authenticate to login.
+
+* `login_server` (string) - The server address to login to.
+
 * `pull` (boolean) - If true, the configured image will be pulled using
   `docker pull` prior to use. Otherwise, it is assumed the image already
   exists and can be used. This defaults to true if not set.
