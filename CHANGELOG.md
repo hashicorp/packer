@@ -16,6 +16,7 @@ FEATURES:
       binaries named `packer-TYPE-NAME`.
   * builder/docker: Images can now be committed instead of exported. [GH-1198]
   * builder/docker: Can now specify login credentials to pull images.
+  * builder/docker: Support mounting additional volumes. [GH-1430]
   * builder/virtualbox-ovf: New `import_flags` setting can be used to add
       new command line flags to `VBoxManage import` to allow things such
       as EULAs to be accepted. [GH-1383]

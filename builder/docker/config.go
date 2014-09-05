@@ -14,6 +14,7 @@ type Config struct {
 	Image      string
 	Pull       bool
 	RunCommand []string `mapstructure:"run_command"`
+	Volumes    map[string]string
 
 	Login         bool
 	LoginEmail    string `mapstructure:"login_email"`
@@ -41,9 +42,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Defaults
 	if len(c.RunCommand) == 0 {
 		c.RunCommand = []string{
-			"run",
 			"-d", "-i", "-t",
-			"-v", "{{.Volumes}}",
 			"{{.Image}}",
 			"/bin/bash",
 		}
@@ -80,6 +79,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
+	}
+
+	for k, v := range c.Volumes {
+		var err error
+		v, err = c.tpl.Process(v, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing volumes[%s]: %s", k, err))
+		}
+
+		c.Volumes[k] = v
 	}
 
 	if c.Image == "" {
