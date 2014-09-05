@@ -69,6 +69,8 @@ BUG FIXES:
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
   * builder/virtualbox/all: Better error if guest additions URL couldn't be
       detected. [GH-1439]
+  * builder/virtualbox/all: Detect errors even when `VBoxManage` exits
+      with a zero exit code. [GH-1119]
   * builder/virtualbox/iso: Append timestamp to default name for parallel
       builds. [GH-1365]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
