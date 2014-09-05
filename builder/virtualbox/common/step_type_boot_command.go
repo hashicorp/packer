@@ -1,9 +1,8 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
@@ -23,7 +22,6 @@ type bootCommandTemplateData struct {
 // This step "types" the boot command into the VM over VNC.
 //
 // Uses:
-//   config *config
 //   driver Driver
 //   http_port int
 //   ui     packer.Ui
@@ -31,11 +29,14 @@ type bootCommandTemplateData struct {
 //
 // Produces:
 //   <nothing>
-type stepTypeBootCommand struct{}
+type StepTypeBootCommand struct {
+	BootCommand []string
+	VMName      string
+	Tpl         *packer.ConfigTemplate
+}
 
-func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
-	driver := state.Get("driver").(vboxcommon.Driver)
+func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -43,12 +44,12 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	tplData := &bootCommandTemplateData{
 		"10.0.2.2",
 		httpPort,
-		config.VMName,
+		s.VMName,
 	}
 
 	ui.Say("Typing the boot command...")
-	for _, command := range config.BootCommand {
-		command, err := config.tpl.Process(command, tplData)
+	for _, command := range s.BootCommand {
+		command, err := s.Tpl.Process(command, tplData)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)
@@ -90,7 +91,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	return multistep.ActionContinue
 }
 
-func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
+func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func scancodes(message string) []string {
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html

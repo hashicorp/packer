@@ -320,7 +320,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
 		},
-		new(stepTypeBootCommand),
+		&vboxcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			VMName:      b.config.VMName,
+			Tpl:         b.config.tpl,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,
 			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
