@@ -60,5 +60,4 @@ type ContainerConfig struct {
 // This is the template that is used for the RunCommand in the ContainerConfig.
 type startContainerTemplate struct {
 	Image   string
-	Volumes string
 }
