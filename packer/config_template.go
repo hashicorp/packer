@@ -3,12 +3,13 @@ package packer
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/common/uuid"
 	"os"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/mitchellh/packer/common/uuid"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
