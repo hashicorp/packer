@@ -69,14 +69,17 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
-	if s.image == nil || s.image.State == "available" {
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+
+	if !cancelled && !halted {
 		return
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI ...")
+	ui.Say("Deregistering the AMI because cancelation or error...")
 	if resp, err := ec2conn.DeregisterImage(s.image.Id); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
 		return
