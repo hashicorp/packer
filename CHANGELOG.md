@@ -63,6 +63,7 @@ BUG FIXES:
   * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
   * builder/amazon-chroot: Add description that Packer made the snapshot
       with a time. [GH-1388]
+  * builder/amazon-ebs: AMI is deregistered if an error. [GH-1186]
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
       [GH-1424]
   * builder/amazon-instance: Add `--no-filter` to the `ec2-bundle-vol`
