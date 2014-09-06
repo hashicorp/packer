@@ -207,6 +207,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
 			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			IamInstanceProfile:       b.config.IamInstanceProfile,
 			UserData:                 b.config.UserData,

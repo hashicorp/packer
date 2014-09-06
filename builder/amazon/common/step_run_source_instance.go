@@ -2,15 +2,18 @@ package common
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+	"strconv"
+	"time"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"io/ioutil"
 )
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress bool
-	SpotPrice                string
 	AvailabilityZone         string
 	BlockDevices             BlockDevices
 	Debug                    bool
@@ -18,12 +21,15 @@ type StepRunSourceInstance struct {
 	InstanceType             string
 	IamInstanceProfile       string
 	SourceAMI                string
+	SpotPrice                string
+	SpotPriceProduct         string
 	SubnetId                 string
 	Tags                     map[string]string
 	UserData                 string
 	UserDataFile             string
-	spotRequest              *ec2.SpotRequestResult
-	instance                 *ec2.Instance
+
+	instance    *ec2.Instance
+	spotRequest *ec2.SpotRequestResult
 }
 
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -68,8 +74,52 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
-	var instanceId []string
-	if s.SpotPrice == "" {
+	spotPrice := s.SpotPrice
+	if spotPrice == "auto" {
+		ui.Message(fmt.Sprintf(
+			"Finding spot price for %s %s...",
+			s.SpotPriceProduct, s.InstanceType))
+
+		// Detect the spot price
+		startTime := time.Now().Add(-1 * time.Hour)
+		resp, err := ec2conn.DescribeSpotPriceHistory(&ec2.DescribeSpotPriceHistory{
+			InstanceType:       []string{s.InstanceType},
+			ProductDescription: []string{s.SpotPriceProduct},
+			AvailabilityZone:   s.AvailabilityZone,
+			StartTime:          startTime,
+		})
+		if err != nil {
+			err := fmt.Errorf("Error finding spot price: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		var price float64
+		for _, history := range resp.History {
+			log.Printf("[INFO] Candidate spot price: %s", history.SpotPrice)
+			current, err := strconv.ParseFloat(history.SpotPrice, 64)
+			if err != nil {
+				log.Printf("[ERR] Error parsing spot price: %s", err)
+				continue
+			}
+			if price == 0 || current < price {
+				price = current
+			}
+		}
+		if price == 0 {
+			err := fmt.Errorf("No candidate spot prices found!")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		spotPrice = strconv.FormatFloat(price, 'f', -1, 64)
+	}
+
+	var instanceId string
+
+	if spotPrice == "" {
 		runOpts := &ec2.RunInstances{
 			KeyName:                  keyName,
 			ImageId:                  s.SourceAMI,
@@ -91,14 +141,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		instanceId = []string{runResp.Instances[0].InstanceId}
+		instanceId = runResp.Instances[0].InstanceId
 	} else {
 		ui.Message(fmt.Sprintf(
 			"Requesting spot instance '%s' for: %s",
-			s.InstanceType, s.SpotPrice))
+			s.InstanceType, spotPrice))
 
 		runOpts := &ec2.RequestSpotInstances{
-			SpotPrice:                s.SpotPrice,
+			SpotPrice:                spotPrice,
 			KeyName:                  keyName,
 			ImageId:                  s.SourceAMI,
 			InstanceType:             s.InstanceType,
@@ -142,10 +192,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		instanceId = []string{spotResp.SpotRequestResults[0].InstanceId}
+		instanceId = spotResp.SpotRequestResults[0].InstanceId
 	}
 
-	instanceResp, err := ec2conn.Instances(instanceId, nil)
+	instanceResp, err := ec2conn.Instances([]string{instanceId}, nil)
 	if err != nil {
 		err := fmt.Errorf("Error finding source instance (%s): %s", instanceId, err)
 		state.Put("error", err)

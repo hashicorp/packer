@@ -20,6 +20,7 @@ type RunConfig struct {
 	RunTags                  map[string]string `mapstructure:"run_tags"`
 	SourceAmi                string            `mapstructure:"source_ami"`
 	SpotPrice                string            `mapstructure:"spot_price"`
+	SpotPriceAutoProduct     string            `mapstructure:"spot_price_auto_product"`
 	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
 	SSHUsername              string            `mapstructure:"ssh_username"`
 	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
@@ -50,6 +51,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"iam_instance_profile":    &c.IamInstanceProfile,
 		"instance_type":           &c.InstanceType,
 		"spot_price":              &c.SpotPrice,
+		"spot_price_auto_product": &c.SpotPriceAutoProduct,
 		"ssh_timeout":             &c.RawSSHTimeout,
 		"ssh_username":            &c.SSHUsername,
 		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
@@ -95,6 +97,13 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	if c.InstanceType == "" {
 		errs = append(errs, errors.New("An instance_type must be specified"))
+	}
+
+	if c.SpotPrice == "auto" {
+		if c.SpotPriceAutoProduct == "" {
+			errs = append(errs, errors.New(
+				"spot_price_auto_product must be specified when spot_price is auto"))
+		}
 	}
 
 	if c.SSHUsername == "" {
