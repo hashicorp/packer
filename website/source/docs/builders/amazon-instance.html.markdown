@@ -162,8 +162,13 @@ each category, the available configuration keys are alphabetized.
   to create the AMI. It is a type of instances that EC2 starts when the maximum
   price that you specify exceeds the current spot price. Spot price will be
   updated based on available spot instance capacity and current spot Instance
-  requests. It may save you some costs. For example, it takes only "0.001" to
-  launch a spot "m3.medium" instance while "0.07" needed for on-demand.
+  requests. It may save you some costs. You can set this to "auto" for
+  Packer to automatically discover the best spot price.
+
+* `spot_price_auto_product` (string) - Required if `spot_price` is set to
+  "auto". This tells Packer what sort of AMI you're launching to find the best
+   spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
+   `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 * `ssh_port` (integer) - The port that SSH will be available on. This defaults
   to port 22.
