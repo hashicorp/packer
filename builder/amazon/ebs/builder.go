@@ -103,6 +103,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
 			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
