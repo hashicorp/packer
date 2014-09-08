@@ -36,43 +36,31 @@ applications running.
 
 ## Installing Plugins
 
-Plugins are installed by modifying the [core Packer configuration](/docs/other/core-configuration.html). Within
-the core configuration, each component has a key/value mapping of the
-plugin name to the actual plugin binary.
+The easiest way to install a plugin is to name it correctly, then place
+it in the proper directory. To name a plugin correctly, make sure the
+binary is named `packer-TYPE-NAME`. For example, `packer-builder-amazon-ebs`
+for a "builder" type plugin named "amazon-ebs". Valid types for plugins
+are down this page more.
 
-For example, if we're adding a new builder for CustomCloud, the core
-Packer configuration may look like this:
+Once the plugin is named properly, Packer automatically discovers plugins
+in the following directories in the given order. If a conflicting plugin is
+found later, it will take precedence over one found earlier.
 
-<pre class="prettyprint">
-{
-  "builders": {
-    "custom-cloud": "packer-builder-custom-cloud"
-  }
-}
-</pre>
+  1. The directory where `packer` is, or the executable directory.
 
-In this case, the "custom-cloud" type is the type that is actually used for the value
-of the "type" configuration key for the builder definition.
+  2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d` on
+     Windows.
 
-The value, "packer-builder-custom-cloud", is the path to the plugin binary.
-It can be an absolute or relative path. If it is not an absolute path, then
-the binary is searched for on the PATH. In the example above, Packer will
-search for `packer-builder-custom-cloud` on the PATH.
+  3. The current working directory.
 
-After adding the plugin to the core Packer configuration, it is immediately
-available on the next run of Packer. To uninstall a plugin, just remove it
-from the core Packer configuration.
+The valid types for plugins are:
 
-In addition to builders, other types of plugins can be installed. The full
-list is below:
+* `builder` - Plugins responsible for building images for a specific platform.
 
-* `builders` - A key/value pair of builder type to the builder plugin
-  application.
+* `command` - A CLI sub-command for `packer`.
 
-* `commands` - A key/value pair of the command name to the command plugin
-  application. The command name is what is executed on the command line, like
-  `packer COMMAND`.
+* `post-processor` - A post-processor responsible for taking an artifact
+    from a builder and turning it into something else.
 
-* `provisioners` - A key/value pair of the provisioner type to the
-  provisioner plugin application. The provisioner type is the value of the
-  "type" configuration used within templates.
+* `provisioner` - A provisioner to install software on images created by
+    a builder.
