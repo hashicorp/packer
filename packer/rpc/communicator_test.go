@@ -82,7 +82,7 @@ func TestCommunicatorRPC(t *testing.T) {
 		defer uploadW.Close()
 		uploadW.Write([]byte("uploadfoo\n"))
 	}()
-	err = remote.Upload("foo", uploadR)
+	err = remote.Upload("foo", uploadR, nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

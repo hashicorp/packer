@@ -33,7 +33,7 @@ func (s *StepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Uploading Parallels version info (%s)", version))
 	var data bytes.Buffer
 	data.WriteString(version)
-	if err := comm.Upload(s.Path, &data); err != nil {
+	if err := comm.Upload(s.Path, &data, nil); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading Parallels version: %s", err))
 		return multistep.ActionHalt
 	}

@@ -62,7 +62,7 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 
 	ui.Say(fmt.Sprintf("Uploading Parallels Tools for '%s' to path: '%s'",
 		s.ParallelsToolsFlavor, s.ParallelsToolsGuestPath))
-	if err := comm.Upload(s.ParallelsToolsGuestPath, f); err != nil {
+	if err := comm.Upload(s.ParallelsToolsGuestPath, f, nil); err != nil {
 		err := fmt.Errorf("Error uploading Parallels Tools: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
