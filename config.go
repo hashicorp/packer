@@ -23,6 +23,19 @@ type config struct {
 	Provisioners   map[string]string
 }
 
+// ConfigFile returns the default path to the configuration file. On
+// Unix-like systems this is the ".packerconfig" file in the home directory.
+// On Windows, this is the "packer.config" file in the application data
+// directory.
+func ConfigFile() (string, error) {
+	return configFile()
+}
+
+// ConfigDir returns the configuration directory for Packer.
+func ConfigDir() (string, error) {
+	return configDir()
+}
+
 // Decodes configuration in JSON format from the given io.Reader into
 // the config object pointed to.
 func decodeConfig(r io.Reader, c *config) error {
@@ -35,11 +48,6 @@ func decodeConfig(r io.Reader, c *config) error {
 // This looks in the directory of the executable and the CWD, in that
 // order for priority.
 func (c *config) Discover() error {
-	// Look in the cwd.
-	if err := c.discover("."); err != nil {
-		return err
-	}
-
 	// Next, look in the same directory as the executable. Any conflicts
 	// will overwrite those found in our current directory.
 	exePath, err := osext.Executable()
@@ -49,6 +57,21 @@ func (c *config) Discover() error {
 		if err := c.discover(filepath.Dir(exePath)); err != nil {
 			return err
 		}
+	}
+
+	// Look in the plugins directory
+	dir, err := ConfigDir()
+	if err != nil {
+		log.Printf("[ERR] Error loading config directory: %s", err)
+	} else {
+		if err := c.discover(filepath.Join(dir, "plugins")); err != nil {
+			return err
+		}
+	}
+
+	// Look in the cwd.
+	if err := c.discover("."); err != nil {
+		return err
 	}
 
 	return nil
