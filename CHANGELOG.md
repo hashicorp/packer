@@ -17,6 +17,8 @@ FEATURES:
   * core: Plugins are automatically discovered if they're named properly.
       Packer will look in the PWD and the directory with `packer` for
       binaries named `packer-TYPE-NAME`.
+  * core: Plugins placed in `~/.packer.d/plugins` are now automatically
+      discovered.
   * builder/amazon: Spot instances can now be used to build EBS backed and
       instance store images. [GH-1139]
   * builder/docker: Images can now be committed instead of exported. [GH-1198]
