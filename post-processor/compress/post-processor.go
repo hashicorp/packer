@@ -4,10 +4,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"os"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 type Config struct {
