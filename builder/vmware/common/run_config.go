@@ -16,8 +16,8 @@ type RunConfig struct {
 	HTTPPortMin uint   `mapstructure:"http_port_min"`
 	HTTPPortMax uint   `mapstructure:"http_port_max"`
 
-	VNCPortMin      uint     `mapstructure:"vnc_port_min"`
-	VNCPortMax      uint     `mapstructure:"vnc_port_max"`
+	VNCPortMin uint `mapstructure:"vnc_port_min"`
+	VNCPortMax uint `mapstructure:"vnc_port_max"`
 
 	BootWait time.Duration ``
 }

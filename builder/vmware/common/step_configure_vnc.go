@@ -20,9 +20,9 @@ import (
 //
 // Produces:
 //   vnc_port uint - The port that VNC is configured to listen on.
-type StepConfigureVNC struct{
-	VNCPortMin      uint
-	VNCPortMax      uint
+type StepConfigureVNC struct {
+	VNCPortMin uint
+	VNCPortMax uint
 }
 
 type VNCAddressFinder interface {
