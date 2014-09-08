@@ -56,14 +56,14 @@ func TestConfigTemplateProcess_isotime_withFormat(t *testing.T) {
 	if err == nil {
 		t.Fatalf("err: cannot have more than 1 input")
 	}
-	
+
 	result, err := tpl.Process(`{{isotime "20060102"}}`, nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	
-	ti := time.Now().UTC() 
-	val := fmt.Sprintf("%04d%02d%02d", ti.Year(), ti.Month(), ti.Day()) 
+
+	ti := time.Now().UTC()
+	val := fmt.Sprintf("%04d%02d%02d", ti.Year(), ti.Month(), ti.Day())
 
 	if result != val {
 		t.Fatalf("val: %s (formated: %s)", val, result)
