@@ -320,7 +320,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 	}
 	defer f.Close()
 
-	if err = comm.Upload(dst, f); err != nil {
+	if err = comm.Upload(dst, f, nil); err != nil {
 		return fmt.Errorf("Error uploading %s: %s", src, err)
 	}
 	return nil
