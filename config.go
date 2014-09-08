@@ -14,8 +14,10 @@ import (
 )
 
 type config struct {
-	PluginMinPort uint
-	PluginMaxPort uint
+	DisableCheckpoint          bool `json:"disable_checkpoint"`
+	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
+	PluginMinPort              uint
+	PluginMaxPort              uint
 
 	Builders       map[string]string
 	Commands       map[string]string
