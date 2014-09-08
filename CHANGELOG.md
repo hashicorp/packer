@@ -8,6 +8,7 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+  * **New Post-Processor: `compress`** - Gzip compresses artifacts with files.
   * **New Post-Processor: `docker-save`** - Save an image. This is similar to
       export, but preserves the image hierarchy.
   * **New Post-Processor: `docker-tag`** - Tag a created image.

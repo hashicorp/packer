@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const BuilderId = "johnbellone.compress"
+const BuilderId = "packer.post-processor.compress"
 
 type Artifact struct {
 	Path     string
