@@ -69,9 +69,12 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
+	if s.image == nil {
+		return
+	}
+
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-
 	if !cancelled && !halted {
 		return
 	}
