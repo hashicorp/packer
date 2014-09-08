@@ -9,7 +9,14 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
+// runCheckpoint runs a HashiCorp Checkpoint request. You can read about
+// Checkpoint here: https://github.com/hashicorp/go-checkpoint.
 func runCheckpoint(c *config) {
+	// If the user doesn't want checkpoint at all, then return.
+	if c.DisableCheckpoint {
+		return
+	}
+
 	configDir, err := ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Checkpoint setup error: %s", err)
@@ -21,10 +28,15 @@ func runCheckpoint(c *config) {
 		version += fmt.Sprintf(".%s", packer.VersionPrerelease)
 	}
 
+	signaturePath := filepath.Join(configDir, "checkpoint_signature")
+	if c.DisableCheckpointSignature {
+		signaturePath = ""
+	}
+
 	_, err = checkpoint.Check(&checkpoint.CheckParams{
 		Product:       "packer",
 		Version:       version,
-		SignatureFile: filepath.Join(configDir, "checkpoint_signature"),
+		SignatureFile: signaturePath,
 		CacheFile:     filepath.Join(configDir, "checkpoint_cache"),
 	})
 	if err != nil {
