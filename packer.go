@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/hashicorp/go-checkpoint"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"github.com/mitchellh/panicwrap"
@@ -92,8 +93,25 @@ func wrappedMain() int {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
 		return 1
 	}
-
 	log.Printf("Packer config: %+v", config)
+
+	configDir, err := ConfigDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading config dir: \n\n%s\n", err)
+		return 1
+	}
+
+	// Fire off the checkpoint.
+	version := packer.Version
+	if packer.VersionPrerelease != "" {
+		version += fmt.Sprintf(".%s", packer.VersionPrerelease)
+	}
+	go checkpoint.Check(&checkpoint.CheckParams{
+		Product:       "packer",
+		Version:       version,
+		SignatureFile: filepath.Join(configDir, "checkpoint_signature"),
+		CacheFile:     filepath.Join(configDir, "checkpoint_cache"),
+	})
 
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {
