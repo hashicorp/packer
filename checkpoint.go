@@ -14,6 +14,7 @@ import (
 func runCheckpoint(c *config) {
 	// If the user doesn't want checkpoint at all, then return.
 	if c.DisableCheckpoint {
+		log.Printf("[INFO] Checkpoint disabled. Not running.")
 		return
 	}
 
@@ -30,6 +31,7 @@ func runCheckpoint(c *config) {
 
 	signaturePath := filepath.Join(configDir, "checkpoint_signature")
 	if c.DisableCheckpointSignature {
+		log.Printf("[INFO] Checkpoint signature disabled")
 		signaturePath = ""
 	}
 
