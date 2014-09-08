@@ -108,6 +108,7 @@ BUG FIXES:
       Fusion Pro). [GH-787]
   * post-processor/vagrant: Can supply your own metadata.json. [GH-1143]
   * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
+  * provisioner/file: Mode will now be preserved. [GH-1064]
 
 ## 0.6.1 (July 20, 2014)
 
