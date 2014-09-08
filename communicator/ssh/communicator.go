@@ -119,7 +119,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	return
 }
 
-func (c *comm) Upload(path string, input io.Reader) error {
+func (c *comm) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	// The target directory and file for talking the SCP protocol
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
@@ -130,7 +130,7 @@ func (c *comm) Upload(path string, input io.Reader) error {
 	target_dir = filepath.ToSlash(target_dir)
 
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
-		return scpUploadFile(target_file, input, w, stdoutR)
+		return scpUploadFile(target_file, input, w, stdoutR, fi)
 	}
 
 	return c.scpSession("scp -vt "+target_dir, scpFunc)
@@ -156,7 +156,11 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 
 		if src[len(src)-1] != '/' {
 			log.Printf("No trailing slash, creating the source directory name")
-			return scpUploadDirProtocol(filepath.Base(src), w, r, uploadEntries)
+			fi, err := os.Stat(src)
+			if err != nil {
+				return err
+			}
+			return scpUploadDirProtocol(filepath.Base(src), w, r, uploadEntries, fi)
 		} else {
 			// Trailing slash, so only upload the contents
 			return uploadEntries()
@@ -328,7 +332,7 @@ func checkSCPStatus(r *bufio.Reader) error {
 	return nil
 }
 
-func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader) error {
+func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *os.FileInfo) error {
 	// Create a temporary file where we can copy the contents of the src
 	// so that we can determine the length, since SCP is length-prefixed.
 	tf, err := ioutil.TempFile("", "packer-upload")
@@ -338,30 +342,45 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader) erro
 	defer os.Remove(tf.Name())
 	defer tf.Close()
 
-	log.Println("Copying input data into temporary file so we can read the length")
-	if _, err := io.Copy(tf, src); err != nil {
-		return err
-	}
+	var mode os.FileMode
+	var size int64
 
-	// Sync the file so that the contents are definitely on disk, then
-	// read the length of it.
-	if err := tf.Sync(); err != nil {
-		return fmt.Errorf("Error creating temporary file for upload: %s", err)
-	}
+	if fi != nil {
+		mode = (*fi).Mode().Perm()
+		size = (*fi).Size()
+	} else {
+		mode = 0644
 
-	// Seek the file to the beginning so we can re-read all of it
-	if _, err := tf.Seek(0, 0); err != nil {
-		return fmt.Errorf("Error creating temporary file for upload: %s", err)
-	}
+		log.Println("Copying input data into temporary file so we can read the length")
+		if _, err := io.Copy(tf, src); err != nil {
+			return err
+		}
 
-	fi, err := tf.Stat()
-	if err != nil {
-		return fmt.Errorf("Error creating temporary file for upload: %s", err)
+		// Sync the file so that the contents are definitely on disk, then
+		// read the length of it.
+		if err := tf.Sync(); err != nil {
+			return fmt.Errorf("Error creating temporary file for upload: %s", err)
+		}
+
+		// Seek the file to the beginning so we can re-read all of it
+		if _, err := tf.Seek(0, 0); err != nil {
+			return fmt.Errorf("Error creating temporary file for upload: %s", err)
+		}
+
+		tfi, err := tf.Stat()
+		if err != nil {
+			return fmt.Errorf("Error creating temporary file for upload: %s", err)
+		}
+
+		size = tfi.Size()
 	}
 
 	// Start the protocol
 	log.Println("Beginning file upload...")
-	fmt.Fprintln(w, "C0644", fi.Size(), dst)
+
+	perms := fmt.Sprintf("C%04o", mode)
+
+	fmt.Fprintln(w, perms, size, dst)
 	if err := checkSCPStatus(r); err != nil {
 		return err
 	}
@@ -378,9 +397,14 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader) erro
 	return nil
 }
 
-func scpUploadDirProtocol(name string, w io.Writer, r *bufio.Reader, f func() error) error {
+func scpUploadDirProtocol(name string, w io.Writer, r *bufio.Reader, f func() error, fi os.FileInfo) error {
 	log.Printf("SCP: starting directory upload: %s", name)
-	fmt.Fprintln(w, "D0755 0", name)
+
+	mode := fi.Mode().Perm()
+
+	perms := fmt.Sprintf("D%04o 0", mode)
+
+	fmt.Fprintln(w, perms, name)
 	err := checkSCPStatus(r)
 	if err != nil {
 		return err
@@ -430,7 +454,7 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 
 			err = func() error {
 				defer f.Close()
-				return scpUploadFile(fi.Name(), f, w, r)
+				return scpUploadFile(fi.Name(), f, w, r, &fi)
 			}()
 
 			if err != nil {
@@ -454,7 +478,7 @@ func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) e
 			}
 
 			return scpUploadDir(realPath, entries, w, r)
-		})
+		}, fi)
 		if err != nil {
 			return err
 		}

@@ -329,7 +329,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst str
 	}
 	defer f.Close()
 
-	return comm.Upload(dst, f)
+	return comm.Upload(dst, f, nil)
 }
 
 func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecretPath string, environmentsPath string, chefEnvironment string) (string, error) {
@@ -379,7 +379,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 	}
 
 	remotePath := filepath.ToSlash(filepath.Join(p.config.StagingDir, "solo.rb"))
-	if err := comm.Upload(remotePath, bytes.NewReader([]byte(configString))); err != nil {
+	if err := comm.Upload(remotePath, bytes.NewReader([]byte(configString)), nil); err != nil {
 		return "", err
 	}
 
@@ -408,7 +408,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 
 	// Upload the bytes
 	remotePath := filepath.ToSlash(filepath.Join(p.config.StagingDir, "node.json"))
-	if err := comm.Upload(remotePath, bytes.NewReader(jsonBytes)); err != nil {
+	if err := comm.Upload(remotePath, bytes.NewReader(jsonBytes), nil); err != nil {
 		return "", err
 	}
 

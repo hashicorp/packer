@@ -3,6 +3,7 @@ package packer
 import (
 	"bytes"
 	"io"
+	"os"
 	"sync"
 )
 
@@ -68,7 +69,7 @@ func (c *MockCommunicator) Start(rc *RemoteCmd) error {
 	return nil
 }
 
-func (c *MockCommunicator) Upload(path string, r io.Reader) error {
+func (c *MockCommunicator) Upload(path string, r io.Reader, fi *os.FileInfo) error {
 	c.UploadCalled = true
 	c.UploadPath = path
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/rpc"
+	"os"
 )
 
 // An implementation of packer.Communicator where the communicator is actually
@@ -103,7 +104,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 	return
 }
 
-func (c *communicator) Upload(path string, r io.Reader) (err error) {
+func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err error) {
 	// Pipe the reader through to the connection
 	streamId := c.mux.NextId()
 	go serveSingleCopy("uploadData", c.mux, streamId, nil, r)
@@ -233,7 +234,7 @@ func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interfa
 	}
 	defer readerC.Close()
 
-	err = c.c.Upload(args.Path, readerC)
+	err = c.c.Upload(args.Path, readerC, nil)
 	return
 }
 
