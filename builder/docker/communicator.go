@@ -57,7 +57,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	return nil
 }
 
-func (c *Communicator) Upload(dst string, src io.Reader) error {
+func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error {
 	// Create a temporary file to store the upload
 	tempfile, err := ioutil.TempFile(c.HostDir, "upload")
 	if err != nil {
