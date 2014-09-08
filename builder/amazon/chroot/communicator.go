@@ -60,7 +60,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	return nil
 }
 
-func (c *Communicator) Upload(dst string, r io.Reader) error {
+func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
 	tf, err := ioutil.TempFile("", "packer-amazon-chroot")
