@@ -17,7 +17,7 @@ if !ENV["PACKER_DISABLE_DOWNLOAD_FETCH"]
   response = http.request(req)
 
   response.body.split("\n").each do |line|
-    next if line !~ /\/mitchellh\/packer\/(#{Regexp.quote(ENV["PACKER_VERSION"])}.+?)'/
+    next if line !~ /\/mitchellh\/packer\/packer_(#{Regexp.quote(ENV["PACKER_VERSION"])}.+?)'/
     filename = $1.to_s
     os = filename.split("_")[1]
     next if os == "SHA256SUMS"
@@ -84,7 +84,7 @@ helpers do
   end
 
   def download_url(file)
-    "https://dl.bintray.com/mitchellh/packer/#{file}"
+    "https://dl.bintray.com/mitchellh/packer/packer_#{file}"
   end
 
   def latest_version
