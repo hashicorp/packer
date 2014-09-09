@@ -16,12 +16,12 @@ var GitCommit string
 var VersionChecker VersionCheckFunc
 
 // The version of packer.
-const Version = "0.7.0"
+const Version = "0.7.1"
 
 // Any pre-release marker for the version. If this is "" (empty string),
 // then it means that it is a final release. Otherwise, this is the
 // pre-release marker.
-const VersionPrerelease = ""
+const VersionPrerelease = "dev"
 
 // VersionCheckFunc is the callback that is called to check the latest
 // version of Packer.
