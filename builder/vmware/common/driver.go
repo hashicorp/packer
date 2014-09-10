@@ -158,7 +158,7 @@ func normalizeVersion(version string) (string, error) {
 	return fmt.Sprintf("%02d", i), nil
 }
 
-func compareVersions(versionFound string, versionWanted string) error {
+func compareVersions(versionFound string, versionWanted string, product string) error {
 	found, err := normalizeVersion(versionFound)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func compareVersions(versionFound string, versionWanted string) error {
 
 	if found < wanted {
 		return fmt.Errorf(
-			"VMware WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
+			"VMware %s version %s, or greater, is required. Found version: %s", product, versionWanted, versionFound)
 	}
 
 	return nil
