@@ -4,11 +4,10 @@ FEATURES:
 
   * builder/vmware: VMware Fusion Pro 7 is now supported. [GH-1478]
 
-IMPROVEMENTS:
-
 BUG FIXES:
 
-  * build scripts: Windows executable renamed to packer.exe. [GH-1483]
+  * core: SSH will connect slightly faster if it is ready immediately.
+  * scripts: Windows executable renamed to packer.exe. [GH-1483]
 
 ## 0.7.0 (September 8, 2014)
 
