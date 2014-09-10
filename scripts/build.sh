@@ -47,8 +47,10 @@ gox \
 # Make sure "packer-packer" is renamed properly
 for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
     set +e
-    mv ${PLATFORM}/packer-packer ${PLATFORM}/packer 2>/dev/null
-    mv ${PLATFORM}/packer-packer ${PLATFORM}/packer 2>/dev/null
+    # The asterisk allows for the packer directory to be a symlink
+    # (to a directory that must begin with the word 'packer')
+    mv ${PLATFORM}/packer-packer*.exe ${PLATFORM}/packer.exe 2>/dev/null
+    mv ${PLATFORM}/packer-packer* ${PLATFORM}/packer 2>/dev/null
     set -e
 done
 
