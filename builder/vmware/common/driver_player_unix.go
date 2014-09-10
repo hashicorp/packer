@@ -64,5 +64,5 @@ func playerVerifyVersion(version string) error {
 	}
 	log.Printf("Detected VMWare Player version: %s", matches[1])
 
-	return compareVersions(matches[1], version)
+	return compareVersions(matches[1], version, "Player")
 }
