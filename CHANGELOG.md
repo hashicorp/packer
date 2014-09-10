@@ -8,6 +8,7 @@ BUG FIXES:
 
   * core: SSH will connect slightly faster if it is ready immediately.
   * provisioner/file: directory uploads no longer hang. [GH-1484]
+  * provisioner/file: fixed crash on large files. [GH-1473]
   * scripts: Windows executable renamed to packer.exe. [GH-1483]
 
 ## 0.7.0 (September 8, 2014)
