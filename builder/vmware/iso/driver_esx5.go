@@ -27,6 +27,8 @@ type ESX5Driver struct {
 	Username  string
 	Password  string
 	Datastore string
+	CacheDatastore string
+	CacheDirectory string
 
 	comm      packer.Communicator
 	outputDir string
@@ -84,13 +86,7 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
-	cacheRoot, _ := filepath.Abs(".")
-	targetFile, err := filepath.Rel(cacheRoot, localPath)
-	if err != nil {
-		return "", err
-	}
-
-	finalPath := d.datastorePath(targetFile)
+	finalPath := d.cachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
@@ -295,6 +291,10 @@ func (d *ESX5Driver) String() string {
 func (d *ESX5Driver) datastorePath(path string) string {
 	baseDir := filepath.Base(filepath.Dir(path))
 	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
+}
+
+func (d *ESX5Driver) cachePath(path string) string {
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.CacheDatastore, d.CacheDirectory, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) connect() error {
