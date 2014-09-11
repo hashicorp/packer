@@ -37,12 +37,14 @@ mkdir -p bin/
 
 # Build!
 echo "==> Building..."
+set +e
 gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
     -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
     -output "pkg/{{.OS}}_{{.Arch}}/packer-{{.Dir}}" \
     ./...
+set -e
 
 # Make sure "packer-packer" is renamed properly
 for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
