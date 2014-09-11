@@ -71,27 +71,6 @@ for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f); do
     cp ${F} ${MAIN_GOPATH}/bin/
 done
 
-if [ "${TF_DEV}x" = "x" ]; then
-    # Zip and copy to the dist dir
-    echo "==> Packaging..."
-    rm -rf ./pkg/dist
-    mkdir -p ./pkg/dist
-    for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
-        OSARCH=$(basename ${PLATFORM})
-        echo "--> ${OSARCH}"
-
-        pushd $PLATFORM >/dev/null 2>&1
-        zip ../dist/packer_${OSARCH}.zip ./*
-        popd >/dev/null 2>&1
-    done
-
-    # Make the checksums
-    echo "==> Checksumming..."
-    pushd ./pkg/dist >/dev/null 2>&1
-    shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
-    popd >/dev/null 2>&1
-fi
-
 # Done!
 echo
 echo "==> Results:"
