@@ -158,7 +158,7 @@ each category, the available options are alphabetized and described.
 * `machine_type` (string) - Select the emulated machine by name.
   Use "qemu-system-x86_64 -machine help"(Ubuntu),
   "/usr/libexec/qemu-kvm -machine help"(RHEL7) to list available machines.
-  The Qemu default uses "pc-1.0" by default. If you use packer on RHEL7,
+  The Qemu builder uses "pc-1.0" by default. If you use packer on RHEL7,
   specify this value to "pc".
 
 * `net_device` (string) - The driver to use for the network interface. Allowed
