@@ -294,7 +294,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
-		new(parallelscommon.StepRemoveDevices),
 	}
 
 	// Setup the state bag
