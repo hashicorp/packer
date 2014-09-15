@@ -45,7 +45,7 @@ each category, the available configuration keys are alphabetized.
 ### Optional:
 
 * `api_url` (string) - API endpoint, by default use https://api.digitalocean.com
-  ALso it can be specified via environment variable `DIGITALOCEAN_API_URL`, if set.
+  Also it can be specified via environment variable `DIGITALOCEAN_API_URL`, if set.
 
 * `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
   sets the hostname of the machine to this value.
