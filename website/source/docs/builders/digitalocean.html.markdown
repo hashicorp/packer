@@ -36,7 +36,14 @@ each category, the available configuration keys are alphabetized.
   If not specified, Packer will use the environment variable
   `DIGITALOCEAN_CLIENT_ID`, if set.
 
+* `api_token` (string) - The client TOKEN to use to access your account. If it
+  specified, then use v2 api (current), if not then used old (v1) deprecated api.
+  Also it can be specified via environment variable `DIGITALOCEAN_API_TOKEN`, if set.
+
 ### Optional:
+
+* `api_url` (string) - API endpoint, by default use https://api.digitalocean.com
+  ALso it can be specified via environment variable `DIGITALOCEAN_API_URL`, if set.
 
 * `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
   sets the hostname of the machine to this value.
