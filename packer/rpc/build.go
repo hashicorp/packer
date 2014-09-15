@@ -9,14 +9,14 @@ import (
 // over an RPC connection.
 type build struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 }
 
 // BuildServer wraps a packer.Build implementation and makes it exportable
 // as part of a Golang RPC server.
 type BuildServer struct {
 	build packer.Build
-	mux   *MuxConn
+	mux   *muxBroker
 }
 
 type BuildPrepareResponse struct {

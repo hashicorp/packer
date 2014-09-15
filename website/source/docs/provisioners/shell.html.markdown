@@ -33,7 +33,7 @@ Exactly _one_ of the following is required:
   The commands are concatenated by newlines and turned into a single file,
   so they are all executed within the same context. This allows you to
   change directories in one command and use something in the directory in
-  the next and so on. Inline scripts are the easiest way to pull of simple
+  the next and so on. Inline scripts are the easiest way to pull off simple
   tasks within the machine.
 
 * `script` (string) - The path to a script to upload and execute in the machine.

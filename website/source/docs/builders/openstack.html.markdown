@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "OpenStack Builder"
 ---
 
 # OpenStack Builder
@@ -40,11 +41,6 @@ each category, the available configuration keys are alphabetized.
   `SDK_PROVIDER`, if set.
   For Rackspace this should be `rackspace-us` or `rackspace-uk`.
 
-* `region` (string) - The name of the region, such as "DFW", in which
-  to launch the server to create the AMI.
-  If not specified, Packer will use the environment variables
-  `SDK_REGION` or `OS_REGION_NAME` (in that order), if set.
-
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
 
@@ -69,6 +65,9 @@ each category, the available configuration keys are alphabetized.
 * `insecure` (boolean) - Whether or not the connection to OpenStack can be done
   over an insecure connection. By default this is false.
 
+* `networks` (array of strings) - A list of networks by UUID to attach
+  to this instance.
+
 * `openstack_provider` (string)
 <!---
 @todo document me
@@ -89,9 +88,16 @@ each category, the available configuration keys are alphabetized.
 <!---
 @todo document me
 -->
-
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
+
+* `region` (string) - The name of the region, such as "DFW", in which
+  to launch the server to create the AMI.
+  If not specified, Packer will use the environment variables
+  `SDK_REGION` or `OS_REGION_NAME` (in that order), if set.
+  For a `provider` of "rackspace", it is required to specify a region,
+  either using this option or with an environment variable. For other
+  providers, including a private cloud, specifying a region is optional.
 
 * `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
   22.
@@ -109,7 +115,7 @@ each category, the available configuration keys are alphabetized.
 * `use_floating_ip` (boolean) - Whether or not to use a floating IP for
   the instance. Defaults to false.
 
-## Basic Example
+## Basic Example: Rackspace public cloud
 
 Here is a basic example. This is a working example to build a
 Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
@@ -118,8 +124,10 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
 {
   "type": "openstack",
   "username": "",
-  "password": "",
+  "api_key": "",
+  "openstack_provider": "rackspace",
   "provider": "rackspace-us",
+  "openstack_provider":"rackspace",
   "region": "DFW",
   "ssh_username": "root",
   "image_name": "Test image",
@@ -127,6 +135,31 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "flavor": "2"
 }
 </pre>
+
+## Basic Example: Private OpenStack cloud
+
+This example builds an Ubuntu 14.04 image on a private OpenStack cloud,
+powered by Metacloud.
+
+<pre class="prettyprint">
+{
+  "type": "openstack",
+  "ssh_username": "root",
+  "image_name": "ubuntu1404_packer_test_1",
+  "source_image": "91d9c168-d1e5-49ca-a775-3bfdbb6c97f1",
+  "flavor": "2"
+}
+</pre>
+
+In this case, the connection information for connecting to OpenStack
+doesn't appear in the template. That is because I source a standard
+OpenStack script with environment variables set before I run this. This
+script is setting environment variables like:
+
+* `OS_AUTH_URL`
+* `OS_TENANT_ID`
+* `OS_USERNAME`
+* `OS_PASSWORD`
 
 ## Troubleshooting
 

@@ -36,17 +36,30 @@ func TestStepAttachFloppy(t *testing.T) {
 		t.Fatal("should NOT have error")
 	}
 
-	if len(driver.PrlctlCalls) != 1 {
+	if len(driver.PrlctlCalls) != 2 {
 		t.Fatal("not enough calls to prlctl")
 	}
 
 	if driver.PrlctlCalls[0][0] != "set" {
 		t.Fatal("bad call")
 	}
-	if driver.PrlctlCalls[0][2] != "--device-add" {
+	if driver.PrlctlCalls[0][2] != "--device-del" {
 		t.Fatal("bad call")
 	}
-	if driver.PrlctlCalls[0][3] != "fdd" {
+	if driver.PrlctlCalls[0][3] != "fdd0" {
+		t.Fatal("bad call")
+	}
+
+	if driver.PrlctlCalls[1][0] != "set" {
+		t.Fatal("bad call")
+	}
+	if driver.PrlctlCalls[1][2] != "--device-add" {
+		t.Fatal("bad call")
+	}
+	if driver.PrlctlCalls[1][3] != "fdd" {
+		t.Fatal("bad call")
+	}
+	if driver.PrlctlCalls[1][6] != "--connect" {
 		t.Fatal("bad call")
 	}
 }

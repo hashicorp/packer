@@ -16,26 +16,29 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	BucketName        string            `mapstructure:"bucket_name"`
-	ClientSecretsFile string            `mapstructure:"client_secrets_file"`
-	ImageName         string            `mapstructure:"image_name"`
-	ImageDescription  string            `mapstructure:"image_description"`
-	InstanceName      string            `mapstructure:"instance_name"`
-	MachineType       string            `mapstructure:"machine_type"`
-	Metadata          map[string]string `mapstructure:"metadata"`
-	Network           string            `mapstructure:"network"`
-	Passphrase        string            `mapstructure:"passphrase"`
-	PrivateKeyFile    string            `mapstructure:"private_key_file"`
-	ProjectId         string            `mapstructure:"project_id"`
-	SourceImage       string            `mapstructure:"source_image"`
-	SSHUsername       string            `mapstructure:"ssh_username"`
-	SSHPort           uint              `mapstructure:"ssh_port"`
-	RawSSHTimeout     string            `mapstructure:"ssh_timeout"`
-	RawStateTimeout   string            `mapstructure:"state_timeout"`
-	Tags              []string          `mapstructure:"tags"`
-	Zone              string            `mapstructure:"zone"`
+	AccountFile       string `mapstructure:"account_file"`
+	ClientSecretsFile string `mapstructure:"client_secrets_file"`
+	ProjectId         string `mapstructure:"project_id"`
 
-	clientSecrets   *clientSecrets
+	BucketName           string            `mapstructure:"bucket_name"`
+	DiskSizeGb           int64             `mapstructure:"disk_size"`
+	ImageName            string            `mapstructure:"image_name"`
+	ImageDescription     string            `mapstructure:"image_description"`
+	InstanceName         string            `mapstructure:"instance_name"`
+	MachineType          string            `mapstructure:"machine_type"`
+	Metadata             map[string]string `mapstructure:"metadata"`
+	Network              string            `mapstructure:"network"`
+	SourceImage          string            `mapstructure:"source_image"`
+	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
+	SSHUsername          string            `mapstructure:"ssh_username"`
+	SSHPort              uint              `mapstructure:"ssh_port"`
+	RawSSHTimeout        string            `mapstructure:"ssh_timeout"`
+	RawStateTimeout      string            `mapstructure:"state_timeout"`
+	Tags                 []string          `mapstructure:"tags"`
+	Zone                 string            `mapstructure:"zone"`
+
+	account         accountFile
+	clientSecrets   clientSecretsFile
 	instanceName    string
 	privateKeyBytes []byte
 	sshTimeout      time.Duration
@@ -62,6 +65,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Set defaults.
 	if c.Network == "" {
 		c.Network = "default"
+	}
+
+	if c.DiskSizeGb == 0 {
+		c.DiskSizeGb = 10
 	}
 
 	if c.ImageDescription == "" {
@@ -98,21 +105,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Process Templates
 	templates := map[string]*string{
-		"bucket_name":         &c.BucketName,
+		"account_file":        &c.AccountFile,
 		"client_secrets_file": &c.ClientSecretsFile,
-		"image_name":          &c.ImageName,
-		"image_description":   &c.ImageDescription,
-		"instance_name":       &c.InstanceName,
-		"machine_type":        &c.MachineType,
-		"network":             &c.Network,
-		"passphrase":          &c.Passphrase,
-		"private_key_file":    &c.PrivateKeyFile,
-		"project_id":          &c.ProjectId,
-		"source_image":        &c.SourceImage,
-		"ssh_username":        &c.SSHUsername,
-		"ssh_timeout":         &c.RawSSHTimeout,
-		"state_timeout":       &c.RawStateTimeout,
-		"zone":                &c.Zone,
+
+		"bucket_name":             &c.BucketName,
+		"image_name":              &c.ImageName,
+		"image_description":       &c.ImageDescription,
+		"instance_name":           &c.InstanceName,
+		"machine_type":            &c.MachineType,
+		"network":                 &c.Network,
+		"project_id":              &c.ProjectId,
+		"source_image":            &c.SourceImage,
+		"source_image_project_id": &c.SourceImageProjectId,
+		"ssh_username":            &c.SSHUsername,
+		"ssh_timeout":             &c.RawSSHTimeout,
+		"state_timeout":           &c.RawStateTimeout,
+		"zone":                    &c.Zone,
 	}
 
 	for n, ptr := range templates {
@@ -130,14 +138,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("a bucket_name must be specified"))
 	}
 
+	if c.AccountFile == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("an account_file must be specified"))
+	}
+
 	if c.ClientSecretsFile == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a client_secrets_file must be specified"))
-	}
-
-	if c.PrivateKeyFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a private_key_file must be specified"))
 	}
 
 	if c.ProjectId == "" {
@@ -170,22 +178,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	c.stateTimeout = stateTimeout
 
-	if c.ClientSecretsFile != "" {
-		// Load the client secrets file.
-		cs, err := loadClientSecrets(c.ClientSecretsFile)
-		if err != nil {
+	if c.AccountFile != "" {
+		if err := loadJSON(&c.account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing client secrets file: %s", err))
+				errs, fmt.Errorf("Failed parsing account file: %s", err))
 		}
-		c.clientSecrets = cs
 	}
 
-	if c.PrivateKeyFile != "" {
-		// Load the private key.
-		c.privateKeyBytes, err = processPrivateKeyFile(c.PrivateKeyFile, c.Passphrase)
-		if err != nil {
+	if c.ClientSecretsFile != "" {
+		if err := loadJSON(&c.clientSecrets, c.ClientSecretsFile); err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed loading private key file: %s", err))
+				errs, fmt.Errorf("Failed parsing client secrets file: %s", err))
 		}
 	}
 

@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -64,7 +63,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
@@ -84,7 +83,7 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
 }
 
-func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
 	cacheRoot, _ := filepath.Abs(".")
 	targetFile, err := filepath.Rel(cacheRoot, localPath)
 	if err != nil {
@@ -92,8 +91,14 @@ func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
 	}
 
 	finalPath := d.datastorePath(targetFile)
-	if err := d.mkdir(filepath.Dir(finalPath)); err != nil {
+	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
+	}
+
+	log.Printf("Verifying checksum of %s", finalPath)
+	if d.verifyChecksum(checksumType, checksum, finalPath) {
+		log.Println("Initial checksum matched, no upload needed.")
+		return finalPath, nil
 	}
 
 	if err := d.upload(finalPath, localPath); err != nil {
@@ -142,29 +147,57 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
+func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
-	// TODO(dougm) use esxcli network ip connection list
+
+	//Process ports ESXi is listening on to determine which are available
+	r, err := d.esxcli("network", "ip", "connection", "list")
+	if err != nil {
+		err = fmt.Errorf("Could not retrieve network information for ESXi: %v", err)
+		return "", 0, err
+	}
+
+	listenPorts := make(map[string]bool)
+	for record, err := r.read(); record != nil && err == nil; record, err = r.read() {
+		if record["State"] == "LISTEN" {
+			splitAddress := strings.Split(record["LocalAddress"], ":")
+			log.Print(splitAddress)
+			port := splitAddress[len(splitAddress)-1]
+			log.Printf("ESXi Listening on: %s", port)
+			listenPorts[port] = true
+		}
+	}
+
 	for port := portMin; port <= portMax; port++ {
+		if _, ok := listenPorts[fmt.Sprintf("%d", port)]; ok {
+			log.Printf("Port %d in use", port)
+			continue
+		}
 		address := fmt.Sprintf("%s:%d", d.Host, port)
 		log.Printf("Trying address: %s...", address)
 		l, err := net.DialTimeout("tcp", address, 1*time.Second)
 
-		if err == nil {
-			log.Printf("%s in use", address)
-			l.Close()
-		} else if e, ok := err.(*net.OpError); ok {
-			if e.Err == syscall.ECONNREFUSED {
-				// then port should be available for listening
-				vncPort = port
-				break
-			} else if e.Timeout() {
-				log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+		if err != nil {
+			if e, ok := err.(*net.OpError); ok {
+				if e.Timeout() {
+					log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+				} else {
+					vncPort = port
+					break
+				}
 			}
+		} else {
+			defer l.Close()
 		}
 	}
 
-	return d.Host, vncPort
+	if vncPort == 0 {
+		err := fmt.Errorf("Unable to find available VNC port between %d and %d",
+			portMin, portMax)
+		return d.Host, vncPort, err
+	}
+
+	return d.Host, vncPort, nil
 }
 
 func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
@@ -233,7 +266,7 @@ func (d *ESX5Driver) ListFiles() ([]string, error) {
 			continue
 		}
 
-		files = append(files, filepath.Join(d.outputDir, string(line)))
+		files = append(files, filepath.ToSlash(filepath.Join(d.outputDir, string(line))))
 	}
 
 	return files, nil
@@ -261,7 +294,7 @@ func (d *ESX5Driver) String() string {
 
 func (d *ESX5Driver) datastorePath(path string) string {
 	baseDir := filepath.Base(filepath.Dir(path))
-	return filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path))
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) connect() error {
@@ -338,7 +371,7 @@ func (d *ESX5Driver) upload(dst, src string) error {
 		return err
 	}
 	defer f.Close()
-	return d.comm.Upload(dst, f)
+	return d.comm.Upload(dst, f, nil)
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,9 +15,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
 
-const DIGITALOCEAN_API_URL = "https://api.digitalocean.com"
+	"github.com/mitchellh/mapstructure"
+)
 
 type Image struct {
 	Id           uint
@@ -55,23 +54,23 @@ type DigitalOceanClient struct {
 	// The http client for communicating
 	client *http.Client
 
-	// The base URL of the API
-	BaseURL string
-
 	// Credentials
 	ClientID string
 	APIKey   string
+
+	// The base URL of the API
+	APIURL string
 }
 
 // Creates a new client for communicating with DO
-func (d DigitalOceanClient) New(client string, key string) *DigitalOceanClient {
+func (d DigitalOceanClient) New(client string, key string, url string) *DigitalOceanClient {
 	c := &DigitalOceanClient{
 		client: &http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
 			},
 		},
-		BaseURL:  DIGITALOCEAN_API_URL,
+		APIURL:   url,
 		ClientID: client,
 		APIKey:   key,
 	}
@@ -229,7 +228,7 @@ func NewRequest(d DigitalOceanClient, path string, params url.Values) (map[strin
 	params.Set("client_id", d.ClientID)
 	params.Set("api_key", d.APIKey)
 
-	url := fmt.Sprintf("%s/%s?%s", DIGITALOCEAN_API_URL, path, params.Encode())
+	url := fmt.Sprintf("%s/%s?%s", d.APIURL, path, params.Encode())
 
 	// Do some basic scrubbing so sensitive information doesn't appear in logs
 	scrubbedUrl := strings.Replace(url, d.ClientID, "CLIENT_ID", -1)

@@ -31,6 +31,11 @@ type DriverMock struct {
 	SendKeyScanCodesCalls [][]string
 	SendKeyScanCodesErrs  []error
 
+	ToolsIsoPathCalled bool
+	ToolsIsoPathFlavor string
+	ToolsIsoPathResult string
+	ToolsIsoPathErr    error
+
 	MacName   string
 	MacReturn string
 	MacError  error
@@ -40,7 +45,7 @@ type DriverMock struct {
 	IpAddressError  error
 }
 
-func (d *DriverMock) Import(name, srcPath, dstPath string) error {
+func (d *DriverMock) Import(name, srcPath, dstPath string, reassignMac bool) error {
 	d.ImportCalled = true
 	d.ImportName = name
 	d.ImportSrcPath = srcPath
@@ -97,4 +102,10 @@ func (d *DriverMock) Mac(name string) (string, error) {
 func (d *DriverMock) IpAddress(mac string) (string, error) {
 	d.IpAddressMac = mac
 	return d.IpAddressReturn, d.IpAddressError
+}
+
+func (d *DriverMock) ToolsIsoPath(flavor string) (string, error) {
+	d.ToolsIsoPathCalled = true
+	d.ToolsIsoPathFlavor = flavor
+	return d.ToolsIsoPathResult, d.ToolsIsoPathErr
 }

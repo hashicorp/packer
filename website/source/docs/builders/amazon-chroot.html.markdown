@@ -121,6 +121,9 @@ each category, the available configuration keys are alphabetized.
   of the source AMI will be attached. This defaults to "" (empty string),
   which forces Packer to find an open device automatically.
 
+* `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
+  HVM-compatible AMIs.
+
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
   `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration

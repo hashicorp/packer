@@ -1,5 +1,6 @@
 ---
 layout: "docs"
+page_title: "DigitalOcean Builder"
 ---
 
 # DigitalOcean Builder
@@ -43,7 +44,7 @@ each category, the available configuration keys are alphabetized.
 * `image` (string) - The name (or slug) of the base image to use. This is the
   image that will be used to launch a new droplet and provision it. This
   defaults to 'ubuntu-12-04-x64' which is the slug for "Ubuntu 12.04.4 x64".
-  See https://developers.digitalocean.com/images/ for the accepted image names/slugs.
+  See https://developers.digitalocean.com/#list-all-images for details on how to get a list of the the accepted image names/slugs.
 
 * `image_id` (integer) - The ID of the base image to use. This is the image that
   will be used to launch a new droplet and provision it.

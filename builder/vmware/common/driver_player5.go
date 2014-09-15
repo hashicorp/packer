@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,8 +12,8 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-// Player5LinuxDriver is a driver that can run VMware Player 5 on Linux.
-type Player5LinuxDriver struct {
+// Player5Driver is a driver that can run VMware Player 5 on Linux.
+type Player5Driver struct {
 	AppPath          string
 	VdiskManagerPath string
 	QemuImgPath      string
@@ -22,11 +23,11 @@ type Player5LinuxDriver struct {
 	SSHConfig *SSHConfig
 }
 
-func (d *Player5LinuxDriver) Clone(dst, src string) error {
-	return errors.New("Cloning is not supported with Player 5. Please use Player 6+.")
+func (d *Player5Driver) Clone(dst, src string) error {
+	return errors.New("Cloning is not supported with VMWare Player version 5. Please use VMWare Player version 6, or greater.")
 }
 
-func (d *Player5LinuxDriver) CompactDisk(diskPath string) error {
+func (d *Player5Driver) CompactDisk(diskPath string) error {
 	if d.QemuImgPath != "" {
 		return d.qemuCompactDisk(diskPath)
 	}
@@ -44,7 +45,7 @@ func (d *Player5LinuxDriver) CompactDisk(diskPath string) error {
 	return nil
 }
 
-func (d *Player5LinuxDriver) qemuCompactDisk(diskPath string) error {
+func (d *Player5Driver) qemuCompactDisk(diskPath string) error {
 	cmd := exec.Command(d.QemuImgPath, "convert", "-f", "vmdk", "-O", "vmdk", "-o", "compat6", diskPath, diskPath+".new")
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
@@ -61,7 +62,7 @@ func (d *Player5LinuxDriver) qemuCompactDisk(diskPath string) error {
 	return nil
 }
 
-func (d *Player5LinuxDriver) CreateDisk(output string, size string, type_id string) error {
+func (d *Player5Driver) CreateDisk(output string, size string, type_id string) error {
 	var cmd *exec.Cmd
 	if d.QemuImgPath != "" {
 		cmd = exec.Command(d.QemuImgPath, "create", "-f", "vmdk", "-o", "compat6", output, size)
@@ -75,7 +76,7 @@ func (d *Player5LinuxDriver) CreateDisk(output string, size string, type_id stri
 	return nil
 }
 
-func (d *Player5LinuxDriver) IsRunning(vmxPath string) (bool, error) {
+func (d *Player5Driver) IsRunning(vmxPath string) (bool, error) {
 	vmxPath, err := filepath.Abs(vmxPath)
 	if err != nil {
 		return false, err
@@ -96,11 +97,11 @@ func (d *Player5LinuxDriver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Player5LinuxDriver) SSHAddress(state multistep.StateBag) (string, error) {
+func (d *Player5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 	return SSHAddressFunc(d.SSHConfig)(state)
 }
 
-func (d *Player5LinuxDriver) Start(vmxPath string, headless bool) error {
+func (d *Player5Driver) Start(vmxPath string, headless bool) error {
 	guiArgument := "gui"
 	if headless {
 		guiArgument = "nogui"
@@ -114,7 +115,7 @@ func (d *Player5LinuxDriver) Start(vmxPath string, headless bool) error {
 	return nil
 }
 
-func (d *Player5LinuxDriver) Stop(vmxPath string) error {
+func (d *Player5Driver) Stop(vmxPath string) error {
 	cmd := exec.Command(d.VmrunPath, "-T", "player", "stop", vmxPath, "hard")
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
@@ -123,74 +124,78 @@ func (d *Player5LinuxDriver) Stop(vmxPath string) error {
 	return nil
 }
 
-func (d *Player5LinuxDriver) SuppressMessages(vmxPath string) error {
+func (d *Player5Driver) SuppressMessages(vmxPath string) error {
 	return nil
 }
 
-func (d *Player5LinuxDriver) Verify() error {
-	if err := d.findApp(); err != nil {
-		return fmt.Errorf("VMware Player application ('vmplayer') not found in path.")
-	}
-
-	if err := d.findVmrun(); err != nil {
-		return fmt.Errorf("Critical application 'vmrun' not found in path.")
-	}
-
-	if err := d.findVdiskManager(); err != nil {
-		if err := d.findQemuImg(); err != nil {
-			return fmt.Errorf(
-				"Neither 'vmware-vdiskmanager', nor 'qemu-img' found in path.\n" +
-					"One of these is required to configure disks for VMware Player.")
+func (d *Player5Driver) Verify() error {
+	var err error
+	if d.AppPath == "" {
+		if d.AppPath, err = playerFindVMware(); err != nil {
+			return err
 		}
 	}
 
-	return nil
-}
-
-func (d *Player5LinuxDriver) findApp() error {
-	path, err := exec.LookPath("vmplayer")
-	if err != nil {
-		return err
+	if d.VmrunPath == "" {
+		if d.VmrunPath, err = playerFindVmrun(); err != nil {
+			return err
+		}
 	}
-	d.AppPath = path
-	return nil
-}
 
-func (d *Player5LinuxDriver) findVdiskManager() error {
-	path, err := exec.LookPath("vmware-vdiskmanager")
-	if err != nil {
-		return err
+	if d.VdiskManagerPath == "" {
+		d.VdiskManagerPath, err = playerFindVdiskManager()
 	}
-	d.VdiskManagerPath = path
-	return nil
-}
 
-func (d *Player5LinuxDriver) findQemuImg() error {
-	path, err := exec.LookPath("qemu-img")
-	if err != nil {
-		return err
+	if d.VdiskManagerPath == "" && d.QemuImgPath == "" {
+		d.QemuImgPath, err = playerFindQemuImg()
 	}
-	d.QemuImgPath = path
-	return nil
-}
 
-func (d *Player5LinuxDriver) findVmrun() error {
-	path, err := exec.LookPath("vmrun")
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"Neither 'vmware-vdiskmanager', nor 'qemu-img' found in path.\n" +
+				"One of these is required to configure disks for VMware Player.")
 	}
-	d.VmrunPath = path
+
+	log.Printf("VMware app path: %s", d.AppPath)
+	log.Printf("vmrun path: %s", d.VmrunPath)
+	log.Printf("vdisk-manager path: %s", d.VdiskManagerPath)
+	log.Printf("qemu-img path: %s", d.QemuImgPath)
+
+	if _, err := os.Stat(d.AppPath); err != nil {
+		return fmt.Errorf("VMware application not found: %s", d.AppPath)
+	}
+
+	if _, err := os.Stat(d.VmrunPath); err != nil {
+		return fmt.Errorf("'vmrun' application not found: %s", d.VmrunPath)
+	}
+
+	if d.VdiskManagerPath != "" {
+		_, err = os.Stat(d.VdiskManagerPath)
+	} else {
+		_, err = os.Stat(d.QemuImgPath)
+	}
+
+	if err != nil {
+		return fmt.Errorf(
+			"Neither 'vmware-vdiskmanager', nor 'qemu-img' found in path.\n" +
+				"One of these is required to configure disks for VMware Player.")
+	}
+
 	return nil
 }
 
-func (d *Player5LinuxDriver) ToolsIsoPath(flavor string) string {
-	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
+func (d *Player5Driver) ToolsIsoPath(flavor string) string {
+	return playerToolsIsoPath(flavor)
 }
 
-func (d *Player5LinuxDriver) ToolsInstall() error {
+func (d *Player5Driver) ToolsInstall() error {
 	return nil
 }
 
-func (d *Player5LinuxDriver) DhcpLeasesPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
+func (d *Player5Driver) DhcpLeasesPath(device string) string {
+	return playerDhcpLeasesPath(device)
+}
+
+func (d *Player5Driver) VmnetnatConfPath() string {
+	return playerVmnetnatConfPath()
 }

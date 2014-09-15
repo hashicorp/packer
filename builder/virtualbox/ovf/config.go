@@ -24,13 +24,15 @@ type Config struct {
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	SourcePath           string `mapstructure:"source_path"`
-	GuestAdditionsMode   string `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath   string `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string `mapstructure:"guest_additions_url"`
-	GuestAdditionsSHA256 string `mapstructure:"guest_additions_sha256"`
-	VMName               string `mapstructure:"vm_name"`
-	ImportOpts           string `mapstructure:"import_opts"`
+	BootCommand          []string `mapstructure:"boot_command"`
+	SourcePath           string   `mapstructure:"source_path"`
+	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
+	VMName               string   `mapstructure:"vm_name"`
+	ImportOpts           string   `mapstructure:"import_opts"`
+	ImportFlags          []string `mapstructure:"import_flags"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -90,12 +92,34 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
+	sliceTemplates := map[string][]string{
+		"import_flags": c.ImportFlags,
+	}
+
+	for n, slice := range sliceTemplates {
+		for i, elem := range slice {
+			var err error
+			slice[i], err = c.tpl.Process(elem, nil)
+			if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
+			}
+		}
+	}
+
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	} else {
 		if _, err := os.Stat(c.SourcePath); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("source_path is invalid: %s", err))
+		}
+	}
+
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
 	}
 
@@ -145,6 +169,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, warnings, errs
+	}
+
+	// TODO: Write a packer fix and just remove import_opts
+	if c.ImportOpts != "" {
+		c.ImportFlags = append(c.ImportFlags, "--options", c.ImportOpts)
 	}
 
 	return c, warnings, nil

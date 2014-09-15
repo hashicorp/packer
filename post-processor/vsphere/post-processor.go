@@ -3,12 +3,12 @@ package vsphere
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"log"
+	"net/url"
 	"os/exec"
 	"strings"
-	"net/url"
 )
 
 var builtins = map[string]string{
