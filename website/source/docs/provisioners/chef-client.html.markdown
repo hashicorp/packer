@@ -23,15 +23,21 @@ remote machine and run Chef client.
 <pre class="prettyprint">
 {
   "type": "chef-client",
-  "server_url": "http://mychefserver.com:4000/"
+  "server_url": "https://mychefserver.com/"
 }
 </pre>
+
+Note: to properly clean up the Chef node and client, you must have
+`knife` on your path and properly configured.
 
 ## Configuration Reference
 
 The reference of available configuration options is listed below. No
 configuration is actually required, but `node_name` is recommended
 since it will allow the provisioner to clean up the node/client.
+
+* `chef_environment` (string) - The name of the chef_environment sent to the
+  Chef server. By default this is empty and will not use an environment.
 
 * `config_template` (string) - Path to a template that will be used for
   the Chef configuration file. By default Packer only sets configuration
@@ -76,7 +82,7 @@ since it will allow the provisioner to clean up the node/client.
   on the machine using the Opscode omnibus installers.
 
 * `staging_directory` (string) - This is the directory where all the configuration
-  of Chef by Packer will be placed. By default this is "/tmp/packer-chef-solo".
+  of Chef by Packer will be placed. By default this is "/tmp/packer-chef-client".
   This directory doesn't need to exist but must have proper permissions so that
   the SSH user that Packer uses is able to create directories and write into
   this folder. If the permissions are not correct, use a shell provisioner

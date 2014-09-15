@@ -20,6 +20,7 @@ type RunConfig struct {
 	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
 	FloatingIp        string   `mapstructure:"floating_ip"`
 	SecurityGroups    []string `mapstructure:"security_groups"`
+	Networks          []string `mapstructure:"networks"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -67,7 +68,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"flavlor":      &c.Flavor,
+		"flavor":       &c.Flavor,
 		"ssh_timeout":  &c.RawSSHTimeout,
 		"ssh_username": &c.SSHUsername,
 		"source_image": &c.SourceImage,

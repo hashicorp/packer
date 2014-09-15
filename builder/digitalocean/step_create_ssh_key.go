@@ -1,16 +1,17 @@
 package digitalocean
 
 import (
-	"code.google.com/p/gosshold/ssh"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"log"
+
+	"code.google.com/p/gosshold/ssh"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 type stepCreateSSHKey struct {
@@ -78,7 +79,7 @@ func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
 	err := client.DestroyKey(s.keyId)
 
 	curlstr := fmt.Sprintf("curl '%v/ssh_keys/%v/destroy?client_id=%v&api_key=%v'",
-		DIGITALOCEAN_API_URL, s.keyId, c.ClientID, c.APIKey)
+		c.APIURL, s.keyId, c.ClientID, c.APIKey)
 
 	if err != nil {
 		log.Printf("Error cleaning up ssh key: %v", err.Error())

@@ -2,6 +2,7 @@ package digitalocean
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -53,7 +54,7 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 	err := client.DestroyDroplet(s.dropletId)
 	if err != nil {
 		curlstr := fmt.Sprintf("curl '%v/droplets/%v/destroy?client_id=%v&api_key=%v'",
-			DIGITALOCEAN_API_URL, s.dropletId, c.ClientID, c.APIKey)
+			c.APIURL, s.dropletId, c.ClientID, c.APIKey)
 
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %v", curlstr))

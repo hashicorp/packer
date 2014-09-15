@@ -3,13 +3,15 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/going/toolkit/xmlpath"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/going/toolkit/xmlpath"
 )
 
 type Parallels9Driver struct {
@@ -17,7 +19,7 @@ type Parallels9Driver struct {
 	PrlctlPath string
 }
 
-func (d *Parallels9Driver) Import(name, srcPath, dstDir string) error {
+func (d *Parallels9Driver) Import(name, srcPath, dstDir string, reassignMac bool) error {
 
 	err := d.Prlctl("register", srcPath, "--preserve-uuid")
 	if err != nil {
@@ -29,9 +31,12 @@ func (d *Parallels9Driver) Import(name, srcPath, dstDir string) error {
 		return err
 	}
 
-	srcMac, err := getFirtsMacAddress(srcPath)
-	if err != nil {
-		return err
+	srcMac := "auto"
+	if !reassignMac {
+		srcMac, err = getFirtsMacAddress(srcPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = d.Prlctl("clone", srcId, "--name", name, "--dst", dstDir)
@@ -70,6 +75,25 @@ func getConfigValueFromXpath(path, xpath string) (string, error) {
 	return value, nil
 }
 
+// Finds an application bundle by identifier (for "darwin" platform only)
+func getAppPath(bundleId string) (string, error) {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command("mdfind", "kMDItemCFBundleIdentifier ==", bundleId)
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	pathOutput := strings.TrimSpace(stdout.String())
+	if pathOutput == "" {
+		return "", fmt.Errorf(
+			"Could not detect Parallels Desktop! Make sure it is properly installed.")
+	}
+
+	return pathOutput, nil
+}
+
 func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 	var stdout bytes.Buffer
 
@@ -78,6 +102,8 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 	if err := cmd.Run(); err != nil {
 		return false, err
 	}
+
+	log.Printf("Checking VM state: %s\n", strings.TrimSpace(stdout.String()))
 
 	for _, line := range strings.Split(stdout.String(), "\n") {
 		if line == "running" {
@@ -88,6 +114,9 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 			return true, nil
 		}
 		if line == "paused" {
+			return true, nil
+		}
+		if line == "stopping" {
 			return true, nil
 		}
 	}
@@ -129,32 +158,24 @@ func (d *Parallels9Driver) Prlctl(args ...string) error {
 }
 
 func (d *Parallels9Driver) Verify() error {
-	version, _ := d.Version()
-	if !strings.HasPrefix(version, "9.") {
-		return fmt.Errorf("The packer-parallels builder plugin only supports Parallels Desktop v. 9. You have: %s!\n", version)
-	}
 	return nil
 }
 
 func (d *Parallels9Driver) Version() (string, error) {
-	var stdout bytes.Buffer
-
-	cmd := exec.Command(d.PrlctlPath, "--version")
-	cmd.Stdout = &stdout
-	if err := cmd.Run(); err != nil {
+	out, err := exec.Command(d.PrlctlPath, "--version").Output()
+	if err != nil {
 		return "", err
 	}
 
-	versionOutput := strings.TrimSpace(stdout.String())
-	re := regexp.MustCompile("prlctl version ([0-9\\.]+)")
-	verMatch := re.FindAllStringSubmatch(versionOutput, 1)
-
-	if len(verMatch) != 1 {
-		return "", fmt.Errorf("prlctl version not found!\n")
+	versionRe := regexp.MustCompile(`prlctl version (\d+\.\d+.\d+)`)
+	matches := versionRe.FindStringSubmatch(string(out))
+	if matches == nil {
+		return "", fmt.Errorf(
+			"Could not find Parallels Desktop version in output:\n%s", string(out))
 	}
 
-	version := verMatch[0][1]
-	log.Printf("prlctl version: %s\n", version)
+	version := matches[1]
+	log.Printf("Parallels Desktop version: %s", version)
 	return version, nil
 }
 
@@ -238,4 +259,15 @@ func (d *Parallels9Driver) IpAddress(mac string) (string, error) {
 	ip := ipMatch[0][1]
 	log.Printf("Found IP lease: %s for MAC address %s\n", ip, mac)
 	return ip, nil
+}
+
+func (d *Parallels9Driver) ToolsIsoPath(k string) (string, error) {
+	appPath, err := getAppPath("com.parallels.desktop.console")
+	if err != nil {
+		return "", err
+	}
+
+	toolsPath := filepath.Join(appPath, "Contents", "Resources", "Tools", "prl-tools-"+k+".iso")
+	log.Printf("Parallels Tools path: '%s'", toolsPath)
+	return toolsPath, nil
 }

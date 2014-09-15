@@ -9,10 +9,18 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	Commit     bool
 	ExportPath string `mapstructure:"export_path"`
 	Image      string
 	Pull       bool
 	RunCommand []string `mapstructure:"run_command"`
+	Volumes    map[string]string
+
+	Login         bool
+	LoginEmail    string `mapstructure:"login_email"`
+	LoginUsername string `mapstructure:"login_username"`
+	LoginPassword string `mapstructure:"login_password"`
+	LoginServer   string `mapstructure:"login_server"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -34,9 +42,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Defaults
 	if len(c.RunCommand) == 0 {
 		c.RunCommand = []string{
-			"run",
 			"-d", "-i", "-t",
-			"-v", "{{.Volumes}}",
 			"{{.Image}}",
 			"/bin/bash",
 		}
@@ -58,8 +64,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs := common.CheckUnusedConfig(md)
 
 	templates := map[string]*string{
-		"export_path": &c.ExportPath,
-		"image":       &c.Image,
+		"export_path":    &c.ExportPath,
+		"image":          &c.Image,
+		"login_email":    &c.LoginEmail,
+		"login_username": &c.LoginUsername,
+		"login_password": &c.LoginPassword,
+		"login_server":   &c.LoginServer,
 	}
 
 	for n, ptr := range templates {
@@ -71,14 +81,25 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.ExportPath == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("export_path must be specified"))
+	for k, v := range c.Volumes {
+		var err error
+		v, err = c.tpl.Process(v, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing volumes[%s]: %s", k, err))
+		}
+
+		c.Volumes[k] = v
 	}
 
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("image must be specified"))
+	}
+
+	if c.ExportPath != "" && c.Commit {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("both commit and export_path cannot be set"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

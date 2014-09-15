@@ -17,7 +17,7 @@ to a registry.
 ## Configuration
 
 The configuration for this post-processor is extremely simple. At least
-a repository is required. The tag is optional.
+a repository is required.
 
 * `repository` (string) - The repository of the imported image.
 

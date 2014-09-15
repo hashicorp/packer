@@ -12,6 +12,8 @@ artifacts that are created will be outputted at the end of the build.
 
 ## Options
 
+* `-color=false` - Disables colorized output. Enabled by default.
+
 * `-debug` - Disables parallelization and enables debug mode. Debug mode flags
   the builders that they should output debugging information. The exact behavior
   of debug mode is left to the builder. In general, builders usually will stop

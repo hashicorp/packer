@@ -70,10 +70,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
+		&vmwcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&vmwcommon.StepConfigureVNC{
+			VNCPortMin: b.config.VNCPortMin,
+			VNCPortMax: b.config.VNCPortMax,
+		},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
+		},
+		&vmwcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			VMName:      b.config.VMName,
+			Tpl:         b.config.tpl,
 		},
 		vmwcommon.NewConnectStep(
 			b.config.RunConfig.CommunicatorType,
@@ -92,10 +106,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 		},
 		&vmwcommon.StepCleanFiles{},
-		&vmwcommon.StepCleanVMX{},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
+			SkipFloppy: true,
 		},
+		&vmwcommon.StepCleanVMX{},
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
 		},

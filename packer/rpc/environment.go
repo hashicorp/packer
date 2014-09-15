@@ -10,14 +10,14 @@ import (
 // where the actual environment is executed over an RPC connection.
 type Environment struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 }
 
 // A EnvironmentServer wraps a packer.Environment and makes it exportable
 // as part of a Golang RPC server.
 type EnvironmentServer struct {
 	env packer.Environment
-	mux *MuxConn
+	mux *muxBroker
 }
 
 type EnvironmentCliArgs struct {

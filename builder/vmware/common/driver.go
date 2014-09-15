@@ -76,18 +76,17 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 			},
 		}
 	case "linux":
-		drivers = []Driver{
-			&Workstation10Driver{
-				Workstation9Driver: Workstation9Driver{},
-			},
-			&Workstation9Driver{},
-			&Player5LinuxDriver{},
-		}
+		fallthrough
 	case "windows":
 		drivers = []Driver{
 			&Workstation10Driver{
 				Workstation9Driver: Workstation9Driver{},
 			},
+			&Workstation9Driver{},
+			&Player6Driver{
+				Player5Driver: Player5Driver{},
+			},
+			&Player5Driver{},
 			&Workstation9Driver{},
 		}
 	default:
@@ -121,7 +120,12 @@ func runAndLog(cmd *exec.Cmd) (string, string, error) {
 	stderrString := strings.TrimSpace(stderr.String())
 
 	if _, ok := err.(*exec.ExitError); ok {
-		err = fmt.Errorf("VMware error: %s", stderrString)
+		message := stderrString
+		if message == "" {
+			message = stdoutString
+		}
+
+		err = fmt.Errorf("VMware error: %s", message)
 	}
 
 	log.Printf("stdout: %s", stdoutString)
@@ -139,13 +143,13 @@ func normalizeVersion(version string) (string, error) {
 	i, err := strconv.Atoi(version)
 	if err != nil {
 		return "", fmt.Errorf(
-			"VMWare version '%s' is not numeric", version)
+			"VMware version '%s' is not numeric", version)
 	}
 
 	return fmt.Sprintf("%02d", i), nil
 }
 
-func compareVersions(versionFound string, versionWanted string) error {
+func compareVersions(versionFound string, versionWanted string, product string) error {
 	found, err := normalizeVersion(versionFound)
 	if err != nil {
 		return err
@@ -158,7 +162,7 @@ func compareVersions(versionFound string, versionWanted string) error {
 
 	if found < wanted {
 		return fmt.Errorf(
-			"VMWare WS version %s, or greater, is required. Found version: %s", versionWanted, versionFound)
+			"VMware %s version %s, or greater, is required. Found version: %s", product, versionWanted, versionFound)
 	}
 
 	return nil

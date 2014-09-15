@@ -3,6 +3,7 @@ package packer
 import (
 	"github.com/mitchellh/iochan"
 	"io"
+	"os"
 	"strings"
 	"sync"
 )
@@ -60,7 +61,7 @@ type Communicator interface {
 	// Upload uploads a file to the machine to the given path with the
 	// contents coming from the given reader. This method will block until
 	// it completes.
-	Upload(string, io.Reader) error
+	Upload(string, io.Reader, *os.FileInfo) error
 
 	// UploadDir uploads the contents of a directory recursively to
 	// the remote path. It also takes an optional slice of paths to

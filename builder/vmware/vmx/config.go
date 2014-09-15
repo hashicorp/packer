@@ -21,6 +21,7 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 	vmwcommon.WinRMConfig    `mapstructure:",squash"`
 
+	BootCommand    []string `mapstructure:"boot_command"`
 	FloppyFiles    []string `mapstructure:"floppy_files"`
 	RemoteType     string   `mapstructure:"remote_type"`
 	SkipCompaction bool     `mapstructure:"skip_compaction"`
@@ -75,6 +76,23 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, file := range c.FloppyFiles {
+		var err error
+		c.FloppyFiles[i], err = c.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing floppy_files[%d]: %s",
+					i, err))
+		}
+	}
+
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
 	}
 
