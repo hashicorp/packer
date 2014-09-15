@@ -105,7 +105,7 @@ func TestUpload(t *testing.T) {
 	}
 	defer f.Close()
 
-	err = comm.Upload("c:\\photo1.jpg", f)
+	err = comm.Upload("c:\\photo1.jpg", f, nil)
 	if err != nil {
 		t.Fatalf("error uploading file: %s", err)
 	}
