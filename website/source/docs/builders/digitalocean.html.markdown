@@ -22,7 +22,7 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-### Required:
+### Required v1 api:
 
 * `api_key` (string) - The API key to use to access your account. You can
   retrieve this on the "API" page visible after logging into your account
@@ -35,6 +35,8 @@ each category, the available configuration keys are alphabetized.
   DigitalOcean.
   If not specified, Packer will use the environment variable
   `DIGITALOCEAN_CLIENT_ID`, if set.
+
+### Required v2 api:
 
 * `api_token` (string) - The client TOKEN to use to access your account. If it
   specified, then use v2 api (current), if not then used old (v1) deprecated api.
