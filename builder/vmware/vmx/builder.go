@@ -62,15 +62,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
-		&vmwcommon.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-		},
-		&vmwcommon.StepConfigureVNC{
-			VNCPortMin: b.config.VNCPortMin,
-			VNCPortMax: b.config.VNCPortMax,
-		},
 		&StepCloneVMX{
 			OutputDir: b.config.OutputDir,
 			Path:      b.config.SourcePath,
@@ -80,6 +71,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
+		&vmwcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&vmwcommon.StepConfigureVNC{
+			VNCPortMin: b.config.VNCPortMin,
+			VNCPortMax: b.config.VNCPortMax,
+		},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
