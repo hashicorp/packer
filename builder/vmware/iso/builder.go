@@ -335,7 +335,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:      b.config.VMName,
 			Tpl:         b.config.tpl,
 		},
-		&stepTypeBootCommand{},
 		vmwcommon.NewConnectStep(
 			b.config.RunConfig.CommunicatorType,
 			driver,

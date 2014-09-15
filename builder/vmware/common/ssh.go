@@ -2,13 +2,10 @@ package common
 
 import (
 	gossh "code.google.com/p/go.crypto/ssh"
-	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
-	"io/ioutil"
-	"os"
 )
 
 func SSHAddressFunc(config *SSHConfig, driver Driver) func(multistep.StateBag) (string, error) {

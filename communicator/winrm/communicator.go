@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -66,9 +67,9 @@ func (c *comm) StartElevated(cmd *packer.RemoteCmd) (err error) {
 		return err
 	}
 
-  // The command gets put into an interpolated string in the PS script,
-  // so we need to escape any embedded quotes.
-  escapedCmd := strings.Replace(cmd.Command, "\"", "`\"", -1)
+	// The command gets put into an interpolated string in the PS script,
+	// so we need to escape any embedded quotes.
+	escapedCmd := strings.Replace(cmd.Command, "\"", "`\"", -1)
 
 	elevatedScript, err := tpl.Process(ElevatedShellTemplate, &elevatedShellOptions{
 		Command:  escapedCmd,
@@ -80,7 +81,7 @@ func (c *comm) StartElevated(cmd *packer.RemoteCmd) (err error) {
 	}
 
 	// Upload the script which creates and manages the scheduled task
-	err = c.Upload("$env:TEMP/packer-elevated-shell.ps1", strings.NewReader(elevatedScript))
+	err = c.Upload("$env:TEMP/packer-elevated-shell.ps1", strings.NewReader(elevatedScript), nil)
 	if err != nil {
 		return err
 	}
@@ -143,7 +144,7 @@ func (c *comm) runCommand(commandText string, cmd *packer.RemoteCmd) (err error)
 	return
 }
 
-func (c *comm) Upload(dst string, input io.Reader) error {
+func (c *comm) Upload(dst string, input io.Reader, ignored *os.FileInfo) error {
 	fm := &fileManager{
 		comm: c,
 	}
