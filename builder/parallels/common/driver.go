@@ -15,6 +15,9 @@ import (
 // versions out of the builder steps, so sometimes the methods are
 // extremely specific.
 type Driver interface {
+	// Adds new CD/DVD drive to the VM and returns name of this device
+	DeviceAddCdRom(string, string) (string, error)
+
 	// Import a VM
 	Import(string, string, string, bool) error
 
