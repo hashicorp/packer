@@ -151,6 +151,8 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
 
 	//Process ports ESXi is listening on to determine which are available
+	//This process does best effort to detect ports that are unavailable,
+	//it will ignore any ports listened to by only localhost
 	r, err := d.esxcli("network", "ip", "connection", "list")
 	if err != nil {
 		err = fmt.Errorf("Could not retrieve network information for ESXi: %v", err)
@@ -161,10 +163,11 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	for record, err := r.read(); record != nil && err == nil; record, err = r.read() {
 		if record["State"] == "LISTEN" {
 			splitAddress := strings.Split(record["LocalAddress"], ":")
-			log.Print(splitAddress)
-			port := splitAddress[len(splitAddress)-1]
-			log.Printf("ESXi Listening on: %s", port)
-			listenPorts[port] = true
+			if splitAddress[0] != "127.0.0.1" {
+				port := splitAddress[len(splitAddress)-1]
+				log.Printf("ESXi listening on address %s, port %s unavailable for VNC", record["LocalAddress"], port)
+				listenPorts[port] = true
+			}
 		}
 	}
 
