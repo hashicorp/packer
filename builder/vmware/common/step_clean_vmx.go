@@ -32,17 +32,15 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if _, ok := state.GetOk("floppy_path"); ok {
-		// Delete the floppy0 entries so the floppy is no longer mounted
-		ui.Message("Unmounting floppy from VMX...")
-		for k, _ := range vmxData {
-			if strings.HasPrefix(k, "floppy0.") {
-				log.Printf("Deleting key: %s", k)
-				delete(vmxData, k)
-			}
+	// Delete the floppy0 entries so the floppy is no longer mounted
+	ui.Message("Unmounting floppy from VMX...")
+	for k, _ := range vmxData {
+		if strings.HasPrefix(k, "floppy0.") {
+			log.Printf("Deleting key: %s", k)
+			delete(vmxData, k)
 		}
-		vmxData["floppy0.present"] = "FALSE"
 	}
+	vmxData["floppy0.present"] = "FALSE"
 
 	if isoPathRaw, ok := state.GetOk("iso_path"); ok {
 		isoPath := isoPathRaw.(string)
