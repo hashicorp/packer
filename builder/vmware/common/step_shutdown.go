@@ -137,10 +137,14 @@ LockWaitLoop:
 		}
 	}
 
-	if runtime.GOOS == "windows" && !s.Testing {
+	if runtime.GOOS != "darwin" && !s.Testing {
 		// Windows takes a while to yield control of the files when the
-		// process is exiting. We just sleep here. In the future, it'd be
-		// nice to find a better solution to this.
+		// process is exiting. Ubuntu will yield control of the files but
+		// VMWare may overwrite the VMX cleanup steps that run after this,
+		// so we wait to ensure VMWare has exited and flushed the VMX.
+
+		// We just sleep here. In the future, it'd be nice to find a better
+		// solution to this.
 		time.Sleep(5 * time.Second)
 	}
 
