@@ -39,7 +39,6 @@ func TestStepCleanVMX_floppyPath(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	state.Put("floppy_path", "foo")
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
