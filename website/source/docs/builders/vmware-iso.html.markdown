@@ -342,6 +342,11 @@ ISO and various files locally, and uploads these to the remote machine.
 Packer currently uses SSH to communicate to the ESXi machine rather than
 the vSphere API. At some point, the vSphere API may be used.
 
+Packer also requires VNC to issue boot commands during a build,
+which may be disabled on some remote VMware Hypervisors.  Please consult
+the appropriate documentation on how to update VMware Hypervisor's firewall
+to allow these connections.
+
 To use a remote VMware vSphere Hypervisor to build your virtual machine,
 fill in the required `remote_*` configurations:
 
