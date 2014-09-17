@@ -5,6 +5,12 @@ import "sync"
 type DriverMock struct {
 	sync.Mutex
 
+	DeviceAddCdRomCalled bool
+	DeviceAddCdRomName   string
+	DeviceAddCdRomImage  string
+	DeviceAddCdRomResult string
+	DeviceAddCdRomErr    error
+
 	ImportCalled  bool
 	ImportName    string
 	ImportSrcPath string
@@ -43,6 +49,13 @@ type DriverMock struct {
 	IpAddressMac    string
 	IpAddressReturn string
 	IpAddressError  error
+}
+
+func (d *DriverMock) DeviceAddCdRom(name string, image string) (string, error) {
+	d.DeviceAddCdRomCalled = true
+	d.DeviceAddCdRomName = name
+	d.DeviceAddCdRomImage = image
+	return d.DeviceAddCdRomResult, d.DeviceAddCdRomErr
 }
 
 func (d *DriverMock) Import(name, srcPath, dstPath string, reassignMac bool) error {
