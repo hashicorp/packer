@@ -1,3 +1,9 @@
+## 0.7.2 (unreleased)
+
+BUG FIXES:
+
+  * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
+
 ## 0.7.1 (September 10, 2014)
 
 FEATURES:
