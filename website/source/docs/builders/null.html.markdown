@@ -27,8 +27,8 @@ no provisioners are defined, but it will connect to the specified host via ssh.
 
 ## Configuration Reference
 
-Configuration options are organized into two categories: `required` and
-`optional`. Within each category, the available options are alphabetized and
+Configuration options are organized into two categories: required and
+optional. Within each category, the available options are alphabetized and
 described.
 
 ### Required:
