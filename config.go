@@ -72,14 +72,14 @@ func (c *config) Discover() error {
 	}
 
 	// Look in the cwd.
-  cwd,err := filepath.Abs(".")
-  if err != nil {
-    log.Printf("[ERR] Error getting path for working directory")
-  } else {
-	  if err := c.discover(cwd); err != nil {
-		  return err
-	  }
-  }
+	cwd, err := filepath.Abs(".")
+	if err != nil {
+		log.Printf("[ERR] Error getting path for working directory")
+	} else {
+		if err := c.discover(cwd); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
