@@ -38,7 +38,7 @@ type Driver interface {
 	// Version reads the version of Parallels that is installed.
 	Version() (string, error)
 
-	// Send scancodes to the vm using the prltype tool.
+	// Send scancodes to the vm using the prltype python script.
 	SendKeyScanCodes(string, ...string) error
 
 	// Finds the MAC address of the NIC nic0
