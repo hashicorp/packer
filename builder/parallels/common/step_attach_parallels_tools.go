@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // This step attaches the Parallels Tools as an inserted CD onto
@@ -17,8 +18,8 @@ import (
 //   vmName string
 //
 // Produces:
+//   attachedToolsIso boolean
 type StepAttachParallelsTools struct {
-	cdromDevice        string
 	ParallelsToolsMode string
 }
 
@@ -37,25 +38,27 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	parallelsToolsPath := state.Get("parallels_tools_path").(string)
 
 	// Attach the guest additions to the computer
-	ui.Say("Attaching Parallels Tools ISO to the new CD/DVD drive...")
-
-	cdrom, err := driver.DeviceAddCdRom(vmName, parallelsToolsPath)
-
-	if err != nil {
-		err := fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)
+	ui.Say("Attaching Parallels Tools ISO onto IDE controller...")
+	command := []string{
+		"set", vmName,
+		"--device-add", "cdrom",
+		"--image", parallelsToolsPath,
+	}
+	if err := driver.Prlctl(command...); err != nil {
+		err := fmt.Errorf("Error attaching Parallels Tools: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	// Track the device name so that we can can delete later
-	s.cdromDevice = cdrom
+	// Set some state so we know to remove it later
+	state.Put("attachedToolsIso", true)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
-	if s.cdromDevice == "" {
+	if _, ok := state.GetOk("attachedToolsIso"); !ok {
 		return
 	}
 
@@ -63,14 +66,15 @@ func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	log.Println("Detaching Parallels Tools ISO...")
+	if _, ok := state.GetOk("attachedIso"); ok {
+		log.Println("Detaching Parallels Tools ISO...")
+		command := []string{
+			"set", vmName,
+			"--device-del", "cdrom1",
+		}
 
-	command := []string{
-		"set", vmName,
-		"--device-del", s.cdromDevice,
-	}
-
-	if err := driver.Prlctl(command...); err != nil {
-		ui.Error(fmt.Sprintf("Error detaching Parallels Tools ISO: %s", err))
+		if err := driver.Prlctl(command...); err != nil {
+			ui.Error(fmt.Sprintf("Error detaching Parallels Tools ISO: %s", err))
+		}
 	}
 }
