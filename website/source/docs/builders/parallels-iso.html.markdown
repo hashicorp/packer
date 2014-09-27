@@ -212,11 +212,11 @@ As documented above, the `boot_command` is an array of strings. The
 strings are all typed in sequence. It is an array only to improve readability
 within the template.
 
-The boot command is "typed" character for character using the `prltype` (part
-of prl-utils, see [Parallels Builder](/docs/builders/parallels.html))
-command connected to the machine, simulating a human actually typing the
-keyboard. There are a set of special keys available. If these are in your
-boot command, they will be replaced by the proper key:
+The boot command is "typed" character for character (using the Parallels
+Virtualization SDK, see [Parallels Builder](/docs/builders/parallels.html))
+simulating a human actually typing the keyboard. There are a set of special
+keys available. If these are in your boot command, they will be replaced by
+the proper key:
 
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
