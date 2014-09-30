@@ -51,7 +51,7 @@ type DriverMock struct {
 	IpAddressError  error
 }
 
-func (d *DriverMock) AttachIso(name string, image string) (string, error) {
+func (d *DriverMock) DeviceAddCdRom(name string, image string) (string, error) {
 	d.DeviceAddCdRomCalled = true
 	d.DeviceAddCdRomName = name
 	d.DeviceAddCdRomImage = image

@@ -94,10 +94,11 @@ func getAppPath(bundleId string) (string, error) {
 	return pathOutput, nil
 }
 
-func (d *Parallels9Driver) AttachIso(name string, image string) (string, error) {
+func (d *Parallels9Driver) DeviceAddCdRom(name string, image string) (string, error) {
 	command := []string{
-		"list", name,
-		"--info",
+		"set", name,
+		"--device-add", "cdrom",
+		"--image", image,
 	}
 
 	out, err := exec.Command(d.PrlctlPath, command...).Output()
@@ -105,7 +106,7 @@ func (d *Parallels9Driver) AttachIso(name string, image string) (string, error) 
 		return "", err
 	}
 
-	deviceRe := regexp.MustCompile(`\s+cdrom0.*real='(.*)'`)
+	deviceRe := regexp.MustCompile(`\s+(cdrom\d+)\s+`)
 	matches := deviceRe.FindStringSubmatch(string(out))
 	if matches == nil {
 		return "", fmt.Errorf(
@@ -113,17 +114,6 @@ func (d *Parallels9Driver) AttachIso(name string, image string) (string, error) 
 	}
 
 	device_name := matches[1]
-
-	command = []string{
-		"set", name,
-		"--device-set", "cdrom0",
-		"--image", image,
-	}
-
-	err = d.Prlctl(command...)
-	if err != nil {
-		return "", err
-	}
 	return device_name, nil
 }
 

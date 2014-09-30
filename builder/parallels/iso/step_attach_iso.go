@@ -2,11 +2,10 @@ package iso
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
 // This step attaches the ISO to the virtual machine.
@@ -29,8 +28,8 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 	vmName := state.Get("vmName").(string)
 
 	// Attach the disk to the controller
-	ui.Say("Attaching ISO to the CD/DVD drive...")
-	cdrom, err := driver.AttachIso(vmName, isoPath)
+	ui.Say("Attaching ISO to the new CD/DVD drive...")
+	cdrom, err := driver.DeviceAddCdRom(vmName, isoPath)
 
 	if err != nil {
 		err := fmt.Errorf("Error attaching ISO: %s", err)
@@ -39,7 +38,20 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	// Track the device name so that we can can restore it later
+	ui.Say("Setting the boot order...")
+	command := []string{
+		"set", vmName,
+		"--device-bootorder", fmt.Sprintf("hdd0 %s cdrom0 net0", cdrom),
+	}
+
+	if err := driver.Prlctl(command...); err != nil {
+		err := fmt.Errorf("Error setting the boot order: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Track the device name so that we can can delete later
 	s.cdromDevice = cdrom
 
 	return multistep.ActionContinue
@@ -58,8 +70,7 @@ func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 
 	command := []string{
 		"set", vmName,
-		"--device-set", "cdrom0",
-		"--device", s.cdromDevice,
+		"--device-del", s.cdromDevice,
 	}
 
 	if err := driver.Prlctl(command...); err != nil {
