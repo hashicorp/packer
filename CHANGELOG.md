@@ -3,6 +3,7 @@
 BUG FIXES:
 
   * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
+  * builder/amazon: Extend timeout and allow user override [GH-1533]
 
 ## 0.7.1 (September 10, 2014)
 
