@@ -38,6 +38,7 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	// Set new boot order
 	ui.Say("Setting the boot order...")
 	command := []string{
 		"set", vmName,
@@ -51,6 +52,20 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	// Disable 'cdrom0' device
+	ui.Say("Disabling default CD/DVD drive...")
+	command = []string{
+		"set", vmName,
+		"--device-set", "cdrom0", "--disable",
+	}
+
+	if err := driver.Prlctl(command...); err != nil {
+		err := fmt.Errorf("Error disabling default CD/DVD drive: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	// Track the device name so that we can can delete later
 	s.cdromDevice = cdrom
 
@@ -58,17 +73,28 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
-	if s.cdromDevice == "" {
-		return
-	}
-
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	log.Println("Detaching ISO...")
-
+	// Enable 'cdrom0' device back
+	log.Println("Enabling default CD/DVD drive...")
 	command := []string{
+		"set", vmName,
+		"--device-set", "cdrom0", "--enable",
+	}
+
+	if err := driver.Prlctl(command...); err != nil {
+		ui.Error(fmt.Sprintf("Error enabling default CD/DVD drive: %s", err))
+	}
+
+	// Detach ISO
+	if s.cdromDevice == "" {
+		return
+	}
+
+	log.Println("Detaching ISO...")
+	command = []string{
 		"set", vmName,
 		"--device-del", s.cdromDevice,
 	}
