@@ -104,7 +104,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.APIToken == "" {
 		// Default to environment variable for api_token, if it exists
-		b.config.APIURL = os.Getenv("DIGITALOCEAN_API_TOKEN")
+		b.config.APIToken = os.Getenv("DIGITALOCEAN_API_TOKEN")
 	}
 
 	if b.config.Region == "" {
@@ -196,7 +196,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 		if b.config.APIKey == "" {
 			errs = packer.MultiErrorAppend(
-				errs, errors.New("an api_key for v1 auth or api_token for v2 auth must be specified"))
+				errs, errors.New("a api_key for v1 auth or api_token for v2 auth must be specified"))
 		}
 	}
 
