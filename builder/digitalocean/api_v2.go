@@ -295,7 +295,7 @@ func NewRequestV2(d DigitalOceanClientV2, path string, method string, req interf
 	request.Header.Add("Authorization", "Bearer "+d.APIToken)
 
 	log.Printf("sending new request to digitalocean: %s", url)
-	log.Printf("DDDD %+v\n", request)
+
 	resp, err := client.Do(request)
 	if err != nil {
 		return err
