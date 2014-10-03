@@ -139,7 +139,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.MachineType == "" {
-		b.config.MachineType = "pc-1.0"
+		b.config.MachineType = "pc"
 	}
 
 	if b.config.OutputDir == "" {
