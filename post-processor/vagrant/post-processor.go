@@ -125,10 +125,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Write our Vagrantfile
 	var customVagrantfile string
 	if config.VagrantfileTemplate != "" {
-		vagrantfilePath, err := config.tpl.Process(config.VagrantfileTemplate, &vagrantfileTemplate{
-			ProviderVagrantfile: vagrantfile,
-			CustomVagrantfile:   "",
-		})
+		vagrantfilePath, err := config.tpl.Process(config.VagrantfileTemplate, nil)
 		if err != nil {
 			return nil, false, err
 		}
