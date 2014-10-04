@@ -29,6 +29,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		"--distribution", config.GuestOSType,
 		"--dst", config.OutputDir,
 		"--vmtype", "vm",
+		"--no-hdd",
 	}
 	commands[1] = []string{"set", name, "--cpus", "1"}
 	commands[2] = []string{"set", name, "--memsize", "512"}
