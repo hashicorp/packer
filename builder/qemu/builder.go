@@ -3,15 +3,16 @@ package qemu
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 const BuilderId = "transcend.qemu"
@@ -46,6 +47,14 @@ var diskInterface = map[string]bool{
 	"virtio": true,
 }
 
+var diskCache = map[string]bool{
+	"writethrough": true,
+	"writeback":    true,
+	"none":         true,
+	"unsafe":       true,
+	"directsync":   true,
+}
+
 type Builder struct {
 	config config
 	runner multistep.Runner
@@ -58,6 +67,7 @@ type config struct {
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
+	DiskCache       string     `mapstructure:"disk_cache`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
@@ -113,6 +123,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.DiskCache == "" {
+		b.config.DiskCache = "writeback"
 	}
 
 	if b.config.Accelerator == "" {
@@ -262,6 +276,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if _, ok := diskInterface[b.config.DiskInterface]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("unrecognized disk interface type"))
+	}
+
+	if _, ok := diskCache[b.config.DiskCache]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk cache type"))
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
