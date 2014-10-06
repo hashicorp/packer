@@ -102,7 +102,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Message("Waiting for VMware to clean up after itself...")
 	lockRegex := regexp.MustCompile(`(?i)\.lck$`)
-	timer := time.After(15 * time.Second)
+	timer := time.After(120 * time.Second)
 LockWaitLoop:
 	for {
 		files, err := dir.ListFiles()

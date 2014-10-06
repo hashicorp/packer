@@ -47,10 +47,24 @@ func TestConfigPrepare_exportPath(t *testing.T) {
 	// No export path
 	delete(raw, "export_path")
 	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
+	testConfigOk(t, warns, errs)
 
 	// Good export path
 	raw["export_path"] = "good"
+	_, warns, errs = NewConfig(raw)
+	testConfigOk(t, warns, errs)
+}
+
+func TestConfigPrepare_exportPathAndCommit(t *testing.T) {
+	raw := testConfig()
+	raw["commit"] = true
+
+	// No export path
+	_, warns, errs := NewConfig(raw)
+	testConfigErr(t, warns, errs)
+
+	// No commit
+	raw["commit"] = false
 	_, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
 }

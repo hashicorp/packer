@@ -9,59 +9,49 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 # Change into that dir because we expect that
 cd $DIR
 
-# Determine the version that we're building based on the contents
-# of packer/version.go.
-VERSION=$(grep "const Version " packer/version.go | sed -E 's/.*"(.+)"$/\1/')
-VERSIONDIR="${VERSION}"
-PREVERSION=$(grep "const VersionPrerelease " packer/version.go | sed -E 's/.*"(.*)"$/\1/')
-if [ ! -z $PREVERSION ]; then
-    PREVERSION="${PREVERSION}.$(date -u +%s)"
-    VERSIONDIR="${VERSIONDIR}-${PREVERSION}"
+# Get the version from the command line
+VERSION=$1
+if [ -z $VERSION ]; then
+    echo "Please specify a version."
+    exit 1
 fi
 
-# This function waits for all background tasks to complete
-waitAll() {
-    RESULT=0
-    for job in `jobs -p`; do
-        wait $job
-        if [ $? -ne 0 ]; then
-            RESULT=1
-        fi
-    done
+# Make sure we have a bintray API key
+if [ -z $BINTRAY_API_KEY ]; then
+    echo "Please set your bintray API key in the BINTRAY_API_KEY env var."
+    exit 1
+fi
 
-    if [ $RESULT -ne 0 ]; then
-        exit $RESULT
-    fi
-}
-
-# Compile the main project
-./scripts/compile.sh
-
-# Make sure that if we're killed, we kill all our subprocseses
-trap "kill 0" SIGINT SIGTERM EXIT
-
-# Zip all the packages
+# Zip and copy to the dist dir
+echo "==> Packaging..."
+rm -rf ./pkg/dist
 mkdir -p ./pkg/dist
 for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
-    PLATFORM_NAME=$(basename ${PLATFORM})
-    ARCHIVE_NAME="${VERSIONDIR}_${PLATFORM_NAME}"
+    OSARCH=$(basename ${PLATFORM})
 
-    if [ $PLATFORM_NAME = "dist" ]; then
+    if [ $OSARCH = "dist" ]; then
         continue
     fi
 
-    (
-    pushd ${PLATFORM}
-    zip ${DIR}/pkg/dist/${ARCHIVE_NAME}.zip ./*
-    popd
-    ) &
+    echo "--> ${OSARCH}"
+    pushd $PLATFORM >/dev/null 2>&1
+    zip ../dist/packer_${VERSION}_${OSARCH}.zip ./*
+    popd >/dev/null 2>&1
 done
 
-waitAll
-
 # Make the checksums
-pushd ./pkg/dist
-shasum -a256 * > ./${VERSIONDIR}_SHA256SUMS
-popd
+echo "==> Checksumming..."
+pushd ./pkg/dist >/dev/null 2>&1
+shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
+popd >/dev/null 2>&1
 
-exit 0
+echo "==> Uploading..."
+for ARCHIVE in ./pkg/dist/*; do
+    ARCHIVE_NAME=$(basename ${ARCHIVE})
+
+    echo Uploading: $ARCHIVE_NAME
+    curl \
+        -T ${ARCHIVE} \
+        -umitchellh:${BINTRAY_API_KEY} \
+        "https://api.bintray.com/content/mitchellh/packer/packer/${VERSION}/${ARCHIVE_NAME}"
+done

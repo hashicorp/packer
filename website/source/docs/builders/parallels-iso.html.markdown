@@ -26,10 +26,11 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
 <pre class="prettyprint">
 {
   "type": "parallels-iso",
-  "guest_os_type": "Ubuntu_64",
+  "guest_os_type": "ubuntu",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
   "iso_checksum": "2cbe868812a871242cdcdd8f2fd6feb9",
   "iso_checksum_type": "md5",
+  "parallels_tools_flavor": "lin"
   "ssh_username": "packer",
   "ssh_password": "packer",
   "ssh_wait_timeout": "30s",
@@ -68,6 +69,10 @@ each category, the available options are alphabetized and described.
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
+* `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
+  install into the VM. Valid values are "win", "lin", "mac", "os2" and "other".
+  This can be ommited only if `parallels_tools_mode` is "disable".
+
 ### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
@@ -96,23 +101,22 @@ each category, the available options are alphabetized and described.
   characters (*, ?, and []) are allowed. Directory names are also allowed,
   which will add all the files found in the directory to the floppy.
 
-* `guest_os_distribution` (string) - The guest OS distribution being
-  installed. By default this is "other", but you can get dramatic
-  performance improvements by setting this to the proper value. To
-  view all available values for this run `prlctl create x --distribution list`.
-  Setting the correct value hints to Parallels how to optimize the virtual
-  hardware to work best with that operating system.
-
 * `guest_os_type` (string) - The guest OS type being installed. By default
   this is "other", but you can get _dramatic_ performance improvements by
   setting this to the proper value. To view all available values for this
-  run `prlctl create x --ostype list`. Setting the correct value hints to
+  run `prlctl create x --distribution list`. Setting the correct value hints to
   Parallels Desktop how to optimize the virtual hardware to work best with
   that operating system.
 
 * `hard_drive_interface` (string) - The type of controller that the
   hard drives are attached to, defaults to "sata". Valid options are
   "sata", "ide", and "scsi".
+
+* `host_interfaces` (array of strings) - A list of which interfaces on the
+  host should be searched for a IP address. The first IP address found on
+  one of these will be used as `{{ .HTTPIP }}` in the `boot_command`.
+  Defaults to ["en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7", "en8",
+  "en9", "ppp0", "ppp1", "ppp2"].
 
 * `http_directory` (string) - Path to a directory to serve using an HTTP
   server. The files in this directory will be available over HTTP that will
@@ -142,18 +146,14 @@ each category, the available options are alphabetized and described.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `parallels_tools_guest_path` (string) - The path on the guest virtual machine
-  where the Parallels tools ISO will be uploaded. By default this is
-  "prl-tools.iso" which should upload into the login directory of the user.
-  This is a configuration template where the `Version` variable is replaced
-  with the prlctl version.
+* `parallels_tools_guest_path` (string) - The path in the VM to upload Parallels
+  Tools. This only takes effect if `parallels_tools_mode` is not "disable".
+  This is a [configuration template](/docs/templates/configuration-templates.html)
+  that has a single valid variable: `Flavor`, which will be the value of
+  `parallels_tools_flavor`. By default the upload path is set to
+  `prl-tools-{{.Flavor}}.iso`.
 
-* `parallels_tools_host_path` (string) - The path to the Parallels Tools ISO to
-  upload. By default the Parallels builder will use the "other" OS tools ISO from
-  the Parallels installation:
-  "/Applications/Parallels Desktop.app/Contents/Resources/Tools/prl-tools-other.iso"
-
-* `parallels_tools_mode` (string) - The method by which Parallels tools are
+* `parallels_tools_mode` (string) - The method by which Parallels Tools are
   made available to the guest for installation. Valid options are "upload",
   "attach", or "disable". The functions of each of these should be
   self-explanatory. The default value is "upload".
@@ -212,11 +212,11 @@ As documented above, the `boot_command` is an array of strings. The
 strings are all typed in sequence. It is an array only to improve readability
 within the template.
 
-The boot command is "typed" character for character using the `prltype` (part
-of prl-utils, see [Parallels Builder](/docs/builders/parallels.html))
-command connected to the machine, simulating a human actually typing the
-keyboard. There are a set of special keys available. If these are in your
-boot command, they will be replaced by the proper key:
+The boot command is "typed" character for character (using the Parallels
+Virtualization SDK, see [Parallels Builder](/docs/builders/parallels.html))
+simulating a human actually typing the keyboard. There are a set of special
+keys available. If these are in your boot command, they will be replaced by
+the proper key:
 
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
@@ -254,20 +254,12 @@ an Ubuntu 12.04 installer:
 ]
 </pre>
 
-## Parallels Tools
-After the virtual machine is up and the operating system is installed, Packer
-uploads the Parallels Tools into the virtual machine. The path where they are
-uploaded is controllable by `parallels_tools_path`, and defaults to
-"prl-tools.iso". Without an absolute path, it is uploaded to the home directory
-of the SSH user. Parallels Tools ISO's can be found in:
-"/Applications/Parallels Desktop.app/Contents/Resources/Tools/"
-
 ## prlctl Commands
 In order to perform extra customization of the virtual machine, a template can
 define extra calls to `prlctl` to perform.
-[prlctl](http://download.parallels.com/desktop/v4/wl/docs/en/Parallels_Command_Line_Reference_Guide/)
-is the command-line interface to Parallels. It can be used to do things such as
-set RAM, CPUs, etc.
+[prlctl](http://download.parallels.com/desktop/v9/ga/docs/en_US/Parallels%20Command%20Line%20Reference%20Guide.pdf)
+is the command-line interface to Parallels Desktop. It can be used to configure
+the virtual machine, such as set RAM, CPUs, etc.
 
 Extra `prlctl` commands are defined in the template in the `prlctl` section.
 An example is shown below that sets the memory and number of CPUs within the

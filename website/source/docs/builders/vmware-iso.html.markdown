@@ -227,6 +227,10 @@ each category, the available options are alphabetized and described.
   to enter into the virtual machine VMX file. This is for advanced users
   who want to set properties such as memory, CPU, etc.
 
+* `vmx_data_post` (object of key/value strings) - Identical to `vmx_data`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
 * `vmx_template_path` (string) - Path to a
   [configuration template](/docs/templates/configuration-templates.html) that
   defines the contents of the virtual machine VMX file for VMware. This is
@@ -337,6 +341,11 @@ When using a remote VMware Hypervisor, the builder still downloads the
 ISO and various files locally, and uploads these to the remote machine.
 Packer currently uses SSH to communicate to the ESXi machine rather than
 the vSphere API. At some point, the vSphere API may be used.
+
+Packer also requires VNC to issue boot commands during a build,
+which may be disabled on some remote VMware Hypervisors.  Please consult
+the appropriate documentation on how to update VMware Hypervisor's firewall
+to allow these connections.
 
 To use a remote VMware vSphere Hypervisor to build your virtual machine,
 fill in the required `remote_*` configurations:

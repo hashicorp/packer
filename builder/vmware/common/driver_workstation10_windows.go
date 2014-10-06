@@ -31,5 +31,5 @@ func workstationVerifyVersion(version string) error {
 	}
 	log.Printf("Detected VMware WS version: %s", matches[1])
 
-	return compareVersions(matches[1], version)
+	return compareVersions(matches[1], version, "Workstation")
 }

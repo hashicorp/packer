@@ -46,7 +46,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad guest OS type: %s", b.config.GuestOSType)
 	}
 
-	if b.config.VMName != "packer-foo" {
+	if b.config.VMName == "" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
 	}
 
@@ -398,6 +398,47 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 
 	if b.config.ISOChecksumType != "none" {
 		t.Fatalf("should've lowercased: %s", b.config.ISOChecksumType)
+	}
+}
+
+func TestBuilderPrepare_ISOInterface(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default boot_wait
+	delete(config, "iso_interface")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.ISOInterface != "ide" {
+		t.Fatalf("bad: %s", b.config.ISOInterface)
+	}
+
+	// Test with a bad
+	config["iso_interface"] = "fake"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good
+	config["iso_interface"] = "sata"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 }
 

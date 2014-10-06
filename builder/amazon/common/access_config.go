@@ -13,6 +13,7 @@ type AccessConfig struct {
 	AccessKey string `mapstructure:"access_key"`
 	SecretKey string `mapstructure:"secret_key"`
 	RawRegion string `mapstructure:"region"`
+	Token     string `mapstructure:"token"`
 }
 
 // Auth returns a valid aws.Auth object for access to AWS services, or
@@ -23,6 +24,10 @@ func (c *AccessConfig) Auth() (aws.Auth, error) {
 		// Store the accesskey and secret that we got...
 		c.AccessKey = auth.AccessKey
 		c.SecretKey = auth.SecretKey
+		c.Token = auth.Token
+	}
+	if auth.Token == "" && c.Token != "" {
+		auth.Token = c.Token
 	}
 
 	return auth, err

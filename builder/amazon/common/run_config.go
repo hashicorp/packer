@@ -3,9 +3,11 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"time"
+
+	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/packer"
 )
 
 // RunConfig contains configuration for running an instance from a source
@@ -17,9 +19,12 @@ type RunConfig struct {
 	InstanceType             string            `mapstructure:"instance_type"`
 	RunTags                  map[string]string `mapstructure:"run_tags"`
 	SourceAmi                string            `mapstructure:"source_ami"`
+	SpotPrice                string            `mapstructure:"spot_price"`
+	SpotPriceAutoProduct     string            `mapstructure:"spot_price_auto_product"`
 	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
 	SSHUsername              string            `mapstructure:"ssh_username"`
 	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
+	SSHPrivateIp             bool              `mapstructure:"ssh_private_ip"`
 	SSHPort                  int               `mapstructure:"ssh_port"`
 	SecurityGroupId          string            `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
@@ -42,6 +47,34 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
+	templates := map[string]*string{
+		"iam_instance_profile":    &c.IamInstanceProfile,
+		"instance_type":           &c.InstanceType,
+		"spot_price":              &c.SpotPrice,
+		"spot_price_auto_product": &c.SpotPriceAutoProduct,
+		"ssh_timeout":             &c.RawSSHTimeout,
+		"ssh_username":            &c.SSHUsername,
+		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
+		"source_ami":              &c.SourceAmi,
+		"subnet_id":               &c.SubnetId,
+		"temporary_key_pair_name": &c.TemporaryKeyPairName,
+		"vpc_id":                  &c.VpcId,
+		"availability_zone":       &c.AvailabilityZone,
+		"user_data":               &c.UserData,
+		"user_data_file":          &c.UserDataFile,
+		"security_group_id":       &c.SecurityGroupId,
+	}
+
+	errs := make([]error, 0)
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = t.Process(*ptr, nil)
+		if err != nil {
+			errs = append(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
 	// Defaults
 	if c.SSHPort == 0 {
 		c.SSHPort = 22
@@ -52,18 +85,25 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	if c.TemporaryKeyPairName == "" {
-		c.TemporaryKeyPairName = "packer {{uuid}}"
+		c.TemporaryKeyPairName = fmt.Sprintf(
+			"packer %s", uuid.TimeOrderedUUID())
 	}
 
 	// Validation
 	var err error
-	errs := make([]error, 0)
 	if c.SourceAmi == "" {
 		errs = append(errs, errors.New("A source_ami must be specified"))
 	}
 
 	if c.InstanceType == "" {
 		errs = append(errs, errors.New("An instance_type must be specified"))
+	}
+
+	if c.SpotPrice == "auto" {
+		if c.SpotPriceAutoProduct == "" {
+			errs = append(errs, errors.New(
+				"spot_price_auto_product must be specified when spot_price is auto"))
+		}
 	}
 
 	if c.SSHUsername == "" {
@@ -84,28 +124,6 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		} else {
 			c.SecurityGroupIds = []string{c.SecurityGroupId}
 			c.SecurityGroupId = ""
-		}
-	}
-
-	templates := map[string]*string{
-		"iam_instance_profile":    &c.IamInstanceProfile,
-		"instance_type":           &c.InstanceType,
-		"ssh_timeout":             &c.RawSSHTimeout,
-		"ssh_username":            &c.SSHUsername,
-		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
-		"source_ami":              &c.SourceAmi,
-		"subnet_id":               &c.SubnetId,
-		"temporary_key_pair_name": &c.TemporaryKeyPairName,
-		"vpc_id":                  &c.VpcId,
-		"availability_zone":       &c.AvailabilityZone,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
 		}
 	}
 

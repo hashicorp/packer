@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -32,6 +33,7 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
+		"ssh_host":         &c.SSHHost,
 		"ssh_key_path":     &c.SSHKeyPath,
 		"ssh_password":     &c.SSHPassword,
 		"ssh_username":     &c.SSHUser,
@@ -50,7 +52,7 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if c.SSHKeyPath != "" {
 		if _, err := os.Stat(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToSigner(c.SSHKeyPath); err != nil {
+		} else if _, err := commonssh.FileSigner(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
 	}

@@ -26,14 +26,7 @@ Packer supports the following Parallels builders:
 
 ## Requirements
 
-In addition to [Parallels Desktop for Mac](http://www.parallels.com/products/desktop/) this requires:
+In addition to [Parallels Desktop for Mac](http://www.parallels.com/products/desktop/) this requires the
+[Parallels Virtualization SDK](http://www.parallels.com/downloads/desktop/).
 
-- [Parallels Virtualization SDK 9 for Mac](http://download.parallels.com//desktop/v9/pde.hf1/ParallelsVirtualizationSDK-9.0.24172.951362.dmg)
-- [prl-utils](https://github.com/rickard-von-essen/prl-utils/)
-
-The SDK can be installed by downloading and following the instructions in the dmg. The easiest way to install _prl-utils_ is using [Homebrew](http://brew.sh/)
-
-  ```
-  brew tap rickard-von-essen/homebrew-formulae
-  brew install --HEAD prl-utils
-  ```
+The SDK can be installed by downloading and following the instructions in the dmg.

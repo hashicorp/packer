@@ -16,7 +16,7 @@ type DriverMock struct {
 	ImportCalled bool
 	ImportName   string
 	ImportPath   string
-	ImportOpts   string
+	ImportFlags  []string
 	ImportErr    error
 
 	IsoCalled bool
@@ -55,11 +55,11 @@ func (d *DriverMock) Delete(name string) error {
 	return d.DeleteErr
 }
 
-func (d *DriverMock) Import(name, path, opts string) error {
+func (d *DriverMock) Import(name string, path string, flags []string) error {
 	d.ImportCalled = true
 	d.ImportName = name
 	d.ImportPath = path
-	d.ImportOpts = opts
+	d.ImportFlags = flags
 	return d.ImportErr
 }
 
