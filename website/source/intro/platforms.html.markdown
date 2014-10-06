@@ -30,8 +30,8 @@ platform is noted. They are listed in alphabetical order. For more detailed
 information on supported configuration parameters and usage, please see
 the appropriate [documentation page within the documentation section](/docs).
 
-* ***Amazon EC2 (AMI)***. Both EBS-backed and instance-store AMIs within EC2,
-  optionally distributed to multiple regions.
+* ***Amazon EC2 (AMI)***. Both EBS-backed and instance-store AMIs within
+  [EC2](http://aws.amazon.com/ec2/), optionally distributed to multiple regions.
 
 * ***DigitalOcean***. Snapshots for [DigitalOcean](http://www.digitalocean.com/)
   that can be used to start a pre-configured DigitalOcean instance of any size.
@@ -45,20 +45,20 @@ the appropriate [documentation page within the documentation section](/docs).
 * ***OpenStack***. Images for [OpenStack](http://www.openstack.org/)
   that can be used to start pre-configured OpenStack servers.
 
-* ***Parallels (PVM)***. Exported virtual machines for Parallels, including
-  virtual machine metadata such as RAM, CPUs, etc. These virtual machines are
-  portable and can be started on any platform Parallels runs on.
+* ***Parallels (PVM)***. Exported virtual machines for [Parallels](http://www.parallels.com/downloads/desktop/),
+  including virtual machine metadata such as RAM, CPUs, etc. These virtual
+  machines are portable and can be started on any platform Parallels runs on.
 
 * ***QEMU***. Images for [KVM](http://www.linux-kvm.org/) or [Xen](http://www.xenproject.org/)
   that can be used to start pre-configured KVM or Xen instances.
 
-* ***VirtualBox (OVF)***. Exported virtual machines for VirtualBox, including
-  virtual machine metadata such as RAM, CPUs, etc. These virtual machines are
-  portable and can be started on any platform VirtualBox runs on.
+* ***VirtualBox (OVF)***. Exported virtual machines for [VirtualBox](https://www.virtualbox.org/),
+  including virtual machine metadata such as RAM, CPUs, etc. These virtual
+  machines are portable and can be started on any platform VirtualBox runs on.
 
-* ***VMware (VMX)***. Exported virtual machines for VMware that can be run
-  within any desktop products such as Fusion, Player, or Workstation, as well
-  as server products such as vSphere.
+* ***VMware (VMX)***. Exported virtual machines for [VMware](http://www.vmware.com/)
+  that can be run within any desktop products such as Fusion, Player, or
+  Workstation, as well as server products such as vSphere.
 
 As previously mentioned, these are just the target image types that Packer
 ships with out of the box. You can always [extend Packer through plugins](/docs/extend/builder.html)

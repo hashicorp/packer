@@ -289,7 +289,7 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 
 	_, err := fmt.Fprintf(u.Writer, "%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
 	if err != nil {
-		if err == syscall.EPIPE {
+		if err == syscall.EPIPE || strings.Contains(err.Error(), "broken pipe") {
 			// Ignore epipe errors because that just means that the file
 			// is probably closed or going to /dev/null or something.
 		} else {

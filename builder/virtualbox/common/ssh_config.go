@@ -3,9 +3,11 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"time"
+
+	commonssh "github.com/mitchellh/packer/common/ssh"
+	"github.com/mitchellh/packer/packer"
 )
 
 type SSHConfig struct {
@@ -56,7 +58,7 @@ func (c *SSHConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if c.SSHKeyPath != "" {
 		if _, err := os.Stat(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToSigner(c.SSHKeyPath); err != nil {
+		} else if _, err := commonssh.FileSigner(c.SSHKeyPath); err != nil {
 			errs = append(errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
 	}

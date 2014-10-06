@@ -12,3 +12,10 @@ func TestArtifact_ImplementsArtifact(t *testing.T) {
 		t.Fatalf("Artifact should be a Artifact")
 	}
 }
+
+func TestArtifact_Id(t *testing.T) {
+	artifact := NewArtifact("vmware", "./")
+	if artifact.Id() != "vmware" {
+		t.Fatalf("should return name as Id")
+	}
+}

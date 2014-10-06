@@ -56,19 +56,32 @@ following steps in order to be able to compile and test Packer.
 1. Install Go. Make sure the Go version is at least Go 1.2. Packer will not work with anything less than
    Go 1.2. On a Mac, you can `brew install go` to install Go 1.2.
 
-2. Set and export the `GOPATH` environment variable. For example, you can
-   add `export GOPATH=$HOME/Documents/golang` to your `.bash_profile`.
+2. Set and export the `GOPATH` environment variable and update your `PATH`.
+   For example, you can add to your `.bash_profile`.
 
-3. Download the Packer source (and its dependencies) by running
+    ```
+    export GOPATH=$HOME/Documents/golang
+    export PATH=$PATH:$GOPATH/bin
+    ```
+
+3. Install and build `gox` with
+
+    ```
+    go get github.com/mitchellh/gox
+    cd $GOPATH/src/github.com/mitchellh/gox
+    go build
+    ```
+
+4. Download the Packer source (and its dependencies) by running
    `go get github.com/mitchellh/packer`. This will download the Packer
    source to `$GOPATH/src/github.com/mitchellh/packer`.
 
-4. Make your changes to the Packer source. You can run `make` from the main
+5. Make your changes to the Packer source. You can run `make` from the main
    source directory to recompile all the binaries. Any compilation errors
    will be shown when the binaries are rebuilding.
 
-5. Test your changes by running `make test` and then running
+6. Test your changes by running `make test` and then running
    `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine.
 
-6. If everything works well and the tests pass, run `go fmt` on your code
+7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull request.

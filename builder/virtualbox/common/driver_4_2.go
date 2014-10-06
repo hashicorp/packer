@@ -69,13 +69,13 @@ func (d *VBox42Driver) Iso() (string, error) {
 	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output")
 }
 
-func (d *VBox42Driver) Import(name, path, opts string) error {
+func (d *VBox42Driver) Import(name string, path string, flags []string) error {
 	args := []string{
 		"import", path,
 		"--vsys", "0",
 		"--vmname", name,
-		"--options", opts,
 	}
+	args = append(args, flags...)
 
 	return d.VBoxManage(args...)
 }
@@ -157,6 +157,15 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 		err = fmt.Errorf("VBoxManage error: %s", stderrString)
 	}
 
+	if err == nil {
+		// Sometimes VBoxManage gives us an error with a zero exit code,
+		// so we also regexp match an error string.
+		m, _ := regexp.MatchString("VBoxManage([.a-z]+?): error:", stderrString)
+		if m {
+			err = fmt.Errorf("VBoxManage error: %s", stderrString)
+		}
+	}
+
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
@@ -186,9 +195,9 @@ func (d *VBox42Driver) Version() (string, error) {
 		return "", fmt.Errorf("VirtualBox is not properly setup: %s", versionOutput)
 	}
 
-	versionRe := regexp.MustCompile("[^.0-9]")
-	matches := versionRe.Split(versionOutput, 2)
-	if len(matches) == 0 || matches[0] == "" {
+	versionRe := regexp.MustCompile("^[.0-9]+(?:_RC[0-9]+)?")
+	matches := versionRe.FindAllString(versionOutput, 1)
+	if matches == nil {
 		return "", fmt.Errorf("No version found: %s", versionOutput)
 	}
 

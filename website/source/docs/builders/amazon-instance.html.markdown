@@ -84,7 +84,7 @@ each category, the available configuration keys are alphabetized.
   device mappings to the AMI. The block device mappings allow for keys:
   "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
   "volume\_type" (string), "volume\_size" (integer), "delete\_on\_termination"
-  (boolean), "no\_device" (boolean), and "iops" (integer).
+  (boolean), "encrypted" (boolean), "no\_device" (boolean), and "iops" (integer).
   See [amazon-ebs](/docs/builders/amazon-ebs.html) for an example template.
 
 * `ami_description` (string) - The description to set for the resulting
@@ -133,6 +133,9 @@ each category, the available configuration keys are alphabetized.
 * `bundle_vol_command` (string) - The command to use to bundle the volume.
   See the "custom bundle commands" section below for more information.
 
+* `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
+  HVM-compatible AMIs.
+
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
@@ -153,13 +156,28 @@ each category, the available configuration keys are alphabetized.
 
 * `security_group_ids` (array of strings) - A list of security groups as
   described above. Note that if this is specified, you must omit the
-  security_group_id.
+  `security_group_id`.
+
+* `spot_price` (string) - The maximum hourly price to launch a spot instance
+  to create the AMI. It is a type of instances that EC2 starts when the maximum
+  price that you specify exceeds the current spot price. Spot price will be
+  updated based on available spot instance capacity and current spot Instance
+  requests. It may save you some costs. You can set this to "auto" for
+  Packer to automatically discover the best spot price.
+
+* `spot_price_auto_product` (string) - Required if `spot_price` is set to
+  "auto". This tells Packer what sort of AMI you're launching to find the best
+   spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
+   `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 * `ssh_port` (integer) - The port that SSH will be available on. This defaults
   to port 22.
 
 * `ssh_private_key_file` (string) - Use this ssh private key file instead of
   a generated ssh key pair for connecting to the instance.
+
+* `ssh_private_ip` (bool) - If true, then SSH will always use the private
+  IP if available.
 
 * `ssh_timeout` (string) - The time to wait for SSH to become available
   before timing out. The format of this value is a duration such as "5s"
@@ -262,7 +280,8 @@ sudo -n ec2-bundle-vol \
 	-e {{.PrivatePath}}/* \
 	-d {{.Destination}} \
 	-p {{.Prefix}} \
-	--batch
+	--batch \
+	--no-filter
 ```
 
 The available template variables should be self-explanatory based on the

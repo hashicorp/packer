@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -39,6 +40,33 @@ func TestConfigTemplateProcess_isotime(t *testing.T) {
 	currentTime := time.Now().UTC()
 	if currentTime.Sub(val) > 2*time.Second {
 		t.Fatalf("val: %d (current: %d)", val, currentTime)
+	}
+}
+
+// Note must format with the magic Date: Mon Jan 2 15:04:05 -0700 MST 2006
+func TestConfigTemplateProcess_isotime_withFormat(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Checking for a too-many arguments error
+	// Because of the variadic function, compile time checking won't work
+	_, err = tpl.Process(`{{isotime "20060102" "huh"}}`, nil)
+	if err == nil {
+		t.Fatalf("err: cannot have more than 1 input")
+	}
+
+	result, err := tpl.Process(`{{isotime "20060102"}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	ti := time.Now().UTC()
+	val := fmt.Sprintf("%04d%02d%02d", ti.Year(), ti.Month(), ti.Day())
+
+	if result != val {
+		t.Fatalf("val: %s (formated: %s)", val, result)
 	}
 }
 
@@ -127,6 +155,42 @@ func TestConfigTemplateProcess_uuid(t *testing.T) {
 
 	if len(result) != 36 {
 		t.Fatalf("err: %s", result)
+	}
+}
+
+func TestConfigTemplateProcess_upper(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tpl.UserVars["foo"] = "bar"
+
+	result, err := tpl.Process(`{{user "foo" | upper}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != "BAR" {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestConfigTemplateProcess_lower(t *testing.T) {
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tpl.UserVars["foo"] = "BAR"
+
+	result, err := tpl.Process(`{{user "foo" | lower}}`, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result != "bar" {
+		t.Fatalf("bad: %s", result)
 	}
 }
 

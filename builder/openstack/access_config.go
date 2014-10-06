@@ -115,8 +115,10 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
-	if c.Region() == "" {
-		errs = append(errs, fmt.Errorf("region must be specified"))
+	if strings.HasPrefix(c.Provider, "rackspace") {
+		if c.Region() == "" {
+			errs = append(errs, fmt.Errorf("region must be specified when using rackspace"))
+		}
 	}
 
 	if len(errs) > 0 {

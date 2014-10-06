@@ -2,10 +2,10 @@ package iso
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
 )
 
 // This step creates the actual virtual machine.
@@ -21,17 +21,15 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
-
 	name := config.VMName
-	path := filepath.Join(".", config.OutputDir)
 
-	commands := make([][]string, 9)
+	commands := make([][]string, 8)
 	commands[0] = []string{
 		"create", name,
-		"--ostype", config.GuestOSType,
-		"--distribution", config.GuestOSDistribution,
-		"--dst", path,
+		"--distribution", config.GuestOSType,
+		"--dst", config.OutputDir,
 		"--vmtype", "vm",
+		"--no-hdd",
 	}
 	commands[1] = []string{"set", name, "--cpus", "1"}
 	commands[2] = []string{"set", name, "--memsize", "512"}
@@ -39,8 +37,7 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	commands[4] = []string{"set", name, "--on-shutdown", "close"}
 	commands[5] = []string{"set", name, "--on-window-close", "keep-running"}
 	commands[6] = []string{"set", name, "--auto-share-camera", "off"}
-	commands[7] = []string{"set", name, "--device-del", "sound0"}
-	commands[8] = []string{"set", name, "--smart-guard", "off"}
+	commands[7] = []string{"set", name, "--smart-guard", "off"}
 
 	ui.Say("Creating virtual machine...")
 	for _, command := range commands {
