@@ -84,7 +84,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s", imgPath, config.DiskInterface)
 	defaultArgs["-cdrom"] = isoPath
 	defaultArgs["-boot"] = bootDrive
-	defaultArgs["-m"] = "512"
+	defaultArgs["-m"] = "512M"
 	defaultArgs["-vnc"] = vnc
 
 	// Append the accelerator to the machine type if it is specified
