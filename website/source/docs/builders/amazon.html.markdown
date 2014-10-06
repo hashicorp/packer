@@ -70,6 +70,3 @@ The following policy document provides the minimal set permissions necessary for
   }]
 }
 </pre>
-
-Depending on what setting you use the following Actions might have to be allowed as well:
-* `ec2:ModifyImageAttribute` when using `ami_description`
