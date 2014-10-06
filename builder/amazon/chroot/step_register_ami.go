@@ -2,6 +2,7 @@ package chroot
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -29,13 +30,11 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		blockDevices[i] = newDevice
 	}
 
-	registerOpts := &ec2.RegisterImage{
-		Name:           config.AMIName,
-		Architecture:   image.Architecture,
-		KernelId:       image.KernelId,
-		RamdiskId:      image.RamdiskId,
-		RootDeviceName: image.RootDeviceName,
-		BlockDevices:   blockDevices,
+	registerOpts := buildRegisterOpts(config, image, blockDevices)
+
+	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
+	if config.AMIEnhancedNetworking {
+		registerOpts.SriovNetSupport = "simple"
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -71,3 +70,20 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {}
+
+func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []ec2.BlockDeviceMapping) *ec2.RegisterImage {
+	registerOpts := &ec2.RegisterImage{
+		Name:           config.AMIName,
+		Architecture:   image.Architecture,
+		RootDeviceName: image.RootDeviceName,
+		BlockDevices:   blockDevices,
+		VirtType:       config.AMIVirtType,
+	}
+
+	if config.AMIVirtType != "hvm" {
+		registerOpts.KernelId = image.KernelId
+		registerOpts.RamdiskId = image.RamdiskId
+	}
+
+	return registerOpts
+}

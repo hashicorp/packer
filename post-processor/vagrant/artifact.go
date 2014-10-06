@@ -28,7 +28,7 @@ func (a *Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return ""
+	return a.Provider
 }
 
 func (a *Artifact) String() string {

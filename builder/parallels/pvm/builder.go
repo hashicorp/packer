@@ -43,9 +43,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("http_port", uint(0))
 
 	// Build the steps.
 	steps := []multistep.Step{
+		&parallelscommon.StepPrepareParallelsTools{
+			ParallelsToolsMode:   b.config.ParallelsToolsMode,
+			ParallelsToolsFlavor: b.config.ParallelsToolsFlavor,
+		},
 		&parallelscommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
@@ -58,8 +63,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourcePath: b.config.SourcePath,
 		},
 		&parallelscommon.StepAttachParallelsTools{
-			ParallelsToolsHostPath: b.config.ParallelsToolsHostPath,
-			ParallelsToolsMode:     b.config.ParallelsToolsMode,
+			ParallelsToolsMode: b.config.ParallelsToolsMode,
 		},
 		new(parallelscommon.StepAttachFloppy),
 		&parallelscommon.StepPrlctl{
@@ -70,6 +74,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
 		},
+		&parallelscommon.StepTypeBootCommand{
+			BootCommand:    b.config.BootCommand,
+			HostInterfaces: []string{},
+			VMName:         b.config.VMName,
+			Tpl:            b.config.tpl,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     parallelscommon.SSHAddress,
 			SSHConfig:      parallelscommon.SSHConfigFunc(b.config.SSHConfig),
@@ -79,8 +89,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Path: b.config.PrlctlVersionFile,
 		},
 		&parallelscommon.StepUploadParallelsTools{
+			ParallelsToolsFlavor:    b.config.ParallelsToolsFlavor,
 			ParallelsToolsGuestPath: b.config.ParallelsToolsGuestPath,
-			ParallelsToolsHostPath:  b.config.ParallelsToolsHostPath,
 			ParallelsToolsMode:      b.config.ParallelsToolsMode,
 			Tpl:                     b.config.tpl,
 		},
@@ -89,7 +99,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
-		new(parallelscommon.StepRemoveDevices),
 	}
 
 	// Run the steps.

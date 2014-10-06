@@ -6,5 +6,4 @@
 /website/build
 .DS_Store
 .vagrant
-Vagrantfile
 test/.env

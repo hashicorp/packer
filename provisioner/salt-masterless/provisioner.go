@@ -214,7 +214,7 @@ func uploadMinionConfig(comm packer.Communicator, dst string, src string) error 
 	}
 	defer f.Close()
 
-	if err = comm.Upload(dst, f); err != nil {
+	if err = comm.Upload(dst, f, nil); err != nil {
 		return fmt.Errorf("Error uploading minion config: %s", err)
 	}
 

@@ -2,10 +2,11 @@ package pvm
 
 import (
 	"fmt"
+	"os"
+
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"os"
 )
 
 // Config is the configuration structure for the builder.
@@ -13,18 +14,17 @@ type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
 	parallelscommon.FloppyConfig        `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
-	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
-	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
+	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 
-	ParallelsToolsMode      string `mapstructure:"parallels_tools_mode"`
-	ParallelsToolsGuestPath string `mapstructure:"parallels_tools_guest_path"`
-	ParallelsToolsHostPath  string `mapstructure:"parallels_tools_host_path"`
-
-	SourcePath string `mapstructure:"source_path"`
-	VMName     string `mapstructure:"vm_name"`
+	BootCommand []string `mapstructure:"boot_command"`
+	SourcePath  string   `mapstructure:"source_path"`
+	VMName      string   `mapstructure:"vm_name"`
+	ReassignMac bool     `mapstructure:"reassign_mac"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -42,19 +42,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	c.tpl.UserVars = c.PackerUserVars
 
-	// Defaults
-	if c.ParallelsToolsMode == "" {
-		c.ParallelsToolsMode = "disable"
-	}
-
-	if c.ParallelsToolsGuestPath == "" {
-		c.ParallelsToolsGuestPath = "prl-tools.iso"
-	}
-
-	if c.ParallelsToolsHostPath == "" {
-		c.ParallelsToolsHostPath = "/Applications/Parallels Desktop.app/Contents/Resources/Tools/prl-tools-other.iso"
-	}
-
 	if c.VMName == "" {
 		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
 	}
@@ -63,18 +50,16 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
-		"parallels_tools_mode":       &c.ParallelsToolsMode,
-		"parallels_tools_host_paht":  &c.ParallelsToolsHostPath,
-		"parallels_tools_guest_path": &c.ParallelsToolsGuestPath,
-		"source_path":                &c.SourcePath,
-		"vm_name":                    &c.VMName,
+		"source_path": &c.SourcePath,
+		"vm_name":     &c.VMName,
 	}
 
 	for n, ptr := range templates {
@@ -86,23 +71,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	validMode := false
-	validModes := []string{
-		parallelscommon.ParallelsToolsModeDisable,
-		parallelscommon.ParallelsToolsModeAttach,
-		parallelscommon.ParallelsToolsModeUpload,
-	}
-
-	for _, mode := range validModes {
-		if c.ParallelsToolsMode == mode {
-			validMode = true
-			break
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
-	}
-
-	if !validMode {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("parallels_tools_mode is invalid. Must be one of: %v", validModes))
 	}
 
 	if c.SourcePath == "" {

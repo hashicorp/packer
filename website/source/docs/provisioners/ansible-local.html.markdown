@@ -68,9 +68,21 @@ Optional:
   chi-appservers
   </pre>
 
+* `playbook_dir` (string) - a path to the complete ansible directory
+  structure on your local system to be copied to the remote machine
+  as the `staging_directory` before all other files and directories.
+
 * `playbook_paths` (array of strings) - An array of paths to playbook files on
   your local system. These will be uploaded to the remote machine under
   `staging_directory`/playbooks. By default, this is empty.
+
+* `group_vars` (string) - a path to the directory containing ansible
+  group variables on your local system to be copied to the
+  remote machine. By default, this is empty.
+
+* `host_vars` (string) - a path to the directory containing ansible
+  host variables on your local system to be copied to the
+  remote machine. By default, this is empty.
 
 * `role_paths` (array of strings) - An array of paths to role directories on
   your local system. These will be uploaded to the remote machine under

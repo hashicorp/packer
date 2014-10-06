@@ -17,17 +17,27 @@ type stepAttachISO struct {
 }
 
 func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
+	controllerName := "IDE Controller"
+	port := "0"
+	device := "1"
+	if config.ISOInterface == "sata" {
+		controllerName = "SATA Controller"
+		port = "1"
+		device = "0"
+	}
+
 	// Attach the disk to the controller
 	command := []string{
 		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "0",
-		"--device", "1",
+		"--storagectl", controllerName,
+		"--port", port,
+		"--device", device,
 		"--type", "dvddrive",
 		"--medium", isoPath,
 	}
@@ -43,6 +53,9 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set some state so we know to remove
 	state.Put("attachedIso", true)
+	if controllerName == "SATA Controller" {
+		state.Put("attachedIsoOnSata", true)
+	}
 
 	return multistep.ActionContinue
 }
@@ -52,14 +65,24 @@ func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	config := state.Get("config").(*config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	vmName := state.Get("vmName").(string)
 
+	controllerName := "IDE Controller"
+	port := "0"
+	device := "1"
+	if config.ISOInterface == "sata" {
+		controllerName = "SATA Controller"
+		port = "1"
+		device = "0"
+	}
+
 	command := []string{
 		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "0",
-		"--device", "1",
+		"--storagectl", controllerName,
+		"--port", port,
+		"--device", device,
 		"--medium", "none",
 	}
 

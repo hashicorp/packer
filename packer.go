@@ -2,17 +2,17 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
-	"github.com/mitchellh/panicwrap"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/mitchellh/panicwrap"
 )
 
 func main() {
@@ -92,8 +92,10 @@ func wrappedMain() int {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
 		return 1
 	}
-
 	log.Printf("Packer config: %+v", config)
+
+	// Fire off the checkpoint.
+	go runCheckpoint(config)
 
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {
@@ -173,7 +175,9 @@ func extractMachineReadable(args []string) ([]string, bool) {
 
 func loadConfig() (*config, error) {
 	var config config
-	if err := decodeConfig(bytes.NewBufferString(defaultConfig), &config); err != nil {
+	config.PluginMinPort = 10000
+	config.PluginMaxPort = 25000
+	if err := config.Discover(); err != nil {
 		return nil, err
 	}
 
