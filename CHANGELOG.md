@@ -1,8 +1,15 @@
 ## 0.7.2 (unreleased)
 
+FEATURES:
+
+  * builder/parallels: Don't depend on _prl-utils_ [GH-1499]
+
 BUG FIXES:
 
   * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
+  * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
+  * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
+  * builder/parallels: Create VM without hdd and then add it later [GH-1548]
 
 ## 0.7.1 (September 10, 2014)
 
