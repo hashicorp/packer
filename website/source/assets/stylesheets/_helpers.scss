@@ -58,9 +58,9 @@ $mono: 'Inconsolata', 'courier new', courier, mono-space;
 
 @font-face {
     font-family: 'HeimatStencil-SemiBold';
-    src: url('../../fonts/2772B2_0_0.eot');
-    src: url('../../fonts/2772B2_0_0.woff') format('woff'),
-         url('../../fonts/2772B2_0_0.ttf') format('truetype');
+    src: font-url('2772B2_0_0.eot');
+    src: font-url('2772B2_0_0.woff') format('woff'),
+         font-url('2772B2_0_0.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
@@ -89,7 +89,7 @@ background-color: $white;
 
 //elements
 .divider {
-background: url(/images/divider.png) no-repeat center bottom;
+background: image-url('divider.png') no-repeat center bottom;
 height: 70px;
 width: 70px;
 background-size: 70px 70px;
