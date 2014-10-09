@@ -25,6 +25,9 @@ type Config struct {
 	// Path to a hiera configuration file to upload and use.
 	HieraConfigPath string `mapstructure:"hiera_config_path"`
 
+	// Path to hiera data
+	HieraDataDir string `mapstructure:"hieradata_dir"`
+
 	// An array of local paths of modules to upload.
 	ModulePaths []string `mapstructure:"module_paths"`
 
@@ -50,6 +53,7 @@ type Provisioner struct {
 type ExecuteTemplate struct {
 	FacterVars      string
 	HieraConfigPath string
+	HieraDataDir    string
 	ModulePath      string
 	ManifestFile    string
 	ManifestDir     string
@@ -88,6 +92,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Templates
 	templates := map[string]*string{
 		"hiera_config_path": &p.config.HieraConfigPath,
+		"hieradata_dir":     &p.config.HieraDataDir,
 		"manifest_file":     &p.config.ManifestFile,
 		"manifest_dir":      &p.config.ManifestDir,
 		"staging_dir":       &p.config.StagingDir,
@@ -161,6 +166,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if p.config.HieraDataDir != "" {
+		info, err := os.Stat(p.config.HieraDataDir)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("hieradata_dir is invalid: %s", err))
+		} else if != info.IsDir() {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("hieradata_dir must point to a directory"))
+		}
+	}
+
 	if p.config.ManifestDir != "" {
 		info, err := os.Stat(p.config.ManifestDir)
 		if err != nil {
@@ -220,6 +236,19 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error uploading hiera config: %s", err)
 		}
 	}
+
+  // Upload hieradata dir if set
+	remoteHieraDataDir := ""
+	if p.config.HieraDataDir != "" {
+		ui.Message(fmt.Sprintf(
+			"Uploading manifest directory from: %s", p.config.HieraDataDir))
+		remoteHieraDataDir = fmt.Sprintf("%s/%s", p.config.StagingDir, p.config.HieraDataDir)
+		err := p.uploadDirectory(ui, comm, remoteHieraDataDir, p.config.HieraDataDir)
+		if err != nil {
+			return fmt.Errorf("Error uploading hieradata  dir: %s", err)
+		}
+	}
+
 
 	// Upload manifest dir if set
 	remoteManifestDir := ""
@@ -307,6 +336,7 @@ func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) 
 
 	return path, nil
 }
+
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
 	// Create the remote manifests directory...

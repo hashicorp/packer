@@ -133,3 +133,36 @@ func TestProvisionerPrepare_modulePaths(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestProvisionerPrepare_HieraDataDirs(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "hieradata_dir")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with bad paths
+	config["hieradata_dir"] = []string{"i-should-not-exist"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should be an error")
+	}
+
+	// Test with a good one
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("error: %s", err)
+	}
+	defer os.RemoveAll(td)
+
+	config["hieradata_dir"] = []string{td}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
