@@ -15,7 +15,7 @@ header .header {
 
 .hero {
     height: $hero-height;
-    background: #000000 url(/images/hero_image.jpg) no-repeat 35px -40px;
+    background: #000000 image-url('hero_image.jpg') no-repeat 35px -40px;
     background-size: 960px 467px;
 
     h2 {
@@ -30,7 +30,7 @@ header .header {
     }
 
     .download-container {
-        background: url(/images/down_arrow.png) no-repeat top left;
+        background: image-url('down_arrow.png') no-repeat top left;
         display: inline-block;
         min-height: 73px;
         margin: 0 auto;
@@ -294,7 +294,7 @@ header .header {
         width: $nav-height;
         border-right: $border;
         float: left;
-        background: $white url(/images/arrow-left.png) no-repeat center center;
+        background: $white image-url('arrow-left.png') no-repeat center center;
         @include respond-to(mobile) {
             width: 50%;
             background-position: left center;
@@ -302,7 +302,7 @@ header .header {
     }
 
     .next-section {
-        background: $white url(/images/arrow-right.png) no-repeat center right;
+        background: $white image-url('arrow-right.png') no-repeat center right;
     }
 }
 
