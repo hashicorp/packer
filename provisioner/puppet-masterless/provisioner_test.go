@@ -144,14 +144,6 @@ func TestProvisionerPrepare_HieraDataDirs(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	// Test with bad paths
-	config["hieradata_dir"] = []string{"i-should-not-exist"}
-	p = new(Provisioner)
-	err = p.Prepare(config)
-	if err == nil {
-		t.Fatal("should be an error")
-	}
-
 	// Test with a good one
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
@@ -159,7 +151,7 @@ func TestProvisionerPrepare_HieraDataDirs(t *testing.T) {
 	}
 	defer os.RemoveAll(td)
 
-	config["hieradata_dir"] = []string{td}
+	config["hieradata_dir"] = td
 	p = new(Provisioner)
 	err = p.Prepare(config)
 	if err != nil {

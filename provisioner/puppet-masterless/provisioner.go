@@ -171,7 +171,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("hieradata_dir is invalid: %s", err))
-		} else if != info.IsDir() {
+		} else if !info.IsDir() {
 				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("hieradata_dir must point to a directory"))
 		}
