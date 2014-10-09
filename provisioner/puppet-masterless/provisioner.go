@@ -346,6 +346,7 @@ func (p *Provisioner) uploadHieraData(ui packer.Ui, comm packer.Communicator) (s
 		return "", fmt.Errorf("Error creating hiera data directory: %s", err)
 	}
 
+	return remoteHieraDataDir, nil
 }
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
