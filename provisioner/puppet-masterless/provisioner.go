@@ -290,6 +290,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
 		FacterVars:      strings.Join(facterVars, " "),
 		HieraConfigPath: remoteHieraConfigPath,
+		HieraDataDir:    remoteHieraDataDir,
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
 		ModulePath:      strings.Join(modulePaths, ":"),
@@ -337,6 +338,15 @@ func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) 
 	return path, nil
 }
 
+func (p *Provisioner) uploadHieraData(ui packer.Ui, comm packer.Communicator) (string, error) {
+	// Create the remote manifests directory...
+	ui.Message("Uploading hieradata...")
+	remoteHieraDataDir := fmt.Sprintf("%s/%s", p.config.StagingDir, p.config.HieraDataDir)
+	if err := p.createDir(ui, comm, remoteHieraDataDir); err != nil {
+		return "", fmt.Errorf("Error creating hiera data directory: %s", err)
+	}
+
+}
 
 func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
 	// Create the remote manifests directory...
