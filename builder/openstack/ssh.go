@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/rackspace/gophercloud"
 	"time"
+	"io/ioutil"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
@@ -49,11 +50,23 @@ func SSHAddress(csp gophercloud.CloudServersProvider, port int) func(multistep.S
 // SSHConfig returns a function that can be used for the SSH communicator
 // config for connecting to the instance created over SSH using the generated
 // private key.
-func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+func SSHConfig(username string, privateKeyFile string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
-		privateKey := state.Get("privateKey").(string)
+		
+		var privateKey string
+
+		if privateKeyFile == "" {
+			privateKey = state.Get("privateKey").(string)
+		} else {
+			bytes, err := ioutil.ReadFile(privateKeyFile)
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			privateKey = string(bytes)		
+		}
 
 		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+
 		if err != nil {
 			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 		}
