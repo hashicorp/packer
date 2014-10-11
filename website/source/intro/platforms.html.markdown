@@ -9,7 +9,7 @@ next_title: "Getting Started: Install Packer"
 # Supported Platforms
 
 Packer can create machine images for any platform. Packer ships with
-support for a set of platforms, but can be [extend through plugins](/docs/extend/builder.html)
+support for a set of platforms, but can be [extended through plugins](/docs/extend/builder.html)
 to support any platform. This page documents the list of supported image
 types that Packer supports creating.
 
