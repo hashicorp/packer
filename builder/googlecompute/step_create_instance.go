@@ -24,6 +24,25 @@ func (config *Config) getImage() Image {
 	return Image{Name: config.SourceImage, ProjectId: project}
 }
 
+func (config *Config) getInstanceMetadata(sshPublicKey string) map[string]string {
+	instanceMetadata := make(map[string]string)
+
+	// Copy metadata from config
+	for k, v := range config.Metadata {
+		instanceMetadata[k] = v
+	}
+
+	// Merge any existing ssh keys with our public key
+	sshMetaKey := "sshKeys"
+	sshKeys := fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey)
+	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
+		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+	}
+	instanceMetadata[sshMetaKey] = sshKeys
+
+	return instanceMetadata
+}
+
 // Run executes the Packer build step that creates a GCE instance.
 func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
@@ -39,9 +58,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		DiskSizeGb:  config.DiskSizeGb,
 		Image:       config.getImage(),
 		MachineType: config.MachineType,
-		Metadata: map[string]string{
-			"sshKeys": fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey),
-		},
+		Metadata: config.getInstanceMetadata(sshPublicKey),
 		Name:    name,
 		Network: config.Network,
 		Tags:    config.Tags,
