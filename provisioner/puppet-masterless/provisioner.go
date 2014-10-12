@@ -237,7 +237,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-  // Upload hieradata dir if set
+	// Upload hieradata dir if set
 	remoteHieraDataDir := ""
 	if p.config.HieraDataDir != "" {
 		ui.Message(fmt.Sprintf(
@@ -288,6 +288,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
+		StagingDir: 	 p.config.StagingDir,
 		FacterVars:      strings.Join(facterVars, " "),
 		HieraConfigPath: remoteHieraConfigPath,
 		HieraDataDir:    remoteHieraDataDir,
