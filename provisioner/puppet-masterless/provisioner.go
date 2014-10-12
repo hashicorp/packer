@@ -57,6 +57,7 @@ type ExecuteTemplate struct {
 	ModulePath      string
 	ManifestFile    string
 	ManifestDir     string
+	StagingDir      string
 	Sudo            bool
 }
 
@@ -242,7 +243,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if p.config.HieraDataDir != "" {
 		ui.Message(fmt.Sprintf(
 			"Uploading manifest directory from: %s", p.config.HieraDataDir))
-		remoteHieraDataDir = fmt.Sprintf("%s/%s", p.config.StagingDir, p.config.HieraDataDir)
+		remoteHieraDataDir = fmt.Sprintf("%s/hieradata", p.config.StagingDir)
 		err := p.uploadDirectory(ui, comm, remoteHieraDataDir, p.config.HieraDataDir)
 		if err != nil {
 			return fmt.Errorf("Error uploading hieradata  dir: %s", err)
