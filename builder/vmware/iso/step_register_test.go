@@ -50,16 +50,13 @@ func TestStepRegister_remoteDriver(t *testing.T) {
 	if driver.RegisterPath != "foo" {
 		t.Fatal("should call with correct path")
 	}
-	if driver.UnregisterCalled {
-		t.Fatal("unregister should not be called")
+	if driver.DestroyCalled {
+		t.Fatal("destroy should not be called")
 	}
 
 	// cleanup
 	step.Cleanup(state)
-	if !driver.UnregisterCalled {
-		t.Fatal("unregister should be called")
-	}
-	if driver.UnregisterPath != "foo" {
-		t.Fatal("should unregister proper path")
+	if !driver.DestroyCalled {
+		t.Fatal("destroy should be called")
 	}
 }

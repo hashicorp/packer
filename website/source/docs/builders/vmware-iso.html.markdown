@@ -362,6 +362,8 @@ Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by runn
 esxcli system settings advanced set -o /Net/GuestIPHack -i 1
 ```
 
+and install VMware OVF Tool on your local machine.
+
 When using a remote VMware Hypervisor, the builder still downloads the
 ISO and various files locally, and uploads these to the remote machine.
 Packer currently uses SSH to communicate to the ESXi machine rather than
@@ -381,6 +383,9 @@ fill in the required `remote_*` configurations:
 
 Additionally, there are some optional configurations that you'll likely
 have to modify as well:
+
+* `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
+  format of the exported virtual machine. This defaults to "ovf".
 
 * `remote_datastore` - The path to the datastore where the VM will be
   stored on the ESXi machine.

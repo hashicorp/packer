@@ -12,7 +12,8 @@ import (
 )
 
 var builtins = map[string]string{
-	"mitchellh.vmware": "vmware",
+	"mitchellh.vmware":     "vmware",
+	"mitchellh.vmware-esx": "vmware",
 }
 
 type Config struct {
@@ -65,14 +66,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// First define all our templatable parameters that are _required_
 	templates := map[string]*string{
-		"cluster":       &p.config.Cluster,
-		"datacenter":    &p.config.Datacenter,
-		"diskmode":      &p.config.DiskMode,
-		"host":          &p.config.Host,
-		"password":      &p.config.Password,
-		"resource_pool": &p.config.ResourcePool,
-		"username":      &p.config.Username,
-		"vm_name":       &p.config.VMName,
+		"cluster":    &p.config.Cluster,
+		"datacenter": &p.config.Datacenter,
+		"diskmode":   &p.config.DiskMode,
+		"host":       &p.config.Host,
+		"password":   &p.config.Password,
+		"username":   &p.config.Username,
+		"vm_name":    &p.config.VMName,
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
@@ -82,6 +82,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Then define the ones that are optional
+	templates["resource_pool"] = &p.config.ResourcePool
 	templates["datastore"] = &p.config.Datastore
 	templates["vm_network"] = &p.config.VMNetwork
 	templates["vm_folder"] = &p.config.VMFolder
@@ -107,16 +108,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
-	vmx := ""
+	source := ""
 	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".vmx") {
-			vmx = path
+		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
+			source = path
 			break
 		}
 	}
 
-	if vmx == "" {
-		return nil, false, fmt.Errorf("VMX file not found")
+	if source == "" {
+		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
 	args := []string{
@@ -127,8 +128,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
-		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
+		fmt.Sprintf("%s", source),
+		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
 			url.QueryEscape(p.config.Username),
 			url.QueryEscape(p.config.Password),
 			p.config.Host,
@@ -137,7 +138,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			p.config.ResourcePool),
 	}
 
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 	var out bytes.Buffer
 	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
