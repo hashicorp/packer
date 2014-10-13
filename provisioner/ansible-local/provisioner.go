@@ -69,7 +69,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Defaults
 	if p.config.Command == "" {
-		p.config.Command = "ansible-playbook"
+		p.config.Command = "ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook"
 	}
 
 	if p.config.StagingDir == "" {
