@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"log"
+	"net"
 	"time"
 )
 
@@ -29,6 +30,14 @@ type StateChangeConf struct {
 	Target    string
 }
 
+func isTransientNetworkError(err error) bool {
+	ret := false
+	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
+		ret = true
+	}
+	return ret
+}
+
 // AMIStateRefreshFunc returns a StateRefreshFunc that is used to watch
 // an AMI for state changes.
 func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
@@ -37,6 +46,9 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 		if err != nil {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidAMIID.NotFound" {
 				// Set this to nil as if we didn't find anything.
+				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
 				resp = nil
 			} else {
 				log.Printf("Error on AMIStateRefresh: %s", err)
@@ -64,6 +76,9 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidInstanceID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
 			} else {
 				log.Printf("Error on InstanceStateRefresh: %s", err)
 				return nil, "", err
@@ -89,6 +104,9 @@ func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefre
 		if err != nil {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidSpotInstanceRequestID.NotFound" {
 				// Set this to nil as if we didn't find anything.
+				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
 				resp = nil
 			} else {
 				log.Printf("Error on SpotRequestStateRefresh: %s", err)
