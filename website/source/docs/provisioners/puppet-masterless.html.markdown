@@ -58,6 +58,11 @@ Optional parameters:
   configuration to be uploaded to the remote machine. Hiera data directories
   must be uploaded using the file provisioner separately.
 
+* `hieradata_dir` (string) - The hiera data directory containing your
+   hiera data yaml files. This is opinionated as to what to call your hiera data
+   directory and will create a directory called `hieradata` in the staging directory.
+   Your hiera.yaml file will need to refer to the :datadir: `hieradata`.  
+
 * `manifest_dir` (string) - The path to a local directory with manifests
   to be uploaded to the remote machine. This is useful if your main
   manifest file uses imports. This directory doesn't necessarily contain
@@ -77,7 +82,8 @@ Optional parameters:
   This directory doesn't need to exist but must have proper permissions so that
   the SSH user that Packer uses is able to create directories and write into
   this folder. If the permissions are not correct, use a shell provisioner
-  prior to this to configure it properly.
+  prior to this to configure it properly. You can access the variable in your
+  execution command below with {{.StagingDir}}.
 
 ## Execute Command
 
@@ -107,3 +113,23 @@ can contain various template variables, defined below:
 * `Sudo` - A boolean of whether to `sudo` the command or not, depending on
   the value of the `prevent_sudo` configuration.
 
+### Note:
+Puppet apply will run from the default user directory. If you want to execute your apply from
+with the StagingDir you might like to add the following:
+```
+pushd {{.StagingDir}} ; {{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
+  --verbose \
+  .....
+  {{.ManifestFile}}
+```
+
+This can be useful if you wanted to define your hiera datadir as follows:
+```
+---
+:backends:
+  - yaml
+:yaml:
+  :datadir: ./hieradata
+:hierarchy:
+  - common
+```
