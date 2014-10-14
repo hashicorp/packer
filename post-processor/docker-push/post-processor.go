@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/post-processor/docker-import"
+  "github.com/mitchellh/packer/post-processor/docker-tag"
 	"strings"
 )
 
@@ -67,9 +68,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	if artifact.BuilderId() != dockerimport.BuilderId {
+	if artifact.BuilderId() != dockerimport.BuilderId && artifact.BuilderId() != dockertag.BuilderId {
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from docker-import artifacts.",
+			"Unknown artifact type: %s\nCan only import from docker-import and docker-tag artifacts.",
 			artifact.BuilderId())
 		return nil, false, err
 	}
