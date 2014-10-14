@@ -1,9 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
-
 $script = <<SCRIPT
 SRCROOT="/opt/go"
 
@@ -31,7 +28,7 @@ sudo chown -R vagrant:vagrant /opt/gopath
 sudo apt-get install -y curl git-core zip
 SCRIPT
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure(2) do |config|
   config.vm.box = "chef/ubuntu-12.04"
 
   config.vm.provision "shell", inline: $script
