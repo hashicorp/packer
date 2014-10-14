@@ -149,6 +149,14 @@ func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
 
 func (c *config) discover(path string) error {
 	var err error
+
+	if !filepath.IsAbs(path) {
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = c.discoverSingle(
 		filepath.Join(path, "packer-builder-*"), &c.Builders)
 	if err != nil {
