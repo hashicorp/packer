@@ -10,6 +10,7 @@ BUG FIXES:
   * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
   * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
   * builder/parallels: Create VM without hdd and then add it later [GH-1548]
+  * providers/aws: Ignore transient network errors. [GH-1579]
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
   * provisioner/shell: Quote environmental variables. [GH-1568]
 
