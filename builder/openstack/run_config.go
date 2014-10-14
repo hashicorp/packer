@@ -21,6 +21,7 @@ type RunConfig struct {
 	FloatingIp        string   `mapstructure:"floating_ip"`
 	SecurityGroups    []string `mapstructure:"security_groups"`
 	Networks          []string `mapstructure:"networks"`
+	PrivateKeyFile    string   `mapstructure:"ssh_private_key"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
