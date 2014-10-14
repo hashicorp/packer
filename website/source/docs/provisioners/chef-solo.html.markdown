@@ -112,7 +112,7 @@ and has a set of variables available to use:
 * `DataBagsPath` is the path to the data bags folder.
 * `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
 * `EnvironmentsPath` - The path to the environments folder.
-* `RolesPath` - The path the folders folder.
+* `RolesPath` - The path to the roles folder.
 
 ## Execute Command
 
