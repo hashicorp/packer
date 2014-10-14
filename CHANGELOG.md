@@ -10,6 +10,7 @@ BUG FIXES:
   * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
   * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
   * builder/parallels: Create VM without hdd and then add it later [GH-1548]
+  * provisioner/shell: Quote environmental variables. [GH-1568]
 
 ## 0.7.1 (September 10, 2014)
 
