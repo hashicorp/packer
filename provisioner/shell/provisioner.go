@@ -170,18 +170,15 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
-	for _, kv := range p.config.Vars {
+	for idx, kv := range p.config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
+		} else {
+			// Single quote env var values
+			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
-	}
-
-	// Single quote env var values
-	for key := range p.config.Vars {
-		vs := strings.SplitN(p.config.Vars[key], "=", 2)
-		p.config.Vars[key] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 	}
 
 	if p.config.RawStartRetryTimeout != "" {
