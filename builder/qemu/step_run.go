@@ -2,11 +2,12 @@ package qemu
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // stepRun runs the virtual machine
@@ -78,13 +79,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
-	defaultArgs["-netdev"] = "user,id=user.0"
+	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:22", sshHostPort)
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s", imgPath, config.DiskInterface)
 	defaultArgs["-cdrom"] = isoPath
 	defaultArgs["-boot"] = bootDrive
 	defaultArgs["-m"] = "512M"
-	defaultArgs["-redir"] = fmt.Sprintf("tcp:%v::22", sshHostPort)
 	defaultArgs["-vnc"] = vnc
 
 	// Append the accelerator to the machine type if it is specified
