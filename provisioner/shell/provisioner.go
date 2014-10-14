@@ -178,6 +178,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	// Single quote env var values
+	for key := range p.config.Vars {
+		vs := strings.SplitN(p.config.Vars[key], "=", 2)
+		p.config.Vars[key] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
+	}
+
 	if p.config.RawStartRetryTimeout != "" {
 		p.config.startRetryTimeout, err = time.ParseDuration(p.config.RawStartRetryTimeout)
 		if err != nil {
