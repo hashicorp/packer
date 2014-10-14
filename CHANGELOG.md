@@ -6,6 +6,7 @@ FEATURES:
 
 BUG FIXES:
 
+  * core: Fix loading plugins from pwd. [GH-1521]
   * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
   * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
   * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
