@@ -24,6 +24,6 @@ An example is shown below, showing only the post-processor configuration:
 <pre class="prettyprint">
 {
   "type": "compress",
-  "path": "foo.tar.gz"
+  "output": "foo.tar.gz"
 }
 </pre>
