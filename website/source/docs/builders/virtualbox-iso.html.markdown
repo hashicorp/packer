@@ -243,11 +243,27 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
+* `<bs>` - Backspace
+
+* `<del>` - Delete
+
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
 * `<esc>` - Simulates pressing the escape key.
 
 * `<tab>` - Simulates pressing the tab key.
+
+* `<f1>` - `<f12>` - Simulates pressing a function key.
+
+* `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+* `<spacebar>` - Simulates pressing the spacebar.
+
+* `<insert>` - Simulates pressing the insert key.
+
+* `<home>` `<end>` - Simulates pressing the home and end keys.
+
+* `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
 * `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
