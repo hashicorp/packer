@@ -25,6 +25,14 @@ Support for other platforms can be added via plugins.
 The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
 
+## Install Packer
+[Download a pre-built Packer binary](http://www.packer.io/downloads.html)
+for your operating system or [compile Packer yourself](#developing-packer).
+
+Install Packer via homebrew:
+
+	$ brew install homebrew/binary/packer
+
 ## Quick Start
 
 **Note:** There is a great
@@ -32,9 +40,6 @@ The images that Packer creates can easily be turned into
 for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
-
-First, [download a pre-built Packer binary](http://www.packer.io/downloads.html)
-for your operating system or [compile Packer yourself](#developing-packer).
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
