@@ -10,7 +10,7 @@ multiple builders depending on the strategy you want to use to build the
 AMI. Packer supports the following builders at the moment:
 
 * [amazon-ebs](/docs/builders/amazon-ebs.html) - Create EBS-backed AMIs
-  by launching a source instance and re-packaging it into a new AMI after
+  by launching a source AMI and re-packaging it into a new AMI after
   provisioning. If in doubt, use this builder, which is the easiest to get
   started with.
 
