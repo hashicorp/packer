@@ -14,6 +14,7 @@ BUG FIXES:
   * providers/aws: Ignore transient network errors. [GH-1579]
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
   * provisioner/shell: Quote environmental variables. [GH-1568]
+  * post-processors/docker-push: Work with docker-tag artifacts. [GH-1526]
 
 ## 0.7.1 (September 10, 2014)
 
