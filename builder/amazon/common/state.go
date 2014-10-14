@@ -30,14 +30,6 @@ type StateChangeConf struct {
 	Target    string
 }
 
-func isTransientNetworkError(err error) bool {
-	ret := false
-	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
-		ret = true
-	}
-	return ret
-}
-
 // AMIStateRefreshFunc returns a StateRefreshFunc that is used to watch
 // an AMI for state changes.
 func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
@@ -178,4 +170,12 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	}
 
 	return
+}
+
+func isTransientNetworkError(err error) bool {
+	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
+		return true
+	}
+
+	return false
 }
