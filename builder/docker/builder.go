@@ -34,10 +34,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if len(warnings) > 0 {
-		log.Printf("Warnings while verifying the driver %s", warnings)
-		log.Printf("Warnings while verifying the driver %s", warnings)
-		log.Println("Warnings while verifying the driver %s", warnings)
-		log.Print("Warnings while verifying the driver %v", warnings)
+		log.Println("Warnings while verifying driver", warnings)
 	}
 
 	steps := []multistep.Step{
