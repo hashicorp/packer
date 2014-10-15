@@ -253,15 +253,14 @@ func (d *DockerDriver) TagImage(id string, repo string) error {
 	return nil
 }
 
-func (d *DockerDriver) Verify() error {
+func (d *DockerDriver) Verify() (warnings []string, error error) {
 	if _, err := exec.LookPath("docker"); err != nil {
-		return err
+		return nil, err
 	}
 
 	if v := os.Getenv("DOCKER_HOST"); v != "" {
-		return fmt.Errorf(
-			"DOCKER_HOST cannot be set with the Packer Docker builder.")
+		warnings = append(warnings, "DOCKER_HOST cannot be set with the Packer Docker builder.")
 	}
 
-	return nil
+	return warnings, nil
 }
