@@ -365,10 +365,10 @@ have to modify as well:
 * `remote_datastore` - The path to the datastore where the VM will be
   stored on the ESXi machine.
 
-* `remote_cache_datastore` (string) - The path to the datastore where
+* `remote_cache_datastore` - The path to the datastore where
   supporting files will be stored during the build on the remote machine.
 
-* `remote_cache_directory` (string) - The path where the ISO and/or floppy
+* `remote_cache_directory` - The path where the ISO and/or floppy
   files will be stored during the build on the remote machine. The path is
   relative to the `remote_cache_datastore` on the remote machine.
 
