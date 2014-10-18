@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"github.com/ugorji/go/codec"
+	"github.com/hashicorp/go-msgpack/codec"
 	"io"
 	"log"
 	"net/rpc"
