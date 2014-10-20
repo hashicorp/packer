@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Shell Provisioner"
+description: |-
+  The shell Packer provisioner provisions machines built by Packer using shell scripts. Shell provisioning is the easiest way to get software installed and configured on a machine.
 ---
 
 # Shell Provisioner
 
 Type: `shell`
 
-The shell provisioner provisions machines built by Packer using shell scripts.
+The shell Packer provisioner provisions machines built by Packer using shell scripts.
 Shell provisioning is the easiest way to get software installed and configured
 on a machine.
 

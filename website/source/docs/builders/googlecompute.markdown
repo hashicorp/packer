@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Google Compute Builder"
+description: |-
+  The `googlecompute` Packer builder is able to create images for use with Google Compute Engine (GCE) based on existing images. Google Compute Engine doesn't allow the creation of images from scratch.
 ---
 
 # Google Compute Builder
 
 Type: `googlecompute`
 
-The `googlecompute` builder is able to create
+The `googlecompute` Packer builder is able to create
 [images](https://developers.google.com/compute/docs/images)
 for use with [Google Compute Engine](https://cloud.google.com/products/compute-engine)
 (GCE) based on existing images. Google Compute Engine doesn't allow the creation

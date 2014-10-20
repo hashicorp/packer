@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Fix - Command-Line"
+description: |-
+  The `packer fix` Packer command takes a template and finds backwards incompatible parts of it and brings it up to date so it can be used with the latest version of Packer. After you update to a new Packer release, you should run the fix command to make sure your templates work with the new release.
 ---
 
 # Command-Line: Fix
 
-The `packer fix` command takes a template and finds backwards incompatible
+The `packer fix` Packer command takes a template and finds backwards incompatible
 parts of it and brings it up to date so it can be used with the latest version
 of Packer. After you update to a new Packer release, you should run the
 fix command to make sure your templates work with the new release.

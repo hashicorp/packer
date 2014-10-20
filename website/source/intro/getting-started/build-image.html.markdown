@@ -4,6 +4,8 @@ page_title: "Build an Image"
 prev_url: "/intro/getting-started/setup.html"
 next_url: "/intro/getting-started/provision.html"
 next_title: "Provision"
+description: |-
+  With Packer installed, let's just dive right into it and build our first image. Our first image will be an Amazon EC2 AMI with Redis pre-installed. This is just an example. Packer can create images for many platforms with anything pre-installed.
 ---
 
 # Build an Image

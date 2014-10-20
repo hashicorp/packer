@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><%= current_page.data.page_title ? "#{current_page.data.page_title} - " : "" %>Packer</title>
-		<meta name="description" content="Packer is a free and open source tool for creating golden images for multiple platforms from a single source configuration." />
+		<title><%= [current_page.data.page_title, "Packer by HashiCorp"].compact.join(" - ") %></title>
+    <meta name="description" content="<%= current_page.data.description %>" />
 
 		<%= stylesheet_link_tag "application" %>
 

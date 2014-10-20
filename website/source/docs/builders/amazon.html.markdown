@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Amazon AMI Builder"
+description: |-
+  Packer is able to create Amazon AMIs. To achieve this, Packer comes with multiple builders depending on the strategy you want to use to build the AMI.
 ---
 
 # Amazon AMI Builder

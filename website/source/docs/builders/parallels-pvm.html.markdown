@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Parallels Builder (from a PVM)"
+description: |-
+  This Parallels builder is able to create Parallels Desktop for Mac virtual machines and export them in the PVM format, starting from an existing PVM (exported virtual machine image).
 ---
 
 # Parallels Builder (from a PVM)

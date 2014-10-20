@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Templates: Provisioners"
+description: |-
+  Within the template, the provisioners section contains an array of all the provisioners that Packer should use to install and configure software within running machines prior to turning them into machine images.
 ---
 
 # Templates: Provisioners

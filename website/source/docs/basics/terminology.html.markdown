@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Packer Terminology"
+description: |-
+  There are a handful of terms used throughout the Packer documentation where the meaning may not be immediately obvious if you haven't used Packer before. Luckily, there are relatively few. This page documents all the terminology required to understand and use Packer. The terminology is in alphabetical order for easy referencing.
 ---
 
 # Packer Terminology

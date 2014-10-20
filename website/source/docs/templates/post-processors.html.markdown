@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Templates: Post-Processors"
+description: |-
+  The post-processor section within a template configures any post-processing that will be done to images built by the builders. Examples of post-processing would be compressing files, uploading artifacts, etc.
 ---
 
 # Templates: Post-Processors

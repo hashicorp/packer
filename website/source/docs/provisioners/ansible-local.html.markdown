@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Ansible (Local) Provisioner"
+description: |-
+  The `ansible-local` Packer provisioner configures Ansible to run on the machine by Packer from local Playbook and Role files.  Playbooks and Roles can be uploaded from your local machine to the remote machine.  Ansible is run in local mode via the `ansible-playbook` command.
 ---
 
 # Ansible Local Provisioner
 
 Type: `ansible-local`
 
-The `ansible-local` provisioner configures Ansible to run on the machine by
+The `ansible-local` Packer provisioner configures Ansible to run on the machine by
 Packer from local Playbook and Role files.  Playbooks and Roles can be uploaded
 from your local machine to the remote machine.  Ansible is run in [local mode](http://docs.ansible.com/playbooks_delegation.html#local-playbooks) via the `ansible-playbook` command.
 

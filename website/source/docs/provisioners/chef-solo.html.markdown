@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Chef-Solo Provisioner"
+description: |-
+  The Chef solo Packer provisioner installs and configures software on machines built by Packer using chef-solo. Cookbooks can be uploaded from your local machine to the remote machine or remote paths can be used.
 ---
 
 # Chef Solo Provisioner
 
 Type: `chef-solo`
 
-The Chef solo provisioner installs and configures software on machines built
+The Chef solo Packer provisioner installs and configures software on machines built
 by Packer using [chef-solo](http://docs.opscode.com/chef_solo.html). Cookbooks
 can be uploaded from your local machine to the remote machine or remote paths
 can be used.

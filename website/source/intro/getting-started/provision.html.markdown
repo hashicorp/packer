@@ -4,6 +4,8 @@ page_title: "Provision"
 prev_url: "/intro/getting-started/build-image.html"
 next_url: "/intro/getting-started/parallel-builds.html"
 next_title: "Parallel Builds"
+description: |-
+  In the previous page of this guide, you created your first image with Packer. The image you just built, however, was basically just a repackaging of a previously existing base AMI. The real utility of Packer comes from being able to install and configure software into the images as well. This stage is also known as the _provision_ step. Packer fully supports automated provisioning in order to install software onto the machines prior to turning them into images.
 ---
 
 # Provision

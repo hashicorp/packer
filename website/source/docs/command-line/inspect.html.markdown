@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Inspect - Command-Line"
+description: |-
+  The `packer inspect` Packer command takes a template and outputs the various components a template defines. This can help you quickly learn about a template without having to dive into the JSON itself. The command will tell you things like what variables a template accepts, the builders it defines, the provisioners it defines and the order they'll run, and more.
 ---
 
 # Command-Line: Inspect
 
-The `packer inspect` command takes a template and outputs the various components
+The `packer inspect` Packer command takes a template and outputs the various components
 a template defines. This can help you quickly learn about a template without
 having to dive into the JSON itself.
 The command will tell you things like what variables a template accepts,

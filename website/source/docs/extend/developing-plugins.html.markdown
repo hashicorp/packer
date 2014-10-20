@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Developing Plugins"
+description: |-
+  This page will document how you can develop your own Packer plugins. Prior to reading this, it is assumed that you're comfortable with Packer and also know the basics of how Plugins work, from a user standpoint.
 ---
 
 # Developing Plugins
