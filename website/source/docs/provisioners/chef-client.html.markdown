@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Chef-Client Provisioner"
+description: |-
+  The Chef Client Packer provisioner installs and configures software on machines built by Packer using chef-client. Packer configures a Chef client to talk to a remote Chef Server to provision the machine.
 ---
 
 # Chef Client Provisioner
 
 Type: `chef-client`
 
-The Chef Client provisioner installs and configures software on machines built
+The Chef Client Packer provisioner installs and configures software on machines built
 by Packer using [chef-client](http://docs.opscode.com/chef_client.html).
 Packer configures a Chef client to talk to a remote Chef Server to
 provision the machine.

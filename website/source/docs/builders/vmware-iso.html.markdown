@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VMware Builder from ISO"
+description: |-
+  This VMware Packer builder is able to create VMware virtual machines from an ISO file as a source. It currently supports building virtual machines on hosts running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and VMware Player on Linux. It can also build machines directly on VMware vSphere Hypervisor using SSH as opposed to the vSphere API.
 ---
 
 # VMware Builder (from ISO)
 
 Type: `vmware-iso`
 
-This VMware builder is able to create VMware virtual machines from an
+This VMware Packer builder is able to create VMware virtual machines from an
 ISO file as a source. It currently
 supports building virtual machines on hosts running
 [VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X,

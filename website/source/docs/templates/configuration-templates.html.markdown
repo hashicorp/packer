@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Configuration Templates"
+description: |-
+  All strings within templates are processed by a common Packer templating engine, where variables and functions can be used to modify the value of a configuration parameter at runtime.
 ---
 
 # Configuration Templates

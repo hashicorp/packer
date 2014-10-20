@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "QEMU Builder"
+description: |-
+  The Qemu Packer builder is able to create KVM and Xen virtual machine images. Support for Xen is experimental at this time.
 ---
 
 # QEMU Builder
 
 Type: `qemu`
 
-The Qemu builder is able to create [KVM](http://www.linux-kvm.org)
+The Qemu Packer builder is able to create [KVM](http://www.linux-kvm.org)
 and [Xen](http://www.xenproject.org) virtual machine images. Support
 for Xen is experimental at this time.
 

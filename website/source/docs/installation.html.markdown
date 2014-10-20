@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Install Packer"
+description: |-
+  Packer must first be installed on the machine you want to run it on. To make installation easy, Packer is distributed as a binary package for all supported platforms and architectures. This page will not cover how to compile Packer from source, as that is covered in the README and is only recommended for advanced users.
 ---
 
 # Install Packer

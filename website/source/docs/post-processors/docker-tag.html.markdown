@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "docker-tag Post-Processor"
+description: |-
+  The Packer Docker Tag post-processor takes an artifact from the docker builder that was committed and tags it into a repository. This allows you to use the other Docker post-processors such as docker-push to push the image to a registry.
 ---
 
 # Docker Tag Post-Processor
 
 Type: `docker-tag`
 
-The Docker Tag post-processor takes an artifact from the
+The Packer Docker Tag post-processor takes an artifact from the
 [docker builder](/docs/builders/docker.html) that was committed
 and tags it into a repository. This allows you to use the other
 Docker post-processors such as

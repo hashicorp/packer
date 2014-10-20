@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "docker-import Post-Processor"
+description: |-
+  The Packer Docker import post-processor takes an artifact from the docker builder and imports it with Docker locally. This allows you to apply a repository and tag to the image and lets you use the other Docker post-processors such as docker-push to push the image to a registry.
 ---
 
 # Docker Import Post-Processor
 
 Type: `docker-import`
 
-The Docker import post-processor takes an artifact from the
+The Packer Docker import post-processor takes an artifact from the
 [docker builder](/docs/builders/docker.html) and imports it with Docker
 locally. This allows you to apply a repository and tag to the image
 and lets you use the other Docker post-processors such as

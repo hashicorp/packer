@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Templates"
+description: |-
+  Templates are JSON files that configure the various components of Packer in order to create one or more machine images. Templates are portable, static, and readable and writable by both humans and computers. This has the added benefit of being able to not only create and modify templates by hand, but also write scripts to dynamically create or modify templates.
 ---
 
 # Templates

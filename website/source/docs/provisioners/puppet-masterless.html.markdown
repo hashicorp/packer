@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Puppet (Masterless) Provisioner"
+description: |-
+  The masterless Puppet Packer provisioner configures Puppet to run on the machines by Packer from local modules and manifest files. Modules and manifests can be uploaded from your local machine to the remote machine or can simply use remote paths (perhaps obtained using something like the shell provisioner). Puppet is run in masterless mode, meaning it never communicates to a Puppet master.
 ---
 
 # Puppet (Masterless) Provisioner
 
 Type: `puppet-masterless`
 
-The masterless Puppet provisioner configures Puppet to run on the machines
+The masterless Puppet Packer provisioner configures Puppet to run on the machines
 by Packer from local modules and manifest files. Modules and manifests
 can be uploaded from your local machine to the remote machine or can simply
 use remote paths (perhaps obtained using something like the shell provisioner).

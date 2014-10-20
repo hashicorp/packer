@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Custom Command Development"
+description: |-
+  Packer Commands are the components of Packer that add functionality to the `packer` application. Packer comes with a set of commands out of the box, such as `build`. Commands are invoked as `packer <COMMAND>`. Custom commands allow you to add new commands to Packer to perhaps perform new functionality.
 ---
 
 # Custom Command Development
 
-Commands are the components of Packer that add functionality to the
+Packer Commands are the components of Packer that add functionality to the
 `packer` application. Packer comes with a set of commands out of the
 box, such as `build`. Commands are invoked as `packer <COMMAND>`.
 Custom commands allow you to add new commands to Packer to perhaps

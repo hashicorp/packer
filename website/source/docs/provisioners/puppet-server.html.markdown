@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Puppet Server Provisioner"
+description: |-
+  The `puppet-server` Packer provisioner provisions Packer machines with Puppet by connecting to a Puppet master.
 ---
 
 # Puppet Server Provisioner
 
 Type: `puppet-server`
 
-The `puppet-server` provisioner provisions Packer machines with Puppet
+The `puppet-server` Packer provisioner provisions Packer machines with Puppet
 by connecting to a Puppet master.
 
 -> **Note:** Puppet will _not_ be installed automatically

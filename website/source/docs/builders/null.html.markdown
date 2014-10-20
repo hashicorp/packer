@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Null Builder"
+description: |-
+  The `null` Packer builder is not really a builder, it just sets up an SSH connection and runs the provisioners. It can be used to debug provisioners without incurring high wait times. It does not create any kind of image or artifact.
 ---
 
 # Null Builder
 
 Type: `null`
 
-The null builder is not really a builder, it just sets up an SSH connection
+The `null` Packer builder is not really a builder, it just sets up an SSH connection
 and runs the provisioners. It can be used to debug provisioners without
 incurring high wait times. It does not create any kind of image or artifact.
 

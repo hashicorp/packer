@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Convert Veewee Definitions to Packer Templates"
+description: |-
+  If you are or were a user of Veewee, then there is an official tool called veewee-to-packer that will convert your Veewee definition into an equivalent Packer template. Even if you're not a Veewee user, Veewee has a large library of templates that can be readily used with Packer by simply converting them.
 ---
 
 # Veewee-to-Packer

@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Amazon AMI Builder (instance-store)"
+description: |-
+  The `amazon-instance` Packer builder is able to create Amazon AMIs backed by instance storage as the root device. For more information on the difference between instance storage and EBS-backed instances, see the storage for the root device section in the EC2 documentation.
 ---
 
 # AMI Builder (instance-store)
 
 Type: `amazon-instance`
 
-The `amazon-instance` builder is able to create Amazon AMIs backed by
+The `amazon-instance` Packer builder is able to create Amazon AMIs backed by
 instance storage as the root device. For more information on the difference
 between instance storage and EBS-backed instances, see the
 ["storage for the root device" section in the EC2 documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).

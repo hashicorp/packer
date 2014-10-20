@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Docker Builder"
+description: |-
+  The `docker` Packer builder builds Docker images using Docker. The builder starts a Docker container, runs provisioners within this container, then exports the container for reuse or commits the image.
 ---
 
 # Docker Builder
 
 Type: `docker`
 
-The Docker builder builds [Docker](http://www.docker.io) images using
+The `docker` Packer builder builds [Docker](http://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within
 this container, then exports the container for reuse or commits the image.
 

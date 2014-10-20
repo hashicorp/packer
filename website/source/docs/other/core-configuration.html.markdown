@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Core Configuration"
+description: |-
+  There are a few configuration settings that affect Packer globally by configuring the core of Packer. These settings all have reasonable defaults, so you generally don't have to worry about it until you want to tweak a configuration. If you're just getting started with Packer, don't worry about core configuration for now.
 ---
 
 # Core Configuration

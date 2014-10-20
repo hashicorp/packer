@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Vagrant Cloud Post-Processor"
+description: |-
+  The Packer Vagrant Cloud post-processor receives a Vagrant box from the `vagrant` post-processor and pushes it to Vagrant Cloud. Vagrant Cloud hosts and serves boxes to Vagrant, allowing you to version and distribute boxes to an organization in a simple way.
 ---
 
 # Vagrant Cloud Post-Processor
 
 Type: `vagrant-cloud`
 
-The Vagrant Cloud post-processor receives a Vagrant box from the `vagrant`
+The Packer Vagrant Cloud post-processor receives a Vagrant box from the `vagrant`
 post-processor and pushes it to Vagrant Cloud. [Vagrant Cloud](https://vagrantcloud.com)
 hosts and serves boxes to Vagrant, allowing you to version and distribute
 boxes to an organization in a simple way.

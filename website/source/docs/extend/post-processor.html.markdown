@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Custom Post-Processor Development"
+description: |-
+  Packer  Post-processors are the components of Packer that transform one artifact into another, for example by compressing files, or uploading them.
 ---
 
 # Custom Post-Processor Development
 
-Post-processors are the components of Packer that transform one artifact
+Packer Post-processors are the components of Packer that transform one artifact
 into another, for example by compressing files, or uploading them.
 
 In the compression example, the transformation would be taking an artifact
