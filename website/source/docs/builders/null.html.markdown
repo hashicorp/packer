@@ -16,14 +16,14 @@ incurring high wait times. It does not create any kind of image or artifact.
 Below is a fully functioning example. It doesn't do anything useful, since
 no provisioners are defined, but it will connect to the specified host via ssh.
 
-<pre class="prettyprint">
+```javascript
 {
   "type":     "null",
   "host":     "127.0.0.1",
   "ssh_username": "foo",
   "ssh_password": "bar"
 }
-</pre>
+```
 
 ## Configuration Reference
 

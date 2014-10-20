@@ -20,12 +20,12 @@ installed, using the official Chef installers provided by Opscode.
 The example below is fully functional and expects cookbooks in the
 "cookbooks" directory relative to your working directory.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "chef-solo",
   "cookbook_paths": ["cookbooks"]
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -98,7 +98,7 @@ configuration template if you'd like to set custom configurations.
 
 The default value for the configuration template is:
 
-```
+```liquid
 cookbook_path [{{.CookbookPaths}}]
 ```
 
@@ -119,7 +119,7 @@ and has a set of variables available to use:
 By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Chef:
 
-```
+```liquid
 {{if .Sudo}}sudo {{end}}chef-solo \
   --no-color \
   -c {{.ConfigPath}} \
@@ -142,7 +142,7 @@ By default, Packer uses the following command (broken across multiple lines
 for readability) to install Chef. This command can be customized if you want
 to install Chef in another way.
 
-```
+```text
 curl -L https://www.opscode.com/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```

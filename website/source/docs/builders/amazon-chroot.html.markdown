@@ -17,12 +17,10 @@ this builder is able to build an EBS-backed AMI without launching a new
 EC2 instance. This can dramatically speed up AMI builds for organizations
 who need the extra fast build.
 
-<div class="alert alert-block alert-warn">
-<p><strong>This is an advanced builder.</strong> If you're just getting
+~> **This is an advanced builder** If you're just getting
 started with Packer, we recommend starting with the
-<a href="/docs/builders/amazon-ebs.html">amazon-ebs builder</a>, which is
-much easier to use.</p>
-</div>
+[amazon-ebs builder](/docs/builders/amazon-ebs.html), which is
+much easier to use.
 
 The builder does _not_ manage AMIs. Once it creates an AMI and stores it
 in your account, it is up to you to use, delete, etc. the AMI.
@@ -136,7 +134,7 @@ each category, the available configuration keys are alphabetized.
 
 Here is a basic example. It is completely valid except for the access keys:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-chroot",
   "access_key": "YOUR KEY HERE",
@@ -144,7 +142,7 @@ Here is a basic example. It is completely valid except for the access keys:
   "source_ami": "ami-e81d5881",
   "ami_name": "packer-amazon-chroot {{timestamp}}"
 }
-</pre>
+```
 
 ## Chroot Mounts
 
@@ -162,14 +160,14 @@ These default mounts are usually good enough for anyone and are sane
 defaults. However, if you want to change or add the mount points, you may
 using the `chroot_mounts` configuration. Here is an example configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "chroot_mounts": [
     ["proc", "proc", "/proc"],
     ["bind", "/dev", "/dev"]
   ]
 }
-</pre>
+```
 
 `chroot_mounts` is a list of a 3-tuples of strings. The three components
 of the 3-tuple, in order, are:
@@ -200,7 +198,7 @@ the filesystem.
 For debian based distributions you can setup a [policy-rc.d](http://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt) file which will
 prevent packages installed by your provisioners from starting services:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "shell",
   "inline": [
@@ -209,11 +207,13 @@ prevent packages installed by your provisioners from starting services:
     "chmod a+x /usr/sbin/policy-rc.d"
   ]
 },
-# ...
+
+// ...
+
 {
   "type": "shell",
   "inline": [
     "rm -f /usr/sbin/policy-rc.d"
   ]
 }
-</pre>
+```

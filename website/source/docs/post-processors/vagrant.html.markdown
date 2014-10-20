@@ -33,11 +33,9 @@ providers.
 * VirtualBox
 * VMware
 
-<div class="alert alert-block alert-info">
-<strong>Support for additional providers</strong> is planned. If the
+-> **Support for additional providers** is planned. If the
 Vagrant post-processor doesn't support creating boxes for a provider you
 care about, please help by contributing to Packer and adding support for it.
-</div>
 
 ## Configuration
 
@@ -84,16 +82,15 @@ The post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
 
-```json
+```javascript
 {
-    "type": "vagrant",
-
-    "compression_level": 1,
-    "override": {
-        "vmware": {
-            "compression_level": 0
-        }
+  "type": "vagrant",
+  "compression_level": 1,
+  "override": {
+    "vmware": {
+      "compression_level": 0
     }
+  }
 }
 ```
 

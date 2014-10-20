@@ -14,25 +14,23 @@ use remote paths (perhaps obtained using something like the shell provisioner).
 Puppet is run in masterless mode, meaning it never communicates to a Puppet
 master.
 
-<div class="alert alert-info alert-block">
-<strong>Note that Puppet will <em>not</em> be installed automatically
-by this provisioner.</strong> This provisioner expects that Puppet is already
+-> **Note:** Puppet will _not_ be installed automatically
+by this provisioner. This provisioner expects that Puppet is already
 installed on the machine. It is common practice to use the
-<a href="/docs/provisioners/shell.html">shell provisioner</a> before the
+[shell provisioner[(/docs/provisioners/shell.html) before the
 Puppet provisioner to do this.
-</div>
 
 ## Basic Example
 
 The example below is fully functional and expects the configured manifest
 file to exist relative to your working directory:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "puppet-masterless",
   "manifest_file": "site.pp"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -84,7 +82,7 @@ Optional parameters:
 By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Puppet:
 
-```
+```liquid
 {{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
@@ -106,4 +104,3 @@ can contain various template variables, defined below:
 * `ModulePath` - The paths to the module directories.
 * `Sudo` - A boolean of whether to `sudo` the command or not, depending on
   the value of the `prevent_sudo` configuration.
-

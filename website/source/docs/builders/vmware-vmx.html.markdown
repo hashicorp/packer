@@ -26,7 +26,7 @@ contains a new VMware virtual machine.
 Here is an example. This example is fully functional as long as the source
 path points to a real VMX file with the proper settings:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "vmware-vmx",
   "source_path": "/path/to/a/vm.vmx",
@@ -34,7 +34,7 @@ path points to a real VMX file with the proper settings:
   "ssh_password": "root",
   "shutdown_command": "shutdown -P now"
 }
-</pre>
+```
 
 ## Configuration Reference
 
