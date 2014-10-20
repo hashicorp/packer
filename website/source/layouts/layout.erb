@@ -4,47 +4,24 @@
 		<title><%= current_page.data.page_title ? "#{current_page.data.page_title} - " : "" %>Packer</title>
 		<meta name="description" content="Packer is a free and open source tool for creating golden images for multiple platforms from a single source configuration." />
 
-		<!-- HTML5 shiv -->
-		<!--[if lt IE 9]>
-		<script src="dist/html5shiv.js"></script>
-		<![endif]-->
+		<%= stylesheet_link_tag "application" %>
 
-		<!-- css -->
-		<%= stylesheet_link_tag "bootstrap.min", "main", "prettify" %>
-
-		<!-- js -->
-		<%= javascript_include_tag "prettify" %>
-
-		<!-- analytics -->
-		<script>
-			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-					(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-			ga('create', 'UA-43075859-1', 'packer.io');
-			ga('send', 'pageview');
-
-		</script>
-
-		<!-- fonts -->
-		<link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
 		<script type="text/javascript" src="//use.typekit.net/apr3jjs.js"></script>
 		<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	</head>
 	<body>
 		<nav class="dark-background">
 		<div class="container-fluid">
-			<div class="row-fluid">
-				<div class="span12">
-					<a href="https://github.com/mitchellh/packer">
-						<button class="download pull-right primary">GitHub</button>
-					</a>
-					<a href="/downloads.html">
-						<button class="download pull-right primary spaced">Download</button>
-					</a>
+			<div class="row">
+				<div class="col-md-12">
 					<a href="/" class="packer-logo pull-left">Packer</a>
 					<ul>
+            <li class="featured">
+              <a href="https://github.com/mitchellh/packer" class="primary">GitHub</a>
+            </li>
+            <li class="featured">
+              <a href="/downloads.html" class="primary">Download</a>
+            </li>
 						<li><a href="/intro">Intro</a></li>
 						<li><a href="/docs">Documentation</a></li>
 						<li><a href="/community">Community</a></li>
@@ -60,20 +37,30 @@
 
 		<footer class="dark-background">
 		<div class="container-fluid">
-			<div class="row-fluid">
-				<div class="span12">
+			<div class="row">
+				<div class="col-md-12">
 					<ul>
 						<li class="packer"><a href="/">Packer</a></li>
-						<li>A <a href="http://www.hashicorp.com/">HashiCorp</a> project.</li>
-						<a href="http://www.hashicorp.com">
-							<li class="pull-right hashi-logo">&nbps;</li>
-						</a>
+            <li>
+						  A <a href="http://www.hashicorp.com/">HashiCorp</a> project.
+            </li>
+					  <a href="http://www.hashicorp.com">
+						 <li class="pull-right hashi-logo">&nbps;</li>
+					  </a>
 					</ul>
 				</div>
 			</div>
 		</div>
 		</footer>
 
-		<script type="text/javascript">prettyPrint();</script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-43075859-1', 'packer.io');
+      ga('send', 'pageview');
+    </script>
 	</body>
 </html>
