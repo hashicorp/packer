@@ -33,15 +33,13 @@ Post-processors are added in the `post-processors` section of a template, which
 we haven't created yet. Modify your `example.json` template and add the section.
 Your template should look like the following:
 
-<pre class="prettyprint">
+```javascript
 {
-  "builders": [...],
-
-  "provisioners": [...],
-
+  "builders": ["..."],
+  "provisioners": ["..."],
   "post-processors": ["vagrant"]
 }
-</pre>
+```
 
 In this case, we're enabling a single post-processor named "vagrant". This
 post-processor is built-in to Packer and will create Vagrant boxes. You
@@ -58,7 +56,7 @@ Since Packer can't currently make a Vagrant box for DigitalOcean anyways,
 I recommend passing the `-only=amazon-ebs` flag to `packer build` so it only
 builds the AMI. The command should look like the following:
 
-```
+```text
 $ packer build -only=amazon-ebs example.json
 ```
 

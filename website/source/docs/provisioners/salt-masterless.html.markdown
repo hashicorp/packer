@@ -14,12 +14,12 @@ The `salt-masterless` provisioner provisions machines built by Packer using
 
 The example below is fully functional.
 
-<pre class="prettyprint">
+```javascript
 {
-    "type": "salt-masterless",
-    "local_state_tree": "/Users/me/salt"
+  "type": "salt-masterless",
+  "local_state_tree": "/Users/me/salt"
 }
-</pre>
+```
 
 ## Configuration Reference
 

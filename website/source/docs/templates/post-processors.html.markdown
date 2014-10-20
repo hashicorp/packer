@@ -19,13 +19,13 @@ however, must be referenced from the documentation for that specific post-proces
 
 Within a template, a section of post-processor definitions looks like this:
 
-<pre class="prettyprint">
+```javascript
 {
   "post-processors": [
-    ... one or more post-processor definitions here ...
+    // ... one or more post-processor definitions here
   ]
 }
-</pre>
+```
 
 For each post-processor definition, Packer will take the result of each of the
 defined builders and send it through the post-processors. This means that if you
@@ -46,11 +46,11 @@ A **simple definition** is just a string; the name of the post-processor. An
 example is shown below. Simple definitions are used when no additional configuration
 is needed for the post-processor.
 
-<pre class="prettyprint">
+```javascript
 {
   "post-processors": ["compress"]
 }
-</pre>
+```
 
 A **detailed definition** is a JSON object. It is very similar to a builder
 or provisioner definition. It contains a `type` field to denote the type of
@@ -58,7 +58,7 @@ the post-processor, but may also contain additional configuration for the
 post-processor. A detailed definition is used when additional configuration
 is needed beyond simply the type for the post-processor. An example is shown below.
 
-<pre class="prettyprint">
+```javascript
 {
   "post-processors": [
     {
@@ -67,7 +67,7 @@ is needed beyond simply the type for the post-processor. An example is shown bel
     }
   ]
 }
-</pre>
+```
 
 A **sequence definition** is a JSON array comprised of other **simple** or
 **detailed** definitions. The post-processors defined in the array are run
@@ -77,7 +77,7 @@ sequence definition. Sequence definitions are used to chain together multiple
 post-processors. An example is shown below, where the artifact of a build is
 compressed then uploaded, but the compressed result is not kept.
 
-<pre class="prettyprint">
+```javascript
 {
   "post-processors": [
     [
@@ -86,7 +86,7 @@ compressed then uploaded, but the compressed result is not kept.
     ]
   ]
 }
-</pre>
+```
 
 As you may be able to imagine, the **simple** and **detailed** definitions
 are simply shortcuts for a **sequence** definition of only one element.
@@ -102,7 +102,7 @@ In some cases, however, you may want to keep the intermediary artifacts.
 You can tell Packer to keep these artifacts by setting the
 `keep_input_artifact` configuration to `true`. An example is shown below:
 
-<pre class="prettyprint">
+```javascript
 {
   "post-processors": [
     {
@@ -111,21 +111,19 @@ You can tell Packer to keep these artifacts by setting the
     }
   ]
 }
-</pre>
+```
 
 This setting will only keep the input artifact to _that specific_
 post-processor. If you're specifying a sequence of post-processors, then
 all intermediaries are discarded by default except for the input artifacts
 to post-processors that explicitly state to keep the input artifact.
 
-<div class="alert alert-info alert-block">
-<strong>Note:</strong> The intuitive reader may be wondering what happens
+-> **Note:** The intuitive reader may be wondering what happens
 if multiple post-processors are specified (not in a sequence). Does Packer require the
 configuration to keep the input artifact on all the post-processors?
 The answer is no, of course not. Packer is smart enough to figure out
 that at least one post-processor requested that the input be kept, so it will keep
 it around.
-</div>
 
 ## Run on Specific Builds
 
@@ -140,12 +138,12 @@ is effectively the same. `only` and `except` can only be specified on "detailed"
 configurations. If you have a sequence of post-processors to run, `only`
 and `except` will only affect that single post-processor in the sequence.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "vagrant",
   "only": ["virtualbox-iso"]
 }
-</pre>
+```
 
 The values within `only` or `except` are _build names_, not builder
 types. If you recall, build names by default are just their builder type,

@@ -20,11 +20,8 @@ over what keyword invokes the command with the `packer` binary. The keyword
 to invoke the command depends on how the plugin is installed and configured
 in the core Packer configuration.
 
-<div class="alert alert-block">
-  <strong>Warning!</strong> This is an advanced topic. If you're new to Packer,
-  we recommend getting a bit more comfortable before you dive into writing
-  plugins.
-</div>
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
+recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
 
@@ -33,13 +30,13 @@ interface. It is reproduced below for easy reference. The actual interface
 in the source code contains some basic documentation as well explaining
 what each method should do.
 
-<pre class="prettyprint">
+```go
 type Command interface {
 	Help() string
 	Run(env Environment, args []string) int
 	Synopsis() string
 }
-</pre>
+```
 
 ### The "Help" Method
 
@@ -52,7 +49,7 @@ Packer commands generally follow the following format for help, but
 it is not required. You're allowed to make the help look like anything
 you please.
 
-```
+```text
 Usage: packer COMMAND [options] ARGS...
 
   Brief one or two sentence about the function of the command.

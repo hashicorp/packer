@@ -44,11 +44,8 @@ to sign up. Because the "droplets" (servers) are charged hourly, you
 _will_ be charged $0.01 for every image you create with Packer. If
 you're not okay with this, just follow along.
 
-<div class="alert alert-block alert-warn">
-<strong>Note!</strong> I want to repeat, in case you didn't see above:
-You <em>will</em> be charged $0.01 by DigitalOcean per image created with Packer
-because of the time the "droplet" is running.
-</div>
+!> **Warning!** You _will_ be charged $0.01 by DigitalOcean per image
+created with Packer because of the time the "droplet" is running.
 
 Once you sign up for an account, grab your client ID and API key from
 the [DigitalOcean API access page](https://www.digitalocean.com/api_access).
@@ -60,24 +57,24 @@ We now have to modify the template to add DigitalOcean to it. Modify the
 template we've been using and add the following JSON object to the `builders`
 array.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "digitalocean",
   "api_key": "{{user `do_api_key`}}",
   "client_id": "{{user `do_client_id`}}"
 }
-</pre>
+```
 
 You'll also need to modify the `variables` section of the template
 to include the access keys for DigitalOcean.
 
-<pre class="prettyprint">
+```javascript
 "variables": {
-  ...
   "do_api_key": "",
   "do_client_id": ""
+  // ...
 }
-</pre>
+```
 
 The entire template should now [look like this](https://gist.github.com/pearkes/cc5f8505eee5403a43a6).
 
@@ -88,12 +85,11 @@ you can do that as well.
 
 Validate the template with `packer validate`. This is always a good practice.
 
-<div class="alert alert-block alert-info">
-<strong>If you're looking for more DigitalOcean configuration options</strong>,
-you can find them on the <a href="/docs/builders/digitalocean.html">DigitalOcean
-Builder page</a> in the documentation. The documentation is more of a reference
-manual that contains a listing of all the available configuration options.
-</div>
+-> **Note:** If you're looking for more **DigitalOcean configuration options**,
+you can find them on the
+[DigitalOcean Builder page](/docs/builders/digitalocean.html) in the
+documentation. The documentation is more of a reference manual that contains a
+listing of all the available configuration options.
 
 ## Build
 
@@ -102,7 +98,7 @@ all of it, but a portion of it is reproduced below. Note that the ordering
 and wording of the lines may be slightly different, but the effect is the
 same.
 
-```
+```text
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
     -var 'aws_secret_key=YOUR SECRET KEY' \

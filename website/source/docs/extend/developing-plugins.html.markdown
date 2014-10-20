@@ -15,11 +15,8 @@ assumed that you're familiar with the language. This page will not be a
 Go language tutorial. Thankfully, if you are familiar with Go, the Go toolchain
 makes it extremely easy to develop Packer plugins.
 
-<div class="alert alert-block">
-  <strong>Warning!</strong> This is an advanced topic. If you're new to Packer,
-  we recommend getting a bit more comfortable before you dive into writing
-  plugins.
-</div>
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
+recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## Plugin System Architecture
 
@@ -68,7 +65,7 @@ There are two steps involved in creating a plugin:
 A basic example is shown below. In this example, assume the `Builder` struct
 implements the `packer.Builder` interface:
 
-<pre class="prettyprint">
+```go
 import (
   "github.com/mitchellh/packer/plugin"
 )
@@ -79,7 +76,7 @@ type Builder struct{}
 func main() {
 	plugin.ServeBuilder(new(Builder))
 }
-</pre>
+```
 
 **That's it!** `plugin.ServeBuilder` handles all the nitty gritty of
 communicating with Packer core and serving your builder over RPC. It
@@ -92,14 +89,12 @@ installed using standard installation procedures.
 The specifics of how to implement each type of interface are covered
 in the relevant subsections available in the navigation to the left.
 
-<div class="alert alert-warn alert-block">
-<strong>Lock your dependencies.</strong> Unfortunately, Go's dependency
+~> **Lock your dependencies!** Unfortunately, Go's dependency
 management story is fairly sad. There are various unofficial methods out
 there for locking dependencies, and using one of them is highly recomended
 since the Packer codebase will continue to improve, potentially breaking
 APIs along the way until there is a stable release. By locking your dependencies,
 your plugins will continue to work with the version of Packer you lock to.
-</div>
 
 ## Logging and Debugging
 
@@ -112,7 +107,7 @@ Packer will prefix any logs from plugins with the path to that plugin
 to make it identifiable where the logs come from. Some example logs are
 shown below:
 
-```
+```text
 2013/06/10 21:44:43 ui: Available commands are:
 2013/06/10 21:44:43 Loading command: build
 2013/06/10 21:44:43 packer-command-build: 2013/06/10 21:44:43 Plugin minimum port: 10000
@@ -144,13 +139,13 @@ While developing plugins, you can configure your Packer configuration
 to point directly to the compiled plugin in order to test it. For example,
 building the CustomCloud plugin, I may configure packer like so:
 
-<pre class="prettyprint">
+```javascript
 {
   "builders": {
     "custom-cloud": "/an/absolute/path/to/packer-builder-custom-cloud"
   }
 }
-</pre>
+```
 
 This would configure Packer to have the "custom-cloud" plugin, and execute
 the binary that I am building during development. This is extremely useful

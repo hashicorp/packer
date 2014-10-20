@@ -22,7 +22,7 @@ all output to become machine-readable on stdout. Logging, if enabled,
 continues to appear on stderr. An example of the output is shown
 below:
 
-```
+```text
 $ packer -machine-readable version
 1376289459,,version,0.2.4
 1376289459,,version-prerelease,
@@ -43,7 +43,7 @@ Python.
 
 The format is:
 
-```
+```text
 timestamp,target,type,data...
 ```
 

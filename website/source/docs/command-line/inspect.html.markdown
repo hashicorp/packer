@@ -25,7 +25,7 @@ validate the syntax of your template by necessity.
 Given a basic template, here is an example of what the output might
 look like:
 
-```
+```text
 $ packer inspect template.json
 Variables and their defaults:
 

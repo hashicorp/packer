@@ -25,11 +25,9 @@ AMI. Packer supports the following builders at the moment:
   newcomers**. However, it is also the fastest way to build an EBS-backed
   AMI since no new EC2 instance needs to be launched.
 
-<div class="alert alert-block alert-info">
-<strong>Don't know which builder to use?</strong> If in doubt, use the
-<a href="/docs/builders/amazon-ebs.html">amazon-ebs builder</a>. It is
+-> **Don't know which builder to use?** If in doubt, use the
+[amazon-ebs builder](/docs/builders/amazon-ebs.html). It is
 much easier to use and Amazon generally recommends EBS-backed images nowadays.
-</div>
 
 ## Using an IAM Instance Profile
 
@@ -38,7 +36,7 @@ Packer will use credentials provided by the instance's IAM profile, if it has on
 
 The following policy document provides the minimal set permissions necessary for Packer to work:
 
-<pre class="prettyprint">
+```javascript
 {
   "Statement": [{
       "Effect": "Allow",
@@ -69,4 +67,4 @@ The following policy document provides the minimal set permissions necessary for
       "Resource" : "*"
   }]
 }
-</pre>
+```

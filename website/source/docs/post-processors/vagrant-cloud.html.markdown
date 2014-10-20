@@ -76,14 +76,14 @@ You'll need to use the Vagrant post-processor before using this post-processor.
 An example configuration is below. Note the use of the array specifying
 the execution order.
 
-```json
+```javascript
 {
     "variables": {
         "version": "",
         "cloud_token": ""
     },
     "builders": [{
-      ...
+      // ...
     }],
     "post-processors": [
       [{
@@ -100,5 +100,4 @@ the execution order.
       }]
     ]
 }
-
 ```

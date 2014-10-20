@@ -20,12 +20,12 @@ installed, using the official Chef installers provided by Opscode.
 The example below is fully functional. It will install Chef onto the
 remote machine and run Chef client.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "chef-client",
   "server_url": "https://mychefserver.com/"
 }
-</pre>
+```
 
 Note: to properly clean up the Chef node and client, you must have
 `knife` on your path and properly configured.
@@ -106,7 +106,7 @@ configuration template if you'd like to set custom configurations.
 
 The default value for the configuration template is:
 
-```
+```liquid
 log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
@@ -131,7 +131,7 @@ and has a set of variables available to use:
 By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Chef:
 
-```
+```liquid
 {{if .Sudo}}sudo {{end}}chef-client \
   --no-color \
   -c {{.ConfigPath}} \
@@ -154,7 +154,7 @@ By default, Packer uses the following command (broken across multiple lines
 for readability) to install Chef. This command can be customized if you want
 to install Chef in another way.
 
-```
+```text
 curl -L https://www.opscode.com/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```

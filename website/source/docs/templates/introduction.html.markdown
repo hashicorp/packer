@@ -62,7 +62,7 @@ Below is an example of a basic template that is nearly fully functional. It is j
 missing valid AWS access keys. Otherwise, it would work properly with
 `packer build`.
 
-<pre class="prettyprint">
+```javascript
 {
   "builders": [
     {
@@ -84,4 +84,4 @@ missing valid AWS access keys. Otherwise, it would work properly with
     }
   ]
 }
-</pre>
+```
