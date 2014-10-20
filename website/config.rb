@@ -2,6 +2,8 @@
 # Configure Middleman
 #-------------------------------------------------------------------------
 
+set :base_url, "https://www.packer.io/"
+
 activate :hashicorp do |h|
   h.version      = '0.7.1'
   h.bintray_repo = 'mitchellh/packer'
