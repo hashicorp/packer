@@ -21,13 +21,13 @@ must be referenced from the documentation for that specific provisioner.
 
 Within a template, a section of provisioner definitions looks like this:
 
-<pre class="prettyprint">
+```javascript
 {
   "provisioners": [
-    ... one or more provisioner definitions here ...
+    // ... one or more provisioner definitions here
   ]
 }
-</pre>
+```
 
 For each of the definitions, Packer will run the provisioner for each
 of the configured builds. The provisioners will be run in the order
@@ -47,12 +47,12 @@ being created.
 An example provisioner definition is shown below, configuring the shell
 provisioner to run a local script within the machines:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "shell",
   "script": "script.sh"
 }
-</pre>
+```
 
 ## Run on Specific Builds
 
@@ -65,13 +65,13 @@ builds.
 An example of `only` being used is shown below, but the usage of `except`
 is effectively the same:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "shell",
   "script": "script.sh",
   "only": ["virtualbox-iso"]
 }
-</pre>
+```
 
 The values within `only` or `except` are _build names_, not builder
 types. If you recall, build names by default are just their builder type,
@@ -95,7 +95,7 @@ identical. However, they may initially need to be run differently.
 
 This example is shown below:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "shell",
   "script": "script.sh",
@@ -106,7 +106,7 @@ This example is shown below:
     }
   }
 }
-</pre>
+```
 
 As you can see, the `override` key is used. The value of this key is another
 JSON object where the key is the name of a [builder definition](/docs/templates/builders.html).
@@ -126,13 +126,13 @@ configuration `pause_before` that is the amount of time to pause before
 running that provisioner. By default, there is no pause. An example
 is shown below:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "shell",
   "script": "script.sh",
   "pause_before": "10s"
 }
-</pre>
+```
 
 For the above provisioner, Packer will wait 10 seconds before uploading
 and executing the shell script.

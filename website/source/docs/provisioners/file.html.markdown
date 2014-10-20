@@ -16,13 +16,13 @@ The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "file",
   "source": "app.tar.gz",
   "destination": "/tmp/app.tar.gz"
 }
-</pre>
+```
 
 ## Configuration Reference
 

@@ -19,13 +19,13 @@ must be referenced from the documentation for that specific builder.
 
 Within a template, a section of builder definitions looks like this:
 
-<pre class="prettyprint">
+```javascript
 {
   "builders": [
-    ... one or more builder definitions here ...
+    // ... one or more builder definitions here
   ]
 }
-</pre>
+```
 
 ## Builder Definition
 
@@ -41,13 +41,13 @@ some other settings. These are placed directly within the builder definition.
 An example builder definition is shown below, in this case configuring
 the AWS builder:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "...",
   "secret_key": "..."
 }
-</pre>
+```
 
 ## Named Builds
 

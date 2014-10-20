@@ -15,12 +15,12 @@ from your local machine to the remote machine.  Ansible is run in [local mode](h
 
 The example below is fully functional.
 
-<pre class="prettyprint">
+```javascript
 {
-    "type": "ansible-local",
-    "playbook_file": "local.yml"
+  "type": "ansible-local",
+  "playbook_file": "local.yml"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -48,7 +48,8 @@ Optional:
   the `extra_arguments` option.
 
   An example inventory file may look like:
-  <pre class="prettyprint">
+
+  ```text
   [chi-dbservers]
   db-01 ansible_connection=local
   db-02 ansible_connection=local
@@ -66,7 +67,7 @@ Optional:
 
   [appservers:children]
   chi-appservers
-  </pre>
+  ```
 
 * `playbook_dir` (string) - a path to the complete ansible directory
   structure on your local system to be copied to the remote machine

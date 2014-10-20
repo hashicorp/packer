@@ -32,13 +32,13 @@ a repository is required.
 
 An example is shown below, showing only the post-processor configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker-tag",
   "repository": "mitchellh/packer",
   "tag": "0.7"
 }
-</pre>
+```
 
 This example would take the image created by the Docker builder
 and tag it into the local Docker process with a name of `mitchellh/packer:0.7`.

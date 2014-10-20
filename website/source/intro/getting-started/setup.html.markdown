@@ -39,13 +39,13 @@ contains instructions for setting the PATH on Windows.
 After installing Packer, verify the installation worked by opening
 a new command prompt or console, and checking that `packer` is available:
 
-```
+```text
 $ packer
 usage: packer [--version] [--help] <command> [<args>]
 
 Available commands are:
     build        build image(s) from template
-    fix           fixes templates from old versions of packer
+    fix          fixes templates from old versions of packer
     inspect      see components of a template
     validate     check that a template is valid
 ```
@@ -66,7 +66,7 @@ are alternatives available.
 If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
 adding the `binary` tap:
 
-```
+```text
 $ brew tap homebrew/binary
 $ brew install packer
 ```

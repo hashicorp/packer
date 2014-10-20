@@ -27,9 +27,9 @@ The configuration for this post-processor is extremely simple.
 
 An example is shown below, showing only the post-processor configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker-save",
   "path": "foo.tar"
 }
-</pre>
+```

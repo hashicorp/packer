@@ -21,9 +21,9 @@ The configuration for this post-processor is extremely simple.
 
 An example is shown below, showing only the post-processor configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "compress",
   "output": "foo.tar.gz"
 }
-</pre>
+```

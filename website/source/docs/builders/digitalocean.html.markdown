@@ -93,13 +93,13 @@ each category, the available configuration keys are alphabetized.
 Here is a basic example. It is completely valid as soon as you enter your
 own access tokens:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "digitalocean",
   "client_id": "YOUR CLIENT ID",
   "api_key": "YOUR API KEY"
 }
-</pre>
+```
 
 ## Finding Image, Region, and Size IDs
 

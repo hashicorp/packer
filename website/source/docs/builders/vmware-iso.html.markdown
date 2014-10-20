@@ -29,7 +29,7 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "vmware-iso",
   "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
@@ -39,7 +39,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "ssh_wait_timeout": "30s",
   "shutdown_command": "shutdown -P now"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -297,7 +297,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-<pre class="prettyprint">
+```javascript
 [
   "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
   "/install/vmlinuz noapic ",
@@ -309,7 +309,7 @@ an Ubuntu 12.04 installer:
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
   "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
-</pre>
+```
 
 ## VMX Template
 
@@ -320,13 +320,9 @@ But for advanced users, this template can be customized. This allows
 Packer to build virtual machines of effectively any guest operating system
 type.
 
-<div class="alert alert-block alert-warn">
-<p>
-<strong>This is an advanced feature.</strong> Modifying the VMX template
+~> **This is an advanced feature.** Modifying the VMX template
 can easily cause your virtual machine to not boot properly. Please only
 modify the template if you know what you're doing.
-</p>
-</div>
 
 Within the template, a handful of variables are available so that your
 template can continue working with the rest of the Packer machinery. Using
@@ -343,13 +339,11 @@ In addition to using the desktop products of VMware locally to build
 virtual machines, Packer can use a remote VMware Hypervisor to build
 the virtual machine.
 
-<div class="alert alert-block alert-info">
-Note: Packer supports ESXi 5.1 and above.
-</div>
+-> **Note:** Packer supports ESXi 5.1 and above.
 
 Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by running the following command:
 
-```
+```text
 esxcli system settings advanced set -o /Net/GuestIPHack -i 1
 ```
 

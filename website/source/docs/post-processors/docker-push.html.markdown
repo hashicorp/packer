@@ -26,11 +26,9 @@ This post-processor has only optional configuration:
 
 * `login_server` (string) - The server address to login to.
 
-<div class="alert alert-info alert-block">
-<strong>Note:</strong> If you login using the credentials above, the
+-> **Note:** If you login using the credentials above, the
 post-processor will automatically log you out afterwards (just the server
 specified).
-</div>
 
 ## Example
 

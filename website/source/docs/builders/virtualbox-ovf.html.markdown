@@ -21,7 +21,7 @@ to finishing the build.
 Here is a basic example. This example is functional if you have an OVF matching
 the settings here.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "virtualbox-ovf",
   "source_path": "source.ovf",
@@ -30,7 +30,7 @@ the settings here.
   "ssh_wait_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
-</pre>
+```
 
 It is important to add a `shutdown_command`. By default Packer halts the
 virtual machine and the file system may not be sync'd. Thus, changes made in a
@@ -220,14 +220,14 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage` sectio
 An example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-<pre class="prettyprint">
+```javascript
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
     ["modifyvm", "{{.Name}}", "--cpus", "2"]
   ]
 }
-</pre>
+```
 
 The value of `vboxmanage` is an array of commands to execute. These commands
 are executed in the order defined. So in the above example, the memory will be

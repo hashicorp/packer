@@ -32,20 +32,20 @@ within the braces, such as `{{timestamp}}`.
 Here is an example from the VMware VMX template that shows configuration
 templates in action:
 
-<pre>
+```liquid
 .encoding = "UTF-8"
 displayName = "{{ .Name }}"
 guestOS = "{{ .GuestOS }}"
-</pre>
+```
 
 In this case, the "Name" and "GuestOS" variables will be replaced, potentially
 resulting in a VMX that looks like this:
 
-<pre>
+```liquid
 .encoding = "UTF-8"
 displayName = "packer"
 guestOS = "otherlinux"
-</pre>
+```
 
 ## Global Functions
 
@@ -66,54 +66,58 @@ in Packer templates. These are listed below for reference.
 Formatting for the function `isotime` uses the magic reference date
 **Mon Jan 2 15:04:05 -0700 MST 2006**, which breaks down to the following:
 
- <table border="1" cellpadding="5" width="100%">
- 	<tr bgcolor="lightgray">
- 		<td></td>
- 		<td align="center"><strong>Day of Week</strong></td>
- 		<td align="center"><strong>Month</strong></td>
- 		<td align="center"><strong>Date</strong></td>
- 		<td align="center"><strong>Hour</strong></td>
- 		<td align="center"><strong>Minute</strong></td>
- 		<td align="center"><strong>Second</strong></td>
- 		<td align="center"><strong>Year</strong></td>
- 		<td align="center"><strong>Timezone</strong></td>
- 	</tr>
- 	<tr>
- 		<td><strong>Numeric</strong></td>
- 		<td align="center">-</td>
- 		<td align="center">01</td>
- 		<td align="center">02</td>
- 		<td align="center">03 (15)</td>
- 		<td align="center">04</td>
- 		<td align="center">05</td>
- 		<td align="center">06</td>
- 		<td align="center">-0700</td>
- 	</tr>
- 	<tr>
- 		<td><strong>Textual</strong></td>
- 		<td align="center">Monday (Mon)</td>
- 		<td align="center">January (Jan)</td>
- 		<td align="center">-</td>
- 		<td align="center">-</td>
- 		<td align="center">-</td>
- 		<td align="center">-</td>
- 		<td align="center">-</td>
- 		<td align="center">MST</td>
- 	</tr>
- </table>
+<div class="table-responsive">
+<table class="table table-bordered table-condensed">
+<thead>
+<tr>
+<th></th>
+<th align="center">Day of Week</th>
+<th align="center">Month</th>
+<th align="center">Date</th>
+<th align="center">Hour</th>
+<th align="center">Minute</th>
+<th align="center">Second</th>
+<th align="center">Year</th>
+<th align="center">Timezone</th>
+</tr>
+</thead>
+<tr>
+<th>Numeric</th>
+<td align="center">-</td>
+<td align="center">01</td>
+<td align="center">02</td>
+<td align="center">03 (15)</td>
+<td align="center">04</td>
+<td align="center">05</td>
+<td align="center">06</td>
+<td align="center">-0700</td>
+</tr>
+<tr>
+<th>Textual</th>
+<td align="center">Monday (Mon)</td>
+<td align="center">January (Jan)</td>
+<td align="center">-</td>
+<td align="center">-</td>
+<td align="center">-</td>
+<td align="center">-</td>
+<td align="center">-</td>
+<td align="center">MST</td>
+</tr>
+</table>
+</div>
 
  _The values in parentheses are the abbreviated, or 24-hour clock values_
 
  Here are some example formated time, using the above format options:
 
- <pre>
+```liquid
 isotime = June 7, 7:22:43pm 2014
 
 {{isotime "2006-01-02"}} = 2014-06-07
 {{isotime "Mon 1506"}} = Sat 1914
 {{isotime "01-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
 {{isotime "Hour15Year200603"}} = Hour19Year201407
-</pre>
+```
 
 ## Amazon Specific Functions
 

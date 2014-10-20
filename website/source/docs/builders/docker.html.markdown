@@ -31,13 +31,13 @@ run Packer within that environment.
 Below is a fully functioning example. It doesn't do anything useful, since
 no provisioners are defined, but it will effectively repackage an image.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker",
   "image": "ubuntu",
   "export_path": "image.tar"
 }
-</pre>
+```
 
 ## Basic Example: Commit
 
@@ -45,13 +45,13 @@ Below is another example, the same as above but instead of exporting the
 running container, this one commits the container to an image. The image
 can then be more easily tagged, pushed, etc.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker",
   "image": "ubuntu",
   "commit": true
 }
-</pre>
+```
 
 
 ## Configuration Reference
@@ -113,9 +113,9 @@ If you set `commit`, see the next section.
 The example below shows a full configuration that would import and push
 the created image:
 
-<pre class="prettyprint">
+```javascript
 {
-    "post-processors": [
+  "post-processors": [
 		[
 			{
 				"type": "docker-import",
@@ -126,12 +126,14 @@ the created image:
 		]
 	]
 }
-</pre>
+```
 
 If you want to do this manually, however, perhaps from a script, you can
 import the image using the process below:
 
-    docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
+```text
+$ docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
+```
 
 You can then add additional tags and push the image as usual with `docker tag`
 and `docker push`, respectively.
@@ -142,9 +144,9 @@ If you committed your container to an image, you probably want to tag,
 save, push, etc. Packer can do this automatically for you. An example is
 shown below which tags and pushes the image:
 
-<pre class="prettyprint">
+```javascript
 {
-    "post-processors": [
+  "post-processors": [
 		[
 			{
 				"type": "docker-tag",
@@ -155,7 +157,7 @@ shown below which tags and pushes the image:
 		]
 	]
 }
-</pre>
+```
 
 ## Dockerfiles
 

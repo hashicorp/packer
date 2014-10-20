@@ -16,13 +16,11 @@ types that Packer supports creating.
 If you were looking to see what platforms Packer is able to run on, see
 the page on [installing Packer](/intro/getting-started/setup.html).
 
-<div class="alert alert-info alert-block">
-<strong>Note:</strong> We're always looking to officially support more
+-> **Note:** We're always looking to officially support more
 target platforms. If you're interested in adding support for another
 platform, please help by opening an issue or pull request within
-<a href="https://github.com/mitchellh/packer">GitHub</a> so we can discuss
+[GitHub](https://github.com/mitchellh/packer) so we can discuss
 how to make it happen.
-</div>
 
 Packer supports creating images for the following platforms or targets.
 The format of the resulting image and any high-level information about the

@@ -22,7 +22,7 @@ containing the image file necessary to run the virtual machine on KVM or Xen.
 Here is a basic example. This example is functional so long as you fixup
 paths to files, URLS for ISOs and checksums.
 
-<pre class="prettyprint">
+```javascript
 {
   "builders":
   [
@@ -58,7 +58,7 @@ paths to files, URLS for ISOs and checksums.
     }
   ]
 }
-</pre>
+```
 
 A working CentOS 6.x kickstart file can be found
 [at this URL](https://gist.github.com/mitchellh/7328271/#file-centos6-ks-cfg), adapted from an unknown source.
@@ -172,17 +172,17 @@ each category, the available options are alphabetized and described.
   switch/value pairs. Any value specified as an empty string is ignored.
   All values after the switch are concatenated with no separater.
 
-  WARNING: The qemu command line allows extreme flexibility, so beware of
-  conflicting arguments causing failures of your run. For instance, using
-   --no-acpi could break the ability to send power signal type commands (e.g.,
-  shutdown -P now) to the virtual machine, thus preventing proper shutdown. To
-  see the defaults, look in the packer.log file and search for the
-  qemu-system-x86 command. The arguments are all printed for review.
+~> **Warning:** The qemu command line allows extreme flexibility, so beware of
+conflicting arguments causing failures of your run. For instance, using
+--no-acpi could break the ability to send power signal type commands (e.g.,
+shutdown -P now) to the virtual machine, thus preventing proper shutdown. To
+see the defaults, look in the packer.log file and search for the
+qemu-system-x86 command. The arguments are all printed for review.
 
   The following shows a sample usage:
 
-<pre class="prettyprint">
-  . . .
+```javascript
+  // ...
   "qemuargs": [
     [ "-m", "1024m" ],
     [ "--no-acpi", "" ],
@@ -194,14 +194,14 @@ each category, the available options are alphabetized and described.
     ],
     [ "-device", "virtio-net,netdev=mynet0" ]
   ]
-  . . .
-</pre>
+  // ...
+```
 
   would produce the following (not including other defaults supplied by the builder and not otherwise conflicting with the qemuargs):
 
-<pre class="prettyprint">
-    qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
-</pre>
+```text
+qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+```
 
 * `qemu_binary` (string) - The name of the Qemu binary to look for.  This
   defaults to "qemu-system-x86_64", but may need to be changed for some
@@ -303,10 +303,10 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an CentOS 6.4 installer:
 
-<pre class="prettyprint">
+```javascript
 "boot_command":
 [
   "<tab><wait>",
   " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
-</pre>
+```
