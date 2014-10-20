@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Parallels Builder (from an ISO)"
+description: |-
+  The Parallels Packer builder is able to create Parallels Desktop for Mac virtual machines and export them in the PVM format, starting from an ISO image.
 ---
 
 # Parallels Builder (from an ISO)
 
 Type: `parallels-iso`
 
-The Parallels builder is able to create
+The Parallels Packer builder is able to create
 [Parallels Desktop for Mac](http://www.parallels.com/products/desktop/) virtual
 machines and export them in the PVM format, starting from an
 ISO image.

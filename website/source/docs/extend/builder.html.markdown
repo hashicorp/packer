@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Custom Builder - Extend Packer"
+description: |-
+  Packer Builders are the components of Packer responsible for creating a machine, bringing it to a point where it can be provisioned, and then turning that provisioned machine into some sort of machine image. Several builders are officially distributed with Packer itself, such as the AMI builder, the VMware builder, etc. However, it is possible to write custom builders using the Packer plugin interface, and this page documents how to do that.
 ---
 
 # Custom Builder Development
 
-Builders are the components of Packer responsible for creating a machine,
+Packer Builders are the components of Packer responsible for creating a machine,
 bringing it to a point where it can be provisioned, and then turning
 that provisioned machine into some sort of machine image. Several builders
 are officially distributed with Packer itself, such as the AMI builder, the

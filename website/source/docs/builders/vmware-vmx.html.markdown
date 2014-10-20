@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VMware Builder from VMX"
+description: |-
+  This VMware Packer builder is able to create VMware virtual machines from an existing VMware virtual machine (a VMX file). It currently supports building virtual machines on hosts running VMware Fusion Professional for OS X, VMware Workstation for Linux and Windows, and VMware Player on Linux.
 ---
 
 # VMware Builder (from VMX)
 
 Type: `vmware-vmx`
 
-This VMware builder is able to create VMware virtual machines from an
+This VMware Packer builder is able to create VMware virtual machines from an
 existing VMware virtual machine (a VMX file). It currently
 supports building virtual machines on hosts running
 [VMware Fusion Professional](http://www.vmware.com/products/fusion-professional/) for OS X,

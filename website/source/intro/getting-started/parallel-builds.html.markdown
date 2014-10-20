@@ -4,6 +4,8 @@ page_title: "Parallel Builds"
 prev_url: "/intro/getting-started/provision.html"
 next_url: "/intro/getting-started/vagrant.html"
 next_title: "Vagrant Boxes"
+description: |-
+  So far we've shown how Packer can automatically build an image and provision it. This on its own is already quite powerful. But Packer can do better than that. Packer can create multiple images for multiple platforms in parallel, all configured from a single template.
 ---
 
 # Parallel Builds

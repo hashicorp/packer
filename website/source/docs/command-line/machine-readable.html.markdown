@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Machine-Readable Output - Command-Line"
+description: |-
+  By default, the output of Packer is very human-readable. It uses nice formatting, spacing, and colors in order to make Packer a pleasure to use. However, Packer was built with automation in mind. To that end, Packer supports a fully machine-readable output setting, allowing you to use Packer in automated environments.
 ---
 
 # Machine-Readable Output

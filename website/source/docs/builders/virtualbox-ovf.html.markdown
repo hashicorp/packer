@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VirtualBox Builder (from an OVF/OVA)"
+description: |-
+  This VirtualBox Packer builder is able to create VirtualBox virtual machines and export them in the OVF format, starting from an existing OVF/OVA (exported virtual machine image).
 ---
 
 # VirtualBox Builder (from an OVF/OVA)
 
 Type: `virtualbox-ovf`
 
-This VirtualBox builder is able to create [VirtualBox](https://www.virtualbox.org/)
+This VirtualBox Packer builder is able to create [VirtualBox](https://www.virtualbox.org/)
 virtual machines and export them in the OVF format, starting from an
 existing OVF/OVA (exported virtual machine image).
 

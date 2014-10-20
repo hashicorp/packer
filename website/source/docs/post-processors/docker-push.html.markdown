@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Docker Push Post-Processor"
+description: |-
+  The Packer Docker push post-processor takes an artifact from the docker-import post-processor and pushes it to a Docker registry.
 ---
 
 # Docker Push Post-Processor
 
 Type: `docker-push`
 
-The Docker push post-processor takes an artifact from the
+The Packer Docker push post-processor takes an artifact from the
 [docker-import](/docs/post-processors/docker-import.html) post-processor
 and pushes it to a Docker registry.
 

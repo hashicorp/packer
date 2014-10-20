@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "OpenStack Builder"
+description: |-
+  The `openstack` Packer builder is able to create new images for use with OpenStack. The builder takes a source image, runs any provisioning necessary on the image after launching it, then creates a new reusable image. This reusable image can then be used as the foundation of new servers that are launched within OpenStack. The builder will create temporary keypairs that provide temporary access to the server while the image is being created. This simplifies configuration quite a bit.
 ---
 
 # OpenStack Builder
 
 Type: `openstack`
 
-The `openstack` builder is able to create new images for use with
+The `openstack` Packer builder is able to create new images for use with
 [OpenStack](http://www.openstack.org). The builder takes a source
 image, runs any provisioning necessary on the image after launching it,
 then creates a new reusable image. This reusable image can then be

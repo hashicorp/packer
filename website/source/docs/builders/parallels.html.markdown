@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Parallels Builder"
+description: |-
+  The Parallels Packer builder is able to create Parallels Desktop for Mac virtual machines and export them in the PVM format.
 ---
 
 # Parallels Builder
 
-The Parallels builder is able to create [Parallels Desktop for Mac](http://www.parallels.com/products/desktop/) virtual machines and export them in the PVM format.
+The Parallels Packer builder is able to create [Parallels Desktop for Mac](http://www.parallels.com/products/desktop/) virtual machines and export them in the PVM format.
 
 Packer actually comes with multiple builders able to create Parallels
 machines, depending on the strategy you want to use to build the image.

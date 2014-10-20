@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Custom Provisioner Development"
+description: |-
+  Packer Provisioners are the components of Packer that install and configure software into a running machine prior to turning that machine into an image. An example of a provisioner is the shell provisioner, which runs shell scripts within the machines.
 ---
 
 # Custom Provisioner Development
 
-Provisioners are the components of Packer that install and configure
+Packer Provisioners are the components of Packer that install and configure
 software into a running machine prior to turning that machine into an
 image. An example of a provisioner is the [shell provisioner](/docs/provisioners/shell.html),
 which runs shell scripts within the machines.

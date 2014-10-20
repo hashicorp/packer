@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Environmental Variables for Packer"
+description: |-
+  Packer uses a variety of environmental variables.
 ---
 
 # Environmental Variables for Packer
