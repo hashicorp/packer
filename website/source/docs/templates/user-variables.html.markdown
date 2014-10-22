@@ -9,7 +9,7 @@ User variables allow your templates to be further configured with variables
 from the command-line, environmental variables, or files. This lets you
 parameterize your templates so that you can keep secret tokens,
 environment-specific data, and other types of information out of your
-templates. This maximizes the portablility and shareability of the template.
+templates. This maximizes the portability and shareability of the template.
 
 Using user variables expects you know how
 [configuration templates](/docs/templates/configuration-templates.html) work.
@@ -20,7 +20,7 @@ page first.
 
 User variables must first be defined in a `variables` section within your
 template. Even if you want a variable to default to an empty string, it
-must be defined. This explicivity makes it easy for newcomers to your
+must be defined. This explicitness makes it easy for newcomers to your
 template to understand what can be modified using variables in your template.
 
 The `variables` section is a simple key/value mapping of the variable
