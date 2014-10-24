@@ -128,7 +128,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
+		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
 			url.QueryEscape(p.config.Username),
 			p.config.Password,
 			p.config.Host,
