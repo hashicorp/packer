@@ -14,13 +14,13 @@ Docker. The builder starts a Docker container, runs provisioners within
 this container, then exports the container for reuse or commits the image.
 
 Packer builds Docker containers _without_ the use of
-[Dockerfiles](http://docs.docker.io/en/latest/use/builder/).
+[Dockerfiles](https://docs.docker.com/reference/builder/).
 By not using Dockerfiles, Packer is able to provision
 containers with portable scripts or configuration management systems
 that are not tied to Docker in any way. It also has a simpler mental model:
 you provision containers much the same way you provision a normal virtualized
 or dedicated server. For more information, read the section on
-[Dockerfiles](#toc_4).
+[Dockerfiles](#toc_8).
 
 The Docker builder must run on a machine that has Docker installed. Therefore
 the builder only works on machines that support Docker (modern Linux machines).
