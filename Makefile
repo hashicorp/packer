@@ -15,7 +15,6 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
-	(go get -u -v -p 2 ./...; exit 0)
-	cd ../../rackspace/gophercloud; git checkout release/v0.1.1  #TODO: goddammit dependency management
+	go get -u -v -p 2 ./...
 
 .PHONY: bin default test updatedeps
