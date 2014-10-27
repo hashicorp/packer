@@ -27,8 +27,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	driver := &DockerDriver{Tpl: b.config.tpl, Ui: ui}
-	if err := driver.Verify(); err != nil {
+	warnings, err := driver.Verify()
+
+	if err != nil {
 		return nil, err
+	}
+
+	if len(warnings) > 0 {
+		log.Println("Warnings while verifying driver", warnings)
 	}
 
 	steps := []multistep.Step{

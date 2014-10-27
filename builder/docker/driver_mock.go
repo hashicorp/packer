@@ -46,13 +46,14 @@ type MockDriver struct {
 	TagImageRepo    string
 	TagImageErr     error
 
-	ExportReader io.Reader
-	ExportError  error
-	PullError    error
-	StartID      string
-	StartError   error
-	StopError    error
-	VerifyError  error
+	ExportReader   io.Reader
+	ExportError    error
+	PullError      error
+	StartID        string
+	StartError     error
+	StopError      error
+	VerifyWarnings []string
+	VerifyError    error
 
 	ExportCalled bool
 	ExportID     string
@@ -158,7 +159,7 @@ func (d *MockDriver) TagImage(id string, repo string) error {
 	return d.TagImageErr
 }
 
-func (d *MockDriver) Verify() error {
+func (d *MockDriver) Verify() ([]string, error) {
 	d.VerifyCalled = true
-	return d.VerifyError
+	return nil, d.VerifyError
 }

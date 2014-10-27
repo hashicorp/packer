@@ -47,7 +47,7 @@ type Driver interface {
 	TagImage(id string, repo string) error
 
 	// Verify verifies that the driver can run
-	Verify() error
+	Verify() (warnings []string, error error)
 }
 
 // ContainerConfig is the configuration used to start a container.
