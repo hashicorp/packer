@@ -18,6 +18,7 @@ BUG FIXES:
   * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
   * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
   * builder/parallels: Create VM without hdd and then add it later [GH-1548]
+  * builder/parallels: Disconnect cdrom0 [GH-1605]
   * builder/qemu: Don't use `-redir` flag anymore, replace with
       `hostfwd` options. [GH-1561]
   * builder/qmeu: Use `pc` as default machine type instead of `pc-1.0`.
