@@ -119,6 +119,10 @@ each category, the available options are alphabetized and described.
   commands or kickstart type scripts must have proper adjustments for
   resulting device names. The Qemu builder uses "virtio" by default.
 
+* `disk_cache` (string) - The cache mode to use for disk. Allowed values
+  values include any of "writethrough", "writeback", "none", "unsafe" or
+  "directsync".
+
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
   disk that is attached when the VM is booted. This is most useful
   for unattended Windows installs, which look for an `Autounattend.xml` file
