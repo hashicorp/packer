@@ -9,6 +9,7 @@ IMPROVEMENTS:
   * builder/amazon/all: Support new AWS Frankfurt region.
   * builder/docker: Allow remote `DOCKER_HOST`, which works as long as
       volumes work. [GH-1594]
+  * builder/vmware/vmx: Source VMX can have a disk connected via SATA. [GH-1604]
 
 BUG FIXES:
 
