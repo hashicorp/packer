@@ -184,7 +184,7 @@ each category, the available options are alphabetized and described.
 <pre class="prettyprint">
   . . .
   "qemuargs": [
-    [ "-m", "1024m" ],
+    [ "-m", "1024M" ],
     [ "--no-acpi", "" ],
     [
        "-netdev",
@@ -200,7 +200,7 @@ each category, the available options are alphabetized and described.
   would produce the following (not including other defaults supplied by the builder and not otherwise conflicting with the qemuargs):
 
 <pre class="prettyprint">
-    qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+    qemu-system-x86 -m 1024M --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
 * `qemu_binary` (string) - The name of the Qemu binary to look for.  This
