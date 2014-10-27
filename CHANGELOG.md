@@ -25,6 +25,7 @@ BUG FIXES:
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
   * provisioner/shell: Quote environmental variables. [GH-1568]
   * post-processors/docker-push: Work with docker-tag artifacts. [GH-1526]
+  * post-processors/vsphere: Append "/" to object address. [GH-1615]
 
 ## 0.7.1 (September 10, 2014)
 
