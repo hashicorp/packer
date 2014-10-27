@@ -4,6 +4,10 @@ FEATURES:
 
   * builder/parallels: Don't depend on _prl-utils_ [GH-1499]
 
+IMPROVEMENTS:
+
+  * builder/amazon/all: Support new AWS Frankfurt region.
+
 BUG FIXES:
 
   * core: Fix loading plugins from pwd. [GH-1521]
