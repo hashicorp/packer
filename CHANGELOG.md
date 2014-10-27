@@ -25,6 +25,7 @@ BUG FIXES:
   * providers/aws: Ignore transient network errors. [GH-1579]
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
   * provisioner/shell: Quote environmental variables. [GH-1568]
+  * provisioner/salt: Bootstrap over SSL. [GH-1608]
   * post-processors/docker-push: Work with docker-tag artifacts. [GH-1526]
   * post-processors/vsphere: Append "/" to object address. [GH-1615]
 
