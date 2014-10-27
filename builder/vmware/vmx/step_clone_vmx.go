@@ -38,13 +38,13 @@ func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	var diskName string
-	_, scsi := vmxData["scsi0:0.filename"]
-	_, sata := vmxData["sata0:0.filename"]
-	if scsi {
+	if _, ok := vmxData["scsi0:0.filename"]; ok {
 		diskName = vmxData["scsi0:0.filename"]
-	} else if sata {
+	}
+	if _, ok := vmxData["sata0:0.filename"]; ok {
 		diskName = vmxData["sata0:0.filename"]
-	} else {
+	}
+	if diskName == "" {
 		err := fmt.Errorf("Root disk filename could not be found!")
 		state.Put("error", err)
 		return multistep.ActionHalt
