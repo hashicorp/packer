@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	"github.com/rackspace/gophercloud"
 	"time"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
