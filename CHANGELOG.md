@@ -7,6 +7,8 @@ FEATURES:
 IMPROVEMENTS:
 
   * builder/amazon/all: Support new AWS Frankfurt region.
+  * builder/docker: Allow remote `DOCKER_HOST`, which works as long as
+      volumes work. [GH-1594]
 
 BUG FIXES:
 
