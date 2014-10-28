@@ -161,11 +161,9 @@ each category, the available options are alphabetized and described.
   must point to the same file (same checksum). By default this is empty
   and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
-* `machine_type` (string) - Select the emulated machine by name.
-  Use "qemu-system-x86_64 -machine help"(Ubuntu),
-  "/usr/libexec/qemu-kvm -machine help"(RHEL7) to list available machines.
-  The Qemu builder uses "pc-1.0" by default. If you use packer on RHEL7,
-  specify this value to "pc".
+* `machine_type` (string) - The type of machine emulation to use. Run
+  your qemu binary with the flags `-machine help` to list available types
+  for your system. This defaults to "pc".
 
 * `net_device` (string) - The driver to use for the network interface. Allowed
   values "ne2k_pci," "i82551," "i82557b," "i82559er," "rtl8139," "e1000,"
