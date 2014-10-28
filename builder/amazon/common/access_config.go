@@ -26,7 +26,7 @@ func (c *AccessConfig) Auth() (aws.Auth, error) {
 		c.SecretKey = auth.SecretKey
 		c.Token = auth.Token
 	}
-	if auth.Token == "" && c.Token != "" {
+	if c.Token != "" {
 		auth.Token = c.Token
 	}
 

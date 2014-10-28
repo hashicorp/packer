@@ -16,6 +16,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: Fix loading plugins from pwd. [GH-1521]
+  * builder/amazon: Prefer token in config if given. [GH-1544]
   * builder/virtualbox: Can read VirtualBox version on FreeBSD. [GH-1570]
   * builder/virtualbox: More robust reading of guest additions URL. [GH-1509]
   * builder/vmware: Always remove floppies/drives. [GH-1504]
