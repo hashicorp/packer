@@ -304,7 +304,7 @@ sudo -n ec2-upload-bundle \
 	-s {{.SecretKey}} \
 	-d {{.BundleDirectory}} \
 	--batch \
-	--url {{.S3Endpoint}} \
+	--region {{.Region}} \
 	--retry
 ```
 
