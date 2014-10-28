@@ -18,16 +18,13 @@ const ErrorPrefix = "e:"
 const OutputPrefix = "o:"
 
 func init() {
-	Ui = &cli.BasicUi{Writer: os.Stdout}
-	/*
-		Ui = &cli.PrefixedUi{
-			AskPrefix:    OutputPrefix,
-			OutputPrefix: OutputPrefix,
-			InfoPrefix:   OutputPrefix,
-			ErrorPrefix:  ErrorPrefix,
-			Ui:           &cli.BasicUi{Writer: os.Stdout},
-		}
-	*/
+	Ui = &cli.PrefixedUi{
+		AskPrefix:    OutputPrefix,
+		OutputPrefix: OutputPrefix,
+		InfoPrefix:   OutputPrefix,
+		ErrorPrefix:  ErrorPrefix,
+		Ui:           &cli.BasicUi{Writer: os.Stdout},
+	}
 
 	meta := command.Meta{
 		EnvConfig: &EnvConfig,
@@ -37,6 +34,18 @@ func init() {
 	Commands = map[string]cli.CommandFactory{
 		"build": func() (cli.Command, error) {
 			return &command.BuildCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"inspect": func() (cli.Command, error) {
+			return &command.InspectCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"validate": func() (cli.Command, error) {
+			return &command.ValidateCommand{
 				Meta: meta,
 			}, nil
 		},
