@@ -40,6 +40,7 @@ type config struct {
 	ISOChecksum     string   `mapstructure:"iso_checksum"`
 	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string `mapstructure:"iso_urls"`
+	Version         string   `mapstructure:"version"`
 	VMName          string   `mapstructure:"vm_name"`
 	BootCommand     []string `mapstructure:"boot_command"`
 	SkipCompaction  bool     `mapstructure:"skip_compaction"`
@@ -108,6 +109,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	}
+
+	if b.config.Version == "" {
+		b.config.Version = "9"
 	}
 
 	if b.config.RemoteUser == "" {

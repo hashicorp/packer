@@ -218,6 +218,8 @@ each category, the available options are alphabetized and described.
   `tools_upload_flavor`. By default the upload path is set to
   `{{.Flavor}}.iso`.
 
+* `version` (string) - The [vmx hardware version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746) for the new virtual machine.  Only the default value has been tested, any other value is expiermental.  Default value is '9'.
+
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
@@ -334,6 +336,7 @@ these variables isn't required, however.
 * `GuestOS` - The VMware-valid guest OS type.
 * `DiskName` - The filename (without the suffix) of the main virtual disk.
 * `ISOPath` - The path to the ISO to use for the OS installation.
+* `Version` - The Hardware version VMWare will execute this vm under.  Also known as the `virtualhw.version`.
 
 ## Building on a Remote vSphere Hypervisor
 
