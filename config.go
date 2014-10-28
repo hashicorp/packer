@@ -13,6 +13,9 @@ import (
 	"github.com/mitchellh/packer/packer/plugin"
 )
 
+// EnvConfig is the global EnvironmentConfig we use to initialize the CLI.
+var EnvConfig packer.EnvironmentConfig
+
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
