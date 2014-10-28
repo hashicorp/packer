@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Get the parent directory of where this script is.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+
+# Change into that dir because we expect that
+cd $DIR
+
 # Get the version from the command line
 VERSION=$1
 if [ -z $VERSION ]; then
@@ -14,28 +22,30 @@ if [ -z $BINTRAY_API_KEY ]; then
     exit 1
 fi
 
-# Get the parent directory of where this script is.
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
-
-# Change into that dir because we expect that
-cd $DIR
-
-# Zip all the files
+# Zip and copy to the dist dir
+echo "==> Packaging..."
 rm -rf ./pkg/dist
 mkdir -p ./pkg/dist
-for FILENAME in $(find ./pkg -mindepth 1 -maxdepth 1 -type f); do
-    FILENAME=$(basename $FILENAME)
-    cp ./pkg/${FILENAME} ./pkg/dist/packer_${VERSION}_${FILENAME}
+for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
+    OSARCH=$(basename ${PLATFORM})
+
+    if [ $OSARCH = "dist" ]; then
+        continue
+    fi
+
+    echo "--> ${OSARCH}"
+    pushd $PLATFORM >/dev/null 2>&1
+    zip ../dist/packer_${VERSION}_${OSARCH}.zip ./*
+    popd >/dev/null 2>&1
 done
 
 # Make the checksums
-pushd ./pkg/dist
+echo "==> Checksumming..."
+pushd ./pkg/dist >/dev/null 2>&1
 shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
-popd
+popd >/dev/null 2>&1
 
-# Upload
+echo "==> Uploading..."
 for ARCHIVE in ./pkg/dist/*; do
     ARCHIVE_NAME=$(basename ${ARCHIVE})
 
@@ -45,5 +55,3 @@ for ARCHIVE in ./pkg/dist/*; do
         -umitchellh:${BINTRAY_API_KEY} \
         "https://api.bintray.com/content/mitchellh/packer/packer/${VERSION}/${ARCHIVE_NAME}"
 done
-
-exit 0

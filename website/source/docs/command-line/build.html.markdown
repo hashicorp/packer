@@ -1,16 +1,20 @@
 ---
 layout: "docs"
 page_title: "Build - Command-Line"
+description: |-
+  The `packer build` Packer command takes a template and runs all the builds within it in order to generate a set of artifacts. The various builds specified within a template are executed in parallel, unless otherwise specified. And the artifacts that are created will be outputted at the end of the build.
 ---
 
 # Command-Line: Build
 
-The `packer build` command takes a template and runs all the builds within
+The `packer build` Packer command takes a template and runs all the builds within
 it in order to generate a set of artifacts. The various builds specified within
 a template are executed in parallel, unless otherwise specified. And the
 artifacts that are created will be outputted at the end of the build.
 
 ## Options
+
+* `-color=false` - Disables colorized output. Enabled by default.
 
 * `-debug` - Disables parallelization and enables debug mode. Debug mode flags
   the builders that they should output debugging information. The exact behavior

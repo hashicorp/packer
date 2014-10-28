@@ -1,0 +1,173 @@
+* {
+  margin: 0;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: $background;
+  font-family: $sans;
+  letter-spacing: 1px;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 2px;
+  font-weight: normal;
+}
+
+h1 {
+  font-family: $sans;
+  font-size: 70px;
+  line-height: (80/70);
+  @include respond-to(mobile) {
+    font-size: 50px;
+    line-height: (50/45);
+  }
+}
+
+h2 {
+  font-family: $sans;
+  font-size: 40px;
+  line-height: (50/40);
+
+  &.has-dividers {
+    //overflow: auto !important;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    @include respond-to(mobile) {
+      display: block;
+    }
+  }
+}
+
+h3 {
+  font-family: $sans;
+  font-size: 20px;
+  line-height: (30/20);
+}
+
+h4 {
+  font-family: $mono;
+  font-size: 20px;
+  line-height: (30/20);
+}
+
+h5 {
+  font-family: $sans;
+  font-size: 16px;
+  line-height: (22/16);
+}
+
+h6 {
+  font-family: $mono;
+  font-size: 16px;
+  line-height: (22/16);
+}
+
+p {
+  font-family: $serif;
+  font-size: 17px;
+  line-height: (30/17);
+  letter-spacing: 1px;
+
+  &.large-text {
+    font-size: 20px;
+    line-height: (35/20);
+  }
+
+  a {
+    color: $green;
+
+    &:hover {
+      color: darken($green, 30%);
+    }
+
+    &:active {
+      color: darken($green, 50%);
+    }
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+dt {
+  font-size: 18px;
+}
+
+dd {
+  font-family: $serif;
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: bold;
+}
+
+small, .small {
+  font-size: 13px;
+}
+
+hr {
+  margin: ($baseline * 2) 0;
+  border-color: $gray-mid;
+  border-bottom: 0;
+}
+
+pre {
+  background-color: $black;
+  color: $white;
+  margin: $baseline 0;
+}
+
+table {
+  font-family: $mono;
+  margin: ($baseline * 2) 0;
+  color: $gray-dark;
+
+  th {
+    color: $black;
+    font-weight: normal !important;
+  }
+}
+
+::selection {
+  background: #ffff00; /* Safari */
+  color: $black;
+}
+::-moz-selection {
+  background: #ffff00; /* Firefox */
+  color: $black;
+}

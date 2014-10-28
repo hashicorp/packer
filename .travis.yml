@@ -7,15 +7,8 @@ go:
 
 install: make updatedeps
 script:
-    - make test
+    - GOMAXPROCS=2 make test
     #- go test -race ./...
-
-notifications:
-    irc:
-        channels:
-            - "chat.freenode.net#packer-tool"
-        on_success: change
-        on_failure: always
 
 matrix:
     allow_failures:

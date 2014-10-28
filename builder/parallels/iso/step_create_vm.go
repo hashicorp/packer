@@ -2,10 +2,10 @@ package iso
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
 )
 
 // This step creates the actual virtual machine.
@@ -21,16 +21,15 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
-
 	name := config.VMName
-	path := filepath.Join(".", config.OutputDir)
 
 	commands := make([][]string, 8)
 	commands[0] = []string{
 		"create", name,
 		"--distribution", config.GuestOSType,
-		"--dst", path,
+		"--dst", config.OutputDir,
 		"--vmtype", "vm",
+		"--no-hdd",
 	}
 	commands[1] = []string{"set", name, "--cpus", "1"}
 	commands[2] = []string{"set", name, "--memsize", "512"}

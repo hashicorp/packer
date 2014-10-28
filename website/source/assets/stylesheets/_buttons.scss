@@ -1,0 +1,52 @@
+@mixin button {
+  font-family: $mono;
+  height: $button-height;
+  line-height: $button-height;
+  background-color: transparent;
+  border-width: 2px;
+  border-style: solid;
+  display: block;
+  padding: 0 30px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  @include rounded(5px);
+
+  &.spaced {
+    margin-right: 20px;
+  }
+
+  &.primary {
+    color: $green;
+    border-color: $green;
+
+    &:hover {
+      background-color: transparentize($green, .7);
+    }
+
+    &:active {
+      background-color: transparentize($green, .5);
+    }
+  }
+
+  &.secondary {
+    color: $black;
+    border-color: $black;
+
+    &:hover {
+      background-color: transparentize($black, .9);
+    }
+
+    &:active {
+      background-color: transparentize($black, .7);
+    }
+  }
+
+  &.inline {
+    margin: auto $baseline;
+    @include respond-to(mobile) {
+      display: block;
+      width: 100%;
+      margin: $baseline 0;
+    }
+  }
+}

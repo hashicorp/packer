@@ -1,6 +1,7 @@
 // vagrant_cloud implements the packer.PostProcessor interface and adds a
 // post-processor that uploads artifacts from the vagrant post-processor
-// to Vagrant Cloud (vagrantcloud.com)
+// to Vagrant Cloud (vagrantcloud.com) or manages self hosted boxes on the
+// Vagrant Cloud
 package vagrantcloud
 
 import (
@@ -25,7 +26,14 @@ type Config struct {
 	AccessToken     string `mapstructure:"access_token"`
 	VagrantCloudUrl string `mapstructure:"vagrant_cloud_url"`
 
+	BoxDownloadUrl string `mapstructure:"box_download_url"`
+
 	tpl *packer.ConfigTemplate
+}
+
+type boxDownloadUrlTemplate struct {
+	ArtifactId string
+	Provider   string
 }
 
 type PostProcessor struct {
@@ -103,6 +111,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// The name of the provider for vagrant cloud, and vagrant
 	providerName := providerFromBuilderName(artifact.Id())
 
+	boxDownloadUrl, err := p.config.tpl.Process(p.config.BoxDownloadUrl, &boxDownloadUrlTemplate {
+		ArtifactId: artifact.Id(),
+		Provider:   providerName,
+	})
+	if err != nil {
+		return nil, false, fmt.Errorf("Error processing box_download_url: %s", err)
+	}
+
 	// Set up the state
 	state := new(multistep.BasicStateBag)
 	state.Put("config", p.config)
@@ -111,16 +127,27 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	state.Put("artifactFilePath", artifact.Files()[0])
 	state.Put("ui", ui)
 	state.Put("providerName", providerName)
+	state.Put("boxDownloadUrl", boxDownloadUrl)
 
 	// Build the steps
-	steps := []multistep.Step{
-		new(stepVerifyBox),
-		new(stepCreateVersion),
-		new(stepCreateProvider),
-		new(stepPrepareUpload),
-		new(stepUpload),
-		new(stepVerifyUpload),
-		new(stepReleaseVersion),
+	steps := []multistep.Step{}
+	if p.config.BoxDownloadUrl == "" {
+		steps = []multistep.Step{
+			new(stepVerifyBox),
+			new(stepCreateVersion),
+			new(stepCreateProvider),
+			new(stepPrepareUpload),
+			new(stepUpload),
+			new(stepVerifyUpload),
+			new(stepReleaseVersion),
+		}
+	} else {
+		steps = []multistep.Step{
+			new(stepVerifyBox),
+			new(stepCreateVersion),
+			new(stepCreateProvider),
+			new(stepReleaseVersion),
+		}
 	}
 
 	// Run the steps

@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Chef-Solo Provisioner"
+description: |-
+  The Chef solo Packer provisioner installs and configures software on machines built by Packer using chef-solo. Cookbooks can be uploaded from your local machine to the remote machine or remote paths can be used.
 ---
 
 # Chef Solo Provisioner
 
 Type: `chef-solo`
 
-The Chef solo provisioner installs and configures software on machines built
+The Chef solo Packer provisioner installs and configures software on machines built
 by Packer using [chef-solo](http://docs.opscode.com/chef_solo.html). Cookbooks
 can be uploaded from your local machine to the remote machine or remote paths
 can be used.
@@ -20,12 +22,12 @@ installed, using the official Chef installers provided by Opscode.
 The example below is fully functional and expects cookbooks in the
 "cookbooks" directory relative to your working directory.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "chef-solo",
   "cookbook_paths": ["cookbooks"]
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -98,7 +100,7 @@ configuration template if you'd like to set custom configurations.
 
 The default value for the configuration template is:
 
-```
+```liquid
 cookbook_path [{{.CookbookPaths}}]
 ```
 
@@ -112,14 +114,14 @@ and has a set of variables available to use:
 * `DataBagsPath` is the path to the data bags folder.
 * `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
 * `EnvironmentsPath` - The path to the environments folder.
-* `RolesPath` - The path the folders folder.
+* `RolesPath` - The path to the roles folder.
 
 ## Execute Command
 
 By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Chef:
 
-```
+```liquid
 {{if .Sudo}}sudo {{end}}chef-solo \
   --no-color \
   -c {{.ConfigPath}} \
@@ -142,7 +144,7 @@ By default, Packer uses the following command (broken across multiple lines
 for readability) to install Chef. This command can be customized if you want
 to install Chef in another way.
 
-```
+```text
 curl -L https://www.opscode.com/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```

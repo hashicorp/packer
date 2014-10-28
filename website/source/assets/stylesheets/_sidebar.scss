@@ -1,0 +1,37 @@
+.sidebar {
+  $border: 1px solid $gray-dark;
+  font-size: 16px;
+  font-family: $mono;
+  color: $gray-light;
+  background-color: $sidebar-background-color;
+  min-height: 100%;
+
+  h2 {
+    color: $green;
+    text-transform: uppercase;
+    padding: $docs-top-margin 20px 0;
+  }
+
+  h4 {
+    color: $white;
+    text-transform: uppercase;
+    margin-bottom: -10px;
+  }
+
+  ul {
+    @extend .padded-sm;
+
+    li {
+      border-bottom: $border;
+      padding: 15px 0;
+      text-align: left;
+    }
+
+    li > * {
+      padding: auto 20px;
+      margin-left: 20px;
+      display: block;
+      width: 100%;
+    }
+  }
+}

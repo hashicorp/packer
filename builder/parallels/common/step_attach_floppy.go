@@ -39,11 +39,10 @@ func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 		"set", vmName,
 		"--device-del", "fdd0",
 	}
-	if err := driver.Prlctl(del_command...); err != nil {
-		state.Put("error", fmt.Errorf("Error deleting floppy: %s", err))
-	}
-	ui.Say("Attaching floppy disk...")
+	// This will almost certainly fail with 'The fdd0 device does not exist.'
+	driver.Prlctl(del_command...)
 
+	ui.Say("Attaching floppy disk...")
 	// Attaching the floppy disk
 	add_command := []string{
 		"set", vmName,

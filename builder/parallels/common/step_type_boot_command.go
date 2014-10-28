@@ -20,8 +20,8 @@ type bootCommandTemplateData struct {
 	Name     string
 }
 
-// This step "types" the boot command into the VM via prltype, built on the
-// Parallels Virtualization SDK - C API.
+// This step "types" the boot command into the VM via the prltype script, built on the
+// Parallels Virtualization SDK - Python API.
 //
 // Uses:
 //   driver Driver

@@ -92,8 +92,10 @@ func wrappedMain() int {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
 		return 1
 	}
-
 	log.Printf("Packer config: %+v", config)
+
+	// Fire off the checkpoint.
+	go runCheckpoint(config)
 
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {

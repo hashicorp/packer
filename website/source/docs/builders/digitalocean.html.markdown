@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "DigitalOcean Builder"
+description: |-
+  The `digitalocean` Packer builder is able to create new images for use with DigitalOcean. The builder takes a source image, runs any provisioning necessary on the image after launching it, then snapshots it into a reusable image. This reusable image can then be used as the foundation of new servers that are launched within DigitalOcean.
 ---
 
 # DigitalOcean Builder
 
 Type: `digitalocean`
 
-The `digitalocean` builder is able to create new images for use with
+The `digitalocean` Packer builder is able to create new images for use with
 [DigitalOcean](http://www.digitalocean.com). The builder takes a source
 image, runs any provisioning necessary on the image after launching it,
 then snapshots it into a reusable image. This reusable image can then be
@@ -102,13 +104,13 @@ each category, the available configuration keys are alphabetized.
 Here is a basic example. It is completely valid as soon as you enter your
 own access tokens:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "digitalocean",
   "client_id": "YOUR CLIENT ID",
   "api_key": "YOUR API KEY"
 }
-</pre>
+```
 
 ## Finding Image, Region, and Size IDs
 

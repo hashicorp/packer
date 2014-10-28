@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Shell Provisioner"
+description: |-
+  The shell Packer provisioner provisions machines built by Packer using shell scripts. Shell provisioning is the easiest way to get software installed and configured on a machine.
 ---
 
 # Shell Provisioner
 
 Type: `shell`
 
-The shell provisioner provisions machines built by Packer using shell scripts.
+The shell Packer provisioner provisions machines built by Packer using shell scripts.
 Shell provisioning is the easiest way to get software installed and configured
 on a machine.
 
@@ -15,12 +17,12 @@ on a machine.
 
 The example below is fully functional.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "shell",
   "inline": ["echo foo"]
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -87,7 +89,7 @@ For example, if the default user of an installed operating system is "packer"
 and has the password "packer" for sudo usage, then you'll likely want to
 change `execute_command` to be:
 
-```
+```text
 "echo 'packer' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
 ```
 
@@ -128,7 +130,7 @@ return and Packer will start executing the next one before SSH actually
 quits and the machine restarts. For this, put a long `sleep` after the
 reboot so that SSH will eventually be killed automatically:
 
-```
+```text
 reboot
 sleep 60
 ```
@@ -138,7 +140,7 @@ reboot, causing the provisioner to hang despite a reboot occuring.
 In this case, make sure you shut down the network interfaces
 on reboot or in your shell script. For example, on Gentoo:
 
-```
+```text
 /etc/init.d/net.eth0 stop
 ```
 
@@ -173,9 +175,9 @@ will echo the script statements as it is executing.
 can create race conditions. Your first provisoner can tell the machine to
 wait until it completely boots.
 
-<pre class="prettyprint">
-    {
-       "type": "shell",
-       "inline": [ "sleep 10" ]
-    }
-</pre>
+```javascript
+{
+  "type": "shell",
+  "inline": [ "sleep 10" ]
+}
+```

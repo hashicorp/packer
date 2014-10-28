@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Machine-Readable Output - Command-Line"
+description: |-
+  By default, the output of Packer is very human-readable. It uses nice formatting, spacing, and colors in order to make Packer a pleasure to use. However, Packer was built with automation in mind. To that end, Packer supports a fully machine-readable output setting, allowing you to use Packer in automated environments.
 ---
 
 # Machine-Readable Output
@@ -22,7 +24,7 @@ all output to become machine-readable on stdout. Logging, if enabled,
 continues to appear on stderr. An example of the output is shown
 below:
 
-```
+```text
 $ packer -machine-readable version
 1376289459,,version,0.2.4
 1376289459,,version-prerelease,
@@ -43,7 +45,7 @@ Python.
 
 The format is:
 
-```
+```text
 timestamp,target,type,data...
 ```
 

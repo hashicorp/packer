@@ -7,38 +7,47 @@ import (
 )
 
 func TestBlockDevice(t *testing.T) {
-	ec2Mapping := []ec2.BlockDeviceMapping{
-		ec2.BlockDeviceMapping{
-			DeviceName:          "/dev/sdb",
-			VirtualName:         "ephemeral0",
-			SnapshotId:          "snap-1234",
-			VolumeType:          "standard",
-			VolumeSize:          8,
-			DeleteOnTermination: true,
-			IOPS:                1000,
+	cases := []struct {
+		Config *BlockDevice
+		Result *ec2.BlockDeviceMapping
+	}{
+		{
+			Config: &BlockDevice{
+				DeviceName:          "/dev/sdb",
+				VirtualName:         "ephemeral0",
+				SnapshotId:          "snap-1234",
+				VolumeType:          "standard",
+				VolumeSize:          8,
+				DeleteOnTermination: true,
+				IOPS:                1000,
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName:          "/dev/sdb",
+				VirtualName:         "ephemeral0",
+				SnapshotId:          "snap-1234",
+				VolumeType:          "standard",
+				VolumeSize:          8,
+				DeleteOnTermination: true,
+				IOPS:                1000,
+			},
 		},
 	}
 
-	blockDevice := BlockDevice{
-		DeviceName:          "/dev/sdb",
-		VirtualName:         "ephemeral0",
-		SnapshotId:          "snap-1234",
-		VolumeType:          "standard",
-		VolumeSize:          8,
-		DeleteOnTermination: true,
-		IOPS:                1000,
-	}
+	for _, tc := range cases {
+		blockDevices := BlockDevices{
+			AMIMappings:    []BlockDevice{*tc.Config},
+			LaunchMappings: []BlockDevice{*tc.Config},
+		}
 
-	blockDevices := BlockDevices{
-		AMIMappings:    []BlockDevice{blockDevice},
-		LaunchMappings: []BlockDevice{blockDevice},
-	}
+		expected := []ec2.BlockDeviceMapping{*tc.Result}
 
-	if !reflect.DeepEqual(ec2Mapping, blockDevices.BuildAMIDevices()) {
-		t.Fatalf("bad: %#v", ec2Mapping)
-	}
+		if !reflect.DeepEqual(expected, blockDevices.BuildAMIDevices()) {
+			t.Fatalf("bad: %#v", expected)
+		}
 
-	if !reflect.DeepEqual(ec2Mapping, blockDevices.BuildLaunchDevices()) {
-		t.Fatalf("bad: %#v", ec2Mapping)
+		if !reflect.DeepEqual(expected, blockDevices.BuildLaunchDevices()) {
+			t.Fatalf("bad: %#v", expected)
+		}
 	}
 }

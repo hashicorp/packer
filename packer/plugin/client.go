@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -355,7 +356,7 @@ func (c *Client) logStderr(r io.Reader) {
 			c.config.Stderr.Write([]byte(line))
 
 			line = strings.TrimRightFunc(line, unicode.IsSpace)
-			log.Printf("%s: %s", c.config.Cmd.Path, line)
+			log.Printf("%s: %s", filepath.Base(c.config.Cmd.Path), line)
 		}
 
 		if err == io.EOF {
