@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mitchellh/packer/packer"
 )
