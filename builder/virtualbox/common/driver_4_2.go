@@ -49,11 +49,12 @@ func (d *VBox42Driver) Iso() (string, error) {
 		return "", err
 	}
 
-	DefaultGuestAdditionsRe := regexp.MustCompile("Default Guest Additions ISO:(.*)")
+	DefaultGuestAdditionsRe := regexp.MustCompile("Default Guest Additions ISO:(.+)")
 
 	for _, line := range strings.Split(stdout.String(), "\n") {
 		// Need to trim off CR character when running in windows
-		line = strings.TrimRight(line, "\r")
+		// Trimming whitespaces at this point helps to filter out empty value
+		line = strings.TrimRight(line, " \r")
 
 		matches := DefaultGuestAdditionsRe.FindStringSubmatch(line)
 		if matches == nil {
@@ -66,7 +67,7 @@ func (d *VBox42Driver) Iso() (string, error) {
 		return isoname, nil
 	}
 
-	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output")
+	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output (or it is empty)")
 }
 
 func (d *VBox42Driver) Import(name string, path string, flags []string) error {
