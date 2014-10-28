@@ -29,6 +29,8 @@ BUG FIXES:
   * builder/qmeu: Use `pc` as default machine type instead of `pc-1.0`.
   * providers/aws: Ignore transient network errors. [GH-1579]
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
+  * provisioner/ansible: Use inventory file always to avoid potentially
+      deprecated feature. [GH-1562]
   * provisioner/shell: Quote environmental variables. [GH-1568]
   * provisioner/salt: Bootstrap over SSL. [GH-1608]
   * post-processors/docker-push: Work with docker-tag artifacts. [GH-1526]
