@@ -72,6 +72,9 @@ to `https://vagrantcloud.com/api/v1`
 * `version_description` (string) - Optionally markdown text used as a full-length
   and in-depth description of the version, typically for denoting changes introduced
 
+* `box_download_url` (string) - Optional URL for a self-hosted box. If this is set
+the box will not be uploaded to the Vagrant Cloud.
+
 ## Use with Vagrant Post-Processor
 
 You'll need to use the Vagrant post-processor before using this post-processor.
