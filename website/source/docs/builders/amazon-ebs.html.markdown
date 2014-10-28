@@ -86,10 +86,6 @@ each category, the available configuration keys are alphabetized.
   to launch the resulting AMI(s). By default no additional users other than the user
   creating the AMI has permissions to launch it.
 
-* `ami_virtualization_type` (string) - The type of virtualization for the AMI
-  you are building. This option is required to register HVM images. Can be
-  "paravirtual" (default) or "hvm".
-
 * `associate_public_ip_address` (boolean) - If using a non-default VPC, public
   IP addresses are not provided by default. If this is toggled, your new
   instance will get a Public IP.
