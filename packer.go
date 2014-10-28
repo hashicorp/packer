@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/mitchellh/cli"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"github.com/mitchellh/panicwrap"
@@ -118,16 +119,14 @@ func wrappedMain() int {
 	defer plugin.CleanupClients()
 
 	// Create the environment configuration
-	envConfig := packer.DefaultEnvironmentConfig()
-	envConfig.Cache = cache
-	envConfig.Commands = config.CommandNames()
-	envConfig.Components.Builder = config.LoadBuilder
-	envConfig.Components.Command = config.LoadCommand
-	envConfig.Components.Hook = config.LoadHook
-	envConfig.Components.PostProcessor = config.LoadPostProcessor
-	envConfig.Components.Provisioner = config.LoadProvisioner
+	EnvConfig = *packer.DefaultEnvironmentConfig()
+	EnvConfig.Cache = cache
+	EnvConfig.Components.Builder = config.LoadBuilder
+	EnvConfig.Components.Hook = config.LoadHook
+	EnvConfig.Components.PostProcessor = config.LoadPostProcessor
+	EnvConfig.Components.Provisioner = config.LoadProvisioner
 	if machineReadable {
-		envConfig.Ui = &packer.MachineReadableUi{
+		EnvConfig.Ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
 
@@ -139,17 +138,18 @@ func wrappedMain() int {
 		}
 	}
 
-	env, err := packer.NewEnvironment(envConfig)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Packer initialization error: \n\n%s\n", err)
-		return 1
+	//setupSignalHandlers(env)
+
+	cli := &cli.CLI{
+		Args:       args,
+		Commands:   Commands,
+		HelpFunc:   cli.BasicHelpFunc("packer"),
+		HelpWriter: os.Stdout,
 	}
 
-	setupSignalHandlers(env)
-
-	exitCode, err := env.Cli(args)
+	exitCode, err := cli.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err)
 		return 1
 	}
 
