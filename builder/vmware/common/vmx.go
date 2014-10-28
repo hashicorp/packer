@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 )
 
 // ParseVMX parses the keys and values from a VMX file and returns
@@ -66,7 +67,8 @@ func WriteVMX(path string, data map[string]string) (err error) {
 	if _, err = io.Copy(f, &buf); err != nil {
 		return
 	}
-
+	f.Sync()
+        time.Sleep(1000 * time.Millisecond)
 	return
 }
 
