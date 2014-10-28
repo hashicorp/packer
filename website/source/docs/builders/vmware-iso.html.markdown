@@ -151,6 +151,16 @@ each category, the available options are alphabetized and described.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
+* `remote_cache_datastore` (string) - The path to the datastore where
+  supporting files will be stored during the build on the remote machine.
+  By default this is the same as the `remote_datastore` option. This only
+  has an effect if `remote_type` is enabled.
+
+* `remote_cache_directory` (string) - The path where the ISO and/or floppy
+  files will be stored during the build on the remote machine. The path is
+  relative to the `remote_cache_datastore` on the remote machine.  By default
+  this is "packer_cache". This only has an effect if `remote_type` is enabled.
+
 * `remote_datastore` (string) - The path to the datastore where the resulting
   VM will be stored when it is built on the remote machine. By default this
   is "datastore1". This only has an effect if `remote_type` is enabled.
@@ -374,6 +384,13 @@ have to modify as well:
 
 * `remote_datastore` - The path to the datastore where the VM will be
   stored on the ESXi machine.
+
+* `remote_cache_datastore` - The path to the datastore where
+  supporting files will be stored during the build on the remote machine.
+
+* `remote_cache_directory` - The path where the ISO and/or floppy
+  files will be stored during the build on the remote machine. The path is
+  relative to the `remote_cache_datastore` on the remote machine.
 
 * `remote_username` - The SSH username used to access the remote machine.
 
