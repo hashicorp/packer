@@ -57,7 +57,21 @@ func (d *ESX5Driver) IsRunning(string) (bool, error) {
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	return d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+	for i := 0; i < 20; i++ {
+		err := d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+		if err != nil {
+			return err
+		}
+		time.Sleep((time.Duration(i) * time.Second) + 1)
+		running, err := d.IsRunning(vmxPathLocal)
+		if err != nil {
+			return err
+		}
+		if running {
+			return nil
+		}
+	}
+	return errors.New("Retry limit exceeded")
 }
 
 func (d *ESX5Driver) Stop(vmxPathLocal string) error {
