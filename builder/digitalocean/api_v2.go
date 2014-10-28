@@ -200,7 +200,7 @@ func (d DigitalOceanClientV2) CreateSnapshot(id uint, name string) error {
 func (d DigitalOceanClientV2) Images() ([]Image, error) {
 	res := ImagesResp{}
 
-	err := NewRequestV2(d, "v2/images", "GET", nil, &res)
+	err := NewRequestV2(d, "v2/images?per_page=200", "GET", nil, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -364,7 +364,7 @@ func (d DigitalOceanClientV2) Image(slug_or_name_or_id string) (Image, error) {
 // Returns all available regions.
 func (d DigitalOceanClientV2) Regions() ([]Region, error) {
 	res := RegionsResp{}
-	err := NewRequestV2(d, "v2/regions", "GET", nil, &res)
+	err := NewRequestV2(d, "v2/regions?per_page=200", "GET", nil, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -407,7 +407,7 @@ func (d DigitalOceanClientV2) Region(slug_or_name_or_id string) (Region, error) 
 // Returns all available sizes.
 func (d DigitalOceanClientV2) Sizes() ([]Size, error) {
 	res := SizesResp{}
-	err := NewRequestV2(d, "v2/sizes", "GET", nil, &res)
+	err := NewRequestV2(d, "v2/sizes?per_page=200", "GET", nil, &res)
 	if err != nil {
 		return nil, err
 	}
