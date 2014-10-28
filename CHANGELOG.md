@@ -10,6 +10,8 @@ IMPROVEMENTS:
   * builder/docker: Allow remote `DOCKER_HOST`, which works as long as
       volumes work. [GH-1594]
   * builder/qemu: Can set cache mode for main disk. [GH-1558]
+  * builder/vmware: Can specify path to Fusion installation with environmental
+      variable `FUSION_APP_PATH`. [GH-1552]
   * builder/vmware/vmx: Source VMX can have a disk connected via SATA. [GH-1604]
   * post-processors/vagrantcloud: Support self-hosted box URLs.
 
