@@ -1,4 +1,4 @@
-package build
+package command
 
 import (
 	"bytes"
@@ -14,15 +14,19 @@ import (
 	"sync"
 )
 
-type Command byte
-
-func (Command) Help() string {
-	return strings.TrimSpace(helpText)
+type BuildCommand struct {
+	Meta
 }
 
-func (c Command) Run(env packer.Environment, args []string) int {
+func (c BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
 	buildOptions := new(cmdcommon.BuildOptions)
+
+	env, err := c.Meta.Environment()
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
+		return 1
+	}
 
 	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
@@ -278,6 +282,28 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	return 0
 }
 
-func (Command) Synopsis() string {
+func (BuildCommand) Help() string {
+	helpText := `
+Usage: packer build [options] TEMPLATE
+
+  Will execute multiple builds in parallel as defined in the template.
+  The various artifacts created by the template will be outputted.
+
+Options:
+
+  -debug                     Debug mode enabled for builds
+  -force                     Force a build to continue if artifacts exist, deletes existing artifacts
+  -machine-readable          Machine-readable output
+  -except=foo,bar,baz        Build all builds other than these
+  -only=foo,bar,baz          Only build the given builds by name
+  -parallel=false            Disable parallelization (on by default)
+  -var 'key=value'           Variable for templates, can be used multiple times.
+  -var-file=path             JSON file containing user variables.
+`
+
+	return strings.TrimSpace(helpText)
+}
+
+func (BuildCommand) Synopsis() string {
 	return "build image(s) from template"
 }

@@ -13,6 +13,9 @@ import (
 	"github.com/mitchellh/packer/packer/plugin"
 )
 
+// EnvConfig is the global EnvironmentConfig we use to initialize the CLI.
+var EnvConfig packer.EnvironmentConfig
+
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
@@ -20,7 +23,6 @@ type config struct {
 	PluginMaxPort              uint
 
 	Builders       map[string]string
-	Commands       map[string]string
 	PostProcessors map[string]string `json:"post-processors"`
 	Provisioners   map[string]string
 }
@@ -79,15 +81,6 @@ func (c *config) Discover() error {
 	return nil
 }
 
-// Returns an array of defined command names.
-func (c *config) CommandNames() (result []string) {
-	result = make([]string, 0, len(c.Commands))
-	for name := range c.Commands {
-		result = append(result, name)
-	}
-	return
-}
-
 // This is a proper packer.BuilderFunc that can be used to load packer.Builder
 // implementations from the defined plugins.
 func (c *config) LoadBuilder(name string) (packer.Builder, error) {
@@ -99,19 +92,6 @@ func (c *config) LoadBuilder(name string) (packer.Builder, error) {
 	}
 
 	return c.pluginClient(bin).Builder()
-}
-
-// This is a proper packer.CommandFunc that can be used to load packer.Command
-// implementations from the defined plugins.
-func (c *config) LoadCommand(name string) (packer.Command, error) {
-	log.Printf("Loading command: %s\n", name)
-	bin, ok := c.Commands[name]
-	if !ok {
-		log.Printf("Command not found: %s\n", name)
-		return nil, nil
-	}
-
-	return c.pluginClient(bin).Command()
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
@@ -159,12 +139,6 @@ func (c *config) discover(path string) error {
 
 	err = c.discoverSingle(
 		filepath.Join(path, "packer-builder-*"), &c.Builders)
-	if err != nil {
-		return err
-	}
-
-	err = c.discoverSingle(
-		filepath.Join(path, "packer-command-*"), &c.Commands)
 	if err != nil {
 		return err
 	}
