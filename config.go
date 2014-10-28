@@ -104,19 +104,6 @@ func (c *config) LoadBuilder(name string) (packer.Builder, error) {
 	return c.pluginClient(bin).Builder()
 }
 
-// This is a proper packer.CommandFunc that can be used to load packer.Command
-// implementations from the defined plugins.
-func (c *config) LoadCommand(name string) (packer.Command, error) {
-	log.Printf("Loading command: %s\n", name)
-	bin, ok := c.Commands[name]
-	if !ok {
-		log.Printf("Command not found: %s\n", name)
-		return nil, nil
-	}
-
-	return c.pluginClient(bin).Command()
-}
-
 // This is a proper implementation of packer.HookFunc that can be used
 // to load packer.Hook implementations from the defined plugins.
 func (c *config) LoadHook(name string) (packer.Hook, error) {

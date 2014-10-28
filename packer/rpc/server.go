@@ -88,13 +88,6 @@ func (s *Server) RegisterCache(c packer.Cache) {
 	})
 }
 
-func (s *Server) RegisterCommand(c packer.Command) {
-	s.server.RegisterName(DefaultCommandEndpoint, &CommandServer{
-		command: c,
-		mux:     s.mux,
-	})
-}
-
 func (s *Server) RegisterCommunicator(c packer.Communicator) {
 	s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c:   c,
