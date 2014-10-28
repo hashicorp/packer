@@ -90,13 +90,6 @@ func (c *Client) Cache() packer.Cache {
 	}
 }
 
-func (c *Client) Command() packer.Command {
-	return &command{
-		client: c.client,
-		mux:    c.mux,
-	}
-}
-
 func (c *Client) Communicator() packer.Communicator {
 	return &communicator{
 		client: c.client,

@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/mitchellh/packer/packer"
-	"reflect"
 	"testing"
 )
 
@@ -93,19 +92,6 @@ func TestEnvironmentRPC(t *testing.T) {
 	cache.Lock("foo")
 	if !testEnvCache.lockCalled {
 		t.Fatal("should be called")
-	}
-
-	// Test Cli
-	cliArgs := []string{"foo", "bar"}
-	result, _ := eClient.Cli(cliArgs)
-	if !e.cliCalled {
-		t.Fatal("should be called")
-	}
-	if !reflect.DeepEqual(e.cliArgs, cliArgs) {
-		t.Fatalf("bad: %#v", e.cliArgs)
-	}
-	if result != 42 {
-		t.Fatalf("bad: %#v", result)
 	}
 
 	// Test Provisioner

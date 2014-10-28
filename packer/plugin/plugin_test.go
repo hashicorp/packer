@@ -61,14 +61,6 @@ func TestHelperProcess(*testing.T) {
 		}
 		server.RegisterBuilder(new(packer.MockBuilder))
 		server.Serve()
-	case "command":
-		server, err := Server()
-		if err != nil {
-			log.Printf("[ERR] %s", err)
-			os.Exit(1)
-		}
-		server.RegisterCommand(new(helperCommand))
-		server.Serve()
 	case "hook":
 		server, err := Server()
 		if err != nil {
