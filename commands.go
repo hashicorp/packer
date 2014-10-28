@@ -38,6 +38,12 @@ func init() {
 			}, nil
 		},
 
+		"fix": func() (cli.Command, error) {
+			return &command.FixCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"inspect": func() (cli.Command, error) {
 			return &command.InspectCommand{
 				Meta: meta,
