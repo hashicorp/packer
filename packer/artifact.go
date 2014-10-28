@@ -25,6 +25,10 @@ type Artifact interface {
 	// This is used for UI output. It can be multiple lines.
 	String() string
 
+	// State allows the caller to ask for builder specific state information
+	// relating to the artifact instance.
+	State(name string) interface{}
+
 	// Destroy deletes the artifact. Packer calls this for various reasons,
 	// such as if a post-processor has processed this artifact and it is
 	// no longer needed.

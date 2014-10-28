@@ -32,6 +32,7 @@ providers.
 * DigitalOcean
 * Hyper-V
 * Parallels
+* QEMU
 * VirtualBox
 * VMware
 
