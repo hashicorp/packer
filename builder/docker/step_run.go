@@ -19,10 +19,13 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	runConfig := ContainerConfig{
 		Image:      config.Image,
 		RunCommand: config.RunCommand,
-		Volumes: map[string]string{
-			tempDir: "/packer-files",
-		},
+		Volumes:    make(map[string]string),
 	}
+
+	for host, container := range config.Volumes {
+		runConfig.Volumes[host] = container
+	}
+	runConfig.Volumes[tempDir] = "/packer-files"
 
 	ui.Say("Starting docker container...")
 	containerId, err := driver.StartContainer(&runConfig)

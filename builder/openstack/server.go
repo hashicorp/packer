@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/racker/perigee"
-	"github.com/rackspace/gophercloud"
 	"log"
 	"time"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 // StateRefreshFunc is a function type used for StateChangeConf that is

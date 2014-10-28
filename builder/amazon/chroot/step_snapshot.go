@@ -3,6 +3,8 @@ package chroot
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -23,7 +25,9 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	volumeId := state.Get("volume_id").(string)
 
 	ui.Say("Creating snapshot...")
-	createSnapResp, err := ec2conn.CreateSnapshot(volumeId, "")
+	createSnapResp, err := ec2conn.CreateSnapshot(
+		volumeId,
+		fmt.Sprintf("Packer: %s", time.Now().String()))
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
 		state.Put("error", err)

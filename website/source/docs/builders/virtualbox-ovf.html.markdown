@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VirtualBox Builder (from an OVF/OVA)"
+description: |-
+  This VirtualBox Packer builder is able to create VirtualBox virtual machines and export them in the OVF format, starting from an existing OVF/OVA (exported virtual machine image).
 ---
 
 # VirtualBox Builder (from an OVF/OVA)
 
 Type: `virtualbox-ovf`
 
-This VirtualBox builder is able to create [VirtualBox](https://www.virtualbox.org/)
+This VirtualBox Packer builder is able to create [VirtualBox](https://www.virtualbox.org/)
 virtual machines and export them in the OVF format, starting from an
 existing OVF/OVA (exported virtual machine image).
 
@@ -21,7 +23,7 @@ to finishing the build.
 Here is a basic example. This example is functional if you have an OVF matching
 the settings here.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "virtualbox-ovf",
   "source_path": "source.ovf",
@@ -30,7 +32,7 @@ the settings here.
   "ssh_wait_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
-</pre>
+```
 
 It is important to add a `shutdown_command`. By default Packer halts the
 virtual machine and the file system may not be sync'd. Thus, changes made in a
@@ -51,6 +53,19 @@ each category, the available options are alphabetized and described.
   once the OS is installed.
 
 ### Optional:
+
+* `boot_command` (array of strings) - This is an array of commands to type
+  when the virtual machine is first booted. The goal of these commands should
+  be to type just enough to initialize the operating system installer. Special
+  keys can be typed as well, and are covered in the section below on the boot
+  command. If this is not specified, it is assumed the installer will start
+  itself.
+
+* `boot_wait` (string) - The time to wait after booting the initial virtual
+  machine before typing the `boot_command`. The value of this should be
+  a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
+  five seconds and one minute 30 seconds, respectively. If this isn't specified,
+  the default is 10 seconds.
 
 * `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
   This can be useful for passing product information to include in the resulting
@@ -95,6 +110,25 @@ each category, the available options are alphabetized and described.
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console.
+
+* `http_directory` (string) - Path to a directory to serve using an HTTP
+  server. The files in this directory will be available over HTTP that will
+  be requestable from the virtual machine. This is useful for hosting
+  kickstart files and so on. By default this is "", which means no HTTP
+  server will be started. The address and port of the HTTP server will be
+  available as variables in `boot_command`. This is covered in more detail
+  below.
+
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
+  maximum port to use for the HTTP server started to serve the `http_directory`.
+  Because Packer often runs in parallel, Packer will choose a randomly available
+  port in this range to run the HTTP server. If you want to force the HTTP
+  server to be on one port, make this minimum and maximum port the same.
+  By default the values are 8000 and 9000, respectively.
+
+* `import_flags` (array of strings) - Additional flags to pass to
+    `VBoxManage import`. This can be used to add additional command-line flags
+    such as `--eula-accept` to accept a EULA in the OVF.
 
 * `import_opts` (string) - Additional options to pass to the `VBoxManage import`.
   This can be useful for passing "keepallmacs" or "keepnatmacs" options for existing
@@ -188,14 +222,14 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage` sectio
 An example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-<pre class="prettyprint">
+```javascript
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
     ["modifyvm", "{{.Name}}", "--cpus", "2"]
   ]
 }
-</pre>
+```
 
 The value of `vboxmanage` is an array of commands to execute. These commands
 are executed in the order defined. So in the above example, the memory will be

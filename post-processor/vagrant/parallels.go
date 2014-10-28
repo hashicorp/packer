@@ -54,13 +54,5 @@ func (p *ParallelsProvider) Process(ui packer.Ui, artifact packer.Artifact, dir 
 		}
 	}
 
-	// Create the Vagrantfile from the template
-	vagrantfile = fmt.Sprintf(parallelsVagrantfile)
-
 	return
 }
-
-var parallelsVagrantfile = `
-Vagrant.configure("2") do |config|
-end
-`

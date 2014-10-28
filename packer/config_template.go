@@ -3,11 +3,13 @@ package packer
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/common/uuid"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
+
+	"github.com/mitchellh/packer/common/uuid"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -43,6 +45,8 @@ func NewConfigTemplate() (*ConfigTemplate, error) {
 		"timestamp": templateTimestamp,
 		"user":      result.templateUser,
 		"uuid":      templateUuid,
+		"upper":     strings.ToUpper,
+		"lower":     strings.ToLower,
 	})
 
 	return result, nil
@@ -110,8 +114,16 @@ func templateEnv(n string) string {
 	return os.Getenv(n)
 }
 
-func templateISOTime() string {
-	return InitTime.Format(time.RFC3339)
+func templateISOTime(timeFormat ...string) (string, error) {
+	if len(timeFormat) == 0 {
+		return time.Now().UTC().Format(time.RFC3339), nil
+	}
+
+	if len(timeFormat) > 1 {
+		return "", fmt.Errorf("too many values, 1 needed: %v", timeFormat)
+	}
+
+	return time.Now().UTC().Format(timeFormat[0]), nil
 }
 
 func templatePwd() (string, error) {

@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VMware Builder from ISO"
+description: |-
+  This VMware Packer builder is able to create VMware virtual machines from an ISO file as a source. It currently supports building virtual machines on hosts running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and VMware Player on Linux. It can also build machines directly on VMware vSphere Hypervisor using SSH as opposed to the vSphere API.
 ---
 
 # VMware Builder (from ISO)
 
 Type: `vmware-iso`
 
-This VMware builder is able to create VMware virtual machines from an
+This VMware Packer builder is able to create VMware virtual machines from an
 ISO file as a source. It currently
 supports building virtual machines on hosts running
 [VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X,
@@ -29,7 +31,7 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "vmware-iso",
   "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
@@ -39,7 +41,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "ssh_wait_timeout": "30s",
   "shutdown_command": "shutdown -P now"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -260,11 +262,27 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
+* `<bs>` - Backspace
+
+* `<del>` - Delete
+
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
 * `<esc>` - Simulates pressing the escape key.
 
 * `<tab>` - Simulates pressing the tab key.
+
+* `<f1>` - `<f12>` - Simulates pressing a function key.
+
+* `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+* `<spacebar>` - Simulates pressing the spacebar.
+
+* `<insert>` - Simulates pressing the insert key.
+
+* `<home>` `<end>` - Simulates pressing the home and end keys.
+
+* `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
 * `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
@@ -281,7 +299,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-<pre class="prettyprint">
+```javascript
 [
   "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
   "/install/vmlinuz noapic ",
@@ -293,7 +311,7 @@ an Ubuntu 12.04 installer:
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
   "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
-</pre>
+```
 
 ## VMX Template
 
@@ -304,13 +322,9 @@ But for advanced users, this template can be customized. This allows
 Packer to build virtual machines of effectively any guest operating system
 type.
 
-<div class="alert alert-block alert-warn">
-<p>
-<strong>This is an advanced feature.</strong> Modifying the VMX template
+~> **This is an advanced feature.** Modifying the VMX template
 can easily cause your virtual machine to not boot properly. Please only
 modify the template if you know what you're doing.
-</p>
-</div>
 
 Within the template, a handful of variables are available so that your
 template can continue working with the rest of the Packer machinery. Using
@@ -327,13 +341,11 @@ In addition to using the desktop products of VMware locally to build
 virtual machines, Packer can use a remote VMware Hypervisor to build
 the virtual machine.
 
-<div class="alert alert-block alert-info">
-Note: Packer supports ESXi 5.1 and above.
-</div>
+-> **Note:** Packer supports ESXi 5.1 and above.
 
 Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by running the following command:
 
-```
+```text
 esxcli system settings advanced set -o /Net/GuestIPHack -i 1
 ```
 
@@ -341,6 +353,11 @@ When using a remote VMware Hypervisor, the builder still downloads the
 ISO and various files locally, and uploads these to the remote machine.
 Packer currently uses SSH to communicate to the ESXi machine rather than
 the vSphere API. At some point, the vSphere API may be used.
+
+Packer also requires VNC to issue boot commands during a build,
+which may be disabled on some remote VMware Hypervisors.  Please consult
+the appropriate documentation on how to update VMware Hypervisor's firewall
+to allow these connections.
 
 To use a remote VMware vSphere Hypervisor to build your virtual machine,
 fill in the required `remote_*` configurations:

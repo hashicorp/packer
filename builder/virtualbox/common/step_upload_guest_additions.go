@@ -58,7 +58,7 @@ func (s *StepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	}
 
 	ui.Say("Uploading VirtualBox guest additions ISO...")
-	if err := comm.Upload(s.GuestAdditionsPath, f); err != nil {
+	if err := comm.Upload(s.GuestAdditionsPath, f, nil); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading guest additions: %s", err))
 		return multistep.ActionHalt
 	}

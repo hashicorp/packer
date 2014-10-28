@@ -125,9 +125,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Write our Vagrantfile
 	var customVagrantfile string
 	if config.VagrantfileTemplate != "" {
+		vagrantfilePath, err := config.tpl.Process(config.VagrantfileTemplate, nil)
+		if err != nil {
+			return nil, false, err
+		}
+
 		ui.Message(fmt.Sprintf(
-			"Using custom Vagrantfile: %s", config.VagrantfileTemplate))
-		customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
+			"Using custom Vagrantfile: %s", vagrantfilePath))
+		customBytes, err := ioutil.ReadFile(vagrantfilePath)
 		if err != nil {
 			return nil, false, err
 		}

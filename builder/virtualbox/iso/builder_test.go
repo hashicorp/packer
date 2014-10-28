@@ -46,7 +46,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad guest OS type: %s", b.config.GuestOSType)
 	}
 
-	if b.config.VMName != "packer-foo" {
+	if b.config.VMName == "" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
 	}
 

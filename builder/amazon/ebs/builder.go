@@ -50,6 +50,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 
@@ -101,6 +102,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
@@ -113,12 +116,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tags:                     b.config.RunTags,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     awscommon.SSHAddress(ec2conn, b.config.SSHPort),
+			SSHAddress: awscommon.SSHAddress(
+				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
 			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
 		&common.StepProvision{},
-		&stepStopInstance{},
+		&stepStopInstance{SpotPrice: b.config.SpotPrice},
+		// TODO(mitchellh): verify works with spots
 		&stepModifyInstance{},
 		&stepCreateAMI{},
 		&awscommon.StepAMIRegionCopy{

@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VirtualBox Builder (from an ISO)"
+description: |-
+  The VirtualBox Packer builder is able to create VirtualBox virtual machines and export them in the OVF format, starting from an ISO image.
 ---
 
 # VirtualBox Builder (from an ISO)
 
 Type: `virtualbox-iso`
 
-The VirtualBox builder is able to create [VirtualBox](https://www.virtualbox.org/)
+The VirtualBox Packer builder is able to create [VirtualBox](https://www.virtualbox.org/)
 virtual machines and export them in the OVF format, starting from an
 ISO image.
 
@@ -22,7 +24,7 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
@@ -34,7 +36,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "ssh_wait_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
-</pre>
+```
 
 It is important to add a `shutdown_command`. By default Packer halts the
 virtual machine and the file system may not be sync'd. Thus, changes made in a
@@ -243,11 +245,27 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
+* `<bs>` - Backspace
+
+* `<del>` - Delete
+
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
 * `<esc>` - Simulates pressing the escape key.
 
 * `<tab>` - Simulates pressing the tab key.
+
+* `<f1>` - `<f12>` - Simulates pressing a function key.
+
+* `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+* `<spacebar>` - Simulates pressing the spacebar.
+
+* `<insert>` - Simulates pressing the insert key.
+
+* `<home>` `<end>` - Simulates pressing the home and end keys.
+
+* `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
 * `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
@@ -264,7 +282,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-<pre class="prettyprint">
+```javascript
 [
   "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
   "/install/vmlinuz noapic ",
@@ -276,7 +294,7 @@ an Ubuntu 12.04 installer:
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
   "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
-</pre>
+```
 
 ## Guest Additions
 
@@ -304,14 +322,14 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage` sectio
 An example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-<pre class="prettyprint">
+```javascript
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
     ["modifyvm", "{{.Name}}", "--cpus", "2"]
   ]
 }
-</pre>
+```
 
 The value of `vboxmanage` is an array of commands to execute. These commands
 are executed in the order defined. So in the above example, the memory will be
