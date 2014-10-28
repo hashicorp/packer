@@ -16,7 +16,5 @@ testrace:
 
 updatedeps:
 	go get -d -v -p 2 ./...
-	@sh -c "go get -u -v -p 2 ./...; exit 0"
-	go get -d -v -p 2 ./...
 
 .PHONY: bin default test updatedeps
