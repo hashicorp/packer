@@ -19,7 +19,7 @@ type stepCreateSSHKey struct {
 }
 
 func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary ssh key for droplet...")
@@ -71,15 +71,14 @@ func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 
 	ui.Say("Deleting temporary ssh key...")
 	err := client.DestroyKey(s.keyId)
 
-	curlstr := fmt.Sprintf("curl '%v/ssh_keys/%v/destroy?client_id=%v&api_key=%v'",
-		c.APIURL, s.keyId, c.ClientID, c.APIKey)
+	curlstr := fmt.Sprintf("curl -H 'Authorization: Bearer #TOKEN#' -X DELETE '%v/v2/account/keys/%v'", c.APIURL, s.keyId)
 
 	if err != nil {
 		log.Printf("Error cleaning up ssh key: %v", err.Error())
