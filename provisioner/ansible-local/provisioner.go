@@ -2,11 +2,13 @@ package ansiblelocal
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
@@ -188,13 +190,29 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
 	}
 
-	if len(p.config.InventoryFile) > 0 {
-		ui.Message("Uploading inventory file...")
-		src := p.config.InventoryFile
-		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
-		if err := p.uploadFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Error uploading inventory file: %s", err)
+	if len(p.config.InventoryFile) == 0 {
+		tf, err := ioutil.TempFile("", "packer-provisioner-ansible-local")
+		if err != nil {
+			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
+		defer os.Remove(tf.Name())
+		_, err = tf.Write([]byte("127.0.0.1"))
+		if err != nil {
+			tf.Close()
+			return fmt.Errorf("Error preparing inventory file: %s", err)
+		}
+		tf.Close()
+		p.config.InventoryFile = tf.Name()
+		defer func() {
+			p.config.InventoryFile = ""
+		}()
+	}
+
+	ui.Message("Uploading inventory file...")
+	src = p.config.InventoryFile
+	dst = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+	if err := p.uploadFile(ui, comm, dst, src); err != nil {
+		return fmt.Errorf("Error uploading inventory file: %s", err)
 	}
 
 	if len(p.config.GroupVars) > 0 {
@@ -253,14 +271,7 @@ func (p *Provisioner) Cancel() {
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
 	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
-
-	// The inventory must be set to "127.0.0.1,".  The comma is important
-	// as its the only way to override the ansible inventory when dealing
-	// with a single host.
-	inventory := "\"127.0.0.1,\""
-	if len(p.config.InventoryFile) > 0 {
-		inventory = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
-	}
+	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
 	extraArgs := ""
 	if len(p.config.ExtraArguments) > 0 {
