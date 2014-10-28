@@ -1,4 +1,4 @@
-## 0.7.2 (unreleased)
+## 0.7.2 (October 28, 2014)
 
 FEATURES:
 
