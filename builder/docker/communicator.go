@@ -117,6 +117,16 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 			return os.MkdirAll(hostpath, info.Mode())
 		}
 
+		if info.Mode() & os.ModeSymlink == os.ModeSymlink {
+			dest, err := os.Readlink(path)
+
+			if err != nil {
+				return err
+			}
+
+			return os.Symlink(dest, hostpath)
+		}
+
 		// It is a file, copy it over, including mode.
 		src, err := os.Open(path)
 		if err != nil {
