@@ -260,6 +260,11 @@ qemu-system-x86 command. The arguments are all printed for review.
   Packer will choose a randomly available port in this range to use as the
   host port.
 
+* `disk_image` (boolean) - Packer defaults to building from an ISO file,
+  this parameter controls whether the ISO URL supplied is actually a bootable
+  QEMU image.  When this value is set to true, the machine will clone the
+  source, resize it according to `disk_size` and boot the image.
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys
