@@ -2,6 +2,7 @@ package digitalocean
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -9,7 +10,7 @@ import (
 type stepDropletInfo struct{}
 
 func (s *stepDropletInfo) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 	dropletId := state.Get("droplet_id").(uint)
