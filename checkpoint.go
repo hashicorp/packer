@@ -6,11 +6,10 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/go-checkpoint"
-	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/command"
 )
 
 func init() {
-	packer.VersionChecker = packerVersionCheck
 	checkpointResult = make(chan *checkpoint.CheckResponse, 1)
 }
 
@@ -33,9 +32,9 @@ func runCheckpoint(c *config) {
 		return
 	}
 
-	version := packer.Version
-	if packer.VersionPrerelease != "" {
-		version += fmt.Sprintf(".%s", packer.VersionPrerelease)
+	version := Version
+	if VersionPrerelease != "" {
+		version += fmt.Sprintf(".%s", VersionPrerelease)
 	}
 
 	signaturePath := filepath.Join(configDir, "checkpoint_signature")
@@ -58,21 +57,23 @@ func runCheckpoint(c *config) {
 	checkpointResult <- resp
 }
 
-// packerVersionCheck implements packer.VersionCheckFunc and is used
+// commandVersionCheck implements command.VersionCheckFunc and is used
 // as the version checker.
-func packerVersionCheck(current string) (packer.VersionCheckInfo, error) {
+func commandVersionCheck() (command.VersionCheckInfo, error) {
+	// Wait for the result to come through
 	info := <-checkpointResult
 	if info == nil {
-		var zero packer.VersionCheckInfo
+		var zero command.VersionCheckInfo
 		return zero, nil
 	}
 
+	// Build the alerts that we may have received about our version
 	alerts := make([]string, len(info.Alerts))
 	for i, a := range info.Alerts {
 		alerts[i] = a.Message
 	}
 
-	return packer.VersionCheckInfo{
+	return command.VersionCheckInfo{
 		Outdated: info.Outdated,
 		Latest:   info.CurrentVersion,
 		Alerts:   alerts,
