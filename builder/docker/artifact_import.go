@@ -28,6 +28,10 @@ func (a *ImportArtifact) String() string {
 	return fmt.Sprintf("Imported Docker image: %s", a.Id())
 }
 
+func (*ImportArtifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *ImportArtifact) Destroy() error {
 	return a.Driver.DeleteImage(a.Id())
 }

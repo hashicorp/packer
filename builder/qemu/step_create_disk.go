@@ -16,8 +16,8 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName,
-		strings.ToLower(config.Format)))
+	name := config.VMName + "." + strings.ToLower(config.Format)
+	path := filepath.Join(config.OutputDir, name)
 
 	command := []string{
 		"create",
@@ -37,6 +37,8 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	state.Put("disk_filename", name)
 
 	return multistep.ActionContinue
 }
