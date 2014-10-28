@@ -1,42 +1,170 @@
-## 0.7.0 (unreleased)
+## 0.7.2 (unreleased)
 
 FEATURES:
 
-  * core: Plugins are automatically discovered if they're named properly.
-      Packer will look in the PWD and the directory with `packer` for
-      binaries named `packer-TYPE-NAME`.
-  * builder/vmware: VMware Player 6 is now supported. [GH-1168]
+  * builder/parallels: Don't depend on _prl-utils_ [GH-1499]
 
 IMPROVEMENTS:
 
+  * builder/amazon/all: Support new AWS Frankfurt region.
+  * builder/docker: Allow remote `DOCKER_HOST`, which works as long as
+      volumes work. [GH-1594]
+  * builder/qemu: Can set cache mode for main disk. [GH-1558]
+  * builder/vmware/vmx: Source VMX can have a disk connected via SATA. [GH-1604]
+  * post-processors/vagrantcloud: Support self-hosted box URLs.
+
+BUG FIXES:
+
+  * core: Fix loading plugins from pwd. [GH-1521]
+  * builder/amazon: Prefer token in config if given. [GH-1544]
+  * builder/virtualbox: Can read VirtualBox version on FreeBSD. [GH-1570]
+  * builder/virtualbox: More robust reading of guest additions URL. [GH-1509]
+  * builder/vmware: Always remove floppies/drives. [GH-1504]
+  * builder/vmware: Wait some time so that post-VMX update aren't
+      overwritten. [GH-1504]
+  * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
+  * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
+  * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
+  * builder/parallels: Create VM without hdd and then add it later [GH-1548]
+  * builder/parallels: Disconnect cdrom0 [GH-1605]
+  * builder/qemu: Don't use `-redir` flag anymore, replace with
+      `hostfwd` options. [GH-1561]
+  * builder/qmeu: Use `pc` as default machine type instead of `pc-1.0`.
+  * providers/aws: Ignore transient network errors. [GH-1579]
+  * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
+  * provisioner/ansible: Use inventory file always to avoid potentially
+      deprecated feature. [GH-1562]
+  * provisioner/shell: Quote environmental variables. [GH-1568]
+  * provisioner/salt: Bootstrap over SSL. [GH-1608]
+  * post-processors/docker-push: Work with docker-tag artifacts. [GH-1526]
+  * post-processors/vsphere: Append "/" to object address. [GH-1615]
+
+## 0.7.1 (September 10, 2014)
+
+FEATURES:
+
+  * builder/vmware: VMware Fusion Pro 7 is now supported. [GH-1478]
+
+BUG FIXES:
+
+  * core: SSH will connect slightly faster if it is ready immediately.
+  * provisioner/file: directory uploads no longer hang. [GH-1484]
+  * provisioner/file: fixed crash on large files. [GH-1473]
+  * scripts: Windows executable renamed to packer.exe. [GH-1483]
+
+## 0.7.0 (September 8, 2014)
+
+BACKWARDS INCOMPATIBILITIES:
+
+  * The authentication configuration for Google Compute Engine has changed.
+      The new method is much simpler, but is not backwards compatible.
+      `packer fix` will _not_ fix this. Please read the updated GCE docs.
+
+FEATURES:
+
+  * **New Post-Processor: `compress`** - Gzip compresses artifacts with files.
+  * **New Post-Processor: `docker-save`** - Save an image. This is similar to
+      export, but preserves the image hierarchy.
+  * **New Post-Processor: `docker-tag`** - Tag a created image.
+  * **New Template Functions: `upper`, `lower`** - See documentation for
+      more details.
+  * core: Plugins are automatically discovered if they're named properly.
+      Packer will look in the PWD and the directory with `packer` for
+      binaries named `packer-TYPE-NAME`.
+  * core: Plugins placed in `~/.packer.d/plugins` are now automatically
+      discovered.
+  * builder/amazon: Spot instances can now be used to build EBS backed and
+      instance store images. [GH-1139]
+  * builder/docker: Images can now be committed instead of exported. [GH-1198]
+  * builder/virtualbox-ovf: New `import_flags` setting can be used to add
+      new command line flags to `VBoxManage import` to allow things such
+      as EULAs to be accepted. [GH-1383]
+  * builder/virtualbox-ovf: Boot commands and the HTTP server are supported.
+      [GH-1169]
+  * builder/vmware: VMware Player 6 is now supported. [GH-1168]
+  * builder/vmware-vmx: Boot commands and the HTTP server are supported.
+      [GH-1169]
+
+IMPROVEMENTS:
+
+  * core: `isotime` function can take a format. [GH-1126]
+  * builder/amazon/all: `AWS_SECURITY_TOKEN` is read and can also be
+      set with the `token` configuration. [GH-1236]
+  * builder/amazon/all: Can force SSH on the private IP address with
+      `ssh_private_ip`. [GH-1229]
+  * builder/amazon/all: String fields in device mappings can use variables. [GH-1090]
   * builder/amazon-instance: EBS AMIs can be used as a source. [GH-1453]
   * builder/digitalocean: Can set API URL endpoint. [GH-1448]
   * builder/digitalocean: Region supports variables. [GH-1452]
-  * builder/parallels/all Path to tools ISO is calculated automatically. [GH-1455]
+  * builder/docker: Can now specify login credentials to pull images.
+  * builder/docker: Support mounting additional volumes. [GH-1430]
+  * builder/parallels/all: Path to tools ISO is calculated automatically. [GH-1455]
+  * builder/parallels-pvm: `reassign_mac` option to choose wehther or not
+      to generate a new MAC address. [GH-1461]
   * builder/qemu: Can specify "none" acceleration type. [GH-1395]
   * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]
   * builder/virtualbox/all: `iso_interface` option to mount ISO with SATA. [GH-1200]
   * builder/vmware-vmx: Proper `floppy_files` support. [GH-1057]
+  * command/build: Add `-color=false` flag to disable color. [GH-1433]
+  * post-processor/docker-push: Can now specify login credentials. [GH-1243]
+  * provisioner/chef-client: Support `chef_environment`. [GH-1190]
 
 BUG FIXES:
 
+  * core: nicer error message if an encrypted private key is used for
+      SSH. [GH-1445]
+  * core: Fix crash that could happen with a well timed double Ctrl-C.
+      [GH-1328] [GH-1314]
+  * core: SSH TCP keepalive period is now 5 seconds (shorter). [GH-1232]
   * builder/amazon-chroot: Can properly build HVM images now. [GH-1360]
   * builder/amazon-chroot: Fix crash in root device check. [GH-1360]
+  * builder/amazon-chroot: Add description that Packer made the snapshot
+      with a time. [GH-1388]
+  * builder/amazon-ebs: AMI is deregistered if an error. [GH-1186]
   * builder/amazon-instance: Fix deprecation warning for `ec2-bundle-vol`
       [GH-1424]
+  * builder/amazon-instance: Add `--no-filter` to the `ec2-bundle-vol`
+      command by default to avoid corrupting data by removing package
+      manager certs. [GH-1137]
+  * builder/amazon/all: `delete_on_termination` set to false will work.
+  * builder/amazon/all: Fix race condition on setting tags. [GH-1367]
+  * builder/amazon/all: More desctriptive error messages if Amazon only
+      sends an error code. [GH-1189]
+  * builder/docker: Error if `DOCKER_HOST` is set.
+  * builder/docker: Remove the container during cleanup. [GH-1206]
+  * builder/docker: Fix case where not all output would show up from
+      provisioners.
   * builder/googlecompute: add `disk_size` option. [GH-1397]
+  * builder/googlecompute: Auth works with latest formats on Google Cloud
+      Console. [GH-1344]
   * builder/openstack: Region is not required. [GH-1418]
   * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
   * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
   * builder/parallels/all: Added some navigation keys [GH-1442]
   * builder/qemu: If headless, sdl display won't be used. [GH-1395]
   * builder/qemu: Use `512M` as `-m` default. [GH-1444]
+  * builder/virtualbox/all: Search `VBOX_MSI_INSTALL_PATH` for path to
+      `VBoxManage` on Windows. [GH-1337]
   * builder/virtualbox/all: Seed RNG to avoid same ports. [GH-1386]
+  * builder/virtualbox/all: Better error if guest additions URL couldn't be
+      detected. [GH-1439]
+  * builder/virtualbox/all: Detect errors even when `VBoxManage` exits
+      with a zero exit code. [GH-1119]
+  * builder/virtualbox/iso: Append timestamp to default name for parallel
+      builds. [GH-1365]
+  * builder/vmware/all: No more error when Packer stops an already-stopped
+      VM. [GH-1300]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
   * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
+  * builder/vmware-iso: Fix crash when `vnc_port_min` and max were the
+      same value. [GH-1288]
+  * builder/vmware-iso: Finding an available VNC port on Windows works. [GH-1372]
+  * builder/vmware-vmx: Nice error if Clone is not supported (not VMware
+      Fusion Pro). [GH-787]
   * post-processor/vagrant: Can supply your own metadata.json. [GH-1143]
   * provisioner/ansible-local: Use proper path on Windows. [GH-1375]
+  * provisioner/file: Mode will now be preserved. [GH-1064]
 
 ## 0.6.1 (July 20, 2014)
 

@@ -17,8 +17,8 @@ import (
 //   vmName string
 //
 // Produces:
-//   attachedToolsIso boolean
 type StepAttachParallelsTools struct {
+	cdromDevice        string
 	ParallelsToolsMode string
 }
 
@@ -37,27 +37,25 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	parallelsToolsPath := state.Get("parallels_tools_path").(string)
 
 	// Attach the guest additions to the computer
-	ui.Say("Attaching Parallels Tools ISO onto IDE controller...")
-	command := []string{
-		"set", vmName,
-		"--device-add", "cdrom",
-		"--image", parallelsToolsPath,
-	}
-	if err := driver.Prlctl(command...); err != nil {
-		err := fmt.Errorf("Error attaching Parallels Tools: %s", err)
+	ui.Say("Attaching Parallels Tools ISO to the new CD/DVD drive...")
+
+	cdrom, err := driver.DeviceAddCdRom(vmName, parallelsToolsPath)
+
+	if err != nil {
+		err := fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	// Set some state so we know to remove
-	state.Put("attachedToolsIso", true)
+	// Track the device name so that we can can delete later
+	s.cdromDevice = cdrom
 
 	return multistep.ActionContinue
 }
 
 func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
-	if _, ok := state.GetOk("attachedToolsIso"); !ok {
+	if s.cdromDevice == "" {
 		return
 	}
 
@@ -66,14 +64,10 @@ func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 	vmName := state.Get("vmName").(string)
 
 	log.Println("Detaching Parallels Tools ISO...")
-	cdDevice := "cdrom0"
-	if _, ok := state.GetOk("attachedIso"); ok {
-		cdDevice = "cdrom1"
-	}
 
 	command := []string{
 		"set", vmName,
-		"--device-del", cdDevice,
+		"--device-del", s.cdromDevice,
 	}
 
 	if err := driver.Prlctl(command...); err != nil {

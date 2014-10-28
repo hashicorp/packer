@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Ansible (Local) Provisioner"
+description: |-
+  The `ansible-local` Packer provisioner configures Ansible to run on the machine by Packer from local Playbook and Role files.  Playbooks and Roles can be uploaded from your local machine to the remote machine.  Ansible is run in local mode via the `ansible-playbook` command.
 ---
 
 # Ansible Local Provisioner
 
 Type: `ansible-local`
 
-The `ansible-local` provisioner configures Ansible to run on the machine by
+The `ansible-local` Packer provisioner configures Ansible to run on the machine by
 Packer from local Playbook and Role files.  Playbooks and Roles can be uploaded
 from your local machine to the remote machine.  Ansible is run in [local mode](http://docs.ansible.com/playbooks_delegation.html#local-playbooks) via the `ansible-playbook` command.
 
@@ -15,12 +17,12 @@ from your local machine to the remote machine.  Ansible is run in [local mode](h
 
 The example below is fully functional.
 
-<pre class="prettyprint">
+```javascript
 {
-    "type": "ansible-local",
-    "playbook_file": "local.yml"
+  "type": "ansible-local",
+  "playbook_file": "local.yml"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -48,7 +50,8 @@ Optional:
   the `extra_arguments` option.
 
   An example inventory file may look like:
-  <pre class="prettyprint">
+
+  ```text
   [chi-dbservers]
   db-01 ansible_connection=local
   db-02 ansible_connection=local
@@ -66,7 +69,7 @@ Optional:
 
   [appservers:children]
   chi-appservers
-  </pre>
+  ```
 
 * `playbook_dir` (string) - a path to the complete ansible directory
   structure on your local system to be copied to the remote machine
@@ -75,6 +78,14 @@ Optional:
 * `playbook_paths` (array of strings) - An array of paths to playbook files on
   your local system. These will be uploaded to the remote machine under
   `staging_directory`/playbooks. By default, this is empty.
+
+* `group_vars` (string) - a path to the directory containing ansible
+  group variables on your local system to be copied to the
+  remote machine. By default, this is empty.
+
+* `host_vars` (string) - a path to the directory containing ansible
+  host variables on your local system to be copied to the
+  remote machine. By default, this is empty.
 
 * `role_paths` (array of strings) - An array of paths to role directories on
   your local system. These will be uploaded to the remote machine under

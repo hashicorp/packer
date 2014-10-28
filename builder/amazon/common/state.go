@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"log"
+	"net"
 	"time"
 )
 
@@ -38,6 +39,9 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidAMIID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
 			} else {
 				log.Printf("Error on AMIStateRefresh: %s", err)
 				return nil, "", err
@@ -64,6 +68,9 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidInstanceID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
 			} else {
 				log.Printf("Error on InstanceStateRefresh: %s", err)
 				return nil, "", err
@@ -78,6 +85,35 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 
 		i = &resp.Reservations[0].Instances[0]
 		return i, i.State.Name, nil
+	}
+}
+
+// SpotRequestStateRefreshFunc returns a StateRefreshFunc that is used to watch
+// a spot request for state changes.
+func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := conn.DescribeSpotRequests([]string{spotRequestId}, ec2.NewFilter())
+		if err != nil {
+			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidSpotInstanceRequestID.NotFound" {
+				// Set this to nil as if we didn't find anything.
+				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
+			} else {
+				log.Printf("Error on SpotRequestStateRefresh: %s", err)
+				return nil, "", err
+			}
+		}
+
+		if resp == nil || len(resp.SpotRequestResults) == 0 {
+			// Sometimes AWS has consistency issues and doesn't see the
+			// SpotRequest. Return an empty state.
+			return nil, "", nil
+		}
+
+		i := resp.SpotRequestResults[0]
+		return i, i.State, nil
 	}
 }
 
@@ -125,8 +161,8 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			}
 
 			if !found {
-				fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
-				return
+				err := fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
+				return nil, err
 			}
 		}
 
@@ -134,4 +170,12 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	}
 
 	return
+}
+
+func isTransientNetworkError(err error) bool {
+	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
+		return true
+	}
+
+	return false
 }

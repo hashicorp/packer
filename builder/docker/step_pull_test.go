@@ -51,6 +51,35 @@ func TestStepPull_error(t *testing.T) {
 	}
 }
 
+func TestStepPull_login(t *testing.T) {
+	state := testState(t)
+	step := new(StepPull)
+	defer step.Cleanup(state)
+
+	config := state.Get("config").(*Config)
+	driver := state.Get("driver").(*MockDriver)
+
+	config.Login = true
+
+	// run the step
+	if action := step.Run(state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// verify we pulled
+	if !driver.PullCalled {
+		t.Fatal("should've pulled")
+	}
+
+	// verify we logged in
+	if !driver.LoginCalled {
+		t.Fatal("should've logged in")
+	}
+	if !driver.LogoutCalled {
+		t.Fatal("should've logged out")
+	}
+}
+
 func TestStepPull_noPull(t *testing.T) {
 	state := testState(t)
 	step := new(StepPull)

@@ -2,8 +2,9 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/rackspace/gophercloud"
 	"log"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 // Artifact is an artifact implementation that contains built images.

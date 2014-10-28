@@ -1,0 +1,50 @@
+.container-xs-height {
+  display:table;
+  padding-left:0px;
+  padding-right:0px;
+}
+
+
+.col-xs-height {
+  display:table-cell;
+  float:none;
+}
+
+@media (min-width: 768px) {
+  .container-sm-height {
+    display:table;
+    padding-left:0px;
+    padding-right:0px;
+  }
+
+  .col-sm-height {
+    display:table-cell;
+    float:none;
+  }
+}
+
+@media (min-width: 992px) {
+  .container-md-height {
+    display:table;
+    padding-left:0px;
+    padding-right:0px;
+  }
+
+  .col-md-height {
+    display:table-cell;
+    float:none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container-lg-height {
+    display:table;
+    padding-left:0px;
+    padding-right:0px;
+  }
+
+  .col-lg-height {
+    display:table-cell;
+    float:none;
+  }
+}
