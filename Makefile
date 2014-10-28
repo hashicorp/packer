@@ -17,7 +17,6 @@ testrace:
 updatedeps:
 	go get -d -v -p 2 ./...
 	@sh -c "go get -u -v -p 2 ./...; exit 0"
-	@sh -c "cd ../../rackspace/gophercloud && git checkout release/v0.1.1" # because dependency management
 	go get -d -v -p 2 ./...
 
 .PHONY: bin default test updatedeps
