@@ -2,9 +2,9 @@ package vagrantcloud
 
 import (
 	"fmt"
-	"strings"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"strings"
 )
 
 type stepReleaseVersion struct {

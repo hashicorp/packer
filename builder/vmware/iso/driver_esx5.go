@@ -22,11 +22,11 @@ import (
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
 // virtual machines. This driver can only manage one machine at a time.
 type ESX5Driver struct {
-	Host      string
-	Port      uint
-	Username  string
-	Password  string
-	Datastore string
+	Host           string
+	Port           uint
+	Username       string
+	Password       string
+	Datastore      string
 	CacheDatastore string
 	CacheDirectory string
 
