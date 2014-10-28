@@ -500,8 +500,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		dir: b.config.OutputDir,
-		f:   files,
+		dir:   b.config.OutputDir,
+		f:     files,
 		state: make(map[string]interface{}),
 	}
 
