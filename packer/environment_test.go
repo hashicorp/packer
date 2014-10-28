@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -41,13 +39,6 @@ func testEnvironment() Environment {
 	}
 
 	return env
-}
-
-func TestEnvironment_DefaultConfig_Commands(t *testing.T) {
-	config := DefaultEnvironmentConfig()
-	if len(config.Commands) != 0 {
-		t.Fatalf("bad: %#v", config.Commands)
-	}
 }
 
 func TestEnvironment_DefaultConfig_Ui(t *testing.T) {
@@ -91,7 +82,6 @@ func TestEnvironment_NilComponents(t *testing.T) {
 	// anything but if there is a panic in the test then yeah, something
 	// went wrong.
 	env.Builder("foo")
-	env.Cli([]string{"foo"})
 	env.Hook("foo")
 	env.PostProcessor("foo")
 	env.Provisioner("foo")
@@ -151,117 +141,6 @@ func TestEnvironment_Cache(t *testing.T) {
 	env, _ := NewEnvironment(config)
 	if env.Cache() == nil {
 		t.Fatal("cache should not be nil")
-	}
-}
-
-func TestEnvironment_Cli_Error(t *testing.T) {
-	config := DefaultEnvironmentConfig()
-	config.Components.Command = func(n string) (Command, error) { return nil, errors.New("foo") }
-
-	env, _ := NewEnvironment(config)
-	_, err := env.Cli([]string{"foo"})
-	if err == nil {
-		t.Fatal("should have error")
-	}
-	if err.Error() != "foo" {
-		t.Fatalf("bad: %s", err)
-	}
-}
-
-func TestEnvironment_Cli_CallsRun(t *testing.T) {
-	command := &TestCommand{}
-	commands := make(map[string]Command)
-	commands["foo"] = command
-
-	config := &EnvironmentConfig{}
-	config.Commands = []string{"foo"}
-	config.Components.Command = func(n string) (Command, error) { return commands[n], nil }
-
-	env, _ := NewEnvironment(config)
-	exitCode, err := env.Cli([]string{"foo", "bar", "baz"})
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if exitCode != 0 {
-		t.Fatalf("bad: %d", exitCode)
-	}
-	if !command.runCalled {
-		t.Fatal("command should be run")
-	}
-	if command.runEnv != env {
-		t.Fatalf("bad env: %#v", command.runEnv)
-	}
-	if !reflect.DeepEqual(command.runArgs, []string{"bar", "baz"}) {
-		t.Fatalf("bad: %#v", command.runArgs)
-	}
-}
-
-func TestEnvironment_DefaultCli_Empty(t *testing.T) {
-	defaultEnv := testEnvironment()
-
-	// Test with no args
-	exitCode, _ := defaultEnv.Cli([]string{})
-	if exitCode != 1 {
-		t.Fatalf("bad: %d", exitCode)
-	}
-
-	// Test with only blank args
-	exitCode, _ = defaultEnv.Cli([]string{""})
-	if exitCode != 1 {
-		t.Fatalf("bad: %d", exitCode)
-	}
-}
-
-func TestEnvironment_DefaultCli_Help(t *testing.T) {
-	defaultEnv := testEnvironment()
-
-	// A little lambda to help us test the output actually contains help
-	testOutput := func() {
-		buffer := defaultEnv.Ui().(*BasicUi).Writer.(*bytes.Buffer)
-		output := buffer.String()
-		buffer.Reset()
-		if !strings.Contains(output, "usage: packer") {
-			t.Fatalf("should contain help: %#v", output)
-		}
-	}
-
-	// Test "--help"
-	exitCode, _ := defaultEnv.Cli([]string{"--help"})
-	if exitCode != 1 {
-		t.Fatalf("bad: %d", exitCode)
-	}
-	testOutput()
-
-	// Test "-h"
-	exitCode, _ = defaultEnv.Cli([]string{"--help"})
-	if exitCode != 1 {
-		t.Fatalf("bad: %d", exitCode)
-	}
-	testOutput()
-}
-
-func TestEnvironment_DefaultCli_Version(t *testing.T) {
-	defaultEnv := testEnvironment()
-
-	versionCommands := []string{"version", "--version", "-v"}
-	for _, command := range versionCommands {
-		exitCode, _ := defaultEnv.Cli([]string{command})
-		if exitCode != 0 {
-			t.Fatalf("bad: %d", exitCode)
-		}
-
-		// Test the --version and -v can appear anywhere
-		exitCode, _ = defaultEnv.Cli([]string{"bad", command})
-
-		if command != "version" {
-			if exitCode != 0 {
-				t.Fatalf("bad: %d", exitCode)
-			}
-		} else {
-			if exitCode != 1 {
-				t.Fatalf("bad: %d", exitCode)
-			}
-		}
 	}
 }
 
