@@ -1,8 +1,8 @@
 package rpc
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"github.com/hashicorp/go-msgpack/codec"
+	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net/rpc"
