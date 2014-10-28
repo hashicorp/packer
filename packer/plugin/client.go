@@ -138,17 +138,6 @@ func (c *Client) Builder() (packer.Builder, error) {
 	return &cmdBuilder{client.Builder(), c}, nil
 }
 
-// Returns a command implementation that is communicating over this
-// client. If the client hasn't been started, this will start it.
-func (c *Client) Command() (packer.Command, error) {
-	client, err := c.packrpcClient()
-	if err != nil {
-		return nil, err
-	}
-
-	return &cmdCommand{client.Command(), c}, nil
-}
-
 // Returns a hook implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Hook() (packer.Hook, error) {

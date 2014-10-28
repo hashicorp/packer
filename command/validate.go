@@ -1,4 +1,4 @@
-package validate
+package command
 
 import (
 	"flag"
@@ -9,15 +9,19 @@ import (
 	"strings"
 )
 
-type Command byte
-
-func (Command) Help() string {
-	return strings.TrimSpace(helpString)
+type ValidateCommand struct {
+	Meta
 }
 
-func (c Command) Run(env packer.Environment, args []string) int {
+func (c *ValidateCommand) Run(args []string) int {
 	var cfgSyntaxOnly bool
 	buildOptions := new(cmdcommon.BuildOptions)
+
+	env, err := c.Meta.Environment()
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
+		return 1
+	}
 
 	cmdFlags := flag.NewFlagSet("validate", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
@@ -123,6 +127,29 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	return 0
 }
 
-func (Command) Synopsis() string {
+func (*ValidateCommand) Help() string {
+	helpText := `
+Usage: packer validate [options] TEMPLATE
+
+  Checks the template is valid by parsing the template and also
+  checking the configuration with the various builders, provisioners, etc.
+
+  If it is not valid, the errors will be shown and the command will exit
+  with a non-zero exit status. If it is valid, it will exit with a zero
+  exit status.
+
+Options:
+
+  -syntax-only           Only check syntax. Do not verify config of the template.
+  -except=foo,bar,baz    Validate all builds other than these
+  -only=foo,bar,baz      Validate only these builds
+  -var 'key=value'       Variable for templates, can be used multiple times.
+  -var-file=path         JSON file containing user variables.
+`
+
+	return strings.TrimSpace(helpText)
+}
+
+func (*ValidateCommand) Synopsis() string {
 	return "check that a template is valid"
 }
