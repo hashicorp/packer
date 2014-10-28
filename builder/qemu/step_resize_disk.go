@@ -25,9 +25,9 @@ func (s *stepResizeDisk) Run(state multistep.StateBag) multistep.StepAction {
 		fmt.Sprintf("%vM", config.DiskSize),
 	}
 
-    if config.DiskImage == false {
-        return multistep.ActionContinue
-    }
+	if config.DiskImage == false {
+		return multistep.ActionContinue
+	}
 
 	ui.Say("Resizing hard drive...")
 	if err := driver.QemuImg(command...); err != nil {
