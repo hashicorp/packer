@@ -29,7 +29,7 @@ func (p *LibVirtProvider) Process(ui packer.Ui, artifact packer.Artifact, dir st
 	format := artifact.State("diskType").(string)
 	origSize := artifact.State("diskSize").(uint64)
 	size := origSize / 1024 // In MB, want GB
-	if origSize % 1024 > 0 {
+	if origSize%1024 > 0 {
 		// Make sure we don't make the size smaller
 		size++
 	}

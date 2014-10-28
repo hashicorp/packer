@@ -27,9 +27,9 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 		path,
 	}
 
-    if config.DiskImage == false {
-        return multistep.ActionContinue
-    }
+	if config.DiskImage == false {
+		return multistep.ActionContinue
+	}
 
 	ui.Say("Copying hard drive...")
 	if err := driver.QemuImg(command...); err != nil {
