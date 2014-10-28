@@ -65,20 +65,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-
-	name, ok := builtins[artifact.BuilderId()]
-	if !ok {
-		return nil, false, fmt.Errorf(
-			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
-	}
-
-	provider := providerForName(name)
-	if provider == nil {
-		// This shouldn't happen since we hard code all of these ourselves
-		panic(fmt.Sprintf("bad provider name: %s", name))
-	}
-
+func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	config := p.configs[""]
 	if specificConfig, ok := p.configs[name]; ok {
 		config = specificConfig
@@ -162,6 +149,23 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
+}
+
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+
+	name, ok := builtins[artifact.BuilderId()]
+	if !ok {
+		return nil, false, fmt.Errorf(
+			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
+	}
+
+	provider := providerForName(name)
+	if provider == nil {
+		// This shouldn't happen since we hard code all of these ourselves
+		panic(fmt.Sprintf("bad provider name: %s", name))
+	}
+
+	return p.PostProcessProvider(name, provider, ui, artifact)
 }
 
 func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) error {
