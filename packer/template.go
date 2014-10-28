@@ -24,6 +24,7 @@ type rawTemplate struct {
 	Description    string
 	Builders       []map[string]interface{}
 	Hooks          map[string][]string
+	Push           PushConfig
 	PostProcessors []interface{} `mapstructure:"post-processors"`
 	Provisioners   []map[string]interface{}
 	Variables      map[string]interface{}
@@ -36,8 +37,17 @@ type Template struct {
 	Variables      map[string]RawVariable
 	Builders       map[string]RawBuilderConfig
 	Hooks          map[string][]string
+	Push           *PushConfig
 	PostProcessors [][]RawPostProcessorConfig
 	Provisioners   []RawProvisionerConfig
+}
+
+// PushConfig is the configuration structure for the push settings.
+type PushConfig struct {
+	Name    string
+	Include []string
+	Exclude []string
+	VCS     bool
 }
 
 // The RawBuilderConfig struct represents a raw, unprocessed builder
@@ -154,6 +164,7 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 	t.Variables = make(map[string]RawVariable)
 	t.Builders = make(map[string]RawBuilderConfig)
 	t.Hooks = rawTpl.Hooks
+	t.Push = &rawTpl.Push
 	t.PostProcessors = make([][]RawPostProcessorConfig, len(rawTpl.PostProcessors))
 	t.Provisioners = make([]RawProvisionerConfig, len(rawTpl.Provisioners))
 

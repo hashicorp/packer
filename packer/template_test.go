@@ -541,6 +541,41 @@ func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
 	}
 }
 
+func TestParseTemplateFile_push(t *testing.T) {
+	data := `
+	{
+		"builders": [{"type": "something"}],
+
+		"push": {
+			"name": "hello",
+			"include": ["one"],
+			"exclude": ["two"]
+		}
+	}
+	`
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Write([]byte(data))
+	tf.Close()
+
+	result, err := ParseTemplateFile(tf.Name(), nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := &PushConfig{
+		Name:    "hello",
+		Include: []string{"one"},
+		Exclude: []string{"two"},
+	}
+	if !reflect.DeepEqual(result.Push, expected) {
+		t.Fatalf("bad: %#v", result.Push)
+	}
+}
+
 func TestParseTemplate_Variables(t *testing.T) {
 	data := `
 	{
