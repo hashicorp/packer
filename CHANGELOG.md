@@ -13,6 +13,7 @@ IMPROVEMENTS:
   * builder/vmware: Can specify path to Fusion installation with environmental
       variable `FUSION_APP_PATH`. [GH-1552]
   * builder/vmware: Can specify the HW version for the VMX. [GH-1530]
+  * builder/vmware/esxi: Will now cache ISOs/floppies remotely. [GH-1479]
   * builder/vmware/vmx: Source VMX can have a disk connected via SATA. [GH-1604]
   * post-processors/vagrantcloud: Support self-hosted box URLs.
 
