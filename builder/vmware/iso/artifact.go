@@ -28,6 +28,10 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("VM files in directory: %s", a.dir)
 }
 
+func (a *Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *Artifact) Destroy() error {
 	return a.dir.RemoveAll()
 }

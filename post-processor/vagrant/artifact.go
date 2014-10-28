@@ -35,6 +35,10 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("'%s' provider box: %s", a.Provider, a.Path)
 }
 
+func (a *Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *Artifact) Destroy() error {
 	return os.Remove(a.Path)
 }

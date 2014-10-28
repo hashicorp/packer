@@ -502,7 +502,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		dir: b.config.OutputDir,
 		f:   files,
+		state: make(map[string]interface{}),
 	}
+
+	artifact.state["diskName"] = state.Get("disk_filename").(string)
+	artifact.state["diskType"] = b.config.Format
+	artifact.state["diskSize"] = uint64(b.config.DiskSize)
+	artifact.state["domainType"] = b.config.Accelerator
 
 	return artifact, nil
 }
