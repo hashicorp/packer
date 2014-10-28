@@ -111,7 +111,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// The name of the provider for vagrant cloud, and vagrant
 	providerName := providerFromBuilderName(artifact.Id())
 
-	boxDownloadUrl, err := p.config.tpl.Process(p.config.BoxDownloadUrl, &boxDownloadUrlTemplate {
+	boxDownloadUrl, err := p.config.tpl.Process(p.config.BoxDownloadUrl, &boxDownloadUrlTemplate{
 		ArtifactId: artifact.Id(),
 		Provider:   providerName,
 	})

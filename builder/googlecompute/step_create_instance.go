@@ -58,11 +58,11 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		DiskSizeGb:  config.DiskSizeGb,
 		Image:       config.getImage(),
 		MachineType: config.MachineType,
-		Metadata: config.getInstanceMetadata(sshPublicKey),
-		Name:    name,
-		Network: config.Network,
-		Tags:    config.Tags,
-		Zone:    config.Zone,
+		Metadata:    config.getInstanceMetadata(sshPublicKey),
+		Name:        name,
+		Network:     config.Network,
+		Tags:        config.Tags,
+		Zone:        config.Zone,
 	})
 
 	if err == nil {
