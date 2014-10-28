@@ -825,7 +825,7 @@ func TestTemplateBuild_names(t *testing.T) {
 		t.Fatalf("bad: %#v", b.Name())
 	}
 
-	b, err = template.Build("test2-{{user \"foo\"}}", testComponentFinder())
+	b, err = template.Build("test2-bar", testComponentFinder())
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

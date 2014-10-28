@@ -189,6 +189,11 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 		t.Variables[k] = variable
 	}
 
+	variables, err := t.processVariables(false)
+	if err != nil {
+		return nil, err
+	}
+
 	// Gather all the builders
 	for i, v := range rawTpl.Builders {
 		var raw RawBuilderConfig
@@ -214,6 +219,16 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 		// at this point.
 		if raw.Name == "" {
 			raw.Name = raw.Type
+		} else {
+			tpl, err := NewConfigTemplate()
+			if err != nil {
+				return nil, err
+			}
+			tpl.UserVars = variables
+			raw.Name, err = tpl.Process(raw.Name, nil)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		// Check if we already have a builder with this name and error if so
@@ -473,53 +488,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
-	// Prepare the variable template processor, which is a bit unique
-	// because we don't allow user variable usage and we add a function
-	// to read from the environment.
-	varTpl, err := NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	varTpl.Funcs(template.FuncMap{
-		"env":  templateEnv,
-		"user": templateDisableUser,
-	})
-
-	// Prepare the variables
-	var varErrors []error
-	variables := make(map[string]string)
-	for k, v := range t.Variables {
-		if v.Required && !v.HasValue {
-			varErrors = append(varErrors,
-				fmt.Errorf("Required user variable '%s' not set", k))
-		}
-
-		var val string
-		if v.HasValue {
-			val = v.Value
-		} else {
-			val, err = varTpl.Process(v.Default, nil)
-			if err != nil {
-				varErrors = append(varErrors,
-					fmt.Errorf("Error processing user variable '%s': %s'", k, err))
-			}
-		}
-
-		variables[k] = val
-	}
-
-	if len(varErrors) > 0 {
-		return nil, &MultiError{varErrors}
-	}
-
-	// Process the name
-	tpl, err := NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	tpl.UserVars = variables
-
-	name, err = tpl.Process(name, nil)
+	variables, err := t.processVariables(true)
 	if err != nil {
 		return nil, err
 	}
@@ -698,4 +667,48 @@ func (t *TemplateOnlyExcept) Validate(b map[string]RawBuilderConfig) (e []error)
 	}
 
 	return
+}
+
+func (t *Template) processVariables(enforceRequired bool) (vars map[string]string, err error) {
+	// Prepare the variable template processor, which is a bit unique
+	// because we don't allow user variable usage and we add a function
+	// to read from the environment.
+	vars = make(map[string]string)
+	varTpl, err := NewConfigTemplate()
+	if err != nil {
+		return nil, err
+	}
+
+	varTpl.Funcs(template.FuncMap{
+		"env":  templateEnv,
+		"user": templateDisableUser,
+	})
+
+	// Prepare the variables
+	var varErrors []error
+
+	for k, v := range t.Variables {
+		if v.Required && !v.HasValue && enforceRequired {
+			varErrors = append(varErrors,
+				fmt.Errorf("Required user variable '%s' not set", k))
+		}
+
+		var val string
+		if v.HasValue {
+			val = v.Value
+		} else {
+			val, err = varTpl.Process(v.Default, nil)
+			if err != nil {
+				varErrors = append(varErrors,
+					fmt.Errorf("Error processing user variable '%s': %s'", k, err))
+			}
+		}
+
+		vars[k] = val
+	}
+
+	if len(varErrors) > 0 {
+		return nil, &MultiError{varErrors}
+	}
+	return vars, nil
 }
