@@ -23,7 +23,6 @@ type config struct {
 	PluginMaxPort              uint
 
 	Builders       map[string]string
-	Commands       map[string]string
 	PostProcessors map[string]string `json:"post-processors"`
 	Provisioners   map[string]string
 }
@@ -80,15 +79,6 @@ func (c *config) Discover() error {
 	}
 
 	return nil
-}
-
-// Returns an array of defined command names.
-func (c *config) CommandNames() (result []string) {
-	result = make([]string, 0, len(c.Commands))
-	for name := range c.Commands {
-		result = append(result, name)
-	}
-	return
 }
 
 // This is a proper packer.BuilderFunc that can be used to load packer.Builder
@@ -149,12 +139,6 @@ func (c *config) discover(path string) error {
 
 	err = c.discoverSingle(
 		filepath.Join(path, "packer-builder-*"), &c.Builders)
-	if err != nil {
-		return err
-	}
-
-	err = c.discoverSingle(
-		filepath.Join(path, "packer-command-*"), &c.Commands)
 	if err != nil {
 		return err
 	}
