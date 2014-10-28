@@ -101,8 +101,8 @@ func wrappedMain() int {
 	log.SetOutput(os.Stderr)
 
 	log.Printf(
-		"Packer Version: %s %s %s",
-		packer.Version, packer.VersionPrerelease, packer.GitCommit)
+		"[INFO] Packer version: %s %s %s",
+		Version, VersionPrerelease, GitCommit)
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("Built with Go Version: %s", runtime.Version())
 
