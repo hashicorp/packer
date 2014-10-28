@@ -8,7 +8,7 @@ import (
 
 // waitForState simply blocks until the droplet is in
 // a state we expect, while eventually timing out.
-func waitForDropletState(desiredState string, dropletId uint, client *DigitalOceanClient, timeout time.Duration) error {
+func waitForDropletState(desiredState string, dropletId uint, client DigitalOceanClient, timeout time.Duration) error {
 	done := make(chan struct{})
 	defer close(done)
 
