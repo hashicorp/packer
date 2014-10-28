@@ -2,6 +2,7 @@
 
 FEATURES:
 
+  * builder/digitalocean: API V2 support. [GH-1463]
   * builder/parallels: Don't depend on _prl-utils_ [GH-1499]
 
 IMPROVEMENTS:
