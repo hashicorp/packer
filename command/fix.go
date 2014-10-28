@@ -1,23 +1,28 @@
-package fix
+package command
 
 import (
 	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/mitchellh/packer/fix"
 )
 
-type Command byte
-
-func (Command) Help() string {
-	return strings.TrimSpace(helpString)
+type FixCommand struct {
+	Meta
 }
 
-func (c Command) Run(env packer.Environment, args []string) int {
+func (c *FixCommand) Run(args []string) int {
+	env, err := c.Meta.Environment()
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
+		return 1
+	}
+
 	cmdFlags := flag.NewFlagSet("fix", flag.ContinueOnError)
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	if err := cmdFlags.Parse(args); err != nil {
@@ -50,9 +55,9 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	tplF.Close()
 
 	input := templateData
-	for _, name := range FixerOrder {
+	for _, name := range fix.FixerOrder {
 		var err error
-		fixer, ok := Fixers[name]
+		fixer, ok := fix.Fixers[name]
 		if !ok {
 			panic("fixer not found: " + name)
 		}
@@ -85,6 +90,30 @@ func (c Command) Run(env packer.Environment, args []string) int {
 	return 0
 }
 
-func (c Command) Synopsis() string {
+func (*FixCommand) Help() string {
+	helpText := `
+Usage: packer fix [options] TEMPLATE
+
+  Reads the JSON template and attempts to fix known backwards
+  incompatibilities. The fixed template will be outputted to standard out.
+
+  If the template cannot be fixed due to an error, the command will exit
+  with a non-zero exit status. Error messages will appear on standard error.
+
+Fixes that are run:
+
+  iso-md5             Replaces "iso_md5" in builders with newer "iso_checksum"
+  createtime          Replaces ".CreateTime" in builder configs with "{{timestamp}}"
+  virtualbox-gaattach Updates VirtualBox builders using "guest_additions_attach"
+                      to use "guest_additions_mode"
+  pp-vagrant-override Replaces old-style provider overrides for the Vagrant
+                      post-processor to new-style as of Packer 0.5.0.
+  virtualbox-rename   Updates "virtualbox" builders to "virtualbox-iso"
+`
+
+	return strings.TrimSpace(helpText)
+}
+
+func (c *FixCommand) Synopsis() string {
 	return "fixes templates from old versions of packer"
 }
