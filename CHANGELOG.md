@@ -17,6 +17,7 @@ IMPROVEMENTS:
   * builder/vmware: Can specify the HW version for the VMX. [GH-1530]
   * builder/vmware/esxi: Will now cache ISOs/floppies remotely. [GH-1479]
   * builder/vmware/vmx: Source VMX can have a disk connected via SATA. [GH-1604]
+  * post-processors/vagrant: Support Qemu (libvirt) boxes. [GH-1330]
   * post-processors/vagrantcloud: Support self-hosted box URLs.
 
 BUG FIXES:
