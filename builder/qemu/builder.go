@@ -76,7 +76,7 @@ type config struct {
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
-	DiskCache       string     `mapstructure:"disk_cache`
+	DiskCache       string     `mapstructure:"disk_cache"`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
