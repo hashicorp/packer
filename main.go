@@ -9,10 +9,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 
+	"github.com/mitchellh/cli"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"github.com/mitchellh/panicwrap"
+	"github.com/mitchellh/prefixedio"
 )
 
 func main() {
@@ -24,63 +27,82 @@ func main() {
 
 // realMain is executed from main and returns the exit status to exit with.
 func realMain() int {
-	// If there is no explicit number of Go threads to use, then set it
-	if os.Getenv("GOMAXPROCS") == "" {
-		runtime.GOMAXPROCS(runtime.NumCPU())
+	var wrapConfig panicwrap.WrapConfig
+
+	if !panicwrap.Wrapped(&wrapConfig) {
+		// Determine where logs should go in general (requested by the user)
+		logWriter, err := logOutput()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Couldn't setup log output: %s", err)
+			return 1
+		}
+		if logWriter == nil {
+			logWriter = ioutil.Discard
+		}
+
+		// We always send logs to a temporary file that we use in case
+		// there is a panic. Otherwise, we delete it.
+		logTempFile, err := ioutil.TempFile("", "packer-log")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Couldn't setup logging tempfile: %s", err)
+			return 1
+		}
+		defer os.Remove(logTempFile.Name())
+		defer logTempFile.Close()
+
+		// Tell the logger to log to this file
+		os.Setenv(EnvLog, "")
+		os.Setenv(EnvLogFile, "")
+
+		// Setup the prefixed readers that send data properly to
+		// stdout/stderr.
+		doneCh := make(chan struct{})
+		outR, outW := io.Pipe()
+		go copyOutput(outR, doneCh)
+
+		// Create the configuration for panicwrap and wrap our executable
+		wrapConfig.Handler = panicHandler(logTempFile)
+		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
+		wrapConfig.Stdout = outW
+		exitStatus, err := panicwrap.Wrap(&wrapConfig)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
+			return 1
+		}
+
+		// If >= 0, we're the parent, so just exit
+		if exitStatus >= 0 {
+			// Close the stdout writer so that our copy process can finish
+			outW.Close()
+
+			// Wait for the output copying to finish
+			<-doneCh
+
+			return exitStatus
+		}
+
+		// We're the child, so just close the tempfile we made in order to
+		// save file handles since the tempfile is only used by the parent.
+		logTempFile.Close()
 	}
 
-	// Determine where logs should go in general (requested by the user)
-	logWriter, err := logOutput()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't setup log output: %s", err)
-		return 1
-	}
-
-	// We also always send logs to a temporary file that we use in case
-	// there is a panic. Otherwise, we delete it.
-	logTempFile, err := ioutil.TempFile("", "packer-log")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't setup logging tempfile: %s", err)
-		return 1
-	}
-	defer os.Remove(logTempFile.Name())
-	defer logTempFile.Close()
-
-	// Reset the log variables to minimize work in the subprocess
-	os.Setenv("PACKER_LOG", "")
-	os.Setenv("PACKER_LOG_FILE", "")
-
-	// Create the configuration for panicwrap and wrap our executable
-	wrapConfig := &panicwrap.WrapConfig{
-		Handler: panicHandler(logTempFile),
-		Writer:  io.MultiWriter(logTempFile, logWriter),
-	}
-
-	exitStatus, err := panicwrap.Wrap(wrapConfig)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
-		return 1
-	}
-
-	if exitStatus >= 0 {
-		return exitStatus
-	}
-
-	// We're the child, so just close the tempfile we made in order to
-	// save file handles since the tempfile is only used by the parent.
-	logTempFile.Close()
-
+	// Call the real main
 	return wrappedMain()
 }
 
 // wrappedMain is called only when we're wrapped by panicwrap and
 // returns the exit status to exit with.
 func wrappedMain() int {
+	// If there is no explicit number of Go threads to use, then set it
+	if os.Getenv("GOMAXPROCS") == "" {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
+
 	log.SetOutput(os.Stderr)
 
 	log.Printf(
-		"Packer Version: %s %s %s",
-		packer.Version, packer.VersionPrerelease, packer.GitCommit)
+		"[INFO] Packer version: %s %s %s",
+		Version, VersionPrerelease, GitCommit)
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("Built with Go Version: %s", runtime.Version())
 
@@ -118,16 +140,14 @@ func wrappedMain() int {
 	defer plugin.CleanupClients()
 
 	// Create the environment configuration
-	envConfig := packer.DefaultEnvironmentConfig()
-	envConfig.Cache = cache
-	envConfig.Commands = config.CommandNames()
-	envConfig.Components.Builder = config.LoadBuilder
-	envConfig.Components.Command = config.LoadCommand
-	envConfig.Components.Hook = config.LoadHook
-	envConfig.Components.PostProcessor = config.LoadPostProcessor
-	envConfig.Components.Provisioner = config.LoadProvisioner
+	EnvConfig = *packer.DefaultEnvironmentConfig()
+	EnvConfig.Cache = cache
+	EnvConfig.Components.Builder = config.LoadBuilder
+	EnvConfig.Components.Hook = config.LoadHook
+	EnvConfig.Components.PostProcessor = config.LoadPostProcessor
+	EnvConfig.Components.Provisioner = config.LoadProvisioner
 	if machineReadable {
-		envConfig.Ui = &packer.MachineReadableUi{
+		EnvConfig.Ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
 
@@ -139,17 +159,18 @@ func wrappedMain() int {
 		}
 	}
 
-	env, err := packer.NewEnvironment(envConfig)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Packer initialization error: \n\n%s\n", err)
-		return 1
+	//setupSignalHandlers(env)
+
+	cli := &cli.CLI{
+		Args:       args,
+		Commands:   Commands,
+		HelpFunc:   cli.BasicHelpFunc("packer"),
+		HelpWriter: os.Stdout,
 	}
 
-	setupSignalHandlers(env)
-
-	exitCode, err := env.Cli(args)
+	exitCode, err := cli.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err)
 		return 1
 	}
 
@@ -220,20 +241,44 @@ func loadConfig() (*config, error) {
 	return &config, nil
 }
 
-// logOutput determines where we should send logs (if anywhere).
-func logOutput() (logOutput io.Writer, err error) {
-	logOutput = ioutil.Discard
-	if os.Getenv("PACKER_LOG") != "" {
-		logOutput = os.Stderr
+// copyOutput uses output prefixes to determine whether data on stdout
+// should go to stdout or stderr. This is due to panicwrap using stderr
+// as the log and error channel.
+func copyOutput(r io.Reader, doneCh chan<- struct{}) {
+	defer close(doneCh)
 
-		if logPath := os.Getenv("PACKER_LOG_PATH"); logPath != "" {
-			var err error
-			logOutput, err = os.Create(logPath)
-			if err != nil {
-				return nil, err
-			}
-		}
+	pr, err := prefixedio.NewReader(r)
+	if err != nil {
+		panic(err)
 	}
 
-	return
+	stderrR, err := pr.Prefix(ErrorPrefix)
+	if err != nil {
+		panic(err)
+	}
+	stdoutR, err := pr.Prefix(OutputPrefix)
+	if err != nil {
+		panic(err)
+	}
+	defaultR, err := pr.Prefix("")
+	if err != nil {
+		panic(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		io.Copy(os.Stderr, stderrR)
+	}()
+	go func() {
+		defer wg.Done()
+		io.Copy(os.Stdout, stdoutR)
+	}()
+	go func() {
+		defer wg.Done()
+		io.Copy(os.Stdout, defaultR)
+	}()
+
+	wg.Wait()
 }

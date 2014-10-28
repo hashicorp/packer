@@ -1,4 +1,4 @@
-package inspect
+package command
 
 import (
 	"flag"
@@ -9,17 +9,17 @@ import (
 	"strings"
 )
 
-type Command struct{}
-
-func (Command) Help() string {
-	return strings.TrimSpace(helpText)
+type InspectCommand struct{
+	Meta
 }
 
-func (c Command) Synopsis() string {
-	return "see components of a template"
-}
+func (c *InspectCommand) Run(args []string) int {
+	env, err := c.Meta.Environment()
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
+		return 1
+	}
 
-func (c Command) Run(env packer.Environment, args []string) int {
 	flags := flag.NewFlagSet("inspect", flag.ContinueOnError)
 	flags.Usage = func() { env.Ui().Say(c.Help()) }
 	if err := flags.Parse(args); err != nil {
@@ -147,4 +147,24 @@ func (c Command) Run(env packer.Environment, args []string) int {
 		"and therefore only show in their raw form here.")
 
 	return 0
+}
+
+func (*InspectCommand) Help() string {
+	helpText := `
+Usage: packer inspect TEMPLATE
+
+  Inspects a template, parsing and outputting the components a template
+  defines. This does not validate the contents of a template (other than
+  basic syntax by necessity).
+
+Options:
+
+  -machine-readable  Machine-readable output
+`
+
+	return strings.TrimSpace(helpText)
+}
+
+func (c *InspectCommand) Synopsis() string {
+	return "see components of a template"
 }
