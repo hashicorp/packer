@@ -7,6 +7,8 @@ import (
 	"github.com/mitchellh/multistep"
 	"log"
 	"net"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -122,6 +124,8 @@ func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefre
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
+	sleepSeconds := 2
+	maxTicks := int(TimeoutSeconds() / sleepSeconds) + 1
 	notfoundTick := 0
 
 	for {
@@ -135,7 +139,7 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			// If we didn't find the resource, check if we have been
 			// not finding it for awhile, and if so, report an error.
 			notfoundTick += 1
-			if notfoundTick > 20 {
+			if notfoundTick > maxTicks {
 				return nil, errors.New("couldn't find resource")
 			}
 		} else {
@@ -166,7 +170,7 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			}
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(sleepSeconds) * time.Second)
 	}
 
 	return
@@ -178,4 +182,24 @@ func isTransientNetworkError(err error) bool {
 	}
 
 	return false
+}
+
+// Returns 300 seconds (5 minutes) by default
+// Some AWS operations, like copying an AMI to a distant region, take a very long time
+// Allow user to override with AWS_TIMEOUT_SECONDS environment variable
+func TimeoutSeconds() (seconds int) {
+	seconds = 300
+
+	override := os.Getenv("AWS_TIMEOUT_SECONDS")
+	if override != "" {
+		n, err := strconv.Atoi(override)
+		if err != nil {
+			log.Printf("Invalid timeout seconds '%s', using default", override)
+		} else {
+			seconds = n
+		}
+	}
+
+	log.Printf("Allowing %ds to complete (change with AWS_TIMEOUT_SECONDS)", seconds)
+	return seconds
 }
