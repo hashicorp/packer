@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/harmony-go"
 	"github.com/hashicorp/harmony-go/archive"
 	"github.com/mitchellh/packer/packer"
 )
@@ -16,6 +17,8 @@ const archiveTemplateEntry = ".packer-template.json"
 
 type PushCommand struct {
 	Meta
+
+	client *harmony.Client
 
 	// For tests:
 	uploadFn func(io.Reader, *uploadOpts) (<-chan struct{}, <-chan error, error)
@@ -52,6 +55,10 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Build our client
+	c.client = harmony.DefaultClient()
+	defer func() { c.client = nil }()
+
 	// Build the archiving options
 	var opts archive.ArchiveOpts
 	opts.Include = tpl.Push.Include
@@ -76,6 +83,10 @@ func (c *PushCommand) Run(args []string) int {
 	var uploadOpts uploadOpts
 	uploadOpts.Slug = tpl.Push.Name
 	uploadOpts.Token = token
+	uploadOpts.Builds = make(map[string]string)
+	for _, b := range tpl.Builders {
+		uploadOpts.Builds[b.Name] = b.Type
+	}
 
 	// Start the archiving process
 	r, archiveErrCh, err := archive.Archive(path, &opts)
@@ -136,11 +147,49 @@ func (c *PushCommand) upload(
 		return c.uploadFn(r, opts)
 	}
 
-	return nil, nil, nil
+	// Separate the slug into the user and name components
+	user, name, err := harmony.ParseSlug(opts.Slug)
+	if err != nil {
+		return nil, nil, fmt.Errorf("upload: %s", err)
+	}
+
+	// Get the app
+	bc, err := c.client.BuildConfig(user, name)
+	if err != nil {
+		return nil, nil, fmt.Errorf("upload: %s", err)
+	}
+
+	// Build the version to send up
+	version := harmony.BuildConfigVersion{
+		User:   bc.User,
+		Name:   bc.Name,
+		Builds: make([]harmony.BuildConfigBuild, 0, len(opts.Builds)),
+	}
+	for name, t := range opts.Builds {
+		version.Builds = append(version.Builds, harmony.BuildConfigBuild{
+			Name: name,
+			Type: t,
+		})
+	}
+
+	// Start the upload
+	doneCh, errCh := make(chan struct{}), make(chan error)
+	go func() {
+		err := c.client.UploadBuildConfigVersion(&version, r)
+		if err != nil {
+			errCh <- err
+			return
+		}
+
+		close(doneCh)
+	}()
+
+	return doneCh, errCh, nil
 }
 
 type uploadOpts struct {
-	URL   string
-	Slug  string
-	Token string
+	URL    string
+	Slug   string
+	Token  string
+	Builds map[string]string
 }
