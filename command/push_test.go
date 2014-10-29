@@ -58,6 +58,11 @@ func TestPush(t *testing.T) {
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("bad: %#v", actual)
 	}
+
+	expectedBuilds := map[string]string{"dummy": "dummy"}
+	if !reflect.DeepEqual(actualOpts.Builds, expectedBuilds) {
+		t.Fatalf("bad: %#v", actualOpts.Builds)
+	}
 }
 
 func TestPush_noName(t *testing.T) {
