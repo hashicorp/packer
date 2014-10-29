@@ -83,6 +83,7 @@ func (c *PushCommand) Run(args []string) int {
 		c.Ui.Error(fmt.Sprintf("Error archiving: %s", err))
 		return 1
 	}
+	defer r.Close()
 
 	// Start the upload process
 	doneCh, uploadErrCh, err := c.upload(r, &uploadOpts)
