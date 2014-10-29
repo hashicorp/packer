@@ -45,6 +45,7 @@ type Template struct {
 // PushConfig is the configuration structure for the push settings.
 type PushConfig struct {
 	Name    string
+	Address string
 	BaseDir string
 	Include []string
 	Exclude []string

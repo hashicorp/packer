@@ -58,8 +58,16 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Build our client
-	c.client = harmony.DefaultClient()
 	defer func() { c.client = nil }()
+	c.client = harmony.DefaultClient()
+	if tpl.Push.Address != "" {
+		c.client, err = harmony.NewClient(tpl.Push.Address)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error setting up API client: %s", err))
+			return 1
+		}
+	}
 
 	// Build the archiving options
 	var opts archive.ArchiveOpts
