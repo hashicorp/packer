@@ -13,7 +13,7 @@ import (
 )
 
 // archiveTemplateEntry is the name the template always takes within the slug.
-const archiveTemplateEntry = ".packer-template.json"
+const archiveTemplateEntry = ".packer-template"
 
 type PushCommand struct {
 	Meta
@@ -25,10 +25,12 @@ type PushCommand struct {
 }
 
 func (c *PushCommand) Run(args []string) int {
+	var create bool
 	var token string
 
 	f := flag.NewFlagSet("push", flag.ContinueOnError)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
+	f.BoolVar(&create, "create", false, "create")
 	f.StringVar(&token, "token", "", "token")
 	if err := f.Parse(args); err != nil {
 		return 1
@@ -88,6 +90,12 @@ func (c *PushCommand) Run(args []string) int {
 		uploadOpts.Builds[b.Name] = b.Type
 	}
 
+	// Create the build config if it doesn't currently exist.
+	if err := c.create(uploadOpts.Slug, create); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+
 	// Start the archiving process
 	r, archiveErrCh, err := archive.Archive(path, &opts)
 	if err != nil {
@@ -128,7 +136,12 @@ Usage: packer push [options] TEMPLATE
   This will not initiate any builds, it will only update the templates
   used for builds.
 
+  The configuration about what is pushed is configured within the
+  template's "push" section.
+
 Options:
+
+  -create             Create the build configuration if it doesn't exist.
 
   -token=<token>      Access token to use to upload. If blank, the
                       TODO environmental variable will be used.
@@ -139,6 +152,39 @@ Options:
 
 func (*PushCommand) Synopsis() string {
 	return "push template files to a Packer build service"
+}
+
+func (c *PushCommand) create(name string, create bool) error {
+	if c.uploadFn != nil {
+		return nil
+	}
+
+	// Separate the slug into the user and name components
+	user, name, err := harmony.ParseSlug(name)
+	if err != nil {
+		return fmt.Errorf("Malformed push name: %s", err)
+	}
+
+	// Check if it exists. If so, we're done.
+	if _, err := c.client.BuildConfig(user, name); err == nil {
+		return nil
+	} else if err != harmony.ErrNotFound {
+		return err
+	}
+
+	// Otherwise, show an error if we're not creating.
+	if !create {
+		return fmt.Errorf(
+			"Push target doesn't exist: %s. Either create this online via\n" +
+				"the website or pass the -create flag.")
+	}
+
+	// Create it
+	if err := c.client.CreateBuildConfig(user, name); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *PushCommand) upload(
