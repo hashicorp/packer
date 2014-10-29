@@ -29,10 +29,10 @@ func TestPush_multiArgs(t *testing.T) {
 }
 
 func TestPush(t *testing.T) {
-	var actualR io.Reader
+	var actual []string
 	var actualOpts *uploadOpts
 	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
-		actualR = r
+		actual = testArchive(t, r)
 		actualOpts = opts
 
 		doneCh := make(chan struct{})
@@ -50,7 +50,6 @@ func TestPush(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	actual := testArchive(t, actualR)
 	expected := []string{
 		archiveTemplateEntry,
 		"template.json",
