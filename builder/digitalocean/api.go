@@ -24,7 +24,7 @@ type Size struct {
 	Memory       uint     `json:"memory,omitempty"`        //only in v2 api
 	VCPUS        uint     `json:"vcpus,omitempty"`         //only in v2 api
 	Disk         uint     `json:"disk,omitempty"`          //only in v2 api
-	Transfer     uint     `json:"transfer,omitempty"`      //only in v2 api
+	Transfer     float64  `json:"transfer,omitempty"`      //only in v2 api
 	PriceMonthly float64  `json:"price_monthly,omitempty"` //only in v2 api
 	PriceHourly  float64  `json:"price_hourly,omitempty"`  //only in v2 api
 	Regions      []string `json:"regions,omitempty"`       //only in v2 api

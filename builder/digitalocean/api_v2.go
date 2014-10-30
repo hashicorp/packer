@@ -285,17 +285,21 @@ func NewRequestV2(d DigitalOceanClientV2, path string, method string, req interf
 		enc.Encode(req)
 		defer buf.Reset()
 		request, err = http.NewRequest(method, url, buf)
+		request.Header.Add("Content-Type", "application/json")
 	} else {
 		request, err = http.NewRequest(method, url, nil)
 	}
 	if err != nil {
 		return err
 	}
+
 	// Add the authentication parameters
 	request.Header.Add("Authorization", "Bearer "+d.APIToken)
-
-	log.Printf("sending new request to digitalocean: %s", url)
-
+	if buf != nil {
+		log.Printf("sending new request to digitalocean: %s buffer: %s", url, buf)
+	} else {
+		log.Printf("sending new request to digitalocean: %s", url)
+	}
 	resp, err := client.Do(request)
 	if err != nil {
 		return err
@@ -325,7 +329,10 @@ func NewRequestV2(d DigitalOceanClientV2, path string, method string, req interf
 		return errors.New(fmt.Sprintf("Failed to decode JSON response %s (HTTP %v) from DigitalOcean: %s", err.Error(),
 			resp.StatusCode, body))
 	}
-
+	switch resp.StatusCode {
+	case 403, 429, 422, 404, 503, 500:
+		return errors.New(fmt.Sprintf("digitalocean request error: %+v", res))
+	}
 	return nil
 }
 
