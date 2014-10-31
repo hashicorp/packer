@@ -122,6 +122,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	warnings := make([]string, 0)
 
 	b.config.tpl, err = packer.NewConfigTemplate()
 	if err != nil {
