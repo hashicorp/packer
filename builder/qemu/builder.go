@@ -304,22 +304,24 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
-	if b.config.ISOChecksum == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-	} else {
-		b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
-	}
-
 	if b.config.ISOChecksumType == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("The iso_checksum_type must be specified."))
 	} else {
 		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
-		if h := common.HashForType(b.config.ISOChecksumType); h == nil {
-			errs = packer.MultiErrorAppend(
-				errs,
-				fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
+		if b.config.ISOChecksumType != "none" {
+			if b.config.ISOChecksum == "" {
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
+			} else {
+				b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
+			}
+
+			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
+				errs = packer.MultiErrorAppend(
+					errs,
+					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
+			}
 		}
 	}
 
@@ -404,11 +406,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.QemuArgs = make([][]string, 0)
 	}
 
-	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+	if b.config.ISOChecksumType == "none" {
+		warnings = append(warnings,
+			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
+				"a checksum is highly recommended.")
 	}
 
-	return nil, nil
+	if errs != nil && len(errs.Errors) > 0 {
+		return warnings, errs
+	}
+
+	return warnings, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
