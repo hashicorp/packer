@@ -330,7 +330,7 @@ func NewRequestV2(d DigitalOceanClientV2, path string, method string, req interf
 			resp.StatusCode, body))
 	}
 	switch resp.StatusCode {
-	case 403, 429, 422, 404, 503, 500:
+	case 403, 401, 429, 422, 404, 503, 500:
 		return errors.New(fmt.Sprintf("digitalocean request error: %+v", res))
 	}
 	return nil
