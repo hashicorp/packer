@@ -1,24 +1,26 @@
 ---
 layout: "docs"
 page_title: "Docker Builder"
+description: |-
+  The `docker` Packer builder builds Docker images using Docker. The builder starts a Docker container, runs provisioners within this container, then exports the container for reuse or commits the image.
 ---
 
 # Docker Builder
 
 Type: `docker`
 
-The Docker builder builds [Docker](http://www.docker.io) images using
+The `docker` Packer builder builds [Docker](http://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within
 this container, then exports the container for reuse or commits the image.
 
 Packer builds Docker containers _without_ the use of
-[Dockerfiles](http://docs.docker.io/en/latest/use/builder/).
+[Dockerfiles](https://docs.docker.com/reference/builder/).
 By not using Dockerfiles, Packer is able to provision
 containers with portable scripts or configuration management systems
 that are not tied to Docker in any way. It also has a simpler mental model:
 you provision containers much the same way you provision a normal virtualized
 or dedicated server. For more information, read the section on
-[Dockerfiles](#toc_4).
+[Dockerfiles](#toc_8).
 
 The Docker builder must run on a machine that has Docker installed. Therefore
 the builder only works on machines that support Docker (modern Linux machines).
@@ -31,13 +33,13 @@ run Packer within that environment.
 Below is a fully functioning example. It doesn't do anything useful, since
 no provisioners are defined, but it will effectively repackage an image.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker",
   "image": "ubuntu",
   "export_path": "image.tar"
 }
-</pre>
+```
 
 ## Basic Example: Commit
 
@@ -45,13 +47,13 @@ Below is another example, the same as above but instead of exporting the
 running container, this one commits the container to an image. The image
 can then be more easily tagged, pushed, etc.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker",
   "image": "ubuntu",
   "commit": true
 }
-</pre>
+```
 
 
 ## Configuration Reference
@@ -113,9 +115,9 @@ If you set `commit`, see the next section.
 The example below shows a full configuration that would import and push
 the created image:
 
-<pre class="prettyprint">
+```javascript
 {
-    "post-processors": [
+  "post-processors": [
 		[
 			{
 				"type": "docker-import",
@@ -126,12 +128,14 @@ the created image:
 		]
 	]
 }
-</pre>
+```
 
 If you want to do this manually, however, perhaps from a script, you can
 import the image using the process below:
 
-    docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
+```text
+$ docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
+```
 
 You can then add additional tags and push the image as usual with `docker tag`
 and `docker push`, respectively.
@@ -142,9 +146,9 @@ If you committed your container to an image, you probably want to tag,
 save, push, etc. Packer can do this automatically for you. An example is
 shown below which tags and pushes the image:
 
-<pre class="prettyprint">
+```javascript
 {
-    "post-processors": [
+  "post-processors": [
 		[
 			{
 				"type": "docker-tag",
@@ -155,7 +159,7 @@ shown below which tags and pushes the image:
 		]
 	]
 }
-</pre>
+```
 
 ## Dockerfiles
 

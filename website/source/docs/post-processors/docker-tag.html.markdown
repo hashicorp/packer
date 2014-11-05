@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "docker-tag Post-Processor"
+description: |-
+  The Packer Docker Tag post-processor takes an artifact from the docker builder that was committed and tags it into a repository. This allows you to use the other Docker post-processors such as docker-push to push the image to a registry.
 ---
 
 # Docker Tag Post-Processor
 
 Type: `docker-tag`
 
-The Docker Tag post-processor takes an artifact from the
+The Packer Docker Tag post-processor takes an artifact from the
 [docker builder](/docs/builders/docker.html) that was committed
 and tags it into a repository. This allows you to use the other
 Docker post-processors such as
@@ -32,13 +34,13 @@ a repository is required.
 
 An example is shown below, showing only the post-processor configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker-tag",
   "repository": "mitchellh/packer",
   "tag": "0.7"
 }
-</pre>
+```
 
 This example would take the image created by the Docker builder
 and tag it into the local Docker process with a name of `mitchellh/packer:0.7`.

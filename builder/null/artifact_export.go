@@ -24,6 +24,10 @@ func (a *NullArtifact) String() string {
 	return fmt.Sprintf("Did not export anything. This is the null builder")
 }
 
+func (a *NullArtifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *NullArtifact) Destroy() error {
 	return nil
 }

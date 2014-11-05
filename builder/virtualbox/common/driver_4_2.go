@@ -49,11 +49,12 @@ func (d *VBox42Driver) Iso() (string, error) {
 		return "", err
 	}
 
-	DefaultGuestAdditionsRe := regexp.MustCompile("Default Guest Additions ISO:(.*)")
+	DefaultGuestAdditionsRe := regexp.MustCompile("Default Guest Additions ISO:(.+)")
 
 	for _, line := range strings.Split(stdout.String(), "\n") {
 		// Need to trim off CR character when running in windows
-		line = strings.TrimRight(line, "\r")
+		// Trimming whitespaces at this point helps to filter out empty value
+		line = strings.TrimRight(line, " \r")
 
 		matches := DefaultGuestAdditionsRe.FindStringSubmatch(line)
 		if matches == nil {
@@ -66,7 +67,7 @@ func (d *VBox42Driver) Iso() (string, error) {
 		return isoname, nil
 	}
 
-	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output")
+	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output (or it is empty)")
 }
 
 func (d *VBox42Driver) Import(name string, path string, flags []string) error {
@@ -195,12 +196,12 @@ func (d *VBox42Driver) Version() (string, error) {
 		return "", fmt.Errorf("VirtualBox is not properly setup: %s", versionOutput)
 	}
 
-	versionRe := regexp.MustCompile("^[.0-9]+(?:_RC[0-9]+)?")
-	matches := versionRe.FindAllString(versionOutput, 1)
-	if matches == nil {
+	versionRe := regexp.MustCompile("^([.0-9]+)(?:_(?:RC|OSEr)[0-9]+)?")
+	matches := versionRe.FindAllStringSubmatch(versionOutput, 1)
+	if matches == nil || len(matches[0]) != 2 {
 		return "", fmt.Errorf("No version found: %s", versionOutput)
 	}
 
-	log.Printf("VirtualBox version: %s", matches[0])
-	return matches[0], nil
+	log.Printf("VirtualBox version: %s", matches[0][1])
+	return matches[0][1], nil
 }

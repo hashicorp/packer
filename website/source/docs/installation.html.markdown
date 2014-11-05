@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Install Packer"
+description: |-
+  Packer must first be installed on the machine you want to run it on. To make installation easy, Packer is distributed as a binary package for all supported platforms and architectures. This page will not cover how to compile Packer from source, as that is covered in the README and is only recommended for advanced users.
 ---
 
 # Install Packer
@@ -36,13 +38,13 @@ contains instructions for setting the PATH on Windows.
 After installing Packer, verify the installation worked by opening
 a new command prompt or console, and checking that `packer` is available:
 
-```
+```text
 $ packer
 usage: packer [--version] [--help] <command> [<args>]
 
 Available commands are:
     build        build image(s) from template
-    fix           fixes templates from old versions of packer
+    fix          fixes templates from old versions of packer
     inspect      see components of a template
     validate     check that a template is valid
 ```
@@ -67,7 +69,7 @@ If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
 adding the `binary` tap. Remember that this is updated by a 3rd party, so
 it may not be the latest available version.
 
-```
+```text
 $ brew tap homebrew/binary
 $ brew install packer
 ```

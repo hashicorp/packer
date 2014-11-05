@@ -1,6 +1,8 @@
 ---
 layout: "community"
 page_title: "Community"
+description: |-
+  Packer is a new project with a growing community. Despite this, there are dedicated users willing to help through various mediums.
 ---
 
 # Community

@@ -22,11 +22,13 @@ import (
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
 // virtual machines. This driver can only manage one machine at a time.
 type ESX5Driver struct {
-	Host      string
-	Port      uint
-	Username  string
-	Password  string
-	Datastore string
+	Host           string
+	Port           uint
+	Username       string
+	Password       string
+	Datastore      string
+	CacheDatastore string
+	CacheDirectory string
 
 	comm      packer.Communicator
 	outputDir string
@@ -55,7 +57,21 @@ func (d *ESX5Driver) IsRunning(string) (bool, error) {
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	return d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+	for i := 0; i < 20; i++ {
+		err := d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+		if err != nil {
+			return err
+		}
+		time.Sleep((time.Duration(i) * time.Second) + 1)
+		running, err := d.IsRunning(vmxPathLocal)
+		if err != nil {
+			return err
+		}
+		if running {
+			return nil
+		}
+	}
+	return errors.New("Retry limit exceeded")
 }
 
 func (d *ESX5Driver) Stop(vmxPathLocal string) error {
@@ -84,13 +100,7 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
-	cacheRoot, _ := filepath.Abs(".")
-	targetFile, err := filepath.Rel(cacheRoot, localPath)
-	if err != nil {
-		return "", err
-	}
-
-	finalPath := d.datastorePath(targetFile)
+	finalPath := d.cachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
@@ -298,6 +308,10 @@ func (d *ESX5Driver) String() string {
 func (d *ESX5Driver) datastorePath(path string) string {
 	baseDir := filepath.Base(filepath.Dir(path))
 	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
+}
+
+func (d *ESX5Driver) cachePath(path string) string {
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.CacheDatastore, d.CacheDirectory, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) connect() error {

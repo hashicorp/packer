@@ -17,11 +17,13 @@ func NewDriver(config *config) (vmwcommon.Driver, error) {
 
 	drivers = []vmwcommon.Driver{
 		&ESX5Driver{
-			Host:      config.RemoteHost,
-			Port:      config.RemotePort,
-			Username:  config.RemoteUser,
-			Password:  config.RemotePassword,
-			Datastore: config.RemoteDatastore,
+			Host:           config.RemoteHost,
+			Port:           config.RemotePort,
+			Username:       config.RemoteUser,
+			Password:       config.RemotePassword,
+			Datastore:      config.RemoteDatastore,
+			CacheDatastore: config.RemoteCacheDatastore,
+			CacheDirectory: config.RemoteCacheDirectory,
 		},
 	}
 

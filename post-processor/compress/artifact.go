@@ -35,6 +35,10 @@ func (self *Artifact) String() string {
 	return fmt.Sprintf("'%s' compressing: %s", self.Provider, self.Path)
 }
 
+func (*Artifact) State(name string) interface{} {
+	return nil
+}
+
 func (self *Artifact) Destroy() error {
 	return os.Remove(self.Path)
 }

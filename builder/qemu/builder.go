@@ -56,6 +56,14 @@ var diskInterface = map[string]bool{
 	"virtio": true,
 }
 
+var diskCache = map[string]bool{
+	"writethrough": true,
+	"writeback":    true,
+	"none":         true,
+	"unsafe":       true,
+	"directsync":   true,
+}
+
 type Builder struct {
 	config config
 	runner multistep.Runner
@@ -68,9 +76,11 @@ type config struct {
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
+	DiskCache       string     `mapstructure:"disk_cache"`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
+	DiskImage       bool       `mapstructure:"disk_image"`
 	HTTPDir         string     `mapstructure:"http_directory"`
 	HTTPPortMin     uint       `mapstructure:"http_port_min"`
 	HTTPPortMax     uint       `mapstructure:"http_port_max"`
@@ -126,6 +136,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskSize = 40000
 	}
 
+	if b.config.DiskCache == "" {
+		b.config.DiskCache = "writeback"
+	}
+
 	if b.config.Accelerator == "" {
 		b.config.Accelerator = "kvm"
 	}
@@ -139,7 +153,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.MachineType == "" {
-		b.config.MachineType = "pc-1.0"
+		b.config.MachineType = "pc"
 	}
 
 	if b.config.OutputDir == "" {
@@ -280,6 +294,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("unrecognized disk interface type"))
 	}
 
+	if _, ok := diskCache[b.config.DiskCache]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk cache type"))
+	}
+
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("http_port_min must be less than http_port_max"))
@@ -412,6 +431,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		new(stepCreateDisk),
+		new(stepCopyDisk),
+		new(stepResizeDisk),
 		new(stepHTTPServer),
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
@@ -479,9 +500,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		dir: b.config.OutputDir,
-		f:   files,
+		dir:   b.config.OutputDir,
+		f:     files,
+		state: make(map[string]interface{}),
 	}
+
+	artifact.state["diskName"] = state.Get("disk_filename").(string)
+	artifact.state["diskType"] = b.config.Format
+	artifact.state["diskSize"] = uint64(b.config.DiskSize)
+	artifact.state["domainType"] = b.config.Accelerator
 
 	return artifact, nil
 }

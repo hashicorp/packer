@@ -12,7 +12,7 @@ type stepCreateDroplet struct {
 }
 
 func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 	sshKeyId := state.Get("ssh_key_id").(uint)
@@ -44,7 +44,7 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*DigitalOceanClient)
+	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(config)
 

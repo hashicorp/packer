@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Amazon AMI Builder (EBS backed)"
+description: |-
+  The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS volumes for use in EC2. For more information on the difference betwen EBS-backed instances and instance-store backed instances, see the storage for the root device section in the EC2 documentation.
 ---
 
 # AMI Builder (EBS backed)
 
 Type: `amazon-ebs`
 
-The `amazon-ebs` builder is able to create Amazon AMIs backed by EBS
+The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
 volumes for use in [EC2](http://aws.amazon.com/ec2/). For more information
 on the difference betwen EBS-backed instances and instance-store backed
 instances, see the
@@ -83,10 +85,6 @@ each category, the available configuration keys are alphabetized.
 * `ami_users` (array of strings) - A list of account IDs that have access
   to launch the resulting AMI(s). By default no additional users other than the user
   creating the AMI has permissions to launch it.
-
-* `ami_virtualization_type` (string) - The type of virtualization for the AMI
-  you are building. This option is required to register HVM images. Can be
-  "paravirtual" (default) or "hvm".
 
 * `associate_public_ip_address` (boolean) - If using a non-default VPC, public
   IP addresses are not provided by default. If this is toggled, your new
@@ -173,7 +171,7 @@ each category, the available configuration keys are alphabetized.
 
 Here is a basic example. It is completely valid except for the access keys:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -184,14 +182,12 @@ Here is a basic example. It is completely valid except for the access keys:
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}"
 }
-</pre>
+```
 
-<div class="alert alert-block alert-info">
-<strong>Note:</strong> Packer can also read the access key and secret
+-> **Note:** Packer can also read the access key and secret
 access key from environmental variables. See the configuration reference in
 the section above for more information on what environmental variables Packer
 will look for.
-</div>
 
 ## Accessing the Instance to Debug
 
@@ -206,7 +202,7 @@ running.
 Here is an example using the optional AMI block device mappings. This will add
 the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -217,24 +213,24 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
   "ami_block_device_mappings": [
-      {
-          "device_name": "/dev/sdb",
-          "virtual_name": "ephemeral0"
-      },
-      {
-          "device_name": "/dev/sdc",
-          "virtual_name": "ephemeral1"
-      }
+    {
+      "device_name": "/dev/sdb",
+      "virtual_name": "ephemeral0"
+    },
+    {
+      "device_name": "/dev/sdc",
+      "virtual_name": "ephemeral1"
+    }
   ]
 }
-</pre>
+```
 
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
 "OS_Version" and "Release" to the finished AMI.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -249,4 +245,4 @@ Here is an example using the optional AMI tags. This will add the tags
     "Release": "Latest"
   }
 }
-</pre>
+```

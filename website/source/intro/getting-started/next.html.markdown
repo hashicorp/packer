@@ -1,6 +1,8 @@
 ---
 layout: "intro"
 page_title: "Next Steps"
+description: |-
+  That concludes the getting started guide for Packer. You should now be comfortable with basic Packer usage, should understand templates, defining builds, provisioners, etc. At this point you're ready to begin playing with and using Packer in real scenarios.
 ---
 
 # Next Steps

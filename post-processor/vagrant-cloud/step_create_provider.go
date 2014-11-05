@@ -8,6 +8,7 @@ import (
 
 type Provider struct {
 	Name        string `json:"name"`
+	Url         string `json:"url,omitempty"`
 	HostedToken string `json:"hosted_token,omitempty"`
 	UploadUrl   string `json:"upload_url,omitempty"`
 }
@@ -22,10 +23,15 @@ func (s *stepCreateProvider) Run(state multistep.StateBag) multistep.StepAction 
 	box := state.Get("box").(*Box)
 	version := state.Get("version").(*Version)
 	providerName := state.Get("providerName").(string)
+	downloadUrl := state.Get("boxDownloadUrl").(string)
 
 	path := fmt.Sprintf("box/%s/version/%v/providers", box.Tag, version.Number)
 
 	provider := &Provider{Name: providerName}
+
+	if downloadUrl != "" {
+		provider.Url = downloadUrl
+	}
 
 	// Wrap the provider in a provider object for the API
 	wrapper := make(map[string]interface{})

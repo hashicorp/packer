@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "compress Post-Processor"
+description: |-
+  The Packer compress post-processor takes an artifact with files (such as from VMware or VirtualBox) and gzip compresses the artifact into a single archive.
 ---
 
 # Compress Post-Processor
 
 Type: `compress`
 
-The compress post-processor takes an artifact with files (such as from
+The Packer compress post-processor takes an artifact with files (such as from
 VMware or VirtualBox) and gzip compresses the artifact into a single
 archive.
 
@@ -21,9 +23,9 @@ The configuration for this post-processor is extremely simple.
 
 An example is shown below, showing only the post-processor configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "compress",
-  "path": "foo.tar.gz"
+  "output": "foo.tar.gz"
 }
-</pre>
+```
