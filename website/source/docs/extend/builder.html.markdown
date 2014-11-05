@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Custom Builder - Extend Packer"
+description: |-
+  Packer Builders are the components of Packer responsible for creating a machine, bringing it to a point where it can be provisioned, and then turning that provisioned machine into some sort of machine image. Several builders are officially distributed with Packer itself, such as the AMI builder, the VMware builder, etc. However, it is possible to write custom builders using the Packer plugin interface, and this page documents how to do that.
 ---
 
 # Custom Builder Development
 
-Builders are the components of Packer responsible for creating a machine,
+Packer Builders are the components of Packer responsible for creating a machine,
 bringing it to a point where it can be provisioned, and then turning
 that provisioned machine into some sort of machine image. Several builders
 are officially distributed with Packer itself, such as the AMI builder, the
@@ -15,11 +17,8 @@ the Packer plugin interface, and this page documents how to do that.
 Prior to reading this page, it is assumed you have read the page on
 [plugin development basics](/docs/extend/developing-plugins.html).
 
-<div class="alert alert-block">
-  <strong>Warning!</strong> This is an advanced topic. If you're new to Packer,
-  we recommend getting a bit more comfortable before you dive into writing
-  plugins.
-</div>
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
+recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
 
@@ -28,13 +27,13 @@ interface. It is reproduced below for easy reference. The actual interface
 in the source code contains some basic documentation as well explaining
 what each method should do.
 
-<pre class="prettyprint">
+```go
 type Builder interface {
 	Prepare(...interface{}) error
 	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
 	Cancel()
 }
-</pre>
+```
 
 ### The "Prepare" Method
 
@@ -133,19 +132,17 @@ When the machine is ready to be provisioned, run the `packer.HookProvision`
 hook, making sure the communicator is not nil, since this is required for
 provisioners. An example of calling the hook is shown below:
 
-<pre class="prettyprint">
+```go
 hook.Run(packer.HookProvision, ui, comm, nil)
-</pre>
+```
 
 At this point, Packer will run the provisioners and no additional work
 is necessary.
 
-<div class="alert alert-info alert-block">
-<strong>Note:</strong> Hooks are still undergoing thought around their
+-> **Note:** Hooks are still undergoing thought around their
 general design and will likely change in a future version. They aren't
 fully "baked" yet, so they aren't documented here other than to tell you
 how to hook in provisioners.
-</div>
 
 ## Caching Files
 

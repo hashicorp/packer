@@ -10,7 +10,6 @@ package plugin
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"io/ioutil"
 	"log"
@@ -38,8 +37,6 @@ const APIVersion = "4"
 // Server waits for a connection to this plugin and returns a Packer
 // RPC server that you can use to register components and serve them.
 func Server() (*packrpc.Server, error) {
-	log.Printf("Plugin build against Packer '%s'", packer.GitCommit)
-
 	if os.Getenv(MagicCookieKey) != MagicCookieValue {
 		return nil, errors.New(
 			"Please do not execute plugins directly. Packer will execute these for you.")

@@ -40,17 +40,20 @@ type config struct {
 	ISOChecksum     string   `mapstructure:"iso_checksum"`
 	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string `mapstructure:"iso_urls"`
+	Version         string   `mapstructure:"version"`
 	VMName          string   `mapstructure:"vm_name"`
 	BootCommand     []string `mapstructure:"boot_command"`
 	SkipCompaction  bool     `mapstructure:"skip_compaction"`
 	VMXTemplatePath string   `mapstructure:"vmx_template_path"`
 
-	RemoteType      string `mapstructure:"remote_type"`
-	RemoteDatastore string `mapstructure:"remote_datastore"`
-	RemoteHost      string `mapstructure:"remote_host"`
-	RemotePort      uint   `mapstructure:"remote_port"`
-	RemoteUser      string `mapstructure:"remote_username"`
-	RemotePassword  string `mapstructure:"remote_password"`
+	RemoteType           string `mapstructure:"remote_type"`
+	RemoteDatastore      string `mapstructure:"remote_datastore"`
+	RemoteCacheDatastore string `mapstructure:"remote_cache_datastore"`
+	RemoteCacheDirectory string `mapstructure:"remote_cache_directory"`
+	RemoteHost           string `mapstructure:"remote_host"`
+	RemotePort           uint   `mapstructure:"remote_port"`
+	RemoteUser           string `mapstructure:"remote_username"`
+	RemotePassword       string `mapstructure:"remote_password"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
@@ -110,6 +113,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
+	if b.config.Version == "" {
+		b.config.Version = "9"
+	}
+
 	if b.config.RemoteUser == "" {
 		b.config.RemoteUser = "root"
 	}
@@ -118,24 +125,34 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RemoteDatastore = "datastore1"
 	}
 
+	if b.config.RemoteCacheDatastore == "" {
+		b.config.RemoteCacheDatastore = b.config.RemoteDatastore
+	}
+
+	if b.config.RemoteCacheDirectory == "" {
+		b.config.RemoteCacheDirectory = "packer_cache"
+	}
+
 	if b.config.RemotePort == 0 {
 		b.config.RemotePort = 22
 	}
 
 	// Errors
 	templates := map[string]*string{
-		"disk_name":         &b.config.DiskName,
-		"guest_os_type":     &b.config.GuestOSType,
-		"iso_checksum":      &b.config.ISOChecksum,
-		"iso_checksum_type": &b.config.ISOChecksumType,
-		"iso_url":           &b.config.RawSingleISOUrl,
-		"vm_name":           &b.config.VMName,
-		"vmx_template_path": &b.config.VMXTemplatePath,
-		"remote_type":       &b.config.RemoteType,
-		"remote_host":       &b.config.RemoteHost,
-		"remote_datastore":  &b.config.RemoteDatastore,
-		"remote_user":       &b.config.RemoteUser,
-		"remote_password":   &b.config.RemotePassword,
+		"disk_name":              &b.config.DiskName,
+		"guest_os_type":          &b.config.GuestOSType,
+		"iso_checksum":           &b.config.ISOChecksum,
+		"iso_checksum_type":      &b.config.ISOChecksumType,
+		"iso_url":                &b.config.RawSingleISOUrl,
+		"vm_name":                &b.config.VMName,
+		"vmx_template_path":      &b.config.VMXTemplatePath,
+		"remote_type":            &b.config.RemoteType,
+		"remote_host":            &b.config.RemoteHost,
+		"remote_datastore":       &b.config.RemoteDatastore,
+		"remote_cache_datastore": &b.config.RemoteCacheDatastore,
+		"remote_cache_directory": &b.config.RemoteCacheDirectory,
+		"remote_user":            &b.config.RemoteUser,
+		"remote_password":        &b.config.RemotePassword,
 	}
 
 	for n, ptr := range templates {

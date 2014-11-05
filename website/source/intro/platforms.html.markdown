@@ -4,25 +4,25 @@ page_title: "Supported Platforms"
 prev_url: "/intro/use-cases.html"
 next_url: "/intro/getting-started/setup.html"
 next_title: "Getting Started: Install Packer"
+description: |-
+  Packer can create machine images for any platform. Packer ships with support for a set of platforms, but can be extended through plugins to support any platform. This page documents the list of supported image types that Packer supports creating.
 ---
 
 # Supported Platforms
 
 Packer can create machine images for any platform. Packer ships with
-support for a set of platforms, but can be [extend through plugins](/docs/extend/builder.html)
+support for a set of platforms, but can be [extended through plugins](/docs/extend/builder.html)
 to support any platform. This page documents the list of supported image
 types that Packer supports creating.
 
 If you were looking to see what platforms Packer is able to run on, see
 the page on [installing Packer](/intro/getting-started/setup.html).
 
-<div class="alert alert-info alert-block">
-<strong>Note:</strong> We're always looking to officially support more
+-> **Note:** We're always looking to officially support more
 target platforms. If you're interested in adding support for another
 platform, please help by opening an issue or pull request within
-<a href="https://github.com/mitchellh/packer">GitHub</a> so we can discuss
+[GitHub](https://github.com/mitchellh/packer) so we can discuss
 how to make it happen.
-</div>
 
 Packer supports creating images for the following platforms or targets.
 The format of the resulting image and any high-level information about the

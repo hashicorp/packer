@@ -1,0 +1,70 @@
+footer {
+  height: $nav-height;
+  max-height: $nav-height;
+  background-color: $black !important;
+  padding: 0;
+  margin: 0;
+  text-transform: uppercase;
+  color: $white;
+  font-family: $sans;
+  @include respond-to(mobile) {
+    margin-right: -20px;
+    margin-left: -20px;
+  }
+
+	ul {
+  	margin-top: 40px;
+  	@include respond-to(mobile) {
+    	margin-left: $baseline;
+    	margin-top: $baseline;
+    }
+
+		li {
+  		display: inline;
+  		margin-right: 50px;
+  		@include respond-to(mobile) {
+    		margin-right: 20px;
+    		display: list-item;
+      }
+    }
+
+		.hashi-logo {
+  		background: image-url('logo_footer.png') no-repeat center top;
+  		height: 40px;
+  		width: 40px;
+  		background-size: 37px 40px;
+  		text-indent: -999999px;
+  		display: inline-block;
+  		margin-top: -10px;
+  		margin-right: 0;
+  		@include respond-to(mobile) {
+    		margin-top: -50px;
+    		margin-right: $baseline;
+  		}
+		}
+	}
+
+	.active {
+    color: $green;
+	}
+
+	button {
+    margin-top: 20px;
+	}
+}
+
+.page-wrap {
+  min-height: 100%;
+  /* equal to footer height */
+  margin-bottom: -($nav-height);
+}
+
+.page-wrap:after {
+  content: "";
+  display: block;
+}
+
+.page-wrap:after {
+  /* .push must be the same height as footer */
+  height: $nav-height;
+}

@@ -1,8 +1,8 @@
 package rpc
 
 import (
+	"github.com/hashicorp/go-msgpack/codec"
 	"github.com/mitchellh/packer/packer"
-	"github.com/ugorji/go/codec"
 	"io"
 	"log"
 	"net/rpc"
@@ -40,8 +40,11 @@ func newClientWithMux(mux *muxBroker, streamId uint32) (*Client, error) {
 		return nil, err
 	}
 
-	var h codec.MsgpackHandle
-	clientCodec := codec.GoRpc.ClientCodec(clientConn, &h)
+	h := &codec.MsgpackHandle{
+		RawToString: true,
+		WriteExt:    true,
+	}
+	clientCodec := codec.GoRpc.ClientCodec(clientConn, h)
 
 	return &Client{
 		mux:      mux,
@@ -87,13 +90,6 @@ func (c *Client) Builder() packer.Builder {
 func (c *Client) Cache() packer.Cache {
 	return &cache{
 		client: c.client,
-	}
-}
-
-func (c *Client) Command() packer.Command {
-	return &command{
-		client: c.client,
-		mux:    c.mux,
 	}
 }
 

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud"
 	"log"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 type StepRunSourceServer struct {

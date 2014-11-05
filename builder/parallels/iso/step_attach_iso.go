@@ -81,7 +81,7 @@ func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 	log.Println("Enabling default CD/DVD drive...")
 	command := []string{
 		"set", vmName,
-		"--device-set", "cdrom0", "--enable",
+		"--device-set", "cdrom0", "--enable", "--disconnect",
 	}
 
 	if err := driver.Prlctl(command...); err != nil {

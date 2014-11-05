@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Docker Push Post-Processor"
+description: |-
+  The Packer Docker push post-processor takes an artifact from the docker-import post-processor and pushes it to a Docker registry.
 ---
 
 # Docker Push Post-Processor
 
 Type: `docker-push`
 
-The Docker push post-processor takes an artifact from the
+The Packer Docker push post-processor takes an artifact from the
 [docker-import](/docs/post-processors/docker-import.html) post-processor
 and pushes it to a Docker registry.
 
@@ -26,11 +28,9 @@ This post-processor has only optional configuration:
 
 * `login_server` (string) - The server address to login to.
 
-<div class="alert alert-info alert-block">
-<strong>Note:</strong> If you login using the credentials above, the
+-> **Note:** If you login using the credentials above, the
 post-processor will automatically log you out afterwards (just the server
 specified).
-</div>
 
 ## Example
 

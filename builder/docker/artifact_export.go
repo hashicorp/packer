@@ -27,6 +27,10 @@ func (a *ExportArtifact) String() string {
 	return fmt.Sprintf("Exported Docker file: %s", a.path)
 }
 
+func (a *ExportArtifact) State(name string) interface{} {
+	return nil
+}
+
 func (a *ExportArtifact) Destroy() error {
 	return os.Remove(a.path)
 }

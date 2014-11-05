@@ -38,6 +38,11 @@ func (a *artifact) String() (result string) {
 	return
 }
 
+func (a *artifact) State(name string) (result interface{}) {
+	a.client.Call(a.endpoint+".State", name, &result)
+	return
+}
+
 func (a *artifact) Destroy() error {
 	var result error
 	if err := a.client.Call(a.endpoint+".Destroy", new(interface{}), &result); err != nil {
@@ -64,6 +69,11 @@ func (s *ArtifactServer) Id(args *interface{}, reply *string) error {
 
 func (s *ArtifactServer) String(args *interface{}, reply *string) error {
 	*reply = s.artifact.String()
+	return nil
+}
+
+func (s *ArtifactServer) State(name string, reply *interface{}) error {
+	*reply = s.artifact.State(name)
 	return nil
 }
 
