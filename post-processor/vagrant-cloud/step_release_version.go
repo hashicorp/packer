@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"strings"
 )
 
 type stepReleaseVersion struct {
@@ -30,6 +31,10 @@ func (s *stepReleaseVersion) Run(state multistep.StateBag) multistep.StepAction 
 	if err != nil || (resp.StatusCode != 200) {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
+		if strings.Contains(cloudErrors.FormatErrors(), "already been released") {
+			ui.Message("Not releasing version, already released")
+			return multistep.ActionContinue
+		}
 		state.Put("error", fmt.Errorf("Error releasing version: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}

@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "OpenStack Builder"
+description: |-
+  The `openstack` Packer builder is able to create new images for use with OpenStack. The builder takes a source image, runs any provisioning necessary on the image after launching it, then creates a new reusable image. This reusable image can then be used as the foundation of new servers that are launched within OpenStack. The builder will create temporary keypairs that provide temporary access to the server while the image is being created. This simplifies configuration quite a bit.
 ---
 
 # OpenStack Builder
 
 Type: `openstack`
 
-The `openstack` builder is able to create new images for use with
+The `openstack` Packer builder is able to create new images for use with
 [OpenStack](http://www.openstack.org). The builder takes a source
 image, runs any provisioning necessary on the image after launching it,
 then creates a new reusable image. This reusable image can then be
@@ -69,9 +71,6 @@ each category, the available configuration keys are alphabetized.
   to this instance.
 
 * `openstack_provider` (string)
-<!---
-@todo document me
--->
 
 * `project` (string) - The project name to boot the instance into. Some
   OpenStack installations require this.
@@ -85,9 +84,7 @@ each category, the available configuration keys are alphabetized.
   `SDK_PROVIDER` or `OS_AUTH_URL` (in that order), if set.
 
 * `proxy_url` (string)
-<!---
-@todo document me
--->
+
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
 
@@ -120,7 +117,7 @@ each category, the available configuration keys are alphabetized.
 Here is a basic example. This is a working example to build a
 Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "openstack",
   "username": "",
@@ -134,14 +131,14 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "source_image": "23b564c9-c3e6-49f9-bc68-86c7a9ab5018",
   "flavor": "2"
 }
-</pre>
+```
 
 ## Basic Example: Private OpenStack cloud
 
 This example builds an Ubuntu 14.04 image on a private OpenStack cloud,
 powered by Metacloud.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "openstack",
   "ssh_username": "root",
@@ -149,7 +146,7 @@ powered by Metacloud.
   "source_image": "91d9c168-d1e5-49ca-a775-3bfdbb6c97f1",
   "flavor": "2"
 }
-</pre>
+```
 
 In this case, the connection information for connecting to OpenStack
 doesn't appear in the template. That is because I source a standard

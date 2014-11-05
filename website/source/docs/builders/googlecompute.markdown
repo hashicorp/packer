@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Google Compute Builder"
+description: |-
+  The `googlecompute` Packer builder is able to create images for use with Google Compute Engine (GCE) based on existing images. Google Compute Engine doesn't allow the creation of images from scratch.
 ---
 
 # Google Compute Builder
 
 Type: `googlecompute`
 
-The `googlecompute` builder is able to create
+The `googlecompute` Packer builder is able to create
 [images](https://developers.google.com/compute/docs/images)
 for use with [Google Compute Engine](https://cloud.google.com/products/compute-engine)
 (GCE) based on existing images. Google Compute Engine doesn't allow the creation
@@ -42,7 +44,7 @@ since no provisioners are defined, but it will effectively repackage an
 existing GCE image. The client secrets file and private key file are the
 files obtained in the previous section.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "googlecompute",
   "bucket_name": "my-project-packer-images",
@@ -52,7 +54,7 @@ files obtained in the previous section.
   "source_image": "debian-7-wheezy-v20140718",
   "zone": "us-central1-a"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -98,9 +100,6 @@ each category, the available options are alphabetized and described.
 * `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
 
 * `metadata` (object of key/value strings)
-<!---
-@todo document me
--->
 
 * `network` (string) - The Google Compute network to use for the launched
   instance. Defaults to `default`.
@@ -116,9 +115,6 @@ each category, the available options are alphabetized and described.
   Defaults to "5m".
 
 * `tags` (array of strings)
-<!---
-@todo document me
--->
 
 ## Gotchas
 

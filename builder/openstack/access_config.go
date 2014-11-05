@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 // AccessConfig is for common configuration related to openstack access

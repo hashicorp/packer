@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "docker-save Post-Processor"
+description: |-
+  The Packer Docker Save post-processor takes an artifact from the docker builder that was committed and saves it to a file. This is similar to exporting the Docker image directly from the builder, except that it preserves the hierarchy of images and metadata.
 ---
 
 # Docker Save Post-Processor
 
 Type: `docker-save`
 
-The Docker Save post-processor takes an artifact from the
+The Packer Docker Save post-processor takes an artifact from the
 [docker builder](/docs/builders/docker.html) that was committed
 and saves it to a file. This is similar to exporting the Docker image
 directly from the builder, except that it preserves the hierarchy of
@@ -27,9 +29,9 @@ The configuration for this post-processor is extremely simple.
 
 An example is shown below, showing only the post-processor configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "docker-save",
   "path": "foo.tar"
 }
-</pre>
+```

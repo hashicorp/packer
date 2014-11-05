@@ -1,6 +1,8 @@
 ---
 layout: "docs_machine_readable"
 page_title: "General Types - Machine-Readable Reference"
+description: |-
+  These are the machine-readable types that can appear in almost any machine-readable output and are provided by Packer core itself.
 ---
 
 # General Types

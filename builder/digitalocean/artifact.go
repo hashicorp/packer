@@ -16,7 +16,7 @@ type Artifact struct {
 	regionName string
 
 	// The client for making API calls
-	client *DigitalOceanClient
+	client DigitalOceanClient
 }
 
 func (*Artifact) BuilderId() string {
@@ -35,6 +35,10 @@ func (a *Artifact) Id() string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("A snapshot was created: '%v' in region '%v'", a.snapshotName, a.regionName)
+}
+
+func (a *Artifact) State(name string) interface{} {
+	return nil
 }
 
 func (a *Artifact) Destroy() error {

@@ -1,6 +1,8 @@
 ---
 layout: "docs_machine_readable"
 page_title: "Command: build - Machine-Readable Reference"
+description: |-
+  These are the machine-readable types that exist as part of the output of `packer build`.
 ---
 
 # Build Command Types

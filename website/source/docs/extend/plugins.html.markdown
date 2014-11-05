@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "Packer Plugins - Extend Packer"
+description: |-
+  Packer Plugins allow new functionality to be added to Packer without modifying the core source code. Packer plugins are able to add new commands, builders, provisioners, hooks, and more. In fact, much of Packer itself is implemented by writing plugins that are simply distributed with Packer. For example, all the commands, builders, provisioners, and more that ship with Packer are implemented as Plugins that are simply hardcoded to load with Packer.
 ---
 
 # Packer Plugins
 
-Plugins allow new functionality to be added to Packer without
+Packer Plugins allow new functionality to be added to Packer without
 modifying the core source code. Packer plugins are able to add new
 commands, builders, provisioners, hooks, and more. In fact, much of Packer
 itself is implemented by writing plugins that are simply distributed with
@@ -46,12 +48,12 @@ Once the plugin is named properly, Packer automatically discovers plugins
 in the following directories in the given order. If a conflicting plugin is
 found later, it will take precedence over one found earlier.
 
-  1. The directory where `packer` is, or the executable directory.
+1. The directory where `packer` is, or the executable directory.
 
-  2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d` on
+2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d` on
      Windows.
 
-  3. The current working directory.
+3. The current working directory.
 
 The valid types for plugins are:
 

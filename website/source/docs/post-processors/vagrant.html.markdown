@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Vagrant Post-Processor"
+description: |-
+  The Packer Vagrant post-processor takes a build and converts the artifact into a valid Vagrant box, if it can. This lets you use Packer to automatically create arbitrarily complex Vagrant boxes, and is in fact how the official boxes distributed by Vagrant are created.
 ---
 
 # Vagrant Post-Processor
 
 Type: `vagrant`
 
-The Vagrant post-processor takes a build and converts the artifact
+The Packer Vagrant post-processor takes a build and converts the artifact
 into a valid [Vagrant](http://www.vagrantup.com) box, if it can.
 This lets you use Packer to automatically create arbitrarily complex
 Vagrant boxes, and is in fact how the official boxes distributed by
@@ -30,14 +32,13 @@ providers.
 * DigitalOcean
 * Hyper-V
 * Parallels
+* QEMU
 * VirtualBox
 * VMware
 
-<div class="alert alert-block alert-info">
-<strong>Support for additional providers</strong> is planned. If the
+-> **Support for additional providers** is planned. If the
 Vagrant post-processor doesn't support creating boxes for a provider you
 care about, please help by contributing to Packer and adding support for it.
-</div>
 
 ## Configuration
 
@@ -84,16 +85,15 @@ The post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
 
-```json
+```javascript
 {
-    "type": "vagrant",
-
-    "compression_level": 1,
-    "override": {
-        "vmware": {
-            "compression_level": 0
-        }
+  "type": "vagrant",
+  "compression_level": 1,
+  "override": {
+    "vmware": {
+      "compression_level": 0
     }
+  }
 }
 ```
 

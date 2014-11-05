@@ -1,25 +1,27 @@
 ---
 layout: "docs"
 page_title: "Salt (Masterless) Provisioner"
+description: |-
+  The `salt-masterless` Packer provisioner provisions machines built by Packer using Salt states, without connecting to a Salt master.
 ---
 
 # Salt Masterless Provisioner
 
 Type: `salt-masterless`
 
-The `salt-masterless` provisioner provisions machines built by Packer using
+The `salt-masterless` Packer provisioner provisions machines built by Packer using
 [Salt](http://saltstack.com/) states, without connecting to a Salt master.
 
 ## Basic Example
 
 The example below is fully functional.
 
-<pre class="prettyprint">
+```javascript
 {
-    "type": "salt-masterless",
-    "local_state_tree": "/Users/me/salt"
+  "type": "salt-masterless",
+  "local_state_tree": "/Users/me/salt"
 }
-</pre>
+```
 
 ## Configuration Reference
 
