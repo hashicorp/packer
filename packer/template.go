@@ -49,6 +49,7 @@ type PushConfig struct {
 	BaseDir string
 	Include []string
 	Exclude []string
+	Token   string
 	VCS     bool
 }
 
