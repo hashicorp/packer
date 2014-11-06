@@ -57,6 +57,11 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Determine our token
+	if token == "" {
+		token = tpl.Push.Token
+	}
+
 	// Build our client
 	defer func() { c.client = nil }()
 	c.client = harmony.DefaultClient()
@@ -68,6 +73,7 @@ func (c *PushCommand) Run(args []string) int {
 			return 1
 		}
 	}
+	c.client.Token = token
 
 	// Build the archiving options
 	var opts archive.ArchiveOpts
@@ -92,7 +98,6 @@ func (c *PushCommand) Run(args []string) int {
 	// Build the upload options
 	var uploadOpts uploadOpts
 	uploadOpts.Slug = tpl.Push.Name
-	uploadOpts.Token = token
 	uploadOpts.Builds = make(map[string]string)
 	for _, b := range tpl.Builders {
 		uploadOpts.Builds[b.Name] = b.Type
@@ -184,7 +189,7 @@ func (c *PushCommand) create(name string, create bool) error {
 	if !create {
 		return fmt.Errorf(
 			"Push target doesn't exist: %s. Either create this online via\n" +
-				"the website or pass the -create flag.")
+				"the website or pass the -create flag.", name)
 	}
 
 	// Create it
@@ -244,6 +249,5 @@ func (c *PushCommand) upload(
 type uploadOpts struct {
 	URL    string
 	Slug   string
-	Token  string
 	Builds map[string]string
 }
