@@ -418,6 +418,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating Qemu driver: %s", err)
 	}
 
+	steprun := &stepRun{}
+	if !b.config.DiskImage {
+		steprun.BootDrive = "once=d"
+		steprun.Message = "Starting VM, booting from CD-ROM"
+	} else {
+		steprun.BootDrive = "c"
+		steprun.Message = "Starting VM, booting disk image"
+	}
+
 	steps := []multistep.Step{
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
@@ -436,10 +445,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepHTTPServer),
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
-		&stepRun{
-			BootDrive: "once=d",
-			Message:   "Starting VM, booting from CD-ROM",
-		},
+		steprun,
 		&stepBootWait{},
 		&stepTypeBootCommand{},
 		&common.StepConnectSSH{
