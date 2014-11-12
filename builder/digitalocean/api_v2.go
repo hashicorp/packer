@@ -262,8 +262,10 @@ func (d DigitalOceanClientV2) DropletStatus(id uint) (string, string, error) {
 	}
 	var ip string
 
-	if len(res.Droplet.Networks.V4) > 0 {
-		ip = res.Droplet.Networks.V4[0].IPAddr
+	for _, n := range res.Droplet.Networks.V4 {
+		if n.Type == "public" {
+			ip = n.IPAddr
+		}
 	}
 
 	return ip, res.Droplet.Status, err
