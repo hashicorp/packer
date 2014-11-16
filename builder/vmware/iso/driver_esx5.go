@@ -56,6 +56,10 @@ func (d *ESX5Driver) IsRunning(string) (bool, error) {
 	return strings.Contains(state, "Powered on"), nil
 }
 
+func (d *ESX5Driver) ReloadVM() error {
+	return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
+}
+
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	for i := 0; i < 20; i++ {
 		err := d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
