@@ -368,6 +368,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SkipFloppy: true,
 		},
 		&vmwcommon.StepCleanVMX{},
+		&StepUploadVMX{
+			RemoteType:        b.config.RemoteType,
+		},
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
 		},
