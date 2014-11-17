@@ -17,7 +17,6 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	AccountFile       string `mapstructure:"account_file"`
-	ClientSecretsFile string `mapstructure:"client_secrets_file"`
 	ProjectId         string `mapstructure:"project_id"`
 
 	BucketName           string            `mapstructure:"bucket_name"`
@@ -38,7 +37,6 @@ type Config struct {
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
-	clientSecrets   clientSecretsFile
 	instanceName    string
 	privateKeyBytes []byte
 	sshTimeout      time.Duration
@@ -106,7 +104,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Process Templates
 	templates := map[string]*string{
 		"account_file":        &c.AccountFile,
-		"client_secrets_file": &c.ClientSecretsFile,
 
 		"bucket_name":             &c.BucketName,
 		"image_name":              &c.ImageName,
@@ -136,16 +133,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.BucketName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a bucket_name must be specified"))
-	}
-
-	if c.AccountFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("an account_file must be specified"))
-	}
-
-	if c.ClientSecretsFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a client_secrets_file must be specified"))
 	}
 
 	if c.ProjectId == "" {
@@ -182,13 +169,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err := loadJSON(&c.account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing account file: %s", err))
-		}
-	}
-
-	if c.ClientSecretsFile != "" {
-		if err := loadJSON(&c.clientSecrets, c.ClientSecretsFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing client secrets file: %s", err))
 		}
 	}
 
