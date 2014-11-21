@@ -1,0 +1,110 @@
+package utils
+
+import (
+	"github.com/mitchellh/packer/packer"
+	"fmt"
+	"os"
+	"runtime"
+)
+
+func NewWinColoredUi() packer.Ui{
+	// Compile all the UIs for the builds
+	ui = &WinPromptColoredUi{
+		SayColor: UiColorLightGreen,
+		MessageColor: UiColorGreen,
+		ErrorColor: UiColorRed,
+		AskColor: UiColorYellow,
+		Ui:    &packer.BasicUi{
+			Reader:      os.Stdin,
+			Writer:      os.Stdout,
+			ErrorWriter: os.Stdout,
+		},
+	}
+	ui.Say(fmt.Sprintf("output will be in this color."))
+
+	return packer.Ui(ui)
+}
+
+const (
+	UiColorBlack string 	= "0"
+	UiColorGray           	 = "8"
+	UiColorBlue            	= "1"
+	UiColorLightBlue        = "9"
+	UiColorGreen           	= "2"
+	UiColorLightGreen      	= "A"
+	UiColorAqua            	= "3"
+	UiColorLightAqua       	= "B"
+	UiColorRed           	= "4"
+	UiColorLightRed      	= "C"
+	UiColorPurple           = "5"
+	UiColorLightPurple     	= "D"
+	UiColorYellow           = "6"
+	UiColorLightYellow     	= "E"
+	UiColorWhite           	= "7"
+	UiColorBrightWhite     	= "F"
+)
+
+type WinPromptColoredUi struct {
+	SayColor      	UiColor
+	MessageColor    UiColor
+	ErrorColor 		UiColor
+	AskColor 		UiColor
+	Ui        	 	packer.Ui
+}
+
+
+func (u *WinPromptColoredUi) Ask(query string) (string, error) {
+	return u.Ui.Ask(u.colorize(query, u.Color, true))
+}
+
+func (u *WinPromptColoredUi) Say(message string) {
+	u.Ui.Say(u.colorize(message, u.SayColor, true))
+}
+
+func (u *WinPromptColoredUi) Message(message string) {
+	u.Ui.Message(u.colorize(message, u.MessageColor, false))
+}
+
+func (u WinPromptColoredUi) Error(message string) {
+
+	u.Ui.Error(u.colorize(message, u.ErrorColor, true))
+}
+
+func (u *WinPromptColoredUi) Machine(t string, args ...string) {
+	// Don't colorize machine-readable output
+	u.Ui.Machine(t, args...)
+}
+
+func (u *WinPromptColoredUi) colorize(message string, color UiColor, bold bool) string {
+	if !u.supportsColors() {
+		return message
+	}
+
+	attr := 0
+	if bold {
+		attr = 1
+	}
+
+
+
+	return fmt.Sprintf("\033[%d;%dm%s\033[0m", attr, color, message)
+}
+
+func (u *ColoredUi) supportsColors() bool {
+	// Never use colors if we have this environmental variable
+	if os.Getenv("PACKER_NO_COLOR") != "" {
+		return false
+	}
+
+	// For now, on non-Windows machine, just assume it does
+	if runtime.GOOS != "windows" {
+		return true
+	}
+
+	// On Windows, if we appear to be in Cygwin, then it does
+	cygwin := os.Getenv("CYGWIN") != "" ||
+		os.Getenv("OSTYPE") == "cygwin" ||
+		os.Getenv("TERM") == "cygwin"
+
+	return cygwin
+}
