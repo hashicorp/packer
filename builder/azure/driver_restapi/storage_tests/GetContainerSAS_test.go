@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func TestGetContainerSas(t *testing.T) {
+func _TestGetContainerSas(t *testing.T) {
 
 	errMassage := "TestGetContainerSas: %s\n"
 

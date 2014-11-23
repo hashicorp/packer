@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestCleanUp(t *testing.T) {
+func _TestCleanUp(t *testing.T) {
 
 	fmt.Println("TestCleanup...")
 

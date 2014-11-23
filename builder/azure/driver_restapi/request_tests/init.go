@@ -17,6 +17,7 @@ import (
 const (
 	psPathLin = "/home/azure/publish_setttings/ps.publishsettings"
 	psPathWin = "d:\\Packer.io\\PackerLinux\\ps.publishsettings"
+	subscriptionName = "EduardK-Docker"
 )
 
 var g_reqManager *request.Manager
@@ -38,7 +39,7 @@ func getRequestManager() (*request.Manager, error) {
 		psPath = psPathWin
 	}
 
-	subscriptionInfo, err := driver_restapi.ParsePublishSettings(psPath, "EduardK-Docker")
+	subscriptionInfo, err := driver_restapi.ParsePublishSettings(psPath, subscriptionName)
 
 	if err != nil {
 		return nil, fmt.Errorf("ParsePublishSettings error: %s\n", err.Error())
