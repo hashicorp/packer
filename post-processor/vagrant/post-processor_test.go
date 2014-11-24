@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"compress/flate"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -120,6 +122,41 @@ func TestPostProcessorPostProcess_badId(t *testing.T) {
 
 	_, _, err := testPP(t).PostProcess(testUi(), artifact)
 	if !strings.Contains(err.Error(), "artifact type") {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestPostProcessorPostProcess_vagrantfileUserVariable(t *testing.T) {
+	var p PostProcessor
+
+	f, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(f.Name())
+
+	c := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": f.Name(),
+		},
+
+		"vagrantfile_template": "{{user `foo`}}",
+	}
+	err = p.Configure(c)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	a := &packer.MockArtifact{
+		BuilderIdValue: "packer.parallels",
+	}
+	a2, _, err := p.PostProcess(testUi(), a)
+	if a2 != nil {
+		for _, fn := range a2.Files() {
+			defer os.Remove(fn)
+		}
+	}
+	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
