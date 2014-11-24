@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"fmt"
 	"log"
+	"strconv"
 )
 
 type Artifact struct {
@@ -29,8 +30,7 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	// mimicing the aws builder
-	return fmt.Sprintf("%s:%s", a.regionName, a.snapshotName)
+	return strconv.FormatUint(uint64(a.snapshotId), 10)
 }
 
 func (a *Artifact) String() string {
