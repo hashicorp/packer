@@ -4,14 +4,18 @@ package googlecompute
 // with GCE. The Driver interface exists mostly to allow a mock implementation
 // to be used to test the steps.
 type Driver interface {
-	// CreateImage creates an image with the given URL in Google Storage.
-	CreateImage(name, description, url string) <-chan error
+	// CreateImage creates an image from the given disk in Google Compute
+	// Engine.
+	CreateImage(name, description, zone, disk string) <-chan error
 
 	// DeleteImage deletes the image with the given name.
 	DeleteImage(name string) <-chan error
 
-	// DeleteInstance deletes the given instance.
+	// DeleteInstance deletes the given instance, keeping the boot disk.
 	DeleteInstance(zone, name string) (<-chan error, error)
+
+	// DeleteDisk deletes the disk with the given name.
+	DeleteDisk(zone, name string) (<-chan error, error)
 
 	// GetNatIP gets the NAT IP address for the instance.
 	GetNatIP(zone, name string) (string, error)
