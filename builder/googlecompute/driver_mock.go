@@ -5,7 +5,8 @@ package googlecompute
 type DriverMock struct {
 	CreateImageName  string
 	CreateImageDesc  string
-	CreateImageURL   string
+	CreateImageZone  string
+	CreateImageDisk  string
 	CreateImageErrCh <-chan error
 
 	DeleteImageName  string
@@ -15,6 +16,11 @@ type DriverMock struct {
 	DeleteInstanceName  string
 	DeleteInstanceErrCh <-chan error
 	DeleteInstanceErr   error
+
+	DeleteDiskZone  string
+	DeleteDiskName  string
+	DeleteDiskErrCh <-chan error
+	DeleteDiskErr   error
 
 	GetNatIPZone   string
 	GetNatIPName   string
@@ -31,10 +37,11 @@ type DriverMock struct {
 	WaitForInstanceErrCh <-chan error
 }
 
-func (d *DriverMock) CreateImage(name, description, url string) <-chan error {
+func (d *DriverMock) CreateImage(name, description, zone, disk string) <-chan error {
 	d.CreateImageName = name
 	d.CreateImageDesc = description
-	d.CreateImageURL = url
+	d.CreateImageZone = zone
+	d.CreateImageDisk = disk
 
 	resultCh := d.CreateImageErrCh
 	if resultCh == nil {
@@ -71,6 +78,20 @@ func (d *DriverMock) DeleteInstance(zone, name string) (<-chan error, error) {
 	}
 
 	return resultCh, d.DeleteInstanceErr
+}
+
+func (d *DriverMock) DeleteDisk(zone, name string) (<-chan error, error) {
+	d.DeleteDiskZone = zone
+	d.DeleteDiskName = name
+
+	resultCh := d.DeleteDiskErrCh
+	if resultCh == nil {
+		ch := make(chan error)
+		close(ch)
+		resultCh = ch
+	}
+
+	return resultCh, d.DeleteDiskErr
 }
 
 func (d *DriverMock) GetNatIP(zone, name string) (string, error) {

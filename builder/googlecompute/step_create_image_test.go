@@ -1,11 +1,10 @@
 package googlecompute
 
 import (
-	"strings"
+	"errors"
 	"testing"
 
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 func TestStepCreateImage_impl(t *testing.T) {
@@ -17,38 +16,49 @@ func TestStepCreateImage(t *testing.T) {
 	step := new(StepCreateImage)
 	defer step.Cleanup(state)
 
-	comm := new(packer.MockCommunicator)
-	state.Put("communicator", comm)
+	config := state.Get("config").(*Config)
+	driver := state.Get("driver").(*DriverMock)
 
 	// run the step
 	if action := step.Run(state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
-	// Verify
-	if !comm.StartCalled {
-		t.Fatal("start should be called")
+	// Verify state
+	if driver.CreateImageName != config.ImageName {
+		t.Fatalf("bad: %#v", driver.CreateImageName)
 	}
-	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
-		t.Fatal("should not sudo")
+	if driver.CreateImageDesc != config.ImageDescription {
+		t.Fatalf("bad: %#v", driver.CreateImageDesc)
 	}
-	if !strings.Contains(comm.StartCmd.Command, "gcimagebundle") {
-		t.Fatalf("bad command: %#v", comm.StartCmd.Command)
+	if driver.CreateImageZone != config.Zone {
+		t.Fatalf("bad: %#v", driver.CreateImageZone)
+	}
+	if driver.CreateImageDisk != config.DiskName {
+		t.Fatalf("bad: %#v", driver.CreateImageDisk)
 	}
 
-	if _, ok := state.GetOk("image_file_name"); !ok {
-		t.Fatal("should have image")
+	nameRaw, ok := state.GetOk("image_name")
+	if !ok {
+		t.Fatal("should have name")
+	}
+	if name, ok := nameRaw.(string); !ok {
+		t.Fatal("name is not a string")
+	} else if name != config.ImageName {
+		t.Fatalf("bad name: %s", name)
 	}
 }
 
-func TestStepCreateImage_badExitStatus(t *testing.T) {
+func TestStepCreateImage_errorOnChannel(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateImage)
 	defer step.Cleanup(state)
 
-	comm := new(packer.MockCommunicator)
-	comm.StartExitStatus = 12
-	state.Put("communicator", comm)
+	errCh := make(chan error, 1)
+	errCh <- errors.New("error")
+
+	driver := state.Get("driver").(*DriverMock)
+	driver.CreateImageErrCh = errCh
 
 	// run the step
 	if action := step.Run(state); action != multistep.ActionHalt {
@@ -58,39 +68,7 @@ func TestStepCreateImage_badExitStatus(t *testing.T) {
 	if _, ok := state.GetOk("error"); !ok {
 		t.Fatal("should have error")
 	}
-	if _, ok := state.GetOk("image_file_name"); ok {
+	if _, ok := state.GetOk("image_name"); ok {
 		t.Fatal("should NOT have image")
-	}
-}
-
-func TestStepCreateImage_nonRoot(t *testing.T) {
-	state := testState(t)
-	step := new(StepCreateImage)
-	defer step.Cleanup(state)
-
-	comm := new(packer.MockCommunicator)
-	state.Put("communicator", comm)
-
-	config := state.Get("config").(*Config)
-	config.SSHUsername = "bob"
-
-	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
-		t.Fatalf("bad action: %#v", action)
-	}
-
-	// Verify
-	if !comm.StartCalled {
-		t.Fatal("start should be called")
-	}
-	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
-		t.Fatal("should sudo")
-	}
-	if !strings.Contains(comm.StartCmd.Command, "gcimagebundle") {
-		t.Fatalf("bad command: %#v", comm.StartCmd.Command)
-	}
-
-	if _, ok := state.GetOk("image_file_name"); !ok {
-		t.Fatal("should have image")
 	}
 }

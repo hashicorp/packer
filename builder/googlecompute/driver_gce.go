@@ -23,7 +23,7 @@ type driverGCE struct {
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
 func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
-	var f *oauth2.Flow
+	var f *oauth2.Options
 	var err error
 
 	// Auth with AccountFile first if provided
@@ -60,15 +60,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, url string) <-chan error {
+func (d *driverGCE) CreateImage(name, description, zone, disk string) <-chan error {
 	image := &compute.Image{
 		Description: description,
 		Name:        name,
-		RawDisk: &compute.ImageRawDisk{
-			ContainerType: "TAR",
-			Source:        url,
-		},
-		SourceType: "RAW",
+		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
+		SourceType:  "RAW",
 	}
 
 	errCh := make(chan error, 1)
@@ -96,6 +93,17 @@ func (d *driverGCE) DeleteImage(name string) <-chan error {
 
 func (d *driverGCE) DeleteInstance(zone, name string) (<-chan error, error) {
 	op, err := d.service.Instances.Delete(d.projectId, zone, name).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "DONE", d.refreshZoneOp(zone, op))
+	return errCh, nil
+}
+
+func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
+	op, err := d.service.Disks.Delete(d.projectId, zone, name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +183,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				Mode:       "READ_WRITE",
 				Kind:       "compute#attachedDisk",
 				Boot:       true,
-				AutoDelete: true,
+				AutoDelete: false,
 				InitializeParams: &compute.AttachedDiskInitializeParams{
 					SourceImage: image.SelfLink,
 					DiskSizeGb:  c.DiskSizeGb,

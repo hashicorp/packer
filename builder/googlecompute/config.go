@@ -16,10 +16,11 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	AccountFile       string `mapstructure:"account_file"`
-	ProjectId         string `mapstructure:"project_id"`
+	AccountFile string `mapstructure:"account_file"`
+	ProjectId   string `mapstructure:"project_id"`
 
 	BucketName           string            `mapstructure:"bucket_name"`
+	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
@@ -37,7 +38,6 @@ type Config struct {
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
-	instanceName    string
 	privateKeyBytes []byte
 	sshTimeout      time.Duration
 	stateTimeout    time.Duration
@@ -81,6 +81,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
+	if c.DiskName == "" {
+		c.DiskName = c.InstanceName
+	}
+
 	if c.MachineType == "" {
 		c.MachineType = "n1-standard-1"
 	}
@@ -103,9 +107,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Process Templates
 	templates := map[string]*string{
-		"account_file":        &c.AccountFile,
+		"account_file": &c.AccountFile,
 
 		"bucket_name":             &c.BucketName,
+		"disk_name":               &c.DiskName,
 		"image_name":              &c.ImageName,
 		"image_description":       &c.ImageDescription,
 		"instance_name":           &c.InstanceName,
