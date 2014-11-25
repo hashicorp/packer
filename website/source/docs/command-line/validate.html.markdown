@@ -1,18 +1,20 @@
 ---
 layout: "docs"
 page_title: "Validate - Command-Line"
+description: |-
+  The `packer validate` Packer command is used to validate the syntax and configuration of a template. The command will return a zero exit status on success, and a non-zero exit status on failure. Additionally, if a template doesn't validate, any error messages will be outputted.
 ---
 
 # Command-Line: Validate
 
-The `packer validate` command is used to validate the syntax and configuration
+The `packer validate` Packer command is used to validate the syntax and configuration
 of a [template](/docs/templates/introduction.html). The command will return
 a zero exit status on success, and a non-zero exit status on failure. Additionally,
 if a template doesn't validate, any error messages will be outputted.
 
 Example usage:
 
-```
+```text
 $ packer validate my-template.json
 Template validation failed. Errors are shown below.
 

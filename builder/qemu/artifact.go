@@ -8,8 +8,9 @@ import (
 // Artifact is the result of running the Qemu builder, namely a set
 // of files associated with the resulting machine.
 type Artifact struct {
-	dir string
-	f   []string
+	dir   string
+	f     []string
+	state map[string]interface{}
 }
 
 func (*Artifact) BuilderId() string {
@@ -26,6 +27,10 @@ func (*Artifact) Id() string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("VM files in directory: %s", a.dir)
+}
+
+func (a *Artifact) State(name string) interface{} {
+	return a.state[name]
 }
 
 func (a *Artifact) Destroy() error {

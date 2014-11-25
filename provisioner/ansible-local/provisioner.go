@@ -2,11 +2,13 @@ package ansiblelocal
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
@@ -26,6 +28,9 @@ type Config struct {
 
 	// Path to host_vars directory
 	HostVars string `mapstructure:"host_vars"`
+
+	// The playbook dir to upload.
+	PlaybookDir string `mapstructure:"playbook_dir"`
 
 	// The main playbook file to execute.
 	PlaybookFile string `mapstructure:"playbook_file"`
@@ -66,7 +71,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Defaults
 	if p.config.Command == "" {
-		p.config.Command = "ansible-playbook"
+		p.config.Command = "ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook"
 	}
 
 	if p.config.StagingDir == "" {
@@ -79,6 +84,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		"group_vars":     &p.config.GroupVars,
 		"host_vars":      &p.config.HostVars,
 		"playbook_file":  &p.config.PlaybookFile,
+		"playbook_dir":   &p.config.PlaybookDir,
 		"staging_dir":    &p.config.StagingDir,
 		"inventory_file": &p.config.InventoryFile,
 	}
@@ -123,6 +129,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	// Check that the playbook_dir directory exists, if configured
+	if len(p.config.PlaybookDir) > 0 {
+		if err := validateDirConfig(p.config.PlaybookDir, "playbook_dir"); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	// Check that the group_vars directory exists, if configured
 	if len(p.config.GroupVars) > 0 {
 		if err := validateDirConfig(p.config.GroupVars, "group_vars"); err != nil {
@@ -158,9 +171,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
 
-	ui.Message("Creating Ansible staging directory...")
-	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
-		return fmt.Errorf("Error creating staging directory: %s", err)
+	if len(p.config.PlaybookDir) > 0 {
+		ui.Message("Uploading Playbook directory to Ansible staging directory...")
+		if err := p.uploadDir(ui, comm, p.config.StagingDir, p.config.PlaybookDir); err != nil {
+			return fmt.Errorf("Error uploading playbook_dir directory: %s", err)
+		}
+	} else {
+		ui.Message("Creating Ansible staging directory...")
+		if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error creating staging directory: %s", err)
+		}
 	}
 
 	ui.Message("Uploading main Playbook file...")
@@ -170,13 +190,29 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
 	}
 
-	if len(p.config.InventoryFile) > 0 {
-		ui.Message("Uploading inventory file...")
-		src := p.config.InventoryFile
-		dst := filepath.Join(p.config.StagingDir, filepath.Base(src))
-		if err := p.uploadFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Error uploading inventory file: %s", err)
+	if len(p.config.InventoryFile) == 0 {
+		tf, err := ioutil.TempFile("", "packer-provisioner-ansible-local")
+		if err != nil {
+			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
+		defer os.Remove(tf.Name())
+		_, err = tf.Write([]byte("127.0.0.1"))
+		if err != nil {
+			tf.Close()
+			return fmt.Errorf("Error preparing inventory file: %s", err)
+		}
+		tf.Close()
+		p.config.InventoryFile = tf.Name()
+		defer func() {
+			p.config.InventoryFile = ""
+		}()
+	}
+
+	ui.Message("Uploading inventory file...")
+	src = p.config.InventoryFile
+	dst = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+	if err := p.uploadFile(ui, comm, dst, src); err != nil {
+		return fmt.Errorf("Error uploading inventory file: %s", err)
 	}
 
 	if len(p.config.GroupVars) > 0 {
@@ -235,14 +271,7 @@ func (p *Provisioner) Cancel() {
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
 	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
-
-	// The inventory must be set to "127.0.0.1,".  The comma is important
-	// as its the only way to override the ansible inventory when dealing
-	// with a single host.
-	inventory := "\"127.0.0.1,\""
-	if len(p.config.InventoryFile) > 0 {
-		inventory = filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile))
-	}
+	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
 	extraArgs := ""
 	if len(p.config.ExtraArguments) > 0 {
@@ -302,7 +331,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 	}
 	defer f.Close()
 
-	if err = comm.Upload(dst, f); err != nil {
+	if err = comm.Upload(dst, f, nil); err != nil {
 		return fmt.Errorf("Error uploading %s: %s", src, err)
 	}
 	return nil

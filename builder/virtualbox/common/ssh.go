@@ -1,12 +1,12 @@
 package common
 
 import (
-	gossh "code.google.com/p/go.crypto/ssh"
 	"fmt"
+
+	gossh "code.google.com/p/go.crypto/ssh"
 	"github.com/mitchellh/multistep"
+	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
-	"io/ioutil"
-	"os"
 )
 
 func SSHAddress(state multistep.StateBag) (string, error) {
@@ -23,7 +23,7 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConf
 		}
 
 		if config.SSHKeyPath != "" {
-			signer, err := sshKeyToSigner(config.SSHKeyPath)
+			signer, err := commonssh.FileSigner(config.SSHKeyPath)
 			if err != nil {
 				return nil, err
 			}
@@ -36,24 +36,4 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConf
 			Auth: auth,
 		}, nil
 	}
-}
-
-func sshKeyToSigner(path string) (gossh.Signer, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	keyBytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-
-	signer, err := gossh.ParsePrivateKey(keyBytes)
-	if err != nil {
-		return nil, fmt.Errorf("Error setting up SSH config: %s", err)
-	}
-
-	return signer, nil
 }

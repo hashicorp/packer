@@ -16,18 +16,19 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 )
 
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
 // virtual machines. This driver can only manage one machine at a time.
 type ESX5Driver struct {
-	Host      string
-	Port      uint
-	Username  string
-	Password  string
-	Datastore string
+	Host           string
+	Port           uint
+	Username       string
+	Password       string
+	Datastore      string
+	CacheDatastore string
+	CacheDirectory string
 
 	comm      packer.Communicator
 	outputDir string
@@ -56,7 +57,21 @@ func (d *ESX5Driver) IsRunning(string) (bool, error) {
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
-	return d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+	for i := 0; i < 20; i++ {
+		err := d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+		if err != nil {
+			return err
+		}
+		time.Sleep((time.Duration(i) * time.Second) + 1)
+		running, err := d.IsRunning(vmxPathLocal)
+		if err != nil {
+			return err
+		}
+		if running {
+			return nil
+		}
+	}
+	return errors.New("Retry limit exceeded")
 }
 
 func (d *ESX5Driver) Stop(vmxPathLocal string) error {
@@ -64,7 +79,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 }
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
-	vmxPath := filepath.Join(d.outputDir, filepath.Base(vmxPathLocal))
+	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
@@ -84,16 +99,16 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
 }
 
-func (d *ESX5Driver) UploadISO(localPath string) (string, error) {
-	cacheRoot, _ := filepath.Abs(".")
-	targetFile, err := filepath.Rel(cacheRoot, localPath)
-	if err != nil {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
+	finalPath := d.cachePath(localPath)
+	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
 
-	finalPath := d.datastorePath(targetFile)
-	if err := d.mkdir(filepath.Dir(finalPath)); err != nil {
-		return "", err
+	log.Printf("Verifying checksum of %s", finalPath)
+	if d.verifyChecksum(checksumType, checksum, finalPath) {
+		log.Println("Initial checksum matched, no upload needed.")
+		return finalPath, nil
 	}
 
 	if err := d.upload(finalPath, localPath); err != nil {
@@ -142,29 +157,60 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint) {
+func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
-	// TODO(dougm) use esxcli network ip connection list
-	for port := portMin; port <= portMax; port++ {
-		address := fmt.Sprintf("%s:%d", d.Host, port)
-		log.Printf("Trying address: %s...", address)
-		l, err := net.DialTimeout("tcp", address, 1*time.Second)
 
-		if err == nil {
-			log.Printf("%s in use", address)
-			l.Close()
-		} else if e, ok := err.(*net.OpError); ok {
-			if e.Err == syscall.ECONNREFUSED {
-				// then port should be available for listening
-				vncPort = port
-				break
-			} else if e.Timeout() {
-				log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+	//Process ports ESXi is listening on to determine which are available
+	//This process does best effort to detect ports that are unavailable,
+	//it will ignore any ports listened to by only localhost
+	r, err := d.esxcli("network", "ip", "connection", "list")
+	if err != nil {
+		err = fmt.Errorf("Could not retrieve network information for ESXi: %v", err)
+		return "", 0, err
+	}
+
+	listenPorts := make(map[string]bool)
+	for record, err := r.read(); record != nil && err == nil; record, err = r.read() {
+		if record["State"] == "LISTEN" {
+			splitAddress := strings.Split(record["LocalAddress"], ":")
+			if splitAddress[0] != "127.0.0.1" {
+				port := splitAddress[len(splitAddress)-1]
+				log.Printf("ESXi listening on address %s, port %s unavailable for VNC", record["LocalAddress"], port)
+				listenPorts[port] = true
 			}
 		}
 	}
 
-	return d.Host, vncPort
+	for port := portMin; port <= portMax; port++ {
+		if _, ok := listenPorts[fmt.Sprintf("%d", port)]; ok {
+			log.Printf("Port %d in use", port)
+			continue
+		}
+		address := fmt.Sprintf("%s:%d", d.Host, port)
+		log.Printf("Trying address: %s...", address)
+		l, err := net.DialTimeout("tcp", address, 1*time.Second)
+
+		if err != nil {
+			if e, ok := err.(*net.OpError); ok {
+				if e.Timeout() {
+					log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+				} else {
+					vncPort = port
+					break
+				}
+			}
+		} else {
+			defer l.Close()
+		}
+	}
+
+	if vncPort == 0 {
+		err := fmt.Errorf("Unable to find available VNC port between %d and %d",
+			portMin, portMax)
+		return d.Host, vncPort, err
+	}
+
+	return d.Host, vncPort, nil
 }
 
 func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
@@ -174,18 +220,35 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return address.(string), nil
 	}
 
-	r, err := d.run(nil, "vim-cmd", "vmsvc/get.guest", d.vmId, " | grep -m 1 ipAddress | awk -F'\"' '{print $2}'")
+	r, err := d.esxcli("network", "vm", "list")
 	if err != nil {
 		return "", err
 	}
 
-	ipAddress := strings.TrimRight(r, "\n")
+	record, err := r.find("Name", config.VMName)
+	if err != nil {
+		return "", err
+	}
+	wid := record["WorldID"]
+	if wid == "" {
+		return "", errors.New("VM WorldID not found")
+	}
 
-	if ipAddress == "" {
+	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
+	if err != nil {
+		return "", err
+	}
+
+	record, err = r.read()
+	if err != nil {
+		return "", err
+	}
+
+	if record["IPAddress"] == "0.0.0.0" {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", ipAddress, config.SSHPort)
+	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
 	state.Put("vm_address", address)
 	return address, nil
 }
@@ -216,7 +279,7 @@ func (d *ESX5Driver) ListFiles() ([]string, error) {
 			continue
 		}
 
-		files = append(files, filepath.Join(d.outputDir, string(line)))
+		files = append(files, filepath.ToSlash(filepath.Join(d.outputDir, string(line))))
 	}
 
 	return files, nil
@@ -243,7 +306,12 @@ func (d *ESX5Driver) String() string {
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
-	return filepath.Join("/vmfs/volumes", d.Datastore, path)
+	baseDir := filepath.Base(filepath.Dir(path))
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
+}
+
+func (d *ESX5Driver) cachePath(path string) string {
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.CacheDatastore, d.CacheDirectory, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) connect() error {
@@ -320,7 +388,7 @@ func (d *ESX5Driver) upload(dst, src string) error {
 		return err
 	}
 	defer f.Close()
-	return d.comm.Upload(dst, f)
+	return d.comm.Upload(dst, f, nil)
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {

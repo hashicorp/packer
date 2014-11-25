@@ -5,14 +5,15 @@ package instance
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"strings"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"os"
-	"strings"
 )
 
 // The unique ID for this builder
@@ -74,7 +75,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"-s {{.SecretKey}} " +
 			"-d {{.BundleDirectory}} " +
 			"--batch " +
-			"--url {{.S3Endpoint}} " +
+			"--region {{.Region}} " +
 			"--retry"
 	}
 
@@ -87,7 +88,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"-e {{.PrivatePath}}/* " +
 			"-d {{.Destination}} " +
 			"-p {{.Prefix}} " +
-			"--batch"
+			"--batch " +
+			"--no-filter"
 	}
 
 	if b.config.X509UploadPath == "" {
@@ -97,6 +99,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 
@@ -186,6 +189,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepSourceAMIInfo{
+			SourceAmi:          b.config.SourceAmi,
+			EnhancedNetworking: b.config.AMIEnhancedNetworking,
+		},
 		&awscommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
@@ -199,7 +206,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
-			ExpectedRootDevice:       "instance-store",
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			IamInstanceProfile:       b.config.IamInstanceProfile,
 			UserData:                 b.config.UserData,
@@ -212,14 +220,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tags:                     b.config.RunTags,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     awscommon.SSHAddress(ec2conn, b.config.SSHPort),
+			SSHAddress: awscommon.SSHAddress(
+				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
 			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
-		&StepBundleVolume{},
-		&StepUploadBundle{},
+		&StepBundleVolume{
+			Debug: b.config.PackerDebug,
+		},
+		&StepUploadBundle{
+			Debug: b.config.PackerDebug,
+		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
 			Regions: b.config.AMIRegions,

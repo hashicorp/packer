@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
+	"log"
+	"net/url"
 	"os/exec"
 	"strings"
 )
@@ -61,26 +63,31 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
+	// First define all our templatable parameters that are _required_
 	templates := map[string]*string{
 		"cluster":       &p.config.Cluster,
 		"datacenter":    &p.config.Datacenter,
-		"datastore":     &p.config.Datastore,
 		"diskmode":      &p.config.DiskMode,
 		"host":          &p.config.Host,
-		"vm_network":    &p.config.VMNetwork,
 		"password":      &p.config.Password,
 		"resource_pool": &p.config.ResourcePool,
 		"username":      &p.config.Username,
-		"vm_folder":     &p.config.VMFolder,
 		"vm_name":       &p.config.VMName,
 	}
-
 	for key, ptr := range templates {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
 
+	// Then define the ones that are optional
+	templates["datastore"] = &p.config.Datastore
+	templates["vm_network"] = &p.config.VMNetwork
+	templates["vm_folder"] = &p.config.VMFolder
+
+	// Template process
+	for key, ptr := range templates {
 		*ptr, err = p.config.tpl.Process(*ptr, nil)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
@@ -121,8 +128,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s",
-			p.config.Username,
+		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
+			url.QueryEscape(p.config.Username),
 			p.config.Password,
 			p.config.Host,
 			p.config.Datacenter,
@@ -132,6 +139,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {

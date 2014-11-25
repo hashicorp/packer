@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
-	"github.com/rackspace/gophercloud"
+	"github.com/racker/perigee"
 	"log"
 	"time"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 // StateRefreshFunc is a function type used for StateChangeConf that is
@@ -30,15 +32,21 @@ type StateChangeConf struct {
 }
 
 // ServerStateRefreshFunc returns a StateRefreshFunc that is used to watch
-// an openstacn server.
+// an openstack server.
 func ServerStateRefreshFunc(csp gophercloud.CloudServersProvider, s *gophercloud.Server) StateRefreshFunc {
 	return func() (interface{}, string, int, error) {
 		resp, err := csp.ServerById(s.Id)
 		if err != nil {
-			log.Printf("Error on ServerStateRefresh: %s", err)
-			return nil, "", 0, err
-		}
+			urce, ok := err.(*perigee.UnexpectedResponseCodeError)
+			if ok && (urce.Actual == 404) {
+				log.Printf("404 on ServerStateRefresh, returning DELETED")
 
+				return nil, "DELETED", 0, nil
+			} else {
+				log.Printf("Error on ServerStateRefresh: %s", err)
+				return nil, "", 0, err
+			}
+		}
 		return resp, resp.Status, resp.Progress, nil
 	}
 }

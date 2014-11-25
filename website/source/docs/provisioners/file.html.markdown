@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "File Provisioner"
+description: |-
+  The file Packer provisioner uploads files to machines built by Packer. The recommended usage of the file provisioner is to use it to upload files, and then use shell provisioner to move them to the proper place, set permissions, etc.
 ---
 
 # File Provisioner
 
 Type: `file`
 
-The file provisioner uploads files to machines built by Packer. The
+The file Packer provisioner uploads files to machines built by Packer. The
 recommended usage of the file provisioner is to use it to upload files,
 and then use [shell provisioner](/docs/provisioners/shell.html) to move
 them to the proper place, set permissions, etc.
@@ -16,13 +18,13 @@ The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "file",
   "source": "app.tar.gz",
   "destination": "/tmp/app.tar.gz"
 }
-</pre>
+```
 
 ## Configuration Reference
 

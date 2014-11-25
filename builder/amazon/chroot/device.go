@@ -27,11 +27,12 @@ func AvailableDevice() (string, error) {
 			continue
 		}
 
-		for i := 1; i < 16; i++ {
-			device := fmt.Sprintf("/dev/%s%c%d", prefix, letter, i)
-			if _, err := os.Stat(device); err != nil {
-				return device, nil
-			}
+		// To be able to build both Paravirtual and HVM images, the unnumbered
+		// device and the first numbered one must be available.
+		// E.g. /dev/xvdf  and  /dev/xvdf1
+		numbered_device := fmt.Sprintf("%s%d", device, 1)
+		if _, err := os.Stat(numbered_device); err != nil {
+			return device, nil
 		}
 	}
 

@@ -21,6 +21,9 @@ var builtins = map[string]string{
 	"mitchellh.virtualbox":      "virtualbox",
 	"mitchellh.vmware":          "vmware",
 	"pearkes.digitalocean":      "digitalocean",
+	"packer.parallels":          "parallels",
+	"MSOpenTech.hyperv":         "hyperv",
+	"transcend.qemu":            "libvirt",
 }
 
 type Config struct {
@@ -62,19 +65,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	name, ok := builtins[artifact.BuilderId()]
-	if !ok {
-		return nil, false, fmt.Errorf(
-			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
-	}
-
-	provider := providerForName(name)
-	if provider == nil {
-		// This shouldn't happen since we hard code all of these ourselves
-		panic(fmt.Sprintf("bad provider name: %s", name))
-	}
-
+func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	config := p.configs[""]
 	if specificConfig, ok := p.configs[name]; ok {
 		config = specificConfig
@@ -122,9 +113,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Write our Vagrantfile
 	var customVagrantfile string
 	if config.VagrantfileTemplate != "" {
+		vagrantfilePath, err := config.tpl.Process(config.VagrantfileTemplate, nil)
+		if err != nil {
+			return nil, false, err
+		}
+
 		ui.Message(fmt.Sprintf(
-			"Using custom Vagrantfile: %s", config.VagrantfileTemplate))
-		customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
+			"Using custom Vagrantfile: %s", vagrantfilePath))
+		customBytes, err := ioutil.ReadFile(vagrantfilePath)
 		if err != nil {
 			return nil, false, err
 		}
@@ -153,6 +149,23 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
+}
+
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+
+	name, ok := builtins[artifact.BuilderId()]
+	if !ok {
+		return nil, false, fmt.Errorf(
+			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
+	}
+
+	provider := providerForName(name)
+	if provider == nil {
+		// This shouldn't happen since we hard code all of these ourselves
+		panic(fmt.Sprintf("bad provider name: %s", name))
+	}
+
+	return p.PostProcessProvider(name, provider, ui, artifact)
 }
 
 func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) error {
@@ -216,6 +229,12 @@ func providerForName(name string) Provider {
 		return new(VBoxProvider)
 	case "vmware":
 		return new(VMwareProvider)
+	case "parallels":
+		return new(ParallelsProvider)
+	case "hyperv":
+		return new(HypervProvider)
+	case "libvirt":
+		return new(LibVirtProvider)
 	default:
 		return nil
 	}

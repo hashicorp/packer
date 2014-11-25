@@ -10,18 +10,14 @@ import (
 // where the actual environment is executed over an RPC connection.
 type Environment struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 }
 
 // A EnvironmentServer wraps a packer.Environment and makes it exportable
 // as part of a Golang RPC server.
 type EnvironmentServer struct {
 	env packer.Environment
-	mux *MuxConn
-}
-
-type EnvironmentCliArgs struct {
-	Args []string
+	mux *muxBroker
 }
 
 func (e *Environment) Builder(name string) (b packer.Builder, err error) {
@@ -51,12 +47,6 @@ func (e *Environment) Cache() packer.Cache {
 		return nil
 	}
 	return client.Cache()
-}
-
-func (e *Environment) Cli(args []string) (result int, err error) {
-	rpcArgs := &EnvironmentCliArgs{args}
-	err = e.client.Call("Environment.Cli", rpcArgs, &result)
-	return
 }
 
 func (e *Environment) Hook(name string) (h packer.Hook, err error) {
@@ -136,11 +126,6 @@ func (e *EnvironmentServer) Cache(args *interface{}, reply *uint32) error {
 	server.RegisterCache(cache)
 	go server.Serve()
 	return nil
-}
-
-func (e *EnvironmentServer) Cli(args *EnvironmentCliArgs, reply *int) (err error) {
-	*reply, err = e.env.Cli(args.Args)
-	return
 }
 
 func (e *EnvironmentServer) Hook(name string, reply *uint32) error {

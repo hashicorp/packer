@@ -1,29 +1,29 @@
 ---
 layout: "docs"
 page_title: "Puppet Server Provisioner"
+description: |-
+  The `puppet-server` Packer provisioner provisions Packer machines with Puppet by connecting to a Puppet master.
 ---
 
 # Puppet Server Provisioner
 
 Type: `puppet-server`
 
-The `puppet-server` provisioner provisions Packer machines with Puppet
+The `puppet-server` Packer provisioner provisions Packer machines with Puppet
 by connecting to a Puppet master.
 
-<div class="alert alert-info alert-block">
-<strong>Note that Puppet will <em>not</em> be installed automatically
-by this provisioner.</strong> This provisioner expects that Puppet is already
+-> **Note:** Puppet will _not_ be installed automatically
+by this provisioner. This provisioner expects that Puppet is already
 installed on the machine. It is common practice to use the
-<a href="/docs/provisioners/shell.html">shell provisioner</a> before the
+[shell provisioner](/docs/provisioners/shell.html) before the
 Puppet provisioner to do this.
-</div>
 
 ## Basic Example
 
 The example below is fully functional and expects a Puppet server to be accessible
 from your network.:
 
-<pre class="prettyprint">
+```javascript
 {
    "type": "puppet-server",
    "options": "--test --pluginsync",
@@ -31,7 +31,7 @@ from your network.:
      "server_role": "webserver"
    }
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -54,15 +54,15 @@ required. They are listed below:
 * `options` (string) - Additional command line options to pass
   to `puppet agent` when Puppet is ran.
 
+* `prevent_sudo` (boolean) - By default, the configured commands that are
+  executed to run Puppet are executed with `sudo`. If this is true,
+  then the sudo will be omitted.
+
 * `puppet_node` (string) - The name of the node. If this isn't set,
    the fully qualified domain name will be used.
 
 * `puppet_server` (string) - Hostname of the Puppet server. By default
   "puppet" will be used.
-
-* `prevent_sudo` (boolean) - By default, the configured commands that are
-  executed to run Puppet are executed with `sudo`. If this is true,
-  then the sudo will be omitted.
 
 * `staging_directory` (string) - This is the directory where all the configuration
   of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-server".

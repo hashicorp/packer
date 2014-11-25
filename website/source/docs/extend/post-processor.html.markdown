@@ -1,10 +1,13 @@
 ---
 layout: "docs"
+page_title: "Custom Post-Processor Development"
+description: |-
+  Packer  Post-processors are the components of Packer that transform one artifact into another, for example by compressing files, or uploading them.
 ---
 
 # Custom Post-Processor Development
 
-Post-processors are the components of Packer that transform one artifact
+Packer Post-processors are the components of Packer that transform one artifact
 into another, for example by compressing files, or uploading them.
 
 In the compression example, the transformation would be taking an artifact
@@ -20,11 +23,8 @@ Prior to reading this page, it is assumed you have read the page on
 Post-processor plugins implement the `packer.PostProcessor` interface and
 are served using the `plugin.ServePostProcessor` function.
 
-<div class="alert alert-block">
-  <strong>Warning!</strong> This is an advanced topic. If you're new to Packer,
-  we recommend getting a bit more comfortable before you dive into writing
-  plugins.
-</div>
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
+recommend getting a bit more comfortable before you dive into writing plugins.
 
 
 ## The Interface
@@ -34,13 +34,12 @@ The interface that must be implemented for a post-processor is the
 The actual interface in the source code contains some basic documentation as well explaining
 what each method should do.
 
-
-<pre class="prettyprint">
+```go
 type PostProcessor interface {
 	Configure(interface{}) error
 	PostProcess(Ui, Artifact) (a Artifact, keep bool, err error)
 }
-</pre>
+```
 
 ### The "Configure" Method
 

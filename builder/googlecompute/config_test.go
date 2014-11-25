@@ -1,14 +1,14 @@
 package googlecompute
 
 import (
+	"io/ioutil"
 	"testing"
 )
 
 func testConfig(t *testing.T) map[string]interface{} {
 	return map[string]interface{}{
+		"account_file":        testAccountFile(t),
 		"bucket_name":         "foo",
-		"client_secrets_file": testClientSecretsFile(t),
-		"private_key_file":    testPrivateKeyFile(t),
 		"project_id":          "hashicorp",
 		"source_image":        "foo",
 		"zone":                "us-east-1a",
@@ -68,32 +68,6 @@ func TestConfigPrepare(t *testing.T) {
 			false,
 		},
 
-		{
-			"client_secrets_file",
-			nil,
-			true,
-		},
-		{
-			"client_secrets_file",
-			testClientSecretsFile(t),
-			false,
-		},
-		{
-			"client_secrets_file",
-			"/tmp/i/should/not/exist",
-			true,
-		},
-
-		{
-			"private_key_file",
-			nil,
-			true,
-		},
-		{
-			"private_key_file",
-			testPrivateKeyFile(t),
-			false,
-		},
 		{
 			"private_key_file",
 			"/tmp/i/should/not/exist",
@@ -174,3 +148,21 @@ func TestConfigPrepare(t *testing.T) {
 		}
 	}
 }
+
+func testAccountFile(t *testing.T) string {
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+
+	if _, err := tf.Write([]byte(testAccountContent)); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	return tf.Name()
+}
+
+// This is just some dummy data that doesn't actually work (it was revoked
+// a long time ago).
+const testAccountContent = `{}`

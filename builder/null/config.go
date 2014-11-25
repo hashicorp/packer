@@ -32,13 +32,27 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	c.tpl.UserVars = c.PackerUserVars
 
-	// Defaults
 	if c.Port == 0 {
 		c.Port = 22
 	}
-	// (none so far)
 
 	errs := common.CheckUnusedConfig(md)
+
+	templates := map[string]*string{
+		"host":                 &c.Host,
+		"ssh_username":         &c.SSHUsername,
+		"ssh_password":         &c.SSHPassword,
+		"ssh_private_key_file": &c.SSHPrivateKeyFile,
+	}
+
+	for n, ptr := range templates {
+		var err error
+		*ptr, err = c.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
 
 	if c.Host == "" {
 		errs = packer.MultiErrorAppend(errs,

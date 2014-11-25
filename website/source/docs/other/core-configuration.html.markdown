@@ -1,5 +1,8 @@
 ---
 layout: "docs"
+page_title: "Core Configuration"
+description: |-
+  There are a few configuration settings that affect Packer globally by configuring the core of Packer. These settings all have reasonable defaults, so you generally don't have to worry about it until you want to tweak a configuration. If you're just getting started with Packer, don't worry about core configuration for now.
 ---
 
 # Core Configuration
@@ -25,7 +28,7 @@ The format of the configuration file is basic JSON.
 Below is the list of all available configuration parameters for the core
 configuration file. None of these are required, since all have sane defaults.
 
-* `plugin_min_port` and `plugin_max_port` (int) - These are the minimum and
+* `plugin_min_port` and `plugin_max_port` (integer) - These are the minimum and
   maximum ports that Packer uses for communication with plugins, since
   plugin communication happens over TCP connections on your local host.
   By default these are 10,000 and 25,000, respectively. Be sure to set a fairly

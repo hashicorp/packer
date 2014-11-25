@@ -1,19 +1,23 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/packer/packer"
 )
 
 // BlockDevice
 type BlockDevice struct {
-	DeviceName          string `mapstructure:"device_name"`
-	VirtualName         string `mapstructure:"virtual_name"`
-	SnapshotId          string `mapstructure:"snapshot_id"`
-	VolumeType          string `mapstructure:"volume_type"`
-	VolumeSize          int64  `mapstructure:"volume_size"`
 	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
+	DeviceName          string `mapstructure:"device_name"`
+	Encrypted           bool   `mapstructure:"encrypted"`
 	IOPS                int64  `mapstructure:"iops"`
 	NoDevice            bool   `mapstructure:"no_device"`
+	SnapshotId          string `mapstructure:"snapshot_id"`
+	VirtualName         string `mapstructure:"virtual_name"`
+	VolumeType          string `mapstructure:"volume_type"`
+	VolumeSize          int64  `mapstructure:"volume_size"`
 }
 
 type BlockDevices struct {
@@ -34,9 +38,55 @@ func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
 			DeleteOnTermination: blockDevice.DeleteOnTermination,
 			IOPS:                blockDevice.IOPS,
 			NoDevice:            blockDevice.NoDevice,
+			Encrypted:           blockDevice.Encrypted,
 		})
 	}
 	return blockDevices
+}
+
+func (b *BlockDevices) Prepare(t *packer.ConfigTemplate) []error {
+	if t == nil {
+		var err error
+		t, err = packer.NewConfigTemplate()
+		if err != nil {
+			return []error{err}
+		}
+	}
+
+	lists := map[string][]BlockDevice{
+		"ami_block_device_mappings":    b.AMIMappings,
+		"launch_block_device_mappings": b.LaunchMappings,
+	}
+
+	var errs []error
+	for outer, bds := range lists {
+		for i, bd := range bds {
+			templates := map[string]*string{
+				"device_name":  &bd.DeviceName,
+				"snapshot_id":  &bd.SnapshotId,
+				"virtual_name": &bd.VirtualName,
+				"volume_type":  &bd.VolumeType,
+			}
+
+			errs := make([]error, 0)
+			for n, ptr := range templates {
+				var err error
+				*ptr, err = t.Process(*ptr, nil)
+				if err != nil {
+					errs = append(
+						errs, fmt.Errorf(
+							"Error processing %s[%d].%s: %s",
+							outer, i, n, err))
+				}
+			}
+		}
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return nil
 }
 
 func (b *BlockDevices) BuildAMIDevices() []ec2.BlockDeviceMapping {

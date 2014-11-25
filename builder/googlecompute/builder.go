@@ -35,7 +35,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // representing a GCE machine image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, b.config.clientSecrets, b.config.privateKeyBytes)
+		ui, b.config.ProjectId, &b.config.account)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: 5 * time.Minute,
 		},
 		new(common.StepProvision),
-		new(StepUpdateGsutil),
+		new(StepUpdateGcloud),
 		new(StepCreateImage),
 		new(StepUploadImage),
 		new(StepRegisterImage),

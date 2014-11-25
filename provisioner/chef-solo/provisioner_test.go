@@ -262,3 +262,42 @@ func TestProvisionerPrepare_json(t *testing.T) {
 		t.Fatalf("bad: %#v", p.config.Json)
 	}
 }
+
+func TestProvisionerPrepare_jsonNested(t *testing.T) {
+	config := testConfig()
+	config["json"] = map[string]interface{}{
+		"foo": map[interface{}]interface{}{
+			"bar": []uint8("baz"),
+		},
+
+		"bar": []interface{}{
+			"foo",
+
+			map[interface{}]interface{}{
+				"bar": "baz",
+			},
+		},
+
+		"bFalse": false,
+		"bTrue":  true,
+		"bNil":   nil,
+		"bStr":   []uint8("bar"),
+
+		"bInt":   1,
+		"bFloat": 4.5,
+	}
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	fooMap := p.config.Json["foo"].(map[string]interface{})
+	if fooMap["bar"] != "baz" {
+		t.Fatalf("nope: %#v", fooMap["bar"])
+	}
+	if p.config.Json["bStr"] != "bar" {
+		t.Fatalf("nope: %#v", fooMap["bar"])
+	}
+}

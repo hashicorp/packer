@@ -40,13 +40,43 @@ func (d *VBox42Driver) Delete(name string) error {
 	return d.VBoxManage("unregistervm", name, "--delete")
 }
 
-func (d *VBox42Driver) Import(name, path, opts string) error {
+func (d *VBox42Driver) Iso() (string, error) {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "list", "systemproperties")
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	DefaultGuestAdditionsRe := regexp.MustCompile("Default Guest Additions ISO:(.+)")
+
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		// Need to trim off CR character when running in windows
+		// Trimming whitespaces at this point helps to filter out empty value
+		line = strings.TrimRight(line, " \r")
+
+		matches := DefaultGuestAdditionsRe.FindStringSubmatch(line)
+		if matches == nil {
+			continue
+		}
+
+		isoname := strings.Trim(matches[1], " \r\n")
+		log.Printf("Found Default Guest Additions ISO: %s", isoname)
+
+		return isoname, nil
+	}
+
+	return "", fmt.Errorf("Cannot find \"Default Guest Additions ISO\" in vboxmanage output (or it is empty)")
+}
+
+func (d *VBox42Driver) Import(name string, path string, flags []string) error {
 	args := []string{
 		"import", path,
 		"--vsys", "0",
 		"--vmname", name,
-		"--options", opts,
 	}
+	args = append(args, flags...)
 
 	return d.VBoxManage(args...)
 }
@@ -128,6 +158,15 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 		err = fmt.Errorf("VBoxManage error: %s", stderrString)
 	}
 
+	if err == nil {
+		// Sometimes VBoxManage gives us an error with a zero exit code,
+		// so we also regexp match an error string.
+		m, _ := regexp.MatchString("VBoxManage([.a-z]+?): error:", stderrString)
+		if m {
+			err = fmt.Errorf("VBoxManage error: %s", stderrString)
+		}
+	}
+
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
@@ -157,12 +196,12 @@ func (d *VBox42Driver) Version() (string, error) {
 		return "", fmt.Errorf("VirtualBox is not properly setup: %s", versionOutput)
 	}
 
-	versionRe := regexp.MustCompile("[^.0-9]")
-	matches := versionRe.Split(versionOutput, 2)
-	if len(matches) == 0 || matches[0] == "" {
+	versionRe := regexp.MustCompile("^([.0-9]+)(?:_(?:RC|OSEr)[0-9]+)?")
+	matches := versionRe.FindAllStringSubmatch(versionOutput, 1)
+	if matches == nil || len(matches[0]) != 2 {
 		return "", fmt.Errorf("No version found: %s", versionOutput)
 	}
 
-	log.Printf("VirtualBox version: %s", matches[0])
-	return matches[0], nil
+	log.Printf("VirtualBox version: %s", matches[0][1])
+	return matches[0][1], nil
 }

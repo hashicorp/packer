@@ -4,6 +4,8 @@ page_title: "Provision"
 prev_url: "/intro/getting-started/build-image.html"
 next_url: "/intro/getting-started/parallel-builds.html"
 next_title: "Parallel Builds"
+description: |-
+  In the previous page of this guide, you created your first image with Packer. The image you just built, however, was basically just a repackaging of a previously existing base AMI. The real utility of Packer comes from being able to install and configure software into the images as well. This stage is also known as the _provision_ step. Packer fully supports automated provisioning in order to install software onto the machines prior to turning them into images.
 ---
 
 # Provision
@@ -35,10 +37,10 @@ shell provisioner that comes with Packer to install Redis. Modify the
 explain the various parts of the new configuration following the code
 block below.
 
-<pre class="prettyprint">
+```javascript
 {
-  "variables": [...],
-  "builders": [...],
+  "variables": ["..."],
+  "builders": ["..."],
 
   "provisioners": [{
     "type": "shell",
@@ -49,18 +51,17 @@ block below.
     ]
   }]
 }
-</pre>
+```
 
-<div class="alert alert-block alert-info">
-<strong>Note:</strong> The <code>sleep 30</code> in the example above is
+-> **Note:** The `sleep 30` in the example above is
 very important. Because Packer is able to detect and SSH into the instance
 as soon as SSH is available, Ubuntu actually doesn't get proper amounts
 of time to initialize. The sleep makes sure that the OS properly initializes.
-</div>
 
 Hopefully it is obvious, but the `builders` section shouldn't actually
 contain "...", it should be the contents setup in the previous page
-of the getting started guide.
+of the getting started guide. Also note the comma after the `"builders": [...]`
+section, which was not present in the previous lesson.
 
 To configure the provisioners, we add a new section `provisioners` to the
 template, alongside the `builders` configuration. The provisioners section

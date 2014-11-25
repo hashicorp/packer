@@ -68,7 +68,7 @@ func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metada
 
 	var md mapstructure.Metadata
 	decoderConfig := &mapstructure.DecoderConfig{
-		DecodeHook:       mapstructure.ComposeDecodeHookFunc(
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			decodeHook,
 			mapstructure.StringToSliceHookFunc(","),
 		),
@@ -217,6 +217,18 @@ func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
 
 	return func(f reflect.Kind, t reflect.Kind, v interface{}) (interface{}, error) {
 		if t != reflect.String {
+			// We need to convert []uint8 to string. We have to do this
+			// because internally Packer uses MsgPack for RPC and the MsgPack
+			// codec turns strings into []uint8
+			if f == reflect.Slice {
+				dataVal := reflect.ValueOf(v)
+				dataType := dataVal.Type()
+				elemKind := dataType.Elem().Kind()
+				if elemKind == reflect.Uint8 {
+					v = string(dataVal.Interface().([]uint8))
+				}
+			}
+
 			if sv, ok := v.(string); ok {
 				var err error
 				v, err = tpl.Process(sv, nil)

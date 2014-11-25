@@ -9,14 +9,14 @@ import (
 // executed over an RPC connection.
 type postProcessor struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 }
 
 // PostProcessorServer wraps a packer.PostProcessor implementation and makes it
 // exportable as part of a Golang RPC server.
 type PostProcessorServer struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 	p      packer.PostProcessor
 }
 

@@ -41,11 +41,20 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if _, ok := state.GetOk("attachedIso"); ok {
+		controllerName := "IDE Controller"
+		port := "0"
+		device := "1"
+		if _, ok := state.GetOk("attachedIsoOnSata"); ok {
+			controllerName = "SATA Controller"
+			port = "1"
+			device = "0"
+		}
+
 		command := []string{
 			"storageattach", vmName,
-			"--storagectl", "IDE Controller",
-			"--port", "0",
-			"--device", "1",
+			"--storagectl", controllerName,
+			"--port", port,
+			"--device", device,
 			"--medium", "none",
 		}
 
