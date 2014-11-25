@@ -84,16 +84,22 @@ func TestPostProcessorPrepare_outputPath(t *testing.T) {
 func TestPostProcessorPrepare_subConfigs(t *testing.T) {
 	var p PostProcessor
 
+	f, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(f.Name())
+
 	// Default
 	c := testConfig()
 	c["compression_level"] = 42
-	c["vagrantfile_template"] = "foo"
+	c["vagrantfile_template"] = f.Name()
 	c["override"] = map[string]interface{}{
 		"aws": map[string]interface{}{
 			"compression_level": 7,
 		},
 	}
-	err := p.Configure(c)
+	err = p.Configure(c)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -102,7 +108,7 @@ func TestPostProcessorPrepare_subConfigs(t *testing.T) {
 		t.Fatalf("bad: %#v", p.configs[""].CompressionLevel)
 	}
 
-	if p.configs[""].VagrantfileTemplate != "foo" {
+	if p.configs[""].VagrantfileTemplate != f.Name() {
 		t.Fatalf("bad: %#v", p.configs[""].VagrantfileTemplate)
 	}
 
@@ -110,8 +116,27 @@ func TestPostProcessorPrepare_subConfigs(t *testing.T) {
 		t.Fatalf("bad: %#v", p.configs["aws"].CompressionLevel)
 	}
 
-	if p.configs["aws"].VagrantfileTemplate != "foo" {
+	if p.configs["aws"].VagrantfileTemplate != f.Name() {
 		t.Fatalf("bad: %#v", p.configs["aws"].VagrantfileTemplate)
+	}
+}
+
+func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
+	var p PostProcessor
+
+	f, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	c := testConfig()
+	c["vagrantfile_template"] = f.Name()
+
+	os.Remove(f.Name())
+
+	err = p.Configure(c)
+	if err == nil {
+		t.Fatal("expected an error since vagrantfile_template does not exist")
 	}
 }
 
