@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<SCRIPT
+sudo apt-get -y update
+
+# RVM/Ruby
+sudo apt-get -y install curl
+curl -sSL https://get.rvm.io | bash -s stable
+. ~/.bashrc
+. ~/.bash_profile
+rvm install 2.0.0
+rvm --default use 2.0.0
+
+# Middleman deps
+cd /vagrant
+bundle
+SCRIPT
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "chef/ubuntu-12.04"
+  config.vm.network "private_network", ip: "33.33.30.10"
+  config.vm.provision "shell", inline: $script, privileged: false
+  config.vm.synced_folder ".", "/vagrant", type: "rsync"
+end

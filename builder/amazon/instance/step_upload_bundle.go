@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -11,11 +12,13 @@ type uploadCmdData struct {
 	BucketName      string
 	BundleDirectory string
 	ManifestPath    string
-	S3Endpoint      string
+	Region          string
 	SecretKey       string
 }
 
-type StepUploadBundle struct{}
+type StepUploadBundle struct {
+	Debug bool
+}
 
 func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
@@ -37,7 +40,7 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
-		S3Endpoint:      region.S3Endpoint,
+		Region:          region.Name,
 		SecretKey:       config.SecretKey,
 	})
 	if err != nil {
@@ -49,6 +52,11 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Uploading the bundle...")
 	cmd := &packer.RemoteCmd{Command: config.BundleUploadCommand}
+
+	if s.Debug {
+		ui.Say(fmt.Sprintf("Running: %s", config.BundleUploadCommand))
+	}
+
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading volume: %s", err))
 		ui.Error(state.Get("error").(error).Error())

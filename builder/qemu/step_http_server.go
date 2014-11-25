@@ -10,8 +10,9 @@ import (
 	"net/http"
 )
 
-// This step creates and runs the HTTP server that is serving the files
-// specified by the 'http_files` configuration parameter in the template.
+// This step creates and runs the HTTP server that is serving files from the
+// directory specified by the 'http_directory` configuration parameter in the
+// template.
 //
 // Uses:
 //   config *config

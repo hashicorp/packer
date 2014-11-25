@@ -98,13 +98,18 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 	handshakeAttempts := 0
 
 	var comm packer.Communicator
+	first := true
 	for {
-		select {
-		case <-cancel:
-			log.Println("SSH wait cancelled. Exiting loop.")
-			return nil, errors.New("SSH wait cancelled")
-		case <-time.After(5 * time.Second):
+		// Don't check for cancel or wait on first iteration
+		if !first {
+			select {
+			case <-cancel:
+				log.Println("SSH wait cancelled. Exiting loop.")
+				return nil, errors.New("SSH wait cancelled")
+			case <-time.After(5 * time.Second):
+			}
 		}
+		first = false
 
 		// First we request the TCP connection information
 		address, err := s.SSHAddress(state)

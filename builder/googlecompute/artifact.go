@@ -37,3 +37,7 @@ func (a *Artifact) Id() string {
 func (a *Artifact) String() string {
 	return fmt.Sprintf("A disk image was created: %v", a.imageName)
 }
+
+func (a *Artifact) State(name string) interface{} {
+	return nil
+}

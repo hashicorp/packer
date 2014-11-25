@@ -3,47 +3,65 @@ package qemu
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	commonssh "github.com/mitchellh/packer/common/ssh"
+	"github.com/mitchellh/packer/packer"
 )
 
 const BuilderId = "transcend.qemu"
 
+var accels = map[string]struct{}{
+	"none": struct{}{},
+	"kvm":  struct{}{},
+	"tcg":  struct{}{},
+	"xen":  struct{}{},
+}
+
 var netDevice = map[string]bool{
-	"ne2k_pci":   true,
-	"i82551":     true,
-	"i82557b":    true,
-	"i82559er":   true,
-	"rtl8139":    true,
-	"e1000":      true,
-	"pcnet":      true,
-	"virtio":     true,
-	"virtio-net": true,
-	"usb-net":    true,
-	"i82559a":    true,
-	"i82559b":    true,
-	"i82559c":    true,
-	"i82550":     true,
-	"i82562":     true,
-	"i82557a":    true,
-	"i82557c":    true,
-	"i82801":     true,
-	"vmxnet3":    true,
-	"i82558a":    true,
-	"i82558b":    true,
+	"ne2k_pci":       true,
+	"i82551":         true,
+	"i82557b":        true,
+	"i82559er":       true,
+	"rtl8139":        true,
+	"e1000":          true,
+	"pcnet":          true,
+	"virtio":         true,
+	"virtio-net":     true,
+	"virtio-net-pci": true,
+	"usb-net":        true,
+	"i82559a":        true,
+	"i82559b":        true,
+	"i82559c":        true,
+	"i82550":         true,
+	"i82562":         true,
+	"i82557a":        true,
+	"i82557c":        true,
+	"i82801":         true,
+	"vmxnet3":        true,
+	"i82558a":        true,
+	"i82558b":        true,
 }
 
 var diskInterface = map[string]bool{
 	"ide":    true,
 	"scsi":   true,
 	"virtio": true,
+}
+
+var diskCache = map[string]bool{
+	"writethrough": true,
+	"writeback":    true,
+	"none":         true,
+	"unsafe":       true,
+	"directsync":   true,
 }
 
 type Builder struct {
@@ -58,15 +76,18 @@ type config struct {
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
+	DiskCache       string     `mapstructure:"disk_cache"`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
+	DiskImage       bool       `mapstructure:"disk_image"`
 	HTTPDir         string     `mapstructure:"http_directory"`
 	HTTPPortMin     uint       `mapstructure:"http_port_min"`
 	HTTPPortMax     uint       `mapstructure:"http_port_max"`
 	ISOChecksum     string     `mapstructure:"iso_checksum"`
 	ISOChecksumType string     `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string   `mapstructure:"iso_urls"`
+	MachineType     string     `mapstructure:"machine_type"`
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
@@ -115,6 +136,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskSize = 40000
 	}
 
+	if b.config.DiskCache == "" {
+		b.config.DiskCache = "writeback"
+	}
+
 	if b.config.Accelerator == "" {
 		b.config.Accelerator = "kvm"
 	}
@@ -125,6 +150,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.HTTPPortMax == 0 {
 		b.config.HTTPPortMax = 9000
+	}
+
+	if b.config.MachineType == "" {
+		b.config.MachineType = "pc"
 	}
 
 	if b.config.OutputDir == "" {
@@ -205,6 +234,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"shutdown_timeout":  &b.config.RawShutdownTimeout,
 		"ssh_wait_timeout":  &b.config.RawSSHWaitTimeout,
 		"accelerator":       &b.config.Accelerator,
+		"machine_type":      &b.config.MachineType,
 		"net_device":        &b.config.NetDevice,
 		"disk_interface":    &b.config.DiskInterface,
 	}
@@ -249,9 +279,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("invalid format, only 'qcow2' or 'raw' are allowed"))
 	}
 
-	if !(b.config.Accelerator == "kvm" || b.config.Accelerator == "xen") {
+	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid format, only 'kvm' or 'xen' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {
@@ -262,6 +292,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if _, ok := diskInterface[b.config.DiskInterface]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("unrecognized disk interface type"))
+	}
+
+	if _, ok := diskCache[b.config.DiskCache]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk cache type"))
 	}
 
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
@@ -338,7 +373,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := sshKeyToSigner(b.config.SSHKeyPath); err != nil {
+		} else if _, err := commonssh.FileSigner(b.config.SSHKeyPath); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
 		}
@@ -396,6 +431,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		new(stepCreateDisk),
+		new(stepCopyDisk),
+		new(stepResizeDisk),
 		new(stepHTTPServer),
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
@@ -463,9 +500,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		dir: b.config.OutputDir,
-		f:   files,
+		dir:   b.config.OutputDir,
+		f:     files,
+		state: make(map[string]interface{}),
 	}
+
+	artifact.state["diskName"] = state.Get("disk_filename").(string)
+	artifact.state["diskType"] = b.config.Format
+	artifact.state["diskSize"] = uint64(b.config.DiskSize)
+	artifact.state["domainType"] = b.config.Accelerator
 
 	return artifact, nil
 }

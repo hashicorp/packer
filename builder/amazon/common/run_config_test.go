@@ -47,6 +47,19 @@ func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 	}
 }
 
+func TestRunConfigPrepare_SpotAuto(t *testing.T) {
+	c := testConfig()
+	c.SpotPrice = "auto"
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+
+	c.SpotPriceAutoProduct = "foo"
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestRunConfigPrepare_SSHPort(t *testing.T) {
 	c := testConfig()
 	c.SSHPort = 0

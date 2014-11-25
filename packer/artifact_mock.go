@@ -5,6 +5,7 @@ type MockArtifact struct {
 	BuilderIdValue string
 	FilesValue     []string
 	IdValue        string
+	StateValues    map[string]interface{}
 	DestroyCalled  bool
 }
 
@@ -35,6 +36,11 @@ func (a *MockArtifact) Id() string {
 
 func (*MockArtifact) String() string {
 	return "string"
+}
+
+func (a *MockArtifact) State(name string) interface{} {
+	value, _ := a.StateValues[name]
+	return value
 }
 
 func (a *MockArtifact) Destroy() error {

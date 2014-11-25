@@ -12,24 +12,24 @@ page_title: "Downloads"
 <section class="downloads">
 <div class="container">
 	<div class="description row">
-		<div class="span8 offset2">
+		<div class="col-md-8 col-md-offset-2">
 			<p>
 			Below are all available downloads for the latest version of Packer
 			(<%= latest_version %>). Please download the proper package for your
 			operating system and architecture. You can find SHA256 checksums
-			for packages <a href="https://dl.bintray.com/mitchellh/packer/<%= latest_version %>_SHA256SUMS?direct">here</a>.
+			for packages <a href="https://dl.bintray.com/mitchellh/packer/packer_<%= latest_version %>_SHA256SUMS?direct">here</a>.
 			</p>
 		</div>
 	</div>
-	<% $packer_os.each do |os| %>
+	<% product_versions.each do |os, versions| %>
 		<div class="row">
-			<div class="span8 offset2 download">
-				<div class="icon pull-left"><%= image_tag "/images/icons/icon_#{os}.png" %></div>
+			<div class="col-md-8 col-md-offset-2 download">
+				<div class="icon pull-left"><%= system_icon(os) %></div>
 				<div class="details">
-					<h2 class="os-name"><%= download_os_human(os) %></h2>
+					<h2 class="os-name"><%= os %></h2>
 					<ul>
-						<% $packer_files[os].each do |file| %>
-						<li><a href="<%= download_url(file) %>"><%= download_arch(file) %></a></li>
+						<% versions.each do |url| %>
+						<li><a href="<%= url %>"><%= arch_for_filename(url) %></a></li>
 						<% end %>
 					</ul>
 					<div class="clearfix"></div>
@@ -39,9 +39,9 @@ page_title: "Downloads"
 	<% end %>
 
 	<div class="row">
-		<div class="span8 offset2 poweredby">
+		<div class="col-md-8 col-md-offset-2 poweredby">
 			<a href='http://www.bintray.com'>
-				<img src='http://www.bintray.com/docs/images/poweredByBintray_ColorTransparent.png'>
+				<img src='https://www.bintray.com/docs/images/poweredByBintray_ColorTransparent.png'>
 			</a>
 		</div>
 	</div>

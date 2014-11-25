@@ -6,6 +6,9 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"log"
+	"net"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -38,6 +41,9 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidAMIID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
 			} else {
 				log.Printf("Error on AMIStateRefresh: %s", err)
 				return nil, "", err
@@ -64,6 +70,9 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidInstanceID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
 			} else {
 				log.Printf("Error on InstanceStateRefresh: %s", err)
 				return nil, "", err
@@ -81,11 +90,42 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 	}
 }
 
+// SpotRequestStateRefreshFunc returns a StateRefreshFunc that is used to watch
+// a spot request for state changes.
+func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := conn.DescribeSpotRequests([]string{spotRequestId}, ec2.NewFilter())
+		if err != nil {
+			if ec2err, ok := err.(*ec2.Error); ok && ec2err.Code == "InvalidSpotInstanceRequestID.NotFound" {
+				// Set this to nil as if we didn't find anything.
+				resp = nil
+			} else if isTransientNetworkError(err) {
+				// Transient network error, treat it as if we didn't find anything
+				resp = nil
+			} else {
+				log.Printf("Error on SpotRequestStateRefresh: %s", err)
+				return nil, "", err
+			}
+		}
+
+		if resp == nil || len(resp.SpotRequestResults) == 0 {
+			// Sometimes AWS has consistency issues and doesn't see the
+			// SpotRequest. Return an empty state.
+			return nil, "", nil
+		}
+
+		i := resp.SpotRequestResults[0]
+		return i, i.State, nil
+	}
+}
+
 // WaitForState watches an object and waits for it to achieve a certain
 // state.
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
+	sleepSeconds := 2
+	maxTicks := int(TimeoutSeconds()/sleepSeconds) + 1
 	notfoundTick := 0
 
 	for {
@@ -99,7 +139,7 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			// If we didn't find the resource, check if we have been
 			// not finding it for awhile, and if so, report an error.
 			notfoundTick += 1
-			if notfoundTick > 20 {
+			if notfoundTick > maxTicks {
 				return nil, errors.New("couldn't find resource")
 			}
 		} else {
@@ -125,13 +165,41 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			}
 
 			if !found {
-				fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
-				return
+				err := fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
+				return nil, err
 			}
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(sleepSeconds) * time.Second)
 	}
 
 	return
+}
+
+func isTransientNetworkError(err error) bool {
+	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
+		return true
+	}
+
+	return false
+}
+
+// Returns 300 seconds (5 minutes) by default
+// Some AWS operations, like copying an AMI to a distant region, take a very long time
+// Allow user to override with AWS_TIMEOUT_SECONDS environment variable
+func TimeoutSeconds() (seconds int) {
+	seconds = 300
+
+	override := os.Getenv("AWS_TIMEOUT_SECONDS")
+	if override != "" {
+		n, err := strconv.Atoi(override)
+		if err != nil {
+			log.Printf("Invalid timeout seconds '%s', using default", override)
+		} else {
+			seconds = n
+		}
+	}
+
+	log.Printf("Allowing %ds to complete (change with AWS_TIMEOUT_SECONDS)", seconds)
+	return seconds
 }

@@ -1,6 +1,8 @@
 ---
 layout: "docs_machine_readable"
 page_title: "Machine-Readable Reference"
+description: |-
+  This is the reference for the various message categories for Packer machine-readable output. Please read that page if you're unfamiliar with the general format and usage for the machine-readable output.
 ---
 
 # Machine-Readable Reference

@@ -12,7 +12,6 @@ import (
 	"math/rand"
 	"os"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -30,34 +29,31 @@ type config struct {
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	DiskName          string   `mapstructure:"vmdk_name"`
-	DiskSize          uint     `mapstructure:"disk_size"`
-	DiskTypeId        string   `mapstructure:"disk_type_id"`
-	FloppyFiles       []string `mapstructure:"floppy_files"`
-	GuestOSType       string   `mapstructure:"guest_os_type"`
-	ISOChecksum       string   `mapstructure:"iso_checksum"`
-	ISOChecksumType   string   `mapstructure:"iso_checksum_type"`
-	ISOUrls           []string `mapstructure:"iso_urls"`
-	VMName            string   `mapstructure:"vm_name"`
-	HTTPDir           string   `mapstructure:"http_directory"`
-	HTTPPortMin       uint     `mapstructure:"http_port_min"`
-	HTTPPortMax       uint     `mapstructure:"http_port_max"`
-	BootCommand       []string `mapstructure:"boot_command"`
-	SkipCompaction    bool     `mapstructure:"skip_compaction"`
-	ToolsUploadFlavor string   `mapstructure:"tools_upload_flavor"`
-	ToolsUploadPath   string   `mapstructure:"tools_upload_path"`
-	VMXTemplatePath   string   `mapstructure:"vmx_template_path"`
-	VNCPortMin        uint     `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint     `mapstructure:"vnc_port_max"`
+	DiskName        string   `mapstructure:"vmdk_name"`
+	DiskSize        uint     `mapstructure:"disk_size"`
+	DiskTypeId      string   `mapstructure:"disk_type_id"`
+	FloppyFiles     []string `mapstructure:"floppy_files"`
+	GuestOSType     string   `mapstructure:"guest_os_type"`
+	ISOChecksum     string   `mapstructure:"iso_checksum"`
+	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
+	ISOUrls         []string `mapstructure:"iso_urls"`
+	Version         string   `mapstructure:"version"`
+	VMName          string   `mapstructure:"vm_name"`
+	BootCommand     []string `mapstructure:"boot_command"`
+	SkipCompaction  bool     `mapstructure:"skip_compaction"`
+	VMXTemplatePath string   `mapstructure:"vmx_template_path"`
 
-	RemoteType      string `mapstructure:"remote_type"`
-	RemoteDatastore string `mapstructure:"remote_datastore"`
-	RemoteHost      string `mapstructure:"remote_host"`
-	RemotePort      uint   `mapstructure:"remote_port"`
-	RemoteUser      string `mapstructure:"remote_username"`
-	RemotePassword  string `mapstructure:"remote_password"`
+	RemoteType           string `mapstructure:"remote_type"`
+	RemoteDatastore      string `mapstructure:"remote_datastore"`
+	RemoteCacheDatastore string `mapstructure:"remote_cache_datastore"`
+	RemoteCacheDirectory string `mapstructure:"remote_cache_directory"`
+	RemoteHost           string `mapstructure:"remote_host"`
+	RemotePort           uint   `mapstructure:"remote_port"`
+	RemoteUser           string `mapstructure:"remote_username"`
+	RemotePassword       string `mapstructure:"remote_password"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
@@ -84,6 +80,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
@@ -116,20 +113,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
-	if b.config.HTTPPortMin == 0 {
-		b.config.HTTPPortMin = 8000
-	}
-
-	if b.config.HTTPPortMax == 0 {
-		b.config.HTTPPortMax = 9000
-	}
-
-	if b.config.VNCPortMin == 0 {
-		b.config.VNCPortMin = 5900
-	}
-
-	if b.config.VNCPortMax == 0 {
-		b.config.VNCPortMax = 6000
+	if b.config.Version == "" {
+		b.config.Version = "9"
 	}
 
 	if b.config.RemoteUser == "" {
@@ -140,30 +125,34 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RemoteDatastore = "datastore1"
 	}
 
+	if b.config.RemoteCacheDatastore == "" {
+		b.config.RemoteCacheDatastore = b.config.RemoteDatastore
+	}
+
+	if b.config.RemoteCacheDirectory == "" {
+		b.config.RemoteCacheDirectory = "packer_cache"
+	}
+
 	if b.config.RemotePort == 0 {
 		b.config.RemotePort = 22
 	}
 
-	if b.config.ToolsUploadPath == "" {
-		b.config.ToolsUploadPath = "{{ .Flavor }}.iso"
-	}
-
 	// Errors
 	templates := map[string]*string{
-		"disk_name":           &b.config.DiskName,
-		"guest_os_type":       &b.config.GuestOSType,
-		"http_directory":      &b.config.HTTPDir,
-		"iso_checksum":        &b.config.ISOChecksum,
-		"iso_checksum_type":   &b.config.ISOChecksumType,
-		"iso_url":             &b.config.RawSingleISOUrl,
-		"tools_upload_flavor": &b.config.ToolsUploadFlavor,
-		"vm_name":             &b.config.VMName,
-		"vmx_template_path":   &b.config.VMXTemplatePath,
-		"remote_type":         &b.config.RemoteType,
-		"remote_host":         &b.config.RemoteHost,
-		"remote_datastore":    &b.config.RemoteDatastore,
-		"remote_user":         &b.config.RemoteUser,
-		"remote_password":     &b.config.RemotePassword,
+		"disk_name":              &b.config.DiskName,
+		"guest_os_type":          &b.config.GuestOSType,
+		"iso_checksum":           &b.config.ISOChecksum,
+		"iso_checksum_type":      &b.config.ISOChecksumType,
+		"iso_url":                &b.config.RawSingleISOUrl,
+		"vm_name":                &b.config.VMName,
+		"vmx_template_path":      &b.config.VMXTemplatePath,
+		"remote_type":            &b.config.RemoteType,
+		"remote_host":            &b.config.RemoteHost,
+		"remote_datastore":       &b.config.RemoteDatastore,
+		"remote_cache_datastore": &b.config.RemoteCacheDatastore,
+		"remote_cache_directory": &b.config.RemoteCacheDirectory,
+		"remote_user":            &b.config.RemoteUser,
+		"remote_password":        &b.config.RemotePassword,
 	}
 
 	for n, ptr := range templates {
@@ -199,11 +188,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				fmt.Errorf("Error processing floppy_files[%d]: %s",
 					i, err))
 		}
-	}
-
-	if b.config.HTTPPortMin > b.config.HTTPPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
 	if b.config.ISOChecksumType == "" {
@@ -245,22 +229,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if _, err := template.New("path").Parse(b.config.ToolsUploadPath); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("tools_upload_path invalid: %s", err))
-	}
-
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("vmx_template_path is invalid: %s", err))
 		}
 
-	}
-
-	if b.config.VNCPortMin > b.config.VNCPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
 	// Remote configuration validation
@@ -320,7 +294,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	steps := []multistep.Step{
-		&stepPrepareTools{},
+		&vmwcommon.StepPrepareTools{
+			RemoteType:        b.config.RemoteType,
+			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
+		},
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
@@ -335,6 +312,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		&stepRemoteUpload{
+			Key:     "floppy_path",
+			Message: "Uploading Floppy to remote machine...",
+		},
+		&stepRemoteUpload{
 			Key:     "iso_path",
 			Message: "Uploading ISO to remote machine...",
 		},
@@ -344,28 +325,48 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
-		&stepHTTPServer{},
-		&stepConfigureVNC{},
+		&vmwcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&vmwcommon.StepConfigureVNC{
+			VNCPortMin: b.config.VNCPortMin,
+			VNCPortMax: b.config.VNCPortMax,
+		},
 		&StepRegister{},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
-		&stepTypeBootCommand{},
+		&vmwcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			VMName:      b.config.VMName,
+			Tpl:         b.config.tpl,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     driver.SSHAddress,
 			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
 			NoPty:          b.config.SSHSkipRequestPty,
 		},
-		&stepUploadTools{},
+		&vmwcommon.StepUploadTools{
+			RemoteType:        b.config.RemoteType,
+			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
+			ToolsUploadPath:   b.config.ToolsUploadPath,
+			Tpl:               b.config.tpl,
+		},
 		&common.StepProvision{},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
 		&vmwcommon.StepCleanFiles{},
+		&vmwcommon.StepConfigureVMX{
+			CustomData: b.config.VMXDataPost,
+			SkipFloppy: true,
+		},
 		&vmwcommon.StepCleanVMX{},
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,

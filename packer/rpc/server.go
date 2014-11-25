@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-msgpack/codec"
 	"github.com/mitchellh/packer/packer"
-	"github.com/ugorji/go/codec"
 	"io"
 	"log"
 	"net/rpc"
@@ -29,7 +29,7 @@ const (
 // Server represents an RPC server for Packer. This must be paired on
 // the other side with a Client.
 type Server struct {
-	mux      *MuxConn
+	mux      *muxBroker
 	streamId uint32
 	server   *rpc.Server
 	closeMux bool
@@ -37,12 +37,14 @@ type Server struct {
 
 // NewServer returns a new Packer RPC server.
 func NewServer(conn io.ReadWriteCloser) *Server {
-	result := newServerWithMux(NewMuxConn(conn), 0)
+	mux, _ := newMuxBrokerServer(conn)
+	result := newServerWithMux(mux, 0)
 	result.closeMux = true
+	go mux.Run()
 	return result
 }
 
-func newServerWithMux(mux *MuxConn, streamId uint32) *Server {
+func newServerWithMux(mux *muxBroker, streamId uint32) *Server {
 	return &Server{
 		mux:      mux,
 		streamId: streamId,
@@ -83,13 +85,6 @@ func (s *Server) RegisterBuilder(b packer.Builder) {
 func (s *Server) RegisterCache(c packer.Cache) {
 	s.server.RegisterName(DefaultCacheEndpoint, &CacheServer{
 		cache: c,
-	})
-}
-
-func (s *Server) RegisterCommand(c packer.Command) {
-	s.server.RegisterName(DefaultCommandEndpoint, &CommandServer{
-		command: c,
-		mux:     s.mux,
 	})
 }
 
@@ -140,14 +135,17 @@ func (s *Server) Serve() {
 	// Accept a connection on stream ID 0, which is always used for
 	// normal client to server connections.
 	stream, err := s.mux.Accept(s.streamId)
-	defer stream.Close()
 	if err != nil {
 		log.Printf("[ERR] Error retrieving stream for serving: %s", err)
 		return
 	}
+	defer stream.Close()
 
-	var h codec.MsgpackHandle
-	rpcCodec := codec.GoRpc.ServerCodec(stream, &h)
+	h := &codec.MsgpackHandle{
+		RawToString: true,
+		WriteExt:    true,
+	}
+	rpcCodec := codec.GoRpc.ServerCodec(stream, h)
 	s.server.ServeCodec(rpcCodec)
 }
 

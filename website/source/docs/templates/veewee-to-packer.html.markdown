@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "Convert Veewee Definitions to Packer Templates"
+description: |-
+  If you are or were a user of Veewee, then there is an official tool called veewee-to-packer that will convert your Veewee definition into an equivalent Packer template. Even if you're not a Veewee user, Veewee has a large library of templates that can be readily used with Packer by simply converting them.
 ---
 
 # Veewee-to-Packer
@@ -17,7 +19,7 @@ of templates that can be readily used with Packer by simply converting them.
 Since Veewee itself is a Ruby project, so too is the veewee-to-packer
 application so that it can read the Veewee configurations. Install it using RubyGems:
 
-```
+```text
 $ gem install veewee-to-packer
 ...
 ```
@@ -27,7 +29,7 @@ at the `definition.rb` file of any template. The converter will output
 any warnings or messages about the conversion. The example below converts
 a CentOS template:
 
-```
+```text
 $ veewee-to-packer templates/CentOS-6.4/definition.rb
 Success! Your Veewee definition was converted to a Packer
 template! The template can be found in the `template.json` file

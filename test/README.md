@@ -41,8 +41,7 @@ Set the following self-explanatory environmental variables:
 Set the following environmental variables:
 
 * `GC_BUCKET_NAME`
-* `GC_CLIENT_SECRETS_FILE`
-* `GC_PRIVATE_KEY_FILE`
+* `GC_ACCOUNT_FILE`
 * `GC_PROJECT_ID`
 
 ### Running

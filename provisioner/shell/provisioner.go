@@ -170,11 +170,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
-	for _, kv := range p.config.Vars {
+	for idx, kv := range p.config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
+		} else {
+			// Single quote env var values
+			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
 	}
 
@@ -227,8 +230,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Build our variables up by adding in the build name and builder type
 	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = "PACKER_BUILD_NAME=" + p.config.PackerBuildName
-	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
+	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
+	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
 	copy(envVars[2:], p.config.Vars)
 
 	for _, path := range scripts {
@@ -269,7 +272,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				r = &UnixReader{Reader: r}
 			}
 
-			if err := comm.Upload(p.config.RemotePath, r); err != nil {
+			if err := comm.Upload(p.config.RemotePath, r, nil); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 

@@ -3,23 +3,18 @@ package iso
 import (
 	"errors"
 	"fmt"
+	"log"
+	"math/rand"
+	"strings"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"strings"
 )
 
 const BuilderId = "mitchellh.virtualbox"
-
-// These are the different valid mode values for "guest_additions_mode" which
-// determine how guest additions are delivered to the guest.
-const (
-	GuestAdditionsModeDisable string = "disable"
-	GuestAdditionsModeAttach         = "attach"
-	GuestAdditionsModeUpload         = "upload"
-)
 
 type Builder struct {
 	config config
@@ -27,16 +22,17 @@ type Builder struct {
 }
 
 type config struct {
-	common.PackerConfig          `mapstructure:",squash"`
-	vboxcommon.ExportConfig      `mapstructure:",squash"`
-	vboxcommon.ExportOpts        `mapstructure:",squash"`
-	vboxcommon.FloppyConfig      `mapstructure:",squash"`
-	vboxcommon.OutputConfig      `mapstructure:",squash"`
-	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
-	vboxcommon.SSHConfig         `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
+	common.PackerConfig             `mapstructure:",squash"`
+	vboxcommon.ExportConfig         `mapstructure:",squash"`
+	vboxcommon.ExportOpts           `mapstructure:",squash"`
+	vboxcommon.FloppyConfig         `mapstructure:",squash"`
+	vboxcommon.OutputConfig         `mapstructure:",squash"`
+	vboxcommon.RunConfig            `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
+	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
+	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
 	DiskSize             uint     `mapstructure:"disk_size"`
@@ -46,11 +42,9 @@ type config struct {
 	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
 	GuestOSType          string   `mapstructure:"guest_os_type"`
 	HardDriveInterface   string   `mapstructure:"hard_drive_interface"`
-	HTTPDir              string   `mapstructure:"http_directory"`
-	HTTPPortMin          uint     `mapstructure:"http_port_min"`
-	HTTPPortMax          uint     `mapstructure:"http_port_max"`
 	ISOChecksum          string   `mapstructure:"iso_checksum"`
 	ISOChecksumType      string   `mapstructure:"iso_checksum_type"`
+	ISOInterface         string   `mapstructure:"iso_interface"`
 	ISOUrls              []string `mapstructure:"iso_urls"`
 	VMName               string   `mapstructure:"vm_name"`
 
@@ -82,6 +76,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(b.config.tpl)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(b.config.tpl)...)
 	warnings := make([]string, 0)
 
@@ -105,16 +100,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.GuestOSType = "Other"
 	}
 
-	if b.config.HTTPPortMin == 0 {
-		b.config.HTTPPortMin = 8000
-	}
-
-	if b.config.HTTPPortMax == 0 {
-		b.config.HTTPPortMax = 9000
+	if b.config.ISOInterface == "" {
+		b.config.ISOInterface = "ide"
 	}
 
 	if b.config.VMName == "" {
-		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+		b.config.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", b.config.PackerBuildName)
 	}
 
 	// Errors
@@ -123,9 +114,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		"guest_additions_sha256": &b.config.GuestAdditionsSHA256,
 		"guest_os_type":          &b.config.GuestOSType,
 		"hard_drive_interface":   &b.config.HardDriveInterface,
-		"http_directory":         &b.config.HTTPDir,
 		"iso_checksum":           &b.config.ISOChecksum,
 		"iso_checksum_type":      &b.config.ISOChecksumType,
+		"iso_interface":          &b.config.ISOInterface,
 		"iso_url":                &b.config.RawSingleISOUrl,
 		"vm_name":                &b.config.VMName,
 	}
@@ -172,11 +163,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("hard_drive_interface can only be ide or sata"))
 	}
 
-	if b.config.HTTPPortMin > b.config.HTTPPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("http_port_min must be less than http_port_max"))
-	}
-
 	if b.config.ISOChecksumType == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("The iso_checksum_type must be specified."))
@@ -196,6 +182,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
 			}
 		}
+	}
+
+	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("iso_interface can only be ide or sata"))
 	}
 
 	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
@@ -218,9 +209,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	validMode := false
 	validModes := []string{
-		GuestAdditionsModeDisable,
-		GuestAdditionsModeAttach,
-		GuestAdditionsModeUpload,
+		vboxcommon.GuestAdditionsModeDisable,
+		vboxcommon.GuestAdditionsModeAttach,
+		vboxcommon.GuestAdditionsModeUpload,
 	}
 
 	for _, mode := range validModes {
@@ -260,6 +251,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	// Create the driver that we'll use to communicate with VirtualBox
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {
@@ -267,7 +261,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps := []multistep.Step{
-		new(stepDownloadGuestAdditions),
+		&vboxcommon.StepDownloadGuestAdditions{
+			GuestAdditionsMode:   b.config.GuestAdditionsMode,
+			GuestAdditionsURL:    b.config.GuestAdditionsURL,
+			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
+			Tpl:                  b.config.tpl,
+		},
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
@@ -282,12 +281,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
-		new(stepHTTPServer),
+		&vboxcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		new(vboxcommon.StepSuppressMessages),
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		new(stepAttachISO),
-		new(stepAttachGuestAdditions),
+		&vboxcommon.StepAttachGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
 			GuestPort:      b.config.SSHPort,
@@ -303,7 +308,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
 		},
-		new(stepTypeBootCommand),
+		&vboxcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			VMName:      b.config.VMName,
+			Tpl:         b.config.tpl,
+		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,
 			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
@@ -312,13 +321,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepUploadVersion{
 			Path: b.config.VBoxVersionFile,
 		},
-		new(stepUploadGuestAdditions),
+		&vboxcommon.StepUploadGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsPath: b.config.GuestAdditionsPath,
+			Tpl:                b.config.tpl,
+		},
 		new(common.StepProvision),
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
 		new(vboxcommon.StepRemoveDevices),
+		&vboxcommon.StepVBoxManage{
+			Commands: b.config.VBoxManagePost,
+			Tpl:      b.config.tpl,
+		},
 		&vboxcommon.StepExport{
 			Format:         b.config.Format,
 			OutputDir:      b.config.OutputDir,

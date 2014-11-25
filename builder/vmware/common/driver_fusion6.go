@@ -11,7 +11,9 @@ import (
 	"strings"
 )
 
-// Fusion6Driver is a driver that can run VMWare Fusion 5.
+const VMWARE_FUSION_VERSION = "6"
+
+// Fusion6Driver is a driver that can run VMware Fusion 6.
 type Fusion6Driver struct {
 	Fusion5Driver
 }
@@ -22,6 +24,12 @@ func (d *Fusion6Driver) Clone(dst, src string) error {
 		"clone", src, dst,
 		"full")
 	if _, _, err := runAndLog(cmd); err != nil {
+		if strings.Contains(err.Error(), "parameters was invalid") {
+			return fmt.Errorf(
+				"Clone is not supported with your version of Fusion. Packer "+
+					"only works with Fusion %s Professional or above. Please verify your version.", VMWARE_FUSION_VERSION)
+		}
+
 		return err
 	}
 
@@ -50,7 +58,7 @@ func (d *Fusion6Driver) Verify() error {
 		return err
 	}
 
-	versionRe := regexp.MustCompile(`(?i)VMware [a-z0-9-]+ (\d+\.\d+\.\d+)\s`)
+	versionRe := regexp.MustCompile(`(?i)VMware [a-z0-9-]+ (\d+)\.`)
 	matches := versionRe.FindStringSubmatch(stderr.String())
 	if matches == nil {
 		return fmt.Errorf(
@@ -58,10 +66,5 @@ func (d *Fusion6Driver) Verify() error {
 	}
 	log.Printf("Detected VMware version: %s", matches[1])
 
-	if !strings.HasPrefix(matches[1], "6.") {
-		return fmt.Errorf(
-			"Fusion 6 not detected. Got version: %s", matches[1])
-	}
-
-	return nil
+	return compareVersions(matches[1], VMWARE_FUSION_VERSION, "Fusion Professional")
 }

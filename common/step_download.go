@@ -3,10 +3,11 @@ package common
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -70,7 +71,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
-			UserAgent:  packer.VersionString(),
+			UserAgent:  "Packer",
 		}
 
 		path, err, retry := s.download(config, state)

@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud"
 	"log"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 type StepRunSourceServer struct {
-	Flavor      string
-	Name        string
-	SourceImage string
+	Flavor         string
+	Name           string
+	SourceImage    string
+	SecurityGroups []string
+	Networks       []string
 
 	server *gophercloud.Server
 }
@@ -23,11 +26,24 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 
 	// XXX - validate image and flavor is available
 
+	securityGroups := make([]map[string]interface{}, len(s.SecurityGroups))
+	for i, groupName := range s.SecurityGroups {
+		securityGroups[i] = make(map[string]interface{})
+		securityGroups[i]["name"] = groupName
+	}
+
+	networks := make([]gophercloud.NetworkConfig, len(s.Networks))
+	for i, networkUuid := range s.Networks {
+		networks[i].Uuid = networkUuid
+	}
+
 	server := gophercloud.NewServer{
-		Name:        s.Name,
-		ImageRef:    s.SourceImage,
-		FlavorRef:   s.Flavor,
-		KeyPairName: keyName,
+		Name:          s.Name,
+		ImageRef:      s.SourceImage,
+		FlavorRef:     s.Flavor,
+		KeyPairName:   keyName,
+		SecurityGroup: securityGroups,
+		Networks:      networks,
 	}
 
 	serverResp, err := csp.CreateServer(server)

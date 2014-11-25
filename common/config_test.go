@@ -99,7 +99,8 @@ func TestDecodeConfig(t *testing.T) {
 // configuration.
 func TestDecodeConfig_stringToSlice(t *testing.T) {
 	type Local struct {
-		Val []string
+		Val      []string
+		EmptyVal []string
 	}
 
 	raw := map[string]interface{}{
@@ -107,7 +108,8 @@ func TestDecodeConfig_stringToSlice(t *testing.T) {
 			"foo": "bar",
 		},
 
-		"val": "foo,{{user `foo`}}",
+		"val":      "foo,{{user `foo`}}",
+		"emptyval": "",
 	}
 
 	var result Local
@@ -119,6 +121,9 @@ func TestDecodeConfig_stringToSlice(t *testing.T) {
 	expected := []string{"foo", "bar"}
 	if !reflect.DeepEqual(result.Val, expected) {
 		t.Fatalf("invalid: %#v", result.Val)
+	}
+	if len(result.EmptyVal) > 0 {
+		t.Fatalf("invalid: %#v", result.EmptyVal)
 	}
 }
 
@@ -135,6 +140,32 @@ func TestDecodeConfig_userVarConversion(t *testing.T) {
 		},
 
 		"val": "{{user `foo`}}",
+	}
+
+	var result Local
+	_, err := DecodeConfig(&result, raw)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Val != 42 {
+		t.Fatalf("invalid: %#v", result.Val)
+	}
+}
+
+// This tests the way MessagePack decodes strings (into []uint8) and
+// that we can still decode into the proper types.
+func TestDecodeConfig_userVarConversionUInt8(t *testing.T) {
+	type Local struct {
+		Val int
+	}
+
+	raw := map[string]interface{}{
+		"packer_user_variables": map[string]string{
+			"foo": "42",
+		},
+
+		"val": []uint8("{{user `foo`}}"),
 	}
 
 	var result Local
