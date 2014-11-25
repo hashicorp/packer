@@ -43,8 +43,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	// Add the IDE controller so we can later attach the disk.
 	// When the hard disk controller is not IDE, this device is still used
 	// by VirtualBox to deliver the guest extensions.
-	controllerName := "IDE Controller"
-	err = driver.VBoxManage("storagectl", vmName, "--name", controllerName, "--add", "ide")
+	err = driver.VBoxManage("storagectl", vmName, "--name", "IDE Controller", "--add", "ide")
 	if err != nil {
 		err := fmt.Errorf("Error creating disk controller: %s", err)
 		state.Put("error", err)
@@ -55,9 +54,8 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	// Add a SATA controller if we were asked to use SATA. We still attach
 	// the IDE controller above because some other things (disks) require
 	// that.
-	if config.HardDriveInterface == "sata" {
-		controllerName = "SATA Controller"
-		if err := driver.CreateSATAController(vmName, controllerName); err != nil {
+	if config.HardDriveInterface == "sata" || config.ISOInterface == "sata" {
+		if err := driver.CreateSATAController(vmName, "SATA Controller"); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -66,6 +64,11 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Attach the disk to the controller
+	controllerName := "IDE Controller"
+	if config.HardDriveInterface == "sata" {
+		controllerName = "SATA Controller"
+	}
+
 	command = []string{
 		"storageattach", vmName,
 		"--storagectl", controllerName,

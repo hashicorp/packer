@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VirtualBox Builder (from an ISO)"
+description: |-
+  The VirtualBox Packer builder is able to create VirtualBox virtual machines and export them in the OVF format, starting from an ISO image.
 ---
 
 # VirtualBox Builder (from an ISO)
 
 Type: `virtualbox-iso`
 
-The VirtualBox builder is able to create [VirtualBox](https://www.virtualbox.org/)
+The VirtualBox Packer builder is able to create [VirtualBox](https://www.virtualbox.org/)
 virtual machines and export them in the OVF format, starting from an
 ISO image.
 
@@ -22,19 +24,19 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
-  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
-  "iso_checksum": "2cbe868812a871242cdcdd8f2fd6feb9",
+  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
+  "iso_checksum": "769474248a3897f4865817446f9a4a53",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "ssh_wait_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
-</pre>
+```
 
 It is important to add a `shutdown_command`. By default Packer halts the
 virtual machine and the file system may not be sync'd. Thus, changes made in a
@@ -46,7 +48,7 @@ There are many configuration options available for the VirtualBox builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
@@ -67,7 +69,7 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
@@ -82,15 +84,22 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (int) - The size, in megabytes, of the hard disk to create
+* `disk_size` (integer) - The size, in megabytes, of the hard disk to create
   for the VM. By default, this is 40000 (about 40 GB).
 
-* `floppy_files` (array of strings) - A list of files to put onto a floppy
-  disk that is attached when the VM is booted for the first time. This is
-  most useful for unattended Windows installs, which look for an
-  `Autounattend.xml` file on removable media. By default no floppy will
-  be attached. The files listed in this configuration will all be put
-  into the root directory of the floppy disk; sub-directories are not supported.
+* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
+  This can be useful for passing product information to include in the resulting
+  appliance file.
+
+* `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that is attached when the VM is booted. This is most useful
+  for unattended Windows installs, which look for an `Autounattend.xml` file
+  on removable media. By default, no floppy will be attached. All files
+  listed in this setting get placed into the root directory of the floppy
+  and the floppy is attached as the first floppy device. Currently, no
+  support exists for creating sub-directories on the floppy. Wildcard
+  characters (*, ?, and []) are allowed. Directory names are also allowed,
+  which will add all the files found in the directory to the floppy.
 
 * `format` (string) - Either "ovf" or "ova", this specifies the output
   format of the exported virtual machine. This defaults to "ovf".
@@ -114,8 +123,9 @@ Optional:
 
 * `guest_additions_url` (string) - The URL to the guest additions ISO
   to upload. This can also be a file URL if the ISO is at a local path.
-  By default the VirtualBox builder will go and download the proper
-  guest additions ISO from the internet.
+  By default, the VirtualBox builder will attempt to find the guest additions
+  ISO on the local file system. If it is not available locally, the builder
+  will download the proper guest additions ISO from the internet.
 
 * `guest_os_type` (string) - The guest OS type being installed. By default
   this is "other", but you can get _dramatic_ performance improvements by
@@ -128,7 +138,7 @@ Optional:
   hard drive is attached to, defaults to "ide".  When set to "sata", the
   drive is attached to an AHCI SATA controller.
 
-* `headless` (bool) - Packer defaults to building VirtualBox
+* `headless` (boolean) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console.
@@ -141,12 +151,16 @@ Optional:
   available as variables in `boot_command`. This is covered in more detail
   below.
 
-* `http_port_min` and `http_port_max` (int) - These are the minimum and
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
   maximum port to use for the HTTP server started to serve the `http_directory`.
   Because Packer often runs in parallel, Packer will choose a randomly available
   port in this range to run the HTTP server. If you want to force the HTTP
   server to be on one port, make this minimum and maximum port the same.
   By default the values are 8000 and 9000, respectively.
+
+* `iso_interface` (string) - The type of controller that the ISO is attached
+  to, defaults to "ide".  When set to "sata", the drive is attached to an
+  AHCI SATA controller.
 
 * `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
   Packer will try these in order. If anything goes wrong attempting to download
@@ -170,7 +184,7 @@ Optional:
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
-* `ssh_host_port_min` and `ssh_host_port_max` (uint) - The minimum and
+* `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
   maximum port to use for the SSH port on the host machine which is forwarded
   to the SSH port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the
@@ -184,7 +198,7 @@ Optional:
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will be listening on in the guest
+* `ssh_port` (integer) - The port that SSH will be listening on in the guest
   virtual machine. By default this is 22.
 
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
@@ -205,19 +219,19 @@ Optional:
   where the `Name` variable is replaced with the VM name. More details on how
   to use `VBoxManage` are below.
 
+* `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
 * `virtualbox_version_file` (string) - The path within the virtual machine
   to upload a file that contains the VirtualBox version that was used to
   create the machine. This information can be useful for provisioning.
-  By default this is ".vbox_version", which will generally upload it into
+  By default this is ".vbox_version", which will generally be upload it into
   the home directory.
 
 * `vm_name` (string) - This is the name of the OVF file for the new virtual
   machine, without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
-
-* `export_opts` (array of strings) - Additional options to pass to the `VBoxManage export`.
-  This can be useful for passing product information to include in the resulting
-  appliance file.
 
 ## Boot Command
 
@@ -235,11 +249,27 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
+* `<bs>` - Backspace
+
+* `<del>` - Delete
+
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
 * `<esc>` - Simulates pressing the escape key.
 
 * `<tab>` - Simulates pressing the tab key.
+
+* `<f1>` - `<f12>` - Simulates pressing a function key.
+
+* `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+* `<spacebar>` - Simulates pressing the spacebar.
+
+* `<insert>` - Simulates pressing the insert key.
+
+* `<home>` `<end>` - Simulates pressing the home and end keys.
+
+* `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
 * `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
@@ -256,7 +286,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-<pre class="prettyprint">
+```javascript
 [
   "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
   "/install/vmlinuz noapic ",
@@ -268,7 +298,7 @@ an Ubuntu 12.04 installer:
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
   "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
-</pre>
+```
 
 ## Guest Additions
 
@@ -296,14 +326,14 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage` sectio
 An example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-<pre class="prettyprint">
+```javascript
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
     ["modifyvm", "{{.Name}}", "--cpus", "2"]
   ]
 }
-</pre>
+```
 
 The value of `vboxmanage` is an array of commands to execute. These commands
 are executed in the order defined. So in the above example, the memory will be

@@ -301,7 +301,7 @@ func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) 
 	defer f.Close()
 
 	path := fmt.Sprintf("%s/hiera.yaml", p.config.StagingDir)
-	if err := comm.Upload(path, f); err != nil {
+	if err := comm.Upload(path, f, nil); err != nil {
 		return "", err
 	}
 
@@ -325,7 +325,7 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 
 	manifestFilename := filepath.Base(p.config.ManifestFile)
 	remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
-	if err := comm.Upload(remoteManifestFile, f); err != nil {
+	if err := comm.Upload(remoteManifestFile, f, nil); err != nil {
 		return "", err
 	}
 

@@ -1,12 +1,15 @@
 ---
 layout: "docs"
+page_title: "Null Builder"
+description: |-
+  The `null` Packer builder is not really a builder, it just sets up an SSH connection and runs the provisioners. It can be used to debug provisioners without incurring high wait times. It does not create any kind of image or artifact.
 ---
 
 # Null Builder
 
 Type: `null`
 
-The null builder is not really a builder, it just setups a SSH connection
+The `null` Packer builder is not really a builder, it just sets up an SSH connection
 and runs the provisioners. It can be used to debug provisioners without
 incurring high wait times. It does not create any kind of image or artifact.
 
@@ -15,22 +18,22 @@ incurring high wait times. It does not create any kind of image or artifact.
 Below is a fully functioning example. It doesn't do anything useful, since
 no provisioners are defined, but it will connect to the specified host via ssh.
 
-<pre class="prettyprint">
+```javascript
 {
   "type":     "null",
   "host":     "127.0.0.1",
-  "username": "foo",
-  "password": "bar"
+  "ssh_username": "foo",
+  "ssh_password": "bar"
 }
-</pre>
+```
 
 ## Configuration Reference
 
-Configuration options are organized below into two categories: required and
+Configuration options are organized into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
-Required:
+### Required:
 
 * `host` (string) - The hostname or IP address to connect to.
 
@@ -42,7 +45,7 @@ Required:
 
 * `ssh_username` (string) - The username to be used for the ssh connection.
 
-Optional:
+### Optional:
 
-* `port` (int) - port to connect to, defaults to 22.
+* `port` (integer) - ssh port to connect to, defaults to 22.
 

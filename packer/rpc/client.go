@@ -1,8 +1,8 @@
 package rpc
 
 import (
+	"github.com/hashicorp/go-msgpack/codec"
 	"github.com/mitchellh/packer/packer"
-	"github.com/ugorji/go/codec"
 	"io"
 	"log"
 	"net/rpc"
@@ -12,14 +12,21 @@ import (
 // Establishing a connection is up to the user, the Client can just
 // communicate over any ReadWriteCloser.
 type Client struct {
-	mux      *MuxConn
+	mux      *muxBroker
 	client   *rpc.Client
 	closeMux bool
 }
 
 func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
-	result, err := newClientWithMux(NewMuxConn(rwc), 0)
+	mux, err := newMuxBrokerClient(rwc)
 	if err != nil {
+		return nil, err
+	}
+	go mux.Run()
+
+	result, err := newClientWithMux(mux, 0)
+	if err != nil {
+		mux.Close()
 		return nil, err
 	}
 
@@ -27,14 +34,17 @@ func NewClient(rwc io.ReadWriteCloser) (*Client, error) {
 	return result, err
 }
 
-func newClientWithMux(mux *MuxConn, streamId uint32) (*Client, error) {
+func newClientWithMux(mux *muxBroker, streamId uint32) (*Client, error) {
 	clientConn, err := mux.Dial(streamId)
 	if err != nil {
 		return nil, err
 	}
 
-	var h codec.MsgpackHandle
-	clientCodec := codec.GoRpc.ClientCodec(clientConn, &h)
+	h := &codec.MsgpackHandle{
+		RawToString: true,
+		WriteExt:    true,
+	}
+	clientCodec := codec.GoRpc.ClientCodec(clientConn, h)
 
 	return &Client{
 		mux:      mux,
@@ -80,13 +90,6 @@ func (c *Client) Builder() packer.Builder {
 func (c *Client) Cache() packer.Cache {
 	return &cache{
 		client: c.client,
-	}
-}
-
-func (c *Client) Command() packer.Command {
-	return &command{
-		client: c.client,
-		mux:    c.mux,
 	}
 }
 

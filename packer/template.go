@@ -119,6 +119,8 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 	}
 
 	if rawTpl.MinimumPackerVersion != "" {
+		// TODO: NOPE! Replace this
+		Version := "1.0"
 		vCur, err := version.NewVersion(Version)
 		if err != nil {
 			panic(err)
@@ -131,8 +133,8 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 
 		if vCur.LessThan(vReq) {
 			return nil, fmt.Errorf(
-				"Template requires Packer version %s. " +
-				"Running version is %s.",
+				"Template requires Packer version %s. "+
+					"Running version is %s.",
 				vReq, vCur)
 		}
 	}

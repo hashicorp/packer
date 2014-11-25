@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Amazon AMI Builder (EBS backed)"
+description: |-
+  The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS volumes for use in EC2. For more information on the difference betwen EBS-backed instances and instance-store backed instances, see the storage for the root device section in the EC2 documentation.
 ---
 
 # AMI Builder (EBS backed)
 
 Type: `amazon-ebs`
 
-The `amazon-ebs` builder is able to create Amazon AMIs backed by EBS
+The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
 volumes for use in [EC2](http://aws.amazon.com/ec2/). For more information
 on the difference betwen EBS-backed instances and instance-store backed
 instances, see the
@@ -29,11 +31,11 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-Required:
+### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
-  If not specified, Packer will attempt to read this from environmental
-  variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order).
+  If not specified, Packer will use the environment variables
+  `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
@@ -47,8 +49,8 @@ Required:
   to launch the EC2 instance to create the AMI.
 
 * `secret_key` (string) - The secret key used to communicate with AWS.
-  If not specified, Packer will attempt to read this from environmental
-  variables `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order).
+  If not specified, Packer will use the environment variables
+  `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
 
 * `source_ami` (string) - The initial AMI used as a base for the newly
   created machine.
@@ -56,36 +58,43 @@ Required:
 * `ssh_username` (string) - The username to use in order to communicate
   over SSH to the running machine.
 
-Optional:
+### Optional:
 
 * `ami_block_device_mappings` (array of block device mappings) - Add the block
   device mappings to the AMI. The block device mappings allow for keys:
   "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
-  "volume\_type" (string), "volume\_size" (int), "delete\_on\_termination"
-  (bool), "no\_device" (bool), and "iops" (int).
-
-* `ami_virtualization_type` (string) - The type of virtualization for the AMI
-  you are building. This option is required to register HVM images. Can be
-  "paravirtual" (default) or "hvm".
+  "volume\_type" (string), "volume\_size" (integer), "delete\_on\_termination"
+  (boolean), "encrypted" (boolean), "no\_device" (boolean), and "iops"
+  (integer).
 
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
-* `ami_groups` (array of string) - A list of groups that have access
+* `ami_groups` (array of strings) - A list of groups that have access
   to launch the resulting AMI(s). By default no groups have permission
   to launch the AMI. `all` will make the AMI publicly accessible.
 
-* `ami_product_codes` (array of string) - A list of product codes to
+* `ami_product_codes` (array of strings) - A list of product codes to
   associate with the AMI. By default no product codes are associated with
   the AMI.
 
-* `ami_regions` (array of string) - A list of regions to copy the AMI to.
+* `ami_regions` (array of strings) - A list of regions to copy the AMI to.
   Tags and attributes are copied along with the AMI. AMI copying takes time
   depending on the size of the AMI, but will generally take many minutes.
 
-* `ami_users` (array of string) - A list of account IDs that have access
+* `ami_users` (array of strings) - A list of account IDs that have access
   to launch the resulting AMI(s). By default no additional users other than the user
   creating the AMI has permissions to launch it.
+
+* `associate_public_ip_address` (boolean) - If using a non-default VPC, public
+  IP addresses are not provided by default. If this is toggled, your new
+  instance will get a Public IP.
+
+* `availability_zone` (string) - Destination availability zone to launch instance in.
+  Leave this empty to allow Amazon to auto-assign.
+
+* `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
+  HVM-compatible AMIs.
 
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
@@ -105,15 +114,30 @@ Optional:
   access. Note that if this is specified, you must be sure the security
   group allows access to the `ssh_port` given below.
 
-* `security_group_ids` (array of string) - A list of security groups as
+* `security_group_ids` (array of strings) - A list of security groups as
   described above. Note that if this is specified, you must omit the
-  security_group_id.
+  `security_group_id`.
 
-* `ssh_port` (int) - The port that SSH will be available on. This defaults
+* `spot_price` (string) - The maximum hourly price to launch a spot instance
+  to create the AMI. It is a type of instances that EC2 starts when the maximum
+  price that you specify exceeds the current spot price. Spot price will be
+  updated based on available spot instance capacity and current spot Instance
+  requests. It may save you some costs. You can set this to "auto" for
+  Packer to automatically discover the best spot price.
+
+* `spot_price_auto_product` (string) - Required if `spot_price` is set to
+  "auto". This tells Packer what sort of AMI you're launching to find the best
+   spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
+   `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+* `ssh_port` (integer) - The port that SSH will be available on. This defaults
   to port 22.
 
-* `ssh_private_key_file` - Use this ssh private key file instead of a generated
-  ssh key pair for connecting to the instance.
+* `ssh_private_key_file` (string) - Use this ssh private key file instead of
+  a generated ssh key pair for connecting to the instance.
+
+* `ssh_private_ip` (bool) - If true, then SSH will always use the private
+  IP if available.
 
 * `ssh_timeout` (string) - The time to wait for SSH to become available
   before timing out. The format of this value is a duration such as "5s"
@@ -122,11 +146,15 @@ Optional:
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
   "subnet-12345def", where Packer will launch the EC2 instance.
 
-* `associate_public_ip_address` (bool) - If using a non-default VPC, public
-  IP addresses are not provided by default. If this is toggled, your new
-	instance will get a Public IP.
-
 * `tags` (object of key/value strings) - Tags applied to the AMI.
+
+* `temporary_key_pair_name` (string) - The name of the temporary keypair
+  to generate. By default, Packer generates a name with a UUID.
+
+* `token` (string) - The access token to use. This is different from
+  the access key and secret key. If you're not sure what this is, then you
+  probably don't need it. This will also be read from the `AWS_SECURITY_TOKEN`
+  environmental variable.
 
 * `user_data` (string) - User data to apply when launching the instance.
   Note that you need to be careful about escaping characters due to the
@@ -139,14 +167,11 @@ Optional:
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
 
-* `availability_zone` (string) - Destination availability zone to launch instance in.
-  Leave this empty to allow Amazon to auto-assign.
-
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -157,14 +182,12 @@ Here is a basic example. It is completely valid except for the access keys:
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}"
 }
-</pre>
+```
 
-<div class="alert alert-block alert-info">
-<strong>Note:</strong> Packer can also read the access key and secret
+-> **Note:** Packer can also read the access key and secret
 access key from environmental variables. See the configuration reference in
 the section above for more information on what environmental variables Packer
 will look for.
-</div>
 
 ## Accessing the Instance to Debug
 
@@ -179,7 +202,7 @@ running.
 Here is an example using the optional AMI block device mappings. This will add
 the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -190,24 +213,24 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
   "ami_block_device_mappings": [
-      {
-          "device_name": "/dev/sdb",
-          "virtual_name": "ephemeral0"
-      },
-      {
-          "device_name": "/dev/sdc",
-          "virtual_name": "ephemeral1"
-      }
+    {
+      "device_name": "/dev/sdb",
+      "virtual_name": "ephemeral0"
+    },
+    {
+      "device_name": "/dev/sdc",
+      "virtual_name": "ephemeral1"
+    }
   ]
 }
-</pre>
+```
 
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
 "OS_Version" and "Release" to the finished AMI.
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -222,4 +245,4 @@ Here is an example using the optional AMI tags. This will add the tags
     "Release": "Latest"
   }
 }
-</pre>
+```

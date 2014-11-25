@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "VMware Builder from ISO"
+description: |-
+  This VMware Packer builder is able to create VMware virtual machines from an ISO file as a source. It currently supports building virtual machines on hosts running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and VMware Player on Linux. It can also build machines directly on VMware vSphere Hypervisor using SSH as opposed to the vSphere API.
 ---
 
 # VMware Builder (from ISO)
 
 Type: `vmware-iso`
 
-This VMware builder is able to create VMware virtual machines from an
+This VMware Packer builder is able to create VMware virtual machines from an
 ISO file as a source. It currently
 supports building virtual machines on hosts running
 [VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for OS X,
@@ -29,7 +31,7 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-<pre class="prettyprint">
+```javascript
 {
   "type": "vmware-iso",
   "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
@@ -39,7 +41,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "ssh_wait_timeout": "30s",
   "shutdown_command": "shutdown -P now"
 }
-</pre>
+```
 
 ## Configuration Reference
 
@@ -47,7 +49,7 @@ There are many configuration options available for the VMware builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
-Required:
+### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
   files are so large, this is required and Packer will verify it prior
@@ -68,7 +70,7 @@ Required:
 * `ssh_username` (string) - The username to use to SSH into the machine
   once the OS is installed.
 
-Optional:
+### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is firsted booted. The goal of these commands should
@@ -83,7 +85,7 @@ Optional:
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (int) - The size of the hard disk for the VM in megabytes.
+* `disk_size` (integer) - The size of the hard disk for the VM in megabytes.
   The builder uses expandable, not fixed-size virtual hard disks, so the
   actual file representing the disk will not use the full size unless it is full.
   By default this is set to 40,000 (about 40 GB).
@@ -95,12 +97,15 @@ Optional:
   [Virtual Disk Manager User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf)
   for desktop VMware clients. For ESXi, refer to the proper ESXi documentation.
 
-* `floppy_files` (array of strings) - A list of files to put onto a floppy
-  disk that is attached when the VM is booted for the first time. This is
-  most useful for unattended Windows installs, which look for an
-  `Autounattend.xml` file on removable media. By default no floppy will
-  be attached. The files listed in this configuration will all be put
-  into the root directory of the floppy disk; sub-directories are not supported.
+* `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that is attached when the VM is booted. This is most useful
+  for unattended Windows installs, which look for an `Autounattend.xml` file
+  on removable media. By default, no floppy will be attached. All files
+  listed in this setting get placed into the root directory of the floppy
+  and the floppy is attached as the first floppy device. Currently, no
+  support exists for creating sub-directories on the floppy. Wildcard
+  characters (*, ?, and []) are allowed. Directory names are also allowed,
+  which will add all the files found in the directory to the floppy.
 
 * `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this
   is "/Applications/VMware Fusion.app" but this setting allows you to
@@ -111,7 +116,7 @@ Optional:
   OS type, VMware may perform some optimizations or virtual hardware changes
   to better support the operating system running in the virtual machine.
 
-* `headless` (bool) - Packer defaults to building VMware
+* `headless` (boolean) - Packer defaults to building VMware
   virtual machines by launching a GUI that shows the console of the
   machine being built. When this value is set to true, the machine will
   start without a console. For VMware machines, Packer will output VNC
@@ -126,7 +131,7 @@ Optional:
   available as variables in `boot_command`. This is covered in more detail
   below.
 
-* `http_port_min` and `http_port_max` (int) - These are the minimum and
+* `http_port_min` and `http_port_max` (integer) - These are the minimum and
   maximum port to use for the HTTP server started to serve the `http_directory`.
   Because Packer often runs in parallel, Packer will choose a randomly available
   port in this range to run the HTTP server. If you want to force the HTTP
@@ -146,10 +151,15 @@ Optional:
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `remote_type` (string) - The type of remote machine that will be used to
-  build this VM rather than a local desktop product. The only value accepted
-  for this currently is "esx5". If this is not set, a desktop product will be
-  used. By default, this is not set.
+* `remote_cache_datastore` (string) - The path to the datastore where
+  supporting files will be stored during the build on the remote machine.
+  By default this is the same as the `remote_datastore` option. This only
+  has an effect if `remote_type` is enabled.
+
+* `remote_cache_directory` (string) - The path where the ISO and/or floppy
+  files will be stored during the build on the remote machine. The path is
+  relative to the `remote_cache_datastore` on the remote machine.  By default
+  this is "packer_cache". This only has an effect if `remote_type` is enabled.
 
 * `remote_datastore` (string) - The path to the datastore where the resulting
   VM will be stored when it is built on the remote machine. By default this
@@ -162,14 +172,13 @@ Optional:
   access the remote machine. By default this is empty. This only has an
   effect if `remote_type` is enabled.
 
+* `remote_type` (string) - The type of remote machine that will be used to
+  build this VM rather than a local desktop product. The only value accepted
+  for this currently is "esx5". If this is not set, a desktop product will be
+  used. By default, this is not set.
+
 * `remote_username` (string) - The username for the SSH user that will access
   the remote machine. This is required if `remote_type` is enabled.
-
-* `skip_compaction` (bool) -  VMware-created disks are defragmented
-  and compacted at the end of the build process using `vmware-vdiskmanager`.
-  In certain rare cases, this might actually end up making the resulting disks
-  slightly larger. If you find this to be the case, you can disable compaction
-  using this configuration value.
 
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
@@ -180,21 +189,27 @@ Optional:
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
+* `skip_compaction` (boolean) -  VMware-created disks are defragmented
+  and compacted at the end of the build process using `vmware-vdiskmanager`.
+  In certain rare cases, this might actually end up making the resulting disks
+  slightly larger. If you find this to be the case, you can disable compaction
+  using this configuration value.
+
+* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
+  is used to connect to the host and this field is not used.
+
 * `ssh_key_path` (string) - Path to a private key to use for authenticating
   with SSH. By default this is not set (key-based auth won't be used).
   The associated public key is expected to already be configured on the
   VM being prepared by some other process (kickstart, etc.).
 
-* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
-  is used to connect to the host and this field is not used. 
-
 * `ssh_password` (string) - The password for `ssh_username` to use to
   authenticate with SSH. By default this is the empty string.
 
-* `ssh_port` (int) - The port that SSH will listen on within the virtual
+* `ssh_port` (integer) - The port that SSH will listen on within the virtual
   machine. By default this is 22.
 
-* `ssh_skip_request_pty` (bool) - If true, a pty will not be requested as
+* `ssh_skip_request_pty` (boolean) - If true, a pty will not be requested as
   part of the SSH connection. By default, this is "false", so a pty
   _will_ be requested.
 
@@ -213,6 +228,8 @@ Optional:
   `tools_upload_flavor`. By default the upload path is set to
   `{{.Flavor}}.iso`.
 
+* `version` (string) - The [vmx hardware version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746) for the new virtual machine.  Only the default value has been tested, any other value is expiermental.  Default value is '9'.
+
 * `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is "packer-BUILDNAME",
   where "BUILDNAME" is the name of the build.
@@ -220,15 +237,13 @@ Optional:
 * `vmdk_name` (string) - The filename of the virtual disk that'll be created,
   without the extension. This defaults to "packer".
 
-* `vmx_data` (object, string keys and string values) - Arbitrary key/values
+* `vmx_data` (object of key/value strings) - Arbitrary key/values
   to enter into the virtual machine VMX file. This is for advanced users
   who want to set properties such as memory, CPU, etc.
 
-* `vnc_port_min` and `vnc_port_max` (int) - The minimum and maximum port to
-  use for VNC access to the virtual machine. The builder uses VNC to type
-  the initial `boot_command`. Because Packer generally runs in parallel, Packer
-  uses a randomly chosen port in this range that appears available. By default
-  this is 5900 to 6000. The minimum and maximum ports are inclusive.
+* `vmx_data_post` (object of key/value strings) - Identical to `vmx_data`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
 
 * `vmx_template_path` (string) - Path to a
   [configuration template](/docs/templates/configuration-templates.html) that
@@ -236,6 +251,12 @@ Optional:
   for **advanced users only** as this can render the virtual machine
   non-functional. See below for more information. For basic VMX modifications,
   try `vmx_data` first.
+
+* `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port to
+  use for VNC access to the virtual machine. The builder uses VNC to type
+  the initial `boot_command`. Because Packer generally runs in parallel, Packer
+  uses a randomly chosen port in this range that appears available. By default
+  this is 5900 to 6000. The minimum and maximum ports are inclusive.
 
 ## Boot Command
 
@@ -253,11 +274,27 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
+* `<bs>` - Backspace
+
+* `<del>` - Delete
+
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
 * `<esc>` - Simulates pressing the escape key.
 
 * `<tab>` - Simulates pressing the tab key.
+
+* `<f1>` - `<f12>` - Simulates pressing a function key.
+
+* `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+* `<spacebar>` - Simulates pressing the spacebar.
+
+* `<insert>` - Simulates pressing the insert key.
+
+* `<home>` `<end>` - Simulates pressing the home and end keys.
+
+* `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
 * `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
@@ -274,7 +311,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-<pre class="prettyprint">
+```javascript
 [
   "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
   "/install/vmlinuz noapic ",
@@ -286,7 +323,7 @@ an Ubuntu 12.04 installer:
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
   "initrd=/install/initrd.gz -- &lt;enter&gt;"
 ]
-</pre>
+```
 
 ## VMX Template
 
@@ -297,13 +334,9 @@ But for advanced users, this template can be customized. This allows
 Packer to build virtual machines of effectively any guest operating system
 type.
 
-<div class="alert alert-block alert-warn">
-<p>
-<strong>This is an advanced feature.</strong> Modifying the VMX template
+~> **This is an advanced feature.** Modifying the VMX template
 can easily cause your virtual machine to not boot properly. Please only
 modify the template if you know what you're doing.
-</p>
-</div>
 
 Within the template, a handful of variables are available so that your
 template can continue working with the rest of the Packer machinery. Using
@@ -313,6 +346,7 @@ these variables isn't required, however.
 * `GuestOS` - The VMware-valid guest OS type.
 * `DiskName` - The filename (without the suffix) of the main virtual disk.
 * `ISOPath` - The path to the ISO to use for the OS installation.
+* `Version` - The Hardware version VMWare will execute this vm under.  Also known as the `virtualhw.version`.
 
 ## Building on a Remote vSphere Hypervisor
 
@@ -320,10 +354,23 @@ In addition to using the desktop products of VMware locally to build
 virtual machines, Packer can use a remote VMware Hypervisor to build
 the virtual machine.
 
+-> **Note:** Packer supports ESXi 5.1 and above.
+
+Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by running the following command:
+
+```text
+esxcli system settings advanced set -o /Net/GuestIPHack -i 1
+```
+
 When using a remote VMware Hypervisor, the builder still downloads the
 ISO and various files locally, and uploads these to the remote machine.
 Packer currently uses SSH to communicate to the ESXi machine rather than
 the vSphere API. At some point, the vSphere API may be used.
+
+Packer also requires VNC to issue boot commands during a build,
+which may be disabled on some remote VMware Hypervisors.  Please consult
+the appropriate documentation on how to update VMware Hypervisor's firewall
+to allow these connections.
 
 To use a remote VMware vSphere Hypervisor to build your virtual machine,
 fill in the required `remote_*` configurations:
@@ -337,6 +384,13 @@ have to modify as well:
 
 * `remote_datastore` - The path to the datastore where the VM will be
   stored on the ESXi machine.
+
+* `remote_cache_datastore` - The path to the datastore where
+  supporting files will be stored during the build on the remote machine.
+
+* `remote_cache_directory` - The path where the ISO and/or floppy
+  files will be stored during the build on the remote machine. The path is
+  relative to the `remote_cache_datastore` on the remote machine.
 
 * `remote_username` - The SSH username used to access the remote machine.
 

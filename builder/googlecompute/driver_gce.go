@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"code.google.com/p/goauth2/oauth"
-	"code.google.com/p/goauth2/oauth/jwt"
 	"code.google.com/p/google-api-go-client/compute/v1"
+	"github.com/golang/oauth2"
+	"github.com/golang/oauth2/google"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -20,40 +20,41 @@ type driverGCE struct {
 	ui        packer.Ui
 }
 
-const DriverScopes string = "https://www.googleapis.com/auth/compute " +
-	"https://www.googleapis.com/auth/devstorage.full_control"
+var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewDriverGCE(ui packer.Ui, projectId string, c *clientSecrets, key []byte) (Driver, error) {
-	log.Printf("[INFO] Requesting token...")
-	log.Printf("[INFO]   -- Email: %s", c.Web.ClientEmail)
-	log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-	log.Printf("[INFO]   -- Private Key Length: %d", len(key))
-	log.Printf("[INFO]   -- Token URL: %s", c.Web.TokenURI)
-	jwtTok := jwt.NewToken(c.Web.ClientEmail, DriverScopes, key)
-	jwtTok.ClaimSet.Aud = c.Web.TokenURI
-	token, err := jwtTok.Assert(new(http.Client))
+func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
+	var f *oauth2.Flow
+	var err error
+
+	// Auth with AccountFile first if provided
+	if a.PrivateKey != "" {
+		log.Printf("[INFO] Requesting Google token via AccountFile...")
+		log.Printf("[INFO]   -- Email: %s", a.ClientEmail)
+		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
+		log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
+
+		f, err = oauth2.New(
+			oauth2.JWTClient(a.ClientEmail, []byte(a.PrivateKey)),
+			oauth2.Scope(DriverScopes...),
+			google.JWTEndpoint())
+	} else {
+		log.Printf("[INFO] Requesting Google token via GCE Service Role...")
+
+		f, err = oauth2.New(google.ComputeEngineAccount(""))
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	transport := &oauth.Transport{
-		Config: &oauth.Config{
-			ClientId: c.Web.ClientId,
-			Scope:    DriverScopes,
-			TokenURL: c.Web.TokenURI,
-			AuthURL:  c.Web.AuthURI,
-		},
-		Token: token,
-	}
-
-	log.Printf("[INFO] Instantiating client...")
-	service, err := compute.New(transport.Client())
+	log.Printf("[INFO] Instantiating GCE client using...")
+	service, err := compute.New(&http.Client{Transport: f.NewTransport()})
 	if err != nil {
 		return nil, err
 	}
 
 	return &driverGCE{
-		projectId: projectId,
+		projectId: p,
 		service:   service,
 		ui:        ui,
 	}, nil
@@ -134,7 +135,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 
 	// Get the image
-	d.ui.Message(fmt.Sprintf("Loading image: %s", c.Image))
+	d.ui.Message(fmt.Sprintf("Loading image: %s in project %s", c.Image.Name, c.Image.ProjectId))
 	image, err := d.getImage(c.Image)
 	if err != nil {
 		return nil, err
@@ -177,6 +178,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				AutoDelete: true,
 				InitializeParams: &compute.AttachedDiskInitializeParams{
 					SourceImage: image.SelfLink,
+					DiskSizeGb:  c.DiskSizeGb,
 				},
 			},
 		},
@@ -228,20 +230,17 @@ func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
 	return errCh
 }
 
-func (d *driverGCE) getImage(name string) (image *compute.Image, err error) {
-	projects := []string{d.projectId, "debian-cloud", "centos-cloud"}
+func (d *driverGCE) getImage(img Image) (image *compute.Image, err error) {
+	projects := []string{img.ProjectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud"}
 	for _, project := range projects {
-		image, err = d.service.Images.Get(project, name).Do()
+		image, err = d.service.Images.Get(project, img.Name).Do()
 		if err == nil && image != nil && image.SelfLink != "" {
 			return
 		}
 		image = nil
 	}
 
-	if err == nil {
-		err = fmt.Errorf("Image could not be found: %s", name)
-	}
-
+	err = fmt.Errorf("Image %s could not be found in any of these projects: %s", img.Name, projects)
 	return
 }
 

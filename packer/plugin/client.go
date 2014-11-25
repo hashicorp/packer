@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -135,17 +136,6 @@ func (c *Client) Builder() (packer.Builder, error) {
 	}
 
 	return &cmdBuilder{client.Builder(), c}, nil
-}
-
-// Returns a command implementation that is communicating over this
-// client. If the client hasn't been started, this will start it.
-func (c *Client) Command() (packer.Command, error) {
-	client, err := c.packrpcClient()
-	if err != nil {
-		return nil, err
-	}
-
-	return &cmdCommand{client.Command(), c}, nil
 }
 
 // Returns a hook implementation that is communicating over this
@@ -355,7 +345,7 @@ func (c *Client) logStderr(r io.Reader) {
 			c.config.Stderr.Write([]byte(line))
 
 			line = strings.TrimRightFunc(line, unicode.IsSpace)
-			log.Printf("%s: %s", c.config.Cmd.Path, line)
+			log.Printf("%s: %s", filepath.Base(c.config.Cmd.Path), line)
 		}
 
 		if err == io.EOF {

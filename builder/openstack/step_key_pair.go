@@ -5,10 +5,11 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud"
 	"log"
 	"os"
 	"runtime"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 type StepKeyPair struct {
@@ -27,6 +28,10 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	keyResp, err := csp.CreateKeyPair(gophercloud.NewKeyPair{Name: keyName})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
+		return multistep.ActionHalt
+	}
+	if keyResp.PrivateKey == "" {
+		state.Put("error", fmt.Errorf("The temporary keypair returned was blank"))
 		return multistep.ActionHalt
 	}
 

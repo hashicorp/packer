@@ -142,7 +142,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_RegionID(t *testing.T) {
+func TestBuilderPrepare_Region(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
@@ -155,12 +155,15 @@ func TestBuilderPrepare_RegionID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.RegionID != 1 {
-		t.Errorf("invalid: %d", b.config.RegionID)
+	if b.config.Region != DefaultRegion {
+		t.Errorf("found %s, expected %s", b.config.Region, DefaultRegion)
 	}
 
+	expected := "sfo1"
+
 	// Test set
-	config["region_id"] = 2
+	config["region_id"] = 0
+	config["region"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
@@ -170,12 +173,12 @@ func TestBuilderPrepare_RegionID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.RegionID != 2 {
-		t.Errorf("invalid: %d", b.config.RegionID)
+	if b.config.Region != expected {
+		t.Errorf("found %s, expected %s", b.config.Region, expected)
 	}
 }
 
-func TestBuilderPrepare_SizeID(t *testing.T) {
+func TestBuilderPrepare_Size(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
@@ -188,12 +191,15 @@ func TestBuilderPrepare_SizeID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SizeID != 66 {
-		t.Errorf("invalid: %d", b.config.SizeID)
+	if b.config.Size != DefaultSize {
+		t.Errorf("found %s, expected %s", b.config.Size, DefaultSize)
 	}
 
+	expected := "1024mb"
+
 	// Test set
-	config["size_id"] = 67
+	config["size_id"] = 0
+	config["size"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
@@ -203,12 +209,12 @@ func TestBuilderPrepare_SizeID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SizeID != 67 {
-		t.Errorf("invalid: %d", b.config.SizeID)
+	if b.config.Size != expected {
+		t.Errorf("found %s, expected %s", b.config.Size, expected)
 	}
 }
 
-func TestBuilderPrepare_ImageID(t *testing.T) {
+func TestBuilderPrepare_Image(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
@@ -221,12 +227,15 @@ func TestBuilderPrepare_ImageID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SizeID != 66 {
-		t.Errorf("invalid: %d", b.config.SizeID)
+	if b.config.Image != DefaultImage {
+		t.Errorf("found %s, expected %s", b.config.Image, DefaultImage)
 	}
 
+	expected := "ubuntu-14-04-x64"
+
 	// Test set
-	config["size_id"] = 2
+	config["image_id"] = 0
+	config["image"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
@@ -236,8 +245,8 @@ func TestBuilderPrepare_ImageID(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SizeID != 2 {
-		t.Errorf("invalid: %d", b.config.SizeID)
+	if b.config.Image != expected {
+		t.Errorf("found %s, expected %s", b.config.Image, expected)
 	}
 }
 

@@ -10,14 +10,14 @@ import (
 // over an RPC connection.
 type hook struct {
 	client *rpc.Client
-	mux    *MuxConn
+	mux    *muxBroker
 }
 
 // HookServer wraps a packer.Hook implementation and makes it exportable
 // as part of a Golang RPC server.
 type HookServer struct {
 	hook packer.Hook
-	mux  *MuxConn
+	mux  *muxBroker
 }
 
 type HookRunArgs struct {

@@ -32,38 +32,27 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if _, ok := state.GetOk("floppy_path"); ok {
-		// Delete the floppy0 entries so the floppy is no longer mounted
-		ui.Message("Unmounting floppy from VMX...")
-		for k, _ := range vmxData {
-			if strings.HasPrefix(k, "floppy0.") {
-				log.Printf("Deleting key: %s", k)
-				delete(vmxData, k)
-			}
+	// Delete the floppy0 entries so the floppy is no longer mounted
+	ui.Message("Unmounting floppy from VMX...")
+	for k, _ := range vmxData {
+		if strings.HasPrefix(k, "floppy0.") {
+			log.Printf("Deleting key: %s", k)
+			delete(vmxData, k)
 		}
-		vmxData["floppy0.present"] = "FALSE"
 	}
+	vmxData["floppy0.present"] = "FALSE"
 
-	if isoPathRaw, ok := state.GetOk("iso_path"); ok {
-		isoPath := isoPathRaw.(string)
+	devRe := regexp.MustCompile(`^ide\d:\d\.`)
+	for k, v := range vmxData {
+		ide := devRe.FindString(k)
+		if ide == "" || v != "cdrom-image" {
+			continue
+		}
 
 		ui.Message("Detaching ISO from CD-ROM device...")
-		devRe := regexp.MustCompile(`^ide\d:\d\.`)
-		for k, _ := range vmxData {
-			match := devRe.FindString(k)
-			if match == "" {
-				continue
-			}
 
-			filenameKey := match + "filename"
-			if filename, ok := vmxData[filenameKey]; ok {
-				if filename == isoPath {
-					// Change the CD-ROM device back to auto-detect to eject
-					vmxData[filenameKey] = "auto detect"
-					vmxData[match+"devicetype"] = "cdrom-raw"
-				}
-			}
-		}
+		vmxData[ide+"devicetype"] = "cdrom-raw"
+		vmxData[ide+"filename"] = "auto detect"
 	}
 
 	// Rewrite the VMX

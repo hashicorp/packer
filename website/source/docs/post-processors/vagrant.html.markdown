@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "Vagrant Post-Processor"
+description: |-
+  The Packer Vagrant post-processor takes a build and converts the artifact into a valid Vagrant box, if it can. This lets you use Packer to automatically create arbitrarily complex Vagrant boxes, and is in fact how the official boxes distributed by Vagrant are created.
 ---
 
 # Vagrant Post-Processor
 
 Type: `vagrant`
 
-The Vagrant post-processor takes a build and converts the artifact
+The Packer Vagrant post-processor takes a build and converts the artifact
 into a valid [Vagrant](http://www.vagrantup.com) box, if it can.
 This lets you use Packer to automatically create arbitrarily complex
 Vagrant boxes, and is in fact how the official boxes distributed by
@@ -28,14 +30,15 @@ providers.
 
 * AWS
 * DigitalOcean
+* Hyper-V
+* Parallels
+* QEMU
 * VirtualBox
 * VMware
 
-<div class="alert alert-block alert-info">
-<strong>Support for additional providers</strong> is planned. If the
+-> **Support for additional providers** is planned. If the
 Vagrant post-processor doesn't support creating boxes for a provider you
 care about, please help by contributing to Packer and adding support for it.
-</div>
 
 ## Configuration
 
@@ -51,12 +54,15 @@ below, with more details about certain options in following sections.
 * `compression_level` (integer) - An integer repesenting the
   compression level to use when creating the Vagrant box.  Valid
   values range from 0 to 9, with 0 being no compression and 9 being
-  the best compression. By default, compression is enabled at level 1.
+  the best compression. By default, compression is enabled at level 6.
 
 * `include` (array of strings) - Paths to files to include in the
   Vagrant box. These files will each be copied into the top level directory
   of the Vagrant box (regardless of their paths). They can then be used
   from the Vagrantfile.
+
+* `keep_input_artifact` (boolean) - If set to true, do not delete the
+  `output_directory` on a successful build. Defaults to false.
 
 * `output` (string) - The full path to the box file that will be created
   by this post-processor. This is a
@@ -79,16 +85,15 @@ The post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
 
-```json
+```javascript
 {
-    "type": "vagrant",
-
-    "compression_level": 1,
-    "override": {
-        "vmware": {
-            "compression_level": 0
-        }
+  "type": "vagrant",
+  "compression_level": 1,
+  "override": {
+    "vmware": {
+      "compression_level": 0
     }
+  }
 }
 ```
 
@@ -96,7 +101,7 @@ In the example above, the compression level will be set to 1 except for
 VMware, where it will be set to 0.
 
 The available provider names are: `aws`, `digitalocean`, `virtualbox`,
-and `vmware`.
+`vmware`, and `parallels`.
 
 ## Input Artifacts
 

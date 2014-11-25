@@ -17,11 +17,15 @@ type Config struct {
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
+	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	SkipCompaction bool   `mapstructure:"skip_compaction"`
-	SourcePath     string `mapstructure:"source_path"`
-	VMName         string `mapstructure:"vm_name"`
+	BootCommand    []string `mapstructure:"boot_command"`
+	FloppyFiles    []string `mapstructure:"floppy_files"`
+	RemoteType     string   `mapstructure:"remote_type"`
+	SkipCompaction bool     `mapstructure:"skip_compaction"`
+	SourcePath     string   `mapstructure:"source_path"`
+	VMName         string   `mapstructure:"vm_name"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -51,9 +55,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
 
 	templates := map[string]*string{
+		"remote_type": &c.RemoteType,
 		"source_path": &c.SourcePath,
 		"vm_name":     &c.VMName,
 	}
@@ -64,6 +70,23 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", n, err))
+		}
+	}
+
+	for i, file := range c.FloppyFiles {
+		var err error
+		c.FloppyFiles[i], err = c.tpl.Process(file, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing floppy_files[%d]: %s",
+					i, err))
+		}
+	}
+
+	for i, command := range c.BootCommand {
+		if err := c.tpl.Validate(command); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
 		}
 	}
 

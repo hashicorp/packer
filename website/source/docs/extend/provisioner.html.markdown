@@ -1,10 +1,13 @@
 ---
 layout: "docs"
+page_title: "Custom Provisioner Development"
+description: |-
+  Packer Provisioners are the components of Packer that install and configure software into a running machine prior to turning that machine into an image. An example of a provisioner is the shell provisioner, which runs shell scripts within the machines.
 ---
 
 # Custom Provisioner Development
 
-Provisioners are the components of Packer that install and configure
+Packer Provisioners are the components of Packer that install and configure
 software into a running machine prior to turning that machine into an
 image. An example of a provisioner is the [shell provisioner](/docs/provisioners/shell.html),
 which runs shell scripts within the machines.
@@ -15,12 +18,8 @@ Prior to reading this page, it is assumed you have read the page on
 Provisioner plugins implement the `packer.Provisioner` interface and
 are served using the `plugin.ServeProvisioner` function.
 
-<div class="alert alert-block">
-  <strong>Warning!</strong> This is an advanced topic. If you're new to Packer,
-  we recommend getting a bit more comfortable before you dive into writing
-  plugins.
-</div>
-
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
+recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
 
@@ -29,13 +28,12 @@ The interface that must be implemented for a provisioner is the
 The actual interface in the source code contains some basic documentation as well explaining
 what each method should do.
 
-
-<pre class="prettyprint">
+```go
 type Provisioner interface {
 	Prepare(...interface{}) error
 	Provision(Ui, Communicator) error
 }
-</pre>
+```
 
 ### The "Prepare" Method
 
@@ -86,7 +84,7 @@ The documentation around the [code itself](https://github.com/mitchellh/packer/b
 is really great as an overview of how to use the interface. You should begin
 by reading this. Once you have read it, you can see some example usage below:
 
-<pre class="prettyprint">
+```go
 // Build the remote command.
 var cmd packer.RemoteCmd
 cmd.Command = "echo foo"
@@ -106,4 +104,4 @@ cmd.Wait()
 
 // Read the stdout!
 fmt.Printf("Command output: %s", stdout.String())
-</pre>
+```

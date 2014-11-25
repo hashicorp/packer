@@ -2,19 +2,13 @@ language: go
 
 go:
     - 1.2
+    - 1.3
     - tip
 
-install: make deps
+install: make updatedeps
 script:
-    - go test ./...
+    - GOMAXPROCS=2 make test
     #- go test -race ./...
-
-notifications:
-    irc:
-        channels:
-            - "chat.freenode.net#packer-tool"
-        on_success: change
-        on_failure: always
 
 matrix:
     allow_failures:

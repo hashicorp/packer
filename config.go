@@ -2,73 +2,42 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/mitchellh/osext"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
 	"io"
 	"log"
 	"os/exec"
 	"path/filepath"
+	"strings"
+
+	"github.com/mitchellh/osext"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/packer/plugin"
 )
 
-// This is the default, built-in configuration that ships with
-// Packer.
-const defaultConfig = `
-{
-	"plugin_min_port": 10000,
-	"plugin_max_port": 25000,
-
-	"builders": {
-		"amazon-ebs": "packer-builder-amazon-ebs",
-		"amazon-chroot": "packer-builder-amazon-chroot",
-		"amazon-instance": "packer-builder-amazon-instance",
-		"digitalocean": "packer-builder-digitalocean",
-		"docker": "packer-builder-docker",
-		"googlecompute": "packer-builder-googlecompute",
-		"openstack": "packer-builder-openstack",
-		"qemu": "packer-builder-qemu",
-		"virtualbox-iso": "packer-builder-virtualbox-iso",
-		"virtualbox-ovf": "packer-builder-virtualbox-ovf",
-		"vmware-iso": "packer-builder-vmware-iso",
-		"vmware-vmx": "packer-builder-vmware-vmx",
-		"null": "packer-builder-null"
-	},
-
-	"commands": {
-		"build": "packer-command-build",
-		"fix": "packer-command-fix",
-		"inspect": "packer-command-inspect",
-		"validate": "packer-command-validate"
-	},
-
-	"post-processors": {
-		"vagrant": "packer-post-processor-vagrant",
-		"vsphere": "packer-post-processor-vsphere",
-		"docker-push": "packer-post-processor-docker-push",
-		"docker-import": "packer-post-processor-docker-import"
-	},
-
-	"provisioners": {
-		"ansible-local": "packer-provisioner-ansible-local",
-		"chef-client": "packer-provisioner-chef-client",
-		"chef-solo": "packer-provisioner-chef-solo",
-		"file": "packer-provisioner-file",
-		"puppet-masterless": "packer-provisioner-puppet-masterless",
-		"puppet-server": "packer-provisioner-puppet-server",
-		"shell": "packer-provisioner-shell",
-		"salt-masterless": "packer-provisioner-salt-masterless"
-	}
-}
-`
+// EnvConfig is the global EnvironmentConfig we use to initialize the CLI.
+var EnvConfig packer.EnvironmentConfig
 
 type config struct {
-	PluginMinPort uint
-	PluginMaxPort uint
+	DisableCheckpoint          bool `json:"disable_checkpoint"`
+	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
+	PluginMinPort              uint
+	PluginMaxPort              uint
 
 	Builders       map[string]string
-	Commands       map[string]string
 	PostProcessors map[string]string `json:"post-processors"`
 	Provisioners   map[string]string
+}
+
+// ConfigFile returns the default path to the configuration file. On
+// Unix-like systems this is the ".packerconfig" file in the home directory.
+// On Windows, this is the "packer.config" file in the application data
+// directory.
+func ConfigFile() (string, error) {
+	return configFile()
+}
+
+// ConfigDir returns the configuration directory for Packer.
+func ConfigDir() (string, error) {
+	return configDir()
 }
 
 // Decodes configuration in JSON format from the given io.Reader into
@@ -78,13 +47,38 @@ func decodeConfig(r io.Reader, c *config) error {
 	return decoder.Decode(c)
 }
 
-// Returns an array of defined command names.
-func (c *config) CommandNames() (result []string) {
-	result = make([]string, 0, len(c.Commands))
-	for name := range c.Commands {
-		result = append(result, name)
+// Discover discovers plugins.
+//
+// This looks in the directory of the executable and the CWD, in that
+// order for priority.
+func (c *config) Discover() error {
+	// Next, look in the same directory as the executable. Any conflicts
+	// will overwrite those found in our current directory.
+	exePath, err := osext.Executable()
+	if err != nil {
+		log.Printf("[ERR] Error loading exe directory: %s", err)
+	} else {
+		if err := c.discover(filepath.Dir(exePath)); err != nil {
+			return err
+		}
 	}
-	return
+
+	// Look in the plugins directory
+	dir, err := ConfigDir()
+	if err != nil {
+		log.Printf("[ERR] Error loading config directory: %s", err)
+	} else {
+		if err := c.discover(filepath.Join(dir, "plugins")); err != nil {
+			return err
+		}
+	}
+
+	// Look in the cwd.
+	if err := c.discover("."); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // This is a proper packer.BuilderFunc that can be used to load packer.Builder
@@ -98,19 +92,6 @@ func (c *config) LoadBuilder(name string) (packer.Builder, error) {
 	}
 
 	return c.pluginClient(bin).Builder()
-}
-
-// This is a proper packer.CommandFunc that can be used to load packer.Command
-// implementations from the defined plugins.
-func (c *config) LoadCommand(name string) (packer.Command, error) {
-	log.Printf("Loading command: %s\n", name)
-	bin, ok := c.Commands[name]
-	if !ok {
-		log.Printf("Command not found: %s\n", name)
-		return nil, nil
-	}
-
-	return c.pluginClient(bin).Command()
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
@@ -144,6 +125,66 @@ func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
 	}
 
 	return c.pluginClient(bin).Provisioner()
+}
+
+func (c *config) discover(path string) error {
+	var err error
+
+	if !filepath.IsAbs(path) {
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-builder-*"), &c.Builders)
+	if err != nil {
+		return err
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-post-processor-*"), &c.PostProcessors)
+	if err != nil {
+		return err
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-provisioner-*"), &c.Provisioners)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *config) discoverSingle(glob string, m *map[string]string) error {
+	matches, err := filepath.Glob(glob)
+	if err != nil {
+		return err
+	}
+
+	if *m == nil {
+		*m = make(map[string]string)
+	}
+
+	prefix := filepath.Base(glob)
+	prefix = prefix[:strings.Index(prefix, "*")]
+	for _, match := range matches {
+		file := filepath.Base(match)
+
+		// If the filename has a ".", trim up to there
+		if idx := strings.Index(file, "."); idx >= 0 {
+			file = file[:idx]
+		}
+
+		// Look for foo-bar-baz. The plugin name is "baz"
+		plugin := file[len(prefix):]
+		log.Printf("[DEBUG] Discoverd plugin: %s = %s", plugin, match)
+		(*m)[plugin] = match
+	}
+
+	return nil
 }
 
 func (c *config) pluginClient(path string) *plugin.Client {

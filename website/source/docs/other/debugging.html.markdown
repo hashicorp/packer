@@ -1,5 +1,8 @@
 ---
 layout: "docs"
+page_title: "Debugging Packer"
+description: |-
+  Packer strives to be stable and bug-free, but issues inevitably arise where certain things may not work entirely correctly, or may not appear to work correctly. In these cases, it is sometimes helpful to see more details about what Packer is actually doing.
 ---
 
 # Debugging Packer

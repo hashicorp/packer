@@ -39,7 +39,6 @@ func TestStepCleanVMX_floppyPath(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	state.Put("floppy_path", "foo")
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
@@ -89,7 +88,6 @@ func TestStepCleanVMX_isoPath(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	state.Put("iso_path", "foo")
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
@@ -136,6 +134,7 @@ floppy0.filetype = "file"
 `
 
 const testVMXISOPath = `
+ide0:0.devicetype = "cdrom-image"
 ide0:0.filename = "foo"
 ide0:1.filename = "bar"
 foo = "bar"

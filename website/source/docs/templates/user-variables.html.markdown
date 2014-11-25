@@ -1,6 +1,8 @@
 ---
 layout: "docs"
 page_title: "User Variables in Templates"
+description: |-
+  User variables allow your templates to be further configured with variables from the command-line, environmental variables, or files. This lets you parameterize your templates so that you can keep secret tokens, environment-specific data, and other types of information out of your templates. This maximizes the portablility and shareability of the template.
 ---
 
 # User Variables
@@ -9,7 +11,7 @@ User variables allow your templates to be further configured with variables
 from the command-line, environmental variables, or files. This lets you
 parameterize your templates so that you can keep secret tokens,
 environment-specific data, and other types of information out of your
-templates. This maximizes the portablility and shareability of the template.
+templates. This maximizes the portability and shareability of the template.
 
 Using user variables expects you know how
 [configuration templates](/docs/templates/configuration-templates.html) work.
@@ -20,14 +22,14 @@ page first.
 
 User variables must first be defined in a `variables` section within your
 template. Even if you want a variable to default to an empty string, it
-must be defined. This explicivity makes it easy for newcomers to your
+must be defined. This explicitness makes it easy for newcomers to your
 template to understand what can be modified using variables in your template.
 
 The `variables` section is a simple key/value mapping of the variable
 name to a default value. A default value can be the empty string. An
 example is shown below:
 
-<pre class="prettyprint">
+```javascript
 {
   "variables": {
     "aws_access_key": "",
@@ -38,10 +40,10 @@ example is shown below:
     "type": "amazon-ebs",
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
-    ...
+    // ...
   }]
 }
-</pre>
+```
 
 In the above example, the template defines two variables: `aws_access_key` and
 `aws_secret_key`. They default to empty values.
@@ -65,28 +67,26 @@ variables. The `env` function is available _only_ within the default value
 of a user variable, allowing you to default a user variable to an
 environmental variable. An example is shown below:
 
-<pre class="prettyprint">
+```javascript
 {
   "variables": {
     "my_secret": "{{env `MY_SECRET`}}",
   },
 
-  ...
+  // ...
 }
-</pre>
+```
 
 This will default "my\_secret" to be the value of the "MY\_SECRET"
 environmental variable (or the empty string if it does not exist).
 
-<div class="alert alert-info">
-<strong>Why can't I use environmental variables elsewhere?</strong>
+-> **Why can't I use environmental variables elsewhere?**
 User variables are the single source of configurable input to a template.
-We felt that having environmental variables used <em>anywhere</em> in a
+We felt that having environmental variables used _anywhere_ in a
 template would confuse the user about the possible inputs to a template.
 By allowing environmental variables only within default values for user
 variables, user variables remain as the single source of input to a template
-that a user can easily discover using <code>packer inspect</code>.
-</div>
+that a user can easily discover using `packer inspect`.
 
 ## Setting Variables
 
@@ -103,7 +103,7 @@ above, we could build our template using the command below. The command
 is split across multiple lines for readability, but can of course be a single
 line.
 
-```
+```text
 $ packer build \
     -var 'aws_access_key=foo' \
     -var 'aws_secret_key=bar' \
@@ -124,18 +124,18 @@ Variables can also be set from an external JSON file. The `-var-file`
 flag reads a file containing a basic key/value mapping of variables to
 values and sets those variables. The JSON file is simple:
 
-<pre class="prettyprint">
+```javascript
 {
   "aws_access_key": "foo",
   "aws_secret_key": "bar"
 }
-</pre>
+```
 
 It is a single JSON object where the keys are variables and the values are
 the variable values. Assuming this file is in `variables.json`, we can
 build our template using the following command:
 
-```
+```text
 $ packer build -var-file=variables.json template.json
 ```
 
