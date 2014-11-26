@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	"log"
+	"net"
 	"strings"
 	"time"
 )
@@ -30,6 +31,14 @@ type StepConnectSSH struct {
 	// SSHConfig is a function that returns the proper client configuration
 	// for SSH access.
 	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
+
+	// SSHBastionAddress is a function that returns the address of a configured
+	// bastion host
+	SSHBastionAddress func(multistep.StateBag) (string, error)
+
+	// SSHBastionConfig is a function that returns the configuration for an
+	// SSH bastion host
+	SSHBastionConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
 
 	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
 	SSHWaitTimeout time.Duration
@@ -125,8 +134,28 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			continue
 		}
 
+		var connFunc func() (net.Conn, error)
+
+		if s.SSHBastionAddress != nil && s.SSHBastionConfig != nil {
+			bastionAddress, err := s.SSHBastionAddress(state)
+			if err != nil {
+				//no bastion configured - connect directly
+				connFunc = ssh.ConnectFunc("tcp", address)
+			} else {
+				bastionConfig, err := s.SSHBastionConfig(state)
+				if err != nil {
+					log.Printf("Error getting SSH bastion config: %v", err)
+					continue
+				}
+
+				connFunc = ssh.BastionConnectFunc(bastionAddress, bastionConfig, address)
+			}
+		} else {
+			connFunc = ssh.ConnectFunc("tcp", address)
+		}
+
 		// Attempt to connect to SSH port
-		connFunc := ssh.ConnectFunc("tcp", address)
+
 		nc, err := connFunc()
 		if err != nil {
 			log.Printf("TCP connection to SSH ip/port failed: %s", err)

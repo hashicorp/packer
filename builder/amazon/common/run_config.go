@@ -26,6 +26,10 @@ type RunConfig struct {
 	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
 	SSHPrivateIp             bool              `mapstructure:"ssh_private_ip"`
 	SSHPort                  int               `mapstructure:"ssh_port"`
+	SSHBastionUsername       string            `mapstructure:"ssh_bastion_username"`
+	SSHBastionPrivateKeyFile string            `mapstructure:"ssh_bastion_private_key_file"`
+	SSHBastionHost           string            `mapstructure:"ssh_bastion_host"`
+	SSHBastionPort           int               `mapstructure:"ssh_bastion_port"`
 	SecurityGroupId          string            `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
 	SubnetId                 string            `mapstructure:"subnet_id"`
