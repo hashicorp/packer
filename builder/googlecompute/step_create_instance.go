@@ -12,8 +12,6 @@ import (
 // StepCreateInstance represents a Packer build step that creates GCE instances.
 type StepCreateInstance struct {
 	Debug bool
-
-	instanceName string
 }
 
 func (config *Config) getImage() Image {
@@ -91,14 +89,18 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	// Things succeeded, store the name so we can remove it later
 	state.Put("instance_name", name)
-	s.instanceName = name
 
 	return multistep.ActionContinue
 }
 
 // Cleanup destroys the GCE instance created during the image creation process.
 func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
-	if s.instanceName == "" {
+	nameRaw, ok := state.GetOk("instance_name")
+	if !ok {
+		return
+	}
+	name := nameRaw.(string)
+	if name == "" {
 		return
 	}
 
@@ -107,7 +109,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting instance...")
-	errCh, err := driver.DeleteInstance(config.Zone, s.instanceName)
+	errCh, err := driver.DeleteInstance(config.Zone, name)
 	if err == nil {
 		select {
 		case err = <-errCh:
@@ -120,9 +122,9 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error deleting instance. Please delete it manually.\n\n"+
 				"Name: %s\n"+
-				"Error: %s", s.instanceName, err))
+				"Error: %s", name, err))
 	}
 
-	s.instanceName = ""
+	state.Put("instance_name", "")
 	return
 }
