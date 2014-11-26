@@ -11,15 +11,26 @@ import (
 )
 
 type StepKeyPair struct {
-	Debug          bool
-	DebugKeyPath   string
-	KeyPairName    string
-	PrivateKeyFile string
+	Debug                 bool
+	DebugKeyPath          string
+	KeyPairName           string
+	PrivateKeyFile        string
+	BastionPrivateKeyFile string
 
 	keyName string
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+	if s.BastionPrivateKeyFile != "" {
+		keyBytes, err := ioutil.ReadFile(s.BastionPrivateKeyFile)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error loading configured bastion private key file: %s", err))
+			return multistep.ActionHalt
+		}
+
+		state.Put("bastionKey", string(keyBytes))
+	}
+
 	if s.PrivateKeyFile != "" {
 		s.keyName = ""
 

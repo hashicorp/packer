@@ -194,10 +194,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
 		&awscommon.StepKeyPair{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:    b.config.TemporaryKeyPairName,
-			PrivateKeyFile: b.config.SSHPrivateKeyFile,
+			Debug:                 b.config.PackerDebug,
+			DebugKeyPath:          fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:           b.config.TemporaryKeyPairName,
+			PrivateKeyFile:        b.config.SSHPrivateKeyFile,
+			BastionPrivateKeyFile: b.config.SSHBastionPrivateKeyFile,
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupIds: b.config.SecurityGroupIds,
@@ -224,6 +225,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
 			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
+			SSHBastionAddress: awscommon.SSHBastionAddress(
+				b.config.SSHBastionHost, b.config.SSHBastionPort),
+			SSHBastionConfig: awscommon.SSHBastionConfig(b.config.SSHBastionUsername),
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
