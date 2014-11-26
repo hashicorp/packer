@@ -1165,7 +1165,62 @@ func TestTemplateBuild_exceptPP(t *testing.T) {
 		t.Fatal("should have no postProcessors")
 	}
 
-	// Verify test2 has no post-processors
+	// Verify test2 has one post-processors
+	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.postProcessors) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.postProcessors))
+	}
+}
+
+func TestTemplateBuild_exceptPPConfigTemplateName(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": null
+		},
+
+		"builders": [
+			{
+				"name": "test1-{{user \"foo\"}}",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"except": ["test1-{{user \"foo\"}}"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{"foo": "bar"})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no post-processors
+	build, err := template.Build("test1-{{user \"foo\"}}", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.postProcessors) > 0 {
+		t.Fatal("should have no postProcessors")
+	}
+
+	// Verify test2 has one post-processors
 	build, err = template.Build("test2", testTemplateComponentFinder())
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -1245,7 +1300,62 @@ func TestTemplateBuild_exceptProv(t *testing.T) {
 		t.Fatal("should have no provisioners")
 	}
 
-	// Verify test2 has no provisioners
+	// Verify test2 has one provisioners
+	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.provisioners) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.provisioners))
+	}
+}
+
+func TestTemplateBuild_exceptProvConfigTemplateName(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": null
+		},
+
+		"builders": [
+			{
+				"name": "test1-{{user \"foo\"}}",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"except": ["test1-{{user \"foo\"}}"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{"foo": "bar"})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no provisioners
+	build, err := template.Build("test1-{{user \"foo\"}}", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.provisioners) > 0 {
+		t.Fatal("should have no provisioners")
+	}
+
+	// Verify test2 has one provisioners
 	build, err = template.Build("test2", testTemplateComponentFinder())
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -1325,8 +1435,63 @@ func TestTemplateBuild_onlyPP(t *testing.T) {
 		t.Fatal("should have no postProcessors")
 	}
 
-	// Verify test2 has no post-processors
+	// Verify test2 has one post-processors
 	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.postProcessors) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.postProcessors))
+	}
+}
+
+func TestTemplateBuild_onlyPPConfigTemplateName(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": null
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2-{{user \"foo\"}}",
+				"type": "test-builder"
+			}
+		],
+
+		"post-processors": [
+			{
+				"type": "test-pp",
+				"only": ["test2-{{user \"foo\"}}"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{"foo": "bar"})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no post-processors
+	build, err := template.Build("test1", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.postProcessors) > 0 {
+		t.Fatal("should have no postProcessors")
+	}
+
+	// Verify test2 has one post-processors
+	build, err = template.Build("test2-{{user \"foo\"}}", testTemplateComponentFinder())
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -1405,8 +1570,63 @@ func TestTemplateBuild_onlyProv(t *testing.T) {
 		t.Fatal("should have no provisioners")
 	}
 
-	// Verify test2 has no provisioners
+	// Verify test2 has one provisioners
 	build, err = template.Build("test2", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild = build.(*coreBuild)
+	if len(cbuild.provisioners) != 1 {
+		t.Fatalf("invalid: %d", len(cbuild.provisioners))
+	}
+}
+
+func TestTemplateBuild_onlyProvConfigTemplateName(t *testing.T) {
+	data := `
+	{
+		"variables": {
+			"foo": null
+		},
+
+		"builders": [
+			{
+				"name": "test1",
+				"type": "test-builder"
+			},
+			{
+				"name": "test2-{{user \"foo\"}}",
+				"type": "test-builder"
+			}
+		],
+
+		"provisioners": [
+			{
+				"type": "test-prov",
+				"only": ["test2-{{user \"foo\"}}"]
+			}
+		]
+	}
+	`
+
+	template, err := ParseTemplate([]byte(data), map[string]string{"foo": "bar"})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify test1 has no provisioners
+	build, err := template.Build("test1", testTemplateComponentFinder())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cbuild := build.(*coreBuild)
+	if len(cbuild.provisioners) > 0 {
+		t.Fatal("should have no provisioners")
+	}
+
+	// Verify test2 has one provisioners
+	build, err = template.Build("test2-{{user \"foo\"}}", testTemplateComponentFinder())
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
