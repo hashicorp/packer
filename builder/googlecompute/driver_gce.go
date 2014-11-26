@@ -23,7 +23,7 @@ type driverGCE struct {
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
 func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
-	var f *oauth2.Flow
+	var f *oauth2.Options
 	var err error
 
 	// Auth with AccountFile first if provided
