@@ -67,3 +67,38 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 		}, nil
 	}
 }
+
+// SSHAddress returns a function that can be given to the SSH communicator
+// for determining the SSH address of a bastion host
+func SSHBastionAddress(host string, port int) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		if len(host) < 1 {
+			return "", errors.New("no bastion configured")
+		}
+
+		if port == 0 {
+			port = 22
+		}
+		return fmt.Sprintf("%s:%d", host, port), nil
+	}
+}
+
+// SSHConfig returns a function that can be used for the SSH communicator
+// config for connecting to the bastion host
+func SSHBastionConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		privateKey := state.Get("bastionKey").(string)
+
+		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+		if err != nil {
+			return nil, fmt.Errorf("Error setting up SSH Bastion config: %s", err)
+		}
+
+		return &ssh.ClientConfig{
+			User: username,
+			Auth: []ssh.AuthMethod{
+				ssh.PublicKeys(signer),
+			},
+		}, nil
+	}
+}
