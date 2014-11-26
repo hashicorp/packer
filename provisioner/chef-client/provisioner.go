@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -187,7 +188,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+
 	nodeName := p.config.NodeName
+	if nodeName == "" {
+		nodeName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	}
 	remoteValidationKeyPath := ""
 	serverUrl := p.config.ServerUrl
 
@@ -553,9 +558,7 @@ validation_client_name "chef-validator"
 {{if ne .ValidationKeyPath ""}}
 validation_key "{{.ValidationKeyPath}}"
 {{end}}
-{{if ne .NodeName ""}}
 node_name "{{.NodeName}}"
-{{end}}
 {{if ne .ChefEnvironment ""}}
 environment "{{.ChefEnvironment}}"
 {{end}}
