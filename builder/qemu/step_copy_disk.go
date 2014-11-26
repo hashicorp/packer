@@ -2,10 +2,11 @@ package qemu
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step copies the virtual disk that will be used as the
@@ -19,6 +20,7 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName,
 		strings.ToLower(config.Format)))
+	name := config.VMName + "." + strings.ToLower(config.Format)
 
 	command := []string{
 		"convert",
@@ -38,6 +40,8 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	state.Put("disk_filename", name)
 
 	return multistep.ActionContinue
 }
