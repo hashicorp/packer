@@ -26,23 +26,9 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	// Set new boot order
-	ui.Say("Setting the boot order...")
-	command := []string{
-		"set", vmName,
-		"--device-bootorder", fmt.Sprintf("hdd0 cdrom0 net0"),
-	}
-
-	if err := driver.Prlctl(command...); err != nil {
-		err := fmt.Errorf("Error setting the boot order: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	// Attach the disk to the cdrom0 device. We couldn't use a separated device because it is failed to boot in PD9 [GH-1667]
 	ui.Say("Attaching ISO to the default CD/DVD ROM device...")
-	command = []string{
+	command := []string{
 		"set", vmName,
 		"--device-set", "cdrom0",
 		"--image", isoPath,
