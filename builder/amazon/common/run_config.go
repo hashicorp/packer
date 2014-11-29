@@ -62,7 +62,6 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"ssh_bastion_username":         &c.SSHBastionUsername,
 		"ssh_bastion_private_key_file": &c.SSHBastionPrivateKeyFile,
 		"ssh_bastion_host":             &c.SSHBastionHost,
-		"ssh_bastion_port":             &c.SSHBastionPort,
 		"source_ami":              &c.SourceAmi,
 		"subnet_id":               &c.SubnetId,
 		"temporary_key_pair_name": &c.TemporaryKeyPairName,
