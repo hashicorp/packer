@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/harmony-go"
-	"github.com/hashicorp/harmony-go/archive"
+	"github.com/hashicorp/atlas-go/v1"
+	"github.com/hashicorp/atlas-go/archive"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -18,7 +18,7 @@ const archiveTemplateEntry = ".packer-template"
 type PushCommand struct {
 	Meta
 
-	client *harmony.Client
+	client *atlas.Client
 
 	// For tests:
 	uploadFn func(io.Reader, *uploadOpts) (<-chan struct{}, <-chan error, error)
@@ -64,9 +64,9 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Build our client
 	defer func() { c.client = nil }()
-	c.client = harmony.DefaultClient()
+	c.client = atlas.DefaultClient()
 	if tpl.Push.Address != "" {
-		c.client, err = harmony.NewClient(tpl.Push.Address)
+		c.client, err = atlas.NewClient(tpl.Push.Address)
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
 				"Error setting up API client: %s", err))
@@ -110,7 +110,7 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Start the archiving process
-	r, archiveErrCh, err := archive.Archive(path, &opts)
+	r, err := archive.CreateArchive(path, &opts)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Error archiving: %s", err))
 		return 1
@@ -126,8 +126,6 @@ func (c *PushCommand) Run(args []string) int {
 
 	err = nil
 	select {
-	case err = <-archiveErrCh:
-		err = fmt.Errorf("Error archiving: %s", err)
 	case err = <-uploadErrCh:
 		err = fmt.Errorf("Error uploading: %s", err)
 	case <-doneCh:
@@ -138,6 +136,7 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	c.Ui.Output(fmt.Sprintf("Push successful to '%s'", tpl.Push.Name))
 	return 0
 }
 
@@ -173,7 +172,7 @@ func (c *PushCommand) create(name string, create bool) error {
 	}
 
 	// Separate the slug into the user and name components
-	user, name, err := harmony.ParseSlug(name)
+	user, name, err := atlas.ParseSlug(name)
 	if err != nil {
 		return fmt.Errorf("Malformed push name: %s", err)
 	}
@@ -181,7 +180,7 @@ func (c *PushCommand) create(name string, create bool) error {
 	// Check if it exists. If so, we're done.
 	if _, err := c.client.BuildConfig(user, name); err == nil {
 		return nil
-	} else if err != harmony.ErrNotFound {
+	} else if err != atlas.ErrNotFound {
 		return err
 	}
 
@@ -201,13 +200,13 @@ func (c *PushCommand) create(name string, create bool) error {
 }
 
 func (c *PushCommand) upload(
-	r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
+	r *archive.Archive, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
 	if c.uploadFn != nil {
 		return c.uploadFn(r, opts)
 	}
 
 	// Separate the slug into the user and name components
-	user, name, err := harmony.ParseSlug(opts.Slug)
+	user, name, err := atlas.ParseSlug(opts.Slug)
 	if err != nil {
 		return nil, nil, fmt.Errorf("upload: %s", err)
 	}
@@ -219,13 +218,13 @@ func (c *PushCommand) upload(
 	}
 
 	// Build the version to send up
-	version := harmony.BuildConfigVersion{
+	version := atlas.BuildConfigVersion{
 		User:   bc.User,
 		Name:   bc.Name,
-		Builds: make([]harmony.BuildConfigBuild, 0, len(opts.Builds)),
+		Builds: make([]atlas.BuildConfigBuild, 0, len(opts.Builds)),
 	}
 	for name, t := range opts.Builds {
-		version.Builds = append(version.Builds, harmony.BuildConfigBuild{
+		version.Builds = append(version.Builds, atlas.BuildConfigBuild{
 			Name: name,
 			Type: t,
 		})
@@ -234,7 +233,7 @@ func (c *PushCommand) upload(
 	// Start the upload
 	doneCh, errCh := make(chan struct{}), make(chan error)
 	go func() {
-		err := c.client.UploadBuildConfigVersion(&version, r)
+		err := c.client.UploadBuildConfigVersion(&version, r, r.Size)
 		if err != nil {
 			errCh <- err
 			return
