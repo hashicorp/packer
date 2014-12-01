@@ -66,6 +66,12 @@ func (f *BuildOptions) AllUserVars() (map[string]string, error) {
 func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([]packer.Build, error) {
 	buildNames := t.BuildNames()
 
+	// Process the name
+	tpl, _, err := t.NewConfigTemplate()
+	if err != nil {
+		return nil, err
+	}
+
 	checks := make(map[string][]string)
 	checks["except"] = f.Except
 	checks["only"] = f.Only
@@ -73,7 +79,12 @@ func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([
 		for _, n := range ns {
 			found := false
 			for _, actual := range buildNames {
-				if actual == n {
+				var processed string
+				processed, err = tpl.Process(actual, nil)
+				if err != nil {
+					return nil, err
+				}
+				if actual == n || processed == n {
 					found = true
 					break
 				}
@@ -88,17 +99,22 @@ func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([
 
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, buildName := range buildNames {
+		var processedBuildName string
+		processedBuildName, err = tpl.Process(buildName, nil)
+		if err != nil {
+			return nil, err
+		}
 		if len(f.Except) > 0 {
 			found := false
 			for _, except := range f.Except {
-				if buildName == except {
+				if buildName == except || processedBuildName == except {
 					found = true
 					break
 				}
 			}
 
 			if found {
-				log.Printf("Skipping build '%s' because specified by -except.", buildName)
+				log.Printf("Skipping build '%s' because specified by -except.", processedBuildName)
 				continue
 			}
 		}
@@ -106,19 +122,19 @@ func (f *BuildOptions) Builds(t *packer.Template, cf *packer.ComponentFinder) ([
 		if len(f.Only) > 0 {
 			found := false
 			for _, only := range f.Only {
-				if buildName == only {
+				if buildName == only || processedBuildName == only {
 					found = true
 					break
 				}
 			}
 
 			if !found {
-				log.Printf("Skipping build '%s' because not specified by -only.", buildName)
+				log.Printf("Skipping build '%s' because not specified by -only.", processedBuildName)
 				continue
 			}
 		}
 
-		log.Printf("Creating build: %s", buildName)
+		log.Printf("Creating build: %s", processedBuildName)
 		build, err := t.Build(buildName, cf)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to create build '%s': \n\n%s", buildName, err)
