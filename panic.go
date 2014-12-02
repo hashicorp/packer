@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/mitchellh/panicwrap"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/mitchellh/panicwrap"
 )
 
 // This is output if a panic happens.

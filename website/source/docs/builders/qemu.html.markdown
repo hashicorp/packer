@@ -1,13 +1,15 @@
 ---
 layout: "docs"
 page_title: "QEMU Builder"
+description: |-
+  The Qemu Packer builder is able to create KVM and Xen virtual machine images. Support for Xen is experimental at this time.
 ---
 
 # QEMU Builder
 
 Type: `qemu`
 
-The Qemu builder is able to create [KVM](http://www.linux-kvm.org)
+The Qemu Packer builder is able to create [KVM](http://www.linux-kvm.org)
 and [Xen](http://www.xenproject.org) virtual machine images. Support
 for Xen is experimental at this time.
 
@@ -22,7 +24,7 @@ containing the image file necessary to run the virtual machine on KVM or Xen.
 Here is a basic example. This example is functional so long as you fixup
 paths to files, URLS for ISOs and checksums.
 
-<pre class="prettyprint">
+```javascript
 {
   "builders":
   [
@@ -58,7 +60,7 @@ paths to files, URLS for ISOs and checksums.
     }
   ]
 }
-</pre>
+```
 
 A working CentOS 6.x kickstart file can be found
 [at this URL](https://gist.github.com/mitchellh/7328271/#file-centos6-ks-cfg), adapted from an unknown source.
@@ -117,6 +119,10 @@ each category, the available options are alphabetized and described.
   commands or kickstart type scripts must have proper adjustments for
   resulting device names. The Qemu builder uses "virtio" by default.
 
+* `disk_cache` (string) - The cache mode to use for disk. Allowed values
+  values include any of "writethrough", "writeback", "none", "unsafe" or
+  "directsync".
+
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
   disk that is attached when the VM is booted. This is most useful
   for unattended Windows installs, which look for an `Autounattend.xml` file
@@ -155,6 +161,10 @@ each category, the available options are alphabetized and described.
   must point to the same file (same checksum). By default this is empty
   and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+* `machine_type` (string) - The type of machine emulation to use. Run
+  your qemu binary with the flags `-machine help` to list available types
+  for your system. This defaults to "pc".
+
 * `net_device` (string) - The driver to use for the network interface. Allowed
   values "ne2k_pci," "i82551," "i82557b," "i82559er," "rtl8139," "e1000,"
   "pcnet" or "virtio." The Qemu builder uses "virtio" by default.
@@ -172,19 +182,19 @@ each category, the available options are alphabetized and described.
   switch/value pairs. Any value specified as an empty string is ignored.
   All values after the switch are concatenated with no separater.
 
-  WARNING: The qemu command line allows extreme flexibility, so beware of
-  conflicting arguments causing failures of your run. For instance, using
-   --no-acpi could break the ability to send power signal type commands (e.g.,
-  shutdown -P now) to the virtual machine, thus preventing proper shutdown. To
-  see the defaults, look in the packer.log file and search for the
-  qemu-system-x86 command. The arguments are all printed for review.
+~> **Warning:** The qemu command line allows extreme flexibility, so beware of
+conflicting arguments causing failures of your run. For instance, using
+--no-acpi could break the ability to send power signal type commands (e.g.,
+shutdown -P now) to the virtual machine, thus preventing proper shutdown. To
+see the defaults, look in the packer.log file and search for the
+qemu-system-x86 command. The arguments are all printed for review.
 
   The following shows a sample usage:
 
-<pre class="prettyprint">
-  . . .
+```javascript
+  // ...
   "qemuargs": [
-    [ "-m", "1024m" ],
+    [ "-m", "1024M" ],
     [ "--no-acpi", "" ],
     [
        "-netdev",
@@ -194,13 +204,13 @@ each category, the available options are alphabetized and described.
     ],
     [ "-device", "virtio-net,netdev=mynet0" ]
   ]
-  . . .
-</pre>
+  // ...
+```
 
   would produce the following (not including other defaults supplied by the builder and not otherwise conflicting with the qemuargs):
 
 <pre class="prettyprint">
-    qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+	qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
 * `qemu_binary` (string) - The name of the Qemu binary to look for.  This
@@ -250,6 +260,11 @@ each category, the available options are alphabetized and described.
   Packer will choose a randomly available port in this range to use as the
   host port.
 
+* `disk_image` (boolean) - Packer defaults to building from an ISO file,
+  this parameter controls whether the ISO URL supplied is actually a bootable
+  QEMU image.  When this value is set to true, the machine will clone the
+  source, resize it according to `disk_size` and boot the image.
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys
@@ -266,11 +281,27 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
+* `<bs>` - Backspace
+
+* `<del>` - Delete
+
 * `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
 * `<esc>` - Simulates pressing the escape key.
 
 * `<tab>` - Simulates pressing the tab key.
+
+* `<f1>` - `<f12>` - Simulates pressing a function key.
+
+* `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+* `<spacebar>` - Simulates pressing the spacebar.
+
+* `<insert>` - Simulates pressing the insert key.
+
+* `<home>` `<end>` - Simulates pressing the home and end keys.
+
+* `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
 * `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before sending any additional keys. This
   is useful if you have to generally wait for the UI to update before typing more.
@@ -287,10 +318,10 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an CentOS 6.4 installer:
 
-<pre class="prettyprint">
+```javascript
 "boot_command":
 [
   "<tab><wait>",
   " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
-</pre>
+```

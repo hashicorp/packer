@@ -1,3 +1,58 @@
+## 0.8.0 (unreleased)
+
+
+
+## 0.7.2 (October 28, 2014)
+
+FEATURES:
+
+  * builder/digitalocean: API V2 support. [GH-1463]
+  * builder/parallels: Don't depend on _prl-utils_ [GH-1499]
+
+IMPROVEMENTS:
+
+  * builder/amazon/all: Support new AWS Frankfurt region.
+  * builder/docker: Allow remote `DOCKER_HOST`, which works as long as
+      volumes work. [GH-1594]
+  * builder/qemu: Can set cache mode for main disk. [GH-1558]
+  * builder/qemu: Can build from pre-existing disk. [GH-1342]
+  * builder/vmware: Can specify path to Fusion installation with environmental
+      variable `FUSION_APP_PATH`. [GH-1552]
+  * builder/vmware: Can specify the HW version for the VMX. [GH-1530]
+  * builder/vmware/esxi: Will now cache ISOs/floppies remotely. [GH-1479]
+  * builder/vmware/vmx: Source VMX can have a disk connected via SATA. [GH-1604]
+  * post-processors/vagrant: Support Qemu (libvirt) boxes. [GH-1330]
+  * post-processors/vagrantcloud: Support self-hosted box URLs.
+
+BUG FIXES:
+
+  * core: Fix loading plugins from pwd. [GH-1521]
+  * builder/amazon: Prefer token in config if given. [GH-1544]
+  * builder/amazon/all: Extended timeout for waiting for AMI. [GH-1533]
+  * builder/virtualbox: Can read VirtualBox version on FreeBSD. [GH-1570]
+  * builder/virtualbox: More robust reading of guest additions URL. [GH-1509]
+  * builder/vmware: Always remove floppies/drives. [GH-1504]
+  * builder/vmware: Wait some time so that post-VMX update aren't
+      overwritten. [GH-1504]
+  * builder/vmware/esxi: Retry power on if it fails. [GH-1334]
+  * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
+  * builder/amazon: Extend timeout and allow user override [GH-1533]
+  * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
+  * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
+  * builder/parallels: Create VM without hdd and then add it later [GH-1548]
+  * builder/parallels: Disconnect cdrom0 [GH-1605]
+  * builder/qemu: Don't use `-redir` flag anymore, replace with
+      `hostfwd` options. [GH-1561]
+  * builder/qmeu: Use `pc` as default machine type instead of `pc-1.0`.
+  * providers/aws: Ignore transient network errors. [GH-1579]
+  * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
+  * provisioner/ansible: Use inventory file always to avoid potentially
+      deprecated feature. [GH-1562]
+  * provisioner/shell: Quote environmental variables. [GH-1568]
+  * provisioner/salt: Bootstrap over SSL. [GH-1608]
+  * post-processors/docker-push: Work with docker-tag artifacts. [GH-1526]
+  * post-processors/vsphere: Append "/" to object address. [GH-1615]
+
 ## 0.7.1 (September 10, 2014)
 
 FEATURES:

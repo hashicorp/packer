@@ -12,8 +12,6 @@ import (
 // StepCreateInstance represents a Packer build step that creates GCE instances.
 type StepCreateInstance struct {
 	Debug bool
-
-	instanceName string
 }
 
 func (config *Config) getImage() Image {
@@ -22,6 +20,25 @@ func (config *Config) getImage() Image {
 		project = config.SourceImageProjectId
 	}
 	return Image{Name: config.SourceImage, ProjectId: project}
+}
+
+func (config *Config) getInstanceMetadata(sshPublicKey string) map[string]string {
+	instanceMetadata := make(map[string]string)
+
+	// Copy metadata from config
+	for k, v := range config.Metadata {
+		instanceMetadata[k] = v
+	}
+
+	// Merge any existing ssh keys with our public key
+	sshMetaKey := "sshKeys"
+	sshKeys := fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey)
+	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
+		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+	}
+	instanceMetadata[sshMetaKey] = sshKeys
+
+	return instanceMetadata
 }
 
 // Run executes the Packer build step that creates a GCE instance.
@@ -39,13 +56,11 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		DiskSizeGb:  config.DiskSizeGb,
 		Image:       config.getImage(),
 		MachineType: config.MachineType,
-		Metadata: map[string]string{
-			"sshKeys": fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey),
-		},
-		Name:    name,
-		Network: config.Network,
-		Tags:    config.Tags,
-		Zone:    config.Zone,
+		Metadata:    config.getInstanceMetadata(sshPublicKey),
+		Name:        name,
+		Network:     config.Network,
+		Tags:        config.Tags,
+		Zone:        config.Zone,
 	})
 
 	if err == nil {
@@ -74,14 +89,18 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	// Things succeeded, store the name so we can remove it later
 	state.Put("instance_name", name)
-	s.instanceName = name
 
 	return multistep.ActionContinue
 }
 
 // Cleanup destroys the GCE instance created during the image creation process.
 func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
-	if s.instanceName == "" {
+	nameRaw, ok := state.GetOk("instance_name")
+	if !ok {
+		return
+	}
+	name := nameRaw.(string)
+	if name == "" {
 		return
 	}
 
@@ -90,7 +109,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting instance...")
-	errCh, err := driver.DeleteInstance(config.Zone, s.instanceName)
+	errCh, err := driver.DeleteInstance(config.Zone, name)
 	if err == nil {
 		select {
 		case err = <-errCh:
@@ -103,9 +122,9 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error deleting instance. Please delete it manually.\n\n"+
 				"Name: %s\n"+
-				"Error: %s", s.instanceName, err))
+				"Error: %s", name, err))
 	}
 
-	s.instanceName = ""
+	state.Put("instance_name", "")
 	return
 }

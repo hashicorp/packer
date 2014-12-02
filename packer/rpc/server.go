@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-msgpack/codec"
 	"github.com/mitchellh/packer/packer"
-	"github.com/ugorji/go/codec"
 	"io"
 	"log"
 	"net/rpc"
@@ -88,13 +88,6 @@ func (s *Server) RegisterCache(c packer.Cache) {
 	})
 }
 
-func (s *Server) RegisterCommand(c packer.Command) {
-	s.server.RegisterName(DefaultCommandEndpoint, &CommandServer{
-		command: c,
-		mux:     s.mux,
-	})
-}
-
 func (s *Server) RegisterCommunicator(c packer.Communicator) {
 	s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c:   c,
@@ -148,8 +141,11 @@ func (s *Server) Serve() {
 	}
 	defer stream.Close()
 
-	var h codec.MsgpackHandle
-	rpcCodec := codec.GoRpc.ServerCodec(stream, &h)
+	h := &codec.MsgpackHandle{
+		RawToString: true,
+		WriteExt:    true,
+	}
+	rpcCodec := codec.GoRpc.ServerCodec(stream, h)
 	s.server.ServeCodec(rpcCodec)
 }
 

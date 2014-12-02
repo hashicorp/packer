@@ -15,6 +15,9 @@ import (
 // versions out of the builder steps, so sometimes the methods are
 // extremely specific.
 type Driver interface {
+	// Adds new CD/DVD drive to the VM and returns name of this device
+	DeviceAddCdRom(string, string) (string, error)
+
 	// Import a VM
 	Import(string, string, string, bool) error
 
@@ -38,7 +41,7 @@ type Driver interface {
 	// Version reads the version of Parallels that is installed.
 	Version() (string, error)
 
-	// Send scancodes to the vm using the prltype tool.
+	// Send scancodes to the vm using the prltype python script.
 	SendKeyScanCodes(string, ...string) error
 
 	// Finds the MAC address of the NIC nic0

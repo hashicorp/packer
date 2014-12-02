@@ -119,6 +119,8 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 	}
 
 	if rawTpl.MinimumPackerVersion != "" {
+		// TODO: NOPE! Replace this
+		Version := "1.0"
 		vCur, err := version.NewVersion(Version)
 		if err != nil {
 			panic(err)
@@ -473,52 +475,13 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 		return
 	}
 
-	// Prepare the variable template processor, which is a bit unique
-	// because we don't allow user variable usage and we add a function
-	// to read from the environment.
-	varTpl, err := NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	varTpl.Funcs(template.FuncMap{
-		"env":  templateEnv,
-		"user": templateDisableUser,
-	})
-
-	// Prepare the variables
-	var varErrors []error
-	variables := make(map[string]string)
-	for k, v := range t.Variables {
-		if v.Required && !v.HasValue {
-			varErrors = append(varErrors,
-				fmt.Errorf("Required user variable '%s' not set", k))
-		}
-
-		var val string
-		if v.HasValue {
-			val = v.Value
-		} else {
-			val, err = varTpl.Process(v.Default, nil)
-			if err != nil {
-				varErrors = append(varErrors,
-					fmt.Errorf("Error processing user variable '%s': %s'", k, err))
-			}
-		}
-
-		variables[k] = val
-	}
-
-	if len(varErrors) > 0 {
-		return nil, &MultiError{varErrors}
-	}
-
 	// Process the name
-	tpl, err := NewConfigTemplate()
+	tpl, variables, err := t.NewConfigTemplate()
 	if err != nil {
 		return nil, err
 	}
-	tpl.UserVars = variables
 
+	rawName := name
 	name, err = tpl.Process(name, nil)
 	if err != nil {
 		return nil, err
@@ -552,7 +515,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	for _, rawPPs := range t.PostProcessors {
 		current := make([]coreBuildPostProcessor, 0, len(rawPPs))
 		for _, rawPP := range rawPPs {
-			if rawPP.TemplateOnlyExcept.Skip(name) {
+			if rawPP.TemplateOnlyExcept.Skip(rawName) {
 				continue
 			}
 
@@ -585,7 +548,7 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	// Prepare the provisioners
 	provisioners := make([]coreBuildProvisioner, 0, len(t.Provisioners))
 	for _, rawProvisioner := range t.Provisioners {
-		if rawProvisioner.TemplateOnlyExcept.Skip(name) {
+		if rawProvisioner.TemplateOnlyExcept.Skip(rawName) {
 			continue
 		}
 
@@ -632,6 +595,59 @@ func (t *Template) Build(name string, components *ComponentFinder) (b Build, err
 	}
 
 	return
+}
+
+//Build a ConfigTemplate object populated by the values within a
+//parsed template
+func (t *Template) NewConfigTemplate() (c *ConfigTemplate, variables map[string]string, err error) {
+
+	// Prepare the variable template processor, which is a bit unique
+	// because we don't allow user variable usage and we add a function
+	// to read from the environment.
+	varTpl, err := NewConfigTemplate()
+	if err != nil {
+		return nil, nil, err
+	}
+	varTpl.Funcs(template.FuncMap{
+		"env":  templateEnv,
+		"user": templateDisableUser,
+	})
+
+	// Prepare the variables
+	var varErrors []error
+	variables = make(map[string]string)
+	for k, v := range t.Variables {
+		if v.Required && !v.HasValue {
+			varErrors = append(varErrors,
+				fmt.Errorf("Required user variable '%s' not set", k))
+		}
+
+		var val string
+		if v.HasValue {
+			val = v.Value
+		} else {
+			val, err = varTpl.Process(v.Default, nil)
+			if err != nil {
+				varErrors = append(varErrors,
+					fmt.Errorf("Error processing user variable '%s': %s'", k, err))
+			}
+		}
+
+		variables[k] = val
+	}
+
+	if len(varErrors) > 0 {
+		return nil, variables, &MultiError{varErrors}
+	}
+
+	// Process the name
+	tpl, err := NewConfigTemplate()
+	if err != nil {
+		return nil, variables, err
+	}
+	tpl.UserVars = variables
+
+	return tpl, variables, nil
 }
 
 // TemplateOnlyExcept contains the logic required for "only" and "except"

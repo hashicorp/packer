@@ -1,11 +1,13 @@
 ---
 layout: "docs"
 page_title: "VMware Builder"
+description: |-
+  The VMware Packer builder is able to create VMware virtual machines for use with any VMware product.
 ---
 
 # VMware Builder
 
-The VMware builder is able to create VMware virtual machines for use
+The VMware Packer builder is able to create VMware virtual machines for use
 with any VMware product.
 
 Packer actually comes with multiple builders able to create VMware

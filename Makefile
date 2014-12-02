@@ -15,6 +15,6 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
-	go get -u -v -p 2 ./...
+	go get -d -v -p 2 ./...
 
 .PHONY: bin default test updatedeps

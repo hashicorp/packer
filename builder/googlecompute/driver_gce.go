@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"code.google.com/p/goauth2/oauth"
-	"code.google.com/p/goauth2/oauth/jwt"
 	"code.google.com/p/google-api-go-client/compute/v1"
+	"github.com/golang/oauth2"
+	"github.com/golang/oauth2/google"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -20,39 +20,35 @@ type driverGCE struct {
 	ui        packer.Ui
 }
 
-const DriverScopes string = "https://www.googleapis.com/auth/compute " +
-	"https://www.googleapis.com/auth/devstorage.full_control"
+var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewDriverGCE(ui packer.Ui, p string, a *accountFile, c *clientSecretsFile) (Driver, error) {
-	// Get the token for use in our requests
-	log.Printf("[INFO] Requesting Google token...")
-	log.Printf("[INFO]   -- Email: %s", a.ClientEmail)
-	log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-	log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
-	log.Printf("[INFO]   -- Token URL: %s", c.Web.TokenURI)
-	jwtTok := jwt.NewToken(
-		a.ClientEmail,
-		DriverScopes,
-		[]byte(a.PrivateKey))
-	jwtTok.ClaimSet.Aud = c.Web.TokenURI
-	token, err := jwtTok.Assert(new(http.Client))
+func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
+	var f *oauth2.Options
+	var err error
+
+	// Auth with AccountFile first if provided
+	if a.PrivateKey != "" {
+		log.Printf("[INFO] Requesting Google token via AccountFile...")
+		log.Printf("[INFO]   -- Email: %s", a.ClientEmail)
+		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
+		log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
+
+		f, err = oauth2.New(
+			oauth2.JWTClient(a.ClientEmail, []byte(a.PrivateKey)),
+			oauth2.Scope(DriverScopes...),
+			google.JWTEndpoint())
+	} else {
+		log.Printf("[INFO] Requesting Google token via GCE Service Role...")
+
+		f, err = oauth2.New(google.ComputeEngineAccount(""))
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving auth token: %s", err)
+		return nil, err
 	}
 
-	// Instantiate the transport to communicate to Google
-	transport := &oauth.Transport{
-		Config: &oauth.Config{
-			ClientId: a.ClientId,
-			Scope:    DriverScopes,
-			TokenURL: c.Web.TokenURI,
-			AuthURL:  c.Web.AuthURI,
-		},
-		Token: token,
-	}
-
-	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.New(transport.Client())
+	log.Printf("[INFO] Instantiating GCE client using...")
+	service, err := compute.New(&http.Client{Transport: f.NewTransport()})
 	if err != nil {
 		return nil, err
 	}
@@ -64,15 +60,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile, c *clientSecretsFile) 
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, url string) <-chan error {
+func (d *driverGCE) CreateImage(name, description, zone, disk string) <-chan error {
 	image := &compute.Image{
 		Description: description,
 		Name:        name,
-		RawDisk: &compute.ImageRawDisk{
-			ContainerType: "TAR",
-			Source:        url,
-		},
-		SourceType: "RAW",
+		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
+		SourceType:  "RAW",
 	}
 
 	errCh := make(chan error, 1)
@@ -100,6 +93,17 @@ func (d *driverGCE) DeleteImage(name string) <-chan error {
 
 func (d *driverGCE) DeleteInstance(zone, name string) (<-chan error, error) {
 	op, err := d.service.Instances.Delete(d.projectId, zone, name).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "DONE", d.refreshZoneOp(zone, op))
+	return errCh, nil
+}
+
+func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
+	op, err := d.service.Disks.Delete(d.projectId, zone, name).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +183,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				Mode:       "READ_WRITE",
 				Kind:       "compute#attachedDisk",
 				Boot:       true,
-				AutoDelete: true,
+				AutoDelete: false,
 				InitializeParams: &compute.AttachedDiskInitializeParams{
 					SourceImage: image.SelfLink,
 					DiskSizeGb:  c.DiskSizeGb,
@@ -235,7 +239,7 @@ func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
 }
 
 func (d *driverGCE) getImage(img Image) (image *compute.Image, err error) {
-	projects := []string{img.ProjectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "windows-cloud"}
+	projects := []string{img.ProjectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud"}
 	for _, project := range projects {
 		image, err = d.service.Images.Get(project, img.Name).Do()
 		if err == nil && image != nil && image.SelfLink != "" {

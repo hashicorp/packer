@@ -7,7 +7,7 @@ go:
 
 install: make updatedeps
 script:
-    - make test
+    - GOMAXPROCS=2 make test
     #- go test -race ./...
 
 matrix:

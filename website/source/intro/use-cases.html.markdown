@@ -4,6 +4,8 @@ page_title: "Use Cases"
 prev_url: "/intro/why.html"
 next_url: "/intro/platforms.html"
 next_title: "Supported Platforms"
+description: |-
+  By now you should know what Packer does and what the benefits of image creation are. In this section, we'll enumerate _some_ of the use cases for Packer. Note that this is not an exhaustive list by any means. There are definitely use cases for Packer not listed here. This list is just meant to give you an idea of how Packer may improve your processes.
 ---
 
 # Use Cases

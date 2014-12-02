@@ -134,6 +134,10 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
 
+	if b.config.Version != "9" {
+		t.Errorf("bad Version: %s", b.config.Version)
+	}
+
 	if b.config.SSHWaitTimeout != (20 * time.Minute) {
 		t.Errorf("bad wait timeout: %s", b.config.SSHWaitTimeout)
 	}

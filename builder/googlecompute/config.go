@@ -16,11 +16,11 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	AccountFile       string `mapstructure:"account_file"`
-	ClientSecretsFile string `mapstructure:"client_secrets_file"`
-	ProjectId         string `mapstructure:"project_id"`
+	AccountFile string `mapstructure:"account_file"`
+	ProjectId   string `mapstructure:"project_id"`
 
 	BucketName           string            `mapstructure:"bucket_name"`
+	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
@@ -38,8 +38,6 @@ type Config struct {
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
-	clientSecrets   clientSecretsFile
-	instanceName    string
 	privateKeyBytes []byte
 	sshTimeout      time.Duration
 	stateTimeout    time.Duration
@@ -83,6 +81,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
+	if c.DiskName == "" {
+		c.DiskName = c.InstanceName
+	}
+
 	if c.MachineType == "" {
 		c.MachineType = "n1-standard-1"
 	}
@@ -105,10 +107,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Process Templates
 	templates := map[string]*string{
-		"account_file":        &c.AccountFile,
-		"client_secrets_file": &c.ClientSecretsFile,
+		"account_file": &c.AccountFile,
 
 		"bucket_name":             &c.BucketName,
+		"disk_name":               &c.DiskName,
 		"image_name":              &c.ImageName,
 		"image_description":       &c.ImageDescription,
 		"instance_name":           &c.InstanceName,
@@ -136,16 +138,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.BucketName == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a bucket_name must be specified"))
-	}
-
-	if c.AccountFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("an account_file must be specified"))
-	}
-
-	if c.ClientSecretsFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a client_secrets_file must be specified"))
 	}
 
 	if c.ProjectId == "" {
@@ -182,13 +174,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err := loadJSON(&c.account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing account file: %s", err))
-		}
-	}
-
-	if c.ClientSecretsFile != "" {
-		if err := loadJSON(&c.clientSecrets, c.ClientSecretsFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing client secrets file: %s", err))
 		}
 	}
 

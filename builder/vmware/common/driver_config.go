@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mitchellh/packer/packer"
 )
@@ -11,6 +12,9 @@ type DriverConfig struct {
 }
 
 func (c *DriverConfig) Prepare(t *packer.ConfigTemplate) []error {
+	if c.FusionAppPath == "" {
+		c.FusionAppPath = os.Getenv("FUSION_APP_PATH")
+	}
 	if c.FusionAppPath == "" {
 		c.FusionAppPath = "/Applications/VMware Fusion.app"
 	}

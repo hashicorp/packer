@@ -1,0 +1,23 @@
+form, input, textarea, button {
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+  border: 0;
+  box-shadow: none;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  -khtml-border-radius: 0;
+  border-radius: 0;
+  background-color: transparent;
+  font-family: $mono;
+  font-size: $base-font-size;
+  line-height: 1.0;
+  color: inherit;
+
+	&:focus {
+  	line-height: 1.0;
+  	box-shadow: none !important;
+  	outline: none;
+  	vertical-align: middle;
+	}
+}

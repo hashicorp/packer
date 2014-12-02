@@ -2,8 +2,9 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/rackspace/gophercloud"
 	"log"
+
+	"github.com/mitchellh/gophercloud-fork-40444fb"
 )
 
 // Artifact is an artifact implementation that contains built images.
@@ -33,6 +34,10 @@ func (a *Artifact) Id() string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("An image was created: %v", a.ImageId)
+}
+
+func (a *Artifact) State(name string) interface{} {
+	return nil
 }
 
 func (a *Artifact) Destroy() error {

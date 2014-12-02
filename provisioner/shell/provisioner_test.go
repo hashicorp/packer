@@ -302,3 +302,21 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 }
+
+func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
+	config := testConfig()
+
+	config["environment_vars"] = []string{"keyone=valueone", "keytwo=value\ntwo"}
+	p := new(Provisioner)
+	p.Prepare(config)
+
+	expectedValue := "keyone='valueone'"
+	if p.config.Vars[0] != expectedValue {
+		t.Fatalf("%s should be equal to %s", p.config.Vars[0], expectedValue)
+	}
+
+	expectedValue = "keytwo='value\ntwo'"
+	if p.config.Vars[1] != expectedValue {
+		t.Fatalf("%s should be equal to %s", p.config.Vars[1], expectedValue)
+	}
+}

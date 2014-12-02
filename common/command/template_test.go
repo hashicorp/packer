@@ -7,17 +7,23 @@ import (
 
 func testTemplate() (*packer.Template, *packer.ComponentFinder) {
 	tplData := `{
-	"builders": [
-	{
-		"type": "foo"
-	},
-	{
-		"type": "bar"
-	}
-	]
-}`
+		"variables": {
+			"foo": null
+		},
 
-	tpl, err := packer.ParseTemplate([]byte(tplData), nil)
+		"builders": [
+    {
+      "type": "foo"
+    },
+    {
+      "name": "{{user \"foo\"}}",
+      "type": "bar"
+    }
+    ]
+  }
+	`
+
+	tpl, err := packer.ParseTemplate([]byte(tplData), map[string]string{"foo": "bar"})
 	if err != nil {
 		panic(err)
 	}
@@ -59,6 +65,44 @@ func TestBuildOptionsBuilds_except(t *testing.T) {
 	}
 }
 
+//Test to make sure the build name pattern matches
+func TestBuildOptionsBuilds_exceptConfigTemplateRaw(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Except = []string{"{{user \"foo\"}}"}
+
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 1 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+
+	if bs[0].Name() != "foo" {
+		t.Fatalf("bad: %s", bs[0].Name())
+	}
+}
+
+//Test to make sure the processed build name matches
+func TestBuildOptionsBuilds_exceptConfigTemplateProcessed(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Except = []string{"bar"}
+
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 1 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+
+	if bs[0].Name() != "foo" {
+		t.Fatalf("bad: %s", bs[0].Name())
+	}
+}
+
 func TestBuildOptionsBuilds_only(t *testing.T) {
 	opts := new(BuildOptions)
 	opts.Only = []string{"foo"}
@@ -73,6 +117,44 @@ func TestBuildOptionsBuilds_only(t *testing.T) {
 	}
 
 	if bs[0].Name() != "foo" {
+		t.Fatalf("bad: %s", bs[0].Name())
+	}
+}
+
+//Test to make sure the build name pattern matches
+func TestBuildOptionsBuilds_onlyConfigTemplateRaw(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Only = []string{"{{user \"foo\"}}"}
+
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 1 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+
+	if bs[0].Name() != "bar" {
+		t.Fatalf("bad: %s", bs[0].Name())
+	}
+}
+
+//Test to make sure the processed build name matches
+func TestBuildOptionsBuilds_onlyConfigTemplateProcessed(t *testing.T) {
+	opts := new(BuildOptions)
+	opts.Only = []string{"bar"}
+
+	bs, err := opts.Builds(testTemplate())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(bs) != 1 {
+		t.Fatalf("bad: %d", len(bs))
+	}
+
+	if bs[0].Name() != "bar" {
 		t.Fatalf("bad: %s", bs[0].Name())
 	}
 }
