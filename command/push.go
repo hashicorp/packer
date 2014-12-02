@@ -73,7 +73,9 @@ func (c *PushCommand) Run(args []string) int {
 			return 1
 		}
 	}
-	c.client.Token = token
+	if token != "" {
+		c.client.Token = token
+	}
 
 	// Build the archiving options
 	var opts archive.ArchiveOpts
