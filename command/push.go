@@ -86,15 +86,32 @@ func (c *PushCommand) Run(args []string) int {
 		archiveTemplateEntry: args[0],
 	}
 
-	// Determine the path we're archiving
+	// Determine the path we're archiving. This logic is a bit complicated
+	// as there are three possibilities:
+	//
+	//   1.) BaseDir is an absolute path, just use that.
+	//
+	//   2.) BaseDir is empty, so we use the directory of the template.
+	//
+	//   3.) BaseDir is relative, so we use the path relative to the directory
+	//       of the template.
+	//
 	path := tpl.Push.BaseDir
-	if path == "" {
-		path, err = filepath.Abs(args[0])
+	if path == "" || !filepath.IsAbs(path) {
+		tplPath, err := filepath.Abs(args[0])
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf("Error determining path to archive: %s", err))
 			return 1
 		}
-		path = filepath.Dir(path)
+		tplPath = filepath.Dir(tplPath)
+		if path != "" {
+			tplPath = filepath.Join(tplPath, path)
+		}
+		path, err = filepath.Abs(tplPath)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf("Error determining path to archive: %s", err))
+			return 1
+		}
 	}
 
 	// Build the upload options

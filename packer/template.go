@@ -46,7 +46,7 @@ type Template struct {
 type PushConfig struct {
 	Name    string
 	Address string
-	BaseDir string
+	BaseDir string `mapstructure:"base_dir"`
 	Include []string
 	Exclude []string
 	Token   string
