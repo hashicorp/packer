@@ -147,6 +147,26 @@ func (c *PushCommand) Run(args []string) int {
 		uploadOpts.Builds[b.Name] = info
 	}
 
+	// Warn about builds not having post-processors.
+	var badBuilds []string
+	for name, b := range uploadOpts.Builds {
+		if b.Artifact {
+			continue
+		}
+
+		badBuilds = append(badBuilds, name)
+	}
+	if len(badBuilds) > 0 {
+		c.Ui.Error(fmt.Sprintf(
+			"Warning! One or more of the builds in this template does not\n" +
+			"have an Atlas post-processor. Artifacts from this template will\n" +
+			"not appear in the Atlas artifact registry.\n\n" +
+			"This is just a warning. Atlas will still build your template\n" +
+			"and assume other post-processors are sending the artifacts where\n" +
+			"they need to go.\n\n" +
+			"Builds: %s\n\n", strings.Join(badBuilds, ", ")))
+	}
+
 	// Create the build config if it doesn't currently exist.
 	if err := c.create(uploadOpts.Slug, create); err != nil {
 		c.Ui.Error(err.Error())
