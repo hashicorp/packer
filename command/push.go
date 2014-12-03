@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/atlas-go/v1"
 	"github.com/hashicorp/atlas-go/archive"
+	"github.com/hashicorp/atlas-go/v1"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -21,8 +21,13 @@ type PushCommand struct {
 	client *atlas.Client
 
 	// For tests:
-	uploadFn func(io.Reader, *uploadOpts) (<-chan struct{}, <-chan error, error)
+	uploadFn pushUploadFn
 }
+
+// pushUploadFn is the callback type used for tests to stub out the uploading
+// logic of the push command.
+type pushUploadFn func(
+	io.Reader, *uploadOpts) (<-chan struct{}, <-chan error, error)
 
 func (c *PushCommand) Run(args []string) int {
 	var create bool
@@ -114,12 +119,32 @@ func (c *PushCommand) Run(args []string) int {
 		}
 	}
 
+	// Find the Atlas post-processors, if possible
+	var atlasPPs []packer.RawPostProcessorConfig
+	for _, list := range tpl.PostProcessors {
+		for _, pp := range list {
+			if pp.Type == "atlas" {
+				atlasPPs = append(atlasPPs, pp)
+			}
+		}
+	}
+
 	// Build the upload options
 	var uploadOpts uploadOpts
 	uploadOpts.Slug = tpl.Push.Name
-	uploadOpts.Builds = make(map[string]string)
+	uploadOpts.Builds = make(map[string]*uploadBuildInfo)
 	for _, b := range tpl.Builders {
-		uploadOpts.Builds[b.Name] = b.Type
+		info := &uploadBuildInfo{Type: b.Type}
+
+		// Determine if we're artifacting this build
+		for _, pp := range atlasPPs {
+			if !pp.Skip(b.Name) {
+				info.Artifact = true
+				break
+			}
+		}
+
+		uploadOpts.Builds[b.Name] = info
 	}
 
 	// Create the build config if it doesn't currently exist.
@@ -206,7 +231,7 @@ func (c *PushCommand) create(name string, create bool) error {
 	// Otherwise, show an error if we're not creating.
 	if !create {
 		return fmt.Errorf(
-			"Push target doesn't exist: %s. Either create this online via\n" +
+			"Push target doesn't exist: %s. Either create this online via\n"+
 				"the website or pass the -create flag.", name)
 	}
 
@@ -242,10 +267,11 @@ func (c *PushCommand) upload(
 		Name:   bc.Name,
 		Builds: make([]atlas.BuildConfigBuild, 0, len(opts.Builds)),
 	}
-	for name, t := range opts.Builds {
+	for name, info := range opts.Builds {
 		version.Builds = append(version.Builds, atlas.BuildConfigBuild{
-			Name: name,
-			Type: t,
+			Name:     name,
+			Type:     info.Type,
+			Artifact: info.Artifact,
 		})
 	}
 
@@ -267,5 +293,10 @@ func (c *PushCommand) upload(
 type uploadOpts struct {
 	URL    string
 	Slug   string
-	Builds map[string]string
+	Builds map[string]*uploadBuildInfo
+}
+
+type uploadBuildInfo struct {
+	Type         string
+	Artifact     bool
 }
