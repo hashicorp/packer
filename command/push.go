@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 
@@ -158,13 +160,13 @@ func (c *PushCommand) Run(args []string) int {
 	}
 	if len(badBuilds) > 0 {
 		c.Ui.Error(fmt.Sprintf(
-			"Warning! One or more of the builds in this template does not\n" +
-			"have an Atlas post-processor. Artifacts from this template will\n" +
-			"not appear in the Atlas artifact registry.\n\n" +
-			"This is just a warning. Atlas will still build your template\n" +
-			"and assume other post-processors are sending the artifacts where\n" +
-			"they need to go.\n\n" +
-			"Builds: %s\n\n", strings.Join(badBuilds, ", ")))
+			"Warning! One or more of the builds in this template does not\n"+
+				"have an Atlas post-processor. Artifacts from this template will\n"+
+				"not appear in the Atlas artifact registry.\n\n"+
+				"This is just a warning. Atlas will still build your template\n"+
+				"and assume other post-processors are sending the artifacts where\n"+
+				"they need to go.\n\n"+
+				"Builds: %s\n\n", strings.Join(badBuilds, ", ")))
 	}
 
 	// Create the build config if it doesn't currently exist.
@@ -188,10 +190,17 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Make a ctrl-C channel
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+	defer signal.Stop(sigCh)
+
 	err = nil
 	select {
 	case err = <-uploadErrCh:
 		err = fmt.Errorf("Error uploading: %s", err)
+	case <-sigCh:
+		err = fmt.Errorf("Push cancelled from Ctrl-C")
 	case <-doneCh:
 	}
 
@@ -317,6 +326,6 @@ type uploadOpts struct {
 }
 
 type uploadBuildInfo struct {
-	Type         string
-	Artifact     bool
+	Type     string
+	Artifact bool
 }
