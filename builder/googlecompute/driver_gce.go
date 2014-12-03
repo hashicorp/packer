@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"code.google.com/p/google-api-go-client/compute/v1"
-	"github.com/golang/oauth2"
-	"github.com/golang/oauth2/google"
 	"github.com/mitchellh/packer/packer"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
