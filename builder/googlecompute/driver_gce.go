@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"code.google.com/p/google-api-go-client/compute/v1"
-	"github.com/golang/oauth2"
-	"github.com/golang/oauth2/google"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"github.com/mitchellh/packer/packer"
 )
 
