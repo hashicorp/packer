@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -381,9 +382,16 @@ func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
 		envVars[keyValue[0]] = keyValue[1]
 	}
 
+	// Create a list of env var keys in sorted order
+	var keys []string
+	for k := range envVars {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
 	// Re-assemble vars using OS specific format pattern and flatten
-	for key, value := range envVars {
-		flattened += fmt.Sprintf(p.guestOsConfig.envVarFormat, key, value)
+	for _, key := range keys {
+		flattened += fmt.Sprintf(p.guestOsConfig.envVarFormat, key, envVars[key])
 	}
 
 	return
