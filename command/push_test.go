@@ -1,10 +1,10 @@
 package command
 
 import (
-	"fmt"
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"path/filepath"
 	"reflect"
@@ -59,7 +59,46 @@ func TestPush(t *testing.T) {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	expectedBuilds := map[string]string{"dummy": "dummy"}
+	expectedBuilds := map[string]*uploadBuildInfo{
+		"dummy": &uploadBuildInfo{
+			Type: "dummy",
+		},
+	}
+	if !reflect.DeepEqual(actualOpts.Builds, expectedBuilds) {
+		t.Fatalf("bad: %#v", actualOpts.Builds)
+	}
+}
+
+func TestPush_builds(t *testing.T) {
+	var actualOpts *uploadOpts
+	uploadFn := func(
+		r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
+		actualOpts = opts
+
+		doneCh := make(chan struct{})
+		close(doneCh)
+		return doneCh, nil, nil
+	}
+
+	c := &PushCommand{
+		Meta:     testMeta(t),
+		uploadFn: uploadFn,
+	}
+
+	args := []string{filepath.Join(testFixture("push-builds"), "template.json")}
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	expectedBuilds := map[string]*uploadBuildInfo{
+		"dummy": &uploadBuildInfo{
+			Type:     "dummy",
+			Artifact: true,
+		},
+		"foo": &uploadBuildInfo{
+			Type: "dummy",
+		},
+	}
 	if !reflect.DeepEqual(actualOpts.Builds, expectedBuilds) {
 		t.Fatalf("bad: %#v", actualOpts.Builds)
 	}
