@@ -37,6 +37,7 @@ func BastionConnectFunc(bAddr string, bConf *ssh.ClientConfig, addr string) func
 		}
 
 		if conn, err := bClient.Dial("tcp", addr); err != nil {
+			bClient.Close()
 			return nil, err
 		} else {
 			return &bastionConn{
