@@ -60,12 +60,12 @@ func (b *BlockDevices) Prepare(t *packer.ConfigTemplate) []error {
 
 	var errs []error
 	for outer, bds := range lists {
-		for i, bd := range bds {
+		for i := 0; i < len(bds); i++ {
 			templates := map[string]*string{
-				"device_name":  &bd.DeviceName,
-				"snapshot_id":  &bd.SnapshotId,
-				"virtual_name": &bd.VirtualName,
-				"volume_type":  &bd.VolumeType,
+				"device_name":  &bds[i].DeviceName,
+				"snapshot_id":  &bds[i].SnapshotId,
+				"virtual_name": &bds[i].VirtualName,
+				"volume_type":  &bds[i].VolumeType,
 			}
 
 			errs := make([]error, 0)
