@@ -229,7 +229,7 @@ Options:
   -create             Create the build configuration if it doesn't exist.
 
   -token=<token>      Access token to use to upload. If blank, the
-                      TODO environmental variable will be used.
+                      ATLAS_TOKEN environmental variable will be used.
 `
 
 	return strings.TrimSpace(helpText)
