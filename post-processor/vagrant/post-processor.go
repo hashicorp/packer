@@ -210,6 +210,13 @@ func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) err
 		"vagrantfile_template": &config.VagrantfileTemplate,
 	}
 
+	if config.VagrantfileTemplate != "" {
+		_, err := os.Stat(config.VagrantfileTemplate)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("vagrantfile_template '%s' does not exist", config.VagrantfileTemplate))
+		}
+	}
+
 	for n, ptr := range validates {
 		if err := config.tpl.Validate(*ptr); err != nil {
 			errs = packer.MultiErrorAppend(
