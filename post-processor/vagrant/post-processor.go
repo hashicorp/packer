@@ -113,14 +113,8 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	// Write our Vagrantfile
 	var customVagrantfile string
 	if config.VagrantfileTemplate != "" {
-		vagrantfilePath, err := config.tpl.Process(config.VagrantfileTemplate, nil)
-		if err != nil {
-			return nil, false, err
-		}
-
-		ui.Message(fmt.Sprintf(
-			"Using custom Vagrantfile: %s", vagrantfilePath))
-		customBytes, err := ioutil.ReadFile(vagrantfilePath)
+		ui.Message(fmt.Sprintf("Using custom Vagrantfile: %s", config.VagrantfileTemplate))
+		customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
 		if err != nil {
 			return nil, false, err
 		}
@@ -199,6 +193,17 @@ func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) err
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
+
+	templates := map[string]*string{
+		"vagrantfile_template": &config.VagrantfileTemplate,
+	}
+
+	for key, ptr := range templates {
+		*ptr, err = config.tpl.Process(*ptr, nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Error processing %s: %s", key, err))
+		}
+	}
 
 	validates := map[string]*string{
 		"output":               &config.OutputPath,
