@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"code.google.com/p/google-api-go-client/compute/v1"
+	"github.com/mitchellh/packer/packer"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"github.com/mitchellh/packer/packer"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -58,6 +58,13 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
 		service:   service,
 		ui:        ui,
 	}, nil
+}
+
+func (d *driverGCE) ImageExists(name string) bool {
+	_, err := d.service.Images.Get(d.projectId, name).Do()
+	// The API may return an error for reasons other than the image not
+	// existing, but this heuristic is sufficient for now.
+	return err == nil
 }
 
 func (d *driverGCE) CreateImage(name, description, zone, disk string) <-chan error {

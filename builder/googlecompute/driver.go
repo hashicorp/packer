@@ -4,6 +4,10 @@ package googlecompute
 // with GCE. The Driver interface exists mostly to allow a mock implementation
 // to be used to test the steps.
 type Driver interface {
+	// ImageExists returns true if the specified image exists. If an error
+	// occurs calling the API, this method returns false.
+	ImageExists(name string) bool
+
 	// CreateImage creates an image from the given disk in Google Compute
 	// Engine.
 	CreateImage(name, description, zone, disk string) <-chan error
