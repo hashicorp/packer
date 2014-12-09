@@ -3,6 +3,9 @@ package googlecompute
 // DriverMock is a Driver implementation that is a mocked out so that
 // it can be used for tests.
 type DriverMock struct {
+	ImageExistsName   string
+	ImageExistsResult bool
+
 	CreateImageName  string
 	CreateImageDesc  string
 	CreateImageZone  string
@@ -35,6 +38,11 @@ type DriverMock struct {
 	WaitForInstanceZone  string
 	WaitForInstanceName  string
 	WaitForInstanceErrCh <-chan error
+}
+
+func (d *DriverMock) ImageExists(name string) bool {
+	d.ImageExistsName = name
+	return d.ImageExistsResult
 }
 
 func (d *DriverMock) CreateImage(name, description, zone, disk string) <-chan error {
