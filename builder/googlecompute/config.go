@@ -19,7 +19,6 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
-	BucketName           string            `mapstructure:"bucket_name"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
 	ImageName            string            `mapstructure:"image_name"`
@@ -109,7 +108,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	templates := map[string]*string{
 		"account_file": &c.AccountFile,
 
-		"bucket_name":             &c.BucketName,
 		"disk_name":               &c.DiskName,
 		"image_name":              &c.ImageName,
 		"image_description":       &c.ImageDescription,
@@ -135,11 +133,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	// Process required parameters.
-	if c.BucketName == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a bucket_name must be specified"))
-	}
-
 	if c.ProjectId == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a project_id must be specified"))
