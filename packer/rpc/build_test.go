@@ -17,6 +17,7 @@ type testBuild struct {
 	runCache        packer.Cache
 	runUi           packer.Ui
 	setDebugCalled  bool
+	setDryRunCalled bool
 	setForceCalled  bool
 	cancelCalled    bool
 
@@ -47,6 +48,10 @@ func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, er
 
 func (b *testBuild) SetDebug(bool) {
 	b.setDebugCalled = true
+}
+
+func (b *testBuild) SetDryRun(bool) {
+	b.setDryRunCalled = true
 }
 
 func (b *testBuild) SetForce(bool) {
@@ -107,6 +112,12 @@ func TestBuild(t *testing.T) {
 	// Test SetDebug
 	bClient.SetDebug(true)
 	if !b.setDebugCalled {
+		t.Fatal("should be called")
+	}
+
+	// Test SetDryRun
+	bClient.SetDryRun(true)
+	if !b.setDryRunCalled {
 		t.Fatal("should be called")
 	}
 
