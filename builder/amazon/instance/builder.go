@@ -226,26 +226,31 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
 		&common.StepProvision{},
-		&StepUploadX509Cert{},
-		&StepBundleVolume{
-			Debug: b.config.PackerDebug,
-		},
-		&StepUploadBundle{
-			Debug: b.config.PackerDebug,
-		},
-		&StepRegisterAMI{},
-		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
-		},
-		&awscommon.StepModifyAMIAttributes{
-			Description:  b.config.AMIDescription,
-			Users:        b.config.AMIUsers,
-			Groups:       b.config.AMIGroups,
-			ProductCodes: b.config.AMIProductCodes,
-		},
-		&awscommon.StepCreateTags{
-			Tags: b.config.AMITags,
-		},
+	}
+
+	if !b.config.PackerDryRun {
+		steps = append(steps,
+			&StepUploadX509Cert{},
+			&StepBundleVolume{
+				Debug: b.config.PackerDebug,
+			},
+			&StepUploadBundle{
+				Debug: b.config.PackerDebug,
+			},
+			&StepRegisterAMI{},
+			&awscommon.StepAMIRegionCopy{
+				Regions: b.config.AMIRegions,
+			},
+			&awscommon.StepModifyAMIAttributes{
+				Description:  b.config.AMIDescription,
+				Users:        b.config.AMIUsers,
+				Groups:       b.config.AMIGroups,
+				ProductCodes: b.config.AMIProductCodes,
+			},
+			&awscommon.StepCreateTags{
+				Tags: b.config.AMITags,
+			}
+		)
 	}
 
 	// Run!
