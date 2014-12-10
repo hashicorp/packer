@@ -130,8 +130,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Format:     b.config.Format,
 				OutputDir:  b.config.OutputDir,
 				ExportOpts: b.config.ExportOpts.ExportOpts,
-			}
-		)
+			})
 	}
 
 	// Run the steps.
