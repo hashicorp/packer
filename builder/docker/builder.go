@@ -38,10 +38,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepProvision{},
 	}
 
-	if b.config.Commit {
-		steps = append(steps, new(StepCommit))
-	} else {
-		steps = append(steps, new(StepExport))
+
+
+	if !b.config.PackerDryRun {
+		if b.config.Commit {
+			steps = append(steps, new(StepCommit))
+		} else {
+			steps = append(steps, new(StepExport))
+		}
 	}
 
 	// Setup the state bag and initial state for the steps
