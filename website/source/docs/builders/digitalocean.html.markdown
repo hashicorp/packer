@@ -66,7 +66,7 @@ each category, the available configuration keys are alphabetized.
 
 * `region` (string) - The name (or slug) of the region to launch the droplet in.
   Consequently, this is the region where the snapshot will be available.
-  This defaults to "nyc1", which is the slug for "New York 1".
+  This defaults to "nyc3", which is the slug for "New York 3".
   See https://developers.digitalocean.com/regions/ for the accepted region names/slugs.
 
 * `region_id` (integer) - The ID of the region to launch the droplet in. Consequently,
