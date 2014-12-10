@@ -7,6 +7,7 @@ type PackerConfig struct {
 	PackerBuildName   string            `mapstructure:"packer_build_name"`
 	PackerBuilderType string            `mapstructure:"packer_builder_type"`
 	PackerDebug       bool              `mapstructure:"packer_debug"`
+	PackerDryRun      bool              `mapstructure:"packer_dry_run"`
 	PackerForce       bool              `mapstructure:"packer_force"`
 	PackerUserVars    map[string]string `mapstructure:"packer_user_variables"`
 }
