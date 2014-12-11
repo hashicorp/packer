@@ -11,13 +11,14 @@ import (
 //
 // This function just uses brute force instead of a more optimized algorithm.
 func longestCommonPrefix(vs []string) string {
+	var length int64
 	// Find the shortest string
 	var shortest string
-	length := math.MaxUint32
+	length = math.MaxUint32
 	for _, v := range vs {
-		if len(v) < length {
+		if int64(len(v)) < length {
 			shortest = v
-			length = len(v)
+			length = int64(len(v))
 		}
 	}
 
