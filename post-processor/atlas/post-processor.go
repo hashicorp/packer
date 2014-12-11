@@ -157,7 +157,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		Type:     p.config.Type,
 		ID:       artifact.Id(),
 		Metadata: p.metadata(artifact),
-		BuildId:  p.config.buildId,
+		BuildID:  p.config.buildId,
 	}
 
 	if fs := artifact.Files(); len(fs) > 0 {
