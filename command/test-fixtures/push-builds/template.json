@@ -1,0 +1,15 @@
+{
+    "builders": [
+        {"type": "dummy"},
+        {"type": "dummy", "name": "foo"}
+    ],
+
+    "post-processors": [{
+        "type": "atlas",
+        "only": ["dummy"]
+    }],
+
+    "push": {
+        "name": "foo/bar"
+    }
+}

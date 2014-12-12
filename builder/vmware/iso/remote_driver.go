@@ -17,4 +17,10 @@ type RemoteDriver interface {
 
 	// Removes a VM from inventory specified by the path to the VMX given.
 	Unregister(string) error
+
+	// Uploads a local file to remote side.
+	upload(dst, src string) error
+
+	// Reload VM on remote side.
+	ReloadVM() error
 }
