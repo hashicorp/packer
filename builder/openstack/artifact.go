@@ -41,6 +41,6 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	log.Printf("Destroying image: %d", a.ImageId)
+	log.Printf("Destroying image: %s", a.ImageId)
 	return a.Conn.DeleteImageById(a.ImageId)
 }
