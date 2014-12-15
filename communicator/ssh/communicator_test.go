@@ -83,10 +83,10 @@ func newMockLineServer(t *testing.T) string {
 			}
 			t.Log("Accepted channel")
 
-			go func() {
+			go func(channelType string) {
 				defer channel.Close()
-				conn.OpenChannel(newChannel.ChannelType(), nil)
-			}()
+				conn.OpenChannel(channelType, nil)
+			}(newChannel.ChannelType())
 		}
 		conn.Close()
 	}()
