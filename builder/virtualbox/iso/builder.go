@@ -380,7 +380,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vboxcommon.NewArtifact(b.config.OutputDir)
+	if b.config.PackerDryRun {
+		return &packer.NullArtifact{
+			BuilderIdValue: vboxcommon.BuilderId,
+		}, nil
+	} else {
+		return vboxcommon.NewArtifact(b.config.OutputDir)
+	}
 }
 
 func (b *Builder) Cancel() {
