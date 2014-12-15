@@ -414,11 +414,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		builderId = BuilderIdESX
 	}
 
-	return &Artifact{
-		builderId: builderId,
-		dir:       dir,
-		f:         files,
-	}, nil
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: builderId,
+		}
+	} else {
+		artifact = &Artifact{
+			builderId: builderId,
+			dir:       dir,
+			f:         files,
+		}
+	}
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {
