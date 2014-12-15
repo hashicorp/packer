@@ -166,10 +166,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Build the artifact and return it
-	artifact := &awscommon.Artifact{
-		Amis:           state.Get("amis").(map[string]string),
-		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else {
+		artifact = &awscommon.Artifact{
+			Amis:           state.Get("amis").(map[string]string),
+			BuilderIdValue: BuilderId,
+			Conn:           ec2conn,
+		}
 	}
 
 	return artifact, nil
