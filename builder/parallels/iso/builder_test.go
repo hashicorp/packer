@@ -75,7 +75,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	}
 
 	if b.config.DiskSize != 60000 {
-		t.Fatalf("bad size: %s", b.config.DiskSize)
+		t.Fatalf("bad size: %d", b.config.DiskSize)
 	}
 }
 
