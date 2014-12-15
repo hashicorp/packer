@@ -26,7 +26,7 @@ func TestStepTeardownInstance(t *testing.T) {
 		t.Fatal("should've deleted instance")
 	}
 	if driver.DeleteInstanceZone != config.Zone {
-		t.Fatal("bad zone: %#v", driver.DeleteInstanceZone)
+		t.Fatalf("bad zone: %#v", driver.DeleteInstanceZone)
 	}
 
 	// cleanup
@@ -36,6 +36,6 @@ func TestStepTeardownInstance(t *testing.T) {
 		t.Fatal("should've deleted disk")
 	}
 	if driver.DeleteDiskZone != config.Zone {
-		t.Fatal("bad zone: %#v", driver.DeleteDiskZone)
+		t.Fatalf("bad zone: %#v", driver.DeleteDiskZone)
 	}
 }
