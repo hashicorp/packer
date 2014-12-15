@@ -1,4 +1,4 @@
-package null
+package packer
 
 import (
 	"fmt"
@@ -6,10 +6,11 @@ import (
 
 // dummy Artifact implementation - does nothing
 type NullArtifact struct {
+	BuilderIdValue string
 }
 
-func (*NullArtifact) BuilderId() string {
-	return BuilderId
+func (a *NullArtifact) BuilderId() string {
+	return a.BuilderIdValue
 }
 
 func (a *NullArtifact) Files() []string {
@@ -21,7 +22,7 @@ func (*NullArtifact) Id() string {
 }
 
 func (a *NullArtifact) String() string {
-	return fmt.Sprintf("Did not export anything. This is the null builder")
+	return fmt.Sprintf("Did not export anything.")
 }
 
 func (a *NullArtifact) State(name string) interface{} {
