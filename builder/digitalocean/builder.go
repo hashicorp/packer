@@ -300,11 +300,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	artifact := &Artifact{
-		snapshotName: state.Get("snapshot_name").(string),
-		snapshotId:   state.Get("snapshot_image_id").(uint),
-		regionName:   found_region.Name,
-		client:       client,
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else {
+		artifact = &Artifact{
+			snapshotName: state.Get("snapshot_name").(string),
+			snapshotId:   state.Get("snapshot_image_id").(uint),
+			regionName:   found_region.Name,
+			client:       client,
+		}
 	}
 
 	return artifact, nil
