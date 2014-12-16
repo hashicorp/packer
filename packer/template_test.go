@@ -497,7 +497,7 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 
 	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
-		t.Fatal("err: %s", err)
+		t.Fatalf("err: %s", err)
 	}
 	if result == nil {
 		t.Fatal("should have result")
@@ -529,7 +529,7 @@ func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
 
 	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
-		t.Fatal("err: %s", err)
+		t.Fatalf("err: %s", err)
 	}
 	if result == nil {
 		t.Fatal("should have result")
