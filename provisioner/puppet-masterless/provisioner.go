@@ -176,7 +176,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("A manifest_file must be specified."))
 	} else {
-		info, err := os.Stat(p.config.ManifestFile)
+		_, err := os.Stat(p.config.ManifestFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_file is invalid: %s", err))
