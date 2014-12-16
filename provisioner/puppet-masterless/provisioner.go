@@ -180,9 +180,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_file is invalid: %s", err))
-		} else if info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("manifest_file must point to a file"))
 		}
 	}
 
