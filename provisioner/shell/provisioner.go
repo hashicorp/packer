@@ -12,11 +12,46 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
 
-const DefaultRemotePath = "/tmp/script.sh"
+const unixOsType = "unix"
+const windowsOsType = "windows"
+
+const defaultOsType = unixOsType
+
+type guestOsConfig struct {
+	hasChmod       bool
+	envVarFormat   string
+	executeCommand string
+	inlinePrefix   string
+	inlineShebang  string
+	newline        string
+	remotePath     string
+}
+
+var guestOsConfigs = map[string]guestOsConfig{
+	unixOsType: guestOsConfig{
+		hasChmod:       true,
+		envVarFormat:   "%s=%s ",
+		executeCommand: "chmod +x {{.Path}}; {{.Vars}} {{.Path}}",
+		inlinePrefix:   "#!",
+		inlineShebang:  "/bin/sh",
+		newline:        "\n",
+		remotePath:     "/tmp/script.sh",
+	},
+	windowsOsType: guestOsConfig{
+		hasChmod:       false,
+		envVarFormat:   "`$env:%s='%s'; ",
+		executeCommand: "& { {{.Vars}}{{.Path}} }",
+		inlinePrefix:   "",
+		inlineShebang:  "",
+		newline:        "\r\n",
+		remotePath:     "C:/Windows/Temp/packer-shell.ps1",
+	},
+}
 
 type config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -24,6 +59,9 @@ type config struct {
 	// If true, the script contains binary and line endings will not be
 	// converted from Windows to Unix-style.
 	Binary bool
+
+	// The type of OS the guest is running: unix or windows
+	GuestOsType string `mapstructure:"guest_os_type"`
 
 	// An inline script to execute. Multiple strings are all executed
 	// in the context of a single shell.
@@ -61,7 +99,8 @@ type config struct {
 }
 
 type Provisioner struct {
-	config config
+	config        config
+	guestOsConfig guestOsConfig
 }
 
 type ExecuteCommandTemplate struct {
@@ -84,8 +123,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
 
+	if p.config.GuestOsType == "" {
+		p.config.GuestOsType = defaultOsType
+	}
+
+	p.config.GuestOsType = strings.ToLower(p.config.GuestOsType)
+
+	var ok bool
+	p.guestOsConfig, ok = guestOsConfigs[p.config.GuestOsType]
+
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOsType)
+	}
+
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
+		p.config.ExecuteCommand = p.guestOsConfig.executeCommand
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -93,7 +145,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh"
+		p.config.InlineShebang = p.guestOsConfig.inlineShebang
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
@@ -101,7 +153,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = DefaultRemotePath
+		p.config.RemotePath = p.guestOsConfig.remotePath
 	}
 
 	if p.config.Scripts == nil {
@@ -214,9 +266,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
-		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
+
+		sheBang := p.guestOsConfig.inlinePrefix + p.config.InlineShebang + p.guestOsConfig.newline
+
+		writer.WriteString(sheBang)
 		for _, command := range p.config.Inline {
-			if _, err := writer.WriteString(command + "\n"); err != nil {
+			if _, err := writer.WriteString(command + p.guestOsConfig.newline); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
@@ -228,11 +283,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		tf.Close()
 	}
 
-	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
-	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
-	copy(envVars[2:], p.config.Vars)
+	// Create environment variables to set before executing the command
+	flattendVars, err := p.createFlattenedEnvVars()
+	if err != nil {
+		return err
+	}
 
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
@@ -243,9 +298,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error opening shell script: %s", err)
 		}
 		defer f.Close()
-
-		// Flatten the environment variables
-		flattendVars := strings.Join(envVars, " ")
 
 		// Compile the command
 		command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
@@ -276,15 +328,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
-			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+			if p.guestOsConfig.hasChmod {
+				cmd = &packer.RemoteCmd{
+					Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+				}
+				if err := comm.Start(cmd); err != nil {
+					return fmt.Errorf(
+						"Error chmodding script file to 0777 in remote "+
+							"machine: %s", err)
+				}
+				cmd.Wait()
 			}
-			if err := comm.Start(cmd); err != nil {
-				return fmt.Errorf(
-					"Error chmodding script file to 0777 in remote "+
-						"machine: %s", err)
-			}
-			cmd.Wait()
 
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
@@ -308,6 +362,39 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
+	flattened = ""
+	envVars := make(map[string]string)
+
+	// Always available Packer provided env vars
+	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
+	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
+
+	// Split vars into key/value components
+	for _, envVar := range p.config.Vars {
+		keyValue := strings.Split(envVar, "=")
+		if len(keyValue) != 2 {
+			err = errors.New("Shell provisioner environment variables must be in key=value format")
+			return
+		}
+		envVars[keyValue[0]] = keyValue[1]
+	}
+
+	// Create a list of env var keys in sorted order
+	var keys []string
+	for k := range envVars {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// Re-assemble vars using OS specific format pattern and flatten
+	for _, key := range keys {
+		flattened += fmt.Sprintf(p.guestOsConfig.envVarFormat, key, envVars[key])
+	}
+
+	return
 }
 
 // retryable will retry the given function over and over until a
