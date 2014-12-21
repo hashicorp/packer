@@ -111,17 +111,22 @@ each category, the available options are alphabetized and described.
   five seconds and one minute 30 seconds, respectively. If this isn't specified,
   the default is 10 seconds.
 
-* `disk_size` (integer) - The size, in megabytes, of the hard disk to create
-  for the VM. By default, this is 40000 (about 40 GB).
+* `disk_cache` (string) - The cache mode to use for disk. Allowed values
+  values include any of "writethrough", "writeback", "none", "unsafe" or
+  "directsync".
+
+* `disk_image` (boolean) - Packer defaults to building from an ISO file,
+  this parameter controls whether the ISO URL supplied is actually a bootable
+  QEMU image.  When this value is set to true, the machine will clone the
+  source, resize it according to `disk_size` and boot the image.
 
 * `disk_interface` (string) - The interface to use for the disk. Allowed
   values include any of "ide," "scsi" or "virtio." Note also that any boot
   commands or kickstart type scripts must have proper adjustments for
   resulting device names. The Qemu builder uses "virtio" by default.
 
-* `disk_cache` (string) - The cache mode to use for disk. Allowed values
-  values include any of "writethrough", "writeback", "none", "unsafe" or
-  "directsync".
+* `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+  for the VM. By default, this is 40000 (about 40 GB).
 
 * `floppy_files` (array of strings) - A list of files to place onto a floppy
   disk that is attached when the VM is booted. This is most useful
@@ -259,11 +264,6 @@ qemu-system-x86 command. The arguments are all printed for review.
   to the VNC port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the
   host port.
-
-* `disk_image` (boolean) - Packer defaults to building from an ISO file,
-  this parameter controls whether the ISO URL supplied is actually a bootable
-  QEMU image.  When this value is set to true, the machine will clone the
-  source, resize it according to `disk_size` and boot the image.
 
 ## Boot Command
 
