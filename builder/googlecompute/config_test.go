@@ -8,7 +8,6 @@ import (
 func testConfig(t *testing.T) map[string]interface{} {
 	return map[string]interface{}{
 		"account_file": testAccountFile(t),
-		"bucket_name":  "foo",
 		"project_id":   "hashicorp",
 		"source_image": "foo",
 		"zone":         "us-east-1a",
@@ -55,17 +54,6 @@ func TestConfigPrepare(t *testing.T) {
 			"unknown_key",
 			"bad",
 			true,
-		},
-
-		{
-			"bucket_name",
-			nil,
-			true,
-		},
-		{
-			"bucket_name",
-			"good",
-			false,
 		},
 
 		{
