@@ -17,20 +17,20 @@ load test_helper
     [[ "$output" == *"Packer v"* ]]
 
     run packer -v
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"Packer v"* ]]
+    [ "$status" -eq 1 ]
+    [[ "$output" =~ ([0-9]+\.[0-9]+) ]]
 
     run packer --version
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"Packer v"* ]]
+    [ "$status" -eq 1 ]
+    [[ "$output" =~ ([0-9]+\.[0-9]+) ]]
 }
 
 @test "cli: packer version show help" {
     run packer version -h
     [ "$status" -eq 0 ]
-    [[ "$output" == *"usage: packer version"* ]]
+    [[ "$output" == *"Packer v"* ]]
 
     run packer version --help
     [ "$status" -eq 0 ]
-    [[ "$output" == *"usage: packer version"* ]]
+    [[ "$output" == *"Packer v"* ]]
 }

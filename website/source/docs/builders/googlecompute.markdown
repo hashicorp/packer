@@ -73,7 +73,6 @@ existing GCE image. The account file is obtained in the previous section.
 ```javascript
 {
   "type": "googlecompute",
-  "bucket_name": "my-project-packer-images",
   "account_file": "account.json",
   "project_id": "my-project",
   "source_image": "debian-7-wheezy-v20140718",
@@ -87,9 +86,6 @@ Configuration options are organized below into two categories: required and opti
 each category, the available options are alphabetized and described.
 
 ### Required:
-
-* `bucket_name` (string) - The Google Cloud Storage bucket to store the
-  images that are created. The bucket must already exist in your project
 
 * `project_id` (string) - The project ID that will be used to launch instances
   and store images.
