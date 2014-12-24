@@ -8,8 +8,12 @@ import (
 
 	"code.google.com/p/google-api-go-client/compute/v1"
 	"github.com/mitchellh/packer/packer"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+
+	// oauth2 "github.com/rasa/oauth2-fork-b3f9a68"
+	"github.com/rasa/oauth2-fork-b3f9a68"
+
+	// oauth2 "github.com/rasa/oauth2-fork-b3f9a68/google"
+	"github.com/rasa/oauth2-fork-b3f9a68/google"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
