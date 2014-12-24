@@ -19,7 +19,7 @@ func (s *stepVerifyUpload) Run(state multistep.StateBag) multistep.StepAction {
 	upload := state.Get("upload").(*Upload)
 	provider := state.Get("provider").(*Provider)
 
-	path := fmt.Sprintf("box/%s/version/%v/provider/%s", box.Tag, version.Number, provider.Name)
+	path := fmt.Sprintf("box/%s/version/%v/provider/%s", box.Tag, version.Version, provider.Name)
 
 	providerCheck := &Provider{}
 
