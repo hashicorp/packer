@@ -30,7 +30,7 @@ in your account, it is up to you to use, delete, etc. the AMI.
 ## How Does it Work?
 
 This builder works by creating a new EBS volume from an existing source AMI
-and attaching it into an already-running EC2 instance. One attached, a
+and attaching it into an already-running EC2 instance. Once attached, a
 [chroot](http://en.wikipedia.org/wiki/Chroot) is used to provision the
 system within that volume. After provisioning, the volume is detached,
 snapshotted, and an AMI is made.
