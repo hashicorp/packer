@@ -6,8 +6,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
-  * postprocessor/vagrant-cloud: Fixed failing on response
   * builder/docker: Fixed hang on prompt while copying script
+  * postprocessor/vagrant-cloud: Fixed failing on response
 
 ## 0.7.5 (December 9, 2014)
 
