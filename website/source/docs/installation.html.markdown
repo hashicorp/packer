@@ -73,3 +73,13 @@ it may not be the latest available version.
 $ brew tap homebrew/binary
 $ brew install packer
 ```
+
+### Chocolatey
+
+If you're using Windows and [Chocolatey](http://chocolatey.org), you can install Packer from
+Windows command line (cmd). Remember that this is updated by a 3rd party, so
+it may not be the latest available version.
+
+```text
+$ choco install packer
+```
