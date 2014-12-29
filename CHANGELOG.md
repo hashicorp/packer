@@ -1,3 +1,13 @@
+## 0.8.0 (unreleased)
+
+FEATURES:
+
+IMPROVEMENTS:
+
+BUG FIXES:
+
+  * postprocessor/vagrant-cloud: Fixed failing on response
+
 ## 0.7.5 (December 9, 2014)
 
 FEATURES:
