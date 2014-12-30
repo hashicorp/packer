@@ -16,7 +16,7 @@ with Redis pre-installed. This is just an example. Packer can create images
 for [many platforms](/intro/platforms.html) with anything pre-installed.
 
 If you don't have an AWS account, [create one now](http://aws.amazon.com/free/).
-For the example, we'll use a "t1.micro" instance to build our image, which
+For the example, we'll use a "t2.micro" instance to build our image, which
 qualifies under the AWS [free-tier](http://aws.amazon.com/free/), meaning
 it will be free. If you already have an AWS account, you may be charged some
 amount of money, but it shouldn't be more than a few cents.
