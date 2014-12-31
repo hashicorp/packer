@@ -9,6 +9,7 @@ BUG FIXES:
   * builder/docker: Fixed hang on prompt while copying script
   * postprocessor/vagrant-cloud: Fixed failing on response
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
+  * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
 
 ## 0.7.5 (December 9, 2014)
 
