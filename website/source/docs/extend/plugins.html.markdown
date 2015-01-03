@@ -50,7 +50,7 @@ found later, it will take precedence over one found earlier.
 
 1. The directory where `packer` is, or the executable directory.
 
-2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d` on
+2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins` on
      Windows.
 
 3. The current working directory.
