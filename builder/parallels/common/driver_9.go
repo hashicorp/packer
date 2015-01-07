@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,6 +19,8 @@ import (
 type Parallels9Driver struct {
 	// This is the path to the "prlctl" application.
 	PrlctlPath string
+	// The path to the parallels_dhcp_leases file
+	dhcp_lease_file string
 }
 
 func (d *Parallels9Driver) Import(name, srcPath, dstDir string, reassignMac bool) error {
@@ -276,31 +279,43 @@ func (d *Parallels9Driver) Mac(vmName string) (string, error) {
 }
 
 // Finds the IP address of a VM connected that uses DHCP by its MAC address
+//
+// Parses the file /Library/Preferences/Parallels/parallels_dhcp_leases
+// file contain a list of DHCP leases given by Parallels Desktop
+// Example line:
+// 10.211.55.181="1418921112,1800,001c42f593fb,ff42f593fb000100011c25b9ff001c42f593fb"
+// IP Address   ="Lease expiry, Lease time, MAC, MAC or DUID"
 func (d *Parallels9Driver) IpAddress(mac string) (string, error) {
-	var stdout bytes.Buffer
-	dhcp_lease_file := "/Library/Preferences/Parallels/parallels_dhcp_leases"
 
 	if len(mac) != 12 {
 		return "", fmt.Errorf("Not a valid MAC address: %s. It should be exactly 12 digits.", mac)
 	}
 
-	cmd := exec.Command("grep", "-i", mac, dhcp_lease_file)
-	cmd.Stdout = &stdout
-	if err := cmd.Run(); err != nil {
+	leases, err := ioutil.ReadFile(d.dhcp_lease_file)
+	if err != nil {
 		return "", err
 	}
 
-	stdoutString := strings.TrimSpace(stdout.String())
-	re := regexp.MustCompile("(.*)=.*")
-	ipMatch := re.FindAllStringSubmatch(stdoutString, 1)
-
-	if len(ipMatch) != 1 {
-		return "", fmt.Errorf("IP lease not found for MAC address %s in: %s\n", mac, dhcp_lease_file)
+	re := regexp.MustCompile("(.*)=\"(.*),(.*)," + strings.ToLower(mac) + ",.*\"")
+	mostRecentIp := ""
+	mostRecentLease := uint64(0)
+	for _, l := range re.FindAllStringSubmatch(string(leases), -1) {
+		ip := l[1]
+		expiry, _ := strconv.ParseUint(l[2], 10, 64)
+		leaseTime, _ := strconv.ParseUint(l[3], 10, 32)
+		log.Printf("Found lease: %s for MAC: %s, expiring at %d, leased for %d s.\n", ip, mac, expiry, leaseTime)
+		if mostRecentLease <= expiry-leaseTime {
+			mostRecentIp = ip
+			mostRecentLease = expiry - leaseTime
+		}
 	}
 
-	ip := ipMatch[0][1]
-	log.Printf("Found IP lease: %s for MAC address %s\n", ip, mac)
-	return ip, nil
+	if len(mostRecentIp) == 0 {
+		return "", fmt.Errorf("IP lease not found for MAC address %s in: %s\n", mac, d.dhcp_lease_file)
+	}
+
+	log.Printf("Found IP lease: %s for MAC address %s\n", mostRecentIp, mac)
+	return mostRecentIp, nil
 }
 
 func (d *Parallels9Driver) ToolsIsoPath(k string) (string, error) {

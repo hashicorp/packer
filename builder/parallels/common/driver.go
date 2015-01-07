@@ -55,6 +55,7 @@ func NewDriver() (Driver, error) {
 	var drivers map[string]Driver
 	var prlctlPath string
 	var supportedVersions []string
+	dhcp_lease_file := "/Library/Preferences/Parallels/parallels_dhcp_leases"
 
 	if runtime.GOOS != "darwin" {
 		return nil, fmt.Errorf(
@@ -74,11 +75,13 @@ func NewDriver() (Driver, error) {
 	drivers = map[string]Driver{
 		"10": &Parallels10Driver{
 			Parallels9Driver: Parallels9Driver{
-				PrlctlPath: prlctlPath,
+				PrlctlPath:      prlctlPath,
+				dhcp_lease_file: dhcp_lease_file,
 			},
 		},
 		"9": &Parallels9Driver{
-			PrlctlPath: prlctlPath,
+			PrlctlPath:      prlctlPath,
+			dhcp_lease_file: dhcp_lease_file,
 		},
 	}
 
