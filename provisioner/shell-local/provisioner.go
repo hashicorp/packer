@@ -15,7 +15,6 @@ import (
   "os/exec"
 )
 
-const DefaultRemotePath = "/tmp/script.sh"
 const DefaultSheBang = "/bin/sh"
 
 type config struct {
@@ -28,11 +27,6 @@ type config struct {
 
   // The shebang value used when running inline scripts.
   InlineShebang string `mapstructure:"inline_shebang"`
-
-  // The command used to execute the script. The '{{ .Path }}' variable
-  // should be used to specify where the script goes, {{ .Vars }}
-  // can be used to inject the environment_vars into the environment.
-  ExecuteCommand string `mapstructure:"execute_command"`
 
   tpl *packer.ConfigTemplate
 }
@@ -60,10 +54,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
   // Accumulate any errors
   errs := common.CheckUnusedConfig(md)
-
-  if p.config.ExecuteCommand == "" {
-    p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
-  }
 
   if p.config.Inline != nil && len(p.config.Inline) == 0 {
     p.config.Inline = nil
