@@ -41,6 +41,10 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
+
+	// The directory from which the command will be executed.
+	// Packer requires the directory to exist when running puppet.
+	WorkingDir string `mapstructure:"working_directory"`
 }
 
 type Provisioner struct {
@@ -48,6 +52,7 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
+	WorkingDir      string
 	FacterVars      string
 	HieraConfigPath string
 	ModulePath      string
@@ -73,7 +78,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
+		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
+		    "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
@@ -85,12 +91,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = "/tmp/packer-puppet-masterless"
 	}
 
+	if p.config.WorkingDir == "" {
+		p.config.StagingDir = p.config.StagingDir
+	}
+
 	// Templates
 	templates := map[string]*string{
 		"hiera_config_path": &p.config.HieraConfigPath,
 		"manifest_file":     &p.config.ManifestFile,
 		"manifest_dir":      &p.config.ManifestDir,
 		"staging_dir":       &p.config.StagingDir,
+		"working_dir":       &p.config.WorkingDir,
 	}
 
 	for n, ptr := range templates {
@@ -256,6 +267,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
+		WorkingDir:      p.config.WorkingDir,
 		FacterVars:      strings.Join(facterVars, " "),
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
