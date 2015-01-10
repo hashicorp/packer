@@ -92,7 +92,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.WorkingDir == "" {
-		p.config.StagingDir = p.config.StagingDir
+		p.config.WorkingDir = p.config.StagingDir
 	}
 
 	// Templates
