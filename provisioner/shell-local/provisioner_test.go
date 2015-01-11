@@ -125,7 +125,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
   }
 
   if runtime.GOOS == "windows" {
-    //this test only runs on windows
+    //the rest of this test only runs on non-windows systems
     return
   }
 
