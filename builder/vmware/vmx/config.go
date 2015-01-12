@@ -19,6 +19,7 @@ type Config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	vmwcommon.WinRMConfig    `mapstructure:",squash"`
 
 	BootCommand    []string `mapstructure:"boot_command"`
 	FloppyFiles    []string `mapstructure:"floppy_files"`
@@ -54,9 +55,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(c.tpl)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(c.tpl)...)
+
+	if c.RunConfig.CommunicatorType == packer.WinRMCommunicatorType {
+		errs = packer.MultiErrorAppend(errs, c.WinRMConfig.Prepare(c.tpl)...)
+	} else {
+		errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
+	}
 
 	templates := map[string]*string{
 		"remote_type": &c.RemoteType,

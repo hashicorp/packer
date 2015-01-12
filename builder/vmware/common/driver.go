@@ -30,7 +30,7 @@ type Driver interface {
 
 	// SSHAddress returns the SSH address for the VM that is being
 	// managed by this driver.
-	SSHAddress(multistep.StateBag) (string, error)
+	IPAddress(multistep.StateBag) (string, error)
 
 	// Start starts a VM specified by the path to the VMX given.
 	Start(string, bool) error
@@ -68,13 +68,11 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 		drivers = []Driver{
 			&Fusion6Driver{
 				Fusion5Driver: Fusion5Driver{
-					AppPath:   dconfig.FusionAppPath,
-					SSHConfig: config,
+					AppPath: dconfig.FusionAppPath,
 				},
 			},
 			&Fusion5Driver{
-				AppPath:   dconfig.FusionAppPath,
-				SSHConfig: config,
+				AppPath: dconfig.FusionAppPath,
 			},
 		}
 	case "linux":
@@ -82,21 +80,14 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 	case "windows":
 		drivers = []Driver{
 			&Workstation10Driver{
-				Workstation9Driver: Workstation9Driver{
-					SSHConfig: config,
-				},
+				Workstation9Driver: Workstation9Driver{},
 			},
-			&Workstation9Driver{
-				SSHConfig: config,
-			},
+			&Workstation9Driver{},
 			&Player6Driver{
-				Player5Driver: Player5Driver{
-					SSHConfig: config,
-				},
+				Player5Driver: Player5Driver{},
 			},
-			&Player5Driver{
-				SSHConfig: config,
-			},
+			&Player5Driver{},
+			&Workstation9Driver{},
 		}
 	default:
 		return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)

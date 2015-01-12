@@ -29,10 +29,10 @@ type DriverMock struct {
 	IsRunningResult bool
 	IsRunningErr    error
 
-	SSHAddressCalled bool
-	SSHAddressState  multistep.StateBag
-	SSHAddressResult string
-	SSHAddressErr    error
+	IPAddressCalled bool
+	IPAddressState  multistep.StateBag
+	IPAddressResult string
+	IPAddressErr    error
 
 	StartCalled   bool
 	StartPath     string
@@ -92,10 +92,10 @@ func (d *DriverMock) IsRunning(path string) (bool, error) {
 	return d.IsRunningResult, d.IsRunningErr
 }
 
-func (d *DriverMock) SSHAddress(state multistep.StateBag) (string, error) {
-	d.SSHAddressCalled = true
-	d.SSHAddressState = state
-	return d.SSHAddressResult, d.SSHAddressErr
+func (d *DriverMock) IPAddress(state multistep.StateBag) (string, error) {
+	d.IPAddressCalled = true
+	d.IPAddressState = state
+	return d.IPAddressResult, d.IPAddressErr
 }
 
 func (d *DriverMock) Start(path string, headless bool) error {

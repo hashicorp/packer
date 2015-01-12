@@ -12,8 +12,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// Builder implements packer.Builder and builds the actual VirtualBox
-// images.
+// Builder implements packer.Builder and builds the actual VMWare images.
 type Builder struct {
 	config *Config
 	runner multistep.Runner
@@ -31,7 +30,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 // Run executes a Packer build and returns a packer.Artifact representing
-// a VirtualBox appliance.
+// a VMWare appliance.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig)
 	if err != nil {
@@ -90,12 +89,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:      b.config.VMName,
 			Tpl:         b.config.tpl,
 		},
-		&common.StepConnectSSH{
-			SSHAddress:     driver.SSHAddress,
-			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
-			SSHWaitTimeout: b.config.SSHWaitTimeout,
-			NoPty:          b.config.SSHSkipRequestPty,
-		},
+		vmwcommon.NewConnectStep(
+			b.config.RunConfig.CommunicatorType,
+			driver,
+			&b.config.SSHConfig,
+			&b.config.WinRMConfig),
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,

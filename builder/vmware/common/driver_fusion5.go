@@ -16,9 +16,6 @@ import (
 type Fusion5Driver struct {
 	// This is the path to the "VMware Fusion.app"
 	AppPath string
-
-	// SSHConfig are the SSH settings for the Fusion VM
-	SSHConfig *SSHConfig
 }
 
 func (d *Fusion5Driver) Clone(dst, src string) error {
@@ -69,8 +66,8 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Fusion5Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return SSHAddressFunc(d.SSHConfig)(state)
+func (d *Fusion5Driver) IPAddress(state multistep.StateBag) (string, error) {
+	return IPAddressFunc()(state)
 }
 
 func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {

@@ -3,14 +3,16 @@ package common
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/packer/packer"
 )
 
 type RunConfig struct {
-	Headless    bool   `mapstructure:"headless"`
-	RawBootWait string `mapstructure:"boot_wait"`
+	CommunicatorType string `mapstructure:"communicator_type"`
+	Headless         bool   `mapstructure:"headless"`
+	RawBootWait      string `mapstructure:"boot_wait"`
 
 	HTTPDir     string `mapstructure:"http_directory"`
 	HTTPPortMin uint   `mapstructure:"http_port_min"`
@@ -25,6 +27,12 @@ type RunConfig struct {
 func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"
+	}
+
+	if c.CommunicatorType == "" {
+		c.CommunicatorType = packer.SSHCommunicatorType
+	} else {
+		c.CommunicatorType = strings.ToLower(c.CommunicatorType)
 	}
 
 	if c.HTTPPortMin == 0 {
@@ -63,6 +71,12 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 			errs = append(
 				errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 		}
+	}
+
+	if c.CommunicatorType != packer.WinRMCommunicatorType && c.CommunicatorType != packer.SSHCommunicatorType {
+		errs = append(
+			errs, fmt.Errorf("Invalid communicator type: %s, expected %s or %s",
+				c.CommunicatorType, packer.WinRMCommunicatorType, packer.SSHCommunicatorType))
 	}
 
 	if c.HTTPPortMin > c.HTTPPortMax {

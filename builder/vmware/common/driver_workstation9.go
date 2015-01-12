@@ -17,9 +17,6 @@ type Workstation9Driver struct {
 	AppPath          string
 	VdiskManagerPath string
 	VmrunPath        string
-
-	// SSHConfig are the SSH settings for the Fusion VM
-	SSHConfig *SSHConfig
 }
 
 func (d *Workstation9Driver) Clone(dst, src string) error {
@@ -70,8 +67,8 @@ func (d *Workstation9Driver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Workstation9Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return SSHAddressFunc(d.SSHConfig)(state)
+func (d *Workstation9Driver) IPAddress(state multistep.StateBag) (string, error) {
+	return IPAddressFunc()(state)
 }
 
 func (d *Workstation9Driver) Start(vmxPath string, headless bool) error {
