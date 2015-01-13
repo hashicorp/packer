@@ -142,12 +142,12 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 
 func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 	c := testConfig()
-	c.SSHKeyPairName = ""
+	c.TemporaryKeyPairName = ""
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.SSHKeyPairName == "" {
+	if c.TemporaryKeyPairName == "" {
 		t.Fatal("keypair empty")
 	}
 }
