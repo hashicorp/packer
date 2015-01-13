@@ -24,6 +24,7 @@ type RunConfig struct {
 	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
 	SSHUsername              string            `mapstructure:"ssh_username"`
 	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
+	SSHKeyPairName           string            `mapstructure:"ssh_keypair_name"`
 	SSHPrivateIp             bool              `mapstructure:"ssh_private_ip"`
 	SSHPort                  int               `mapstructure:"ssh_port"`
 	SecurityGroupId          string            `mapstructure:"security_group_id"`
@@ -55,6 +56,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"ssh_timeout":             &c.RawSSHTimeout,
 		"ssh_username":            &c.SSHUsername,
 		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
+		"ssh_keypair_name":        &c.SSHKeyPairName,
 		"source_ami":              &c.SourceAmi,
 		"subnet_id":               &c.SubnetId,
 		"temporary_key_pair_name": &c.TemporaryKeyPairName,
@@ -84,8 +86,9 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		c.RawSSHTimeout = "5m"
 	}
 
-	if c.TemporaryKeyPairName == "" {
-		c.TemporaryKeyPairName = fmt.Sprintf(
+	// if we are not given an explicit keypairname, create a temporary one
+    if c.SSHKeyPairName == "" {
+		c.SSHKeyPairName = fmt.Sprintf(
 			"packer %s", uuid.TimeOrderedUUID())
 	}
 
