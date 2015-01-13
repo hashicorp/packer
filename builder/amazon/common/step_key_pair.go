@@ -13,6 +13,7 @@ import (
 type StepKeyPair struct {
 	Debug          bool
 	DebugKeyPath   string
+	TemporaryKeyPairName    string
 	KeyPairName    string
 	PrivateKeyFile string
 
@@ -21,7 +22,9 @@ type StepKeyPair struct {
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	if s.PrivateKeyFile != "" {
-		s.keyName = s.KeyPairName // need to get from config
+        if s.KeyPairName != "" { 
+            s.keyName = s.KeyPairName // need to get from config
+        }
 
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
 		if err != nil {
@@ -38,15 +41,15 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.KeyPairName))
-	keyResp, err := ec2conn.CreateKeyPair(s.KeyPairName)
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
+	keyResp, err := ec2conn.CreateKeyPair(s.TemporaryKeyPairName)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
 	// Set the keyname so we know to delete it later
-	s.keyName = s.KeyPairName
+	s.keyName = s.TemporaryKeyPairName
 
 	// Set some state data for use in future steps
 	state.Put("keyPair", s.keyName)
@@ -89,13 +92,13 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	//ec2conn := state.Get("ec2").(*ec2.EC2)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("DANGER: Deleting temporary keypair (not really)...")
-	//_, err := ec2conn.DeleteKeyPair(s.keyName)
-	//if err != nil {
-	//ui.Error(fmt.Sprintf(
-    //"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
-	//}
+	ui.Say("DANGER: Deleting temporary keypair...")
+	_, err := ec2conn.DeleteKeyPair(s.keyName)
+	if err != nil {
+	    ui.Error(fmt.Sprintf(
+          "Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
+	}
 }
