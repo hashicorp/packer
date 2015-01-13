@@ -21,7 +21,7 @@ type StepKeyPair struct {
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	if s.PrivateKeyFile != "" {
-		s.keyName = ""
+		s.keyName = s.KeyPairName // need to get from config
 
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
 		if err != nil {
@@ -29,7 +29,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", "")
+		state.Put("keyPair", s.keyName)
 		state.Put("privateKey", string(privateKeyBytes))
 
 		return multistep.ActionContinue
@@ -83,17 +83,19 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
-	if s.keyName == "" {
+    // If we used an SSH private key file, do not go about deleting 
+    // keypairs
+	if s.PrivateKeyFile != "" {
 		return
 	}
 
-	ec2conn := state.Get("ec2").(*ec2.EC2)
+	//ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deleting temporary keypair...")
-	_, err := ec2conn.DeleteKeyPair(s.keyName)
-	if err != nil {
-		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
-	}
+	ui.Say("DANGER: Deleting temporary keypair (not really)...")
+	//_, err := ec2conn.DeleteKeyPair(s.keyName)
+	//if err != nil {
+	//ui.Error(fmt.Sprintf(
+    //"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
+	//}
 }
