@@ -87,7 +87,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	// if we are not given an explicit keypairname, create a temporary one
-    if c.SSHKeyPairName == "" {
+	if c.SSHKeyPairName == "" {
 		c.TemporaryKeyPairName = fmt.Sprintf(
 			"packer %s", uuid.TimeOrderedUUID())
 	}
