@@ -95,7 +95,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("DANGER: Deleting temporary keypair...")
+	ui.Say("Deleting temporary keypair...")
 	_, err := ec2conn.DeleteKeyPair(s.keyName)
 	if err != nil {
 	    ui.Error(fmt.Sprintf(
