@@ -2,15 +2,23 @@
 layout: "docs"
 page_title: "Shell Local Provisioner"
 description: |-
-  The shell-local Packer provisioner allows shell scripts to be run on machine running packer
+  The shell-local Packer provisioner allows shell scripts to be run on machine
+  running packer
 ---
 
 # Shell Local Provisioner
 
 Type: `shell-local`
 
-The shell-local Packer provisioner allows shell scripts to be run on machine running packer.
-The primary use case for the shell-local provisioner is to allow for running an image verification process such as [serverspec](http://serverspec.org/) prior to creating an image without the need to run this from the machine you are building. Generally it is used as the last provisioner for a giving machine.
+The shell-local Packer provisioner allows shell scripts to be run on machine
+running packer.
+
+The primary use case for the shell-local provisioner is to allow for running an
+image verification process such as [serverspec](http://serverspec.org/) prior to
+creating an image without the need to run this from the machine you are
+building.
+
+Generally it is used as the last provisioner for a giving machine.
 
 ## Basic Example
 
