@@ -42,6 +42,14 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	exitCodePath := outputFile.Name() + "-exit"
 
 	cmd := exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+	//Exec only works in 1.3+, attach doesn't work in 1.4. How to make it backwards compatible:
+	//1. Check the version and use one or the other
+	//2. Bash OR (docker exec -i ... || docker attach ....)
+	//3. Somehow check if docker would accept exec and use it if so
+	//Using attach doesn't return an error, it goes silent instead, so we cannot fallback (we could use timeouts or set
+	//a sequence of commands to try when the first one fails)
+
+	//Also. What's the best way of unit testing this? Do we have a mock docker?
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
