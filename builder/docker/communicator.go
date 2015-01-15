@@ -60,12 +60,6 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
 
-	//Exec only works in 1.3+, attach doesn't work in 1.4. How to make it backwards compatible:
-	//1. Check the version and use one or the other (Very hard to maintain)
-	//2. Bash OR (docker exec -i ... || docker attach ....) (Ugly)
-	//3. Somehow check if docker would accept exec and use it if so
-	//Using attach doesn't return an error, it goes silent instead, so we cannot fallback (we could use timeouts or set
-	//a sequence of commands to try when the first one fails)
 	cmd := exec.Command("docker", "attach", c.ContainerId)
 
 	//Use exec instead if available
