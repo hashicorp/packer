@@ -11,13 +11,13 @@ func TestCommunicator_impl(t *testing.T) {
 	var _ packer.Communicator = new(Communicator)
 }
 
-func TestIsValidDockerCommand(t *testing.T) {
+func TestIsValidDockerShellCommand(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.False(IsValidDockerCommand(exec.Command("THIS_COMMAND_WILL_FAIL")), "THIS_COMMAND_WILL_FAIL")
-	assert.False(IsValidDockerCommand(exec.Command("docker", "attack")), "docker attack")
-	assert.True(IsValidDockerCommand(exec.Command("docker", "attach")), "docker attach")
+	assert.False(IsValidDockerShellCommand(exec.Command("THIS_COMMAND_WILL_FAIL")), "THIS_COMMAND_WILL_FAIL")
+	assert.False(IsValidDockerShellCommand(exec.Command("docker", "attack")), "docker attack")
+	assert.True(IsValidDockerShellCommand(exec.Command("docker", "attach")), "docker attach")
 
 	//This one depends on the version of docker.
-	//assert.True(IsValidDockerCommand(exec.Command("docker", "exec")), "docker exec")
+	//assert.True(IsValidDockerShellCommand(exec.Command("docker", "exec")), "docker exec")
 }

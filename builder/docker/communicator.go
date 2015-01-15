@@ -26,7 +26,8 @@ type Communicator struct {
 	lock sync.Mutex
 }
 
-func IsValidDockerCommand(cmd *exec.Cmd) bool {
+//Don't pass any arguments to the docker command
+func IsValidDockerShellCommand(cmd *exec.Cmd) bool {
 	if result := cmd.Run(); result != nil {
 		switch result.(type) {
 		default:
@@ -63,7 +64,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	cmd := exec.Command("docker", "attach", c.ContainerId)
 
 	//Use exec instead if available
-	if IsValidDockerCommand(exec.Command("docker", "exec")) {
+	if IsValidDockerShellCommand(exec.Command("docker", "exec")) {
 		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
 	}
 
