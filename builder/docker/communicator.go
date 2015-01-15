@@ -26,6 +26,25 @@ type Communicator struct {
 	lock sync.Mutex
 }
 
+func IsValidDockerCommand(cmd *exec.Cmd) bool {
+	if result := cmd.Run(); result != nil {
+		switch result.(type) {
+		default:
+			//WTF?!?
+			return false
+		case *exec.ExitError:
+			//The command failed because it's supported but missing arguments
+			return true
+		case *exec.Error:
+			//Failed completely to execute!
+			return false
+		}
+	} else {
+		//The command succeeded when it shouldn't because it was not recognised
+		return false
+	}
+}
+
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// Create a temporary file to store the output. Because of a bug in
 	// Docker, sometimes all the output doesn't properly show up. This
@@ -41,15 +60,19 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
 
-	cmd := exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
 	//Exec only works in 1.3+, attach doesn't work in 1.4. How to make it backwards compatible:
-	//1. Check the version and use one or the other
-	//2. Bash OR (docker exec -i ... || docker attach ....)
+	//1. Check the version and use one or the other (Very hard to maintain)
+	//2. Bash OR (docker exec -i ... || docker attach ....) (Ugly)
 	//3. Somehow check if docker would accept exec and use it if so
 	//Using attach doesn't return an error, it goes silent instead, so we cannot fallback (we could use timeouts or set
 	//a sequence of commands to try when the first one fails)
+	cmd := exec.Command("docker", "attach", c.ContainerId)
 
-	//Also. What's the best way of unit testing this? Do we have a mock docker?
+	//Use exec instead if available
+	if IsValidDockerCommand(exec.Command("docker", "exec")) {
+		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+	}
+
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
@@ -125,7 +148,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 			return os.MkdirAll(hostpath, info.Mode())
 		}
 
-		if info.Mode() & os.ModeSymlink == os.ModeSymlink {
+		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 			dest, err := os.Readlink(path)
 
 			if err != nil {
