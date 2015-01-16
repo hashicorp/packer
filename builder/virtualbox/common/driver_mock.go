@@ -9,7 +9,7 @@ type DriverMock struct {
 	CreateSATAControllerController string
 	CreateSATAControllerErr        error
 
-  CreateSCSIControllerVM         string
+	CreateSCSIControllerVM         string
 	CreateSCSIControllerController string
 	CreateSCSIControllerErr        error
 
@@ -54,9 +54,9 @@ func (d *DriverMock) CreateSATAController(vm string, controller string) error {
 }
 
 func (d *DriverMock) CreateSCSIController(vm string, controller string) error {
-  d.CreateSCSIControllerVM = vm
-  d.CreateSCSIControllerController = vm
-  return d.CreateSCSIControllerErr
+	d.CreateSCSIControllerVM = vm
+	d.CreateSCSIControllerController = vm
+	return d.CreateSCSIControllerErr
 }
 
 func (d *DriverMock) Delete(name string) error {
