@@ -42,7 +42,7 @@ func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 		"storagectl", vmName,
 		"--name", name,
 		"--add", "scsi",
-    "--controller", "LSILogic",
+		"--controller", "LSILogic",
 	}
 
 	return d.VBoxManage(command...)
