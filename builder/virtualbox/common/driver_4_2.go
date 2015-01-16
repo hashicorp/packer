@@ -36,6 +36,18 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
 	return d.VBoxManage(command...)
 }
 
+func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
+
+	command := []string{
+		"storagectl", vmName,
+		"--name", name,
+		"--add", "scsi",
+    "--controller", "LSILogic",
+	}
+
+	return d.VBoxManage(command...)
+}
+
 func (d *VBox42Driver) Delete(name string) error {
 	return d.VBoxManage("unregistervm", name, "--delete")
 }
