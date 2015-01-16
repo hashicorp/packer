@@ -63,24 +63,24 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-  if config.HardDriveInterface == "scsi" {
-    if err := driver.CreateSCSIController(vmName, "SCSI Controller"); err != nil {
-      err := fmt.Errorf("Error creating disk controller: %s", err)
-      state.Put("error", err)
-      ui.Error(err.Error())
-      return multistep.ActionHalt
-    }
-  }
+	if config.HardDriveInterface == "scsi" {
+		if err := driver.CreateSCSIController(vmName, "SCSI Controller"); err != nil {
+			err := fmt.Errorf("Error creating disk controller: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
 
 	// Attach the disk to the controller
 	controllerName := "IDE Controller"
 	if config.HardDriveInterface == "sata" {
 		controllerName = "SATA Controller"
 	}
-  
-  if config.HardDriveInterface == "scsi" {
-    controllerName = "SCSI Controller"
-  }
+
+	if config.HardDriveInterface == "scsi" {
+		controllerName = "SCSI Controller"
+	}
 
 	command = []string{
 		"storageattach", vmName,
