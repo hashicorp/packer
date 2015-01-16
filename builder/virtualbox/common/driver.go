@@ -18,6 +18,9 @@ import (
 type Driver interface {
 	// Create a SATA controller.
 	CreateSATAController(vm string, controller string) error
+  
+  // Create a SCSI controller.
+  CreateSCSIController(vm string, controller string) error
 
 	// Delete a VM by name
 	Delete(string) error
