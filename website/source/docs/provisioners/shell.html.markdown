@@ -150,7 +150,7 @@ on reboot or in your shell script. For example, on Gentoo:
 
 * On Ubuntu the /bin/sh shell is
 [dash](http://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script has
-[bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell\)) specific commands in it
+[bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell)) specific commands in it
 then put `#!/bin/bash` at the top of your script. Differences
 between dash and bash can be found on the [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
