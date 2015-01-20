@@ -148,15 +148,15 @@ on reboot or in your shell script. For example, on Gentoo:
 
 *My shell script doesn't work correctly on Ubuntu*
 
-* On Ubuntu the `/bin/sh` shell is
+* On Ubuntu, the `/bin/sh` shell is
 [dash](http://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script has
-[bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell)) specific commands in it
+[bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands in it,
 then put `#!/bin/bash` at the top of your script. Differences
 between dash and bash can be found on the [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
 *My shell works when I login but fails with the shell provisioner*
 
-* See the above tip. More than likely your login shell is using `/bin/bash`
+* See the above tip. More than likely, your login shell is using `/bin/bash`
 while the provisioner is using `/bin/sh`.
 
 *My installs hang when using `apt-get` or `yum`*
