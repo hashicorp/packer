@@ -54,6 +54,10 @@ configuration is actually required, but at least `run_list` is recommended.
   the secret for encrypted data bags. By default, this is empty, so no
   secret will be available.
 
+* `environments_path` (string) - The path to the "environments" directory on your local filesystem.
+  These will be uploaded to the remote machine in the directory specified by the
+  `staging_directory`.  By default, this is empty.
+
 * `execute_command` (string) - The command used to execute Chef. This has
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
