@@ -185,7 +185,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ManifestFile == "" && p.config.ManifestDir == "" {
 		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("manifest_file or manifest_dir must be specified."))
+			fmt.Errorf("one of manifest_file or manifest_dir must be specified"))
 	}
 
 	for i, path := range p.config.ModulePaths {
