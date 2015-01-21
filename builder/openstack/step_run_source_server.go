@@ -6,7 +6,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 
+	"encoding/base64"
 	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"io/ioutil"
 )
 
 type StepRunSourceServer struct {
@@ -15,6 +17,7 @@ type StepRunSourceServer struct {
 	SourceImage    string
 	SecurityGroups []string
 	Networks       []string
+	UserDataFile   string
 
 	server *gophercloud.Server
 }
@@ -37,6 +40,19 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		networks[i].Uuid = networkUuid
 	}
 
+	encodedUserData := ""
+	if s.UserDataFile != "" {
+		data, err := ioutil.ReadFile(s.UserDataFile)
+		if err != nil {
+			err := fmt.Errorf("Error reading user data file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		encodedUserData = base64.StdEncoding.EncodeToString(data)
+	}
+
 	server := gophercloud.NewServer{
 		Name:          s.Name,
 		ImageRef:      s.SourceImage,
@@ -44,6 +60,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		KeyPairName:   keyName,
 		SecurityGroup: securityGroups,
 		Networks:      networks,
+		UserData:      encodedUserData,
 	}
 
 	serverResp, err := csp.CreateServer(server)
