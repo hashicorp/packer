@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	cmdcommon "github.com/mitchellh/packer/common/command"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
+
+	cmdcommon "github.com/mitchellh/packer/common/command"
+	"github.com/mitchellh/packer/packer"
 )
 
 type BuildCommand struct {
@@ -149,7 +151,9 @@ func (c BuildCommand) Run(args []string) int {
 
 		// Handle interrupts for this build
 		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt)
+		for _, sigtype := range []os.Signal{syscall.SIGTERM, os.Interrupt} {
+			signal.Notify(sigCh, sigtype)
+		}
 		defer signal.Stop(sigCh)
 		go func(b packer.Build) {
 			<-sigCh
