@@ -5,7 +5,7 @@ description: |-
   The `packer push` Packer command takes a template and pushes it to a build service that will automatically build this Packer template.
 ---
 
-# Command-Line: Build
+# Command-Line: Push
 
 The `packer push` Packer command takes a template and pushes it to a build
 service. The build service will automatically build your Packer template and
