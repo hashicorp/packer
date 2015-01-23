@@ -67,10 +67,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	templates := map[string]*string{
 		"cluster":       &p.config.Cluster,
 		"datacenter":    &p.config.Datacenter,
-		"diskmode":      &p.config.DiskMode,
-		"host":          &p.config.Host,
+	   	"host":          &p.config.Host,
 		"password":      &p.config.Password,
-		"resource_pool": &p.config.ResourcePool,
 		"username":      &p.config.Username,
 		"vm_name":       &p.config.VMName,
 	}
@@ -85,6 +83,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	templates["datastore"] = &p.config.Datastore
 	templates["vm_network"] = &p.config.VMNetwork
 	templates["vm_folder"] = &p.config.VMFolder
+	templates["resource_pool"] = &p.config.ResourcePool
+	templates["diskmode"] = &p.config.DiskMode
 
 	// Template process
 	for key, ptr := range templates {
@@ -123,19 +123,37 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
 		fmt.Sprintf("--name=%s", p.config.VMName),
-		fmt.Sprintf("--datastore=%s", p.config.Datastore),
-		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
-		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
-		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
-			url.QueryEscape(p.config.Username),
-			url.QueryEscape(p.config.Password),
-			p.config.Host,
-			p.config.Datacenter,
-			p.config.Cluster,
-			p.config.ResourcePool),
 	}
+
+	if p.config.Datastore != "" {
+		args = append(args, fmt.Sprintf("--datastore=%s", p.config.Datastore))
+	}
+
+	if p.config.DiskMode != "" {
+		args = append(args, fmt.Sprintf("--diskMode=%s", p.config.DiskMode))
+	}
+
+	if p.config.VMFolder != "" {
+		args = append(args, fmt.Sprintf("--vmFolder=%s", p.config.VMFolder))
+	}
+
+	args = append(args, fmt.Sprintf("%s", vmx))
+
+	vi_target := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/",
+		url.QueryEscape(p.config.Username),
+		url.QueryEscape(p.config.Password),
+		p.config.Host,
+		p.config.Datacenter,
+		p.config.Cluster)
+
+	if p.config.ResourcePool != "" {
+		vi_target = fmt.Sprintf("%sResources/%s/",
+			vi_target,
+			p.config.ResourcePool)
+	}
+
+	args = append(args, vi_target)
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
