@@ -6,6 +6,8 @@ sudo apt-get -y update
 
 # RVM/Ruby
 sudo apt-get -y install curl
+sudo apt-get -y install git
+gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
 curl -sSL https://get.rvm.io | bash -s stable
 . ~/.bashrc
 . ~/.bash_profile
