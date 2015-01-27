@@ -106,6 +106,10 @@ this exits with exit status 0, then everything is working!
     $ make
     ...
 
+If you want to install the binaries into $GOPATH/bin simply type `make bin`:
+
+    $ make bin
+
 To compile a development version of Packer and the built-in plugins,
 run `make dev`. This will put Packer binaries in the `bin` folder:
 
