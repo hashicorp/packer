@@ -147,6 +147,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		newFacts[k] = v
 	}
 
+	newFacts["packer_build_name"] = p.config.PackerBuildName
+	newFacts["packer_builder_type"] = p.config.PackerBuilderType
 	p.config.Facter = newFacts
 
 	// Validation
