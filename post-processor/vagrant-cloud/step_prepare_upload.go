@@ -22,7 +22,7 @@ func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
 	provider := state.Get("provider").(*Provider)
 	artifactFilePath := state.Get("artifactFilePath").(string)
 
-	path := fmt.Sprintf("box/%s/version/%v/provider/%s/upload", box.Tag, version.Number, provider.Name)
+	path := fmt.Sprintf("box/%s/version/%v/provider/%s/upload", box.Tag, version.Version, provider.Name)
 	upload := &Upload{}
 
 	ui.Say(fmt.Sprintf("Preparing upload of box: %s", artifactFilePath))

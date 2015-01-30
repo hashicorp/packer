@@ -313,7 +313,7 @@ an Ubuntu 12.04 installer:
 
 ```javascript
 [
-  "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
+  "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
   "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
   "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
@@ -321,7 +321,7 @@ an Ubuntu 12.04 installer:
   "fb=false debconf/frontend=noninteractive ",
   "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- &lt;enter&gt;"
+  "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
 
