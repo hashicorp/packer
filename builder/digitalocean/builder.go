@@ -20,14 +20,6 @@ import (
 // name="Ubuntu 12.04.4 x64", id=6374128,
 const DefaultImage = "ubuntu-12-04-x64"
 
-// see https://api.digitalocean.com/regions/?client_id=[client_id]&api_key=[api_key]
-// name="New York 3", id=8
-const DefaultRegion = "nyc3"
-
-// see https://api.digitalocean.com/sizes/?client_id=[client_id]&api_key=[api_key]
-// name="512MB", id=66 (the smallest droplet size)
-const DefaultSize = "512mb"
-
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
 
@@ -110,25 +102,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.Region == "" {
 		if b.config.RegionID != 0 {
 			b.config.Region = fmt.Sprintf("%v", b.config.RegionID)
-		} else {
-			b.config.Region = DefaultRegion
 		}
 	}
 
 	if b.config.Size == "" {
 		if b.config.SizeID != 0 {
 			b.config.Size = fmt.Sprintf("%v", b.config.SizeID)
-		} else {
-			b.config.Size = DefaultSize
 		}
 	}
 
 	if b.config.Image == "" {
 		if b.config.ImageID != 0 {
 			b.config.Image = fmt.Sprintf("%v", b.config.ImageID)
-		} else {
-			b.config.Image = DefaultImage
 		}
+	} else {
+		b.config.Image = DefaultImage
 	}
 
 	if b.config.SnapshotName == "" {
@@ -222,7 +210,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	common.ScrubConfig(b.config, b.config.ClientID, b.config.APIKey)
+	common.ScrubConfig(b.config, b.config.ClientID, b.config.APIKey, b.config.APIToken)
 	return nil, nil
 }
 
@@ -244,6 +232,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		new(stepGetDefaults),
 		new(stepCreateSSHKey),
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
