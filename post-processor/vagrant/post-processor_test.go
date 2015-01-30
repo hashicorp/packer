@@ -122,20 +122,25 @@ func TestPostProcessorPrepare_subConfigs(t *testing.T) {
 }
 
 func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
-	var p PostProcessor
-
 	f, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
+	name := f.Name()
 	c := testConfig()
-	c["vagrantfile_template"] = f.Name()
+	c["vagrantfile_template"] = name
 
-	os.Remove(f.Name())
+	if err := f.Close(); err != nil {
+		t.Fatal("err: %s", err)
+	}
 
-	err = p.Configure(c)
-	if err == nil {
+	if err := os.Remove(name); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	var p PostProcessor
+	if err := p.Configure(c); err == nil {
 		t.Fatal("expected an error since vagrantfile_template does not exist")
 	}
 }
