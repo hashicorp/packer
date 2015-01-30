@@ -136,7 +136,8 @@ each category, the available options are alphabetized and described.
 
 * `hard_drive_interface` (string) - The type of controller that the primary
   hard drive is attached to, defaults to "ide".  When set to "sata", the
-  drive is attached to an AHCI SATA controller.
+  drive is attached to an AHCI SATA controller. When set to "scsi", the drive
+  is attached to an LsiLogic SCSI controller.
 
 * `headless` (boolean) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the

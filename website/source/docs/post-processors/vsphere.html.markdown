@@ -31,7 +31,8 @@ Required:
 * `password` (string) - Password to use to authenticate to the vSphere
   endpoint.
 
-* `resource_pool` (string) - The resource pool to upload the VM to.
+* `resource_pool` (string) - The resource pool to upload the VM to. This can be
+  " " if you do not have resource pools configured
 
 * `username` (string) - The username to use to authenticate to the vSphere
   endpoint.

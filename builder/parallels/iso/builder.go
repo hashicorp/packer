@@ -256,6 +256,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepHTTPServer),
 		new(stepCreateVM),
 		new(stepCreateDisk),
+		new(stepSetBootOrder),
 		new(stepAttachISO),
 		&parallelscommon.StepAttachParallelsTools{
 			ParallelsToolsMode: b.config.ParallelsToolsMode,

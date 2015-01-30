@@ -50,6 +50,12 @@ func init() {
 			}, nil
 		},
 
+		"push": func() (cli.Command, error) {
+			return &command.PushCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"validate": func() (cli.Command, error) {
 			return &command.ValidateCommand{
 				Meta: meta,
