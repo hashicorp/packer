@@ -75,7 +75,7 @@ func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error 
 	// Copy the file into place by copying the temporary file we put
 	// into the shared folder into the proper location in the container
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("cp %s/%s %s", c.ContainerDir,
+		Command: fmt.Sprintf("command cp %s/%s %s", c.ContainerDir,
 			filepath.Base(tempfile.Name()), dst),
 	}
 
@@ -166,7 +166,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 	// Make the directory, then copy into it
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("set -e; mkdir -p %s; cp -R %s/* %s",
+		Command: fmt.Sprintf("set -e; mkdir -p %s; command cp -R %s/* %s",
 			containerDst, containerSrc, containerDst),
 	}
 	if err := c.Start(cmd); err != nil {

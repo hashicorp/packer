@@ -114,7 +114,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
-			Command: fmt.Sprintf("wget -O - https://bootstrap.saltstack.com | sudo sh -s %s", p.config.BootstrapArgs),
+			Command: fmt.Sprintf("curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh"),
+		}
+		ui.Message(fmt.Sprintf("Downloading saltstack bootstrap to /tmp/install_salt.sh"))
+		if err = cmd.StartWithUi(comm, ui); err != nil {
+			return fmt.Errorf("Unable to download Salt: %d", err)
+		}
+		cmd = &packer.RemoteCmd{
+			Command: fmt.Sprintf("sudo sh /tmp/install_salt.sh %s", p.config.BootstrapArgs),
 		}
 		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
@@ -174,7 +181,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info"}
+	cmd := &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info --retcode-passthrough"}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)

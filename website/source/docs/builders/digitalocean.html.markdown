@@ -66,8 +66,8 @@ each category, the available configuration keys are alphabetized.
 
 * `region` (string) - The name (or slug) of the region to launch the droplet in.
   Consequently, this is the region where the snapshot will be available.
-  This defaults to "nyc1", which is the slug for "New York 1".
-  See https://developers.digitalocean.com/regions/ for the accepted region names/slugs.
+  This defaults to "nyc3", which is the slug for "New York 3".
+  See https://developers.digitalocean.com/v2/#regions for the accepted region names/slugs.
 
 * `region_id` (integer) - The ID of the region to launch the droplet in. Consequently,
   this is the region where the snapshot will be available.
@@ -75,7 +75,7 @@ each category, the available configuration keys are alphabetized.
 
 * `size` (string) - The name (or slug) of the droplet size to use.
   This defaults to "512mb", which is the slug for "512MB".
-  See https://developers.digitalocean.com/sizes/ for the accepted size names/slugs.
+  See https://developers.digitalocean.com/#sizes for the accepted size names/slugs.
 
 * `size_id` (integer) - The ID of the droplet size to use.
   This setting is deprecated. Use `size` instead.

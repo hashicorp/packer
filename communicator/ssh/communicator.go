@@ -336,7 +336,7 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *
 	var mode os.FileMode
 	var size int64
 
-	if fi != nil {
+	if fi != nil && (*fi).Mode().IsRegular() {
 		mode = (*fi).Mode().Perm()
 		size = (*fi).Size()
 	} else {

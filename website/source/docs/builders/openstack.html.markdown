@@ -38,11 +38,6 @@ each category, the available configuration keys are alphabetized.
   If not specified, Packer will use the environment variables
   `SDK_PASSWORD` or `OS_PASSWORD` (in that order), if set.
 
-* `provider` (string) - The provider used to connect to the OpenStack service.
-  If not specified, Packer will use the environment variable
-  `SDK_PROVIDER`, if set.
-  For Rackspace this should be `rackspace-us` or `rackspace-uk`.
-
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
 
@@ -70,18 +65,19 @@ each category, the available configuration keys are alphabetized.
 * `networks` (array of strings) - A list of networks by UUID to attach
   to this instance.
 
-* `openstack_provider` (string)
+* `openstack_provider` (string) - A name of a provider that has a slightly
+  different API model. Currently supported values are "openstack" (default),
+  and "rackspace".
 
 * `project` (string) - The project name to boot the instance into. Some
   OpenStack installations require this.
   If not specified, Packer will use the environment variables
   `SDK_PROJECT` or `OS_TENANT_NAME` (in that order), if set.
 
-* `provider` (string) - A name of a provider that has a slightly
-  different API model. Currently supported values are "openstack" (default),
-  and "rackspace".
-  If not specified, Packer will use the environment variables
-  `SDK_PROVIDER` or `OS_AUTH_URL` (in that order), if set.
+* `provider` (string) - The provider used to connect to the OpenStack service.
+  If not specified, Packer will use the environment variables `SDK_PROVIDER` 
+  or `OS_AUTH_URL` (in that order), if set. 
+  For Rackspace this should be `rackspace-us` or `rackspace-uk`.
 
 * `proxy_url` (string)
 
@@ -124,7 +120,6 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
   "api_key": "",
   "openstack_provider": "rackspace",
   "provider": "rackspace-us",
-  "openstack_provider":"rackspace",
   "region": "DFW",
   "ssh_username": "root",
   "image_name": "Test image",

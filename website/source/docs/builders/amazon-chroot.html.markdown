@@ -30,7 +30,7 @@ in your account, it is up to you to use, delete, etc. the AMI.
 ## How Does it Work?
 
 This builder works by creating a new EBS volume from an existing source AMI
-and attaching it into an already-running EC2 instance. One attached, a
+and attaching it into an already-running EC2 instance. Once attached, a
 [chroot](http://en.wikipedia.org/wiki/Chroot) is used to provision the
 system within that volume. After provisioning, the volume is detached,
 snapshotted, and an AMI is made.
@@ -54,8 +54,8 @@ each category, the available configuration keys are alphabetized.
 ### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
-  If not specified, Packer will use the environment variables
-  `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
+  If not specified, Packer will use the key from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
+  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
   If the environmental variables aren't set and Packer is running on
   an EC2 instance, Packer will check the instance metadata for IAM role
   keys.
@@ -66,8 +66,8 @@ each category, the available configuration keys are alphabetized.
   [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
 * `secret_key` (string) - The secret key used to communicate with AWS.
-  If not specified, Packer will use the environment variables
-  `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
+  If not specified, Packer will use the secret from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
+  or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
   If the environmental variables aren't set and Packer is running on
   an EC2 instance, Packer will check the instance metadata for IAM role
   keys.
