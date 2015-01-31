@@ -87,6 +87,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"openstack_provider": &c.OpenstackProvider,
 		"floating_ip_pool":   &c.FloatingIpPool,
 		"floating_ip":        &c.FloatingIp,
+		"user_data_file":     &c.UserDataFile,
 	}
 
 	for n, ptr := range templates {
