@@ -16,6 +16,10 @@ External build services such as HashiCorp's Atlas make it easy to iterate on
 Packer templates, especially when the builder you are running may not be easily
 accessable (such as developing `qemu` builders on Mac or Windows).
 
+!> The Packer build service will receive the raw copy of your Packer template
+when you push. **If you have sensitive data in your Packer template, you should
+move that data into Packer variables or environment variables!**
+
 For the `push` command to work, the [push configuration](/docs/templates/push.html)
 must be completed within the template.
 
