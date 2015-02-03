@@ -62,4 +62,4 @@ each category, the available configuration keys are alphabetized.
 
 * `vcs` (bool) - If true, Packer will detect your VCS (if there is one)
   and only upload the files that are tracked by the VCS. This is useful
-  for automatically excluding ignored files. This defaults to true.
+  for automatically excluding ignored files. This defaults to false.
