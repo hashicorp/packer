@@ -155,6 +155,8 @@ func (c *PushCommand) Run(args []string) int {
 	if message != "" {
 		metadata["message"] = message
 	}
+	metadata["template"] = tpl.RawContents
+	metadata["template_name"] = filepath.Base(args[0])
 	uploadOpts.Metadata = metadata
 
 	// Warn about builds not having post-processors.
