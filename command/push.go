@@ -38,6 +38,7 @@ func (c *PushCommand) Run(args []string) int {
 	f := flag.NewFlagSet("push", flag.ContinueOnError)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
 	f.StringVar(&token, "token", "", "token")
+	f.StringVar(&message, "m", "", "message")
 	f.StringVar(&message, "message", "", "message")
 	if err := f.Parse(args); err != nil {
 		return 1
@@ -149,6 +150,13 @@ func (c *PushCommand) Run(args []string) int {
 		uploadOpts.Builds[b.Name] = info
 	}
 
+	// Add the upload metadata
+	metadata := make(map[string]interface{})
+	if message != "" {
+		metadata["message"] = message
+	}
+	uploadOpts.Metadata = metadata
+
 	// Warn about builds not having post-processors.
 	var badBuilds []string
 	for name, b := range uploadOpts.Builds {
@@ -224,10 +232,10 @@ Usage: packer push [options] TEMPLATE
 
 Options:
 
-  -message=<detail>    A message to identify the purpose or changes in this
-                       Packer template much like a VCS commit message
+  -m, -message=<detail>    A message to identify the purpose or changes in this
+                           Packer template much like a VCS commit message
 
-  -token=<token>       The access token to use to when uploading
+  -token=<token>           The access token to use to when uploading
 `
 
 	return strings.TrimSpace(helpText)
@@ -279,7 +287,7 @@ func (c *PushCommand) upload(
 	// Start the upload
 	doneCh, errCh := make(chan struct{}), make(chan error)
 	go func() {
-		err := c.client.UploadBuildConfigVersion(&version, r, r.Size)
+		err := c.client.UploadBuildConfigVersion(&version, opts.Metadata, r, r.Size)
 		if err != nil {
 			errCh <- err
 			return
@@ -292,9 +300,10 @@ func (c *PushCommand) upload(
 }
 
 type uploadOpts struct {
-	URL    string
-	Slug   string
-	Builds map[string]*uploadBuildInfo
+	URL      string
+	Slug     string
+	Builds   map[string]*uploadBuildInfo
+	Metadata map[string]interface{}
 }
 
 type uploadBuildInfo struct {
