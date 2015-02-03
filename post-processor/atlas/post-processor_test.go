@@ -10,7 +10,7 @@ import (
 
 func TestPostProcessorConfigure(t *testing.T) {
 	currentEnv := os.Getenv("ATLAS_TOKEN")
-	os.Unsetenv("ATLAS_TOKEN")
+	os.Setenv("ATLAS_TOKEN", "")
 	defer os.Setenv("ATLAS_TOKEN", currentEnv)
 
 	var p PostProcessor
