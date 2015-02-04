@@ -3,15 +3,16 @@ package packer
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/go-version"
-	"github.com/mitchellh/mapstructure"
-	jsonutil "github.com/mitchellh/packer/common/json"
 	"io"
 	"io/ioutil"
 	"os"
 	"sort"
 	"text/template"
 	"time"
+
+	"github.com/hashicorp/go-version"
+	"github.com/mitchellh/mapstructure"
+	jsonutil "github.com/mitchellh/packer/common/json"
 )
 
 // The rawTemplate struct represents the structure of a template read
@@ -33,6 +34,7 @@ type rawTemplate struct {
 // The Template struct represents a parsed template, parsed into the most
 // completed form it can be without additional processing by the caller.
 type Template struct {
+	RawContents    []byte
 	Description    string
 	Variables      map[string]RawVariable
 	Builders       map[string]RawBuilderConfig
@@ -163,6 +165,7 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 	}
 
 	t = &Template{}
+	t.RawContents = data
 	t.Description = rawTpl.Description
 	t.Variables = make(map[string]RawVariable)
 	t.Builders = make(map[string]RawBuilderConfig)

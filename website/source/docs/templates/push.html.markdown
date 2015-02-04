@@ -46,8 +46,8 @@ each category, the available configuration keys are alphabetized.
   this is `https://atlas.hashicorp.com`.
 
 * `base_dir` (string) - The base directory of the files to upload. This
-  will be the CWD when the build service executes your template. This
-  path is relative to the template.
+  will be the current working directory when the build service executes your
+  template. This path is relative to the template.
 
 * `include` (array of strings) - Glob patterns to include relative to
   the `base_dir`. If this is specified, only files that match the include
@@ -57,9 +57,38 @@ each category, the available configuration keys are alphabetized.
   the `base_dir`.
 
 * `token` (string) - An access token to use to authenticate to the build
-  service. For Atlas, you can retrieve this access token in your account
-  section by clicking your account name in the upper right corner.
+  service.
 
 * `vcs` (bool) - If true, Packer will detect your VCS (if there is one)
   and only upload the files that are tracked by the VCS. This is useful
-  for automatically excluding ignored files. This defaults to true.
+  for automatically excluding ignored files. This defaults to false.
+
+## Examples
+
+A push configuration section with minimal options:
+
+```javascript
+{
+  "push": {
+    "name": "hashicorp/precise64"
+  }
+}
+```
+
+A push configuration specifying Packer to inspect the VCS and list individual
+files to include:
+
+```javascript
+{
+  "push": {
+    "name": "hashicorp/precise64",
+    "vcs": true,
+    "include": [
+      "other_file/outside_of.vcs"
+    ]
+  }
+}
+```
+
+~> **Variable interpolation** is not currently possible in Packer push
+configurations. This will be fixed in an upcoming release.
