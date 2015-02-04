@@ -7,27 +7,42 @@ description: |-
 
 # Command-Line: Push
 
-The `packer push` Packer command takes a template and pushes it to a build
-service. The build service will automatically build your Packer template and
-expose the artifacts.
+The `packer push` Packer command takes a template and pushes it to a Packer
+build service such as [HashiCorp's Atlas](https://atlas.hashicorp.com). The
+build service will automatically build your Packer template and expose the
+artifacts.
 
-This command currently only sends templates to
-[Atlas](https://atlas.hashicorp.com) by HashiCorp, but the command will
-be pluggable in the future with alternate implementations.
-
-External build services such as Atlas make it easy to iterate on Packer
-templates, especially when the builder you're running may not be easily
+External build services such as HashiCorp's Atlas make it easy to iterate on
+Packer templates, especially when the builder you are running may not be easily
 accessable (such as developing `qemu` builders on Mac or Windows).
 
-For the `push` command to work, the
-[push configuration](/docs/templates/push.html)
+!> The Packer build service will receive the raw copy of your Packer template
+when you push. **If you have sensitive data in your Packer template, you should
+move that data into Packer variables or environment variables!**
+
+For the `push` command to work, the [push configuration](/docs/templates/push.html)
 must be completed within the template.
 
 ## Options
 
-* `-create=true` - If the build configuration matching the name of the push
-  doesn't exist, it will be created if this is true. This defaults to true.
+* `-message` - A message to identify the purpose or changes in this Packer
+  template much like a VCS commit message. This message will be passed to the
+  Packer build service. This option is also available as a short option `-m`.
 
-* `-token=FOO` - An access token for authenticating the push. This can also
-  be specified within the push configuration in the template. By setting this
-  in the template, you can take advantage of user variables.
+* `-token` - An access token for authenticating the push to the Packer build
+  service such as Atlas. This can also be specified within the push
+  configuration in the template.
+
+## Examples
+
+Push a Packer template:
+
+```shell
+$ packer push -m "Updating the apache version" template.json
+```
+
+Push a Packer template with a custom token:
+
+```shell
+$ packer push -token ABCD1234 template.json
+```
