@@ -10,7 +10,7 @@ import (
 
 // These are the extensions of files and directories that are unnecessary for the function
 // of a Parallels virtual machine.
-var UnnecessaryFilesPatterns = []string{"\\.log$", "\\.backup$", "\\.Backup$", "\\.app/"}
+var UnnecessaryFilesPatterns = []string{"\\.log$", "\\.backup$", "\\.Backup$", "\\.app/", "/Windows Disks/"}
 
 type ParallelsProvider struct{}
 
