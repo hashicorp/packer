@@ -18,9 +18,9 @@ workflow for creating artifacts with Packer and storing them in Atlas using this
 
 Here is an example workflow:
 
-1. Packer builds an AMI with the [Amazon AMI builder](http://www.packer.io/docs/builders/amazon.html)
+1. Packer builds an AMI with the [Amazon AMI builder](/docs/builders/amazon.html)
 2. The `atlas` post-processor takes the resulting AMI and uploads it to Atlas. The `atlas` post-processor is configured with the name of the AMI, for example `hashicorp/foobar`, to create the artifact in Atlas or update the version if the artifact already exists
-4. The version is released and available to be used in deployments with a tool like [Terraform](https://terraform.io)
+3. The new version is ready and available to be used in deployments with a tool like [Terraform](https://terraform.io)
 
 
 ## Configuration
@@ -39,6 +39,8 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 * `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will always be `aws.ami`.
   This field must be defined because Atlas can host other artifact types, such as Vagrant boxes.
+
+-> **Note:** If you want to upload Vagrant boxes to Atlas, for now use the [Vagrant Cloud post-processor](/docs/post-processors/vagrant-cloud.html).
 
 ### Optional:
 
