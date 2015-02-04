@@ -34,12 +34,14 @@ type pushUploadFn func(
 func (c *PushCommand) Run(args []string) int {
 	var token string
 	var message string
+	var create bool
 
 	f := flag.NewFlagSet("push", flag.ContinueOnError)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
 	f.StringVar(&token, "token", "", "token")
 	f.StringVar(&message, "m", "", "message")
 	f.StringVar(&message, "message", "", "message")
+	f.BoolVar(&create, "create", false, "create (deprecated)")
 	if err := f.Parse(args); err != nil {
 		return 1
 	}
@@ -48,6 +50,12 @@ func (c *PushCommand) Run(args []string) int {
 	if len(args) != 1 {
 		f.Usage()
 		return 1
+	}
+
+	// Print deprecations
+	if create {
+		c.Ui.Error(fmt.Sprintf("The '-create' option is now the default and is\n" +
+			"longer used. It will be removed in the next version."))
 	}
 
 	// Read the template
