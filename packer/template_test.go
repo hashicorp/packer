@@ -58,6 +58,10 @@ func TestParseTemplateFile_basic(t *testing.T) {
 	if len(result.Builders) != 1 {
 		t.Fatalf("bad: %#v", result.Builders)
 	}
+
+	if string(result.RawContents) != data {
+		t.Fatalf("expected %q to be %q", result.RawContents, data)
+	}
 }
 
 func TestParseTemplateFile_minPackerVersionBad(t *testing.T) {
