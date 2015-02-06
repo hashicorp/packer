@@ -226,7 +226,7 @@ each category, the available options are alphabetized and described.
   This is a [configuration template](/docs/templates/configuration-templates.html)
   that has a single valid variable: `Flavor`, which will be the value of
   `tools_upload_flavor`. By default the upload path is set to
-  `{{.Flavor}}.iso`.
+  `{{.Flavor}}.iso`. This setting is not used when `remote_type` is "esx5".
 
 * `version` (string) - The [vmx hardware version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746) for the new virtual machine.  Only the default value has been tested, any other value is experimental.  Default value is '9'.
 
