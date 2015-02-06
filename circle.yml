@@ -12,7 +12,7 @@ dependencies:
 
     - go get -u github.com/MSOpenTech/packer-azure/...
 
-override:
+  override:
     - cd $GOPATH/src/github.com/mitchellh/packer && make dev
     - cd $GOPATH/src/github.com/MSOpenTech/packer-azure && go get -u ./... && go install -tags 'restapi' ./...
 
