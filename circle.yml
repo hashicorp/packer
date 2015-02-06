@@ -10,11 +10,10 @@ dependencies:
     - go get -d github.com/mitchellh/packer
     - sed -i '/VersionPrerelease/ s/""/"dev"/' $GOPATH/src/github.com/mitchellh/packer/version.go
 
-    - go get -d github.com/MSOpenTech/packer-azure || true
 
   override:
     - cd $GOPATH/src/github.com/mitchellh/packer && make dev
-    - cd $GOPATH/src/github.com/MSOpenTech/packer-azure && go get -u ./... && go install -tags 'restapi' ./...
+    - go get -tags restapi github.com/MSOpenTech/packer-azure/...
 
   post:
     - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C  $GOPATH/bin $(find $GOPATH/bin -name packer\* -printf '%P ')
