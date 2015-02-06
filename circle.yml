@@ -10,7 +10,7 @@ dependencies:
     - go get -d github.com/mitchellh/packer
     - sed -i '/VersionPrerelease/ s/""/"dev"/' $GOPATH/src/github.com/mitchellh/packer/version.go
 
-    - go get -u github.com/MSOpenTech/packer-azure/...
+    - go get -d github.com/MSOpenTech/packer-azure
 
   override:
     - cd $GOPATH/src/github.com/mitchellh/packer && make dev
