@@ -12,3 +12,7 @@ dependencies:
     - cd $GOPATH/src/github.com/mitchellh/packer/ && make dev
   post:
     - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C  $GOPATH/src/github.com/mitchellh/packer/bin  .
+
+test:
+  override:
+    - /bin/true
