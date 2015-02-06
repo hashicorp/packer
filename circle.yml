@@ -1,0 +1,8 @@
+dependencies:
+  pre:
+    - go get github.com/mitchellh/gox
+    - gox -osarch=linux/amd64 -build-toolchain
+  override:
+    - make dev
+  post:
+    - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C /go/src/github.com/mitchellh/packer/bin  .
