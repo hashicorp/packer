@@ -2,7 +2,9 @@ dependencies:
   pre:
     - go get github.com/mitchellh/gox
     - gox -osarch=linux/amd64 -build-toolchain
+    - go get -d github.com/mitchellh/packer
+    - sed -i '/VersionPrerelease/ s/""/"dev"/' $GOPATH/src/github.com/mitchellh/packer/version.go \
   override:
-    - make dev
+    - cd $GOPATH/src/github.com/mitchellh/packer/ && make dev
   post:
-    - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C /go/src/github.com/mitchellh/packer/bin  .
+    - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C  $GOPATH/src/github.com/mitchellh/packer/bin  .
