@@ -1,3 +1,7 @@
+machine:
+  environment:
+    GOPATH: "/home/ubuntu/.go_workspace"
+
 dependencies:
   pre:
     - go get github.com/mitchellh/gox
