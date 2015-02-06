@@ -11,7 +11,7 @@ dependencies:
   override:
     - cd $GOPATH/src/github.com/mitchellh/packer/ && make dev
   post:
-    - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C  $GOPATH/src/github.com/mitchellh/packer/bin  .
+    - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C  $GOPATH/bin $(find $GOPATH/bin -name packer\* -printf '%P ')
 
 test:
   override:
