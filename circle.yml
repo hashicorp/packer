@@ -1,11 +1,12 @@
 machine:
   environment:
     GOPATH: "/home/ubuntu/.go_workspace"
+    CGO_ENABLED: "0"
 
 dependencies:
   pre:
     - go get github.com/mitchellh/gox
-    - gox -osarch=linux/amd64 -build-toolchain
+    - CGO_ENABLED=0 gox -osarch=linux/amd64 -build-toolchain
 
     - go get -d github.com/mitchellh/packer
     - sed -i '/VersionPrerelease/ s/""/"dev"/' $GOPATH/src/github.com/mitchellh/packer/version.go
