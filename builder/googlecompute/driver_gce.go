@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"code.google.com/p/google-api-go-client/compute/v1"
+	//"code.google.com/p/google-api-go-client/compute/v1"
 	"github.com/mitchellh/packer/packer"
+	"google.golang.org/api/compute/v1"
 
 	// oauth2 "github.com/rasa/oauth2-fork-b3f9a68"
 	"github.com/rasa/oauth2-fork-b3f9a68"

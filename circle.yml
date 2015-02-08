@@ -1,0 +1,24 @@
+machine:
+  environment:
+    GOPATH: "/home/ubuntu/.go_workspace"
+    CGO_ENABLED: "0"
+
+dependencies:
+  pre:
+    - go get github.com/mitchellh/gox
+    - CGO_ENABLED=0 gox -osarch=linux/amd64 -build-toolchain
+
+    - go get -d github.com/mitchellh/packer
+    - sed -i '/VersionPrerelease/ s/""/"dev"/' $GOPATH/src/github.com/mitchellh/packer/version.go
+
+
+  override:
+    - cd $GOPATH/src/github.com/mitchellh/packer && make dev
+    - go get -tags restapi github.com/MSOpenTech/packer-azure/...
+
+  post:
+    - tar -czvf $CIRCLE_ARTIFACTS/packer.tgz -C  $GOPATH/bin $(find $GOPATH/bin -name packer\* -printf '%P ')
+
+test:
+  override:
+    - /bin/true

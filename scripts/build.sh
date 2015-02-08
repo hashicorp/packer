@@ -38,7 +38,7 @@ mkdir -p bin/
 # Build!
 echo "==> Building..."
 set +e
-gox \
+CGO_ENABLED=0 gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
     -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
