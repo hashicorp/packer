@@ -14,6 +14,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 )
 
@@ -171,8 +172,58 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 	return c.scpSession("scp -rvt "+dst, scpFunc)
 }
 
-func (c *comm) Download(string, io.Writer) error {
-	panic("not implemented yet")
+func (c *comm) Download(path string, output io.Writer) error {
+
+	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
+		fmt.Fprint(w, "\x00")
+
+		// read file info
+		fi, err := stdoutR.ReadString( '\n')
+		if err != nil {
+			return err
+		}
+
+		if len(fi) < 0 {
+			return fmt.Errorf("empty response from server")
+		}
+
+		switch fi[0] {
+		case '\x01', '\x02':
+			return fmt.Errorf("%s", fi[1:len(fi)])
+		case 'C':
+		case 'D':
+			return fmt.Errorf("remote file is directory")
+		default:
+			return fmt.Errorf("unexpected server response (%x)", fi[0])
+		}
+
+		var mode string
+		var size int64
+
+		n, err := fmt.Sscanf(fi, "%6s %d ", &mode, &size)
+		if err != nil || n != 2 {
+			return fmt.Errorf("can't parse server response (%s)", fi)
+		}
+		if size < 0 {
+			return fmt.Errorf("negative file size")
+		}
+
+		fmt.Fprint(w, "\x00")
+
+		if _, err := io.CopyN(output, stdoutR, size); err != nil {
+			return err
+		}
+
+		fmt.Fprint(w, "\x00")
+
+		if err := checkSCPStatus(stdoutR); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return c.scpSession("scp -vf "+strconv.Quote(path), scpFunc)
 }
 
 func (c *comm) newSession() (session *ssh.Session, err error) {
