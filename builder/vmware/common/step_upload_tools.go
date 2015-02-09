@@ -23,14 +23,14 @@ type StepUploadTools struct {
 func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
+	if c.ToolsUploadFlavor == "" {
+		return multistep.ActionContinue
+	}
+
 	if c.RemoteType == "esx5" {
 		if err := driver.ToolsInstall(); err != nil {
 			state.Put("error", fmt.Errorf("Couldn't mount VMware tools ISO. Please check the 'guest_os_type' in your template.json."))
 		}
-		return multistep.ActionContinue
-	}
-
-	if c.ToolsUploadFlavor == "" {
 		return multistep.ActionContinue
 	}
 
