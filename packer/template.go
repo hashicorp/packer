@@ -263,7 +263,18 @@ func ParseTemplate(data []byte, vars map[string]string) (t *Template, err error)
 		configs := make([]RawPostProcessorConfig, 0, len(rawPP))
 		for j, pp := range rawPP {
 			var config RawPostProcessorConfig
-			if err := mapstructure.Decode(pp, &config); err != nil {
+
+			decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				Result:           &config,
+				WeaklyTypedInput: true,
+			})
+			if err != nil {
+				// This should never happen.
+				panic(err)
+			}
+
+			err = decoder.Decode(pp)
+			if err != nil {
 				if merr, ok := err.(*mapstructure.Error); ok {
 					for _, err := range merr.Errors {
 						errors = append(errors,
