@@ -18,7 +18,7 @@ Compute Engine doesn't allow the creation of images from scratch.
 Authenticating with Google Cloud services requires at most one JSON file, 
 called the _account file_. The _account file_ is **not** required if you are running
 the `googlecompute` Packer builder from a GCE instance with a properly-configured
-[Compute Engine Service Account](https://cloud.google.com/compute/docs/authentication.
+[Compute Engine Service Account](https://cloud.google.com/compute/docs/authentication).
 
 ### Running With a Compute Engine Service Account
 If you run the `googlecompute` Packer builder from a GCE instance, you can configure that
