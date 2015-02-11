@@ -115,7 +115,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.client, err = atlas.NewClient(p.config.ServerAddr)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error initializing client: %s", err))
+				errs, fmt.Errorf("Error initializing atlas client: %s", err))
 			return errs
 		}
 	}
@@ -126,8 +126,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if !p.config.Test {
 		// Verify the client
 		if err := p.client.Verify(); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error initializing client: %s", err))
+			if err == atlas.ErrAuth {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Error connecting to atlas server, please check your ATLAS_TOKEN env: %s", err))
+			} else {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Error initializing atlas client: %s", err))
+			}
 			return errs
 		}
 	}
