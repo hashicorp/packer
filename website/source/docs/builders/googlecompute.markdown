@@ -75,7 +75,7 @@ existing GCE image. The account file is obtained in the previous section.
   "type": "googlecompute",
   "account_file": "account.json",
   "project_id": "my-project",
-  "source_image": "debian-7-wheezy-v20140718",
+  "source_image": "debian-7-wheezy-v20150127",
   "zone": "us-central1-a"
 }
 ```
@@ -91,44 +91,44 @@ each category, the available options are alphabetized and described.
   and store images.
 
 * `source_image` (string) - The source image to use to create the new image
-  from. Example: "debian-7"
+  from. Example: `"debian-7-wheezy-v20150127"`
 
 * `zone` (string) - The zone in which to launch the instance used to create
-  the image. Example: "us-central1-a"
+  the image. Example: `"us-central1-a"`
 
 ### Optional:
 
 * `account_file` (string) - The JSON file containing your account credentials.
-     Not required if you run Packer on a GCE instance with a service account.
-     Instructions for creating file or using service accounts are above.
+  Not required if you run Packer on a GCE instance with a service account.
+  Instructions for creating file or using service accounts are above.
 
 * `disk_size` (integer) - The size of the disk in GB.
-  This defaults to 10, which is 10GB.
+  This defaults to `10`, which is 10GB.
 
 * `image_name` (string) - The unique name of the resulting image.
-  Defaults to `packer-{{timestamp}}`.
+  Defaults to `"packer-{{timestamp}}"`.
 
 * `image_description` (string) - The description of the resulting image.
 
 * `instance_name` (string) - A name to give the launched instance. Beware
-  that this must be unique. Defaults to "packer-{{uuid}}".
+  that this must be unique. Defaults to `"packer-{{uuid}}"`.
 
-* `machine_type` (string) - The machine type. Defaults to `n1-standard-1`.
+* `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
 * `metadata` (object of key/value strings)
 
 * `network` (string) - The Google Compute network to use for the launched
-  instance. Defaults to `default`.
+  instance. Defaults to `"default"`.
 
-* `ssh_port` (integer) - The SSH port. Defaults to 22.
+* `ssh_port` (integer) - The SSH port. Defaults to `22`.
 
 * `ssh_timeout` (string) - The time to wait for SSH to become available.
-  Defaults to "1m".
+  Defaults to `"1m"`.
 
-* `ssh_username` (string) - The SSH username. Defaults to "root".
+* `ssh_username` (string) - The SSH username. Defaults to `"root"`.
 
 * `state_timeout` (string) - The time to wait for instance state changes.
-  Defaults to "5m".
+  Defaults to `"5m"`.
 
 * `tags` (array of strings)
 
