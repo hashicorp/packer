@@ -54,6 +54,7 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 		vmxData[ide+"devicetype"] = "cdrom-raw"
 		vmxData[ide+"filename"] = "auto detect"
+		vmxData[ide+"clientdevice"] = "TRUE"
 	}
 
 	ui.Message("Disabling VNC server...")

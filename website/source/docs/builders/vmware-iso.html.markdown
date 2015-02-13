@@ -398,6 +398,10 @@ modify as well:
 
 -   `remote_password` - The SSH password for access to the remote machine.
 
+-   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
+    format of the exported virtual machine. This defaults to "ovf".
+    Before using this option, you need to install `ovftool`.
+
 ### Using a Floppy for Linux kickstart file or preseed
 
 Depending on your network configuration, it may be difficult to use packer's

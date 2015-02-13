@@ -40,6 +40,7 @@ type Config struct {
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
 	FloppyFiles         []string `mapstructure:"floppy_files"`
+	Format              string   `mapstruture:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
 	ISOChecksum         string   `mapstructure:"iso_checksum"`
 	ISOChecksumType     string   `mapstructure:"iso_checksum_type"`
@@ -235,6 +236,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+	if b.config.RemoteType != "" && b.config.Format != "" {
+		b.config.OutputDir = b.config.VMName
+	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Setup the state bag
@@ -289,7 +293,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VNCPortMin: b.config.VNCPortMin,
 			VNCPortMax: b.config.VNCPortMax,
 		},
-		&StepRegister{},
+		&StepRegister{
+			Format: b.config.Format,
+		},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
@@ -328,6 +334,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
 		},
+		&StepExport{
+			Format: b.config.Format,
+		},
 	}
 
 	// Run!
@@ -357,7 +366,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Compile the artifact list
-	files, err := state.Get("dir").(OutputDir).ListFiles()
+	var files []string
+	if b.config.RemoteType != "" {
+		dir = new(vmwcommon.LocalOutputDir)
+		dir.SetOutputDir(b.config.OutputDir)
+		files, err = dir.ListFiles()
+	} else {
+		files, err = state.Get("dir").(OutputDir).ListFiles()
+	}
 	if err != nil {
 		return nil, err
 	}
