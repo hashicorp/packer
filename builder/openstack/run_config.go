@@ -68,10 +68,13 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"flavor":       &c.Flavor,
-		"ssh_timeout":  &c.RawSSHTimeout,
-		"ssh_username": &c.SSHUsername,
-		"source_image": &c.SourceImage,
+		"flavor":             &c.Flavor,
+		"ssh_timeout":        &c.RawSSHTimeout,
+		"ssh_username":       &c.SSHUsername,
+		"source_image":       &c.SourceImage,
+		"openstack_provider": &c.OpenstackProvider,
+		"floating_ip_pool":   &c.FloatingIpPool,
+		"floating_ip":        &c.FloatingIp,
 	}
 
 	for n, ptr := range templates {
