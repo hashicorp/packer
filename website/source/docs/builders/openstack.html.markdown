@@ -102,11 +102,19 @@ each category, the available configuration keys are alphabetized.
 * `ssh_username` (string) - The username to use in order to communicate
   over SSH to the running server. The default is "root".
 
+* `ssh_interface` (string) - The type of interface to connect via SSH. Values
+  useful for Rackspace are "public" or "private", and the default behavior is
+  to connect via whichever is returned first from the OpenStack API.
+
 * `tenant_id` (string) - Tenant ID for accessing OpenStack if your
   installation requires this.
 
 * `use_floating_ip` (boolean) - Whether or not to use a floating IP for
   the instance. Defaults to false.
+
+* `rackconnect_wait` (boolean) - For rackspace, whether or not to wait for
+  Rackconnect to assign the machine an IP address before connecting via SSH.
+  Defaults to false.
 
 ## Basic Example: Rackspace public cloud
 
