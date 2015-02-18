@@ -20,6 +20,7 @@ type BuildCommand struct {
 
 func (c BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
+	var artifactOutputFile string
 	buildOptions := new(cmdcommon.BuildOptions)
 
 	env, err := c.Meta.Environment()
@@ -34,6 +35,7 @@ func (c BuildCommand) Run(args []string) int {
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
 	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
 	cmdFlags.BoolVar(&cfgParallel, "parallel", true, "enable/disable parallelization")
+	cmdFlags.StringVar(&artifactOutputFile, "artifact-output-file", "", "Filename where to store the created instance id")
 	cmdcommon.BuildOptionFlags(cmdFlags, buildOptions)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
@@ -250,6 +252,14 @@ func (c BuildCommand) Run(args []string) int {
 
 				iStr := strconv.FormatInt(int64(i), 10)
 				if artifact != nil {
+					if (artifactOutputFile != "") {
+						f, err := os.Create(artifactOutputFile)
+						if err != nil {
+							log.Fatal(err)
+						}
+						defer f.Close()
+						f.WriteString(artifact.Id() + "\n")
+					}
 					ui.Machine("artifact", iStr, "builder-id", artifact.BuilderId())
 					ui.Machine("artifact", iStr, "id", artifact.Id())
 					ui.Machine("artifact", iStr, "string", artifact.String())
@@ -291,14 +301,15 @@ Usage: packer build [options] TEMPLATE
 
 Options:
 
-  -debug                     Debug mode enabled for builds
-  -force                     Force a build to continue if artifacts exist, deletes existing artifacts
-  -machine-readable          Machine-readable output
-  -except=foo,bar,baz        Build all builds other than these
-  -only=foo,bar,baz          Only build the given builds by name
-  -parallel=false            Disable parallelization (on by default)
-  -var 'key=value'           Variable for templates, can be used multiple times.
-  -var-file=path             JSON file containing user variables.
+  -debug                         Debug mode enabled for builds
+  -force                         Force a build to continue if artifacts exist, deletes existing artifacts
+  -machine-readable              Machine-readable output
+  -artifact-output-file=path     Filename where to store the created instance id
+  -except=foo,bar,baz            Build all builds other than these
+  -only=foo,bar,baz              Only build the given builds by name
+  -parallel=false                Disable parallelization (on by default)
+  -var 'key=value'               Variable for templates, can be used multiple times.
+  -var-file=path                 JSON file containing user variables.
 `
 
 	return strings.TrimSpace(helpText)
