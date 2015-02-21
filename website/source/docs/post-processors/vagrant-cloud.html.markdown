@@ -24,7 +24,7 @@ It's important to understand the workflow that using this post-processor
 enforces in order to take full advantage of Vagrant and Vagrant Cloud.
 
 The use of this processor assume that you currently distribute, or plan
-to distrubute, boxes via Vagrant Cloud. It also assumes you create Vagrant
+to distribute, boxes via Vagrant Cloud. It also assumes you create Vagrant
 Boxes and deliver them to your team in some fashion.
 
 Here is an example workflow:

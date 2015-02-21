@@ -26,7 +26,7 @@ instance to use a [Compute Engine Service Account](https://cloud.google.com/comp
 to Google Cloud without having to bake in a separate credential/authentication file. 
 
 To create a GCE instance that uses a service account, provide the required scopes when
-launching the intance.
+launching the instance.
 
 For `gcloud`, do this via the `--scopes` parameter:
 

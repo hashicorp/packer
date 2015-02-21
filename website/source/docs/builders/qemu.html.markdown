@@ -185,7 +185,7 @@ each category, the available options are alphabetized and described.
   the qemu command line (though not, at this time, qemu-img). Each array
   of strings makes up a command line switch that overrides matching default
   switch/value pairs. Any value specified as an empty string is ignored.
-  All values after the switch are concatenated with no separater.
+  All values after the switch are concatenated with no separator.
 
 ~> **Warning:** The qemu command line allows extreme flexibility, so beware of
 conflicting arguments causing failures of your run. For instance, using
