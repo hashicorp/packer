@@ -19,6 +19,9 @@ type Config struct {
 	LoginPassword string `mapstructure:"login_password"`
 	LoginServer   string `mapstructure:"login_server"`
 
+	Repository    string `mapstructure:"repository"`
+	Tag           string `mapstructure:"tag"`
+
 	tpl *packer.ConfigTemplate
 }
 
@@ -104,7 +107,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Get the name. We strip off any tags from the name because the
 	// push doesn't use those.
-	name := artifact.Id()
+	//name := artifact.Id()
+
+	name := p.config.Repository
+	if p.config.Tag != "" {
+		name += ":" + p.config.Tag
+	}
+
+	ui.Message("name is: " + name)
 
 	if i := strings.Index(name, "/"); i >= 0 {
 		// This should always be true because the / is required. But we have
