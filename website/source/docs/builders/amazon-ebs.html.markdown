@@ -2,7 +2,7 @@
 layout: "docs"
 page_title: "Amazon AMI Builder (EBS backed)"
 description: |-
-  The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS volumes for use in EC2. For more information on the difference betwen EBS-backed instances and instance-store backed instances, see the storage for the root device section in the EC2 documentation.
+  The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS volumes for use in EC2. For more information on the difference between EBS-backed instances and instance-store backed instances, see the storage for the root device section in the EC2 documentation.
 ---
 
 # AMI Builder (EBS backed)
@@ -11,7 +11,7 @@ Type: `amazon-ebs`
 
 The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
 volumes for use in [EC2](http://aws.amazon.com/ec2/). For more information
-on the difference betwen EBS-backed instances and instance-store backed
+on the difference between EBS-backed instances and instance-store backed
 instances, see the
 ["storage for the root device" section in the EC2 documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
 
