@@ -51,7 +51,7 @@ However, if you want to configure things a bit more, the post-processor
 does expose some configuration options. The available options are listed
 below, with more details about certain options in following sections.
 
-* `compression_level` (integer) - An integer repesenting the
+* `compression_level` (integer) - An integer representing the
   compression level to use when creating the Vagrant box.  Valid
   values range from 0 to 9, with 0 being no compression and 9 being
   the best compression. By default, compression is enabled at level 6.
