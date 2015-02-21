@@ -69,7 +69,7 @@ list as contributors come and go.
 			<h3>Ross Smith II (<a href="https://github.com/rasa" target="_blank">@rasa</a>)</h3>
 			<p>
 <a href="http://smithii.com/" target="_blank">Ross Smith</a> maintains our VMware builder on Windows, and provides other valuable assistance.
-Ross is an open source enthusist, published author, and freelance consultant.</p>
+Ross is an open source enthusiast, published author, and freelance consultant.</p>
 		</div>
 	</div>
 
