@@ -50,7 +50,7 @@ Optional parameters:
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
 
-* `facter` (object, string keys and values) - Additonal
+* `facter` (object, string keys and values) - Additional
   [facts](http://puppetlabs.com/puppet/related-projects/facter) to make
   available when Puppet is running.
 
