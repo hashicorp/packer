@@ -2,7 +2,7 @@
 layout: "docs"
 page_title: "User Variables in Templates"
 description: |-
-  User variables allow your templates to be further configured with variables from the command-line, environmental variables, or files. This lets you parameterize your templates so that you can keep secret tokens, environment-specific data, and other types of information out of your templates. This maximizes the portablility and shareability of the template.
+  User variables allow your templates to be further configured with variables from the command-line, environmental variables, or files. This lets you parameterize your templates so that you can keep secret tokens, environment-specific data, and other types of information out of your templates. This maximizes the portability and shareability of the template.
 ---
 
 # User Variables

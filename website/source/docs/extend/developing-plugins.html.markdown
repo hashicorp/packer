@@ -34,7 +34,7 @@ uses, because they're completely isolated into the process space of the
 plugin itself.
 
 And, thanks to Go's [interfaces](http://golang.org/doc/effective_go.html#interfaces_and_types),
-it doesn't even look like inter-process communication is occuring. You just
+it doesn't even look like inter-process communication is occurring. You just
 use the interfaces like normal, but in fact they're being executed in
 a remote process. Pretty cool.
 
@@ -93,7 +93,7 @@ in the relevant subsections available in the navigation to the left.
 
 ~> **Lock your dependencies!** Unfortunately, Go's dependency
 management story is fairly sad. There are various unofficial methods out
-there for locking dependencies, and using one of them is highly recomended
+there for locking dependencies, and using one of them is highly recommended
 since the Packer codebase will continue to improve, potentially breaking
 APIs along the way until there is a stable release. By locking your dependencies,
 your plugins will continue to work with the version of Packer you lock to.

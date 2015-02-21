@@ -73,7 +73,7 @@ passed directly into something like the standard Go `flag` package for
 command-line flag parsing.
 
 The return value of `Run` is the exit status for the command. If everything
-ran successfully, this should be 0. If any errors occured, it should be any
+ran successfully, this should be 0. If any errors occurred, it should be any
 positive integer.
 
 ### The "Synopsis" Method
