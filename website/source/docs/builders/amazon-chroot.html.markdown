@@ -122,7 +122,7 @@ each category, the available configuration keys are alphabetized.
   which forces Packer to find an open device automatically.
 
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
-  HVM-compatible AMIs.
+  HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
