@@ -159,9 +159,9 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	}
 	defer os.RemoveAll(td)
 
-  facts := make(map[string]string)
+	facts := make(map[string]string)
 	facts["fact_name"] = "fact_value"
-  config["facter"] = facts
+	config["facter"] = facts
 
 	p = new(Provisioner)
 	err = p.Prepare(config)
@@ -169,7 +169,7 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-  // Make sure the default facts are present
+	// Make sure the default facts are present
 	delete(config, "facter")
 	p = new(Provisioner)
 	err = p.Prepare(config)
