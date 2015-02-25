@@ -4,6 +4,11 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * builder/openstack: Add rackconnect_wait for Rackspace customers to wait for
+    RackConnect data to appear
+  * buidler/openstakc: Add ssh_interface option for rackconnect for users that
+    have prohibitive firewalls
+
 BUG FIXES:
 
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
