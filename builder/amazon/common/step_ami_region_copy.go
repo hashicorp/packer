@@ -79,7 +79,7 @@ func amiRegionCopy(state multistep.StateBag, auth aws.Auth, imageId string,
 
 	if err != nil {
 		return "", fmt.Errorf("Error Copying AMI (%s) to region (%s): %s",
-			imageId, target, err)
+			imageId, target.Name, err)
 	}
 
 	stateChange := StateChangeConf{
@@ -91,7 +91,7 @@ func amiRegionCopy(state multistep.StateBag, auth aws.Auth, imageId string,
 
 	if _, err := WaitForState(&stateChange); err != nil {
 		return "", fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
-			resp.ImageId, target, err)
+			resp.ImageId, target.Name, err)
 	}
 
 	return resp.ImageId, nil
