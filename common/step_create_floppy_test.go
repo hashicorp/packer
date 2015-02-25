@@ -76,7 +76,7 @@ func TestStepCreateFloppy(t *testing.T) {
 		floppy_path := state.Get("floppy_path").(string)
 
 		if _, err := os.Stat(floppy_path); err != nil {
-			t.Fatal("file not found: %s for %v", floppy_path, step.Files)
+			t.Fatalf("file not found: %s for %v", floppy_path, step.Files)
 		}
 
 		if len(step.FilesAdded) != expected {
@@ -86,7 +86,7 @@ func TestStepCreateFloppy(t *testing.T) {
 		step.Cleanup(state)
 
 		if _, err := os.Stat(floppy_path); err == nil {
-			t.Fatal("file found: %s for %v", floppy_path, step.Files)
+			t.Fatalf("file found: %s for %v", floppy_path, step.Files)
 		}
 	}
 }
@@ -177,7 +177,7 @@ func xxxTestStepCreateFloppy_notfound(t *testing.T) {
 		floppy_path := state.Get("floppy_path").(string)
 
 		if _, err := os.Stat(floppy_path); err != nil {
-			t.Fatal("file not found: %s for %v", floppy_path, step.Files)
+			t.Fatalf("file not found: %s for %v", floppy_path, step.Files)
 		}
 
 		if len(step.FilesAdded) != expected {
@@ -187,7 +187,7 @@ func xxxTestStepCreateFloppy_notfound(t *testing.T) {
 		step.Cleanup(state)
 
 		if _, err := os.Stat(floppy_path); err == nil {
-			t.Fatal("file found: %s for %v", floppy_path, step.Files)
+			t.Fatalf("file found: %s for %v", floppy_path, step.Files)
 		}
 	}
 }

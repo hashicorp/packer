@@ -78,7 +78,7 @@ func (v VagrantCloudClient) Get(path string) (*http.Response, error) {
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := v.client.Do(req)
 
-	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%s", resp)
+	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
 
 	return resp, err
 }
@@ -96,7 +96,7 @@ func (v VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := v.client.Do(req)
 
-	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%s", resp)
+	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
 
 	return resp, err
 }
@@ -128,7 +128,7 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 
 	resp, err := v.client.Do(request)
 
-	log.Printf("Post-Processor Vagrant Cloud Upload Response: \n\n%s", resp)
+	log.Printf("Post-Processor Vagrant Cloud Upload Response: \n\n%+v", resp)
 
 	return resp, err
 }
@@ -153,7 +153,7 @@ func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response,
 
 	resp, err := v.client.Do(req)
 
-	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%s", resp)
+	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
 
 	return resp, err
 }
@@ -172,7 +172,7 @@ func (v VagrantCloudClient) Put(path string) (*http.Response, error) {
 
 	resp, err := v.client.Do(req)
 
-	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%s", resp)
+	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
 
 	return resp, err
 }

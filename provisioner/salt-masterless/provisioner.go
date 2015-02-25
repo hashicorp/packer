@@ -118,14 +118,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 		ui.Message(fmt.Sprintf("Downloading saltstack bootstrap to /tmp/install_salt.sh"))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
-			return fmt.Errorf("Unable to download Salt: %d", err)
+			return fmt.Errorf("Unable to download Salt: %s", err)
 		}
 		cmd = &packer.RemoteCmd{
 			Command: fmt.Sprintf("sudo sh /tmp/install_salt.sh %s", p.config.BootstrapArgs),
 		}
-		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd))
+		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd.Command))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
-			return fmt.Errorf("Unable to install Salt: %d", err)
+			return fmt.Errorf("Unable to install Salt: %s", err)
 		}
 	}
 
@@ -146,7 +146,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "minion"))
 		dst = "/etc/salt/minion"
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %d", p.config.TempConfigDir, err)
+			return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %s", p.config.TempConfigDir, err)
 		}
 	}
 
@@ -161,7 +161,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "states"))
 	dst = "/srv/salt"
 	if err = p.moveFile(ui, comm, dst, src); err != nil {
-		return fmt.Errorf("Unable to move %s/states to /srv/salt: %d", p.config.TempConfigDir, err)
+		return fmt.Errorf("Unable to move %s/states to /srv/salt: %s", p.config.TempConfigDir, err)
 	}
 
 	if p.config.LocalPillarRoots != "" {
@@ -176,7 +176,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "pillar"))
 		dst = "/srv/pillar"
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Unable to move %s/pillar to /srv/pillar: %d", p.config.TempConfigDir, err)
+			return fmt.Errorf("Unable to move %s/pillar to /srv/pillar: %s", p.config.TempConfigDir, err)
 		}
 	}
 
@@ -220,7 +220,7 @@ func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst, src 
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
 		}
 
-		return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %d", p.config.TempConfigDir, err)
+		return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %s", p.config.TempConfigDir, err)
 	}
 	return nil
 }

@@ -21,7 +21,6 @@ func (s *StepWaitForRackConnect) Run(state multistep.StateBag) multistep.StepAct
 	csp := state.Get("csp").(gophercloud.CloudServersProvider)
 	server := state.Get("server").(*gophercloud.Server)
 	ui := state.Get("ui").(packer.Ui)
-	fmt.Printf("%s", server)
 
 	ui.Say(fmt.Sprintf("Waiting for server (%s) to become RackConnect ready...", server.Id))
 
