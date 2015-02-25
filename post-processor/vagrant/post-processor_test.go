@@ -132,7 +132,7 @@ func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
 	c["vagrantfile_template"] = name
 
 	if err := f.Close(); err != nil {
-		t.Fatal("err: %s", err)
+		t.Fatalf("err: %s", err)
 	}
 
 	if err := os.Remove(name); err != nil {
