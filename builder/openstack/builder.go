@@ -95,12 +95,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SecurityGroups: b.config.SecurityGroups,
 			Networks:       b.config.Networks,
 		},
+		&StepWaitForRackConnect{
+			Wait:           b.config.RackconnectWait,
+		},
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
 			FloatingIp:     b.config.FloatingIp,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(csp, b.config.SSHPort),
+			SSHAddress:     SSHAddress(csp, b.config.SSHInterface, b.config.SSHPort),
 			SSHConfig:      SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
