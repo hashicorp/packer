@@ -13,6 +13,16 @@ This VirtualBox Packer builder is able to create [VirtualBox](https://www.virtua
 virtual machines and export them in the OVF format, starting from an
 existing OVF/OVA (exported virtual machine image).
 
+When exporting from VirtualBox make sure to choose OVF Version 2, since Version 1 is not compatible and will generate errors like this:
+
+```
+==> virtualbox-ovf: Progress state: VBOX_E_FILE_ERROR
+==> virtualbox-ovf: VBoxManage: error: Appliance read failed
+==> virtualbox-ovf: VBoxManage: error: Error reading "source.ova": element "Section" has no "type" attribute, line 21
+==> virtualbox-ovf: VBoxManage: error: Details: code VBOX_E_FILE_ERROR (0x80bb0004), component Appliance, interface IAppliance
+==> virtualbox-ovf: VBoxManage: error: Context: "int handleImportAppliance(HandlerArg*)" at line 304 of file VBoxManageAppliance.cpp
+```
+
 The builder builds a virtual machine by importing an existing OVF or OVA
 file. It then boots this image, runs provisioners on this new VM, and
 exports that VM to create the image. The imported machine is deleted prior
