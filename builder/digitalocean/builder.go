@@ -100,23 +100,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Region == "" {
-		if b.config.RegionID != 0 {
-			b.config.Region = fmt.Sprintf("%v", b.config.RegionID)
-		}
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("region must be specified"))
 	}
 
 	if b.config.Size == "" {
-		if b.config.SizeID != 0 {
-			b.config.Size = fmt.Sprintf("%v", b.config.SizeID)
-		}
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("size must be specified"))
 	}
 
 	if b.config.Image == "" {
-		if b.config.ImageID != 0 {
-			b.config.Image = fmt.Sprintf("%v", b.config.ImageID)
-		}
-	} else {
-		b.config.Image = DefaultImage
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("image must be specified"))
 	}
 
 	if b.config.SnapshotName == "" {
@@ -232,7 +227,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		new(stepGetDefaults),
 		new(stepCreateSSHKey),
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
