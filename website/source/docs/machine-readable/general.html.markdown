@@ -15,7 +15,7 @@ machine-readable output and are provided by Packer core itself.
 	<dd>
 		<p>
 		Specifies the output and type of output that would've normally
-		gone to the console if Packer wasn't running in human-readable
+		gone to the console if Packer were running in human-readable
 		mode.
 		</p>
 
