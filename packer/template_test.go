@@ -58,6 +58,10 @@ func TestParseTemplateFile_basic(t *testing.T) {
 	if len(result.Builders) != 1 {
 		t.Fatalf("bad: %#v", result.Builders)
 	}
+
+	if string(result.RawContents) != data {
+		t.Fatalf("expected %q to be %q", result.RawContents, data)
+	}
 }
 
 func TestParseTemplateFile_minPackerVersionBad(t *testing.T) {
@@ -493,7 +497,7 @@ func TestParseTemplate_Provisioners(t *testing.T) {
 
 	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
-		t.Fatal("err: %s", err)
+		t.Fatalf("err: %s", err)
 	}
 	if result == nil {
 		t.Fatal("should have result")
@@ -525,7 +529,7 @@ func TestParseTemplate_ProvisionerPauseBefore(t *testing.T) {
 
 	result, err := ParseTemplate([]byte(data), nil)
 	if err != nil {
-		t.Fatal("err: %s", err)
+		t.Fatalf("err: %s", err)
 	}
 	if result == nil {
 		t.Fatal("should have result")

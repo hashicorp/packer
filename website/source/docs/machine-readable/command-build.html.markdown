@@ -14,7 +14,7 @@ of `packer build`.
 	<dt>artifact (>= 2)</dt>
 	<dd>
 		<p>
-		Information about an artifact of the targetted item. This is a
+		Information about an artifact of the targeted item. This is a
 		fairly complex (but uniform!) machine-readable type that contains
 		subtypes. The subtypes are documented within this page in the
 		syntax of "artifact subtype: SUBTYPE". The number of arguments within
@@ -119,7 +119,7 @@ of `packer build`.
 	<dt>artifact subtype: nil (0)</dt>
 	<dd>
 		<p>
-		If present, this means that the artifact was nil, or that the targetted
+		If present, this means that the artifact was nil, or that the targeted
 		build completed successfully but no artifact was created.
 		</p>
 	</dd>

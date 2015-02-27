@@ -301,7 +301,7 @@ func TestBuilderPrepare_SSHUsername(t *testing.T) {
 	}
 
 	if b.config.SSHUsername != "root" {
-		t.Errorf("invalid: %d", b.config.SSHUsername)
+		t.Errorf("invalid: %s", b.config.SSHUsername)
 	}
 
 	// Test set
@@ -334,7 +334,7 @@ func TestBuilderPrepare_SSHTimeout(t *testing.T) {
 	}
 
 	if b.config.RawSSHTimeout != "1m" {
-		t.Errorf("invalid: %d", b.config.RawSSHTimeout)
+		t.Errorf("invalid: %s", b.config.RawSSHTimeout)
 	}
 
 	// Test set
@@ -375,7 +375,7 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 	}
 
 	if b.config.RawStateTimeout != "6m" {
-		t.Errorf("invalid: %d", b.config.RawStateTimeout)
+		t.Errorf("invalid: %s", b.config.RawStateTimeout)
 	}
 
 	// Test set
@@ -416,7 +416,7 @@ func TestBuilderPrepare_PrivateNetworking(t *testing.T) {
 	}
 
 	if b.config.PrivateNetworking != false {
-		t.Errorf("invalid: %s", b.config.PrivateNetworking)
+		t.Errorf("invalid: %t", b.config.PrivateNetworking)
 	}
 
 	// Test set
@@ -431,7 +431,7 @@ func TestBuilderPrepare_PrivateNetworking(t *testing.T) {
 	}
 
 	if b.config.PrivateNetworking != true {
-		t.Errorf("invalid: %s", b.config.PrivateNetworking)
+		t.Errorf("invalid: %t", b.config.PrivateNetworking)
 	}
 }
 

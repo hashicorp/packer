@@ -49,16 +49,16 @@ each category, the available configuration keys are alphabetized.
 * `image` (string) - The name (or slug) of the base image to use. This is the
   image that will be used to launch a new droplet and provision it. You can try to use
   "ubuntu-12-04-x64" which is the slug for "Ubuntu 12.04.4 x64".
-  See https://developers.digitalocean.com/#list-all-images for the accepted image names/slugs.
+  See https://developers.digitalocean.com/documentation/v2/#list-all-images for the accepted image names/slugs.
 
 * `region` (string) - The name (or slug) of the region to launch the droplet in.
   Consequently, this is the region where the snapshot will be available.
   You can try to use "nyc3", which is the slug for "New York 3".
-  See https://developers.digitalocean.com/v2/#regions for the accepted region names/slugs.
+  See https://developers.digitalocean.com/documentation/v2/#list-all-regions for the accepted region names/slugs.
 
 * `size` (string) - The name (or slug) of the droplet size to use.
   You can try to use "512mb", which is the slug for "512MB".
-  See https://developers.digitalocean.com/#sizes for the accepted size names/slugs.
+  See https://developers.digitalocean.com/documentation/v2/#list-all-sizes for the accepted size names/slugs.
 
 ### Optional:
 

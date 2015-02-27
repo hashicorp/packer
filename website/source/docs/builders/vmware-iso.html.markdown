@@ -73,7 +73,7 @@ each category, the available options are alphabetized and described.
 ### Optional:
 
 * `boot_command` (array of strings) - This is an array of commands to type
-  when the virtual machine is firsted booted. The goal of these commands should
+  when the virtual machine is first booted. The goal of these commands should
   be to type just enough to initialize the operating system installer. Special
   keys can be typed as well, and are covered in the section below on the boot
   command. If this is not specified, it is assumed the installer will start
@@ -226,7 +226,7 @@ each category, the available options are alphabetized and described.
   This is a [configuration template](/docs/templates/configuration-templates.html)
   that has a single valid variable: `Flavor`, which will be the value of
   `tools_upload_flavor`. By default the upload path is set to
-  `{{.Flavor}}.iso`.
+  `{{.Flavor}}.iso`. This setting is not used when `remote_type` is "esx5".
 
 * `version` (string) - The [vmx hardware version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746) for the new virtual machine.  Only the default value has been tested, any other value is experimental.  Default value is '9'.
 
@@ -311,7 +311,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-```javascript
+```
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",

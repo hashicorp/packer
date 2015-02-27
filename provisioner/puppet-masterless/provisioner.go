@@ -190,7 +190,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				fmt.Errorf("module_path[%d] is invalid: %s", i, err))
 		} else if !info.IsDir() {
 			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("module_path[%d] must point to a directory"))
+				fmt.Errorf("module_path[%d] must point to a directory", i))
 		}
 	}
 

@@ -4,8 +4,15 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * builder/openstack: Add rackconnect_wait for Rackspace customers to wait for
+    RackConnect data to appear
+  * buidler/openstakc: Add ssh_interface option for rackconnect for users that
+    have prohibitive firewalls
+
 BUG FIXES:
 
+  * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
+  * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/docker: Fixed hang on prompt while copying script
   * builder/virtualbox: Added SCSI support
   * postprocessor/vagrant-cloud: Fixed failing on response

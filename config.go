@@ -180,7 +180,7 @@ func (c *config) discoverSingle(glob string, m *map[string]string) error {
 
 		// Look for foo-bar-baz. The plugin name is "baz"
 		plugin := file[len(prefix):]
-		log.Printf("[DEBUG] Discoverd plugin: %s = %s", plugin, match)
+		log.Printf("[DEBUG] Discovered plugin: %s = %s", plugin, match)
 		(*m)[plugin] = match
 	}
 

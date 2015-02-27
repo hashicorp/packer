@@ -9,6 +9,10 @@ import (
 )
 
 func TestPostProcessorConfigure(t *testing.T) {
+	currentEnv := os.Getenv("ATLAS_TOKEN")
+	os.Setenv("ATLAS_TOKEN", "")
+	defer os.Setenv("ATLAS_TOKEN", currentEnv)
+
 	var p PostProcessor
 	if err := p.Configure(validDefaults()); err != nil {
 		t.Fatalf("err: %s", err)
