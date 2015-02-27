@@ -33,9 +33,6 @@ type config struct {
 	APIKey   string `mapstructure:"api_key"`
 	APIURL   string `mapstructure:"api_url"`
 	APIToken string `mapstructure:"api_token"`
-	RegionID uint   `mapstructure:"region_id"`
-	SizeID   uint   `mapstructure:"size_id"`
-	ImageID  uint   `mapstructure:"image_id"`
 
 	Region string `mapstructure:"region"`
 	Size   string `mapstructure:"size"`
