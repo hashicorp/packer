@@ -16,10 +16,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// see https://api.digitalocean.com/images/?client_id=[client_id]&api_key=[api_key]
-// name="Ubuntu 12.04.4 x64", id=6374128,
-const DefaultImage = "ubuntu-12-04-x64"
-
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
 
