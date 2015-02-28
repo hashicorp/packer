@@ -146,7 +146,8 @@ each category, the available configuration keys are alphabetized.
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
   "subnet-12345def", where Packer will launch the EC2 instance.
 
-* `tags` (object of key/value strings) - Tags applied to the AMI.
+* `tags` (object of key/value strings) - Tags applied to the AMI and
+  relevant snapshots.
 
 * `temporary_key_pair_name` (string) - The name of the temporary keypair
   to generate. By default, Packer generates a name with a UUID.
