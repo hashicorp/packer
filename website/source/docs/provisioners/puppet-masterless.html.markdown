@@ -81,7 +81,7 @@ Optional parameters:
 
 * `working_directory` (string) - This is the directory from which the puppet command
   will be run. When using hiera with a relative path, this option allows to ensure
-  that he paths are working properly. If not specified, defaults to the value of
+  that the paths are working properly. If not specified, defaults to the value of
   specified `staging_directory` (or its default value if not specified either).
 
 ## Execute Command
