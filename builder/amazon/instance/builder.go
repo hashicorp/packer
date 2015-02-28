@@ -180,6 +180,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	ec2conn := ec2.New(auth, region)
 
+	// If the subnet is specified but not the AZ, try to determine the AZ automatically
+	if b.config.SubnetId != "" && b.config.AvailabilityZone == "" {
+		log.Printf("[INFO] Finding AZ for the given subnet '%s'", b.config.SubnetId)
+		resp, err := ec2conn.DescribeSubnets([]string{b.config.SubnetId}, nil)
+		if err != nil {
+			return nil, err
+		}
+		b.config.AvailabilityZone = resp.Subnets[0].AvailabilityZone
+		log.Printf("[INFO] AZ found: '%s'", b.config.AvailabilityZone)
+	}
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
