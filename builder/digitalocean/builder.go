@@ -29,6 +29,9 @@ type config struct {
 	APIKey   string `mapstructure:"api_key"`
 	APIURL   string `mapstructure:"api_url"`
 	APIToken string `mapstructure:"api_token"`
+	RegionID uint   `mapstructure:"region_id"`
+	SizeID   uint   `mapstructure:"size_id"`
+	ImageID  uint   `mapstructure:"image_id"`
 
 	Region string `mapstructure:"region"`
 	Size   string `mapstructure:"size"`
@@ -93,18 +96,30 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Region == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("region must be specified"))
+		if b.config.RegionID != 0 {
+			b.config.Region = fmt.Sprintf("%v", b.config.RegionID)
+		} else {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("region or region_id must be specified"))
+		}
 	}
 
 	if b.config.Size == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("size must be specified"))
+		if b.config.SizeID != 0 {
+			b.config.Size = fmt.Sprintf("%v", b.config.SizeID)
+		} else {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("size or size_id must be specified"))
+		}
 	}
 
 	if b.config.Image == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("image must be specified"))
+		if b.config.ImageID != 0 {
+			b.config.Image = fmt.Sprintf("%v", b.config.ImageID)
+		} else {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("image or image_id must be specified"))
+		}
 	}
 
 	if b.config.SnapshotName == "" {

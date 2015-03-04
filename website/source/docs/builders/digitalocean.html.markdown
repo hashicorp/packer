@@ -46,17 +46,17 @@ each category, the available configuration keys are alphabetized.
 
 ### Required for all apis:
 
-* `image` (string) - The name (or slug) of the base image to use. This is the
-  image that will be used to launch a new droplet and provision it. You can try to use
+* `image` (string) - The name (or slug) of the base image to use. Required if `image_id` is not provided.
+  This is the image that will be used to launch a new droplet and provision it. You can try to use
   "ubuntu-12-04-x64" which is the slug for "Ubuntu 12.04.4 x64".
   See https://developers.digitalocean.com/documentation/v2/#list-all-images for the accepted image names/slugs.
 
-* `region` (string) - The name (or slug) of the region to launch the droplet in.
+* `region` (string) - The name (or slug) of the region to launch the droplet in. Required if `region_id` is not provided.
   Consequently, this is the region where the snapshot will be available.
   You can try to use "nyc3", which is the slug for "New York 3".
   See https://developers.digitalocean.com/documentation/v2/#list-all-regions for the accepted region names/slugs.
 
-* `size` (string) - The name (or slug) of the droplet size to use.
+* `size` (string) - The name (or slug) of the droplet size to use. Required if `size_id` is not provided.
   You can try to use "512mb", which is the slug for "512MB".
   See https://developers.digitalocean.com/documentation/v2/#list-all-sizes for the accepted size names/slugs.
 
@@ -68,8 +68,19 @@ each category, the available configuration keys are alphabetized.
 * `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
   sets the hostname of the machine to this value.
 
+* `image_id` (integer) - The ID of the base image to use. This is the image that
+  will be used to launch a new droplet and provision it.
+  This setting is deprecated. Use `image` instead.
+
 * `private_networking` (boolean) - Set to `true` to enable private networking
   for the droplet being created. This defaults to `false`, or not enabled.
+
+* `region_id` (integer) - The ID of the region to launch the droplet in. Consequently,
+  this is the region where the snapshot will be available.
+  This setting is deprecated. Use `region` instead.
+
+* `size_id` (integer) - The ID of the droplet size to use.
+  This setting is deprecated. Use `size` instead.
 
 * `snapshot_name` (string) - The name of the resulting snapshot that will
   appear in your account. This must be unique.
@@ -107,8 +118,8 @@ own access tokens:
 
 ## Finding Image, Region, and Size IDs
 
-Unfortunately, finding a list of available values for `image`, `region`,
-and `size` is not easy at the moment. Basically, it has to be done through
+Unfortunately, finding a list of available values for `image_id`, `region_id`,
+and `size_id` is not easy at the moment. Basically, it has to be done through
 the [DigitalOcean API](https://www.digitalocean.com/api_access) using the
 `/images`, `/regions`, and `/sizes` endpoints. You can use `curl` for this
 or request it in your browser.

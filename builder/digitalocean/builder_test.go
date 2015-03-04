@@ -210,6 +210,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	expected := "sfo1"
 
 	// Test set
+	config["region_id"] = 0
 	config["region"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
@@ -241,6 +242,7 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	expected := "1024mb"
 
 	// Test set
+	config["size_id"] = 0
 	config["size"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
@@ -272,6 +274,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	expected := "ubuntu-14-04-x64"
 
 	// Test set
+	config["image_id"] = 0
 	config["image"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
