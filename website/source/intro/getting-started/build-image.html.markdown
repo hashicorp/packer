@@ -157,10 +157,13 @@ the Packer output.
 
 Packer only builds images. It does not attempt to manage them in any way.
 After they're built, it is up to you to launch or destroy them as you see
-fit. As a result of this, after running the above example, your AWS account
-now has an AMI associated with it.
+fit. If you want to store and namespace images for easy reference, you
+can use [Atlas by HashiCorp](https://atlas.hashicorp.com). We'll cover
+remotely building and storing images at the end of this getting started guide.
 
-AMIs are stored in S3 by Amazon, so unless you want to be charged about $0.01
+After running the above example, your AWS account
+now has an AMI associated with it. AMIs are stored in S3 by Amazon,
+so unless you want to be charged about $0.01
 per month, you'll probably want to remove it. Remove the AMI by
 first deregistering it on the [AWS AMI management page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images).
 Next, delete the associated snapshot on the
