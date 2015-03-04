@@ -16,6 +16,9 @@ From this point forward, the most important reference for you will be
 the [documentation](/docs). The documentation is less of a guide and
 more of a reference of all the overall features and options of Packer.
 
+If you're interested in learning more about how Packer fits into the
+HashiCorp ecosystem of tools, read our [Atlas getting started overview](https://atlas.hashicorp.com/help/getting-started/getting-started-overview).
+
 As you use Packer more, please voice your comments and concerns on
 the [mailing list or IRC](/community). Additionally, Packer is
 [open source](https://github.com/mitchellh/packer) so please contribute
