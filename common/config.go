@@ -33,7 +33,7 @@ func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
 		for _, unused := range md.Unused {
 			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
 				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
+					errs, fmt.Errorf("Unknown configuration key: %q", unused))
 			}
 		}
 	}
