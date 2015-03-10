@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/bhcleek/packer-provisioner-ansible/provisioner/ansible"
 	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/mitchellh/packer/provisioner/ansible"
 )
 
 func main() {
