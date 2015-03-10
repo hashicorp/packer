@@ -51,7 +51,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 	defer os.Remove(playbook_file.Name())
 
-	config["ssh_private_host_key_file"] = hostkey_file.Name()
+	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["ssh_authorized_key_file"] = publickey_file.Name()
 	config["playbook_file"] = playbook_file.Name()
 	err = p.Prepare(config)
@@ -76,7 +76,7 @@ func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 	}
 	defer os.Remove(publickey_file.Name())
 
-	config["ssh_private_host_key_file"] = hostkey_file.Name()
+	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["ssh_authorized_key_file"] = publickey_file.Name()
 
 	err = p.Prepare(config)
@@ -119,13 +119,13 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 		t.Fatal("could not create random file name")
 	}
 
-	config["ssh_private_host_key_file"] = fmt.Sprintf("%x", filename)
+	config["ssh_host_key_file"] = fmt.Sprintf("%x", filename)
 	config["ssh_authorized_key_file"] = publickey_file.Name()
 	config["playbook_file"] = playbook_file.Name()
 
 	err = p.Prepare(config)
 	if err == nil {
-		t.Fatal("should error if ssh_private_host_key_file does not exist")
+		t.Fatal("should error if ssh_host_key_file does not exist")
 	}
 
 	hostkey_file, err := ioutil.TempFile("", "hostkey")
@@ -134,7 +134,7 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	config["ssh_private_host_key_file"] = hostkey_file.Name()
+	config["ssh_host_key_file"] = hostkey_file.Name()
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -157,7 +157,7 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	}
 	defer os.Remove(playbook_file.Name())
 
-	config["ssh_private_host_key_file"] = hostkey_file.Name()
+	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["playbook_file"] = playbook_file.Name()
 
 	err = p.Prepare(config)
@@ -200,7 +200,7 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	}
 	defer os.Remove(playbook_file.Name())
 
-	config["ssh_private_host_key_file"] = hostkey_file.Name()
+	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["ssh_authorized_key_file"] = publickey_file.Name()
 	config["playbook_file"] = playbook_file.Name()
 
