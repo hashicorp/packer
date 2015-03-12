@@ -138,8 +138,13 @@ func (d DigitalOceanClientV2) CreateDroplet(name string, size string, image stri
 		return 0, fmt.Errorf("Invalid region or lookup failure: '%s': %s", region, err)
 	}
 
+	if found_image.Slug == "" {
+		req.Image = strconv.Itoa(int(found_image.Id))
+	} else {
+		req.Image = found_image.Slug
+	}
+
 	req.Size = found_size.Slug
-	req.Image = found_image.Slug
 	req.Region = found_region.Slug
 	req.SSHKeys = []string{fmt.Sprintf("%v", keyId)}
 	req.PrivateNetworking = privateNetworking
