@@ -283,7 +283,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-```
+```text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
