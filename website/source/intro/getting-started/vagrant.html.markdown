@@ -2,8 +2,8 @@
 layout: "intro"
 page_title: "Vagrant Boxes"
 prev_url: "/intro/getting-started/parallel-builds.html"
-next_url: "/intro/getting-started/next.html"
-next_title: "Next Steps"
+next_url: "/intro/getting-started/remote-builds.html"
+next_title: "Remote Builds and Storage"
 description: |-
   Packer also has the ability to take the results of a builder (such as an AMI or plain VMware image) and turn it into a Vagrant box.
 ---
