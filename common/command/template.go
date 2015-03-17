@@ -17,6 +17,7 @@ type BuildOptions struct {
 	UserVars     map[string]string
 	Except       []string
 	Only         []string
+	ArtifactOutputFile string
 }
 
 // Validate validates the options
