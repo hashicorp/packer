@@ -2,6 +2,7 @@ package common
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -75,14 +76,14 @@ func (f *DHCPLeaseGuestLookup) GuestIP() (string, error) {
 		// If the mac address matches and this lease ends farther in the
 		// future than the last match we might have, then choose it.
 		matches = macLineRe.FindStringSubmatch(line)
-		if matches != nil && matches[1] == f.MACAddress && curLeaseEnd.Before(lastLeaseEnd) {
+		if matches != nil && strings.EqualFold(matches[1], f.MACAddress) && curLeaseEnd.Before(lastLeaseEnd) {
 			curIp = lastIp
 			curLeaseEnd = lastLeaseEnd
 		}
 	}
 
 	if curIp == "" {
-		return "", errors.New("IP not found for MAC in DHCP leases")
+		return "", fmt.Errorf("IP not found for MAC %s in DHCP leases at %s", f.MACAddress, dhcpLeasesPath)
 	}
 
 	return curIp, nil
