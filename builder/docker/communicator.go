@@ -28,19 +28,23 @@ type Communicator struct {
 	lock sync.Mutex
 }
 
-var dockerVersion version.Version
+var dockerVersion *version.Version
 var useDockerExec bool
 
 func init() {
 	execConstraint, _ := version.NewConstraint(">= 1.4.0")
 
 	versionExtractor := regexp.MustCompile(version.VersionRegexpRaw)
-	dockerVersionOutput, _ := exec.Command("docker", "-v").Output()
-	dockerVersionString := string(versionExtractor.FindSubmatch(dockerVersionOutput)[0])
+	dockerVersionOutput, err := exec.Command("docker", "-v").Output()
+	extractedVersion := versionExtractor.FindSubmatch(dockerVersionOutput)
 
-	dockerVersion, err := version.NewVersion(dockerVersionString)
-	if err != nil {
-		log.Printf("Docker returned malformed version string: %e", err)
+	if extractedVersion != nil {
+		dockerVersionString := string(extractedVersion[0])
+		dockerVersion, err = version.NewVersion(dockerVersionString)
+	}
+
+	if dockerVersion == nil {
+		log.Printf("Could not determine docker version: %v", err)
 		log.Printf("Assuming no `exec` capability, using `attatch`")
 		useDockerExec = false
 	} else {
