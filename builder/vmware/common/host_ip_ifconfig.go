@@ -44,7 +44,7 @@ func (f *IfconfigIPFinder) HostIP() (string, error) {
 		return "", err
 	}
 
-	re := regexp.MustCompile(`inet\s*(?:addr:)?(.+?)\s`)
+	re := regexp.MustCompile(`inet[^\d]+([\d\.]+)\s`)
 	matches := re.FindStringSubmatch(stdout.String())
 	if matches == nil {
 		return "", errors.New("IP not found in ifconfig output...")
