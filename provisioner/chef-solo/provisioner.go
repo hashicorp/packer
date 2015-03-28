@@ -33,8 +33,8 @@ type Config struct {
 	RunList                    []string `mapstructure:"run_list"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
-	IsWindows				   bool 	`mapstructure:"is_windows"`
-	PathSeperator			   string 	`mapstructure:"path_seperator"`
+	IsWindows                  bool     `mapstructure:"is_windows"`
+	PathSeperator              string   `mapstructure:"path_seperator"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -94,29 +94,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RunList = make([]string, 0)
 	}
 
-	switch p.config.IsWindows {
+	if p.config.StagingDir == "" {
+		if p.config.IsWindows == true {
+			p.config.StagingDir = "C:\\tmp\\packer-chef-solo"
+		} else {
+			p.config.StagingDir = "/tmp/packer-chef-solo"
+		}
+	}
+	if p.config.PathSeperator == "" {
+		switch p.config.IsWindows {
 		case false:
 			p.config.PathSeperator = "/"
 		case true:
 			p.config.PathSeperator = "\\"
-		default:
-			p.config.PathSeperator = "/"
 		}
-	
-	// if p.config.StagingDir == "" {
-	// 	switch p.config.OsType {
-	// 	case "linux":
-	// 		p.config.StagingDir = "/tmp/packer-chef-solo"
-	// 	case "windows":
-	// 		p.config.StagingDir = "C:\\tmp\\packer-chef-solo"
-	// 	default:
-	// 		p.config.StagingDir = "/tmp/packer-chef-solo"
-	// 	}
-	// }
-
-	// if p.config.PathSeperator == "" {
-	// 	p.config.PathSeperator = "/"
-	// }
+	}
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
