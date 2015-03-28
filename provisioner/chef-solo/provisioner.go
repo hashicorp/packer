@@ -33,6 +33,8 @@ type Config struct {
 	RunList                    []string `mapstructure:"run_list"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
+	IsWindows				   bool 	`mapstructure:"is_windows"`
+	PathSeperator			   string 	`mapstructure:"path_seperator"`
 
 	tpl *packer.ConfigTemplate
 }
@@ -92,9 +94,29 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RunList = make([]string, 0)
 	}
 
-	if p.config.StagingDir == "" {
-		p.config.StagingDir = "/tmp/packer-chef-solo"
-	}
+	switch p.config.IsWindows {
+		case false:
+			p.config.PathSeperator = "/"
+		case true:
+			p.config.PathSeperator = "\\"
+		default:
+			p.config.PathSeperator = "/"
+		}
+	
+	// if p.config.StagingDir == "" {
+	// 	switch p.config.OsType {
+	// 	case "linux":
+	// 		p.config.StagingDir = "/tmp/packer-chef-solo"
+	// 	case "windows":
+	// 		p.config.StagingDir = "C:\\tmp\\packer-chef-solo"
+	// 	default:
+	// 		p.config.StagingDir = "/tmp/packer-chef-solo"
+	// 	}
+	// }
+
+	// if p.config.PathSeperator == "" {
+	// 	p.config.PathSeperator = "/"
+	// }
 
 	// Accumulate any errors
 	errs := common.CheckUnusedConfig(md)
@@ -245,7 +267,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	cookbookPaths := make([]string, 0, len(p.config.CookbookPaths))
 	for i, path := range p.config.CookbookPaths {
-		targetPath := fmt.Sprintf("%s/cookbooks-%d", p.config.StagingDir, i)
+		targetPath := fmt.Sprintf("%s%scookbooks-%d", p.config.StagingDir, p.config.PathSeperator, i)
 		if err := p.uploadDirectory(ui, comm, targetPath, path); err != nil {
 			return fmt.Errorf("Error uploading cookbooks: %s", err)
 		}
@@ -255,7 +277,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	rolesPath := ""
 	if p.config.RolesPath != "" {
-		rolesPath = fmt.Sprintf("%s/roles", p.config.StagingDir)
+		rolesPath = fmt.Sprintf("%s%sroles", p.config.StagingDir, p.config.PathSeperator)
 		if err := p.uploadDirectory(ui, comm, rolesPath, p.config.RolesPath); err != nil {
 			return fmt.Errorf("Error uploading roles: %s", err)
 		}
@@ -263,7 +285,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	dataBagsPath := ""
 	if p.config.DataBagsPath != "" {
-		dataBagsPath = fmt.Sprintf("%s/data_bags", p.config.StagingDir)
+		dataBagsPath = fmt.Sprintf("%s%sdata_bags", p.config.StagingDir, p.config.PathSeperator)
 		if err := p.uploadDirectory(ui, comm, dataBagsPath, p.config.DataBagsPath); err != nil {
 			return fmt.Errorf("Error uploading data bags: %s", err)
 		}
@@ -271,7 +293,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	encryptedDataBagSecretPath := ""
 	if p.config.EncryptedDataBagSecretPath != "" {
-		encryptedDataBagSecretPath = fmt.Sprintf("%s/encrypted_data_bag_secret", p.config.StagingDir)
+		encryptedDataBagSecretPath = fmt.Sprintf("%s%sencrypted_data_bag_secret", p.config.StagingDir, p.config.PathSeperator)
 		if err := p.uploadFile(ui, comm, encryptedDataBagSecretPath, p.config.EncryptedDataBagSecretPath); err != nil {
 			return fmt.Errorf("Error uploading encrypted data bag secret: %s", err)
 		}
@@ -279,7 +301,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	environmentsPath := ""
 	if p.config.EnvironmentsPath != "" {
-		environmentsPath = fmt.Sprintf("%s/environments", p.config.StagingDir)
+		environmentsPath = fmt.Sprintf("%s%senvironments", p.config.StagingDir, p.config.PathSeperator)
 		if err := p.uploadDirectory(ui, comm, environmentsPath, p.config.EnvironmentsPath); err != nil {
 			return fmt.Errorf("Error uploading environments: %s", err)
 		}
@@ -337,11 +359,13 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 
 	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
 	for i, path := range p.config.RemoteCookbookPaths {
+		path = strings.Replace(path, `\`, `/`, -1)
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
 	}
 
 	for i, path := range localCookbooks {
 		i = len(p.config.RemoteCookbookPaths) + i
+		path = strings.Replace(path, `\`, `/`, -1)
 		cookbook_paths[i] = fmt.Sprintf(`"%s"`, path)
 	}
 
@@ -417,20 +441,31 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p '%s'", dir),
+	//switch p.config.IsWindows {
+	if p.config.IsWindows != true {
+		cmd := &packer.RemoteCmd{
+			Command: fmt.Sprintf("mkdir -p '%s'", dir),
+		}
+		if err := cmd.StartWithUi(comm, ui); err != nil {
+			return err
+		}
+		if cmd.ExitStatus != 0 {
+			return fmt.Errorf("Non-zero exit status.")
+		}
+	}else {
+		cmd := &packer.RemoteCmd{
+			Command: fmt.Sprintf("mkdir \"%s\"", dir),
+		}
+		if err := cmd.StartWithUi(comm, ui); err != nil {
+			return err
+		}
+		if cmd.ExitStatus != 0 {
+			return fmt.Errorf("Non-zero exit status with IsWindows = %t", p.config.IsWindows)
+		}
 	}
-
-	if err := cmd.StartWithUi(comm, ui); err != nil {
-		return err
-	}
-
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status.")
-	}
-
 	return nil
 }
+	
 
 func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config string, json string) error {
 	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
