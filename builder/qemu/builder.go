@@ -465,6 +465,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
+		new(stepShrinkDisk),
 	}
 
 	// Setup the state bag
