@@ -7,6 +7,8 @@ import (
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+
+	"os"
 )
 
 // This step shrinks the virtual disk that was used as the
@@ -17,17 +19,15 @@ func (s *stepShrinkDisk) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
 	sourcePath := state.Get("disk_filename")
-	//isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName,
-		strings.ToLower(config.Format)))
-	name := config.VMName + "." + strings.ToLower(config.Format)
+	name := config.VMName + ".shrink." + strings.ToLower(config.Format)
+	targetPath := filepath.Join(config.OutputDir, name)
 
 	command := []string{
 		"convert",
 		"-f", config.Format,
-		isoPath,
-		path,
+		sourcePath,
+		targetPath,
 	}
 
 	if config.ShrinkImage == false {
@@ -36,10 +36,15 @@ func (s *stepShrinkDisk) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Shrinking hard drive...")
 	if err := driver.QemuImg(command...); err != nil {
-		err := fmt.Errorf("Error creating hard drive: %s", err)
+		err := fmt.Errorf("Error shrinking hard drive: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	if _, err := os.Stat(targetPath); err == nil && config.PackerForce {
+		ui.Say("Deleting unshrinked disk image...")
+		os.RemoveAll(targetPath)
 	}
 
 	state.Put("disk_filename", name)
