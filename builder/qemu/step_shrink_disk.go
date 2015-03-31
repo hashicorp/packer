@@ -18,7 +18,7 @@ type stepShrinkDisk struct{}
 func (s *stepShrinkDisk) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*config)
 	driver := state.Get("driver").(Driver)
-	sourcePath := state.Get("disk_filename")
+	sourcePath := state.Get("disk_filename").(string)
 	ui := state.Get("ui").(packer.Ui)
 	name := config.VMName + ".shrink." + strings.ToLower(config.Format)
 	targetPath := filepath.Join(config.OutputDir, name)
