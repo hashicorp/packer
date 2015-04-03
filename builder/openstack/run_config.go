@@ -17,6 +17,7 @@ type RunConfig struct {
 	SSHPort           int      `mapstructure:"ssh_port"`
 	SSHInterface      string   `mapstructure:"ssh_interface"`
 	OpenstackProvider string   `mapstructure:"openstack_provider"`
+	AvailabilityZone  string   `mapstructure:"availability_zone"`
 	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
 	RackconnectWait   bool     `mapstructure:"rackconnect_wait"`
 	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
