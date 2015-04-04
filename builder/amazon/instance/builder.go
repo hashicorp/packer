@@ -80,7 +80,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.BundleVolCommand == "" {
-		b.config.BundleVolCommand = "sudo i -n ec2-bundle-vol " +
+		b.config.BundleVolCommand = "sudo -i -n ec2-bundle-vol " +
 			"-k {{.KeyPath}} " +
 			"-u {{.AccountId}} " +
 			"-c {{.CertPath}} " +
