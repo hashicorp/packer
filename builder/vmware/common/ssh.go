@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	gossh "code.google.com/p/go.crypto/ssh"
+	gossh "golang.org/x/crypto/ssh"
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
