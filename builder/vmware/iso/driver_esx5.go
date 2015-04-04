@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
-	gossh "code.google.com/p/go.crypto/ssh"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
