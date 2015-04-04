@@ -75,6 +75,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	spotPrice := s.SpotPrice
+	availabilityZone := s.AvailabilityZone
 	if spotPrice == "auto" {
 		ui.Message(fmt.Sprintf(
 			"Finding spot price for %s %s...",
@@ -96,6 +97,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		}
 
 		var price float64
+
 		for _, history := range resp.History {
 			log.Printf("[INFO] Candidate spot price: %s", history.SpotPrice)
 			current, err := strconv.ParseFloat(history.SpotPrice, 64)
@@ -105,6 +107,9 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			}
 			if price == 0 || current < price {
 				price = current
+				if s.AvailabilityZone == "" {
+					availabilityZone = history.AvailabilityZone
+				}
 			}
 		}
 		if price == 0 {
@@ -158,7 +163,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			SubnetId:                 s.SubnetId,
 			AssociatePublicIpAddress: s.AssociatePublicIpAddress,
 			BlockDevices:             s.BlockDevices.BuildLaunchDevices(),
-			AvailZone:                s.AvailabilityZone,
+			AvailZone:                availabilityZone,
 		}
 		runSpotResp, err := ec2conn.RequestSpotInstances(runOpts)
 		if err != nil {
