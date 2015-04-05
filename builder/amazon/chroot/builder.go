@@ -10,7 +10,7 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
@@ -153,17 +153,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")
 	}
 
-	region, err := b.config.Region()
+	config, err := b.config.Config()
 	if err != nil {
 		return nil, err
 	}
 
-	auth, err := b.config.AccessConfig.Auth()
-	if err != nil {
-		return nil, err
-	}
-
-	ec2conn := ec2.New(auth, region)
+	ec2conn := ec2.New(config)
 
 	wrappedCommand := func(command string) (string, error) {
 		return b.config.tpl.Process(
