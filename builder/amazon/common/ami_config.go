@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 
-	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -81,7 +80,7 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 			regionSet[region] = struct{}{}
 
 			// Verify the region is real
-			if _, ok := aws.Regions[region]; !ok {
+			if valid := ValidateRegion(region); valid == false {
 				errs = append(errs, fmt.Errorf("Unknown region: %s", region))
 				continue
 			}
