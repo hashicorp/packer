@@ -1,8 +1,9 @@
 package ebs
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {

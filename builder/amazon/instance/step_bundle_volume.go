@@ -3,7 +3,7 @@ package instance
 import (
 	"fmt"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -34,7 +34,7 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 	var err error
 	config.BundleVolCommand, err = config.tpl.Process(config.BundleVolCommand, bundleCmdData{
 		AccountId:    config.AccountId,
-		Architecture: instance.Architecture,
+		Architecture: *instance.Architecture,
 		CertPath:     x509RemoteCertPath,
 		Destination:  config.BundleDestination,
 		KeyPath:      x509RemoteKeyPath,

@@ -40,7 +40,7 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
-		Region:          region.Name,
+		Region:          region,
 		SecretKey:       config.SecretKey,
 	})
 	if err != nil {
