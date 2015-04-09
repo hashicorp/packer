@@ -119,6 +119,7 @@ isotime = June 7, 7:22:43pm 2014
 {{isotime "Mon 1506"}} = Sat 1914
 {{isotime "01-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
 {{isotime "Hour15Year200603"}} = Hour19Year201407
+{{isotime "20060102T150405"}} = 20140607T192243
 ```
 
 Please note that double quote characters need escaping inside of templates:
