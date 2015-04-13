@@ -92,6 +92,7 @@ type config struct {
 	OutputDir       string     `mapstructure:"output_directory"`
 	QemuArgs        [][]string `mapstructure:"qemuargs"`
 	QemuBinary      string     `mapstructure:"qemu_binary"`
+	ShrinkImage     bool	   `mapstructure:"shrink_image"`
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
@@ -464,6 +465,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
+		new(stepShrinkDisk),
 	}
 
 	// Setup the state bag
