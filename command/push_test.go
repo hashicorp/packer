@@ -120,6 +120,42 @@ func TestPush_noName(t *testing.T) {
 	}
 }
 
+func TestPush_cliName(t *testing.T) {
+	var actual []string
+	var actualOpts *uploadOpts
+	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
+		actual = testArchive(t, r)
+		actualOpts = opts
+
+		doneCh := make(chan struct{})
+		close(doneCh)
+		return doneCh, nil, nil
+	}
+
+	c := &PushCommand{
+		Meta:     testMeta(t),
+		uploadFn: uploadFn,
+	}
+
+	args := []string{
+		"-name=foo/bar",
+		filepath.Join(testFixture("push-no-name"), "template.json"),
+	}
+
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	expected := []string{
+		archiveTemplateEntry,
+		"template.json",
+	}
+
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("bad: %#v", actual)
+	}
+}
+
 func TestPush_uploadError(t *testing.T) {
 	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
 		return nil, nil, fmt.Errorf("bad")
