@@ -25,7 +25,11 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	for i, device := range image.BlockDeviceMappings {
 		newDevice := device
 		if newDevice.DeviceName == image.RootDeviceName {
-			newDevice.EBS.SnapshotID = &snapshotId
+			if newDevice.EBS != nil {
+				newDevice.EBS.SnapshotID = &snapshotId
+			} else {
+				newDevice.EBS = &ec2.EBSBlockDevice{SnapshotID: &snapshotId}
+			}
 		}
 
 		blockDevices[i] = newDevice
