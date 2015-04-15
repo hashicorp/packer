@@ -261,15 +261,15 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	if s.Debug {
-		if *s.instance.PublicDNSName != "" {
+		if s.instance.PublicDNSName != nil && *s.instance.PublicDNSName != "" {
 			ui.Message(fmt.Sprintf("Public DNS: %s", *s.instance.PublicDNSName))
 		}
 
-		if *s.instance.PublicIPAddress != "" {
+		if s.instance.PublicIPAddress != nil && *s.instance.PublicIPAddress != "" {
 			ui.Message(fmt.Sprintf("Public IP: %s", *s.instance.PublicIPAddress))
 		}
 
-		if *s.instance.PrivateIPAddress != "" {
+		if s.instance.PrivateIPAddress != nil && *s.instance.PrivateIPAddress != "" {
 			ui.Message(fmt.Sprintf("Private IP: %s", *s.instance.PrivateIPAddress))
 		}
 	}
