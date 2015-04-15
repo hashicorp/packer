@@ -17,13 +17,13 @@ func SSHAddress(e *ec2.EC2, port int, private bool) func(multistep.StateBag) (st
 		for j := 0; j < 2; j++ {
 			var host string
 			i := state.Get("instance").(*ec2.Instance)
-			if *i.VPCID != "" {
-				if *i.PublicIPAddress != "" && !private {
+			if i.VPCID != nil && *i.VPCID != "" {
+				if i.PublicIPAddress != nil && *i.PublicIPAddress != "" && !private {
 					host = *i.PublicIPAddress
 				} else {
 					host = *i.PrivateIPAddress
 				}
-			} else if *i.PublicDNSName != "" {
+			} else if i.PublicDNSName != nil && *i.PublicDNSName != "" {
 				host = *i.PublicDNSName
 			}
 
