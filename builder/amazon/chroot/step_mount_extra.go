@@ -6,6 +6,8 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"os"
+	"os/exec"
+	"syscall"
 )
 
 // StepMountExtra mounts the attached device.
@@ -90,13 +92,37 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		var path string
 		lastIndex := len(s.mounts) - 1
 		path, s.mounts = s.mounts[lastIndex], s.mounts[:lastIndex]
+
+		grepCommand, err := wrappedCommand(fmt.Sprintf("grep %s /proc/mounts", path))
+		if err != nil {
+			return fmt.Errorf("Error creating grep command: %s", err)
+		}
+
+		// Before attempting to unmount,
+		// check to see if path is already unmounted
+		stderr := new(bytes.Buffer)
+		cmd := ShellCommand(grepCommand)
+		cmd.Stderr = stderr
+		if err := cmd.Run(); err != nil {
+			if exitError, ok := err.(*exec.ExitError); ok {
+				if status, ok := exitError.Sys().(syscall.WaitStatus); ok {
+					exitStatus := status.ExitStatus()
+					if exitStatus == 1 {
+						// path has already been unmounted
+						// just skip this path
+						continue
+					}
+				}
+			}
+		}
+		
 		unmountCommand, err := wrappedCommand(fmt.Sprintf("umount %s", path))
 		if err != nil {
 			return fmt.Errorf("Error creating unmount command: %s", err)
 		}
 
-		stderr := new(bytes.Buffer)
-		cmd := ShellCommand(unmountCommand)
+		stderr = new(bytes.Buffer)
+		cmd = ShellCommand(unmountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf(
