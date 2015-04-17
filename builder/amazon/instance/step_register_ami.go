@@ -43,6 +43,10 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	amis[ec2conn.Region.Name] = registerResp.ImageId
 	state.Put("amis", amis)
 
+	namedamis := make(map[string]string)
+	namedamis[config.AMIName] = registerResp.ImageId
+	state.Put("namedamis", namedamis)
+
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},

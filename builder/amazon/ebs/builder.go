@@ -164,6 +164,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the artifact and return it
 	artifact := &awscommon.Artifact{
 		Amis:           state.Get("amis").(map[string]string),
+		NamedAmis:      state.Get("namedamis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Conn:           ec2conn,
 	}

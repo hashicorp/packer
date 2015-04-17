@@ -16,6 +16,9 @@ type Artifact struct {
 	// A map of regions to AMI IDs.
 	Amis map[string]string
 
+	// A map of AMI Names to AMI IDs.
+	NamedAmis map[string]string
+
 	// BuilderId is the unique ID for the builder that created this AMI
 	BuilderIdValue string
 
@@ -57,6 +60,8 @@ func (a *Artifact) State(name string) interface{} {
 	switch name {
 	case "atlas.artifact.metadata":
 		return a.stateAtlasMetadata()
+	case "awsgeneric.artifact.metadata":
+		return a.stateGenericMetadata()
 	default:
 		return nil
 	}
@@ -94,4 +99,13 @@ func (a *Artifact) stateAtlasMetadata() interface{} {
 	}
 
 	return metadata
+}
+
+func (a *Artifact) stateGenericMetadata() interface{} {
+	metadata := make(map[string]string)
+	for name, imageId := range a.NamedAmis {
+		metadata[name] = imageId
+	}
+
+	return metadata;
 }
