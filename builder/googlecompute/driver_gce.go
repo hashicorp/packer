@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"time"
 
-	"code.google.com/p/google-api-go-client/compute/v1"
 	"github.com/mitchellh/packer/packer"
 
-	// oauth2 "github.com/rasa/oauth2-fork-b3f9a68"
-	"github.com/rasa/oauth2-fork-b3f9a68"
-
-	// oauth2 "github.com/rasa/oauth2-fork-b3f9a68/google"
-	"github.com/rasa/oauth2-fork-b3f9a68/google"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/jwt"
+	"google.golang.org/api/compute/v1"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -27,8 +26,9 @@ type driverGCE struct {
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
 func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
-	var f *oauth2.Options
 	var err error
+
+	var client *http.Client
 
 	// Auth with AccountFile first if provided
 	if a.PrivateKey != "" {
@@ -37,22 +37,45 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
 		log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
 
-		f, err = oauth2.New(
-			oauth2.JWTClient(a.ClientEmail, []byte(a.PrivateKey)),
-			oauth2.Scope(DriverScopes...),
-			google.JWTEndpoint())
+		conf := jwt.Config{
+			Email:      a.ClientEmail,
+			PrivateKey: []byte(a.PrivateKey),
+			Scopes:     DriverScopes,
+			TokenURL:   "https://accounts.google.com/o/oauth2/token",
+		}
+
+		// Initiate an http.Client. The following GET request will be
+		// authorized and authenticated on the behalf of
+		// your service account.
+		client = conf.Client(oauth2.NoContext)
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE Service Role...")
-
-		f, err = oauth2.New(google.ComputeEngineAccount(""))
+		client = &http.Client{
+			Transport: &oauth2.Transport{
+				// Fetch from Google Compute Engine's metadata server to retrieve
+				// an access token for the provided account.
+				// If no account is specified, "default" is used.
+				Source: google.ComputeTokenSource(""),
+			},
+		}
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] Instantiating GCE client using...")
-	service, err := compute.New(&http.Client{Transport: f.NewTransport()})
+	log.Printf("[INFO] Instantiating GCE client...")
+	service, err := compute.New(client)
+	// Set UserAgent
+	versionString := "0.0.0"
+	// TODO(dcunnin): Use Packer's version code from version.go
+	// versionString := main.Version
+	// if main.VersionPrerelease != "" {
+	//      versionString = fmt.Sprintf("%s-%s", versionString, main.VersionPrerelease)
+	// }
+	service.UserAgent = fmt.Sprintf(
+		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
+
 	if err != nil {
 		return nil, err
 	}
