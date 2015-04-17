@@ -7,8 +7,8 @@ import (
 	"log"
 
 	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/keypairs"	
 )
 
 type StepRunSourceServer struct {
@@ -26,39 +26,39 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	compute_client := state.Get("compute_client").(*gophercloud.ServiceClient)
 	keyName := state.Get("keyPair").(string)
 	ui := state.Get("ui").(packer.Ui)
-	
+
 	// XXX - validate image and flavor is available
-	
+
 	securityGroups := make([]string, len(s.SecurityGroups))
 	for i, groupName := range s.SecurityGroups {
 		securityGroups[i] = groupName
 	}
-	
+
 	networkList := make([]servers.Network, len(s.Networks))
 	for i, networkUuid := range s.Networks {
 		networkList[i] = servers.Network{UUID: networkUuid}
 	}
-	
+
 	create_opts := servers.CreateOpts{
-		Name: s.Name,
-		ImageRef: s.SourceImage,
-		FlavorRef: s.Flavor,
+		Name:           s.Name,
+		ImageRef:       s.SourceImage,
+		FlavorRef:      s.Flavor,
 		SecurityGroups: securityGroups,
-		Networks: networkList,
+		Networks:       networkList,
 	}
-	
+
 	var err error
-	s.server, err = servers.Create(compute_client, keypairs.CreateOptsExt{ create_opts, keyName }).Extract()
+	s.server, err = servers.Create(compute_client, keypairs.CreateOptsExt{create_opts, keyName}).Extract()
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	
-	log.Printf("server id: %s", s.server.ID)	
+
+	log.Printf("server id: %s", s.server.ID)
 	ui.Say(fmt.Sprintf("Waiting for server (%s) to become ready...", s.server.ID))
-	
+
 	stateChange := StateChangeConf{
 		Pending:   []string{"BUILD"},
 		Target:    "ACTIVE",
@@ -74,7 +74,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	s.server = latestServer.(*servers.Server)
-	
+
 	state.Put("server", s.server)
 	return multistep.ActionContinue
 }
@@ -86,7 +86,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 
 	compute_client := state.Get("compute_client").(*gophercloud.ServiceClient)
 	ui := state.Get("ui").(packer.Ui)
-	
+
 	ui.Say("Terminating the source server...")
 
 	err := servers.Delete(compute_client, s.server.ID).ExtractErr()

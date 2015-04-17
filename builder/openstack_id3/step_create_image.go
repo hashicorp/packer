@@ -8,29 +8,29 @@ import (
 	"time"
 
 	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type stepCreateImage struct{}
 
 func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
-	
+
 	computeClient := state.Get("compute_client").(*gophercloud.ServiceClient)
 	config := state.Get("config").(config)
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
-	
+
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the image: %s", config.ImageName))
 
-	imageId, err := servers.CreateImage(computeClient, server.ID, 
-										servers.CreateImageOpts{Name: config.ImageName}).ExtractImageID()
+	imageId, err := servers.CreateImage(computeClient, server.ID,
+		servers.CreateImageOpts{Name: config.ImageName}).ExtractImageID()
 	if err != err {
 		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		return multistep.ActionHalt		
+		return multistep.ActionHalt
 	}
 
 	// Set the Image ID in the state

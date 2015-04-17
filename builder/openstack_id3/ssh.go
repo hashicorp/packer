@@ -8,52 +8,52 @@ import (
 	"time"
 
 	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the server AccessIPv4 setting..
 func SSHAddress(compute_client *gophercloud.ServiceClient, sshinterface string, port int) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
-		
+
 		s := state.Get("server").(*servers.Server)
 
 		if ip := state.Get("access_ip").(*floatingip.FloatingIP); ip.IP != "" {
 			return fmt.Sprintf("%s:%d", ip.IP, port), nil
 		} else {
 			// We wrap up things here for now
-			return "", errors.New("Error parsing SSH addresses")			
-		}
-/*
-		// FIXME: Support for selecting sshinterface. Leaving old code here for now
-		ip_pools, err := s.AllAddressPools()
-		if err != nil {
 			return "", errors.New("Error parsing SSH addresses")
 		}
-		for pool, addresses := range ip_pools {
-			if sshinterface != "" {
-				if pool != sshinterface {
-					continue
-				}
+		/*
+			// FIXME: Support for selecting sshinterface. Leaving old code here for now
+			ip_pools, err := s.AllAddressPools()
+			if err != nil {
+				return "", errors.New("Error parsing SSH addresses")
 			}
-			if pool != "" {
-				for _, address := range addresses {
-					if address.Addr != "" && address.Version == 4 {
-						return fmt.Sprintf("%s:%d", address.Addr, port), nil
+			for pool, addresses := range ip_pools {
+				if sshinterface != "" {
+					if pool != sshinterface {
+						continue
+					}
+				}
+				if pool != "" {
+					for _, address := range addresses {
+						if address.Addr != "" && address.Version == 4 {
+							return fmt.Sprintf("%s:%d", address.Addr, port), nil
+						}
 					}
 				}
 			}
-		}
-*/
+		*/
 		serverState, err := servers.Get(compute_client, s.ID).Extract()
 		if err != nil {
-			return "", err			
+			return "", err
 		}
 
 		state.Put("server", serverState)
 		time.Sleep(1 * time.Second)
-		
+
 		return "", errors.New("couldn't determine IP address for server")
 	}
 }

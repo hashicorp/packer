@@ -46,7 +46,7 @@ func ServerStateRefreshFunc(sc *gophercloud.ServiceClient, s *servers.Server) St
 			} else {
 				log.Printf("Error on ServerStateRefresh: %s", err)
 				return nil, "", 0, err
-			}			
+			}
 		}
 		return server, server.Status, server.Progress, nil
 	}

@@ -6,8 +6,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 
 	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type StepAllocateIp struct {
@@ -16,7 +16,7 @@ type StepAllocateIp struct {
 }
 
 func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
-	
+
 	ui := state.Get("ui").(packer.Ui)
 	computeClient := state.Get("compute_client").(*gophercloud.ServiceClient)
 	server := state.Get("server").(*servers.Server)
@@ -24,7 +24,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	var instanceIp *floatingip.FloatingIP
 	if s.FloatingIp != "" {
 		instanceIp.IP = s.FloatingIp
-	} else if s.FloatingIpPool != "" {		
+	} else if s.FloatingIpPool != "" {
 		// Obtain new floating IP. Supports both networks pool id and name
 		newIp, err := floatingip.Create(computeClient, floatingip.CreateOpts{Pool: s.FloatingIpPool}).Extract()
 		if err != nil {
@@ -45,9 +45,9 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		} else {
 			ui.Say(fmt.Sprintf("Added floating IP %s to instance...", instanceIp.IP))
-		}		
+		}
 	}
-	state.Put("access_ip", instanceIp)	
+	state.Put("access_ip", instanceIp)
 	return multistep.ActionContinue
 }
 
@@ -60,8 +60,8 @@ func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 		err := floatingip.Delete(computeClient, instanceIp.ID).ExtractErr()
 		if err != nil {
 			ui.Error(fmt.Sprintf("Error deleting temporary floating IP %s", instanceIp.IP))
-			return			
+			return
 		}
 		ui.Say(fmt.Sprintf("Deleted temporary floating IP %s", instanceIp.IP))
-	}		
+	}
 }

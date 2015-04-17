@@ -33,39 +33,39 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
-	}	
+	}
 
 	if result.PrivateKey == "" {
 		state.Put("error", fmt.Errorf("The temporary keypair returned was blank"))
 		return multistep.ActionHalt
 	}
-/*
-	// If we're in debug mode, output the private key to the working
-	// directory.
-	if s.Debug {
-		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
-		f, err := os.Create(s.DebugKeyPath)
-		if err != nil {
-			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
-			return multistep.ActionHalt
-		}
-		defer f.Close()
-
-		// Write the key out
-		if _, err := f.Write([]byte(keyResp.PrivateKey)); err != nil {
-			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
-			return multistep.ActionHalt
-		}
-
-		// Chmod it so that it is SSH ready
-		if runtime.GOOS != "windows" {
-			if err := f.Chmod(0600); err != nil {
-				state.Put("error", fmt.Errorf("Error setting permissions of debug key: %s", err))
+	/*
+		// If we're in debug mode, output the private key to the working
+		// directory.
+		if s.Debug {
+			ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
+			f, err := os.Create(s.DebugKeyPath)
+			if err != nil {
+				state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 				return multistep.ActionHalt
 			}
+			defer f.Close()
+
+			// Write the key out
+			if _, err := f.Write([]byte(keyResp.PrivateKey)); err != nil {
+				state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
+				return multistep.ActionHalt
+			}
+
+			// Chmod it so that it is SSH ready
+			if runtime.GOOS != "windows" {
+				if err := f.Chmod(0600); err != nil {
+					state.Put("error", fmt.Errorf("Error setting permissions of debug key: %s", err))
+					return multistep.ActionHalt
+				}
+			}
 		}
-	}
-*/
+	*/
 	// Set the keyname so we know to delete it later
 	s.keyName = keyName
 
@@ -89,10 +89,10 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	ui.Say("Deleting temporary keypair...")
 	keypairs.Delete(compute_client, s.keyName)
 	// FIXME: Check delete result
-/*	
-	if err != nil {
-		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
-	}
-*/
+	/*
+		if err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
+		}
+	*/
 }

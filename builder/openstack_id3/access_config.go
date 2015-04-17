@@ -16,7 +16,7 @@ import (
 
 // AccessConfig is for common configuration related to openstack access
 type AccessConfig struct {
-	Domain	  string `mapstructure:"domain"`
+	Domain    string `mapstructure:"domain"`
 	DomainID  string `mapstructure:"domain_id"`
 	Username  string `mapstructure:"username"`
 	Password  string `mapstructure:"password"`
@@ -31,32 +31,32 @@ type AccessConfig struct {
 // Auth returns a ProviderClient with an valid token and catalog for access to openstack services, or
 // an error if the authentication couldn't be resolved.
 func (c *AccessConfig) Auth() (*gophercloud.ProviderClient, error) {
-	c.Domain = common.ChooseString(c.Domain, 	   os.Getenv("OS_USER_DOMAIN_NAME"))
-	c.DomainID = common.ChooseString(c.DomainID,   os.Getenv("OS_USER_DOMAIN_ID"), os.Getenv("OS_PROJECT_DOMAIN_ID"))
-	
-	c.Username = common.ChooseString(c.Username,   os.Getenv("OS_USERNAME"))
-	c.Password = common.ChooseString(c.Password,   os.Getenv("OS_PASSWORD"))
-	
-	c.Project = common.ChooseString(c.Project, 	   os.Getenv("OS_PROJECT_NAME"))
-	c.ProjectID = common.ChooseString(c.ProjectID,  os.Getenv("OS_PROJECT_ID"))
-	
-	c.Provider = common.ChooseString(c.Provider,   os.Getenv("OS_AUTH_URL"))
+	c.Domain = common.ChooseString(c.Domain, os.Getenv("OS_USER_DOMAIN_NAME"))
+	c.DomainID = common.ChooseString(c.DomainID, os.Getenv("OS_USER_DOMAIN_ID"), os.Getenv("OS_PROJECT_DOMAIN_ID"))
+
+	c.Username = common.ChooseString(c.Username, os.Getenv("OS_USERNAME"))
+	c.Password = common.ChooseString(c.Password, os.Getenv("OS_PASSWORD"))
+
+	c.Project = common.ChooseString(c.Project, os.Getenv("OS_PROJECT_NAME"))
+	c.ProjectID = common.ChooseString(c.ProjectID, os.Getenv("OS_PROJECT_ID"))
+
+	c.Provider = common.ChooseString(c.Provider, os.Getenv("OS_AUTH_URL"))
 	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("OS_REGION_NAME"))
 
 	authoptions := gophercloud.AuthOptions{
 		IdentityEndpoint: c.Provider,
-		DomainName: c.Domain,
-		Username: c.Username,
-		Password: c.Password,
-		TenantName: c.Project,
-		AllowReauth: true,
+		DomainName:       c.Domain,
+		Username:         c.Username,
+		Password:         c.Password,
+		TenantName:       c.Project,
+		AllowReauth:      true,
 	}
 	// Creates the provider empty client that will contain token and catalog
 	provider, err := openstack.AuthenticatedClient(authoptions)
 	if err != nil {
 		return nil, err
 	}
-	// Attempts to autheticate and update provider with token and catatlog 
+	// Attempts to autheticate and update provider with token and catatlog
 	err = openstack.Authenticate(provider, authoptions)
 	if err != nil {
 		return nil, err
