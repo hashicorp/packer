@@ -18,7 +18,7 @@ func (s *StepWaitForRackConnect) Run(state multistep.StateBag) multistep.StepAct
 	if !s.Wait {
 		return multistep.ActionContinue
 	}
-	
+
 	computeClient := state.Get("compute_client").(*gophercloud.ServiceClient)
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
