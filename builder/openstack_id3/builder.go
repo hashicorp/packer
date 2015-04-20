@@ -101,6 +101,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SecurityGroups: b.config.SecurityGroups,
 			Networks:       b.config.Networks,
 		},
+		&StepWaitForRackConnect{
+			Wait:           b.config.RackconnectWait,
+		},
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
 			FloatingIp:     b.config.FloatingIp,
