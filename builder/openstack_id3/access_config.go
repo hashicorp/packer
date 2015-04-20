@@ -1,12 +1,12 @@
 package openstack_id3
 
 import (
-	//"crypto/tls"
+	"crypto/tls"
 	"fmt"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	//"net/http"
-	//"net/url"
+	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -16,47 +16,81 @@ import (
 
 // AccessConfig is for common configuration related to openstack access
 type AccessConfig struct {
-	Domain    string `mapstructure:"domain"`
-	DomainID  string `mapstructure:"domain_id"`
 	Username  string `mapstructure:"username"`
+	UserId    string `mapstructure:"user_id"`
 	Password  string `mapstructure:"password"`
+	ApiKey    string `mapstructure:"api_key"`
 	Project   string `mapstructure:"project"`
-	ProjectID string `mapstructure:"project_id"`
+	ProjectId string `mapstructure:"project_id"`
 	Provider  string `mapstructure:"provider"`
 	RawRegion string `mapstructure:"region"`
 	ProxyUrl  string `mapstructure:"proxy_url"`
+	TenantId  string `mapstructure:"tenant_id"`
 	Insecure  bool   `mapstructure:"insecure"`
+	Domain    string `mapstructure:"domain"`
+	DomainId  string `mapstructure:"domain_id"`
 }
 
-// Auth returns a ProviderClient with an valid token and catalog for access to openstack services, or
-// an error if the authentication couldn't be resolved.
+// Auth returns a ProviderClient with an valid token and catalog for access to openstack services,
+// or an error if the authentication couldn't be resolved.
 func (c *AccessConfig) Auth() (*gophercloud.ProviderClient, error) {
-	c.Domain = common.ChooseString(c.Domain, os.Getenv("OS_USER_DOMAIN_NAME"))
-	c.DomainID = common.ChooseString(c.DomainID, os.Getenv("OS_USER_DOMAIN_ID"), os.Getenv("OS_PROJECT_DOMAIN_ID"))
-
-	c.Username = common.ChooseString(c.Username, os.Getenv("OS_USERNAME"))
-	c.Password = common.ChooseString(c.Password, os.Getenv("OS_PASSWORD"))
-
-	c.Project = common.ChooseString(c.Project, os.Getenv("OS_PROJECT_NAME"))
-	c.ProjectID = common.ChooseString(c.ProjectID, os.Getenv("OS_PROJECT_ID"))
-
-	c.Provider = common.ChooseString(c.Provider, os.Getenv("OS_AUTH_URL"))
-	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("OS_REGION_NAME"))
+	// Note: Some of the fetched env vars here are a bit odd but needs to be here because of compatibility
+	c.Username = common.ChooseString(c.Username, os.Getenv("SDK_USERNAME"), os.Getenv("OS_USERNAME"))
+	c.UserId = common.ChooseString(c.UserId, os.Getenv("OS_USER_ID"))
+	c.Password = common.ChooseString(c.Password, os.Getenv("SDK_PASSWORD"), os.Getenv("OS_PASSWORD"))
+	c.ApiKey = common.ChooseString(c.ApiKey, os.Getenv("SDK_API_KEY"))
+	c.Project = common.ChooseString(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"), os.Getenv("OS_PROJECT_NAME"))
+	c.Provider = common.ChooseString(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
+	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
+	c.TenantId = common.ChooseString(c.TenantId, c.ProjectId, os.Getenv("OS_TENANT_ID"), os.Getenv("OS_PROJECT_ID"))
+	c.Domain = common.ChooseString(c.Domain, os.Getenv("OS_DOMAIN_NAME"))
+	c.DomainId = common.ChooseString(c.DomainId, os.Getenv("OS_PROJECT_DOMAIN_ID"), os.Getenv("OS_USER_DOMAIN_ID"))
 
 	authoptions := gophercloud.AuthOptions{
+		AllowReauth: true,
+
 		IdentityEndpoint: c.Provider,
-		DomainName:       c.Domain,
 		Username:         c.Username,
+		UserID:           c.UserId,
 		Password:         c.Password,
+		APIKey:           c.ApiKey,
 		TenantName:       c.Project,
-		AllowReauth:      true,
+		TenantID:         c.TenantId,
+		DomainName:       c.Domain,
+		DomainID:         c.DomainId,
 	}
-	// Creates the provider empty client that will contain token and catalog
+
+	default_transport := &http.Transport{}
+
+	if c.Insecure {
+		cfg := new(tls.Config)
+		cfg.InsecureSkipVerify = true
+		default_transport.TLSClientConfig = cfg
+	}
+
+	// For corporate networks it may be the case where we want our API calls
+	// to be sent through a separate HTTP proxy than external traffic.
+	if c.ProxyUrl != "" {
+		url, err := url.Parse(c.ProxyUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		// The gophercloud.Context has a UseCustomClient method which
+		// would allow us to override with a new instance of http.Client.
+		default_transport.Proxy = http.ProxyURL(url)
+	}
+
+	if c.Insecure || c.ProxyUrl != "" {
+		http.DefaultTransport = default_transport
+	}
+
+	// Creates the provider client that will contain token and catalog
 	provider, err := openstack.AuthenticatedClient(authoptions)
 	if err != nil {
 		return nil, err
 	}
-	// Attempts to autheticate and update provider with token and catatlog
+	// Attempts to autheticate and update provider with token and catalog
 	err = openstack.Authenticate(provider, authoptions)
 	if err != nil {
 		return nil, err
@@ -78,12 +112,18 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"username":  &c.Username,
-		"password":  &c.Password,
-		"provider":  &c.Provider,
-		"project":   &c.Project,
-		"region":    &c.RawRegion,
-		"proxy_url": &c.ProxyUrl,
+		"username":   &c.Username,
+		"user_id":    &c.UserId,
+		"password":   &c.Password,
+		"api_key":    &c.ApiKey,
+		"provider":   &c.Provider,
+		"project":    &c.Project,
+		"project_id": &c.ProjectId,
+		"tenant_id":  &c.TenantId,
+		"domain":     &c.Domain,
+		"domain_id":  &c.DomainId,
+		"region":     &c.RawRegion,
+		"proxy_url":  &c.ProxyUrl,
 	}
 
 	errs := make([]error, 0)
