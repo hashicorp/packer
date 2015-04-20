@@ -41,7 +41,7 @@ func (c *AccessConfig) Auth() (*gophercloud.ProviderClient, error) {
 	c.ApiKey = common.ChooseString(c.ApiKey, os.Getenv("SDK_API_KEY"))
 	c.Project = common.ChooseString(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"), os.Getenv("OS_PROJECT_NAME"))
 	c.Provider = common.ChooseString(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
-	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
+	c.RawRegion = c.Region()
 	c.TenantId = common.ChooseString(c.TenantId, c.ProjectId, os.Getenv("OS_TENANT_ID"), os.Getenv("OS_PROJECT_ID"))
 	c.Domain = common.ChooseString(c.Domain, os.Getenv("OS_DOMAIN_NAME"))
 	c.DomainId = common.ChooseString(c.DomainId, os.Getenv("OS_PROJECT_DOMAIN_ID"), os.Getenv("OS_USER_DOMAIN_ID"))

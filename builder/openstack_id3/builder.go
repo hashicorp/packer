@@ -65,7 +65,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	computeClient, err := openstack.NewComputeV2(providerClient, gophercloud.EndpointOpts{
 		Type:         "compute",
 		Availability: "public",
-		Region:       b.config.AccessConfig.Region(),
+		Region:       b.config.AccessConfig.RawRegion,
 	})
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	networkClient, err := openstack.NewNetworkV2(providerClient, gophercloud.EndpointOpts{
 		Type:         "network",
 		Availability: "public",
-		Region:       b.config.AccessConfig.Region(),
+		Region:       b.config.AccessConfig.RawRegion,
 	})
 	if err != nil {
 		return nil, err
