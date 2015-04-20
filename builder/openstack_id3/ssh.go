@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
 	"time"
 
@@ -21,31 +22,22 @@ func SSHAddress(compute_client *gophercloud.ServiceClient, sshinterface string, 
 
 		if ip := state.Get("access_ip").(*floatingip.FloatingIP); ip.IP != "" {
 			return fmt.Sprintf("%s:%d", ip.IP, port), nil
-		} else {
-			// We wrap up things here for now
-			return "", errors.New("Error parsing SSH addresses")
 		}
-		/*
-			// FIXME: Support for selecting sshinterface. Leaving old code here for now
-			ip_pools, err := s.AllAddressPools()
+
+		// Does the pool actually exist?
+		if pool, ok := s.Addresses[sshinterface]; ok {
+			var addresses []servers.Address
+			err := mapstructure.Decode(pool, &addresses)
 			if err != nil {
-				return "", errors.New("Error parsing SSH addresses")
+				return "", errors.New("Error parsing ip pools from the server")
 			}
-			for pool, addresses := range ip_pools {
-				if sshinterface != "" {
-					if pool != sshinterface {
-						continue
-					}
-				}
-				if pool != "" {
-					for _, address := range addresses {
-						if address.Addr != "" && address.Version == 4 {
-							return fmt.Sprintf("%s:%d", address.Addr, port), nil
-						}
-					}
+			for _, address := range addresses {
+				if address.Address != "" && address.Version == 4 {
+					return fmt.Sprintf("%s:%d", address.Address, port), nil
 				}
 			}
-		*/
+		}
+
 		serverState, err := servers.Get(compute_client, s.ID).Extract()
 		if err != nil {
 			return "", err
