@@ -57,6 +57,8 @@ type config struct {
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
+	ThirdPartySwitchCompatibility bool `mapstructure:"third_party_switch_compatibility"`
+
 	tpl *packer.ConfigTemplate
 }
 
@@ -369,7 +371,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepCleanVMX{},
 		&StepUploadVMX{
-			RemoteType:        b.config.RemoteType,
+			RemoteType: b.config.RemoteType,
 		},
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
