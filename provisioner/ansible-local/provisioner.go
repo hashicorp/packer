@@ -47,6 +47,9 @@ type Config struct {
 
 	// The optional inventory file
 	InventoryFile string `mapstructure:"inventory_file"`
+
+	// The optional inventory groups
+	InventoryGroups []string `mapstructure:"inventory_groups"`
 }
 
 type Provisioner struct {
@@ -99,9 +102,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	sliceTemplates := map[string][]string{
-		"extra_arguments": p.config.ExtraArguments,
-		"playbook_paths":  p.config.PlaybookPaths,
-		"role_paths":      p.config.RolePaths,
+		"extra_arguments":  p.config.ExtraArguments,
+		"playbook_paths":   p.config.PlaybookPaths,
+		"role_paths":       p.config.RolePaths,
+		"inventory_groups": p.config.InventoryGroups,
 	}
 
 	for n, slice := range sliceTemplates {
@@ -196,7 +200,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		defer os.Remove(tf.Name())
-		_, err = tf.Write([]byte("127.0.0.1"))
+		if len(p.config.InventoryGroups) != 0 {
+			content := ""
+			for _, group := range p.config.InventoryGroups {
+				content += fmt.Sprintf("[%s]\n127.0.0.1\n", group)
+			}
+			_, err = tf.Write([]byte(content))
+		} else {
+			_, err = tf.Write([]byte("127.0.0.1"))
+		}
 		if err != nil {
 			tf.Close()
 			return fmt.Errorf("Error preparing inventory file: %s", err)
