@@ -40,7 +40,7 @@ a new command prompt or console, and checking that `packer` is available:
 
 ```text
 $ packer
-usage: packer [--version] [--help] <command> [<args>]
+usage: packer [--help] <command> [<args>]
 
 Available commands are:
     build        build image(s) from template
