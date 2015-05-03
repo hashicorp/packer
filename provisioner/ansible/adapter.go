@@ -52,6 +52,7 @@ func (c *adapter) Serve() {
 		conn, err := c.l.Accept()
 		select {
 		case <-c.done:
+			close(errc)
 			return
 		default:
 			if err != nil {
@@ -62,8 +63,6 @@ func (c *adapter) Serve() {
 			}(conn)
 		}
 	}
-
-	close(errc)
 }
 
 func (c *adapter) Handle(conn net.Conn, errc chan<- error) error {
@@ -83,9 +82,9 @@ func (c *adapter) Handle(conn net.Conn, errc chan<- error) error {
 			continue
 		}
 
-		go func(errc chan<- error) {
-			errc <- c.handleSession(newChannel)
-		}(errc)
+		go func(errc chan<- error, ch ssh.NewChannel) {
+			errc <- c.handleSession(ch)
+		}(errc, newChannel)
 	}
 
 	return nil
