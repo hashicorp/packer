@@ -148,17 +148,19 @@ each category, the available options are alphabetized and described.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `parallels_tools_guest_path` (string) - The path in the VM to upload Parallels
-  Tools. This only takes effect if `parallels_tools_mode` is not "disable".
+* `parallels_tools_guest_path` (string) - The path in the virtual machine to upload
+  Parallels Tools. This only takes effect if `parallels_tools_mode` is "upload".
   This is a [configuration template](/docs/templates/configuration-templates.html)
   that has a single valid variable: `Flavor`, which will be the value of
-  `parallels_tools_flavor`. By default the upload path is set to
-  `prl-tools-{{.Flavor}}.iso`.
+  `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso" which
+  should upload into the login directory of the user.
 
-* `parallels_tools_mode` (string) - The method by which Parallels Tools are
-  made available to the guest for installation. Valid options are "upload",
-  "attach", or "disable". The functions of each of these should be
-  self-explanatory. The default value is "upload".
+* `parallels_tools_mode` (string) - The method by which Parallels Tools are made
+  available to the guest for installation. Valid options are "upload", "attach",
+  or "disable". If the mode is "attach" the Parallels Tools ISO will be attached
+  as a CD device to the virtual machine. If the mode is "upload" the Parallels
+  Tools ISO will be uploaded to the path specified by
+  `parallels_tools_guest_path`. The default value is "upload".
 
 * `prlctl` (array of array of strings) - Custom `prlctl` commands to execute in
   order to further customize the virtual machine being created. The value of

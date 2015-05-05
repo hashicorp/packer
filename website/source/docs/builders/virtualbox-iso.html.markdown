@@ -106,9 +106,12 @@ each category, the available options are alphabetized and described.
 
 * `guest_additions_mode` (string) - The method by which guest additions
   are made available to the guest for installation. Valid options are
-  "upload", "attach", or "disable". The functions of each of these should be
-  self-explanatory. The default value is "upload". If "disable" is used,
-  guest additions won't be downloaded, either.
+  "upload", "attach", or "disable". If the mode is "attach" the guest
+  additions ISO will be attached as a CD device to the virtual machine.
+  If the mode is "upload" the guest additions ISO will be uploaded to
+  the path specified by `guest_additions_path`. The default value is
+  "upload". If "disable" is used, guest additions won't be downloaded,
+  either.
 
 * `guest_additions_path` (string) - The path on the guest virtual machine
   where the VirtualBox guest additions ISO will be uploaded. By default this
