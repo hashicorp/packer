@@ -25,7 +25,7 @@ func (s *stepCreateProvider) Run(state multistep.StateBag) multistep.StepAction 
 	providerName := state.Get("providerName").(string)
 	downloadUrl := state.Get("boxDownloadUrl").(string)
 
-	path := fmt.Sprintf("box/%s/version/%v/providers", box.Tag, version.Number)
+	path := fmt.Sprintf("box/%s/version/%v/providers", box.Tag, version.Version)
 
 	provider := &Provider{Name: providerName}
 
@@ -86,7 +86,7 @@ func (s *stepCreateProvider) Cleanup(state multistep.StateBag) {
 	ui.Say("Cleaning up provider")
 	ui.Message(fmt.Sprintf("Deleting provider: %s", s.name))
 
-	path := fmt.Sprintf("box/%s/version/%v/provider/%s", box.Tag, version.Number, s.name)
+	path := fmt.Sprintf("box/%s/version/%v/provider/%s", box.Tag, version.Version, s.name)
 
 	// No need for resp from the cleanup DELETE
 	_, err := client.Delete(path)

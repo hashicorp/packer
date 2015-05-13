@@ -166,6 +166,7 @@ func wrappedMain() int {
 		Commands:   Commands,
 		HelpFunc:   cli.BasicHelpFunc("packer"),
 		HelpWriter: os.Stdout,
+		Version:    Version,
 	}
 
 	exitCode, err := cli.Run()

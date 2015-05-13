@@ -121,6 +121,25 @@ isotime = June 7, 7:22:43pm 2014
 {{isotime "Hour15Year200603"}} = Hour19Year201407
 ```
 
+Please note that double quote characters need escaping inside of templates:
+
+```javascript
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "...",
+      "secret_key": "...",
+      "region": "us-east-1",
+      "source_ami": "ami-de0d9eb7",
+      "instance_type": "t1.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer {{isotime \"2006-01-02\"}}"
+    }
+  ]
+}
+```
+
 ## Amazon Specific Functions
 
 Specific to Amazon builders:

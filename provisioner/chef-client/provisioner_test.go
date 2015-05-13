@@ -1,8 +1,10 @@
 package chefclient
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/mitchellh/packer/packer"
@@ -133,5 +135,57 @@ func TestProvisionerPrepare_serverUrl(t *testing.T) {
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisioner_createDir(t *testing.T) {
+	p1 := &Provisioner{config: Config{PreventSudo: true}}
+	p2 := &Provisioner{config: Config{PreventSudo: false}}
+	comm := &packer.MockCommunicator{}
+	ui := &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
+
+	if err := p1.createDir(ui, comm, "/tmp/foo"); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
+		t.Fatalf("createDir should not use sudo, got: \"%s\"", comm.StartCmd.Command)
+	}
+
+	if err := p2.createDir(ui, comm, "/tmp/foo"); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
+		t.Fatalf("createDir should use sudo, got: \"%s\"", comm.StartCmd.Command)
+	}
+}
+
+func TestProvisioner_removeDir(t *testing.T) {
+	p1 := &Provisioner{config: Config{PreventSudo: true}}
+	p2 := &Provisioner{config: Config{PreventSudo: false}}
+	comm := &packer.MockCommunicator{}
+	ui := &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
+
+	if err := p1.removeDir(ui, comm, "/tmp/foo"); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
+		t.Fatalf("removeDir should not use sudo, got: \"%s\"", comm.StartCmd.Command)
+	}
+
+	if err := p2.removeDir(ui, comm, "/tmp/foo"); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
+		t.Fatalf("removeDir should use sudo, got: \"%s\"", comm.StartCmd.Command)
 	}
 }

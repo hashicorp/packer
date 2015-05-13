@@ -2,7 +2,7 @@
 layout: "docs"
 page_title: "Amazon AMI Builder (EBS backed)"
 description: |-
-  The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS volumes for use in EC2. For more information on the difference betwen EBS-backed instances and instance-store backed instances, see the storage for the root device section in the EC2 documentation.
+  The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS volumes for use in EC2. For more information on the difference between EBS-backed instances and instance-store backed instances, see the storage for the root device section in the EC2 documentation.
 ---
 
 # AMI Builder (EBS backed)
@@ -11,7 +11,7 @@ Type: `amazon-ebs`
 
 The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
 volumes for use in [EC2](http://aws.amazon.com/ec2/). For more information
-on the difference betwen EBS-backed instances and instance-store backed
+on the difference between EBS-backed instances and instance-store backed
 instances, see the
 ["storage for the root device" section in the EC2 documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
 
@@ -34,8 +34,8 @@ each category, the available configuration keys are alphabetized.
 ### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
-  If not specified, Packer will use the environment variables
-  `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
+  If not specified, Packer will use the key from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
+  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
@@ -49,8 +49,8 @@ each category, the available configuration keys are alphabetized.
   to launch the EC2 instance to create the AMI.
 
 * `secret_key` (string) - The secret key used to communicate with AWS.
-  If not specified, Packer will use the environment variables
-  `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
+  If not specified, Packer will use the secret from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
+  or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
 
 * `source_ami` (string) - The initial AMI used as a base for the newly
   created machine.
@@ -94,7 +94,7 @@ each category, the available configuration keys are alphabetized.
   Leave this empty to allow Amazon to auto-assign.
 
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
-  HVM-compatible AMIs.
+  HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
@@ -118,11 +118,11 @@ each category, the available configuration keys are alphabetized.
   described above. Note that if this is specified, you must omit the
   `security_group_id`.
 
-* `spot_price` (string) - The maximum hourly price to launch a spot instance
-  to create the AMI. It is a type of instances that EC2 starts when the maximum
-  price that you specify exceeds the current spot price. Spot price will be
-  updated based on available spot instance capacity and current spot Instance
-  requests. It may save you some costs. You can set this to "auto" for
+* `spot_price` (string) - The maximum hourly price to pay for a spot instance
+  to create the AMI. Spot instances are a type of instance that EC2 starts when
+  the current spot price is less than the maximum price you specify. Spot price
+  will be updated based on available spot instance capacity and current spot
+  instance requests. It may save you some costs. You can set this to "auto" for
   Packer to automatically discover the best spot price.
 
 * `spot_price_auto_product` (string) - Required if `spot_price` is set to
