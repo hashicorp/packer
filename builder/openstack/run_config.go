@@ -15,8 +15,10 @@ type RunConfig struct {
 	RawSSHTimeout     string   `mapstructure:"ssh_timeout"`
 	SSHUsername       string   `mapstructure:"ssh_username"`
 	SSHPort           int      `mapstructure:"ssh_port"`
+	SSHInterface      string   `mapstructure:"ssh_interface"`
 	OpenstackProvider string   `mapstructure:"openstack_provider"`
 	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
+	RackconnectWait   bool     `mapstructure:"rackconnect_wait"`
 	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
 	FloatingIp        string   `mapstructure:"floating_ip"`
 	SecurityGroups    []string `mapstructure:"security_groups"`
@@ -68,10 +70,14 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	templates := map[string]*string{
-		"flavor":       &c.Flavor,
-		"ssh_timeout":  &c.RawSSHTimeout,
-		"ssh_username": &c.SSHUsername,
-		"source_image": &c.SourceImage,
+		"flavor":             &c.Flavor,
+		"ssh_timeout":        &c.RawSSHTimeout,
+		"ssh_username":       &c.SSHUsername,
+		"ssh_interface":      &c.SSHInterface,
+		"source_image":       &c.SourceImage,
+		"openstack_provider": &c.OpenstackProvider,
+		"floating_ip_pool":   &c.FloatingIpPool,
+		"floating_ip":        &c.FloatingIp,
 	}
 
 	for n, ptr := range templates {

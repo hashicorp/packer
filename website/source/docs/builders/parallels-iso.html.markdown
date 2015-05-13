@@ -73,7 +73,7 @@ each category, the available options are alphabetized and described.
 
 * `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
   install into the VM. Valid values are "win", "lin", "mac", "os2" and "other".
-  This can be ommited only if `parallels_tools_mode` is "disable".
+  This can be omitted only if `parallels_tools_mode` is "disable".
 
 ### Optional:
 
@@ -257,9 +257,9 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-```javascript
+```text
 [
-  "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
+  "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
   "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
   "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
@@ -267,7 +267,7 @@ an Ubuntu 12.04 installer:
   "fb=false debconf/frontend=noninteractive ",
   "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- &lt;enter&gt;"
+  "initrd=/install/initrd.gz -- <enter>;"
 ]
 ```
 

@@ -136,7 +136,7 @@ sleep 60
 ```
 
 Some OS configurations don't properly kill all network connections on
-reboot, causing the provisioner to hang despite a reboot occuring.
+reboot, causing the provisioner to hang despite a reboot occurring.
 In this case, make sure you shut down the network interfaces
 on reboot or in your shell script. For example, on Gentoo:
 
@@ -148,20 +148,20 @@ on reboot or in your shell script. For example, on Gentoo:
 
 *My shell script doesn't work correctly on Ubuntu*
 
-* On Ubuntu the /bin/sh shell is
+* On Ubuntu, the `/bin/sh` shell is
 [dash](http://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script has
-[bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell\)) specific commands in it
+[bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands in it,
 then put `#!/bin/bash` at the top of your script. Differences
 between dash and bash can be found on the [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
 *My shell works when I login but fails with the shell provisioner*
 
-* See the above tip. More than likely your login shell is using /bin/bash
-while the provisioner is using /bin/sh.
+* See the above tip. More than likely, your login shell is using `/bin/bash`
+while the provisioner is using `/bin/sh`.
 
 *My installs hang when using `apt-get` or `yum`*
 
-* Make sure you add a "-y" to the command to prevent it from requiring
+* Make sure you add a `-y` to the command to prevent it from requiring
 user input before proceeding.
 
 *How do I tell what my shell script is doing?*
@@ -172,7 +172,7 @@ will echo the script statements as it is executing.
 *My builds don't always work the same*
 
 * Some distributions start the SSH daemon before other core services which
-can create race conditions. Your first provisoner can tell the machine to
+can create race conditions. Your first provisioner can tell the machine to
 wait until it completely boots.
 
 ```javascript

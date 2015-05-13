@@ -130,7 +130,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("%s", vmx),
 		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
 			url.QueryEscape(p.config.Username),
-			p.config.Password,
+			url.QueryEscape(p.config.Password),
 			p.config.Host,
 			p.config.Datacenter,
 			p.config.Cluster,

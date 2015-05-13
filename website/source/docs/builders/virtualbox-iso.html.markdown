@@ -136,7 +136,8 @@ each category, the available options are alphabetized and described.
 
 * `hard_drive_interface` (string) - The type of controller that the primary
   hard drive is attached to, defaults to "ide".  When set to "sata", the
-  drive is attached to an AHCI SATA controller.
+  drive is attached to an AHCI SATA controller. When set to "scsi", the drive
+  is attached to an LsiLogic SCSI controller.
 
 * `headless` (boolean) - Packer defaults to building VirtualBox
   virtual machines by launching a GUI that shows the console of the
@@ -282,9 +283,9 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-```javascript
+```text
 [
-  "&lt;esc&gt;&lt;esc&gt;&lt;enter&gt;&lt;wait&gt;",
+  "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
   "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
   "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
@@ -292,7 +293,7 @@ an Ubuntu 12.04 installer:
   "fb=false debconf/frontend=noninteractive ",
   "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- &lt;enter&gt;"
+  "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
 

@@ -176,13 +176,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("A manifest_file must be specified."))
 	} else {
-		info, err := os.Stat(p.config.ManifestFile)
+		_, err := os.Stat(p.config.ManifestFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_file is invalid: %s", err))
-		} else if info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("manifest_file must point to a file"))
 		}
 	}
 
@@ -193,7 +190,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				fmt.Errorf("module_path[%d] is invalid: %s", i, err))
 		} else if !info.IsDir() {
 			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("module_path[%d] must point to a directory"))
+				fmt.Errorf("module_path[%d] must point to a directory", i))
 		}
 	}
 

@@ -12,7 +12,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// Builder implements packer.Builder and builds the actual VirtualBox
+// Builder implements packer.Builder and builds the actual VMware
 // images.
 type Builder struct {
 	config *Config

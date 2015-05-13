@@ -19,7 +19,7 @@ master.
 -> **Note:** Puppet will _not_ be installed automatically
 by this provisioner. This provisioner expects that Puppet is already
 installed on the machine. It is common practice to use the
-[shell provisioner[(/docs/provisioners/shell.html) before the
+[shell provisioner](/docs/provisioners/shell.html) before the
 Puppet provisioner to do this.
 
 ## Basic Example
@@ -50,7 +50,7 @@ Optional parameters:
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
 
-* `facter` (object, string keys and values) - Additonal
+* `facter` (object, string keys and values) - Additional
   [facts](http://puppetlabs.com/puppet/related-projects/facter) to make
   available when Puppet is running.
 

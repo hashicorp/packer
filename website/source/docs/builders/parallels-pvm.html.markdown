@@ -56,7 +56,7 @@ each category, the available options are alphabetized and described.
 
 * `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
   install into the VM. Valid values are "win", "lin", "mac", "os2" and "other".
-  This can be ommited only if `parallels_tools_mode` is "disable".
+  This can be omitted only if `parallels_tools_mode` is "disable".
 
 ### Optional:
 
