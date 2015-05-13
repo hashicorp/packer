@@ -16,7 +16,7 @@ with Redis pre-installed. This is just an example. Packer can create images
 for [many platforms](/intro/platforms.html) with anything pre-installed.
 
 If you don't have an AWS account, [create one now](http://aws.amazon.com/free/).
-For the example, we'll use a "t1.micro" instance to build our image, which
+For the example, we'll use a "t2.micro" instance to build our image, which
 qualifies under the AWS [free-tier](http://aws.amazon.com/free/), meaning
 it will be free. If you already have an AWS account, you may be charged some
 amount of money, but it shouldn't be more than a few cents.
@@ -54,8 +54,8 @@ briefly. Create a file `example.json` and fill it with the following contents:
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-de0d9eb7",
-    "instance_type": "t1.micro",
+    "source_ami": "ami-9eaa1cf6",
+    "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
   }]
@@ -157,10 +157,13 @@ the Packer output.
 
 Packer only builds images. It does not attempt to manage them in any way.
 After they're built, it is up to you to launch or destroy them as you see
-fit. As a result of this, after running the above example, your AWS account
-now has an AMI associated with it.
+fit. If you want to store and namespace images for easy reference, you
+can use [Atlas by HashiCorp](https://atlas.hashicorp.com). We'll cover
+remotely building and storing images at the end of this getting started guide.
 
-AMIs are stored in S3 by Amazon, so unless you want to be charged about $0.01
+After running the above example, your AWS account
+now has an AMI associated with it. AMIs are stored in S3 by Amazon,
+so unless you want to be charged about $0.01
 per month, you'll probably want to remove it. Remove the AMI by
 first deregistering it on the [AWS AMI management page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images).
 Next, delete the associated snapshot on the

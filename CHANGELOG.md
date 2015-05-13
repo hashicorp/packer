@@ -1,6 +1,60 @@
 ## 0.8.0 (unreleased)
 
+FEATURES:
 
+IMPROVEMENTS:
+
+  * builder/openstack: Add rackconnect_wait for Rackspace customers to wait for
+    RackConnect data to appear
+  * buidler/openstakc: Add ssh_interface option for rackconnect for users that
+    have prohibitive firewalls
+
+BUG FIXES:
+
+  * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
+  * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
+  * builder/docker: Fixed hang on prompt while copying script
+  * builder/virtualbox: Added SCSI support
+  * postprocessor/vagrant-cloud: Fixed failing on response
+  * provisioner/puppet-masterless: Allow manifest_file to be a directory
+  * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
+
+## 0.7.5 (December 9, 2014)
+
+FEATURES:
+
+  * **New command: `packer push`**: Push template and files to HashiCorp's
+      Atlas for building your templates automatically.
+  * **New post-processor: `atlas`**: Send artifact to HashiCorp's Atlas for
+      versioning and storing artifacts. These artifacts can then be queried
+      using the API, Terraform, etc.
+
+IMPROVEMENTS:
+
+  * builder/googlecompute: Support for ubuntu-os-cloud project
+  * builder/googlecompute: Support for OAuth2 to avoid client secrets file
+  * builder/googlecompute: GCE image from persistant disk instead of tarball
+  * builder/qemu: Checksum type "none" can be used
+  * provisioner/chef: Generate a node name if none available
+  * provisioner/chef: Added ssl_verify_mode configuration
+
+BUG FIXES:
+
+  * builder/parallels: Fixed attachment of ISO to cdrom device
+  * builder/parallels: Fixed boot load ordering
+  * builder/digitalocean: Fixed decoding of size
+  * builder/digitalocean: Fixed missing content-type header in request
+  * builder/digitalocean: Fixed use of private IP
+  * builder/digitalocean: Fixed the artifact ID generation
+  * builder/vsphere: Fixed credential escaping
+  * builder/qemu: Fixed use of CDROM with disk_image
+  * builder/aws: Fixed IP address for SSH in VPC
+  * builder/aws: Fixed issue with multiple block devices
+  * builder/vmware: Upload VMX to ESX5 after editing
+  * communicator/docker: Fix handling of symlinks during upload
+  * provisioner/chef: Fixed use of sudo in some cases
+  * core: Fixed build name interpolation
+  * postprocessor/vagrant: Fixed check for Vagrantfile template
 
 ## 0.7.2 (October 28, 2014)
 

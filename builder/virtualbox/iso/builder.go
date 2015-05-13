@@ -158,9 +158,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" {
+	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("hard_drive_interface can only be ide or sata"))
+			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
 	}
 
 	if b.config.ISOChecksumType == "" {

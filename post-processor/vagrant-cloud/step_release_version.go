@@ -24,7 +24,7 @@ func (s *stepReleaseVersion) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionContinue
 	}
 
-	path := fmt.Sprintf("box/%s/version/%v/release", box.Tag, version.Number)
+	path := fmt.Sprintf("box/%s/version/%v/release", box.Tag, version.Version)
 
 	resp, err := client.Put(path)
 

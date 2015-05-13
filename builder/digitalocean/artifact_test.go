@@ -1,8 +1,9 @@
 package digitalocean
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {
@@ -10,6 +11,15 @@ func TestArtifact_Impl(t *testing.T) {
 	raw = &Artifact{}
 	if _, ok := raw.(packer.Artifact); !ok {
 		t.Fatalf("Artifact should be artifact")
+	}
+}
+
+func TestArtifactId(t *testing.T) {
+	a := &Artifact{"packer-foobar", 42, "San Francisco", nil}
+	expected := "42"
+
+	if a.Id() != expected {
+		t.Fatalf("artifact ID should match: %v", expected)
 	}
 }
 
