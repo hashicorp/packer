@@ -77,6 +77,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Template process
+	templates["version_description"] = &p.config.VersionDescription
 	for key, ptr := range templates {
 		*ptr, err = p.config.tpl.Process(*ptr, nil)
 		if err != nil {
