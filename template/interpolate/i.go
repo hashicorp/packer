@@ -8,6 +8,10 @@ import (
 // Context is the context that an interpolation is done in. This defines
 // things such as available variables.
 type Context struct {
+	// Data is the data for the template that is available
+	Data interface{}
+
+	// DisableEnv disables the env function
 	DisableEnv bool
 }
 
@@ -25,7 +29,10 @@ func (i *I) Render(ctx *Context) (string, error) {
 	}
 
 	var result bytes.Buffer
-	data := map[string]interface{}{}
+	var data interface{}
+	if ctx != nil {
+		data = ctx.Data
+	}
 	if err := tpl.Execute(&result, data); err != nil {
 		return "", err
 	}
