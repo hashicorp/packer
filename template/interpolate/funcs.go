@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
+
+	"github.com/mitchellh/packer/common/uuid"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -24,7 +27,11 @@ var FuncGens = map[string]FuncGenerator{
 	"isotime":   funcGenIsotime,
 	"pwd":       funcGenPwd,
 	"timestamp": funcGenTimestamp,
+	"uuid":      funcGenUuid,
 	"user":      funcGenUser,
+
+	"upper": funcGenPrimitive(strings.ToUpper),
+	"lower": funcGenPrimitive(strings.ToLower),
 }
 
 // FuncGenerator is a function that given a context generates a template
@@ -68,6 +75,12 @@ func funcGenIsotime(ctx *Context) interface{} {
 	}
 }
 
+func funcGenPrimitive(value interface{}) FuncGenerator {
+	return func(ctx *Context) interface{} {
+		return value
+	}
+}
+
 func funcGenPwd(ctx *Context) interface{} {
 	return func() (string, error) {
 		return os.Getwd()
@@ -83,5 +96,11 @@ func funcGenTimestamp(ctx *Context) interface{} {
 func funcGenUser(ctx *Context) interface{} {
 	return func() string {
 		return ""
+	}
+}
+
+func funcGenUuid(ctx *Context) interface{} {
+	return func() string {
+		return uuid.TimeOrderedUUID()
 	}
 }
