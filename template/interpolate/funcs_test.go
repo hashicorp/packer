@@ -3,6 +3,7 @@ package interpolate
 import (
 	"os"
 	"testing"
+	"time"
 )
 
 func TestFuncEnv(t *testing.T) {
@@ -62,6 +63,25 @@ func TestFuncEnv_disable(t *testing.T) {
 		if result != tc.Output {
 			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
 		}
+	}
+}
+
+func TestFuncIsotime(t *testing.T) {
+	ctx := &Context{}
+	i := &I{Value: "{{isotime}}"}
+	result, err := i.Render(ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	val, err := time.Parse(time.RFC3339, result)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	currentTime := time.Now().UTC()
+	if currentTime.Sub(val) > 2*time.Second {
+		t.Fatalf("val: %d (current: %d)", val, currentTime)
 	}
 }
 
