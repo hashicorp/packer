@@ -9,6 +9,7 @@ import (
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
 	"env":  funcGenEnv,
+	"pwd":  funcGenPwd,
 	"user": funcGenUser,
 }
 
@@ -36,6 +37,12 @@ func funcGenEnv(ctx *Context) interface{} {
 		}
 
 		return os.Getenv(k), nil
+	}
+}
+
+func funcGenPwd(ctx *Context) interface{} {
+	return func() (string, error) {
+		return os.Getwd()
 	}
 }
 
