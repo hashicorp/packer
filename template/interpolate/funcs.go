@@ -2,15 +2,18 @@ package interpolate
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"text/template"
+	"time"
 )
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
-	"env":  funcGenEnv,
-	"pwd":  funcGenPwd,
-	"user": funcGenUser,
+	"env":     funcGenEnv,
+	"isotime": funcGenIsotime,
+	"pwd":     funcGenPwd,
+	"user":    funcGenUser,
 }
 
 // FuncGenerator is a function that given a context generates a template
@@ -37,6 +40,20 @@ func funcGenEnv(ctx *Context) interface{} {
 		}
 
 		return os.Getenv(k), nil
+	}
+}
+
+func funcGenIsotime(ctx *Context) interface{} {
+	return func(format ...string) (string, error) {
+		if len(format) == 0 {
+			return time.Now().UTC().Format(time.RFC3339), nil
+		}
+
+		if len(format) > 1 {
+			return "", fmt.Errorf("too many values, 1 needed: %v", format)
+		}
+
+		return time.Now().UTC().Format(format[0]), nil
 	}
 }
 
