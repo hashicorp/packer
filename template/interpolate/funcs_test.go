@@ -2,6 +2,7 @@ package interpolate
 
 import (
 	"os"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -98,6 +99,33 @@ func TestFuncPwd(t *testing.T) {
 		{
 			`{{pwd}}`,
 			wd,
+		},
+	}
+
+	ctx := &Context{}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
+func TestFuncTimestamp(t *testing.T) {
+	expected := strconv.FormatInt(InitTime.Unix(), 10)
+
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{timestamp}}`,
+			expected,
 		},
 	}
 
