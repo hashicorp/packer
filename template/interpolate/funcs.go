@@ -94,8 +94,12 @@ func funcGenTimestamp(ctx *Context) interface{} {
 }
 
 func funcGenUser(ctx *Context) interface{} {
-	return func() string {
-		return ""
+	return func(k string) string {
+		if ctx == nil || ctx.UserVariables == nil {
+			return ""
+		}
+
+		return ctx.UserVariables[k]
 	}
 }
 

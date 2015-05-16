@@ -142,3 +142,37 @@ func TestFuncTimestamp(t *testing.T) {
 		}
 	}
 }
+
+func TestFuncUser(t *testing.T) {
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{user "foo"}}`,
+			`foo`,
+		},
+
+		{
+			`{{user "what"}}`,
+			``,
+		},
+	}
+
+	ctx := &Context{
+		UserVariables: map[string]string{
+			"foo": "foo",
+		},
+	}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
