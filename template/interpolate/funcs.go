@@ -4,16 +4,27 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"text/template"
 	"time"
 )
 
+// InitTime is the UTC time when this package was initialized. It is
+// used as the timestamp for all configuration templates so that they
+// match for a single build.
+var InitTime time.Time
+
+func init() {
+	InitTime = time.Now().UTC()
+}
+
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
-	"env":     funcGenEnv,
-	"isotime": funcGenIsotime,
-	"pwd":     funcGenPwd,
-	"user":    funcGenUser,
+	"env":       funcGenEnv,
+	"isotime":   funcGenIsotime,
+	"pwd":       funcGenPwd,
+	"timestamp": funcGenTimestamp,
+	"user":      funcGenUser,
 }
 
 // FuncGenerator is a function that given a context generates a template
@@ -60,6 +71,12 @@ func funcGenIsotime(ctx *Context) interface{} {
 func funcGenPwd(ctx *Context) interface{} {
 	return func() (string, error) {
 		return os.Getwd()
+	}
+}
+
+func funcGenTimestamp(ctx *Context) interface{} {
+	return func() string {
+		return strconv.FormatInt(InitTime.Unix(), 10)
 	}
 }
 
