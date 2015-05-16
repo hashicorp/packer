@@ -64,3 +64,33 @@ func TestFuncEnv_disable(t *testing.T) {
 		}
 	}
 }
+
+func TestFuncPwd(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{pwd}}`,
+			wd,
+		},
+	}
+
+	ctx := &Context{}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
