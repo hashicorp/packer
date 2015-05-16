@@ -11,6 +11,10 @@ type Context struct {
 	// Data is the data for the template that is available
 	Data interface{}
 
+	// UserVariables is the mapping of user variables that the
+	// "user" function reads from.
+	UserVariables map[string]string
+
 	// DisableEnv disables the env function
 	DisableEnv bool
 }
