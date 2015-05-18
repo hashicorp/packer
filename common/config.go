@@ -18,6 +18,9 @@ import (
 func ScrubConfig(target interface{}, values ...string) string {
 	conf := fmt.Sprintf("Config: %+v", target)
 	for _, value := range values {
+		if value == "" {
+			continue
+		}
 		conf = strings.Replace(conf, value, "<Filtered>", -1)
 	}
 	return conf
