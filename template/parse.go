@@ -174,6 +174,17 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Provisioners = append(result.Provisioners, &p)
 	}
 
+	// Push
+	if len(r.Push) > 0 {
+		var p Push
+		if err := r.decoder(&p, nil).Decode(r.Push); err != nil {
+			errs = multierror.Append(errs, fmt.Errorf(
+				"push: %s", err))
+		}
+
+		result.Push = &p
+	}
+
 	// If we have errors, return those with a nil result
 	if errs != nil {
 		return nil, errs
