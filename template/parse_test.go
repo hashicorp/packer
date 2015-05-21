@@ -4,6 +4,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestParse(t *testing.T) {
@@ -12,6 +13,9 @@ func TestParse(t *testing.T) {
 		Result *Template
 		Err    bool
 	}{
+		/*
+		 * Builders
+		 */
 		{
 			"parse-basic.json",
 			&Template{
@@ -34,6 +38,85 @@ func TestParse(t *testing.T) {
 			nil,
 			true,
 		},
+
+		/*
+		 * Provisioners
+		 */
+		{
+			"parse-provisioner-basic.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					&Provisioner{
+						Type: "something",
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-provisioner-pause-before.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					&Provisioner{
+						Type:        "something",
+						PauseBefore: 1 * time.Second,
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-provisioner-only.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					&Provisioner{
+						Type: "something",
+						OnlyExcept: OnlyExcept{
+							Only: []string{"foo"},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-provisioner-except.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					&Provisioner{
+						Type: "something",
+						OnlyExcept: OnlyExcept{
+							Except: []string{"foo"},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-provisioner-override.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					&Provisioner{
+						Type: "something",
+						Override: map[string]interface{}{
+							"foo": map[string]interface{}{},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-provisioner-no-type.json",
+			nil,
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -49,7 +132,7 @@ func TestParse(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(tpl, tc.Result) {
-			t.Fatalf("bad: %#v", tpl)
+			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
 		}
 	}
 }
