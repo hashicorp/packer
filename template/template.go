@@ -91,12 +91,44 @@ func (t *Template) Validate() error {
 
 	// Verify that the provisioner overrides target builders that exist
 	for i, p := range t.Provisioners {
+		// Validate only/except
+		if verr := p.OnlyExcept.Validate(t); verr != nil {
+			for _, e := range multierror.Append(verr).Errors {
+				err = multierror.Append(err, fmt.Errorf(
+					"provisioner %d: %s", i+1, e))
+			}
+		}
+
+		// Validate overrides
 		for name, _ := range p.Override {
 			if _, ok := t.Builders[name]; !ok {
 				err = multierror.Append(err, fmt.Errorf(
 					"provisioner %d: override '%s' doesn't exist",
 					i+1, name))
 			}
+		}
+	}
+
+	return err
+}
+
+// Validate validates that the OnlyExcept settings are correct for a thing.
+func (o *OnlyExcept) Validate(t *Template) error {
+	if len(o.Only) > 0 && len(o.Except) > 0 {
+		return errors.New("only one of 'only' or 'except' may be specified")
+	}
+
+	var err error
+	for _, n := range o.Only {
+		if _, ok := t.Builders[n]; !ok {
+			err = multierror.Append(err, fmt.Errorf(
+				"'only' specified builder '%s' not found", n))
+		}
+	}
+	for _, n := range o.Except {
+		if _, ok := t.Builders[n]; !ok {
+			err = multierror.Append(err, fmt.Errorf(
+				"'except' specified builder '%s' not found", n))
 		}
 	}
 
