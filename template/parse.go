@@ -30,6 +30,10 @@ func (r *rawTemplate) Template() (*Template, error) {
 	var result Template
 	var errs error
 
+	// Copy some literals
+	result.Description = r.Description
+	result.MinVersion = r.MinVersion
+
 	// Gather the variables
 	if len(r.Variables) > 0 {
 		result.Variables = make(map[string]*Variable, len(r.Variables))
