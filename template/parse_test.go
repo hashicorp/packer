@@ -243,6 +243,22 @@ func TestParse(t *testing.T) {
 			nil,
 			true,
 		},
+
+		{
+			"parse-description.json",
+			&Template{
+				Description: "foo",
+			},
+			false,
+		},
+
+		{
+			"parse-min-version.json",
+			&Template{
+				MinVersion: "1.2",
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {
