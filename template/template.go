@@ -1,8 +1,11 @@
 package template
 
 import (
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/hashicorp/go-multierror"
 )
 
 // Template represents the parsed template that is used to configure
@@ -66,6 +69,38 @@ type Variable struct {
 type OnlyExcept struct {
 	Only   []string
 	Except []string
+}
+
+//-------------------------------------------------------------------
+// Functions
+//-------------------------------------------------------------------
+
+// Validate does some basic validation of the template on top of the
+// validation that occurs while parsing. If possible, we try to defer
+// validation to here. The validation errors that occur during parsing
+// are the minimal necessary to make sure parsing builds a reasonable
+// Template structure.
+func (t *Template) Validate() error {
+	var err error
+
+	// At least one builder must be defined
+	if len(t.Builders) == 0 {
+		err = multierror.Append(err, errors.New(
+			"at least one builder must be defined"))
+	}
+
+	// Verify that the provisioner overrides target builders that exist
+	for i, p := range t.Provisioners {
+		for name, _ := range p.Override {
+			if _, ok := t.Builders[name]; !ok {
+				err = multierror.Append(err, fmt.Errorf(
+					"provisioner %d: override '%s' doesn't exist",
+					i+1, name))
+			}
+		}
+	}
+
+	return err
 }
 
 //-------------------------------------------------------------------
