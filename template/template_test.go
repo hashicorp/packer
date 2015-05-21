@@ -32,6 +32,26 @@ func TestTemplateValidate(t *testing.T) {
 			"validate-good-override.json",
 			false,
 		},
+
+		{
+			"validate-bad-prov-only.json",
+			true,
+		},
+
+		{
+			"validate-good-prov-only.json",
+			false,
+		},
+
+		{
+			"validate-bad-prov-except.json",
+			true,
+		},
+
+		{
+			"validate-good-prov-except.json",
+			false,
+		},
 	}
 
 	for _, tc := range cases {
