@@ -36,12 +36,12 @@ type PostProcessor struct {
 
 // Provisioner represents a provisioner within the template.
 type Provisioner struct {
-	OnlyExcept
+	OnlyExcept `mapstructure:",squash"`
 
 	Type        string
 	Config      map[string]interface{}
 	Override    map[string]interface{}
-	PauseBefore time.Duration
+	PauseBefore time.Duration `mapstructure:"pause_before"`
 }
 
 // Push represents the configuration for pushing the template to Atlas.
@@ -74,4 +74,8 @@ type OnlyExcept struct {
 
 func (b *Builder) GoString() string {
 	return fmt.Sprintf("*%#v", *b)
+}
+
+func (p *Provisioner) GoString() string {
+	return fmt.Sprintf("*%#v", *p)
 }

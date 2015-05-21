@@ -31,7 +31,9 @@ func (r *rawTemplate) Template() (*Template, error) {
 	var errs error
 
 	// Let's start by gathering all the builders
-	result.Builders = make(map[string]*Builder)
+	if len(r.Builders) > 0 {
+		result.Builders = make(map[string]*Builder, len(r.Builders))
+	}
 	for i, rawB := range r.Builders {
 		var b Builder
 		if err := mapstructure.WeakDecode(rawB, &b); err != nil {
@@ -72,12 +74,62 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Builders[b.Name] = &b
 	}
 
+	// Gather all the provisioners
+	if len(r.Provisioners) > 0 {
+		result.Provisioners = make([]*Provisioner, 0, len(r.Provisioners))
+	}
+	for i, v := range r.Provisioners {
+		var p Provisioner
+		if err := r.decoder(&p, nil).Decode(v); err != nil {
+			errs = multierror.Append(errs, fmt.Errorf(
+				"provisioner %d: %s", i+1, err))
+			continue
+		}
+
+		// Type is required before any richer validation
+		if p.Type == "" {
+			errs = multierror.Append(errs, fmt.Errorf(
+				"provisioner %d: missing 'type'", i+1))
+			continue
+		}
+
+		// Copy the configuration
+		delete(v, "except")
+		delete(v, "only")
+		delete(v, "override")
+		delete(v, "pause_before")
+		delete(v, "type")
+		if len(v) > 0 {
+			p.Config = v
+		}
+
+		// TODO: stuff
+		result.Provisioners = append(result.Provisioners, &p)
+	}
+
 	// If we have errors, return those with a nil result
 	if errs != nil {
 		return nil, errs
 	}
 
 	return &result, nil
+}
+
+func (r *rawTemplate) decoder(
+	result interface{},
+	md *mapstructure.Metadata) *mapstructure.Decoder {
+	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		DecodeHook: mapstructure.StringToTimeDurationHookFunc(),
+		Metadata:   md,
+		Result:     result,
+	})
+	if err != nil {
+		// This really shouldn't happen since we have firm control over
+		// all the arguments and they're all unit tested. So we use a
+		// panic here to note this would definitely be a bug.
+		panic(err)
+	}
+	return d
 }
 
 // Parse takes the given io.Reader and parses a Template object out of it.
