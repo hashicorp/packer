@@ -117,6 +117,30 @@ func TestParse(t *testing.T) {
 			nil,
 			true,
 		},
+
+		{
+			"parse-variable-default.json",
+			&Template{
+				Variables: map[string]*Variable{
+					"foo": &Variable{
+						Default: "foo",
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-variable-required.json",
+			&Template{
+				Variables: map[string]*Variable{
+					"foo": &Variable{
+						Required: true,
+					},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {

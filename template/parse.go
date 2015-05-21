@@ -30,6 +30,26 @@ func (r *rawTemplate) Template() (*Template, error) {
 	var result Template
 	var errs error
 
+	// Gather the variables
+	if len(r.Variables) > 0 {
+		result.Variables = make(map[string]*Variable, len(r.Variables))
+	}
+	for k, rawV := range r.Variables {
+		var v Variable
+
+		// Variable is required if the value is exactly nil
+		v.Required = rawV == nil
+
+		// Weak decode the default if we have one
+		if err := r.decoder(&v.Default, nil).Decode(rawV); err != nil {
+			errs = multierror.Append(errs, fmt.Errorf(
+				"variable %s: %s", k, err))
+			continue
+		}
+
+		result.Variables[k] = &v
+	}
+
 	// Let's start by gathering all the builders
 	if len(r.Builders) > 0 {
 		result.Builders = make(map[string]*Builder, len(r.Builders))
