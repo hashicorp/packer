@@ -27,10 +27,10 @@ type Builder struct {
 
 // PostProcessor represents a post-processor within the template.
 type PostProcessor struct {
-	OnlyExcept
+	OnlyExcept `mapstructure:",squash"`
 
 	Type              string
-	KeepInputArtifact bool
+	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
 	Config            map[string]interface{}
 }
 
@@ -78,4 +78,12 @@ func (b *Builder) GoString() string {
 
 func (p *Provisioner) GoString() string {
 	return fmt.Sprintf("*%#v", *p)
+}
+
+func (p *PostProcessor) GoString() string {
+	return fmt.Sprintf("*%#v", *p)
+}
+
+func (v *Variable) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
 }

@@ -17,11 +17,11 @@ type rawTemplate struct {
 	MinVersion  string `mapstructure:"min_packer_version"`
 	Description string
 
-	Builders      []map[string]interface{}
-	Push          map[string]interface{}
-	PostProcesors []interface{} `mapstructure:"post-processors"`
-	Provisioners  []map[string]interface{}
-	Variables     map[string]interface{}
+	Builders       []map[string]interface{}
+	Push           map[string]interface{}
+	PostProcessors []interface{} `mapstructure:"post-processors"`
+	Provisioners   []map[string]interface{}
+	Variables      map[string]interface{}
 }
 
 // Template returns the actual Template object built from this raw
@@ -94,6 +94,49 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Builders[b.Name] = &b
 	}
 
+	// Gather all the post-processors
+	if len(r.PostProcessors) > 0 {
+		result.PostProcessors = make([][]*PostProcessor, 0, len(r.PostProcessors))
+	}
+	for i, v := range r.PostProcessors {
+		// Parse the configurations. We need to do this because post-processors
+		// can take three different formats.
+		configs, err := r.parsePostProcessor(i, v)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+
+		// Parse the PostProcessors out of the configs
+		pps := make([]*PostProcessor, 0, len(configs))
+		for j, c := range configs {
+			var pp PostProcessor
+			if err := r.decoder(&pp, nil).Decode(c); err != nil {
+				errs = multierror.Append(errs, fmt.Errorf(
+					"post-processor %d.%d: %s", i+1, j+1, err))
+				continue
+			}
+
+			// Type is required
+			if pp.Type == "" {
+				errs = multierror.Append(errs, fmt.Errorf(
+					"post-processor %d.%d: type is required", i+1, j+1))
+				continue
+			}
+
+			// Set the configuration
+			delete(c, "keep_input_artifact")
+			delete(c, "type")
+			if len(c) > 0 {
+				pp.Config = c
+			}
+
+			pps = append(pps, &pp)
+		}
+
+		result.PostProcessors = append(result.PostProcessors, pps)
+	}
+
 	// Gather all the provisioners
 	if len(r.Provisioners) > 0 {
 		result.Provisioners = make([]*Provisioner, 0, len(r.Provisioners))
@@ -150,6 +193,45 @@ func (r *rawTemplate) decoder(
 		panic(err)
 	}
 	return d
+}
+
+func (r *rawTemplate) parsePostProcessor(
+	i int, raw interface{}) ([]map[string]interface{}, error) {
+	switch v := raw.(type) {
+	case string:
+		return []map[string]interface{}{
+			{"type": v},
+		}, nil
+	case map[string]interface{}:
+		return []map[string]interface{}{v}, nil
+	case []interface{}:
+		var err error
+		result := make([]map[string]interface{}, len(v))
+		for j, innerRaw := range v {
+			switch innerV := innerRaw.(type) {
+			case string:
+				result[j] = map[string]interface{}{"type": innerV}
+			case map[string]interface{}:
+				result[j] = innerV
+			case []interface{}:
+				err = multierror.Append(err, fmt.Errorf(
+					"post-processor %d.%d: sequence not allowed to be nested in a sequence",
+					i+1, j+1))
+			default:
+				err = multierror.Append(err, fmt.Errorf(
+					"post-processor %d.%d: unknown format",
+					i+1, j+1))
+			}
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	default:
+		return nil, fmt.Errorf("post-processor %d: bad format", i+1)
+	}
 }
 
 // Parse takes the given io.Reader and parses a Template object out of it.
