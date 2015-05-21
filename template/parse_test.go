@@ -141,6 +141,108 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"parse-pp-basic.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+							Config: map[string]interface{}{
+								"foo": "bar",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-keep.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type:              "foo",
+							KeepInputArtifact: true,
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-string.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-map.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-slice.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+						},
+					},
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "bar",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-multi.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+						},
+						&PostProcessor{
+							Type: "bar",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-no-type.json",
+			nil,
+			true,
+		},
 	}
 
 	for _, tc := range cases {
