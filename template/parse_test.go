@@ -259,6 +259,16 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"parse-push.json",
+			&Template{
+				Push: &Push{
+					Name: "foo",
+				},
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {
