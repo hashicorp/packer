@@ -1,0 +1,10 @@
+{
+    "builders": [{
+        "type": "foo"
+    }],
+
+    "post-processors": [{
+        "type": "bar",
+        "except": ["bar"]
+    }]
+}
