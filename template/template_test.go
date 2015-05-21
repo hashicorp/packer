@@ -52,6 +52,26 @@ func TestTemplateValidate(t *testing.T) {
 			"validate-good-prov-except.json",
 			false,
 		},
+
+		{
+			"validate-bad-pp-only.json",
+			true,
+		},
+
+		{
+			"validate-good-pp-only.json",
+			false,
+		},
+
+		{
+			"validate-bad-pp-except.json",
+			true,
+		},
+
+		{
+			"validate-good-pp-except.json",
+			false,
+		},
 	}
 
 	for _, tc := range cases {

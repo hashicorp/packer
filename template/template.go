@@ -109,6 +109,19 @@ func (t *Template) Validate() error {
 		}
 	}
 
+	// Verify post-processors
+	for i, chain := range t.PostProcessors {
+		for j, p := range chain {
+			// Validate only/except
+			if verr := p.OnlyExcept.Validate(t); verr != nil {
+				for _, e := range multierror.Append(verr).Errors {
+					err = multierror.Append(err, fmt.Errorf(
+						"post-processor %d.%d: %s", i+1, j+1, e))
+				}
+			}
+		}
+	}
+
 	return err
 }
 
