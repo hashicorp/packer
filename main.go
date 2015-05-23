@@ -159,6 +159,13 @@ func wrappedMain() int {
 		}
 	}
 
+	// Create the core configuration
+	CoreConfig = packer.CoreConfig{
+		Cache:      EnvConfig.Cache,
+		Components: EnvConfig.Components,
+		Ui:         EnvConfig.Ui,
+	}
+
 	//setupSignalHandlers(env)
 
 	cli := &cli.CLI{

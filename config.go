@@ -13,6 +13,9 @@ import (
 	"github.com/mitchellh/packer/packer/plugin"
 )
 
+// CoreConfig is the global CoreConfig we use to initialize the CLI.
+var CoreConfig packer.CoreConfig
+
 // EnvConfig is the global EnvironmentConfig we use to initialize the CLI.
 var EnvConfig packer.EnvironmentConfig
 

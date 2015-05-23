@@ -221,7 +221,7 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.Ui.Output(fmt.Sprintf("Push successful to '%s'", tpl.Push.Name))
+	c.Ui.Say(fmt.Sprintf("Push successful to '%s'", tpl.Push.Name))
 	return 0
 }
 
