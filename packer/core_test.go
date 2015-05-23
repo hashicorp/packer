@@ -2,10 +2,51 @@ package packer
 
 import (
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/mitchellh/packer/template"
 )
+
+func TestCoreBuildNames(t *testing.T) {
+	cases := []struct {
+		File   string
+		Vars   map[string]string
+		Result []string
+	}{
+		{
+			"build-names-basic.json",
+			nil,
+			[]string{"something"},
+		},
+
+		{
+			"build-names-func.json",
+			nil,
+			[]string{"TUBES"},
+		},
+	}
+
+	for _, tc := range cases {
+		tpl, err := template.ParseFile(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		core, err := NewCore(&CoreConfig{
+			Template:  tpl,
+			Variables: tc.Vars,
+		})
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		names := core.BuildNames()
+		if !reflect.DeepEqual(names, tc.Result) {
+			t.Fatalf("err: %s\n\n%#v", tc.File, names)
+		}
+	}
+}
 
 func TestCoreValidate(t *testing.T) {
 	cases := []struct {

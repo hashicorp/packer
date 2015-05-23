@@ -3,9 +3,11 @@ package packer
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/packer/template"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -16,6 +18,7 @@ type Core struct {
 	ui         Ui
 	template   *template.Template
 	variables  map[string]string
+	builds     map[string]*template.Builder
 }
 
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
@@ -38,13 +41,41 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		}
 	}
 
+	// Go through and interpolate all the build names. We shuld be able
+	// to do this at this point with the variables.
+	builds := make(map[string]*template.Builder)
+	for _, b := range c.Template.Builders {
+		v, err := interpolate.Render(b.Name, &interpolate.Context{
+			UserVariables: c.Variables,
+		})
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error interpolating builder '%s': %s",
+				b.Name, err)
+		}
+
+		builds[v] = b
+	}
+
 	return &Core{
 		cache:      c.Cache,
 		components: c.Components,
 		ui:         c.Ui,
 		template:   c.Template,
 		variables:  c.Variables,
+		builds:     builds,
 	}, nil
+}
+
+// BuildNames returns the builds that are available in this configured core.
+func (c *Core) BuildNames() []string {
+	r := make([]string, 0, len(c.builds))
+	for n, _ := range c.builds {
+		r = append(r, n)
+	}
+	sort.Strings(r)
+
+	return r
 }
 
 // Build returns the Build object for the given name.
