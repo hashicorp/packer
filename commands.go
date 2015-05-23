@@ -6,6 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/packer/command"
+	"github.com/mitchellh/packer/packer"
 )
 
 // Commands is the mapping of all the available Terraform commands.
@@ -18,18 +19,14 @@ const ErrorPrefix = "e:"
 const OutputPrefix = "o:"
 
 func init() {
-	Ui = &cli.PrefixedUi{
-		AskPrefix:    OutputPrefix,
-		OutputPrefix: OutputPrefix,
-		InfoPrefix:   OutputPrefix,
-		ErrorPrefix:  ErrorPrefix,
-		Ui:           &cli.BasicUi{Writer: os.Stdout},
-	}
-
 	meta := command.Meta{
 		CoreConfig: &CoreConfig,
 		EnvConfig:  &EnvConfig,
-		Ui:         Ui,
+		Ui: &packer.BasicUi{
+			Reader:      os.Stdin,
+			Writer:      os.Stdout,
+			ErrorWriter: os.Stdout,
+		},
 	}
 
 	Commands = map[string]cli.CommandFactory{
