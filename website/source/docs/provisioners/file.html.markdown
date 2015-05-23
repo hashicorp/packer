@@ -61,7 +61,7 @@ machine will be created by Packer.
 
 If the source, however, is `/foo/` (a trailing slash is present), and
 the destination is `/tmp`, then the contents of `/foo` will be uploaded
-directly into `/tmp` directly.
+into `/tmp` directly.
 
 This behavior was adopted from the standard behavior of rsync. Note that
 under the covers, rsync may or may not be used.
