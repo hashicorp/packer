@@ -15,8 +15,8 @@ type Context struct {
 	// "user" function reads from.
 	UserVariables map[string]string
 
-	// DisableEnv disables the env function
-	DisableEnv bool
+	// EnableEnv enables the env function
+	EnableEnv bool
 }
 
 // I stands for "interpolation" and is the main interpolation struct
