@@ -51,7 +51,7 @@ func Funcs(ctx *Context) template.FuncMap {
 
 func funcGenEnv(ctx *Context) interface{} {
 	return func(k string) (string, error) {
-		if ctx.DisableEnv {
+		if !ctx.EnableEnv {
 			// The error message doesn't have to be that detailed since
 			// semantic checks should catch this.
 			return "", errors.New("env vars are not allowed here")

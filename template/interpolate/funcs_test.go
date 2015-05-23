@@ -26,7 +26,7 @@ func TestFuncEnv(t *testing.T) {
 	os.Setenv("PACKER_TEST_ENV", "foo")
 	defer os.Setenv("PACKER_TEST_ENV", "")
 
-	ctx := &Context{}
+	ctx := &Context{EnableEnv: true}
 	for _, tc := range cases {
 		i := &I{Value: tc.Input}
 		result, err := i.Render(ctx)
@@ -53,7 +53,7 @@ func TestFuncEnv_disable(t *testing.T) {
 		},
 	}
 
-	ctx := &Context{DisableEnv: true}
+	ctx := &Context{EnableEnv: false}
 	for _, tc := range cases {
 		i := &I{Value: tc.Input}
 		result, err := i.Render(ctx)
