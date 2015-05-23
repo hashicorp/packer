@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
@@ -289,4 +290,16 @@ func Parse(r io.Reader) (*Template, error) {
 
 	// Return the template parsed from the raw structure
 	return rawTpl.Template()
+}
+
+// ParseFile is the same as Parse but is a helper to automatically open
+// a file for parsing.
+func ParseFile(path string) (*Template, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return Parse(f)
 }

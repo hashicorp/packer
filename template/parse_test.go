@@ -1,7 +1,6 @@
 package template
 
 import (
-	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -272,13 +271,7 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		f, err := os.Open(fixtureDir(tc.File))
-		if err != nil {
-			t.Fatalf("err: %s", err)
-		}
-
-		tpl, err := Parse(f)
-		f.Close()
+		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s", err)
 		}
