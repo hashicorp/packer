@@ -67,10 +67,8 @@ are alternatives available.
 
 ### Homebrew
 
-If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
-adding the `binary` tap:
+If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
 ```text
-$ brew tap homebrew/binary
 $ brew install packer
 ```
