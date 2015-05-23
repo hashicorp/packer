@@ -65,12 +65,9 @@ installation managed by the Packer community:
 
 ### Homebrew
 
-If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
-adding the `binary` tap. Remember that this is updated by a 3rd party, so
-it may not be the latest available version.
+If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
 ```text
-$ brew tap homebrew/binary
 $ brew install packer
 ```
 
