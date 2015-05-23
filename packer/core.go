@@ -47,6 +47,35 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	}, nil
 }
 
+// Build returns the Build object for the given name.
+func (c *Core) Build(n string) (Build, error) {
+	// Setup the builder
+	configBuilder, ok := c.template.Builders[n]
+	if !ok {
+		return nil, fmt.Errorf("no such build found: %s", n)
+	}
+	builder, err := c.components.Builder(configBuilder.Type)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error initializing builder '%s': %s",
+			configBuilder.Type, err)
+	}
+	if builder == nil {
+		return nil, fmt.Errorf(
+			"builder type not found: %s", configBuilder.Type)
+	}
+
+	// TODO: template process name
+
+	return &coreBuild{
+		name:          n,
+		builder:       builder,
+		builderConfig: configBuilder.Config,
+		builderType:   configBuilder.Type,
+		variables:     c.variables,
+	}, nil
+}
+
 // Validate does a full validation of the template.
 //
 // This will automatically call template.Validate() in addition to doing
