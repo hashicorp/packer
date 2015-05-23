@@ -19,6 +19,11 @@ type Context struct {
 	EnableEnv bool
 }
 
+// Render is shorthand for constructing an I and calling Render.
+func Render(v string, ctx *Context) (string, error) {
+	return (&I{Value: v}).Render(ctx)
+}
+
 // I stands for "interpolation" and is the main interpolation struct
 // in order to render values.
 type I struct {
