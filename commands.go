@@ -27,8 +27,9 @@ func init() {
 	}
 
 	meta := command.Meta{
-		EnvConfig: &EnvConfig,
-		Ui:        Ui,
+		CoreConfig: &CoreConfig,
+		EnvConfig:  &EnvConfig,
+		Ui:         Ui,
 	}
 
 	Commands = map[string]cli.CommandFactory{
