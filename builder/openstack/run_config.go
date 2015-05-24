@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"os"
 	"time"
 )
 
@@ -23,6 +24,7 @@ type RunConfig struct {
 	FloatingIp        string   `mapstructure:"floating_ip"`
 	SecurityGroups    []string `mapstructure:"security_groups"`
 	Networks          []string `mapstructure:"networks"`
+	UserDataFile      string   `mapstructure:"user_data_file"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
@@ -69,6 +71,13 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
 	}
 
+	if c.UserDataFile != "" {
+		if _, err := os.Stat(c.UserDataFile); err != nil {
+			errs = append(errs,
+				fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
+		}
+	}
+
 	templates := map[string]*string{
 		"flavor":             &c.Flavor,
 		"ssh_timeout":        &c.RawSSHTimeout,
@@ -78,6 +87,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		"openstack_provider": &c.OpenstackProvider,
 		"floating_ip_pool":   &c.FloatingIpPool,
 		"floating_ip":        &c.FloatingIp,
+		"user_data_file":     &c.UserDataFile,
 	}
 
 	for n, ptr := range templates {

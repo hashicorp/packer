@@ -110,7 +110,10 @@ each category, the available configuration keys are alphabetized.
   installation requires this.
 
 * `use_floating_ip` (boolean) - Whether or not to use a floating IP for
-  the instance. Defaults to false.
+the instance. Defaults to false.
+
+* `user_data_file` (string) - The path to a file that will be used for the
+  user data when launching the instance. 
 
 * `rackconnect_wait` (boolean) - For rackspace, whether or not to wait for
   Rackconnect to assign the machine an IP address before connecting via SSH.
