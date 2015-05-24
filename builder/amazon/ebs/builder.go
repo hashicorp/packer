@@ -123,20 +123,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&stepStopInstance{SpotPrice: b.config.SpotPrice},
-		// TODO(mitchellh): verify works with spots
-		&stepModifyInstance{},
-		&stepCreateAMI{},
-		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
-		},
-		&awscommon.StepModifyAMIAttributes{
-			Description: b.config.AMIDescription,
-			Users:       b.config.AMIUsers,
-			Groups:      b.config.AMIGroups,
-		},
-		&awscommon.StepCreateTags{
-			Tags: b.config.AMITags,
-		},
+	}
+
+	if !b.config.PackerDryRun {
+		steps = append(steps,
+			// TODO(mitchellh): verify works with spots
+			&stepModifyInstance{},
+			&stepCreateAMI{},
+			&awscommon.StepAMIRegionCopy{
+				Regions: b.config.AMIRegions,
+			},
+			&awscommon.StepModifyAMIAttributes{
+				Description: b.config.AMIDescription,
+				Users:       b.config.AMIUsers,
+				Groups:      b.config.AMIGroups,
+			},
+			&awscommon.StepCreateTags{
+				Tags: b.config.AMITags,
+			})
 	}
 
 	// Run!
@@ -162,10 +166,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Build the artifact and return it
-	artifact := &awscommon.Artifact{
-		Amis:           state.Get("amis").(map[string]string),
-		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else {
+		artifact = &awscommon.Artifact{
+			Amis:           state.Get("amis").(map[string]string),
+			BuilderIdValue: BuilderId,
+			Conn:           ec2conn,
+		}
 	}
 
 	return artifact, nil

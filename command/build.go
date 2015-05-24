@@ -19,7 +19,7 @@ type BuildCommand struct {
 }
 
 func (c BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
+	var cfgColor, cfgDebug, cfgDryRun, cfgForce, cfgParallel bool
 	buildOptions := new(cmdcommon.BuildOptions)
 
 	env, err := c.Meta.Environment()
@@ -32,6 +32,7 @@ func (c BuildCommand) Run(args []string) int {
 	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
 	cmdFlags.BoolVar(&cfgColor, "color", true, "enable or disable color")
 	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
+	cmdFlags.BoolVar(&cfgDryRun, "dry-run", false, "dry-run mode for builds")
 	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
 	cmdFlags.BoolVar(&cfgParallel, "parallel", true, "enable/disable parallelization")
 	cmdcommon.BuildOptionFlags(cmdFlags, buildOptions)
@@ -87,6 +88,10 @@ func (c BuildCommand) Run(args []string) int {
 		env.Ui().Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
+	if cfgDryRun {
+		env.Ui().Say("Dry-run mode enabled. Images will be provisionned but not generated.")
+	}
+
 	// Compile all the UIs for the builds
 	colors := [5]packer.UiColor{
 		packer.UiColorGreen,
@@ -115,12 +120,14 @@ func (c BuildCommand) Run(args []string) int {
 	env.Ui().Say("")
 
 	log.Printf("Build debug mode: %v", cfgDebug)
+	log.Printf("Build dry-run mode: %v", cfgDryRun)
 	log.Printf("Force build: %v", cfgForce)
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
+		b.SetDryRun(cfgDryRun)
 		b.SetForce(cfgForce)
 
 		warnings, err := b.Prepare()
@@ -292,6 +299,7 @@ Usage: packer build [options] TEMPLATE
 Options:
 
   -debug                     Debug mode enabled for builds
+  -dry-run                   Dry-run mode enabled for builds
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
   -except=foo,bar,baz        Build all builds other than these

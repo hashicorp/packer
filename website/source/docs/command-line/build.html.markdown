@@ -22,6 +22,13 @@ artifacts that are created will be outputted at the end of the build.
   between each step, waiting for keyboard input before continuing. This will allow
   the user to inspect state and so on.
 
+* `-dry-run` - Enables dry-run mode. Dry-run mode only does the provisionning of the
+  machine and skips entirely the generation of the image afterwards.
+  In general, builders will do the provisionning and cleaning of the instance used
+  during the run and skip the steps related to the publication of the image.
+  This will allow using packer in Continuous Integration environments without publishing
+  new content.
+
 * `-except=foo,bar,baz` - Builds all the builds except those with the given
   comma-separated names. Build names by default are the names of their builders,
   unless a specific `name` attribute is specified within the configuration.

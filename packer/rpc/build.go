@@ -73,6 +73,12 @@ func (b *build) SetDebug(val bool) {
 	}
 }
 
+func (b *build) SetDryRun(val bool) {
+	if err := b.client.Call("Build.SetDryRun", val, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
 func (b *build) SetForce(val bool) {
 	if err := b.client.Call("Build.SetForce", val, new(interface{})); err != nil {
 		panic(err)
@@ -126,6 +132,11 @@ func (b *BuildServer) Run(streamId uint32, reply *[]uint32) error {
 
 func (b *BuildServer) SetDebug(val *bool, reply *interface{}) error {
 	b.build.SetDebug(*val)
+	return nil
+}
+
+func (b *BuildServer) SetDryRun(val *bool, reply *interface{}) error {
+	b.build.SetDryRun(*val)
 	return nil
 }
 

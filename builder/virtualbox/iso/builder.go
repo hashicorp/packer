@@ -335,11 +335,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Commands: b.config.VBoxManagePost,
 			Tpl:      b.config.tpl,
 		},
-		&vboxcommon.StepExport{
-			Format:     b.config.Format,
-			OutputDir:  b.config.OutputDir,
-			ExportOpts: b.config.ExportOpts.ExportOpts,
-		},
+	}
+
+	if !b.config.PackerDryRun {
+		steps = append(steps,
+			&vboxcommon.StepExport{
+				Format:     b.config.Format,
+				OutputDir:  b.config.OutputDir,
+				ExportOpts: b.config.ExportOpts.ExportOpts,
+			})
 	}
 
 	// Setup the state bag
@@ -376,7 +380,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vboxcommon.NewArtifact(b.config.OutputDir)
+	if b.config.PackerDryRun {
+		return &packer.NullArtifact{
+			BuilderIdValue: vboxcommon.BuilderId,
+		}, nil
+	} else {
+		return vboxcommon.NewArtifact(b.config.OutputDir)
+	}
 }
 
 func (b *Builder) Cancel() {

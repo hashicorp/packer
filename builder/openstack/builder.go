@@ -108,7 +108,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
 		&common.StepProvision{},
-		&stepCreateImage{},
+	}
+
+	if !b.config.PackerDryRun {
+		steps = append(steps,
+			&stepCreateImage{})
 	}
 
 	// Run!
@@ -134,10 +138,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Build the artifact and return it
-	artifact := &Artifact{
-		ImageId:        state.Get("image").(string),
-		BuilderIdValue: BuilderId,
-		Conn:           csp,
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else {
+		artifact = &Artifact{
+			ImageId:        state.Get("image").(string),
+			BuilderIdValue: BuilderId,
+			Conn:           csp,
+		}
 	}
 
 	return artifact, nil

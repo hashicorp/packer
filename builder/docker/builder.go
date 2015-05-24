@@ -38,10 +38,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepProvision{},
 	}
 
-	if b.config.Commit {
-		steps = append(steps, new(StepCommit))
-	} else {
-		steps = append(steps, new(StepExport))
+	if !b.config.PackerDryRun {
+		if b.config.Commit {
+			steps = append(steps, new(StepCommit))
+		} else {
+			steps = append(steps, new(StepExport))
+		}
 	}
 
 	// Setup the state bag and initial state for the steps
@@ -70,9 +72,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	var artifact packer.Artifact
 	// No errors, must've worked
-	if b.config.Commit {
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else if b.config.Commit {
 		artifact = &ImportArtifact{
 			IdValue:        state.Get("image_id").(string),
 			BuilderIdValue: BuilderIdImport,

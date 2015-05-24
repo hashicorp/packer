@@ -67,7 +67,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(StepTeardownInstance),
-		new(StepCreateImage),
+	}
+
+	if !b.config.PackerDryRun {
+		steps = append(steps,
+			new(StepCreateImage))
 	}
 
 	// Run the steps.
@@ -90,9 +94,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
-	artifact := &Artifact{
-		imageName: state.Get("image_name").(string),
-		driver:    driver,
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else {
+		artifact = &Artifact{
+			imageName: state.Get("image_name").(string),
+			driver:    driver,
+		}
 	}
 	return artifact, nil
 }

@@ -514,16 +514,25 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	artifact := &Artifact{
-		dir:   b.config.OutputDir,
-		f:     files,
-		state: make(map[string]interface{}),
-	}
+	var artifact packer.Artifact
+	if b.config.PackerDryRun {
+		artifact = &packer.NullArtifact{
+			BuilderIdValue: BuilderId,
+		}
+	} else {
+		state := map[string]interface{}{
+			"diskName": state.Get("disk_filename").(string),
+			"diskType": b.config.Format,
+			"diskSize": uint64(b.config.DiskSize),
+			"domainType": b.config.Accelerator,
+		}
 
-	artifact.state["diskName"] = state.Get("disk_filename").(string)
-	artifact.state["diskType"] = b.config.Format
-	artifact.state["diskSize"] = uint64(b.config.DiskSize)
-	artifact.state["domainType"] = b.config.Accelerator
+		artifact = &Artifact{
+			dir:   b.config.OutputDir,
+			f:     files,
+			state: state,
+		}
+	}
 
 	return artifact, nil
 }
