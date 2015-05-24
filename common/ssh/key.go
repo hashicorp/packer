@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"code.google.com/p/go.crypto/ssh"
+	"golang.org/x/crypto/ssh"
 )
 
 // FileSigner returns an ssh.Signer for a key file.
