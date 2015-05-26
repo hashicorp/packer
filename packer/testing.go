@@ -42,3 +42,19 @@ func TestCore(t *testing.T, c *CoreConfig) *Core {
 
 	return core
 }
+
+// TestBuilder sets the builder with the name n to the component finder
+// and returns the mock.
+func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
+	var b MockBuilder
+
+	c.Components.Builder = func(actual string) (Builder, error) {
+		if actual != n {
+			return nil, nil
+		}
+
+		return &b, nil
+	}
+
+	return &b
+}
