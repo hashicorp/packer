@@ -118,13 +118,55 @@ func (c *Core) Build(n string) (Build, error) {
 			"builder type not found: %s", configBuilder.Type)
 	}
 
-	// TODO: template process name
+	// rawName is the uninterpolated name that we use for various lookups
+	rawName := configBuilder.Name
+
+	// Setup the provisioners for this build
+	provisioners := make([]coreBuildProvisioner, 0, len(c.template.Provisioners))
+	for _, rawP := range c.template.Provisioners {
+		// If we're skipping this, then ignore it
+		if rawP.Skip(rawName) {
+			continue
+		}
+
+		// Get the provisioner
+		provisioner, err := c.components.Provisioner(rawP.Type)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"error initializing provisioner '%s': %s",
+				rawP.Type, err)
+		}
+		if provisioner == nil {
+			return nil, fmt.Errorf(
+				"provisioner type not found: %s", rawP.Type)
+		}
+
+		// Get the configuration
+		config := make([]interface{}, 1, 2)
+		config[0] = rawP.Config
+
+		// TODO override
+
+		// If we're pausing, we wrap the provisioner in a special pauser.
+		if rawP.PauseBefore > 0 {
+			provisioner = &PausedProvisioner{
+				PauseBefore: rawP.PauseBefore,
+				Provisioner: provisioner,
+			}
+		}
+
+		provisioners = append(provisioners, coreBuildProvisioner{
+			provisioner: provisioner,
+			config:      config,
+		})
+	}
 
 	return &coreBuild{
 		name:          n,
 		builder:       builder,
 		builderConfig: configBuilder.Config,
 		builderType:   configBuilder.Type,
+		provisioners:  provisioners,
 		variables:     c.variables,
 	}, nil
 }
