@@ -92,3 +92,46 @@ func TestTemplateValidate(t *testing.T) {
 		}
 	}
 }
+
+func TestOnlyExceptSkip(t *testing.T) {
+	cases := []struct {
+		Only, Except []string
+		Input        string
+		Result       bool
+	}{
+		{
+			[]string{"foo"},
+			nil,
+			"foo",
+			false,
+		},
+
+		{
+			nil,
+			[]string{"foo"},
+			"foo",
+			true,
+		},
+
+		{
+			nil,
+			nil,
+			"foo",
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		oe := &OnlyExcept{
+			Only:   tc.Only,
+			Except: tc.Except,
+		}
+
+		actual := oe.Skip(tc.Input)
+		if actual != tc.Result {
+			t.Fatalf(
+				"bad: %#v\n\n%#v\n\n%#v\n\n%#v",
+				actual, tc.Only, tc.Except, tc.Input)
+		}
+	}
+}
