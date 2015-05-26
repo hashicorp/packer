@@ -276,6 +276,9 @@ func TestParse(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 
+		if tpl != nil {
+			tpl.RawContents = nil
+		}
 		if !reflect.DeepEqual(tpl, tc.Result) {
 			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
 		}

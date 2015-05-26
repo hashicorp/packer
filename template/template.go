@@ -19,6 +19,9 @@ type Template struct {
 	Provisioners   []*Provisioner
 	PostProcessors [][]*PostProcessor
 	Push           *Push
+
+	// RawContents is just the raw data for this template
+	RawContents []byte
 }
 
 // Builder represents a builder configured in the template
