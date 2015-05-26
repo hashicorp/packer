@@ -2,6 +2,7 @@ package template
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -282,5 +283,18 @@ func TestParse(t *testing.T) {
 		if !reflect.DeepEqual(tpl, tc.Result) {
 			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
 		}
+	}
+}
+
+func TestParse_contents(t *testing.T) {
+	tpl, err := ParseFile(fixtureDir("parse-contents.json"))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	actual := strings.TrimSpace(string(tpl.RawContents))
+	expected := `{"builders":[{"type":"test"}]}`
+	if actual != expected {
+		t.Fatalf("bad: %s\n\n%s", actual, expected)
 	}
 }
