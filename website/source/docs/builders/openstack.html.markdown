@@ -52,6 +52,9 @@ each category, the available configuration keys are alphabetized.
   If not specified, Packer will use the environment variables
   `SDK_API_KEY`, if set.
 
+* `availability_zone` (string) - The availability zone to create the instance
+  inside. If not specified, Packer will use the default availability zone.
+
 * `floating_ip` (string) - A specific floating IP to assign to this instance.
   `use_floating_ip` must also be set to true for this to have an affect.
 
