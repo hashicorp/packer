@@ -121,3 +121,35 @@ package by specifying the `TEST` variable. For example below, only
 
     $ make test TEST=./packer
     ...
+
+### Acceptance Tests
+
+Packer has comprehensive [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
+covering the builders of Packer.
+
+If you're working on a feature of a builder or a new builder and want
+verify it is functioning (and also hasn't broken anything else), we recommend
+running the acceptance tests.
+
+**Warning:** The acceptance tests create/destroy/modify *real resources*, which
+may incur real costs in some cases. In the presence of a bug, it is technically
+possible that broken backends could leave dangling data behind. Therefore,
+please run the acceptance tests at your own risk. At the very least,
+we recommend running them in their own private account for whatever builder
+you're testing.
+
+To run the acceptance tests, invoke `make testacc`:
+
+```sh
+$ make testacc TEST=./builder/amazon/ebs
+...
+```
+
+The `TEST` variable is required, and you should specify the folder where the
+backend is. The `TESTARGS` variable is recommended to filter down to a specific
+resource to test, since testing all of them at once can sometimes take a very
+long time.
+
+Acceptance tests typically require other environment variables to be set for
+things such as access keys. The test itself should error early and tell
+you what to set, so it is not documented here.
