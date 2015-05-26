@@ -58,3 +58,19 @@ func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 
 	return &b
 }
+
+// TestProvisioner sets the prov. with the name n to the component finder
+// and returns the mock.
+func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
+	var b MockProvisioner
+
+	c.Components.Provisioner = func(actual string) (Provisioner, error) {
+		if actual != n {
+			return nil, nil
+		}
+
+		return &b, nil
+	}
+
+	return &b
+}
