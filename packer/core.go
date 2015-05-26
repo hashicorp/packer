@@ -144,8 +144,11 @@ func (c *Core) Build(n string) (Build, error) {
 		// Get the configuration
 		config := make([]interface{}, 1, 2)
 		config[0] = rawP.Config
-
-		// TODO override
+		if rawP.Override != nil {
+			if override, ok := rawP.Override[rawName]; ok {
+				config = append(config, override)
+			}
+		}
 
 		// If we're pausing, we wrap the provisioner in a special pauser.
 		if rawP.PauseBefore > 0 {

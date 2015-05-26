@@ -222,6 +222,53 @@ func TestCoreBuild_provSkipInclude(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_provOverride(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-prov-override.json"))
+	b := TestBuilder(t, config, "test")
+	p := TestProvisioner(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	artifact, err := build.Run(nil, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(artifact) != 1 {
+		t.Fatalf("bad: %#v", artifact)
+	}
+
+	if artifact[0].Id() != b.ArtifactId {
+		t.Fatalf("bad: %s", artifact[0].Id())
+	}
+	if !p.ProvCalled {
+		t.Fatal("provisioner not called")
+	}
+
+	found := false
+	for _, raw := range p.PrepConfigs {
+		if m, ok := raw.(map[string]interface{}); ok {
+			if _, ok := m["foo"]; ok {
+				found = true
+				break
+			}
+		}
+	}
+	if !found {
+		t.Fatal("override not called")
+	}
+}
+
 func TestCoreBuild_postProcess(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-pp.json"))
