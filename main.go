@@ -140,14 +140,13 @@ func wrappedMain() int {
 	defer plugin.CleanupClients()
 
 	// Create the environment configuration
-	EnvConfig = *packer.DefaultEnvironmentConfig()
-	EnvConfig.Cache = cache
-	EnvConfig.Components.Builder = config.LoadBuilder
-	EnvConfig.Components.Hook = config.LoadHook
-	EnvConfig.Components.PostProcessor = config.LoadPostProcessor
-	EnvConfig.Components.Provisioner = config.LoadProvisioner
+	CoreConfig.Cache = cache
+	CoreConfig.Components.Builder = config.LoadBuilder
+	CoreConfig.Components.Hook = config.LoadHook
+	CoreConfig.Components.PostProcessor = config.LoadPostProcessor
+	CoreConfig.Components.Provisioner = config.LoadProvisioner
 	if machineReadable {
-		EnvConfig.Ui = &packer.MachineReadableUi{
+		CoreConfig.Ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
 
@@ -157,13 +156,6 @@ func wrappedMain() int {
 			fmt.Fprintf(os.Stderr, "Packer failed to initialize UI: %s\n", err)
 			return 1
 		}
-	}
-
-	// Create the core configuration
-	CoreConfig = packer.CoreConfig{
-		Cache:      EnvConfig.Cache,
-		Components: EnvConfig.Components,
-		Ui:         EnvConfig.Ui,
 	}
 
 	//setupSignalHandlers(env)

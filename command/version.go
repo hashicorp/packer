@@ -33,15 +33,9 @@ func (c *VersionCommand) Help() string {
 }
 
 func (c *VersionCommand) Run(args []string) int {
-	env, err := c.Meta.Environment()
-	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
-		return 1
-	}
-
-	env.Ui().Machine("version", c.Version)
-	env.Ui().Machine("version-prelease", c.VersionPrerelease)
-	env.Ui().Machine("version-commit", c.Revision)
+	c.Ui.Machine("version", c.Version)
+	c.Ui.Machine("version-prelease", c.VersionPrerelease)
+	c.Ui.Machine("version-commit", c.Revision)
 
 	var versionString bytes.Buffer
 	fmt.Fprintf(&versionString, "Packer v%s", c.Version)

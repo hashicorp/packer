@@ -16,9 +16,6 @@ import (
 // CoreConfig is the global CoreConfig we use to initialize the CLI.
 var CoreConfig packer.CoreConfig
 
-// EnvConfig is the global EnvironmentConfig we use to initialize the CLI.
-var EnvConfig packer.EnvironmentConfig
-
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`

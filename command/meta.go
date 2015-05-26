@@ -26,7 +26,6 @@ const (
 // Packer command inherits.
 type Meta struct {
 	CoreConfig *packer.CoreConfig
-	EnvConfig  *packer.EnvironmentConfig
 	Ui         packer.Ui
 
 	// These are set by command-line flags
@@ -147,8 +146,4 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 func (m *Meta) ValidateFlags() error {
 	// TODO
 	return nil
-}
-
-func (m *Meta) Environment() (packer.Environment, error) {
-	return packer.NewEnvironment(m.EnvConfig)
 }

@@ -31,6 +31,28 @@ type CoreConfig struct {
 	Variables  map[string]string
 }
 
+// The function type used to lookup Builder implementations.
+type BuilderFunc func(name string) (Builder, error)
+
+// The function type used to lookup Hook implementations.
+type HookFunc func(name string) (Hook, error)
+
+// The function type used to lookup PostProcessor implementations.
+type PostProcessorFunc func(name string) (PostProcessor, error)
+
+// The function type used to lookup Provisioner implementations.
+type ProvisionerFunc func(name string) (Provisioner, error)
+
+// ComponentFinder is a struct that contains the various function
+// pointers necessary to look up components of Packer such as builders,
+// commands, etc.
+type ComponentFinder struct {
+	Builder       BuilderFunc
+	Hook          HookFunc
+	PostProcessor PostProcessorFunc
+	Provisioner   ProvisionerFunc
+}
+
 // NewCore creates a new Core.
 func NewCore(c *CoreConfig) (*Core, error) {
 	if c.Ui == nil {
