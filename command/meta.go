@@ -32,7 +32,6 @@ type Meta struct {
 	flagBuildExcept []string
 	flagBuildOnly   []string
 	flagVars        map[string]string
-	flagVarFiles    []string
 }
 
 // Core returns the core for the given template given the configured
@@ -122,7 +121,7 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	// FlagSetVars tells us what variables to use
 	if fs&FlagSetVars != 0 {
 		f.Var((*kvflag.Flag)(&m.flagVars), "var", "")
-		f.Var((*sliceflag.StringFlag)(&m.flagVarFiles), "var-file", "")
+		f.Var((*kvflag.FlagJSON)(&m.flagVars), "var-file", "")
 	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.
