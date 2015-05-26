@@ -103,7 +103,7 @@ func (c *Core) BuildNames() []string {
 // Build returns the Build object for the given name.
 func (c *Core) Build(n string) (Build, error) {
 	// Setup the builder
-	configBuilder, ok := c.template.Builders[n]
+	configBuilder, ok := c.builds[n]
 	if !ok {
 		return nil, fmt.Errorf("no such build found: %s", n)
 	}
