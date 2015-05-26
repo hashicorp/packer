@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -27,8 +28,7 @@ type TestCase struct {
 	// as the "test" builder in the template.
 	Builder packer.Builder
 
-	// Template is a path to a text template. We use a text file
-	// so we can use the entire machinery to test this builder.
+	// Template is the template contents to use.
 	Template string
 
 	// Check is called after this step is executed in order to test that
@@ -90,8 +90,8 @@ func Test(t TestT, c TestCase) {
 	}
 
 	// Parse the template
-	log.Printf("[DEBUG] Parsing template: %s", c.Template)
-	tpl, err := template.ParseFile(c.Template)
+	log.Printf("[DEBUG] Parsing template...")
+	tpl, err := template.Parse(strings.NewReader(c.Template))
 	if err != nil {
 		t.Fatal(fmt.Sprintf("Failed to parse template: %s", err))
 		return
@@ -138,18 +138,19 @@ func Test(t TestT, c TestCase) {
 		return
 	}
 
-	// Run it!
+	// Run it! We use a temporary directory for caching and discard
+	// any UI output. We discard since it shows up in logs anyways.
 	log.Printf("[DEBUG] Running 'test' build")
 	cache := &packer.FileCache{CacheDir: os.TempDir()}
 	ui := &packer.BasicUi{
 		Reader:      os.Stdin,
-		Writer:      os.Stdout,
-		ErrorWriter: os.Stdout,
+		Writer:      ioutil.Discard,
+		ErrorWriter: ioutil.Discard,
 	}
 	artifacts, err := build.Run(ui, cache)
 	if err != nil {
 		t.Fatal(fmt.Sprintf("Run error:\n\n%s", err))
-		return
+		goto TEARDOWN
 	}
 
 	// Check function
@@ -157,7 +158,17 @@ func Test(t TestT, c TestCase) {
 		log.Printf("[DEBUG] Running check function")
 		if err := c.Check(artifacts); err != nil {
 			t.Fatal(fmt.Sprintf("Check error:\n\n%s", err))
-			return
+			goto TEARDOWN
+		}
+	}
+
+TEARDOWN:
+	// Delete all artifacts
+	for _, a := range artifacts {
+		if err := a.Destroy(); err != nil {
+			t.Error(fmt.Sprintf(
+				"!!! ERROR REMOVING ARTIFACT '%s': %s !!!",
+				a.String(), err))
 		}
 	}
 
