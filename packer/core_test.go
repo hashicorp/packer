@@ -78,6 +78,48 @@ func TestCoreBuild_basic(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_basicInterpolated(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-basic-interpolated.json"))
+	b := TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("NAME")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	artifact, err := build.Run(nil, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(artifact) != 1 {
+		t.Fatalf("bad: %#v", artifact)
+	}
+
+	if artifact[0].Id() != b.ArtifactId {
+		t.Fatalf("bad: %s", artifact[0].Id())
+	}
+}
+
+func TestCoreBuild_nonExist(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-basic.json"))
+	TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	_, err := core.Build("nope")
+	if err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func TestCoreValidate(t *testing.T) {
 	cases := []struct {
 		File string
