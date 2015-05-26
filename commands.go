@@ -21,7 +21,6 @@ const OutputPrefix = "o:"
 func init() {
 	meta := command.Meta{
 		CoreConfig: &CoreConfig,
-		EnvConfig:  &EnvConfig,
 		Ui: &packer.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
