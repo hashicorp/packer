@@ -2,16 +2,16 @@ package command
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
-	cmdcommon "github.com/mitchellh/packer/common/command"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template"
 )
 
 type BuildCommand struct {
@@ -20,71 +20,52 @@ type BuildCommand struct {
 
 func (c BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
-	buildOptions := new(cmdcommon.BuildOptions)
-
-	env, err := c.Meta.Environment()
-	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
+	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
+	flags.Usage = func() { c.Ui.Say(c.Help()) }
+	flags.BoolVar(&cfgColor, "color", true, "")
+	flags.BoolVar(&cfgDebug, "debug", false, "")
+	flags.BoolVar(&cfgForce, "force", false, "")
+	flags.BoolVar(&cfgParallel, "parallel", true, "")
+	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	cmdFlags := flag.NewFlagSet("build", flag.ContinueOnError)
-	cmdFlags.Usage = func() { env.Ui().Say(c.Help()) }
-	cmdFlags.BoolVar(&cfgColor, "color", true, "enable or disable color")
-	cmdFlags.BoolVar(&cfgDebug, "debug", false, "debug mode for builds")
-	cmdFlags.BoolVar(&cfgForce, "force", false, "force a build if artifacts exist")
-	cmdFlags.BoolVar(&cfgParallel, "parallel", true, "enable/disable parallelization")
-	cmdcommon.BuildOptionFlags(cmdFlags, buildOptions)
-	if err := cmdFlags.Parse(args); err != nil {
-		return 1
-	}
-
-	args = cmdFlags.Args()
+	args = flags.Args()
 	if len(args) != 1 {
-		cmdFlags.Usage()
+		flags.Usage()
 		return 1
 	}
 
-	if err := buildOptions.Validate(); err != nil {
-		env.Ui().Error(err.Error())
-		env.Ui().Error("")
-		env.Ui().Error(c.Help())
-		return 1
-	}
-
-	userVars, err := buildOptions.AllUserVars()
+	// Parse the template
+	tpl, err := template.ParseFile(args[0])
 	if err != nil {
-		env.Ui().Error(fmt.Sprintf("Error compiling user variables: %s", err))
-		env.Ui().Error("")
-		env.Ui().Error(c.Help())
+		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
 	}
 
-	// Read the file into a byte array so that we can parse the template
-	log.Printf("Reading template: %s", args[0])
-	tpl, err := packer.ParseTemplateFile(args[0], userVars)
+	// Get the core
+	core, err := c.Meta.Core(tpl)
 	if err != nil {
-		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
+		c.Ui.Error(err.Error())
 		return 1
 	}
 
-	// The component finder for our builds
-	components := &packer.ComponentFinder{
-		Builder:       env.Builder,
-		Hook:          env.Hook,
-		PostProcessor: env.PostProcessor,
-		Provisioner:   env.Provisioner,
-	}
+	// Get the builds we care about
+	buildNames := c.Meta.BuildNames(core)
+	builds := make([]packer.Build, 0, len(buildNames))
+	for _, n := range buildNames {
+		b, err := core.Build(n)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Failed to initialize build '%s': %s",
+				n, err))
+		}
 
-	// Go through each builder and compile the builds that we care about
-	builds, err := buildOptions.Builds(tpl, components)
-	if err != nil {
-		env.Ui().Error(err.Error())
-		return 1
+		builds = append(builds, b)
 	}
 
 	if cfgDebug {
-		env.Ui().Say("Debug mode enabled. Builds will not be parallelized.")
+		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
 	// Compile all the UIs for the builds
@@ -95,24 +76,23 @@ func (c BuildCommand) Run(args []string) int {
 		packer.UiColorYellow,
 		packer.UiColorBlue,
 	}
-
 	buildUis := make(map[string]packer.Ui)
-	for i, b := range builds {
+	for i, b := range buildNames {
 		var ui packer.Ui
-		ui = env.Ui()
+		ui = c.Ui
 		if cfgColor {
 			ui = &packer.ColoredUi{
 				Color: colors[i%len(colors)],
-				Ui:    env.Ui(),
+				Ui:    ui,
 			}
 		}
 
-		buildUis[b.Name()] = ui
-		ui.Say(fmt.Sprintf("%s output will be in this color.", b.Name()))
+		buildUis[b] = ui
+		ui.Say(fmt.Sprintf("%s output will be in this color.", b))
 	}
 
 	// Add a newline between the color output and the actual output
-	env.Ui().Say("")
+	c.Ui.Say("")
 
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
@@ -125,7 +105,7 @@ func (c BuildCommand) Run(args []string) int {
 
 		warnings, err := b.Prepare()
 		if err != nil {
-			env.Ui().Error(err.Error())
+			c.Ui.Error(err.Error())
 			return 1
 		}
 		if len(warnings) > 0 {
@@ -169,7 +149,7 @@ func (c BuildCommand) Run(args []string) int {
 			name := b.Name()
 			log.Printf("Starting build run: %s", name)
 			ui := buildUis[name]
-			runArtifacts, err := b.Run(ui, env.Cache())
+			runArtifacts, err := b.Run(ui, c.CoreConfig.Cache)
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
@@ -205,34 +185,34 @@ func (c BuildCommand) Run(args []string) int {
 	interruptWg.Wait()
 
 	if interrupted {
-		env.Ui().Say("Cleanly cancelled builds after being interrupted.")
+		c.Ui.Say("Cleanly cancelled builds after being interrupted.")
 		return 1
 	}
 
 	if len(errors) > 0 {
-		env.Ui().Machine("error-count", strconv.FormatInt(int64(len(errors)), 10))
+		c.Ui.Machine("error-count", strconv.FormatInt(int64(len(errors)), 10))
 
-		env.Ui().Error("\n==> Some builds didn't complete successfully and had errors:")
+		c.Ui.Error("\n==> Some builds didn't complete successfully and had errors:")
 		for name, err := range errors {
 			// Create a UI for the machine readable stuff to be targetted
 			ui := &packer.TargettedUi{
 				Target: name,
-				Ui:     env.Ui(),
+				Ui:     c.Ui,
 			}
 
 			ui.Machine("error", err.Error())
 
-			env.Ui().Error(fmt.Sprintf("--> %s: %s", name, err))
+			c.Ui.Error(fmt.Sprintf("--> %s: %s", name, err))
 		}
 	}
 
 	if len(artifacts) > 0 {
-		env.Ui().Say("\n==> Builds finished. The artifacts of successful builds are:")
+		c.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts {
 			// Create a UI for the machine readable stuff to be targetted
 			ui := &packer.TargettedUi{
 				Target: name,
-				Ui:     env.Ui(),
+				Ui:     c.Ui,
 			}
 
 			// Machine-readable helpful
@@ -267,11 +247,11 @@ func (c BuildCommand) Run(args []string) int {
 				}
 
 				ui.Machine("artifact", iStr, "end")
-				env.Ui().Say(message.String())
+				c.Ui.Say(message.String())
 			}
 		}
 	} else {
-		env.Ui().Say("\n==> Builds finished but no artifacts were created.")
+		c.Ui.Say("\n==> Builds finished but no artifacts were created.")
 	}
 
 	if len(errors) > 0 {
