@@ -1,6 +1,7 @@
 package template
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,6 +24,8 @@ type rawTemplate struct {
 	PostProcessors []interface{} `mapstructure:"post-processors"`
 	Provisioners   []map[string]interface{}
 	Variables      map[string]interface{}
+
+	RawContents []byte
 }
 
 // Template returns the actual Template object built from this raw
@@ -34,6 +37,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 	// Copy some literals
 	result.Description = r.Description
 	result.MinVersion = r.MinVersion
+	result.RawContents = r.RawContents
 
 	// Gather the variables
 	if len(r.Variables) > 0 {
@@ -252,6 +256,10 @@ func (r *rawTemplate) parsePostProcessor(
 
 // Parse takes the given io.Reader and parses a Template object out of it.
 func Parse(r io.Reader) (*Template, error) {
+	// Create a buffer to copy what we read
+	var buf bytes.Buffer
+	r = io.TeeReader(r, &buf)
+
 	// First, decode the object into an interface{}. We do this instead of
 	// the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
@@ -263,6 +271,7 @@ func Parse(r io.Reader) (*Template, error) {
 	// Create our decoder
 	var md mapstructure.Metadata
 	var rawTpl rawTemplate
+	rawTpl.RawContents = buf.Bytes()
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Metadata: &md,
 		Result:   &rawTpl,
