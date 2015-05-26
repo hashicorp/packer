@@ -8,14 +8,6 @@ import (
 )
 
 func TestCoreConfig(t *testing.T) *CoreConfig {
-	// Create a UI that is effectively /dev/null everywhere
-	var buf bytes.Buffer
-	ui := &BasicUi{
-		Reader:      &buf,
-		Writer:      ioutil.Discard,
-		ErrorWriter: ioutil.Discard,
-	}
-
 	// Create some test components
 	components := ComponentFinder{
 		Builder: func(n string) (Builder, error) {
@@ -30,7 +22,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 	return &CoreConfig{
 		Cache:      &FileCache{CacheDir: os.TempDir()},
 		Components: components,
-		Ui:         ui,
+		Ui:         TestUi(t),
 	}
 }
 
@@ -41,6 +33,15 @@ func TestCore(t *testing.T, c *CoreConfig) *Core {
 	}
 
 	return core
+}
+
+func TestUi(t *testing.T) Ui {
+	var buf bytes.Buffer
+	return &BasicUi{
+		Reader:      &buf,
+		Writer:      ioutil.Discard,
+		ErrorWriter: ioutil.Discard,
+	}
 }
 
 // TestBuilder sets the builder with the name n to the component finder
@@ -65,6 +66,22 @@ func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
 	var b MockProvisioner
 
 	c.Components.Provisioner = func(actual string) (Provisioner, error) {
+		if actual != n {
+			return nil, nil
+		}
+
+		return &b, nil
+	}
+
+	return &b
+}
+
+// TestPostProcessor sets the prov. with the name n to the component finder
+// and returns the mock.
+func TestPostProcessor(t *testing.T, c *CoreConfig, n string) *MockPostProcessor {
+	var b MockPostProcessor
+
+	c.Components.PostProcessor = func(actual string) (PostProcessor, error) {
 		if actual != n {
 			return nil, nil
 		}

@@ -161,13 +161,54 @@ func (c *Core) Build(n string) (Build, error) {
 		})
 	}
 
+	// Setup the post-processors
+	postProcessors := make([][]coreBuildPostProcessor, 0, len(c.template.PostProcessors))
+	for _, rawPs := range c.template.PostProcessors {
+		current := make([]coreBuildPostProcessor, 0, len(rawPs))
+		for _, rawP := range rawPs {
+			// If we skip, ignore
+			if rawP.Skip(rawName) {
+				continue
+			}
+
+			// Get the post-processor
+			postProcessor, err := c.components.PostProcessor(rawP.Type)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"error initializing post-processor '%s': %s",
+					rawP.Type, err)
+			}
+			if postProcessor == nil {
+				return nil, fmt.Errorf(
+					"post-processor type not found: %s", rawP.Type)
+			}
+
+			current = append(current, coreBuildPostProcessor{
+				processor:         postProcessor,
+				processorType:     rawP.Type,
+				config:            rawP.Config,
+				keepInputArtifact: rawP.KeepInputArtifact,
+			})
+		}
+
+		// If we have no post-processors in this chain, just continue.
+		if len(current) == 0 {
+			continue
+		}
+
+		postProcessors = append(postProcessors, current)
+	}
+
+	// TODO hooks one day
+
 	return &coreBuild{
-		name:          n,
-		builder:       builder,
-		builderConfig: configBuilder.Config,
-		builderType:   configBuilder.Type,
-		provisioners:  provisioners,
-		variables:     c.variables,
+		name:           n,
+		builder:        builder,
+		builderConfig:  configBuilder.Config,
+		builderType:    configBuilder.Type,
+		postProcessors: postProcessors,
+		provisioners:   provisioners,
+		variables:      c.variables,
 	}, nil
 }
 
