@@ -125,6 +125,31 @@ func (t *Template) Validate() error {
 	return err
 }
 
+// Skip says whether or not to skip the build with the given name.
+func (o *OnlyExcept) Skip(n string) bool {
+	if len(o.Only) > 0 {
+		for _, v := range o.Only {
+			if v == n {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	if len(o.Except) > 0 {
+		for _, v := range o.Except {
+			if v == n {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	return false
+}
+
 // Validate validates that the OnlyExcept settings are correct for a thing.
 func (o *OnlyExcept) Validate(t *Template) error {
 	if len(o.Only) > 0 && len(o.Except) > 0 {
