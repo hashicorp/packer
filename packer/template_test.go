@@ -11,7 +11,7 @@ import (
 
 func testTemplateComponentFinder() *ComponentFinder {
 	builder := new(MockBuilder)
-	pp := new(TestPostProcessor)
+	pp := new(MockPostProcessor)
 	provisioner := &MockProvisioner{}
 
 	builderMap := map[string]Builder{
@@ -1018,7 +1018,7 @@ func TestTemplate_Build(t *testing.T) {
 		"test-prov": provisioner,
 	}
 
-	pp := new(TestPostProcessor)
+	pp := new(MockPostProcessor)
 	ppMap := map[string]PostProcessor{
 		"simple": pp,
 	}

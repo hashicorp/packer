@@ -222,6 +222,42 @@ func TestCoreBuild_provSkipInclude(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_postProcess(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-pp.json"))
+	b := TestBuilder(t, config, "test")
+	p := TestPostProcessor(t, config, "test")
+	core := TestCore(t, config)
+	ui := TestUi(t)
+
+	b.ArtifactId = "hello"
+	p.ArtifactId = "goodbye"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	artifact, err := build.Run(ui, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(artifact) != 1 {
+		t.Fatalf("bad: %#v", artifact)
+	}
+
+	if artifact[0].Id() != p.ArtifactId {
+		t.Fatalf("bad: %s", artifact[0].Id())
+	}
+	if p.PostProcessArtifact.Id() != b.ArtifactId {
+		t.Fatalf("bad: %s", p.PostProcessArtifact.Id())
+	}
+}
+
 func TestCoreValidate(t *testing.T) {
 	cases := []struct {
 		File string
@@ -276,7 +312,7 @@ func TestCoreValidate(t *testing.T) {
 
 func testComponentFinder() *ComponentFinder {
 	builderFactory := func(n string) (Builder, error) { return new(MockBuilder), nil }
-	ppFactory := func(n string) (PostProcessor, error) { return new(TestPostProcessor), nil }
+	ppFactory := func(n string) (PostProcessor, error) { return new(MockPostProcessor), nil }
 	provFactory := func(n string) (Provisioner, error) { return new(MockProvisioner), nil }
 	return &ComponentFinder{
 		Builder:       builderFactory,
