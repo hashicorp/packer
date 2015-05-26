@@ -42,6 +42,12 @@ func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 		return nil, nil
 	}
 
+	if h != nil {
+		if err := h.Run(HookProvision, ui, nil, nil); err != nil {
+			return nil, err
+		}
+	}
+
 	return &MockArtifact{
 		IdValue: tb.ArtifactId,
 	}, nil

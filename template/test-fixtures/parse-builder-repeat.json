@@ -1,0 +1,6 @@
+{
+    "builders": [
+        {"type": "something"},
+        {"type": "something"}
+    ]
+}

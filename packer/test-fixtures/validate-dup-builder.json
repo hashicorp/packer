@@ -1,0 +1,10 @@
+{
+    "builders": [
+        {"type": "foo"}
+    ],
+
+    "provisioners": [{
+        "type": "foo",
+        "only": ["bar"]
+    }]
+}

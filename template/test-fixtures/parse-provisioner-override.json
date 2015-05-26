@@ -1,0 +1,10 @@
+{
+    "provisioners": [
+        {
+            "type": "something",
+            "override": {
+                "foo": {}
+            }
+        }
+    ]
+}
