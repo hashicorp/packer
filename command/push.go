@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
-	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template"
 )
 
 // archiveTemplateEntry is the name the template always takes within the slug.
@@ -58,15 +58,15 @@ func (c *PushCommand) Run(args []string) int {
 			"longer used. It will be removed in the next version."))
 	}
 
-	// Read the template
-	tpl, err := packer.ParseTemplateFile(args[0], nil)
+	// Parse the template
+	tpl, err := template.ParseFile(args[0])
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
 	}
 
 	// Validate some things
-	if tpl.Push.Name == "" {
+	if tpl.Push == nil || tpl.Push.Name == "" {
 		c.Ui.Error(fmt.Sprintf(
 			"The 'push' section must be specified in the template with\n" +
 				"at least the 'name' option set."))
@@ -131,7 +131,7 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Find the Atlas post-processors, if possible
-	var atlasPPs []packer.RawPostProcessorConfig
+	var atlasPPs []*template.PostProcessor
 	for _, list := range tpl.PostProcessors {
 		for _, pp := range list {
 			if pp.Type == "atlas" {
