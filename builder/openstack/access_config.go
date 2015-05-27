@@ -3,14 +3,14 @@ package openstack
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 
 	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to openstack access
@@ -86,36 +86,8 @@ func (c *AccessConfig) Region() string {
 	return common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
 }
 
-func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	templates := map[string]*string{
-		"username":  &c.Username,
-		"password":  &c.Password,
-		"api_key":   &c.ApiKey,
-		"provider":  &c.Provider,
-		"project":   &c.Project,
-		"tenant_id": &c.TenantId,
-		"region":    &c.RawRegion,
-		"proxy_url": &c.ProxyUrl,
-	}
-
+func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
 	if strings.HasPrefix(c.Provider, "rackspace") {
 		if c.Region() == "" {
 			errs = append(errs, fmt.Errorf("region must be specified when using rackspace"))
