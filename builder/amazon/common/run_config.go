@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // RunConfig contains configuration for running an instance from a source
@@ -38,43 +38,7 @@ type RunConfig struct {
 	sshTimeout time.Duration
 }
 
-func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	templates := map[string]*string{
-		"iam_instance_profile":    &c.IamInstanceProfile,
-		"instance_type":           &c.InstanceType,
-		"spot_price":              &c.SpotPrice,
-		"spot_price_auto_product": &c.SpotPriceAutoProduct,
-		"ssh_timeout":             &c.RawSSHTimeout,
-		"ssh_username":            &c.SSHUsername,
-		"ssh_private_key_file":    &c.SSHPrivateKeyFile,
-		"source_ami":              &c.SourceAmi,
-		"subnet_id":               &c.SubnetId,
-		"temporary_key_pair_name": &c.TemporaryKeyPairName,
-		"vpc_id":                  &c.VpcId,
-		"availability_zone":       &c.AvailabilityZone,
-		"user_data":               &c.UserData,
-		"user_data_file":          &c.UserDataFile,
-		"security_group_id":       &c.SecurityGroupId,
-	}
-
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
+func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Defaults
 	if c.SSHPort == 0 {
 		c.SSHPort = 22
@@ -90,7 +54,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	// Validation
-	var err error
+	var errs []error
 	if c.SourceAmi == "" {
 		errs = append(errs, errors.New("A source_ami must be specified"))
 	}
@@ -127,42 +91,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
-	sliceTemplates := map[string][]string{
-		"security_group_ids": c.SecurityGroupIds,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = t.Process(elem, nil)
-			if err != nil {
-				errs = append(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
-	}
-
-	newTags := make(map[string]string)
-	for k, v := range c.RunTags {
-		k, err := t.Process(k, nil)
-		if err != nil {
-			errs = append(errs,
-				fmt.Errorf("Error processing tag key %s: %s", k, err))
-			continue
-		}
-
-		v, err := t.Process(v, nil)
-		if err != nil {
-			errs = append(errs,
-				fmt.Errorf("Error processing tag value '%s': %s", v, err))
-			continue
-		}
-
-		newTags[k] = v
-	}
-
-	c.RunTags = newTags
-
+	var err error
 	c.sshTimeout, err = time.ParseDuration(c.RawSSHTimeout)
 	if err != nil {
 		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
