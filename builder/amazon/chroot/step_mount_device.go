@@ -3,12 +3,14 @@ package chroot
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/mitchellh/goamz/ec2"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type mountPathData struct {
@@ -31,9 +33,9 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	device := state.Get("device").(string)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
-	mountPath, err := config.tpl.Process(config.MountPath, &mountPathData{
-		Device: filepath.Base(device),
-	})
+	ctx := *config.ctx
+	ctx.Data = &mountPathData{Device: filepath.Base(device)}
+	mountPath, err := interpolate.Render(config.MountPath, &ctx)
 
 	if err != nil {
 		err := fmt.Errorf("Error preparing mount directory: %s", err)

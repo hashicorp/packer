@@ -14,8 +14,10 @@ import (
 // doesn't within an interface.
 type RenderFilter struct {
 	Include []string
+	Exclude []string
 
 	once       sync.Once
+	excludeSet map[string]struct{}
 	includeSet map[string]struct{}
 }
 
@@ -74,15 +76,30 @@ func (f *RenderFilter) include(k string) bool {
 		return true
 	}
 
+	k = strings.ToLower(k)
+
 	f.once.Do(f.init)
-	_, ok := f.includeSet[strings.ToLower(k)]
-	return ok
+	if len(f.includeSet) > 0 {
+		_, ok := f.includeSet[k]
+		return ok
+	}
+	if len(f.excludeSet) > 0 {
+		_, ok := f.excludeSet[k]
+		return !ok
+	}
+
+	return true
 }
 
 func (f *RenderFilter) init() {
 	f.includeSet = make(map[string]struct{})
 	for _, v := range f.Include {
 		f.includeSet[strings.ToLower(v)] = struct{}{}
+	}
+
+	f.excludeSet = make(map[string]struct{})
+	for _, v := range f.Exclude {
+		f.excludeSet[strings.ToLower(v)] = struct{}{}
 	}
 }
 
