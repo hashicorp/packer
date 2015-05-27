@@ -30,8 +30,20 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.RemotePath != DefaultRemotePath {
-		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
+	if p.config.GuestOsType != defaultOsType {
+		t.Errorf("defaultOsType: expecting %s, found %s", defaultOsType, p.config.GuestOsType)
+	}
+
+	if p.config.ExecuteCommand != guestOsConfigs[defaultOsType].executeCommand {
+		t.Errorf("ExecuteCommand: expecting %s, found %s", guestOsConfigs[defaultOsType].executeCommand, p.config.ExecuteCommand)
+	}
+
+	if p.config.InlineShebang != guestOsConfigs[defaultOsType].inlineShebang {
+		t.Errorf("InlineShebang: expecting %s, found %s", guestOsConfigs[defaultOsType].inlineShebang, p.config.InlineShebang)
+	}
+
+	if p.config.RemotePath != guestOsConfigs[defaultOsType].remotePath {
+		t.Errorf("RemotePath: expecting %s, found %s", guestOsConfigs[defaultOsType].remotePath, p.config.RemotePath)
 	}
 }
 
@@ -45,8 +57,8 @@ func TestProvisionerPrepare_InlineShebang(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.InlineShebang != "/bin/sh" {
-		t.Fatalf("bad value: %s", p.config.InlineShebang)
+	if p.config.InlineShebang != guestOsConfigs[defaultOsType].inlineShebang {
+		t.Errorf("InlineShebang: expecting %s, found %s", guestOsConfigs[defaultOsType].inlineShebang, p.config.InlineShebang)
 	}
 
 	// Test with a good one
