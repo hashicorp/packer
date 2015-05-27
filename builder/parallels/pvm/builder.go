@@ -68,7 +68,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(parallelscommon.StepAttachFloppy),
 		&parallelscommon.StepPrlctl{
 			Commands: b.config.Prlctl,
-			Tpl:      b.config.tpl,
+			Ctx:      b.config.ctx,
 		},
 		&parallelscommon.StepRun{
 			BootWait: b.config.BootWait,
@@ -78,7 +78,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootCommand:    b.config.BootCommand,
 			HostInterfaces: []string{},
 			VMName:         b.config.VMName,
-			Tpl:            b.config.tpl,
+			Ctx:            b.config.ctx,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     parallelscommon.SSHAddress,
@@ -92,7 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ParallelsToolsFlavor:    b.config.ParallelsToolsFlavor,
 			ParallelsToolsGuestPath: b.config.ParallelsToolsGuestPath,
 			ParallelsToolsMode:      b.config.ParallelsToolsMode,
-			Tpl:                     b.config.tpl,
+			Ctx:                     b.config.ctx,
 		},
 		new(common.StepProvision),
 		&parallelscommon.StepShutdown{
