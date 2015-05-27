@@ -2,12 +2,14 @@ package iso
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type vmxTemplateData struct {
@@ -32,13 +34,14 @@ type stepCreateVMX struct {
 }
 
 func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Building and writing VMX file")
 
-	tplData := &vmxTemplateData{
+	ctx := config.ctx
+	ctx.Data = &vmxTemplateData{
 		Name:     config.VMName,
 		GuestOS:  config.GuestOSType,
 		DiskName: config.DiskName,
@@ -68,7 +71,7 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxTemplate = string(rawBytes)
 	}
 
-	vmxContents, err := config.tpl.Process(vmxTemplate, tplData)
+	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
 	if err != nil {
 		err := fmt.Errorf("Error procesing VMX template: %s", err)
 		state.Put("error", err)

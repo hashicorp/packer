@@ -1,10 +1,7 @@
 package common
 
 import (
-	"fmt"
-	"text/template"
-
-	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type ToolsConfig struct {
@@ -12,27 +9,10 @@ type ToolsConfig struct {
 	ToolsUploadPath   string `mapstructure:"tools_upload_path"`
 }
 
-func (c *ToolsConfig) Prepare(t *packer.ConfigTemplate) []error {
+func (c *ToolsConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.ToolsUploadPath == "" {
 		c.ToolsUploadPath = "{{ .Flavor }}.iso"
 	}
 
-	templates := map[string]*string{
-		"tools_upload_flavor": &c.ToolsUploadFlavor,
-	}
-
-	var err error
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	if _, err := template.New("path").Parse(c.ToolsUploadPath); err != nil {
-		errs = append(errs, fmt.Errorf("tools_upload_path invalid: %s", err))
-	}
-
-	return errs
+	return nil
 }
