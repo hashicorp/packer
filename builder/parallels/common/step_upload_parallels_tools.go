@@ -2,10 +2,12 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // This step uploads the Parallels Tools ISO to the virtual machine.
@@ -25,7 +27,7 @@ type StepUploadParallelsTools struct {
 	ParallelsToolsFlavor    string
 	ParallelsToolsGuestPath string
 	ParallelsToolsMode      string
-	Tpl                     *packer.ConfigTemplate
+	Ctx                     interpolate.Context
 }
 
 func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
@@ -48,11 +50,11 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	}
 	defer f.Close()
 
-	tplData := &toolsPathTemplate{
+	s.Ctx.Data = &toolsPathTemplate{
 		Flavor: s.ParallelsToolsFlavor,
 	}
 
-	s.ParallelsToolsGuestPath, err = s.Tpl.Process(s.ParallelsToolsGuestPath, tplData)
+	s.ParallelsToolsGuestPath, err = interpolate.Render(s.ParallelsToolsGuestPath, &s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error preparing Parallels Tools path: %s", err)
 		state.Put("error", err)
