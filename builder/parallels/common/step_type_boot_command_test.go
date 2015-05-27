@@ -9,7 +9,6 @@ import (
 
 func TestStepTypeBootCommand(t *testing.T) {
 	state := testState(t)
-	tpl, _ := packer.NewConfigTemplate()
 
 	var bootcommand = []string{
 		"1234567890-=<enter><wait>",
@@ -27,7 +26,7 @@ func TestStepTypeBootCommand(t *testing.T) {
 		BootCommand:    bootcommand,
 		HostInterfaces: []string{},
 		VMName:         "myVM",
-		Tpl:            tpl,
+		Ctx:            *testConfigTemplate(t),
 	}
 
 	comm := new(packer.MockCommunicator)
