@@ -15,7 +15,9 @@ import (
 
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type Config struct {
@@ -38,7 +40,7 @@ type Config struct {
 	ValidationKeyPath    string   `mapstructure:"validation_key_path"`
 	ValidationClientName string   `mapstructure:"validation_client_name"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type Provisioner struct {
@@ -65,40 +67,17 @@ type InstallChefTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"execute_command",
+				"install_command",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return err
-	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	templates := map[string]*string{
-		"chef_environment":       &p.config.ChefEnvironment,
-		"ssl_verify_mode":        &p.config.SslVerifyMode,
-		"config_template":        &p.config.ConfigTemplate,
-		"node_name":              &p.config.NodeName,
-		"staging_dir":            &p.config.StagingDir,
-		"chef_server_url":        &p.config.ServerUrl,
-		"execute_command":        &p.config.ExecuteCommand,
-		"install_command":        &p.config.InstallCommand,
-		"validation_key_path":    &p.config.ValidationKeyPath,
-		"validation_client_name": &p.config.ValidationClientName,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
 	}
 
 	if p.config.ExecuteCommand == "" {
@@ -120,33 +99,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = "/tmp/packer-chef-client"
 	}
 
-	sliceTemplates := map[string][]string{
-		"run_list": p.config.RunList,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = p.config.tpl.Process(elem, nil)
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
-	}
-
-	validates := map[string]*string{
-		"execute_command": &p.config.ExecuteCommand,
-		"install_command": &p.config.InstallCommand,
-	}
-
-	for n, ptr := range validates {
-		if err := p.config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
-		}
-	}
-
+	var errs *packer.MultiError
 	if p.config.ConfigTemplate != "" {
 		fi, err := os.Stat(p.config.ConfigTemplate)
 		if err != nil {
@@ -291,14 +244,16 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 		tpl = string(tplBytes)
 	}
 
-	configString, err := p.config.tpl.Process(tpl, &ConfigTemplate{
+	ctx := p.config.ctx
+	ctx.Data = &ConfigTemplate{
 		NodeName:             nodeName,
 		ServerUrl:            serverUrl,
 		ValidationKeyPath:    remoteKeyPath,
 		ValidationClientName: validationClientName,
 		ChefEnvironment:      chefEnvironment,
 		SslVerifyMode:        sslVerifyMode,
-	})
+	}
+	configString, err := interpolate.Render(tpl, &ctx)
 	if err != nil {
 		return "", err
 	}
@@ -415,11 +370,12 @@ func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir stri
 }
 
 func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config string, json string) error {
-	command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteTemplate{
+	p.config.ctx.Data = &ExecuteTemplate{
 		ConfigPath: config,
 		JsonPath:   json,
 		Sudo:       !p.config.PreventSudo,
-	})
+	}
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
@@ -444,9 +400,10 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error {
 	ui.Message("Installing Chef...")
 
-	command, err := p.config.tpl.Process(p.config.InstallCommand, &InstallChefTemplate{
+	p.config.ctx.Data = &InstallChefTemplate{
 		Sudo: !p.config.PreventSudo,
-	})
+	}
+	command, err := interpolate.Render(p.config.InstallCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
@@ -532,24 +489,25 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 	// Copy the user variables so that we can restore them later, and
 	// make sure we make the quotes JSON-friendly in the user variables.
 	originalUserVars := make(map[string]string)
-	for k, v := range p.config.tpl.UserVars {
+	for k, v := range p.config.ctx.UserVariables {
 		originalUserVars[k] = v
 	}
 
 	// Make sure we reset them no matter what
 	defer func() {
-		p.config.tpl.UserVars = originalUserVars
+		p.config.ctx.UserVariables = originalUserVars
 	}()
 
 	// Make the current user variables JSON string safe.
-	for k, v := range p.config.tpl.UserVars {
+	for k, v := range p.config.ctx.UserVariables {
 		v = strings.Replace(v, `\`, `\\`, -1)
 		v = strings.Replace(v, `"`, `\"`, -1)
-		p.config.tpl.UserVars[k] = v
+		p.config.ctx.UserVariables[k] = v
 	}
 
 	// Process the bytes with the template processor
-	jsonBytesProcessed, err := p.config.tpl.Process(string(jsonBytes), nil)
+	p.config.ctx.Data = nil
+	jsonBytesProcessed, err := interpolate.Render(string(jsonBytes), &p.config.ctx)
 	if err != nil {
 		return nil, err
 	}
