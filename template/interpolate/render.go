@@ -36,7 +36,7 @@ func RenderMap(v interface{}, ctx *Context, f *RenderFilter) (map[string]interfa
 			continue
 		}
 
-		raw, err := renderInterface(raw, ctx)
+		raw, err := RenderInterface(raw, ctx)
 		if err != nil {
 			return nil, fmt.Errorf("render '%s': %s", k, err)
 		}
@@ -47,7 +47,8 @@ func RenderMap(v interface{}, ctx *Context, f *RenderFilter) (map[string]interfa
 	return m, nil
 }
 
-func renderInterface(v interface{}, ctx *Context) (interface{}, error) {
+// RenderInterface renders any value and returns the resulting value.
+func RenderInterface(v interface{}, ctx *Context) (interface{}, error) {
 	f := func(v string) (string, error) {
 		return Render(v, ctx)
 	}
