@@ -13,7 +13,9 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // see https://api.digitalocean.com/images/?client_id=[client_id]&api_key=[api_key]
@@ -34,7 +36,7 @@ const BuilderId = "pearkes.digitalocean"
 // Configuration tells the builder the credentials
 // to use while communicating with DO and describes the image
 // you are creating
-type config struct {
+type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	ClientID string `mapstructure:"client_id"`
@@ -63,28 +65,22 @@ type config struct {
 	sshTimeout   time.Duration
 	stateTimeout time.Duration
 
+	ctx *interpolate.Context
 	tpl *packer.ConfigTemplate
 }
 
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate: true,
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
 
 	// Optional configuration with defaults
 	if b.config.APIKey == "" {
@@ -163,30 +159,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RawStateTimeout = "6m"
 	}
 
-	templates := map[string]*string{
-		"region":        &b.config.Region,
-		"size":          &b.config.Size,
-		"image":         &b.config.Image,
-		"client_id":     &b.config.ClientID,
-		"api_key":       &b.config.APIKey,
-		"api_url":       &b.config.APIURL,
-		"api_token":     &b.config.APIToken,
-		"snapshot_name": &b.config.SnapshotName,
-		"droplet_name":  &b.config.DropletName,
-		"ssh_username":  &b.config.SSHUsername,
-		"ssh_timeout":   &b.config.RawSSHTimeout,
-		"state_timeout": &b.config.RawStateTimeout,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
+	var errs *packer.MultiError
 	if b.config.APIToken == "" {
 		// Required configurations that will display errors if not set
 		if b.config.ClientID == "" {
