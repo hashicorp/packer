@@ -2,15 +2,17 @@ package qemu
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-vnc"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"net"
 	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/mitchellh/go-vnc"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
@@ -34,7 +36,7 @@ type bootCommandTemplateData struct {
 type stepTypeBootCommand struct{}
 
 func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	vncPort := state.Get("vnc_port").(uint)
@@ -61,7 +63,8 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
-	tplData := &bootCommandTemplateData{
+	ctx := config.ctx
+	ctx.Data = &bootCommandTemplateData{
 		"10.0.2.2",
 		httpPort,
 		config.VMName,
@@ -69,7 +72,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Say("Typing the boot command over VNC...")
 	for _, command := range config.BootCommand {
-		command, err := config.tpl.Process(command, tplData)
+		command, err := interpolate.Render(command, &ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)

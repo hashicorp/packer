@@ -13,7 +13,9 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	commonssh "github.com/mitchellh/packer/common/ssh"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderId = "transcend.qemu"
@@ -65,11 +67,11 @@ var diskCache = map[string]bool{
 }
 
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
-type config struct {
+type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Accelerator     string     `mapstructure:"accelerator"`
@@ -114,24 +116,25 @@ type config struct {
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	sshWaitTimeout  time.Duration ``
-	tpl             *packer.ConfigTemplate
+	ctx             interpolate.Context
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"boot_command",
+				"qemuargs",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
+
+	var errs *packer.MultiError
 	warnings := make([]string, 0)
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -189,15 +192,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VNCPortMax = 6000
 	}
 
-	for i, args := range b.config.QemuArgs {
-		for j, arg := range args {
-			if err := b.config.tpl.Validate(arg); err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Error processing qemu-system_x86-64[%d][%d]: %s", i, j, err))
-			}
-		}
-	}
-
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
@@ -216,63 +210,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskInterface == "" {
 		b.config.DiskInterface = "virtio"
-	}
-
-	// Errors
-	templates := map[string]*string{
-		"http_directory":    &b.config.HTTPDir,
-		"iso_checksum":      &b.config.ISOChecksum,
-		"iso_checksum_type": &b.config.ISOChecksumType,
-		"iso_url":           &b.config.RawSingleISOUrl,
-		"output_directory":  &b.config.OutputDir,
-		"shutdown_command":  &b.config.ShutdownCommand,
-		"ssh_key_path":      &b.config.SSHKeyPath,
-		"ssh_password":      &b.config.SSHPassword,
-		"ssh_username":      &b.config.SSHUser,
-		"vm_name":           &b.config.VMName,
-		"format":            &b.config.Format,
-		"boot_wait":         &b.config.RawBootWait,
-		"shutdown_timeout":  &b.config.RawShutdownTimeout,
-		"ssh_wait_timeout":  &b.config.RawSSHWaitTimeout,
-		"accelerator":       &b.config.Accelerator,
-		"machine_type":      &b.config.MachineType,
-		"net_device":        &b.config.NetDevice,
-		"disk_interface":    &b.config.DiskInterface,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	for i, url := range b.config.ISOUrls {
-		var err error
-		b.config.ISOUrls[i], err = b.config.tpl.Process(url, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing iso_urls[%d]: %s", i, err))
-		}
-	}
-
-	for i, command := range b.config.BootCommand {
-		if err := b.config.tpl.Validate(command); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
-		}
-	}
-
-	for i, file := range b.config.FloppyFiles {
-		var err error
-		b.config.FloppyFiles[i], err = b.config.tpl.Process(file, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing floppy_files[%d]: %s",
-					i, err))
-		}
 	}
 
 	if !(b.config.Format == "qcow2" || b.config.Format == "raw") {
