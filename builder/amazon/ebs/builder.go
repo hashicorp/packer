@@ -13,46 +13,45 @@ import (
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // The unique ID for this builder
 const BuilderId = "mitchellh.amazonebs"
 
-type config struct {
+type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	tpl *packer.ConfigTemplate
+	ctx *interpolate.Context
 }
 
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	b.config.ctx = &interpolate.Context{Funcs: awscommon.TemplateFuncs}
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: b.config.ctx,
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
-	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
