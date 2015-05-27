@@ -76,6 +76,24 @@ func TestRenderMap(t *testing.T) {
 				Include: []string{"bar"},
 			},
 		},
+
+		"filter case-insensitive": {
+			map[string]interface{}{
+				"bar": "{{upper `baz`}}",
+				"foo": map[string]string{
+					"{{upper `bar`}}": "{{upper `baz`}}",
+				},
+			},
+			map[string]interface{}{
+				"bar": "BAZ",
+				"foo": map[string]string{
+					"{{upper `bar`}}": "{{upper `baz`}}",
+				},
+			},
+			&RenderFilter{
+				Include: []string{"baR"},
+			},
+		},
 	}
 
 	ctx := &Context{}

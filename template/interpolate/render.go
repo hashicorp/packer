@@ -74,14 +74,14 @@ func (f *RenderFilter) include(k string) bool {
 	}
 
 	f.once.Do(f.init)
-	_, ok := f.includeSet[k]
+	_, ok := f.includeSet[strings.ToLower(k)]
 	return ok
 }
 
 func (f *RenderFilter) init() {
 	f.includeSet = make(map[string]struct{})
 	for _, v := range f.Include {
-		f.includeSet[v] = struct{}{}
+		f.includeSet[strings.ToLower(v)] = struct{}{}
 	}
 }
 
