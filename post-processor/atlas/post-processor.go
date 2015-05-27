@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/atlas-go/v1"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuildEnvKey = "ATLAS_BUILD_ID"
@@ -39,7 +41,7 @@ type Config struct {
 	// This shouldn't ever be set outside of unit tests.
 	Test bool `mapstructure:"test"`
 
-	tpl        *packer.ConfigTemplate
+	ctx        interpolate.Context
 	user, name string
 	buildId    int
 }
@@ -50,31 +52,14 @@ type PostProcessor struct {
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	_, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{},
+		},
+	}, raws...)
 	if err != nil {
 		return err
-	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
-
-	templates := map[string]*string{
-		"artifact":       &p.config.Artifact,
-		"type":           &p.config.Type,
-		"server_address": &p.config.ServerAddr,
-		"token":          &p.config.Token,
-	}
-
-	errs := new(packer.MultiError)
-	for key, ptr := range templates {
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", key, err))
-		}
 	}
 
 	required := map[string]*string{
@@ -82,6 +67,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"artifact_type": &p.config.Type,
 	}
 
+	var errs *packer.MultiError
 	for key, ptr := range required {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
@@ -89,7 +75,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	if len(errs.Errors) > 0 {
+	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
 

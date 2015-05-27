@@ -8,7 +8,9 @@ import (
 	"os"
 
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type Config struct {
@@ -16,7 +18,7 @@ type Config struct {
 
 	OutputPath string `mapstructure:"output"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type PostProcessor struct {
@@ -24,37 +26,14 @@ type PostProcessor struct {
 }
 
 func (self *PostProcessor) Configure(raws ...interface{}) error {
-	_, err := common.DecodeConfig(&self.config, raws...)
+	err := config.Decode(&self.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{},
+		},
+	}, raws...)
 	if err != nil {
 		return err
-	}
-
-	self.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	self.config.tpl.UserVars = self.config.PackerUserVars
-
-	templates := map[string]*string{
-		"output": &self.config.OutputPath,
-	}
-
-	errs := new(packer.MultiError)
-	for key, ptr := range templates {
-		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("%s must be set", key))
-		}
-
-		*ptr, err = self.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", key, err))
-		}
-	}
-
-	if len(errs.Errors) > 0 {
-		return errs
 	}
 
 	return nil
