@@ -1,8 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
+	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -66,6 +70,21 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 	}
 	for _, raw := range raws {
 		if err := decoder.Decode(raw); err != nil {
+			return err
+		}
+	}
+
+	// If we have unused keys, it is an error
+	if len(md.Unused) > 0 {
+		var err error
+		sort.Strings(md.Unused)
+		for _, unused := range md.Unused {
+			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
+				err = multierror.Append(err, fmt.Errorf(
+					"unknown configuration key: %q", unused))
+			}
+		}
+		if err != nil {
 			return err
 		}
 	}
