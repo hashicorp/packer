@@ -5,10 +5,13 @@ package saltmasterless
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"path/filepath"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const DefaultTempConfigDir = "/tmp/salt"
@@ -32,7 +35,7 @@ type Config struct {
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type Provisioner struct {
@@ -40,40 +43,21 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	if p.config.TempConfigDir == "" {
 		p.config.TempConfigDir = DefaultTempConfigDir
 	}
 
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	templates := map[string]*string{
-		"bootstrap_args":     &p.config.BootstrapArgs,
-		"minion_config":      &p.config.MinionConfig,
-		"local_state_tree":   &p.config.LocalStateTree,
-		"local_pillar_roots": &p.config.LocalPillarRoots,
-		"temp_config_dir":    &p.config.TempConfigDir,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
+	var errs *packer.MultiError
 
 	// require a salt state tree
 	if p.config.LocalStateTree == "" {
