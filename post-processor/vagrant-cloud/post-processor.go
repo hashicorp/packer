@@ -6,11 +6,14 @@ package vagrantcloud
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
@@ -28,7 +31,7 @@ type Config struct {
 
 	BoxDownloadUrl string `mapstructure:"box_download_url"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type boxDownloadUrlTemplate struct {
@@ -43,16 +46,17 @@ type PostProcessor struct {
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	_, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"box_download_url",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	// Default configuration
 	if p.config.VagrantCloudUrl == "" {
@@ -73,15 +77,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
-		}
-	}
-
-	// Template process
-	for key, ptr := range templates {
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", key, err))
 		}
 	}
 
@@ -111,10 +106,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// The name of the provider for vagrant cloud, and vagrant
 	providerName := providerFromBuilderName(artifact.Id())
 
-	boxDownloadUrl, err := p.config.tpl.Process(p.config.BoxDownloadUrl, &boxDownloadUrlTemplate{
+	p.config.ctx.Data = &boxDownloadUrlTemplate{
 		ArtifactId: artifact.Id(),
 		Provider:   providerName,
-	})
+	}
+	boxDownloadUrl, err := interpolate.Render(p.config.BoxDownloadUrl, &p.config.ctx)
 	if err != nil {
 		return nil, false, fmt.Errorf("Error processing box_download_url: %s", err)
 	}
