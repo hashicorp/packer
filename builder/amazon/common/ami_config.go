@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.
@@ -20,49 +20,8 @@ type AMIConfig struct {
 	AMIEnhancedNetworking bool              `mapstructure:"enhanced_networking"`
 }
 
-func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	templates := map[string]*string{
-		"ami_name":                &c.AMIName,
-		"ami_description":         &c.AMIDescription,
-		"ami_virtualization_type": &c.AMIVirtType,
-	}
-
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	sliceTemplates := map[string][]string{
-		"ami_users":         c.AMIUsers,
-		"ami_groups":        c.AMIGroups,
-		"ami_product_codes": c.AMIProductCodes,
-		"ami_regions":       c.AMIRegions,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = t.Process(elem, nil)
-			if err != nil {
-				errs = append(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
-	}
-
+func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
+	var errs []error
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
 	}
@@ -91,27 +50,6 @@ func (c *AMIConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 		c.AMIRegions = regions
 	}
-
-	newTags := make(map[string]string)
-	for k, v := range c.AMITags {
-		k, err := t.Process(k, nil)
-		if err != nil {
-			errs = append(errs,
-				fmt.Errorf("Error processing tag key %s: %s", k, err))
-			continue
-		}
-
-		v, err := t.Process(v, nil)
-		if err != nil {
-			errs = append(errs,
-				fmt.Errorf("Error processing tag value '%s': %s", v, err))
-			continue
-		}
-
-		newTags[k] = v
-	}
-
-	c.AMITags = newTags
 
 	if len(errs) > 0 {
 		return errs
