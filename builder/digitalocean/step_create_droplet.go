@@ -14,7 +14,7 @@ type stepCreateDroplet struct {
 func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(config)
+	c := state.Get("config").(Config)
 	sshKeyId := state.Get("ssh_key_id").(uint)
 
 	ui.Say("Creating droplet...")
@@ -46,7 +46,7 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(config)
+	c := state.Get("config").(Config)
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
