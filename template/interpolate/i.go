@@ -11,6 +11,9 @@ type Context struct {
 	// Data is the data for the template that is available
 	Data interface{}
 
+	// Funcs are extra functions available in the template
+	Funcs map[string]interface{}
+
 	// UserVariables is the mapping of user variables that the
 	// "user" function reads from.
 	UserVariables map[string]string

@@ -45,6 +45,11 @@ func Funcs(ctx *Context) template.FuncMap {
 	for k, v := range FuncGens {
 		result[k] = v(ctx)
 	}
+	if ctx != nil {
+		for k, v := range ctx.Funcs {
+			result[k] = v
+		}
+	}
 
 	return template.FuncMap(result)
 }
