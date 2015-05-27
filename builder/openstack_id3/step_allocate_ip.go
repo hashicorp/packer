@@ -21,7 +21,11 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	computeClient := state.Get("compute_client").(*gophercloud.ServiceClient)
 	server := state.Get("server").(*servers.Server)
 
-	var instanceIp *floatingip.FloatingIP
+	var instanceIp floatingip.FloatingIP
+	// This is here in case we error out before putting instanceIp into the
+	// statebag below, because it is requested by Cleanup()
+	state.Put("access_ip", instanceIp)
+
 	if s.FloatingIp != "" {
 		instanceIp.IP = s.FloatingIp
 	} else if s.FloatingIpPool != "" {
@@ -33,7 +37,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		instanceIp = newIp
+		instanceIp = *newIp
 		ui.Say(fmt.Sprintf("Created temporary floating IP %s...", instanceIp.IP))
 	}
 	if instanceIp.IP != "" {
@@ -54,7 +58,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	computeClient := state.Get("compute_client").(*gophercloud.ServiceClient)
-	instanceIp := state.Get("access_ip").(*floatingip.FloatingIP)
+	instanceIp := state.Get("access_ip").(floatingip.FloatingIP)
 
 	if s.FloatingIpPool != "" && instanceIp.ID != "" {
 		err := floatingip.Delete(computeClient, instanceIp.ID).ExtractErr()

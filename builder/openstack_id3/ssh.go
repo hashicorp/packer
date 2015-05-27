@@ -1,12 +1,13 @@
 package openstack_id3
 
 import (
-	"code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
+	"time"
+
+	"code.google.com/p/go.crypto/ssh"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/multistep"
-	"time"
 
 	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
@@ -20,20 +21,27 @@ func SSHAddress(compute_client *gophercloud.ServiceClient, sshinterface string, 
 
 		s := state.Get("server").(*servers.Server)
 
-		if ip := state.Get("access_ip").(*floatingip.FloatingIP); ip.IP != "" {
+		if ip := state.Get("access_ip").(floatingip.FloatingIP); ip.IP != "" {
 			return fmt.Sprintf("%s:%d", ip.IP, port), nil
 		}
 
-		// Does the pool actually exist?
-		if pool, ok := s.Addresses[sshinterface]; ok {
-			var addresses []servers.Address
-			err := mapstructure.Decode(pool, &addresses)
-			if err != nil {
-				return "", errors.New("Error parsing ip pools from the server")
+		ipPools := make(map[string][]servers.Address, len(s.Addresses))
+		err := mapstructure.Decode(s.Addresses, &ipPools)
+		if err != nil {
+			return "", fmt.Errorf("Error parsing ip pools from the server: %s", err)
+		}
+
+		for pool, addresses := range ipPools {
+			if sshinterface != "" {
+				if pool != sshinterface {
+					continue
+				}
 			}
-			for _, address := range addresses {
-				if address.Address != "" && address.Version == 4 {
-					return fmt.Sprintf("%s:%d", address.Address, port), nil
+			if pool != "" {
+				for _, address := range addresses {
+					if address.Address != "" && address.Version == 4 {
+						return fmt.Sprintf("%s:%d", address.Address, port), nil
+					}
 				}
 			}
 		}
