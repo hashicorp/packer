@@ -26,7 +26,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver := &DockerDriver{Ctx: b.config.ctx, Ui: ui}
+	driver := &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
 	if err := driver.Verify(); err != nil {
 		return nil, err
 	}
