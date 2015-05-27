@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/packer/packer"
 	"strings"
 	"unicode"
+
+	"github.com/mitchellh/goamz/aws"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to AWS access
@@ -49,31 +50,8 @@ func (c *AccessConfig) Region() (aws.Region, error) {
 	return aws.Regions[region], nil
 }
 
-func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	templates := map[string]*string{
-		"access_key": &c.AccessKey,
-		"secret_key": &c.SecretKey,
-		"region":     &c.RawRegion,
-	}
-
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
+func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
+	var errs []error
 	if c.RawRegion != "" {
 		if _, ok := aws.Regions[c.RawRegion]; !ok {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
