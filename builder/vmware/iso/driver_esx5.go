@@ -217,19 +217,13 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	return d.Host, vncPort, nil
 }
 
-func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(*config)
-
-	if address, ok := state.GetOk("vm_address"); ok {
-		return address.(string), nil
-	}
-
+func (d *ESX5Driver) getIPAddress(vmName string) (string, error) {
 	r, err := d.esxcli("network", "vm", "list")
 	if err != nil {
 		return "", err
 	}
 
-	record, err := r.find("Name", config.VMName)
+	record, err := r.find("Name", vmName)
 	if err != nil {
 		return "", err
 	}
@@ -252,7 +246,43 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
+	return record["Address"], nil
+}
+
+func (d *ESX5Driver) getIPAddressCompat() (string, error) {
+	r, err := d.run(nil, "vim-cmd", "vmsvc/get.guest", d.vmId, " | grep -m 1 ipAddress | awk -F'\"' '{print $2}'")
+	if err != nil {
+		return "", err
+	}
+
+	ipAddress := strings.TrimRight(r, "\n")
+
+	if ipAddress == "" {
+		return "", errors.New("VM network port found, but no IP address")
+	}
+
+	return ipAddress, nil
+}
+
+func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
+	config := state.Get("config").(*config)
+
+	if address, ok := state.GetOk("vm_address"); ok {
+		return address.(string), nil
+	}
+
+	var ipAddress string
+	var err error
+	if config.ThirdPartySwitchCompatibility {
+		ipAddress, err = d.getIPAddressCompat()
+	} else {
+		ipAddress, err = d.getIPAddress(config.VMName)
+	}
+	if err != nil {
+		return "", err
+	}
+
+	address := fmt.Sprintf("%s:%d", ipAddress, config.SSHPort)
 	state.Put("vm_address", address)
 	return address, nil
 }

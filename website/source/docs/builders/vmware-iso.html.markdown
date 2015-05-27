@@ -217,6 +217,11 @@ each category, the available options are alphabetized and described.
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as the virtual machine is booted.
 
+* `third_party_switch_compatibility` (boolean) - If true, will use a method
+  compatible with third party distributed switches (like the Cisco 1000v) to get
+  the virtual machine's IP address. This method requires that VMWare Tools is
+  installed and running. This only has an effect if `remote_type` is enabled.
+
 * `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
   upload into the VM. Valid values are "darwin", "linux", and "windows".
   By default, this is empty, which means VMware tools won't be uploaded.
