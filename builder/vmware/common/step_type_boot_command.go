@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/go-vnc"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
@@ -35,7 +36,7 @@ type bootCommandTemplateData struct {
 type StepTypeBootCommand struct {
 	BootCommand []string
 	VMName      string
-	Tpl         *packer.ConfigTemplate
+	Ctx         interpolate.Context
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
@@ -87,7 +88,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	log.Printf("Host IP for the VMware machine: %s", hostIp)
 
-	tplData := &bootCommandTemplateData{
+	s.Ctx.Data = &bootCommandTemplateData{
 		hostIp,
 		httpPort,
 		s.VMName,
@@ -95,7 +96,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Say("Typing the boot command over VNC...")
 	for _, command := range s.BootCommand {
-		command, err := s.Tpl.Process(command, tplData)
+		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)

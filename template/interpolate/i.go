@@ -27,6 +27,11 @@ func Render(v string, ctx *Context) (string, error) {
 	return (&I{Value: v}).Render(ctx)
 }
 
+// Validate is shorthand for constructing an I and calling Validate.
+func Validate(v string, ctx *Context) error {
+	return (&I{Value: v}).Validate(ctx)
+}
+
 // I stands for "interpolation" and is the main interpolation struct
 // in order to render values.
 type I struct {
@@ -50,6 +55,12 @@ func (i *I) Render(ctx *Context) (string, error) {
 	}
 
 	return result.String(), nil
+}
+
+// Validate validates that the template is syntactically valid.
+func (i *I) Validate(ctx *Context) error {
+	_, err := i.template(ctx)
+	return err
 }
 
 func (i *I) template(ctx *Context) (*template.Template, error) {

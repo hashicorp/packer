@@ -8,7 +8,7 @@ import (
 
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
-func NewDriver(config *config) (vmwcommon.Driver, error) {
+func NewDriver(config *Config) (vmwcommon.Driver, error) {
 	drivers := []vmwcommon.Driver{}
 
 	if config.RemoteType == "" {
