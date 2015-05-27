@@ -34,6 +34,11 @@ func RenderMap(v interface{}, ctx *Context, f *RenderFilter) (map[string]interfa
 
 	// Now go through each value and render it
 	for k, raw := range m {
+		// Always validate every field
+		if err := ValidateInterface(raw, ctx); err != nil {
+			return nil, fmt.Errorf("invalid '%s': %s", k, err)
+		}
+
 		if !f.include(k) {
 			continue
 		}
@@ -68,6 +73,24 @@ func RenderInterface(v interface{}, ctx *Context) (interface{}, error) {
 		v = walker.Top
 	}
 	return v, nil
+}
+
+// ValidateInterface renders any value and returns the resulting value.
+func ValidateInterface(v interface{}, ctx *Context) error {
+	f := func(v string) (string, error) {
+		return v, Validate(v, ctx)
+	}
+
+	walker := &renderWalker{
+		F:       f,
+		Replace: false,
+	}
+	err := reflectwalk.Walk(v, walker)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Include checks whether a key should be included.
