@@ -3,8 +3,8 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"text/template"
+
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // These are the different valid mode values for "parallels_tools_mode" which
@@ -21,31 +21,13 @@ type ToolsConfig struct {
 	ParallelsToolsMode      string `mapstructure:"parallels_tools_mode"`
 }
 
-func (c *ToolsConfig) Prepare(t *packer.ConfigTemplate) []error {
+func (c *ToolsConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.ParallelsToolsMode == "" {
 		c.ParallelsToolsMode = ParallelsToolsModeUpload
 	}
 
 	if c.ParallelsToolsGuestPath == "" {
 		c.ParallelsToolsGuestPath = "prl-tools-{{.Flavor}}.iso"
-	}
-
-	templates := map[string]*string{
-		"parallels_tools_flavor": &c.ParallelsToolsFlavor,
-		"parallels_tools_mode":   &c.ParallelsToolsMode,
-	}
-
-	var err error
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	if _, err := template.New("path").Parse(c.ParallelsToolsGuestPath); err != nil {
-		errs = append(errs, fmt.Errorf("parallels_tools_guest_path invalid: %s", err))
 	}
 
 	validMode := false
@@ -62,6 +44,7 @@ func (c *ToolsConfig) Prepare(t *packer.ConfigTemplate) []error {
 		}
 	}
 
+	var errs []error
 	if !validMode {
 		errs = append(errs,
 			fmt.Errorf("parallels_tools_mode is invalid. Must be one of: %v",

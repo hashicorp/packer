@@ -18,7 +18,7 @@ type stepCreateVM struct {
 
 func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	name := config.VMName
