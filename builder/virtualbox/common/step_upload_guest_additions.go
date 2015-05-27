@@ -2,10 +2,12 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type guestAdditionsPathTemplate struct {
@@ -16,7 +18,7 @@ type guestAdditionsPathTemplate struct {
 type StepUploadGuestAdditions struct {
 	GuestAdditionsMode string
 	GuestAdditionsPath string
-	Tpl                *packer.ConfigTemplate
+	Ctx                interpolate.Context
 }
 
 func (s *StepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
@@ -45,11 +47,11 @@ func (s *StepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionHalt
 	}
 
-	tplData := &guestAdditionsPathTemplate{
+	s.Ctx.Data = &guestAdditionsPathTemplate{
 		Version: version,
 	}
 
-	s.GuestAdditionsPath, err = s.Tpl.Process(s.GuestAdditionsPath, tplData)
+	s.GuestAdditionsPath, err = interpolate.Render(s.GuestAdditionsPath, &s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions path: %s", err)
 		state.Put("error", err)

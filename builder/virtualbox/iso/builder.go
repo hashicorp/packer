@@ -11,17 +11,19 @@ import (
 	"github.com/mitchellh/multistep"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderId = "mitchellh.virtualbox"
 
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
-type config struct {
+type Config struct {
 	common.PackerConfig             `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.ExportOpts           `mapstructure:",squash"`
@@ -50,34 +52,39 @@ type config struct {
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"boot_command",
+				"guest_additions_path",
+				"guest_additions_url",
+				"vboxmanage",
+				"vboxmanage_post",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
 
 	// Accumulate any errors and warnings
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ExportOpts.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(b.config.tpl)...)
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportOpts.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(
-		errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(b.config.tpl)...)
+		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(&b.config.ctx)...)
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
@@ -106,56 +113,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", b.config.PackerBuildName)
-	}
-
-	// Errors
-	templates := map[string]*string{
-		"guest_additions_mode":   &b.config.GuestAdditionsMode,
-		"guest_additions_sha256": &b.config.GuestAdditionsSHA256,
-		"guest_os_type":          &b.config.GuestOSType,
-		"hard_drive_interface":   &b.config.HardDriveInterface,
-		"iso_checksum":           &b.config.ISOChecksum,
-		"iso_checksum_type":      &b.config.ISOChecksumType,
-		"iso_interface":          &b.config.ISOInterface,
-		"iso_url":                &b.config.RawSingleISOUrl,
-		"vm_name":                &b.config.VMName,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	for i, url := range b.config.ISOUrls {
-		var err error
-		b.config.ISOUrls[i], err = b.config.tpl.Process(url, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing iso_urls[%d]: %s", i, err))
-		}
-	}
-
-	validates := map[string]*string{
-		"guest_additions_path": &b.config.GuestAdditionsPath,
-		"guest_additions_url":  &b.config.GuestAdditionsURL,
-	}
-
-	for n, ptr := range validates {
-		if err := b.config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
-		}
-	}
-
-	for i, command := range b.config.BootCommand {
-		if err := b.config.tpl.Validate(command); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
-		}
 	}
 
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
@@ -265,7 +222,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			GuestAdditionsMode:   b.config.GuestAdditionsMode,
 			GuestAdditionsURL:    b.config.GuestAdditionsURL,
 			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
-			Tpl:                  b.config.tpl,
+			Ctx:                  b.config.ctx,
 		},
 		&common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
@@ -301,7 +258,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
-			Tpl:      b.config.tpl,
+			Ctx:      b.config.ctx,
 		},
 		&vboxcommon.StepRun{
 			BootWait: b.config.BootWait,
@@ -310,7 +267,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepTypeBootCommand{
 			BootCommand: b.config.BootCommand,
 			VMName:      b.config.VMName,
-			Tpl:         b.config.tpl,
+			Ctx:         b.config.ctx,
 		},
 		&common.StepConnectSSH{
 			SSHAddress:     vboxcommon.SSHAddress,
@@ -323,7 +280,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepUploadGuestAdditions{
 			GuestAdditionsMode: b.config.GuestAdditionsMode,
 			GuestAdditionsPath: b.config.GuestAdditionsPath,
-			Tpl:                b.config.tpl,
+			Ctx:                b.config.ctx,
 		},
 		new(common.StepProvision),
 		&vboxcommon.StepShutdown{
@@ -333,7 +290,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(vboxcommon.StepRemoveDevices),
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
-			Tpl:      b.config.tpl,
+			Ctx:      b.config.ctx,
 		},
 		&vboxcommon.StepExport{
 			Format:     b.config.Format,
