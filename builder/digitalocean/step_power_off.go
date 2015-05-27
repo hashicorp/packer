@@ -12,7 +12,7 @@ type stepPowerOff struct{}
 
 func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(DigitalOceanClient)
-	c := state.Get("config").(config)
+	c := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(uint)
 

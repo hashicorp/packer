@@ -73,7 +73,7 @@ func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(DigitalOceanClient)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(config)
+	c := state.Get("config").(Config)
 
 	ui.Say("Deleting temporary ssh key...")
 	err := client.DestroyKey(s.keyId)
