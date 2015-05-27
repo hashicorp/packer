@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type RunConfig struct {
@@ -19,7 +19,7 @@ type RunConfig struct {
 	BootWait time.Duration ``
 }
 
-func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
+func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"
 	}
@@ -32,20 +32,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		c.HTTPPortMax = 9000
 	}
 
-	templates := map[string]*string{
-		"boot_wait":      &c.RawBootWait,
-		"http_directory": &c.HTTPDir,
-	}
-
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
+	var errs []error
 	var err error
 	c.BootWait, err = time.ParseDuration(c.RawBootWait)
 	if err != nil {

@@ -3,14 +3,16 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var additionsVersionMap = map[string]string{
@@ -31,7 +33,7 @@ type StepDownloadGuestAdditions struct {
 	GuestAdditionsMode   string
 	GuestAdditionsURL    string
 	GuestAdditionsSHA256 string
-	Tpl                  *packer.ConfigTemplate
+	Ctx                  interpolate.Context
 }
 
 func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
@@ -67,11 +69,11 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	// Use the provided source (URL or file path) or generate it
 	url := s.GuestAdditionsURL
 	if url != "" {
-		tplData := &guestAdditionsUrlTemplate{
+		s.Ctx.Data = &guestAdditionsUrlTemplate{
 			Version: version,
 		}
 
-		url, err = s.Tpl.Process(url, tplData)
+		url, err = interpolate.Render(url, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing guest additions url: %s", err)
 			state.Put("error", err)
