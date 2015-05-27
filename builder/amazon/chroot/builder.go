@@ -6,7 +6,6 @@ package chroot
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"runtime"
 
@@ -14,7 +13,9 @@ import (
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // The unique ID for this builder
@@ -34,7 +35,7 @@ type Config struct {
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 
-	tpl *packer.ConfigTemplate
+	ctx *interpolate.Context
 }
 
 type wrappedCommandTemplate struct {
@@ -47,17 +48,20 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	b.config.ctx = &interpolate.Context{Funcs: awscommon.TemplateFuncs}
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"command_wrapper",
+				"mount_path",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
-	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	// Defaults
 	if b.config.ChrootMounts == nil {
@@ -91,53 +95,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.ctx)...)
 
-	for i, mounts := range b.config.ChrootMounts {
+	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("Each chroot_mounts entry should be three elements."))
 			break
 		}
-
-		for j, entry := range mounts {
-			b.config.ChrootMounts[i][j], err = b.config.tpl.Process(entry, nil)
-			if err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Error processing chroot_mounts[%d][%d]: %s",
-						i, j, err))
-			}
-		}
-	}
-
-	for i, file := range b.config.CopyFiles {
-		var err error
-		b.config.CopyFiles[i], err = b.config.tpl.Process(file, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing copy_files[%d]: %s",
-					i, err))
-		}
 	}
 
 	if b.config.SourceAmi == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("source_ami is required."))
-	}
-
-	templates := map[string]*string{
-		"device_path": &b.config.DevicePath,
-		"source_ami":  &b.config.SourceAmi,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -166,10 +137,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ec2conn := ec2.New(auth, region)
 
 	wrappedCommand := func(command string) (string, error) {
-		return b.config.tpl.Process(
-			b.config.CommandWrapper, &wrappedCommandTemplate{
-				Command: command,
-			})
+		ctx := *b.config.ctx
+		ctx.Data = &wrappedCommandTemplate{Command: command}
+		return interpolate.Render(b.config.CommandWrapper, &ctx)
 	}
 
 	// Setup the state bag and initial state for the steps

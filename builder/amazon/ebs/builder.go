@@ -28,7 +28,6 @@ type Config struct {
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	tpl *packer.ConfigTemplate
 	ctx *interpolate.Context
 }
 

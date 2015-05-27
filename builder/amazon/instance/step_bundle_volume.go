@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type bundleCmdData struct {
@@ -32,7 +33,7 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Bundle the volume
 	var err error
-	config.BundleVolCommand, err = config.tpl.Process(config.BundleVolCommand, bundleCmdData{
+	config.ctx.Data = bundleCmdData{
 		AccountId:    config.AccountId,
 		Architecture: instance.Architecture,
 		CertPath:     x509RemoteCertPath,
@@ -40,7 +41,8 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 		KeyPath:      x509RemoteKeyPath,
 		Prefix:       config.BundlePrefix,
 		PrivatePath:  config.X509UploadPath,
-	})
+	}
+	config.BundleVolCommand, err = interpolate.Render(config.BundleVolCommand, config.ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle volume command: %s", err)
 		state.Put("error", err)
