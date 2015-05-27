@@ -7,7 +7,9 @@ import (
 
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // Config is the configuration structure for the GCE builder. It stores
@@ -40,24 +42,22 @@ type Config struct {
 	privateKeyBytes []byte
 	sshTimeout      time.Duration
 	stateTimeout    time.Duration
-	tpl             *packer.ConfigTemplate
+	ctx             *interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
-	md, err := common.DecodeConfig(c, raws...)
+	err := config.Decode(&c, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_command",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	c.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, nil, err
-	}
-	c.tpl.UserVars = c.PackerUserVars
-
-	// Prepare the errors
-	errs := common.CheckUnusedConfig(md)
 
 	// Set defaults.
 	if c.Network == "" {
@@ -104,33 +104,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.SSHPort = 22
 	}
 
-	// Process Templates
-	templates := map[string]*string{
-		"account_file": &c.AccountFile,
-
-		"disk_name":               &c.DiskName,
-		"image_name":              &c.ImageName,
-		"image_description":       &c.ImageDescription,
-		"instance_name":           &c.InstanceName,
-		"machine_type":            &c.MachineType,
-		"network":                 &c.Network,
-		"project_id":              &c.ProjectId,
-		"source_image":            &c.SourceImage,
-		"source_image_project_id": &c.SourceImageProjectId,
-		"ssh_username":            &c.SSHUsername,
-		"ssh_timeout":             &c.RawSSHTimeout,
-		"state_timeout":           &c.RawStateTimeout,
-		"zone":                    &c.Zone,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = c.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
+	var errs *packer.MultiError
 
 	// Process required parameters.
 	if c.ProjectId == "" {
