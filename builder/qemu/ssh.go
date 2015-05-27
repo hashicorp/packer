@@ -15,7 +15,7 @@ func sshAddress(state multistep.StateBag) (string, error) {
 }
 
 func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 
 	auth := []gossh.AuthMethod{
 		gossh.Password(config.SSHPassword),

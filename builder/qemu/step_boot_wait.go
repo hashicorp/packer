@@ -11,7 +11,7 @@ import (
 type stepBootWait struct{}
 
 func (s *stepBootWait) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	if int64(config.bootWait) > 0 {
