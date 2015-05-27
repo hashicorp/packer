@@ -11,8 +11,11 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var builtins = map[string]string{
@@ -35,7 +38,7 @@ type Config struct {
 	Override            map[string]interface{}
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type PostProcessor struct {
@@ -73,10 +76,12 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	outputPath, err := config.tpl.Process(config.OutputPath, &outputPathTemplate{
-		ArtifactId: artifact.Id(),
-		BuildName:  config.PackerBuildName,
-		Provider:   name,
+	outputPath, err := interpolate.Render(config.OutputPath, &interpolate.Context{
+		Data: &outputPathTemplate{
+			ArtifactId: artifact.Id(),
+			BuildName:  config.PackerBuildName,
+			Provider:   name,
+		},
 	})
 	if err != nil {
 		return nil, false, err
@@ -162,21 +167,24 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	return p.PostProcessProvider(name, provider, ui, artifact)
 }
 
-func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) error {
-	md, err := common.DecodeConfig(config, raws...)
+func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
+	var md mapstructure.Metadata
+	err := config.Decode(c, &config.DecodeOpts{
+		Metadata:    &md,
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"output",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	config.tpl.UserVars = config.PackerUserVars
 
 	// Defaults
-	if config.OutputPath == "" {
-		config.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
+	if c.OutputPath == "" {
+		c.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
 	}
 
 	found := false
@@ -188,39 +196,15 @@ func (p *PostProcessor) configureSingle(config *Config, raws ...interface{}) err
 	}
 
 	if !found {
-		config.CompressionLevel = flate.DefaultCompression
+		c.CompressionLevel = flate.DefaultCompression
 	}
 
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	templates := map[string]*string{
-		"vagrantfile_template": &config.VagrantfileTemplate,
-	}
-
-	for key, ptr := range templates {
-		*ptr, err = config.tpl.Process(*ptr, nil)
+	var errs *packer.MultiError
+	if c.VagrantfileTemplate != "" {
+		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Error processing %s: %s", key, err))
-		}
-	}
-
-	validates := map[string]*string{
-		"output":               &config.OutputPath,
-		"vagrantfile_template": &config.VagrantfileTemplate,
-	}
-
-	if config.VagrantfileTemplate != "" {
-		_, err := os.Stat(config.VagrantfileTemplate)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("vagrantfile_template '%s' does not exist", config.VagrantfileTemplate))
-		}
-	}
-
-	for n, ptr := range validates {
-		if err := config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+				"vagrantfile_template '%s' does not exist", c.VagrantfileTemplate))
 		}
 	}
 
