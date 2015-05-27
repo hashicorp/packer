@@ -13,6 +13,9 @@ import (
 
 // DecodeOpts are the options for decoding configuration.
 type DecodeOpts struct {
+	// Metadata, if non-nil, will be set to the metadata post-decode
+	Metadata *mapstructure.Metadata
+
 	// Interpolate, if true, will automatically interpolate the
 	// configuration with the given InterpolateContext. User variables
 	// will be automatically detected and added in-place to the given
@@ -72,6 +75,11 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		if err := decoder.Decode(raw); err != nil {
 			return err
 		}
+	}
+
+	// Set the metadata if it is set
+	if config.Metadata != nil {
+		*config.Metadata = md
 	}
 
 	// If we have unused keys, it is an error
