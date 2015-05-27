@@ -70,14 +70,6 @@ func TestToolsConfigPrepare_ParallelsToolsGuestPath(t *testing.T) {
 		t.Fatal("should not be empty")
 	}
 
-	// Test with a bad value
-	c = testToolsConfig()
-	c.ParallelsToolsGuestPath = "{{{nope}"
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatal("should have error")
-	}
-
 	// Test with a good one
 	c = testToolsConfig()
 	c.ParallelsToolsGuestPath = "foo"
