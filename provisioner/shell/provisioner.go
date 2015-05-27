@@ -6,19 +6,22 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const DefaultRemotePath = "/tmp/script.sh"
 
-type config struct {
+type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// If true, the script contains binary and line endings will not be
@@ -57,11 +60,11 @@ type config struct {
 	RawStartRetryTimeout string `mapstructure:"start_retry_timeout"`
 
 	startRetryTimeout time.Duration
-	tpl               *packer.ConfigTemplate
+	ctx               interpolate.Context
 }
 
 type Provisioner struct {
-	config config
+	config Config
 }
 
 type ExecuteCommandTemplate struct {
@@ -70,19 +73,17 @@ type ExecuteCommandTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"execute_command",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
@@ -112,6 +113,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Vars = make([]string, 0)
 	}
 
+	var errs *packer.MultiError
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Only one of script or scripts can be specified."))
@@ -119,39 +121,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Script != "" {
 		p.config.Scripts = []string{p.config.Script}
-	}
-
-	templates := map[string]*string{
-		"inline_shebang":      &p.config.InlineShebang,
-		"script":              &p.config.Script,
-		"start_retry_timeout": &p.config.RawStartRetryTimeout,
-		"remote_path":         &p.config.RemotePath,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	sliceTemplates := map[string][]string{
-		"inline":           p.config.Inline,
-		"scripts":          p.config.Scripts,
-		"environment_vars": p.config.Vars,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = p.config.tpl.Process(elem, nil)
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
 	}
 
 	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
@@ -248,10 +217,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		flattendVars := strings.Join(envVars, " ")
 
 		// Compile the command
-		command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
+		p.config.ctx.Data = &ExecuteCommandTemplate{
 			Vars: flattendVars,
 			Path: p.config.RemotePath,
-		})
+		}
+		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error processing command: %s", err)
 		}
