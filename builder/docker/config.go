@@ -26,7 +26,7 @@ type Config struct {
 	LoginPassword string `mapstructure:"login_password"`
 	LoginServer   string `mapstructure:"login_server"`
 
-	ctx *interpolate.Context
+	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
