@@ -2,8 +2,12 @@ package docker
 
 import (
 	"fmt"
+
+	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type Config struct {
@@ -22,22 +26,25 @@ type Config struct {
 	LoginPassword string `mapstructure:"login_password"`
 	LoginServer   string `mapstructure:"login_server"`
 
-	tpl *packer.ConfigTemplate
+	ctx *interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
-	md, err := common.DecodeConfig(c, raws...)
+
+	var md mapstructure.Metadata
+	err := config.Decode(&c, &config.DecodeOpts{
+		Metadata:    &md,
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_command",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	c.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	c.tpl.UserVars = c.PackerUserVars
 
 	// Defaults
 	if len(c.RunCommand) == 0 {
@@ -61,37 +68,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Pull = true
 	}
 
-	errs := common.CheckUnusedConfig(md)
-
-	templates := map[string]*string{
-		"export_path":    &c.ExportPath,
-		"image":          &c.Image,
-		"login_email":    &c.LoginEmail,
-		"login_username": &c.LoginUsername,
-		"login_password": &c.LoginPassword,
-		"login_server":   &c.LoginServer,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = c.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	for k, v := range c.Volumes {
-		var err error
-		v, err = c.tpl.Process(v, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing volumes[%s]: %s", k, err))
-		}
-
-		c.Volumes[k] = v
-	}
-
+	var errs *packer.MultiError
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("image must be specified"))

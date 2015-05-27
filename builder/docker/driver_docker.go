@@ -11,11 +11,12 @@ import (
 	"sync"
 
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type DockerDriver struct {
 	Ui  packer.Ui
-	Tpl *packer.ConfigTemplate
+	Ctx *interpolate.Context
 
 	l sync.Mutex
 }
@@ -185,6 +186,8 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
 	tplData.Image = config.Image
+	ctx := *d.Ctx
+	ctx.Data = &tplData
 
 	// Args that we're going to pass to Docker
 	args := []string{"run"}
@@ -192,7 +195,7 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
 	}
 	for _, v := range config.RunCommand {
-		v, err := d.Tpl.Process(v, &tplData)
+		v, err := interpolate.Render(v, &ctx)
 		if err != nil {
 			return "", err
 		}
