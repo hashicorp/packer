@@ -7,7 +7,9 @@ import (
 
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.
@@ -34,21 +36,26 @@ type Config struct {
 	ImportOpts           string   `mapstructure:"import_opts"`
 	ImportFlags          []string `mapstructure:"import_flags"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
-	md, err := common.DecodeConfig(c, raws...)
+	var c Config
+	err := config.Decode(&c, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"boot_command",
+				"guest_additions_path",
+				"guest_additions_url",
+				"vboxmanage",
+				"vboxmanage_post",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	c.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, nil, err
-	}
-	c.tpl.UserVars = c.PackerUserVars
 
 	// Defaults
 	if c.GuestAdditionsMode == "" {
@@ -63,49 +70,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	// Prepare the errors
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.ExportOpts.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(c.tpl, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(c.tpl)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.tpl)...)
-
-	templates := map[string]*string{
-		"guest_additions_mode":   &c.GuestAdditionsMode,
-		"guest_additions_sha256": &c.GuestAdditionsSHA256,
-		"source_path":            &c.SourcePath,
-		"vm_name":                &c.VMName,
-		"import_opts":            &c.ImportOpts,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = c.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	sliceTemplates := map[string][]string{
-		"import_flags": c.ImportFlags,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = c.tpl.Process(elem, nil)
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
-	}
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.ExportOpts.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
@@ -113,25 +88,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if _, err := os.Stat(c.SourcePath); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("source_path is invalid: %s", err))
-		}
-	}
-
-	for i, command := range c.BootCommand {
-		if err := c.tpl.Validate(command); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Error processing boot_command[%d]: %s", i, err))
-		}
-	}
-
-	validates := map[string]*string{
-		"guest_additions_path": &c.GuestAdditionsPath,
-		"guest_additions_url":  &c.GuestAdditionsURL,
-	}
-
-	for n, ptr := range validates {
-		if err := c.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
 		}
 	}
 
@@ -176,5 +132,5 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.ImportFlags = append(c.ImportFlags, "--options", c.ImportOpts)
 	}
 
-	return c, warnings, nil
+	return &c, warnings, nil
 }
