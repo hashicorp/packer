@@ -3,12 +3,15 @@ package vsphere
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"net/url"
 	"os/exec"
 	"strings"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var builtins = map[string]string{
@@ -31,7 +34,7 @@ type Config struct {
 	VMName       string `mapstructure:"vm_name"`
 	VMNetwork    string `mapstructure:"vm_network"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type PostProcessor struct {
@@ -39,16 +42,15 @@ type PostProcessor struct {
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	_, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
 
 	// Defaults
 	if p.config.DiskMode == "" {
@@ -78,20 +80,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
-		}
-	}
-
-	// Then define the ones that are optional
-	templates["datastore"] = &p.config.Datastore
-	templates["vm_network"] = &p.config.VMNetwork
-	templates["vm_folder"] = &p.config.VMFolder
-
-	// Template process
-	for key, ptr := range templates {
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", key, err))
 		}
 	}
 
