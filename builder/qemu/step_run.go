@@ -8,6 +8,7 @@ import (
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // stepRun runs the virtual machine
@@ -56,7 +57,7 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 }
 
 func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	vncPort := state.Get("vnc_port").(uint)
 	sshHostPort := state.Get("sshHostPort").(uint)
@@ -109,14 +110,15 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
 		httpPort := state.Get("http_port").(uint)
-		tplData := qemuArgsTemplateData{
+		ctx := config.ctx
+		ctx.Data = qemuArgsTemplateData{
 			"10.0.2.2",
 			httpPort,
 			config.HTTPDir,
 			config.OutputDir,
 			config.VMName,
 		}
-		newQemuArgs, err := processArgs(config.QemuArgs, config.tpl, &tplData)
+		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +162,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	return outArgs, nil
 }
 
-func processArgs(args [][]string, tpl *packer.ConfigTemplate, tplData *qemuArgsTemplateData) ([][]string, error) {
+func processArgs(args [][]string, ctx *interpolate.Context) ([][]string, error) {
 	var err error
 
 	if args == nil {
@@ -172,7 +174,7 @@ func processArgs(args [][]string, tpl *packer.ConfigTemplate, tplData *qemuArgsT
 		parms := make([]string, len(rowArgs))
 		newArgs[argsIdx] = parms
 		for i, parm := range rowArgs {
-			parms[i], err = tpl.Process(parm, &tplData)
+			parms[i], err = interpolate.Render(parm, ctx)
 			if err != nil {
 				return nil, err
 			}
