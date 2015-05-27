@@ -2,13 +2,15 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
@@ -32,7 +34,7 @@ type bootCommandTemplateData struct {
 type StepTypeBootCommand struct {
 	BootCommand []string
 	VMName      string
-	Tpl         *packer.ConfigTemplate
+	Ctx         interpolate.Context
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
@@ -41,7 +43,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	tplData := &bootCommandTemplateData{
+	s.Ctx.Data = &bootCommandTemplateData{
 		"10.0.2.2",
 		httpPort,
 		s.VMName,
@@ -49,7 +51,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Say("Typing the boot command...")
 	for _, command := range s.BootCommand {
-		command, err := s.Tpl.Process(command, tplData)
+		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)
