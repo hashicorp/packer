@@ -3,8 +3,9 @@ package openstack
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"time"
+
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // RunConfig contains configuration for running an instance from a source
@@ -28,15 +29,7 @@ type RunConfig struct {
 	sshTimeout time.Duration
 }
 
-func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
+func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Defaults
 	if c.SSHUsername == "" {
 		c.SSHUsername = "root"
@@ -67,25 +60,6 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 
 	if c.SSHUsername == "" {
 		errs = append(errs, errors.New("An ssh_username must be specified"))
-	}
-
-	templates := map[string]*string{
-		"flavor":             &c.Flavor,
-		"ssh_timeout":        &c.RawSSHTimeout,
-		"ssh_username":       &c.SSHUsername,
-		"ssh_interface":      &c.SSHInterface,
-		"source_image":       &c.SourceImage,
-		"openstack_provider": &c.OpenstackProvider,
-		"floating_ip_pool":   &c.FloatingIpPool,
-		"floating_ip":        &c.FloatingIp,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
 	}
 
 	c.sshTimeout, err = time.ParseDuration(c.RawSSHTimeout)
