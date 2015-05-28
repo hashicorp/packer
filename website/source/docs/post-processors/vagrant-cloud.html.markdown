@@ -78,31 +78,34 @@ the box will not be uploaded to the Vagrant Cloud.
 ## Use with Vagrant Post-Processor
 
 You'll need to use the Vagrant post-processor before using this post-processor.
-An example configuration is below. Note the use of the array specifying
-the execution order.
+An example configuration is below. Note the use of a doubly-nested array, which
+ensures that the Vagrant Cloud post-processor is run after the Vagrant
+post-processor.
 
 ```javascript
 {
-    "variables": {
-        "version": "",
-        "cloud_token": ""
-    },
-    "builders": [{
+  "variables": {
+    "version": "",
+    "cloud_token": ""
+  },
+  "builders": [{
       // ...
-    }],
-    "post-processors": [
-      [{
-          "type": "vagrant",
-          "include": ["image.iso"],
-          "vagrantfile_template": "vagrantfile.tpl",
-          "output": "proxycore_{{.Provider}}.box"
+  }],
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "include": ["image.iso"],
+        "vagrantfile_template": "vagrantfile.tpl",
+        "output": "proxycore_{{.Provider}}.box"
       },
       {
-          "type": "vagrant-cloud",
-          "box_tag": "hashicorp/precise64",
-          "access_token": "{{user `cloud_token`}}",
-          "version": "{{user `version`}}"
-      }]
+        "type": "vagrant-cloud",
+        "box_tag": "hashicorp/precise64",
+        "access_token": "{{user `cloud_token`}}",
+        "version": "{{user `version`}}"
+      }
     ]
+  ]
 }
 ```
