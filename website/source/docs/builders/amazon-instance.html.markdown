@@ -270,7 +270,7 @@ is responsible for executing `ec2-bundle-vol` in order to store and image
 of the root filesystem to use to create the AMI.
 
 ```text
-sudo -n ec2-bundle-vol \
+sudo -i -n ec2-bundle-vol \
 	-k {{.KeyPath}}  \
 	-u {{.AccountId}} \
 	-c {{.CertPath}} \
@@ -297,7 +297,7 @@ across multiple lines for convenience of reading. The bundle upload command
 is responsible for taking the bundled volume and uploading it to S3.
 
 ```text
-sudo -n ec2-upload-bundle \
+sudo -i -n ec2-upload-bundle \
 	-b {{.BucketName}} \
 	-m {{.ManifestPath}} \
 	-a {{.AccessKey}} \

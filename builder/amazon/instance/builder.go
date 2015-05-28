@@ -73,7 +73,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.BundleUploadCommand == "" {
-		b.config.BundleUploadCommand = "sudo -n ec2-upload-bundle " +
+		b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
 			"-b {{.BucketName}} " +
 			"-m {{.ManifestPath}} " +
 			"-a {{.AccessKey}} " +
@@ -85,7 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.BundleVolCommand == "" {
-		b.config.BundleVolCommand = "sudo -n ec2-bundle-vol " +
+		b.config.BundleVolCommand = "sudo -i -n ec2-bundle-vol " +
 			"-k {{.KeyPath}} " +
 			"-u {{.AccountId}} " +
 			"-c {{.CertPath}} " +
