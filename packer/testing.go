@@ -3,7 +3,6 @@ package packer
 import (
 	"bytes"
 	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -20,9 +19,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 	}
 
 	return &CoreConfig{
-		Cache:      &FileCache{CacheDir: os.TempDir()},
 		Components: components,
-		Ui:         TestUi(t),
 	}
 }
 

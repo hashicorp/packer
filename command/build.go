@@ -149,7 +149,7 @@ func (c BuildCommand) Run(args []string) int {
 			name := b.Name()
 			log.Printf("Starting build run: %s", name)
 			ui := buildUis[name]
-			runArtifacts, err := b.Run(ui, c.CoreConfig.Cache)
+			runArtifacts, err := b.Run(ui, c.Cache)
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
