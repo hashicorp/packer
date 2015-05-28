@@ -18,7 +18,7 @@ type Template struct {
 	Builders       map[string]*Builder
 	Provisioners   []*Provisioner
 	PostProcessors [][]*PostProcessor
-	Push           *Push
+	Push           Push
 
 	// RawContents is just the raw data for this template
 	RawContents []byte

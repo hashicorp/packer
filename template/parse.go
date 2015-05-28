@@ -187,7 +187,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 				"push: %s", err))
 		}
 
-		result.Push = &p
+		result.Push = p
 	}
 
 	// If we have errors, return those with a nil result
