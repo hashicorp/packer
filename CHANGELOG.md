@@ -4,10 +4,11 @@ FEATURES:
 
 IMPROVEMENTS:
 
-  * builder/openstack: Add rackconnect_wait for Rackspace customers to wait for
-    RackConnect data to appear
-  * buidler/openstakc: Add ssh_interface option for rackconnect for users that
-    have prohibitive firewalls
+  * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
+      RackConnect data to appear
+  * buidler/openstakc: Add `ssh_interface` option for rackconnect for users that
+      have prohibitive firewalls
+  * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
 
 BUG FIXES:
 
