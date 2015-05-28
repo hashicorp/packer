@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/aws/awserr"
 	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 )
@@ -42,7 +42,7 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 			ImageIDs: []*string{&imageId},
 		})
 		if err != nil {
-			if ec2err, ok := err.(*aws.APIError); ok && ec2err.Code == "InvalidAMIID.NotFound" {
+			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidAMIID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
 			} else if isTransientNetworkError(err) {
@@ -73,7 +73,7 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
 			InstanceIDs: []*string{i.InstanceID},
 		})
 		if err != nil {
-			if ec2err, ok := err.(*aws.APIError); ok && ec2err.Code == "InvalidInstanceID.NotFound" {
+			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidInstanceID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
 			} else if isTransientNetworkError(err) {
@@ -105,7 +105,7 @@ func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefre
 		})
 
 		if err != nil {
-			if ec2err, ok := err.(*aws.APIError); ok && ec2err.Code == "InvalidSpotInstanceRequestID.NotFound" {
+			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidSpotInstanceRequestID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
 			} else if isTransientNetworkError(err) {
