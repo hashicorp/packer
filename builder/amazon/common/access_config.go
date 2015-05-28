@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/aws/credentials"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -22,16 +23,16 @@ type AccessConfig struct {
 // Config returns a valid aws.Config object for access to AWS services, or
 // an error if the authentication and region couldn't be resolved
 func (c *AccessConfig) Config() (*aws.Config, error) {
-	credsProvider := aws.DetectCreds(c.AccessKey, c.SecretKey, c.Token)
-
-	creds, err := credsProvider.Credentials()
-	if err != nil {
-		return nil, err
-	}
-
-	c.AccessKey = creds.AccessKeyID
-	c.SecretKey = creds.SecretAccessKey
-	c.Token = creds.SessionToken
+	creds := credentials.NewChainCredentials([]credentials.Provider{
+		&credentials.StaticProvider{Value: credentials.Value{
+			AccessKeyID:     c.AccessKey,
+			SecretAccessKey: c.SecretKey,
+			SessionToken:    c.Token,
+		}},
+		&credentials.EnvProvider{},
+		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
+		&credentials.EC2RoleProvider{},
+	})
 
 	region, err := c.Region()
 	if err != nil {
@@ -40,7 +41,8 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 
 	return &aws.Config{
 		Region:      region,
-		Credentials: credsProvider,
+		Credentials: creds,
+		MaxRetries:  11,
 	}, nil
 }
 
