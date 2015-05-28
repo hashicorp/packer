@@ -66,12 +66,17 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		builds[v] = b
 	}
 
-	return &Core{
+	result := &Core{
 		components: c.Components,
 		template:   c.Template,
 		variables:  c.Variables,
 		builds:     builds,
-	}, nil
+	}
+	if err := result.init(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // BuildNames returns the builds that are available in this configured core.
@@ -227,4 +232,36 @@ func (c *Core) Validate() error {
 	// TODO: ^^ post-processor
 
 	return err
+}
+
+func (c *Core) init() error {
+	if c.variables == nil {
+		c.variables = make(map[string]string)
+	}
+
+	// Go through the variables and interpolate the environment variables
+	ctx := &interpolate.Context{EnableEnv: true}
+	for k, v := range c.template.Variables {
+		// Ignore variables that are required
+		if v.Required {
+			continue
+		}
+
+		// Ignore variables that have a value
+		if _, ok := c.variables[k]; ok {
+			continue
+		}
+
+		// Interpolate the default
+		def, err := interpolate.Render(v.Default, ctx)
+		if err != nil {
+			return fmt.Errorf(
+				"error interpolating default value for '%s': %s",
+				k, err)
+		}
+
+		c.variables[k] = def
+	}
+
+	return nil
 }
