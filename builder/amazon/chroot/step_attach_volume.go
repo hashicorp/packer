@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
@@ -34,7 +34,11 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 	attachVolume := strings.Replace(device, "/xvd", "/sd", 1)
 
 	ui.Say(fmt.Sprintf("Attaching the root volume to %s", attachVolume))
-	_, err := ec2conn.AttachVolume(volumeId, instance.InstanceId, attachVolume)
+	_, err := ec2conn.AttachVolume(&ec2.AttachVolumeInput{
+		InstanceID: instance.InstanceID,
+		VolumeID:   &volumeId,
+		Device:     &attachVolume,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error attaching volume: %s", err)
 		state.Put("error", err)
@@ -54,13 +58,13 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 		Refresh: func() (interface{}, string, error) {
 			attempts := 0
 			for attempts < 30 {
-				resp, err := ec2conn.Volumes([]string{volumeId}, ec2.NewFilter())
+				resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIDs: []*string{&volumeId}})
 				if err != nil {
 					return nil, "", err
 				}
 				if len(resp.Volumes[0].Attachments) > 0 {
 					a := resp.Volumes[0].Attachments[0]
-					return a, a.Status, nil
+					return a, *a.State, nil
 				}
 				// When Attachment on volume is not present sleep for 2s and retry
 				attempts += 1
@@ -103,7 +107,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Detaching EBS volume...")
-	_, err := ec2conn.DetachVolume(s.volumeId)
+	_, err := ec2conn.DetachVolume(&ec2.DetachVolumeInput{VolumeID: &s.volumeId})
 	if err != nil {
 		return fmt.Errorf("Error detaching EBS volume: %s", err)
 	}
@@ -116,14 +120,14 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 		StepState: state,
 		Target:    "detached",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.Volumes([]string{s.volumeId}, ec2.NewFilter())
+			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIDs: []*string{&s.volumeId}})
 			if err != nil {
 				return nil, "", err
 			}
 
 			v := resp.Volumes[0]
 			if len(v.Attachments) > 0 {
-				return v, v.Attachments[0].Status, nil
+				return v, *v.Attachments[0].State, nil
 			} else {
 				return v, "detached", nil
 			}
