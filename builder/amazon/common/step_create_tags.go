@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
+
+	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -21,14 +22,20 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		for region, ami := range amis {
 			ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
 
-			var ec2Tags []ec2.Tag
+			var ec2Tags []*ec2.Tag
 			for key, value := range s.Tags {
 				ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"", key, value))
-				ec2Tags = append(ec2Tags, ec2.Tag{key, value})
+				ec2Tags = append(ec2Tags, &ec2.Tag{Key: &key, Value: &value})
 			}
 
-			regionconn := ec2.New(ec2conn.Auth, aws.Regions[region])
-			_, err := regionconn.CreateTags([]string{ami}, ec2Tags)
+			regionconn := ec2.New(&aws.Config{
+				Credentials: ec2conn.Config.Credentials,
+				Region:      region,
+			})
+			_, err := regionconn.CreateTags(&ec2.CreateTagsInput{
+				Resources: []*string{&ami},
+				Tags:      ec2Tags,
+			})
 			if err != nil {
 				err := fmt.Errorf("Error adding tags to AMI (%s): %s", ami, err)
 				state.Put("error", err)
