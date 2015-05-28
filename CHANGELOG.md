@@ -17,6 +17,7 @@ BUG FIXES:
   * builder/amazon: If no AZ is specified, use AZ chosen automatically by
       AWS for spot instance. [GH-2017]
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
+  * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/docker: Fixed hang on prompt while copying script
   * builder/qemu: Add `disk_discard` option [GH-2120]
