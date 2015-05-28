@@ -1,7 +1,10 @@
 package common
 
 import (
-	"github.com/mitchellh/goamz/ec2"
+	"fmt"
+
+	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -23,21 +26,29 @@ type BlockDevices struct {
 	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
-func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
-	var blockDevices []ec2.BlockDeviceMapping
+func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
+	var blockDevices []*ec2.BlockDeviceMapping
 
 	for _, blockDevice := range b {
-		blockDevices = append(blockDevices, ec2.BlockDeviceMapping{
-			DeviceName:          blockDevice.DeviceName,
-			VirtualName:         blockDevice.VirtualName,
-			SnapshotId:          blockDevice.SnapshotId,
-			VolumeType:          blockDevice.VolumeType,
-			VolumeSize:          blockDevice.VolumeSize,
-			DeleteOnTermination: blockDevice.DeleteOnTermination,
-			IOPS:                blockDevice.IOPS,
-			NoDevice:            blockDevice.NoDevice,
-			Encrypted:           blockDevice.Encrypted,
-		})
+		ebsBlockDevice := &ec2.EBSBlockDevice{
+			SnapshotID:          &blockDevice.SnapshotId,
+			Encrypted:           &blockDevice.Encrypted,
+			IOPS:                &blockDevice.IOPS,
+			VolumeType:          &blockDevice.VolumeType,
+			VolumeSize:          &blockDevice.VolumeSize,
+			DeleteOnTermination: &blockDevice.DeleteOnTermination,
+		}
+		mapping := &ec2.BlockDeviceMapping{
+			EBS:         ebsBlockDevice,
+			DeviceName:  &blockDevice.DeviceName,
+			VirtualName: &blockDevice.VirtualName,
+		}
+
+		if blockDevice.NoDevice {
+			mapping.NoDevice = aws.String("")
+		}
+
+		blockDevices = append(blockDevices, mapping)
 	}
 	return blockDevices
 }
@@ -46,10 +57,10 @@ func (b *BlockDevices) Prepare(ctx *interpolate.Context) []error {
 	return nil
 }
 
-func (b *BlockDevices) BuildAMIDevices() []ec2.BlockDeviceMapping {
+func (b *BlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.AMIMappings)
 }
 
-func (b *BlockDevices) BuildLaunchDevices() []ec2.BlockDeviceMapping {
+func (b *BlockDevices) BuildLaunchDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.LaunchMappings)
 }

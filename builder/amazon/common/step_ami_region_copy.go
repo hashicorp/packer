@@ -2,11 +2,14 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
+
+	"sync"
+
+	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"sync"
 )
 
 type StepAMIRegionCopy struct {
@@ -17,7 +20,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
-	ami := amis[ec2conn.Region.Name]
+	ami := amis[ec2conn.Config.Region]
 
 	if len(s.Regions) == 0 {
 		return multistep.ActionContinue
@@ -34,8 +37,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 
 		go func(region string) {
 			defer wg.Done()
-			id, err := amiRegionCopy(state, ec2conn.Auth, ami,
-				aws.Regions[region], ec2conn.Region)
+			id, err := amiRegionCopy(state, ec2conn.Config.Credentials, ami, region, ec2conn.Config.Region)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -67,32 +69,36 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID or error.
-func amiRegionCopy(state multistep.StateBag, auth aws.Auth, imageId string,
-	target aws.Region, source aws.Region) (string, error) {
+func amiRegionCopy(state multistep.StateBag, auth aws.CredentialsProvider, imageId string,
+	target string, source string) (string, error) {
 
 	// Connect to the region where the AMI will be copied to
-	regionconn := ec2.New(auth, target)
-	resp, err := regionconn.CopyImage(&ec2.CopyImage{
-		SourceRegion:  source.Name,
-		SourceImageId: imageId,
+	config := &aws.Config{
+		Credentials: auth,
+		Region:      target,
+	}
+	regionconn := ec2.New(config)
+	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
+		SourceRegion:  &source,
+		SourceImageID: &imageId,
 	})
 
 	if err != nil {
 		return "", fmt.Errorf("Error Copying AMI (%s) to region (%s): %s",
-			imageId, target.Name, err)
+			imageId, target, err)
 	}
 
 	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   AMIStateRefreshFunc(regionconn, resp.ImageId),
+		Refresh:   AMIStateRefreshFunc(regionconn, *resp.ImageID),
 		StepState: state,
 	}
 
 	if _, err := WaitForState(&stateChange); err != nil {
 		return "", fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
-			resp.ImageId, target.Name, err)
+			*resp.ImageID, target, err)
 	}
 
-	return resp.ImageId, nil
+	return *resp.ImageID, nil
 }
