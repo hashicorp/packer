@@ -121,7 +121,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepModifyInstance{},
 		&stepCreateAMI{},
 		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
+			AccessConfig: &b.config.AccessConfig,
+			Regions:      b.config.AMIRegions,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description: b.config.AMIDescription,
