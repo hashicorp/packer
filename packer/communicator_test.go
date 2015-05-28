@@ -33,7 +33,7 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 	rc.Wait()
 
 	expected := strings.TrimSpace(data)
-	if uiOutput.String() != expected+"\n" {
+	if strings.TrimSpace(uiOutput.String()) != expected {
 		t.Fatalf("bad output: '%s'", uiOutput.String())
 	}
 
