@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	configHelper "github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/template"
 )
 
@@ -105,6 +106,38 @@ func TestCoreBuild_basicInterpolated(t *testing.T) {
 
 	if artifact[0].Id() != b.ArtifactId {
 		t.Fatalf("bad: %s", artifact[0].Id())
+	}
+}
+
+func TestCoreBuild_env(t *testing.T) {
+	os.Setenv("PACKER_TEST_ENV", "test")
+	defer os.Setenv("PACKER_TEST_ENV", "")
+
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-env.json"))
+	b := TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Interpolate the config
+	var result map[string]interface{}
+	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result["value"] != "test" {
+		t.Fatalf("bad: %#v", result)
 	}
 }
 
