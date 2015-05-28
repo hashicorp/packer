@@ -35,6 +35,10 @@ func TestColoredUi(t *testing.T) {
 	bufferUi := testUi()
 	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi}
 
+	if !ui.supportsColors() {
+		t.Skip("skipping for ui without color support")
+	}
+
 	ui.Say("foo")
 	result := readWriter(bufferUi)
 	if result != "\033[1;33mfoo\033[0m\n" {
