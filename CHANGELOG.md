@@ -16,6 +16,7 @@ BUG FIXES:
       consistency. [GH-2129]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/docker: Fixed hang on prompt while copying script
+  * builder/qemu: Add `disk_discard` option [GH-2120]
   * builder/virtualbox: Added SCSI support
   * postprocessor/vagrant-cloud: Fixed failing on response
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
