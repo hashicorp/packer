@@ -263,7 +263,7 @@ func TestParse(t *testing.T) {
 		{
 			"parse-push.json",
 			&Template{
-				Push: &Push{
+				Push: Push{
 					Name: "foo",
 				},
 			},
