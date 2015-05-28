@@ -13,9 +13,6 @@ import (
 	"github.com/mitchellh/packer/packer/plugin"
 )
 
-// CoreConfig is the global CoreConfig we use to initialize the CLI.
-var CoreConfig packer.CoreConfig
-
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
