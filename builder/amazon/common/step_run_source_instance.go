@@ -195,13 +195,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		instanceId = spotResp.SpotRequestResults[0].InstanceId
 	}
 
-	var instanceResp, instanceErr = ec2conn.Instances([]string{instanceId}, nil)
+	instanceResp, instanceErr := ec2conn.Instances([]string{instanceId}, nil)
 	for i := 0; i < 10; i++ {
 		if instanceErr == nil {
 			err = instanceErr
 			break
 		}
-		time.Sleep(time.Duration(3))
+
+		time.Sleep(3 * time.Second)
 		instanceResp, err = ec2conn.Instances([]string{instanceId}, nil)
 	}
 
