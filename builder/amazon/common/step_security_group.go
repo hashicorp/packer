@@ -46,6 +46,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	groupResp, err := ec2conn.CreateSecurityGroup(group)
 	if err != nil {
 		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
