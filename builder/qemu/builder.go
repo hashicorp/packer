@@ -66,6 +66,11 @@ var diskCache = map[string]bool{
 	"directsync":   true,
 }
 
+var diskDiscard = map[string]bool{
+	"unmap":  true,
+	"ignore": true,
+}
+
 type Builder struct {
 	config Config
 	runner multistep.Runner
@@ -79,6 +84,7 @@ type Config struct {
 	DiskInterface   string     `mapstructure:"disk_interface"`
 	DiskSize        uint       `mapstructure:"disk_size"`
 	DiskCache       string     `mapstructure:"disk_cache"`
+	DiskDiscard     string     `mapstructure:"disk_discard"`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
@@ -142,6 +148,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskCache == "" {
 		b.config.DiskCache = "writeback"
+	}
+
+	if b.config.DiskDiscard == "" {
+		b.config.DiskDiscard = "ignore"
 	}
 
 	if b.config.Accelerator == "" {
@@ -233,6 +243,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if _, ok := diskCache[b.config.DiskCache]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk cache type"))
+	}
+
+	if _, ok := diskDiscard[b.config.DiskDiscard]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("unrecognized disk cache type"))
 	}
