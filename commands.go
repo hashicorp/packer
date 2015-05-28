@@ -6,62 +6,53 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/packer/command"
-	"github.com/mitchellh/packer/packer"
 )
 
 // Commands is the mapping of all the available Terraform commands.
 var Commands map[string]cli.CommandFactory
 
-// Ui is the cli.Ui used for communicating to the outside world.
-var Ui cli.Ui
+// CommandMeta is the Meta to use for the commands. This must be written
+// before the CLI is started.
+var CommandMeta *command.Meta
 
 const ErrorPrefix = "e:"
 const OutputPrefix = "o:"
 
 func init() {
-	meta := command.Meta{
-		CoreConfig: &CoreConfig,
-		Ui: &packer.BasicUi{
-			Reader:      os.Stdin,
-			Writer:      os.Stdout,
-			ErrorWriter: os.Stdout,
-		},
-	}
-
 	Commands = map[string]cli.CommandFactory{
 		"build": func() (cli.Command, error) {
 			return &command.BuildCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"fix": func() (cli.Command, error) {
 			return &command.FixCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"inspect": func() (cli.Command, error) {
 			return &command.InspectCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"push": func() (cli.Command, error) {
 			return &command.PushCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"validate": func() (cli.Command, error) {
 			return &command.ValidateCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
-				Meta:              meta,
+				Meta:              *CommandMeta,
 				Revision:          GitCommit,
 				Version:           Version,
 				VersionPrerelease: VersionPrerelease,

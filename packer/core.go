@@ -2,7 +2,6 @@ package packer
 
 import (
 	"fmt"
-	"os"
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
@@ -13,9 +12,7 @@ import (
 // Core is the main executor of Packer. If Packer is being used as a
 // library, this is the struct you'll want to instantiate to get anything done.
 type Core struct {
-	cache      Cache
 	components ComponentFinder
-	ui         Ui
 	template   *template.Template
 	variables  map[string]string
 	builds     map[string]*template.Builder
@@ -24,9 +21,7 @@ type Core struct {
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
 // is used to initialize a Core, it shouldn't be re-used or modified again.
 type CoreConfig struct {
-	Cache      Cache
 	Components ComponentFinder
-	Ui         Ui
 	Template   *template.Template
 	Variables  map[string]string
 }
@@ -55,14 +50,6 @@ type ComponentFinder struct {
 
 // NewCore creates a new Core.
 func NewCore(c *CoreConfig) (*Core, error) {
-	if c.Ui == nil {
-		c.Ui = &BasicUi{
-			Reader:      os.Stdin,
-			Writer:      os.Stdout,
-			ErrorWriter: os.Stdout,
-		}
-	}
-
 	// Go through and interpolate all the build names. We shuld be able
 	// to do this at this point with the variables.
 	builds := make(map[string]*template.Builder)
@@ -80,9 +67,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	}
 
 	return &Core{
-		cache:      c.Cache,
 		components: c.Components,
-		ui:         c.Ui,
 		template:   c.Template,
 		variables:  c.Variables,
 		builds:     builds,
