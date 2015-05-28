@@ -115,6 +115,9 @@ each category, the available options are alphabetized and described.
   values include any of "writethrough", "writeback", "none", "unsafe" or
   "directsync".
 
+* `disk_discard` (string) - The discard mode to use for disk. Allowed values
+  include any of "unmap" or "ignore".
+
 * `disk_image` (boolean) - Packer defaults to building from an ISO file,
   this parameter controls whether the ISO URL supplied is actually a bootable
   QEMU image.  When this value is set to true, the machine will clone the
