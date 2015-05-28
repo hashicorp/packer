@@ -8,6 +8,7 @@ import (
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 	"strings"
+	"time"
 )
 
 // StepAttachVolume attaches the previously created volume to an
@@ -50,17 +51,25 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 		StepState: state,
 		Target:    "attached",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.Volumes([]string{volumeId}, ec2.NewFilter())
-			if err != nil {
-				return nil, "", err
+			var attempts = 0
+			for attempts < 30 {
+				resp, err := ec2conn.Volumes([]string{volumeId}, ec2.NewFilter())
+				if err != nil {
+					return nil, "", err
+				}
+				if len(resp.Volumes[0].Attachments) > 0 {
+					a := resp.Volumes[0].Attachments[0]
+					return a, a.Status, nil
+				}
+				// When Attachment on volume is not present sleep for 2s and retry
+				attempts += 1
+				ui.Say(
+					fmt.Sprintf("Warning volume %s show no attachments, Attempt %d/30, Sleeping for 2s and will retry.",
+						volumeId, attempts))
+				time.Sleep(time.Duration(2) * time.Second)
 			}
-
-			if len(resp.Volumes[0].Attachments) == 0 {
-				return nil, "", errors.New("No attachments on volume.")
-			}
-
-			a := resp.Volumes[0].Attachments[0]
-			return a, a.Status, nil
+			// Attachment on volume is not present after all attempts
+			return nil, "", errors.New("No attachments on volume.")
 		},
 	}
 
