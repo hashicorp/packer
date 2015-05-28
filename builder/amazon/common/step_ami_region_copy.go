@@ -5,7 +5,6 @@ import (
 
 	"sync"
 
-	"github.com/awslabs/aws-sdk-go/aws"
 	"github.com/awslabs/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -13,7 +12,8 @@ import (
 )
 
 type StepAMIRegionCopy struct {
-	Regions []string
+	AccessConfig *AccessConfig
+	Regions      []string
 }
 
 func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
@@ -37,7 +37,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 
 		go func(region string) {
 			defer wg.Done()
-			id, err := amiRegionCopy(state, ec2conn.Config.Credentials, ami, region, ec2conn.Config.Region)
+			id, err := amiRegionCopy(state, s.AccessConfig, ami, region, ec2conn.Config.Region)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -69,15 +69,17 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID or error.
-func amiRegionCopy(state multistep.StateBag, auth aws.CredentialsProvider, imageId string,
+func amiRegionCopy(state multistep.StateBag, config *AccessConfig, imageId string,
 	target string, source string) (string, error) {
 
 	// Connect to the region where the AMI will be copied to
-	config := &aws.Config{
-		Credentials: auth,
-		Region:      target,
+	awsConfig, err := config.Config()
+	if err != nil {
+		return "", err
 	}
-	regionconn := ec2.New(config)
+	awsConfig.Region = target
+
+	regionconn := ec2.New(awsConfig)
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
 		SourceRegion:  &source,
 		SourceImageID: &imageId,
