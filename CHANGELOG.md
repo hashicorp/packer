@@ -14,6 +14,7 @@ BUG FIXES:
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
   * builder/amazon: Retry finding created instance for eventual
       consistency. [GH-2129]
+  * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/docker: Fixed hang on prompt while copying script
   * builder/qemu: Add `disk_discard` option [GH-2120]
