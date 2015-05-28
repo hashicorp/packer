@@ -3,12 +3,13 @@ package chroot
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/mitchellh/goamz/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
-	"strings"
-	"time"
 )
 
 // StepAttachVolume attaches the previously created volume to an
@@ -51,7 +52,7 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 		StepState: state,
 		Target:    "attached",
 		Refresh: func() (interface{}, string, error) {
-			var attempts = 0
+			attempts := 0
 			for attempts < 30 {
 				resp, err := ec2conn.Volumes([]string{volumeId}, ec2.NewFilter())
 				if err != nil {
@@ -63,11 +64,12 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 				}
 				// When Attachment on volume is not present sleep for 2s and retry
 				attempts += 1
-				ui.Say(
-					fmt.Sprintf("Warning volume %s show no attachments, Attempt %d/30, Sleeping for 2s and will retry.",
-						volumeId, attempts))
-				time.Sleep(time.Duration(2) * time.Second)
+				ui.Say(fmt.Sprintf(
+					"Volume %s show no attachments. Attempt %d/30. Sleeping for 2s and will retry.",
+					volumeId, attempts))
+				time.Sleep(2 * time.Second)
 			}
+
 			// Attachment on volume is not present after all attempts
 			return nil, "", errors.New("No attachments on volume.")
 		},
