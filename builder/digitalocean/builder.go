@@ -66,7 +66,6 @@ type Config struct {
 	stateTimeout time.Duration
 
 	ctx *interpolate.Context
-	tpl *packer.ConfigTemplate
 }
 
 type Builder struct {
