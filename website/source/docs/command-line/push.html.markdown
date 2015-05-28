@@ -33,6 +33,9 @@ must be completed within the template.
   service such as Atlas. This can also be specified within the push
   configuration in the template.
 
+* `-name` - The name of the build in the service. This typically
+  looks like `hashicorp/precise64`.
+
 ## Examples
 
 Push a Packer template:
