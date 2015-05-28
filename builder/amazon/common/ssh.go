@@ -1,12 +1,13 @@
 package common
 
 import (
-	"golang.org/x/crypto/ssh"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/multistep"
 	"time"
+
+	"github.com/awslabs/aws-sdk-go/service/ec2"
+	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
@@ -16,27 +17,29 @@ func SSHAddress(e *ec2.EC2, port int, private bool) func(multistep.StateBag) (st
 		for j := 0; j < 2; j++ {
 			var host string
 			i := state.Get("instance").(*ec2.Instance)
-			if i.VpcId != "" {
-				if i.PublicIpAddress != "" && !private {
-					host = i.PublicIpAddress
+			if i.VPCID != nil && *i.VPCID != "" {
+				if i.PublicIPAddress != nil && *i.PublicIPAddress != "" && !private {
+					host = *i.PublicIPAddress
 				} else {
-					host = i.PrivateIpAddress
+					host = *i.PrivateIPAddress
 				}
-			} else if i.DNSName != "" {
-				host = i.DNSName
+			} else if i.PublicDNSName != nil && *i.PublicDNSName != "" {
+				host = *i.PublicDNSName
 			}
 
 			if host != "" {
 				return fmt.Sprintf("%s:%d", host, port), nil
 			}
 
-			r, err := e.Instances([]string{i.InstanceId}, ec2.NewFilter())
+			r, err := e.DescribeInstances(&ec2.DescribeInstancesInput{
+				InstanceIDs: []*string{i.InstanceID},
+			})
 			if err != nil {
 				return "", err
 			}
 
 			if len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
-				return "", fmt.Errorf("instance not found: %s", i.InstanceId)
+				return "", fmt.Errorf("instance not found: %s", *i.InstanceID)
 			}
 
 			state.Put("instance", &r.Reservations[0].Instances[0])
