@@ -49,11 +49,6 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 		return nil, fmt.Errorf("Error initializing core: %s", err)
 	}
 
-	// Validate it
-	if err := core.Validate(); err != nil {
-		return nil, err
-	}
-
 	return core, nil
 }
 

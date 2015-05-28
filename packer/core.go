@@ -72,6 +72,9 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		variables:  c.Variables,
 		builds:     builds,
 	}
+	if err := result.validate(); err != nil {
+		return nil, err
+	}
 	if err := result.init(); err != nil {
 		return nil, err
 	}
@@ -205,11 +208,11 @@ func (c *Core) Build(n string) (Build, error) {
 	}, nil
 }
 
-// Validate does a full validation of the template.
+// validate does a full validation of the template.
 //
-// This will automatically call template.Validate() in addition to doing
+// This will automatically call template.validate() in addition to doing
 // richer semantic checks around variables and so on.
-func (c *Core) Validate() error {
+func (c *Core) validate() error {
 	// First validate the template in general, we can't do anything else
 	// unless the template itself is valid.
 	if err := c.template.Validate(); err != nil {

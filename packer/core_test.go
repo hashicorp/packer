@@ -376,15 +376,11 @@ func TestCoreValidate(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		core, err := NewCore(&CoreConfig{
+		_, err = NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
 		})
-		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
-		}
-
-		if err := core.Validate(); (err != nil) != tc.Err {
+		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 	}
