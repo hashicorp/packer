@@ -2,7 +2,8 @@ package ebs
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
+
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
@@ -24,7 +25,9 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Stop the instance so we can create an AMI from it
 	ui.Say("Stopping the source instance...")
-	_, err := ec2conn.StopInstances(instance.InstanceId)
+	_, err := ec2conn.StopInstances(&ec2.StopInstancesInput{
+		InstanceIDs: []*string{instance.InstanceID},
+	})
 	if err != nil {
 		err := fmt.Errorf("Error stopping instance: %s", err)
 		state.Put("error", err)

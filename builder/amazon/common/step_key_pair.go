@@ -2,12 +2,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"runtime"
+
+	"github.com/awslabs/aws-sdk-go/service/ec2"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 type StepKeyPair struct {
@@ -39,7 +40,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.KeyPairName))
-	keyResp, err := ec2conn.CreateKeyPair(s.KeyPairName)
+	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{KeyName: &s.KeyPairName})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
@@ -50,7 +51,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set some state data for use in future steps
 	state.Put("keyPair", s.keyName)
-	state.Put("privateKey", keyResp.KeyMaterial)
+	state.Put("privateKey", *keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -64,7 +65,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		defer f.Close()
 
 		// Write the key out
-		if _, err := f.Write([]byte(keyResp.KeyMaterial)); err != nil {
+		if _, err := f.Write([]byte(*keyResp.KeyMaterial)); err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
@@ -91,7 +92,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting temporary keypair...")
-	_, err := ec2conn.DeleteKeyPair(s.keyName)
+	_, err := ec2conn.DeleteKeyPair(&ec2.DeleteKeyPairInput{KeyName: &s.keyName})
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))

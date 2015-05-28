@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -67,8 +67,17 @@ func (a *Artifact) Destroy() error {
 
 	for region, imageId := range a.Amis {
 		log.Printf("Deregistering image ID (%s) from region (%s)", imageId, region)
-		regionconn := ec2.New(a.Conn.Auth, aws.Regions[region])
-		if _, err := regionconn.DeregisterImage(imageId); err != nil {
+
+		regionConfig := &aws.Config{
+			Credentials: a.Conn.Config.Credentials,
+			Region:      region,
+		}
+		regionConn := ec2.New(regionConfig)
+
+		input := &ec2.DeregisterImageInput{
+			ImageID: &imageId,
+		}
+		if _, err := regionConn.DeregisterImage(input); err != nil {
 			errors = append(errors, err)
 		}
 

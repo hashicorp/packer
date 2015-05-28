@@ -3,7 +3,8 @@ package chroot
 import (
 	"fmt"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
@@ -20,11 +21,15 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
-	blockDevices := make([]ec2.BlockDeviceMapping, len(image.BlockDevices))
-	for i, device := range image.BlockDevices {
+	blockDevices := make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
+	for i, device := range image.BlockDeviceMappings {
 		newDevice := device
 		if newDevice.DeviceName == image.RootDeviceName {
-			newDevice.SnapshotId = snapshotId
+			if newDevice.EBS != nil {
+				newDevice.EBS.SnapshotID = &snapshotId
+			} else {
+				newDevice.EBS = &ec2.EBSBlockDevice{SnapshotID: &snapshotId}
+			}
 		}
 
 		blockDevices[i] = newDevice
@@ -34,7 +39,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
-		registerOpts.SriovNetSupport = "simple"
+		registerOpts.SRIOVNetSupport = aws.String("simple")
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -45,16 +50,16 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the AMI ID in the state
-	ui.Say(fmt.Sprintf("AMI: %s", registerResp.ImageId))
+	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageID))
 	amis := make(map[string]string)
-	amis[ec2conn.Region.Name] = registerResp.ImageId
+	amis[ec2conn.Config.Region] = *registerResp.ImageID
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, registerResp.ImageId),
+		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageID),
 		StepState: state,
 	}
 
@@ -71,18 +76,18 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {}
 
-func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []ec2.BlockDeviceMapping) *ec2.RegisterImage {
-	registerOpts := &ec2.RegisterImage{
-		Name:           config.AMIName,
-		Architecture:   image.Architecture,
-		RootDeviceName: image.RootDeviceName,
-		BlockDevices:   blockDevices,
-		VirtType:       config.AMIVirtType,
+func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.BlockDeviceMapping) *ec2.RegisterImageInput {
+	registerOpts := &ec2.RegisterImageInput{
+		Name:                &config.AMIName,
+		Architecture:        image.Architecture,
+		RootDeviceName:      image.RootDeviceName,
+		BlockDeviceMappings: blockDevices,
+		VirtualizationType:  &config.AMIVirtType,
 	}
 
 	if config.AMIVirtType != "hvm" {
-		registerOpts.KernelId = image.KernelId
-		registerOpts.RamdiskId = image.RamdiskId
+		registerOpts.KernelID = image.KernelID
+		registerOpts.RAMDiskID = image.RAMDiskID
 	}
 
 	return registerOpts
