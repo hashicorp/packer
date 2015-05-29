@@ -14,6 +14,10 @@ type Context struct {
 	// Funcs are extra functions available in the template
 	Funcs map[string]interface{}
 
+	// TemplatePath is the path to the template that this is being
+	// rendered within.
+	TemplatePath string
+
 	// UserVariables is the mapping of user variables that the
 	// "user" function reads from.
 	UserVariables map[string]string
