@@ -240,9 +240,15 @@ func (d *DockerDriver) StopContainer(id string) error {
 	return exec.Command("docker", "rm", id).Run()
 }
 
-func (d *DockerDriver) TagImage(id string, repo string) error {
+func (d *DockerDriver) TagImage(id string, repo string, force bool) error {
+	args := []string{"tag"}
+	if force {
+		args = append(args, "-f")
+	}
+	args = append(args, id, repo)
+
 	var stderr bytes.Buffer
-	cmd := exec.Command("docker", "tag", id, repo)
+	cmd := exec.Command("docker", args...)
 	cmd.Stderr = &stderr
 
 	if err := cmd.Start(); err != nil {

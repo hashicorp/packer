@@ -18,6 +18,7 @@ type Config struct {
 
 	Repository string `mapstructure:"repository"`
 	Tag        string `mapstructure:"tag"`
+	Force      bool
 
 	ctx interpolate.Context
 }
@@ -64,7 +65,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message("Tagging image: " + artifact.Id())
 	ui.Message("Repository: " + importRepo)
-	err := driver.TagImage(artifact.Id(), importRepo)
+	err := driver.TagImage(artifact.Id(), importRepo, p.config.Force)
 	if err != nil {
 		return nil, false, err
 	}

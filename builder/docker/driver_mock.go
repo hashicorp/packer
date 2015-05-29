@@ -46,6 +46,7 @@ type MockDriver struct {
 	TagImageCalled  bool
 	TagImageImageId string
 	TagImageRepo    string
+	TagImageForce   bool
 	TagImageErr     error
 
 	ExportReader io.Reader
@@ -156,10 +157,11 @@ func (d *MockDriver) StopContainer(id string) error {
 	return d.StopError
 }
 
-func (d *MockDriver) TagImage(id string, repo string) error {
+func (d *MockDriver) TagImage(id string, repo string, force bool) error {
 	d.TagImageCalled = true
 	d.TagImageImageId = id
 	d.TagImageRepo = repo
+	d.TagImageForce = force
 	return d.TagImageErr
 }
 

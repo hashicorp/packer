@@ -68,4 +68,47 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 	if driver.TagImageRepo != "foo:bar" {
 		t.Fatal("bad repo")
 	}
+	if driver.TagImageForce {
+		t.Fatal("bad force. force=false in default")
+	}
+}
+
+func TestPostProcessor_PostProcess_Force(t *testing.T) {
+	driver := &docker.MockDriver{}
+	p := &PostProcessor{Driver: driver}
+	config := testConfig()
+	config["force"] = true
+	_, err := common.DecodeConfig(&p.config, config)
+	if err != nil {
+		t.Fatalf("err %s", err)
+	}
+
+	artifact := &packer.MockArtifact{
+		BuilderIdValue: dockerimport.BuilderId,
+		IdValue:        "1234567890abcdef",
+	}
+
+	result, keep, err := p.PostProcess(testUi(), artifact)
+	if _, ok := result.(packer.Artifact); !ok {
+		t.Fatal("should be instance of Artifact")
+	}
+	if !keep {
+		t.Fatal("should keep")
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !driver.TagImageCalled {
+		t.Fatal("should call TagImage")
+	}
+	if driver.TagImageImageId != "1234567890abcdef" {
+		t.Fatal("bad image id")
+	}
+	if driver.TagImageRepo != "foo:bar" {
+		t.Fatal("bad repo")
+	}
+	if !driver.TagImageForce {
+		t.Fatal("bad force")
+	}
 }
