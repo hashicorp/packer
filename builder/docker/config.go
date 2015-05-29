@@ -30,7 +30,7 @@ type Config struct {
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+	var c Config
 
 	var md mapstructure.Metadata
 	err := config.Decode(&c, &config.DecodeOpts{
@@ -83,5 +83,5 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, errs
 	}
 
-	return c, nil, nil
+	return &c, nil, nil
 }
