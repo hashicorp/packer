@@ -29,14 +29,6 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
-	// Determine if we're using docker exec or not
-	useExec := false
-	execConstraint, err := version.NewConstraint(">= 1.4.0")
-	if err != nil {
-		return err
-	}
-	useExec = execConstraint.Check(c.Version)
-
 	// Create a temporary file to store the output. Because of a bug in
 	// Docker, sometimes all the output doesn't properly show up. This
 	// file will capture ALL of the output, and we'll read that.
@@ -52,7 +44,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	exitCodePath := outputFile.Name() + "-exit"
 
 	var cmd *exec.Cmd
-	if useExec {
+	if c.canExec() {
 		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
 	} else {
 		cmd = exec.Command("docker", "attach", c.ContainerId)
@@ -200,6 +192,15 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 func (c *Communicator) Download(src string, dst io.Writer) error {
 	panic("not implemented")
+}
+
+// canExec tells us whether `docker exec` is supported
+func (c *Communicator) canExec() bool {
+	execConstraint, err := version.NewConstraint(">= 1.4.0")
+	if err != nil {
+		panic(err)
+	}
+	return execConstraint.Check(c.Version)
 }
 
 // Runs the given command and blocks until completion
