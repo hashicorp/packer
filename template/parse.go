@@ -310,5 +310,11 @@ func ParseFile(path string) (*Template, error) {
 	}
 	defer f.Close()
 
-	return Parse(f)
+	tpl, err := Parse(f)
+	if err != nil {
+		return nil, err
+	}
+
+	tpl.Path = path
+	return tpl, nil
 }

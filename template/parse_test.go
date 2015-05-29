@@ -272,11 +272,15 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tc := range cases {
+		path := fixtureDir(tc.File)
 		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s", err)
 		}
 
+		if tc.Result != nil {
+			tc.Result.Path = path
+		}
 		if tpl != nil {
 			tpl.RawContents = nil
 		}
