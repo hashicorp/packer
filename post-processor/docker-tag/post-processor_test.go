@@ -76,11 +76,10 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 func TestPostProcessor_PostProcess_Force(t *testing.T) {
 	driver := &docker.MockDriver{}
 	p := &PostProcessor{Driver: driver}
-	config := testConfig()
-	config["force"] = true
-	_, err := common.DecodeConfig(&p.config, config)
-	if err != nil {
-		t.Fatalf("err %s", err)
+	c := testConfig()
+	c["force"] = true
+	if err := p.Configure(c); err != nil {
+		t.Fatalf("err: %s", err)
 	}
 
 	artifact := &packer.MockArtifact{
