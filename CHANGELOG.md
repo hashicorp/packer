@@ -21,6 +21,9 @@ BUG FIXES:
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/docker: Fixed hang on prompt while copying script
+  * builder/docker: Use `docker exec` for newer versions of Docker for
+      running scripts [GH-1993]
+  * builder/docker: Fix crash that could occur at certain timed ctrl-c [GH-1838]
   * builder/qemu: Add `disk_discard` option [GH-2120]
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
