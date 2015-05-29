@@ -1,10 +1,11 @@
 package docker
 
 import (
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 const BuilderId = "packer.docker"
@@ -30,6 +31,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err := driver.Verify(); err != nil {
 		return nil, err
 	}
+
+	version, err := driver.Version()
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("[DEBUG] Docker version: %s", version.String())
 
 	steps := []multistep.Step{
 		&StepTempDir{},

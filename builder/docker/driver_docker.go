@@ -7,9 +7,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -262,4 +264,18 @@ func (d *DockerDriver) Verify() error {
 	}
 
 	return nil
+}
+
+func (d *DockerDriver) Version() (*version.Version, error) {
+	output, err := exec.Command("docker", "-v").Output()
+	if err != nil {
+		return nil, err
+	}
+
+	match := regexp.MustCompile(version.VersionRegexpRaw).FindSubmatch(output)
+	if match == nil {
+		return nil, fmt.Errorf("unknown version: %s", output)
+	}
+
+	return version.NewVersion(string(match[0]))
 }
