@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
 	"github.com/mitchellh/packer/template"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // archiveTemplateEntry is the name the template always takes within the slug.
@@ -73,13 +72,7 @@ func (c *PushCommand) Run(args []string) int {
 		c.Ui.Error(err.Error())
 		return 1
 	}
-	push := tpl.Push
-	pushRaw, err := interpolate.RenderInterface(&push, core.Context())
-	if err != nil {
-		c.Ui.Error(err.Error())
-		return 1
-	}
-	push = *pushRaw.(*template.Push)
+	push := core.Template.Push
 
 	// If we didn't pass name from the CLI, use the template
 	if name == "" {
