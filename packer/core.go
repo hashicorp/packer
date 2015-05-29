@@ -12,8 +12,9 @@ import (
 // Core is the main executor of Packer. If Packer is being used as a
 // library, this is the struct you'll want to instantiate to get anything done.
 type Core struct {
+	Template *template.Template
+
 	components ComponentFinder
-	template   *template.Template
 	variables  map[string]string
 	builds     map[string]*template.Builder
 }
@@ -51,8 +52,8 @@ type ComponentFinder struct {
 // NewCore creates a new Core.
 func NewCore(c *CoreConfig) (*Core, error) {
 	result := &Core{
+		Template:   c.Template,
 		components: c.Components,
-		template:   c.Template,
 		variables:  c.Variables,
 	}
 	if err := result.validate(); err != nil {
@@ -66,7 +67,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	// to do this at this point with the variables.
 	result.builds = make(map[string]*template.Builder)
 	for _, b := range c.Template.Builders {
-		v, err := interpolate.Render(b.Name, result.context())
+		v, err := interpolate.Render(b.Name, result.Context())
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error interpolating builder '%s': %s",
@@ -112,8 +113,8 @@ func (c *Core) Build(n string) (Build, error) {
 	rawName := configBuilder.Name
 
 	// Setup the provisioners for this build
-	provisioners := make([]coreBuildProvisioner, 0, len(c.template.Provisioners))
-	for _, rawP := range c.template.Provisioners {
+	provisioners := make([]coreBuildProvisioner, 0, len(c.Template.Provisioners))
+	for _, rawP := range c.Template.Provisioners {
 		// If we're skipping this, then ignore it
 		if rawP.Skip(rawName) {
 			continue
@@ -155,8 +156,8 @@ func (c *Core) Build(n string) (Build, error) {
 	}
 
 	// Setup the post-processors
-	postProcessors := make([][]coreBuildPostProcessor, 0, len(c.template.PostProcessors))
-	for _, rawPs := range c.template.PostProcessors {
+	postProcessors := make([][]coreBuildPostProcessor, 0, len(c.Template.PostProcessors))
+	for _, rawPs := range c.Template.PostProcessors {
 		current := make([]coreBuildPostProcessor, 0, len(rawPs))
 		for _, rawP := range rawPs {
 			// If we skip, ignore
@@ -201,9 +202,17 @@ func (c *Core) Build(n string) (Build, error) {
 		builderType:    configBuilder.Type,
 		postProcessors: postProcessors,
 		provisioners:   provisioners,
-		templatePath:   c.template.Path,
+		templatePath:   c.Template.Path,
 		variables:      c.variables,
 	}, nil
+}
+
+// Context returns an interpolation context.
+func (c *Core) Context() *interpolate.Context {
+	return &interpolate.Context{
+		TemplatePath:  c.Template.Path,
+		UserVariables: c.variables,
+	}
 }
 
 // validate does a full validation of the template.
@@ -213,13 +222,13 @@ func (c *Core) Build(n string) (Build, error) {
 func (c *Core) validate() error {
 	// First validate the template in general, we can't do anything else
 	// unless the template itself is valid.
-	if err := c.template.Validate(); err != nil {
+	if err := c.Template.Validate(); err != nil {
 		return err
 	}
 
 	// Validate variables are set
 	var err error
-	for n, v := range c.template.Variables {
+	for n, v := range c.Template.Variables {
 		if v.Required {
 			if _, ok := c.variables[n]; !ok {
 				err = multierror.Append(err, fmt.Errorf(
@@ -241,10 +250,10 @@ func (c *Core) init() error {
 	}
 
 	// Go through the variables and interpolate the environment variables
-	ctx := c.context()
+	ctx := c.Context()
 	ctx.EnableEnv = true
 	ctx.UserVariables = nil
-	for k, v := range c.template.Variables {
+	for k, v := range c.Template.Variables {
 		// Ignore variables that are required
 		if v.Required {
 			continue
@@ -266,12 +275,10 @@ func (c *Core) init() error {
 		c.variables[k] = def
 	}
 
-	return nil
-}
-
-func (c *Core) context() *interpolate.Context {
-	return &interpolate.Context{
-		TemplatePath:  c.template.Path,
-		UserVariables: c.variables,
+	// Interpolate the push configuration
+	if _, err := interpolate.RenderInterface(&c.Template.Push, c.Context()); err != nil {
+		return fmt.Errorf("Error interpolating 'push': %s", err)
 	}
+
+	return nil
 }
