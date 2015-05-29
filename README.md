@@ -81,7 +81,7 @@ http://www.packer.io/docs
 ## Developing Packer
 
 If you wish to work on Packer itself or any of its built-in providers,
-you'll first need [Go](http://www.golang.org) installed (version 1.2+ is
+you'll first need [Go](http://www.golang.org) installed (version 1.4+ is
 _required_). Make sure Go is properly installed, including setting up
 a [GOPATH](http://golang.org/doc/code.html#GOPATH).
 
