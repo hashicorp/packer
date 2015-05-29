@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/ActiveState/tail"
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -22,6 +23,7 @@ type Communicator struct {
 	ContainerId  string
 	HostDir      string
 	ContainerDir string
+	Version      *version.Version
 
 	lock sync.Mutex
 }
@@ -41,7 +43,13 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
 
-	cmd := exec.Command("docker", "attach", c.ContainerId)
+	var cmd *exec.Cmd
+	if c.canExec() {
+		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+	} else {
+		cmd = exec.Command("docker", "attach", c.ContainerId)
+	}
+
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
@@ -117,7 +125,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 			return os.MkdirAll(hostpath, info.Mode())
 		}
 
-		if info.Mode() & os.ModeSymlink == os.ModeSymlink {
+		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 			dest, err := os.Readlink(path)
 
 			if err != nil {
@@ -184,6 +192,15 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 func (c *Communicator) Download(src string, dst io.Writer) error {
 	panic("not implemented")
+}
+
+// canExec tells us whether `docker exec` is supported
+func (c *Communicator) canExec() bool {
+	execConstraint, err := version.NewConstraint(">= 1.4.0")
+	if err != nil {
+		panic(err)
+	}
+	return execConstraint.Check(c.Version)
 }
 
 // Runs the given command and blocks until completion

@@ -2,6 +2,8 @@ package docker
 
 import (
 	"io"
+
+	"github.com/hashicorp/go-version"
 )
 
 // MockDriver is a driver implementation that can be used for tests.
@@ -63,6 +65,9 @@ type MockDriver struct {
 	StopCalled   bool
 	StopID       string
 	VerifyCalled bool
+
+	VersionCalled  bool
+	VersionVersion string
 }
 
 func (d *MockDriver) Commit(id string) (string, error) {
@@ -161,4 +166,9 @@ func (d *MockDriver) TagImage(id string, repo string) error {
 func (d *MockDriver) Verify() error {
 	d.VerifyCalled = true
 	return d.VerifyError
+}
+
+func (d *MockDriver) Version() (*version.Version, error) {
+	d.VersionCalled = true
+	return version.NewVersion(d.VersionVersion)
 }
