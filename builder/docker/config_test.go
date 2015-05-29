@@ -1,6 +1,8 @@
 package docker
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -42,6 +44,12 @@ func testConfigOk(t *testing.T, warns []string, err error) {
 }
 
 func TestConfigPrepare_exportPath(t *testing.T) {
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.RemoveAll(td)
+
 	raw := testConfig()
 
 	// No export path
@@ -53,6 +61,11 @@ func TestConfigPrepare_exportPath(t *testing.T) {
 	raw["export_path"] = "good"
 	_, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
+
+	// Bad export path (directory)
+	raw["export_path"] = td
+	_, warns, errs = NewConfig(raw)
+	testConfigErr(t, warns, errs)
 }
 
 func TestConfigPrepare_exportPathAndCommit(t *testing.T) {

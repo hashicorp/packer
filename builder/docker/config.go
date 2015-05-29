@@ -2,6 +2,7 @@ package docker
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
@@ -77,6 +78,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ExportPath != "" && c.Commit {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("both commit and export_path cannot be set"))
+	}
+
+	if c.ExportPath != "" {
+		if fi, err := os.Stat(c.ExportPath); err == nil && fi.IsDir() {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+				"export_path must be a file, not a directory"))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
