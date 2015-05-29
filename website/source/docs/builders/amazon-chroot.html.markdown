@@ -55,7 +55,7 @@ each category, the available configuration keys are alphabetized.
 
 * `access_key` (string) - The access key used to communicate with AWS.
   If not specified, Packer will use the key from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
-  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
+  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` (in that order), if set.
   If the environmental variables aren't set and Packer is running on
   an EC2 instance, Packer will check the instance metadata for IAM role
   keys.
