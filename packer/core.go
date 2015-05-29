@@ -66,7 +66,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	// to do this at this point with the variables.
 	result.builds = make(map[string]*template.Builder)
 	for _, b := range c.Template.Builders {
-		v, err := interpolate.Render(b.Name, result.context())
+		v, err := interpolate.Render(b.Name, result.Context())
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error interpolating builder '%s': %s",
@@ -206,6 +206,14 @@ func (c *Core) Build(n string) (Build, error) {
 	}, nil
 }
 
+// Context returns an interpolation context.
+func (c *Core) Context() *interpolate.Context {
+	return &interpolate.Context{
+		TemplatePath:  c.template.Path,
+		UserVariables: c.variables,
+	}
+}
+
 // validate does a full validation of the template.
 //
 // This will automatically call template.validate() in addition to doing
@@ -241,7 +249,7 @@ func (c *Core) init() error {
 	}
 
 	// Go through the variables and interpolate the environment variables
-	ctx := c.context()
+	ctx := c.Context()
 	ctx.EnableEnv = true
 	ctx.UserVariables = nil
 	for k, v := range c.template.Variables {
@@ -267,11 +275,4 @@ func (c *Core) init() error {
 	}
 
 	return nil
-}
-
-func (c *Core) context() *interpolate.Context {
-	return &interpolate.Context{
-		TemplatePath:  c.template.Path,
-		UserVariables: c.variables,
-	}
 }

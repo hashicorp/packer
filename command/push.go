@@ -1,7 +1,6 @@
 package command
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
 	"github.com/mitchellh/packer/template"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // archiveTemplateEntry is the name the template always takes within the slug.
@@ -37,7 +37,7 @@ func (c *PushCommand) Run(args []string) int {
 	var name string
 	var create bool
 
-	f := flag.NewFlagSet("push", flag.ContinueOnError)
+	f := c.Meta.FlagSet("push", FlagSetVars)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
 	f.StringVar(&token, "token", "", "token")
 	f.StringVar(&message, "m", "", "message")
@@ -67,9 +67,23 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Get the core
+	core, err := c.Meta.Core(tpl)
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+	push := tpl.Push
+	pushRaw, err := interpolate.RenderInterface(&push, core.Context())
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+	push = *pushRaw.(*template.Push)
+
 	// If we didn't pass name from the CLI, use the template
 	if name == "" {
-		name = tpl.Push.Name
+		name = push.Name
 	}
 
 	// Validate some things
@@ -83,14 +97,14 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Determine our token
 	if token == "" {
-		token = tpl.Push.Token
+		token = push.Token
 	}
 
 	// Build our client
 	defer func() { c.client = nil }()
 	c.client = atlas.DefaultClient()
-	if tpl.Push.Address != "" {
-		c.client, err = atlas.NewClient(tpl.Push.Address)
+	if push.Address != "" {
+		c.client, err = atlas.NewClient(push.Address)
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
 				"Error setting up API client: %s", err))
@@ -103,9 +117,9 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Build the archiving options
 	var opts archive.ArchiveOpts
-	opts.Include = tpl.Push.Include
-	opts.Exclude = tpl.Push.Exclude
-	opts.VCS = tpl.Push.VCS
+	opts.Include = push.Include
+	opts.Exclude = push.Exclude
+	opts.VCS = push.VCS
 	opts.Extra = map[string]string{
 		archiveTemplateEntry: args[0],
 	}
@@ -120,7 +134,7 @@ func (c *PushCommand) Run(args []string) int {
 	//   3.) BaseDir is relative, so we use the path relative to the directory
 	//       of the template.
 	//
-	path := tpl.Push.BaseDir
+	path := push.BaseDir
 	if path == "" || !filepath.IsAbs(path) {
 		tplPath, err := filepath.Abs(args[0])
 		if err != nil {
@@ -150,7 +164,7 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Build the upload options
 	var uploadOpts uploadOpts
-	uploadOpts.Slug = tpl.Push.Name
+	uploadOpts.Slug = push.Name
 	uploadOpts.Builds = make(map[string]*uploadBuildInfo)
 	for _, b := range tpl.Builders {
 		info := &uploadBuildInfo{Type: b.Type}
@@ -229,7 +243,7 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.Ui.Say(fmt.Sprintf("Push successful to '%s'", tpl.Push.Name))
+	c.Ui.Say(fmt.Sprintf("Push successful to '%s'", push.Name))
 	return 0
 }
 
@@ -257,6 +271,10 @@ Options:
                            "username/name".
 
   -token=<token>           The access token to use to when uploading
+
+  -var 'key=value'         Variable for templates, can be used multiple times.
+
+  -var-file=path           JSON file containing user variables.
 `
 
 	return strings.TrimSpace(helpText)
