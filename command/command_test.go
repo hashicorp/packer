@@ -28,6 +28,7 @@ func testMeta(t *testing.T) Meta {
 	var out, err bytes.Buffer
 
 	return Meta{
+		CoreConfig: packer.TestCoreConfig(t),
 		Ui: &packer.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,

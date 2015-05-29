@@ -1,0 +1,11 @@
+{
+    "variables": {
+        "name": null
+    },
+
+    "builders": [{"type": "dummy"}],
+
+    "push": {
+        "name": "{{user `name`}}"
+    }
+}
