@@ -28,7 +28,8 @@ BUG FIXES:
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
-  * postprocessor/vagrant-cloud: Fixed failing on response
+  * post-processor/atlas: Find common archive prefix for Windows [GH-1874]
+  * post-processor/vagrant-cloud: Fixed failing on response
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
 
