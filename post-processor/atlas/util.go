@@ -2,6 +2,7 @@ package atlas
 
 import (
 	"math"
+	"path/filepath"
 	"strings"
 )
 
@@ -26,12 +27,12 @@ func longestCommonPrefix(vs []string) string {
 	// short string, which itself must contain the prefix.
 	for i := len(shortest); i > 0; i-- {
 		// We only care about prefixes with path seps
-		if shortest[i-1] != '/' {
+		if shortest[i-1] != filepath.Separator {
 			continue
 		}
 
 		bad := false
-		prefix := shortest[0 : i]
+		prefix := shortest[0:i]
 		for _, v := range vs {
 			if !strings.HasPrefix(v, prefix) {
 				bad = true
