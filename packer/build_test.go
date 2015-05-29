@@ -32,6 +32,7 @@ func testDefaultPackerConfig() map[string]interface{} {
 		BuilderTypeConfigKey:   "foo",
 		DebugConfigKey:         false,
 		ForceConfigKey:         false,
+		TemplatePathKey:        "",
 		UserVariablesConfigKey: make(map[string]string),
 	}
 }
