@@ -368,6 +368,40 @@ func TestCoreBuild_templatePath(t *testing.T) {
 	}
 }
 
+func TestCore_pushInterpolate(t *testing.T) {
+	cases := []struct {
+		File   string
+		Vars   map[string]string
+		Result template.Push
+	}{
+		{
+			"push-vars.json",
+			map[string]string{"foo": "bar"},
+			template.Push{Name: "bar"},
+		},
+	}
+
+	for _, tc := range cases {
+		tpl, err := template.ParseFile(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		core, err := NewCore(&CoreConfig{
+			Template:  tpl,
+			Variables: tc.Vars,
+		})
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		expected := core.Template.Push
+		if !reflect.DeepEqual(expected, tc.Result) {
+			t.Fatalf("err: %s\n\n%#v", tc.File, expected)
+		}
+	}
+}
+
 func TestCoreValidate(t *testing.T) {
 	cases := []struct {
 		File string
