@@ -9,12 +9,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"sync"
 	"syscall"
 	"time"
 
 	"github.com/ActiveState/tail"
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -24,6 +26,31 @@ type Communicator struct {
 	ContainerDir string
 
 	lock sync.Mutex
+}
+
+var dockerVersion *version.Version
+var useDockerExec bool
+
+func init() {
+	execConstraint, _ := version.NewConstraint(">= 1.4.0")
+
+	versionExtractor := regexp.MustCompile(version.VersionRegexpRaw)
+	dockerVersionOutput, err := exec.Command("docker", "-v").Output()
+	extractedVersion := versionExtractor.FindSubmatch(dockerVersionOutput)
+
+	if extractedVersion != nil {
+		dockerVersionString := string(extractedVersion[0])
+		dockerVersion, err = version.NewVersion(dockerVersionString)
+	}
+
+	if dockerVersion == nil {
+		log.Printf("Could not determine docker version: %v", err)
+		log.Printf("Assuming no `exec` capability, using `attatch`")
+		useDockerExec = false
+	} else {
+		log.Printf("Docker version detected as %s", dockerVersion)
+		useDockerExec = execConstraint.Check(dockerVersion)
+	}
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
@@ -41,7 +68,13 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
 
-	cmd := exec.Command("docker", "attach", c.ContainerId)
+	var cmd *exec.Cmd
+	if useDockerExec {
+		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+	} else {
+		cmd = exec.Command("docker", "attach", c.ContainerId)
+	}
+
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
