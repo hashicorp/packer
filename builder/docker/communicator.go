@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"sync"
 	"syscall"
@@ -24,36 +23,20 @@ type Communicator struct {
 	ContainerId  string
 	HostDir      string
 	ContainerDir string
+	Version      *version.Version
 
 	lock sync.Mutex
 }
 
-var dockerVersion *version.Version
-var useDockerExec bool
-
-func init() {
-	execConstraint, _ := version.NewConstraint(">= 1.4.0")
-
-	versionExtractor := regexp.MustCompile(version.VersionRegexpRaw)
-	dockerVersionOutput, err := exec.Command("docker", "-v").Output()
-	extractedVersion := versionExtractor.FindSubmatch(dockerVersionOutput)
-
-	if extractedVersion != nil {
-		dockerVersionString := string(extractedVersion[0])
-		dockerVersion, err = version.NewVersion(dockerVersionString)
-	}
-
-	if dockerVersion == nil {
-		log.Printf("Could not determine docker version: %v", err)
-		log.Printf("Assuming no `exec` capability, using `attatch`")
-		useDockerExec = false
-	} else {
-		log.Printf("Docker version detected as %s", dockerVersion)
-		useDockerExec = execConstraint.Check(dockerVersion)
-	}
-}
-
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
+	// Determine if we're using docker exec or not
+	useExec := false
+	execConstraint, err := version.NewConstraint(">= 1.4.0")
+	if err != nil {
+		return err
+	}
+	useExec = execConstraint.Check(c.Version)
+
 	// Create a temporary file to store the output. Because of a bug in
 	// Docker, sometimes all the output doesn't properly show up. This
 	// file will capture ALL of the output, and we'll read that.
@@ -69,7 +52,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	exitCodePath := outputFile.Name() + "-exit"
 
 	var cmd *exec.Cmd
-	if useDockerExec {
+	if useExec {
 		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
 	} else {
 		cmd = exec.Command("docker", "attach", c.ContainerId)
@@ -150,7 +133,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 			return os.MkdirAll(hostpath, info.Mode())
 		}
 
-		if info.Mode() & os.ModeSymlink == os.ModeSymlink {
+		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 			dest, err := os.Readlink(path)
 
 			if err != nil {
