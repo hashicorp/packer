@@ -24,6 +24,9 @@ type Driver interface {
 	// GetNatIP gets the NAT IP address for the instance.
 	GetNatIP(zone, name string) (string, error)
 
+	// GetInternalIP gets the GCE-internal IP address for the instance.
+	GetInternalIP(zone, name string) (string, error)
+
 	// RunInstance takes the given config and launches an instance.
 	RunInstance(*InstanceConfig) (<-chan error, error)
 

@@ -157,12 +157,27 @@ func (d *driverGCE) GetNatIP(zone, name string) (string, error) {
 		if ni.AccessConfigs == nil {
 			continue
 		}
-
 		for _, ac := range ni.AccessConfigs {
 			if ac.NatIP != "" {
 				return ac.NatIP, nil
 			}
 		}
+	}
+
+	return "", nil
+}
+
+func (d *driverGCE) GetInternalIP(zone, name string) (string, error) {
+	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
+	if err != nil {
+		return "", err
+	}
+
+	for _, ni := range instance.NetworkInterfaces {
+		if ni.NetworkIP == "" {
+			continue
+		}
+		return ni.NetworkIP, nil
 	}
 
 	return "", nil

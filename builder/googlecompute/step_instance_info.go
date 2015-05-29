@@ -40,23 +40,41 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ip, err := driver.GetNatIP(config.Zone, instanceName)
-	if err != nil {
-		err := fmt.Errorf("Error retrieving instance nat ip address: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if s.Debug {
-		if ip != "" {
-			ui.Message(fmt.Sprintf("Public IP: %s", ip))
+	if config.UseInternalIP {
+		ip, err := driver.GetInternalIP(config.Zone, instanceName)
+		if err != nil {
+			err := fmt.Errorf("Error retrieving instance internal ip address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
-	}
 
-	ui.Message(fmt.Sprintf("IP: %s", ip))
-	state.Put("instance_ip", ip)
-	return multistep.ActionContinue
+		if s.Debug {
+			if ip != "" {
+				ui.Message(fmt.Sprintf("Internal IP: %s", ip))
+			}
+		}
+		ui.Message(fmt.Sprintf("IP: %s", ip))
+		state.Put("instance_ip", ip)
+		return multistep.ActionContinue
+	} else {
+		ip, err := driver.GetNatIP(config.Zone, instanceName)
+		if err != nil {
+			err := fmt.Errorf("Error retrieving instance nat ip address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		if s.Debug {
+			if ip != "" {
+				ui.Message(fmt.Sprintf("Public IP: %s", ip))
+			}
+		}
+		ui.Message(fmt.Sprintf("IP: %s", ip))
+		state.Put("instance_ip", ip)
+		return multistep.ActionContinue
+	}
 }
 
 // Cleanup.

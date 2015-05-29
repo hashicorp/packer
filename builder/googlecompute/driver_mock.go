@@ -30,6 +30,11 @@ type DriverMock struct {
 	GetNatIPResult string
 	GetNatIPErr    error
 
+	GetInternalIPZone   string
+	GetInternalIPName   string
+	GetInternalIPResult string
+	GetInternalIPErr    error
+
 	RunInstanceConfig *InstanceConfig
 	RunInstanceErrCh  <-chan error
 	RunInstanceErr    error
@@ -106,6 +111,12 @@ func (d *DriverMock) GetNatIP(zone, name string) (string, error) {
 	d.GetNatIPZone = zone
 	d.GetNatIPName = name
 	return d.GetNatIPResult, d.GetNatIPErr
+}
+
+func (d *DriverMock) GetInternalIP(zone, name string) (string, error) {
+	d.GetInternalIPZone = zone
+	d.GetInternalIPName = name
+	return d.GetInternalIPResult, d.GetInternalIPErr
 }
 
 func (d *DriverMock) RunInstance(c *InstanceConfig) (<-chan error, error) {
