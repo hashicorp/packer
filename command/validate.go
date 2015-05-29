@@ -60,6 +60,7 @@ func (c *ValidateCommand) Run(args []string) int {
 			c.Ui.Error(fmt.Sprintf(
 				"Failed to initialize build '%s': %s",
 				n, err))
+			return 1
 		}
 
 		builds = append(builds, b)
