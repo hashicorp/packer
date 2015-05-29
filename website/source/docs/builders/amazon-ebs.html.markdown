@@ -35,7 +35,7 @@ each category, the available configuration keys are alphabetized.
 
 * `access_key` (string) - The access key used to communicate with AWS.
   If not specified, Packer will use the key from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
-  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
+  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` (in that order), if set.
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
