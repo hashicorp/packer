@@ -50,33 +50,30 @@ type ComponentFinder struct {
 
 // NewCore creates a new Core.
 func NewCore(c *CoreConfig) (*Core, error) {
-	// Go through and interpolate all the build names. We shuld be able
-	// to do this at this point with the variables.
-	builds := make(map[string]*template.Builder)
-	for _, b := range c.Template.Builders {
-		v, err := interpolate.Render(b.Name, &interpolate.Context{
-			UserVariables: c.Variables,
-		})
-		if err != nil {
-			return nil, fmt.Errorf(
-				"Error interpolating builder '%s': %s",
-				b.Name, err)
-		}
-
-		builds[v] = b
-	}
-
 	result := &Core{
 		components: c.Components,
 		template:   c.Template,
 		variables:  c.Variables,
-		builds:     builds,
 	}
 	if err := result.validate(); err != nil {
 		return nil, err
 	}
 	if err := result.init(); err != nil {
 		return nil, err
+	}
+
+	// Go through and interpolate all the build names. We shuld be able
+	// to do this at this point with the variables.
+	result.builds = make(map[string]*template.Builder)
+	for _, b := range c.Template.Builders {
+		v, err := interpolate.Render(b.Name, result.context())
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error interpolating builder '%s': %s",
+				b.Name, err)
+		}
+
+		result.builds[v] = b
 	}
 
 	return result, nil
@@ -204,6 +201,7 @@ func (c *Core) Build(n string) (Build, error) {
 		builderType:    configBuilder.Type,
 		postProcessors: postProcessors,
 		provisioners:   provisioners,
+		templatePath:   c.template.Path,
 		variables:      c.variables,
 	}, nil
 }
@@ -243,7 +241,9 @@ func (c *Core) init() error {
 	}
 
 	// Go through the variables and interpolate the environment variables
-	ctx := &interpolate.Context{EnableEnv: true}
+	ctx := c.context()
+	ctx.EnableEnv = true
+	ctx.UserVariables = nil
 	for k, v := range c.template.Variables {
 		// Ignore variables that are required
 		if v.Required {
@@ -267,4 +267,11 @@ func (c *Core) init() error {
 	}
 
 	return nil
+}
+
+func (c *Core) context() *interpolate.Context {
+	return &interpolate.Context{
+		TemplatePath:  c.template.Path,
+		UserVariables: c.variables,
+	}
 }

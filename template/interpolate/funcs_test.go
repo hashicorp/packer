@@ -2,6 +2,7 @@ package interpolate
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -117,18 +118,21 @@ func TestFuncPwd(t *testing.T) {
 }
 
 func TestFuncTemplatePath(t *testing.T) {
+	path := "foo/bar"
+	expected, _ := filepath.Abs(filepath.Dir(path))
+
 	cases := []struct {
 		Input  string
 		Output string
 	}{
 		{
-			`{{template_path}}`,
-			`foo`,
+			`{{template_dir}}`,
+			expected,
 		},
 	}
 
 	ctx := &Context{
-		TemplatePath: "foo/bar",
+		TemplatePath: path,
 	}
 	for _, tc := range cases {
 		i := &I{Value: tc.Input}
