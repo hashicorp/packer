@@ -1,0 +1,11 @@
+{
+    "variables": {
+        "foo": null
+    },
+
+    "builders": [{"type": "test"}],
+
+    "push": {
+        "name": "{{user `foo`}}"
+    }
+}
