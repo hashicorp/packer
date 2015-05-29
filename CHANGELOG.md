@@ -12,6 +12,7 @@ IMPROVEMENTS:
   * buidler/openstakc: Add `ssh_interface` option for rackconnect for users that
       have prohibitive firewalls
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
+  * command/push: Push configuration in templates supports variables [GH-1861]
 
 BUG FIXES:
 
