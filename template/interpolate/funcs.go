@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -99,7 +100,7 @@ func funcGenTemplatePath(ctx *Context) interface{} {
 			return "", errors.New("template path not available")
 		}
 
-		return ctx.TemplatePath, nil
+		return filepath.Dir(ctx.TemplatePath), nil
 	}
 }
 

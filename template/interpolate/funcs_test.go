@@ -128,7 +128,7 @@ func TestFuncTemplatePath(t *testing.T) {
 	}
 
 	ctx := &Context{
-		TemplatePath: "foo",
+		TemplatePath: "foo/bar",
 	}
 	for _, tc := range cases {
 		i := &I{Value: tc.Input}
