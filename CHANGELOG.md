@@ -2,6 +2,9 @@
 
 FEATURES:
 
+  * **New config function: `template_dir`**: The directory to the template
+      being built. This should be used for template-relative paths. [GH-54]
+
 IMPROVEMENTS:
 
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
