@@ -104,7 +104,8 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 // detecting things like user variables from the raw configuration params.
 func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	var s struct {
-		Vars map[string]string `mapstructure:"packer_user_variables"`
+		TemplatePath string            `mapstructure:"packer_template_path"`
+		Vars         map[string]string `mapstructure:"packer_user_variables"`
 	}
 
 	for _, r := range raws {
@@ -114,6 +115,7 @@ func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	}
 
 	return &interpolate.Context{
+		TemplatePath:  s.TemplatePath,
 		UserVariables: s.Vars,
 	}, nil
 }
