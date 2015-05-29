@@ -2,6 +2,7 @@ package packer
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -335,6 +336,35 @@ func TestCoreBuild_postProcess(t *testing.T) {
 	}
 	if p.PostProcessArtifact.Id() != b.ArtifactId {
 		t.Fatalf("bad: %s", p.PostProcessArtifact.Id())
+	}
+}
+
+func TestCoreBuild_templatePath(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-template-path.json"))
+	b := TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	expected, _ := filepath.Abs("./test-fixtures")
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Interpolate the config
+	var result map[string]interface{}
+	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result["value"] != expected {
+		t.Fatalf("bad: %#v", result)
 	}
 }
 

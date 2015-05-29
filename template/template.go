@@ -11,6 +11,10 @@ import (
 // Template represents the parsed template that is used to configure
 // Packer builds.
 type Template struct {
+	// Path is the path to the template. This will be blank if Parse is
+	// used, but will be automatically populated by ParseFile.
+	Path string
+
 	Description string
 	MinVersion  string
 
