@@ -116,6 +116,21 @@ func TestConfigPrepare(t *testing.T) {
 			"5s",
 			false,
 		},
+		{
+			"use_internal_ip",
+			nil,
+			false,
+		},
+		{
+			"use_internal_ip",
+			false,
+			false,
+		},
+		{
+			"use_internal_ip",
+			"SO VERY BAD",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
