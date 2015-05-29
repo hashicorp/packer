@@ -55,10 +55,11 @@ While some configuration settings have local variables specific to only that
 configuration, a set of functions are available globally for use in _any string_
 in Packer templates. These are listed below for reference.
 
-* `lower` - Lowercases the string.
-* `pwd` - The working directory while executing Packer.
 * `isotime [FORMAT]` - UTC time, which can be [formatted](http://golang.org/pkg/time/#example_Time_Format).
    See more examples below.
+* `lower` - Lowercases the string.
+* `pwd` - The working directory while executing Packer.
+* `template_dir` - The directory to the template for the build.
 * `timestamp` - The current Unix timestamp in UTC.
 * `uuid` - Returns a random UUID.
 * `upper` - Uppercases the string.

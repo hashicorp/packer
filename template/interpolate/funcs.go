@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -23,12 +24,13 @@ func init() {
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
-	"env":       funcGenEnv,
-	"isotime":   funcGenIsotime,
-	"pwd":       funcGenPwd,
-	"timestamp": funcGenTimestamp,
-	"uuid":      funcGenUuid,
-	"user":      funcGenUser,
+	"env":          funcGenEnv,
+	"isotime":      funcGenIsotime,
+	"pwd":          funcGenPwd,
+	"template_dir": funcGenTemplateDir,
+	"timestamp":    funcGenTimestamp,
+	"uuid":         funcGenUuid,
+	"user":         funcGenUser,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -89,6 +91,21 @@ func funcGenPrimitive(value interface{}) FuncGenerator {
 func funcGenPwd(ctx *Context) interface{} {
 	return func() (string, error) {
 		return os.Getwd()
+	}
+}
+
+func funcGenTemplateDir(ctx *Context) interface{} {
+	return func() (string, error) {
+		if ctx == nil || ctx.TemplatePath == "" {
+			return "", errors.New("template path not available")
+		}
+
+		path, err := filepath.Abs(filepath.Dir(ctx.TemplatePath))
+		if err != nil {
+			return "", err
+		}
+
+		return path, nil
 	}
 }
 

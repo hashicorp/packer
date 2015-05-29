@@ -2,6 +2,7 @@ package interpolate
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -103,6 +104,36 @@ func TestFuncPwd(t *testing.T) {
 	}
 
 	ctx := &Context{}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
+func TestFuncTemplatePath(t *testing.T) {
+	path := "foo/bar"
+	expected, _ := filepath.Abs(filepath.Dir(path))
+
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{template_dir}}`,
+			expected,
+		},
+	}
+
+	ctx := &Context{
+		TemplatePath: path,
+	}
 	for _, tc := range cases {
 		i := &I{Value: tc.Input}
 		result, err := i.Render(ctx)
