@@ -41,7 +41,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
 
-	cmd := exec.Command("docker", "attach", c.ContainerId)
+	cmd := exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
