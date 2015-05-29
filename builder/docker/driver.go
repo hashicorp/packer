@@ -2,6 +2,8 @@ package docker
 
 import (
 	"io"
+
+	"github.com/hashicorp/go-version"
 )
 
 // Driver is the interface that has to be implemented to communicate with
@@ -48,6 +50,9 @@ type Driver interface {
 
 	// Verify verifies that the driver can run
 	Verify() error
+
+	// Version reads the Docker version
+	Version() (*version.Version, error)
 }
 
 // ContainerConfig is the configuration used to start a container.
