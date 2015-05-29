@@ -26,6 +26,26 @@ type Communicator struct {
 	lock sync.Mutex
 }
 
+//Don't pass any arguments to the docker command
+func IsValidDockerShellCommand(cmd *exec.Cmd) bool {
+	if result := cmd.Run(); result != nil {
+		switch result.(type) {
+		default:
+			//WTF?!?
+			return false
+		case *exec.ExitError:
+			//The command failed because it's supported but missing arguments
+			return true
+		case *exec.Error:
+			//Failed completely to execute!
+			return false
+		}
+	} else {
+		//The command succeeded when it shouldn't because it was not recognised
+		return false
+	}
+}
+
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// Create a temporary file to store the output. Because of a bug in
 	// Docker, sometimes all the output doesn't properly show up. This
@@ -42,6 +62,12 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	exitCodePath := outputFile.Name() + "-exit"
 
 	cmd := exec.Command("docker", "attach", c.ContainerId)
+
+	//Use exec instead if available
+	if IsValidDockerShellCommand(exec.Command("docker", "exec")) {
+		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+	}
+
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
