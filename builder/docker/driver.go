@@ -46,7 +46,7 @@ type Driver interface {
 	StopContainer(id string) error
 
 	// TagImage tags the image with the given ID
-	TagImage(id string, repo string) error
+	TagImage(id string, repo string, force bool) error
 
 	// Verify verifies that the driver can run
 	Verify() error
