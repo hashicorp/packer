@@ -36,6 +36,7 @@ type Config struct {
 	RawSSHTimeout        string            `mapstructure:"ssh_timeout"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Tags                 []string          `mapstructure:"tags"`
+	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
