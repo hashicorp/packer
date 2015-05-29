@@ -190,6 +190,35 @@ func TestPush_uploadErrorCh(t *testing.T) {
 	}
 }
 
+func TestPush_vars(t *testing.T) {
+	var actualOpts *uploadOpts
+	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
+		actualOpts = opts
+
+		doneCh := make(chan struct{})
+		close(doneCh)
+		return doneCh, nil, nil
+	}
+
+	c := &PushCommand{
+		Meta:     testMeta(t),
+		uploadFn: uploadFn,
+	}
+
+	args := []string{
+		"-var", "name=foo/bar",
+		filepath.Join(testFixture("push-vars"), "template.json"),
+	}
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	expected := "foo/bar"
+	if actualOpts.Slug != expected {
+		t.Fatalf("bad: %#v", actualOpts.Slug)
+	}
+}
+
 func testArchive(t *testing.T, r io.Reader) []string {
 	// Finish the archiving process in-memory
 	var buf bytes.Buffer
