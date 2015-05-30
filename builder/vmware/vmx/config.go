@@ -63,7 +63,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 
 	if c.SourcePath == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
 	} else {
 		if _, err := os.Stat(c.SourcePath); err != nil {
 			errs = packer.MultiErrorAppend(errs,
