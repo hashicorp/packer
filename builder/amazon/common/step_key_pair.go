@@ -91,10 +91,19 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
+	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")
 	_, err := ec2conn.DeleteKeyPair(&ec2.DeleteKeyPairInput{KeyName: &s.keyName})
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
+	}
+
+	// Also remove the physical key if we're debugging.
+	if s.Debug {
+		if err := os.Remove(s.DebugKeyPath); err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error removing debug key '%s': %s", s.DebugKeyPath, err))
+		}
 	}
 }
