@@ -41,6 +41,7 @@ vet:
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
 		echo "and fix them if necessary before submitting the code for reviewal."; \
+		exit 1; \
 	fi
 
 .PHONY: bin default generate test testacc updatedeps vet
