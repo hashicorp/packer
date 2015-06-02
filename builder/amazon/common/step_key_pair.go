@@ -30,7 +30,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", "")
+		state.Put("keyPair", s.KeyPairName)
 		state.Put("privateKey", string(privateKeyBytes))
 
 		return multistep.ActionContinue
