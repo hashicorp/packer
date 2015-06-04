@@ -45,15 +45,6 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Building and writing VMX file")
 
-	ctx := config.ctx
-	ctx.Data = &vmxTemplateData{
-		Name:     config.VMName,
-		GuestOS:  config.GuestOSType,
-		DiskName: config.DiskName,
-		Version:  config.Version,
-		ISOPath:  isoPath,
-	}
-
 	vmxTemplate := DefaultVMXTemplate
 	if config.VMXTemplatePath != "" {
 		f, err := os.Open(config.VMXTemplatePath)
@@ -76,14 +67,16 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxTemplate = string(rawBytes)
 	}
 
+	ctx := config.ctx
+
 	if len(config.AdditionalDiskSize) > 0 {
 		for i, _ := range config.AdditionalDiskSize {
-			data := &additionalDiskTemplateData{
+			ctx.Data = &additionalDiskTemplateData{
 				DiskNumber: i + 1,
 				DiskName:   config.DiskName,
 			}
 
-			diskTemplate, err := config.tpl.Process(DefaultAdditionalDiskTemplate, data)
+			diskTemplate, err := interpolate.Render(DefaultAdditionalDiskTemplate, &ctx)
 			if err != nil {
 				err := fmt.Errorf("Error preparing VMX template for additional disk: %s", err)
 				state.Put("error", err)
@@ -93,6 +86,14 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 			vmxTemplate += diskTemplate
 		}
+	}
+
+	ctx.Data = &vmxTemplateData{
+		Name:     config.VMName,
+		GuestOS:  config.GuestOSType,
+		DiskName: config.DiskName,
+		Version:  config.Version,
+		ISOPath:  isoPath,
 	}
 
 	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
