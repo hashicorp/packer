@@ -59,6 +59,7 @@ func (c BuildCommand) Run(args []string) int {
 			c.Ui.Error(fmt.Sprintf(
 				"Failed to initialize build '%s': %s",
 				n, err))
+			continue
 		}
 
 		builds = append(builds, b)
