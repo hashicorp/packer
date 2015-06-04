@@ -172,6 +172,11 @@ func (c *config) discoverSingle(glob string, m *map[string]string) error {
 	for _, match := range matches {
 		file := filepath.Base(match)
 
+		// skip *.ignore files from Windows Chocolatey
+		if strings.HasSuffix(file, ".ignore") {
+			continue
+		}
+
 		// If the filename has a ".", trim up to there
 		if idx := strings.Index(file, "."); idx >= 0 {
 			file = file[:idx]
