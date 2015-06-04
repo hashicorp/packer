@@ -1,11 +1,12 @@
 package packer
 
 import (
-	"github.com/mitchellh/iochan"
 	"io"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/mitchellh/iochan"
 )
 
 // RemoteCmd represents a remote command being prepared or run.
@@ -132,9 +133,13 @@ OutputLoop:
 	for {
 		select {
 		case output := <-stderrCh:
-			ui.Message(r.cleanOutputLine(output))
+			if output != "" {
+				ui.Message(r.cleanOutputLine(output))
+			}
 		case output := <-stdoutCh:
-			ui.Message(r.cleanOutputLine(output))
+			if output != "" {
+				ui.Message(r.cleanOutputLine(output))
+			}
 		case <-exitCh:
 			break OutputLoop
 		}
