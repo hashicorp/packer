@@ -47,6 +47,9 @@ type Config struct {
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
 
+	// The exclusion patterns used when uploading a directory.
+	Exclude []string `mapstructure:"exclude"`
+
 	// The optional inventory file
 	InventoryFile string `mapstructure:"inventory_file"`
 }
@@ -322,5 +325,20 @@ func (p *Provisioner) uploadDir(ui packer.Ui, comm packer.Communicator, dst, src
 	if src[len(src)-1] != '/' {
 		src = src + "/"
 	}
-	return comm.UploadDir(dst, src, nil)
+
+	if err := comm.UploadDir(dst, src, nil); err != nil {
+		return err
+	}
+
+	for _, element := range p.config.Exclude {
+		cmd := &packer.RemoteCmd{
+			Command: fmt.Sprintf("rm -rf '%s'", filepath.Join(dst, element)),
+		}
+
+		if err := cmd.StartWithUi(comm, ui); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
