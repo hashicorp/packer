@@ -24,9 +24,9 @@ type MockDriver struct {
 	ImportId     string
 	ImportErr    error
 
-  BuildImageCalled		 bool
-  BuildImageDockerfile *bytes.Buffer
-  BuildImageErr				 error
+	BuildImageCalled     bool
+	BuildImageDockerfile *bytes.Buffer
+	BuildImageErr        error
 
 	LoginCalled   bool
 	LoginEmail    string
