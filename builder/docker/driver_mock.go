@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/hashicorp/go-version"
@@ -22,6 +23,10 @@ type MockDriver struct {
 	ImportRepo   string
 	ImportId     string
 	ImportErr    error
+
+  BuildImageCalled		 bool
+  BuildImageDockerfile *bytes.Buffer
+  BuildImageErr				 error
 
 	LoginCalled   bool
 	LoginEmail    string
@@ -102,6 +107,12 @@ func (d *MockDriver) Import(path, repo string) (string, error) {
 	d.ImportPath = path
 	d.ImportRepo = repo
 	return d.ImportId, d.ImportErr
+}
+
+func (d *MockDriver) BuildImage(dockerfile *bytes.Buffer) (string, error) {
+	d.BuildImageCalled = true
+	d.BuildImageDockerfile = dockerfile
+	return "1234567890abcdef", d.BuildImageErr
 }
 
 func (d *MockDriver) Login(r, e, u, p string) error {
