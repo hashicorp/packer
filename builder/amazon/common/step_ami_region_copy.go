@@ -14,6 +14,7 @@ import (
 type StepAMIRegionCopy struct {
 	AccessConfig *AccessConfig
 	Regions      []string
+	Name         string
 }
 
 func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
@@ -37,7 +38,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 
 		go func(region string) {
 			defer wg.Done()
-			id, err := amiRegionCopy(state, s.AccessConfig, ami, region, ec2conn.Config.Region)
+			id, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, ec2conn.Config.Region)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -69,7 +70,7 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID or error.
-func amiRegionCopy(state multistep.StateBag, config *AccessConfig, imageId string,
+func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, imageId string,
 	target string, source string) (string, error) {
 
 	// Connect to the region where the AMI will be copied to
@@ -83,6 +84,7 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, imageId strin
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
 		SourceRegion:  &source,
 		SourceImageID: &imageId,
+		Name:          &name,
 	})
 
 	if err != nil {
