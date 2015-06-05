@@ -175,6 +175,40 @@ func TestParse(t *testing.T) {
 		},
 
 		{
+			"parse-pp-only.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+							OnlyExcept: OnlyExcept{
+								Only: []string{"bar"},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pp-except.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+							OnlyExcept: OnlyExcept{
+								Except: []string{"bar"},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"parse-pp-string.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
