@@ -118,7 +118,7 @@ isotime = June 7, 7:22:43pm 2014
 
 {{isotime "2006-01-02"}} = 2014-06-07
 {{isotime "Mon 1504"}} = Sat 1922
-{{isotime "01-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
+{{isotime "02-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
 {{isotime "Hour15Year200603"}} = Hour19Year201407
 ```
 
