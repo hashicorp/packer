@@ -10,12 +10,12 @@ description: |-
 Type: `chef-solo`
 
 The Chef solo Packer provisioner installs and configures software on machines built
-by Packer using [chef-solo](http://docs.opscode.com/chef_solo.html). Cookbooks
+by Packer using [chef-solo](https://docs.chef.io/chef_solo.html). Cookbooks
 can be uploaded from your local machine to the remote machine or remote paths
 can be used.
 
 The provisioner will even install Chef onto your machine if it isn't already
-installed, using the official Chef installers provided by Opscode.
+installed, using the official Chef installers provided by Chef Inc.
 
 ## Basic Example
 
@@ -82,11 +82,11 @@ configuration is actually required, but at least `run_list` is recommended.
   These will be uploaded to the remote machine in the directory specified by the
   `staging_directory`.  By default, this is empty.
 
-* `run_list` (array of strings) - The [run list](http://docs.opscode.com/essentials_node_object_run_lists.html)
+* `run_list` (array of strings) - The [run list](https://docs.chef.io/run_lists.html)
   for Chef. By default this is empty.
 
 * `skip_install` (boolean) - If true, Chef will not automatically be installed
-  on the machine using the Opscode omnibus installers.
+  on the machine using the Chef omnibus installers.
 
 * `staging_directory` (string) - This is the directory where all the configuration
   of Chef by Packer will be placed. By default this is "/tmp/packer-chef-solo".
@@ -149,7 +149,7 @@ for readability) to install Chef. This command can be customized if you want
 to install Chef in another way.
 
 ```text
-curl -L https://www.opscode.com/chef/install.sh | \
+curl -L https://www.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
