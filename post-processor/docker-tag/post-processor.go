@@ -45,7 +45,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	if artifact.BuilderId() != dockerimport.BuilderId {
+	if artifact.BuilderId() != BuilderId &&
+		artifact.BuilderId() != dockerimport.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only tag from Docker builder artifacts.",
 			artifact.BuilderId())
