@@ -134,6 +134,8 @@ func (r *rawTemplate) Template() (*Template, error) {
 			}
 
 			// Set the configuration
+			delete(c, "except")
+			delete(c, "only")
 			delete(c, "keep_input_artifact")
 			delete(c, "type")
 			if len(c) > 0 {
