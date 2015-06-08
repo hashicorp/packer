@@ -13,7 +13,9 @@ IMPROVEMENTS:
       have prohibitive firewalls
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
+  * post-processor/docker-save: Can be chained [GH-2179]
   * post-processor/docker-tag: Support `force` option [GH-2055]
+  * post-processor/docker-tag: Can be chained [GH-2179]
 
 BUG FIXES:
 
