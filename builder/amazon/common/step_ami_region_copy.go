@@ -33,6 +33,12 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 	var wg sync.WaitGroup
 	errs := new(packer.MultiError)
 	for _, region := range s.Regions {
+
+		if region == ec2conn.Config.Region {
+			ui.Message(fmt.Sprintf("Avoid copying AMI (%s) to %s", ec2conn.Config.Region, region))
+			continue
+		}
+
 		wg.Add(1)
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
