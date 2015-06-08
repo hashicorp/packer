@@ -27,6 +27,7 @@ BUG FIXES:
       AWS for spot instance. [GH-2017]
   * builder/amazon: Private key file (only available in debug mode)
       is deleted on cleanup. [GH-1801]
+  * builder/amazon: AMI copy won't copy to the source region [GH-2123]
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
