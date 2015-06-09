@@ -169,7 +169,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 			// Modify the archive options to only include the files
 			// that are in our file list.
-			include := make([]string, 0, len(fs))
+			include := make([]string, len(fs))
 			for i, f := range fs {
 				include[i] = strings.Replace(f, path, "", 1)
 			}
