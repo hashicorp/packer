@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -28,9 +29,29 @@ func TestBlockDevice(t *testing.T) {
 				DeviceName:  aws.String("/dev/sdb"),
 				VirtualName: aws.String("ephemeral0"),
 				EBS: &ec2.EBSBlockDevice{
-					Encrypted:           aws.Boolean(false),
 					SnapshotID:          aws.String("snap-1234"),
 					VolumeType:          aws.String("standard"),
+					VolumeSize:          aws.Long(8),
+					DeleteOnTermination: aws.Boolean(true),
+				},
+			},
+		},
+		{
+			Config: &BlockDevice{
+				DeviceName:          "/dev/sdb",
+				VirtualName:         "ephemeral0",
+				VolumeType:          "io1",
+				VolumeSize:          8,
+				DeleteOnTermination: true,
+				IOPS:                1000,
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName:  aws.String("/dev/sdb"),
+				VirtualName: aws.String("ephemeral0"),
+				EBS: &ec2.EBSBlockDevice{
+					Encrypted:           aws.Boolean(false),
+					VolumeType:          aws.String("io1"),
 					VolumeSize:          aws.Long(8),
 					DeleteOnTermination: aws.Boolean(true),
 					IOPS:                aws.Long(1000),
@@ -48,11 +69,11 @@ func TestBlockDevice(t *testing.T) {
 		expected := []*ec2.BlockDeviceMapping{tc.Result}
 		got := blockDevices.BuildAMIDevices()
 		if !reflect.DeepEqual(expected, got) {
-			t.Fatalf("bad: %#v", expected)
+			t.Fatalf("Bad block device, \nexpected: %s\n\ngot: %s", awsutil.StringValue(expected), awsutil.StringValue(got))
 		}
 
 		if !reflect.DeepEqual(expected, blockDevices.BuildLaunchDevices()) {
-			t.Fatalf("bad: %#v", expected)
+			t.Fatalf("Bad block device, \nexpected: %s\n\ngot: %s", awsutil.StringValue(expected), awsutil.StringValue(blockDevices.BuildLaunchDevices()))
 		}
 	}
 }
