@@ -1,10 +1,10 @@
 package null
 
 import (
-	gossh "golang.org/x/crypto/ssh"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
+	gossh "golang.org/x/crypto/ssh"
 	"io/ioutil"
 )
 

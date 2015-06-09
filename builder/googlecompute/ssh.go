@@ -1,9 +1,9 @@
 package googlecompute
 
 import (
-	"golang.org/x/crypto/ssh"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
 )
 
 // sshAddress returns the ssh address.
