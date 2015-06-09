@@ -1,6 +1,7 @@
 package common
 
 import (
+	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -36,6 +37,12 @@ type StepDownload struct {
 
 	// A list of URLs to attempt to download this thing.
 	Url []string
+
+	// Extension is the extension to force for the file that is downloaded.
+	// Some systems require a certain extension. If this isn't set, the
+	// extension on the URL is used. Otherwise, this will be forced
+	// on the downloaded file for every URL.
+	Extension string
 }
 
 func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
@@ -60,9 +67,19 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 		targetPath := s.TargetPath
 		if targetPath == "" {
+			// Determine a cache key. This is normally just the URL but
+			// if we force a certain extension we hash the URL and add
+			// the extension to force it.
+			cacheKey := url
+			if s.Extension != "" {
+				hash := sha1.Sum([]byte(url))
+				cacheKey = fmt.Sprintf(
+					"%s.%s", hex.EncodeToString(hash[:]), s.Extension)
+			}
+
 			log.Printf("Acquiring lock to download: %s", url)
-			targetPath = cache.Lock(url)
-			defer cache.Unlock(url)
+			targetPath = cache.Lock(cacheKey)
+			defer cache.Unlock(cacheKey)
 		}
 
 		config := &DownloadConfig{
