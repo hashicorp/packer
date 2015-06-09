@@ -47,6 +47,7 @@ BUG FIXES:
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
   * command/validate: don't crash for invalid builds [GH-2139]
   * post-processor/atlas: Find common archive prefix for Windows [GH-1874]
+  * post-processor/atlas: Fix index out of range panic [GH-1959]
   * post-processor/vagrant-cloud: Fixed failing on response
   * post-processor/vagrant-cloud: Don't delete version on error [GH-2014]
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
