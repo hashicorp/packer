@@ -46,6 +46,8 @@ BUG FIXES:
       OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
       floppy disk. [GH-1879]
+  * builder/vmware: Add 100ms delay between keystrokes to avoid subtle
+      timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
