@@ -44,6 +44,22 @@ each category, the available configuration keys are alphabetized.
   specified, then use v2 api (current), if not then used old (v1) deprecated api.
   Also it can be specified via environment variable `DIGITALOCEAN_API_TOKEN`, if set.
 
+### Required for all apis:
+
+* `image` (string) - The name (or slug) of the base image to use. Required if `image_id` is not provided.
+  This is the image that will be used to launch a new droplet and provision it. You can try to use
+  "ubuntu-12-04-x64" which is the slug for "Ubuntu 12.04.4 x64".
+  See https://developers.digitalocean.com/documentation/v2/#list-all-images for the accepted image names/slugs.
+
+* `region` (string) - The name (or slug) of the region to launch the droplet in. Required if `region_id` is not provided.
+  Consequently, this is the region where the snapshot will be available.
+  You can try to use "nyc3", which is the slug for "New York 3".
+  See https://developers.digitalocean.com/documentation/v2/#list-all-regions for the accepted region names/slugs.
+
+* `size` (string) - The name (or slug) of the droplet size to use. Required if `size_id` is not provided.
+  You can try to use "512mb", which is the slug for "512MB".
+  See https://developers.digitalocean.com/documentation/v2/#list-all-sizes for the accepted size names/slugs.
+
 ### Optional:
 
 * `api_url` (string) - API endpoint, by default use https://api.digitalocean.com
@@ -52,11 +68,6 @@ each category, the available configuration keys are alphabetized.
 * `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
   sets the hostname of the machine to this value.
 
-* `image` (string) - The name (or slug) of the base image to use. This is the
-  image that will be used to launch a new droplet and provision it. This
-  defaults to 'ubuntu-12-04-x64' which is the slug for "Ubuntu 12.04.4 x64".
-  See https://developers.digitalocean.com/documentation/v2/#list-all-images for details on how to get a list of the the accepted image names/slugs.
-
 * `image_id` (integer) - The ID of the base image to use. This is the image that
   will be used to launch a new droplet and provision it.
   This setting is deprecated. Use `image` instead.
@@ -64,18 +75,9 @@ each category, the available configuration keys are alphabetized.
 * `private_networking` (boolean) - Set to `true` to enable private networking
   for the droplet being created. This defaults to `false`, or not enabled.
 
-* `region` (string) - The name (or slug) of the region to launch the droplet in.
-  Consequently, this is the region where the snapshot will be available.
-  This defaults to "nyc3", which is the slug for "New York 3".
-  See https://developers.digitalocean.com/documentation/v2/#list-all-regions for the accepted region names/slugs.
-
 * `region_id` (integer) - The ID of the region to launch the droplet in. Consequently,
   this is the region where the snapshot will be available.
   This setting is deprecated. Use `region` instead.
-
-* `size` (string) - The name (or slug) of the droplet size to use.
-  This defaults to "512mb", which is the slug for "512MB".
-  See https://developers.digitalocean.com/documentation/v2/#list-all-sizes for the accepted size names/slugs.
 
 * `size_id` (integer) - The ID of the droplet size to use.
   This setting is deprecated. Use `size` instead.
@@ -107,8 +109,10 @@ own access tokens:
 ```javascript
 {
   "type": "digitalocean",
-  "client_id": "YOUR CLIENT ID",
-  "api_key": "YOUR API KEY"
+  "api_token": "YOUR API TOKEN",
+  "image": "ubuntu-12-04-x64",
+  "region": "nyc3",
+  "size": "512mb"
 }
 ```
 

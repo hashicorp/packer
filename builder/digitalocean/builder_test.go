@@ -1,22 +1,29 @@
 package digitalocean
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func init() {
 	// Clear out the credential env vars
 	os.Setenv("DIGITALOCEAN_API_KEY", "")
 	os.Setenv("DIGITALOCEAN_CLIENT_ID", "")
+	os.Setenv("DIGITALOCEAN_API_TOKEN", "")
 }
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"client_id": "foo",
 		"api_key":   "bar",
+		"api_url":   "http://example.com",
+		"api_token": "token",
+		"image":     "ubuntu-14-04-x64",
+		"size":      "512m",
+		"region":    "nyc3",
 	}
 }
 
@@ -43,6 +50,49 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_APIToken(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test good
+	config["api_token"] = "token"
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.APIToken != "token" {
+		t.Errorf("access token invalid: %s", b.config.APIToken)
+	}
+
+	// Test bad
+	delete(config, "api_token")
+	delete(config, "api_key")
+	b = Builder{}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test env variable
+	delete(config, "api_token")
+	os.Setenv("DIGITALOCEAN_API_TOKEN", "token")
+	defer os.Setenv("DIGITALOCEAN_API_TOKEN", "")
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_APIKey(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -62,6 +112,7 @@ func TestBuilderPrepare_APIKey(t *testing.T) {
 	}
 
 	// Test bad
+	delete(config, "api_token")
 	delete(config, "api_key")
 	b = Builder{}
 	warnings, err = b.Prepare(config)
@@ -104,6 +155,7 @@ func TestBuilderPrepare_ClientID(t *testing.T) {
 	}
 
 	// Test bad
+	delete(config, "api_token")
 	delete(config, "client_id")
 	b = Builder{}
 	warnings, err = b.Prepare(config)
@@ -155,10 +207,6 @@ func TestBuilderPrepare_Region(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.Region != DefaultRegion {
-		t.Errorf("found %s, expected %s", b.config.Region, DefaultRegion)
-	}
-
 	expected := "sfo1"
 
 	// Test set
@@ -191,10 +239,6 @@ func TestBuilderPrepare_Size(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.Size != DefaultSize {
-		t.Errorf("found %s, expected %s", b.config.Size, DefaultSize)
-	}
-
 	expected := "1024mb"
 
 	// Test set
@@ -225,10 +269,6 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.Image != DefaultImage {
-		t.Errorf("found %s, expected %s", b.config.Image, DefaultImage)
 	}
 
 	expected := "ubuntu-14-04-x64"
