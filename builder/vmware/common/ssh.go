@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
-	gossh "golang.org/x/crypto/ssh"
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 func SSHAddressFunc(config *SSHConfig) func(multistep.StateBag) (string, error) {

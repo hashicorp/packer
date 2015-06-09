@@ -3,10 +3,10 @@ package ssh
 import (
 	"bufio"
 	"bytes"
-	"golang.org/x/crypto/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"log"

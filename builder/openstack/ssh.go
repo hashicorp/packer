@@ -1,10 +1,10 @@
 package openstack
 
 import (
-	"golang.org/x/crypto/ssh"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
 	"time"
 
 	"github.com/mitchellh/gophercloud-fork-40444fb"
