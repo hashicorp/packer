@@ -6,7 +6,7 @@ import (
 
 func TestLongestCommonPrefix(t *testing.T) {
 	cases := []struct {
-		Input []string
+		Input  []string
 		Output string
 	}{
 		{

@@ -1,9 +1,9 @@
 package digitalocean
 
 import (
-	"golang.org/x/crypto/ssh"
 	"fmt"
 	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
 )
 
 func sshAddress(state multistep.StateBag) (string, error) {

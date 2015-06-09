@@ -3,10 +3,10 @@ package common
 import (
 	"fmt"
 
-	"golang.org/x/crypto/ssh"
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	packerssh "github.com/mitchellh/packer/communicator/ssh"
+	"golang.org/x/crypto/ssh"
 )
 
 func SSHAddress(state multistep.StateBag) (string, error) {
