@@ -33,6 +33,7 @@ BUG FIXES:
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
+  * builder/digitalocean: Private images can be used as a source [GH-1792]
   * builder/docker: Fixed hang on prompt while copying script
   * builder/docker: Use `docker exec` for newer versions of Docker for
       running scripts [GH-1993]
