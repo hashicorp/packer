@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/packer/plugin"
 )
 
 // Prepares the signal handlers so that we handle interrupts properly.
