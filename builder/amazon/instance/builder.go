@@ -80,7 +80,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"-s {{.SecretKey}} " +
 			"-d {{.BundleDirectory}} " +
 			"--batch " +
-			"--location {{.Region}} " +
+			"--region {{.Region}} " +
 			"--retry"
 	}
 
