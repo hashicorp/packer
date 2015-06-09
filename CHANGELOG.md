@@ -37,6 +37,7 @@ BUG FIXES:
       running scripts [GH-1993]
   * builder/docker: Fix crash that could occur at certain timed ctrl-c [GH-1838]
   * builder/docker: validate that `export_path` is not a directory [GH-2105]
+  * builder/google: `ssh_timeout` is respected [GH-1781]
   * builder/qemu: Add `disk_discard` option [GH-2120]
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
