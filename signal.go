@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
@@ -14,6 +15,7 @@ import (
 func setupSignalHandlers(ui packer.Ui) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
+	signal.Notify(ch, syscall.SIGTERM)
 
 	go func() {
 		// First interrupt. We mostly ignore this because it allows the
