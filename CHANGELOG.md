@@ -41,8 +41,12 @@ BUG FIXES:
   * builder/docker: validate that `export_path` is not a directory [GH-2105]
   * builder/google: `ssh_timeout` is respected [GH-1781]
   * builder/qemu: Add `disk_discard` option [GH-2120]
+  * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
+      OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
       floppy disk. [GH-1879]
+  * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
+      OS installers. [GH-1709]
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
   * command/validate: don't crash for invalid builds [GH-2139]
