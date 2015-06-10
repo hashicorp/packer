@@ -31,12 +31,10 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	// Wait a second to ensure VM is really shutdown.
 	log.Println("1 second timeout to ensure VM is really shutdown")
 	time.Sleep(1 * time.Second)
+	ui.Say("Preparing to export machine...")
 
 	// Clear out the Packer-created forwarding rule
-	ui.Say("Preparing to export machine...")
-	var command []string
-
-	if s.SkipNatMapping == false {
+	if !s.SkipNatMapping {
 		ui.Message(fmt.Sprintf(
 			"Deleting forwarded port mapping for SSH (host port %d)",
 			state.Get("sshHostPort")))
@@ -52,13 +50,12 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	// Export the VM to an OVF
 	outputPath := filepath.Join(s.OutputDir, vmName+"."+s.Format)
 
-	command = []string{
+	command := []string{
 		"export",
 		vmName,
 		"--output",
 		outputPath,
 	}
-
 	command = append(command, s.ExportOpts...)
 
 	ui.Say("Exporting virtual machine...")
