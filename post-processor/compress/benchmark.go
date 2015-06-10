@@ -4,17 +4,17 @@ package main
 
 import (
 	"compress/flate"
-	gzip "compress/gzip"
+	"compress/gzip"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"fmt"
 	"os"
 	"runtime"
 	"testing"
 
-	bgzf "github.com/biogo/hts/bgzf"
-	pgzip "github.com/klauspost/pgzip"
-	lz4 "github.com/pierrec/lz4"
+	"github.com/biogo/hts/bgzf"
+	"github.com/klauspost/pgzip"
+	"github.com/pierrec/lz4"
 )
 
 type Compressor struct {
@@ -60,7 +60,7 @@ func NewCompressor(src, dst string) (*Compressor, error) {
 
 func main() {
 
-        runtime.GOMAXPROCS(runtime.NumCPU())
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	var resw testing.BenchmarkResult
 	var resr testing.BenchmarkResult
@@ -174,7 +174,7 @@ func (c *Compressor) BenchmarkPGZIPReader(b *testing.B) {
 
 func (c *Compressor) BenchmarkLZ4Writer(b *testing.B) {
 	cw := lz4.NewWriter(c.w)
-//	cw.Header.HighCompression = true
+	//	cw.Header.HighCompression = true
 	cw.Header.NoChecksum = true
 	b.ResetTimer()
 
