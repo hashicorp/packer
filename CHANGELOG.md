@@ -35,6 +35,7 @@ BUG FIXES:
   * builder/amazon: AMI copy won't copy to the source region [GH-2123]
   * builder/amazon: Validate AMI doesn't exist with name prior to build [GH-1774]
   * builder/amazon: Improved retry logic around waiting for instances. [GH-1764]
+  * builder/amazon: Fix issues with creating Block Devices. [GH-2195]
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/amazon/instance: Use `--region` flag for bundle upload command. [GH-1931]
