@@ -45,11 +45,11 @@ type Config struct {
 	ctx               *interpolate.Context
 }
 
-type CompressPostProcessor struct {
+type PostProcessor struct {
 	cfg Config
 }
 
-func (p *CompressPostProcessor) Configure(raws ...interface{}) error {
+func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.cfg.Compression = -1
 	err := config.Decode(&p.cfg, &config.DecodeOpts{
 		Interpolate: true,
@@ -109,7 +109,7 @@ func (p *CompressPostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *CompressPostProcessor) fillMetadata(metadata Metadata, files []string) Metadata {
+func (p *PostProcessor) fillMetadata(metadata Metadata, files []string) Metadata {
 	// layout shows by example how the reference time should be represented.
 	const layout = "2006-01-02_15-04-05"
 	t := time.Now()
@@ -133,9 +133,9 @@ func (p *CompressPostProcessor) fillMetadata(metadata Metadata, files []string) 
 	return metadata
 }
 
-func (p *CompressPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	newartifact := &Artifact{builderId: artifact.BuilderId(), dir: p.cfg.OutputPath}
-	var metafile string = filepath.Join(p.cfg.OutputPath, "metadata")
+	metafile := filepath.Join(p.cfg.OutputPath, "metadata")
 
 	_, err := os.Stat(newartifact.dir)
 	if err == nil {
@@ -206,7 +206,7 @@ func (p *CompressPostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifa
 	return newartifact, p.cfg.KeepInputArtifact, nil
 }
 
-func (p *CompressPostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
 	fw, err := os.Create(dst)
 	if err != nil {
 		return nil, fmt.Errorf("tar error: %s", err)
@@ -225,7 +225,7 @@ func (p *CompressPostProcessor) cmpTAR(src []string, dst string) ([]string, erro
 		target, _ := os.Readlink(name)
 		header, err := tar.FileInfoHeader(fi, target)
 		if err != nil {
-			return nil, fmt.Errorf("tar erorr: %s", err)
+			return nil, fmt.Errorf("tar error: %s", err)
 		}
 
 		if err = tw.WriteHeader(header); err != nil {
@@ -246,7 +246,7 @@ func (p *CompressPostProcessor) cmpTAR(src []string, dst string) ([]string, erro
 	return []string{dst}, nil
 }
 
-func (p *CompressPostProcessor) cmpGZIP(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpGZIP(src []string, dst string) ([]string, error) {
 	var res []string
 	for _, name := range src {
 		filename := filepath.Join(dst, filepath.Base(name))
@@ -279,7 +279,7 @@ func (p *CompressPostProcessor) cmpGZIP(src []string, dst string) ([]string, err
 	return res, nil
 }
 
-func (p *CompressPostProcessor) cmpPGZIP(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpPGZIP(src []string, dst string) ([]string, error) {
 	var res []string
 	for _, name := range src {
 		filename := filepath.Join(dst, filepath.Base(name))
@@ -312,7 +312,7 @@ func (p *CompressPostProcessor) cmpPGZIP(src []string, dst string) ([]string, er
 	return res, nil
 }
 
-func (p *CompressPostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
 	var res []string
 	for _, name := range src {
 		filename := filepath.Join(dst, filepath.Base(name))
@@ -348,7 +348,7 @@ func (p *CompressPostProcessor) cmpLZ4(src []string, dst string) ([]string, erro
 	return res, nil
 }
 
-func (p *CompressPostProcessor) cmpBGZF(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpBGZF(src []string, dst string) ([]string, error) {
 	var res []string
 	for _, name := range src {
 		filename := filepath.Join(dst, filepath.Base(name))
@@ -381,11 +381,11 @@ func (p *CompressPostProcessor) cmpBGZF(src []string, dst string) ([]string, err
 	return res, nil
 }
 
-func (p *CompressPostProcessor) cmpE2FS(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpE2FS(src []string, dst string) ([]string, error) {
 	panic("not implemented")
 }
 
-func (p *CompressPostProcessor) cmpZIP(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpZIP(src []string, dst string) ([]string, error) {
 	fw, err := os.Create(dst)
 	if err != nil {
 		return nil, fmt.Errorf("zip error: %s", err)
@@ -398,7 +398,7 @@ func (p *CompressPostProcessor) cmpZIP(src []string, dst string) ([]string, erro
 	for _, name := range src {
 		header, err := zw.Create(name)
 		if err != nil {
-			return nil, fmt.Errorf("zip erorr: %s", err)
+			return nil, fmt.Errorf("zip error: %s", err)
 		}
 
 		fr, err := os.Open(name)
