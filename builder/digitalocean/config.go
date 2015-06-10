@@ -12,15 +12,12 @@ import (
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
-	//"github.com/digitalocean/godo"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	APIToken string `mapstructure:"api_token"`
-
-	// OLD STUFF
 
 	Region string `mapstructure:"region"`
 	Size   string `mapstructure:"size"`
