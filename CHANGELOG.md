@@ -8,7 +8,6 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
-  * builder/amazon-ebs: Add pre-build step, validate unique AMI name [GH-2187]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
@@ -38,6 +37,7 @@ BUG FIXES:
   * builder/amazon: Improved retry logic around waiting for instances. [GH-1764]
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
+  * builder/amazon/instance: Use `--region` flag for bundle upload command. [GH-1931]
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/digitalocean: Private images can be used as a source [GH-1792]
   * builder/docker: Fixed hang on prompt while copying script
