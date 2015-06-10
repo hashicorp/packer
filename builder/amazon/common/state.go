@@ -67,10 +67,10 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 
 // InstanceStateRefreshFunc returns a StateRefreshFunc that is used to watch
 // an EC2 instance.
-func InstanceStateRefreshFunc(conn *ec2.EC2, i *ec2.Instance) StateRefreshFunc {
+func InstanceStateRefreshFunc(conn *ec2.EC2, instanceId string) StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIDs: []*string{i.InstanceID},
+			InstanceIDs: []*string{&instanceId},
 		})
 		if err != nil {
 			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidInstanceID.NotFound" {
