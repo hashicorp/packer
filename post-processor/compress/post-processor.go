@@ -1,10 +1,10 @@
 package compress
 
 import (
-	tar "archive/tar"
-	zip "archive/zip"
+	"archive/tar"
+	"archive/zip"
 	"compress/flate"
-	gzip "compress/gzip"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	bgzf "github.com/biogo/hts/bgzf"
-	pgzip "github.com/klauspost/pgzip"
+	"github.com/biogo/hts/bgzf"
+	"github.com/klauspost/pgzip"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
-	lz4 "github.com/pierrec/lz4"
+	"github.com/pierrec/lz4"
 	"gopkg.in/yaml.v2"
 )
 
