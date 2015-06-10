@@ -16,7 +16,9 @@ import (
 	bgzf "github.com/biogo/hts/bgzf"
 	pgzip "github.com/klauspost/pgzip"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 	lz4 "github.com/pierrec/lz4"
 	"gopkg.in/yaml.v2"
 )
@@ -40,7 +42,7 @@ type Config struct {
 	NumCPU            int    `mapstructure:"numcpu"`
 	Format            string `mapstructure:"format"`
 	KeepInputArtifact bool   `mapstructure:"keep_input_artifact"`
-	tpl               *packer.ConfigTemplate
+	ctx               *interpolate.Context
 }
 
 type CompressPostProcessor struct {
@@ -49,24 +51,22 @@ type CompressPostProcessor struct {
 
 func (p *CompressPostProcessor) Configure(raws ...interface{}) error {
 	p.cfg.Compression = -1
-	_, err := common.DecodeConfig(&p.cfg, raws...)
-	if err != nil {
-		return err
-	}
+	err := config.Decode(&p.cfg, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+			// TODO figure out if something needs to go here.
+			},
+		},
+	}, raws...)
 
 	errs := new(packer.MultiError)
-
-	p.cfg.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.cfg.tpl.UserVars = p.cfg.PackerUserVars
 
 	if p.cfg.OutputPath == "" {
 		p.cfg.OutputPath = "packer_{{.BuildName}}_{{.Provider}}"
 	}
 
-	if err = p.cfg.tpl.Validate(p.cfg.OutputPath); err != nil {
+	if err = interpolate.Validate(p.cfg.OutputPath, p.cfg.ctx); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
@@ -94,7 +94,7 @@ func (p *CompressPostProcessor) Configure(raws ...interface{}) error {
 				errs, fmt.Errorf("%s must be set", key))
 		}
 
-		*ptr, err = p.cfg.tpl.Process(*ptr, nil)
+		*ptr, err = interpolate.Render(p.cfg.OutputPath, p.cfg.ctx)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", key, err))
