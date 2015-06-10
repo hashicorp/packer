@@ -223,31 +223,12 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		instanceId = *spotResp.SpotInstanceRequests[0].InstanceID
 	}
 
-	instanceResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIDs: []*string{&instanceId}})
-	for i := 0; i < 10; i++ {
-		if err == nil {
-			break
-		}
-
-		time.Sleep(3 * time.Second)
-		instanceResp, err = ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIDs: []*string{&instanceId}})
-	}
-	if err != nil {
-		err := fmt.Errorf("Error finding source instance (%s): %s", instanceId, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	s.instance = instanceResp.Reservations[0].Instances[0]
-	ui.Message(fmt.Sprintf("Instance ID: %s", *s.instance.InstanceID))
-
-	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", *s.instance.InstanceID))
+	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
+	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
 	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "running",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, s.instance),
+		Refresh:   InstanceStateRefreshFunc(ec2conn, instanceId),
 		StepState: state,
 	}
 	latestInstance, err := WaitForState(&stateChange)
@@ -329,7 +310,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 		}
 		stateChange := StateChangeConf{
 			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
+			Refresh: InstanceStateRefreshFunc(ec2conn, s.instance.InstanceId),
 			Target:  "terminated",
 		}
 
