@@ -310,7 +310,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 		}
 		stateChange := StateChangeConf{
 			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, s.instance.InstanceId),
+			Refresh: InstanceStateRefreshFunc(ec2conn, *s.instance.InstanceID),
 			Target:  "terminated",
 		}
 
