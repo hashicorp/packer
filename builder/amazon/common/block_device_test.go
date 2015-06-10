@@ -39,6 +39,23 @@ func TestBlockDevice(t *testing.T) {
 		{
 			Config: &BlockDevice{
 				DeviceName:          "/dev/sdb",
+				VolumeSize:          8,
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName:  aws.String("/dev/sdb"),
+				VirtualName: aws.String(""),
+				EBS: &ec2.EBSBlockDevice{
+					Encrypted:           aws.Boolean(false),
+					VolumeType:          aws.String(""),
+					VolumeSize:          aws.Long(8),
+					DeleteOnTermination: aws.Boolean(false),
+				},
+			},
+		},
+		{
+			Config: &BlockDevice{
+				DeviceName:          "/dev/sdb",
 				VirtualName:         "ephemeral0",
 				VolumeType:          "io1",
 				VolumeSize:          8,
