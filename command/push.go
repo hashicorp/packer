@@ -157,7 +157,7 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Build the upload options
 	var uploadOpts uploadOpts
-	uploadOpts.Slug = push.Name
+	uploadOpts.Slug = name
 	uploadOpts.Builds = make(map[string]*uploadBuildInfo)
 	for _, b := range tpl.Builders {
 		info := &uploadBuildInfo{Type: b.Type}
