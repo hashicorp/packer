@@ -30,11 +30,8 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	var sshHostPort uint
-	if s.SkipNatMapping {
-		sshHostPort = s.GuestPort
-		log.Printf("Skipping SSH NAT mapping and using SSH port %d", sshHostPort)
-	} else {
+	sshHostPort := s.GuestPort
+	if !s.SkipNatMapping {
 		log.Printf("Looking for available SSH port between %d and %d",
 			s.HostPortMin, s.HostPortMax)
 		var offset uint = 0
