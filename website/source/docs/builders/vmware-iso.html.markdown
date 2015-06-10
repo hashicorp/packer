@@ -72,7 +72,7 @@ each category, the available options are alphabetized and described.
 
 ### Optional:
 
-* `additionaldisk_size` (array of integers) - The size(s) of any additional
+* `disk_additional_size` (array of integers) - The size(s) of any additional
   hard disks for the VM in megabytes. If this is not specified then the VM will
   only contain a primary hard disk. The builder uses expandable, not fixed-size
   virtual hard disks, so the actual file representing the disk will not use the
