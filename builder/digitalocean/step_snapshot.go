@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -12,13 +13,13 @@ import (
 type stepSnapshot struct{}
 
 func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(DigitalOceanClient)
+	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
-	dropletId := state.Get("droplet_id").(uint)
+	dropletId := state.Get("droplet_id").(int)
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
-	err := client.CreateSnapshot(dropletId, c.SnapshotName)
+	_, _, err := client.DropletActions.Snapshot(dropletId, c.SnapshotName)
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
 		state.Put("error", err)
@@ -36,7 +37,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
-	images, err := client.Images()
+	images, _, err := client.Images.List(nil)
 	if err != nil {
 		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
 		state.Put("error", err)
@@ -44,10 +45,10 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	var imageId uint
+	var imageId int
 	for _, image := range images {
 		if image.Name == c.SnapshotName {
-			imageId = image.Id
+			imageId = image.ID
 			break
 		}
 	}
@@ -60,7 +61,6 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Snapshot image ID: %d", imageId)
-
 	state.Put("snapshot_image_id", imageId)
 	state.Put("snapshot_name", c.SnapshotName)
 	state.Put("region", c.Region)

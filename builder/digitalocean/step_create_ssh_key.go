@@ -9,17 +9,18 @@ import (
 	"log"
 
 	"code.google.com/p/gosshold/ssh"
+	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 
 type stepCreateSSHKey struct {
-	keyId uint
+	keyId int
 }
 
 func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(DigitalOceanClient)
+	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary ssh key for droplet...")
@@ -46,7 +47,10 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
-	keyId, err := client.CreateKey(name, pub_sshformat)
+	key, _, err := client.Keys.Create(&godo.KeyCreateRequest{
+		Name:      name,
+		PublicKey: pub_sshformat,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary SSH key: %s", err)
 		state.Put("error", err)
@@ -55,12 +59,12 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// We use this to check cleanup
-	s.keyId = keyId
+	s.keyId = key.ID
 
 	log.Printf("temporary ssh key name: %s", name)
 
 	// Remember some state for the future
-	state.Put("ssh_key_id", keyId)
+	state.Put("ssh_key_id", key.ID)
 
 	return multistep.ActionContinue
 }
@@ -71,18 +75,14 @@ func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(DigitalOceanClient)
+	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
 
 	ui.Say("Deleting temporary ssh key...")
-	err := client.DestroyKey(s.keyId)
-
-	curlstr := fmt.Sprintf("curl -H 'Authorization: Bearer #TOKEN#' -X DELETE '%v/v2/account/keys/%v'", c.APIURL, s.keyId)
-
+	_, err := client.Keys.DeleteByID(s.keyId)
 	if err != nil {
-		log.Printf("Error cleaning up ssh key: %v", err.Error())
+		log.Printf("Error cleaning up ssh key: %s", err)
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up ssh key. Please delete the key manually: %v", curlstr))
+			"Error cleaning up ssh key. Please delete the key manually: %s", err))
 	}
 }
