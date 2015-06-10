@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const BuilderId = "vtolstov.compress"
+const BuilderId = "packer.post-processor.compress"
 
 type Artifact struct {
 	builderId string
