@@ -101,7 +101,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			FloatingIp:     b.config.FloatingIp,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(csp, b.config.SSHInterface, b.config.SSHPort),
+			SSHAddress:     SSHAddress(csp, b.config.SSHInterface, b.config.SSHPort, b.config.SSHPrivateIp),
 			SSHConfig:      SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},

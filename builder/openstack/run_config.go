@@ -17,6 +17,7 @@ type RunConfig struct {
 	SSHUsername       string   `mapstructure:"ssh_username"`
 	SSHPort           int      `mapstructure:"ssh_port"`
 	SSHInterface      string   `mapstructure:"ssh_interface"`
+	SSHPrivateIp      bool     `mapstructure:"ssh_private_ip"`
 	OpenstackProvider string   `mapstructure:"openstack_provider"`
 	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
 	RackconnectWait   bool     `mapstructure:"rackconnect_wait"`
