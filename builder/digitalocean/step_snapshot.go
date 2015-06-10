@@ -37,7 +37,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
-	images, _, err := client.Images.List(nil)
+	images, _, err := client.Images.ListUser(&godo.ListOptions{PerPage: 200})
 	if err != nil {
 		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
 		state.Put("error", err)
