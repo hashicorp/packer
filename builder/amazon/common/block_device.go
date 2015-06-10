@@ -35,7 +35,7 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 		}
 
 		// IOPS is only valid for SSD Volumes
-		if blockDevice.VolumeType != "standard" && blockDevice.VolumeType != "gp2" {
+		if blockDevice.VolumeType != "" && blockDevice.VolumeType != "standard" && blockDevice.VolumeType != "gp2" {
 			ebsBlockDevice.IOPS = &blockDevice.IOPS
 		}
 
