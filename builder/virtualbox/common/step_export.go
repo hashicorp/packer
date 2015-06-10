@@ -17,9 +17,10 @@ import (
 // Produces:
 //   exportPath string - The path to the resulting export.
 type StepExport struct {
-	Format     string
-	OutputDir  string
-	ExportOpts []string
+	Format         string
+	OutputDir      string
+	ExportOpts     []string
+	SkipNatMapping bool
 }
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
@@ -33,15 +34,19 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Clear out the Packer-created forwarding rule
 	ui.Say("Preparing to export machine...")
-	ui.Message(fmt.Sprintf(
-		"Deleting forwarded port mapping for SSH (host port %d)",
-		state.Get("sshHostPort")))
-	command := []string{"modifyvm", vmName, "--natpf1", "delete", "packerssh"}
-	if err := driver.VBoxManage(command...); err != nil {
-		err := fmt.Errorf("Error deleting port forwarding rule: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	var command []string
+
+	if s.SkipNatMapping == false {
+		ui.Message(fmt.Sprintf(
+			"Deleting forwarded port mapping for SSH (host port %d)",
+			state.Get("sshHostPort")))
+		command := []string{"modifyvm", vmName, "--natpf1", "delete", "packerssh"}
+		if err := driver.VBoxManage(command...); err != nil {
+			err := fmt.Errorf("Error deleting port forwarding rule: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Export the VM to an OVF
