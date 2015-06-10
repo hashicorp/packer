@@ -5,40 +5,34 @@ import (
 	"os"
 )
 
-const BuilderId = "packer.post-processor.compress"
+const BuilderId = "vtolstov.compress"
 
 type Artifact struct {
-	Path     string
-	Provider string
+	builderId string
+	dir       string
+	f         []string
 }
 
-func NewArtifact(provider, path string) *Artifact {
-	return &Artifact{
-		Path:     path,
-		Provider: provider,
-	}
-}
-
-func (*Artifact) BuilderId() string {
+func (a *Artifact) BuilderId() string {
 	return BuilderId
 }
 
-func (self *Artifact) Id() string {
-	return ""
+func (a *Artifact) Files() []string {
+	return a.f
 }
 
-func (self *Artifact) Files() []string {
-	return []string{self.Path}
+func (*Artifact) Id() string {
+	return "COMPRESS"
 }
 
-func (self *Artifact) String() string {
-	return fmt.Sprintf("'%s' compressing: %s", self.Provider, self.Path)
+func (a *Artifact) String() string {
+	return fmt.Sprintf("VM compressed files in directory: %s", a.dir)
 }
 
 func (*Artifact) State(name string) interface{} {
 	return nil
 }
 
-func (self *Artifact) Destroy() error {
-	return os.Remove(self.Path)
+func (a *Artifact) Destroy() error {
+	return os.RemoveAll(a.dir)
 }
