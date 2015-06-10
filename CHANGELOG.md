@@ -13,6 +13,8 @@ IMPROVEMENTS:
       RackConnect data to appear
   * buidler/openstakc: Add `ssh_interface` option for rackconnect for users that
       have prohibitive firewalls
+  * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
+      automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
