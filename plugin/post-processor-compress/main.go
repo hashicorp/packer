@@ -10,6 +10,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterPostProcessor(new(compress.PostProcessor))
+	server.RegisterPostProcessor(new(compress.CompressPostProcessor))
 	server.Serve()
 }
