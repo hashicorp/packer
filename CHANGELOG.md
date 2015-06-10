@@ -8,6 +8,7 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
+  * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
   * buidler/openstakc: Add `ssh_interface` option for rackconnect for users that
