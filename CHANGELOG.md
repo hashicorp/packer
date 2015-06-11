@@ -34,6 +34,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: Fix potential panic for post-processor plugin exits [GH-2098]
+  * builder/amazon: Allow spaces in AMI names when using `clean_ami_name` [GH-2182]
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
   * builder/amazon: Retry finding created instance for eventual
       consistency. [GH-2129]
