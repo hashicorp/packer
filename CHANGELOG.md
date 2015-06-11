@@ -5,6 +5,7 @@ BACKWARDS INCOMPATIBILITIES:
   * The DigitalOcean builder no longer supports the v1 API which has been
       deprecated for some time. Most configurations should continue to
       work as long as you use the `api_token` field for auth.
+  * builder/digitalocean: `image`, `region`, and `size` are now required.
 
 FEATURES:
 
