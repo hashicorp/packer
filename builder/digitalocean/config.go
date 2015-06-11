@@ -26,6 +26,7 @@ type Config struct {
 	PrivateNetworking bool   `mapstructure:"private_networking"`
 	SnapshotName      string `mapstructure:"snapshot_name"`
 	DropletName       string `mapstructure:"droplet_name"`
+	UserData          string `mapstructure:"user_data"`
 	SSHUsername       string `mapstructure:"ssh_username"`
 	SSHPort           uint   `mapstructure:"ssh_port"`
 
