@@ -67,6 +67,8 @@ each category, the available configuration keys are alphabetized.
   for a droplet to enter a desired state (such as "active") before
   timing out. The default state timeout is "6m".
 
+* `user_data` (string) - User data to launch with the Droplet.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your
