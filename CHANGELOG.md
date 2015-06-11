@@ -15,6 +15,7 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
+  * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
