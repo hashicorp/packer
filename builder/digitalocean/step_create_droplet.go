@@ -31,6 +31,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 			godo.DropletCreateSSHKey{ID: int(sshKeyId)},
 		},
 		PrivateNetworking: c.PrivateNetworking,
+		UserData:          c.UserData,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
