@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/digitalocean/godo"
 )
 
 // waitForState simply blocks until the droplet is in
 // a state we expect, while eventually timing out.
-func waitForDropletState(desiredState string, dropletId uint, client DigitalOceanClient, timeout time.Duration) error {
+func waitForDropletState(
+	desiredState string, dropletId int,
+	client *godo.Client, timeout time.Duration) error {
 	done := make(chan struct{})
 	defer close(done)
 
@@ -19,13 +23,13 @@ func waitForDropletState(desiredState string, dropletId uint, client DigitalOcea
 			attempts += 1
 
 			log.Printf("Checking droplet status... (attempt: %d)", attempts)
-			_, status, err := client.DropletStatus(dropletId)
+			droplet, _, err := client.Droplets.Get(dropletId)
 			if err != nil {
 				result <- err
 				return
 			}
 
-			if status == desiredState {
+			if droplet.Status == desiredState {
 				result <- nil
 				return
 			}

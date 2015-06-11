@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"fmt"
 
+	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -10,10 +11,10 @@ import (
 type stepDropletInfo struct{}
 
 func (s *stepDropletInfo) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(DigitalOceanClient)
+	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
-	dropletId := state.Get("droplet_id").(uint)
+	dropletId := state.Get("droplet_id").(int)
 
 	ui.Say("Waiting for droplet to become active...")
 
@@ -26,16 +27,25 @@ func (s *stepDropletInfo) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the IP on the state for later
-	ip, _, err := client.DropletStatus(dropletId)
+	droplet, _, err := client.Droplets.Get(dropletId)
 	if err != nil {
-		err := fmt.Errorf("Error retrieving droplet ID: %s", err)
+		err := fmt.Errorf("Error retrieving droplet: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state.Put("droplet_ip", ip)
+	// Verify we have an IPv4 address
+	invalid := droplet.Networks == nil ||
+		len(droplet.Networks.V4) == 0
+	if invalid {
+		err := fmt.Errorf("IPv4 address not found for droplet!")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
+	state.Put("droplet_ip", droplet.Networks.V4[0].IPAddress)
 	return multistep.ActionContinue
 }
 
