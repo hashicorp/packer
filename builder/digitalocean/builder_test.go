@@ -10,6 +10,9 @@ import (
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"api_token": "bar",
+		"region":    "nyc2",
+		"size":      "512mb",
+		"image":     "foo",
 	}
 }
 
@@ -56,6 +59,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	config := testConfig()
 
 	// Test default
+	delete(config, "region")
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -87,6 +91,7 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	config := testConfig()
 
 	// Test default
+	delete(config, "size")
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -118,6 +123,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	config := testConfig()
 
 	// Test default
+	delete(config, "image")
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
