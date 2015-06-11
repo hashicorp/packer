@@ -39,6 +39,7 @@ type Config struct {
 	StagingDir           string   `mapstructure:"staging_directory"`
 	ValidationKeyPath    string   `mapstructure:"validation_key_path"`
 	ValidationClientName string   `mapstructure:"validation_client_name"`
+	CleanupFromGuest     bool     `mapstructure:"cleanup_from_guest"`
 
 	ctx interpolate.Context
 }
@@ -182,13 +183,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	err = p.executeChef(ui, comm, configPath, jsonPath)
 	if !p.config.SkipCleanNode {
-		if err2 := p.cleanNode(ui, comm, nodeName); err2 != nil {
+		if err2 := p.cleanNode(ui, comm, nodeName, configPath, jsonPath); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef node: %s", err2)
 		}
 	}
 
 	if !p.config.SkipCleanClient {
-		if err2 := p.cleanClient(ui, comm, nodeName); err2 != nil {
+		if err2 := p.cleanClient(ui, comm, nodeName, configPath, jsonPath); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef client: %s", err2)
 		}
 	}
@@ -318,36 +319,30 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string) error {
-	ui.Say("Cleaning up chef node...")
-	app := fmt.Sprintf("knife node delete %s -y", node)
+func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string, configPath string, jsonPath string) error {
 
-	cmd := exec.Command("sh", "-c", app)
-	out, err := cmd.Output()
+	if p.config.CleanupFromGuest {
+		command	:= fmt.Sprintf("{{if .Sudo}}sudo {{end}} knife node delete %s -c {{.ConfigPath}} -y", node)
+		return p.executeCommandOnGuest("cleanNode", command, ui, comm, configPath, jsonPath)
 
-	ui.Message(fmt.Sprintf("%s", out))
-
-	if err != nil {
-		return err
+	} else {
+		command	:= fmt.Sprintf("knife node delete %s -y", node)
+		return p.executeCommandOnHost("cleanNode", command, ui, comm)
 	}
 
-	return nil
 }
 
-func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string) error {
-	ui.Say("Cleaning up chef client...")
-	app := fmt.Sprintf("knife client delete %s -y", node)
+func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string, configPath string, jsonPath string) error {
 
-	cmd := exec.Command("sh", "-c", app)
-	out, err := cmd.Output()
+	if p.config.CleanupFromGuest {
+		command	:= fmt.Sprintf("{{if .Sudo}}sudo {{end}} knife client delete %s -c {{.ConfigPath}} -y", node)
+		return p.executeCommandOnGuest("cleanClient", command, ui, comm, configPath, jsonPath)
 
-	ui.Message(fmt.Sprintf("%s", out))
-
-	if err != nil {
-		return err
+	} else {
+		command	:= fmt.Sprintf("knife client delete %s -y", node)
+		return p.executeCommandOnHost("cleanClient", command, ui, comm)
 	}
 
-	return nil
 }
 
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
@@ -392,6 +387,50 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 
 	if cmd.ExitStatus != 0 {
 		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+	}
+
+	return nil
+}
+
+func (p *Provisioner) executeCommandOnGuest(name string, userCommand string, ui packer.Ui, comm packer.Communicator, config string, json string) error {
+
+	command, err := p.config.tpl.Process(userCommand, &ExecuteTemplate{
+		ConfigPath: config,
+		JsonPath:   json,
+		Sudo:       !p.config.PreventSudo,
+	})
+	if err != nil {
+		return err
+	}
+
+	ui.Message(fmt.Sprintf("Executing executeCommandOnGuest::[%s]::[%s]", name, command))
+
+	cmd := &packer.RemoteCmd{
+		Command: command,
+	}
+
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+	}
+
+	return nil
+}
+
+func (p *Provisioner) executeCommandOnHost(name string, userCommand string, ui packer.Ui, comm packer.Communicator) error {
+
+	ui.Message(fmt.Sprintf("Executing executeCommandOnHost::[%s]::[%s]", name, userCommand))
+
+	cmd := exec.Command("sh", "-c", userCommand)
+	out, err := cmd.Output()
+
+	ui.Message(fmt.Sprintf("%s", out))
+
+	if err != nil {
+		return err
 	}
 
 	return nil
