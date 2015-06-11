@@ -48,6 +48,8 @@ BUG FIXES:
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/amazon/instance: Use `--region` flag for bundle upload command. [GH-1931]
+  * builder/digitalocean: Wait for droplet to unlock before changing state,
+      should lower the "pending event" errors.
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/digitalocean: Private images can be used as a source [GH-1792]
   * builder/docker: Fixed hang on prompt while copying script
