@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -20,7 +19,28 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 	if len(s.Tags) > 0 {
 		for region, ami := range amis {
-			ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
+			ui.Say(fmt.Sprintf("Preparing tags for AMI (%s) and related snapshots", ami))
+
+			// Declare list of resources to tag
+			resourceIds := []string{ami}
+
+			// Retrieve image list for given AMI
+			imageResp, err := ec2conn.Images([]string{ami}, ec2.NewFilter())
+			if err != nil {
+				err := fmt.Errorf("Error retrieving details for AMI (%s): %s", ami, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+			image := &imageResp.Images[0]
+
+			// Add only those with a Snapshot ID, i.e. not Ephemeral
+			for _, device := range image.BlockDevices {
+				if device.SnapshotId != "" {
+					ui.Say(fmt.Sprintf("Tagging snapshot: %s", device.SnapshotId))
+					resourceIds = append(resourceIds, device.SnapshotId)
+				}
+			}
 
 			var ec2Tags []*ec2.Tag
 			for key, value := range s.Tags {
@@ -28,12 +48,8 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 				ec2Tags = append(ec2Tags, &ec2.Tag{Key: &key, Value: &value})
 			}
 
-			regionconn := ec2.New(&aws.Config{
-				Credentials: ec2conn.Config.Credentials,
-				Region:      region,
-			})
 			_, err := regionconn.CreateTags(&ec2.CreateTagsInput{
-				Resources: []*string{&ami},
+				Resources: resourceIds,
 				Tags:      ec2Tags,
 			})
 			if err != nil {
