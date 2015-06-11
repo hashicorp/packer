@@ -34,6 +34,9 @@ The example below is fully functional and expects cookbooks in the
 The reference of available configuration options is listed below. No
 configuration is actually required, but at least `run_list` is recommended.
 
+* `chef_environment` (string) - The name of the `chef_environment` sent to the
+  Chef server. By default this is empty and will not use an environment
+
 * `config_template` (string) - Path to a template that will be used for
   the Chef configuration file. By default Packer only sets configuration
   it needs to match the settings set in the provisioner configuration. If
