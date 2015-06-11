@@ -1,22 +1,15 @@
 package digitalocean
 
 import (
-	"github.com/mitchellh/packer/packer"
-	"os"
 	"strconv"
 	"testing"
-)
 
-func init() {
-	// Clear out the credential env vars
-	os.Setenv("DIGITALOCEAN_API_KEY", "")
-	os.Setenv("DIGITALOCEAN_CLIENT_ID", "")
-}
+	"github.com/mitchellh/packer/packer"
+)
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"client_id": "foo",
-		"api_key":   "bar",
+		"api_token": "bar",
 	}
 }
 
@@ -40,90 +33,6 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatalf("prepare should fail")
-	}
-}
-
-func TestBuilderPrepare_APIKey(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test good
-	config["api_key"] = "foo"
-	warnings, err := b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.APIKey != "foo" {
-		t.Errorf("access key invalid: %s", b.config.APIKey)
-	}
-
-	// Test bad
-	delete(config, "api_key")
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test env variable
-	delete(config, "api_key")
-	os.Setenv("DIGITALOCEAN_API_KEY", "foo")
-	defer os.Setenv("DIGITALOCEAN_API_KEY", "")
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestBuilderPrepare_ClientID(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test good
-	config["client_id"] = "foo"
-	warnings, err := b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ClientID != "foo" {
-		t.Errorf("invalid: %s", b.config.ClientID)
-	}
-
-	// Test bad
-	delete(config, "client_id")
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test env variable
-	delete(config, "client_id")
-	os.Setenv("DIGITALOCEAN_CLIENT_ID", "foo")
-	defer os.Setenv("DIGITALOCEAN_CLIENT_ID", "")
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
 	}
 }
 
@@ -162,7 +71,6 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	expected := "sfo1"
 
 	// Test set
-	config["region_id"] = 0
 	config["region"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
@@ -198,7 +106,6 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	expected := "1024mb"
 
 	// Test set
-	config["size_id"] = 0
 	config["size"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
@@ -234,7 +141,6 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	expected := "ubuntu-14-04-x64"
 
 	// Test set
-	config["image_id"] = 0
 	config["image"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)
