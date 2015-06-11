@@ -64,8 +64,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.SnapshotName == "" {
+		def, err := interpolate.Render("packer-{{timestamp}}", nil)
+		if err != nil {
+			panic(err)
+		}
+
 		// Default to packer-{{ unix timestamp (utc) }}
-		c.SnapshotName = "packer-{{timestamp}}"
+		c.SnapshotName = def
 	}
 
 	if c.DropletName == "" {

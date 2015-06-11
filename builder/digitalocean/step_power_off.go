@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
@@ -43,6 +44,15 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	log.Println("Waiting for poweroff event to complete...")
 	err = waitForDropletState("off", dropletId, client, c.stateTimeout)
 	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Wait for the droplet to become unlocked for future steps
+	if err := waitForDropletUnlocked(client, dropletId, 2*time.Minute); err != nil {
+		// If we get an error the first time, actually report it
+		err := fmt.Errorf("Error powering off droplet: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
