@@ -175,7 +175,7 @@ func (c *config) discoverSingle(glob string, m *map[string]string) error {
 
 		// One Windows, ignore any plugins that don't end in .exe.
 		// We could do a full PATHEXT parse, but this is probably good enough.
-		if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(file)) != "exe" {
+		if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(file)) != ".exe" {
 			log.Printf(
 				"[DEBUG] Ignoring plugin match %s, no exe extension",
 				match)
