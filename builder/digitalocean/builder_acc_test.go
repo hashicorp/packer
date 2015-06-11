@@ -24,7 +24,10 @@ func testAccPreCheck(t *testing.T) {
 const testBuilderAccBasic = `
 {
 	"builders": [{
-		"type": "test"
+		"type": "test",
+		"region": "nyc2",
+		"size": "512mb",
+		"image": "ubuntu-12-04-x64"
 	}]
 }
 `
