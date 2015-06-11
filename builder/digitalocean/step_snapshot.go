@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
@@ -27,6 +28,18 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	// Wait for the droplet to become unlocked first. For snapshots
+	// this can end up taking quite a long time, so we hardcode this to
+	// 10 minutes.
+	if err := waitForDropletUnlocked(client, dropletId, 10*time.Minute); err != nil {
+		// If we get an error the first time, actually report it
+		err := fmt.Errorf("Error shutting down droplet: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// With the pending state over, verify that we're in the active state
 	ui.Say("Waiting for snapshot to complete...")
 	err = waitForDropletState("active", dropletId, client, c.stateTimeout)
 	if err != nil {
