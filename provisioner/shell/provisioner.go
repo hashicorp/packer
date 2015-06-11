@@ -94,7 +94,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh"
+		p.config.InlineShebang = "/bin/sh -e"
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
