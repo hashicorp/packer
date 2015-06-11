@@ -38,6 +38,7 @@ BUG FIXES:
   * builder/amazon: Allow spaces in AMI names when using `clean_ami_name` [GH-2182]
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
   * builder/amazon: Use IAM Profile to upload bundle if provided [GH-1985]
+  * builder/amazon: Use correct exit code after SSH authentication failed [GH-2004]
   * builder/amazon: Retry finding created instance for eventual
       consistency. [GH-2129]
   * builder/amazon: If no AZ is specified, use AZ chosen automatically by
