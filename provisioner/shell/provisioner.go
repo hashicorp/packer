@@ -184,6 +184,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
 		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
+		writer.WriteString("set -e\n")
 		for _, command := range p.config.Inline {
 			if _, err := writer.WriteString(command + "\n"); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
