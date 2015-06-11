@@ -83,6 +83,7 @@ BUG FIXES:
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
   * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
+  * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
 
 ## 0.7.5 (December 9, 2014)
 
