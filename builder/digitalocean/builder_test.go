@@ -60,12 +60,8 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.Region != DefaultRegion {
-		t.Errorf("found %s, expected %s", b.config.Region, DefaultRegion)
+	if err == nil {
+		t.Fatalf("should error")
 	}
 
 	expected := "sfo1"
@@ -95,12 +91,8 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.Size != DefaultSize {
-		t.Errorf("found %s, expected %s", b.config.Size, DefaultSize)
+	if err == nil {
+		t.Fatalf("should error")
 	}
 
 	expected := "1024mb"
@@ -130,12 +122,8 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.Image != DefaultImage {
-		t.Errorf("found %s, expected %s", b.config.Image, DefaultImage)
+	if err == nil {
+		t.Fatal("should error")
 	}
 
 	expected := "ubuntu-14-04-x64"

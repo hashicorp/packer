@@ -63,18 +63,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.APIToken = os.Getenv("DIGITALOCEAN_API_TOKEN")
 	}
 
-	if c.Region == "" {
-		c.Region = DefaultRegion
-	}
-
-	if c.Size == "" {
-		c.Size = DefaultSize
-	}
-
-	if c.Image == "" {
-		c.Image = DefaultImage
-	}
-
 	if c.SnapshotName == "" {
 		// Default to packer-{{ unix timestamp (utc) }}
 		c.SnapshotName = "packer-{{timestamp}}"
@@ -112,6 +100,21 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		// Required configurations that will display errors if not set
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("api_token for auth must be specified"))
+	}
+
+	if c.Region == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("region is required"))
+	}
+
+	if c.Size == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("size is required"))
+	}
+
+	if c.Image == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("image is required"))
 	}
 
 	sshTimeout, err := time.ParseDuration(c.RawSSHTimeout)
