@@ -7,6 +7,8 @@ import (
 	"encoding/pem"
 	"fmt"
 	"log"
+	"os"
+	"runtime"
 
 	"code.google.com/p/gosshold/ssh"
 	"github.com/digitalocean/godo"
@@ -16,6 +18,9 @@ import (
 )
 
 type stepCreateSSHKey struct {
+	Debug        bool
+	DebugKeyPath string
+
 	keyId int
 }
 
@@ -65,6 +70,31 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Remember some state for the future
 	state.Put("ssh_key_id", key.ID)
+
+	// If we're in debug mode, output the private key to the working directory.
+	if s.Debug {
+		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
+		f, err := os.Create(s.DebugKeyPath)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
+			return multistep.ActionHalt
+		}
+		defer f.Close()
+
+		// Write the key out
+		if _, err := f.Write(pem.EncodeToMemory(&priv_blk)); err != nil {
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
+			return multistep.ActionHalt
+		}
+
+		// Chmod it so that it is SSH ready
+		if runtime.GOOS != "windows" {
+			if err := f.Chmod(0600); err != nil {
+				state.Put("error", fmt.Errorf("Error setting permissions of debug key: %s", err))
+				return multistep.ActionHalt
+			}
+		}
+	}
 
 	return multistep.ActionContinue
 }
