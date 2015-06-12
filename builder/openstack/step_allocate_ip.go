@@ -36,6 +36,8 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	if s.FloatingIp != "" {
 		instanceIp.IP = s.FloatingIp
 	} else if s.FloatingIpPool != "" {
+		ui.Say(fmt.Sprintf("Creating floating IP..."))
+		ui.Message(fmt.Sprintf("Pool: %s", s.FloatingIpPool))
 		newIp, err := floatingip.Create(client, floatingip.CreateOpts{
 			Pool: s.FloatingIpPool,
 		}).Extract()
@@ -47,22 +49,24 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		instanceIp = *newIp
-		ui.Say(fmt.Sprintf("Created temporary floating IP %s...", instanceIp.IP))
+		ui.Message(fmt.Sprintf("Created floating IP: %s", instanceIp.IP))
 	}
 
 	if instanceIp.IP != "" {
+		ui.Say(fmt.Sprintf("Associating floating IP with server..."))
+		ui.Message(fmt.Sprintf("IP: %s", instanceIp.IP))
 		err := floatingip.Associate(client, server.ID, instanceIp.IP).ExtractErr()
 		if err != nil {
 			err := fmt.Errorf(
-				"Error associating floating IP %s with instance.",
-				instanceIp.IP)
+				"Error associating floating IP %s with instance: %s",
+				instanceIp.IP, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
-		ui.Say(fmt.Sprintf(
-			"Added floating IP %s to instance...", instanceIp.IP))
+		ui.Message(fmt.Sprintf(
+			"Added floating IP %s to instance!", instanceIp.IP))
 	}
 
 	state.Put("access_ip", &instanceIp)
