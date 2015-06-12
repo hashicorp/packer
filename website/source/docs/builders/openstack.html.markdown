@@ -50,6 +50,10 @@ each category, the available configuration keys are alphabetized.
 * `api_key` (string) - The API key used to access OpenStack. Some OpenStack
   installations require this.
 
+* `availability_zone` (string) - The availability zone to launch the
+  server in. If this isn't specified, the default enforced by your OpenStack
+  cluster will be used. This may be required for some OpenStack clusters.
+
 * `floating_ip` (string) - A specific floating IP to assign to this instance.
   `use_floating_ip` must also be set to true for this to have an affect.
 
