@@ -9,7 +9,6 @@ import (
 	"github.com/mitchellh/packer/common"
 	"log"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -55,40 +54,28 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	auth, err := b.config.AccessConfig.Auth()
+	computeClient, err := b.config.computeV2Client()
 	if err != nil {
-		return nil, err
-	}
-	//fetches the api requisites from gophercloud for the appropriate
-	//openstack variant
-	api, err := gophercloud.PopulateApi(b.config.RunConfig.OpenstackProvider)
-	if err != nil {
-		return nil, err
-	}
-	api.Region = b.config.AccessConfig.Region()
-
-	csp, err := gophercloud.ServersApi(auth, api)
-	if err != nil {
-		log.Printf("Region: %s", b.config.AccessConfig.Region())
-		return nil, err
+		return nil, fmt.Errorf("Error initializing compute client: %s", err)
 	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
-	state.Put("csp", csp)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	// Build the steps
 	steps := []multistep.Step{
+		&StepLoadFlavor{
+			Flavor: b.config.Flavor,
+		},
 		&StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepRunSourceServer{
 			Name:           b.config.ImageName,
-			Flavor:         b.config.Flavor,
 			SourceImage:    b.config.SourceImage,
 			SecurityGroups: b.config.SecurityGroups,
 			Networks:       b.config.Networks,
@@ -101,7 +88,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			FloatingIp:     b.config.FloatingIp,
 		},
 		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(csp, b.config.SSHInterface, b.config.SSHPort),
+			SSHAddress:     SSHAddress(computeClient, b.config.SSHInterface, b.config.SSHPort),
 			SSHConfig:      SSHConfig(b.config.SSHUsername),
 			SSHWaitTimeout: b.config.SSHTimeout(),
 		},
@@ -135,7 +122,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		ImageId:        state.Get("image").(string),
 		BuilderIdValue: BuilderId,
-		Conn:           csp,
+		Client:         computeClient,
 	}
 
 	return artifact, nil

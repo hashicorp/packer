@@ -2,11 +2,11 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"time"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type StepWaitForRackConnect struct {
@@ -18,14 +18,22 @@ func (s *StepWaitForRackConnect) Run(state multistep.StateBag) multistep.StepAct
 		return multistep.ActionContinue
 	}
 
-	csp := state.Get("csp").(gophercloud.CloudServersProvider)
-	server := state.Get("server").(*gophercloud.Server)
+	config := state.Get("config").(Config)
+	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say(fmt.Sprintf("Waiting for server (%s) to become RackConnect ready...", server.Id))
+	// We need the v2 compute client
+	computeClient, err := config.computeV2Client()
+	if err != nil {
+		err = fmt.Errorf("Error initializing compute client: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 
+	ui.Say(fmt.Sprintf(
+		"Waiting for server (%s) to become RackConnect ready...", server.ID))
 	for {
-		server, err := csp.ServerById(server.Id)
+		server, err = servers.Get(computeClient, server.ID).Extract()
 		if err != nil {
 			return multistep.ActionHalt
 		}
