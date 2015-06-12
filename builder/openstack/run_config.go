@@ -11,19 +11,21 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	SourceImage       string   `mapstructure:"source_image"`
-	Flavor            string   `mapstructure:"flavor"`
-	RawSSHTimeout     string   `mapstructure:"ssh_timeout"`
-	SSHUsername       string   `mapstructure:"ssh_username"`
-	SSHPort           int      `mapstructure:"ssh_port"`
-	SSHInterface      string   `mapstructure:"ssh_interface"`
-	OpenstackProvider string   `mapstructure:"openstack_provider"`
-	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
-	RackconnectWait   bool     `mapstructure:"rackconnect_wait"`
-	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
-	FloatingIp        string   `mapstructure:"floating_ip"`
-	SecurityGroups    []string `mapstructure:"security_groups"`
-	Networks          []string `mapstructure:"networks"`
+	SourceImage     string   `mapstructure:"source_image"`
+	Flavor          string   `mapstructure:"flavor"`
+	RawSSHTimeout   string   `mapstructure:"ssh_timeout"`
+	SSHUsername     string   `mapstructure:"ssh_username"`
+	SSHPort         int      `mapstructure:"ssh_port"`
+	SSHInterface    string   `mapstructure:"ssh_interface"`
+	RackconnectWait bool     `mapstructure:"rackconnect_wait"`
+	FloatingIpPool  string   `mapstructure:"floating_ip_pool"`
+	FloatingIp      string   `mapstructure:"floating_ip"`
+	SecurityGroups  []string `mapstructure:"security_groups"`
+	Networks        []string `mapstructure:"networks"`
+
+	// Not really used, but here for BC
+	OpenstackProvider string `mapstructure:"openstack_provider"`
+	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
 
 	// Unexported fields that are calculated from others
 	sshTimeout time.Duration
