@@ -75,10 +75,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepRunSourceServer{
-			Name:           b.config.ImageName,
-			SourceImage:    b.config.SourceImage,
-			SecurityGroups: b.config.SecurityGroups,
-			Networks:       b.config.Networks,
+			Name:             b.config.ImageName,
+			SourceImage:      b.config.SourceImage,
+			SecurityGroups:   b.config.SecurityGroups,
+			Networks:         b.config.Networks,
+			AvailabilityZone: b.config.AvailabilityZone,
 		},
 		&StepWaitForRackConnect{
 			Wait: b.config.RackconnectWait,
