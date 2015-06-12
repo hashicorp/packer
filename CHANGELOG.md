@@ -22,8 +22,9 @@ IMPROVEMENTS:
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
-  * buidler/openstakc: Add `ssh_interface` option for rackconnect for users that
+  * buidler/openstack: Add `ssh_interface` option for rackconnect for users that
       have prohibitive firewalls
+  * builder/openstack: Flavor names can be used as well as refs
   * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
