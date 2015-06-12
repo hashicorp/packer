@@ -29,7 +29,7 @@ each category, the available configuration keys are alphabetized.
 
 ### Required:
 
-* `flavor` (string) - The ID or full URL for the desired flavor for the
+* `flavor` (string) - The ID, name, or full URL for the desired flavor for the
   server to be created.
 
 * `image_name` (string) - The name of the resulting image.

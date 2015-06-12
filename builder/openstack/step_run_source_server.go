@@ -11,7 +11,6 @@ import (
 )
 
 type StepRunSourceServer struct {
-	Flavor         string
 	Name           string
 	SourceImage    string
 	SecurityGroups []string
@@ -22,6 +21,7 @@ type StepRunSourceServer struct {
 
 func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
+	flavor := state.Get("flavor_id").(string)
 	keyName := state.Get("keyPair").(string)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -38,11 +38,12 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		networks[i].UUID = networkUuid
 	}
 
+	ui.Say("Launching server...")
 	s.server, err = servers.Create(computeClient, keypairs.CreateOptsExt{
 		CreateOptsBuilder: servers.CreateOpts{
 			Name:           s.Name,
 			ImageRef:       s.SourceImage,
-			FlavorName:     s.Flavor,
+			FlavorRef:      flavor,
 			SecurityGroups: s.SecurityGroups,
 			Networks:       networks,
 		},
@@ -56,9 +57,10 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		return multistep.ActionHalt
 	}
 
+	ui.Message(fmt.Sprintf("Server ID: %s", s.server.ID))
 	log.Printf("server id: %s", s.server.ID)
 
-	ui.Say(fmt.Sprintf("Waiting for server (%s) to become ready...", s.server.ID))
+	ui.Say("Waiting for server to become ready...")
 	stateChange := StateChangeConf{
 		Pending:   []string{"BUILD"},
 		Target:    "ACTIVE",
