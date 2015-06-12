@@ -41,6 +41,23 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		c.Region = os.Getenv("OS_REGION_NAME")
 	}
 
+	// Legacy RackSpace stuff. We're keeping this around to keep things BC.
+	if c.APIKey == "" {
+		c.APIKey = os.Getenv("SDK_API_KEY")
+	}
+	if c.Password == "" {
+		c.Password = os.Getenv("SDK_PASSWORD")
+	}
+	if c.Region == "" {
+		c.Region = os.Getenv("SDK_REGION")
+	}
+	if c.TenantName == "" {
+		c.TenantName = os.Getenv("SDK_PROJECT")
+	}
+	if c.Username == "" {
+		c.Username = os.Getenv("SDK_USERNAME")
+	}
+
 	// Get as much as possible from the end
 	ao, _ := openstack.AuthOptionsFromEnv()
 
