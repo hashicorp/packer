@@ -13,12 +13,18 @@ import (
 // the build before actually doing any time consuming work
 //
 type StepPreValidate struct {
-	DestAmiName string
+	DestAmiName     string
+	ForceDeregister bool
 }
 
 func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
-	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
+	if s.ForceDeregister {
+		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")
+		return multistep.ActionContinue
+	}
+
+	ec2conn := state.Get("ec2").(*ec2.EC2)
 
 	ui.Say("Prevalidating AMI Name...")
 	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
