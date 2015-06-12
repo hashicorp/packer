@@ -25,6 +25,7 @@ IMPROVEMENTS:
   * buidler/openstack: Add `ssh_interface` option for rackconnect for users that
       have prohibitive firewalls
   * builder/openstack: Flavor names can be used as well as refs
+  * builder/openstack: Add `availability_zone` [GH-2016]
   * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
