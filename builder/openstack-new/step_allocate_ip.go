@@ -33,7 +33,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("access_ip", instanceIp)
 
 	if s.FloatingIp != "" {
-		instanceIp.FixedIP = s.FloatingIp
+		*instanceIp = floatingip.FloatingIP{FixedIP: s.FloatingIp}
 	} else if s.FloatingIpPool != "" {
 		newIp, err := floatingip.Create(client, floatingip.CreateOpts{
 			Pool: s.FloatingIpPool,
@@ -45,11 +45,11 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		instanceIp = newIp
+		*instanceIp = *newIp
 		ui.Say(fmt.Sprintf("Created temporary floating IP %s...", instanceIp.FixedIP))
 	}
 
-	if instanceIp.FixedIP != "" {
+	if instanceIp != nil && instanceIp.FixedIP != "" {
 		err := floatingip.Associate(client, server.ID, instanceIp.FixedIP).ExtractErr()
 		if err != nil {
 			err := fmt.Errorf(
@@ -65,7 +65,6 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	state.Put("access_ip", instanceIp)
-
 	return multistep.ActionContinue
 }
 
