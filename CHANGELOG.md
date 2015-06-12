@@ -1,5 +1,14 @@
 ## 0.8.0 (unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * builder/digitalocean: no longer supports the v1 API which has been
+      deprecated for some time. Most configurations should continue to
+      work as long as you use the `api_token` field for auth.
+  * builder/digitalocean: `image`, `region`, and `size` are now required.
+  * builder/openstack: auth parameters have been changed to better
+      reflect OS terminology. Existing environment variables still work.
+
 FEATURES:
 
   * **New config function: `template_dir`**: The directory to the template
@@ -8,11 +17,19 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
+  * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
+  * builder/digitalocean: User data support [GH-2113]
+  * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
-  * buidler/openstakc: Add `ssh_interface` option for rackconnect for users that
+  * buidler/openstack: Add `ssh_interface` option for rackconnect for users that
       have prohibitive firewalls
+  * builder/openstack: Flavor names can be used as well as refs
+  * builder/openstack: Add `availability_zone` [GH-2016]
+  * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
+      automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
+  * builder/vmware: Support for additional disks [GH-1382]
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
   * post-processor/docker-save: Can be chained [GH-2179]
@@ -22,7 +39,10 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: Fix potential panic for post-processor plugin exits [GH-2098]
+  * builder/amazon: Allow spaces in AMI names when using `clean_ami_name` [GH-2182]
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
+  * builder/amazon: Use IAM Profile to upload bundle if provided [GH-1985]
+  * builder/amazon: Use correct exit code after SSH authentication failed [GH-2004]
   * builder/amazon: Retry finding created instance for eventual
       consistency. [GH-2129]
   * builder/amazon: If no AZ is specified, use AZ chosen automatically by
@@ -31,8 +51,13 @@ BUG FIXES:
       is deleted on cleanup. [GH-1801]
   * builder/amazon: AMI copy won't copy to the source region [GH-2123]
   * builder/amazon: Validate AMI doesn't exist with name prior to build [GH-1774]
+  * builder/amazon: Improved retry logic around waiting for instances. [GH-1764]
+  * builder/amazon: Fix issues with creating Block Devices. [GH-2195]
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
+  * builder/amazon/instance: Use `--region` flag for bundle upload command. [GH-1931]
+  * builder/digitalocean: Wait for droplet to unlock before changing state,
+      should lower the "pending event" errors.
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
   * builder/digitalocean: Private images can be used as a source [GH-1792]
   * builder/docker: Fixed hang on prompt while copying script
@@ -46,12 +71,15 @@ BUG FIXES:
       OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
       floppy disk. [GH-1879]
+  * builder/virtualbox: Fixed regression where downloading ISO without a
+      ".iso" extension didn't work. [GH-1839]
   * builder/vmware: Add 100ms delay between keystrokes to avoid subtle
       timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
+  * builder/vmware: Nested output directories for ESXi work [GH-2174]
   * command/validate: don't crash for invalid builds [GH-2139]
   * post-processor/atlas: Find common archive prefix for Windows [GH-1874]
   * post-processor/atlas: Fix index out of range panic [GH-1959]
@@ -59,6 +87,8 @@ BUG FIXES:
   * post-processor/vagrant-cloud: Don't delete version on error [GH-2014]
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
+  * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
+  * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
 
 ## 0.7.5 (December 9, 2014)
 

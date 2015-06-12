@@ -184,7 +184,8 @@ each category, the available configuration keys are alphabetized.
   or "5m". The default SSH timeout is "5m", or five minutes.
 
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
-  "subnet-12345def", where Packer will launch the EC2 instance.
+  "subnet-12345def", where Packer will launch the EC2 instance. This field is
+  required if you are using an non-default VPC.
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
