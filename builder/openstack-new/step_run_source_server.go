@@ -42,7 +42,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		CreateOptsBuilder: servers.CreateOpts{
 			Name:           s.Name,
 			ImageRef:       s.SourceImage,
-			FlavorRef:      s.Flavor,
+			FlavorName:     s.Flavor,
 			SecurityGroups: s.SecurityGroups,
 			Networks:       networks,
 		},
