@@ -27,13 +27,14 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	var instanceIp *floatingip.FloatingIP
+	var instanceIp floatingip.FloatingIP
+
 	// This is here in case we error out before putting instanceIp into the
 	// statebag below, because it is requested by Cleanup()
-	state.Put("access_ip", instanceIp)
+	state.Put("access_ip", &instanceIp)
 
 	if s.FloatingIp != "" {
-		*instanceIp = floatingip.FloatingIP{FixedIP: s.FloatingIp}
+		instanceIp.IP = s.FloatingIp
 	} else if s.FloatingIpPool != "" {
 		newIp, err := floatingip.Create(client, floatingip.CreateOpts{
 			Pool: s.FloatingIpPool,
@@ -45,26 +46,26 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		*instanceIp = *newIp
-		ui.Say(fmt.Sprintf("Created temporary floating IP %s...", instanceIp.FixedIP))
+		instanceIp = *newIp
+		ui.Say(fmt.Sprintf("Created temporary floating IP %s...", instanceIp.IP))
 	}
 
-	if instanceIp != nil && instanceIp.FixedIP != "" {
-		err := floatingip.Associate(client, server.ID, instanceIp.FixedIP).ExtractErr()
+	if instanceIp.IP != "" {
+		err := floatingip.Associate(client, server.ID, instanceIp.IP).ExtractErr()
 		if err != nil {
 			err := fmt.Errorf(
 				"Error associating floating IP %s with instance.",
-				instanceIp.FixedIP)
+				instanceIp.IP)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
 		ui.Say(fmt.Sprintf(
-			"Added floating IP %s to instance...", instanceIp.FixedIP))
+			"Added floating IP %s to instance...", instanceIp.IP))
 	}
 
-	state.Put("access_ip", instanceIp)
+	state.Put("access_ip", &instanceIp)
 	return multistep.ActionContinue
 }
 
@@ -77,17 +78,17 @@ func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 	client, err := config.computeV2Client()
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error deleting temporary floating IP %s", instanceIp.FixedIP))
+			"Error deleting temporary floating IP %s", instanceIp.IP))
 		return
 	}
 
 	if s.FloatingIpPool != "" && instanceIp.ID != "" {
 		if err := floatingip.Delete(client, instanceIp.ID).ExtractErr(); err != nil {
 			ui.Error(fmt.Sprintf(
-				"Error deleting temporary floating IP %s", instanceIp.FixedIP))
+				"Error deleting temporary floating IP %s", instanceIp.IP))
 			return
 		}
 
-		ui.Say(fmt.Sprintf("Deleted temporary floating IP %s", instanceIp.FixedIP))
+		ui.Say(fmt.Sprintf("Deleted temporary floating IP %s", instanceIp.IP))
 	}
 }
