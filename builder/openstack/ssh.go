@@ -23,8 +23,8 @@ func SSHAddress(
 
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingip.FloatingIP)
-		if ip != nil && ip.FixedIP != "" {
-			return fmt.Sprintf("%s:%d", ip.FixedIP, port), nil
+		if ip != nil && ip.IP != "" {
+			return fmt.Sprintf("%s:%d", ip.IP, port), nil
 		}
 
 		if s.AccessIPv4 != "" {
