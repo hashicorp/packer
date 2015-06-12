@@ -79,7 +79,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
-			DestAmiName: b.config.AMIName,
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
@@ -122,6 +123,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepStopInstance{SpotPrice: b.config.SpotPrice},
 		// TODO(mitchellh): verify works with spots
 		&stepModifyInstance{},
+		&awscommon.StepDeregisterAMI{
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
+		},
 		&stepCreateAMI{},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig: &b.config.AccessConfig,
