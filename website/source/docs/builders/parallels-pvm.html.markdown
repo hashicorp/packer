@@ -27,7 +27,7 @@ the settings here.
 ```javascript
 {
   "type": "parallels-pvm",
-  "parallels_tools_flavor": "lin"
+  "parallels_tools_flavor": "lin",
   "source_path": "source.pvm",
   "ssh_username": "packer",
   "ssh_password": "packer",
