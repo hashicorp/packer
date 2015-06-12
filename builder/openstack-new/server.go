@@ -36,20 +36,15 @@ type StateChangeConf struct {
 func ServerStateRefreshFunc(
 	client *gophercloud.ServiceClient, s *servers.Server) StateRefreshFunc {
 	return func() (interface{}, string, int, error) {
-		var serverNew *servers.Server
-		result := servers.Get(client, s.ID)
-		err := result.Err
-		if err == nil {
-			serverNew, err = result.Extract()
-		}
-		if result.Err != nil {
-			errCode, ok := result.Err.(*gophercloud.UnexpectedResponseCodeError)
+		serverNew, err := servers.Get(client, s.ID).Extract()
+		if err != nil {
+			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
 			if ok && errCode.Actual == 404 {
 				log.Printf("[INFO] 404 on ServerStateRefresh, returning DELETED")
 				return nil, "DELETED", 0, nil
 			} else {
-				log.Printf("[ERROR] Error on ServerStateRefresh: %s", result.Err)
-				return nil, "", 0, result.Err
+				log.Printf("[ERROR] Error on ServerStateRefresh: %s", err)
+				return nil, "", 0, err
 			}
 		}
 
