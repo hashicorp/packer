@@ -40,7 +40,7 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the Image ID in the state
-	ui.Say(fmt.Sprintf("Image: %s", imageId))
+	ui.Message(fmt.Sprintf("Image: %s", imageId))
 	state.Put("image", imageId)
 
 	// Wait for the image to become ready
