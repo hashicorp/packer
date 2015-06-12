@@ -3,49 +3,67 @@ package openstack
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"golang.org/x/crypto/ssh"
+	"log"
 	"time"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	"golang.org/x/crypto/ssh"
 )
 
 // SSHAddress returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(csp gophercloud.CloudServersProvider, sshinterface string, port int) func(multistep.StateBag) (string, error) {
+func SSHAddress(
+	client *gophercloud.ServiceClient,
+	sshinterface string, port int) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
-		s := state.Get("server").(*gophercloud.Server)
+		s := state.Get("server").(*servers.Server)
 
-		if ip := state.Get("access_ip").(gophercloud.FloatingIp); ip.Ip != "" {
-			return fmt.Sprintf("%s:%d", ip.Ip, port), nil
+		// If we have a floating IP, use that
+		ip := state.Get("access_ip").(*floatingip.FloatingIP)
+		if ip != nil && ip.IP != "" {
+			return fmt.Sprintf("%s:%d", ip.IP, port), nil
 		}
 
-		ip_pools, err := s.AllAddressPools()
-		if err != nil {
-			return "", errors.New("Error parsing SSH addresses")
+		if s.AccessIPv4 != "" {
+			return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
 		}
-		for pool, addresses := range ip_pools {
-			if sshinterface != "" {
-				if pool != sshinterface {
-					continue
-				}
+
+		// Get all the addresses associated with this server. This
+		// was taken directly from Terraform.
+		for _, networkAddresses := range s.Addresses {
+			elements, ok := networkAddresses.([]interface{})
+			if !ok {
+				log.Printf(
+					"[ERROR] Unknown return type for address field: %#v",
+					networkAddresses)
+				continue
 			}
-			if pool != "" {
-				for _, address := range addresses {
-					if address.Addr != "" && address.Version == 4 {
-						return fmt.Sprintf("%s:%d", address.Addr, port), nil
+
+			for _, element := range elements {
+				var addr string
+				address := element.(map[string]interface{})
+				if address["OS-EXT-IPS:type"] == "floating" {
+					addr = address["addr"].(string)
+				} else {
+					if address["version"].(float64) == 4 {
+						addr = address["addr"].(string)
 					}
 				}
+				if addr != "" {
+					return fmt.Sprintf("%s:%d", addr, port), nil
+				}
 			}
 		}
 
-		serverState, err := csp.ServerById(s.Id)
-
+		s, err := servers.Get(client, s.ID).Extract()
 		if err != nil {
 			return "", err
 		}
 
-		state.Put("server", serverState)
+		state.Put("server", s)
 		time.Sleep(1 * time.Second)
 
 		return "", errors.New("couldn't determine IP address for server")
