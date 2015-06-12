@@ -72,6 +72,12 @@ each category, the available options are alphabetized and described.
 
 ### Optional:
 
+* `disk_additional_size` (array of integers) - The size(s) of any additional
+  hard disks for the VM in megabytes. If this is not specified then the VM will
+  only contain a primary hard disk. The builder uses expandable, not fixed-size
+  virtual hard disks, so the actual file representing the disk will not use the
+  full size unless it is full.
+
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
   be to type just enough to initialize the operating system installer. Special

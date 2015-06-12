@@ -3,13 +3,14 @@ package common
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
-	"log"
-	"strings"
-	"time"
 )
 
 // StepConnectSSH is a multistep Step implementation that waits for SSH
@@ -64,6 +65,7 @@ WaitLoop:
 		case <-waitDone:
 			if err != nil {
 				ui.Error(fmt.Sprintf("Error waiting for SSH: %s", err))
+				state.Put("error", err)
 				return multistep.ActionHalt
 			}
 

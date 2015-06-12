@@ -66,8 +66,10 @@ Optional parameters:
 
 * `inline_shebang` (string) - The
   [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
-  running commands specified by `inline`. By default, this is `/bin/sh`.
+  running commands specified by `inline`. By default, this is `/bin/sh -e`.
   If you're not using `inline`, then this configuration has no effect.
+  **Important:** If you customize this, be sure to include something like
+  the `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
 * `remote_path` (string) - The path where the script will be uploaded to
   in the machine. This defaults to "/tmp/script.sh". This value must be
