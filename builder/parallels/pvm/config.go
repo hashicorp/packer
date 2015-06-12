@@ -33,7 +33,7 @@ type Config struct {
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
