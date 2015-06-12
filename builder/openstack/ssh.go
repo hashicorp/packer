@@ -21,6 +21,13 @@ func SSHAddress(
 	return func(state multistep.StateBag) (string, error) {
 		s := state.Get("server").(*servers.Server)
 
+		// If we have a specific interface, try that
+		if sshinterface != "" {
+			if addr := sshAddrFromPool(s, sshinterface, port); addr != "" {
+				return addr, nil
+			}
+		}
+
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingip.FloatingIP)
 		if ip != nil && ip.IP != "" {
@@ -31,39 +38,9 @@ func SSHAddress(
 			return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
 		}
 
-		// Get all the addresses associated with this server. This
-		// was taken directly from Terraform.
-		for pool, networkAddresses := range s.Addresses {
-			// If we have an SSH interface specified, skip it if no match
-			if sshinterface != "" && pool != sshinterface {
-				log.Printf(
-					"[INFO] Skipping pool %s, doesn't match requested %s",
-					pool, sshinterface)
-				continue
-			}
-
-			elements, ok := networkAddresses.([]interface{})
-			if !ok {
-				log.Printf(
-					"[ERROR] Unknown return type for address field: %#v",
-					networkAddresses)
-				continue
-			}
-
-			for _, element := range elements {
-				var addr string
-				address := element.(map[string]interface{})
-				if address["OS-EXT-IPS:type"] == "floating" {
-					addr = address["addr"].(string)
-				} else {
-					if address["version"].(float64) == 4 {
-						addr = address["addr"].(string)
-					}
-				}
-				if addr != "" {
-					return fmt.Sprintf("%s:%d", addr, port), nil
-				}
-			}
+		// Try to get it from the requested interface
+		if addr := sshAddrFromPool(s, sshinterface, port); addr != "" {
+			return addr, nil
 		}
 
 		s, err := servers.Get(client, s.ID).Extract()
@@ -97,4 +74,43 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 			},
 		}, nil
 	}
+}
+
+func sshAddrFromPool(s *servers.Server, desired string, port int) string {
+	// Get all the addresses associated with this server. This
+	// was taken directly from Terraform.
+	for pool, networkAddresses := range s.Addresses {
+		// If we have an SSH interface specified, skip it if no match
+		if desired != "" && pool != desired {
+			log.Printf(
+				"[INFO] Skipping pool %s, doesn't match requested %s",
+				pool, desired)
+			continue
+		}
+
+		elements, ok := networkAddresses.([]interface{})
+		if !ok {
+			log.Printf(
+				"[ERROR] Unknown return type for address field: %#v",
+				networkAddresses)
+			continue
+		}
+
+		for _, element := range elements {
+			var addr string
+			address := element.(map[string]interface{})
+			if address["OS-EXT-IPS:type"] == "floating" {
+				addr = address["addr"].(string)
+			} else {
+				if address["version"].(float64) == 4 {
+					addr = address["addr"].(string)
+				}
+			}
+			if addr != "" {
+				return fmt.Sprintf("%s:%d", addr, port)
+			}
+		}
+	}
+
+	return ""
 }
