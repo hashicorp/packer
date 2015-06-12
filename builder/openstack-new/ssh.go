@@ -3,6 +3,7 @@ package openstack
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -21,7 +22,8 @@ func SSHAddress(
 		s := state.Get("server").(*servers.Server)
 
 		// If we have a floating IP, use that
-		if ip := state.Get("access_ip").(*floatingip.FloatingIP); ip.FixedIP != "" {
+		ip := state.Get("access_ip").(*floatingip.FloatingIP)
+		if ip != nil && ip.FixedIP != "" {
 			return fmt.Sprintf("%s:%d", ip.FixedIP, port), nil
 		}
 
@@ -29,33 +31,34 @@ func SSHAddress(
 			return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
 		}
 
-		// Get all the addresses associated with this server
-		/*
-			ip_pools, err := s.AllAddressPools()
-			if err != nil {
-				return "", errors.New("Error parsing SSH addresses")
+		// Get all the addresses associated with this server. This
+		// was taken directly from Terraform.
+		for _, networkAddresses := range s.Addresses {
+			elements, ok := networkAddresses.([]interface{})
+			if !ok {
+				log.Printf(
+					"[ERROR] Unknown return type for address field: %#v",
+					networkAddresses)
+				continue
 			}
-			for pool, addresses := range ip_pools {
-				if sshinterface != "" {
-					if pool != sshinterface {
-						continue
-					}
-				}
-				if pool != "" {
-					for _, address := range addresses {
-						if address.Addr != "" && address.Version == 4 {
-							return fmt.Sprintf("%s:%d", address.Addr, port), nil
-						}
-					}
-				}
-			}
-		*/
 
-		result := servers.Get(client, s.ID)
-		err := result.Err
-		if err == nil {
-			s, err = result.Extract()
+			for _, element := range elements {
+				var addr string
+				address := element.(map[string]interface{})
+				if address["OS-EXT-IPS:type"] == "floating" {
+					addr = address["addr"].(string)
+				} else {
+					if address["version"].(float64) == 4 {
+						addr = address["addr"].(string)
+					}
+				}
+				if addr != "" {
+					return fmt.Sprintf("%s:%d", addr, port), nil
+				}
+			}
 		}
+
+		s, err := servers.Get(client, s.ID).Extract()
 		if err != nil {
 			return "", err
 		}
