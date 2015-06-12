@@ -36,6 +36,8 @@ each category, the available configuration keys are alphabetized.
 
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
+  Unless you specify completely custom SSH settings, the source image must
+  have `cloud-init` installed so that the keypair gets assigned properly.
 
 * `username` (string) - The username used to connect to the OpenStack service.
   If not specified, Packer will use the environment variable
