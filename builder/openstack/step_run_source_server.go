@@ -11,10 +11,11 @@ import (
 )
 
 type StepRunSourceServer struct {
-	Name           string
-	SourceImage    string
-	SecurityGroups []string
-	Networks       []string
+	Name             string
+	SourceImage      string
+	SecurityGroups   []string
+	Networks         []string
+	AvailabilityZone string
 
 	server *servers.Server
 }
@@ -41,11 +42,12 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	ui.Say("Launching server...")
 	s.server, err = servers.Create(computeClient, keypairs.CreateOptsExt{
 		CreateOptsBuilder: servers.CreateOpts{
-			Name:           s.Name,
-			ImageRef:       s.SourceImage,
-			FlavorRef:      flavor,
-			SecurityGroups: s.SecurityGroups,
-			Networks:       networks,
+			Name:             s.Name,
+			ImageRef:         s.SourceImage,
+			FlavorRef:        flavor,
+			SecurityGroups:   s.SecurityGroups,
+			Networks:         networks,
+			AvailabilityZone: s.AvailabilityZone,
 		},
 
 		KeyName: keyName,
