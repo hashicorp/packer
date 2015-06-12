@@ -33,7 +33,15 @@ func SSHAddress(
 
 		// Get all the addresses associated with this server. This
 		// was taken directly from Terraform.
-		for _, networkAddresses := range s.Addresses {
+		for pool, networkAddresses := range s.Addresses {
+			// If we have an SSH interface specified, skip it if no match
+			if sshinterface != "" && pool != sshinterface {
+				log.Printf(
+					"[INFO] Skipping pool %s, doesn't match requested %s",
+					pool, sshinterface)
+				continue
+			}
+
 			elements, ok := networkAddresses.([]interface{})
 			if !ok {
 				log.Printf(
