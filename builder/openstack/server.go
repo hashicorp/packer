@@ -3,12 +3,12 @@ package openstack
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/racker/perigee"
 	"log"
 	"time"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 // StateRefreshFunc is a function type used for StateChangeConf that is
@@ -33,21 +33,22 @@ type StateChangeConf struct {
 
 // ServerStateRefreshFunc returns a StateRefreshFunc that is used to watch
 // an openstack server.
-func ServerStateRefreshFunc(csp gophercloud.CloudServersProvider, s *gophercloud.Server) StateRefreshFunc {
+func ServerStateRefreshFunc(
+	client *gophercloud.ServiceClient, s *servers.Server) StateRefreshFunc {
 	return func() (interface{}, string, int, error) {
-		resp, err := csp.ServerById(s.Id)
+		serverNew, err := servers.Get(client, s.ID).Extract()
 		if err != nil {
-			urce, ok := err.(*perigee.UnexpectedResponseCodeError)
-			if ok && (urce.Actual == 404) {
-				log.Printf("404 on ServerStateRefresh, returning DELETED")
-
+			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
+			if ok && errCode.Actual == 404 {
+				log.Printf("[INFO] 404 on ServerStateRefresh, returning DELETED")
 				return nil, "DELETED", 0, nil
 			} else {
-				log.Printf("Error on ServerStateRefresh: %s", err)
+				log.Printf("[ERROR] Error on ServerStateRefresh: %s", err)
 				return nil, "", 0, err
 			}
 		}
-		return resp, resp.Status, resp.Progress, nil
+
+		return serverNew, serverNew.Status, serverNew.Progress, nil
 	}
 }
 
