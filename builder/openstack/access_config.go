@@ -42,10 +42,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Get as much as possible from the end
-	ao, err := openstack.AuthOptionsFromEnv()
-	if err != nil {
-		return []error{err}
-	}
+	ao, _ := openstack.AuthOptionsFromEnv()
 
 	// Override values if we have them in our config
 	overrides := []struct {
