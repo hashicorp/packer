@@ -311,8 +311,8 @@ func (d *ESX5Driver) String() string {
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
-	baseDir := filepath.Base(filepath.Dir(path))
-	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
+	dirPath := filepath.Dir(path)
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, dirPath, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) cachePath(path string) string {

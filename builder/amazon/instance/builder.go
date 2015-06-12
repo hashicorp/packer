@@ -73,15 +73,25 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.BundleUploadCommand == "" {
-		b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
-			"-b {{.BucketName}} " +
-			"-m {{.ManifestPath}} " +
-			"-a {{.AccessKey}} " +
-			"-s {{.SecretKey}} " +
-			"-d {{.BundleDirectory}} " +
-			"--batch " +
-			"--region {{.Region}} " +
-			"--retry"
+		if b.config.IamInstanceProfile != "" {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		} else {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-a {{.AccessKey}} " +
+				"-s {{.SecretKey}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		}
 	}
 
 	if b.config.BundleVolCommand == "" {

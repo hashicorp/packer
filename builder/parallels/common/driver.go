@@ -73,6 +73,12 @@ func NewDriver() (Driver, error) {
 	log.Printf("prlctl path: %s", prlctlPath)
 
 	drivers = map[string]Driver{
+		"11": &Parallels10Driver{
+			Parallels9Driver: Parallels9Driver{
+				PrlctlPath:      prlctlPath,
+				dhcp_lease_file: dhcp_lease_file,
+			},
+		},
 		"10": &Parallels10Driver{
 			Parallels9Driver: Parallels9Driver{
 				PrlctlPath:      prlctlPath,

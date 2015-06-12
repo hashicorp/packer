@@ -2,51 +2,56 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type StepRunSourceServer struct {
-	Flavor         string
-	Name           string
-	SourceImage    string
-	SecurityGroups []string
-	Networks       []string
+	Name             string
+	SourceImage      string
+	SecurityGroups   []string
+	Networks         []string
+	AvailabilityZone string
 
-	server *gophercloud.Server
+	server *servers.Server
 }
 
 func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
-	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	config := state.Get("config").(Config)
+	flavor := state.Get("flavor_id").(string)
 	keyName := state.Get("keyPair").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	// XXX - validate image and flavor is available
-
-	securityGroups := make([]map[string]interface{}, len(s.SecurityGroups))
-	for i, groupName := range s.SecurityGroups {
-		securityGroups[i] = make(map[string]interface{})
-		securityGroups[i]["name"] = groupName
+	// We need the v2 compute client
+	computeClient, err := config.computeV2Client()
+	if err != nil {
+		err = fmt.Errorf("Error initializing compute client: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
 	}
 
-	networks := make([]gophercloud.NetworkConfig, len(s.Networks))
+	networks := make([]servers.Network, len(s.Networks))
 	for i, networkUuid := range s.Networks {
-		networks[i].Uuid = networkUuid
+		networks[i].UUID = networkUuid
 	}
 
-	server := gophercloud.NewServer{
-		Name:          s.Name,
-		ImageRef:      s.SourceImage,
-		FlavorRef:     s.Flavor,
-		KeyPairName:   keyName,
-		SecurityGroup: securityGroups,
-		Networks:      networks,
-	}
+	ui.Say("Launching server...")
+	s.server, err = servers.Create(computeClient, keypairs.CreateOptsExt{
+		CreateOptsBuilder: servers.CreateOpts{
+			Name:             s.Name,
+			ImageRef:         s.SourceImage,
+			FlavorRef:        flavor,
+			SecurityGroups:   s.SecurityGroups,
+			Networks:         networks,
+			AvailabilityZone: s.AvailabilityZone,
+		},
 
-	serverResp, err := csp.CreateServer(server)
+		KeyName: keyName,
+	}).Extract()
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
 		state.Put("error", err)
@@ -54,25 +59,25 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		return multistep.ActionHalt
 	}
 
-	s.server, err = csp.ServerById(serverResp.Id)
-	log.Printf("server id: %s", s.server.Id)
+	ui.Message(fmt.Sprintf("Server ID: %s", s.server.ID))
+	log.Printf("server id: %s", s.server.ID)
 
-	ui.Say(fmt.Sprintf("Waiting for server (%s) to become ready...", s.server.Id))
+	ui.Say("Waiting for server to become ready...")
 	stateChange := StateChangeConf{
 		Pending:   []string{"BUILD"},
 		Target:    "ACTIVE",
-		Refresh:   ServerStateRefreshFunc(csp, s.server),
+		Refresh:   ServerStateRefreshFunc(computeClient, s.server),
 		StepState: state,
 	}
 	latestServer, err := WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for server (%s) to become ready: %s", s.server.Id, err)
+		err := fmt.Errorf("Error waiting for server (%s) to become ready: %s", s.server.ID, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	s.server = latestServer.(*gophercloud.Server)
+	s.server = latestServer.(*servers.Server)
 	state.Put("server", s.server)
 
 	return multistep.ActionContinue
@@ -83,18 +88,25 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	csp := state.Get("csp").(gophercloud.CloudServersProvider)
+	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
+	// We need the v2 compute client
+	computeClient, err := config.computeV2Client()
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+		return
+	}
+
 	ui.Say("Terminating the source server...")
-	if err := csp.DeleteServerById(s.server.Id); err != nil {
+	if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
 		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
 		return
 	}
 
 	stateChange := StateChangeConf{
 		Pending: []string{"ACTIVE", "BUILD", "REBUILD", "SUSPENDED"},
-		Refresh: ServerStateRefreshFunc(csp, s.server),
+		Refresh: ServerStateRefreshFunc(computeClient, s.server),
 		Target:  "DELETED",
 	}
 

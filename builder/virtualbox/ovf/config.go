@@ -40,8 +40,8 @@ type Config struct {
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
-	err := config.Decode(&c, &config.DecodeOpts{
+	c := new(Config)
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
@@ -132,5 +132,5 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.ImportFlags = append(c.ImportFlags, "--options", c.ImportOpts)
 	}
 
-	return &c, warnings, nil
+	return c, warnings, nil
 }
