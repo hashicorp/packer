@@ -2,6 +2,7 @@ package null
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
@@ -19,9 +20,9 @@ type Config struct {
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+	var c Config
 
-	err := config.Decode(c, &config.DecodeOpts{
+	err := config.Decode(&c, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
@@ -62,5 +63,5 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, errs
 	}
 
-	return c, nil, nil
+	return &c, nil, nil
 }
