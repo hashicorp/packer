@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -298,11 +299,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
 		},
-		&common.StepConnectSSH{
-			SSHAddress:     driver.SSHAddress,
-			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
-			SSHWaitTimeout: b.config.SSHWaitTimeout,
-			Pty:            !b.config.SSHSkipRequestPty,
+		&communicator.StepConnect{
+			Config:     &b.config.SSHConfig.Comm,
+			SSHAddress: driver.SSHAddress,
+			SSHConfig:  vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
 		},
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,
