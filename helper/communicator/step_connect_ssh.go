@@ -149,8 +149,10 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 				handshakeAttempts += 1
 			}
 
-			if handshakeAttempts < 10 {
-				// Try to connect via SSH a handful of times
+			if handshakeAttempts < s.Config.SSHHandshakeAttempts {
+				// Try to connect via SSH a handful of times. We sleep here
+				// so we don't get a ton of authentication errors back to back.
+				time.Sleep(2 * time.Second)
 				continue
 			}
 
