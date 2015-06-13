@@ -92,10 +92,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			SSHAddress: SSHAddress(
+			Host: CommHost(
 				computeClient,
-				b.config.SSHInterface,
-				b.config.RunConfig.Comm.SSHPort),
+				b.config.SSHInterface),
 			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},

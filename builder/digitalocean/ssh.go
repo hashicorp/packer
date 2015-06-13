@@ -2,14 +2,14 @@ package digitalocean
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
+
+	"github.com/mitchellh/multistep"
 )
 
-func sshAddress(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(Config)
+func commHost(state multistep.StateBag) (string, error) {
 	ipAddress := state.Get("droplet_ip").(string)
-	return fmt.Sprintf("%s:%d", ipAddress, config.Comm.SSHPort), nil
+	return ipAddress, nil
 }
 
 func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {

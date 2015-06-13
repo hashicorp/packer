@@ -1,15 +1,13 @@
 package common
 
 import (
-	"fmt"
-
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 )
 
-func SSHAddress(state multistep.StateBag) (string, error) {
+func CommHost(state multistep.StateBag) (string, error) {
 	vmName := state.Get("vmName").(string)
 	driver := state.Get("driver").(Driver)
 
@@ -23,7 +21,7 @@ func SSHAddress(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s:22", ip), nil
+	return ip, nil
 }
 
 func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*ssh.ClientConfig, error) {

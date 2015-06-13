@@ -30,8 +30,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&communicator.StepConnect{
 			Config: &b.config.CommConfig,
-			SSHAddress: SSHAddress(
-				b.config.CommConfig.SSHHost, b.config.CommConfig.SSHPort),
+			Host:   CommHost(b.config.CommConfig.SSHHost),
 			SSHConfig: SSHConfig(
 				b.config.CommConfig.SSHUsername,
 				b.config.CommConfig.SSHPassword,

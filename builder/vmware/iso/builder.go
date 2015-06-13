@@ -300,9 +300,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:         b.config.ctx,
 		},
 		&communicator.StepConnect{
-			Config:     &b.config.SSHConfig.Comm,
-			SSHAddress: driver.SSHAddress,
-			SSHConfig:  vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
+			Config:    &b.config.SSHConfig.Comm,
+			Host:      driver.CommHost,
+			SSHConfig: vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
 		},
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,

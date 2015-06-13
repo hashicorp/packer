@@ -102,9 +102,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:         b.config.ctx,
 		},
 		&communicator.StepConnect{
-			Config:     &b.config.SSHConfig.Comm,
-			SSHAddress: vboxcommon.SSHAddress,
-			SSHConfig:  vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			Config:    &b.config.SSHConfig.Comm,
+			Host:      vboxcommon.CommHost,
+			SSHConfig: vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHPort:   vboxcommon.SSHPort,
 		},
 		&vboxcommon.StepUploadVersion{
 			Path: b.config.VBoxVersionFile,

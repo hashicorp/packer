@@ -10,9 +10,9 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// SSHAddress returns a function that can be given to the SSH communicator
+// SSHHost returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the instance DNS name.
-func SSHAddress(e *ec2.EC2, port int, private bool) func(multistep.StateBag) (string, error) {
+func SSHHost(e *ec2.EC2, private bool) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		for j := 0; j < 2; j++ {
 			var host string
@@ -28,7 +28,7 @@ func SSHAddress(e *ec2.EC2, port int, private bool) func(multistep.StateBag) (st
 			}
 
 			if host != "" {
-				return fmt.Sprintf("%s:%d", host, port), nil
+				return host, nil
 			}
 
 			r, err := e.DescribeInstances(&ec2.DescribeInstancesInput{

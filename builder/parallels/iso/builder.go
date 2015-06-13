@@ -247,9 +247,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:            b.config.ctx,
 		},
 		&communicator.StepConnect{
-			Config:     &b.config.SSHConfig.Comm,
-			SSHAddress: parallelscommon.SSHAddress,
-			SSHConfig:  parallelscommon.SSHConfigFunc(b.config.SSHConfig),
+			Config:    &b.config.SSHConfig.Comm,
+			Host:      parallelscommon.CommHost,
+			SSHConfig: parallelscommon.SSHConfigFunc(b.config.SSHConfig),
 		},
 		&parallelscommon.StepUploadVersion{
 			Path: b.config.PrlctlVersionFile,

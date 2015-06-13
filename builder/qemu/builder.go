@@ -393,9 +393,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepBootWait{},
 		&stepTypeBootCommand{},
 		&communicator.StepConnect{
-			Config:     &b.config.Comm,
-			SSHAddress: sshAddress,
-			SSHConfig:  sshConfig,
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: sshConfig,
+			SSHPort:   commPort,
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
