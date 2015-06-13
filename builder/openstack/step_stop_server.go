@@ -41,7 +41,7 @@ func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Message("Waiting for server to stop...")
 	stateChange := StateChangeConf{
 		Pending:   []string{"ACTIVE"},
-		Target:    "STOPPED",
+		Target:    []string{"SHUTOFF", "STOPPED"},
 		Refresh:   ServerStateRefreshFunc(client, server),
 		StepState: state,
 	}

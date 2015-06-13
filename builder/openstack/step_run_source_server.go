@@ -65,7 +65,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	ui.Say("Waiting for server to become ready...")
 	stateChange := StateChangeConf{
 		Pending:   []string{"BUILD"},
-		Target:    "ACTIVE",
+		Target:    []string{"ACTIVE"},
 		Refresh:   ServerStateRefreshFunc(computeClient, s.server),
 		StepState: state,
 	}
@@ -105,9 +105,9 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 	}
 
 	stateChange := StateChangeConf{
-		Pending: []string{"ACTIVE", "BUILD", "REBUILD", "SUSPENDED"},
+		Pending: []string{"ACTIVE", "BUILD", "REBUILD", "SUSPENDED", "SHUTOFF", "STOPPED"},
 		Refresh: ServerStateRefreshFunc(computeClient, s.server),
-		Target:  "DELETED",
+		Target:  []string{"DELETED"},
 	}
 
 	WaitForState(&stateChange)
