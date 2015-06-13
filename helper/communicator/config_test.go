@@ -23,6 +23,13 @@ func TestConfigType(t *testing.T) {
 	}
 }
 
+func TestConfig_none(t *testing.T) {
+	c := &Config{Type: "none"}
+	if err := c.Prepare(testContext(t)); len(err) > 0 {
+		t.Fatalf("bad: %#v", err)
+	}
+}
+
 func testContext(t *testing.T) *interpolate.Context {
 	return nil
 }

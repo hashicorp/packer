@@ -35,8 +35,10 @@ func (c *Config) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	var errs []error
-	if c.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
+	if c.Type == "ssh" {
+		if c.SSHUsername == "" {
+			errs = append(errs, errors.New("An ssh_username must be specified"))
+		}
 	}
 
 	return errs
