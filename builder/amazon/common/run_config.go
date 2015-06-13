@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -21,11 +21,6 @@ type RunConfig struct {
 	SourceAmi                string            `mapstructure:"source_ami"`
 	SpotPrice                string            `mapstructure:"spot_price"`
 	SpotPriceAutoProduct     string            `mapstructure:"spot_price_auto_product"`
-	RawSSHTimeout            string            `mapstructure:"ssh_timeout"`
-	SSHUsername              string            `mapstructure:"ssh_username"`
-	SSHPrivateKeyFile        string            `mapstructure:"ssh_private_key_file"`
-	SSHPrivateIp             bool              `mapstructure:"ssh_private_ip"`
-	SSHPort                  int               `mapstructure:"ssh_port"`
 	SecurityGroupId          string            `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
 	SubnetId                 string            `mapstructure:"subnet_id"`
@@ -34,27 +29,19 @@ type RunConfig struct {
 	UserDataFile             string            `mapstructure:"user_data_file"`
 	VpcId                    string            `mapstructure:"vpc_id"`
 
-	// Unexported fields that are calculated from others
-	sshTimeout time.Duration
+	// Communicator settings
+	Comm         communicator.Config `mapstructure:",squash"`
+	SSHPrivateIp bool                `mapstructure:"ssh_private_ip"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
-	// Defaults
-	if c.SSHPort == 0 {
-		c.SSHPort = 22
-	}
-
-	if c.RawSSHTimeout == "" {
-		c.RawSSHTimeout = "5m"
-	}
-
 	if c.TemporaryKeyPairName == "" {
 		c.TemporaryKeyPairName = fmt.Sprintf(
 			"packer %s", uuid.TimeOrderedUUID())
 	}
 
 	// Validation
-	var errs []error
+	errs := c.Comm.Prepare(ctx)
 	if c.SourceAmi == "" {
 		errs = append(errs, errors.New("A source_ami must be specified"))
 	}
@@ -68,10 +55,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, errors.New(
 				"spot_price_auto_product must be specified when spot_price is auto"))
 		}
-	}
-
-	if c.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
@@ -91,15 +74,5 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	var err error
-	c.sshTimeout, err = time.ParseDuration(c.RawSSHTimeout)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
-	}
-
 	return errs
-}
-
-func (c *RunConfig) SSHTimeout() time.Duration {
-	return c.sshTimeout
 }

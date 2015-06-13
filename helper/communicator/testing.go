@@ -1,102 +1,22 @@
-package common
+package communicator
 
 import (
 	"io/ioutil"
-	"os"
 	"testing"
-
-	"github.com/mitchellh/packer/helper/communicator"
 )
 
-func testSSHConfig() *SSHConfig {
-	return &SSHConfig{
-		Comm: communicator.Config{
-			SSHUsername: "foo",
-		},
-	}
-}
-
-func TestSSHConfigPrepare(t *testing.T) {
-	c := testSSHConfig()
-	errs := c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("err: %#v", errs)
-	}
-
-	if c.Comm.SSHPort != 22 {
-		t.Errorf("bad ssh port: %d", c.Comm.SSHPort)
-	}
-}
-
-func TestSSHConfigPrepare_SSHKeyPath(t *testing.T) {
-	var c *SSHConfig
-	var errs []error
-
-	c = testSSHConfig()
-	c.SSHKeyPath = ""
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-
-	c = testSSHConfig()
-	c.SSHKeyPath = "/i/dont/exist"
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatal("should have error")
-	}
-
-	// Test bad contents
+func TestPEM(t *testing.T) string {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.Remove(tf.Name())
-	defer tf.Close()
+	tf.Write([]byte(TestPEMContents))
+	tf.Close()
 
-	if _, err := tf.Write([]byte("HELLO!")); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	c = testSSHConfig()
-	c.SSHKeyPath = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatal("should have error")
-	}
-
-	// Test good contents
-	tf.Seek(0, 0)
-	tf.Truncate(0)
-	tf.Write([]byte(testPem))
-	c = testSSHConfig()
-	c.SSHKeyPath = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
+	return tf.Name()
 }
 
-func TestSSHConfigPrepare_SSHUser(t *testing.T) {
-	var c *SSHConfig
-	var errs []error
-
-	c = testSSHConfig()
-	c.Comm.SSHUsername = ""
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatalf("should have error")
-	}
-
-	c = testSSHConfig()
-	c.Comm.SSHUsername = "exists"
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-}
-
-const testPem = `
+const TestPEMContents = `
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEAxd4iamvrwRJvtNDGQSIbNvvIQN8imXTRWlRY62EvKov60vqu
 hh+rDzFYAIIzlmrJopvOe0clqmi3mIP9dtkjPFrYflq52a2CF5q+BdwsJXuRHbJW

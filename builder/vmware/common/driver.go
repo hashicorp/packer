@@ -29,9 +29,9 @@ type Driver interface {
 	// Checks if the VMX file at the given path is running.
 	IsRunning(string) (bool, error)
 
-	// SSHAddress returns the SSH address for the VM that is being
+	// CommHost returns the host address for the VM that is being
 	// managed by this driver.
-	SSHAddress(multistep.StateBag) (string, error)
+	CommHost(multistep.StateBag) (string, error)
 
 	// Start starts a VM specified by the path to the VMX given.
 	Start(string, bool) error
