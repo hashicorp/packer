@@ -291,11 +291,16 @@ func Parse(r io.Reader) (*Template, error) {
 	if len(md.Unused) > 0 {
 		sort.Strings(md.Unused)
 		for _, unused := range md.Unused {
+			// Ignore keys starting with '_' as comments
+			if unused[0] == '_' {
+				continue
+			}
+
 			err = multierror.Append(err, fmt.Errorf(
 				"Unknown root level key in template: '%s'", unused))
 		}
-
-		// Return early for these errors
+	}
+	if err != nil {
 		return nil, err
 	}
 
