@@ -42,7 +42,7 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Println("Waiting for poweroff event to complete...")
-	err = waitForDropletState("off", dropletId, client, c.stateTimeout)
+	err = waitForDropletState("off", dropletId, client, c.StateTimeout)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
