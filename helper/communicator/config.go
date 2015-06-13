@@ -12,14 +12,15 @@ import (
 // Config is the common configuration that communicators allow within
 // a builder.
 type Config struct {
-	Type          string        `mapstructure:"communicator"`
-	SSHHost       string        `mapstructure:"ssh_host"`
-	SSHPort       int           `mapstructure:"ssh_port"`
-	SSHUsername   string        `mapstructure:"ssh_username"`
-	SSHPassword   string        `mapstructure:"ssh_password"`
-	SSHPrivateKey string        `mapstructure:"ssh_private_key_file"`
-	SSHPty        bool          `mapstructure:"ssh_pty"`
-	SSHTimeout    time.Duration `mapstructure:"ssh_timeout"`
+	Type                 string        `mapstructure:"communicator"`
+	SSHHost              string        `mapstructure:"ssh_host"`
+	SSHPort              int           `mapstructure:"ssh_port"`
+	SSHUsername          string        `mapstructure:"ssh_username"`
+	SSHPassword          string        `mapstructure:"ssh_password"`
+	SSHPrivateKey        string        `mapstructure:"ssh_private_key_file"`
+	SSHPty               bool          `mapstructure:"ssh_pty"`
+	SSHTimeout           time.Duration `mapstructure:"ssh_timeout"`
+	SSHHandshakeAttempts int           `mapstructure:"ssh_handshake_attempts"`
 }
 
 func (c *Config) Prepare(ctx *interpolate.Context) []error {
@@ -33,6 +34,10 @@ func (c *Config) Prepare(ctx *interpolate.Context) []error {
 
 	if c.SSHTimeout == 0 {
 		c.SSHTimeout = 5 * time.Minute
+	}
+
+	if c.SSHHandshakeAttempts == 0 {
+		c.SSHHandshakeAttempts = 10
 	}
 
 	// Validation
