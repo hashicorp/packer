@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/mitchellh/packer/packer"
 )
@@ -163,8 +164,8 @@ func TestBuilderPrepare_SSHUsername(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SSHUsername != "root" {
-		t.Errorf("invalid: %s", b.config.SSHUsername)
+	if b.config.Comm.SSHUsername != "root" {
+		t.Errorf("invalid: %s", b.config.Comm.SSHUsername)
 	}
 
 	// Test set
@@ -178,50 +179,9 @@ func TestBuilderPrepare_SSHUsername(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SSHUsername != "foo" {
-		t.Errorf("invalid: %s", b.config.SSHUsername)
+	if b.config.Comm.SSHUsername != "foo" {
+		t.Errorf("invalid: %s", b.config.Comm.SSHUsername)
 	}
-}
-
-func TestBuilderPrepare_SSHTimeout(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test default
-	warnings, err := b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.RawSSHTimeout != "1m" {
-		t.Errorf("invalid: %s", b.config.RawSSHTimeout)
-	}
-
-	// Test set
-	config["ssh_timeout"] = "30s"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Test bad
-	config["ssh_timeout"] = "tubes"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
 }
 
 func TestBuilderPrepare_StateTimeout(t *testing.T) {
@@ -237,8 +197,8 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.RawStateTimeout != "6m" {
-		t.Errorf("invalid: %s", b.config.RawStateTimeout)
+	if b.config.StateTimeout != 6*time.Minute {
+		t.Errorf("invalid: %s", b.config.StateTimeout)
 	}
 
 	// Test set
