@@ -15,6 +15,8 @@ FEATURES:
 
   * **New config function: `template_dir`**: The directory to the template
       being built. This should be used for template-relative paths. [GH-54]
+  * **Disable SSH:** Set `communicator` to "none" in any builder to disable SSH
+      connections. Note that provisioners won't work if this is done. [GH-1591]
 
 IMPROVEMENTS:
 
