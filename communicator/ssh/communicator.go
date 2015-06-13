@@ -33,8 +33,8 @@ type Config struct {
 	// case an error occurs.
 	Connection func() (net.Conn, error)
 
-	// NoPty, if true, will not request a pty from the remote end.
-	NoPty bool
+	// Pty, if true, will request a pty from the remote end.
+	Pty bool
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -65,7 +65,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	session.Stdout = cmd.Stdout
 	session.Stderr = cmd.Stderr
 
-	if !c.config.NoPty {
+	if c.config.Pty {
 		// Request a PTY
 		termModes := ssh.TerminalModes{
 			ssh.ECHO:          0,     // do not echo

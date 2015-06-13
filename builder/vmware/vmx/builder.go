@@ -94,7 +94,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHAddress:     driver.SSHAddress,
 			SSHConfig:      vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
 			SSHWaitTimeout: b.config.SSHWaitTimeout,
-			NoPty:          b.config.SSHSkipRequestPty,
+			Pty:            !b.config.SSHSkipRequestPty,
 		},
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,

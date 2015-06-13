@@ -335,7 +335,6 @@ func (d *ESX5Driver) connect() error {
 			User: d.Username,
 			Auth: auth,
 		},
-		NoPty: true,
 	}
 
 	comm, err := ssh.New(address, sshConfig)
