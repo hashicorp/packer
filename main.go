@@ -217,12 +217,10 @@ func loadConfig() (*config, error) {
 		return nil, err
 	}
 
-	mustExist := true
 	configFilePath := os.Getenv("PACKER_CONFIG")
 	if configFilePath == "" {
 		var err error
 		configFilePath, err = configFile()
-		mustExist = false
 
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
@@ -240,11 +238,7 @@ func loadConfig() (*config, error) {
 			return nil, err
 		}
 
-		if mustExist {
-			return nil, err
-		}
-
-		log.Println("File doesn't exist, but doesn't need to. Ignoring.")
+		log.Println("[WARN] Config file doesn't exist: %s", configFilePath)
 		return &config, nil
 	}
 	defer f.Close()
