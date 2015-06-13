@@ -19,7 +19,7 @@ func TestConfigType(t *testing.T) {
 	}
 
 	if c.Type != "ssh" {
-		t.Fatal("bad: %#v", c)
+		t.Fatalf("bad: %#v", c)
 	}
 }
 
