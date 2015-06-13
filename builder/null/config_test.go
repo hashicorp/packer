@@ -1,7 +1,10 @@
 package null
 
 import (
+	"os"
 	"testing"
+
+	"github.com/mitchellh/packer/helper/communicator"
 )
 
 func testConfig() map[string]interface{} {
@@ -97,7 +100,9 @@ func TestConfigPrepare_sshCredential(t *testing.T) {
 	testConfigOk(t, warns, errs)
 
 	// only ssh_private_key_file
-	raw["ssh_private_key_file"] = "good"
+	testFile := communicator.TestPEM(t)
+	defer os.Remove(testFile)
+	raw["ssh_private_key_file"] = testFile
 	delete(raw, "ssh_password")
 	_, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
