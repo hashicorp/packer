@@ -1,6 +1,9 @@
 package communicator
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -26,14 +29,27 @@ type StepConnect struct {
 }
 
 func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
-	// Eventually we might switch between multiple of these depending
-	// on the communicator type.
-	s.substep = &StepConnectSSH{
-		Config:     s.Config,
-		SSHAddress: s.SSHAddress,
-		SSHConfig:  s.SSHConfig,
+	typeMap := map[string]multistep.Step{
+		"none": nil,
+		"ssh": &StepConnectSSH{
+			Config:     s.Config,
+			SSHAddress: s.SSHAddress,
+			SSHConfig:  s.SSHConfig,
+		},
 	}
 
+	step, ok := typeMap[s.Config.Type]
+	if !ok {
+		state.Put("error", fmt.Errorf("unknown communicator type: %s", s.Config.Type))
+		return multistep.ActionHalt
+	}
+
+	if step == nil {
+		log.Printf("[INFO] communicator disabled, will not connect")
+		return multistep.ActionContinue
+	}
+
+	s.substep = step
 	return s.substep.Run(state)
 }
 

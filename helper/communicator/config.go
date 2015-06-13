@@ -10,6 +10,7 @@ import (
 // Config is the common configuration that communicators allow within
 // a builder.
 type Config struct {
+	Type          string        `mapstructure:"communicator"`
 	SSHHost       string        `mapstructure:"ssh_host"`
 	SSHPort       int           `mapstructure:"ssh_port"`
 	SSHUsername   string        `mapstructure:"ssh_username"`
@@ -20,6 +21,10 @@ type Config struct {
 }
 
 func (c *Config) Prepare(ctx *interpolate.Context) []error {
+	if c.Type == "" {
+		c.Type = "ssh"
+	}
+
 	if c.SSHPort == 0 {
 		c.SSHPort = 22
 	}
