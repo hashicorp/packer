@@ -8,25 +8,32 @@ import (
 const BuilderId = "packer.post-processor.compress"
 
 type Artifact struct {
-	builderId string
-	dir       string
-	f         []string
+	Path     string
+	Provider string
+	files    []string
+}
+
+func NewArtifact(provider, path string) *Artifact {
+	return &Artifact{
+		Path:     path,
+		Provider: provider,
+	}
 }
 
 func (a *Artifact) BuilderId() string {
 	return BuilderId
 }
 
-func (a *Artifact) Files() []string {
-	return a.f
+func (*Artifact) Id() string {
+	return ""
 }
 
-func (*Artifact) Id() string {
-	return "COMPRESS"
+func (a *Artifact) Files() []string {
+	return a.files
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("VM compressed files in directory: %s", a.dir)
+	return fmt.Sprintf("'%s' compressing: %s", a.Provider, a.Path)
 }
 
 func (*Artifact) State(name string) interface{} {
@@ -34,5 +41,5 @@ func (*Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	return os.RemoveAll(a.dir)
+	return os.Remove(a.Path)
 }

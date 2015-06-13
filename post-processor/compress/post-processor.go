@@ -46,47 +46,45 @@ type Config struct {
 }
 
 type PostProcessor struct {
-	cfg Config
+	config Config
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	p.cfg.Compression = -1
-	err := config.Decode(&p.cfg, &config.DecodeOpts{
+	p.config.Compression = -1
+	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{
-			// TODO figure out if something needs to go here.
-			},
+			Exclude: []string{},
 		},
 	}, raws...)
 
 	errs := new(packer.MultiError)
 
-	if p.cfg.OutputPath == "" {
-		p.cfg.OutputPath = "packer_{{.BuildName}}_{{.Provider}}"
+	if p.config.OutputPath == "" {
+		p.config.OutputPath = "packer_{{.BuildName}}_{{.Provider}}"
 	}
 
-	if err = interpolate.Validate(p.cfg.OutputPath, p.cfg.ctx); err != nil {
+	if err = interpolate.Validate(p.config.OutputPath, p.config.ctx); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
 
 	templates := map[string]*string{
-		"output": &p.cfg.OutputPath,
+		"output": &p.config.OutputPath,
 	}
 
-	if p.cfg.Compression > flate.BestCompression {
-		p.cfg.Compression = flate.BestCompression
+	if p.config.Compression > flate.BestCompression {
+		p.config.Compression = flate.BestCompression
 	}
-	if p.cfg.Compression == -1 {
-		p.cfg.Compression = flate.DefaultCompression
-	}
-
-	if p.cfg.NumCPU < 1 {
-		p.cfg.NumCPU = runtime.NumCPU()
+	if p.config.Compression == -1 {
+		p.config.Compression = flate.DefaultCompression
 	}
 
-	runtime.GOMAXPROCS(p.cfg.NumCPU)
+	if p.config.NumCPU < 1 {
+		p.config.NumCPU = runtime.NumCPU()
+	}
+
+	runtime.GOMAXPROCS(p.config.NumCPU)
 
 	for key, ptr := range templates {
 		if *ptr == "" {
@@ -94,7 +92,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 				errs, fmt.Errorf("%s must be set", key))
 		}
 
-		*ptr, err = interpolate.Render(p.cfg.OutputPath, p.cfg.ctx)
+		*ptr, err = interpolate.Render(p.config.OutputPath, p.config.ctx)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", key, err))
@@ -114,7 +112,7 @@ func (p *PostProcessor) fillMetadata(metadata Metadata, files []string) Metadata
 	const layout = "2006-01-02_15-04-05"
 	t := time.Now()
 
-	if !p.cfg.Metadata {
+	if !p.config.Metadata {
 		return metadata
 	}
 	for _, f := range files {
@@ -122,7 +120,7 @@ func (p *PostProcessor) fillMetadata(metadata Metadata, files []string) Metadata
 			continue
 		} else {
 			if i, ok := metadata[filepath.Base(f)]; !ok {
-				metadata[filepath.Base(f)] = Metaitem{CompType: p.cfg.Format, OrigSize: fi.Size(), CompDate: t.Format(layout)}
+				metadata[filepath.Base(f)] = Metaitem{CompType: p.config.Format, OrigSize: fi.Size(), CompDate: t.Format(layout)}
 			} else {
 				i.CompSize = fi.Size()
 				i.CompDate = t.Format(layout)
@@ -134,46 +132,55 @@ func (p *PostProcessor) fillMetadata(metadata Metadata, files []string) Metadata
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	newartifact := &Artifact{builderId: artifact.BuilderId(), dir: p.cfg.OutputPath}
-	metafile := filepath.Join(p.cfg.OutputPath, "metadata")
+	newartifact := &Artifact{Path: p.config.OutputPath}
+	metafile := filepath.Join(p.config.OutputPath, "metadata")
 
-	_, err := os.Stat(newartifact.dir)
+	ui.Say(fmt.Sprintf("[CBEDNARSKI] Creating archive at %s", newartifact.Path))
+	_, err := os.Stat(newartifact.Path)
 	if err == nil {
-		return nil, false, fmt.Errorf("output dir must not exists: %s", err)
+		return nil, false, fmt.Errorf("output dir %s must not exists", newartifact.Path)
 	}
-	err = os.MkdirAll(newartifact.dir, 0755)
+	err = os.MkdirAll(newartifact.Path, 0755)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to create output: %s", err)
 	}
 
-	formats := strings.Split(p.cfg.Format, ".")
+	p.config.Format += "tar.gzip"
+	formats := strings.Split(p.config.Format, ".")
+	ui.Say(fmt.Sprintf("[CBEDNARSKI] Formats length %d", len(formats)))
+	if len(p.config.Format) == 0 {
+		ui.Say("[CBEDNARSKI] Formats is empty")
+		formats[0] = "tar.gzip"
+	}
 	files := artifact.Files()
 
 	metadata := make(Metadata, 0)
 	metadata = p.fillMetadata(metadata, files)
 
+	ui.Say(fmt.Sprintf("[CBEDNARSKI] Formats %#v", formats))
+
 	for _, compress := range formats {
 		switch compress {
 		case "tar":
-			files, err = p.cmpTAR(files, filepath.Join(p.cfg.OutputPath, p.cfg.OutputFile))
+			files, err = p.cmpTAR(files, filepath.Join(p.config.OutputPath, p.config.OutputFile))
 			metadata = p.fillMetadata(metadata, files)
 		case "zip":
-			files, err = p.cmpZIP(files, filepath.Join(p.cfg.OutputPath, p.cfg.OutputFile))
+			files, err = p.cmpZIP(files, filepath.Join(p.config.OutputPath, p.config.OutputFile))
 			metadata = p.fillMetadata(metadata, files)
 		case "pgzip":
-			files, err = p.cmpPGZIP(files, p.cfg.OutputPath)
+			files, err = p.cmpPGZIP(files, p.config.OutputPath)
 			metadata = p.fillMetadata(metadata, files)
 		case "gzip":
-			files, err = p.cmpGZIP(files, p.cfg.OutputPath)
+			files, err = p.cmpGZIP(files, p.config.OutputPath)
 			metadata = p.fillMetadata(metadata, files)
 		case "bgzf":
-			files, err = p.cmpBGZF(files, p.cfg.OutputPath)
+			files, err = p.cmpBGZF(files, p.config.OutputPath)
 			metadata = p.fillMetadata(metadata, files)
 		case "lz4":
-			files, err = p.cmpLZ4(files, p.cfg.OutputPath)
+			files, err = p.cmpLZ4(files, p.config.OutputPath)
 			metadata = p.fillMetadata(metadata, files)
 		case "e2fs":
-			files, err = p.cmpE2FS(files, filepath.Join(p.cfg.OutputPath, p.cfg.OutputFile))
+			files, err = p.cmpE2FS(files, filepath.Join(p.config.OutputPath, p.config.OutputFile))
 			metadata = p.fillMetadata(metadata, files)
 		}
 		if err != nil {
@@ -181,7 +188,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 	}
 
-	if p.cfg.Metadata {
+	if p.config.Metadata {
 		fp, err := os.Create(metafile)
 		if err != nil {
 			return nil, false, err
@@ -198,18 +205,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 	}
 
-	newartifact.f = append(newartifact.f, files...)
-	if p.cfg.Metadata {
-		newartifact.f = append(newartifact.f, metafile)
+	newartifact.files = append(newartifact.files, files...)
+	if p.config.Metadata {
+		newartifact.files = append(newartifact.files, metafile)
 	}
 
-	return newartifact, p.cfg.KeepInputArtifact, nil
+	return newartifact, p.config.KeepInputArtifact, nil
 }
 
 func (p *PostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
 	fw, err := os.Create(dst)
 	if err != nil {
-		return nil, fmt.Errorf("tar error: %s", err)
+		return nil, fmt.Errorf("tar error creating tar %s: %s", dst, err)
 	}
 	defer fw.Close()
 
@@ -219,27 +226,27 @@ func (p *PostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
 	for _, name := range src {
 		fi, err := os.Stat(name)
 		if err != nil {
-			return nil, fmt.Errorf("tar error: %s", err)
+			return nil, fmt.Errorf("tar error on stat of %s: %s", name, err)
 		}
 
 		target, _ := os.Readlink(name)
 		header, err := tar.FileInfoHeader(fi, target)
 		if err != nil {
-			return nil, fmt.Errorf("tar error: %s", err)
+			return nil, fmt.Errorf("tar error reading info for %s: %s", name, err)
 		}
 
 		if err = tw.WriteHeader(header); err != nil {
-			return nil, fmt.Errorf("tar error: %s", err)
+			return nil, fmt.Errorf("tar error writing header for %s: %s", name, err)
 		}
 
 		fr, err := os.Open(name)
 		if err != nil {
-			return nil, fmt.Errorf("tar error: %s", err)
+			return nil, fmt.Errorf("tar error opening file %s: %s", name, err)
 		}
 
 		if _, err = io.Copy(tw, fr); err != nil {
 			fr.Close()
-			return nil, fmt.Errorf("tar error: %s", err)
+			return nil, fmt.Errorf("tar error copying contents of %s: %s", name, err)
 		}
 		fr.Close()
 	}
@@ -254,7 +261,7 @@ func (p *PostProcessor) cmpGZIP(src []string, dst string) ([]string, error) {
 		if err != nil {
 			return nil, fmt.Errorf("gzip error: %s", err)
 		}
-		cw, err := gzip.NewWriterLevel(fw, p.cfg.Compression)
+		cw, err := gzip.NewWriterLevel(fw, p.config.Compression)
 		if err != nil {
 			fw.Close()
 			return nil, fmt.Errorf("gzip error: %s", err)
@@ -287,7 +294,7 @@ func (p *PostProcessor) cmpPGZIP(src []string, dst string) ([]string, error) {
 		if err != nil {
 			return nil, fmt.Errorf("pgzip error: %s", err)
 		}
-		cw, err := pgzip.NewWriterLevel(fw, p.cfg.Compression)
+		cw, err := pgzip.NewWriterLevel(fw, p.config.Compression)
 		if err != nil {
 			fw.Close()
 			return nil, fmt.Errorf("pgzip error: %s", err)
@@ -325,7 +332,7 @@ func (p *PostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
 			fw.Close()
 			return nil, fmt.Errorf("lz4 error: %s", err)
 		}
-		if p.cfg.Compression > flate.DefaultCompression {
+		if p.config.Compression > flate.DefaultCompression {
 			cw.Header.HighCompression = true
 		}
 		fr, err := os.Open(name)
@@ -357,7 +364,7 @@ func (p *PostProcessor) cmpBGZF(src []string, dst string) ([]string, error) {
 			return nil, fmt.Errorf("bgzf error: %s", err)
 		}
 
-		cw, err := bgzf.NewWriterLevel(fw, p.cfg.Compression, runtime.NumCPU())
+		cw, err := bgzf.NewWriterLevel(fw, p.config.Compression, runtime.NumCPU())
 		if err != nil {
 			return nil, fmt.Errorf("bgzf error: %s", err)
 		}
