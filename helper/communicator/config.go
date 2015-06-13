@@ -2,6 +2,8 @@ package communicator
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/mitchellh/packer/template/interpolate"
@@ -38,6 +40,16 @@ func (c *Config) Prepare(ctx *interpolate.Context) []error {
 	if c.Type == "ssh" {
 		if c.SSHUsername == "" {
 			errs = append(errs, errors.New("An ssh_username must be specified"))
+		}
+
+		if c.SSHPrivateKey != "" {
+			if _, err := os.Stat(c.SSHPrivateKey); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_private_key_file is invalid: %s", err))
+			} else if _, err := SSHFileSigner(c.SSHPrivateKey); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_private_key_file is invalid: %s", err))
+			}
 		}
 	}
 
