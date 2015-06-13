@@ -33,8 +33,14 @@ type Builder struct {
 //
 // Prepare should return a list of warnings along with any errors
 // that occured while preparing.
-func (b *Builder) Prepare(...interface{}) ([]string, error) {
-	return nil, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+	c, warnings, errs := NewConfig(raws...)
+	if errs != nil {
+		return warnings, errs
+	}
+	b.config = c
+
+	return warnings, nil
 }
 
 // Run is where the actual build should take place. It takes a Build and a Ui.
