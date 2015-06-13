@@ -28,7 +28,7 @@ type StateChangeConf struct {
 	Pending   []string
 	Refresh   StateRefreshFunc
 	StepState multistep.StateBag
-	Target    string
+	Target    []string
 }
 
 // ServerStateRefreshFunc returns a StateRefreshFunc that is used to watch
@@ -65,8 +65,10 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 			return
 		}
 
-		if currentState == conf.Target {
-			return
+		for _, t := range conf.Target {
+			if currentState == t {
+				return
+			}
 		}
 
 		if conf.StepState != nil {
