@@ -66,6 +66,7 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			uint8ToStringHook,
 			mapstructure.StringToSliceHookFunc(","),
+			mapstructure.StringToTimeDurationHookFunc(),
 		),
 	})
 	if err != nil {
