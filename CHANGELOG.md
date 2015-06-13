@@ -2,6 +2,8 @@
 
 BACKWARDS INCOMPATIBILITIES:
 
+  * core: SSH connection will no longer request a PTY by default. This
+      can be enabled per builder.
   * builder/digitalocean: no longer supports the v1 API which has been
       deprecated for some time. Most configurations should continue to
       work as long as you use the `api_token` field for auth.
