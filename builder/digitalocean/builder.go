@@ -54,9 +54,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
 		&communicator.StepConnect{
-			Config:     &b.config.Comm,
-			SSHAddress: sshAddress,
-			SSHConfig:  sshConfig,
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: sshConfig,
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
