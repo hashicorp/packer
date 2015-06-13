@@ -18,13 +18,13 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 	config := state.Get("config").(*Config)
 
 	auth := []gossh.AuthMethod{
-		gossh.Password(config.SSHPassword),
+		gossh.Password(config.Comm.SSHPassword),
 		gossh.KeyboardInteractive(
-			ssh.PasswordKeyboardInteractive(config.SSHPassword)),
+			ssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
 	}
 
-	if config.SSHKeyPath != "" {
-		signer, err := commonssh.FileSigner(config.SSHKeyPath)
+	if config.Comm.SSHPrivateKey != "" {
+		signer, err := commonssh.FileSigner(config.Comm.SSHPrivateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -33,7 +33,7 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 	}
 
 	return &gossh.ClientConfig{
-		User: config.SSHUser,
+		User: config.Comm.SSHUsername,
 		Auth: auth,
 	}, nil
 }

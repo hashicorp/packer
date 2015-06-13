@@ -79,8 +79,8 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad max ssh host port: %d", b.config.SSHHostPortMax)
 	}
 
-	if b.config.SSHPort != 22 {
-		t.Errorf("bad ssh port: %d", b.config.SSHPort)
+	if b.config.Comm.SSHPort != 22 {
+		t.Errorf("bad ssh port: %d", b.config.Comm.SSHPort)
 	}
 
 	if b.config.VMName != "packer-foo" {
@@ -593,10 +593,6 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
-	}
-
-	if b.config.RawSSHWaitTimeout != "20m" {
-		t.Fatalf("bad value: %s", b.config.RawSSHWaitTimeout)
 	}
 
 	// Test with a bad value
