@@ -115,9 +115,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			SSHAddress: awscommon.SSHAddress(
+			Host: awscommon.SSHHost(
 				ec2conn,
-				b.config.RunConfig.Comm.SSHPort,
 				b.config.SSHPrivateIp),
 			SSHConfig: awscommon.SSHConfig(
 				b.config.RunConfig.Comm.SSHUsername),

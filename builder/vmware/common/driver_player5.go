@@ -97,8 +97,8 @@ func (d *Player5Driver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Player5Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return SSHAddressFunc(d.SSHConfig)(state)
+func (d *Player5Driver) CommHost(state multistep.StateBag) (string, error) {
+	return CommHost(d.SSHConfig)(state)
 }
 
 func (d *Player5Driver) Start(vmxPath string, headless bool) error {

@@ -13,13 +13,13 @@ import (
 	gossh "golang.org/x/crypto/ssh"
 )
 
-func SSHAddressFunc(config *SSHConfig) func(multistep.StateBag) (string, error) {
+func CommHost(config *SSHConfig) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		driver := state.Get("driver").(Driver)
 		vmxPath := state.Get("vmx_path").(string)
 
 		if config.Comm.SSHHost != "" {
-			return fmt.Sprintf("%s:%d", config.Comm.SSHHost, config.Comm.SSHPort), nil
+			return config.Comm.SSHHost, nil
 		}
 
 		log.Println("Lookup up IP information...")
@@ -62,7 +62,7 @@ func SSHAddressFunc(config *SSHConfig) func(multistep.StateBag) (string, error) 
 		}
 
 		log.Printf("Detected IP: %s", ipAddress)
-		return fmt.Sprintf("%s:%d", ipAddress, config.Comm.SSHPort), nil
+		return ipAddress, nil
 	}
 }
 

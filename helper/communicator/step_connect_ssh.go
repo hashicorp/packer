@@ -18,9 +18,10 @@ import (
 // In general, you should use StepConnect.
 type StepConnectSSH struct {
 	// All the fields below are documented on StepConnect
-	Config     *Config
-	SSHAddress func(multistep.StateBag) (string, error)
-	SSHConfig  func(multistep.StateBag) (*gossh.ClientConfig, error)
+	Config    *Config
+	Host      func(multistep.StateBag) (string, error)
+	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
+	SSHPort   func(multistep.StateBag) (int, error)
 }
 
 func (s *StepConnectSSH) Run(state multistep.StateBag) multistep.StepAction {
@@ -95,10 +96,18 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		first = false
 
 		// First we request the TCP connection information
-		address, err := s.SSHAddress(state)
+		host, err := s.Host(state)
 		if err != nil {
 			log.Printf("[DEBUG] Error getting SSH address: %s", err)
 			continue
+		}
+		port := s.Config.SSHPort
+		if s.SSHPort != nil {
+			port, err = s.SSHPort(state)
+			if err != nil {
+				log.Printf("[DEBUG] Error getting SSH port: %s", err)
+				continue
+			}
 		}
 
 		// Retrieve the SSH configuration
@@ -107,6 +116,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			log.Printf("[DEBUG] Error getting SSH config: %s", err)
 			continue
 		}
+
+		address := fmt.Sprintf("%s:%d", host, port)
 
 		// Attempt to connect to SSH port
 		connFunc := ssh.ConnectFunc("tcp", address)

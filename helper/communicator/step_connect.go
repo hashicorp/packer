@@ -15,15 +15,16 @@ type StepConnect struct {
 	// Config is the communicator config struct
 	Config *Config
 
+	// Host should return a host that can be connected to for communicator
+	// connections.
+	Host func(multistep.StateBag) (string, error)
+
 	// The fields below are callbacks to assist with connecting to SSH.
-	//
-	// SSHAddress should return the default host to connect to for SSH.
-	// This is only called if ssh_host isn't specified in the config.
 	//
 	// SSHConfig should return the default configuration for
 	// connecting via SSH.
-	SSHAddress func(multistep.StateBag) (string, error)
-	SSHConfig  func(multistep.StateBag) (*gossh.ClientConfig, error)
+	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
+	SSHPort   func(multistep.StateBag) (int, error)
 
 	substep multistep.Step
 }
@@ -32,9 +33,10 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 	typeMap := map[string]multistep.Step{
 		"none": nil,
 		"ssh": &StepConnectSSH{
-			Config:     s.Config,
-			SSHAddress: s.SSHAddress,
-			SSHConfig:  s.SSHConfig,
+			Config:    s.Config,
+			Host:      s.Host,
+			SSHConfig: s.SSHConfig,
+			SSHPort:   s.SSHPort,
 		},
 	}
 

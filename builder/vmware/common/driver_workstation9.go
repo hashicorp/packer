@@ -70,8 +70,8 @@ func (d *Workstation9Driver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Workstation9Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return SSHAddressFunc(d.SSHConfig)(state)
+func (d *Workstation9Driver) CommHost(state multistep.StateBag) (string, error) {
+	return CommHost(d.SSHConfig)(state)
 }
 
 func (d *Workstation9Driver) Start(vmxPath string, headless bool) error {
