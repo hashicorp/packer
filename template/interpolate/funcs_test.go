@@ -8,6 +8,56 @@ import (
 	"time"
 )
 
+func TestFuncBuildName(t *testing.T) {
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{build_name}}`,
+			"foo",
+		},
+	}
+
+	ctx := &Context{BuildName: "foo"}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
+func TestFuncBuildType(t *testing.T) {
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{build_type}}`,
+			"foo",
+		},
+	}
+
+	ctx := &Context{BuildType: "foo"}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
 func TestFuncEnv(t *testing.T) {
 	cases := []struct {
 		Input  string
