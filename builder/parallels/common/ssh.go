@@ -1,15 +1,13 @@
 package common
 
 import (
-	"fmt"
-
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 )
 
-func SSHAddress(state multistep.StateBag) (string, error) {
+func CommHost(state multistep.StateBag) (string, error) {
 	vmName := state.Get("vmName").(string)
 	driver := state.Get("driver").(Driver)
 
@@ -23,19 +21,19 @@ func SSHAddress(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s:22", ip), nil
+	return ip, nil
 }
 
 func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		auth := []ssh.AuthMethod{
-			ssh.Password(config.SSHPassword),
+			ssh.Password(config.Comm.SSHPassword),
 			ssh.KeyboardInteractive(
-				packerssh.PasswordKeyboardInteractive(config.SSHPassword)),
+				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
 		}
 
 		if config.SSHKeyPath != "" {
-			signer, err := commonssh.FileSigner(config.SSHKeyPath)
+			signer, err := commonssh.FileSigner(config.Comm.SSHPrivateKey)
 			if err != nil {
 				return nil, err
 			}
@@ -44,7 +42,7 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*ssh.ClientConfig
 		}
 
 		return &ssh.ClientConfig{
-			User: config.SSHUser,
+			User: config.Comm.SSHUsername,
 			Auth: auth,
 		}, nil
 	}

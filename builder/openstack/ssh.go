@@ -13,22 +13,21 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// SSHAddress returns a function that can be given to the SSH communicator
-// for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(
+// CommHost looks up the host for the communicator.
+func CommHost(
 	client *gophercloud.ServiceClient,
-	sshinterface string, port int) func(multistep.StateBag) (string, error) {
+	sshinterface string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		s := state.Get("server").(*servers.Server)
 
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingip.FloatingIP)
 		if ip != nil && ip.IP != "" {
-			return fmt.Sprintf("%s:%d", ip.IP, port), nil
+			return ip.IP, nil
 		}
 
 		if s.AccessIPv4 != "" {
-			return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
+			return s.AccessIPv4, nil
 		}
 
 		// Get all the addresses associated with this server. This
@@ -53,7 +52,7 @@ func SSHAddress(
 					}
 				}
 				if addr != "" {
-					return fmt.Sprintf("%s:%d", addr, port), nil
+					return addr, nil
 				}
 			}
 		}

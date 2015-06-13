@@ -5,10 +5,11 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
 	"log"
 
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -19,9 +20,10 @@ const BuilderId = "mitchellh.openstack"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	AccessConfig        `mapstructure:",squash"`
-	ImageConfig         `mapstructure:",squash"`
-	RunConfig           `mapstructure:",squash"`
+
+	AccessConfig `mapstructure:",squash"`
+	ImageConfig  `mapstructure:",squash"`
+	RunConfig    `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -88,10 +90,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			FloatingIpPool: b.config.FloatingIpPool,
 			FloatingIp:     b.config.FloatingIp,
 		},
-		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(computeClient, b.config.SSHInterface, b.config.SSHPort),
-			SSHConfig:      SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: CommHost(
+				computeClient,
+				b.config.SSHInterface),
+			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
 		&stepCreateImage{},
