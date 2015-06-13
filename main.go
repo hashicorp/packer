@@ -238,7 +238,7 @@ func loadConfig() (*config, error) {
 			return nil, err
 		}
 
-		log.Println("[WARN] Config file doesn't exist: %s", configFilePath)
+		log.Printf("[WARN] Config file doesn't exist: %s", configFilePath)
 		return &config, nil
 	}
 	defer f.Close()
