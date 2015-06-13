@@ -48,13 +48,18 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.RawSSHTimeout = "5m"
 	}
 
-	if c.TemporaryKeyPairName == "" {
-		c.TemporaryKeyPairName = fmt.Sprintf(
-			"packer %s", uuid.TimeOrderedUUID())
-	}
-
 	// Validation
 	var errs []error
+
+	if c.TemporaryKeyPairName == "" {
+		if c.SSHPrivateKeyFile != "" {
+			errs = append(errs, errors.New("A temporary_key_pair_name must be specified when ssh_private_key_file is specified"))
+		} else {
+			c.TemporaryKeyPairName = fmt.Sprintf(
+				"packer %s", uuid.TimeOrderedUUID())
+		}
+	}
+
 	if c.SourceAmi == "" {
 		errs = append(errs, errors.New("A source_ami must be specified"))
 	}

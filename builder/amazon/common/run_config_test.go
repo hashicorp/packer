@@ -151,3 +151,12 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 		t.Fatal("keypair empty")
 	}
 }
+
+func TestRunConfigPrepare_TemporaryKeyPairName_SSHPrivateKeyFile(t *testing.T) {
+	c := testConfig()
+	c.TemporaryKeyPairName = ""
+	c.SSHPrivateKeyFile = "test"
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+}
