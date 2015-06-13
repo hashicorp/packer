@@ -6,11 +6,11 @@ package digitalocean
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
 	"golang.org/x/oauth2"
 )
@@ -53,10 +53,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: 5 * time.Minute,
+		&communicator.StepConnect{
+			Config:     &b.config.Comm,
+			SSHAddress: sshAddress,
+			SSHConfig:  sshConfig,
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
