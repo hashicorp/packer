@@ -6,7 +6,7 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"host":         "foo",
+		"ssh_host":     "foo",
 		"ssh_username": "bar",
 		"ssh_password": "baz",
 	}
@@ -48,8 +48,8 @@ func TestConfigPrepare_port(t *testing.T) {
 	// default port should be 22
 	delete(raw, "port")
 	c, warns, errs := NewConfig(raw)
-	if c.Port != 22 {
-		t.Fatalf("bad: port should default to 22, not %d", c.Port)
+	if c.CommConfig.SSHPort != 22 {
+		t.Fatalf("bad: port should default to 22, not %d", c.CommConfig.SSHPort)
 	}
 	testConfigOk(t, warns, errs)
 }
@@ -58,12 +58,12 @@ func TestConfigPrepare_host(t *testing.T) {
 	raw := testConfig()
 
 	// No host
-	delete(raw, "host")
+	delete(raw, "ssh_host")
 	_, warns, errs := NewConfig(raw)
 	testConfigErr(t, warns, errs)
 
 	// Good host
-	raw["host"] = "good"
+	raw["ssh_host"] = "good"
 	_, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
 }
