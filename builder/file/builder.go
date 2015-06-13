@@ -6,7 +6,10 @@ any virutalization or network resources, it's very fast and useful for testing.
 */
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -47,7 +50,35 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	artifact := new(FileArtifact)
 
-	ioutil.WriteFile(b.config.Filename, []byte(b.config.Contents), 0600)
+	if b.config.Source != "" {
+		source, err := os.Open(b.config.Source)
+		defer source.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		target, err := os.OpenFile(b.config.Target, os.O_WRONLY, 0600)
+		defer target.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		ui.Say(fmt.Sprintf("Copying %s to %s", source.Name(), target.Name()))
+		bytes, err := io.Copy(source, target)
+		if err != nil {
+			return nil, err
+		}
+		ui.Say(fmt.Sprintf("Copied %d bytes", bytes))
+		artifact.filename = target.Name()
+	} else {
+		// We're going to write Contents; if it's empty we'll just create an
+		// empty file.
+		err := ioutil.WriteFile(b.config.Target, []byte(b.config.Content), 0600)
+		if err != nil {
+			return nil, err
+		}
+		artifact.filename = b.config.Target
+	}
 
 	return artifact, nil
 }
