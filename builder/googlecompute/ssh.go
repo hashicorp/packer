@@ -10,7 +10,7 @@ import (
 func sshAddress(state multistep.StateBag) (string, error) {
 	config := state.Get("config").(*Config)
 	ipAddress := state.Get("instance_ip").(string)
-	return fmt.Sprintf("%s:%d", ipAddress, config.SSHPort), nil
+	return fmt.Sprintf("%s:%d", ipAddress, config.Comm.SSHPort), nil
 }
 
 // sshConfig returns the ssh configuration.
@@ -24,7 +24,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 	}
 
 	return &ssh.ClientConfig{
-		User: config.SSHUsername,
+		User: config.Comm.SSHUsername,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},
