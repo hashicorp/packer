@@ -13,12 +13,14 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
-  * **New config function: `template_dir`**: The directory to the template
-      being built. This should be used for template-relative paths. [GH-54]
+  * **WinRM:** You can now connect via WinRM with almost every builder.
+      See the docs for more info. [GH-2239]
   * **Disable SSH:** Set `communicator` to "none" in any builder to disable SSH
       connections. Note that provisioners won't work if this is done. [GH-1591]
   * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
       to allow access to remote servers such as private git repos. [GH-1066]
+  * **New config function: `template_dir`**: The directory to the template
+      being built. This should be used for template-relative paths. [GH-54]
 
 IMPROVEMENTS:
 
