@@ -179,8 +179,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			PrivateKeyFile: b.config.RunConfig.Comm.SSHPrivateKey,
 		},
 		&awscommon.StepSecurityGroup{
+			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
-			SSHPort:          b.config.RunConfig.Comm.SSHPort,
 			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
