@@ -15,6 +15,9 @@ FEATURES:
 
   * **WinRM:** You can now connect via WinRM with almost every builder.
       See the docs for more info. [GH-2239]
+  * **Windows AWS Support:** Windows AMIs can now be built without any
+      external plugins: Packer will start a Windows instance, get the
+      admin password, and can use WinRM (above) to connect through. [GH-2240]
   * **Disable SSH:** Set `communicator` to "none" in any builder to disable SSH
       connections. Note that provisioners won't work if this is done. [GH-1591]
   * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
