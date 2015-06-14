@@ -46,6 +46,9 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 	waitDone := make(chan bool, 1)
 	go func() {
 		ui.Say("Waiting for auto-generated password for instance...")
+		ui.Message(
+			"It is normal for this process to take up to 15 minutes,\n" +
+				"but it usually takes around 5. Please wait.")
 		password, err = s.waitForPassword(state, cancel)
 		waitDone <- true
 	}()
