@@ -48,7 +48,9 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Waiting for auto-generated password for instance...")
 		ui.Message(
 			"It is normal for this process to take up to 15 minutes,\n" +
-				"but it usually takes around 5. Please wait.")
+				"but it usually takes around 5. Please wait. After the\n" +
+				"password is read, it will printed out below. Since it should\n" +
+				"be a temporary password, this should be a minimal security risk.")
 		password, err = s.waitForPassword(state, cancel)
 		waitDone <- true
 	}()
@@ -66,7 +68,7 @@ WaitLoop:
 				return multistep.ActionHalt
 			}
 
-			ui.Message("Password retrieved!")
+			ui.Message(fmt.Sprintf(" \nPassword retrieved: %s", password))
 			s.Comm.WinRMPassword = password
 			break WaitLoop
 		case <-timeout:
@@ -121,6 +123,8 @@ func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-cha
 
 			return decryptedPassword, nil
 		}
+
+		log.Printf("[DEBUG] Password is blank, will retry...")
 	}
 }
 
