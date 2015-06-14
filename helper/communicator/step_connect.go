@@ -26,6 +26,12 @@ type StepConnect struct {
 	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
 	SSHPort   func(multistep.StateBag) (int, error)
 
+	// The fields below are callbacks to assist with connecting to WinRM.
+	//
+	// WinRMConfig should return the default configuration for
+	// connecting via WinRM.
+	WinRMConfig func(multistep.StateBag) (*WinRMConfig, error)
+
 	substep multistep.Step
 }
 
@@ -37,6 +43,11 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 			Host:      s.Host,
 			SSHConfig: s.SSHConfig,
 			SSHPort:   s.SSHPort,
+		},
+		"winrm": &StepConnectWinRM{
+			Config:      s.Config,
+			Host:        s.Host,
+			WinRMConfig: s.WinRMConfig,
 		},
 	}
 
