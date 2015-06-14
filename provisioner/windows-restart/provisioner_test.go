@@ -234,7 +234,7 @@ func TestProvision_waitForCommunicator(t *testing.T) {
 	err := waitForCommunicator(p)
 
 	if err != nil {
-		t.Fatal("should not have error, got: %s", err.Error())
+		t.Fatalf("should not have error, got: %s", err.Error())
 	}
 
 	expectedCommand := DefaultRestartCheckCommand
