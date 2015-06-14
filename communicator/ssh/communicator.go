@@ -240,19 +240,19 @@ func (c *comm) connectToAgent() {
 	// open connection to the local agent
 	socketLocation := os.Getenv("SSH_AUTH_SOCK")
 	if socketLocation == "" {
-		log.Printf("no local agent socket")
+		log.Printf("[INFO] no local agent socket, will not connect agent")
 		return
 	}
 	agentConn, err := net.Dial("unix", socketLocation)
 	if err != nil {
-		log.Printf("could not connect to local agent socket: %s", socketLocation)
+		log.Printf("[ERROR] could not connect to local agent socket: %s", socketLocation)
 		return
 	}
 
 	// create agent and add in auth
 	forwardingAgent := agent.NewClient(agentConn)
 	if forwardingAgent == nil {
-		log.Printf("could not create agent client")
+		log.Printf("[ERROR] Could not create agent client")
 		agentConn.Close()
 		return
 	}
@@ -272,11 +272,11 @@ func (c *comm) connectToAgent() {
 
 	err = agent.RequestAgentForwarding(session)
 	if err != nil {
-		log.Printf("RequestAgentForwarding:", err)
+		log.Printf("[ERROR] RequestAgentForwarding: %#v", err)
 		return
 	}
 
-	log.Printf("agent forwarding enabled")
+	log.Printf("[INFO] agent forwarding enabled")
 	return
 }
 
