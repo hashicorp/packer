@@ -28,7 +28,7 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 	image := state.Get("source_image").(*ec2.Image)
 
 	// Skip if we're not Windows...
-	if *image.Platform != "windows" {
+	if image.Platform == nil || *image.Platform != "windows" {
 		log.Printf("[INFO] Not Windows, skipping get password...")
 		return multistep.ActionContinue
 	}
