@@ -94,7 +94,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupIds: b.config.SecurityGroupIds,
-			SSHPort:          b.config.RunConfig.Comm.SSHPort,
+			CommConfig:       &b.config.RunConfig.Comm,
 			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
