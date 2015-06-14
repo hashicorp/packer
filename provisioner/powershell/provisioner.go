@@ -294,7 +294,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			}
 		}
 		if !validExitCode {
-			return fmt.Errorf("Script exited with non-zero exit status: %d. Allowed exit codes are: %s", cmd.ExitStatus, p.config.ValidExitCodes)
+			return fmt.Errorf(
+				"Script exited with non-zero exit status: %d. Allowed exit codes are: %v",
+				cmd.ExitStatus, p.config.ValidExitCodes)
 		}
 	}
 
