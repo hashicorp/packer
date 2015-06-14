@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/helper/communicator"
@@ -27,6 +28,7 @@ type RunConfig struct {
 	TemporaryKeyPairName     string            `mapstructure:"temporary_key_pair_name"`
 	UserData                 string            `mapstructure:"user_data"`
 	UserDataFile             string            `mapstructure:"user_data_file"`
+	WindowsPasswordTimeout   time.Duration     `mapstructure:"windows_password_timeout"`
 	VpcId                    string            `mapstructure:"vpc_id"`
 
 	// Communicator settings
@@ -38,6 +40,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.TemporaryKeyPairName == "" {
 		c.TemporaryKeyPairName = fmt.Sprintf(
 			"packer %s", uuid.TimeOrderedUUID())
+	}
+
+	if c.WindowsPasswordTimeout == 0 {
+		c.WindowsPasswordTimeout = 10 * time.Minute
 	}
 
 	// Validation
