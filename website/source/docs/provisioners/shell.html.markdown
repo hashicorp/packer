@@ -146,6 +146,33 @@ on reboot or in your shell script. For example, on Gentoo:
 /etc/init.d/net.eth0 stop
 ```
 
+## SSH Agent Forwarding
+
+Some provisioning requires connecting to remote SSH servers from within the
+packer instance. The below example is for pulling code from a private git
+repository utilizing openssh on the client. Make sure you are running
+`ssh-agent` and add your git repo ssh keys into it using `ssh-add /path/to/key`.
+When the packer instance needs access to the ssh keys the agent will forward
+the request back to your `ssh-agent`.
+
+Note: when provisioning via git you should add the git server keys into
+the `~/.ssh/known_hosts` file otherwise the git command could hang awaiting
+input. This can be done by copying the file in via the
+[file provisioner](/docs/provisioners/file.html) (more secure)
+or using `ssh-keyscan` to populate the file (less secure). An example of the
+latter accessing github would be:
+
+```
+{
+  "type": "shell",
+  "inline": [
+    "sudo apt-get install -y git",
+    "ssh-keyscan github.com >> ~/.ssh/known_hosts",
+    "git clone git@github.com:exampleorg/myprivaterepo.git"
+  ]
+}
+```
+
 ## Troubleshooting
 
 *My shell script doesn't work correctly on Ubuntu*
