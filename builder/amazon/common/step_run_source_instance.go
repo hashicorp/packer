@@ -174,11 +174,15 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 				ImageID:            &s.SourceAMI,
 				InstanceType:       &s.InstanceType,
 				UserData:           &userData,
-				SecurityGroupIDs:   securityGroupIds,
 				IAMInstanceProfile: &ec2.IAMInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-				SubnetID:           &s.SubnetId,
 				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-					&ec2.InstanceNetworkInterfaceSpecification{AssociatePublicIPAddress: &s.AssociatePublicIpAddress},
+					&ec2.InstanceNetworkInterfaceSpecification{
+						DeviceIndex:              aws.Long(0),
+						AssociatePublicIPAddress: &s.AssociatePublicIpAddress,
+						SubnetID:                 &s.SubnetId,
+						Groups:                   securityGroupIds,
+						DeleteOnTermination:      aws.Boolean(true),
+					},
 				},
 				Placement: &ec2.SpotPlacement{
 					AvailabilityZone: &availabilityZone,
