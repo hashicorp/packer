@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
@@ -315,6 +316,13 @@ func ParseFile(path string) (*Template, error) {
 	tpl, err := Parse(f)
 	if err != nil {
 		return nil, err
+	}
+
+	if !filepath.IsAbs(path) {
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	tpl.Path = path

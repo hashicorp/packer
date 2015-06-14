@@ -31,6 +31,18 @@ type Config struct {
 	WinRMTimeout  time.Duration `mapstructure:"winrm_timeout"`
 }
 
+// Port returns the port that will be used for access based on config.
+func (c *Config) Port() int {
+	switch c.Type {
+	case "ssh":
+		return c.SSHPort
+	case "winrm":
+		return c.WinRMPort
+	default:
+		return 0
+	}
+}
+
 func (c *Config) Prepare(ctx *interpolate.Context) []error {
 	if c.Type == "" {
 		c.Type = "ssh"

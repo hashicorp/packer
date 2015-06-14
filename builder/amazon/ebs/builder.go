@@ -94,7 +94,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupIds: b.config.SecurityGroupIds,
-			SSHPort:          b.config.RunConfig.Comm.SSHPort,
+			CommConfig:       &b.config.RunConfig.Comm,
 			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
@@ -112,6 +112,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
+		},
+		&awscommon.StepGetPassword{
+			Comm:    &b.config.RunConfig.Comm,
+			Timeout: b.config.WindowsPasswordTimeout,
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
