@@ -209,6 +209,10 @@ each category, the available configuration keys are alphabetized.
   it is perfectly okay to create this directory as part of the provisioning
   process.
 
+* `windows_password_timeout` (string) - The timeout for waiting for
+  a Windows password for Windows instances. Defaults to 20 minutes.
+  Example value: "10m"
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
