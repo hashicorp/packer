@@ -1,6 +1,7 @@
 package template
 
 import (
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -306,7 +307,7 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		path := fixtureDir(tc.File)
+		path, _ := filepath.Abs(fixtureDir(tc.File))
 		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s", err)
