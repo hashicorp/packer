@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 
 	"github.com/masterzen/winrm/winrm"
 	"github.com/mitchellh/packer/packer"
@@ -92,7 +93,7 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 }
 
 // Upload implementation of communicator.Communicator interface
-func (c *Communicator) Upload(path string, input io.Reader) error {
+func (c *Communicator) Upload(path string, input io.Reader, _ *os.FileInfo) error {
 	wcp, err := c.newCopyClient()
 	if err != nil {
 		return err
@@ -101,19 +102,18 @@ func (c *Communicator) Upload(path string, input io.Reader) error {
 	return wcp.Write(path, input)
 }
 
-// UploadScript implementation of communicator.Communicator interface
-func (c *Communicator) UploadScript(path string, input io.Reader) error {
-	return c.Upload(path, input)
-}
-
 // UploadDir implementation of communicator.Communicator interface
-func (c *Communicator) UploadDir(dst string, src string) error {
+func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
 	log.Printf("Uploading dir '%s' to '%s'", src, dst)
 	wcp, err := c.newCopyClient()
 	if err != nil {
 		return err
 	}
 	return wcp.Copy(src, dst)
+}
+
+func (c *Communicator) Download(src string, dst io.Writer) error {
+	panic("download not implemented")
 }
 
 func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
