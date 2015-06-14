@@ -17,6 +17,8 @@ FEATURES:
       being built. This should be used for template-relative paths. [GH-54]
   * **Disable SSH:** Set `communicator` to "none" in any builder to disable SSH
       connections. Note that provisioners won't work if this is done. [GH-1591]
+  * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
+      to allow access to remote servers such as private git repos. [GH-1066]
 
 IMPROVEMENTS:
 
