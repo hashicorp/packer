@@ -40,9 +40,19 @@ The reference of available configuration options is listed below.
 
 Required parameters:
 
+At least one of manifest_file or manifest_dir must be specified, but both are
+not required.
+
 * `manifest_file` (string) - The manifest file for Puppet to use in order
   to compile and run a catalog. This file must exist on your local system
   and will be uploaded to the remote machine.
+
+* `manifest_dir` (string) - The path to a local directory with manifests
+  to be uploaded to the remote machine. This is useful if your main
+  manifest file uses imports. This directory doesn't necessarily contain
+  the `manifest_file`. It is a separate directory that will be set as
+  the "manifestdir" setting on Puppet. If you do not specify a `manifest_file`
+  puppet will apply the entire contents of `manifest_dir`.
 
 Optional parameters:
 
@@ -57,12 +67,6 @@ Optional parameters:
 * `hiera_config_path` (string) - The path to a local file with hiera
   configuration to be uploaded to the remote machine. Hiera data directories
   must be uploaded using the file provisioner separately.
-
-* `manifest_dir` (string) - The path to a local directory with manifests
-  to be uploaded to the remote machine. This is useful if your main
-  manifest file uses imports. This directory doesn't necessarily contain
-  the `manifest_file`. It is a separate directory that will be set as
-  the "manifestdir" setting on Puppet.
 
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote

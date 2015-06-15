@@ -126,15 +126,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.ManifestFile == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("A manifest_file must be specified."))
-	} else {
-		_, err := os.Stat(p.config.ManifestFile)
+	if p.config.ManifestFile != "" {
+		info, err := os.Stat(p.config.ManifestFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_file is invalid: %s", err))
+		} else if info.IsDir() {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("manifest_file must point to a regular file"))			
 		}
+	}
+
+	if p.config.ManifestFile == "" && p.config.ManifestDir == "" {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("one of manifest_file or manifest_dir must be specified"))
 	}
 
 	for i, path := range p.config.ModulePaths {
@@ -196,10 +201,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		modulePaths = append(modulePaths, targetPath)
 	}
 
-	// Upload manifests
-	remoteManifestFile, err := p.uploadManifests(ui, comm)
-	if err != nil {
-		return fmt.Errorf("Error uploading manifests: %s", err)
+	// Upload manifest file if set
+	remoteManifestFile := ""
+	var err error
+	if p.config.ManifestFile != "" {
+		remoteManifestFile, err = p.uploadManifests(ui, comm)
+		if err != nil {
+			return fmt.Errorf("Error uploading manifests: %s", err)
+		}
+	} else {
+		remoteManifestFile = remoteManifestDir
 	}
 
 	// Compile the facter variables
@@ -269,7 +280,6 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 		return "", fmt.Errorf("Error creating manifests directory: %s", err)
 	}
 
-	// Upload the main manifest
 	f, err := os.Open(p.config.ManifestFile)
 	if err != nil {
 		return "", err
@@ -277,6 +287,7 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 	defer f.Close()
 
 	manifestFilename := filepath.Base(p.config.ManifestFile)
+
 	remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
 	if err := comm.Upload(remoteManifestFile, f, nil); err != nil {
 		return "", err
