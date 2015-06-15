@@ -152,7 +152,8 @@ AMI if one with the same name already exists. Default `false`.
   to port 22.
 
 * `ssh_private_key_file` (string) - Use this ssh private key file instead of
-  a generated ssh key pair for connecting to the instance.
+  a generated ssh key pair for connecting to the instance. This key file must 
+  already exist on the `source_ami`
 
 * `ssh_private_ip` (bool) - If true, then SSH will always use the private
   IP if available.
