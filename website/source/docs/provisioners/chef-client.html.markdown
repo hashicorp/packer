@@ -164,7 +164,7 @@ This command can be customized using the `install_command` configuration.
 
 ## Folder Permissions
 
-The `chef-client` provisioner will chmod the directory with your Chef
+!> The `chef-client` provisioner will chmod the directory with your Chef
 keys to 777. This is to ensure that Packer can upload and make use of that
 directory. However, once the machine is created, you usually don't
 want to keep these directories with those permissions. To change the
