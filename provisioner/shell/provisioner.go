@@ -282,7 +282,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		cmd.Wait()
 		if cmd.ExitStatus != 0 {
 			return fmt.Errorf(
-				"Error removing temporary script at %s!")
+				"Error removing temporary script at %s!",
+				p.config.RemotePath)
 		}
 	}
 
