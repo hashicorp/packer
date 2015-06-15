@@ -372,7 +372,10 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 		return err
 	}
 	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status. See output above for more info.")
+		return fmt.Errorf(
+			"Non-zero exit status. See output above for more info.\n\n"+
+				"Command: %s",
+			cmdText)
 	}
 
 	return nil
