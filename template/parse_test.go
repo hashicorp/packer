@@ -304,6 +304,19 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"parse-comment.json",
+			&Template{
+				Builders: map[string]*Builder{
+					"something": &Builder{
+						Name: "something",
+						Type: "something",
+					},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {

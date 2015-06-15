@@ -58,6 +58,22 @@ Along with each key, it is noted whether it is required or not.
   For more information on how to define and use user variables, read the
   sub-section on [user variables in templates](/docs/templates/user-variables.html).
 
+## Comments
+
+JSON doesn't support comments and Packer reports unknown keys as validation
+errors. If you'd like to comment your template, you can prefix a _root level_
+key with an underscore. Example:
+
+```javascript
+{
+  "_comment": "This is a comment",
+  "builders": [{}]
+}
+```
+
+**Important:** Only _root level_ keys can be underscore prefixed. Keys within
+builders, provisioners, etc. will still result in validation errors.
+
 ## Example Template
 
 Below is an example of a basic template that is nearly fully functional. It is just
