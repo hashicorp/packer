@@ -131,6 +131,7 @@ BUG FIXES:
   * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
   * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
   * provisioner/shell: single quotes in env vars are escaped [GH-2229]
+  * provisioner/shell: Temporary file is deleted after run [GH-2259]
 
 ## 0.7.5 (December 9, 2014)
 
