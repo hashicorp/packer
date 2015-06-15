@@ -122,6 +122,7 @@ BUG FIXES:
   * post-processor/vagrant-cloud: Fixed failing on response
   * post-processor/vagrant-cloud: Don't delete version on error [GH-2014]
   * provisioner/chef-client: Fix permissions issues on default dir [GH-2255]
+  * provisioner/chef-client: Node cleanup works now. [GH-2257]
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
   * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
