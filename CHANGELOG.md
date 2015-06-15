@@ -2,6 +2,8 @@
 
 BACKWARDS INCOMPATIBILITIES:
 
+  * core: SSH connection will no longer request a PTY by default. This
+      can be enabled per builder.
   * builder/digitalocean: no longer supports the v1 API which has been
       deprecated for some time. Most configurations should continue to
       work as long as you use the `api_token` field for auth.
@@ -11,12 +13,32 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+  * **WinRM:** You can now connect via WinRM with almost every builder.
+      See the docs for more info. [GH-2239]
+  * **Windows AWS Support:** Windows AMIs can now be built without any
+      external plugins: Packer will start a Windows instance, get the
+      admin password, and can use WinRM (above) to connect through. [GH-2240]
+  * **Disable SSH:** Set `communicator` to "none" in any builder to disable SSH
+      connections. Note that provisioners won't work if this is done. [GH-1591]
+  * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
+      to allow access to remote servers such as private git repos. [GH-1066]
+  * **Docker builder supports SSH**: The Docker builder now supports containers
+      with SSH, just set `communicator` to "ssh" [GH-2244]
+  * **New config function: `build_name`**: The name of the currently running
+      build. [GH-2232]
+  * **New config function: `build_type`**: The type of the currently running
+      builder. This is useful for provisioners. [GH-2232]
   * **New config function: `template_dir`**: The directory to the template
       being built. This should be used for template-relative paths. [GH-54]
 
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
+  * builder/*: Add `ssh_handshake_attempts` to configure the number of
+      handshake attempts done before failure [GH-2237]
+  * builder/amazon: Add `force_deregister` option for automatic AMI
+      deregistration [GH-2221]
+  * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
@@ -26,10 +48,14 @@ IMPROVEMENTS:
       have prohibitive firewalls
   * builder/openstack: Flavor names can be used as well as refs
   * builder/openstack: Add `availability_zone` [GH-2016]
+  * builder/openstack: Machine will be stopped prior to imaging if the
+      cluster supports the `startstop` extension. [GH-2223]
+  * builder/openstack: Support for user data [GH-2224]
   * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Support for additional disks [GH-1382]
+  * command/fix: After fixing, the template is validated [GH-2228]
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
   * post-processor/docker-save: Can be chained [GH-2179]
@@ -39,6 +65,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: Fix potential panic for post-processor plugin exits [GH-2098]
+  * core: `PACKER_CONFIG` may point to a non-existent file [GH-2226]
   * builder/amazon: Allow spaces in AMI names when using `clean_ami_name` [GH-2182]
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
   * builder/amazon: Use IAM Profile to upload bundle if provided [GH-1985]
@@ -66,13 +93,18 @@ BUG FIXES:
   * builder/docker: Fix crash that could occur at certain timed ctrl-c [GH-1838]
   * builder/docker: validate that `export_path` is not a directory [GH-2105]
   * builder/google: `ssh_timeout` is respected [GH-1781]
+  * builder/openstack: `ssh_interface` can be used to specify the interface
+      to retrieve the SSH IP from. [GH-2220]
   * builder/qemu: Add `disk_discard` option [GH-2120]
+  * builder/qemu: Use proper SSH port, not hardcoded to 22. [GH-2236]
   * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
       floppy disk. [GH-1879]
   * builder/virtualbox: Fixed regression where downloading ISO without a
       ".iso" extension didn't work. [GH-1839]
+  * builder/virtualbox: Output dir is verified at runtime, not template
+      validation time. [GH-2233]
   * builder/vmware: Add 100ms delay between keystrokes to avoid subtle
       timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
@@ -80,6 +112,10 @@ BUG FIXES:
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
   * builder/vmware: Nested output directories for ESXi work [GH-2174]
+  * builder/vmware: Output dir is verified at runtime, not template
+      validation time. [GH-2233]
+  * command/fix: For the `virtualbox` to `virtualbox-iso` builder rename,
+      provisioner overrides are now also fixed [GH-2231]
   * command/validate: don't crash for invalid builds [GH-2139]
   * post-processor/atlas: Find common archive prefix for Windows [GH-1874]
   * post-processor/atlas: Fix index out of range panic [GH-1959]
@@ -89,6 +125,7 @@ BUG FIXES:
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
   * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
   * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
+  * provisioner/shell: single quotes in env vars are escaped [GH-2229]
 
 ## 0.7.5 (December 9, 2014)
 

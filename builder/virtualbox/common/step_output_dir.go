@@ -22,7 +22,16 @@ type StepOutputDir struct {
 func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if _, err := os.Stat(s.Path); err == nil && s.Force {
+	if _, err := os.Stat(s.Path); err == nil {
+		if !s.Force {
+			err := fmt.Errorf(
+				"Output directory exists: %s\n\n"+
+					"Use the force flag to delete it prior to building.",
+				s.Path)
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
 		ui.Say("Deleting previous output directory...")
 		os.RemoveAll(s.Path)
 	}

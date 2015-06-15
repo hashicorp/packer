@@ -4,11 +4,15 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/mitchellh/packer/helper/communicator"
 )
 
 func testSSHConfig() *SSHConfig {
 	return &SSHConfig{
-		SSHUser: "foo",
+		Comm: communicator.Config{
+			SSHUsername: "foo",
+		},
 	}
 }
 
@@ -19,8 +23,8 @@ func TestSSHConfigPrepare(t *testing.T) {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	if c.SSHPort != 22 {
-		t.Errorf("bad ssh port: %d", c.SSHPort)
+	if c.Comm.SSHPort != 22 {
+		t.Errorf("bad ssh port: %d", c.Comm.SSHPort)
 	}
 }
 
@@ -67,57 +71,6 @@ func TestSSHConfigPrepare_SSHKeyPath(t *testing.T) {
 	tf.Write([]byte(testPem))
 	c = testSSHConfig()
 	c.SSHKeyPath = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-}
-
-func TestSSHConfigPrepare_SSHUser(t *testing.T) {
-	var c *SSHConfig
-	var errs []error
-
-	c = testSSHConfig()
-	c.SSHUser = ""
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatalf("should have error")
-	}
-
-	c = testSSHConfig()
-	c.SSHUser = "exists"
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-}
-
-func TestSSHConfigPrepare_SSHWaitTimeout(t *testing.T) {
-	var c *SSHConfig
-	var errs []error
-
-	// Defaults
-	c = testSSHConfig()
-	c.RawSSHWaitTimeout = ""
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-	if c.RawSSHWaitTimeout != "20m" {
-		t.Fatalf("bad value: %s", c.RawSSHWaitTimeout)
-	}
-
-	// Test with a bad value
-	c = testSSHConfig()
-	c.RawSSHWaitTimeout = "this is not good"
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatal("should have error")
-	}
-
-	// Test with a good one
-	c = testSSHConfig()
-	c.RawSSHWaitTimeout = "5s"
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
