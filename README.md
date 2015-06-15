@@ -55,6 +55,7 @@ own.
     "instance_type": "t1.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
+    "security_group_id" : "OPTIONAL SECURITY GROUP ID"
   }]
 }
 ```
