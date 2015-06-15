@@ -94,6 +94,8 @@ BUG FIXES:
       floppy disk. [GH-1879]
   * builder/virtualbox: Fixed regression where downloading ISO without a
       ".iso" extension didn't work. [GH-1839]
+  * builder/virtualbox: Output dir is verified at runtime, not template
+      validation time. [GH-2233]
   * builder/vmware: Add 100ms delay between keystrokes to avoid subtle
       timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
@@ -101,6 +103,8 @@ BUG FIXES:
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
   * builder/vmware: Nested output directories for ESXi work [GH-2174]
+  * builder/vmware: Output dir is verified at runtime, not template
+      validation time. [GH-2233]
   * command/fix: For the `virtualbox` to `virtualbox-iso` builder rename,
       provisioner overrides are now also fixed [GH-2231]
   * command/validate: don't crash for invalid builds [GH-2139]
