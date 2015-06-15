@@ -61,24 +61,24 @@ each category, the available configuration keys are alphabetized.
 ### Optional:
 
 * `ami_block_device_mappings` (array of block device mappings) - Add the block
-  device mappings to the AMI. The block device mappings allow for keys:  
+  device mappings to the AMI. The block device mappings allow for keys:
 
-  - `device_name` (string) – The device name exposed to the instance (for 
-      example, "/dev/sdh" or "xvdh")  
-  - `virtual_name` (string) – The virtual device name. See the documentation on 
+  - `device_name` (string) – The device name exposed to the instance (for
+      example, "/dev/sdh" or "xvdh")
+  - `virtual_name` (string) – The virtual device name. See the documentation on
           [Block Device Mapping][1] for more information
   - `snapshot_id` (string) – The ID of the snapshot
-  - `volume_type` (string) – The volume type. gp2 for General Purpose (SSD) 
-  volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic 
+  - `volume_type` (string) – The volume type. gp2 for General Purpose (SSD)
+  volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
   volumes
   - `volume_size` (integer) – The size of the volume, in GiB. Required if not
       specifying a `snapshot_id`
-  - `delete_on_termination` (boolean) – Indicates whether the EBS volume is 
+  - `delete_on_termination` (boolean) – Indicates whether the EBS volume is
       deleted on instance termination
   - `encrypted` (boolean) – Indicates whether to encrypt the volume or not
-  - `no_device` (boolean) – Suppresses the specified device included in the 
-       block device mapping of the AMI  
-  - `iops` (integer) – The number of I/O operations per second (IOPS) that the 
+  - `no_device` (boolean) – Suppresses the specified device included in the
+       block device mapping of the AMI
+  - `iops` (integer) – The number of I/O operations per second (IOPS) that the
        volume supports. See the documentation on [IOPs][2] for more information
 
 
@@ -148,11 +148,16 @@ AMI if one with the same name already exists. Default `false`.
    spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
    `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
+* `ssh_keypair_name` (string) - If specified, this is the key that will be
+  used for SSH with the machine. By default, this is blank, and Packer will
+  generate a temporary keypair. `ssh_private_key_file` must be specified
+  with this.
+
 * `ssh_port` (integer) - The port that SSH will be available on. This defaults
   to port 22.
 
 * `ssh_private_key_file` (string) - Use this ssh private key file instead of
-  a generated ssh key pair for connecting to the instance. This key file must 
+  a generated ssh key pair for connecting to the instance. This key file must
   already exist on the `source_ami`
 
 * `ssh_private_ip` (bool) - If true, then SSH will always use the private
