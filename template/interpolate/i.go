@@ -14,16 +14,23 @@ type Context struct {
 	// Funcs are extra functions available in the template
 	Funcs map[string]interface{}
 
-	// TemplatePath is the path to the template that this is being
-	// rendered within.
-	TemplatePath string
-
 	// UserVariables is the mapping of user variables that the
 	// "user" function reads from.
 	UserVariables map[string]string
 
 	// EnableEnv enables the env function
 	EnableEnv bool
+
+	// All the fields below are used for built-in functions.
+	//
+	// BuildName and BuildType are the name and type, respectively,
+	// of the builder being used.
+	//
+	// TemplatePath is the path to the template that this is being
+	// rendered within.
+	BuildName    string
+	BuildType    string
+	TemplatePath string
 }
 
 // Render is shorthand for constructing an I and calling Render.

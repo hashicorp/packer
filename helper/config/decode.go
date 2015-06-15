@@ -106,6 +106,8 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 // detecting things like user variables from the raw configuration params.
 func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	var s struct {
+		BuildName    string            `mapstructure:"packer_build_name"`
+		BuildType    string            `mapstructure:"packer_builder_type"`
 		TemplatePath string            `mapstructure:"packer_template_path"`
 		Vars         map[string]string `mapstructure:"packer_user_variables"`
 	}
@@ -117,6 +119,8 @@ func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	}
 
 	return &interpolate.Context{
+		BuildName:     s.BuildName,
+		BuildType:     s.BuildType,
 		TemplatePath:  s.TemplatePath,
 		UserVariables: s.Vars,
 	}, nil
