@@ -15,13 +15,14 @@ type Config struct {
 	Type string `mapstructure:"communicator"`
 
 	// SSH
-	SSHHost       string        `mapstructure:"ssh_host"`
-	SSHPort       int           `mapstructure:"ssh_port"`
-	SSHUsername   string        `mapstructure:"ssh_username"`
-	SSHPassword   string        `mapstructure:"ssh_password"`
-	SSHPrivateKey string        `mapstructure:"ssh_private_key_file"`
-	SSHPty        bool          `mapstructure:"ssh_pty"`
-	SSHTimeout    time.Duration `mapstructure:"ssh_timeout"`
+	SSHHost              string        `mapstructure:"ssh_host"`
+	SSHPort              int           `mapstructure:"ssh_port"`
+	SSHUsername          string        `mapstructure:"ssh_username"`
+	SSHPassword          string        `mapstructure:"ssh_password"`
+	SSHPrivateKey        string        `mapstructure:"ssh_private_key_file"`
+	SSHPty               bool          `mapstructure:"ssh_pty"`
+	SSHTimeout           time.Duration `mapstructure:"ssh_timeout"`
+	SSHHandshakeAttempts int           `mapstructure:"ssh_handshake_attempts"`
 
 	// WinRM
 	WinRMUser     string        `mapstructure:"winrm_username"`
@@ -70,6 +71,10 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 	if c.SSHTimeout == 0 {
 		c.SSHTimeout = 5 * time.Minute
+	}
+
+	if c.SSHHandshakeAttempts == 0 {
+		c.SSHHandshakeAttempts = 10
 	}
 
 	// Validation
