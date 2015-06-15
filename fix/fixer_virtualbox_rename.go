@@ -8,14 +8,14 @@ import (
 type FixerVirtualBoxRename struct{}
 
 func (FixerVirtualBoxRename) Fix(input map[string]interface{}) (map[string]interface{}, error) {
-	// The type we'll decode into; we only care about builders
 	type template struct {
-		Builders []map[string]interface{}
+		Builders     []map[string]interface{}
+		Provisioners []interface{}
 	}
 
 	// Decode the input into our structure, if we can
 	var tpl template
-	if err := mapstructure.Decode(input, &tpl); err != nil {
+	if err := mapstructure.WeakDecode(input, &tpl); err != nil {
 		return nil, err
 	}
 
@@ -37,7 +37,39 @@ func (FixerVirtualBoxRename) Fix(input map[string]interface{}) (map[string]inter
 		builder["type"] = "virtualbox-iso"
 	}
 
-	input["builders"] = tpl.Builders
+	for i, raw := range tpl.Provisioners {
+		var m map[string]interface{}
+		if err := mapstructure.WeakDecode(raw, &m); err != nil {
+			// Ignore errors, could be a non-map
+			continue
+		}
+
+		raw, ok := m["override"]
+		if !ok {
+			continue
+		}
+
+		var override map[string]interface{}
+		if err := mapstructure.WeakDecode(raw, &override); err != nil {
+			return nil, err
+		}
+
+		if raw, ok := override["virtualbox"]; ok {
+			override["virtualbox-iso"] = raw
+			delete(override, "virtualbox")
+
+			// Set the change
+			m["override"] = override
+			tpl.Provisioners[i] = m
+		}
+	}
+
+	if len(tpl.Builders) > 0 {
+		input["builders"] = tpl.Builders
+	}
+	if len(tpl.Provisioners) > 0 {
+		input["provisioners"] = tpl.Provisioners
+	}
 	return input, nil
 }
 
