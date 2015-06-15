@@ -55,6 +55,7 @@ IMPROVEMENTS:
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Support for additional disks [GH-1382]
+  * builder/vmware: Can now customize the template used for adding disks [GH-2254]
   * command/fix: After fixing, the template is validated [GH-2228]
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
