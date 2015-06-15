@@ -47,6 +47,7 @@ IMPROVEMENTS:
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Support for additional disks [GH-1382]
+  * command/fix: After fixing, the template is validated [GH-2228]
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
   * post-processor/docker-save: Can be chained [GH-2179]
@@ -109,6 +110,7 @@ BUG FIXES:
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
   * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
   * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
+  * provisioner/shell: single quotes in env vars are escaped [GH-2229]
 
 ## 0.7.5 (December 9, 2014)
 
