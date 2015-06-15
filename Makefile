@@ -31,7 +31,7 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
-	go get -d -v -p 2 ./...
+	go get -u -d -v -p 2 ./...
 
 vet:
 	@go tool vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
