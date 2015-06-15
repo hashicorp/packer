@@ -101,6 +101,8 @@ BUG FIXES:
   * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
   * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
   * builder/vmware: Nested output directories for ESXi work [GH-2174]
+  * command/fix: For the `virtualbox` to `virtualbox-iso` builder rename,
+      provisioner overrides are now also fixed [GH-2231]
   * command/validate: don't crash for invalid builds [GH-2139]
   * post-processor/atlas: Find common archive prefix for Windows [GH-1874]
   * post-processor/atlas: Fix index out of range panic [GH-1959]
