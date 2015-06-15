@@ -23,6 +23,11 @@ type MockDriver struct {
 	ImportId     string
 	ImportErr    error
 
+	IPAddressCalled bool
+	IPAddressID     string
+	IPAddressResult string
+	IPAddressErr    error
+
 	LoginCalled   bool
 	LoginEmail    string
 	LoginUsername string
@@ -102,6 +107,12 @@ func (d *MockDriver) Import(path, repo string) (string, error) {
 	d.ImportPath = path
 	d.ImportRepo = repo
 	return d.ImportId, d.ImportErr
+}
+
+func (d *MockDriver) IPAddress(id string) (string, error) {
+	d.IPAddressCalled = true
+	d.IPAddressID = id
+	return d.IPAddressResult, d.IPAddressErr
 }
 
 func (d *MockDriver) Login(r, e, u, p string) error {
