@@ -22,6 +22,10 @@ type Driver interface {
 	// Import imports a container from a tar file
 	Import(path, repo string) (string, error)
 
+	// IPAddress returns the address of the container that can be used
+	// for external access.
+	IPAddress(id string) (string, error)
+
 	// Login. This will lock the driver from performing another Login
 	// until Logout is called. Therefore, any users MUST call Logout.
 	Login(repo, email, username, password string) error

@@ -1,12 +1,12 @@
 package iso
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
-	"time"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -136,10 +136,6 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 
 	if b.config.Version != "9" {
 		t.Errorf("bad Version: %s", b.config.Version)
-	}
-
-	if b.config.SSHWaitTimeout != (20 * time.Minute) {
-		t.Errorf("bad wait timeout: %s", b.config.SSHWaitTimeout)
 	}
 
 	if b.config.VMName != "packer-foo" {
@@ -353,8 +349,8 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err == nil {
-		t.Fatal("should have error")
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 
 	// Test with a good one
