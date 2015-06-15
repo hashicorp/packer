@@ -66,6 +66,8 @@ IMPROVEMENTS:
   * post-processor/docker-tag: Support `force` option [GH-2055]
   * post-processor/docker-tag: Can be chained [GH-2179]
   * provisioner/puppet-masterless: `working_directory` option [GH-1831]
+  * provisioner/puppet-masterless: `packer_build_name` and
+      `packer_build_type` are default facts. [GH-1878]
 
 BUG FIXES:
 
