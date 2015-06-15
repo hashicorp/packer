@@ -28,6 +28,8 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
+  * builder/amazon: Add `force_deregister` option for automatic AMI 
+      deregistration [GH-1873]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
