@@ -96,6 +96,9 @@ each category, the available configuration keys are alphabetized.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+* `force_deregister` (boolean) – Force Packer to first deregister an existing
+AMI if one with the same name already exists. Default `false`.
+
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
@@ -147,7 +150,8 @@ each category, the available configuration keys are alphabetized.
   "subnet-12345def", where Packer will launch the EC2 instance. This field is
   required if you are using an non-default VPC.
 
-* `tags` (object of key/value strings) - Tags applied to the AMI.
+* `tags` (object of key/value strings) - Tags applied to the AMI and
+  relevant snapshots.
 
 * `temporary_key_pair_name` (string) - The name of the temporary keypair
   to generate. By default, Packer generates a name with a UUID.
@@ -167,6 +171,10 @@ each category, the available configuration keys are alphabetized.
 
 * `vpc_id` (string) - If launching into a VPC subnet, Packer needs the
   VPC ID in order to create a temporary security group within the VPC.
+
+* `windows_password_timeout` (string) - The timeout for waiting for
+  a Windows password for Windows instances. Defaults to 20 minutes.
+  Example value: "10m"
 
 ## Basic Example
 

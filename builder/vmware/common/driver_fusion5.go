@@ -69,8 +69,8 @@ func (d *Fusion5Driver) IsRunning(vmxPath string) (bool, error) {
 	return false, nil
 }
 
-func (d *Fusion5Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	return SSHAddressFunc(d.SSHConfig)(state)
+func (d *Fusion5Driver) CommHost(state multistep.StateBag) (string, error) {
+	return CommHost(d.SSHConfig)(state)
 }
 
 func (d *Fusion5Driver) Start(vmxPath string, headless bool) error {

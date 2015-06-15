@@ -39,27 +39,7 @@ func TestOutputConfigPrepare_exists(t *testing.T) {
 		PackerForce:     false,
 	}
 	errs := c.Prepare(testConfigTemplate(t), pc)
-	if len(errs) == 0 {
-		t.Fatal("should have errors")
-	}
-}
-
-func TestOutputConfigPrepare_forceExists(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.RemoveAll(td)
-
-	c := new(OutputConfig)
-	c.OutputDir = td
-
-	pc := &common.PackerConfig{
-		PackerBuildName: "foo",
-		PackerForce:     true,
-	}
-	errs := c.Prepare(testConfigTemplate(t), pc)
-	if len(errs) > 0 {
+	if len(errs) != 0 {
 		t.Fatal("should not have errors")
 	}
 }
