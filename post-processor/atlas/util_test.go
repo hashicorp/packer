@@ -1,12 +1,14 @@
 package atlas
 
 import (
+	"path/filepath"
 	"testing"
 )
 
 func TestLongestCommonPrefix(t *testing.T) {
+	sep := string(filepath.Separator)
 	cases := []struct {
-		Input []string
+		Input  []string
 		Output string
 	}{
 		{
@@ -18,12 +20,12 @@ func TestLongestCommonPrefix(t *testing.T) {
 			"",
 		},
 		{
-			[]string{"foo/", "foo/bar"},
-			"foo/",
+			[]string{"foo" + sep, "foo" + sep + "bar"},
+			"foo" + sep,
 		},
 		{
-			[]string{"/foo/", "/bar"},
-			"/",
+			[]string{sep + "foo" + sep, sep + "bar"},
+			sep,
 		},
 	}
 

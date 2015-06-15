@@ -102,10 +102,13 @@ func TestStepRemoveDevices_floppyPath(t *testing.T) {
 	}
 
 	// Test that both were removed
-	if len(driver.VBoxManageCalls) != 1 {
+	if len(driver.VBoxManageCalls) != 2 {
 		t.Fatalf("bad: %#v", driver.VBoxManageCalls)
 	}
 	if driver.VBoxManageCalls[0][3] != "Floppy Controller" {
+		t.Fatalf("bad: %#v", driver.VBoxManageCalls)
+	}
+	if driver.VBoxManageCalls[1][3] != "Floppy Controller" {
 		t.Fatalf("bad: %#v", driver.VBoxManageCalls)
 	}
 }

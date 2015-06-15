@@ -218,7 +218,7 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	return d.Host, vncPort, nil
 }
 
-func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
+func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	config := state.Get("config").(*Config)
 
 	if address, ok := state.GetOk("vm_address"); ok {
@@ -253,7 +253,7 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
+	address := record["IPAddress"]
 	state.Put("vm_address", address)
 	return address, nil
 }
@@ -311,8 +311,8 @@ func (d *ESX5Driver) String() string {
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
-	baseDir := filepath.Base(filepath.Dir(path))
-	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
+	dirPath := filepath.Dir(path)
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, dirPath, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) cachePath(path string) string {
@@ -335,7 +335,6 @@ func (d *ESX5Driver) connect() error {
 			User: d.Username,
 			Auth: auth,
 		},
-		NoPty: true,
 	}
 
 	comm, err := ssh.New(address, sshConfig)

@@ -1,51 +1,53 @@
 package openstack
 
 import (
-	"golang.org/x/crypto/ssh"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
+	"log"
 	"time"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	"golang.org/x/crypto/ssh"
 )
 
-// SSHAddress returns a function that can be given to the SSH communicator
-// for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(csp gophercloud.CloudServersProvider, sshinterface string, port int) func(multistep.StateBag) (string, error) {
+// CommHost looks up the host for the communicator.
+func CommHost(
+	client *gophercloud.ServiceClient,
+	sshinterface string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
-		s := state.Get("server").(*gophercloud.Server)
+		s := state.Get("server").(*servers.Server)
 
-		if ip := state.Get("access_ip").(gophercloud.FloatingIp); ip.Ip != "" {
-			return fmt.Sprintf("%s:%d", ip.Ip, port), nil
-		}
-
-		ip_pools, err := s.AllAddressPools()
-		if err != nil {
-			return "", errors.New("Error parsing SSH addresses")
-		}
-		for pool, addresses := range ip_pools {
-			if sshinterface != "" {
-				if pool != sshinterface {
-					continue
-				}
-			}
-			if pool != "" {
-				for _, address := range addresses {
-					if address.Addr != "" && address.Version == 4 {
-						return fmt.Sprintf("%s:%d", address.Addr, port), nil
-					}
-				}
+		// If we have a specific interface, try that
+		if sshinterface != "" {
+			if addr := sshAddrFromPool(s, sshinterface); addr != "" {
+				return addr, nil
 			}
 		}
 
-		serverState, err := csp.ServerById(s.Id)
+		// If we have a floating IP, use that
+		ip := state.Get("access_ip").(*floatingip.FloatingIP)
+		if ip != nil && ip.IP != "" {
+			return ip.IP, nil
+		}
 
+		if s.AccessIPv4 != "" {
+			return s.AccessIPv4, nil
+		}
+
+		// Try to get it from the requested interface
+		if addr := sshAddrFromPool(s, sshinterface); addr != "" {
+			return addr, nil
+		}
+
+		s, err := servers.Get(client, s.ID).Extract()
 		if err != nil {
 			return "", err
 		}
 
-		state.Put("server", serverState)
+		state.Put("server", s)
 		time.Sleep(1 * time.Second)
 
 		return "", errors.New("couldn't determine IP address for server")
@@ -71,4 +73,43 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 			},
 		}, nil
 	}
+}
+
+func sshAddrFromPool(s *servers.Server, desired string) string {
+	// Get all the addresses associated with this server. This
+	// was taken directly from Terraform.
+	for pool, networkAddresses := range s.Addresses {
+		// If we have an SSH interface specified, skip it if no match
+		if desired != "" && pool != desired {
+			log.Printf(
+				"[INFO] Skipping pool %s, doesn't match requested %s",
+				pool, desired)
+			continue
+		}
+
+		elements, ok := networkAddresses.([]interface{})
+		if !ok {
+			log.Printf(
+				"[ERROR] Unknown return type for address field: %#v",
+				networkAddresses)
+			continue
+		}
+
+		for _, element := range elements {
+			var addr string
+			address := element.(map[string]interface{})
+			if address["OS-EXT-IPS:type"] == "floating" {
+				addr = address["addr"].(string)
+			} else {
+				if address["version"].(float64) == 4 {
+					addr = address["addr"].(string)
+				}
+			}
+			if addr != "" {
+				return addr
+			}
+		}
+	}
+
+	return ""
 }

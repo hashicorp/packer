@@ -55,6 +55,8 @@ While some configuration settings have local variables specific to only that
 configuration, a set of functions are available globally for use in _any string_
 in Packer templates. These are listed below for reference.
 
+* `build_name` - The name of the build being run.
+* `build_type` - The type of the builder being used currently.
 * `isotime [FORMAT]` - UTC time, which can be [formatted](http://golang.org/pkg/time/#example_Time_Format).
    See more examples below.
 * `lower` - Lowercases the string.
@@ -118,7 +120,7 @@ isotime = June 7, 7:22:43pm 2014
 
 {{isotime "2006-01-02"}} = 2014-06-07
 {{isotime "Mon 1504"}} = Sat 1922
-{{isotime "01-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
+{{isotime "02-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
 {{isotime "Hour15Year200603"}} = Hour19Year201407
 ```
 

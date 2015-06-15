@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -53,7 +54,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			return multistep.ActionHalt
 		}
 
+		// Test if it is encoded already, and if not, encode it
+		if _, err := base64.StdEncoding.DecodeString(string(contents)); err != nil {
+			log.Printf("[DEBUG] base64 encoding user data...")
+			contents = []byte(base64.StdEncoding.EncodeToString(contents))
+		}
+
 		userData = string(contents)
+
 	}
 
 	ui.Say("Launching a source AWS instance...")
@@ -174,11 +182,15 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 				ImageID:            &s.SourceAMI,
 				InstanceType:       &s.InstanceType,
 				UserData:           &userData,
-				SecurityGroupIDs:   securityGroupIds,
 				IAMInstanceProfile: &ec2.IAMInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-				SubnetID:           &s.SubnetId,
 				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-					&ec2.InstanceNetworkInterfaceSpecification{AssociatePublicIPAddress: &s.AssociatePublicIpAddress},
+					&ec2.InstanceNetworkInterfaceSpecification{
+						DeviceIndex:              aws.Long(0),
+						AssociatePublicIPAddress: &s.AssociatePublicIpAddress,
+						SubnetID:                 &s.SubnetId,
+						Groups:                   securityGroupIds,
+						DeleteOnTermination:      aws.Boolean(true),
+					},
 				},
 				Placement: &ec2.SpotPlacement{
 					AvailabilityZone: &availabilityZone,
@@ -223,36 +235,17 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		instanceId = *spotResp.SpotInstanceRequests[0].InstanceID
 	}
 
-	instanceResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIDs: []*string{&instanceId}})
-	for i := 0; i < 10; i++ {
-		if err == nil {
-			break
-		}
-
-		time.Sleep(3 * time.Second)
-		instanceResp, err = ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIDs: []*string{&instanceId}})
-	}
-	if err != nil {
-		err := fmt.Errorf("Error finding source instance (%s): %s", instanceId, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	s.instance = instanceResp.Reservations[0].Instances[0]
-	ui.Message(fmt.Sprintf("Instance ID: %s", *s.instance.InstanceID))
-
-	ui.Say(fmt.Sprintf("Waiting for instance (%s) to become ready...", *s.instance.InstanceID))
+	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
+	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
 	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "running",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, s.instance),
+		Refresh:   InstanceStateRefreshFunc(ec2conn, instanceId),
 		StepState: state,
 	}
 	latestInstance, err := WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", *s.instance.InstanceID, err)
+		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -329,7 +322,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 		}
 		stateChange := StateChangeConf{
 			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, s.instance),
+			Refresh: InstanceStateRefreshFunc(ec2conn, *s.instance.InstanceID),
 			Target:  "terminated",
 		}
 

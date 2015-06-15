@@ -46,3 +46,45 @@ func TestFixerVirtualBoxRename_Fix(t *testing.T) {
 		}
 	}
 }
+
+func TestFixerVirtualBoxRenameFix_provisionerOverride(t *testing.T) {
+	cases := []struct {
+		Input    map[string]interface{}
+		Expected map[string]interface{}
+	}{
+		{
+			Input: map[string]interface{}{
+				"provisioners": []interface{}{
+					map[string]interface{}{
+						"override": map[string]interface{}{
+							"virtualbox": map[string]interface{}{},
+						},
+					},
+				},
+			},
+
+			Expected: map[string]interface{}{
+				"provisioners": []interface{}{
+					map[string]interface{}{
+						"override": map[string]interface{}{
+							"virtualbox-iso": map[string]interface{}{},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		var f FixerVirtualBoxRename
+
+		output, err := f.Fix(tc.Input)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if !reflect.DeepEqual(output, tc.Expected) {
+			t.Fatalf("unexpected:\n\n%#v\nexpected:\n\n%#v\n", output, tc.Expected)
+		}
+	}
+}

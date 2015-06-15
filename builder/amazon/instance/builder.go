@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -73,15 +74,25 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.BundleUploadCommand == "" {
-		b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
-			"-b {{.BucketName}} " +
-			"-m {{.ManifestPath}} " +
-			"-a {{.AccessKey}} " +
-			"-s {{.SecretKey}} " +
-			"-d {{.BundleDirectory}} " +
-			"--batch " +
-			"--location {{.Region}} " +
-			"--retry"
+		if b.config.IamInstanceProfile != "" {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		} else {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-a {{.AccessKey}} " +
+				"-s {{.SecretKey}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		}
 	}
 
 	if b.config.BundleVolCommand == "" {
@@ -157,6 +168,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepPreValidate{
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
@@ -165,11 +180,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 			KeyPairName:    b.config.TemporaryKeyPairName,
-			PrivateKeyFile: b.config.SSHPrivateKeyFile,
+			PrivateKeyFile: b.config.RunConfig.Comm.SSHPrivateKey,
 		},
 		&awscommon.StepSecurityGroup{
+			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
-			SSHPort:          b.config.SSHPort,
 			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
@@ -187,11 +202,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
 		},
-		&common.StepConnectSSH{
-			SSHAddress: awscommon.SSHAddress(
-				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
-			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
+		&awscommon.StepGetPassword{
+			Comm:    &b.config.RunConfig.Comm,
+			Timeout: b.config.WindowsPasswordTimeout,
+		},
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: awscommon.SSHHost(
+				ec2conn,
+				b.config.SSHPrivateIp),
+			SSHConfig: awscommon.SSHConfig(
+				b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
@@ -201,10 +222,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepUploadBundle{
 			Debug: b.config.PackerDebug,
 		},
+		&awscommon.StepDeregisterAMI{
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
+		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig: &b.config.AccessConfig,
 			Regions:      b.config.AMIRegions,
+			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:  b.config.AMIDescription,

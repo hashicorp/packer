@@ -4,9 +4,9 @@ package ssh
 
 import (
 	"bytes"
-	"golang.org/x/crypto/ssh"
 	"fmt"
 	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
 	"net"
 	"testing"
 )
