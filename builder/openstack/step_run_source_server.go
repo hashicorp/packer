@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/mitchellh/multistep"
@@ -16,6 +17,8 @@ type StepRunSourceServer struct {
 	SecurityGroups   []string
 	Networks         []string
 	AvailabilityZone string
+	UserData         string
+	UserDataFile     string
 
 	server *servers.Server
 }
@@ -39,6 +42,16 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		networks[i].UUID = networkUuid
 	}
 
+	userData := []byte(s.UserData)
+	if s.UserDataFile != "" {
+		userData, err = ioutil.ReadFile(s.UserDataFile)
+		if err != nil {
+			err = fmt.Errorf("Error reading user data file: %s", err)
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+	}
+
 	ui.Say("Launching server...")
 	s.server, err = servers.Create(computeClient, keypairs.CreateOptsExt{
 		CreateOptsBuilder: servers.CreateOpts{
@@ -48,6 +61,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 			SecurityGroups:   s.SecurityGroups,
 			Networks:         networks,
 			AvailabilityZone: s.AvailabilityZone,
+			UserData:         userData,
 		},
 
 		KeyName: keyName,
