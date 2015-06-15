@@ -21,6 +21,8 @@ type RunConfig struct {
 	FloatingIp       string   `mapstructure:"floating_ip"`
 	SecurityGroups   []string `mapstructure:"security_groups"`
 	Networks         []string `mapstructure:"networks"`
+	UserData         string   `mapstructure:"user_data"`
+	UserDataFile     string   `mapstructure:"user_data_file"`
 
 	// Not really used, but here for BC
 	OpenstackProvider string `mapstructure:"openstack_provider"`
