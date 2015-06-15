@@ -88,6 +88,7 @@ BUG FIXES:
   * builder/openstack: `ssh_interface` can be used to specify the interface
       to retrieve the SSH IP from. [GH-2220]
   * builder/qemu: Add `disk_discard` option [GH-2120]
+  * builder/qemu: Use proper SSH port, not hardcoded to 22. [GH-2236]
   * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
