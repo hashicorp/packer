@@ -124,6 +124,9 @@ each category, the available configuration keys are alphabetized.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+* `force_deregister` (boolean) – Force Packer to first deregister an existing
+AMI if one with the same name already exists. Default `false`.
+
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
   `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration

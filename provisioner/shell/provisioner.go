@@ -94,7 +94,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh"
+		p.config.InlineShebang = "/bin/sh -e"
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
@@ -145,6 +145,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		} else {
+			// Replace single quotes so they parse
+			vs[1] = strings.Replace(vs[1], "'", `'"'"'`, -1)
+
 			// Single quote env var values
 			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
@@ -247,11 +250,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			}
 
 			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
 			}
 			if err := comm.Start(cmd); err != nil {
 				return fmt.Errorf(
-					"Error chmodding script file to 0777 in remote "+
+					"Error chmodding script file to 0755 in remote "+
 						"machine: %s", err)
 			}
 			cmd.Wait()

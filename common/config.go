@@ -99,6 +99,14 @@ func DownloadableURL(original string) (string, error) {
 	// Make sure it is lowercased
 	url.Scheme = strings.ToLower(url.Scheme)
 
+	// This is to work around issue #5927. This can safely be removed once
+	// we distribute with a version of Go that fixes that bug.
+	//
+	// See: https://code.google.com/p/go/issues/detail?id=5927
+	if url.Path != "" && url.Path[0] != '/' {
+		url.Path = "/" + url.Path
+	}
+
 	// Verify that the scheme is something we support in our common downloader.
 	supported := []string{"file", "http", "https"}
 	found := false

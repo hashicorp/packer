@@ -7,6 +7,7 @@ import (
 
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -17,6 +18,7 @@ import (
 // state of the config object.
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	Comm                communicator.Config `mapstructure:",squash"`
 
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
@@ -31,23 +33,19 @@ type Config struct {
 	Network              string            `mapstructure:"network"`
 	SourceImage          string            `mapstructure:"source_image"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
-	SSHUsername          string            `mapstructure:"ssh_username"`
-	SSHPort              uint              `mapstructure:"ssh_port"`
-	RawSSHTimeout        string            `mapstructure:"ssh_timeout"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Tags                 []string          `mapstructure:"tags"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
 	privateKeyBytes []byte
-	sshTimeout      time.Duration
 	stateTimeout    time.Duration
 	ctx             *interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
@@ -88,20 +86,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.MachineType = "n1-standard-1"
 	}
 
-	if c.RawSSHTimeout == "" {
-		c.RawSSHTimeout = "5m"
-	}
-
 	if c.RawStateTimeout == "" {
 		c.RawStateTimeout = "5m"
 	}
 
-	if c.SSHUsername == "" {
-		c.SSHUsername = "root"
-	}
-
-	if c.SSHPort == 0 {
-		c.SSHPort = 22
+	if c.Comm.SSHUsername == "" {
+		c.Comm.SSHUsername = "root"
 	}
 
 	var errs *packer.MultiError
@@ -121,14 +111,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a zone must be specified"))
 	}
-
-	// Process timeout settings.
-	sshTimeout, err := time.ParseDuration(c.RawSSHTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
-	}
-	c.sshTimeout = sshTimeout
 
 	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
 	if err != nil {

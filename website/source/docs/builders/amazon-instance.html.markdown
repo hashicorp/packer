@@ -81,12 +81,26 @@ each category, the available configuration keys are alphabetized.
 ### Optional:
 
 * `ami_block_device_mappings` (array of block device mappings) - Add the block
-  device mappings to the AMI. The block device mappings allow for keys:
-  "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
-  "volume\_type" (string), "volume\_size" (integer), "delete\_on\_termination"
-  (boolean), "encrypted" (boolean), "no\_device" (boolean), and "iops" (integer).
-  See [amazon-ebs](/docs/builders/amazon-ebs.html) for an example template.
+  device mappings to the AMI. The block device mappings allow for keys:  
 
+  - `device_name` (string) – The device name exposed to the instance (for 
+      example, "/dev/sdh" or "xvdh")  
+  - `virtual_name` (string) – The virtual device name. See the documentation on 
+          [Block Device Mapping][1] for more information
+  - `snapshot_id` (string) – The ID of the snapshot
+  - `volume_type` (string) – The volume type. gp2 for General Purpose (SSD) 
+  volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic 
+  volumes
+  - `volume_size` (integer) – The size of the volume, in GiB. Required if not
+      specifying a `snapshot_id`
+  - `delete_on_termination` (boolean) – Indicates whether the EBS volume is 
+      deleted on instance termination
+  - `encrypted` (boolean) – Indicates whether to encrypt the volume or not
+  - `no_device` (boolean) – Suppresses the specified device included in the 
+       block device mapping of the AMI  
+  - `iops` (integer) – The number of I/O operations per second (IOPS) that the 
+  volume supports. See the documentation on [IOPs][2] for more information
+  
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
@@ -136,6 +150,9 @@ each category, the available configuration keys are alphabetized.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+* `force_deregister` (boolean) – Force Packer to first deregister an existing
+AMI if one with the same name already exists. Default `false`.
+
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
@@ -184,7 +201,8 @@ each category, the available configuration keys are alphabetized.
   or "5m". The default SSH timeout is "5m", or five minutes.
 
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
-  "subnet-12345def", where Packer will launch the EC2 instance.
+  "subnet-12345def", where Packer will launch the EC2 instance. This field is
+  required if you are using an non-default VPC.
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
@@ -207,6 +225,10 @@ each category, the available configuration keys are alphabetized.
   writable. X509 certificates are uploaded after provisioning is run, so
   it is perfectly okay to create this directory as part of the provisioning
   process.
+
+* `windows_password_timeout` (string) - The timeout for waiting for
+  a Windows password for Windows instances. Defaults to 20 minutes.
+  Example value: "10m"
 
 ## Basic Example
 
@@ -310,3 +332,6 @@ sudo -i -n ec2-upload-bundle \
 
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-upload-bundle` command.
+
+[1]: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html
+[2]: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html

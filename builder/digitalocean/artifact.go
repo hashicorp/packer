@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+
+	"github.com/digitalocean/godo"
 )
 
 type Artifact struct {
@@ -11,13 +13,13 @@ type Artifact struct {
 	snapshotName string
 
 	// The ID of the image
-	snapshotId uint
+	snapshotId int
 
 	// The name of the region
 	regionName string
 
 	// The client for making API calls
-	client DigitalOceanClient
+	client *godo.Client
 }
 
 func (*Artifact) BuilderId() string {
@@ -43,5 +45,6 @@ func (a *Artifact) State(name string) interface{} {
 
 func (a *Artifact) Destroy() error {
 	log.Printf("Destroying image: %d (%s)", a.snapshotId, a.snapshotName)
-	return a.client.DestroyImage(a.snapshotId)
+	_, err := a.client.Images.Delete(a.snapshotId)
+	return err
 }

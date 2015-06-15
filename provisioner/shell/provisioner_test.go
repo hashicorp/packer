@@ -45,7 +45,7 @@ func TestProvisionerPrepare_InlineShebang(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.InlineShebang != "/bin/sh" {
+	if p.config.InlineShebang != "/bin/sh -e" {
 		t.Fatalf("bad value: %s", p.config.InlineShebang)
 	}
 

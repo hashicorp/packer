@@ -1,43 +1,27 @@
-package common
+package communicator
 
 import (
-	gossh "golang.org/x/crypto/ssh"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/communicator/ssh"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/communicator/ssh"
+	"github.com/mitchellh/packer/packer"
+	gossh "golang.org/x/crypto/ssh"
 )
 
-// StepConnectSSH is a multistep Step implementation that waits for SSH
-// to become available. It gets the connection information from a single
-// configuration when creating the step.
+// StepConnectSSH is a step that only connects to SSH.
 //
-// Uses:
-//   ui packer.Ui
-//
-// Produces:
-//   communicator packer.Communicator
+// In general, you should use StepConnect.
 type StepConnectSSH struct {
-	// SSHAddress is a function that returns the TCP address to connect to
-	// for SSH. This is a function so that you can query information
-	// if necessary for this address.
-	SSHAddress func(multistep.StateBag) (string, error)
-
-	// SSHConfig is a function that returns the proper client configuration
-	// for SSH access.
+	// All the fields below are documented on StepConnect
+	Config    *Config
+	Host      func(multistep.StateBag) (string, error)
 	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
-
-	// SSHWaitTimeout is the total timeout to wait for SSH to become available.
-	SSHWaitTimeout time.Duration
-
-	// NoPty, if true, will not request a Pty from the remote end.
-	NoPty bool
-
-	comm packer.Communicator
+	SSHPort   func(multistep.StateBag) (int, error)
 }
 
 func (s *StepConnectSSH) Run(state multistep.StateBag) multistep.StepAction {
@@ -54,8 +38,8 @@ func (s *StepConnectSSH) Run(state multistep.StateBag) multistep.StepAction {
 		waitDone <- true
 	}()
 
-	log.Printf("Waiting for SSH, up to timeout: %s", s.SSHWaitTimeout)
-	timeout := time.After(s.SSHWaitTimeout)
+	log.Printf("[INFO] Waiting for SSH, up to timeout: %s", s.Config.SSHTimeout)
+	timeout := time.After(s.Config.SSHTimeout)
 WaitLoop:
 	for {
 		// Wait for either SSH to become available, a timeout to occur,
@@ -64,11 +48,11 @@ WaitLoop:
 		case <-waitDone:
 			if err != nil {
 				ui.Error(fmt.Sprintf("Error waiting for SSH: %s", err))
+				state.Put("error", err)
 				return multistep.ActionHalt
 			}
 
 			ui.Say("Connected to SSH!")
-			s.comm = comm
 			state.Put("communicator", comm)
 			break WaitLoop
 		case <-timeout:
@@ -82,7 +66,7 @@ WaitLoop:
 				// The step sequence was cancelled, so cancel waiting for SSH
 				// and just start the halting process.
 				close(cancel)
-				log.Println("Interrupt detected, quitting waiting for SSH.")
+				log.Println("[WARN] Interrupt detected, quitting waiting for SSH.")
 				return multistep.ActionHalt
 			}
 		}
@@ -104,7 +88,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		if !first {
 			select {
 			case <-cancel:
-				log.Println("SSH wait cancelled. Exiting loop.")
+				log.Println("[DEBUG] SSH wait cancelled. Exiting loop.")
 				return nil, errors.New("SSH wait cancelled")
 			case <-time.After(5 * time.Second):
 			}
@@ -112,24 +96,34 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		first = false
 
 		// First we request the TCP connection information
-		address, err := s.SSHAddress(state)
+		host, err := s.Host(state)
 		if err != nil {
-			log.Printf("Error getting SSH address: %s", err)
+			log.Printf("[DEBUG] Error getting SSH address: %s", err)
 			continue
+		}
+		port := s.Config.SSHPort
+		if s.SSHPort != nil {
+			port, err = s.SSHPort(state)
+			if err != nil {
+				log.Printf("[DEBUG] Error getting SSH port: %s", err)
+				continue
+			}
 		}
 
 		// Retrieve the SSH configuration
 		sshConfig, err := s.SSHConfig(state)
 		if err != nil {
-			log.Printf("Error getting SSH config: %s", err)
+			log.Printf("[DEBUG] Error getting SSH config: %s", err)
 			continue
 		}
+
+		address := fmt.Sprintf("%s:%d", host, port)
 
 		// Attempt to connect to SSH port
 		connFunc := ssh.ConnectFunc("tcp", address)
 		nc, err := connFunc()
 		if err != nil {
-			log.Printf("TCP connection to SSH ip/port failed: %s", err)
+			log.Printf("[DEBUG] TCP connection to SSH ip/port failed: %s", err)
 			continue
 		}
 		nc.Close()
@@ -138,24 +132,27 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		config := &ssh.Config{
 			Connection: connFunc,
 			SSHConfig:  sshConfig,
-			NoPty:      s.NoPty,
+			Pty:        s.Config.SSHPty,
 		}
 
-		log.Println("Attempting SSH connection...")
+		log.Println("[INFO] Attempting SSH connection...")
 		comm, err = ssh.New(address, config)
 		if err != nil {
-			log.Printf("SSH handshake err: %s", err)
+			log.Printf("[DEBUG] SSH handshake err: %s", err)
 
 			// Only count this as an attempt if we were able to attempt
 			// to authenticate. Note this is very brittle since it depends
 			// on the string of the error... but I don't see any other way.
 			if strings.Contains(err.Error(), "authenticate") {
-				log.Printf("Detected authentication error. Increasing handshake attempts.")
+				log.Printf(
+					"[DEBUG] Detected authentication error. Increasing handshake attempts.")
 				handshakeAttempts += 1
 			}
 
-			if handshakeAttempts < 10 {
-				// Try to connect via SSH a handful of times
+			if handshakeAttempts < s.Config.SSHHandshakeAttempts {
+				// Try to connect via SSH a handful of times. We sleep here
+				// so we don't get a ton of authentication errors back to back.
+				time.Sleep(2 * time.Second)
 				continue
 			}
 
