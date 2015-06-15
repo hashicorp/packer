@@ -310,16 +310,25 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 		mkdirCmd = "sudo " + mkdirCmd
 	}
 
-	cmd := &packer.RemoteCmd{
-		Command: mkdirCmd,
-	}
-
+	cmd := &packer.RemoteCmd{Command: mkdirCmd}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
-
 	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status.")
+		return fmt.Errorf("Non-zero exit status. See output above for more info.")
+	}
+
+	// Chmod the directory to 0777 just so that we can access it as our user
+	mkdirCmd = fmt.Sprintf("chmod 0777 '%s'", dir)
+	if !p.config.PreventSudo {
+		mkdirCmd = "sudo " + mkdirCmd
+	}
+	cmd = &packer.RemoteCmd{Command: mkdirCmd}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
 	return nil
