@@ -22,6 +22,8 @@ FEATURES:
       connections. Note that provisioners won't work if this is done. [GH-1591]
   * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
       to allow access to remote servers such as private git repos. [GH-1066]
+  * **Docker builder supports SSH**: The Docker builder now supports containers
+      with SSH, just set `communicator` to "ssh" [GH-2244]
   * **New config function: `build_name`**: The name of the currently running
       build. [GH-2232]
   * **New config function: `build_type`**: The type of the currently running
