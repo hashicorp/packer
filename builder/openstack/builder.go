@@ -69,6 +69,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&StepLoadExtensions{},
 		&StepLoadFlavor{
 			Flavor: b.config.Flavor,
 		},
@@ -98,6 +99,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
+		&StepStopServer{},
 		&stepCreateImage{},
 	}
 
