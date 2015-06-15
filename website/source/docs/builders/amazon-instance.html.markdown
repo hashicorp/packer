@@ -81,12 +81,26 @@ each category, the available configuration keys are alphabetized.
 ### Optional:
 
 * `ami_block_device_mappings` (array of block device mappings) - Add the block
-  device mappings to the AMI. The block device mappings allow for keys:
-  "device\_name" (string), "virtual\_name" (string), "snapshot\_id" (string),
-  "volume\_type" (string), "volume\_size" (integer), "delete\_on\_termination"
-  (boolean), "encrypted" (boolean), "no\_device" (boolean), and "iops" (integer).
-  See [amazon-ebs](/docs/builders/amazon-ebs.html) for an example template.
+  device mappings to the AMI. The block device mappings allow for keys:  
 
+  - `device_name` (string) – The device name exposed to the instance (for 
+      example, "/dev/sdh" or "xvdh")  
+  - `virtual_name` (string) – The virtual device name. See the documentation on 
+          [Block Device Mapping][1] for more information
+  - `snapshot_id` (string) – The ID of the snapshot
+  - `volume_type` (string) – The volume type. gp2 for General Purpose (SSD) 
+  volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic 
+  volumes
+  - `volume_size` (integer) – The size of the volume, in GiB. Required if not
+      specifying a `snapshot_id`
+  - `delete_on_termination` (boolean) – Indicates whether the EBS volume is 
+      deleted on instance termination
+  - `encrypted` (boolean) – Indicates whether to encrypt the volume or not
+  - `no_device` (boolean) – Suppresses the specified device included in the 
+       block device mapping of the AMI  
+  - `iops` (integer) – The number of I/O operations per second (IOPS) that the 
+  volume supports. See the documentation on [IOPs][2] for more information
+  
 * `ami_description` (string) - The description to set for the resulting
   AMI(s). By default this description is empty.
 
@@ -318,3 +332,6 @@ sudo -i -n ec2-upload-bundle \
 
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-upload-bundle` command.
+
+[1]: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html
+[2]: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html
