@@ -22,7 +22,7 @@ func CommHost(
 
 		// If we have a specific interface, try that
 		if sshinterface != "" {
-			if addr := sshAddrFromPool(s, sshinterface, port); addr != "" {
+			if addr := sshAddrFromPool(s, sshinterface); addr != "" {
 				return addr, nil
 			}
 		}
@@ -38,7 +38,7 @@ func CommHost(
 		}
 
 		// Try to get it from the requested interface
-		if addr := sshAddrFromPool(s, sshinterface, port); addr != "" {
+		if addr := sshAddrFromPool(s, sshinterface); addr != "" {
 			return addr, nil
 		}
 
@@ -75,7 +75,7 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 	}
 }
 
-func sshAddrFromPool(s *servers.Server, desired string, port int) string {
+func sshAddrFromPool(s *servers.Server, desired string) string {
 	// Get all the addresses associated with this server. This
 	// was taken directly from Terraform.
 	for pool, networkAddresses := range s.Addresses {
@@ -106,7 +106,7 @@ func sshAddrFromPool(s *servers.Server, desired string, port int) string {
 				}
 			}
 			if addr != "" {
-				return fmt.Sprintf("%s:%d", addr, port)
+				return addr
 			}
 		}
 	}
