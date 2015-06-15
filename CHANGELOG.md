@@ -64,6 +64,7 @@ IMPROVEMENTS:
   * post-processor/docker-save: Can be chained [GH-2179]
   * post-processor/docker-tag: Support `force` option [GH-2055]
   * post-processor/docker-tag: Can be chained [GH-2179]
+  * provisioner/puppet-masterless: `working_directory` option [GH-1831]
 
 BUG FIXES:
 
