@@ -254,7 +254,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
-			GuestPort:      uint(b.config.SSHConfig.Comm.SSHPort),
+			CommConfig:     &b.config.SSHConfig.Comm,
 			HostPortMin:    b.config.SSHHostPortMin,
 			HostPortMax:    b.config.SSHHostPortMax,
 			SkipNatMapping: b.config.SSHSkipNatMapping,
