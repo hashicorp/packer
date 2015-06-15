@@ -66,8 +66,10 @@ Optional parameters:
 
 * `inline_shebang` (string) - The
   [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
-  running commands specified by `inline`. By default, this is `/bin/sh`.
+  running commands specified by `inline`. By default, this is `/bin/sh -e`.
   If you're not using `inline`, then this configuration has no effect.
+  **Important:** If you customize this, be sure to include something like
+  the `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
 * `remote_path` (string) - The path where the script will be uploaded to
   in the machine. This defaults to "/tmp/script.sh". This value must be
@@ -142,6 +144,33 @@ on reboot or in your shell script. For example, on Gentoo:
 
 ```text
 /etc/init.d/net.eth0 stop
+```
+
+## SSH Agent Forwarding
+
+Some provisioning requires connecting to remote SSH servers from within the
+packer instance. The below example is for pulling code from a private git
+repository utilizing openssh on the client. Make sure you are running
+`ssh-agent` and add your git repo ssh keys into it using `ssh-add /path/to/key`.
+When the packer instance needs access to the ssh keys the agent will forward
+the request back to your `ssh-agent`.
+
+Note: when provisioning via git you should add the git server keys into
+the `~/.ssh/known_hosts` file otherwise the git command could hang awaiting
+input. This can be done by copying the file in via the
+[file provisioner](/docs/provisioners/file.html) (more secure)
+or using `ssh-keyscan` to populate the file (less secure). An example of the
+latter accessing github would be:
+
+```
+{
+  "type": "shell",
+  "inline": [
+    "sudo apt-get install -y git",
+    "ssh-keyscan github.com >> ~/.ssh/known_hosts",
+    "git clone git@github.com:exampleorg/myprivaterepo.git"
+  ]
+}
 ```
 
 ## Troubleshooting

@@ -179,9 +179,11 @@ each category, the available options are alphabetized and described.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
-* `shutdown_command` (string) - The command to use to gracefully shut down
-  the machine once all the provisioning is done. By default this is an empty
-  string, which tells Packer to just forcefully shut down the machine.
+* `shutdown_command` (string) - The command to use to gracefully shut down the machine once all
+  the provisioning is done. By default this is an empty string, which tells Packer to just
+  forcefully shut down the machine unless a shutdown command takes place inside script so this may
+  safely be omitted. If one or more scripts require a reboot it is suggested to leave this blank
+  since reboots may fail and specify the final shutdown command in your last script.
 
 * `shutdown_timeout` (string) - The amount of time to wait after executing
   the `shutdown_command` for the virtual machine to actually shut down.
@@ -208,6 +210,10 @@ each category, the available options are alphabetized and described.
 * `ssh_wait_timeout` (string) - The duration to wait for SSH to become
   available. By default this is "20m", or 20 minutes. Note that this should
   be quite long since the timer begins as soon as the virtual machine is booted.
+
+* `ssh_skip_nat_mapping` (bool) - Defaults to false. When enabled, Packer does
+  not setup forwarded port mapping for SSH requests and uses `ssh_port` on the
+  host to communicate to the virtual machine
 
 * `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
   execute in order to further customize the virtual machine being created.

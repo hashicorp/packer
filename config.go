@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/mitchellh/osext"
@@ -171,6 +172,15 @@ func (c *config) discoverSingle(glob string, m *map[string]string) error {
 	prefix = prefix[:strings.Index(prefix, "*")]
 	for _, match := range matches {
 		file := filepath.Base(match)
+
+		// One Windows, ignore any plugins that don't end in .exe.
+		// We could do a full PATHEXT parse, but this is probably good enough.
+		if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(file)) != ".exe" {
+			log.Printf(
+				"[DEBUG] Ignoring plugin match %s, no exe extension",
+				match)
+			continue
+		}
 
 		// If the filename has a ".", trim up to there
 		if idx := strings.Index(file, "."); idx >= 0 {
