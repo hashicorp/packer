@@ -173,12 +173,11 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 }
 
 func (c *comm) Download(path string, output io.Writer) error {
-
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
 		fmt.Fprint(w, "\x00")
 
 		// read file info
-		fi, err := stdoutR.ReadString( '\n')
+		fi, err := stdoutR.ReadString('\n')
 		if err != nil {
 			return err
 		}
