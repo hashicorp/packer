@@ -266,11 +266,23 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return err
 		}
 
-		// Close the original file since we copied it
-		f.Close()
-
 		if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		}
+
+		// Delete the temporary file we created
+		cmd = &packer.RemoteCmd{
+			Command: fmt.Sprintf("rm -f %s", p.config.RemotePath),
+		}
+		if err := comm.Start(cmd); err != nil {
+			return fmt.Errorf(
+				"Error removing temporary script at %s: %s",
+				p.config.RemotePath, err)
+		}
+		cmd.Wait()
+		if cmd.ExitStatus != 0 {
+			return fmt.Errorf(
+				"Error removing temporary script at %s!")
 		}
 	}
 
