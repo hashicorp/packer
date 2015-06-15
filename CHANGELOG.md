@@ -40,6 +40,9 @@ IMPROVEMENTS:
       have prohibitive firewalls
   * builder/openstack: Flavor names can be used as well as refs
   * builder/openstack: Add `availability_zone` [GH-2016]
+  * builder/openstack: Machine will be stopped prior to imaging if the
+      cluster supports the `startstop` extension. [GH-2223]
+  * builder/openstack: Support for user data [GH-2224]
   * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
@@ -53,6 +56,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: Fix potential panic for post-processor plugin exits [GH-2098]
+  * core: `PACKER_CONFIG` may point to a non-existent file [GH-2226]
   * builder/amazon: Allow spaces in AMI names when using `clean_ami_name` [GH-2182]
   * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
   * builder/amazon: Use IAM Profile to upload bundle if provided [GH-1985]
