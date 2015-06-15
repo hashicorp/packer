@@ -96,6 +96,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.WorkingDir = p.config.StagingDir
 	}
 
+	if p.config.Facter == nil {
+		p.config.Facter = make(map[string]string)
+	}
+	p.config.Facter["packer_build_name"] = p.config.PackerBuildName
+	p.config.Facter["packer_builder_type"] = p.config.PackerBuilderType
+
 	// Validation
 	var errs *packer.MultiError
 	if p.config.HieraConfigPath != "" {
