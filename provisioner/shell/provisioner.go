@@ -145,6 +145,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		} else {
+			// Replace single quotes so they parse
+			vs[1] = strings.Replace(vs[1], "'", `'"'"'`, -1)
+
 			// Single quote env var values
 			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}

@@ -2,12 +2,11 @@ package docker
 
 import (
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
 )
 
-type StepProvision struct{}
+type StepConnectDocker struct{}
 
-func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
 	containerId := state.Get("container_id").(string)
 	driver := state.Get("driver").(Driver)
 	tempDir := state.Get("temp_dir").(string)
@@ -28,8 +27,8 @@ func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
 		Version:      version,
 	}
 
-	prov := common.StepProvision{Comm: comm}
-	return prov.Run(state)
+	state.Put("communicator", comm)
+	return multistep.ActionContinue
 }
 
-func (s *StepProvision) Cleanup(state multistep.StateBag) {}
+func (s *StepConnectDocker) Cleanup(state multistep.StateBag) {}

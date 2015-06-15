@@ -5,6 +5,7 @@ import (
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -42,7 +43,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepTempDir{},
 		&StepPull{},
 		&StepRun{},
-		&StepProvision{},
+		&communicator.StepConnect{
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: sshConfig(&b.config.Comm),
+			CustomConnect: map[string]multistep.Step{
+				"docker": &StepConnectDocker{},
+			},
+		},
+		&common.StepProvision{},
 	}
 
 	if b.config.Commit {

@@ -1,6 +1,7 @@
 package template
 
 import (
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -303,10 +304,23 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"parse-comment.json",
+			&Template{
+				Builders: map[string]*Builder{
+					"something": &Builder{
+						Name: "something",
+						Type: "something",
+					},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {
-		path := fixtureDir(tc.File)
+		path, _ := filepath.Abs(fixtureDir(tc.File))
 		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s", err)

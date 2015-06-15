@@ -8,11 +8,9 @@ import (
 	"io/ioutil"
 )
 
-// SSHAddress returns a function that can be given to the SSH communicator
-// for determining the SSH address
-func SSHAddress(host string, port int) func(multistep.StateBag) (string, error) {
+func CommHost(host string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
-		return fmt.Sprintf("%s:%d", host, port), nil
+		return host, nil
 	}
 }
 
