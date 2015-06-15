@@ -88,6 +88,9 @@ configuration is actually required.
   this folder. If the permissions are not correct, use a shell provisioner
   prior to this to configure it properly.
 
+* `client_key` (string) - Path to client key. If not set, this defaults to a file
+  named client.pem in `staging_directory`.
+
 * `validation_client_name` (string) - Name of the validation client. If
   not set, this won't be set in the configuration and the default that Chef
   uses will be used.
