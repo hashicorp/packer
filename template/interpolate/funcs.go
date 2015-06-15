@@ -24,6 +24,8 @@ func init() {
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
+	"build_name":   funcGenBuildName,
+	"build_type":   funcGenBuildType,
 	"env":          funcGenEnv,
 	"isotime":      funcGenIsotime,
 	"pwd":          funcGenPwd,
@@ -54,6 +56,26 @@ func Funcs(ctx *Context) template.FuncMap {
 	}
 
 	return template.FuncMap(result)
+}
+
+func funcGenBuildName(ctx *Context) interface{} {
+	return func() (string, error) {
+		if ctx == nil || ctx.BuildName == "" {
+			return "", errors.New("build_name not available")
+		}
+
+		return ctx.BuildName, nil
+	}
+}
+
+func funcGenBuildType(ctx *Context) interface{} {
+	return func() (string, error) {
+		if ctx == nil || ctx.BuildType == "" {
+			return "", errors.New("build_name not available")
+		}
+
+		return ctx.BuildType, nil
+	}
 }
 
 func funcGenEnv(ctx *Context) interface{} {

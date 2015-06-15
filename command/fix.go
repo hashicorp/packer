@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/packer/fix"
+	"github.com/mitchellh/packer/template"
 )
 
 type FixCommand struct {
@@ -16,7 +17,9 @@ type FixCommand struct {
 }
 
 func (c *FixCommand) Run(args []string) int {
+	var flagValidate bool
 	flags := c.Meta.FlagSet("fix", FlagSetNone)
+	flags.BoolVar(&flagValidate, "validate", true, "")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	if err := flags.Parse(args); err != nil {
 		return 1
@@ -80,6 +83,28 @@ func (c *FixCommand) Run(args []string) int {
 	result = strings.Replace(result, `\u003c`, "<", -1)
 	result = strings.Replace(result, `\u003e`, ">", -1)
 	c.Ui.Say(result)
+
+	if flagValidate {
+		// Attemot to parse and validate the template
+		tpl, err := template.Parse(strings.NewReader(result))
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error! Fixed template fails to parse: %s\n\n"+
+					"This is usually caused by an error in the input template.\n"+
+					"Please fix the error and try again.",
+				err))
+			return 1
+		}
+		if err := tpl.Validate(); err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error! Fixed template failed to validate: %s\n\n"+
+					"This is usually caused by an error in the input template.\n"+
+					"Please fix the error and try again.",
+				err))
+			return 1
+		}
+	}
+
 	return 0
 }
 
@@ -102,6 +127,10 @@ Fixes that are run:
   pp-vagrant-override Replaces old-style provider overrides for the Vagrant
                       post-processor to new-style as of Packer 0.5.0.
   virtualbox-rename   Updates "virtualbox" builders to "virtualbox-iso"
+
+Options:
+
+  -validate=true      If true (default), validates the fixed template.
 `
 
 	return strings.TrimSpace(helpText)

@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -16,6 +17,7 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	Comm                communicator.Config `mapstructure:",squash"`
 
 	APIToken string `mapstructure:"api_token"`
 
@@ -23,20 +25,11 @@ type Config struct {
 	Size   string `mapstructure:"size"`
 	Image  string `mapstructure:"image"`
 
-	PrivateNetworking bool   `mapstructure:"private_networking"`
-	SnapshotName      string `mapstructure:"snapshot_name"`
-	DropletName       string `mapstructure:"droplet_name"`
-	UserData          string `mapstructure:"user_data"`
-	SSHUsername       string `mapstructure:"ssh_username"`
-	SSHPort           uint   `mapstructure:"ssh_port"`
-
-	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
-	RawStateTimeout string `mapstructure:"state_timeout"`
-
-	// These are unexported since they're set by other fields
-	// being set.
-	sshTimeout   time.Duration
-	stateTimeout time.Duration
+	PrivateNetworking bool          `mapstructure:"private_networking"`
+	SnapshotName      string        `mapstructure:"snapshot_name"`
+	StateTimeout      time.Duration `mapstructure:"state_timeout"`
+	DropletName       string        `mapstructure:"droplet_name"`
+	UserData          string        `mapstructure:"user_data"`
 
 	ctx *interpolate.Context
 }
@@ -79,29 +72,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.DropletName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
-	if c.SSHUsername == "" {
+	if c.Comm.SSHUsername == "" {
 		// Default to "root". You can override this if your
 		// SourceImage has a different user account then the DO default
-		c.SSHUsername = "root"
+		c.Comm.SSHUsername = "root"
 	}
 
-	if c.SSHPort == 0 {
-		// Default to port 22 per DO default
-		c.SSHPort = 22
-	}
-
-	if c.RawSSHTimeout == "" {
-		// Default to 1 minute timeouts
-		c.RawSSHTimeout = "1m"
-	}
-
-	if c.RawStateTimeout == "" {
+	if c.StateTimeout == 0 {
 		// Default to 6 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active
-		c.RawStateTimeout = "6m"
+		c.StateTimeout = 6 * time.Minute
 	}
 
 	var errs *packer.MultiError
+	if es := c.Comm.Prepare(c.ctx); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
+	}
 	if c.APIToken == "" {
 		// Required configurations that will display errors if not set
 		errs = packer.MultiErrorAppend(
@@ -122,20 +108,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("image is required"))
 	}
-
-	sshTimeout, err := time.ParseDuration(c.RawSSHTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
-	}
-	c.sshTimeout = sshTimeout
-
-	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
-	}
-	c.stateTimeout = stateTimeout
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs

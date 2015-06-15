@@ -2,11 +2,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"math/rand"
 	"net"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step adds a NAT port forwarding definition so that SSH is available
@@ -19,7 +21,7 @@ import (
 //
 // Produces:
 type StepForwardSSH struct {
-	GuestPort      uint
+	CommConfig     *communicator.Config
 	HostPortMin    uint
 	HostPortMax    uint
 	SkipNatMapping bool
@@ -30,20 +32,21 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	sshHostPort := s.GuestPort
+	guestPort := s.CommConfig.Port()
+	sshHostPort := guestPort
 	if !s.SkipNatMapping {
 		log.Printf("Looking for available SSH port between %d and %d",
 			s.HostPortMin, s.HostPortMax)
-		var offset uint = 0
+		offset := 0
 
 		portRange := int(s.HostPortMax - s.HostPortMin)
 		if portRange > 0 {
 			// Have to check if > 0 to avoid a panic
-			offset = uint(rand.Intn(portRange))
+			offset = rand.Intn(portRange)
 		}
 
 		for {
-			sshHostPort = offset + s.HostPortMin
+			sshHostPort = offset + int(s.HostPortMin)
 			log.Printf("Trying port: %d", sshHostPort)
 			l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", sshHostPort))
 			if err == nil {
@@ -57,7 +60,7 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 		command := []string{
 			"modifyvm", vmName,
 			"--natpf1",
-			fmt.Sprintf("packerssh,tcp,127.0.0.1,%d,,%d", sshHostPort, s.GuestPort),
+			fmt.Sprintf("packerssh,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
 		}
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error creating port forwarding rule: %s", err)

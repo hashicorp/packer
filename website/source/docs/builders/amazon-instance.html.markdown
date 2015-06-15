@@ -136,6 +136,9 @@ each category, the available configuration keys are alphabetized.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+* `force_deregister` (boolean) – Force Packer to first deregister an existing
+AMI if one with the same name already exists. Default `false`.
+
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
@@ -208,6 +211,10 @@ each category, the available configuration keys are alphabetized.
   writable. X509 certificates are uploaded after provisioning is run, so
   it is perfectly okay to create this directory as part of the provisioning
   process.
+
+* `windows_password_timeout` (string) - The timeout for waiting for
+  a Windows password for Windows instances. Defaults to 20 minutes.
+  Example value: "10m"
 
 ## Basic Example
 

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -53,7 +54,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			return multistep.ActionHalt
 		}
 
+		// Test if it is encoded already, and if not, encode it
+		if _, err := base64.StdEncoding.DecodeString(string(contents)); err != nil {
+			log.Printf("[DEBUG] base64 encoding user data...")
+			contents = []byte(base64.StdEncoding.EncodeToString(contents))
+		}
+
 		userData = string(contents)
+
 	}
 
 	ui.Say("Launching a source AWS instance...")
@@ -174,11 +182,15 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 				ImageID:            &s.SourceAMI,
 				InstanceType:       &s.InstanceType,
 				UserData:           &userData,
-				SecurityGroupIDs:   securityGroupIds,
 				IAMInstanceProfile: &ec2.IAMInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-				SubnetID:           &s.SubnetId,
 				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-					&ec2.InstanceNetworkInterfaceSpecification{AssociatePublicIPAddress: &s.AssociatePublicIpAddress},
+					&ec2.InstanceNetworkInterfaceSpecification{
+						DeviceIndex:              aws.Long(0),
+						AssociatePublicIPAddress: &s.AssociatePublicIpAddress,
+						SubnetID:                 &s.SubnetId,
+						Groups:                   securityGroupIds,
+						DeleteOnTermination:      aws.Boolean(true),
+					},
 				},
 				Placement: &ec2.SpotPlacement{
 					AvailabilityZone: &availabilityZone,
