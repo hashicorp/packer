@@ -32,6 +32,11 @@ type StepConnect struct {
 	// connecting via WinRM.
 	WinRMConfig func(multistep.StateBag) (*WinRMConfig, error)
 
+	// CustomConnect can be set to have custom connectors for specific
+	// types. These take highest precedence so you can also override
+	// existing types.
+	CustomConnect map[string]multistep.Step
+
 	substep multistep.Step
 }
 
@@ -49,6 +54,9 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 			Host:        s.Host,
 			WinRMConfig: s.WinRMConfig,
 		},
+	}
+	for k, v := range s.CustomConnect {
+		typeMap[k] = v
 	}
 
 	step, ok := typeMap[s.Config.Type]

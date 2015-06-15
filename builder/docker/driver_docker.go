@@ -116,6 +116,23 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 	return strings.TrimSpace(stdout.String()), nil
 }
 
+func (d *DockerDriver) IPAddress(id string) (string, error) {
+	var stderr, stdout bytes.Buffer
+	cmd := exec.Command(
+		"docker",
+		"inspect",
+		"--format",
+		"{{ .NetworkSettings.IPAddress }}",
+		id)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("Error: %s\n\nStderr: %s", err, stderr.String())
+	}
+
+	return strings.TrimSpace(stdout.String()), nil
+}
+
 func (d *DockerDriver) Login(repo, email, user, pass string) error {
 	d.l.Lock()
 
