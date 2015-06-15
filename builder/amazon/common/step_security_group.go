@@ -9,12 +9,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepSecurityGroup struct {
+	CommConfig       *communicator.Config
 	SecurityGroupIds []string
-	SSHPort          int
 	VpcId            string
 
 	createdGroupId string
@@ -30,8 +31,9 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
-	if s.SSHPort == 0 {
-		panic("SSHPort must be set to a non-zero value.")
+	port := s.CommConfig.Port()
+	if port == 0 {
+		panic("port must be set to a non-zero value.")
 	}
 
 	// Create the group
@@ -57,15 +59,17 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	req := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupID:    groupResp.GroupID,
 		IPProtocol: aws.String("tcp"),
-		FromPort:   aws.Long(int64(s.SSHPort)),
-		ToPort:     aws.Long(int64(s.SSHPort)),
+		FromPort:   aws.Long(int64(port)),
+		ToPort:     aws.Long(int64(port)),
 		CIDRIP:     aws.String("0.0.0.0/0"),
 	}
 
 	// We loop and retry this a few times because sometimes the security
 	// group isn't available immediately because AWS resources are eventaully
 	// consistent.
-	ui.Say("Authorizing SSH access on the temporary security group...")
+	ui.Say(fmt.Sprintf(
+		"Authorizing access to port %d the temporary security group...",
+		port))
 	for i := 0; i < 5; i++ {
 		_, err = ec2conn.AuthorizeSecurityGroupIngress(req)
 		if err == nil {

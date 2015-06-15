@@ -13,49 +13,33 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// SSHAddress returns a function that can be given to the SSH communicator
-// for determining the SSH address based on the server AccessIPv4 setting..
-func SSHAddress(
+// CommHost looks up the host for the communicator.
+func CommHost(
 	client *gophercloud.ServiceClient,
-	sshinterface string, port int) func(multistep.StateBag) (string, error) {
+	sshinterface string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		s := state.Get("server").(*servers.Server)
+
+		// If we have a specific interface, try that
+		if sshinterface != "" {
+			if addr := sshAddrFromPool(s, sshinterface); addr != "" {
+				return addr, nil
+			}
+		}
 
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingip.FloatingIP)
 		if ip != nil && ip.IP != "" {
-			return fmt.Sprintf("%s:%d", ip.IP, port), nil
+			return ip.IP, nil
 		}
 
 		if s.AccessIPv4 != "" {
-			return fmt.Sprintf("%s:%d", s.AccessIPv4, port), nil
+			return s.AccessIPv4, nil
 		}
 
-		// Get all the addresses associated with this server. This
-		// was taken directly from Terraform.
-		for _, networkAddresses := range s.Addresses {
-			elements, ok := networkAddresses.([]interface{})
-			if !ok {
-				log.Printf(
-					"[ERROR] Unknown return type for address field: %#v",
-					networkAddresses)
-				continue
-			}
-
-			for _, element := range elements {
-				var addr string
-				address := element.(map[string]interface{})
-				if address["OS-EXT-IPS:type"] == "floating" {
-					addr = address["addr"].(string)
-				} else {
-					if address["version"].(float64) == 4 {
-						addr = address["addr"].(string)
-					}
-				}
-				if addr != "" {
-					return fmt.Sprintf("%s:%d", addr, port), nil
-				}
-			}
+		// Try to get it from the requested interface
+		if addr := sshAddrFromPool(s, sshinterface); addr != "" {
+			return addr, nil
 		}
 
 		s, err := servers.Get(client, s.ID).Extract()
@@ -89,4 +73,43 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 			},
 		}, nil
 	}
+}
+
+func sshAddrFromPool(s *servers.Server, desired string) string {
+	// Get all the addresses associated with this server. This
+	// was taken directly from Terraform.
+	for pool, networkAddresses := range s.Addresses {
+		// If we have an SSH interface specified, skip it if no match
+		if desired != "" && pool != desired {
+			log.Printf(
+				"[INFO] Skipping pool %s, doesn't match requested %s",
+				pool, desired)
+			continue
+		}
+
+		elements, ok := networkAddresses.([]interface{})
+		if !ok {
+			log.Printf(
+				"[ERROR] Unknown return type for address field: %#v",
+				networkAddresses)
+			continue
+		}
+
+		for _, element := range elements {
+			var addr string
+			address := element.(map[string]interface{})
+			if address["OS-EXT-IPS:type"] == "floating" {
+				addr = address["addr"].(string)
+			} else {
+				if address["version"].(float64) == 4 {
+					addr = address["addr"].(string)
+				}
+			}
+			if addr != "" {
+				return addr
+			}
+		}
+	}
+
+	return ""
 }

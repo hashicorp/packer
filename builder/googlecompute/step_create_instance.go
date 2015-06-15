@@ -32,7 +32,7 @@ func (config *Config) getInstanceMetadata(sshPublicKey string) map[string]string
 
 	// Merge any existing ssh keys with our public key
 	sshMetaKey := "sshKeys"
-	sshKeys := fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey)
+	sshKeys := fmt.Sprintf("%s:%s", config.Comm.SSHUsername, sshPublicKey)
 	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
 		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 	}
