@@ -79,12 +79,18 @@ Optional parameters:
   this folder. If the permissions are not correct, use a shell provisioner
   prior to this to configure it properly.
 
+* `working_directory` (string) - This is the directory from which the puppet command
+  will be run. When using hiera with a relative path, this option allows to ensure
+  that the paths are working properly. If not specified, defaults to the value of
+  specified `staging_directory` (or its default value if not specified either).
+
 ## Execute Command
 
 By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Puppet:
 
 ```liquid
+cd {{.WorkingDir}} && \
 {{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
@@ -98,6 +104,7 @@ This command can be customized using the `execute_command` configuration.
 As you can see from the default value above, the value of this configuration
 can contain various template variables, defined below:
 
+* `WorkingDir` - The path from which Puppet will be executed.
 * `FacterVars` - Shell-friendly string of environmental variables used
   to set custom facts configured for this provisioner.
 * `HieraConfigPath` - The path to a hiera configuration file.
