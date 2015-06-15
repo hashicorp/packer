@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -336,15 +335,9 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 
 func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string) error {
 	ui.Say("Cleaning up chef node...")
-	app := fmt.Sprintf("knife node delete %s -y", node)
-
-	cmd := exec.Command("sh", "-c", app)
-	out, err := cmd.Output()
-
-	ui.Message(fmt.Sprintf("%s", out))
-
-	if err != nil {
-		return err
+	args := []string{"node", "delete", node}
+	if err := p.knifeExec(ui, comm, node, args); err != nil {
+		return fmt.Errorf("Failed to cleanup node: %s", err)
 	}
 
 	return nil
@@ -352,15 +345,37 @@ func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node str
 
 func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string) error {
 	ui.Say("Cleaning up chef client...")
-	app := fmt.Sprintf("knife client delete %s -y", node)
+	args := []string{"client", "delete", node}
+	if err := p.knifeExec(ui, comm, node, args); err != nil {
+		return fmt.Errorf("Failed to cleanup client: %s", err)
+	}
 
-	cmd := exec.Command("sh", "-c", app)
-	out, err := cmd.Output()
+	return nil
+}
 
-	ui.Message(fmt.Sprintf("%s", out))
+func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node string, args []string) error {
+	flags := []string{
+		"-y",
+		"-s", fmt.Sprintf("'%s'", p.config.ServerUrl),
+		"-k", fmt.Sprintf("'%s'", p.config.ClientKey),
+		"-u", fmt.Sprintf("'%s'", node),
+	}
 
-	if err != nil {
+	cmdText := fmt.Sprintf(
+		"knife %s %s", strings.Join(args, " "), strings.Join(flags, " "))
+	if !p.config.PreventSudo {
+		cmdText = "sudo " + cmdText
+	}
+
+	cmd := &packer.RemoteCmd{Command: cmdText}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
+	}
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf(
+			"Non-zero exit status. See output above for more info.\n\n"+
+				"Command: %s",
+			cmdText)
 	}
 
 	return nil
