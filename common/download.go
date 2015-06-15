@@ -215,18 +215,23 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 
 	resp, err := httpClient.Do(req)
-	if err != nil {
-		return err
+	if err != nil || resp.StatusCode != 200 {
+		req.Method = "GET"
+		resp, err = httpClient.Do(req)
+		if err != nil {
+			return err
+		}
 	}
 
-	req.Method = "GET"
 	if resp.StatusCode != 200 {
 		log.Printf(
 			"Non-200 status code: %d. Getting error body.", resp.StatusCode)
-
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			return err
+		if req.Method != "GET" {
+			req.Method = "GET"
+			resp, err = httpClient.Do(req)
+			if err != nil {
+				return err
+			}
 		}
 		errorBody := new(bytes.Buffer)
 		io.Copy(errorBody, resp.Body)
@@ -234,6 +239,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 			resp.StatusCode, errorBody.String())
 	}
 
+	req.Method = "GET"
 	d.progress = 0
 
 	if resp.Header.Get("Accept-Ranges") == "bytes" {
