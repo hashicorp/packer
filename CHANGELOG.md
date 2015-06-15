@@ -28,7 +28,7 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
-  * builder/amazon: Add `force_deregister` option for automatic AMI 
+  * builder/amazon: Add `force_deregister` option for automatic AMI
       deregistration [GH-2221]
   * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
@@ -80,6 +80,8 @@ BUG FIXES:
   * builder/docker: Fix crash that could occur at certain timed ctrl-c [GH-1838]
   * builder/docker: validate that `export_path` is not a directory [GH-2105]
   * builder/google: `ssh_timeout` is respected [GH-1781]
+  * builder/openstack: `ssh_interface` can be used to specify the interface
+      to retrieve the SSH IP from. [GH-2220]
   * builder/qemu: Add `disk_discard` option [GH-2120]
   * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
