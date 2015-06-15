@@ -41,6 +41,10 @@ type TestCase struct {
 	// in the case that the test can't guarantee all resources were
 	// properly cleaned up.
 	Teardown TestTeardownFunc
+
+	// If SkipArtifactTeardown is true, we will not attempt to destroy the
+	// artifact created in this test run.
+	SkipArtifactTeardown bool
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
@@ -163,12 +167,14 @@ func Test(t TestT, c TestCase) {
 	}
 
 TEARDOWN:
-	// Delete all artifacts
-	for _, a := range artifacts {
-		if err := a.Destroy(); err != nil {
-			t.Error(fmt.Sprintf(
-				"!!! ERROR REMOVING ARTIFACT '%s': %s !!!",
-				a.String(), err))
+	if !c.SkipArtifactTeardown {
+		// Delete all artifacts
+		for _, a := range artifacts {
+			if err := a.Destroy(); err != nil {
+				t.Error(fmt.Sprintf(
+					"!!! ERROR REMOVING ARTIFACT '%s': %s !!!",
+					a.String(), err))
+			}
 		}
 	}
 

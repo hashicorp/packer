@@ -28,6 +28,22 @@ func TestBuilderAcc_regionCopy(t *testing.T) {
 	})
 }
 
+func TestBuilderAcc_forceDeregister(t *testing.T) {
+	// Build the same AMI name twice, with force_deregister on the second run
+	builderT.Test(t, builderT.TestCase{
+		PreCheck:             func() { testAccPreCheck(t) },
+		Builder:              &Builder{},
+		Template:             buildForceDeregisterConfig("false", "dereg"),
+		SkipArtifactTeardown: true,
+	})
+
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: buildForceDeregisterConfig("true", "dereg"),
+	})
+}
+
 func checkRegionCopy(regions []string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
 		if len(artifacts) > 1 {
@@ -107,3 +123,21 @@ const testBuilderAccRegionCopy = `
 	}]
 }
 `
+
+const testBuilderAccForceDeregister = `
+{
+	"builders": [{
+		"type": "test",
+		"region": "us-east-1",
+		"instance_type": "m3.medium",
+		"source_ami": "ami-76b2a71e",
+		"ssh_username": "ubuntu",
+		"force_deregister": "%s",
+		"ami_name": "packer-test-%s"
+	}]
+}
+`
+
+func buildForceDeregisterConfig(name, flag string) string {
+	return fmt.Sprintf(testBuilderAccForceDeregister, name, flag)
+}

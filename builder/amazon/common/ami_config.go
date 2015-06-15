@@ -17,6 +17,7 @@ type AMIConfig struct {
 	AMIRegions            []string          `mapstructure:"ami_regions"`
 	AMITags               map[string]string `mapstructure:"tags"`
 	AMIEnhancedNetworking bool              `mapstructure:"enhanced_networking"`
+	AMIForceDeregister    bool              `mapstructure:"force_deregister"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
