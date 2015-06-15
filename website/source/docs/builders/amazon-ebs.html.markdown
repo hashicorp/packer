@@ -150,7 +150,8 @@ AMI if one with the same name already exists. Default `false`.
   "subnet-12345def", where Packer will launch the EC2 instance. This field is
   required if you are using an non-default VPC.
 
-* `tags` (object of key/value strings) - Tags applied to the AMI.
+* `tags` (object of key/value strings) - Tags applied to the AMI and
+  relevant snapshots.
 
 * `temporary_key_pair_name` (string) - The name of the temporary keypair
   to generate. By default, Packer generates a name with a UUID.
