@@ -96,6 +96,9 @@ each category, the available configuration keys are alphabetized.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+* `force_deregister` (boolean) – Force Packer to first deregister an existing
+AMI if one with the same name already exists. Default `false`.
+
 * `iam_instance_profile` (string) - The name of an
   [IAM instance profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
   to launch the EC2 instance with.
