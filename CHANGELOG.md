@@ -24,6 +24,8 @@ FEATURES:
       to allow access to remote servers such as private git repos. [GH-1066]
   * **Docker builder supports SSH**: The Docker builder now supports containers
       with SSH, just set `communicator` to "ssh" [GH-2244]
+  * **File provisioner can download**: The file provisioner can now download
+      files out of the build process. [GH-1909]
   * **New config function: `build_name`**: The name of the currently running
       build. [GH-2232]
   * **New config function: `build_type`**: The type of the currently running
