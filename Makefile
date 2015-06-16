@@ -31,7 +31,13 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
-	go get -d -v -p 2 ./...
+	go get -u github.com/mitchellh/gox
+	go get -u golang.org/x/tools/cmd/stringer
+	go list ./... \
+		| xargs go list -f '{{join .Deps "\n"}}' \
+		| grep -v github.com/mitchellh/packer \
+		| sort -u \
+		| xargs go get -f -u -v
 
 vet:
 	@go tool vet 2>/dev/null ; if [ $$? -eq 3 ]; then \

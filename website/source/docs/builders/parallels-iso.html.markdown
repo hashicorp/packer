@@ -32,7 +32,7 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
   "iso_checksum": "2cbe868812a871242cdcdd8f2fd6feb9",
   "iso_checksum_type": "md5",
-  "parallels_tools_flavor": "lin"
+  "parallels_tools_flavor": "lin",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "ssh_wait_timeout": "30s",
