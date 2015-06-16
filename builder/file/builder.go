@@ -57,14 +57,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			return nil, err
 		}
 
-		target, err := os.OpenFile(b.config.Target, os.O_WRONLY, 0600)
+		// Create will truncate an existing file
+		target, err := os.Create(b.config.Target)
 		defer target.Close()
 		if err != nil {
 			return nil, err
 		}
 
 		ui.Say(fmt.Sprintf("Copying %s to %s", source.Name(), target.Name()))
-		bytes, err := io.Copy(source, target)
+		bytes, err := io.Copy(target, source)
 		if err != nil {
 			return nil, err
 		}
