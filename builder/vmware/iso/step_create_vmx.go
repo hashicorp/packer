@@ -76,7 +76,29 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 				DiskName:   config.DiskName,
 			}
 
-			diskTemplate, err := interpolate.Render(DefaultAdditionalDiskTemplate, &ctx)
+			diskTemplate := DefaultAdditionalDiskTemplate
+			if config.VMXDiskTemplatePath != "" {
+				f, err := os.Open(config.VMXDiskTemplatePath)
+				if err != nil {
+					err := fmt.Errorf("Error reading VMX disk template: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
+				}
+				defer f.Close()
+
+				rawBytes, err := ioutil.ReadAll(f)
+				if err != nil {
+					err := fmt.Errorf("Error reading VMX disk template: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
+				}
+
+				diskTemplate = string(rawBytes)
+			}
+
+			diskContents, err := interpolate.Render(diskTemplate, &ctx)
 			if err != nil {
 				err := fmt.Errorf("Error preparing VMX template for additional disk: %s", err)
 				state.Put("error", err)
@@ -84,7 +106,7 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 				return multistep.ActionHalt
 			}
 
-			vmxTemplate += diskTemplate
+			vmxTemplate += diskContents
 		}
 	}
 

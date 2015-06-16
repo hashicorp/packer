@@ -113,7 +113,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 }
 
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	panic("download not implemented")
+	return fmt.Errorf("WinRM doesn't support download.")
 }
 
 func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {

@@ -36,20 +36,21 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	AdditionalDiskSize []uint   `mapstructure:"disk_additional_size"`
-	DiskName           string   `mapstructure:"vmdk_name"`
-	DiskSize           uint     `mapstructure:"disk_size"`
-	DiskTypeId         string   `mapstructure:"disk_type_id"`
-	FloppyFiles        []string `mapstructure:"floppy_files"`
-	GuestOSType        string   `mapstructure:"guest_os_type"`
-	ISOChecksum        string   `mapstructure:"iso_checksum"`
-	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
-	ISOUrls            []string `mapstructure:"iso_urls"`
-	Version            string   `mapstructure:"version"`
-	VMName             string   `mapstructure:"vm_name"`
-	BootCommand        []string `mapstructure:"boot_command"`
-	SkipCompaction     bool     `mapstructure:"skip_compaction"`
-	VMXTemplatePath    string   `mapstructure:"vmx_template_path"`
+	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
+	DiskName            string   `mapstructure:"vmdk_name"`
+	DiskSize            uint     `mapstructure:"disk_size"`
+	DiskTypeId          string   `mapstructure:"disk_type_id"`
+	FloppyFiles         []string `mapstructure:"floppy_files"`
+	GuestOSType         string   `mapstructure:"guest_os_type"`
+	ISOChecksum         string   `mapstructure:"iso_checksum"`
+	ISOChecksumType     string   `mapstructure:"iso_checksum_type"`
+	ISOUrls             []string `mapstructure:"iso_urls"`
+	Version             string   `mapstructure:"version"`
+	VMName              string   `mapstructure:"vm_name"`
+	BootCommand         []string `mapstructure:"boot_command"`
+	SkipCompaction      bool     `mapstructure:"skip_compaction"`
+	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`

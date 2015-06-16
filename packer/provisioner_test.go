@@ -19,7 +19,7 @@ func TestProvisionHook(t *testing.T) {
 	pB := &MockProvisioner{}
 
 	ui := testUi()
-	var comm Communicator = nil
+	var comm Communicator = new(MockCommunicator)
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
@@ -34,6 +34,24 @@ func TestProvisionHook(t *testing.T) {
 
 	if !pB.ProvCalled {
 		t.Error("provision should be called on pB")
+	}
+}
+
+func TestProvisionHook_nilComm(t *testing.T) {
+	pA := &MockProvisioner{}
+	pB := &MockProvisioner{}
+
+	ui := testUi()
+	var comm Communicator = nil
+	var data interface{} = nil
+
+	hook := &ProvisionHook{
+		Provisioners: []Provisioner{pA, pB},
+	}
+
+	err := hook.Run("foo", ui, comm, data)
+	if err == nil {
+		t.Fatal("should error")
 	}
 }
 
@@ -59,7 +77,7 @@ func TestProvisionHook_cancel(t *testing.T) {
 
 	finished := make(chan struct{})
 	go func() {
-		hook.Run("foo", nil, nil, nil)
+		hook.Run("foo", nil, new(MockCommunicator), nil)
 		close(finished)
 	}()
 
@@ -74,7 +92,7 @@ func TestProvisionHook_cancel(t *testing.T) {
 	<-finished
 
 	// Verify order
-	if order[0] != "cancel" || order[1] != "prov" {
+	if len(order) != 2 || order[0] != "cancel" || order[1] != "prov" {
 		t.Fatalf("bad: %#v", order)
 	}
 }
