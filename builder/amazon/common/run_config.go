@@ -32,12 +32,14 @@ type RunConfig struct {
 	VpcId                    string            `mapstructure:"vpc_id"`
 
 	// Communicator settings
-	Comm         communicator.Config `mapstructure:",squash"`
-	SSHPrivateIp bool                `mapstructure:"ssh_private_ip"`
+	Comm           communicator.Config `mapstructure:",squash"`
+	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
+	SSHPrivateIp   bool                `mapstructure:"ssh_private_ip"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
-	if c.TemporaryKeyPairName == "" {
+	// if we are not given an explicit keypairname, create a temporary one
+	if c.SSHKeyPairName == "" {
 		c.TemporaryKeyPairName = fmt.Sprintf(
 			"packer %s", uuid.TimeOrderedUUID())
 	}

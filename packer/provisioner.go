@@ -38,6 +38,18 @@ type ProvisionHook struct {
 
 // Runs the provisioners in order.
 func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interface{}) error {
+	// Shortcut
+	if len(h.Provisioners) == 0 {
+		return nil
+	}
+
+	if comm == nil {
+		return fmt.Errorf(
+			"No communicator found for provisioners! This is usually because the\n" +
+				"`communicator` config was set to \"none\". If you have any provisioners\n" +
+				"then a communicator is required. Please fix this to continue.")
+	}
+
 	defer func() {
 		h.lock.Lock()
 		defer h.lock.Unlock()

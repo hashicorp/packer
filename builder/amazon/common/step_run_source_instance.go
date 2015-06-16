@@ -245,7 +245,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 	latestInstance, err := WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", *s.instance.InstanceID, err)
+		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

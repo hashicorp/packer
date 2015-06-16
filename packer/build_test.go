@@ -202,7 +202,7 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(HookProvision, nil, nil, 42)
+	dispatchHook.Run(HookProvision, nil, new(MockCommunicator), 42)
 	prov := build.provisioners[0].provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")

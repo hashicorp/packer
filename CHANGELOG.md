@@ -24,6 +24,8 @@ FEATURES:
       to allow access to remote servers such as private git repos. [GH-1066]
   * **Docker builder supports SSH**: The Docker builder now supports containers
       with SSH, just set `communicator` to "ssh" [GH-2244]
+  * **File provisioner can download**: The file provisioner can now download
+      files out of the build process. [GH-1909]
   * **New config function: `build_name`**: The name of the currently running
       build. [GH-2232]
   * **New config function: `build_type`**: The type of the currently running
@@ -39,6 +41,7 @@ IMPROVEMENTS:
   * builder/amazon: Add `force_deregister` option for automatic AMI
       deregistration [GH-2221]
   * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
+  * builder/amazon: Support custom keypairs [GH-1837]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
@@ -55,12 +58,16 @@ IMPROVEMENTS:
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
   * builder/vmware: Support for additional disks [GH-1382]
+  * builder/vmware: Can now customize the template used for adding disks [GH-2254]
   * command/fix: After fixing, the template is validated [GH-2228]
   * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
   * command/push: Push configuration in templates supports variables [GH-1861]
   * post-processor/docker-save: Can be chained [GH-2179]
   * post-processor/docker-tag: Support `force` option [GH-2055]
   * post-processor/docker-tag: Can be chained [GH-2179]
+  * provisioner/puppet-masterless: `working_directory` option [GH-1831]
+  * provisioner/puppet-masterless: `packer_build_name` and
+      `packer_build_type` are default facts. [GH-1878]
 
 BUG FIXES:
 
@@ -121,11 +128,14 @@ BUG FIXES:
   * post-processor/atlas: Fix index out of range panic [GH-1959]
   * post-processor/vagrant-cloud: Fixed failing on response
   * post-processor/vagrant-cloud: Don't delete version on error [GH-2014]
+  * provisioner/chef-client: Fix permissions issues on default dir [GH-2255]
+  * provisioner/chef-client: Node cleanup works now. [GH-2257]
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
   * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
   * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
   * provisioner/shell: single quotes in env vars are escaped [GH-2229]
+  * provisioner/shell: Temporary file is deleted after run [GH-2259]
 
 ## 0.7.5 (December 9, 2014)
 
