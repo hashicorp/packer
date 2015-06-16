@@ -23,9 +23,11 @@ type StepProvision struct {
 func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
 	comm := s.Comm
 	if comm == nil {
-		comm = state.Get("communicator").(packer.Communicator)
+		raw, ok := state.Get("communicator").(packer.Communicator)
+		if ok {
+			comm = raw.(packer.Communicator)
+		}
 	}
-
 	hook := state.Get("hook").(packer.Hook)
 	ui := state.Get("ui").(packer.Ui)
 
