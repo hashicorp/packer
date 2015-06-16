@@ -264,6 +264,8 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 		return "", fmt.Errorf("Error inspecting manifest file: %s", err)
 	} else if !fi.IsDir() {
 		manifestFilename = filepath.Base(manifestFilename)
+	} else {
+		ui.Say("WARNING: manifest_file should be a file. Use manifest_dir for directories")
 	}
 
 	remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
