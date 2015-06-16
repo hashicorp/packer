@@ -1,7 +1,6 @@
 package file
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -39,8 +38,7 @@ func TestNoContent(t *testing.T) {
 	delete(raw, "content")
 	delete(raw, "source")
 	_, warns, _ := NewConfig(raw)
-	fmt.Println(len(warns))
-	fmt.Printf("%#v\n", warns)
+
 	if len(warns) == 0 {
 		t.Error("Expected config warning without any content")
 	}
