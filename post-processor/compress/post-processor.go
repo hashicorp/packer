@@ -54,33 +54,14 @@ func (self *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (
 	gw := gzip.NewWriter(fw)
 	defer gw.Close()
 
-	// Iterate through all of the artifact's files and put them into the
-	// compressed archive using the tar/gzip writers.
-	for _, path := range artifact.Files() {
-		fi, err := os.Stat(path)
-		if err != nil {
-			return nil, false, fmt.Errorf(
-				"Failed stating file: %s", path)
-		}
+	if len(artifact.Files()) == 1 {
 
-		target, _ := os.Readlink(path)
-		header, err := tar.FileInfoHeader(fi, target)
-		if err != nil {
-			return nil, false, fmt.Errorf(
-				"Failed creating archive header: %s", path)
-		}
+		// make a .gz rather than .tar.gz if only one file
 
-		tw := tar.NewWriter(gw)
-		defer tw.Close()
+		files := artifact.Files()
+		path := files[0]
 
-		// Write the header first to the archive. This takes partial data
-		// from the FileInfo that is grabbed by running the stat command.
-		if err := tw.WriteHeader(header); err != nil {
-			return nil, false, fmt.Errorf(
-				"Failed writing archive header: %s", path)
-		}
-
-		// Open the target file for archiving and compressing.
+		// Open the target file for compressing.
 		fr, err := os.Open(path)
 		if err != nil {
 			return nil, false, fmt.Errorf(
@@ -88,10 +69,53 @@ func (self *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (
 		}
 		defer fr.Close()
 
-		if _, err = io.Copy(tw, fr); err != nil {
+		if _, err = io.Copy(gw, fr); err != nil {
 			return nil, false, fmt.Errorf(
 				"Failed copying file to archive: %s", path)
 		}
+
+	} else {
+
+		// Iterate through all of the artifact's files and put them into the
+		// compressed archive using the tar/gzip writers.
+		for _, path := range artifact.Files() {
+			fi, err := os.Stat(path)
+			if err != nil {
+				return nil, false, fmt.Errorf(
+					"Failed stating file: %s", path)
+			}
+
+			target, _ := os.Readlink(path)
+			header, err := tar.FileInfoHeader(fi, target)
+			if err != nil {
+				return nil, false, fmt.Errorf(
+					"Failed creating archive header: %s", path)
+			}
+
+			tw := tar.NewWriter(gw)
+			defer tw.Close()
+
+			// Write the header first to the archive. This takes partial data
+			// from the FileInfo that is grabbed by running the stat command.
+			if err := tw.WriteHeader(header); err != nil {
+				return nil, false, fmt.Errorf(
+					"Failed writing archive header: %s", path)
+			}
+
+			// Open the target file for archiving and compressing.
+			fr, err := os.Open(path)
+			if err != nil {
+				return nil, false, fmt.Errorf(
+					"Failed opening file '%s' to write compressed archive.", path)
+			}
+			defer fr.Close()
+
+			if _, err = io.Copy(tw, fr); err != nil {
+				return nil, false, fmt.Errorf(
+					"Failed copying file to archive: %s", path)
+			}
+		}
+
 	}
 
 	return NewArtifact(artifact.BuilderId(), self.config.OutputPath), false, nil
