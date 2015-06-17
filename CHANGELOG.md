@@ -22,6 +22,8 @@ FEATURES:
       connections. Note that provisioners won't work if this is done. [GH-1591]
   * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
       to allow access to remote servers such as private git repos. [GH-1066]
+  * **OpenStack v3 Identity:** The OpenStack builder now supports the
+      v3 identity API.
   * **Docker builder supports SSH**: The Docker builder now supports containers
       with SSH, just set `communicator` to "ssh" [GH-2244]
   * **File provisioner can download**: The file provisioner can now download
@@ -32,6 +34,12 @@ FEATURES:
       builder. This is useful for provisioners. [GH-2232]
   * **New config function: `template_dir`**: The directory to the template
       being built. This should be used for template-relative paths. [GH-54]
+  * **New provisioner: powershell**: Provision Windows machines
+      with PowerShell scripts. [GH-2243]
+  * **New provisioner: windows-shell**: Provision Windows machines with
+      batch files. [GH-2243]
+  * **New provisioner: windows-restart**: Restart a Windows machines and
+      wait for it to come back online. [GH-2243]
 
 IMPROVEMENTS:
 
