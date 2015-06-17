@@ -86,6 +86,10 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		if c.SSHBastionPort == 0 {
 			c.SSHBastionPort = 22
 		}
+
+		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKey != "" {
+			c.SSHBastionPrivateKey = c.SSHPrivateKey
+		}
 	}
 
 	// Validation
