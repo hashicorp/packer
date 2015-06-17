@@ -133,3 +133,47 @@ func TestProvisionerPrepare_modulePaths(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestProvisionerPrepare_facterFacts(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "facter")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with malformed fact
+	config["facter"] = "fact=stringified"
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should be an error")
+	}
+
+	// Test with a good one
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("error: %s", err)
+	}
+	defer os.RemoveAll(td)
+
+	facts := make(map[string]string)
+	facts["fact_name"] = "fact_value"
+	config["facter"] = facts
+
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Make sure the default facts are present
+	delete(config, "facter")
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if p.config.Facter == nil {
+		t.Fatalf("err: Default facts are not set in the Puppet provisioner!")
+	}
+}
