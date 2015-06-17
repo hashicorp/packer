@@ -88,6 +88,9 @@ configuration is actually required.
   this folder. If the permissions are not correct, use a shell provisioner
   prior to this to configure it properly.
 
+* `client_key` (string) - Path to client key. If not set, this defaults to a file
+  named client.pem in `staging_directory`.
+
 * `validation_client_name` (string) - Name of the validation client. If
   not set, this won't be set in the configuration and the default that Chef
   uses will be used.
@@ -158,3 +161,12 @@ curl -L https://www.opscode.com/chef/install.sh | \
 ```
 
 This command can be customized using the `install_command` configuration.
+
+## Folder Permissions
+
+!> The `chef-client` provisioner will chmod the directory with your Chef
+keys to 777. This is to ensure that Packer can upload and make use of that
+directory. However, once the machine is created, you usually don't
+want to keep these directories with those permissions. To change the
+permissions on the directories, append a shell provisioner after Chef
+to modify them.

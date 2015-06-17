@@ -43,7 +43,7 @@ func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	}
 
 	if h != nil {
-		if err := h.Run(HookProvision, ui, nil, nil); err != nil {
+		if err := h.Run(HookProvision, ui, new(MockCommunicator), nil); err != nil {
 			return nil, err
 		}
 	}

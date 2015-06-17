@@ -2,47 +2,23 @@ package compress
 
 import (
 	"archive/tar"
-	"archive/zip"
-	"compress/flate"
 	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"time"
 
-	"github.com/biogo/hts/bgzf"
-	"github.com/klauspost/pgzip"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
-	"github.com/pierrec/lz4"
-	"gopkg.in/yaml.v2"
 )
-
-type Metadata map[string]Metaitem
-
-type Metaitem struct {
-	CompSize int64  `yaml:"compsize"`
-	OrigSize int64  `yaml:"origsize"`
-	CompType string `yaml:"comptype"`
-	CompDate string `yaml:"compdate"`
-}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	OutputPath        string `mapstructure:"output"`
-	OutputFile        string `mapstructure:"file"`
-	Compression       int    `mapstructure:"compression"`
-	Metadata          bool   `mapstructure:"metadata"`
-	NumCPU            int    `mapstructure:"numcpu"`
-	Format            string `mapstructure:"format"`
-	KeepInputArtifact bool   `mapstructure:"keep_input_artifact"`
-	ctx               *interpolate.Context
+	OutputPath string `mapstructure:"output"`
+
+	ctx interpolate.Context
 }
 
 type PostProcessor struct {
@@ -229,7 +205,7 @@ func (p *PostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
 			return nil, fmt.Errorf("tar error on stat of %s: %s", name, err)
 		}
 
-		target, _ := os.Readlink(name)
+		target, _ := os.Readlink(path)
 		header, err := tar.FileInfoHeader(fi, target)
 		if err != nil {
 			return nil, fmt.Errorf("tar error reading info for %s: %s", name, err)
