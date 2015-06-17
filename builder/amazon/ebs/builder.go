@@ -88,10 +88,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
 		&awscommon.StepKeyPair{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:    b.config.TemporaryKeyPairName,
-			PrivateKeyFile: b.config.RunConfig.Comm.SSHPrivateKey,
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:          b.config.TemporaryKeyPairName,
+			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
+			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupIds: b.config.SecurityGroupIds,
