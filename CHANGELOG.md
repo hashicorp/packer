@@ -22,6 +22,8 @@ FEATURES:
       connections. Note that provisioners won't work if this is done. [GH-1591]
   * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
       to allow access to remote servers such as private git repos. [GH-1066]
+  * **SSH Bastion Hosts:** You can now specify a bastion host for
+      SSH access (works with all builders). [GH-387]
   * **OpenStack v3 Identity:** The OpenStack builder now supports the
       v3 identity API.
   * **Docker builder supports SSH**: The Docker builder now supports containers
