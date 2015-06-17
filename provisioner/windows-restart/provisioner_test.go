@@ -34,7 +34,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Errorf("unexpected remote path: %s", p.config.RestartTimeout)
 	}
 
-	if p.config.RestartCommand != "shutdown /r /c \"packer restart\" /t 5 && net stop winrm" {
+	if p.config.RestartCommand != "powershell \"& {Restart-Computer -force }\"" {
 		t.Errorf("unexpected remote path: %s", p.config.RestartCommand)
 	}
 }
