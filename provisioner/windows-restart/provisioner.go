@@ -3,6 +3,7 @@ package restart
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/masterzen/winrm/winrm"
@@ -33,10 +34,11 @@ type Config struct {
 }
 
 type Provisioner struct {
-	config Config
-	comm   packer.Communicator
-	ui     packer.Ui
-	cancel chan struct{}
+	config     Config
+	comm       packer.Communicator
+	ui         packer.Ui
+	cancel     chan struct{}
+	cancelLock sync.Mutex
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -68,10 +70,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	p.cancelLock.Lock()
+	p.cancel = make(chan struct{})
+	p.cancelLock.Unlock()
+
 	ui.Say("Restarting Machine")
 	p.comm = comm
 	p.ui = ui
-	p.cancel = make(chan struct{})
 
 	var cmd *packer.RemoteCmd
 	command := p.config.RestartCommand
@@ -164,7 +169,12 @@ var waitForCommunicator = func(p *Provisioner) error {
 
 func (p *Provisioner) Cancel() {
 	log.Printf("Received interrupt Cancel()")
-	close(p.cancel)
+
+	p.cancelLock.Lock()
+	defer p.cancelLock.Unlock()
+	if p.cancel != nil {
+		close(p.cancel)
+	}
 }
 
 // retryable will retry the given function over and over until a
