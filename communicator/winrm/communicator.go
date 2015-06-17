@@ -89,7 +89,10 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 	go io.Copy(rc.Stderr, cmd.Stderr)
 
 	cmd.Wait()
-	rc.SetExited(cmd.ExitCode())
+
+	code := cmd.ExitCode()
+	log.Printf("[INFO] command '%s' exited with code: %d", rc.Command, code)
+	rc.SetExited(code)
 }
 
 // Upload implementation of communicator.Communicator interface
