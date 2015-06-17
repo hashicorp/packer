@@ -23,6 +23,11 @@ type Config struct {
 	SSHPty               bool          `mapstructure:"ssh_pty"`
 	SSHTimeout           time.Duration `mapstructure:"ssh_timeout"`
 	SSHHandshakeAttempts int           `mapstructure:"ssh_handshake_attempts"`
+	SSHBastionHost       string        `mapstructure:"ssh_bastion_host"`
+	SSHBastionPort       int           `mapstructure:"ssh_bastion_port"`
+	SSHBastionUsername   string        `mapstructure:"ssh_bastion_username"`
+	SSHBastionPassword   string        `mapstructure:"ssh_bastion_password"`
+	SSHBastionPrivateKey string        `mapstructure:"ssh_bastion_private_key_file"`
 
 	// WinRM
 	WinRMUser     string        `mapstructure:"winrm_username"`
@@ -77,6 +82,12 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		c.SSHHandshakeAttempts = 10
 	}
 
+	if c.SSHBastionHost != "" {
+		if c.SSHBastionPort == 0 {
+			c.SSHBastionPort = 22
+		}
+	}
+
 	// Validation
 	var errs []error
 	if c.SSHUsername == "" {
@@ -90,6 +101,13 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		} else if _, err := SSHFileSigner(c.SSHPrivateKey); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
+		}
+	}
+
+	if c.SSHBastionHost != "" {
+		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKey == "" {
+			errs = append(errs, errors.New(
+				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
 		}
 	}
 
