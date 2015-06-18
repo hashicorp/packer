@@ -46,13 +46,18 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		for {
-			sshHostPort = offset + int(s.HostPortMin)
+			sshHostPort = offset + s.HostPortMin
+			if sshHostPort >= s.HostPortMax {
+				offset = 0
+				sshHostPort = s.HostPortMin
+			}
 			log.Printf("Trying port: %d", sshHostPort)
 			l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", sshHostPort))
 			if err == nil {
 				defer l.Close()
 				break
 			}
+			offset++
 		}
 
 		// Create a forwarded port mapping to the VM
