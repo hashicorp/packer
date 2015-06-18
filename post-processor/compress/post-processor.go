@@ -3,19 +3,14 @@ package compress
 import (
 	"archive/tar"
 	"archive/zip"
-	"compress/flate"
 	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
-	"strings"
-	"time"
 
-	"gopkg.in/yaml.v2"
-
-	"github.com/biogo/hts/bgzf"
 	"github.com/klauspost/pgzip"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
@@ -24,24 +19,13 @@ import (
 	"github.com/pierrec/lz4"
 )
 
-type Metadata map[string]Metaitem
-
-type Metaitem struct {
-	CompSize int64  `yaml:"compsize"`
-	OrigSize int64  `yaml:"origsize"`
-	CompType string `yaml:"comptype"`
-	CompDate string `yaml:"compdate"`
-}
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	OutputPath          string `mapstructure:"output"`
-	OutputFile          string `mapstructure:"file"`
-	Compression         int    `mapstructure:"compression"`
-	Metadata            bool   `mapstructure:"metadata"`
-	NumCPU              int    `mapstructure:"numcpu"`
-	Format              string `mapstructure:"format"`
+	Level               int    `mapstructure:"level"`
 	KeepInputArtifact   bool   `mapstructure:"keep_input_artifact"`
+	Archive             string
+	Algorithm           string
 	ctx                 *interpolate.Context
 }
 
@@ -49,8 +33,52 @@ type PostProcessor struct {
 	config Config
 }
 
+// ErrInvalidCompressionLevel is returned when the compression level passed to
+// gzip is not in the expected range. See compress/flate for details.
+var ErrInvalidCompressionLevel = fmt.Errorf(
+	"Invalid compression level. Expected an integer from -1 to 9.")
+
+var ErrWrongInputCount = fmt.Errorf(
+	"Can only have 1 input file when not using tar/zip")
+
+func detectFromFilename(config *Config) error {
+	re := regexp.MustCompile("^.+?(?:\\.([a-z0-9]+))?\\.([a-z0-9]+)$")
+
+	extensions := map[string]string{
+		"tar": "tar",
+		"zip": "zip",
+		"gz":  "pgzip",
+		"lz4": "lz4",
+	}
+
+	result := re.FindAllString(config.OutputPath, -1)
+
+	// Should we make an archive? E.g. tar or zip?
+	if result[0] == "tar" {
+		config.Archive = "tar"
+	}
+	if result[1] == "zip" || result[1] == "tar" {
+		config.Archive = result[1]
+		// Tar or zip is our final artifact. Bail out.
+		return nil
+	}
+
+	// Should we compress the artifact?
+	algorithm, ok := extensions[result[1]]
+	if ok {
+		config.Algorithm = algorithm
+		// We found our compression algorithm something. Bail out.
+		return nil
+	}
+
+	// We didn't find anything. Default to tar + pgzip
+	config.Algorithm = "pgzip"
+	config.Archive = "tar"
+	return fmt.Errorf("Unable to detect compression algorithm")
+}
+
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	p.config.Compression = -1
+	p.config.Level = -1
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
@@ -73,18 +101,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"output": &p.config.OutputPath,
 	}
 
-	if p.config.Compression > flate.BestCompression {
-		p.config.Compression = flate.BestCompression
+	if p.config.Level > gzip.BestCompression {
+		p.config.Level = gzip.BestCompression
 	}
-	if p.config.Compression == -1 {
-		p.config.Compression = flate.DefaultCompression
+	if p.config.Level == -1 {
+		p.config.Level = gzip.DefaultCompression
 	}
-
-	if p.config.NumCPU < 1 {
-		p.config.NumCPU = runtime.NumCPU()
-	}
-
-	runtime.GOMAXPROCS(p.config.NumCPU)
 
 	for key, ptr := range templates {
 		if *ptr == "" {
@@ -107,123 +129,113 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) fillMetadata(metadata Metadata, files []string) Metadata {
-	// layout shows by example how the reference time should be represented.
-	const layout = "2006-01-02_15-04-05"
-	t := time.Now()
-
-	if !p.config.Metadata {
-		return metadata
-	}
-	for _, f := range files {
-		if fi, err := os.Stat(f); err != nil {
-			continue
-		} else {
-			if i, ok := metadata[filepath.Base(f)]; !ok {
-				metadata[filepath.Base(f)] = Metaitem{CompType: p.config.Format, OrigSize: fi.Size(), CompDate: t.Format(layout)}
-			} else {
-				i.CompSize = fi.Size()
-				i.CompDate = t.Format(layout)
-				metadata[filepath.Base(f)] = i
-			}
-		}
-	}
-	return metadata
-}
-
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	newartifact := &Artifact{Path: p.config.OutputPath}
-	metafile := filepath.Join(p.config.OutputPath, "metadata")
 
-	ui.Say(fmt.Sprintf("[CBEDNARSKI] Creating archive at %s", newartifact.Path))
-	_, err := os.Stat(newartifact.Path)
-	if err == nil {
-		return nil, false, fmt.Errorf("output dir %s must not exists", newartifact.Path)
-	}
-	err = os.MkdirAll(newartifact.Path, 0755)
+	newArtifact := &Artifact{Path: p.config.OutputPath}
+
+	outputFile, err := os.Create(p.config.OutputPath)
 	if err != nil {
-		return nil, false, fmt.Errorf("failed to create output: %s", err)
+		return nil, false, fmt.Errorf(
+			"Unable to create archive %s: %s", p.config.OutputPath, err)
 	}
+	defer outputFile.Close()
 
-	p.config.Format += "tar.gzip"
-	formats := strings.Split(p.config.Format, ".")
-	ui.Say(fmt.Sprintf("[CBEDNARSKI] Formats length %d", len(formats)))
-	if len(p.config.Format) == 0 {
-		ui.Say("[CBEDNARSKI] Formats is empty")
-		formats[0] = "tar.gzip"
-	}
-	files := artifact.Files()
-
-	metadata := make(Metadata, 0)
-	metadata = p.fillMetadata(metadata, files)
-
-	ui.Say(fmt.Sprintf("[CBEDNARSKI] Formats %#v", formats))
-
-	for _, compress := range formats {
-		switch compress {
-		case "tar":
-			files, err = p.cmpTAR(files, filepath.Join(p.config.OutputPath, p.config.OutputFile))
-			metadata = p.fillMetadata(metadata, files)
-		case "zip":
-			files, err = p.cmpZIP(files, filepath.Join(p.config.OutputPath, p.config.OutputFile))
-			metadata = p.fillMetadata(metadata, files)
-		case "pgzip":
-			files, err = p.cmpPGZIP(files, p.config.OutputPath)
-			metadata = p.fillMetadata(metadata, files)
-		case "gzip":
-			files, err = p.cmpGZIP(files, p.config.OutputPath)
-			metadata = p.fillMetadata(metadata, files)
-		case "bgzf":
-			files, err = p.cmpBGZF(files, p.config.OutputPath)
-			metadata = p.fillMetadata(metadata, files)
-		case "lz4":
-			files, err = p.cmpLZ4(files, p.config.OutputPath)
-			metadata = p.fillMetadata(metadata, files)
-		case "e2fs":
-			files, err = p.cmpE2FS(files, filepath.Join(p.config.OutputPath, p.config.OutputFile))
-			metadata = p.fillMetadata(metadata, files)
+	// Setup output interface. If we're using compression, output is a
+	// compression writer. Otherwise it's just a file.
+	var output io.WriteCloser
+	switch p.config.Algorithm {
+	case "lz4":
+		lzwriter := lz4.NewWriter(outputFile)
+		if p.config.Level > gzip.DefaultCompression {
+			lzwriter.Header.HighCompression = true
 		}
+		defer lzwriter.Close()
+		output = lzwriter
+	case "pgzip":
+		output, err = pgzip.NewWriterLevel(outputFile, p.config.Level)
 		if err != nil {
-			return nil, false, fmt.Errorf("Failed to compress: %s", err)
+			return nil, false, ErrInvalidCompressionLevel
 		}
+		defer output.Close()
+	default:
+		output = outputFile
 	}
 
-	if p.config.Metadata {
-		fp, err := os.Create(metafile)
+	//Archive
+	switch p.config.Archive {
+	case "tar":
+		archiveTar(artifact.Files(), output)
+	case "zip":
+		archive := zip.NewWriter(output)
+		defer archive.Close()
+	default:
+		// We have a regular file, so we'll just do an io.Copy
+		if len(artifact.Files()) != 1 {
+			return nil, false, fmt.Errorf(
+				"Can only have 1 input file when not using tar/zip. Found %d "+
+					"files: %v", len(artifact.Files()), artifact.Files())
+		}
+		source, err := os.Open(artifact.Files()[0])
 		if err != nil {
-			return nil, false, err
+			return nil, false, fmt.Errorf(
+				"Failed to open source file %s for reading: %s",
+				artifact.Files()[0], err)
 		}
-		if buf, err := yaml.Marshal(metadata); err != nil {
-			fp.Close()
-			return nil, false, err
-		} else {
-			if _, err = fp.Write(buf); err != nil {
-				fp.Close()
-				return nil, false, err
-			}
-			fp.Close()
-		}
+		defer source.Close()
+		io.Copy(output, source)
 	}
 
-	newartifact.files = append(newartifact.files, files...)
-	if p.config.Metadata {
-		newartifact.files = append(newartifact.files, metafile)
-	}
-
-	return newartifact, p.config.KeepInputArtifact, nil
+	return newArtifact, p.config.KeepInputArtifact, nil
 }
 
-func (p *PostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
-	fw, err := os.Create(dst)
+func archiveTar(files []string, output io.WriteCloser) error {
+	archive := tar.NewWriter(output)
+	defer archive.Close()
+
+	for _, path := range files {
+		file, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("Unable to read file %s: %s", path, err)
+		}
+		defer file.Close()
+
+		fi, err := file.Stat()
+		if err != nil {
+			return fmt.Errorf("Unable to get fileinfo for %s: %s", path, err)
+		}
+
+		target, err := os.Readlink(path)
+		if err != nil {
+			return fmt.Errorf("Failed to readlink for %s: %s", path, err)
+		}
+
+		header, err := tar.FileInfoHeader(fi, target)
+		if err != nil {
+			return fmt.Errorf("Failed to create tar header for %s: %s", path, err)
+		}
+
+		if err := archive.WriteHeader(header); err != nil {
+			return fmt.Errorf("Failed to write tar header for %s: %s", path, err)
+		}
+
+		if _, err := io.Copy(archive, file); err != nil {
+			return fmt.Errorf("Failed to copy %s data to archive: %s", path, err)
+		}
+	}
+	return nil
+}
+
+func (p *PostProcessor) cmpTAR(files []string, target string) ([]string, error) {
+	fw, err := os.Create(target)
 	if err != nil {
-		return nil, fmt.Errorf("tar error creating tar %s: %s", dst, err)
+		return nil, fmt.Errorf("tar error creating tar %s: %s", target, err)
 	}
 	defer fw.Close()
 
 	tw := tar.NewWriter(fw)
 	defer tw.Close()
 
-	for _, name := range src {
+	for _, name := range files {
 		fi, err := os.Stat(name)
 		if err != nil {
 			return nil, fmt.Errorf("tar error on stat of %s: %s", name, err)
@@ -250,18 +262,18 @@ func (p *PostProcessor) cmpTAR(src []string, dst string) ([]string, error) {
 		}
 		fr.Close()
 	}
-	return []string{dst}, nil
+	return []string{target}, nil
 }
 
-func (p *PostProcessor) cmpGZIP(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpGZIP(files []string, target string) ([]string, error) {
 	var res []string
-	for _, name := range src {
-		filename := filepath.Join(dst, filepath.Base(name))
+	for _, name := range files {
+		filename := filepath.Join(target, filepath.Base(name))
 		fw, err := os.Create(filename)
 		if err != nil {
-			return nil, fmt.Errorf("gzip error: %s", err)
+			return nil, fmt.Errorf("gzip error creating archive: %s", err)
 		}
-		cw, err := gzip.NewWriterLevel(fw, p.config.Compression)
+		cw, err := gzip.NewWriterLevel(fw, p.config.Level)
 		if err != nil {
 			fw.Close()
 			return nil, fmt.Errorf("gzip error: %s", err)
@@ -286,15 +298,16 @@ func (p *PostProcessor) cmpGZIP(src []string, dst string) ([]string, error) {
 	return res, nil
 }
 
-func (p *PostProcessor) cmpPGZIP(src []string, dst string) ([]string, error) {
+func (p *PostProcessor) cmpPGZIP(files []string, target string) ([]string, error) {
 	var res []string
-	for _, name := range src {
-		filename := filepath.Join(dst, filepath.Base(name))
+	for _, name := range files {
+		filename := filepath.Join(target, filepath.Base(name))
 		fw, err := os.Create(filename)
 		if err != nil {
 			return nil, fmt.Errorf("pgzip error: %s", err)
 		}
-		cw, err := pgzip.NewWriterLevel(fw, p.config.Compression)
+		cw, err := pgzip.NewWriterLevel(fw, p.config.Level)
+		cw.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
 		if err != nil {
 			fw.Close()
 			return nil, fmt.Errorf("pgzip error: %s", err)
@@ -332,7 +345,7 @@ func (p *PostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
 			fw.Close()
 			return nil, fmt.Errorf("lz4 error: %s", err)
 		}
-		if p.config.Compression > flate.DefaultCompression {
+		if p.config.Level > gzip.DefaultCompression {
 			cw.Header.HighCompression = true
 		}
 		fr, err := os.Open(name)
@@ -353,43 +366,6 @@ func (p *PostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
 		res = append(res, filename)
 	}
 	return res, nil
-}
-
-func (p *PostProcessor) cmpBGZF(src []string, dst string) ([]string, error) {
-	var res []string
-	for _, name := range src {
-		filename := filepath.Join(dst, filepath.Base(name))
-		fw, err := os.Create(filename)
-		if err != nil {
-			return nil, fmt.Errorf("bgzf error: %s", err)
-		}
-
-		cw, err := bgzf.NewWriterLevel(fw, p.config.Compression, runtime.NumCPU())
-		if err != nil {
-			return nil, fmt.Errorf("bgzf error: %s", err)
-		}
-		fr, err := os.Open(name)
-		if err != nil {
-			cw.Close()
-			fw.Close()
-			return nil, fmt.Errorf("bgzf error: %s", err)
-		}
-		if _, err = io.Copy(cw, fr); err != nil {
-			cw.Close()
-			fr.Close()
-			fw.Close()
-			return nil, fmt.Errorf("bgzf error: %s", err)
-		}
-		cw.Close()
-		fr.Close()
-		fw.Close()
-		res = append(res, filename)
-	}
-	return res, nil
-}
-
-func (p *PostProcessor) cmpE2FS(src []string, dst string) ([]string, error) {
-	panic("not implemented")
 }
 
 func (p *PostProcessor) cmpZIP(src []string, dst string) ([]string, error) {
