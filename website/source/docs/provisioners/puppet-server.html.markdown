@@ -48,7 +48,7 @@ required. They are listed below:
   the node on your disk. This defaults to nothing, in which case a client
   private key won't be uploaded.
 
-* `facter` (hash) - Additional Facter facts to make available to the
+* `facter` (object of key/value strings) - Additional Facter facts to make available to the
   Puppet run.
 
 * `options` (string) - Additional command line options to pass
