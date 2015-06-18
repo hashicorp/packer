@@ -42,7 +42,7 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 		// You cannot specify Encrypted if you specify a Snapshot ID
 		if blockDevice.SnapshotId != "" {
 			ebsBlockDevice.SnapshotID = &blockDevice.SnapshotId
-		} else {
+		} else if blockDevice.Encrypted {
 			ebsBlockDevice.Encrypted = &blockDevice.Encrypted
 		}
 
