@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 	"time"
 
 	"github.com/mitchellh/multistep"
+	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
@@ -79,6 +81,24 @@ func (s *StepConnectSSH) Cleanup(multistep.StateBag) {
 }
 
 func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan struct{}) (packer.Communicator, error) {
+	// Determine if we're using a bastion host, and if so, retrieve
+	// that configuration. This configuration doesn't change so we
+	// do this one before entering the retry loop.
+	var bProto, bAddr string
+	var bConf *gossh.ClientConfig
+	if s.Config.SSHBastionHost != "" {
+		// The protocol is hardcoded for now, but may be configurable one day
+		bProto = "tcp"
+		bAddr = fmt.Sprintf(
+			"%s:%d", s.Config.SSHBastionHost, s.Config.SSHBastionPort)
+
+		conf, err := sshBastionConfig(s.Config)
+		if err != nil {
+			return nil, fmt.Errorf("Error configuring bastion: %s", err)
+		}
+		bConf = conf
+	}
+
 	handshakeAttempts := 0
 
 	var comm packer.Communicator
@@ -117,10 +137,18 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			continue
 		}
 
-		address := fmt.Sprintf("%s:%d", host, port)
-
 		// Attempt to connect to SSH port
-		connFunc := ssh.ConnectFunc("tcp", address)
+		var connFunc func() (net.Conn, error)
+		address := fmt.Sprintf("%s:%d", host, port)
+		if bAddr != "" {
+			// We're using a bastion host, so use the bastion connfunc
+			connFunc = ssh.BastionConnectFunc(
+				bProto, bAddr, bConf, "tcp", address)
+		} else {
+			// No bastion host, connect directly
+			connFunc = ssh.ConnectFunc("tcp", address)
+		}
+
 		nc, err := connFunc()
 		if err != nil {
 			log.Printf("[DEBUG] TCP connection to SSH ip/port failed: %s", err)
@@ -163,4 +191,28 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 	}
 
 	return comm, nil
+}
+
+func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
+	auth := make([]gossh.AuthMethod, 0, 2)
+	if config.SSHBastionPassword != "" {
+		auth = append(auth,
+			gossh.Password(config.SSHBastionPassword),
+			gossh.KeyboardInteractive(
+				ssh.PasswordKeyboardInteractive(config.SSHBastionPassword)))
+	}
+
+	if config.SSHBastionPrivateKey != "" {
+		signer, err := commonssh.FileSigner(config.SSHBastionPrivateKey)
+		if err != nil {
+			return nil, err
+		}
+
+		auth = append(auth, gossh.PublicKeys(signer))
+	}
+
+	return &gossh.ClientConfig{
+		User: config.SSHBastionUsername,
+		Auth: auth,
+	}, nil
 }

@@ -2,10 +2,10 @@ package qemu
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
-	"strings"
 )
 
 // This step creates the virtual disk that will be used as the
@@ -16,7 +16,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	name := config.VMName + "." + strings.ToLower(config.Format)
+	name := config.VMName
 	path := filepath.Join(config.OutputDir, name)
 
 	command := []string{
