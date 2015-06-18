@@ -45,6 +45,48 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	return ui, artifact, err
 }
 
+func TestDetectFilename(t *testing.T) {
+	// Test default / fallback with no file extension
+	nakedFilename := Config{OutputPath: "test"}
+	nakedFilename.detectFromFilename()
+	if nakedFilename.Archive != "tar" {
+		t.Error("Expected to find tar archive setting")
+	}
+	if nakedFilename.Algorithm != "pgzip" {
+		t.Error("Expected to find pgzip algorithm setting")
+	}
+
+	// Test .archive
+	zipFilename := Config{OutputPath: "test.zip"}
+	zipFilename.detectFromFilename()
+	if zipFilename.Archive != "zip" {
+		t.Error("Expected to find zip archive setting")
+	}
+	if zipFilename.Algorithm != "" {
+		t.Error("Expected to find empty algorithm setting")
+	}
+
+	// Test .compress
+	lz4Filename := Config{OutputPath: "test.lz4"}
+	lz4Filename.detectFromFilename()
+	if lz4Filename.Archive != "" {
+		t.Error("Expected to find empty archive setting")
+	}
+	if lz4Filename.Algorithm != "lz4" {
+		t.Error("Expected to find lz4 algorithm setting")
+	}
+
+	// Test .archive.compress with some.extra.dots...
+	lotsOfDots := Config{OutputPath: "test.blah.bloo.blee.tar.lz4"}
+	lotsOfDots.detectFromFilename()
+	if lotsOfDots.Archive != "tar" {
+		t.Error("Expected to find tar archive setting")
+	}
+	if lotsOfDots.Algorithm != "lz4" {
+		t.Error("Expected to find lz4 algorithm setting")
+	}
+}
+
 func TestSimpleCompress(t *testing.T) {
 	if os.Getenv(env.TestEnvVar) == "" {
 		t.Skip(fmt.Sprintf(
@@ -167,13 +209,18 @@ func TestCompressOptions(t *testing.T) {
 		defer artifact.Destroy()
 	}
 
-	tpl, err := template.Parse(strings.NewReader(zipTestCase))
+	tpl, err := template.Parse(strings.NewReader(optionsTestCase))
 	if err != nil {
 		t.Fatalf("Unable to parse test config: %s", err)
 	}
 
 	compressor := PostProcessor{}
 	compressor.Configure(tpl.PostProcessors[0][0].Config)
+
+	if compressor.config.CompressionLevel != 9 {
+		t.Errorf("Expected compression_level 9, got %d", compressor.config.CompressionLevel)
+	}
+
 	artifactOut, _, err := compressor.PostProcess(ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to archive artifact: %s", err)
@@ -227,8 +274,7 @@ const optionsTestCase = `
         {
             "type": "compress",
             "output": "package.gz",
-            "level": 9,
-            "parallel": false
+            "compression_level": 9
         }
     ]
 }
