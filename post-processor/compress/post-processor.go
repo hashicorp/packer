@@ -60,6 +60,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	errs := new(packer.MultiError)
 
+	// If there is no explicit number of Go threads to use, then set it
+	if os.Getenv("GOMAXPROCS") == "" {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
+
 	if p.config.OutputPath == "" {
 		p.config.OutputPath = "packer_{{.BuildName}}_{{.Provider}}"
 	}
@@ -124,11 +129,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	var output io.WriteCloser
 	switch p.config.Algorithm {
 	case "lz4":
-		ui.Say(fmt.Sprintf("Preparing lz4 compression for %s", target))
+		ui.Say(fmt.Sprintf("Using lz4 compression with %d cores for %s",
+			runtime.GOMAXPROCS(-1), target))
 		output, err = makeLZ4Writer(outputFile, p.config.CompressionLevel)
 		defer output.Close()
 	case "pgzip":
-		ui.Say(fmt.Sprintf("Preparing gzip compression for %s", target))
+		ui.Say(fmt.Sprintf("Using pgzip compression with %d cores for %s",
+			runtime.GOMAXPROCS(-1), target))
 		output, err = makePgzipWriter(outputFile, p.config.CompressionLevel)
 		defer output.Close()
 	default:
@@ -137,13 +144,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	compression := p.config.Algorithm
 	if compression == "" {
-		compression = "no"
+		compression = "no compression"
 	}
 
 	// Build an archive, if we're supposed to do that.
 	switch p.config.Archive {
 	case "tar":
-		ui.Say(fmt.Sprintf("Tarring %s with %s compression", target, compression))
+		ui.Say(fmt.Sprintf("Tarring %s with %s", target, compression))
 		err = createTarArchive(artifact.Files(), output)
 		if err != nil {
 			return nil, keep, fmt.Errorf("Error creating tar: %s", err)
@@ -155,7 +162,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, keep, fmt.Errorf("Error creating zip: %s", err)
 		}
 	default:
-		ui.Say(fmt.Sprintf("Copying %s with %s compression", target, compression))
 		// Filename indicates no tarball (just compress) so we'll do an io.Copy
 		// into our compressor.
 		if len(artifact.Files()) != 1 {
@@ -163,18 +169,20 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				"Can only have 1 input file when not using tar/zip. Found %d "+
 					"files: %v", len(artifact.Files()), artifact.Files())
 		}
+		archiveFile := artifact.Files()[0]
+		ui.Say(fmt.Sprintf("Archiving %s with %s", archiveFile, compression))
 
-		source, err := os.Open(artifact.Files()[0])
+		source, err := os.Open(archiveFile)
 		if err != nil {
 			return nil, keep, fmt.Errorf(
 				"Failed to open source file %s for reading: %s",
-				artifact.Files()[0], err)
+				archiveFile, err)
 		}
 		defer source.Close()
 
 		if _, err = io.Copy(output, source); err != nil {
 			return nil, keep, fmt.Errorf("Failed to compress %s: %s",
-				artifact.Files()[0], err)
+				archiveFile, err)
 		}
 	}
 
