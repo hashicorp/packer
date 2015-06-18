@@ -38,8 +38,8 @@ func TestBlockDevice(t *testing.T) {
 		},
 		{
 			Config: &BlockDevice{
-				DeviceName:          "/dev/sdb",
-				VolumeSize:          8,
+				DeviceName: "/dev/sdb",
+				VolumeSize: 8,
 			},
 
 			Result: &ec2.BlockDeviceMapping{

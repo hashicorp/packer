@@ -35,6 +35,7 @@ type Config struct {
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Tags                 []string          `mapstructure:"tags"`
+	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile

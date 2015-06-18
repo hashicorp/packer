@@ -3,7 +3,6 @@ package qemu
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -18,13 +17,13 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName,
-		strings.ToLower(config.Format)))
-	name := config.VMName + "." + strings.ToLower(config.Format)
+	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s", config.VMName))
+	name := config.VMName
 
 	command := []string{
 		"convert",
 		"-f", config.Format,
+		"-O", config.Format,
 		isoPath,
 		path,
 	}
