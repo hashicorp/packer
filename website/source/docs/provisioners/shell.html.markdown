@@ -13,6 +13,10 @@ The shell Packer provisioner provisions machines built by Packer using shell scr
 Shell provisioning is the easiest way to get software installed and configured
 on a machine.
 
+-> **Building Windows images?** You probably want to use the
+[PowerShell](/docs/provisioners/powershell.html) or
+[Windows Shell](/docs/provisioners/windows-shell.html) provisioners.
+
 ## Basic Example
 
 The example below is fully functional.

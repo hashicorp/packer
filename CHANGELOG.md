@@ -22,6 +22,10 @@ FEATURES:
       connections. Note that provisioners won't work if this is done. [GH-1591]
   * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
       to allow access to remote servers such as private git repos. [GH-1066]
+  * **SSH Bastion Hosts:** You can now specify a bastion host for
+      SSH access (works with all builders). [GH-387]
+  * **OpenStack v3 Identity:** The OpenStack builder now supports the
+      v3 identity API.
   * **Docker builder supports SSH**: The Docker builder now supports containers
       with SSH, just set `communicator` to "ssh" [GH-2244]
   * **File provisioner can download**: The file provisioner can now download
@@ -32,6 +36,12 @@ FEATURES:
       builder. This is useful for provisioners. [GH-2232]
   * **New config function: `template_dir`**: The directory to the template
       being built. This should be used for template-relative paths. [GH-54]
+  * **New provisioner: powershell**: Provision Windows machines
+      with PowerShell scripts. [GH-2243]
+  * **New provisioner: windows-shell**: Provision Windows machines with
+      batch files. [GH-2243]
+  * **New provisioner: windows-restart**: Restart a Windows machines and
+      wait for it to come back online. [GH-2243]
 
 IMPROVEMENTS:
 
@@ -44,6 +54,7 @@ IMPROVEMENTS:
   * builder/amazon: Support custom keypairs [GH-1837]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
+  * builder/googlecompute: Option to use internal IP for connections. [GH-2152]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
@@ -65,6 +76,8 @@ IMPROVEMENTS:
   * post-processor/docker-save: Can be chained [GH-2179]
   * post-processor/docker-tag: Support `force` option [GH-2055]
   * post-processor/docker-tag: Can be chained [GH-2179]
+  * post-processor/vsphere: Make more fields optional, support empty
+      resource pools. [GH-1868]
   * provisioner/puppet-masterless: `working_directory` option [GH-1831]
   * provisioner/puppet-masterless: `packer_build_name` and
       `packer_build_type` are default facts. [GH-1878]
@@ -88,6 +101,7 @@ BUG FIXES:
   * builder/amazon: Improved retry logic around waiting for instances. [GH-1764]
   * builder/amazon: Fix issues with creating Block Devices. [GH-2195]
   * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
+  * builder/amazon/chroot: Only unmount path if it is mounted [GH-2054]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/amazon/instance: Use `--region` flag for bundle upload command. [GH-1931]
   * builder/digitalocean: Wait for droplet to unlock before changing state,
@@ -104,6 +118,7 @@ BUG FIXES:
       to retrieve the SSH IP from. [GH-2220]
   * builder/qemu: Add `disk_discard` option [GH-2120]
   * builder/qemu: Use proper SSH port, not hardcoded to 22. [GH-2236]
+  * builder/qemu: Find unused SSH port if SSH port is taken. [GH-2032]
   * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
@@ -112,6 +127,7 @@ BUG FIXES:
       ".iso" extension didn't work. [GH-1839]
   * builder/virtualbox: Output dir is verified at runtime, not template
       validation time. [GH-2233]
+  * builder/virtualbox: Find unused SSH port if SSH port is taken. [GH-2032]
   * builder/vmware: Add 100ms delay between keystrokes to avoid subtle
       timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
