@@ -118,6 +118,7 @@ BUG FIXES:
       to retrieve the SSH IP from. [GH-2220]
   * builder/qemu: Add `disk_discard` option [GH-2120]
   * builder/qemu: Use proper SSH port, not hardcoded to 22. [GH-2236]
+  * builder/qemu: Find unused SSH port if SSH port is taken. [GH-2032]
   * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
   * builder/virtualbox: Remove the floppy controller in addition to the
@@ -126,6 +127,7 @@ BUG FIXES:
       ".iso" extension didn't work. [GH-1839]
   * builder/virtualbox: Output dir is verified at runtime, not template
       validation time. [GH-2233]
+  * builder/virtualbox: Find unused SSH port if SSH port is taken. [GH-2032]
   * builder/vmware: Add 100ms delay between keystrokes to avoid subtle
       timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
