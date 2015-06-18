@@ -255,6 +255,25 @@ func prepend(head string, tail []string) []string {
 	return tmp
 }
 
+func (d *Parallels9Driver) SetDefaultConfiguration(vmName string) error {
+	commands := make([][]string, 7)
+	commands[0] = []string{"set", vmName, "--cpus", "1"}
+	commands[1] = []string{"set", vmName, "--memsize", "512"}
+	commands[2] = []string{"set", vmName, "--startup-view", "same"}
+	commands[3] = []string{"set", vmName, "--on-shutdown", "close"}
+	commands[4] = []string{"set", vmName, "--on-window-close", "keep-running"}
+	commands[5] = []string{"set", vmName, "--auto-share-camera", "off"}
+	commands[6] = []string{"set", vmName, "--smart-guard", "off"}
+
+	for _, command := range commands {
+		err := d.Prlctl(command...)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (d *Parallels9Driver) Mac(vmName string) (string, error) {
 	var stdout bytes.Buffer
 
