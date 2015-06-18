@@ -139,7 +139,7 @@ func TestZipArchive(t *testing.T) {
 		defer artifact.Destroy()
 	}
 
-	tpl, err := template.Parse(strings.NewReader(tarTestCase))
+	tpl, err := template.Parse(strings.NewReader(zipTestCase))
 	if err != nil {
 		t.Fatalf("Unable to parse test config: %s", err)
 	}
