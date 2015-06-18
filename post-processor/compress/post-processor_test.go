@@ -83,12 +83,152 @@ func TestSimpleCompress(t *testing.T) {
 	}
 }
 
+func TestZipArchive(t *testing.T) {
+	if os.Getenv(env.TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf(
+			"Acceptance tests skipped unless env '%s' set", env.TestEnvVar))
+	}
+
+	ui, artifact, err := setup(t)
+	if err != nil {
+		t.Fatalf("Error bootstrapping test: %s", err)
+	}
+	if artifact != nil {
+		defer artifact.Destroy()
+	}
+
+	tpl, err := template.Parse(strings.NewReader(tarTestCase))
+	if err != nil {
+		t.Fatalf("Unable to parse test config: %s", err)
+	}
+
+	compressor := PostProcessor{}
+	compressor.Configure(tpl.PostProcessors[0][0].Config)
+	artifactOut, _, err := compressor.PostProcess(ui, artifact)
+	if err != nil {
+		t.Fatalf("Failed to archive artifact: %s", err)
+	}
+	// Cleanup after the test completes
+	defer artifactOut.Destroy()
+
+	// Verify things look good
+	_, err = os.Stat("package.zip")
+	if err != nil {
+		t.Errorf("Unable to read archive: %s", err)
+	}
+}
+
+func TestTarArchive(t *testing.T) {
+	if os.Getenv(env.TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf(
+			"Acceptance tests skipped unless env '%s' set", env.TestEnvVar))
+	}
+
+	ui, artifact, err := setup(t)
+	if err != nil {
+		t.Fatalf("Error bootstrapping test: %s", err)
+	}
+	if artifact != nil {
+		defer artifact.Destroy()
+	}
+
+	tpl, err := template.Parse(strings.NewReader(tarTestCase))
+	if err != nil {
+		t.Fatalf("Unable to parse test config: %s", err)
+	}
+
+	compressor := PostProcessor{}
+	compressor.Configure(tpl.PostProcessors[0][0].Config)
+	artifactOut, _, err := compressor.PostProcess(ui, artifact)
+	if err != nil {
+		t.Fatalf("Failed to archive artifact: %s", err)
+	}
+	// Cleanup after the test completes
+	defer artifactOut.Destroy()
+
+	// Verify things look good
+	_, err = os.Stat("package.tar")
+	if err != nil {
+		t.Errorf("Unable to read archive: %s", err)
+	}
+}
+
+func TestCompressOptions(t *testing.T) {
+	if os.Getenv(env.TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf(
+			"Acceptance tests skipped unless env '%s' set", env.TestEnvVar))
+	}
+
+	ui, artifact, err := setup(t)
+	if err != nil {
+		t.Fatalf("Error bootstrapping test: %s", err)
+	}
+	if artifact != nil {
+		defer artifact.Destroy()
+	}
+
+	tpl, err := template.Parse(strings.NewReader(zipTestCase))
+	if err != nil {
+		t.Fatalf("Unable to parse test config: %s", err)
+	}
+
+	compressor := PostProcessor{}
+	compressor.Configure(tpl.PostProcessors[0][0].Config)
+	artifactOut, _, err := compressor.PostProcess(ui, artifact)
+	if err != nil {
+		t.Fatalf("Failed to archive artifact: %s", err)
+	}
+	// Cleanup after the test completes
+	defer artifactOut.Destroy()
+
+	// Verify things look good
+	_, err = os.Stat("package.gz")
+	if err != nil {
+		t.Errorf("Unable to read archive: %s", err)
+	}
+}
+
 const simpleTestCase = `
 {
     "post-processors": [
         {
             "type": "compress",
             "output": "package.tar.gz"
+        }
+    ]
+}
+`
+
+const zipTestCase = `
+{
+    "post-processors": [
+        {
+            "type": "compress",
+            "output": "package.zip"
+        }
+    ]
+}
+`
+
+const tarTestCase = `
+{
+    "post-processors": [
+        {
+            "type": "compress",
+            "output": "package.tar"
+        }
+    ]
+}
+`
+
+const optionsTestCase = `
+{
+    "post-processors": [
+        {
+            "type": "compress",
+            "output": "package.gz",
+            "level": 9,
+            "parallel": false
         }
     ]
 }
