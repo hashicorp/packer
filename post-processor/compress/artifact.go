@@ -29,7 +29,7 @@ func (*Artifact) Id() string {
 }
 
 func (a *Artifact) Files() []string {
-	return a.files
+	return []string{a.Path}
 }
 
 func (a *Artifact) String() string {
