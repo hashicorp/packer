@@ -21,13 +21,17 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	OutputPath          string `mapstructure:"output"`
-	CompressionLevel    int    `mapstructure:"compression_level"`
-	KeepInputArtifact   bool   `mapstructure:"keep_input_artifact"`
-	Archive             string
-	Algorithm           string
-	UsingDefault        bool
-	ctx                 *interpolate.Context
+
+	// Fields from config file
+	OutputPath        string `mapstructure:"output"`
+	CompressionLevel  int    `mapstructure:"compression_level"`
+	KeepInputArtifact bool   `mapstructure:"keep_input_artifact"`
+
+	// Derived fields
+	Archive   string
+	Algorithm string
+
+	ctx *interpolate.Context
 }
 
 type PostProcessor struct {
@@ -54,8 +58,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		},
 	}, raws...)
 
-	fmt.Printf("CompressionLevel: %d\n", p.config.CompressionLevel)
-
 	errs := new(packer.MultiError)
 
 	if p.config.OutputPath == "" {
@@ -81,7 +83,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.CompressionLevel = pgzip.DefaultCompression
 	}
 
-	fmt.Printf("CompressionLevel: %d\n", p.config.CompressionLevel)
 	for key, ptr := range templates {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
