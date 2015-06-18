@@ -30,7 +30,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.RemotePath != DefaultRemotePath {
+	if p.config.RemotePath == "" {
 		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
 	}
 }
