@@ -54,6 +54,7 @@ IMPROVEMENTS:
   * builder/amazon: Support custom keypairs [GH-1837]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
+  * builder/googlecompute: Option to use internal IP for connections. [GH-2152]
   * builder/parallels: Support Parallels Desktop 11 [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
