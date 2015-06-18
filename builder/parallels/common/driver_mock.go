@@ -37,6 +37,9 @@ type DriverMock struct {
 	SendKeyScanCodesCalls [][]string
 	SendKeyScanCodesErrs  []error
 
+	SetDefaultConfigurationCalled bool
+	SetDefaultConfigurationError  error
+
 	ToolsIsoPathCalled bool
 	ToolsIsoPathFlavor string
 	ToolsIsoPathResult string
@@ -105,6 +108,11 @@ func (d *DriverMock) SendKeyScanCodes(name string, scancodes ...string) error {
 		return d.SendKeyScanCodesErrs[len(d.SendKeyScanCodesCalls)-1]
 	}
 	return nil
+}
+
+func (d *DriverMock) SetDefaultConfiguration(name string) error {
+	d.SetDefaultConfigurationCalled = true
+	return d.SetDefaultConfigurationError
 }
 
 func (d *DriverMock) Mac(name string) (string, error) {
