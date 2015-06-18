@@ -46,55 +46,6 @@ var (
 	filenamePattern = regexp.MustCompile(`(?:\.([a-z0-9]+))`)
 )
 
-func (config *Config) detectFromFilename() {
-
-	extensions := map[string]string{
-		"tar": "tar",
-		"zip": "zip",
-		"gz":  "pgzip",
-		"lz4": "lz4",
-	}
-
-	result := filenamePattern.FindAllStringSubmatch(config.OutputPath, -1)
-
-	if len(result) == 0 {
-		config.Algorithm = "pgzip"
-		config.Archive = "tar"
-		return
-	}
-
-	// Should we make an archive? E.g. tar or zip?
-	var nextToLastItem string
-	if len(result) == 1 {
-		nextToLastItem = ""
-	} else {
-		nextToLastItem = result[len(result)-2][1]
-	}
-
-	lastItem := result[len(result)-1][1]
-	if nextToLastItem == "tar" {
-		config.Archive = "tar"
-	}
-	if lastItem == "zip" || lastItem == "tar" {
-		config.Archive = lastItem
-		// Tar or zip is our final artifact. Bail out.
-		return
-	}
-
-	// Should we compress the artifact?
-	algorithm, ok := extensions[lastItem]
-	if ok {
-		config.Algorithm = algorithm
-		// We found our compression algorithm. Bail out.
-		return
-	}
-
-	// We didn't find anything. Default to tar + pgzip
-	config.Algorithm = "pgzip"
-	config.Archive = "tar"
-	return
-}
-
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate: true,
@@ -157,6 +108,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 
 	target := p.config.OutputPath
+	keep := p.config.KeepInputArtifact
 	newArtifact := &Artifact{Path: target}
 
 	outputFile, err := os.Create(target)
@@ -172,20 +124,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	switch p.config.Algorithm {
 	case "lz4":
 		ui.Say(fmt.Sprintf("Preparing lz4 compression for %s", target))
-		lzwriter := lz4.NewWriter(outputFile)
-		if p.config.CompressionLevel > gzip.DefaultCompression {
-			lzwriter.Header.HighCompression = true
-		}
-		defer lzwriter.Close()
-		output = lzwriter
+		output, err = makeLZ4Writer(outputFile, p.config.CompressionLevel)
+		defer output.Close()
 	case "pgzip":
 		ui.Say(fmt.Sprintf("Preparing gzip compression for %s", target))
-		gzipWriter, err := pgzip.NewWriterLevel(outputFile, p.config.CompressionLevel)
-		if err != nil {
-			return nil, false, ErrInvalidCompressionLevel
-		}
-		gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
-		output = gzipWriter
+		output, err = makePgzipWriter(outputFile, p.config.CompressionLevel)
 		defer output.Close()
 	default:
 		output = outputFile
@@ -199,34 +142,112 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Build an archive, if we're supposed to do that.
 	switch p.config.Archive {
 	case "tar":
-		ui.Say(fmt.Sprintf("Taring %s with %s compression", target, compression))
-		createTarArchive(artifact.Files(), output)
+		ui.Say(fmt.Sprintf("Tarring %s with %s compression", target, compression))
+		err = createTarArchive(artifact.Files(), output)
+		if err != nil {
+			return nil, keep, fmt.Errorf("Error creating tar: %s", err)
+		}
 	case "zip":
 		ui.Say(fmt.Sprintf("Zipping %s", target))
-		archive := zip.NewWriter(output)
-		defer archive.Close()
+		err = createZipArchive(artifact.Files(), output)
+		if err != nil {
+			return nil, keep, fmt.Errorf("Error creating zip: %s", err)
+		}
 	default:
 		ui.Say(fmt.Sprintf("Copying %s with %s compression", target, compression))
 		// Filename indicates no tarball (just compress) so we'll do an io.Copy
 		// into our compressor.
 		if len(artifact.Files()) != 1 {
-			return nil, false, fmt.Errorf(
+			return nil, keep, fmt.Errorf(
 				"Can only have 1 input file when not using tar/zip. Found %d "+
 					"files: %v", len(artifact.Files()), artifact.Files())
 		}
+
 		source, err := os.Open(artifact.Files()[0])
 		if err != nil {
-			return nil, false, fmt.Errorf(
+			return nil, keep, fmt.Errorf(
 				"Failed to open source file %s for reading: %s",
 				artifact.Files()[0], err)
 		}
 		defer source.Close()
-		io.Copy(output, source)
+
+		if _, err = io.Copy(output, source); err != nil {
+			return nil, keep, fmt.Errorf("Failed to compress %s: %s",
+				artifact.Files()[0], err)
+		}
 	}
 
 	ui.Say(fmt.Sprintf("Archive %s completed", target))
 
-	return newArtifact, p.config.KeepInputArtifact, nil
+	return newArtifact, keep, nil
+}
+
+func (config *Config) detectFromFilename() {
+
+	extensions := map[string]string{
+		"tar": "tar",
+		"zip": "zip",
+		"gz":  "pgzip",
+		"lz4": "lz4",
+	}
+
+	result := filenamePattern.FindAllStringSubmatch(config.OutputPath, -1)
+
+	// No dots. Bail out with defaults.
+	if len(result) == 0 {
+		config.Algorithm = "pgzip"
+		config.Archive = "tar"
+		return
+	}
+
+	// Parse the last two .groups, if they're there
+	lastItem := result[len(result)-1][1]
+	var nextToLastItem string
+	if len(result) == 1 {
+		nextToLastItem = ""
+	} else {
+		nextToLastItem = result[len(result)-2][1]
+	}
+
+	// Should we make an archive? E.g. tar or zip?
+	if nextToLastItem == "tar" {
+		config.Archive = "tar"
+	}
+	if lastItem == "zip" || lastItem == "tar" {
+		config.Archive = lastItem
+		// Tar or zip is our final artifact. Bail out.
+		return
+	}
+
+	// Should we compress the artifact?
+	algorithm, ok := extensions[lastItem]
+	if ok {
+		config.Algorithm = algorithm
+		// We found our compression algorithm. Bail out.
+		return
+	}
+
+	// We didn't match a known compression format. Default to tar + pgzip
+	config.Algorithm = "pgzip"
+	config.Archive = "tar"
+	return
+}
+
+func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
+	lzwriter := lz4.NewWriter(output)
+	if compressionLevel > gzip.DefaultCompression {
+		lzwriter.Header.HighCompression = true
+	}
+	return lzwriter, nil
+}
+
+func makePgzipWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
+	gzipWriter, err := pgzip.NewWriterLevel(output, compressionLevel)
+	if err != nil {
+		return nil, ErrInvalidCompressionLevel
+	}
+	gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
+	return gzipWriter, nil
 }
 
 func createTarArchive(files []string, output io.WriteCloser) error {
@@ -245,12 +266,7 @@ func createTarArchive(files []string, output io.WriteCloser) error {
 			return fmt.Errorf("Unable to get fileinfo for %s: %s", path, err)
 		}
 
-		target, err := os.Readlink(path)
-		if err != nil {
-			return fmt.Errorf("Failed to readlink for %s: %s", path, err)
-		}
-
-		header, err := tar.FileInfoHeader(fi, target)
+		header, err := tar.FileInfoHeader(fi, path)
 		if err != nil {
 			return fmt.Errorf("Failed to create tar header for %s: %s", path, err)
 		}
@@ -267,139 +283,27 @@ func createTarArchive(files []string, output io.WriteCloser) error {
 }
 
 func createZipArchive(files []string, output io.WriteCloser) error {
-	return fmt.Errorf("Not implemented")
-}
+	archive := zip.NewWriter(output)
+	defer archive.Close()
 
-func (p *PostProcessor) cmpGZIP(files []string, target string) ([]string, error) {
-	var res []string
-	for _, name := range files {
-		filename := filepath.Join(target, filepath.Base(name))
-		fw, err := os.Create(filename)
+	for _, path := range files {
+		path = filepath.ToSlash(path)
+
+		source, err := os.Open(path)
 		if err != nil {
-			return nil, fmt.Errorf("gzip error creating archive: %s", err)
+			return fmt.Errorf("Unable to read file %s: %s", path, err)
 		}
-		cw, err := gzip.NewWriterLevel(fw, p.config.CompressionLevel)
+		defer source.Close()
+
+		target, err := archive.Create(path)
 		if err != nil {
-			fw.Close()
-			return nil, fmt.Errorf("gzip error: %s", err)
+			return fmt.Errorf("Failed to add zip header for %s: %s", path, err)
 		}
-		fr, err := os.Open(name)
+
+		_, err = io.Copy(target, source)
 		if err != nil {
-			cw.Close()
-			fw.Close()
-			return nil, fmt.Errorf("gzip error: %s", err)
+			return fmt.Errorf("Failed to copy %s data to archive: %s", path, err)
 		}
-		if _, err = io.Copy(cw, fr); err != nil {
-			cw.Close()
-			fr.Close()
-			fw.Close()
-			return nil, fmt.Errorf("gzip error: %s", err)
-		}
-		cw.Close()
-		fr.Close()
-		fw.Close()
-		res = append(res, filename)
 	}
-	return res, nil
-}
-
-func (p *PostProcessor) cmpPGZIP(files []string, target string) ([]string, error) {
-	var res []string
-	for _, name := range files {
-		filename := filepath.Join(target, filepath.Base(name))
-		fw, err := os.Create(filename)
-		if err != nil {
-			return nil, fmt.Errorf("pgzip error: %s", err)
-		}
-		cw, err := pgzip.NewWriterLevel(fw, p.config.CompressionLevel)
-
-		if err != nil {
-			fw.Close()
-			return nil, fmt.Errorf("pgzip error: %s", err)
-		}
-		fr, err := os.Open(name)
-		if err != nil {
-			cw.Close()
-			fw.Close()
-			return nil, fmt.Errorf("pgzip error: %s", err)
-		}
-		if _, err = io.Copy(cw, fr); err != nil {
-			cw.Close()
-			fr.Close()
-			fw.Close()
-			return nil, fmt.Errorf("pgzip error: %s", err)
-		}
-		cw.Close()
-		fr.Close()
-		fw.Close()
-		res = append(res, filename)
-	}
-	return res, nil
-}
-
-func (p *PostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
-	var res []string
-	for _, name := range src {
-		filename := filepath.Join(dst, filepath.Base(name))
-		fw, err := os.Create(filename)
-		if err != nil {
-			return nil, fmt.Errorf("lz4 error: %s", err)
-		}
-		cw := lz4.NewWriter(fw)
-		if err != nil {
-			fw.Close()
-			return nil, fmt.Errorf("lz4 error: %s", err)
-		}
-		if p.config.CompressionLevel > gzip.DefaultCompression {
-			cw.Header.HighCompression = true
-		}
-		fr, err := os.Open(name)
-		if err != nil {
-			cw.Close()
-			fw.Close()
-			return nil, fmt.Errorf("lz4 error: %s", err)
-		}
-		if _, err = io.Copy(cw, fr); err != nil {
-			cw.Close()
-			fr.Close()
-			fw.Close()
-			return nil, fmt.Errorf("lz4 error: %s", err)
-		}
-		cw.Close()
-		fr.Close()
-		fw.Close()
-		res = append(res, filename)
-	}
-	return res, nil
-}
-
-func (p *PostProcessor) cmpZIP(src []string, dst string) ([]string, error) {
-	fw, err := os.Create(dst)
-	if err != nil {
-		return nil, fmt.Errorf("zip error: %s", err)
-	}
-	defer fw.Close()
-
-	zw := zip.NewWriter(fw)
-	defer zw.Close()
-
-	for _, name := range src {
-		header, err := zw.Create(name)
-		if err != nil {
-			return nil, fmt.Errorf("zip error: %s", err)
-		}
-
-		fr, err := os.Open(name)
-		if err != nil {
-			return nil, fmt.Errorf("zip error: %s", err)
-		}
-
-		if _, err = io.Copy(header, fr); err != nil {
-			fr.Close()
-			return nil, fmt.Errorf("zip error: %s", err)
-		}
-		fr.Close()
-	}
-	return []string{dst}, nil
-
+	return nil
 }
