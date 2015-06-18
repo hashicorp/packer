@@ -23,37 +23,33 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	name := config.VMName
 
-	commands := make([][]string, 8)
-	commands[0] = []string{
+	command := []string{
 		"create", name,
 		"--distribution", config.GuestOSType,
 		"--dst", config.OutputDir,
 		"--vmtype", "vm",
 		"--no-hdd",
 	}
-	commands[1] = []string{"set", name, "--cpus", "1"}
-	commands[2] = []string{"set", name, "--memsize", "512"}
-	commands[3] = []string{"set", name, "--startup-view", "same"}
-	commands[4] = []string{"set", name, "--on-shutdown", "close"}
-	commands[5] = []string{"set", name, "--on-window-close", "keep-running"}
-	commands[6] = []string{"set", name, "--auto-share-camera", "off"}
-	commands[7] = []string{"set", name, "--smart-guard", "off"}
 
 	ui.Say("Creating virtual machine...")
-	for _, command := range commands {
-		err := driver.Prlctl(command...)
-		ui.Say(fmt.Sprintf("Executing: prlctl %s", command))
-		if err != nil {
-			err := fmt.Errorf("Error creating VM: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	if err := driver.Prlctl(command...); err != nil {
+		err := fmt.Errorf("Error creating VM: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		// Set the VM name property on the first command
-		if s.vmName == "" {
-			s.vmName = name
-		}
+	ui.Say("Applying default settings...")
+	if err := driver.SetDefaultConfiguration(name); err != nil {
+		err := fmt.Errorf("Error VM configuration: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Set the VM name property on the first command
+	if s.vmName == "" {
+		s.vmName = name
 	}
 
 	// Set the final name in the state bag so others can use it
