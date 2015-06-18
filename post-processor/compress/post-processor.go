@@ -22,27 +22,31 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	OutputPath          string `mapstructure:"output"`
-	Level               int    `mapstructure:"level"`
+	CompressionLevel    int    `mapstructure:"compression_level"`
 	KeepInputArtifact   bool   `mapstructure:"keep_input_artifact"`
 	Archive             string
 	Algorithm           string
+	UsingDefault        bool
 	ctx                 *interpolate.Context
 }
 
 type PostProcessor struct {
-	config Config
+	config *Config
 }
 
-// ErrInvalidCompressionLevel is returned when the compression level passed to
-// gzip is not in the expected range. See compress/flate for details.
-var ErrInvalidCompressionLevel = fmt.Errorf(
-	"Invalid compression level. Expected an integer from -1 to 9.")
+var (
+	// ErrInvalidCompressionLevel is returned when the compression level passed
+	// to gzip is not in the expected range. See compress/flate for details.
+	ErrInvalidCompressionLevel = fmt.Errorf(
+		"Invalid compression level. Expected an integer from -1 to 9.")
 
-var ErrWrongInputCount = fmt.Errorf(
-	"Can only have 1 input file when not using tar/zip")
+	ErrWrongInputCount = fmt.Errorf(
+		"Can only have 1 input file when not using tar/zip")
 
-func detectFromFilename(config *Config) error {
-	re := regexp.MustCompile("^.+?(?:\\.([a-z0-9]+))?\\.([a-z0-9]+)$")
+	filenamePattern = regexp.MustCompile(`(?:\.([a-z0-9]+))`)
+)
+
+func (config *Config) detectFromFilename() {
 
 	extensions := map[string]string{
 		"tar": "tar",
@@ -51,40 +55,55 @@ func detectFromFilename(config *Config) error {
 		"lz4": "lz4",
 	}
 
-	result := re.FindAllString(config.OutputPath, -1)
+	result := filenamePattern.FindAllStringSubmatch(config.OutputPath, -1)
+
+	if len(result) == 0 {
+		config.Algorithm = "pgzip"
+		config.Archive = "tar"
+		return
+	}
 
 	// Should we make an archive? E.g. tar or zip?
-	if result[0] == "tar" {
+	var nextToLastItem string
+	if len(result) == 1 {
+		nextToLastItem = ""
+	} else {
+		nextToLastItem = result[len(result)-2][1]
+	}
+
+	lastItem := result[len(result)-1][1]
+	if nextToLastItem == "tar" {
 		config.Archive = "tar"
 	}
-	if result[1] == "zip" || result[1] == "tar" {
-		config.Archive = result[1]
+	if lastItem == "zip" || lastItem == "tar" {
+		config.Archive = lastItem
 		// Tar or zip is our final artifact. Bail out.
-		return nil
+		return
 	}
 
 	// Should we compress the artifact?
-	algorithm, ok := extensions[result[1]]
+	algorithm, ok := extensions[lastItem]
 	if ok {
 		config.Algorithm = algorithm
-		// We found our compression algorithm something. Bail out.
-		return nil
+		// We found our compression algorithm. Bail out.
+		return
 	}
 
 	// We didn't find anything. Default to tar + pgzip
 	config.Algorithm = "pgzip"
 	config.Archive = "tar"
-	return fmt.Errorf("Unable to detect compression algorithm")
+	return
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	p.config.Level = -1
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{},
 		},
 	}, raws...)
+
+	fmt.Printf("CompressionLevel: %d\n", p.config.CompressionLevel)
 
 	errs := new(packer.MultiError)
 
@@ -101,13 +120,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"output": &p.config.OutputPath,
 	}
 
-	if p.config.Level > gzip.BestCompression {
-		p.config.Level = gzip.BestCompression
+	if p.config.CompressionLevel > pgzip.BestCompression {
+		p.config.CompressionLevel = pgzip.BestCompression
 	}
-	if p.config.Level == -1 {
-		p.config.Level = gzip.DefaultCompression
+	// Technically 0 means "don't compress" but I don't know how to
+	// differentiate between "user entered zero" and "user entered nothing".
+	// Also, why bother creating a compressed file with zero compression?
+	if p.config.CompressionLevel == -1 || p.config.CompressionLevel == 0 {
+		p.config.CompressionLevel = pgzip.DefaultCompression
 	}
 
+	fmt.Printf("CompressionLevel: %d\n", p.config.CompressionLevel)
 	for key, ptr := range templates {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
@@ -121,6 +144,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
+	p.config.detectFromFilename()
+
 	if len(errs.Errors) > 0 {
 		return errs
 	}
@@ -131,12 +156,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 
-	newArtifact := &Artifact{Path: p.config.OutputPath}
+	target := p.config.OutputPath
+	newArtifact := &Artifact{Path: target}
 
-	outputFile, err := os.Create(p.config.OutputPath)
+	outputFile, err := os.Create(target)
 	if err != nil {
 		return nil, false, fmt.Errorf(
-			"Unable to create archive %s: %s", p.config.OutputPath, err)
+			"Unable to create archive %s: %s", target, err)
 	}
 	defer outputFile.Close()
 
@@ -145,31 +171,44 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	var output io.WriteCloser
 	switch p.config.Algorithm {
 	case "lz4":
+		ui.Say(fmt.Sprintf("Preparing lz4 compression for %s", target))
 		lzwriter := lz4.NewWriter(outputFile)
-		if p.config.Level > gzip.DefaultCompression {
+		if p.config.CompressionLevel > gzip.DefaultCompression {
 			lzwriter.Header.HighCompression = true
 		}
 		defer lzwriter.Close()
 		output = lzwriter
 	case "pgzip":
-		output, err = pgzip.NewWriterLevel(outputFile, p.config.Level)
+		ui.Say(fmt.Sprintf("Preparing gzip compression for %s", target))
+		gzipWriter, err := pgzip.NewWriterLevel(outputFile, p.config.CompressionLevel)
 		if err != nil {
 			return nil, false, ErrInvalidCompressionLevel
 		}
+		gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
+		output = gzipWriter
 		defer output.Close()
 	default:
 		output = outputFile
 	}
 
-	//Archive
+	compression := p.config.Algorithm
+	if compression == "" {
+		compression = "no"
+	}
+
+	// Build an archive, if we're supposed to do that.
 	switch p.config.Archive {
 	case "tar":
-		archiveTar(artifact.Files(), output)
+		ui.Say(fmt.Sprintf("Taring %s with %s compression", target, compression))
+		createTarArchive(artifact.Files(), output)
 	case "zip":
+		ui.Say(fmt.Sprintf("Zipping %s", target))
 		archive := zip.NewWriter(output)
 		defer archive.Close()
 	default:
-		// We have a regular file, so we'll just do an io.Copy
+		ui.Say(fmt.Sprintf("Copying %s with %s compression", target, compression))
+		// Filename indicates no tarball (just compress) so we'll do an io.Copy
+		// into our compressor.
 		if len(artifact.Files()) != 1 {
 			return nil, false, fmt.Errorf(
 				"Can only have 1 input file when not using tar/zip. Found %d "+
@@ -185,10 +224,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		io.Copy(output, source)
 	}
 
+	ui.Say(fmt.Sprintf("Archive %s completed", target))
+
 	return newArtifact, p.config.KeepInputArtifact, nil
 }
 
-func archiveTar(files []string, output io.WriteCloser) error {
+func createTarArchive(files []string, output io.WriteCloser) error {
 	archive := tar.NewWriter(output)
 	defer archive.Close()
 
@@ -225,44 +266,8 @@ func archiveTar(files []string, output io.WriteCloser) error {
 	return nil
 }
 
-func (p *PostProcessor) cmpTAR(files []string, target string) ([]string, error) {
-	fw, err := os.Create(target)
-	if err != nil {
-		return nil, fmt.Errorf("tar error creating tar %s: %s", target, err)
-	}
-	defer fw.Close()
-
-	tw := tar.NewWriter(fw)
-	defer tw.Close()
-
-	for _, name := range files {
-		fi, err := os.Stat(name)
-		if err != nil {
-			return nil, fmt.Errorf("tar error on stat of %s: %s", name, err)
-		}
-
-		target, _ := os.Readlink(name)
-		header, err := tar.FileInfoHeader(fi, target)
-		if err != nil {
-			return nil, fmt.Errorf("tar error reading info for %s: %s", name, err)
-		}
-
-		if err = tw.WriteHeader(header); err != nil {
-			return nil, fmt.Errorf("tar error writing header for %s: %s", name, err)
-		}
-
-		fr, err := os.Open(name)
-		if err != nil {
-			return nil, fmt.Errorf("tar error opening file %s: %s", name, err)
-		}
-
-		if _, err = io.Copy(tw, fr); err != nil {
-			fr.Close()
-			return nil, fmt.Errorf("tar error copying contents of %s: %s", name, err)
-		}
-		fr.Close()
-	}
-	return []string{target}, nil
+func createZipArchive(files []string, output io.WriteCloser) error {
+	return fmt.Errorf("Not implemented")
 }
 
 func (p *PostProcessor) cmpGZIP(files []string, target string) ([]string, error) {
@@ -273,7 +278,7 @@ func (p *PostProcessor) cmpGZIP(files []string, target string) ([]string, error)
 		if err != nil {
 			return nil, fmt.Errorf("gzip error creating archive: %s", err)
 		}
-		cw, err := gzip.NewWriterLevel(fw, p.config.Level)
+		cw, err := gzip.NewWriterLevel(fw, p.config.CompressionLevel)
 		if err != nil {
 			fw.Close()
 			return nil, fmt.Errorf("gzip error: %s", err)
@@ -306,8 +311,8 @@ func (p *PostProcessor) cmpPGZIP(files []string, target string) ([]string, error
 		if err != nil {
 			return nil, fmt.Errorf("pgzip error: %s", err)
 		}
-		cw, err := pgzip.NewWriterLevel(fw, p.config.Level)
-		cw.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
+		cw, err := pgzip.NewWriterLevel(fw, p.config.CompressionLevel)
+
 		if err != nil {
 			fw.Close()
 			return nil, fmt.Errorf("pgzip error: %s", err)
@@ -345,7 +350,7 @@ func (p *PostProcessor) cmpLZ4(src []string, dst string) ([]string, error) {
 			fw.Close()
 			return nil, fmt.Errorf("lz4 error: %s", err)
 		}
-		if p.config.Level > gzip.DefaultCompression {
+		if p.config.CompressionLevel > gzip.DefaultCompression {
 			cw.Header.HighCompression = true
 		}
 		fr, err := os.Open(name)
