@@ -153,6 +153,8 @@ BUG FIXES:
   * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
   * provisioner/shell: single quotes in env vars are escaped [GH-2229]
   * provisioner/shell: Temporary file is deleted after run [GH-2259]
+  * provisioner/shell: Randomize default script name to avoid strange
+      race issues from Windows. [GH-2270]
 
 ## 0.7.5 (December 9, 2014)
 
