@@ -81,6 +81,7 @@ IMPROVEMENTS:
   * provisioner/puppet-masterless: `working_directory` option [GH-1831]
   * provisioner/puppet-masterless: `packer_build_name` and
       `packer_build_type` are default facts. [GH-1878]
+  * provisioner/puppet-server: `ignore_exit_codes` option added [GH-2280]
 
 BUG FIXES:
 
