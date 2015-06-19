@@ -23,17 +23,14 @@ type StepKeyPair struct {
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	if s.PrivateKeyFile != "" {
-		if s.KeyPairName != "" {
-			s.keyName = s.KeyPairName // need to get from config
-		}
-
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
 		if err != nil {
-			state.Put("error", fmt.Errorf("Error loading configured private key file: %s", err))
+			state.Put("error", fmt.Errorf(
+				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", s.keyName)
+		state.Put("keyPair", s.KeyPairName)
 		state.Put("privateKey", string(privateKeyBytes))
 
 		return multistep.ActionContinue
@@ -43,7 +40,8 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
-	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{KeyName: &s.KeyPairName})
+	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
+		KeyName: &s.TemporaryKeyPairName})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
