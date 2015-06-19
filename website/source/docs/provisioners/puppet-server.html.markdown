@@ -51,6 +51,9 @@ required. They are listed below:
 * `facter` (object of key/value strings) - Additional Facter facts to make available to the
   Puppet run.
 
+* `ignore_exit_codes` (bool) - If true, Packer will never consider the
+  provisioner a failure.
+
 * `options` (string) - Additional command line options to pass
   to `puppet agent` when Puppet is ran.
 
