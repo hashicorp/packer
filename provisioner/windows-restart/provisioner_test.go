@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"testing"
 	"time"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -256,7 +257,7 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.comm = comm
 	p.ui = ui
-	retryableSleep = 10 * time.Millisecond
+	retryableSleep = 5 * time.Second
 	p.cancel = make(chan struct{})
 	var err error
 
@@ -273,6 +274,7 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	}()
 
 	go func() {
+		time.Sleep(10 * time.Millisecond)
 		p.Cancel()
 		waitDone <- true
 	}()
