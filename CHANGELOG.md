@@ -42,6 +42,9 @@ FEATURES:
       batch files. [GH-2243]
   * **New provisioner: windows-restart**: Restart a Windows machines and
       wait for it to come back online. [GH-2243]
+  * **Compress post-processor supports multiple algorithms:** The compress
+      post-processor now supports lz4 compression and compresses gzip in
+      parallel for much faster throughput.
 
 IMPROVEMENTS:
 
