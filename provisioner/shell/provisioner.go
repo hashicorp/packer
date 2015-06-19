@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -18,8 +19,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
-
-const DefaultRemotePath = "/tmp/script.sh"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -102,7 +101,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = DefaultRemotePath
+		p.config.RemotePath = fmt.Sprintf(
+			"/tmp/script_%d.sh", rand.Intn(9999))
 	}
 
 	if p.config.Scripts == nil {
