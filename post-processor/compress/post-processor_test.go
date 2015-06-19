@@ -1,7 +1,9 @@
 package compress
 
 import (
+	"compress/gzip"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -53,6 +55,8 @@ func TestDetectFilename(t *testing.T) {
 		t.Error("Expected to find lz4 algorithm setting")
 	}
 }
+
+const expectedFileContents = "Hello world!"
 
 func TestSimpleCompress(t *testing.T) {
 	const config = `
@@ -137,10 +141,13 @@ func TestCompressOptions(t *testing.T) {
 	artifact := testArchive(t, config)
 	defer artifact.Destroy()
 
-	// Verify things look good
-	_, err := os.Stat("package.gz")
-	if err != nil {
-		t.Errorf("Unable to read archive: %s", err)
+	filename := "package.gz"
+	archive, _ := os.Open(filename)
+	gzipReader, _ := gzip.NewReader(archive)
+	data, _ := ioutil.ReadAll(gzipReader)
+
+	if string(data) != expectedFileContents {
+		t.Errorf("Expected:\n%s\nFound:\n%s\n", expectedFileContents, data)
 	}
 }
 
