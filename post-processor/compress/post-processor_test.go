@@ -54,19 +54,18 @@ func TestDetectFilename(t *testing.T) {
 	}
 }
 
-const simpleTestCase = `
-{
-    "post-processors": [
-        {
-            "type": "compress",
-            "output": "package.tar.gz"
-        }
-    ]
-}
-`
-
 func TestSimpleCompress(t *testing.T) {
-	artifact := testArchive(t, simpleTestCase)
+	const config = `
+	{
+	    "post-processors": [
+	        {
+	            "type": "compress",
+	            "output": "package.tar.gz"
+	        }
+	    ]
+	}
+	`
+	artifact := testArchive(t, config)
 	defer artifact.Destroy()
 
 	fi, err := os.Stat("package.tar.gz")
@@ -78,19 +77,19 @@ func TestSimpleCompress(t *testing.T) {
 	}
 }
 
-const zipTestCase = `
-{
-    "post-processors": [
-        {
-            "type": "compress",
-            "output": "package.zip"
-        }
-    ]
-}
-`
-
 func TestZipArchive(t *testing.T) {
-	artifact := testArchive(t, zipTestCase)
+	const config = `
+	{
+	    "post-processors": [
+	        {
+	            "type": "compress",
+	            "output": "package.zip"
+	        }
+	    ]
+	}
+	`
+
+	artifact := testArchive(t, config)
 	defer artifact.Destroy()
 
 	// Verify things look good
@@ -100,19 +99,19 @@ func TestZipArchive(t *testing.T) {
 	}
 }
 
-const tarTestCase = `
-{
-    "post-processors": [
-        {
-            "type": "compress",
-            "output": "package.tar"
-        }
-    ]
-}
-`
-
 func TestTarArchive(t *testing.T) {
-	artifact := testArchive(t, tarTestCase)
+	const config = `
+	{
+	    "post-processors": [
+	        {
+	            "type": "compress",
+	            "output": "package.tar"
+	        }
+	    ]
+	}
+	`
+
+	artifact := testArchive(t, config)
 	defer artifact.Destroy()
 
 	// Verify things look good
@@ -122,20 +121,20 @@ func TestTarArchive(t *testing.T) {
 	}
 }
 
-const optionsTestCase = `
-{
-    "post-processors": [
-        {
-            "type": "compress",
-            "output": "package.gz",
-            "compression_level": 9
-        }
-    ]
-}
-`
-
 func TestCompressOptions(t *testing.T) {
-	artifact := testArchive(t, optionsTestCase)
+	const config = `
+	{
+	    "post-processors": [
+	        {
+	            "type": "compress",
+	            "output": "package.gz",
+	            "compression_level": 9
+	        }
+	    ]
+	}
+	`
+
+	artifact := testArchive(t, config)
 	defer artifact.Destroy()
 
 	// Verify things look good
