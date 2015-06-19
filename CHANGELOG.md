@@ -144,6 +144,7 @@ BUG FIXES:
   * post-processor/atlas: Fix index out of range panic [GH-1959]
   * post-processor/vagrant-cloud: Fixed failing on response
   * post-processor/vagrant-cloud: Don't delete version on error [GH-2014]
+  * post-processor/vagrant-cloud: Retry failed uploads a few times
   * provisioner/chef-client: Fix permissions issues on default dir [GH-2255]
   * provisioner/chef-client: Node cleanup works now. [GH-2257]
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
