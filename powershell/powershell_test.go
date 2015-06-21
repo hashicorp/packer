@@ -1,5 +1,3 @@
-
-
 package powershell
 
 import (
@@ -7,14 +5,18 @@ import (
 	"testing"
 )
 
-func TestOutputScriptBlock(t *testing.T) {
-
-	ps, err := powershell.Command()
+func TestOutput(t *testing.T) {
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output("")
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	trueOutput, err := powershell.OutputScriptBlock("$True")
+	if cmdOut != "" {
+		t.Fatalf("output '%v' is not ''", cmdOut)
+	}
+
+	trueOutput, err := ps.Output("$True")
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -23,7 +25,7 @@ func TestOutputScriptBlock(t *testing.T) {
 		t.Fatalf("output '%v' is not 'True'", trueOutput)
 	}
 
-	falseOutput, err := powershell.OutputScriptBlock("$False")
+	falseOutput, err := ps.Output("$False")
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -33,40 +35,18 @@ func TestOutputScriptBlock(t *testing.T) {
 	}
 }
 
-func TestRunScriptBlock(t *testing.T) {
-	powershell, err := powershell.Command()
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	err = powershell.RunScriptBlock("$True")
-}
-
-func TestVersion(t *testing.T) {
-	powershell, err := powershell.Command()
-	version, err := powershell.Version();
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if (version != 4) {
-		t.Fatalf("expected version 4")
-	}
-}
-
 func TestRunFile(t *testing.T) {
-	powershell, err := powershell.Command()
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
 	var blockBuffer bytes.Buffer
 	blockBuffer.WriteString("param([string]$a, [string]$b, [int]$x, [int]$y) $n = $x + $y; Write-Host $a, $b, $n")
 
-	err = powershell.Run(blockBuffer.String(), "a", "b", "5", "10")
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(blockBuffer.String(), "a", "b", "5", "10")
 
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
+	if cmdOut != "a b 15" {
+		t.Fatalf("output '%v' is not 'a b 15'", cmdOut)
+	}
 }
