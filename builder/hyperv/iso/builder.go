@@ -11,13 +11,14 @@ import (
 	"github.com/mitchellh/multistep"
 	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
 	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
 	powershell "github.com/mitchellh/packer/powershell"
 	"github.com/mitchellh/packer/powershell/hyperv"
+	"github.com/mitchellh/packer/template/interpolate"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -40,11 +41,18 @@ const (
 // Builder implements packer.Builder and builds the actual Hyperv
 // images.
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
-type config struct {
+type Config struct {
+	common.PackerConfig         `mapstructure:",squash"`
+	hypervcommon.FloppyConfig   `mapstructure:",squash"`
+	hypervcommon.OutputConfig   `mapstructure:",squash"`
+	hypervcommon.SSHConfig      `mapstructure:",squash"`
+	hypervcommon.ShutdownConfig `mapstructure:",squash"`
+	hypervcommon.RunConfig      `mapstructure:",squash"`
+
 	// The size, in megabytes, of the hard disk to create for the VM.
 	// By default, this is 130048 (about 127 GB).
 	DiskSize uint `mapstructure:"disk_size"`
@@ -87,11 +95,6 @@ type config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
-	common.PackerConfig         `mapstructure:",squash"`
-	hypervcommon.OutputConfig   `mapstructure:",squash"`
-	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.ShutdownConfig `mapstructure:",squash"`
-
 	SwitchName string `mapstructure:"switch_name"`
 
 	Communicator string `mapstructure:"communicator"`
@@ -102,32 +105,28 @@ type config struct {
 
 	SSHWaitTimeout time.Duration
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 // Prepare processes the build configuration parameters.
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-
-	md, err := common.DecodeConfig(&b.config, raws...)
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate: true,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{},
+		},
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "PackerUserVars", b.config.PackerUserVars))
-
-	b.config.tpl.UserVars = b.config.PackerUserVars
 
 	// Accumulate any errors and warnings
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(b.config.tpl, &b.config.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(b.config.tpl)...)
-
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	warnings := make([]string, 0)
 
 	err = b.checkDiskSize()
@@ -144,6 +143,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VMName = fmt.Sprintf("pvm_%s", uuid.New())
 	}
 
+	log.Println(fmt.Sprintf("%s: %v", "VMName", b.config.VMName))
+
 	if b.config.SwitchName == "" {
 		// no switch name, try to get one attached to a online network adapter
 		onlineSwitchName, err := hyperv.GetExternalOnlineVirtualSwitch()
@@ -155,6 +156,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
+	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
 
 	if b.config.Communicator == "" {
 		b.config.Communicator = "ssh"
@@ -165,22 +167,47 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	// Errors
-	templates := map[string]*string{
-		"iso_url":     &b.config.RawSingleISOUrl
-	}
+	log.Println(fmt.Sprintf("%s: %v", "Communicator", b.config.Communicator))
 
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Error processing %s: %s", n, err))
+	// Errors
+	if b.config.ISOChecksumType == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("The iso_checksum_type must be specified."))
+	} else {
+		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
+		if b.config.ISOChecksumType != "none" {
+			if b.config.ISOChecksum == "" {
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
+			} else {
+				b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
+			}
+
+			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
+				errs = packer.MultiErrorAppend(
+					errs,
+					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
+			}
 		}
 	}
 
-	log.Println(fmt.Sprintf("%s: %v", "VMName", b.config.VMName))
-	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
-	log.Println(fmt.Sprintf("%s: %v", "Communicator", b.config.Communicator))
+	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("One of iso_url or iso_urls must be specified."))
+	} else if b.config.RawSingleISOUrl != "" && len(b.config.ISOUrls) > 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
+	} else if b.config.RawSingleISOUrl != "" {
+		b.config.ISOUrls = []string{b.config.RawSingleISOUrl}
+	}
+
+	for i, url := range b.config.ISOUrls {
+		b.config.ISOUrls[i], err = common.DownloadableURL(url)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
+		}
+	}
 
 	if b.config.RawSingleISOUrl == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("iso_url: The option can't be missed and a path must be specified."))
@@ -190,12 +217,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	log.Println(fmt.Sprintf("%s: %v", "RawSingleISOUrl", b.config.RawSingleISOUrl))
 
-	b.config.SSHWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
-
 	// Warnings
 	warning := b.checkHostAvailableMemory()
 	if warning != "" {
 		warnings = appendWarnings(warnings, warning)
+	}
+
+	if b.config.ISOChecksumType == "none" {
+		warnings = append(warnings,
+			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
+				"a checksum is highly recommended.")
 	}
 
 	if b.config.ShutdownCommand == "" {
@@ -254,7 +285,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		&hypervcommon.StepMountSecondaryDvdImages{},
 
-
 		&hypervcommon.StepStartVm{
 			Reason: "OS installation",
 		},
@@ -277,7 +307,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      hypervcommon.CommHost,
 			SSHConfig: hypervcommon.SSHConfigFunc(b.config.SSHConfig),
-			SSHPort:   hypervcommon.SSHPort,
 		},
 
 		// provision requires communicator to be setup
