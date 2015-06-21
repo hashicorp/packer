@@ -121,6 +121,23 @@ func (d *Parallels9Driver) DeviceAddCdRom(name string, image string) (string, er
 	return device_name, nil
 }
 
+func (d *Parallels9Driver) DiskPath(name string) (string, error) {
+	out, err := exec.Command(d.PrlctlPath, "list", "-i", name).Output()
+	if err != nil {
+		return "", err
+	}
+
+	hddRe := regexp.MustCompile("hdd0.* image='(.*)' type=*")
+	matches := hddRe.FindStringSubmatch(string(out))
+	if matches == nil {
+		return "", fmt.Errorf(
+			"Could not determine hdd image path in the output:\n%s", string(out))
+	}
+
+	hdd_path := matches[1]
+	return hdd_path, nil
+}
+
 func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 	var stdout bytes.Buffer
 
