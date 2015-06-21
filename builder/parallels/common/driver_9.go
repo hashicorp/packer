@@ -98,6 +98,33 @@ func getAppPath(bundleId string) (string, error) {
 	return pathOutput, nil
 }
 
+func (d *Parallels9Driver) CompactDisk(diskPath string) error {
+	prlDiskToolPath, err := exec.LookPath("prl_disk_tool")
+	if err != nil {
+		return err
+	}
+
+	// Analyze the disk content and remove unused blocks
+	command := []string{
+		"compact",
+		"--hdd", diskPath,
+	}
+	if err := exec.Command(prlDiskToolPath, command...).Run(); err != nil {
+		return err
+	}
+
+	// Remove null blocks
+	command = []string{
+		"compact", "--buildmap",
+		"--hdd", diskPath,
+	}
+	if err := exec.Command(prlDiskToolPath, command...).Run(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *Parallels9Driver) DeviceAddCdRom(name string, image string) (string, error) {
 	command := []string{
 		"set", name,
