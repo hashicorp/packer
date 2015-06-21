@@ -11,6 +11,11 @@ type DriverMock struct {
 	DeviceAddCdRomResult string
 	DeviceAddCdRomErr    error
 
+	DiskPathCalled bool
+	DiskPathName   string
+	DiskPathResult string
+	DiskPathErr    error
+
 	ImportCalled  bool
 	ImportName    string
 	ImportSrcPath string
@@ -59,6 +64,12 @@ func (d *DriverMock) DeviceAddCdRom(name string, image string) (string, error) {
 	d.DeviceAddCdRomName = name
 	d.DeviceAddCdRomImage = image
 	return d.DeviceAddCdRomResult, d.DeviceAddCdRomErr
+}
+
+func (d *DriverMock) DiskPath(name string) (string, error) {
+	d.DiskPathCalled = true
+	d.DiskPathName = name
+	return d.DiskPathResult, d.DiskPathErr
 }
 
 func (d *DriverMock) Import(name, srcPath, dstPath string, reassignMac bool) error {
