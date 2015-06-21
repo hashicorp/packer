@@ -18,6 +18,9 @@ type Driver interface {
 	// Adds new CD/DVD drive to the VM and returns name of this device
 	DeviceAddCdRom(string, string) (string, error)
 
+	// Get path to the first virtual disk image
+	DiskPath(string) (string, error)
+
 	// Import a VM
 	Import(string, string, string, bool) error
 
