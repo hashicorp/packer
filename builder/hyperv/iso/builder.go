@@ -96,6 +96,8 @@ type Config struct {
 	VMName string `mapstructure:"vm_name"`
 
 	SwitchName string `mapstructure:"switch_name"`
+	Cpu        uint   `mapstructure:"cpu"`
+	Generation uint   `mapstructure:"generation"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -153,6 +155,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		} else {
 			b.config.SwitchName = onlineSwitchName
 		}
+	}
+
+	if b.config.Cpu < 1 {
+		b.config.Cpu = 1
+	}
+
+	if b.config.Generation != 2 {
+		b.config.Generation = 1
 	}
 
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
@@ -269,6 +279,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 			RamSizeMB:  b.config.RamSizeMB,
 			DiskSize:   b.config.DiskSize,
+			Generation: b.config.Generation,
+			Cpu:        b.config.Cpu,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
@@ -283,19 +295,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Reason: "OS installation",
 		},
 
-		// wait for the vm to be powered off
-		&hypervcommon.StepWaitForPowerOff{},
-
-		// remove the integration services dvd drive
-		// after we power down
-		&hypervcommon.StepUnmountSecondaryDvdImages{},
-
-		//
-		&hypervcommon.StepStartVm{
-			Reason:       "provisioning",
-			StartUpDelay: 60,
-		},
-
 		// configure the communicator ssh, winrm
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
@@ -306,6 +305,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// provision requires communicator to be setup
 		&common.StepProvision{},
 
+		// remove the integration services dvd drive
+		// after we power down
+		&hypervcommon.StepUnmountSecondaryDvdImages{},
 		&hypervcommon.StepUnmountFloppyDrive{},
 		&hypervcommon.StepUnmountDvdDrive{},
 
@@ -313,6 +315,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
+
+		// wait for the vm to be powered off
+		&hypervcommon.StepWaitForPowerOff{},
 
 		&hypervcommon.StepExportVm{
 			OutputDir: b.config.OutputDir,
