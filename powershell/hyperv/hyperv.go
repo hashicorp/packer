@@ -74,17 +74,29 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, ram string, diskSize string, switchName string) error {
+func CreateVirtualMachine(vmName string, path string, ram string, diskSize string, switchName string, generation string) error {
 
 	var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]generation)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
-New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, path, ram, diskSize, switchName)
+	err := ps.Run(script, vmName, path, ram, diskSize, switchName, generation)
+	return err
+}
+
+func SetVirtualMachineCpu(vmName string, cpu string) error {
+
+	var script = `
+param([string]$vmName, [int]cpu)
+Set-VMProcessor -VMName $vmName –Count $cpu
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, cpu)
 	return err
 }
 
