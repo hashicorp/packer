@@ -5,7 +5,6 @@
 package iso
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -18,13 +17,12 @@ import (
 	"github.com/mitchellh/packer/powershell/hyperv"
 	"github.com/mitchellh/packer/template/interpolate"
 	"log"
-	"os"
 	"strings"
 	"time"
 )
 
 const (
-	DefaultDiskSize = 127 * 1024   // 127GB
+	DefaultDiskSize = 40000        // ~40GB
 	MinDiskSize     = 10 * 1024    // 10GB
 	MaxDiskSize     = 65536 * 1024 // 64TB
 
@@ -71,6 +69,7 @@ type Config struct {
 	FloppyFiles []string `mapstructure:"floppy_files"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
+
 	// The checksum for the OS ISO file. Because ISO files are so large,
 	// this is required and Packer will verify it prior to booting a virtual
 	// machine with the ISO attached. The type of the checksum is specified
@@ -91,6 +90,7 @@ type Config struct {
 	// same file (same checksum). By default this is empty and iso_url is
 	// used. Only one of iso_url or iso_urls can be specified.
 	ISOUrls []string `mapstructure:"iso_urls"`
+
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
@@ -140,7 +140,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.VMName == "" {
-		b.config.VMName = fmt.Sprintf("pvm_%s", uuid.New())
+		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
 	log.Println(fmt.Sprintf("%s: %v", "VMName", b.config.VMName))
@@ -149,7 +149,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		// no switch name, try to get one attached to a online network adapter
 		onlineSwitchName, err := hyperv.GetExternalOnlineVirtualSwitch()
 		if onlineSwitchName == "" || err != nil {
-			b.config.SwitchName = fmt.Sprintf("pis_%s", uuid.New())
+			b.config.SwitchName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 		} else {
 			b.config.SwitchName = onlineSwitchName
 		}
@@ -209,20 +209,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.RawSingleISOUrl == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("iso_url: The option can't be missed and a path must be specified."))
-	} else if _, err := os.Stat(b.config.RawSingleISOUrl); err != nil {
-		errs = packer.MultiErrorAppend(errs, errors.New("iso_url: Check the path is correct"))
-	}
-
 	log.Println(fmt.Sprintf("%s: %v", "RawSingleISOUrl", b.config.RawSingleISOUrl))
 
 	// Warnings
-	warning := b.checkHostAvailableMemory()
-	if warning != "" {
-		warnings = appendWarnings(warnings, warning)
-	}
-
 	if b.config.ISOChecksumType == "none" {
 		warnings = append(warnings,
 			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
@@ -233,6 +222,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
+	}
+
+	warning := b.checkHostAvailableMemory()
+	if warning != "" {
+		warnings = appendWarnings(warnings, warning)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
