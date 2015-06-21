@@ -39,7 +39,7 @@ func TestOutputConfigPrepare_exists(t *testing.T) {
 		PackerForce:     false,
 	}
 	errs := c.Prepare(testConfigTemplate(t), pc)
-	if len(errs) != 0 {
-		t.Fatal("should not have errors")
+	if len(errs) == 0 {
+		t.Fatal("should have errors")
 	}
 }
