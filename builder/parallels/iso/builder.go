@@ -45,6 +45,7 @@ type Config struct {
 	ISOChecksum        string   `mapstructure:"iso_checksum"`
 	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
 	ISOUrls            []string `mapstructure:"iso_urls"`
+	SkipCompaction     bool     `mapstructure:"skip_compaction"`
 	VMName             string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
@@ -271,6 +272,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&parallelscommon.StepPrlctl{
 			Commands: b.config.PrlctlPost,
 			Ctx:      b.config.ctx,
+		},
+		&parallelscommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
 		},
 	}
 
