@@ -17,6 +17,8 @@ import (
 type StepOutputDir struct {
 	Force bool
 	Path  string
+
+	cleanup bool
 }
 
 func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
@@ -35,6 +37,9 @@ func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Deleting previous output directory...")
 		os.RemoveAll(s.Path)
 	}
+
+	// Enable cleanup
+	s.cleanup = true
 
 	// Create the directory
 	if err := os.MkdirAll(s.Path, 0755); err != nil {
@@ -56,6 +61,10 @@ func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepOutputDir) Cleanup(state multistep.StateBag) {
+	if !s.cleanup {
+		return
+	}
+
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 
