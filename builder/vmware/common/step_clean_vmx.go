@@ -55,6 +55,9 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxData[ide+"filename"] = "auto detect"
 	}
 
+	ui.Message("Disabling VNC server...")
+	vmxData["remotedisplay.vnc.enabled"] = "FALSE"
+
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		state.Put("error", fmt.Errorf("Error writing VMX: %s", err))
