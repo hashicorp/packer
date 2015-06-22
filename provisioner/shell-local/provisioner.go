@@ -96,7 +96,7 @@ func (p *Provisioner) Provision(ui packer.Ui, _ packer.Communicator) error {
 	}
 	if cmd.ExitStatus != 0 {
 		return fmt.Errorf(
-			"Erroneous exit code %s while executing command: %s\n\n"+
+			"Erroneous exit code %d while executing command: %s\n\n"+
 				"Please see output above for more information.",
 			cmd.ExitStatus,
 			p.config.Command)
