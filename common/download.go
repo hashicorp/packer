@@ -118,7 +118,7 @@ func (d *DownloadClient) Get() (string, error) {
 		finalPath = url.Path
 
 		// Remove forward slash on absolute Windows file URLs before processing
-		if runtime.GOOS == "windows" && finalPath[0] == '/' {
+		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
 			finalPath = finalPath[1:len(finalPath)]
 		}
 	} else {
