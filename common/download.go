@@ -209,6 +209,9 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		return err
 	}
 
+	// Reset our progress
+	d.progress = 0
+
 	// Make the request. We first make a HEAD request so we can check
 	// if the server supports range queries. If the server/URL doesn't
 	// support HEAD requests, we just fall back to GET.
