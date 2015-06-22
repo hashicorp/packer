@@ -68,12 +68,33 @@ func (d *HypervPS4Driver) Verify() error {
 
 // Get mac address for VM.
 func (d *HypervPS4Driver) Mac(vmName string) (string, error) {
-	return hyperv.Mac(vmName)
+	res, err := hyperv.Mac(vmName)
+
+	if err != nil {
+		return res, err
+	}
+
+	if res == "" {
+		err := fmt.Errorf("%s", "No mac address.")
+		return res, err
+	}
+
+	return res, err
 }
 
 // Get ip address for mac address.
 func (d *HypervPS4Driver) IpAddress(mac string) (string, error) {
-	return hyperv.IpAddress(mac)
+	res, err := hyperv.IpAddress(mac)
+
+	if err != nil {
+		return res, err
+	}
+
+	if res == "" {
+		err := fmt.Errorf("%s", "No ip address.")
+		return res, err
+	}
+	return res, err
 }
 
 func (d *HypervPS4Driver) verifyPSVersion() error {
