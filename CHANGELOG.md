@@ -54,6 +54,7 @@ IMPROVEMENTS:
   * builder/amazon: Add `force_deregister` option for automatic AMI
       deregistration [GH-2221]
   * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
+  * builder/amazon: Clean up orphaned volumes from Source AMIs [GH-1783]
   * builder/amazon: Support custom keypairs [GH-1837]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
