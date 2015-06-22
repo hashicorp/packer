@@ -68,13 +68,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// First define all our templatable parameters that are _required_
 	templates := map[string]*string{
-		"cluster":       &p.config.Cluster,
-		"datacenter":    &p.config.Datacenter,
-		"diskmode":      &p.config.DiskMode,
-		"host":          &p.config.Host,
-		"password":      &p.config.Password,
-		"username":      &p.config.Username,
-		"vm_name":       &p.config.VMName,
+		"cluster":    &p.config.Cluster,
+		"datacenter": &p.config.Datacenter,
+		"diskmode":   &p.config.DiskMode,
+		"host":       &p.config.Host,
+		"password":   &p.config.Password,
+		"username":   &p.config.Username,
+		"vm_name":    &p.config.VMName,
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
@@ -108,11 +108,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
-			url.QueryEscape(p.config.Username),
-			url.QueryEscape(p.config.Password),
-			p.config.Host,
-			p.config.Datacenter,
-			p.config.Cluster)
+		url.QueryEscape(p.config.Username),
+		url.QueryEscape(p.config.Password),
+		p.config.Host,
+		p.config.Datacenter,
+		p.config.Cluster)
 
 	if p.config.ResourcePool != "" {
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
