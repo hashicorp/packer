@@ -29,7 +29,7 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Searching for root device of the image (%s)", *image.RootDeviceName)
 	var rootDevice *ec2.BlockDeviceMapping
 	for _, device := range image.BlockDeviceMappings {
-		if device.DeviceName == image.RootDeviceName {
+		if *device.DeviceName == *image.RootDeviceName {
 			rootDevice = device
 			break
 		}
