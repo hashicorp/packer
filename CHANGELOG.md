@@ -49,6 +49,7 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
+  * core: HTTP downloads support resuming [GH-2106]
   * builder/*: Add `ssh_handshake_attempts` to configure the number of
       handshake attempts done before failure [GH-2237]
   * builder/amazon: Add `force_deregister` option for automatic AMI
