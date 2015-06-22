@@ -115,7 +115,7 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 				}
 			}
 		}
-		
+
 		unmountCommand, err := wrappedCommand(fmt.Sprintf("umount %s", path))
 		if err != nil {
 			return fmt.Errorf("Error creating unmount command: %s", err)
