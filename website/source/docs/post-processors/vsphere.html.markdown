@@ -35,7 +35,7 @@ Required:
   endpoint.
 
 * `resource_pool` (string) - The resource pool to upload the VM to.
-  This is _not required_ if `datastore` is specified.
+  This is _not required_.
 
 * `username` (string) - The username to use to authenticate to the vSphere
   endpoint.

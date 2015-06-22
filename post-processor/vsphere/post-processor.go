@@ -72,7 +72,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"diskmode":      &p.config.DiskMode,
 		"host":          &p.config.Host,
 		"password":      &p.config.Password,
-		"resource_pool": &p.config.ResourcePool,
 		"username":      &p.config.Username,
 		"vm_name":       &p.config.VMName,
 	}
@@ -107,6 +106,17 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX file not found")
 	}
 
+	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
+			url.QueryEscape(p.config.Username),
+			url.QueryEscape(p.config.Password),
+			p.config.Host,
+			p.config.Datacenter,
+			p.config.Cluster)
+
+	if p.config.ResourcePool != "" {
+		ovftool_uri += "/Resources/" + p.config.ResourcePool
+	}
+
 	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
@@ -116,13 +126,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
-			url.QueryEscape(p.config.Username),
-			url.QueryEscape(p.config.Password),
-			p.config.Host,
-			p.config.Datacenter,
-			p.config.Cluster,
-			p.config.ResourcePool),
+		fmt.Sprintf("%s", ovftool_uri),
 	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
