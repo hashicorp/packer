@@ -46,7 +46,6 @@ func TestBlockDevice(t *testing.T) {
 				DeviceName:  aws.String("/dev/sdb"),
 				VirtualName: aws.String(""),
 				EBS: &ec2.EBSBlockDevice{
-					Encrypted:           aws.Boolean(false),
 					VolumeType:          aws.String(""),
 					VolumeSize:          aws.Long(8),
 					DeleteOnTermination: aws.Boolean(false),
@@ -67,7 +66,6 @@ func TestBlockDevice(t *testing.T) {
 				DeviceName:  aws.String("/dev/sdb"),
 				VirtualName: aws.String("ephemeral0"),
 				EBS: &ec2.EBSBlockDevice{
-					Encrypted:           aws.Boolean(false),
 					VolumeType:          aws.String("io1"),
 					VolumeSize:          aws.Long(8),
 					DeleteOnTermination: aws.Boolean(true),

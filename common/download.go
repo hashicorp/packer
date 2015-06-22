@@ -136,10 +136,10 @@ func (d *DownloadClient) Get() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		defer f.Close()
 
 		log.Printf("Downloading: %s", url.String())
 		err = d.downloader.Download(f, url)
+		f.Close()
 		if err != nil {
 			return "", err
 		}
@@ -149,7 +149,12 @@ func (d *DownloadClient) Get() (string, error) {
 		var verify bool
 		verify, err = d.VerifyChecksum(finalPath)
 		if err == nil && !verify {
-			err = fmt.Errorf("checksums didn't match expected: %s", hex.EncodeToString(d.config.Checksum))
+			// Delete the file
+			os.Remove(finalPath)
+
+			err = fmt.Errorf(
+				"checksums didn't match expected: %s",
+				hex.EncodeToString(d.config.Checksum))
 		}
 	}
 
