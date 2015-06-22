@@ -23,6 +23,8 @@ type Config struct {
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
 
+	DisableSudo bool `mapstructure:"disable_sudo"`
+
 	// Local path to the minion config
 	MinionConfig string `mapstructure:"minion_config"`
 
@@ -106,7 +108,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Unable to download Salt: %s", err)
 		}
 		cmd = &packer.RemoteCmd{
-			Command: fmt.Sprintf("sudo sh /tmp/install_salt.sh %s", p.config.BootstrapArgs),
+			Command: fmt.Sprintf("%s /tmp/install_salt.sh %s", p.sudo("sh"), p.config.BootstrapArgs),
 		}
 		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd.Command))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
@@ -166,7 +168,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: "sudo salt-call --local state.highstate -l info --retcode-passthrough"}
+	cmd := &packer.RemoteCmd{Command: p.sudo("salt-call --local state.highstate -l info --retcode-passthrough")}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -184,6 +186,15 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
+// Prepends sudo to supplied command if config says to
+func (p *Provisioner) sudo(cmd string) string {
+	if p.config.DisableSudo {
+		return cmd
+	}
+
+	return "sudo " + cmd
+}
+
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
@@ -199,7 +210,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 
 func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
 	ui.Message(fmt.Sprintf("Moving %s to %s", src, dst))
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf("sudo mv %s %s", src, dst)}
+	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("mv %s %s"), src, dst)}
 	if err := cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
