@@ -249,7 +249,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		return err
 	}
 
-	d.total = uint(resp.ContentLength)
+	d.total = d.progress + uint(resp.ContentLength)
 	var buffer [4096]byte
 	for {
 		n, err := resp.Body.Read(buffer[:])
