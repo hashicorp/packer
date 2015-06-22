@@ -24,12 +24,18 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	blockDevices := make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
 	for i, device := range image.BlockDeviceMappings {
 		newDevice := device
-		if newDevice.DeviceName == image.RootDeviceName {
+		if *newDevice.DeviceName == *image.RootDeviceName {
 			if newDevice.EBS != nil {
-				newDevice.EBS.SnapshotID = &snapshotId
+				newDevice.EBS.SnapshotID = aws.String(snapshotId)
 			} else {
-				newDevice.EBS = &ec2.EBSBlockDevice{SnapshotID: &snapshotId}
+				newDevice.EBS = &ec2.EBSBlockDevice{SnapshotID: aws.String(snapshotId)}
 			}
+		}
+
+		// assume working from a snapshot, so we unset the Encrypted field if set,
+		// otherwise AWS API will return InvalidParameter
+		if newDevice.EBS.Encrypted != nil {
+			newDevice.EBS.Encrypted = nil
 		}
 
 		blockDevices[i] = newDevice
@@ -82,7 +88,10 @@ func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.Blo
 		Architecture:        image.Architecture,
 		RootDeviceName:      image.RootDeviceName,
 		BlockDeviceMappings: blockDevices,
-		VirtualizationType:  &config.AMIVirtType,
+	}
+
+	if config.AMIVirtType != "" {
+		registerOpts.VirtualizationType = aws.String(config.AMIVirtType)
 	}
 
 	if config.AMIVirtType != "hvm" {
