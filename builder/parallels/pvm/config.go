@@ -58,7 +58,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.PrlctlPostConfig.Prepare(&c.tpl)...)
+	errs = packer.MultiErrorAppend(errs, c.PrlctlPostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
