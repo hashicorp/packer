@@ -77,7 +77,7 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 func CreateVirtualMachine(vmName string, path string, ram string, diskSize string, switchName string, generation string) error {
 
 	var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]generation)
+param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
@@ -91,8 +91,8 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 func SetVirtualMachineCpu(vmName string, cpu string) error {
 
 	var script = `
-param([string]$vmName, [int]cpu)
-Set-VMProcessor -VMName $vmName –Count $cpu
+param([string]$vmName, [int]$cpu)
+Set-VMProcessor -VMName $vmName -Count $cpu
 `
 
 	var ps powershell.PowerShellCmd
@@ -359,15 +359,15 @@ $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 
 func Mac(vmName string) (string, error) {
 	var script = `
-param([string]$vmName, [int]$addressIndex)
+param([string]$vmName, [int]$adapterIndex)
 try {
   $adapter = Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
-  $mac = $adapter.MacAddress[$addressIndex]
+  $mac = $adapter[$adapterIndex].MacAddress
   if($mac -eq $null) {
-    return $false
+    return ""
   }
 } catch {
-  return $false
+  return ""
 }
 $mac
 `
@@ -385,10 +385,10 @@ try {
   $ip = Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
 	
   if($ip -eq $null) {
-    return $false
+    return ""
   }
 } catch {
-  return $false
+  return ""
 }
 $ip
 `
