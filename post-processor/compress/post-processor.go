@@ -31,7 +31,7 @@ type Config struct {
 	Archive   string
 	Algorithm string
 
-	ctx *interpolate.Context
+	ctx interpolate.Context
 }
 
 type PostProcessor struct {
@@ -52,7 +52,8 @@ var (
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{},
 		},
@@ -69,7 +70,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.OutputPath = "packer_{{.BuildName}}_{{.Provider}}"
 	}
 
-	if err = interpolate.Validate(p.config.OutputPath, p.config.ctx); err != nil {
+	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
@@ -94,7 +95,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 				errs, fmt.Errorf("%s must be set", key))
 		}
 
-		*ptr, err = interpolate.Render(p.config.OutputPath, p.config.ctx)
+		*ptr, err = interpolate.Render(p.config.OutputPath, &p.config.ctx)
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing %s: %s", key, err))

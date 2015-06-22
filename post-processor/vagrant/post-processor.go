@@ -170,8 +170,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
-		Metadata:    &md,
-		Interpolate: true,
+		Metadata:           &md,
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"output",
