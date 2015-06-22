@@ -278,6 +278,13 @@ Here is an example using the optional AMI tags. This will add the tags
 }
 ```
 
+-> **Note:** Packer uses pre-built AMIs as the source for building images.
+These source AMIs may include volumes that are not flagged to be destroyed on 
+termiation of the instance building the new image. Packer will attempt to clean
+up all residual volumes that are not designated by the user to remain after
+termination. If you need to preserve those source volumes, you can overwrite the
+termination setting by specifying `delete_on_termination=false` in the 
+`launch_device_mappings` block for the device.
 
 [1]: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html
 [2]: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html
