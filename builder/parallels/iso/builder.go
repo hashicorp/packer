@@ -27,6 +27,7 @@ type Config struct {
 	parallelscommon.FloppyConfig        `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
@@ -78,6 +79,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.PrlctlPostConfig.Prepare(&b.config.tpl)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlVersionConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
@@ -265,6 +267,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&parallelscommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
+		},
+		&parallelscommon.StepPrlctl{
+			Commands: b.config.PrlctlPost,
+			Tpl:      b.config.tpl,
 		},
 	}
 
