@@ -161,6 +161,41 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 	}
 }
 
+func TestDownloadClient_resume(t *testing.T) {
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Write([]byte("w"))
+	tf.Close()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if r.Method == "HEAD" {
+			rw.Header().Set("Accept-Ranges", "bytes")
+			rw.WriteHeader(204)
+			return
+		}
+
+		http.ServeFile(rw, r, "./test-fixtures/root/basic.txt")
+	}))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL,
+		TargetPath: tf.Name(),
+	})
+	path, err := client.Get()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if string(raw) != "wello\n" {
+		t.Fatalf("bad: %s", string(raw))
+	}
+}
+
 func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
