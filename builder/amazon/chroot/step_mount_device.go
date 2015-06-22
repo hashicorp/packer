@@ -33,7 +33,7 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	device := state.Get("device").(string)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
-	ctx := *config.ctx
+	ctx := config.ctx
 	ctx.Data = &mountPathData{Device: filepath.Base(device)}
 	mountPath, err := interpolate.Render(config.MountPath, &ctx)
 

@@ -31,7 +31,7 @@ type Config struct {
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
 
-	ctx *interpolate.Context
+	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -39,8 +39,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
-		Metadata:    &md,
-		Interpolate: true,
+		Metadata:           &md,
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_command",
@@ -85,7 +86,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	var errs *packer.MultiError
-	if es := c.Comm.Prepare(c.ctx); len(es) > 0 {
+	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
 	if c.APIToken == "" {

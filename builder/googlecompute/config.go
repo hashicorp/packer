@@ -41,13 +41,14 @@ type Config struct {
 	account         accountFile
 	privateKeyBytes []byte
 	stateTimeout    time.Duration
-	ctx             *interpolate.Context
+	ctx             interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
 	err := config.Decode(c, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_command",
