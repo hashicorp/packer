@@ -42,7 +42,7 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 		Prefix:       config.BundlePrefix,
 		PrivatePath:  config.X509UploadPath,
 	}
-	config.BundleVolCommand, err = interpolate.Render(config.BundleVolCommand, config.ctx)
+	config.BundleVolCommand, err = interpolate.Render(config.BundleVolCommand, &config.ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle volume command: %s", err)
 		state.Put("error", err)

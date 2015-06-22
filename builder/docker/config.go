@@ -37,8 +37,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
-		Metadata:    &md,
-		Interpolate: true,
+		Metadata:           &md,
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_command",
