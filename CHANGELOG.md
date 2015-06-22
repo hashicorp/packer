@@ -36,6 +36,7 @@ FEATURES:
       builder. This is useful for provisioners. [GH-2232]
   * **New config function: `template_dir`**: The directory to the template
       being built. This should be used for template-relative paths. [GH-54]
+  * **New provisioner: shell-local**: Runs a local shell script. [GH-770]
   * **New provisioner: powershell**: Provision Windows machines
       with PowerShell scripts. [GH-2243]
   * **New provisioner: windows-shell**: Provision Windows machines with
