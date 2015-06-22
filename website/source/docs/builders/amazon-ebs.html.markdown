@@ -278,7 +278,7 @@ Here is an example using the optional AMI tags. This will add the tags
 }
 ```
 
--> **Note:** Packer users pre-built AMIs as the source for building images.
+-> **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on 
 termiation of the instance building the new image. Packer will attempt to clean
 up all residual volumes that are not designated by the user to remain after
