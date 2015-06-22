@@ -57,9 +57,6 @@ type Config struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	// Set some defaults
-	b.config.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", b.config.PackerBuildName)
-
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -114,6 +111,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.ISOInterface == "" {
 		b.config.ISOInterface = "ide"
+	}
+
+	if b.config.VMName == "" {
+		b.config.VMName = fmt.Sprintf(
+			"packer-%s-%d", b.config.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
