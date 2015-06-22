@@ -43,16 +43,17 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Cleaning up any extra volumes...")
 
-	save := make(map[string]bool)
+	// We don't actually care about the value here, but we need Set behavior
+	save := make(map[string]struct{})
 	for _, b := range s.BlockDevices.AMIMappings {
 		if !b.DeleteOnTermination {
-			save[b.DeviceName] = true
+			save[b.DeviceName] = struct{}{}
 		}
 	}
 
 	for _, b := range s.BlockDevices.LaunchMappings {
 		if !b.DeleteOnTermination {
-			save[b.DeviceName] = true
+			save[b.DeviceName] = struct{}{}
 		}
 	}
 
