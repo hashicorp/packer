@@ -24,8 +24,9 @@ type mountPathData struct {
 //   mount_path string - The location where the volume was mounted.
 //   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
-	mountPath    string
 	MountOptions []string
+
+	mountPath string
 }
 
 func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
