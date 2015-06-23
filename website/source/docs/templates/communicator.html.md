@@ -48,6 +48,10 @@ configuration parameters for that communicator. These are documented below.
 
 ## SSH Communicator
 
+The SSH communicator connects to the host via SSH. If you have an SSH
+agent enabled on the machine running Packer, it will automatically forward
+the SSH agent to the remote host.
+
 The SSH communicator has the following options:
 
   * `ssh_host` (string) - The address to SSH to. This usually is automatically
