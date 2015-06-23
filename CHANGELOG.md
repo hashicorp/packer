@@ -58,6 +58,10 @@ IMPROVEMENTS:
   * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
   * builder/amazon: Clean up orphaned volumes from Source AMIs [GH-1783]
   * builder/amazon: Support custom keypairs [GH-1837]
+  * builder/amazon-chroot: Can now resize the root volume of the resulting 
+      AMI with the `root_volume_size` option [GH-2289]
+  * builder/amazon-chroot: Add `mount_options` configuration option for providing
+      options to the `mount` command [GH-2296]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
   * builder/digitalocean: User data support [GH-2113]
   * builder/googlecompute: Option to use internal IP for connections. [GH-2152]
