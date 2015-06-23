@@ -49,7 +49,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	instance := &instancesResp.Reservations[0].Instances[0]
+	instance := instancesResp.Reservations[0].Instances[0]
 	state.Put("instance", instance)
 
 	return multistep.ActionContinue
