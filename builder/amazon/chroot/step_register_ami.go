@@ -11,7 +11,9 @@ import (
 )
 
 // StepRegisterAMI creates the AMI.
-type StepRegisterAMI struct{}
+type StepRegisterAMI struct {
+	RootVolumeSize int64
+}
 
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
@@ -29,6 +31,10 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 				newDevice.EBS.SnapshotID = aws.String(snapshotId)
 			} else {
 				newDevice.EBS = &ec2.EBSBlockDevice{SnapshotID: aws.String(snapshotId)}
+			}
+
+			if s.RootVolumeSize > *newDevice.EBS.VolumeSize {
+				newDevice.EBS.VolumeSize = aws.Long(s.RootVolumeSize)
 			}
 		}
 
