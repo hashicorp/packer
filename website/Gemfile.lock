@@ -175,6 +175,3 @@ PLATFORMS
 
 DEPENDENCIES
   middleman-hashicorp!
-
-BUNDLED WITH
-   1.10.2
