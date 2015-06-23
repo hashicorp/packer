@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -153,7 +154,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Accelerator == "" {
-		b.config.Accelerator = "kvm"
+		if runtime.GOOS == "windows" {
+			b.config.Accelerator = "tcg"
+		} else {
+			b.config.Accelerator = "kvm"
+		}
 	}
 
 	if b.config.HTTPPortMin == 0 {
