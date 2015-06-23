@@ -15,7 +15,7 @@ Compute Engine doesn't allow the creation of images from scratch.
 
 ## Authentication
 
-Authenticating with Google Cloud services requires at most one JSON file, 
+Authenticating with Google Cloud services requires at most one JSON file,
 called the _account file_. The _account file_ is **not** required if you are running
 the `googlecompute` Packer builder from a GCE instance with a properly-configured
 [Compute Engine Service Account](https://cloud.google.com/compute/docs/authentication).
@@ -23,7 +23,7 @@ the `googlecompute` Packer builder from a GCE instance with a properly-configure
 ### Running With a Compute Engine Service Account
 If you run the `googlecompute` Packer builder from a GCE instance, you can configure that
 instance to use a [Compute Engine Service Account](https://cloud.google.com/compute/docs/authentication). This will allow Packer to authenticate
-to Google Cloud without having to bake in a separate credential/authentication file. 
+to Google Cloud without having to bake in a separate credential/authentication file.
 
 To create a GCE instance that uses a service account, provide the required scopes when
 launching the instance.
@@ -85,6 +85,10 @@ existing GCE image. The account file is obtained in the previous section.
 Configuration options are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `project_id` (string) - The project ID that will be used to launch instances
@@ -119,13 +123,6 @@ each category, the available options are alphabetized and described.
 
 * `network` (string) - The Google Compute network to use for the launched
   instance. Defaults to `"default"`.
-
-* `ssh_port` (integer) - The SSH port. Defaults to `22`.
-
-* `ssh_timeout` (string) - The time to wait for SSH to become available.
-  Defaults to `"1m"`.
-
-* `ssh_username` (string) - The SSH username. Defaults to `"root"`.
 
 * `state_timeout` (string) - The time to wait for instance state changes.
   Defaults to `"5m"`.

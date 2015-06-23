@@ -24,6 +24,10 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `api_token` (string) - The client TOKEN to use to access your account.
@@ -52,16 +56,6 @@ each category, the available configuration keys are alphabetized.
   appear in your account. This must be unique.
   To help make this unique, use a function like `timestamp` (see
   [configuration templates](/docs/templates/configuration-templates.html) for more info)
-
-* `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
-  22.
-
-* `ssh_timeout` (string) - The time to wait for SSH to become available
-  before timing out. The format of this value is a duration such as "5s"
-  or "5m". The default SSH timeout is "1m".
-
-* `ssh_username` (string) - The username to use in order to communicate
-  over SSH to the running droplet. Default is "root".
 
 * `state_timeout` (string) - The time to wait, as a duration string,
   for a droplet to enter a desired state (such as "active") before

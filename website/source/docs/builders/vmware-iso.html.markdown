@@ -49,6 +49,10 @@ There are many configuration options available for the VMware builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
@@ -200,28 +204,6 @@ each category, the available options are alphabetized and described.
   In certain rare cases, this might actually end up making the resulting disks
   slightly larger. If you find this to be the case, you can disable compaction
   using this configuration value.
-
-* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
-  is used to connect to the host and this field is not used.
-
-* `ssh_key_path` (string) - Path to a private key to use for authenticating
-  with SSH. By default this is not set (key-based auth won't be used).
-  The associated public key is expected to already be configured on the
-  VM being prepared by some other process (kickstart, etc.).
-
-* `ssh_password` (string) - The password for `ssh_username` to use to
-  authenticate with SSH. By default this is the empty string.
-
-* `ssh_port` (integer) - The port that SSH will listen on within the virtual
-  machine. By default this is 22.
-
-* `ssh_skip_request_pty` (boolean) - If true, a pty will not be requested as
-  part of the SSH connection. By default, this is "false", so a pty
-  _will_ be requested.
-
-* `ssh_wait_timeout` (string) - The duration to wait for SSH to become
-  available. By default this is "20m", or 20 minutes. Note that this should
-  be quite long since the timer begins as soon as the virtual machine is booted.
 
 * `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
   upload into the VM. Valid values are "darwin", "linux", and "windows".

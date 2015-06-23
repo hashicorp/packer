@@ -36,6 +36,10 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
@@ -193,19 +197,8 @@ AMI if one with the same name already exists. Default `false`.
   generate a temporary keypair. `ssh_private_key_file` must be specified
   with this.
 
-* `ssh_port` (integer) - The port that SSH will be available on. This defaults
-  to port 22.
-
-* `ssh_private_key_file` (string) - Use this ssh private key file instead of
-  a generated ssh key pair for connecting to the instance. This key file must
-  already exist on the `source_ami`
-
 * `ssh_private_ip` (bool) - If true, then SSH will always use the private
   IP if available.
-
-* `ssh_timeout` (string) - The time to wait for SSH to become available
-  before timing out. The format of this value is a duration such as "5s"
-  or "5m". The default SSH timeout is "5m", or five minutes.
 
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as
   "subnet-12345def", where Packer will launch the EC2 instance. This field is
