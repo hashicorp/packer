@@ -35,6 +35,7 @@ type Config struct {
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
 	RootVolumeSize int64      `mapstructure:"root_volume_size"`
+	MountOptions   []string   `mapstructure:"mount_options"`
 
 	ctx interpolate.Context
 }
@@ -165,7 +166,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
-		&StepMountDevice{},
+		&StepMountDevice{
+			MountOptions: b.config.MountOptions,
+		},
 		&StepMountExtra{},
 		&StepCopyFiles{},
 		&StepChrootProvision{},
