@@ -34,7 +34,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 		// assume working from a snapshot, so we unset the Encrypted field if set,
 		// otherwise AWS API will return InvalidParameter
-		if newDevice.EBS.Encrypted != nil {
+		if newDevice.EBS != nil && newDevice.EBS.Encrypted != nil {
 			newDevice.EBS.Encrypted = nil
 		}
 
