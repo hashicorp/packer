@@ -1,4 +1,4 @@
-## 0.8.0 (unreleased)
+## 0.8.0 (June 23, 2015)
 
 BACKWARDS INCOMPATIBILITIES:
 
@@ -58,7 +58,7 @@ IMPROVEMENTS:
   * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
   * builder/amazon: Clean up orphaned volumes from Source AMIs [GH-1783]
   * builder/amazon: Support custom keypairs [GH-1837]
-  * builder/amazon-chroot: Can now resize the root volume of the resulting 
+  * builder/amazon-chroot: Can now resize the root volume of the resulting
       AMI with the `root_volume_size` option [GH-2289]
   * builder/amazon-chroot: Add `mount_options` configuration option for providing
       options to the `mount` command [GH-2296]
