@@ -133,6 +133,9 @@ AMI if one with the same name already exists. Default `false`.
   template where the `.Device` variable is replaced with the name of the
   device where the volume is attached.
 
+* `root_volume_size` (integer) – The size of the root volume for the chroot
+environment, and the resulting AMI
+
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
 ## Basic Example
