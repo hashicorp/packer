@@ -71,6 +71,7 @@ IMPROVEMENTS:
   * builder/openstack: Machine will be stopped prior to imaging if the
       cluster supports the `startstop` extension. [GH-2223]
   * builder/openstack: Support for user data [GH-2224]
+  * builder/qemu: Default accelerator to "tcg" on Windows [GH-2291]
   * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
