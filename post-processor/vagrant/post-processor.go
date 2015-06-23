@@ -76,13 +76,12 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	outputPath, err := interpolate.Render(config.OutputPath, &interpolate.Context{
-		Data: &outputPathTemplate{
-			ArtifactId: artifact.Id(),
-			BuildName:  config.PackerBuildName,
-			Provider:   name,
-		},
-	})
+	config.ctx.Data = &outputPathTemplate{
+		ArtifactId: artifact.Id(),
+		BuildName:  config.PackerBuildName,
+		Provider:   name,
+	}
+	outputPath, err := interpolate.Render(config.OutputPath, &config.ctx)
 	if err != nil {
 		return nil, false, err
 	}
