@@ -27,6 +27,10 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `flavor` (string) - The ID, name, or full URL for the desired flavor for the
@@ -81,16 +85,6 @@ each category, the available configuration keys are alphabetized.
   to launch the server to create the AMI.
   If not specified, Packer will use the environment variable
   `OS_REGION_NAME`, if set.
-
-* `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
-  22.
-
-* `ssh_timeout` (string) - The time to wait for SSH to become available
-  before timing out. The format of this value is a duration such as "5s"
-  or "1m". The default SSH timeout is "5m".
-
-* `ssh_username` (string) - The username to use in order to communicate
-  over SSH to the running server. The default is "root".
 
 * `ssh_interface` (string) - The type of interface to connect via SSH. Values
   useful for Rackspace are "public" or "private", and the default behavior is
