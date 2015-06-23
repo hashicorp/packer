@@ -61,3 +61,15 @@ you can specify a custom name using the `name` key within the builder definition
 This is particularly useful if you have multiple builds defined that use
 the same underlying builder. In this case, you must specify a name for at least
 one of them since the names must be unique.
+
+## Communicators
+
+Every build is associated with a single
+[communicator](/docs/templates/communicator.html). Communicators are
+used to establish a connection for provisioning a remote machine (such
+as an AWS instance or local virtual machine).
+
+All the examples for the various builders show some communicator (usually
+SSH), but the communicators are highly customizable so we recommend
+reading the
+[communicator documentation](/docs/templates/communicator.html).
