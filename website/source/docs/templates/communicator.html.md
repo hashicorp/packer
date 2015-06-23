@@ -77,6 +77,8 @@ The SSH communicator has the following options:
   * `ssh_handshake_attempts` (int) - The number of handshakes to attempt with
     SSH once it can connect. This defaults to 10.
 
+  * `ssh_disable_agent` (bool) - If true, SSH agent forwarding will be disabled.
+
   * `ssh_bastion_host` (string) - A bastion host to use for the actual
     SSH connection.
 
