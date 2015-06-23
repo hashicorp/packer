@@ -73,6 +73,10 @@ There are many configuration options available for the Qemu builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
@@ -240,23 +244,6 @@ qemu-system-x86 command. The arguments are all printed for review.
   to the SSH port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the
   host port.
-
-* `ssh_key_path` (string) - Path to a private key to use for authenticating
-  with SSH. By default this is not set (key-based auth won't be used).
-  The associated public key is expected to already be configured on the
-  VM being prepared by some other process (kickstart, etc.).
-
-* `ssh_password` (string) - The password for `ssh_username` to use to
-  authenticate with SSH. By default this is the empty string.
-
-* `ssh_port` (integer) - The port that SSH will be listening on in the guest
-  virtual machine. By default this is 22. The Qemu builder will map, via
-  port forward, a port on the host machine to the port listed here so
-  machines outside the installing VM can access the VM.
-
-* `ssh_wait_timeout` (string) - The duration to wait for SSH to become
-  available. By default this is "20m", or 20 minutes. Note that this should
-  be quite long since the timer begins as soon as the virtual machine is booted.
 
 * `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
   the new virtual machine, without the file extension. By default this is
