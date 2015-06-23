@@ -88,6 +88,7 @@ func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.Blo
 		Architecture:        image.Architecture,
 		RootDeviceName:      image.RootDeviceName,
 		BlockDeviceMappings: blockDevices,
+		VirtualizationType:  image.VirtualizationType,
 	}
 
 	if config.AMIVirtType != "" {
