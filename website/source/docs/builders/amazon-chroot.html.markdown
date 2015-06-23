@@ -133,6 +133,12 @@ AMI if one with the same name already exists. Default `false`.
   template where the `.Device` variable is replaced with the name of the
   device where the volume is attached.
 
+* `mount_options` (array of strings) – Options to supply the `mount` command
+when mounting devices. Each option will be prefixed with `-o ` and supplied to
+the `mount` command ran by Packer. Because this command is ran in a shell, user
+discrestion is advised. See [this manual page for the mount command][1] for valid
+file system specific options
+
 * `root_volume_size` (integer) – The size of the root volume for the chroot
 environment, and the resulting AMI
 
@@ -225,3 +231,6 @@ prevent packages installed by your provisioners from starting services:
   ]
 }
 ```
+
+
+[1]: http://linuxcommand.org/man_pages/mount8.html
