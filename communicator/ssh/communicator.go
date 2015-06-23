@@ -37,6 +37,9 @@ type Config struct {
 
 	// Pty, if true, will request a pty from the remote end.
 	Pty bool
+
+	// DisableAgent, if true, will not forward the SSH agent.
+	DisableAgent bool
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -284,6 +287,11 @@ func (c *comm) reconnect() (err error) {
 
 func (c *comm) connectToAgent() {
 	if c.client == nil {
+		return
+	}
+
+	if c.config.DisableAgent {
+		log.Printf("[INFO] SSH agent forwarding is diabled.")
 		return
 	}
 
