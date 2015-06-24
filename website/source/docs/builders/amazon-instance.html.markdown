@@ -87,22 +87,22 @@ can be configured for this builder.
 * `ami_block_device_mappings` (array of block device mappings) - Add the block
   device mappings to the AMI. The block device mappings allow for keys:
 
-  - `device_name` (string) – The device name exposed to the instance (for
+  - `device_name` (string) - The device name exposed to the instance (for
       example, "/dev/sdh" or "xvdh")
-  - `virtual_name` (string) – The virtual device name. See the documentation on
+  - `virtual_name` (string) - The virtual device name. See the documentation on
           [Block Device Mapping][1] for more information
-  - `snapshot_id` (string) – The ID of the snapshot
-  - `volume_type` (string) – The volume type. gp2 for General Purpose (SSD)
+  - `snapshot_id` (string) - The ID of the snapshot
+  - `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
   volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
   volumes
-  - `volume_size` (integer) – The size of the volume, in GiB. Required if not
+  - `volume_size` (integer) - The size of the volume, in GiB. Required if not
       specifying a `snapshot_id`
-  - `delete_on_termination` (boolean) – Indicates whether the EBS volume is
+  - `delete_on_termination` (boolean) - Indicates whether the EBS volume is
       deleted on instance termination
-  - `encrypted` (boolean) – Indicates whether to encrypt the volume or not
-  - `no_device` (boolean) – Suppresses the specified device included in the
+  - `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+  - `no_device` (boolean) - Suppresses the specified device included in the
        block device mapping of the AMI
-  - `iops` (integer) – The number of I/O operations per second (IOPS) that the
+  - `iops` (integer) - The number of I/O operations per second (IOPS) that the
   volume supports. See the documentation on [IOPs][2] for more information
 
 * `ami_description` (string) - The description to set for the resulting
@@ -155,7 +155,7 @@ can be configured for this builder.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
-* `force_deregister` (boolean) – Force Packer to first deregister an existing
+* `force_deregister` (boolean) - Force Packer to first deregister an existing
 AMI if one with the same name already exists. Default `false`.
 
 * `iam_instance_profile` (string) - The name of an
