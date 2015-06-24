@@ -58,3 +58,7 @@ Optional:
 
 -   `overwrite` (boolean) - If it's true force the system to overwrite the
   existing files instead create new ones. Default is false
+
+* `options` (array of strings) - Custom options to add in ovftool. See `ovftool
+  --help` to list all the options
+
