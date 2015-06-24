@@ -22,19 +22,20 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Cluster      string `mapstructure:"cluster"`
-	Datacenter   string `mapstructure:"datacenter"`
-	Datastore    string `mapstructure:"datastore"`
-	DiskMode     string `mapstructure:"disk_mode"`
-	Host         string `mapstructure:"host"`
-	Insecure     bool   `mapstructure:"insecure"`
-	Overwrite    bool   `mapstructure:"overwrite"`
-	Password     string `mapstructure:"password"`
-	ResourcePool string `mapstructure:"resource_pool"`
-	Username     string `mapstructure:"username"`
-	VMFolder     string `mapstructure:"vm_folder"`
-	VMName       string `mapstructure:"vm_name"`
-	VMNetwork    string `mapstructure:"vm_network"`
+	Cluster      string   `mapstructure:"cluster"`
+	Datacenter   string   `mapstructure:"datacenter"`
+	Datastore    string   `mapstructure:"datastore"`
+	DiskMode     string   `mapstructure:"disk_mode"`
+	Host         string   `mapstructure:"host"`
+	Insecure     bool     `mapstructure:"insecure"`
+	Options      []string `mapstructure:"options"`
+	Overwrite    bool     `mapstructure:"overwrite"`
+	Password     string   `mapstructure:"password"`
+	ResourcePool string   `mapstructure:"resource_pool"`
+	Username     string   `mapstructure:"username"`
+	VMFolder     string   `mapstructure:"vm_folder"`
+	VMName       string   `mapstructure:"vm_name"`
+	VMNetwork    string   `mapstructure:"vm_network"`
 
 	ctx interpolate.Context
 }
@@ -143,12 +144,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		options = append(options, "--overwrite")
 	}
 
+	if len(p.config.Options) > 0 {
+		options = append(options, p.config.Options...)
+	}
+
 	command := append(options, args...)
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
 	log.Printf("Starting ovftool with parameters: %s", strings.Join(command, " "))
-	cmd := exec.Command("ovftool", args...)
+	cmd := exec.Command("ovftool", command...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		return nil, false, fmt.Errorf("Failed: %s\nStdout: %s", err, out.String())
