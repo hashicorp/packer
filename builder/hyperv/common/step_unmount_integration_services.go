@@ -6,10 +6,10 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	powershell "github.com/mitchellh/packer/powershell"
+	"log"
 )
 
 type StepUnmountSecondaryDvdImages struct {
@@ -35,6 +35,8 @@ func (s *StepUnmountSecondaryDvdImages) Run(state multistep.StateBag) multistep.
 		powershell := new(powershell.PowerShellCmd)
 
 		script.WriteLine("param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)")
+		script.WriteLine("$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation")
+		script.WriteLine("if (!$vmDvdDrive) {throw 'unable to find dvd drive'}")
 		script.WriteLine("Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation")
 		err := powershell.Run(script.String(), vmName, controllerNumber, controllerLocation)
 		if err != nil {
@@ -43,7 +45,6 @@ func (s *StepUnmountSecondaryDvdImages) Run(state multistep.StateBag) multistep.
 			return multistep.ActionHalt
 		}
 	}
-
 
 	return multistep.ActionContinue
 }

@@ -305,12 +305,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// provision requires communicator to be setup
 		&common.StepProvision{},
 
-		// remove the integration services dvd drive
-		// after we power down
-		&hypervcommon.StepUnmountSecondaryDvdImages{},
-		&hypervcommon.StepUnmountFloppyDrive{},
-		&hypervcommon.StepUnmountDvdDrive{},
-
 		&hypervcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
@@ -318,6 +312,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		// wait for the vm to be powered off
 		&hypervcommon.StepWaitForPowerOff{},
+
+		// remove the integration services dvd drive
+		// after we power down
+		&hypervcommon.StepUnmountSecondaryDvdImages{},
+		&hypervcommon.StepUnmountFloppyDrive{},
+		&hypervcommon.StepUnmountDvdDrive{},
 
 		&hypervcommon.StepExportVm{
 			OutputDir: b.config.OutputDir,
