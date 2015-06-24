@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"regexp"
-	"strings"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -53,7 +52,6 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 	// Set custom data
 	for k, v := range s.CustomData {
 		log.Printf("Setting VMX: '%s' = '%s'", k, v)
-		k = strings.ToLower(k)
 		vmxData[k] = v
 	}
 
