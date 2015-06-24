@@ -1,6 +1,8 @@
 ## 0.8.1 (unreleased)
 
+BUG FIXES:
 
+  * builder/amazon: Fix issue with sharing AMIs when using `ami_users` [GH-2308]
 
 ## 0.8.0 (June 23, 2015)
 
