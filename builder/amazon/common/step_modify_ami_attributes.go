@@ -54,11 +54,16 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 
 	if len(s.Users) > 0 {
 		users := make([]*string, len(s.Users))
+		adds := make([]*ec2.LaunchPermission, len(s.Users))
 		for i, u := range s.Users {
 			users[i] = &u
+			adds[i] = &ec2.LaunchPermission{UserID: &u}
 		}
 		options["users"] = &ec2.ModifyImageAttributeInput{
 			UserIDs: users,
+			LaunchPermission: &ec2.LaunchPermissionModifications{
+				Add: adds,
+			},
 		}
 	}
 
