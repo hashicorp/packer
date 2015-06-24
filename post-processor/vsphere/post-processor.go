@@ -22,12 +22,13 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Insecure     bool   `mapstructure:"insecure"`
 	Cluster      string `mapstructure:"cluster"`
 	Datacenter   string `mapstructure:"datacenter"`
 	Datastore    string `mapstructure:"datastore"`
 	DiskMode     string `mapstructure:"disk_mode"`
 	Host         string `mapstructure:"host"`
+	Insecure     bool   `mapstructure:"insecure"`
+	Overwrite    bool   `mapstructure:"overwrite"`
 	Password     string `mapstructure:"password"`
 	ResourcePool string `mapstructure:"resource_pool"`
 	Username     string `mapstructure:"username"`
@@ -119,7 +120,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
 
-	args := []string{
+	options := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
 		fmt.Sprintf("--name=%s", p.config.VMName),
@@ -132,8 +133,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
+
+	args := []string{
+		fmt.Sprintf("%s", vmx),
+		fmt.Sprintf("%s", ovftool_uri),
+	}
+
+	if p.config.Overwrite == true {
+		options = append(options, "--overwrite")
+	}
+
+	command := append(options, args...)
+
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
 	var out bytes.Buffer
-	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(command, " "))
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
