@@ -128,7 +128,7 @@ can be configured for this builder.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
-* `force_deregister` (boolean) – Force Packer to first deregister an existing
+* `force_deregister` (boolean) - Force Packer to first deregister an existing
 AMI if one with the same name already exists. Default `false`.
 
 * `mount_path` (string) - The path where the volume will be mounted. This is
@@ -137,13 +137,13 @@ AMI if one with the same name already exists. Default `false`.
   template where the `.Device` variable is replaced with the name of the
   device where the volume is attached.
 
-* `mount_options` (array of strings) – Options to supply the `mount` command
+* `mount_options` (array of strings) - Options to supply the `mount` command
 when mounting devices. Each option will be prefixed with `-o ` and supplied to
 the `mount` command ran by Packer. Because this command is ran in a shell, user
 discrestion is advised. See [this manual page for the mount command][1] for valid
 file system specific options
 
-* `root_volume_size` (integer) – The size of the root volume for the chroot
+* `root_volume_size` (integer) - The size of the root volume for the chroot
 environment, and the resulting AMI
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
