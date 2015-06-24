@@ -26,11 +26,6 @@ func (s *StepWaitForPowerOff) Run(state multistep.StateBag) multistep.StepAction
 	vmName := state.Get("vmName").(string)
 	ui.Say("Waiting for vm to be powered down...")
 
-	// unless the person has a super fast disk, it should take at least 5 minutes
-	// for the install and post-install operations to take. Wait 5 minutes to 
-	// avoid hammering on getting VM status via PowerShell
-	time.Sleep(time.Second * 300);
-
 	var script powershell.ScriptBuilder
 	script.WriteLine("param([string]$vmName)")
 	script.WriteLine("(Get-VM -Name $vmName).State -eq [Microsoft.HyperV.PowerShell.VMState]::Off")

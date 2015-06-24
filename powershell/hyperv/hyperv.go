@@ -40,10 +40,9 @@ Set-VMDvdDrive -VMName $vmName -Path $path
 }
 
 func UnmountDvdDrive(vmName string) error {
-
 	var script = `
 param([string]$vmName)
-Set-VMDvdDrive -VMName $vmName -Path $null
+Get-VMDvdDrive -VMName $vmName | Set-VMDvdDrive  -Path $null
 `
 
 	var ps powershell.PowerShellCmd
@@ -104,6 +103,12 @@ func DeleteVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
+
+$vm = Get-VM -Name $vmName
+if (($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::Off) -and ($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::OffCritical)) {
+    Stop-VM -VM $vm -TurnOff -Force
+}
+
 Remove-VM -Name $vmName -Force
 `
 

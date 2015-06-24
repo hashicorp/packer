@@ -9,7 +9,7 @@ import (
 )
 
 // This is the common builder ID to all of these artifacts.
-const BuilderId = "mitchellh.hyperv"
+const BuilderId = "MSOpenTech.hyperv"
 
 // Artifact is the result of running the hyperv builder, namely a set
 // of files associated with the resulting machine.
