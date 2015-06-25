@@ -34,8 +34,13 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 			// Declare list of resources to tag
 			resourceIds := []*string{&ami}
 
+			regionconn := ec2.New(&aws.Config{
+				Credentials: ec2conn.Config.Credentials,
+				Region:      region,
+			})
+
 			// Retrieve image list for given AMI
-			imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+			imageResp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
 				ImageIDs: resourceIds,
 			})
 
@@ -62,11 +67,6 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 					resourceIds = append(resourceIds, device.EBS.SnapshotID)
 				}
 			}
-
-			regionconn := ec2.New(&aws.Config{
-				Credentials: ec2conn.Config.Credentials,
-				Region:      region,
-			})
 
 			_, err = regionconn.CreateTags(&ec2.CreateTagsInput{
 				Resources: resourceIds,
