@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/mitchellh/packer/builder/file"
-	env "github.com/mitchellh/packer/helper/builder/testing"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template"
 )
@@ -187,11 +186,6 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 }
 
 func testArchive(t *testing.T, config string) packer.Artifact {
-	if os.Getenv(env.TestEnvVar) == "" {
-		t.Skip(fmt.Sprintf(
-			"Acceptance tests skipped unless env '%s' set", env.TestEnvVar))
-	}
-
 	ui, artifact, err := setup(t)
 	if err != nil {
 		t.Fatalf("Error bootstrapping test: %s", err)
