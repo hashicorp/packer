@@ -35,7 +35,7 @@ type Config struct {
 }
 
 type PostProcessor struct {
-	config *Config
+	config Config
 }
 
 var (
