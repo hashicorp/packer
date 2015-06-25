@@ -19,6 +19,18 @@ import (
 	"github.com/pierrec/lz4"
 )
 
+var (
+	// ErrInvalidCompressionLevel is returned when the compression level passed
+	// to gzip is not in the expected range. See compress/flate for details.
+	ErrInvalidCompressionLevel = fmt.Errorf(
+		"Invalid compression level. Expected an integer from -1 to 9.")
+
+	ErrWrongInputCount = fmt.Errorf(
+		"Can only have 1 input file when not using tar/zip")
+
+	filenamePattern = regexp.MustCompile(`(?:\.([a-z0-9]+))`)
+)
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -35,20 +47,8 @@ type Config struct {
 }
 
 type PostProcessor struct {
-	config *Config
+	config Config
 }
-
-var (
-	// ErrInvalidCompressionLevel is returned when the compression level passed
-	// to gzip is not in the expected range. See compress/flate for details.
-	ErrInvalidCompressionLevel = fmt.Errorf(
-		"Invalid compression level. Expected an integer from -1 to 9.")
-
-	ErrWrongInputCount = fmt.Errorf(
-		"Can only have 1 input file when not using tar/zip")
-
-	filenamePattern = regexp.MustCompile(`(?:\.([a-z0-9]+))`)
-)
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -109,7 +109,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	return nil
-
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
