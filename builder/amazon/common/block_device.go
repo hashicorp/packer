@@ -29,27 +29,27 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 
 	for _, blockDevice := range b {
 		ebsBlockDevice := &ec2.EBSBlockDevice{
-			VolumeType:          &blockDevice.VolumeType,
-			VolumeSize:          &blockDevice.VolumeSize,
-			DeleteOnTermination: &blockDevice.DeleteOnTermination,
+			VolumeType:          aws.String(blockDevice.VolumeType),
+			VolumeSize:          aws.Long(blockDevice.VolumeSize),
+			DeleteOnTermination: aws.Boolean(blockDevice.DeleteOnTermination),
 		}
 
 		// IOPS is only valid for SSD Volumes
 		if blockDevice.VolumeType != "" && blockDevice.VolumeType != "standard" && blockDevice.VolumeType != "gp2" {
-			ebsBlockDevice.IOPS = &blockDevice.IOPS
+			ebsBlockDevice.IOPS = aws.Long(blockDevice.IOPS)
 		}
 
 		// You cannot specify Encrypted if you specify a Snapshot ID
 		if blockDevice.SnapshotId != "" {
-			ebsBlockDevice.SnapshotID = &blockDevice.SnapshotId
+			ebsBlockDevice.SnapshotID = aws.String(blockDevice.SnapshotId)
 		} else if blockDevice.Encrypted {
-			ebsBlockDevice.Encrypted = &blockDevice.Encrypted
+			ebsBlockDevice.Encrypted = aws.Boolean(blockDevice.Encrypted)
 		}
 
 		mapping := &ec2.BlockDeviceMapping{
 			EBS:         ebsBlockDevice,
-			DeviceName:  &blockDevice.DeviceName,
-			VirtualName: &blockDevice.VirtualName,
+			DeviceName:  aws.String(blockDevice.DeviceName),
+			VirtualName: aws.String(blockDevice.VirtualName),
 		}
 
 		if blockDevice.NoDevice {
