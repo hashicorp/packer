@@ -113,11 +113,17 @@ The default value for the configuration template is:
 log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
+{{if ne .ValidationClientName ""}}
+validation_client_name "{{.ValidationClientName}}"
+{{else}}
 validation_client_name "chef-validator"
+{{end}}
 {{if ne .ValidationKeyPath ""}}
 validation_key "{{.ValidationKeyPath}}"
 {{end}}
+{{if ne .NodeName ""}}
 node_name "{{.NodeName}}"
+{{end}}
 ```
 
 This template is a [configuration template](/docs/templates/configuration-templates.html)
