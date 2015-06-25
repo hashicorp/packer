@@ -1,6 +1,8 @@
 package common
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -44,6 +46,11 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 			ebsBlockDevice.SnapshotID = &blockDevice.SnapshotId
 		} else if blockDevice.Encrypted {
 			ebsBlockDevice.Encrypted = &blockDevice.Encrypted
+		}
+
+		// Don't add EBS mapping if this is an ephemeral drive
+		if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+			ebsBlockDevice = nil
 		}
 
 		mapping := &ec2.BlockDeviceMapping{
