@@ -50,11 +50,11 @@ func TestBuilderAcc_amiSharing(t *testing.T) {
 		PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
 		Template: testBuilderAccSharing,
-		Check:    checkAMISharing(1, "932021504756"),
+		Check:    checkAMISharing(2, "932021504756", "all"),
 	})
 }
 
-func checkAMISharing(count int, uid string) builderT.TestCheckFunc {
+func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
@@ -84,15 +84,26 @@ func checkAMISharing(count int, uid string) builderT.TestCheckFunc {
 			return fmt.Errorf("Error in Image Attributes, expected (%d) Launch Permissions, got (%d)", count, len(imageResp.LaunchPermissions))
 		}
 
-		found := false
+		userFound := false
 		for _, lp := range imageResp.LaunchPermissions {
-			if uid == *lp.UserID {
-				found = true
+			if lp.UserID != nil && uid == *lp.UserID {
+				userFound = true
 			}
 		}
 
-		if !found {
+		if !userFound {
 			return fmt.Errorf("Error in Image Attributes, expected User ID (%s) to have Launch Permissions, but was not found", uid)
+		}
+
+		groupFound := false
+		for _, lp := range imageResp.LaunchPermissions {
+			if lp.Group != nil && group == *lp.Group {
+				groupFound = true
+			}
+		}
+
+		if !groupFound {
+			return fmt.Errorf("Error in Image Attributes, expected Group ID (%s) to have Launch Permissions, but was not found", group)
 		}
 
 		return nil
@@ -203,7 +214,8 @@ const testBuilderAccSharing = `
 		"source_ami": "ami-76b2a71e",
 		"ssh_username": "ubuntu",
 		"ami_name": "packer-test {{timestamp}}",
-		"ami_users":["932021504756"]
+		"ami_users":["932021504756"],
+		"ami_groups":["all"]
 	}]
 }
 `
