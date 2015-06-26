@@ -291,7 +291,7 @@ func (c *comm) connectToAgent() {
 	}
 
 	if c.config.DisableAgent {
-		log.Printf("[INFO] SSH agent forwarding is diabled.")
+		log.Printf("[INFO] SSH agent forwarding is disabled.")
 		return
 	}
 
