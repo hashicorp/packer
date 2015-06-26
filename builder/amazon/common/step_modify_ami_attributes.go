@@ -50,9 +50,9 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		}
 
 		for i, g := range s.Groups {
-			groups[i] = &g
+			groups[i] = aws.String(g)
 			adds[i] = &ec2.LaunchPermission{
-				Group: &g,
+				Group: aws.String(g),
 			}
 		}
 		addGroups.UserGroups = groups
