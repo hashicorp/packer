@@ -13,6 +13,22 @@ func TestESX5Driver_implDriver(t *testing.T) {
 	var _ vmwcommon.Driver = new(ESX5Driver)
 }
 
+func TestESX5Driver_UpdateVMX(t *testing.T) {
+	var driver ESX5Driver
+	data := make(map[string]string)
+	driver.UpdateVMX("0.0.0.0", "", 5900, data)
+	if _, ok := data["remotedisplay.vnc.ip"]; ok {
+		// Do not add the remotedisplay.vnc.ip on ESXi
+		t.Fatal("invalid VMX data key: remotedisplay.vnc.ip")
+	}
+	if enabled := data["remotedisplay.vnc.enabled"]; enabled != "TRUE" {
+		t.Errorf("bad VMX data for key remotedisplay.vnc.enabled: %v", enabled)
+	}
+	if port := data["remotedisplay.vnc.port"]; port != fmt.Sprint(port) {
+		t.Errorf("bad VMX data for key remotedisplay.vnc.port: %v", port)
+	}
+}
+
 func TestESX5Driver_implOutputDir(t *testing.T) {
 	var _ vmwcommon.OutputDir = new(ESX5Driver)
 }
