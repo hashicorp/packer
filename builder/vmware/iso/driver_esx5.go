@@ -231,10 +231,11 @@ func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, 
 }
 
 // UpdateVMX, adds the VNC port to the VMX data.
-func (ESX5Driver) UpdateVMX(_ string, port uint, data map[string]string) {
+func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]string) {
 	// Do not set remotedisplay.vnc.ip - this breaks ESXi.
 	data["remotedisplay.vnc.enabled"] = "TRUE"
 	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
+	data["remotedisplay.vnc.password"] = password
 }
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
