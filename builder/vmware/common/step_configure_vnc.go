@@ -30,7 +30,7 @@ type VNCAddressFinder interface {
 	VNCAddress(string, uint, uint) (string, uint, error)
 
 	// UpdateVMX, sets driver specific VNC values to VMX data.
-	UpdateVMX(vncAddress string, vncPort uint, vmxData map[string]string)
+	UpdateVMX(vncAddress, vncPassword string, vncPort uint, vmxData map[string]string)
 }
 
 func (StepConfigureVNC) VNCAddress(vncBindAddress string, portMin, portMax uint) (string, uint, error) {
@@ -54,6 +54,21 @@ func (StepConfigureVNC) VNCAddress(vncBindAddress string, portMin, portMax uint)
 		}
 	}
 	return vncBindAddress, vncPort, nil
+}
+
+func VNCPassword() string {
+	length := int(8)
+
+	charSet := []byte("1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./!@#%^*()_+QWERTYUIOP{}|ASDFGHJKL:XCVBNM<>?")
+	charSetLength := len(charSet)
+
+	password := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		password[i] = charSet[rand.Intn(charSetLength)]
+	}
+
+	return string(password)
 }
 
 func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
@@ -91,10 +106,12 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	vncPassword := VNCPassword()
+
 	log.Printf("Found available VNC port: %d", vncPort)
 
 	vmxData := ParseVMX(string(vmxBytes))
-	vncFinder.UpdateVMX(vncBindAddress, vncPort, vmxData)
+	vncFinder.UpdateVMX(vncBindAddress, vncPassword, vncPort, vmxData)
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
@@ -105,14 +122,16 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 
 	state.Put("vnc_port", vncPort)
 	state.Put("vnc_ip", vncBindAddress)
+	state.Put("vnc_password", vncPassword)
 
 	return multistep.ActionContinue
 }
 
-func (StepConfigureVNC) UpdateVMX(address string, port uint, data map[string]string) {
+func (StepConfigureVNC) UpdateVMX(address, password string, port uint, data map[string]string) {
 	data["remotedisplay.vnc.enabled"] = "TRUE"
 	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
 	data["remotedisplay.vnc.ip"] = address
+	data["remotedisplay.vnc.password"] = password
 }
 
 func (StepConfigureVNC) Cleanup(multistep.StateBag) {
