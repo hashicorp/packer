@@ -7,6 +7,8 @@ BUG FIXES:
   * builder/amazon: Fix issue with creating AMIs with multiple device mappings [GH-2320]
   * builder/amazon: Fix failing AMI snapshot tagging when copying to other 
       regions [GH-2316]
+  * builder/amazon-instance: Fix issue with creating AMIs without specifying a 
+      virtualization type [GH-2330]
 
 ## 0.8.0 (June 23, 2015)
 
