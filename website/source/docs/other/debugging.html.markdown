@@ -5,18 +5,41 @@ description: |-
   Packer strives to be stable and bug-free, but issues inevitably arise where certain things may not work entirely correctly, or may not appear to work correctly. In these cases, it is sometimes helpful to see more details about what Packer is actually doing.
 ---
 
-# Debugging Packer
+# Debugging Packer Builds
 
-Packer strives to be stable and bug-free, but issues inevitably arise where
-certain things may not work entirely correctly, or may not appear to work
-correctly. In these cases, it is sometimes helpful to see more details about
-what Packer is actually doing.
+For remote builds with cloud providers like Amazon Web Services AMIs, debugging
+a Packer build can be eased greatly with `packer build -debug`. This disables
+parallelization and enables debug mode.
+
+Debug mode informs the builders that they should output debugging information.
+The exact behavior of debug mode is left to the builder. In general, builders
+usually will stop between each step, waiting for keyboard input before
+continuing. This will allow you to inspect state and so on.
+
+In debug mode once the remote instance is instantiated, Packer will emit to the
+current directory an emphemeral private ssh key as a .pem file.  Using that you
+can `ssh -i <key.pem>` into the remote build instance and see what is going on
+for debugging.  The emphemeral key will be deleted at the end of the packer run
+during cleanup.
+
+### Windows
+As of Packer 0.8.1 the default WinRM communicator will emit the password for a
+Remote Desktop Connection into your instance. This happens following the several
+minute pause as the instance is booted. Note a .pem key is still created for
+securely transmitting the password. Packer automatically decrypts the password
+for you in debug mode.
+
+## Debugging Packer 
+
+Issues occasionally arise where certain things may not work entirely correctly,
+or may not appear to work correctly. In these cases, it is sometimes helpful to
+see more details about what Packer is actually doing.
 
 Packer has detailed logs which can be enabled by setting the `PACKER_LOG`
-environmental variable to any value. This will cause detailed logs to appear
-on stderr. The logs contain log messages from Packer as well as any plugins
-that are being used. Log messages from plugins are prefixed by their application
-name.
+environmental variable to any value like this `PACKER_LOG=1 packer build
+<config.json>`. This will cause detailed logs to appear on stderr. The logs
+contain log messages from Packer as well as any plugins that are being used. Log
+messages from plugins are prefixed by their application name.
 
 Note that because Packer is highly parallelized, log messages sometimes
 appear out of order, especially with respect to plugins. In this case,
