@@ -48,8 +48,8 @@ type Config struct {
 	hypervcommon.FloppyConfig   `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.ShutdownConfig `mapstructure:",squash"`
 	hypervcommon.RunConfig      `mapstructure:",squash"`
+	hypervcommon.ShutdownConfig `mapstructure:",squash"`
 
 	// The size, in megabytes, of the hard disk to create for the VM.
 	// By default, this is 130048 (about 127 GB).
@@ -95,9 +95,10 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
-	SwitchName string `mapstructure:"switch_name"`
-	Cpu        uint   `mapstructure:"cpu"`
-	Generation uint   `mapstructure:"generation"`
+	BootCommand []string `mapstructure:"boot_command"`
+	SwitchName  string   `mapstructure:"switch_name"`
+	Cpu         uint     `mapstructure:"cpu"`
+	Generation  uint     `mapstructure:"generation"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -107,6 +108,8 @@ type Config struct {
 
 	SSHWaitTimeout time.Duration
 
+	SkipCompaction bool `mapstructure:"skip_compaction"`
+
 	ctx interpolate.Context
 }
 
@@ -115,7 +118,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{
+				"boot_command",
+			},
 		},
 	}, raws...)
 	if err != nil {
@@ -271,6 +276,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
+		&hypervcommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		&hypervcommon.StepCreateSwitch{
 			SwitchName: b.config.SwitchName,
 		},
@@ -291,8 +301,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		&hypervcommon.StepMountSecondaryDvdImages{},
 
-		&hypervcommon.StepStartVm{
-			Reason: "OS installation",
+		&hypervcommon.StepRun{
+			BootWait: b.config.BootWait,
+			Headless: b.config.Headless,
+		},
+
+		&hypervcommon.StepTypeBootCommand{
+			BootCommand: b.config.BootCommand,
+			SwitchName:  b.config.SwitchName,
+			VMName:      b.config.VMName,
+			Ctx:         b.config.ctx,
 		},
 
 		// configure the communicator ssh, winrm
@@ -320,7 +338,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepUnmountDvdDrive{},
 
 		&hypervcommon.StepExportVm{
-			OutputDir: b.config.OutputDir,
+			OutputDir:      b.config.OutputDir,
+			SkipCompaction: b.config.SkipCompaction,
 		},
 
 		// the clean up actions for each step will be executed reverse order

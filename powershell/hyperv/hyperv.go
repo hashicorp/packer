@@ -5,6 +5,29 @@ import (
 	"strings"
 )
 
+func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
+	var script = `
+param([string]$switchName, [int]$addressIndex)
+
+$HostVMAdapter = Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
+if ($HostVMAdapter){
+    $HostNetAdapter = Get-NetAdapter | ?{ $_.DeviceID -eq $HostVMAdapter.DeviceId }
+    if ($HostNetAdapter){
+        $HostNetAdapterConfiguration =  @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE' AND InterfaceIndex=$($HostNetAdapter.ifIndex)")
+        if ($HostNetAdapterConfiguration){
+            return $HostNetAdapterConfiguration.IpAddress[$addressIndex]
+        }
+    }
+}
+return $false
+`
+
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, switchName, "0")
+
+	return cmdOut, err
+}
+
 func GetVirtualMachineNetworkAdapterAddress(vmName string) (string, error) {
 
 	var script = `
@@ -106,7 +129,7 @@ param([string]$vmName)
 
 $vm = Get-VM -Name $vmName
 if (($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::Off) -and ($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::OffCritical)) {
-    Stop-VM -VM $vm -TurnOff -Force
+    Stop-VM -VM $vm -TurnOff -Force -Confirm:$false
 }
 
 Remove-VM -Name $vmName -Force
@@ -126,6 +149,19 @@ Export-VM -Name $vmName -Path $path
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, path)
+	return err
+}
+
+func CompactDisks(expPath string, vhdDir string) error {
+	var script = `
+param([string]$srcPath, [string]$vhdDirName)
+Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
+    Optimize-VHD -Path $_.FullName -Mode Full
+}
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, expPath, vhdDir)
 	return err
 }
 
@@ -180,7 +216,10 @@ func StartVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-Start-VM -Name $vmName
+$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off) {
+  Start-VM -Name $vmName
+}
 `
 
 	var ps powershell.PowerShellCmd
@@ -206,7 +245,7 @@ func StopVirtualMachine(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-    Stop-VM -VM $vm
+    Stop-VM -VM $vm -Confirm:$false
 }
 `
 
@@ -297,7 +336,7 @@ foreach ($adapter in $adapters) {
 }
 
 if($switch -ne $null) { 
-  Get-VMNetworkAdapter –VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch 
+  Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch 
 } else { 
   Write-Error 'No internet adapters found'
 }
@@ -327,7 +366,7 @@ func ConnectVirtualMachineNetworkAdapterToSwitch(vmName string, switchName strin
 
 	var script = `
 param([string]$vmName,[string]$switchName)
-Get-VMNetworkAdapter –VMName $vmName | Connect-VMNetworkAdapter –SwitchName $switchName
+Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName $switchName
 `
 
 	var ps powershell.PowerShellCmd
@@ -404,28 +443,13 @@ $ip
 	return cmdOut, err
 }
 
-func Start(vmName string) error {
-
-	var script = `
-param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
-if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off) {
-  Start-VM –Name $vmName
-}
-`
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName)
-	return err
-}
-
 func TurnOff(vmName string) error {
 
 	var script = `
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -TurnOff
+  Stop-VM -Name $vmName -TurnOff -Confirm:$false
 }
 `
 
@@ -440,11 +464,182 @@ func ShutDown(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM –Name $vmName
+  Stop-VM -Name $vmName -Confirm:$false
 }
 `
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName)
+	return err
+}
+
+func TypeScanCodes(vmName string, scanCodes string) error {
+	var script = `
+param([string]$vmName, [string]$scanCodes)
+	#Requires -Version 3
+	#Requires -RunAsAdministrator
+	
+	function Get-VMConsole
+	{
+	    [CmdletBinding()]
+	    param (
+	        [Parameter(Mandatory)]
+	        [string] $VMName
+	    )
+	
+	    $ErrorActionPreference = "Stop"
+	    
+	    $vm = Get-CimInstance -ComputerName localhost -Namespace "root\virtualization\v2" -ClassName Msvm_ComputerSystem -ErrorAction Ignore -Verbose:$false | where ElementName -eq $VMName | select -first 1
+	    if ($vm -eq $null){
+	        Write-Error ("VirtualMachine({0}) is not found!" -f $VMName)
+	    }
+	
+	    $vmKeyboard = $vm | Get-CimAssociatedInstance -ResultClassName "Msvm_Keyboard" -ErrorAction Ignore -Verbose:$false
+	    if ($vmKeyboard -eq $null){
+	        Write-Error ("VirtualMachine({0}) keyboard class is not found!" -f $VMName)
+	    }
+	
+	    #TODO: It may be better using New-Module -AsCustomObject to return console object?
+	
+	    #Console object to return
+	    $console = [pscustomobject] @{
+	        Msvm_ComputerSystem = $vm
+	        Msvm_Keyboard = $vmKeyboard
+	    }
+	
+	    #Need to import assembly to use System.Windows.Input.Key
+	    Add-Type -AssemblyName WindowsBase
+	
+	    #region Add Console Members
+	    $console | Add-Member -MemberType ScriptMethod -Name TypeText -Value {
+	        [OutputType([bool])]
+	        param (
+	            [ValidateNotNullOrEmpty()]
+	            [Parameter(Mandatory)]
+	            [string] $AsciiText
+	        )
+	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeText" -Arguments @{ asciiText = $AsciiText }
+	        return (0 -eq $result.ReturnValue)
+	    }
+	
+	    #Define method:TypeCtrlAltDel
+	    $console | Add-Member -MemberType ScriptMethod -Name TypeCtrlAltDel -Value {
+	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeCtrlAltDel"
+	        return (0 -eq $result.ReturnValue)
+	    }
+	
+	    #Define method:TypeKey
+	    $console | Add-Member -MemberType ScriptMethod -Name TypeKey -Value {
+	        [OutputType([bool])]
+	        param (
+	            [Parameter(Mandatory)]
+	            [Windows.Input.Key] $Key,
+	            [Windows.Input.ModifierKeys] $ModifierKey = [Windows.Input.ModifierKeys]::None
+	        )
+	
+	        $keyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey($Key)
+	        
+	        switch ($ModifierKey)
+	        {
+	            ([Windows.Input.ModifierKeys]::Control){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftCtrl)}
+	            ([Windows.Input.ModifierKeys]::Alt){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftAlt)}
+	            ([Windows.Input.ModifierKeys]::Shift){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftShift)}
+	            ([Windows.Input.ModifierKeys]::Windows){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LWin)}
+	        }
+	
+	        if ($ModifierKey -eq [Windows.Input.ModifierKeys]::None)
+	        {
+	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
+	        }
+	        else
+	        {
+	            $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "PressKey" -Arguments @{ keyCode = $modifierKeyCode }
+	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
+	            $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "ReleaseKey" -Arguments @{ keyCode = $modifierKeyCode }
+	        }
+	        $result = return (0 -eq $result.ReturnValue)
+	    }
+	
+	    #Define method:Scancodes
+	    $console | Add-Member -MemberType ScriptMethod -Name TypeScancodes -Value {
+	        [OutputType([bool])]
+	        param (
+	            [Parameter(Mandatory)]
+	            [byte[]] $ScanCodes
+	        )
+	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $ScanCodes }
+	        return (0 -eq $result.ReturnValue)
+	    }
+	
+	    #Define method:ExecCommand
+	    $console | Add-Member -MemberType ScriptMethod -Name ExecCommand -Value {
+	        param (
+	            [Parameter(Mandatory)]
+	            [string] $Command
+	        )
+	        if ([String]::IsNullOrEmpty($Command)){
+	            return
+	        }
+	
+	        $console.TypeText($Command) > $null
+	        $console.TypeKey([Windows.Input.Key]::Enter) > $null
+	        #sleep -Milliseconds 100
+	    }
+	
+	    #Define method:Dispose
+	    $console | Add-Member -MemberType ScriptMethod -Name Dispose -Value {
+	        $this.Msvm_ComputerSystem.Dispose()
+	        $this.Msvm_Keyboard.Dispose()
+	    }
+	    
+	
+	    #endregion
+	
+	    return $console
+	}
+	
+	$vmConsole = Get-VMConsole -VMName $vmName
+	$scanCodesToSend = ''
+	$scanCodes.Split(' ') | %{
+		$scanCode = $_
+			
+		if ($scanCode.StartsWith('wait')){
+			$timeToWait = $scanCode.Substring(4)
+			if (!$timeToWait){
+				$timeToWait = "10"
+			}
+			
+			Start-Sleep -s $timeToWait
+			
+			if ($scanCodesToSend){
+				$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
+				
+                $scanCodesToSendByteArray | %{
+				    $vmConsole.TypeScancodes($_)
+                }
+			}
+			
+			$scanCodesToSend = ''
+		} else {
+			if ($scanCodesToSend){
+				$scanCodesToSend = "$scanCodesToSend $scanCode"
+			} else {
+				$scanCodesToSend = "$scanCode"
+			}
+		}
+	}
+	if ($scanCodesToSend){
+		$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
+		
+        $scanCodesToSendByteArray | %{
+			$vmConsole.TypeScancodes($_)
+        }
+	}
+
+
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, scanCodes)
 	return err
 }

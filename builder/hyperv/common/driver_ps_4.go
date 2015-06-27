@@ -41,12 +41,12 @@ func (d *HypervPS4Driver) IsRunning(vmName string) (bool, error) {
 
 // Start starts a VM specified by the name given.
 func (d *HypervPS4Driver) Start(vmName string) error {
-	return hyperv.Start(vmName)
+	return hyperv.StartVirtualMachine(vmName)
 }
 
 // Stop stops a VM specified by the name given.
 func (d *HypervPS4Driver) Stop(vmName string) error {
-	return hyperv.TurnOff(vmName)
+	return hyperv.StopVirtualMachine(vmName)
 }
 
 func (d *HypervPS4Driver) Verify() error {
@@ -95,6 +95,26 @@ func (d *HypervPS4Driver) IpAddress(mac string) (string, error) {
 		return res, err
 	}
 	return res, err
+}
+
+// Finds the IP address of a host adapter connected to switch
+func (d *HypervPS4Driver) GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
+	res, err := hyperv.GetHostAdapterIpAddressForSwitch(switchName)
+
+	if err != nil {
+		return res, err
+	}
+
+	if res == "" {
+		err := fmt.Errorf("%s", "No ip address.")
+		return res, err
+	}
+	return res, err
+}
+
+// Type scan codes to virtual keyboard of vm
+func (d *HypervPS4Driver) TypeScanCodes(vmName string, scanCodes string) error {
+	return hyperv.TypeScanCodes(vmName, scanCodes)
 }
 
 func (d *HypervPS4Driver) verifyPSVersion() error {
