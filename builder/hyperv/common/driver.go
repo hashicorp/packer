@@ -24,11 +24,17 @@ type Driver interface {
 	// Verify checks to make sure that this driver should function
 	// properly. If there is any indication the driver can't function,
 	// this will return an error.
-	Verify() error	
-	
+	Verify() error
+
 	// Finds the MAC address of the NIC nic0
 	Mac(string) (string, error)
 
 	// Finds the IP address of a VM connected that uses DHCP by its MAC address
 	IpAddress(string) (string, error)
+
+	// Finds the IP address of a host adapter connected to switch
+	GetHostAdapterIpAddressForSwitch(string) (string, error)
+
+	// Type scan codes to virtual keyboard of vm
+	TypeScanCodes(string, string) error
 }
