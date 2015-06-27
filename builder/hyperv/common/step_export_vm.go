@@ -6,20 +6,21 @@ package common
 
 import (
 	"fmt"
-	"path/filepath"
-	"io/ioutil"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/powershell/hyperv"
+	"io/ioutil"
+	"path/filepath"
 )
 
-const(
+const (
 	vhdDir string = "Virtual Hard Disks"
-	vmDir string = "Virtual Machines"
+	vmDir  string = "Virtual Machines"
 )
 
 type StepExportVm struct {
-	OutputDir string
+	OutputDir      string
+	SkipCompaction bool
 }
 
 func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
@@ -29,12 +30,12 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 	var errorMsg string
 
 	vmName := state.Get("vmName").(string)
-	tmpPath :=	state.Get("packerTempDir").(string)
+	tmpPath := state.Get("packerTempDir").(string)
 	outputPath := s.OutputDir
 
 	// create temp path to export vm
 	errorMsg = "Error creating temp export path: %s"
-	vmExportPath , err := ioutil.TempDir(tmpPath, "export")
+	vmExportPath, err := ioutil.TempDir(tmpPath, "export")
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
@@ -54,7 +55,21 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// copy to output dir
-	expPath := filepath.Join(vmExportPath,vmName)
+	expPath := filepath.Join(vmExportPath, vmName)
+
+	if s.SkipCompaction {
+		ui.Say("Skipping disk compaction...")
+	} else {
+		ui.Say("Compacting disks...")
+		err = hyperv.CompactDisks(expPath, vhdDir)
+		if err != nil {
+			errorMsg = "Error compacting disks: %s"
+			err := fmt.Errorf(errorMsg, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
 
 	ui.Say("Coping to output dir...")
 	err = hyperv.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)

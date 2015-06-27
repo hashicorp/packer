@@ -1,0 +1,211 @@
+package common
+
+import (
+	"fmt"
+	"log"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
+)
+
+type bootCommandTemplateData struct {
+	HTTPIP   string
+	HTTPPort uint
+	Name     string
+}
+
+// This step "types" the boot command into the VM via the prltype script, built on the
+// Parallels Virtualization SDK - Python API.
+//
+// Uses:
+//   driver Driver
+//   http_port int
+//   ui     packer.Ui
+//   vmName string
+//
+// Produces:
+//   <nothing>
+type StepTypeBootCommand struct {
+	BootCommand []string
+	SwitchName  string
+	VMName      string
+	Ctx         interpolate.Context
+}
+
+func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	httpPort := state.Get("http_port").(uint)
+	ui := state.Get("ui").(packer.Ui)
+
+	driver := state.Get("driver").(Driver)
+
+	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
+
+	if err != nil {
+		err := fmt.Errorf("Error getting host adapter ip address: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	ui.Say(fmt.Sprintf("Host IP for the HyperV machine: %s", hostIp))
+
+	s.Ctx.Data = &bootCommandTemplateData{
+		hostIp,
+		httpPort,
+		s.VMName,
+	}
+
+	ui.Say("Typing the boot command...")
+	scanCodesToSend := []string{}
+
+	for _, command := range s.BootCommand {
+		command, err := interpolate.Render(command, &s.Ctx)
+
+		if err != nil {
+			err := fmt.Errorf("Error preparing boot command: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		scanCodesToSend = append(scanCodesToSend, scancodes(command)...)
+	}
+
+	scanCodesToSendString := strings.Join(scanCodesToSend, " ")
+
+	if err := driver.TypeScanCodes(s.VMName, scanCodesToSendString); err != nil {
+		err := fmt.Errorf("Error sending boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	return multistep.ActionContinue
+}
+
+func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
+
+func scancodes(message string) []string {
+	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+	//
+	// Scancodes represent raw keyboard output and are fed to the VM by the
+	// VBoxManage controlvm keyboardputscancode program.
+	//
+	// Scancodes are recorded here in pairs. The first entry represents
+	// the key press and the second entry represents the key release and is
+	// derived from the first by the addition of 0x80.
+	special := make(map[string][]string)
+	special["<bs>"] = []string{"0e", "8e"}
+	special["<del>"] = []string{"53", "d3"}
+	special["<enter>"] = []string{"1c", "9c"}
+	special["<esc>"] = []string{"01", "81"}
+	special["<f1>"] = []string{"3b", "bb"}
+	special["<f2>"] = []string{"3c", "bc"}
+	special["<f3>"] = []string{"3d", "bd"}
+	special["<f4>"] = []string{"3e", "be"}
+	special["<f5>"] = []string{"3f", "bf"}
+	special["<f6>"] = []string{"40", "c0"}
+	special["<f7>"] = []string{"41", "c1"}
+	special["<f8>"] = []string{"42", "c2"}
+	special["<f9>"] = []string{"43", "c3"}
+	special["<f10>"] = []string{"44", "c4"}
+	special["<return>"] = []string{"1c", "9c"}
+	special["<tab>"] = []string{"0f", "8f"}
+	special["<up>"] = []string{"48", "c8"}
+	special["<down>"] = []string{"50", "d0"}
+	special["<left>"] = []string{"4b", "cb"}
+	special["<right>"] = []string{"4d", "cd"}
+	special["<spacebar>"] = []string{"39", "b9"}
+	special["<insert>"] = []string{"52", "d2"}
+	special["<home>"] = []string{"47", "c7"}
+	special["<end>"] = []string{"4f", "cf"}
+	special["<pageUp>"] = []string{"49", "c9"}
+	special["<pageDown>"] = []string{"51", "d1"}
+
+	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
+
+	scancodeIndex := make(map[string]uint)
+	scancodeIndex["1234567890-="] = 0x02
+	scancodeIndex["!@#$%^&*()_+"] = 0x02
+	scancodeIndex["qwertyuiop[]"] = 0x10
+	scancodeIndex["QWERTYUIOP{}"] = 0x10
+	scancodeIndex["asdfghjkl;'`"] = 0x1e
+	scancodeIndex[`ASDFGHJKL:"~`] = 0x1e
+	scancodeIndex[`\zxcvbnm,./`] = 0x2b
+	scancodeIndex["|ZXCVBNM<>?"] = 0x2b
+	scancodeIndex[" "] = 0x39
+
+	scancodeMap := make(map[rune]uint)
+	for chars, start := range scancodeIndex {
+		var i uint = 0
+		for len(chars) > 0 {
+			r, size := utf8.DecodeRuneInString(chars)
+			chars = chars[size:]
+			scancodeMap[r] = start + i
+			i += 1
+		}
+	}
+
+	result := make([]string, 0, len(message)*2)
+	for len(message) > 0 {
+		var scancode []string
+
+		if strings.HasPrefix(message, "<wait>") {
+			log.Printf("Special code <wait> found, will sleep 1 second at this point.")
+			scancode = []string{"wait"}
+			message = message[len("<wait>"):]
+		}
+
+		if strings.HasPrefix(message, "<wait5>") {
+			log.Printf("Special code <wait5> found, will sleep 5 seconds at this point.")
+			scancode = []string{"wait5"}
+			message = message[len("<wait5>"):]
+		}
+
+		if strings.HasPrefix(message, "<wait10>") {
+			log.Printf("Special code <wait10> found, will sleep 10 seconds at this point.")
+			scancode = []string{"wait10"}
+			message = message[len("<wait10>"):]
+		}
+
+		if scancode == nil {
+			for specialCode, specialValue := range special {
+				if strings.HasPrefix(message, specialCode) {
+					log.Printf("Special code '%s' found, replacing with: %s", specialCode, specialValue)
+					scancode = specialValue
+					message = message[len(specialCode):]
+					break
+				}
+			}
+		}
+
+		if scancode == nil {
+			r, size := utf8.DecodeRuneInString(message)
+			message = message[size:]
+			scancodeInt := scancodeMap[r]
+			keyShift := unicode.IsUpper(r) || strings.ContainsRune(shiftedChars, r)
+
+			scancode = make([]string, 0, 4)
+			if keyShift {
+				scancode = append(scancode, "2a")
+			}
+
+			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt))
+
+			if keyShift {
+				scancode = append(scancode, "aa")
+			}
+
+			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt+0x80))
+			log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
+		}
+
+		result = append(result, scancode...)
+	}
+
+	return result
+}
