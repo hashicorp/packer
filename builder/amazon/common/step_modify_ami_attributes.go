@@ -44,12 +44,21 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 
 	if len(s.Groups) > 0 {
 		groups := make([]*string, len(s.Groups))
+		adds := make([]*ec2.LaunchPermission, len(s.Groups))
+		addGroups := &ec2.ModifyImageAttributeInput{
+			LaunchPermission: &ec2.LaunchPermissionModifications{},
+		}
+
 		for i, g := range s.Groups {
-			groups[i] = &g
+			groups[i] = aws.String(g)
+			adds[i] = &ec2.LaunchPermission{
+				Group: aws.String(g),
+			}
 		}
-		options["groups"] = &ec2.ModifyImageAttributeInput{
-			UserGroups: groups,
-		}
+		addGroups.UserGroups = groups
+		addGroups.LaunchPermission.Add = adds
+
+		options["groups"] = addGroups
 	}
 
 	if len(s.Users) > 0 {
