@@ -1,6 +1,7 @@
 # Packer
 
 [![Build Status](https://travis-ci.org/mitchellh/packer.svg?branch=master)](https://travis-ci.org/mitchellh/packer)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true)](https://ci.appveyor.com/project/hashicorp/packer)
 
 * Website: http://www.packer.io
 * IRC: `#packer-tool` on Freenode
