@@ -152,6 +152,35 @@ func TestConfigPrepare(t *testing.T) {
 	}
 }
 
+func TestConfigDefaults(t *testing.T) {
+	cases := []struct {
+		Read  func(c *Config) interface{}
+		Value interface{}
+	}{
+		{
+			func(c *Config) interface{} { return c.Comm.Type },
+			"ssh",
+		},
+
+		{
+			func(c *Config) interface{} { return c.Comm.SSHPort },
+			22,
+		},
+	}
+
+	for _, tc := range cases {
+		raw := testConfig(t)
+
+		c, warns, errs := NewConfig(raw)
+		testConfigOk(t, warns, errs)
+
+		actual := tc.Read(c)
+		if actual != tc.Value {
+			t.Fatalf("bad: %#v", actual)
+		}
+	}
+}
+
 func testAccountFile(t *testing.T) string {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
