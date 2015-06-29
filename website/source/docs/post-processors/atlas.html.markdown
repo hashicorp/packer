@@ -40,7 +40,7 @@ The configuration allows you to specify and access the artifact in Atlas.
 * `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will always be `amazon.ami`.
   This field must be defined because Atlas can host other artifact types, such as Vagrant boxes.
 
--> **Note:** If you want to upload Vagrant boxes to Atlas, for now use the [Vagrant Cloud post-processor](/docs/post-processors/vagrant-cloud.html).
+-> **Note:** If you want to upload Vagrant boxes to Atlas, use the [Atlas post-processor](/docs/post-processors/atlas.html).
 
 ### Optional:
 
