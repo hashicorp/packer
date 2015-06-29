@@ -4,6 +4,10 @@ version: "{build}"
 
 skip_tags: true
 
+branches:
+  only:
+    - master
+
 os: Windows Server 2012 R2
 
 environment:
