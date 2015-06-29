@@ -5,9 +5,10 @@ BUG FIXES:
   * builder/amazon: Fix issue with sharing AMIs when using `ami_users` [GH-2308]
   * builder/amazon: Fix for tag creation when creating new ec2 instance [GH-2317]
   * builder/amazon: Fix issue with creating AMIs with multiple device mappings [GH-2320]
-  * builder/amazon: Fix failing AMI snapshot tagging when copying to other 
+  * builder/amazon: Fix failing AMI snapshot tagging when copying to other
       regions [GH-2316]
-  * builder/amazon-instance: Fix issue with creating AMIs without specifying a 
+  * builder/amazon: Fix setting AMI launch permissions [GH-2348]
+  * builder/amazon-instance: Fix issue with creating AMIs without specifying a
       virtualization type [GH-2330]
 
 ## 0.8.0 (June 23, 2015)
