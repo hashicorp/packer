@@ -54,7 +54,7 @@ briefly. Create a file `example.json` and fill it with the following contents:
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-c65be9ae",
+    "source_ami": "ami-de0d9eb7",
     "instance_type": "t1.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
