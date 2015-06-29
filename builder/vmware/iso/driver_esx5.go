@@ -396,9 +396,8 @@ func (d *ESX5Driver) upload(dst, src string) error {
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
-	if (ctype == "none") {
-		err := d.sh("stat", file)
-		if err != nil {
+	if ctype == "none" {
+		if err := d.sh("stat", file); err != nil {
 			return false
 		}
 	} else {
@@ -408,6 +407,7 @@ func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool
 			return false
 		}
 	}
+
 	return true
 }
 

@@ -11,6 +11,8 @@ BUG FIXES:
   * builder/amazon: Fix spot instance cleanup to remove the correct request [GH-2327]
   * builder/amazon-instance: Fix issue with creating AMIs without specifying a
       virtualization type [GH-2330]
+  * builder/vmware-iso: Setting `checksum_type` to `none` for ESX builds
+      now works [GH-2323]
 
 ## 0.8.0 (June 23, 2015)
 
