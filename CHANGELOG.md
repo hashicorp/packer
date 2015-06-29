@@ -1,7 +1,13 @@
 ## 0.8.1 (unreleased)
 
+IMPROVEMENTS:
+
+  * builder/amazon: When debug mode is enabled, the Windows administrator
+      password for Windows instances will be shown [GH-2351]
+
 BUG FIXES:
 
+  * core: `min_packer_version`  field in configs work [GH-2356]
   * builder/amazon: Fix issue with sharing AMIs when using `ami_users` [GH-2308]
   * builder/amazon: Fix for tag creation when creating new ec2 instance [GH-2317]
   * builder/amazon: Fix issue with creating AMIs with multiple device mappings [GH-2320]
