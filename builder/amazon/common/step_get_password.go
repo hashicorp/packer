@@ -19,6 +19,7 @@ import (
 // StepGetPassword reads the password from a Windows server and sets it
 // on the WinRM config.
 type StepGetPassword struct {
+	Debug   bool
 	Comm    *communicator.Config
 	Timeout time.Duration
 }
@@ -85,6 +86,13 @@ WaitLoop:
 			}
 		}
 	}
+
+	// In debug-mode, we output the password
+	if s.Debug {
+		ui.Message(fmt.Sprintf(
+			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
+	}
+
 	return multistep.ActionContinue
 }
 
