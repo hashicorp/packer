@@ -396,10 +396,17 @@ func (d *ESX5Driver) upload(dst, src string) error {
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
-	stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
-	_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
-	if err != nil {
-		return false
+	if (ctype == "none") {
+		err := d.sh("stat", file)
+		if err != nil {
+			return false
+		}
+	} else {
+		stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
+		_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
+		if err != nil {
+			return false
+		}
 	}
 	return true
 }
