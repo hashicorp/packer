@@ -44,6 +44,8 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 		script.Reset()
 		script.WriteLine("param([string]$vmName)")
 		script.WriteLine("Add-VMDvdDrive -VMName $vmName")
+		script.WriteLine("$dvdDrive = Get-VMDvdDrive -VMName $vmName | Select-Object -first 1")
+		script.WriteLine("Set-VMFirmware -VMName $vmName -FirstBootDevice $dvdDrive")
 		err = powershell.Run(script.String(), vmName)
 		if err != nil {
 			state.Put("error", err)
