@@ -484,6 +484,19 @@ func TestCoreValidate(t *testing.T) {
 			map[string]string{"foo": "bar"},
 			false,
 		},
+
+		// Min version good
+		{
+			"validate-min-version.json",
+			map[string]string{"foo": "bar"},
+			false,
+		},
+
+		{
+			"validate-min-version-high.json",
+			map[string]string{"foo": "bar"},
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -501,6 +514,7 @@ func TestCoreValidate(t *testing.T) {
 		_, err = NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
+			Version:   "1.0.0",
 		})
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
