@@ -168,6 +168,7 @@ func wrappedMain() int {
 				PostProcessor: config.LoadPostProcessor,
 				Provisioner:   config.LoadProvisioner,
 			},
+			Version: Version,
 		},
 		Cache: cache,
 		Ui:    ui,
