@@ -56,8 +56,8 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		users := make([]*string, len(s.Users))
 		adds := make([]*ec2.LaunchPermission, len(s.Users))
 		for i, u := range s.Users {
-			users[i] = aws.String(&u)
-			adds[i] = &ec2.LaunchPermission{UserID: aws.String(&u)}
+			users[i] = aws.String(u)
+			adds[i] = &ec2.LaunchPermission{UserID: aws.String(u)}
 		}
 		options["users"] = &ec2.ModifyImageAttributeInput{
 			UserIDs: users,
