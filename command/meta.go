@@ -28,6 +28,7 @@ type Meta struct {
 	CoreConfig *packer.CoreConfig
 	Cache      packer.Cache
 	Ui         packer.Ui
+	Version    string
 
 	// These are set by command-line flags
 	flagBuildExcept []string
@@ -42,6 +43,7 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	config := *m.CoreConfig
 	config.Template = tpl
 	config.Variables = m.flagVars
+	config.Version = m.Version
 
 	// Init the core
 	core, err := packer.NewCore(&config)
