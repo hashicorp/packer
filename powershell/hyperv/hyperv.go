@@ -98,16 +98,27 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 
 func CreateVirtualMachine(vmName string, path string, ram string, diskSize string, switchName string, generation string) error {
 
-	var script = `
+	if generation == "2" {
+		var script = `
 param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
 `
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, path, ram, diskSize, switchName, generation)
-	return err
+		var ps powershell.PowerShellCmd
+		err := ps.Run(script, vmName, path, ram, diskSize, switchName, generation)
+		return err
+	} else {
+		var script = `
+param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+$vhdx = $vmName + '.vhdx'
+$vhdPath = Join-Path -Path $path -ChildPath $vhdx
+New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+`
+		var ps powershell.PowerShellCmd
+		err := ps.Run(script, vmName, path, ram, diskSize, switchName)
+		return err
+	}
 }
 
 func SetVirtualMachineCpu(vmName string, cpu string) error {
@@ -119,6 +130,23 @@ Set-VMProcessor -VMName $vmName -Count $cpu
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, cpu)
+	return err
+}
+
+func SetSecureBoot(vmName string, enable bool) error {
+	var script = `
+param([string]$vmName, $enableSecureBoot)
+Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
+`
+
+	var ps powershell.PowerShellCmd
+
+	enableSecureBoot := "Off"
+	if enable {
+		enableSecureBoot = "On"
+	}
+
+	err := ps.Run(script, vmName, enableSecureBoot)
 	return err
 }
 
@@ -635,8 +663,6 @@ param([string]$vmName, [string]$scanCodes)
 			$vmConsole.TypeScancodes($_)
         }
 	}
-
-
 `
 
 	var ps powershell.PowerShellCmd
