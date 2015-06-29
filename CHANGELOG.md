@@ -13,6 +13,8 @@ BUG FIXES:
       virtualization type [GH-2330]
   * builder/vmware-iso: Setting `checksum_type` to `none` for ESX builds
       now works [GH-2323]
+  * provisioner/chef: Use knife config file vs command-line params to
+      clean up nodes so full set of features can be used [GH-2306]
 
 ## 0.8.0 (June 23, 2015)
 
