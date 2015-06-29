@@ -15,6 +15,7 @@ BUG FIXES:
       regions [GH-2316]
   * builder/amazon: Fix setting AMI launch permissions [GH-2348]
   * builder/amazon: Fix spot instance cleanup to remove the correct request [GH-2327]
+  * builder/amazon: Fix `bundle_prefix` not interpolating `timestamp` [GH-2352]
   * builder/amazon-instance: Fix issue with creating AMIs without specifying a
       virtualization type [GH-2330]
   * builder/vmware-iso: Setting `checksum_type` to `none` for ESX builds
