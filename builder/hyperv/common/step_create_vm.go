@@ -23,6 +23,7 @@ type StepCreateVM struct {
 	DiskSize   uint
 	Generation uint
 	Cpu        uint
+	EnabeSecureBoot bool
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -40,6 +41,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	switchName := s.SwitchName
 	generation := strconv.FormatInt(int64(s.Generation), 10)
 	cpu := strconv.FormatInt(int64(s.Cpu), 10)
+	enabeSecureBoot := s.EnabeSecureBoot
 
 	err := hyperv.CreateVirtualMachine(s.VMName, path, ram, diskSize, switchName, generation)
 	if err != nil {
@@ -48,13 +50,23 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
+ 
 	err = hyperv.SetVirtualMachineCpu(s.VMName, cpu)
 	if err != nil {
 		err := fmt.Errorf("Error creating setting virtual machine cpu: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+	
+	if generation == "2" {
+		err = hyperv.SetSecureBoot(s.VMName, enabeSecureBoot)
+		if err != nil {
+			err := fmt.Errorf("Error setting secure boot: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Set the final name in the state bag so others can use it

@@ -95,10 +95,11 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
-	BootCommand []string `mapstructure:"boot_command"`
-	SwitchName  string   `mapstructure:"switch_name"`
-	Cpu         uint     `mapstructure:"cpu"`
-	Generation  uint     `mapstructure:"generation"`
+	BootCommand      []string `mapstructure:"boot_command"`
+	SwitchName       string   `mapstructure:"switch_name"`
+	Cpu              uint     `mapstructure:"cpu"`
+	Generation       uint     `mapstructure:"generation"`
+	EnableSecureBoot bool     `mapstructure:"enable_secure_boot"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -285,12 +286,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepCreateVM{
-			VMName:     b.config.VMName,
-			SwitchName: b.config.SwitchName,
-			RamSizeMB:  b.config.RamSizeMB,
-			DiskSize:   b.config.DiskSize,
-			Generation: b.config.Generation,
-			Cpu:        b.config.Cpu,
+			VMName:          b.config.VMName,
+			SwitchName:      b.config.SwitchName,
+			RamSizeMB:       b.config.RamSizeMB,
+			DiskSize:        b.config.DiskSize,
+			Generation:      b.config.Generation,
+			Cpu:             b.config.Cpu,
+			EnabeSecureBoot: b.config.EnableSecureBoot,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 

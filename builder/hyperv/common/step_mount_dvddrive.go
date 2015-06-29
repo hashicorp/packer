@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	powershell "github.com/mitchellh/packer/powershell"
 	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
-
 type StepMountDvdDrive struct {
 	RawSingleISOUrl string
-	path string
+	path            string
 }
 
 func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
@@ -25,9 +25,36 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	vmName := state.Get("vmName").(string)
 	isoPath := s.RawSingleISOUrl
 
+	// Check that there is a virtual dvd drive
+	var script powershell.ScriptBuilder
+	powershell := new(powershell.PowerShellCmd)
+
+	script.Reset()
+	script.WriteLine("param([string]$vmName)")
+	script.WriteLine("(Get-VMDvdDrive -VMName $vmName).ControllerNumber")
+	controllerNumber, err := powershell.Output(script.String(), vmName)
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if controllerNumber == "" {
+		// Add a virtual dvd drive as there is none
+		script.Reset()
+		script.WriteLine("param([string]$vmName)")
+		script.WriteLine("Add-VMDvdDrive -VMName $vmName")
+		err = powershell.Run(script.String(), vmName)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	ui.Say("Mounting dvd drive...")
 
-	err := hyperv.MountDvdDrive(vmName, isoPath)
+	err = hyperv.MountDvdDrive(vmName, isoPath)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
