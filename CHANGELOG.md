@@ -18,6 +18,7 @@ BUG FIXES:
   * builder/amazon: Fix `bundle_prefix` not interpolating `timestamp` [GH-2352]
   * builder/amazon-instance: Fix issue with creating AMIs without specifying a
       virtualization type [GH-2330]
+  * builder/google: Set default communicator settings properly [GH-2353]
   * builder/vmware-iso: Setting `checksum_type` to `none` for ESX builds
       now works [GH-2323]
   * provisioner/chef: Use knife config file vs command-line params to
