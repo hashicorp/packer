@@ -296,7 +296,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 	if s.spotRequest != nil {
 		ui.Say("Cancelling the spot request...")
 		input := &ec2.CancelSpotInstanceRequestsInput{
-			SpotInstanceRequestIDs: []*string{s.spotRequest.InstanceID},
+			SpotInstanceRequestIDs: []*string{s.spotRequest.SpotInstanceRequestID},
 		}
 		if _, err := ec2conn.CancelSpotInstanceRequests(input); err != nil {
 			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
