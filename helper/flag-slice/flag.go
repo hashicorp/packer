@@ -11,6 +11,6 @@ func (s *StringFlag) String() string {
 }
 
 func (s *StringFlag) Set(value string) error {
-	*s = append(*s, value)
+	*s = append(*s, strings.Split(value, ",")...)
 	return nil
 }
