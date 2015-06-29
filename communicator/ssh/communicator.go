@@ -277,6 +277,7 @@ func (c *comm) reconnect() (err error) {
 	if err != nil {
 		log.Printf("handshake error: %s", err)
 	}
+	log.Printf("handshake complete!")
 	if sshConn != nil {
 		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
