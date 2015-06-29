@@ -119,6 +119,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tags:                     b.config.RunTags,
 		},
 		&awscommon.StepGetPassword{
+			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
 			Timeout: b.config.WindowsPasswordTimeout,
 		},
