@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +13,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 type comm struct {
@@ -272,10 +273,23 @@ func (c *comm) reconnect() (err error) {
 		return
 	}
 
+	// Attempt to establish an SSH connection
 	log.Printf("handshaking with SSH")
-	sshConn, sshChan, req, err := ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
-	if err != nil {
-		log.Printf("handshake error: %s", err)
+	retry := 3
+	var sshConn ssh.Conn
+	var sshChan <-chan ssh.NewChannel
+	var req <-chan *ssh.Request
+
+	for retry > 0 {
+		log.Printf("%s handshake attempt(s) left")
+		sshConn, sshChan, req, err = ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+		if err == nil {
+			break
+		} else {
+			retry--
+			log.Printf("handshake error: %s", err)
+		}
+
 	}
 	log.Printf("handshake complete!")
 	if sshConn != nil {
