@@ -8,6 +8,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: `min_packer_version`  field in configs work [GH-2356]
+  * core: The `build_name` and `build_type` functions work in provisioners [GH-2367]
   * builder/amazon: Fix issue with sharing AMIs when using `ami_users` [GH-2308]
   * builder/amazon: Fix for tag creation when creating new ec2 instance [GH-2317]
   * builder/amazon: Fix issue with creating AMIs with multiple device mappings [GH-2320]
