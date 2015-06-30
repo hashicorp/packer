@@ -274,14 +274,14 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	// Attempt to establish an SSH connection
-	log.Printf("handshaking with SSH")
+	log.Printf("Handshaking with SSH")
 	retry := 3
 	var sshConn ssh.Conn
 	var sshChan <-chan ssh.NewChannel
 	var req <-chan *ssh.Request
 
 	for retry > 0 {
-		log.Printf("%s handshake attempt(s) left")
+		log.Printf("%d handshake attempt(s) left", retry)
 		sshConn, sshChan, req, err = ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
 		if err == nil {
 			break
@@ -291,7 +291,7 @@ func (c *comm) reconnect() (err error) {
 		}
 
 	}
-	log.Printf("handshake complete!")
+	log.Printf("Handshake complete!")
 	if sshConn != nil {
 		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
