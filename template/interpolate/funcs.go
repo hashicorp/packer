@@ -71,7 +71,7 @@ func funcGenBuildName(ctx *Context) interface{} {
 func funcGenBuildType(ctx *Context) interface{} {
 	return func() (string, error) {
 		if ctx == nil || ctx.BuildType == "" {
-			return "", errors.New("build_name not available")
+			return "", errors.New("build_type not available")
 		}
 
 		return ctx.BuildType, nil
