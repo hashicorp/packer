@@ -165,7 +165,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")
-		comm, err = ssh.New(address, config)
+		// Abort after 20 seconds, retry 3 times.
+		comm, err = ssh.ConnectToSSH(address, config, 20, 3)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)
 
@@ -175,7 +176,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			if strings.Contains(err.Error(), "authenticate") {
 				log.Printf(
 					"[DEBUG] Detected authentication error. Increasing handshake attempts.")
-				handshakeAttempts += 1
+				handshakeAttempts++
 			}
 
 			if handshakeAttempts < s.Config.SSHHandshakeAttempts {

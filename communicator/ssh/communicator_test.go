@@ -5,10 +5,11 @@ package ssh
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
 	"net"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
 )
 
 // private key for mock server

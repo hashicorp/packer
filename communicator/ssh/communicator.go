@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +13,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 type comm struct {
@@ -57,6 +59,38 @@ func New(address string, config *Config) (result *comm, err error) {
 	}
 
 	return
+}
+
+// ConnectToSSH returns the same data as New() but will retry the connection if
+// there is a problem. Will retry after [timeout] seconds up to [retry] times.
+func ConnectToSSH(address string, config *Config, timeout uint8, retry uint8) (communicator *comm, err error) {
+	attempts := retry
+
+	for attempts > 0 {
+		connection := make(chan bool, 1)
+		elapsed := time.After(time.Duration(timeout) * time.Second)
+		go func() {
+			communicator, err = New(address, config)
+			connection <- true
+		}()
+		for {
+			select {
+			case ok := <-connection:
+				if ok {
+					return communicator, err
+				}
+			case <-elapsed:
+				log.Printf("[WARN] Failed to establish an SSH connection after %d seconds", timeout)
+				break
+			}
+		}
+
+		attempts--
+		log.Printf("[WARN] Failed to connect to SSH; %d attempt(s) remaining", attempts)
+	}
+	log.Printf("[ERROR] Failed to connect to SSH after %d attempts", retry)
+
+	return communicator, err
 }
 
 func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
