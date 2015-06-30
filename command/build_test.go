@@ -37,6 +37,36 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	}
 }
 
+func TestBuildStdin(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+	f, err := os.Open(filepath.Join(testFixture("build-only"), "template.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	stdin := os.Stdin
+	os.Stdin = f
+	defer func() { os.Stdin = stdin }()
+
+	defer cleanup()
+	if code := c.Run([]string{"-"}); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	if !fileExists("chocolate.txt") {
+		t.Error("Expected to find chocolate.txt")
+	}
+	if !fileExists("vanilla.txt") {
+		t.Error("Expected to find vanilla.txt")
+	}
+	if !fileExists("cherry.txt") {
+		t.Error("Expected to find cherry.txt")
+	}
+}
+
 func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
