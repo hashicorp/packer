@@ -33,6 +33,7 @@ type StepConnect struct {
 	// WinRMConfig should return the default configuration for
 	// connecting via WinRM.
 	WinRMConfig func(multistep.StateBag) (*WinRMConfig, error)
+	WinRMPort   func(multistep.StateBag) (int, error)
 
 	// CustomConnect can be set to have custom connectors for specific
 	// types. These take highest precedence so you can also override
@@ -55,7 +56,7 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 			Config:      s.Config,
 			Host:        s.Host,
 			WinRMConfig: s.WinRMConfig,
-			WinRMPort:   s.SSHPort,
+			WinRMPort: 	 s.WinRMPort,
 		},
 	}
 	for k, v := range s.CustomConnect {
