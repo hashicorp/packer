@@ -74,6 +74,36 @@ func TestDecode(t *testing.T) {
 				},
 			},
 		},
+
+		"build name": {
+			[]interface{}{
+				map[string]interface{}{
+					"name": "{{build_name}}",
+				},
+				map[string]interface{}{
+					"packer_build_name": "foo",
+				},
+			},
+			&Target{
+				Name: "foo",
+			},
+			nil,
+		},
+
+		"build type": {
+			[]interface{}{
+				map[string]interface{}{
+					"name": "{{build_type}}",
+				},
+				map[string]interface{}{
+					"packer_builder_type": "foo",
+				},
+			},
+			&Target{
+				Name: "foo",
+			},
+			nil,
+		},
 	}
 
 	for k, tc := range cases {
