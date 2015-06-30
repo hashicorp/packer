@@ -89,10 +89,14 @@ Optional parameters:
 
 To many new users, the `execute_command` is puzzling. However, it provides
 an important function: customization of how the command is executed. The
-most common use case for this is dealing with **sudo password prompts**.
+most common use case for this is dealing with **sudo password prompts**. You may
+also need to customize this if you use a non-POSIX shell, such as `tcsh` on
+FreeBSD.
 
-For example, if the default user of an installed operating system is "packer"
-and has the password "packer" for sudo usage, then you'll likely want to
+### Sudo Example
+
+Some operating systems default to a non-root user. For example if you login
+as `ubuntu` and can sudo using the password `packer`, then you'll want to
 change `execute_command` to be:
 
 ```text
@@ -100,12 +104,22 @@ change `execute_command` to be:
 ```
 
 The `-S` flag tells `sudo` to read the password from stdin, which in this
-case is being piped in with the value of "packer". The `-E` flag tells `sudo`
+case is being piped in with the value of `packer`. The `-E` flag tells `sudo`
 to preserve the environment, allowing our environmental variables to work
 within the script.
 
 By setting the `execute_command` to this, your script(s) can run with
 root privileges without worrying about password prompts.
+
+### FreeBSD Example
+
+FreeBSD's default shell is `tcsh`, which deviates from POSIX sematics. In order
+for packer to pass environment variables you will need to change the
+`execute_command` to:
+
+    chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+
+Note the addition of `env` before `{{ .Vars }}`.
 
 ## Default Environmental Variables
 
