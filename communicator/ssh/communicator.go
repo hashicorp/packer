@@ -287,9 +287,12 @@ func (c *comm) reconnect() (err error) {
 			break
 		} else {
 			retry--
-			log.Printf("handshake error: %s", err)
+			log.Printf("Handshake error: %s", err)
+			if retry == 0 {
+				log.Print("Exhausted handshake retries")
+				return
+			}
 		}
-
 	}
 	log.Printf("Handshake complete!")
 	if sshConn != nil {
