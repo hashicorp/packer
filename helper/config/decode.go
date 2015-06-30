@@ -42,6 +42,8 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		if config.InterpolateContext == nil {
 			config.InterpolateContext = ctx
 		} else {
+			config.InterpolateContext.BuildName = ctx.BuildName
+			config.InterpolateContext.BuildType = ctx.BuildType
 			config.InterpolateContext.TemplatePath = ctx.TemplatePath
 			config.InterpolateContext.UserVariables = ctx.UserVariables
 		}
