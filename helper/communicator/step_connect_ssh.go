@@ -165,7 +165,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")
-		// Abort after 20 seconds, retry 3 times.
+		// Abort the handshake after 20 seconds, try 3 times.
 		comm, err = ssh.ConnectToSSH(address, config, 20, 3)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)

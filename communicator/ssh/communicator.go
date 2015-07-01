@@ -44,7 +44,7 @@ type Config struct {
 	DisableAgent bool
 }
 
-// Creates a new packer.Communicator implementation over SSH. This takes
+// New creates a new packer.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
 func New(address string, config *Config) (result *comm, err error) {
 	// Establish an initial connection and connect
@@ -73,6 +73,7 @@ func ConnectToSSH(address string, config *Config, timeout uint8, retry uint8) (c
 			communicator, err = New(address, config)
 			connection <- true
 		}()
+	WaitForHandshake:
 		for {
 			select {
 			case ok := <-connection:
@@ -81,15 +82,15 @@ func ConnectToSSH(address string, config *Config, timeout uint8, retry uint8) (c
 				}
 			case <-elapsed:
 				log.Printf("[WARN] Failed to establish an SSH connection after %d seconds", timeout)
-				break
+				break WaitForHandshake
 			}
 		}
 
 		attempts--
-		log.Printf("[WARN] Failed to connect to SSH; %d attempt(s) remaining", attempts)
+		log.Printf("[WARN] Failed to establish an SSH connection; %d attempt(s) remaining", attempts)
 	}
-	log.Printf("[ERROR] Failed to connect to SSH after %d attempts", retry)
 
+	err = fmt.Errorf("Failed to establish SSH connection after %d attempts", retry)
 	return communicator, err
 }
 
