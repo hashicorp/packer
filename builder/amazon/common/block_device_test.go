@@ -21,7 +21,6 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "standard",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				IOPS:                1000,
 			},
 
 			Result: &ec2.BlockDeviceMapping{
