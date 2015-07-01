@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +13,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 type comm struct {
@@ -42,7 +44,7 @@ type Config struct {
 	DisableAgent bool
 }
 
-// Creates a new packer.Communicator implementation over SSH. This takes
+// New creates a new packer.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
 func New(address string, config *Config) (result *comm, err error) {
 	// Establish an initial connection and connect
@@ -57,6 +59,39 @@ func New(address string, config *Config) (result *comm, err error) {
 	}
 
 	return
+}
+
+// ConnectToSSH returns the same data as New() but will retry the connection if
+// there is a problem. Will retry after [timeout] seconds up to [retry] times.
+func ConnectToSSH(address string, config *Config, timeout uint8, retry uint8) (communicator *comm, err error) {
+	attempts := retry
+
+	for attempts > 0 {
+		connectionEstablished := make(chan bool, 1)
+		timeoutExceeded := time.After(time.Duration(timeout) * time.Second)
+		go func() {
+			communicator, err = New(address, config)
+			connectionEstablished <- true
+		}()
+	WaitForHandshake:
+		for {
+			select {
+			case ok := <-connectionEstablished:
+				if ok {
+					return communicator, err
+				}
+			case <-timeoutExceeded:
+				log.Printf("[WARN] Failed to establish an SSH connection after %d seconds", timeout)
+				break WaitForHandshake
+			}
+		}
+
+		attempts--
+		log.Printf("[WARN] Failed to establish an SSH connection; %d attempt(s) remaining", attempts)
+	}
+
+	err = fmt.Errorf("Failed to establish SSH connection after %d attempts", retry)
+	return communicator, err
 }
 
 func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
