@@ -75,8 +75,8 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Error("expected elevated_password to be empty")
 	}
 
-	if p.config.ExecuteCommand != "powershell \"& { {{.Vars}}{{.Path}}; exit $LastExitCode}\"" {
-		t.Fatalf("Default command should be powershell \"& { {{.Vars}}{{.Path}}; exit $LastExitCode}\", but got %s", p.config.ExecuteCommand)
+	if p.config.ExecuteCommand != "powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}'" {
+		t.Fatalf("Default command should be powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}', but got %s", p.config.ExecuteCommand)
 	}
 
 	if p.config.ElevatedExecuteCommand != "{{.Vars}}{{.Path}}" {
