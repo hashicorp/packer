@@ -17,7 +17,6 @@ func TestBlockDevice(t *testing.T) {
 		{
 			Config: &BlockDevice{
 				DeviceName:          "/dev/sdb",
-				VirtualName:         "ephemeral0",
 				SnapshotId:          "snap-1234",
 				VolumeType:          "standard",
 				VolumeSize:          8,
@@ -27,7 +26,7 @@ func TestBlockDevice(t *testing.T) {
 
 			Result: &ec2.BlockDeviceMapping{
 				DeviceName:  aws.String("/dev/sdb"),
-				VirtualName: aws.String("ephemeral0"),
+				VirtualName: aws.String(""),
 				EBS: &ec2.EBSBlockDevice{
 					SnapshotID:          aws.String("snap-1234"),
 					VolumeType:          aws.String("standard"),
@@ -55,7 +54,6 @@ func TestBlockDevice(t *testing.T) {
 		{
 			Config: &BlockDevice{
 				DeviceName:          "/dev/sdb",
-				VirtualName:         "ephemeral0",
 				VolumeType:          "io1",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
@@ -64,13 +62,24 @@ func TestBlockDevice(t *testing.T) {
 
 			Result: &ec2.BlockDeviceMapping{
 				DeviceName:  aws.String("/dev/sdb"),
-				VirtualName: aws.String("ephemeral0"),
+				VirtualName: aws.String(""),
 				EBS: &ec2.EBSBlockDevice{
 					VolumeType:          aws.String("io1"),
 					VolumeSize:          aws.Long(8),
 					DeleteOnTermination: aws.Boolean(true),
 					IOPS:                aws.Long(1000),
 				},
+			},
+		},
+		{
+			Config: &BlockDevice{
+				DeviceName:  "/dev/sdb",
+				VirtualName: "ephemeral0",
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName:  aws.String("/dev/sdb"),
+				VirtualName: aws.String("ephemeral0"),
 			},
 		},
 	}
