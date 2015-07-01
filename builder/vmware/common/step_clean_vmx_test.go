@@ -61,8 +61,8 @@ func TestStepCleanVMX_floppyPath(t *testing.T) {
 		Value string
 	}{
 		{"floppy0.present", "FALSE"},
-		{"floppy0.filetype", ""},
-		{"floppy0.filename", ""},
+		{"floppy0.fileType", ""},
+		{"floppy0.fileName", ""},
 	}
 
 	for _, tc := range cases {
@@ -109,9 +109,9 @@ func TestStepCleanVMX_isoPath(t *testing.T) {
 		Key   string
 		Value string
 	}{
-		{"ide0:0.filename", "auto detect"},
-		{"ide0:0.devicetype", "cdrom-raw"},
-		{"ide0:1.filename", "bar"},
+		{"ide0:0.fileName", "auto detect"},
+		{"ide0:0.deviceType", "cdrom-raw"},
+		{"ide0:1.fileName", "bar"},
 		{"foo", "bar"},
 	}
 
@@ -130,12 +130,12 @@ func TestStepCleanVMX_isoPath(t *testing.T) {
 
 const testVMXFloppyPath = `
 floppy0.present = "TRUE"
-floppy0.filetype = "file"
+floppy0.fileType = "file"
 `
 
 const testVMXISOPath = `
-ide0:0.devicetype = "cdrom-image"
-ide0:0.filename = "foo"
-ide0:1.filename = "bar"
+ide0:0.deviceType = "cdrom-image"
+ide0:0.fileName = "foo"
+ide0:1.fileName = "bar"
 foo = "bar"
 `
