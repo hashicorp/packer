@@ -51,8 +51,8 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 		ui.Message("Detaching ISO from CD-ROM device...")
 
-		vmxData[ide+"devicetype"] = "cdrom-raw"
-		vmxData[ide+"filename"] = "auto detect"
+		vmxData[ide+"deviceType"] = "cdrom-raw"
+		vmxData[ide+"fileName"] = "auto detect"
 	}
 
 	ui.Message("Disabling VNC server...")
