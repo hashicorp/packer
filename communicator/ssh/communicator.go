@@ -67,20 +67,20 @@ func ConnectToSSH(address string, config *Config, timeout uint8, retry uint8) (c
 	attempts := retry
 
 	for attempts > 0 {
-		connection := make(chan bool, 1)
-		elapsed := time.After(time.Duration(timeout) * time.Second)
+		connectionEstablished := make(chan bool, 1)
+		timeoutExceeded := time.After(time.Duration(timeout) * time.Second)
 		go func() {
 			communicator, err = New(address, config)
-			connection <- true
+			connectionEstablished <- true
 		}()
 	WaitForHandshake:
 		for {
 			select {
-			case ok := <-connection:
+			case ok := <-connectionEstablished:
 				if ok {
 					return communicator, err
 				}
-			case <-elapsed:
+			case <-timeoutExceeded:
 				log.Printf("[WARN] Failed to establish an SSH connection after %d seconds", timeout)
 				break WaitForHandshake
 			}
