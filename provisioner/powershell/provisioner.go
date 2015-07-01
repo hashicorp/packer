@@ -116,11 +116,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ElevatedEnvVarFormat == "" {
-		p.config.ElevatedEnvVarFormat = `$env:%s="%s"; `
+		p.config.ElevatedEnvVarFormat = `$env:%s=\"%s\"; `
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `powershell "& { {{.Vars}}{{.Path}}; exit $LastExitCode}"`
+		p.config.ExecuteCommand = `powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}'`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {

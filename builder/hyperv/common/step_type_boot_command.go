@@ -32,15 +32,14 @@ type bootCommandTemplateData struct {
 type StepTypeBootCommand struct {
 	BootCommand []string
 	SwitchName  string
-	VMName      string
 	Ctx         interpolate.Context
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
-
 	driver := state.Get("driver").(Driver)
+	vmName := state.Get("vmName").(string)
 
 	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
 
@@ -56,7 +55,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	s.Ctx.Data = &bootCommandTemplateData{
 		hostIp,
 		httpPort,
-		s.VMName,
+		vmName,
 	}
 
 	ui.Say("Typing the boot command...")
@@ -77,7 +76,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	scanCodesToSendString := strings.Join(scanCodesToSend, " ")
 
-	if err := driver.TypeScanCodes(s.VMName, scanCodesToSendString); err != nil {
+	if err := driver.TypeScanCodes(vmName, scanCodesToSendString); err != nil {
 		err := fmt.Errorf("Error sending boot command: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
