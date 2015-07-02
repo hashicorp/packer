@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,7 +13,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
+
+var ErrHandshakeTimeout = fmt.Errorf("Timeout during SSH handshake")
 
 type comm struct {
 	client  *ssh.Client
@@ -40,6 +44,10 @@ type Config struct {
 
 	// DisableAgent, if true, will not forward the SSH agent.
 	DisableAgent bool
+
+	// HandshakeTimeout limits the amount of time we'll wait to handshake before
+	// saying the connection failed.
+	HandshakeTimeout time.Duration
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -273,9 +281,39 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	log.Printf("handshaking with SSH")
-	sshConn, sshChan, req, err := ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+
+	// Default timeout to 1 minute if it wasn't specified (zero value). For
+	// when you need to handshake from low orbit.
+	var duration time.Duration
+	if c.config.HandshakeTimeout == 0 {
+		duration = 1 * time.Minute
+	} else {
+		duration = c.config.HandshakeTimeout
+	}
+
+	timeoutExceeded := time.After(duration)
+	connectionEstablished := make(chan bool, 1)
+
+	var sshConn ssh.Conn
+	var sshChan <-chan ssh.NewChannel
+	var req <-chan *ssh.Request
+
+	go func() {
+		sshConn, sshChan, req, err = ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+		connectionEstablished <- true
+	}()
+
+	select {
+	case <-connectionEstablished:
+		// We don't need to do anything here. We just want select to block until
+		// we connect or timeout.
+	case <-timeoutExceeded:
+		return ErrHandshakeTimeout
+	}
+
 	if err != nil {
 		log.Printf("handshake error: %s", err)
+		return
 	}
 	log.Printf("handshake complete!")
 	if sshConn != nil {
