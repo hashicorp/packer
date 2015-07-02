@@ -5,10 +5,12 @@ package ssh
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
 	"net"
 	"testing"
+	"time"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
 )
 
 // private key for mock server
@@ -94,6 +96,28 @@ func newMockLineServer(t *testing.T) string {
 	return l.Addr().String()
 }
 
+func newMockBrokenServer(t *testing.T) string {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("Unable tp listen for connection: %s", err)
+	}
+
+	go func() {
+		defer l.Close()
+		c, err := l.Accept()
+		if err != nil {
+			t.Errorf("Unable to accept incoming connection: %s", err)
+		}
+		defer c.Close()
+		// This should block for a period of time longer than our timeout in
+		// the test case. That way we invoke a failure scenario.
+		time.Sleep(5 * time.Second)
+		t.Log("Block on handshaking for SSH connection")
+	}()
+
+	return l.Addr().String()
+}
+
 func TestCommIsCommunicator(t *testing.T) {
 	var raw interface{}
 	raw = &comm{}
@@ -157,10 +181,44 @@ func TestStart(t *testing.T) {
 		t.Fatalf("error connecting to SSH: %s", err)
 	}
 
-	var cmd packer.RemoteCmd
-	stdout := new(bytes.Buffer)
-	cmd.Command = "echo foo"
-	cmd.Stdout = stdout
+	cmd := &packer.RemoteCmd{
+		Command: "echo foo",
+		Stdout:  new(bytes.Buffer),
+	}
 
-	client.Start(&cmd)
+	client.Start(cmd)
+}
+
+func TestHandshakeTimeout(t *testing.T) {
+	clientConfig := &ssh.ClientConfig{
+		User: "user",
+		Auth: []ssh.AuthMethod{
+			ssh.Password("pass"),
+		},
+	}
+
+	address := newMockBrokenServer(t)
+	conn := func() (net.Conn, error) {
+		conn, err := net.Dial("tcp", address)
+		if err != nil {
+			t.Fatalf("unable to dial to remote side: %s", err)
+		}
+		return conn, err
+	}
+
+	config := &Config{
+		Connection:       conn,
+		SSHConfig:        clientConfig,
+		HandshakeTimeout: 50 * time.Millisecond,
+	}
+
+	_, err := New(address, config)
+	if err != ErrHandshakeTimeout {
+		// Note: there's another error that can come back from this call:
+		//   ssh: handshake failed: EOF
+		// This should appear in cases where the handshake fails because of
+		// malformed (or no) data sent back by the server, but should not happen
+		// in a timeout scenario.
+		t.Fatalf("Expected handshake timeout, got: %s", err)
+	}
 }
