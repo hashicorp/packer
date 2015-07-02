@@ -111,8 +111,8 @@ func newMockBrokenServer(t *testing.T) string {
 		defer c.Close()
 		// This should block for a period of time longer than our timeout in
 		// the test case. That way we invoke a failure scenario.
-		time.Sleep(5 * time.Second)
 		t.Log("Block on handshaking for SSH connection")
+		time.Sleep(5 * time.Second)
 	}()
 
 	return l.Addr().String()
