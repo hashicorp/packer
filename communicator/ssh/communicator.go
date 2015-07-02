@@ -20,6 +20,9 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
+// ErrHandshakeTimeout is returned from New() whenever we're unable to establish
+// an ssh connection within a certain timeframe. By default the handshake time-
+// out period is 1 minute. You can change it with Config.HandshakeTimeout.
 var ErrHandshakeTimeout = fmt.Errorf("Timeout during SSH handshake")
 
 type comm struct {
@@ -291,8 +294,7 @@ func (c *comm) reconnect() (err error) {
 		duration = c.config.HandshakeTimeout
 	}
 
-	timeoutExceeded := time.After(duration)
-	connectionEstablished := make(chan bool, 1)
+	connectionEstablished := make(chan struct{}, 1)
 
 	var sshConn ssh.Conn
 	var sshChan <-chan ssh.NewChannel
@@ -300,14 +302,14 @@ func (c *comm) reconnect() (err error) {
 
 	go func() {
 		sshConn, sshChan, req, err = ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
-		connectionEstablished <- true
+		close(connectionEstablished)
 	}()
 
 	select {
 	case <-connectionEstablished:
 		// We don't need to do anything here. We just want select to block until
 		// we connect or timeout.
-	case <-timeoutExceeded:
+	case <-time.After(duration):
 		if c.conn != nil {
 			c.conn.Close()
 		}
