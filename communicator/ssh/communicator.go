@@ -308,6 +308,12 @@ func (c *comm) reconnect() (err error) {
 		// We don't need to do anything here. We just want select to block until
 		// we connect or timeout.
 	case <-timeoutExceeded:
+		if c.conn != nil {
+			c.conn.Close()
+		}
+		if sshConn != nil {
+			sshConn.Close()
+		}
 		return ErrHandshakeTimeout
 	}
 
