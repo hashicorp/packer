@@ -1,4 +1,4 @@
-## 0.8.1 (unreleased)
+## 0.8.1 (July 2, 2015)
 
 IMPROVEMENTS:
 
@@ -9,6 +9,8 @@ BUG FIXES:
 
   * core: `min_packer_version`  field in configs work [GH-2356]
   * core: The `build_name` and `build_type` functions work in provisioners [GH-2367]
+  * core: Handle timeout in SSH handshake [GH-2333]
+  * command/build: Fix reading configuration from stdin [GH-2366]
   * builder/amazon: Fix issue with sharing AMIs when using `ami_users` [GH-2308]
   * builder/amazon: Fix issue when using multiple Security Groups [GH-2381]
   * builder/amazon: Fix for tag creation when creating new ec2 instance [GH-2317]
@@ -20,6 +22,7 @@ BUG FIXES:
   * builder/amazon: Fix `bundle_prefix` not interpolating `timestamp` [GH-2352]
   * builder/amazon-instance: Fix issue with creating AMIs without specifying a
       virtualization type [GH-2330]
+  * builder/digitalocean: Fix builder using private IP instead of public IP [GH-2339]
   * builder/google: Set default communicator settings properly [GH-2353]
   * builder/vmware-iso: Setting `checksum_type` to `none` for ESX builds
       now works [GH-2323]
