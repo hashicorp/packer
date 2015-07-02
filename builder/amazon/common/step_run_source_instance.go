@@ -43,7 +43,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
 	for i, sg := range tempSecurityGroupIds {
-		securityGroupIds[i] = &sg
+		securityGroupIds[i] = aws.String(sg)
 	}
 
 	userData := s.UserData
