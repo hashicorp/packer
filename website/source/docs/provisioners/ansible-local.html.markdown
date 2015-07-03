@@ -41,7 +41,7 @@ Optional:
 * `extra_arguments` (array of strings) - An array of extra arguments to pass to the
   ansible command. By default, this is empty.
 
-* `inventory_groups` (string) - You can let Packer generate a temporary inventory
+* `inventory_groups` (array of strings) - You can let Packer generate a temporary inventory
   for you. It will contains only `127.0.0.1`. Thanks to `inventory_groups`,
   packer will set the current machine into different groups and will
   generate an inventory like:
