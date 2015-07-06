@@ -28,6 +28,7 @@ BUG FIXES:
       now works [GH-2323]
   * provisioner/chef: Use knife config file vs command-line params to
       clean up nodes so full set of features can be used [GH-2306]
+  * post-processor/compress: Fixed crash in compress post-processor plugin [GH-2311]
 
 ## 0.8.0 (June 23, 2015)
 
