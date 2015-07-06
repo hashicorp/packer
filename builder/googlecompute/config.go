@@ -73,7 +73,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ImageName == "" {
-		c.ImageName = "packer-{{timestamp}}"
+		img, err := interpolate.Render("packer-{{timestamp}}", nil)
+		if err != nil {
+			panic(err)
+		}
+
+		// Default to packer-{{ unix timestamp (utc) }}
+		c.ImageName = img
 	}
 
 	if c.InstanceName == "" {
