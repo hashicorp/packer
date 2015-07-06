@@ -16,8 +16,7 @@ Running the site locally is simple. Clone this repo and run the following
 commands:
 
 ```
-$ bundle
-$ PACKER_DISABLE_DOWNLOAD_FETCH=true PACKER_VERSION=1.0 bundle exec middleman server
+make dev
 ```
 
 Then open up `localhost:4567`. Note that some URLs you may need to append
