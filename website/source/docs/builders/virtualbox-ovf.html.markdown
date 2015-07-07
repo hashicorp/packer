@@ -39,7 +39,6 @@ the settings here.
   "source_path": "source.ovf",
   "ssh_username": "packer",
   "ssh_password": "packer",
-  "ssh_wait_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
 ```

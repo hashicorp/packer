@@ -33,7 +33,6 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
   "ssh_password": "packer",
-  "ssh_wait_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
 ```
