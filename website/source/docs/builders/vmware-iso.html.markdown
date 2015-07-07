@@ -38,7 +38,6 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
-  "ssh_wait_timeout": "30s",
   "shutdown_command": "shutdown -P now"
 }
 ```
