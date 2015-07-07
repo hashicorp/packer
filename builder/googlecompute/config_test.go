@@ -2,47 +2,9 @@ package googlecompute
 
 import (
 	"io/ioutil"
+	"strings"
 	"testing"
 )
-
-func testConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
-		"account_file": testAccountFile(t),
-		"project_id":   "hashicorp",
-		"source_image": "foo",
-		"zone":         "us-east-1a",
-	}
-}
-
-func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig(t))
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", len(warns))
-	}
-	if errs != nil {
-		t.Fatalf("bad: %#v", errs)
-	}
-
-	return c
-}
-
-func testConfigErr(t *testing.T, warns []string, err error, extra string) {
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatalf("should error: %s", extra)
-	}
-}
-
-func testConfigOk(t *testing.T, warns []string, err error) {
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("bad: %s", err)
-	}
-}
 
 func TestConfigPrepare(t *testing.T) {
 	cases := []struct {
@@ -178,6 +140,54 @@ func TestConfigDefaults(t *testing.T) {
 		if actual != tc.Value {
 			t.Fatalf("bad: %#v", actual)
 		}
+	}
+}
+
+func TestImageName(t *testing.T) {
+	c, _, _ := NewConfig(testConfig(t))
+	if strings.Contains(c.ImageName, "{{timestamp}}") {
+		t.Errorf("ImageName should be interpolated; found %s", c.ImageName)
+	}
+}
+
+// Helper stuff below
+
+func testConfig(t *testing.T) map[string]interface{} {
+	return map[string]interface{}{
+		"account_file": testAccountFile(t),
+		"project_id":   "hashicorp",
+		"source_image": "foo",
+		"zone":         "us-east-1a",
+	}
+}
+
+func testConfigStruct(t *testing.T) *Config {
+	c, warns, errs := NewConfig(testConfig(t))
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", len(warns))
+	}
+	if errs != nil {
+		t.Fatalf("bad: %#v", errs)
+	}
+
+	return c
+}
+
+func testConfigErr(t *testing.T, warns []string, err error, extra string) {
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatalf("should error: %s", extra)
+	}
+}
+
+func testConfigOk(t *testing.T, warns []string, err error) {
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad: %s", err)
 	}
 }
 
