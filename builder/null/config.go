@@ -33,7 +33,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	if c.CommConfig.SSHHost == "" {
 		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("host must be specified"))
+			fmt.Errorf("ssh_host must be specified"))
 	}
 
 	if c.CommConfig.SSHUsername == "" {
