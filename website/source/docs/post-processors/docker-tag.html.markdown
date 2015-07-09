@@ -30,6 +30,9 @@ a repository is required.
 * `tag` (string) - The tag for the image. By default this is not
   set.
 
+* `force` (boolean) - If true, this post-processor forcibly tag the image 
+  even if tag name is collided. Default to `false`.
+
 ## Example
 
 An example is shown below, showing only the post-processor configuration:
