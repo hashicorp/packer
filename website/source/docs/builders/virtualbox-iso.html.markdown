@@ -199,7 +199,7 @@ can be configured for this builder.
   Packer will choose a randomly available port in this range to use as the
   host port.
 
-* `ssh_skip_nat_mapping` (bool) - Defaults to false. When enabled, Packer does
+* `ssh_skip_nat_mapping` (boolean) - Defaults to false. When enabled, Packer does
   not setup forwarded port mapping for SSH requests and uses `ssh_port` on the
   host to communicate to the virtual machine
 
