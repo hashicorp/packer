@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -60,6 +61,9 @@ type Config struct {
 
 	startRetryTimeout time.Duration
 	ctx               interpolate.Context
+
+	// If true, the provisioner runs in interactive mode
+	Interactive bool
 }
 
 type Provisioner struct {
@@ -207,94 +211,134 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
 	copy(envVars[2:], p.config.Vars)
 
-	for _, path := range scripts {
-		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
-
-		log.Printf("Opening %s for reading", path)
-		f, err := os.Open(path)
-		if err != nil {
-			return fmt.Errorf("Error opening shell script: %s", err)
+	if p.config.Interactive {
+		for {
+			i := 0
+			for _, path := range scripts {
+				ui.Say(fmt.Sprintf("[%d] %s", i, path))
+				i++
+			}
+			ui.Say("Enter script number to execute, or: (c) continue, (m) enter script path")
+			var input string
+			var script string
+			fmt.Scanf("%s", &input)
+			sel, err := strconv.Atoi(input)
+			if err == nil {
+				script = scripts[sel]
+			} else {
+				if input == "m" {
+					ui.Say("Enter script path")
+					fmt.Scanf("%s", &script)
+					scripts = append(scripts, script)
+				} else if input == "c" {
+					break
+				}
+			}
+			err = p.runScript(script, ui, comm, envVars)
+			if (err != nil) {
+				ui.Error(fmt.Sprintf("Error executing shell script %s, %s", script, err))
+			}
 		}
-		defer f.Close()
-
-		// Flatten the environment variables
-		flattendVars := strings.Join(envVars, " ")
-
-		// Compile the command
-		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars: flattendVars,
-			Path: p.config.RemotePath,
-		}
-		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Error processing command: %s", err)
-		}
-
-		// Upload the file and run the command. Do this in the context of
-		// a single retryable function so that we don't end up with
-		// the case that the upload succeeded, a restart is initiated,
-		// and then the command is executed but the file doesn't exist
-		// any longer.
-		var cmd *packer.RemoteCmd
-		err = p.retryable(func() error {
-			if _, err := f.Seek(0, 0); err != nil {
+	} else {
+		for _, path := range scripts {
+			err := p.runScript(path, ui, comm, envVars)
+			if (err != nil) {
 				return err
 			}
+		}
+	}
 
-			var r io.Reader = f
-			if !p.config.Binary {
-				r = &UnixReader{Reader: r}
-			}
+	return nil
+}
 
-			if err := comm.Upload(p.config.RemotePath, r, nil); err != nil {
-				return fmt.Errorf("Error uploading script: %s", err)
-			}
+func (p *Provisioner) runScript(path string, ui packer.Ui, comm packer.Communicator, envVars []string) error {
 
-			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
-			}
-			if err := comm.Start(cmd); err != nil {
-				return fmt.Errorf(
-					"Error chmodding script file to 0755 in remote "+
-						"machine: %s", err)
-			}
-			cmd.Wait()
+	ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
 
-			cmd = &packer.RemoteCmd{Command: command}
-			return cmd.StartWithUi(comm, ui)
-		})
-		if err != nil {
+	log.Printf("Opening %s for reading", path)
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("Error opening shell script: %s", err)
+	}
+	defer f.Close()
+
+	// Flatten the environment variables
+	flattendVars := strings.Join(envVars, " ")
+
+	// Compile the command
+	p.config.ctx.Data = &ExecuteCommandTemplate{
+		Vars: flattendVars,
+		Path: p.config.RemotePath,
+	}
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error processing command: %s", err)
+	}
+
+	// Upload the file and run the command. Do this in the context of
+	// a single retryable function so that we don't end up with
+	// the case that the upload succeeded, a restart is initiated,
+	// and then the command is executed but the file doesn't exist
+	// any longer.
+	var cmd *packer.RemoteCmd
+	err = p.retryable(func() error {
+		if _, err := f.Seek(0, 0); err != nil {
 			return err
 		}
 
-		if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		var r io.Reader = f
+		if !p.config.Binary {
+			r = &UnixReader{Reader: r}
 		}
 
-		// Delete the temporary file we created. We retry this a few times
-		// since if the above rebooted we have to wait until the reboot
-		// completes.
-		err = p.retryable(func() error {
-			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("rm -f %s", p.config.RemotePath),
-			}
-			if err := comm.Start(cmd); err != nil {
-				return fmt.Errorf(
-					"Error removing temporary script at %s: %s",
-					p.config.RemotePath, err)
-			}
-			cmd.Wait()
-			return nil
-		})
-		if err != nil {
-			return err
+		if err := comm.Upload(p.config.RemotePath, r, nil); err != nil {
+			return fmt.Errorf("Error uploading script: %s", err)
 		}
 
-		if cmd.ExitStatus != 0 {
+		cmd = &packer.RemoteCmd{
+			Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
+		}
+		if err := comm.Start(cmd); err != nil {
 			return fmt.Errorf(
-				"Error removing temporary script at %s!",
-				p.config.RemotePath)
+				"Error chmodding script file to 0755 in remote "+
+					"machine: %s", err)
 		}
+		cmd.Wait()
+
+		cmd = &packer.RemoteCmd{Command: command}
+		return cmd.StartWithUi(comm, ui)
+	})
+	if err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+	}
+
+	// Delete the temporary file we created. We retry this a few times
+	// since if the above rebooted we have to wait until the reboot
+	// completes.
+	err = p.retryable(func() error {
+		cmd = &packer.RemoteCmd{
+			Command: fmt.Sprintf("rm -f %s", p.config.RemotePath),
+		}
+		if err := comm.Start(cmd); err != nil {
+			return fmt.Errorf(
+				"Error removing temporary script at %s: %s",
+				p.config.RemotePath, err)
+		}
+		cmd.Wait()
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf(
+			"Error removing temporary script at %s!",
+			p.config.RemotePath)
 	}
 
 	return nil
