@@ -15,8 +15,8 @@ import (
 
 type StepMountSecondaryDvdImages struct {
 	Files         []string
+	Generation    uint
 	dvdProperties []DvdControllerProperties
-	generation    uint
 }
 
 type DvdControllerProperties struct {
@@ -94,7 +94,7 @@ func (s *StepMountSecondaryDvdImages) addAndMountDvdDisk(vmName string, isoPath 
 	powershell := new(powershell.PowerShellCmd)
 
 	controllerNumber := "0"
-	if s.generation < 2 {
+	if s.Generation < 2 {
 		// get the controller number that the OS install disk is mounted on
 		// generation 1 requires dvd to be added to ide controller, generation 2 uses scsi for dvd drives
 		script.Reset()
