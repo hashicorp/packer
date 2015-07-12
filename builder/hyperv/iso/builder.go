@@ -310,6 +310,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		&hypervcommon.StepMountSecondaryDvdImages{
 			Files: b.config.SecondaryDvdImages,
+			generation: b.config.Generation,
 		},
 
 		&hypervcommon.StepRun{
