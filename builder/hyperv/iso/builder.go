@@ -309,8 +309,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepMountFloppydrive{},
 
 		&hypervcommon.StepMountSecondaryDvdImages{
-			Files: b.config.SecondaryDvdImages,
-			generation: b.config.Generation,
+			Files:      b.config.SecondaryDvdImages,
+			Generation: b.config.Generation,
 		},
 
 		&hypervcommon.StepRun{
