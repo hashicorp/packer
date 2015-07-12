@@ -28,7 +28,7 @@ use. For example, the Docker builder has a "docker" communicator that uses
 ## Using a Communicator
 
 By default, the SSH communicator is usually used. Additional configuration
-may not even be necesssary, since some builders such as Amazon automatically
+may not even be necessary, since some builders such as Amazon automatically
 configure everything.
 
 However, to specify a communicator, you set the `communicator` key within
