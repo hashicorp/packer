@@ -172,7 +172,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Generation == 2 {
-		if len(b.config.SecondaryDvdImages) > 0 {
+		if len(b.config.FloppyFiles) > 0 {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
