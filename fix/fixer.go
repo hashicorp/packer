@@ -28,6 +28,7 @@ func init() {
 		"vmware-rename":          new(FixerVMwareRename),
 		"parallels-headless":     new(FixerParallelsHeadless),
 		"parallels-deprecations": new(FixerParallelsDeprecations),
+		"sshkeypath":             new(FixerSSHKeyPath),
 	}
 
 	FixerOrder = []string{
@@ -39,5 +40,6 @@ func init() {
 		"vmware-rename",
 		"parallels-headless",
 		"parallels-deprecations",
+		"sshkeypath",
 	}
 }
