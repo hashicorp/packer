@@ -59,6 +59,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, err
 	}
 
+	var errs *packer.MultiError
+
 	// Set defaults.
 	if c.Network == "" {
 		c.Network = "default"
@@ -73,7 +75,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ImageName == "" {
-		c.ImageName = "packer-{{timestamp}}"
+		img, err := interpolate.Render("packer-{{timestamp}}", nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Unable to parse image name: %s ", err))
+			c.ImageName = img
+		}
 	}
 
 	if c.InstanceName == "" {
@@ -96,7 +103,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Comm.SSHUsername = "root"
 	}
 
-	var errs *packer.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
