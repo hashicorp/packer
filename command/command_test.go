@@ -20,6 +20,13 @@ func fatalCommand(t *testing.T, m Meta) {
 		err.String())
 }
 
+func outputCommand(t *testing.T, m Meta) (string, string) {
+	ui := m.Ui.(*packer.BasicUi)
+	out := ui.Writer.(*bytes.Buffer)
+	err := ui.ErrorWriter.(*bytes.Buffer)
+	return out.String(), err.String()
+}
+
 func testFixture(n string) string {
 	return filepath.Join(fixturesDir, n)
 }
