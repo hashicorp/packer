@@ -246,8 +246,7 @@ func (c *Core) validate() error {
 
 		if versionActual.LessThan(versionMin) {
 			return fmt.Errorf(
-				"This template requires a minimum Packer version of %s,\n"+
-					"but version %s is running.",
+				"This template requires Packer version %s or higher; using %s",
 				versionMin,
 				versionActual)
 		}

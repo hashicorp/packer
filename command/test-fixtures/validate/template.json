@@ -6,5 +6,5 @@
       "content":"chocolate"
     }
   ],
-  "min_packer_version":"0.8.0"
+  "min_packer_version":"101.0.0"
 }
