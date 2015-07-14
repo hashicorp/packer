@@ -11,13 +11,17 @@ import (
 	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
-
 type StepUnmountFloppyDrive struct {
+	Generation uint
 }
 
 func (s *StepUnmountFloppyDrive) Run(state multistep.StateBag) multistep.StepAction {
 	//driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.Generation > 1 {
+		return multistep.ActionContinue
+	}
 
 	errorMsg := "Error Unmounting floppy drive: %s"
 	vmName := state.Get("vmName").(string)
