@@ -34,7 +34,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			}
 
 			if s.RootVolumeSize > *newDevice.EBS.VolumeSize {
-				newDevice.EBS.VolumeSize = aws.Long(s.RootVolumeSize)
+				newDevice.EBS.VolumeSize = aws.Int64(s.RootVolumeSize)
 			}
 		}
 

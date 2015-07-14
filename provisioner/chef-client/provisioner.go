@@ -287,10 +287,10 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 
 	ctx := p.config.ctx
 	ctx.Data = &ConfigTemplate{
-		NodeName:             nodeName,
-		ServerUrl:            serverUrl,
-		ClientKey:            clientKey,
-		SslVerifyMode:        sslVerifyMode,
+		NodeName:      nodeName,
+		ServerUrl:     serverUrl,
+		ClientKey:     clientKey,
+		SslVerifyMode: sslVerifyMode,
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
 	if err != nil {
