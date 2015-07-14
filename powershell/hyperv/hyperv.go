@@ -160,7 +160,7 @@ if (($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::Off) -and ($vm.State -
     Stop-VM -VM $vm -TurnOff -Force -Confirm:$false
 }
 
-Remove-VM -Name $vmName -Force
+Remove-VM -Name $vmName -Force -Confirm:$false
 `
 
 	var ps powershell.PowerShellCmd
@@ -231,7 +231,7 @@ func DeleteVirtualSwitch(switchName string) error {
 param([string]$switchName)
 $switch = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
 if ($switch -ne $null) {
-    $switch | Remove-VMSwitch -Force
+    $switch | Remove-VMSwitch -Force -Confirm:$false
 }
 `
 
@@ -246,7 +246,7 @@ func StartVirtualMachine(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off) {
-  Start-VM -Name $vmName
+  Start-VM -Name $vmName -Confirm:$false
 }
 `
 
@@ -259,7 +259,7 @@ func RestartVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-Restart-VM $vmName -Force
+Restart-VM $vmName -Force -Confirm:$false
 `
 
 	var ps powershell.PowerShellCmd
