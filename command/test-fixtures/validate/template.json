@@ -1,0 +1,10 @@
+{
+  "builders":[
+    {
+      "type":"file",
+      "target":"chocolate.txt",
+      "content":"chocolate"
+    }
+  ],
+  "min_packer_version":"101.0.0"
+}
