@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/template/interpolate"
+	"strings"
 )
 
 // BlockDevice
@@ -47,9 +48,12 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 		}
 
 		mapping := &ec2.BlockDeviceMapping{
-			EBS:         ebsBlockDevice,
-			DeviceName:  aws.String(blockDevice.DeviceName),
-			VirtualName: aws.String(blockDevice.VirtualName),
+		  DeviceName:  aws.String(blockDevice.DeviceName),
+		  VirtualName: aws.String(blockDevice.VirtualName),
+		}
+
+		if !strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+		  mapping.EBS = ebsBlockDevice
 		}
 
 		if blockDevice.NoDevice {
