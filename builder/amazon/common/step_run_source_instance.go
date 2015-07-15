@@ -202,20 +202,26 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			InstanceType:       &s.InstanceType,
 			UserData:           &userData,
 			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-			NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-				{
+			Placement: &ec2.SpotPlacement{
+				AvailabilityZone: &availabilityZone,
+			},
+			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+			EbsOptimized:        &s.EbsOptimized,
+		}
+
+		if s.SubnetId != "" && s.AssociatePublicIpAddress {
+			runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
+				&ec2.InstanceNetworkInterfaceSpecification{
 					DeviceIndex:              aws.Int64(0),
 					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
 					SubnetId:                 &s.SubnetId,
 					Groups:                   securityGroupIds,
 					DeleteOnTermination:      aws.Bool(true),
 				},
-			},
-			Placement: &ec2.SpotPlacement{
-				AvailabilityZone: &availabilityZone,
-			},
-			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
-			EbsOptimized:        &s.EbsOptimized,
+			}
+		} else {
+			runOpts.SubnetId = &s.SubnetId
+			runOpts.SecurityGroupIds = securityGroupIds
 		}
 
 		if keyName != "" {
