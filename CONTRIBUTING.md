@@ -53,8 +53,8 @@ it raises the chances we can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to complete the
 following steps in order to be able to compile and test Packer.
 
-1. Install Go. Make sure the Go version is at least Go 1.2. Packer will not work with anything less than
-   Go 1.2. On a Mac, you can `brew install go` to install Go 1.2.
+1. Install Go. Make sure the Go version is at least Go 1.4. Packer will not work with anything less than
+   Go 1.4. On a Mac, you can `brew install go` to install Go 1.4.
 
 2. Set and export the `GOPATH` environment variable and update your `PATH`.
    For example, you can add to your `.bash_profile`.
