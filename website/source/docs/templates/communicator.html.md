@@ -67,7 +67,7 @@ The SSH communicator has the following options:
   * `ssh_private_key_file` (string) - Path to a PEM encoded private key
     file to use to authentiate with SSH.
 
-  * `ssh_pty` (bool) - If true, a PTY will be requested for the SSH connection.
+  * `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH connection.
     This defaults to false.
 
   * `ssh_timeout` (string) - The time to wait for SSH to become available.
@@ -77,7 +77,7 @@ The SSH communicator has the following options:
   * `ssh_handshake_attempts` (int) - The number of handshakes to attempt with
     SSH once it can connect. This defaults to 10.
 
-  * `ssh_disable_agent` (bool) - If true, SSH agent forwarding will be disabled.
+  * `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be disabled.
 
   * `ssh_bastion_host` (string) - A bastion host to use for the actual
     SSH connection.
