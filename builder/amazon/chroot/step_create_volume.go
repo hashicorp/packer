@@ -52,12 +52,12 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	}
 	createVolume := &ec2.CreateVolumeInput{
 		AvailabilityZone: instance.Placement.AvailabilityZone,
-		Size:             aws.Long(vs),
+		Size:             aws.Int64(vs),
 		SnapshotID:       rootDevice.EBS.SnapshotID,
 		VolumeType:       rootDevice.EBS.VolumeType,
 		IOPS:             rootDevice.EBS.IOPS,
 	}
-	log.Printf("Create args: %s", awsutil.StringValue(createVolume))
+	log.Printf("Create args: %s", awsutil.Prettify(createVolume))
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
