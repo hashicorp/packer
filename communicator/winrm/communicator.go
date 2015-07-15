@@ -87,10 +87,14 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 
 	if rc.Stdout != nil && cmd.Stdout != nil {
 		go io.Copy(rc.Stdout, cmd.Stdout)
+	} else {
+		log.Printf("[WARN] Failed to read stdout for command '%s'", rc.Command)
 	}
 
 	if rc.Stderr != nil && cmd.Stderr != nil {
 		go io.Copy(rc.Stderr, cmd.Stderr)
+	} else {
+		log.Printf("[WARN] Failed to read stderr for command '%s'", rc.Command)
 	}
 
 	cmd.Wait()
