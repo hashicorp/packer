@@ -34,7 +34,7 @@ If you want more control over how the archive is created you can specify the fol
   that support it, from 1 through 9 inclusive. Typically higher compression
   levels take longer but produce smaller files. Defaults to `6`
 
-* `keep_input_artifact` (bool) - Keep source files; defaults to `false`
+* `keep_input_artifact` (boolean) - Keep source files; defaults to `false`
 
 ### Supported Formats
 
