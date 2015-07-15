@@ -85,8 +85,13 @@ func (c *Communicator) Start(rc *packer.RemoteCmd) error {
 func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 	defer shell.Close()
 
-	go io.Copy(rc.Stdout, cmd.Stdout)
-	go io.Copy(rc.Stderr, cmd.Stderr)
+	if rc.Stdout != nil && cmd.Stdout != nil {
+		go io.Copy(rc.Stdout, cmd.Stdout)
+	}
+
+	if rc.Stderr != nil && cmd.Stderr != nil {
+		go io.Copy(rc.Stderr, cmd.Stderr)
+	}
 
 	cmd.Wait()
 
