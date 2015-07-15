@@ -197,7 +197,7 @@ AMI if one with the same name already exists. Default `false`.
   generate a temporary keypair. `ssh_private_key_file` must be specified
   with this.
 
-* `ssh_private_ip` (bool) - If true, then SSH will always use the private
+* `ssh_private_ip` (boolean) - If true, then SSH will always use the private
   IP if available.
 
 * `subnet_id` (string) - If using VPC, the ID of the subnet, such as

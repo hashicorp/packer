@@ -59,7 +59,7 @@ each category, the available configuration keys are alphabetized.
 * `token` (string) - An access token to use to authenticate to the build
   service.
 
-* `vcs` (bool) - If true, Packer will detect your VCS (if there is one)
+* `vcs` (boolean) - If true, Packer will detect your VCS (if there is one)
   and only upload the files that are tracked by the VCS. This is useful
   for automatically excluding ignored files. This defaults to false.
 
