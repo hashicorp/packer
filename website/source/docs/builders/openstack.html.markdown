@@ -96,6 +96,8 @@ can be configured for this builder.
 * `rackconnect_wait` (boolean) - For rackspace, whether or not to wait for
   Rackconnect to assign the machine an IP address before connecting via SSH.
   Defaults to false.
+* `metadata` (object of key/value strings) - Glance metadata that will be applied
+  to the image.
 
 ## Basic Example: Rackspace public cloud
 

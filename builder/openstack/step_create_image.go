@@ -30,7 +30,8 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the image: %s", config.ImageName))
 	imageId, err := servers.CreateImage(client, server.ID, servers.CreateImageOpts{
-		Name: config.ImageName,
+		Name:     config.ImageName,
+		Metadata: config.ImageMetadata,
 	}).ExtractImageID()
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
