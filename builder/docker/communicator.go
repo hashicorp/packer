@@ -28,10 +28,6 @@ type Communicator struct {
 	lock sync.Mutex
 }
 
-type Config struct {
-	// Pty, if true, will request a pty from docker with -t
-	Pty bool
-}
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// Create a temporary file to store the output. Because of a bug in
 	// Docker, sometimes all the output doesn't properly show up. This
