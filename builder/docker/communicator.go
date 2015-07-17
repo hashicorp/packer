@@ -45,7 +45,7 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 
 	var cmd *exec.Cmd
 	if c.canExec() {
-		if c.config.Pty {
+		if c.Config.Pty {
 			cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerId, "/bin/sh")
 		} else {
 			cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
