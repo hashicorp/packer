@@ -270,28 +270,43 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 		return "", fmt.Errorf("Error creating manifests directory: %s", err)
 	}
 
-	// Upload the main manifest
-	f, err := os.Open(p.config.ManifestFile)
+	// NOTE! manifest_file may either be a directory or a file, as puppet apply
+	// now accepts either one.
+
+	fi, err := os.Stat(p.config.ManifestFile)
 	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	manifestFilename := p.config.ManifestFile
-	if fi, err := os.Stat(p.config.ManifestFile); err != nil {
 		return "", fmt.Errorf("Error inspecting manifest file: %s", err)
-	} else if !fi.IsDir() {
-		manifestFilename = filepath.Base(manifestFilename)
+	}
+
+	if fi.IsDir() {
+		// If manifest_file is a directory we'll upload the whole thing
+		ui.Message(fmt.Sprintf(
+			"Uploading manifest directory from: %s", p.config.ManifestFile))
+
+		remoteManifestDir := fmt.Sprintf("%s/manifests", p.config.StagingDir)
+		err := p.uploadDirectory(ui, comm, remoteManifestDir, p.config.ManifestFile)
+		if err != nil {
+			return "", fmt.Errorf("Error uploading manifest dir: %s", err)
+		}
+		return remoteManifestDir, nil
 	} else {
-		ui.Say("WARNING: manifest_file should be a file. Use manifest_dir for directories")
-	}
+		// Otherwise manifest_file is a file and we'll upload it
+		ui.Message(fmt.Sprintf(
+			"Uploading manifest file from: %s", p.config.ManifestFile))
 
-	remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
-	if err := comm.Upload(remoteManifestFile, f, nil); err != nil {
-		return "", err
-	}
+		f, err := os.Open(p.config.ManifestFile)
+		if err != nil {
+			return "", err
+		}
+		defer f.Close()
 
-	return remoteManifestFile, nil
+		manifestFilename := filepath.Base(p.config.ManifestFile)
+		remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
+		if err := comm.Upload(remoteManifestFile, f, nil); err != nil {
+			return "", err
+		}
+		return remoteManifestFile, nil
+	}
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
