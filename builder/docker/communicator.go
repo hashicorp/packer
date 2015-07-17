@@ -24,7 +24,7 @@ type Communicator struct {
 	HostDir      string
 	ContainerDir string
 	Version      *version.Version
-	config 	     *Config
+	Config 	     *Config
 	lock sync.Mutex
 }
 
