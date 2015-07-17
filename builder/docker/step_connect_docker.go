@@ -7,6 +7,7 @@ import (
 type StepConnectDocker struct{}
 
 func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	containerId := state.Get("container_id").(string)
 	driver := state.Get("driver").(Driver)
 	tempDir := state.Get("temp_dir").(string)
@@ -25,6 +26,7 @@ func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
 		HostDir:      tempDir,
 		ContainerDir: "/packer-files",
 		Version:      version,
+		Config: 	config,
 	}
 
 	state.Put("communicator", comm)

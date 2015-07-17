@@ -24,7 +24,7 @@ type Communicator struct {
 	HostDir      string
 	ContainerDir string
 	Version      *version.Version
-
+	Config 	     *Config
 	lock sync.Mutex
 }
 
@@ -45,7 +45,11 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 
 	var cmd *exec.Cmd
 	if c.canExec() {
-		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+		if c.Config.Pty {
+			cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerId, "/bin/sh")
+		} else {
+			cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+		}
 	} else {
 		cmd = exec.Command("docker", "attach", c.ContainerId)
 	}
