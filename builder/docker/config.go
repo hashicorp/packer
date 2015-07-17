@@ -28,7 +28,7 @@ type Config struct {
 	LoginUsername string `mapstructure:"login_username"`
 	LoginPassword string `mapstructure:"login_password"`
 	LoginServer   string `mapstructure:"login_server"`
-
+	Pty	      bool
 	ctx interpolate.Context
 }
 
