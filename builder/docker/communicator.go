@@ -24,10 +24,14 @@ type Communicator struct {
 	HostDir      string
 	ContainerDir string
 	Version      *version.Version
-
+	config 	     *Config
 	lock sync.Mutex
 }
 
+type Config struct {
+	// Pty, if true, will request a pty from docker with -t
+	Pty bool
+}
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// Create a temporary file to store the output. Because of a bug in
 	// Docker, sometimes all the output doesn't properly show up. This
@@ -45,7 +49,11 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 
 	var cmd *exec.Cmd
 	if c.canExec() {
-		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+		if c.config.Pty {
+			cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerId, "/bin/sh")
+		} else {
+			cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+		}
 	} else {
 		cmd = exec.Command("docker", "attach", c.ContainerId)
 	}
