@@ -41,9 +41,11 @@ The reference of available configuration options is listed below.
 Required parameters:
 
 * `manifest_file` (string) - This is either a path to a puppet manifest (`.pp`
-  file) _or_ a directory containing multiple manifests that puppet will apply.
-  These file(s) must exist on your local system and will be uploaded to the
-  remote machine.
+  file) _or_ a directory containing multiple manifests that puppet will apply
+  (the ["main manifest"][1]). These file(s) must exist on your local system and
+  will be uploaded to the remote machine.
+
+  [1]: https://docs.puppetlabs.com/puppet/latest/reference/dirs_manifest.html
 
 Optional parameters:
 
@@ -66,9 +68,8 @@ Optional parameters:
   the "manifestdir" setting on Puppet.
 
   ~> `manifest_dir` is passed to `puppet apply` as the `--manifestdir` option.
-     This option was deprecated in puppet 3.6, and is slated to be removed in
-     puppet 4.0. If you have multiple manifests you should simply use
-     `manifest_file` instead.
+     This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you
+     have multiple manifests you should use `manifest_file` instead.
 
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote
