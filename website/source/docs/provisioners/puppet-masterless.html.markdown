@@ -40,9 +40,10 @@ The reference of available configuration options is listed below.
 
 Required parameters:
 
-* `manifest_file` (string) - The manifest file for Puppet to use in order
-  to compile and run a catalog. This file must exist on your local system
-  and will be uploaded to the remote machine.
+* `manifest_file` (string) - This is either a path to a puppet manifest (`.pp`
+  file) _or_ a directory containing multiple manifests that puppet will apply.
+  These file(s) must exist on your local system and will be uploaded to the
+  remote machine.
 
 Optional parameters:
 
@@ -63,6 +64,11 @@ Optional parameters:
   manifest file uses imports. This directory doesn't necessarily contain
   the `manifest_file`. It is a separate directory that will be set as
   the "manifestdir" setting on Puppet.
+
+  ~> `manifest_dir` is passed to `puppet apply` as the `--manifestdir` option.
+     This option was deprecated in puppet 3.6, and is slated to be removed in
+     puppet 4.0. If you have multiple manifests you should simply use
+     `manifest_file` instead.
 
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote
