@@ -116,11 +116,11 @@ can be configured for this builder.
   the default is 10 seconds.
 
 * `disk_cache` (string) - The cache mode to use for disk. Allowed values
-  values include any of "writethrough", "writeback", "none", "unsafe" or
-  "directsync".
+  include any of "writethrough", "writeback", "none", "unsafe" or
+  "directsync".  By default, this is set to "writeback".
 
 * `disk_discard` (string) - The discard mode to use for disk. Allowed values
-  include any of "unmap" or "ignore".
+  include any of "unmap" or "ignore".  By default, this is set to "ignore".
 
 * `disk_image` (boolean) - Packer defaults to building from an ISO file,
   this parameter controls whether the ISO URL supplied is actually a bootable
@@ -148,7 +148,7 @@ can be configured for this builder.
 * `format` (string) - Either "qcow2" or "raw", this specifies the output
   format of the virtual machine image. This defaults to "qcow2".
 
-* `headless` (boolean) - Packer defaults to building virtual machines by
+* `headless` (boolean) - Packer defaults to building QEMU virtual machines by
   launching a GUI that shows the console of the machine being built.
   When this value is set to true, the machine will start without a console.
 
@@ -188,6 +188,11 @@ can be configured for this builder.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
+* `qemu_binary` (string) - The name of the Qemu binary to look for.  This
+  defaults to "qemu-system-x86_64", but may need to be changed for some
+  platforms.  For example "qemu-kvm", or "qemu-system-i386" may be a better
+  choice for some systems.
+
 * `qemuargs` (array of array of strings) - Allows complete control over
   the qemu command line (though not, at this time, qemu-img). Each array
   of strings makes up a command line switch that overrides matching default
@@ -224,11 +229,6 @@ qemu-system-x86 command. The arguments are all printed for review.
 <pre class="prettyprint">
 	qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
-
-* `qemu_binary` (string) - The name of the Qemu binary to look for.  This
-  defaults to "qemu-system-x86_64", but may need to be changed for some
-  platforms.  For example "qemu-kvm", or "qemu-system-i386" may be a better
-  choice for some systems.
 
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
