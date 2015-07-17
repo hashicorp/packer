@@ -1,3 +1,19 @@
+## 0.8.2 (July 17, 2015)
+
+IMPROVEMENTS:
+
+  * builder/docker: Add option to use a Pty [GH-2425]
+
+BUG FIXES:
+
+  * core: Fix crash when `min_packer_version` is specified in a template. [GH-2385]
+  * builder/amazon: Fix EC2 devices being included in EBS mappings [GH-2459]
+  * builder/googlecompute: Fix default name for GCE images [GH-2400]
+  * builder/null: Fix error message with missing ssh_host [GH-2407]
+  * builder/virtualbox: Use --portcount on VirtualBox 5.x [GH-2438]
+  * provisioner/puppet: Packer now correctly handles a directory for manifest_file [GH-2463]
+  * provisioner/winrm: Fix potential crash with WinRM [GH-2416]
+
 ## 0.8.1 (July 2, 2015)
 
 IMPROVEMENTS:
