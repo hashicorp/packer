@@ -116,7 +116,7 @@ can be configured for this builder.
   the default is 10 seconds.
 
 * `disk_cache` (string) - The cache mode to use for disk. Allowed values
-  values include any of "writethrough", "writeback", "none", "unsafe" or
+  include any of "writethrough", "writeback", "none", "unsafe" or
   "directsync".  By default, this is set to "writeback".
 
 * `disk_discard` (string) - The discard mode to use for disk. Allowed values
