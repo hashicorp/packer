@@ -65,8 +65,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	vmName := config.VMName
-	imgPath := filepath.Join(config.OutputDir,
-		fmt.Sprintf("%s.%s", vmName, strings.ToLower(config.Format)))
+	imgPath := filepath.Join(config.OutputDir, vmName)
 
 	defaultArgs := make(map[string]string)
 
@@ -80,7 +79,8 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
-	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:22", sshHostPort)
+	defaultArgs["-netdev"] = fmt.Sprintf(
+		"user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
 	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard)
 	if !config.DiskImage {

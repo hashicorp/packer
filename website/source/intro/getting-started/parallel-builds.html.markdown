@@ -49,9 +49,9 @@ you're not okay with this, just follow along.
 !> **Warning!** You _will_ be charged $0.01 by DigitalOcean per image
 created with Packer because of the time the "droplet" is running.
 
-Once you sign up for an account, grab your client ID and API key from
-the [DigitalOcean API access page](https://www.digitalocean.com/api_access).
-Save these values somewhere, you'll need them in a second.
+Once you sign up for an account, grab your API token from
+the [DigitalOcean API access page](https://cloud.digitalocean.com/settings/applications).
+Save these values somewhere; you'll need them in a second.
 
 ## Modifying the Template
 
@@ -62,8 +62,10 @@ array.
 ```javascript
 {
   "type": "digitalocean",
-  "api_key": "{{user `do_api_key`}}",
-  "client_id": "{{user `do_client_id`}}"
+  "api_token": "{{user `do_api_token`}}",
+	"image": "ubuntu-14-04-x64",
+	"region": "nyc3",
+	"size": "512mb",
 }
 ```
 
@@ -72,13 +74,46 @@ to include the access keys for DigitalOcean.
 
 ```javascript
 "variables": {
-  "do_api_key": "",
-  "do_client_id": ""
+  "do_api_token": "",
   // ...
 }
 ```
 
-The entire template should now [look like this](https://gist.github.com/pearkes/cc5f8505eee5403a43a6).
+The entire template should now look like this:
+
+```javascript
+{
+	"variables": {
+		"aws_access_key": "",
+		"aws_secret_key": "",
+		"do_api_token": ""
+	},
+	"builders": [{
+		"type": "amazon-ebs",
+		"access_key": "{{user `aws_access_key`}}",
+		"secret_key": "{{user `aws_secret_key`}}",
+		"region": "us-east-1",
+		"source_ami": "ami-de0d9eb7",
+		"instance_type": "t1.micro",
+		"ssh_username": "ubuntu",
+		"ami_name": "packer-example {{timestamp}}"
+	},{
+		"type": "digitalocean",
+		"api_token": "{{user `do_api_token`}}",
+		"image": "ubuntu-14-04-x64",
+		"region": "nyc3",
+		"size": "512mb"
+	}],
+	"provisioners": [{
+		"type": "shell",
+		"inline": [
+			"sleep 30",
+			"sudo apt-get update",
+			"sudo apt-get install -y redis-server"
+		]
+	}]
+}
+```
 
 Additional builders are simply added to the `builders` array in the template.
 This tells Packer to build multiple images. The builder `type` values don't
@@ -104,8 +139,7 @@ same.
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
     -var 'aws_secret_key=YOUR SECRET KEY' \
-    -var 'do_api_key=YOUR API KEY' \
-    -var 'do_client_id=YOUR CLIENT ID' \
+    -var 'do_api_token=YOUR API TOKEN' \
     example.json
 ==> amazon-ebs: amazon-ebs output will be in this color.
 ==> digitalocean: digitalocean output will be in this color.

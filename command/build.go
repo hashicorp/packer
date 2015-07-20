@@ -37,7 +37,13 @@ func (c BuildCommand) Run(args []string) int {
 	}
 
 	// Parse the template
-	tpl, err := template.ParseFile(args[0])
+	var tpl *template.Template
+	var err error
+	if args[0] == "-" {
+		tpl, err = template.Parse(os.Stdin)
+	} else {
+		tpl, err = template.ParseFile(args[0])
+	}
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1

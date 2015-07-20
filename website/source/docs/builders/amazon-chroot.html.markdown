@@ -51,6 +51,10 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
@@ -124,11 +128,23 @@ each category, the available configuration keys are alphabetized.
 * `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport) on
   HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+* `force_deregister` (boolean) - Force Packer to first deregister an existing
+AMI if one with the same name already exists. Default `false`.
+
 * `mount_path` (string) - The path where the volume will be mounted. This is
   where the chroot environment will be. This defaults to
   `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration
   template where the `.Device` variable is replaced with the name of the
   device where the volume is attached.
+
+* `mount_options` (array of strings) - Options to supply the `mount` command
+when mounting devices. Each option will be prefixed with `-o ` and supplied to
+the `mount` command ran by Packer. Because this command is ran in a shell, user
+discrestion is advised. See [this manual page for the mount command][1] for valid
+file system specific options
+
+* `root_volume_size` (integer) - The size of the root volume for the chroot
+environment, and the resulting AMI
 
 * `tags` (object of key/value strings) - Tags applied to the AMI.
 
@@ -219,3 +235,6 @@ prevent packages installed by your provisioners from starting services:
   ]
 }
 ```
+
+
+[1]: http://linuxcommand.org/man_pages/mount8.html

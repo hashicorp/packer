@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -18,8 +19,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
-
-const DefaultRemotePath = "/tmp/script.sh"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -74,7 +73,8 @@ type ExecuteCommandTemplate struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
@@ -94,7 +94,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh"
+		p.config.InlineShebang = "/bin/sh -e"
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
@@ -102,7 +102,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = DefaultRemotePath
+		p.config.RemotePath = fmt.Sprintf(
+			"/tmp/script_%d.sh", rand.Intn(9999))
 	}
 
 	if p.config.Scripts == nil {
@@ -145,6 +146,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		} else {
+			// Replace single quotes so they parse
+			vs[1] = strings.Replace(vs[1], "'", `'"'"'`, -1)
+
 			// Single quote env var values
 			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
@@ -247,11 +251,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			}
 
 			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
 			}
 			if err := comm.Start(cmd); err != nil {
 				return fmt.Errorf(
-					"Error chmodding script file to 0777 in remote "+
+					"Error chmodding script file to 0755 in remote "+
 						"machine: %s", err)
 			}
 			cmd.Wait()
@@ -263,11 +267,33 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return err
 		}
 
-		// Close the original file since we copied it
-		f.Close()
-
 		if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		}
+
+		// Delete the temporary file we created. We retry this a few times
+		// since if the above rebooted we have to wait until the reboot
+		// completes.
+		err = p.retryable(func() error {
+			cmd = &packer.RemoteCmd{
+				Command: fmt.Sprintf("rm -f %s", p.config.RemotePath),
+			}
+			if err := comm.Start(cmd); err != nil {
+				return fmt.Errorf(
+					"Error removing temporary script at %s: %s",
+					p.config.RemotePath, err)
+			}
+			cmd.Wait()
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+
+		if cmd.ExitStatus != 0 {
+			return fmt.Errorf(
+				"Error removing temporary script at %s!",
+				p.config.RemotePath)
 		}
 	}
 

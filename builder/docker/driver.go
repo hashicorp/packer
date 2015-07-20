@@ -23,6 +23,10 @@ type Driver interface {
 	// Import imports a container from a tar file
 	Import(path, repo string) (string, error)
 
+	// IPAddress returns the address of the container that can be used
+	// for external access.
+	IPAddress(id string) (string, error)
+
 	// Build an image with the given Dockerfile and returns the ID for that image,
 	// along with a potential error.
 	BuildImage(dockerfile *bytes.Buffer) (string, error)

@@ -41,6 +41,17 @@ Optional:
 * `extra_arguments` (array of strings) - An array of extra arguments to pass to the
   ansible command. By default, this is empty.
 
+* `inventory_groups` (string) -  A comma-separated list of groups to which
+  packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
+  will generate an Ansible inventory like:
+
+  ```text
+  [my_group_1]
+  127.0.0.1
+  [my_group_2]
+  127.0.0.1
+  ```
+
 * `inventory_file` (string) - The inventory file to be used by ansible.
   This file must exist on your local system and will be uploaded to the
   remote machine.

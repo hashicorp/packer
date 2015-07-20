@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/template"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -17,6 +18,7 @@ type Core struct {
 	components ComponentFinder
 	variables  map[string]string
 	builds     map[string]*template.Builder
+	version    string
 }
 
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
@@ -25,6 +27,7 @@ type CoreConfig struct {
 	Components ComponentFinder
 	Template   *template.Template
 	Variables  map[string]string
+	Version    string
 }
 
 // The function type used to lookup Builder implementations.
@@ -55,6 +58,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		Template:   c.Template,
 		components: c.Components,
 		variables:  c.Variables,
+		version:    c.Version,
 	}
 	if err := result.validate(); err != nil {
 		return nil, err
@@ -224,6 +228,28 @@ func (c *Core) validate() error {
 	// unless the template itself is valid.
 	if err := c.Template.Validate(); err != nil {
 		return err
+	}
+
+	// Validate the minimum version is satisfied
+	if c.Template.MinVersion != "" {
+		versionActual, err := version.NewVersion(c.version)
+		if err != nil {
+			// This shouldn't happen since we set it via the compiler
+			panic(err)
+		}
+
+		versionMin, err := version.NewVersion(c.Template.MinVersion)
+		if err != nil {
+			return fmt.Errorf(
+				"min_version is invalid: %s", err)
+		}
+
+		if versionActual.LessThan(versionMin) {
+			return fmt.Errorf(
+				"This template requires Packer version %s or higher; using %s",
+				versionMin,
+				versionActual)
+		}
 	}
 
 	// Validate variables are set

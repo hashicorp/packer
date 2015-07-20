@@ -62,6 +62,10 @@ Configuration options are organized below into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `commit` (boolean) - If true, the container will be committed to an
@@ -113,7 +117,10 @@ _exported_. More specifically, if you set `export_path` in your configuration.
 If you set `commit`, see the next section.
 
 The example below shows a full configuration that would import and push
-the created image:
+the created image. This is accomplished using a sequence definition (a
+collection of post-processors that are treated as as single pipeline, see
+[Post-Processors](/docs/templates/post-processors.html)
+for more information):
 
 ```javascript
 {
@@ -130,6 +137,12 @@ the created image:
 }
 ```
 
+In the above example, the result of each builder is passed through the defined
+sequence of post-processors starting first with the `docker-import`
+post-processor which will import the artifact as a docker image. The resulting
+docker image is then passed on to the `docker-push` post-processor which handles
+pushing the image to a container repository.
+
 If you want to do this manually, however, perhaps from a script, you can
 import the image using the process below:
 
@@ -142,9 +155,12 @@ and `docker push`, respectively.
 
 ## Using the Artifact: Committed
 
-If you committed your container to an image, you probably want to tag,
-save, push, etc. Packer can do this automatically for you. An example is
-shown below which tags and pushes the image:
+If you committed your container to an image, you probably want to tag, save,
+push, etc. Packer can do this automatically for you. An example is shown below
+which tags and pushes an image. This is accomplished using a sequence
+definition (a collection of post-processors that are treated as as single
+pipeline, see [Post-Processors](/docs/templates/post-processors.html) for more
+information):
 
 ```javascript
 {
@@ -153,6 +169,39 @@ shown below which tags and pushes the image:
 			{
 				"type": "docker-tag",
 				"repository": "mitchellh/packer",
+				"tag": "0.7"
+			},
+			"docker-push"
+		]
+	]
+}
+```
+
+In the above example, the result of each builder is passed through the defined
+sequence of post-processors starting first with the `docker-tag` post-processor
+which tags the committed image with the supplied repository and tag information.
+Once tagged, the resulting artifact is then passed on to the `docker-push`
+post-processor which handles pushing the image to a container repository.
+
+Going a step further, if you wanted to tag and push an image to multiple
+container repositories, this could be accomplished by defining two,
+nearly-identical sequence definitions, as demonstrated by the example below:
+
+```javascript
+{
+	"post-processors": [
+		[
+			{
+				"type": "docker-tag",
+				"repository": "mitchellh/packer",
+				"tag": "0.7"
+			},
+			"docker-push"
+		],
+		[
+			{
+				"type": "docker-tag",
+				"repository": "hashicorp/packer",
 				"tag": "0.7"
 			},
 			"docker-push"

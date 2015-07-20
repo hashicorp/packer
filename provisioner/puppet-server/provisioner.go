@@ -41,6 +41,9 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_dir"`
+
+	// If true, packer will ignore all exit-codes from a puppet run
+	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
 }
 
 type Provisioner struct {
@@ -59,7 +62,8 @@ type ExecuteTemplate struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{},
 		},
@@ -163,7 +167,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 && cmd.ExitStatus != 2 {
+	if cmd.ExitStatus != 0 && cmd.ExitStatus != 2 && !p.config.IgnoreExitCodes {
 		return fmt.Errorf("Puppet exited with a non-zero exit status: %d", cmd.ExitStatus)
 	}
 

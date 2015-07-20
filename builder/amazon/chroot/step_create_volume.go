@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -16,7 +18,8 @@ import (
 // Produces:
 //   volume_id string - The ID of the created volume
 type StepCreateVolume struct {
-	volumeId string
+	volumeId       string
+	RootVolumeSize int64
 }
 
 func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
@@ -29,7 +32,7 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Searching for root device of the image (%s)", *image.RootDeviceName)
 	var rootDevice *ec2.BlockDeviceMapping
 	for _, device := range image.BlockDeviceMappings {
-		if device.DeviceName == image.RootDeviceName {
+		if *device.DeviceName == *image.RootDeviceName {
 			rootDevice = device
 			break
 		}
@@ -43,14 +46,18 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say("Creating the root volume...")
+	vs := *rootDevice.EBS.VolumeSize
+	if s.RootVolumeSize > *rootDevice.EBS.VolumeSize {
+		vs = s.RootVolumeSize
+	}
 	createVolume := &ec2.CreateVolumeInput{
 		AvailabilityZone: instance.Placement.AvailabilityZone,
-		Size:             rootDevice.EBS.VolumeSize,
+		Size:             aws.Long(vs),
 		SnapshotID:       rootDevice.EBS.SnapshotID,
 		VolumeType:       rootDevice.EBS.VolumeType,
 		IOPS:             rootDevice.EBS.IOPS,
 	}
-	log.Printf("Create args: %#v", createVolume)
+	log.Printf("Create args: %s", awsutil.StringValue(createVolume))
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {

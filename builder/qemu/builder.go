@@ -7,12 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
-	commonssh "github.com/mitchellh/packer/common/ssh"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -78,6 +79,7 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	Comm                communicator.Config `mapstructure:",squash"`
 
 	Accelerator     string     `mapstructure:"accelerator"`
 	BootCommand     []string   `mapstructure:"boot_command"`
@@ -103,13 +105,14 @@ type Config struct {
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
-	SSHPassword     string     `mapstructure:"ssh_password"`
-	SSHPort         uint       `mapstructure:"ssh_port"`
-	SSHUser         string     `mapstructure:"ssh_username"`
-	SSHKeyPath      string     `mapstructure:"ssh_key_path"`
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
+
+	// These are deprecated, but we keep them around for BC
+	// TODO(@mitchellh): remove
+	SSHKeyPath     string        `mapstructure:"ssh_key_path"`
+	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
@@ -117,17 +120,16 @@ type Config struct {
 	RawBootWait        string `mapstructure:"boot_wait"`
 	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	RawSSHWaitTimeout  string `mapstructure:"ssh_wait_timeout"`
 
 	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
-	sshWaitTimeout  time.Duration ``
 	ctx             interpolate.Context
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -138,9 +140,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	var errs *packer.MultiError
-	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -155,7 +154,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Accelerator == "" {
-		b.config.Accelerator = "kvm"
+		if runtime.GOOS == "windows" {
+			b.config.Accelerator = "tcg"
+		} else {
+			b.config.Accelerator = "kvm"
+		}
 	}
 
 	if b.config.HTTPPortMin == 0 {
@@ -190,10 +193,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.SSHHostPortMax = 4444
 	}
 
-	if b.config.SSHPort == 0 {
-		b.config.SSHPort = 22
-	}
-
 	if b.config.VNCPortMin == 0 {
 		b.config.VNCPortMin = 5900
 	}
@@ -220,6 +219,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskInterface == "" {
 		b.config.DiskInterface = "virtio"
+	}
+
+	// TODO: backwards compatibility, write fixer instead
+	if b.config.SSHKeyPath != "" {
+		b.config.Comm.SSHPrivateKey = b.config.SSHKeyPath
+	}
+	if b.config.SSHWaitTimeout != 0 {
+		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
+	}
+
+	var errs *packer.MultiError
+	warnings := make([]string, 0)
+
+	if es := b.config.Comm.Prepare(&b.config.ctx); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
 	}
 
 	if !(b.config.Format == "qcow2" || b.config.Format == "raw") {
@@ -314,40 +328,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RawShutdownTimeout = "5m"
 	}
 
-	if b.config.RawSSHWaitTimeout == "" {
-		b.config.RawSSHWaitTimeout = "20m"
-	}
-
 	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
 
-	if b.config.SSHKeyPath != "" {
-		if _, err := os.Stat(b.config.SSHKeyPath); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		} else if _, err := commonssh.FileSigner(b.config.SSHKeyPath); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("ssh_key_path is invalid: %s", err))
-		}
-	}
-
 	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
-	}
-
-	if b.config.SSHUser == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("An ssh_username must be specified."))
-	}
-
-	b.config.sshWaitTimeout, err = time.ParseDuration(b.config.RawSSHWaitTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing ssh_wait_timeout: %s", err))
 	}
 
 	if b.config.VNCPortMin > b.config.VNCPortMax {
@@ -409,10 +398,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		steprun,
 		&stepBootWait{},
 		&stepTypeBootCommand{},
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: b.config.sshWaitTimeout,
+		&communicator.StepConnect{
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: sshConfig,
+			SSHPort:   commPort,
 		},
 		new(common.StepProvision),
 		new(stepShutdown),

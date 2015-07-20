@@ -40,9 +40,12 @@ The reference of available configuration options is listed below.
 
 Required parameters:
 
-* `manifest_file` (string) - The manifest file for Puppet to use in order
-  to compile and run a catalog. This file must exist on your local system
-  and will be uploaded to the remote machine.
+* `manifest_file` (string) - This is either a path to a puppet manifest (`.pp`
+  file) _or_ a directory containing multiple manifests that puppet will apply
+  (the ["main manifest"][1]). These file(s) must exist on your local system and
+  will be uploaded to the remote machine.
+
+  [1]: https://docs.puppetlabs.com/puppet/latest/reference/dirs_manifest.html
 
 Optional parameters:
 
@@ -50,7 +53,7 @@ Optional parameters:
   various [configuration template variables](/docs/templates/configuration-templates.html)
   available. See below for more information.
 
-* `facter` (object, string keys and values) - Additional
+* `facter` (object of key/value strings) - Additional
   [facts](http://puppetlabs.com/puppet/related-projects/facter) to make
   available when Puppet is running.
 
@@ -63,6 +66,10 @@ Optional parameters:
   manifest file uses imports. This directory doesn't necessarily contain
   the `manifest_file`. It is a separate directory that will be set as
   the "manifestdir" setting on Puppet.
+
+  ~> `manifest_dir` is passed to `puppet apply` as the `--manifestdir` option.
+     This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you
+     have multiple manifests you should use `manifest_file` instead.
 
 * `module_paths` (array of strings) - This is an array of paths to module
   directories on your local filesystem. These will be uploaded to the remote
@@ -79,12 +86,18 @@ Optional parameters:
   this folder. If the permissions are not correct, use a shell provisioner
   prior to this to configure it properly.
 
+* `working_directory` (string) - This is the directory from which the puppet command
+  will be run. When using hiera with a relative path, this option allows to ensure
+  that the paths are working properly. If not specified, defaults to the value of
+  specified `staging_directory` (or its default value if not specified either).
+
 ## Execute Command
 
 By default, Packer uses the following command (broken across multiple lines
 for readability) to execute Puppet:
 
 ```liquid
+cd {{.WorkingDir}} && \
 {{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
@@ -98,6 +111,7 @@ This command can be customized using the `execute_command` configuration.
 As you can see from the default value above, the value of this configuration
 can contain various template variables, defined below:
 
+* `WorkingDir` - The path from which Puppet will be executed.
 * `FacterVars` - Shell-friendly string of environmental variables used
   to set custom facts configured for this provisioner.
 * `HieraConfigPath` - The path to a hiera configuration file.
@@ -106,3 +120,17 @@ can contain various template variables, defined below:
 * `ModulePath` - The paths to the module directories.
 * `Sudo` - A boolean of whether to `sudo` the command or not, depending on
   the value of the `prevent_sudo` configuration.
+
+## Default Facts
+
+In addition to being able to specify custom Facter facts using the `facter`
+configuration, the provisioner automatically defines certain commonly useful
+facts:
+
+* `packer_build_name` is set to the name of the build that Packer is running.
+  This is most useful when Packer is making multiple builds and you want to
+  distinguish them in your Hiera hierarchy.
+
+* `packer_builder_type` is the type of the builder that was used to create the
+  machine that Puppet is running on. This is useful if you want to run only
+  certain parts of your Puppet code on systems built with certain builders.

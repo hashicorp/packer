@@ -34,8 +34,10 @@ type Config struct {
 	DevicePath     string     `mapstructure:"device_path"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
+	RootVolumeSize int64      `mapstructure:"root_volume_size"`
+	MountOptions   []string   `mapstructure:"mount_options"`
 
-	ctx *interpolate.Context
+	ctx interpolate.Context
 }
 
 type wrappedCommandTemplate struct {
@@ -48,10 +50,10 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	b.config.ctx = &interpolate.Context{Funcs: awscommon.TemplateFuncs}
+	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
-		InterpolateContext: b.config.ctx,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"command_wrapper",
@@ -96,8 +98,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	var errs *packer.MultiError
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
 
 	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
@@ -132,7 +134,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ec2conn := ec2.New(config)
 
 	wrappedCommand := func(command string) (string, error) {
-		ctx := *b.config.ctx
+		ctx := b.config.ctx
 		ctx.Data = &wrappedCommandTemplate{Command: command}
 		return interpolate.Render(b.config.CommandWrapper, &ctx)
 	}
@@ -147,6 +149,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepPreValidate{
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+		},
 		&StepInstanceInfo{},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
@@ -155,18 +161,30 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCheckRootDevice{},
 		&StepFlock{},
 		&StepPrepareDevice{},
-		&StepCreateVolume{},
+		&StepCreateVolume{
+			RootVolumeSize: b.config.RootVolumeSize,
+		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
-		&StepMountDevice{},
+		&StepMountDevice{
+			MountOptions: b.config.MountOptions,
+		},
 		&StepMountExtra{},
 		&StepCopyFiles{},
 		&StepChrootProvision{},
 		&StepEarlyCleanup{},
 		&StepSnapshot{},
-		&StepRegisterAMI{},
+		&awscommon.StepDeregisterAMI{
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
+		},
+		&StepRegisterAMI{
+			RootVolumeSize: b.config.RootVolumeSize,
+		},
 		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
+			AccessConfig: &b.config.AccessConfig,
+			Regions:      b.config.AMIRegions,
+			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description: b.config.AMIDescription,

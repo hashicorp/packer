@@ -24,80 +24,44 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-### Required v1 api:
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
 
-* `api_key` (string) - The API key to use to access your account. You can
-  retrieve this on the "API" page visible after logging into your account
-  on DigitalOcean.
-  If not specified, Packer will use the environment variable
-  `DIGITALOCEAN_API_KEY`, if set.
+### Required:
 
-* `client_id` (string) - The client ID to use to access your account. You can
-  find this on the "API" page visible after logging into your account on
-  DigitalOcean.
-  If not specified, Packer will use the environment variable
-  `DIGITALOCEAN_CLIENT_ID`, if set.
+* `api_token` (string) - The client TOKEN to use to access your account.
+  It can also be specified via environment variable `DIGITALOCEAN_API_TOKEN`, if set.
 
-### Required v2 api:
+* `image` (string) - The name (or slug) of the base image to use. This is the
+  image that will be used to launch a new droplet and provision it.
+  See https://developers.digitalocean.com/documentation/v2/#list-all-images for details on how to get a list of the the accepted image names/slugs.
 
-* `api_token` (string) - The client TOKEN to use to access your account. If it
-  specified, then use v2 api (current), if not then used old (v1) deprecated api.
-  Also it can be specified via environment variable `DIGITALOCEAN_API_TOKEN`, if set.
+* `region` (string) - The name (or slug) of the region to launch the droplet in.
+  Consequently, this is the region where the snapshot will be available.
+  See https://developers.digitalocean.com/documentation/v2/#list-all-regions for the accepted region names/slugs.
+
+* `size` (string) - The name (or slug) of the droplet size to use.
+  See https://developers.digitalocean.com/documentation/v2/#list-all-sizes for the accepted size names/slugs.
 
 ### Optional:
-
-* `api_url` (string) - API endpoint, by default use https://api.digitalocean.com
-  Also it can be specified via environment variable `DIGITALOCEAN_API_URL`, if set.
 
 * `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
   sets the hostname of the machine to this value.
 
-* `image` (string) - The name (or slug) of the base image to use. This is the
-  image that will be used to launch a new droplet and provision it. This
-  defaults to 'ubuntu-12-04-x64' which is the slug for "Ubuntu 12.04.4 x64".
-  See https://developers.digitalocean.com/documentation/v2/#list-all-images for details on how to get a list of the the accepted image names/slugs.
-
-* `image_id` (integer) - The ID of the base image to use. This is the image that
-  will be used to launch a new droplet and provision it.
-  This setting is deprecated. Use `image` instead.
-
 * `private_networking` (boolean) - Set to `true` to enable private networking
   for the droplet being created. This defaults to `false`, or not enabled.
-
-* `region` (string) - The name (or slug) of the region to launch the droplet in.
-  Consequently, this is the region where the snapshot will be available.
-  This defaults to "nyc3", which is the slug for "New York 3".
-  See https://developers.digitalocean.com/documentation/v2/#list-all-regions for the accepted region names/slugs.
-
-* `region_id` (integer) - The ID of the region to launch the droplet in. Consequently,
-  this is the region where the snapshot will be available.
-  This setting is deprecated. Use `region` instead.
-
-* `size` (string) - The name (or slug) of the droplet size to use.
-  This defaults to "512mb", which is the slug for "512MB".
-  See https://developers.digitalocean.com/documentation/v2/#list-all-sizes for the accepted size names/slugs.
-
-* `size_id` (integer) - The ID of the droplet size to use.
-  This setting is deprecated. Use `size` instead.
 
 * `snapshot_name` (string) - The name of the resulting snapshot that will
   appear in your account. This must be unique.
   To help make this unique, use a function like `timestamp` (see
   [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
-* `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
-  22.
-
-* `ssh_timeout` (string) - The time to wait for SSH to become available
-  before timing out. The format of this value is a duration such as "5s"
-  or "5m". The default SSH timeout is "1m".
-
-* `ssh_username` (string) - The username to use in order to communicate
-  over SSH to the running droplet. Default is "root".
-
 * `state_timeout` (string) - The time to wait, as a duration string,
   for a droplet to enter a desired state (such as "active") before
   timing out. The default state timeout is "6m".
+
+* `user_data` (string) - User data to launch with the Droplet.
 
 ## Basic Example
 
@@ -107,20 +71,9 @@ own access tokens:
 ```javascript
 {
   "type": "digitalocean",
-  "client_id": "YOUR CLIENT ID",
-  "api_key": "YOUR API KEY"
+  "api_token": "YOUR API KEY",
+  "image": "ubuntu-12-04-x64",
+  "region": "nyc2",
+  "size": "512mb"
 }
 ```
-
-## Finding Image, Region, and Size IDs
-
-Unfortunately, finding a list of available values for `image_id`, `region_id`,
-and `size_id` is not easy at the moment. Basically, it has to be done through
-the [DigitalOcean API](https://www.digitalocean.com/api_access) using the
-`/images`, `/regions`, and `/sizes` endpoints. You can use `curl` for this
-or request it in your browser.
-
-If you're comfortable installing RubyGems, [Tugboat](https://github.com/pearkes/tugboat)
-is a fantastic DigitalOcean command-line client that has commands to
-find the available images, regions, and sizes. For example, to see all the
-global images, you can run `tugboat images --global`.

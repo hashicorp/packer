@@ -20,6 +20,9 @@ type Config struct {
 	// The remote path where the local file will be uploaded to.
 	Destination string
 
+	// Direction
+	Direction string
+
 	ctx interpolate.Context
 }
 
@@ -29,7 +32,8 @@ type Provisioner struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{},
 		},
@@ -38,10 +42,22 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	if p.config.Direction == "" {
+		p.config.Direction = "upload"
+	}
+
 	var errs *packer.MultiError
-	if _, err := os.Stat(p.config.Source); err != nil {
+
+	if p.config.Direction != "download" && p.config.Direction != "upload" {
 		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
+			errors.New("Direction must be one of: download, upload."))
+	}
+
+	if p.config.Direction == "upload" {
+		if _, err := os.Stat(p.config.Source); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
+		}
 	}
 
 	if p.config.Destination == "" {
@@ -57,6 +73,30 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	if p.config.Direction == "download" {
+		return p.ProvisionDownload(ui, comm)
+	} else {
+		return p.ProvisionUpload(ui, comm)
+	}
+}
+
+func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) error {
+	ui.Say(fmt.Sprintf("Downloading %s => %s", p.config.Source, p.config.Destination))
+
+	f, err := os.OpenFile(p.config.Destination, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	err = comm.Download(p.config.Source, f)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Download failed: %s", err))
+	}
+	return err
+}
+
+func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say(fmt.Sprintf("Uploading %s => %s", p.config.Source, p.config.Destination))
 	info, err := os.Stat(p.config.Source)
 	if err != nil {

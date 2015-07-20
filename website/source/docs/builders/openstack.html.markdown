@@ -27,30 +27,38 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
-* `flavor` (string) - The ID or full URL for the desired flavor for the
+* `flavor` (string) - The ID, name, or full URL for the desired flavor for the
   server to be created.
 
 * `image_name` (string) - The name of the resulting image.
 
-* `password` (string) - The password used to connect to the OpenStack service.
-  If not specified, Packer will use the environment variables
-  `SDK_PASSWORD` or `OS_PASSWORD` (in that order), if set.
-
 * `source_image` (string) - The ID or full URL to the base image to use.
   This is the image that will be used to launch a new server and provision it.
+  Unless you specify completely custom SSH settings, the source image must
+  have `cloud-init` installed so that the keypair gets assigned properly.
 
 * `username` (string) - The username used to connect to the OpenStack service.
+  If not specified, Packer will use the environment variable
+  `OS_USERNAME`, if set.
+
+* `password` (string) - The password used to connect to the OpenStack service.
   If not specified, Packer will use the environment variables
-  `SDK_USERNAME` or `OS_USERNAME` (in that order), if set.
+  `OS_PASSWORD`, if set.
 
 ### Optional:
 
 * `api_key` (string) - The API key used to access OpenStack. Some OpenStack
   installations require this.
-  If not specified, Packer will use the environment variables
-  `SDK_API_KEY`, if set.
+
+* `availability_zone` (string) - The availability zone to launch the
+  server in. If this isn't specified, the default enforced by your OpenStack
+  cluster will be used. This may be required for some OpenStack clusters.
 
 * `floating_ip` (string) - A specific floating IP to assign to this instance.
   `use_floating_ip` must also be set to true for this to have an affect.
@@ -65,49 +73,22 @@ each category, the available configuration keys are alphabetized.
 * `networks` (array of strings) - A list of networks by UUID to attach
   to this instance.
 
-* `openstack_provider` (string) - A name of a provider that has a slightly
-  different API model. Currently supported values are "openstack" (default),
-  and "rackspace".
-
-* `project` (string) - The project name to boot the instance into. Some
-  OpenStack installations require this.
-  If not specified, Packer will use the environment variables
-  `SDK_PROJECT` or `OS_TENANT_NAME` (in that order), if set.
-
-* `provider` (string) - The provider used to connect to the OpenStack service.
-  If not specified, Packer will use the environment variables `SDK_PROVIDER` 
-  or `OS_AUTH_URL` (in that order), if set. 
-  For Rackspace this should be `rackspace-us` or `rackspace-uk`.
-
-* `proxy_url` (string)
+* `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
+  instance into. Some OpenStack installations require this.
+  If not specified, Packer will use the environment variable
+  `OS_TENANT_NAME`, if set.
 
 * `security_groups` (array of strings) - A list of security groups by name
   to add to this instance.
 
 * `region` (string) - The name of the region, such as "DFW", in which
   to launch the server to create the AMI.
-  If not specified, Packer will use the environment variables
-  `SDK_REGION` or `OS_REGION_NAME` (in that order), if set.
-  For a `provider` of "rackspace", it is required to specify a region,
-  either using this option or with an environment variable. For other
-  providers, including a private cloud, specifying a region is optional.
-
-* `ssh_port` (integer) - The port that SSH will be available on. Defaults to port
-  22.
-
-* `ssh_timeout` (string) - The time to wait for SSH to become available
-  before timing out. The format of this value is a duration such as "5s"
-  or "1m". The default SSH timeout is "5m".
-
-* `ssh_username` (string) - The username to use in order to communicate
-  over SSH to the running server. The default is "root".
+  If not specified, Packer will use the environment variable
+  `OS_REGION_NAME`, if set.
 
 * `ssh_interface` (string) - The type of interface to connect via SSH. Values
   useful for Rackspace are "public" or "private", and the default behavior is
   to connect via whichever is returned first from the OpenStack API.
-
-* `tenant_id` (string) - Tenant ID for accessing OpenStack if your
-  installation requires this.
 
 * `use_floating_ip` (boolean) - Whether or not to use a floating IP for
   the instance. Defaults to false.
@@ -124,10 +105,8 @@ Ubuntu 12.04 LTS (Precise Pangolin) on Rackspace OpenStack cloud offering.
 ```javascript
 {
   "type": "openstack",
-  "username": "",
-  "api_key": "",
-  "openstack_provider": "rackspace",
-  "provider": "rackspace-us",
+  "username": "foo",
+  "password": "foo",
   "region": "DFW",
   "ssh_username": "root",
   "image_name": "Test image",
@@ -160,13 +139,3 @@ script is setting environment variables like:
 * `OS_TENANT_ID`
 * `OS_USERNAME`
 * `OS_PASSWORD`
-
-## Troubleshooting
-
-*I get the error "Missing or incorrect provider"*
-
-* Verify your "username", "password" and "provider" settings.
-
-*I get the error "Missing endpoint, or insufficient privileges to access endpoint"*
-
-* Verify your "region" setting.

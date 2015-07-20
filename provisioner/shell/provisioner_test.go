@@ -30,7 +30,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.RemotePath != DefaultRemotePath {
+	if p.config.RemotePath == "" {
 		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
 	}
 }
@@ -45,7 +45,7 @@ func TestProvisionerPrepare_InlineShebang(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.InlineShebang != "/bin/sh" {
+	if p.config.InlineShebang != "/bin/sh -e" {
 		t.Fatalf("bad value: %s", p.config.InlineShebang)
 	}
 

@@ -76,13 +76,12 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	outputPath, err := interpolate.Render(config.OutputPath, &interpolate.Context{
-		Data: &outputPathTemplate{
-			ArtifactId: artifact.Id(),
-			BuildName:  config.PackerBuildName,
-			Provider:   name,
-		},
-	})
+	config.ctx.Data = &outputPathTemplate{
+		ArtifactId: artifact.Id(),
+		BuildName:  config.PackerBuildName,
+		Provider:   name,
+	}
+	outputPath, err := interpolate.Render(config.OutputPath, &config.ctx)
 	if err != nil {
 		return nil, false, err
 	}
@@ -170,8 +169,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
-		Metadata:    &md,
-		Interpolate: true,
+		Metadata:           &md,
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"output",

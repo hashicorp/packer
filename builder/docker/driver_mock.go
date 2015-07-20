@@ -24,6 +24,11 @@ type MockDriver struct {
 	ImportId     string
 	ImportErr    error
 
+	IPAddressCalled bool
+	IPAddressID     string
+	IPAddressResult string
+	IPAddressErr    error
+
 	BuildImageCalled     bool
 	BuildImageDockerfile *bytes.Buffer
 	BuildImageErr        error
@@ -107,6 +112,12 @@ func (d *MockDriver) Import(path, repo string) (string, error) {
 	d.ImportPath = path
 	d.ImportRepo = repo
 	return d.ImportId, d.ImportErr
+}
+
+func (d *MockDriver) IPAddress(id string) (string, error) {
+	d.IPAddressCalled = true
+	d.IPAddressID = id
+	return d.IPAddressResult, d.IPAddressErr
 }
 
 func (d *MockDriver) BuildImage(dockerfile *bytes.Buffer) (string, error) {

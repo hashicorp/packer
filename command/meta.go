@@ -28,6 +28,7 @@ type Meta struct {
 	CoreConfig *packer.CoreConfig
 	Cache      packer.Cache
 	Ui         packer.Ui
+	Version    string
 
 	// These are set by command-line flags
 	flagBuildExcept []string

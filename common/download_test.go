@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestDownloadClient_VerifyChecksum(t *testing.T) {
+func TestDownloadClientVerifyChecksum(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
@@ -43,7 +43,160 @@ func TestDownloadClient_VerifyChecksum(t *testing.T) {
 	}
 }
 
-func TestDownloadClientUsesDefaultUserAgent(t *testing.T) {
+func TestDownloadClient_basic(t *testing.T) {
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Close()
+	os.Remove(tf.Name())
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/basic.txt",
+		TargetPath: tf.Name(),
+	})
+	path, err := client.Get()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if string(raw) != "hello\n" {
+		t.Fatalf("bad: %s", string(raw))
+	}
+}
+
+func TestDownloadClient_checksumBad(t *testing.T) {
+	checksum, err := hex.DecodeString("b2946ac92492d2347c6235b4d2611184")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Close()
+	os.Remove(tf.Name())
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/basic.txt",
+		TargetPath: tf.Name(),
+		Hash:       HashForType("md5"),
+		Checksum:   checksum,
+	})
+	if _, err := client.Get(); err == nil {
+		t.Fatal("should error")
+	}
+}
+
+func TestDownloadClient_checksumGood(t *testing.T) {
+	checksum, err := hex.DecodeString("b1946ac92492d2347c6235b4d2611184")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Close()
+	os.Remove(tf.Name())
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/basic.txt",
+		TargetPath: tf.Name(),
+		Hash:       HashForType("md5"),
+		Checksum:   checksum,
+	})
+	path, err := client.Get()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if string(raw) != "hello\n" {
+		t.Fatalf("bad: %s", string(raw))
+	}
+}
+
+func TestDownloadClient_checksumNoDownload(t *testing.T) {
+	checksum, err := hex.DecodeString("3740570a423feec44c2a759225a9fcf9")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/basic.txt",
+		TargetPath: "./test-fixtures/root/another.txt",
+		Hash:       HashForType("md5"),
+		Checksum:   checksum,
+	})
+	path, err := client.Get()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// If this says "hello" it means we downloaded it. We faked out
+	// the downloader above by giving it the checksum for "another", but
+	// requested the download of "hello"
+	if string(raw) != "another\n" {
+		t.Fatalf("bad: %s", string(raw))
+	}
+}
+
+func TestDownloadClient_resume(t *testing.T) {
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Write([]byte("w"))
+	tf.Close()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if r.Method == "HEAD" {
+			rw.Header().Set("Accept-Ranges", "bytes")
+			rw.WriteHeader(204)
+			return
+		}
+
+		http.ServeFile(rw, r, "./test-fixtures/root/basic.txt")
+	}))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL,
+		TargetPath: tf.Name(),
+	})
+	path, err := client.Get()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if string(raw) != "wello\n" {
+		t.Fatalf("bad: %s", string(raw))
+	}
+}
+
+func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
@@ -97,7 +250,7 @@ func TestDownloadClientUsesDefaultUserAgent(t *testing.T) {
 	}
 }
 
-func TestDownloadClientSetsUserAgent(t *testing.T) {
+func TestDownloadClient_setsUserAgent(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)

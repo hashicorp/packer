@@ -44,7 +44,7 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		Region:          region,
 		SecretKey:       config.SecretKey,
 	}
-	config.BundleUploadCommand, err = interpolate.Render(config.BundleUploadCommand, config.ctx)
+	config.BundleUploadCommand, err = interpolate.Render(config.BundleUploadCommand, &config.ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle upload command: %s", err)
 		state.Put("error", err)

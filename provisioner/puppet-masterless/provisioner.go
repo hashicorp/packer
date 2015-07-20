@@ -44,6 +44,10 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
+
+	// The directory from which the command will be executed.
+	// Packer requires the directory to exist when running puppet.
+	WorkingDir string `mapstructure:"working_directory"`
 }
 
 type Provisioner struct {
@@ -51,6 +55,7 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
+	WorkingDir      string
 	FacterVars      string
 	HieraConfigPath string
 	ModulePath      string
@@ -61,7 +66,8 @@ type ExecuteTemplate struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
@@ -74,7 +80,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
+		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
@@ -85,6 +92,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = "/tmp/packer-puppet-masterless"
 	}
+
+	if p.config.WorkingDir == "" {
+		p.config.WorkingDir = p.config.StagingDir
+	}
+
+	if p.config.Facter == nil {
+		p.config.Facter = make(map[string]string)
+	}
+	p.config.Facter["packer_build_name"] = p.config.PackerBuildName
+	p.config.Facter["packer_builder_type"] = p.config.PackerBuilderType
 
 	// Validation
 	var errs *packer.MultiError
@@ -200,6 +217,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		ManifestFile:    remoteManifestFile,
 		ModulePath:      strings.Join(modulePaths, ":"),
 		Sudo:            !p.config.PreventSudo,
+		WorkingDir:      p.config.WorkingDir,
 	}
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
@@ -252,20 +270,43 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 		return "", fmt.Errorf("Error creating manifests directory: %s", err)
 	}
 
-	// Upload the main manifest
-	f, err := os.Open(p.config.ManifestFile)
+	// NOTE! manifest_file may either be a directory or a file, as puppet apply
+	// now accepts either one.
+
+	fi, err := os.Stat(p.config.ManifestFile)
 	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	manifestFilename := filepath.Base(p.config.ManifestFile)
-	remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
-	if err := comm.Upload(remoteManifestFile, f, nil); err != nil {
-		return "", err
+		return "", fmt.Errorf("Error inspecting manifest file: %s", err)
 	}
 
-	return remoteManifestFile, nil
+	if fi.IsDir() {
+		// If manifest_file is a directory we'll upload the whole thing
+		ui.Message(fmt.Sprintf(
+			"Uploading manifest directory from: %s", p.config.ManifestFile))
+
+		remoteManifestDir := fmt.Sprintf("%s/manifests", p.config.StagingDir)
+		err := p.uploadDirectory(ui, comm, remoteManifestDir, p.config.ManifestFile)
+		if err != nil {
+			return "", fmt.Errorf("Error uploading manifest dir: %s", err)
+		}
+		return remoteManifestDir, nil
+	} else {
+		// Otherwise manifest_file is a file and we'll upload it
+		ui.Message(fmt.Sprintf(
+			"Uploading manifest file from: %s", p.config.ManifestFile))
+
+		f, err := os.Open(p.config.ManifestFile)
+		if err != nil {
+			return "", err
+		}
+		defer f.Close()
+
+		manifestFilename := filepath.Base(p.config.ManifestFile)
+		remoteManifestFile := fmt.Sprintf("%s/%s", remoteManifestsPath, manifestFilename)
+		if err := comm.Upload(remoteManifestFile, f, nil); err != nil {
+			return "", err
+		}
+		return remoteManifestFile, nil
+	}
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {

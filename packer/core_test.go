@@ -142,6 +142,64 @@ func TestCoreBuild_env(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_buildNameVar(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-var-build-name.json"))
+	b := TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Interpolate the config
+	var result map[string]interface{}
+	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result["value"] != "test" {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
+func TestCoreBuild_buildTypeVar(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-var-build-type.json"))
+	b := TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Interpolate the config
+	var result map[string]interface{}
+	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result["value"] != "test" {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestCoreBuild_nonExist(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-basic.json"))
@@ -426,6 +484,19 @@ func TestCoreValidate(t *testing.T) {
 			map[string]string{"foo": "bar"},
 			false,
 		},
+
+		// Min version good
+		{
+			"validate-min-version.json",
+			map[string]string{"foo": "bar"},
+			false,
+		},
+
+		{
+			"validate-min-version-high.json",
+			map[string]string{"foo": "bar"},
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -443,6 +514,7 @@ func TestCoreValidate(t *testing.T) {
 		_, err = NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
+			Version:   "1.0.0",
 		})
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)

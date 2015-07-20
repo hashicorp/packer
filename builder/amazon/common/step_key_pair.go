@@ -12,25 +12,25 @@ import (
 )
 
 type StepKeyPair struct {
-	Debug          bool
-	DebugKeyPath   string
-	KeyPairName    string
-	PrivateKeyFile string
+	Debug                bool
+	DebugKeyPath         string
+	TemporaryKeyPairName string
+	KeyPairName          string
+	PrivateKeyFile       string
 
 	keyName string
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	if s.PrivateKeyFile != "" {
-		s.keyName = ""
-
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
 		if err != nil {
-			state.Put("error", fmt.Errorf("Error loading configured private key file: %s", err))
+			state.Put("error", fmt.Errorf(
+				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", "")
+		state.Put("keyPair", s.KeyPairName)
 		state.Put("privateKey", string(privateKeyBytes))
 
 		return multistep.ActionContinue
@@ -39,15 +39,16 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.KeyPairName))
-	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{KeyName: &s.KeyPairName})
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
+	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
+		KeyName: &s.TemporaryKeyPairName})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
 	// Set the keyname so we know to delete it later
-	s.keyName = s.KeyPairName
+	s.keyName = s.TemporaryKeyPairName
 
 	// Set some state data for use in future steps
 	state.Put("keyPair", s.keyName)
@@ -84,7 +85,9 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
-	if s.keyName == "" {
+	// If we used an SSH private key file, do not go about deleting
+	// keypairs
+	if s.PrivateKeyFile != "" {
 		return
 	}
 

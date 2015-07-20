@@ -3,6 +3,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -11,6 +12,7 @@ func TestDecode(t *testing.T) {
 	type Target struct {
 		Name    string
 		Address string
+		Time    time.Duration
 	}
 
 	cases := map[string]struct {
@@ -22,10 +24,12 @@ func TestDecode(t *testing.T) {
 			[]interface{}{
 				map[string]interface{}{
 					"name": "bar",
+					"time": "5s",
 				},
 			},
 			&Target{
 				Name: "bar",
+				Time: 5 * time.Second,
 			},
 			nil,
 		},
@@ -69,6 +73,36 @@ func TestDecode(t *testing.T) {
 					Include: []string{"name"},
 				},
 			},
+		},
+
+		"build name": {
+			[]interface{}{
+				map[string]interface{}{
+					"name": "{{build_name}}",
+				},
+				map[string]interface{}{
+					"packer_build_name": "foo",
+				},
+			},
+			&Target{
+				Name: "foo",
+			},
+			nil,
+		},
+
+		"build type": {
+			[]interface{}{
+				map[string]interface{}{
+					"name": "{{build_type}}",
+				},
+				map[string]interface{}{
+					"packer_builder_type": "foo",
+				},
+			},
+			&Target{
+				Name: "foo",
+			},
+			nil,
 		},
 	}
 

@@ -20,7 +20,7 @@ func isalphanumeric(b byte) bool {
 
 // Clean up AMI name by replacing invalid characters with "-"
 func templateCleanAMIName(s string) string {
-	allowed := []byte{'(', ')', ',', '/', '-', '_'}
+	allowed := []byte{'(', ')', ',', '/', '-', '_', ' '}
 	b := []byte(s)
 	newb := make([]byte, len(b))
 	for i, c := range b {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/packer/builder/docker"
+	"github.com/mitchellh/packer/builder/qemu"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
@@ -27,7 +28,8 @@ type PostProcessor struct {
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{},
 		},
@@ -41,9 +43,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	if artifact.BuilderId() != docker.BuilderId {
+	switch artifact.BuilderId() {
+	case docker.BuilderId, qemu.BuilderId:
+		break
+	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from Docker builder artifacts.",
+			"Unknown artifact type: %s\nCan only import from Docker, Qemu builder artifacts.",
 			artifact.BuilderId())
 		return nil, false, err
 	}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
@@ -134,6 +135,8 @@ func (r *rawTemplate) Template() (*Template, error) {
 			}
 
 			// Set the configuration
+			delete(c, "except")
+			delete(c, "only")
 			delete(c, "keep_input_artifact")
 			delete(c, "type")
 			if len(c) > 0 {
@@ -289,11 +292,16 @@ func Parse(r io.Reader) (*Template, error) {
 	if len(md.Unused) > 0 {
 		sort.Strings(md.Unused)
 		for _, unused := range md.Unused {
+			// Ignore keys starting with '_' as comments
+			if unused[0] == '_' {
+				continue
+			}
+
 			err = multierror.Append(err, fmt.Errorf(
 				"Unknown root level key in template: '%s'", unused))
 		}
-
-		// Return early for these errors
+	}
+	if err != nil {
 		return nil, err
 	}
 
@@ -313,6 +321,13 @@ func ParseFile(path string) (*Template, error) {
 	tpl, err := Parse(f)
 	if err != nil {
 		return nil, err
+	}
+
+	if !filepath.IsAbs(path) {
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	tpl.Path = path

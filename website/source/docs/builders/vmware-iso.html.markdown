@@ -38,7 +38,6 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
-  "ssh_wait_timeout": "30s",
   "shutdown_command": "shutdown -P now"
 }
 ```
@@ -48,6 +47,10 @@ Ubuntu to self-install. Still, the example serves to show the basic configuratio
 There are many configuration options available for the VMware builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
 
 ### Required:
 
@@ -71,6 +74,12 @@ each category, the available options are alphabetized and described.
   once the OS is installed.
 
 ### Optional:
+
+* `disk_additional_size` (array of integers) - The size(s) of any additional
+  hard disks for the VM in megabytes. If this is not specified then the VM will
+  only contain a primary hard disk. The builder uses expandable, not fixed-size
+  virtual hard disks, so the actual file representing the disk will not use the
+  full size unless it is full.
 
 * `boot_command` (array of strings) - This is an array of commands to type
   when the virtual machine is first booted. The goal of these commands should
@@ -194,28 +203,6 @@ each category, the available options are alphabetized and described.
   In certain rare cases, this might actually end up making the resulting disks
   slightly larger. If you find this to be the case, you can disable compaction
   using this configuration value.
-
-* `ssh_host` (string) - Hostname or IP address of the host. By default, DHCP
-  is used to connect to the host and this field is not used.
-
-* `ssh_key_path` (string) - Path to a private key to use for authenticating
-  with SSH. By default this is not set (key-based auth won't be used).
-  The associated public key is expected to already be configured on the
-  VM being prepared by some other process (kickstart, etc.).
-
-* `ssh_password` (string) - The password for `ssh_username` to use to
-  authenticate with SSH. By default this is the empty string.
-
-* `ssh_port` (integer) - The port that SSH will listen on within the virtual
-  machine. By default this is 22.
-
-* `ssh_skip_request_pty` (boolean) - If true, a pty will not be requested as
-  part of the SSH connection. By default, this is "false", so a pty
-  _will_ be requested.
-
-* `ssh_wait_timeout` (string) - The duration to wait for SSH to become
-  available. By default this is "20m", or 20 minutes. Note that this should
-  be quite long since the timer begins as soon as the virtual machine is booted.
 
 * `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
   upload into the VM. Valid values are "darwin", "linux", and "windows".

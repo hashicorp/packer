@@ -37,10 +37,10 @@ The configuration allows you to specify and access the artifact in Atlas.
   have access to the organization, hashicorp in this example, in order to add an artifact to
   the organization in Atlas.
 
-* `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will always be `aws.ami`.
+* `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will always be `amazon.ami`.
   This field must be defined because Atlas can host other artifact types, such as Vagrant boxes.
 
--> **Note:** If you want to upload Vagrant boxes to Atlas, for now use the [Vagrant Cloud post-processor](/docs/post-processors/vagrant-cloud.html).
+-> **Note:** If you want to upload Vagrant boxes to Atlas, use the [Atlas post-processor](/docs/post-processors/atlas.html).
 
 ### Optional:
 
@@ -85,7 +85,7 @@ to `https://atlas.hashicorp.com/api/v1`.
         "type": "atlas",
         "token": "{{user `atlas_token`}}",
         "artifact": "hashicorp/foobar",
-        "artifact_type": "aws.ami",
+        "artifact_type": "amazon.ami",
         "metadata": {
           "created_at": "{{timestamp}}"
         }

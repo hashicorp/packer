@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/multistep"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -57,7 +58,8 @@ type Config struct {
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -112,7 +114,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.VMName == "" {
-		b.config.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", b.config.PackerBuildName)
+		b.config.VMName = fmt.Sprintf(
+			"packer-%s-%d", b.config.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
@@ -230,6 +233,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			Extension:    "iso",
 		},
 		&vboxcommon.StepOutputDir{
 			Force: b.config.PackerForce,
@@ -252,9 +256,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
-			GuestPort:   b.config.SSHPort,
-			HostPortMin: b.config.SSHHostPortMin,
-			HostPortMax: b.config.SSHHostPortMax,
+			CommConfig:     &b.config.SSHConfig.Comm,
+			HostPortMin:    b.config.SSHHostPortMin,
+			HostPortMax:    b.config.SSHHostPortMax,
+			SkipNatMapping: b.config.SSHSkipNatMapping,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
@@ -269,10 +274,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
 		},
-		&common.StepConnectSSH{
-			SSHAddress:     vboxcommon.SSHAddress,
-			SSHConfig:      vboxcommon.SSHConfigFunc(b.config.SSHConfig),
-			SSHWaitTimeout: b.config.SSHWaitTimeout,
+		&communicator.StepConnect{
+			Config:    &b.config.SSHConfig.Comm,
+			Host:      vboxcommon.CommHost,
+			SSHConfig: vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHPort:   vboxcommon.SSHPort,
 		},
 		&vboxcommon.StepUploadVersion{
 			Path: b.config.VBoxVersionFile,
@@ -293,9 +299,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:      b.config.ctx,
 		},
 		&vboxcommon.StepExport{
-			Format:     b.config.Format,
-			OutputDir:  b.config.OutputDir,
-			ExportOpts: b.config.ExportOpts.ExportOpts,
+			Format:         b.config.Format,
+			OutputDir:      b.config.OutputDir,
+			ExportOpts:     b.config.ExportOpts.ExportOpts,
+			SkipNatMapping: b.config.SSHSkipNatMapping,
 		},
 	}
 

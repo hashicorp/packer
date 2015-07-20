@@ -73,6 +73,10 @@ There are many configuration options available for the Qemu builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html)
+can be configured for this builder.
+
 ### Required:
 
 * `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
@@ -112,11 +116,11 @@ each category, the available options are alphabetized and described.
   the default is 10 seconds.
 
 * `disk_cache` (string) - The cache mode to use for disk. Allowed values
-  values include any of "writethrough", "writeback", "none", "unsafe" or
-  "directsync".
+  include any of "writethrough", "writeback", "none", "unsafe" or
+  "directsync".  By default, this is set to "writeback".
 
 * `disk_discard` (string) - The discard mode to use for disk. Allowed values
-  include any of "unmap" or "ignore".
+  include any of "unmap" or "ignore".  By default, this is set to "ignore".
 
 * `disk_image` (boolean) - Packer defaults to building from an ISO file,
   this parameter controls whether the ISO URL supplied is actually a bootable
@@ -144,7 +148,7 @@ each category, the available options are alphabetized and described.
 * `format` (string) - Either "qcow2" or "raw", this specifies the output
   format of the virtual machine image. This defaults to "qcow2".
 
-* `headless` (boolean) - Packer defaults to building virtual machines by
+* `headless` (boolean) - Packer defaults to building QEMU virtual machines by
   launching a GUI that shows the console of the machine being built.
   When this value is set to true, the machine will start without a console.
 
@@ -184,6 +188,11 @@ each category, the available options are alphabetized and described.
   By default this is "output-BUILDNAME" where "BUILDNAME" is the name
   of the build.
 
+* `qemu_binary` (string) - The name of the Qemu binary to look for.  This
+  defaults to "qemu-system-x86_64", but may need to be changed for some
+  platforms.  For example "qemu-kvm", or "qemu-system-i386" may be a better
+  choice for some systems.
+
 * `qemuargs` (array of array of strings) - Allows complete control over
   the qemu command line (though not, at this time, qemu-img). Each array
   of strings makes up a command line switch that overrides matching default
@@ -221,11 +230,6 @@ qemu-system-x86 command. The arguments are all printed for review.
 	qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
-* `qemu_binary` (string) - The name of the Qemu binary to look for.  This
-  defaults to "qemu-system-x86_64", but may need to be changed for some
-  platforms.  For example "qemu-kvm", or "qemu-system-i386" may be a better
-  choice for some systems.
-
 * `shutdown_command` (string) - The command to use to gracefully shut down
   the machine once all the provisioning is done. By default this is an empty
   string, which tells Packer to just forcefully shut down the machine.
@@ -235,28 +239,11 @@ qemu-system-x86 command. The arguments are all printed for review.
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
-* `ssh_host_port_min` and `ssh_host_port_max` (uint) - The minimum and
+* `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
   maximum port to use for the SSH port on the host machine which is forwarded
   to the SSH port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the
   host port.
-
-* `ssh_key_path` (string) - Path to a private key to use for authenticating
-  with SSH. By default this is not set (key-based auth won't be used).
-  The associated public key is expected to already be configured on the
-  VM being prepared by some other process (kickstart, etc.).
-
-* `ssh_password` (string) - The password for `ssh_username` to use to
-  authenticate with SSH. By default this is the empty string.
-
-* `ssh_port` (integer) - The port that SSH will be listening on in the guest
-  virtual machine. By default this is 22. The Qemu builder will map, via
-  port forward, a port on the host machine to the port listed here so
-  machines outside the installing VM can access the VM.
-
-* `ssh_wait_timeout` (string) - The duration to wait for SSH to become
-  available. By default this is "20m", or 20 minutes. Note that this should
-  be quite long since the timer begins as soon as the virtual machine is booted.
 
 * `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
   the new virtual machine, without the file extension. By default this is

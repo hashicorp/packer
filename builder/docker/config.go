@@ -6,6 +6,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -13,6 +14,7 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	Comm                communicator.Config `mapstructure:",squash"`
 
 	Commit     bool
 	ExportPath string `mapstructure:"export_path"`
@@ -26,17 +28,19 @@ type Config struct {
 	LoginUsername string `mapstructure:"login_username"`
 	LoginPassword string `mapstructure:"login_password"`
 	LoginServer   string `mapstructure:"login_server"`
+	Pty           bool
 
 	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
+	c := new(Config)
 
 	var md mapstructure.Metadata
-	err := config.Decode(&c, &config.DecodeOpts{
-		Metadata:    &md,
-		Interpolate: true,
+	err := config.Decode(c, &config.DecodeOpts{
+		Metadata:           &md,
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_command",
@@ -69,7 +73,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Pull = true
 	}
 
+	// Default to the normal Docker type
+	if c.Comm.Type == "" {
+		c.Comm.Type = "docker"
+	}
+
 	var errs *packer.MultiError
+	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
+	}
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("image must be specified"))
@@ -91,5 +103,5 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, errs
 	}
 
-	return &c, nil, nil
+	return c, nil, nil
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -40,7 +41,7 @@ type Config struct {
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
 
-	ctx *interpolate.Context
+	ctx interpolate.Context
 }
 
 type Builder struct {
@@ -49,17 +50,23 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	b.config.ctx = &interpolate.Context{Funcs: awscommon.TemplateFuncs}
+	configs := make([]interface{}, len(raws)+1)
+	configs[0] = map[string]interface{}{
+		"bundle_prefix": "image-{{timestamp}}",
+	}
+	copy(configs[1:], raws)
+
+	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
-		InterpolateContext: b.config.ctx,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"bundle_upload_command",
 				"bundle_vol_command",
 			},
 		},
-	}, raws...)
+	}, configs...)
 	if err != nil {
 		return nil, err
 	}
@@ -68,20 +75,26 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.BundleDestination = "/tmp"
 	}
 
-	if b.config.BundlePrefix == "" {
-		b.config.BundlePrefix = "image-{{timestamp}}"
-	}
-
 	if b.config.BundleUploadCommand == "" {
-		b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
-			"-b {{.BucketName}} " +
-			"-m {{.ManifestPath}} " +
-			"-a {{.AccessKey}} " +
-			"-s {{.SecretKey}} " +
-			"-d {{.BundleDirectory}} " +
-			"--batch " +
-			"--location {{.Region}} " +
-			"--retry"
+		if b.config.IamInstanceProfile != "" {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		} else {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-a {{.AccessKey}} " +
+				"-s {{.SecretKey}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		}
 	}
 
 	if b.config.BundleVolCommand == "" {
@@ -103,10 +116,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	var errs *packer.MultiError
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.AccountId == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
@@ -157,19 +170,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepPreValidate{
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
 		&awscommon.StepKeyPair{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:    b.config.TemporaryKeyPairName,
-			PrivateKeyFile: b.config.SSHPrivateKeyFile,
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:          b.config.SSHKeyPairName,
+			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
 		},
 		&awscommon.StepSecurityGroup{
+			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
-			SSHPort:          b.config.SSHPort,
 			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
@@ -187,11 +205,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
 		},
-		&common.StepConnectSSH{
-			SSHAddress: awscommon.SSHAddress(
-				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
-			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
+		&awscommon.StepGetPassword{
+			Debug:   b.config.PackerDebug,
+			Comm:    &b.config.RunConfig.Comm,
+			Timeout: b.config.WindowsPasswordTimeout,
+		},
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: awscommon.SSHHost(
+				ec2conn,
+				b.config.SSHPrivateIp),
+			SSHConfig: awscommon.SSHConfig(
+				b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
@@ -201,10 +226,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepUploadBundle{
 			Debug: b.config.PackerDebug,
 		},
+		&awscommon.StepDeregisterAMI{
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
+		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig: &b.config.AccessConfig,
 			Regions:      b.config.AMIRegions,
+			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:  b.config.AMIDescription,

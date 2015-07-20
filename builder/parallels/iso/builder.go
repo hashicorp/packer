@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -26,6 +27,7 @@ type Config struct {
 	parallelscommon.FloppyConfig        `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
@@ -56,7 +58,8 @@ type Config struct {
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -76,6 +79,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.PrlctlPostConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlVersionConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
@@ -245,10 +249,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
 		},
-		&common.StepConnectSSH{
-			SSHAddress:     parallelscommon.SSHAddress,
-			SSHConfig:      parallelscommon.SSHConfigFunc(b.config.SSHConfig),
-			SSHWaitTimeout: b.config.SSHWaitTimeout,
+		&communicator.StepConnect{
+			Config:    &b.config.SSHConfig.Comm,
+			Host:      parallelscommon.CommHost,
+			SSHConfig: parallelscommon.SSHConfigFunc(b.config.SSHConfig),
 		},
 		&parallelscommon.StepUploadVersion{
 			Path: b.config.PrlctlVersionFile,
@@ -263,6 +267,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&parallelscommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
+		},
+		&parallelscommon.StepPrlctl{
+			Commands: b.config.PrlctlPost,
+			Ctx:      b.config.ctx,
 		},
 	}
 

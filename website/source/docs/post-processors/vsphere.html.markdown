@@ -25,14 +25,17 @@ Required:
 * `datacenter` (string) - The name of the datacenter within vSphere to
   add the VM to.
 
+* `datastore` (string) - The name of the datastore to store this VM.
+  This is _not required_ if `resource_pool` is specified.
+
 * `host` (string) - The vSphere host that will be contacted to perform
   the VM upload.
 
 * `password` (string) - Password to use to authenticate to the vSphere
   endpoint.
 
-* `resource_pool` (string) - The resource pool to upload the VM to. This can be
-  " " if you do not have resource pools configured
+* `resource_pool` (string) - The resource pool to upload the VM to.
+  This is _not required_.
 
 * `username` (string) - The username to use to authenticate to the vSphere
   endpoint.
@@ -40,8 +43,6 @@ Required:
 * `vm_name` (string) - The name of the VM once it is uploaded.
 
 Optional:
-
-* `datastore` (string) - The name of the datastore to store this VM.
 
 * `disk_mode` (string) - Target disk format. See `ovftool` manual for
   available options. By default, "thick" will be used.

@@ -17,6 +17,7 @@ type Config struct {
 	parallelscommon.FloppyConfig        `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
+	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
@@ -33,8 +34,9 @@ type Config struct {
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
-	err := config.Decode(&c, &config.DecodeOpts{
-		Interpolate: true,
+	err := config.Decode(c, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -56,6 +58,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.PrlctlPostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)

@@ -122,10 +122,8 @@ func TestPush_noName(t *testing.T) {
 
 func TestPush_cliName(t *testing.T) {
 	var actual []string
-	var actualOpts *uploadOpts
 	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
 		actual = testArchive(t, r)
-		actualOpts = opts
 
 		doneCh := make(chan struct{})
 		close(doneCh)
