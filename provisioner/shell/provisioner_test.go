@@ -33,6 +33,10 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	if p.config.RemotePath == "" {
 		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
 	}
+
+	if p.config.Interactive {
+		t.Errorf("unexpected interactive: %t", p.config.Interactive)
+	}
 }
 
 func TestProvisionerPrepare_InlineShebang(t *testing.T) {
