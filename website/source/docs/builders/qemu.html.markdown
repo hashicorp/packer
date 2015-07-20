@@ -239,7 +239,7 @@ qemu-system-x86 command. The arguments are all printed for review.
   If it doesn't shut down in this time, it is an error. By default, the timeout
   is "5m", or five minutes.
 
-* `ssh_host_port_min` and `ssh_host_port_max` (uint) - The minimum and
+* `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
   maximum port to use for the SSH port on the host machine which is forwarded
   to the SSH port on the guest machine. Because Packer often runs in parallel,
   Packer will choose a randomly available port in this range to use as the

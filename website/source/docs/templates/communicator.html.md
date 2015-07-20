@@ -57,7 +57,7 @@ The SSH communicator has the following options:
   * `ssh_host` (string) - The address to SSH to. This usually is automatically
     configured by the builder.
 
-  * `ssh_port` (int) - The port to connect to SSH. This defaults to 22.
+  * `ssh_port` (integer) - The port to connect to SSH. This defaults to 22.
 
   * `ssh_username` (string) - The username to connect to SSH with.
 
@@ -67,24 +67,27 @@ The SSH communicator has the following options:
   * `ssh_private_key_file` (string) - Path to a PEM encoded private key
     file to use to authentiate with SSH.
 
-  * `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH connection.
-    This defaults to false.
+  * `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
+    connection. This defaults to false.
 
   * `ssh_timeout` (string) - The time to wait for SSH to become available.
-    Packer uses this to determine when the machine has booted so this is usually
-    quite long. Example value: "10m"
+    Packer uses this to determine when the machine has booted so this is
+    usually quite long. Example value: "10m"
 
-  * `ssh_handshake_attempts` (int) - The number of handshakes to attempt with
-    SSH once it can connect. This defaults to 10.
+  * `ssh_handshake_attempts` (integer) - The number of handshakes to attempt
+    with SSH once it can connect. This defaults to 10.
 
-  * `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be disabled.
+  * `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
+    disabled.
 
   * `ssh_bastion_host` (string) - A bastion host to use for the actual
     SSH connection.
 
-  * `ssh_bastion_port` (int) - The port of the bastion host. Defaults to 22.
+  * `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to
+    22.
 
-  * `ssh_bastion_username` (string) - The username to connect to the bastion host.
+  * `ssh_bastion_username` (string) - The username to connect to the bastion
+    host.
 
   * `ssh_bastion_password` (string) - The password to use to authenticate
     with the bastion host.
@@ -98,7 +101,8 @@ The WinRM communicator has the following options.
 
   * `winrm_host` (string) - The address for WinRM to connect to.
 
-  * `winrm_port` (int) - The WinRM port to connect to. This defaults to 5985.
+  * `winrm_port` (integer) - The WinRM port to connect to. This defaults to
+    5985.
 
   * `winrm_username` (string) - The username to use to connect to WinRM.
 
