@@ -58,11 +58,9 @@ can be configured for this builder.
 ### Required:
 
 * `access_key` (string) - The access key used to communicate with AWS.
-  If not specified, Packer will use the key from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
-  or fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY` (in that order), if set.
-  If the environmental variables aren't set and Packer is running on
-  an EC2 instance, Packer will check the instance metadata for IAM role
-  keys.
+  If not specified, Packer will search the standard [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file using environment variable `AWS_PROFILE` as the profile name, will use the `[default]` entry,
+  or will fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY`. 
+  Finally, if Packer is running on an EC2 instance it will check the instance metadata for IAM role keys.
 
 * `ami_name` (string) - The name of the resulting AMI that will appear
   when managing AMIs in the AWS console or via APIs. This must be unique.
@@ -70,11 +68,7 @@ can be configured for this builder.
   [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
 * `secret_key` (string) - The secret key used to communicate with AWS.
-  If not specified, Packer will use the secret from any [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file
-  or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY` (in that order), if set.
-  If the environmental variables aren't set and Packer is running on
-  an EC2 instance, Packer will check the instance metadata for IAM role
-  keys.
+  Lookup behavior is as above for `access_key` except the variables are `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY`.
 
 * `source_ami` (string) - The source AMI whose root volume will be copied
   and provisioned on the currently running instance. This must be an

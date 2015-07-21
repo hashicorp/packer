@@ -33,8 +33,8 @@ much easier to use and Amazon generally recommends EBS-backed images nowadays.
 
 ## Using an IAM Instance Profile
 
-If AWS keys are not specified in the template, a [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file or through environment variables
-Packer will use credentials provided by the instance's IAM profile, if it has one.
+If AWS keys are not specified in the template, Packer will consult the [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file, try the standard AWS environment variables, and then
+any IAM role credentials defined by the instance's metadata.
 
 The following policy document provides the minimal set permissions necessary for Packer to work:
 
