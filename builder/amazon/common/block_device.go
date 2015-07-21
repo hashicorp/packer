@@ -32,7 +32,6 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 	for _, blockDevice := range b {
 		ebsBlockDevice := &ec2.EBSBlockDevice{
 			VolumeType:          aws.String(blockDevice.VolumeType),
-			VolumeSize:          aws.Long(blockDevice.VolumeSize),
 			DeleteOnTermination: aws.Boolean(blockDevice.DeleteOnTermination),
 		}
 
@@ -46,6 +45,11 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 			ebsBlockDevice.SnapshotID = aws.String(blockDevice.SnapshotId)
 		} else if blockDevice.Encrypted {
 			ebsBlockDevice.Encrypted = aws.Boolean(blockDevice.Encrypted)
+		}
+
+		// Use snapshot size if you don't specify a VolumeSize
+		if blockDevice.VolumeSize != 0 {
+			ebsBlockDevice.VolumeSize = aws.Long(blockDevice.VolumeSize)
 		}
 
 		mapping := &ec2.BlockDeviceMapping{
