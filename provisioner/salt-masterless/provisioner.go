@@ -45,6 +45,9 @@ type Config struct {
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
+    // Arguments pass to salt-call command
+	ExecuteCommand string `mapstructure:"execute_command"`
+
 	ctx interpolate.Context
 }
 
@@ -52,12 +55,19 @@ type Provisioner struct {
 	config Config
 }
 
+type ExecuteTemplate struct {
+    RemoteStateTree string
+    RemotePillarRoots string
+}
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{
+                "execute_command",
+            },
 		},
 	}, raws...)
 	if err != nil {
@@ -193,8 +203,27 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("salt-call --local state.highstate --file-root=%s --pillar-root=%s -l info --retcode-passthrough"), p.config.RemoteStateTree, p.config.RemotePillarRoots)}
+    if p.config.ExecuteCommand == "" {
+        p.config.ExecuteCommand = ("salt-call --local state.highstate " +
+                                   "--file-root={{.RemoteStateTree}} " +
+                                   "--pillar-root={{.RemotePillarRoots}} " +
+                                   "-l info --retcode-passthrough")
+    }
+
+    p.config.ctx.Data = &ExecuteTemplate{
+        RemoteStateTree:   p.config.RemoteStateTree,
+        RemotePillarRoots: p.config.RemotePillarRoots,
+    }
+
+    command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+    if err != nil {
+        return err
+    }
+
+	ui.Message(fmt.Sprintf("Running highstate: %s", command))
+	cmd := &packer.RemoteCmd{
+       Command: p.sudo(command),
+    }
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
