@@ -89,6 +89,3 @@ files to include:
   }
 }
 ```
-
-~> **Variable interpolation** is not currently possible in Packer push
-configurations. This will be fixed in an upcoming release.
