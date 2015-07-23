@@ -60,10 +60,10 @@ dependencies.
 
 There are two steps involved in creating a plugin:
 
-1.  Implement the desired interface. For example, if you're building a builder
+1. Implement the desired interface. For example, if you're building a builder
   plugin, implement the `packer.Builder` interface.
 
-2.  Serve the interface by calling the appropriate plugin serving method in your
+2. Serve the interface by calling the appropriate plugin serving method in your
   main method. In the case of a builder, this is `plugin.ServeBuilder`.
 
 A basic example is shown below. In this example, assume the `Builder` struct
