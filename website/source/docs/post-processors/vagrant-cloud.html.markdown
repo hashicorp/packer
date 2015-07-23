@@ -36,16 +36,16 @@ and deliver them to your team in some fashion.
 
 Here is an example workflow:
 
-1.  You use Packer to build a Vagrant Box for the `virtualbox` provider
-2.  The `vagrant-cloud` post-processor is configured to point to the box
+1. You use Packer to build a Vagrant Box for the `virtualbox` provider
+2. The `vagrant-cloud` post-processor is configured to point to the box
   `hashicorp/foobar` on Vagrant Cloud via the `box_tag` configuration
-3.  The post-processor receives the box from the `vagrant` post-processor
-4.  It then creates the configured version, or verifies the existence of it, on
+3. The post-processor receives the box from the `vagrant` post-processor
+4. It then creates the configured version, or verifies the existence of it, on
   Vagrant Cloud
-5.  A provider matching the name of the Vagrant provider is then created
-6.  The box is uploaded to Vagrant Cloud
-7.  The upload is verified
-8.  The version is released and available to users of the box
+5. A provider matching the name of the Vagrant provider is then created
+6. The box is uploaded to Vagrant Cloud
+7. The upload is verified
+8. The version is released and available to users of the box
 
 ## Configuration
 
