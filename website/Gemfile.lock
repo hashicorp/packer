@@ -69,6 +69,7 @@ GEM
     hitimes (1.2.2)
     hooks (0.4.0)
       uber (~> 0.0.4)
+    htmlbeautifier (1.1.0)
     htmlcompressor (0.2.0)
     http_parser.rb (0.6.0)
     i18n (0.7.0)
@@ -92,6 +93,8 @@ GEM
       middleman-sprockets (>= 3.1.2)
       sass (>= 3.4.0, < 4.0)
       uglifier (~> 2.5)
+    middleman-breadcrumbs (0.1.0)
+      middleman (>= 3.3.5)
     middleman-core (3.3.12)
       activesupport (~> 4.1.0)
       bundler (~> 1.1)
@@ -179,4 +182,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  htmlbeautifier
+  middleman-breadcrumbs
   middleman-hashicorp!
