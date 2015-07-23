@@ -60,98 +60,100 @@ builder.
 
 ### Required:
 
-- `access_key` (string) - The access key used to communicate with AWS. If not
-  specified, Packer will use the key from any
-  [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-  file or fall back to environment variables `AWS_ACCESS_KEY_ID` or
-  `AWS_ACCESS_KEY` (in that order), if set. If the environmental variables
-  aren't set and Packer is running on an EC2 instance, Packer will check the
-  instance metadata for IAM role keys.
+-   `access_key` (string) - The access key used to communicate with AWS. If not
+    specified, Packer will use the key from any
+    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    file or fall back to environment variables `AWS_ACCESS_KEY_ID` or
+    `AWS_ACCESS_KEY` (in that order), if set. If the environmental variables
+    aren't set and Packer is running on an EC2 instance, Packer will check the
+    instance metadata for IAM role keys.
 
-- `ami_name` (string) - The name of the resulting AMI that will appear when
-  managing AMIs in the AWS console or via APIs. This must be unique. To help
-  make this unique, use a function like `timestamp` (see [configuration
-  templates](/docs/templates/configuration-templates.html) for more info)
+-   `ami_name` (string) - The name of the resulting AMI that will appear when
+    managing AMIs in the AWS console or via APIs. This must be unique. To help
+    make this unique, use a function like `timestamp` (see [configuration
+    templates](/docs/templates/configuration-templates.html) for more info)
 
-- `secret_key` (string) - The secret key used to communicate with AWS. If not
-  specified, Packer will use the secret from any
-  [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-  file or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or
-  `AWS_SECRET_KEY` (in that order), if set. If the environmental variables
-  aren't set and Packer is running on an EC2 instance, Packer will check the
-  instance metadata for IAM role keys.
+-   `secret_key` (string) - The secret key used to communicate with AWS. If not
+    specified, Packer will use the secret from any
+    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    file or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or
+    `AWS_SECRET_KEY` (in that order), if set. If the environmental variables
+    aren't set and Packer is running on an EC2 instance, Packer will check the
+    instance metadata for IAM role keys.
 
-- `source_ami` (string) - The source AMI whose root volume will be copied and
-  provisioned on the currently running instance. This must be an EBS-backed AMI
-  with a root volume snapshot that you have access to.
+-   `source_ami` (string) - The source AMI whose root volume will be copied and
+    provisioned on the currently running instance. This must be an EBS-backed
+    AMI with a root volume snapshot that you have access to.
 
 ### Optional:
 
-- `ami_description` (string) - The description to set for the resulting AMI(s).
-  By default this description is empty.
+-   `ami_description` (string) - The description to set for the
+    resulting AMI(s). By default this description is empty.
 
-- `ami_groups` (array of strings) - A list of groups that have access to launch
-  the resulting AMI(s). By default no groups have permission to launch the AMI.
-  `all` will make the AMI publicly accessible.
+-   `ami_groups` (array of strings) - A list of groups that have access to
+    launch the resulting AMI(s). By default no groups have permission to launch
+    the AMI. `all` will make the AMI publicly accessible.
 
-- `ami_product_codes` (array of strings) - A list of product codes to associate
-  with the AMI. By default no product codes are associated with the AMI.
+-   `ami_product_codes` (array of strings) - A list of product codes to
+    associate with the AMI. By default no product codes are associated with
+    the AMI.
 
-- `ami_regions` (array of strings) - A list of regions to copy the AMI to. Tags
-  and attributes are copied along with the AMI. AMI copying takes time depending
-  on the size of the AMI, but will generally take many minutes.
+-   `ami_regions` (array of strings) - A list of regions to copy the AMI to.
+    Tags and attributes are copied along with the AMI. AMI copying takes time
+    depending on the size of the AMI, but will generally take many minutes.
 
-- `ami_users` (array of strings) - A list of account IDs that have access to
-  launch the resulting AMI(s). By default no additional users other than the
-  user creating the AMI has permissions to launch it.
+-   `ami_users` (array of strings) - A list of account IDs that have access to
+    launch the resulting AMI(s). By default no additional users other than the
+    user creating the AMI has permissions to launch it.
 
-- `ami_virtualization_type` (string) - The type of virtualization for the AMI
-  you are building. This option is required to register HVM images. Can be
-  "paravirtual" (default) or "hvm".
+-   `ami_virtualization_type` (string) - The type of virtualization for the AMI
+    you are building. This option is required to register HVM images. Can be
+    "paravirtual" (default) or "hvm".
 
-- `chroot_mounts` (array of array of strings) - This is a list of additional
-  devices to mount into the chroot environment. This configuration parameter
-  requires some additional documentation which is in the "Chroot Mounts"
-  section below. Please read that section for more information on how to
-  use this.
+-   `chroot_mounts` (array of array of strings) - This is a list of additional
+    devices to mount into the chroot environment. This configuration parameter
+    requires some additional documentation which is in the "Chroot Mounts"
+    section below. Please read that section for more information on how to
+    use this.
 
-- `command_wrapper` (string) - How to run shell commands. This defaults
-  to "{{.Command}}". This may be useful to set if you want to set environmental
-  variables or perhaps run it with `sudo` or so on. This is a configuration
-  template where the `.Command` variable is replaced with the command to be run.
+-   `command_wrapper` (string) - How to run shell commands. This defaults
+    to "{{.Command}}". This may be useful to set if you want to set
+    environmental variables or perhaps run it with `sudo` or so on. This is a
+    configuration template where the `.Command` variable is replaced with the
+    command to be run.
 
-- `copy_files` (array of strings) - Paths to files on the running EC2 instance
-  that will be copied into the chroot environment prior to provisioning. This is
-  useful, for example, to copy `/etc/resolv.conf` so that DNS lookups work.
+-   `copy_files` (array of strings) - Paths to files on the running EC2 instance
+    that will be copied into the chroot environment prior to provisioning. This
+    is useful, for example, to copy `/etc/resolv.conf` so that DNS lookups work.
 
-- `device_path` (string) - The path to the device where the root volume of the
-  source AMI will be attached. This defaults to "" (empty string), which forces
-  Packer to find an open device automatically.
+-   `device_path` (string) - The path to the device where the root volume of the
+    source AMI will be attached. This defaults to "" (empty string), which
+    forces Packer to find an open device automatically.
 
-- `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport)
-  on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS
-  IAM policy.
+-   `enhanced_networking` (boolean) - Enable enhanced
+    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
+    `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
-- `force_deregister` (boolean) - Force Packer to first deregister an existing
-  AMI if one with the same name already exists. Default `false`.
+-   `force_deregister` (boolean) - Force Packer to first deregister an existing
+    AMI if one with the same name already exists. Default `false`.
 
-- `mount_path` (string) - The path where the volume will be mounted. This is
-  where the chroot environment will be. This defaults to
-  `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
-  where the `.Device` variable is replaced with the name of the device where the
-  volume is attached.
+-   `mount_path` (string) - The path where the volume will be mounted. This is
+    where the chroot environment will be. This defaults to
+    `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
+    where the `.Device` variable is replaced with the name of the device where
+    the volume is attached.
 
-- `mount_options` (array of strings) - Options to supply the `mount` command
-  when mounting devices. Each option will be prefixed with `-o` and supplied to
-  the `mount` command ran by Packer. Because this command is ran in a shell,
-  user discrestion is advised. See [this manual page for the mount
-  command](http://linuxcommand.org/man_pages/mount8.html) for valid file system
-  specific options
+-   `mount_options` (array of strings) - Options to supply the `mount` command
+    when mounting devices. Each option will be prefixed with `-o` and supplied
+    to the `mount` command ran by Packer. Because this command is ran in a
+    shell, user discrestion is advised. See [this manual page for the mount
+    command](http://linuxcommand.org/man_pages/mount8.html) for valid file
+    system specific options
 
-- `root_volume_size` (integer) - The size of the root volume for the chroot
-  environment, and the resulting AMI
+-   `root_volume_size` (integer) - The size of the root volume for the chroot
+    environment, and the resulting AMI
 
-- `tags` (object of key/value strings) - Tags applied to the AMI.
+-   `tags` (object of key/value strings) - Tags applied to the AMI.
 
 ## Basic Example
 
@@ -173,11 +175,11 @@ The `chroot_mounts` configuration can be used to mount additional devices within
 the chroot. By default, the following additional mounts are added into the
 chroot by Packer:
 
-- `/proc` (proc)
-- `/sys` (sysfs)
-- `/dev` (bind to real `/dev`)
-- `/dev/pts` (devpts)
-- `/proc/sys/fs/binfmt_misc` (binfmt\_misc)
+-   `/proc` (proc)
+-   `/sys` (sysfs)
+-   `/dev` (bind to real `/dev`)
+-   `/dev/pts` (devpts)
+-   `/proc/sys/fs/binfmt_misc` (binfmt\_misc)
 
 These default mounts are usually good enough for anyone and are sane defaults.
 However, if you want to change or add the mount points, you may using the
@@ -195,12 +197,12 @@ However, if you want to change or add the mount points, you may using the
 `chroot_mounts` is a list of a 3-tuples of strings. The three components of the
 3-tuple, in order, are:
 
-- The filesystem type. If this is "bind", then Packer will properly bind the
-  filesystem to another mount point.
+-   The filesystem type. If this is "bind", then Packer will properly bind the
+    filesystem to another mount point.
 
-- The source device.
+-   The source device.
 
-- The mount directory.
+-   The mount directory.
 
 ## Parallelism
 

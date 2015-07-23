@@ -18,16 +18,16 @@ pushes it to a Docker registry.
 
 This post-processor has only optional configuration:
 
-- `login` (boolean) - Defaults to false. If true, the post-processor will login
-  prior to pushing.
+-   `login` (boolean) - Defaults to false. If true, the post-processor will
+    login prior to pushing.
 
-- `login_email` (string) - The email to use to authenticate to login.
+-   `login_email` (string) - The email to use to authenticate to login.
 
-- `login_username` (string) - The username to use to authenticate to login.
+-   `login_username` (string) - The username to use to authenticate to login.
 
-- `login_password` (string) - The password to use to authenticate to login.
+-   `login_password` (string) - The password to use to authenticate to login.
 
-- `login_server` (string) - The server address to login to.
+-   `login_server` (string) - The server address to login to.
 
 -&gt; **Note:** If you login using the credentials above, the post-processor
 will automatically log you out afterwards (just the server specified).

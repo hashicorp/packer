@@ -53,20 +53,22 @@ timestamp,target,type,data...
 
 Each component is explained below:
 
-- **timestamp** is a Unix timestamp in UTC of when the message was printed.
+-   **timestamp** is a Unix timestamp in UTC of when the message was printed.
 
-- **target** is the target of the following output. This is empty if the message
-  is related to Packer globally. Otherwise, this is generally a build name so
-  you can relate output to a specific build while parallel builds are running.
+-   **target** is the target of the following output. This is empty if the
+    message is related to Packer globally. Otherwise, this is generally a build
+    name so you can relate output to a specific build while parallel builds
+    are running.
 
-- **type** is the type of machine-readable message being outputted. There are a
-  set of standard types which are covered later, but each component of Packer
-  (builders, provisioners, etc.) may output their own custom types as well,
-  allowing the machine-readable output to be infinitely flexible.
+-   **type** is the type of machine-readable message being outputted. There are
+    a set of standard types which are covered later, but each component of
+    Packer (builders, provisioners, etc.) may output their own custom types as
+    well, allowing the machine-readable output to be infinitely flexible.
 
-- **data** is zero or more comma-seperated values associated with the
-  prior type. The exact amount and meaning of this data is type-dependent, so
-  you must read the documentation associated with the type to understand fully.
+-   **data** is zero or more comma-seperated values associated with the
+    prior type. The exact amount and meaning of this data is type-dependent, so
+    you must read the documentation associated with the type to
+    understand fully.
 
 Within the format, if data contains a comma, it is replaced with
 `%!(PACKER_COMMA)`. This was preferred over an escape character such as `\'`

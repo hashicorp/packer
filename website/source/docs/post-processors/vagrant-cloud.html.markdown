@@ -36,16 +36,16 @@ and deliver them to your team in some fashion.
 
 Here is an example workflow:
 
-1. You use Packer to build a Vagrant Box for the `virtualbox` provider
-2. The `vagrant-cloud` post-processor is configured to point to the box
-  `hashicorp/foobar` on Vagrant Cloud via the `box_tag` configuration
-3. The post-processor receives the box from the `vagrant` post-processor
-4. It then creates the configured version, or verifies the existence of it, on
-  Vagrant Cloud
-5. A provider matching the name of the Vagrant provider is then created
-6. The box is uploaded to Vagrant Cloud
-7. The upload is verified
-8. The version is released and available to users of the box
+1.  You use Packer to build a Vagrant Box for the `virtualbox` provider
+2.  The `vagrant-cloud` post-processor is configured to point to the box
+    `hashicorp/foobar` on Vagrant Cloud via the `box_tag` configuration
+3.  The post-processor receives the box from the `vagrant` post-processor
+4.  It then creates the configured version, or verifies the existence of it, on
+    Vagrant Cloud
+5.  A provider matching the name of the Vagrant provider is then created
+6.  The box is uploaded to Vagrant Cloud
+7.  The upload is verified
+8.  The version is released and available to users of the box
 
 ## Configuration
 
@@ -54,35 +54,35 @@ on Vagrant Cloud, as well as authentication and version information.
 
 ### Required:
 
-- `access_token` (string) - Your access token for the Vagrant Cloud API. This
-  can be generated on your [tokens
-  page](https://vagrantcloud.com/account/tokens).
+-   `access_token` (string) - Your access token for the Vagrant Cloud API. This
+    can be generated on your [tokens
+    page](https://vagrantcloud.com/account/tokens).
 
-- `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
-  Cloud, i.e `hashicorp/precise64` for `vagrantcloud.com/hashicorp/precise64`
+-   `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
+    Cloud, i.e `hashicorp/precise64` for `vagrantcloud.com/hashicorp/precise64`
 
-- `version` (string) - The version number, typically incrementing a
-  previous version. The version string is validated based on [Semantic
-  Versioning](http://semver.org/). The string must match a pattern that could be
-  semver, and doesn't validate that the version comes after your
-  previous versions.
+-   `version` (string) - The version number, typically incrementing a
+    previous version. The version string is validated based on [Semantic
+    Versioning](http://semver.org/). The string must match a pattern that could
+    be semver, and doesn't validate that the version comes after your
+    previous versions.
 
 ### Optional:
 
-- `no_release` (string) - If set to true, does not release the version on
-  Vagrant Cloud, making it active. You can manually release the version via the
-  API or Web UI. Defaults to false.
+-   `no_release` (string) - If set to true, does not release the version on
+    Vagrant Cloud, making it active. You can manually release the version via
+    the API or Web UI. Defaults to false.
 
-- `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud. This
-  is useful if you're using Vagrant Private Cloud in your own network. Defaults
-  to `https://vagrantcloud.com/api/v1`
+-   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud. This
+    is useful if you're using Vagrant Private Cloud in your own network.
+    Defaults to `https://vagrantcloud.com/api/v1`
 
-- `version_description` (string) - Optionally markdown text used as a
-  full-length and in-depth description of the version, typically for denoting
-  changes introduced
+-   `version_description` (string) - Optionally markdown text used as a
+    full-length and in-depth description of the version, typically for denoting
+    changes introduced
 
-- `box_download_url` (string) - Optional URL for a self-hosted box. If this is
-  set the box will not be uploaded to the Vagrant Cloud.
+-   `box_download_url` (string) - Optional URL for a self-hosted box. If this is
+    set the box will not be uploaded to the Vagrant Cloud.
 
 ## Use with Vagrant Post-Processor
 

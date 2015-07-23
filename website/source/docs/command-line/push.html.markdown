@@ -26,16 +26,16 @@ configuration](/docs/templates/push.html) must be completed within the template.
 
 ## Options
 
-- `-message` - A message to identify the purpose or changes in this Packer
-  template much like a VCS commit message. This message will be passed to the
-  Packer build service. This option is also available as a short option `-m`.
+-   `-message` - A message to identify the purpose or changes in this Packer
+    template much like a VCS commit message. This message will be passed to the
+    Packer build service. This option is also available as a short option `-m`.
 
-- `-token` - An access token for authenticating the push to the Packer build
-  service such as Atlas. This can also be specified within the push
-  configuration in the template.
+-   `-token` - An access token for authenticating the push to the Packer build
+    service such as Atlas. This can also be specified within the push
+    configuration in the template.
 
-- `-name` - The name of the build in the service. This typically looks like
-  `hashicorp/precise64`.
+-   `-name` - The name of the build in the service. This typically looks like
+    `hashicorp/precise64`.
 
 ## Examples
 

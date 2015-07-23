@@ -45,196 +45,199 @@ builder.
 
 ### Required:
 
-- `access_key` (string) - The access key used to communicate with AWS. If not
-  specified, Packer will use the key from any
-  [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-  file or fall back to environment variables `AWS_ACCESS_KEY_ID` or
-  `AWS_ACCESS_KEY` (in that order), if set.
+-   `access_key` (string) - The access key used to communicate with AWS. If not
+    specified, Packer will use the key from any
+    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    file or fall back to environment variables `AWS_ACCESS_KEY_ID` or
+    `AWS_ACCESS_KEY` (in that order), if set.
 
-- `account_id` (string) - Your AWS account ID. This is required for bundling
-  the AMI. This is *not the same* as the access key. You can find your account
-  ID in the security credentials page of your AWS account.
+-   `account_id` (string) - Your AWS account ID. This is required for bundling
+    the AMI. This is *not the same* as the access key. You can find your account
+    ID in the security credentials page of your AWS account.
 
-- `ami_name` (string) - The name of the resulting AMI that will appear when
-  managing AMIs in the AWS console or via APIs. This must be unique. To help
-  make this unique, use a function like `timestamp` (see [configuration
-  templates](/docs/templates/configuration-templates.html) for more info)
+-   `ami_name` (string) - The name of the resulting AMI that will appear when
+    managing AMIs in the AWS console or via APIs. This must be unique. To help
+    make this unique, use a function like `timestamp` (see [configuration
+    templates](/docs/templates/configuration-templates.html) for more info)
 
-- `instance_type` (string) - The EC2 instance type to use while building the
-  AMI, such as "m1.small".
+-   `instance_type` (string) - The EC2 instance type to use while building the
+    AMI, such as "m1.small".
 
-- `region` (string) - The name of the region, such as "us-east-1", in which to
-  launch the EC2 instance to create the AMI.
+-   `region` (string) - The name of the region, such as "us-east-1", in which to
+    launch the EC2 instance to create the AMI.
 
-- `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This
-  bucket will be created if it doesn't exist.
+-   `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This
+    bucket will be created if it doesn't exist.
 
-- `secret_key` (string) - The secret key used to communicate with AWS. If not
-  specified, Packer will use the secret from any
-  [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-  file or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or
-  `AWS_SECRET_KEY` (in that order), if set.
+-   `secret_key` (string) - The secret key used to communicate with AWS. If not
+    specified, Packer will use the secret from any
+    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    file or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or
+    `AWS_SECRET_KEY` (in that order), if set.
 
-- `source_ami` (string) - The initial AMI used as a base for the newly
-  created machine.
+-   `source_ami` (string) - The initial AMI used as a base for the newly
+    created machine.
 
-- `ssh_username` (string) - The username to use in order to communicate over SSH
-  to the running machine.
+-   `ssh_username` (string) - The username to use in order to communicate over
+    SSH to the running machine.
 
-- `x509_cert_path` (string) - The local path to a valid X509 certificate for
-  your AWS account. This is used for bundling the AMI. This X509 certificate
-  must be registered with your account from the security credentials page in the
-  AWS console.
+-   `x509_cert_path` (string) - The local path to a valid X509 certificate for
+    your AWS account. This is used for bundling the AMI. This X509 certificate
+    must be registered with your account from the security credentials page in
+    the AWS console.
 
-- `x509_key_path` (string) - The local path to the private key for the X509
-  certificate specified by `x509_cert_path`. This is used for bundling the AMI.
+-   `x509_key_path` (string) - The local path to the private key for the X509
+    certificate specified by `x509_cert_path`. This is used for bundling
+    the AMI.
 
 ### Optional:
 
-- `ami_block_device_mappings` (array of block device mappings) - Add the block
-  device mappings to the AMI. The block device mappings allow for keys:
+-   `ami_block_device_mappings` (array of block device mappings) - Add the block
+    device mappings to the AMI. The block device mappings allow for keys:
 
-  - `device_name` (string) - The device name exposed to the instance (for
+-   `device_name` (string) - The device name exposed to the instance (for
     example, "/dev/sdh" or "xvdh")
-  - `virtual_name` (string) - The virtual device name. See the documentation on
+-   `virtual_name` (string) - The virtual device name. See the documentation on
     [Block Device
     Mapping](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
     for more information
-  - `snapshot_id` (string) - The ID of the snapshot
-  - `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
+-   `snapshot_id` (string) - The ID of the snapshot
+-   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
     volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
     volumes
-  - `volume_size` (integer) - The size of the volume, in GiB. Required if not
+-   `volume_size` (integer) - The size of the volume, in GiB. Required if not
     specifying a `snapshot_id`
-  - `delete_on_termination` (boolean) - Indicates whether the EBS volume is
+-   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
     deleted on instance termination
-  - `encrypted` (boolean) - Indicates whether to encrypt the volume or not
-  - `no_device` (boolean) - Suppresses the specified device included in the
+-   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+-   `no_device` (boolean) - Suppresses the specified device included in the
     block device mapping of the AMI
-  - `iops` (integer) - The number of I/O operations per second (IOPS) that the
+-   `iops` (integer) - The number of I/O operations per second (IOPS) that the
     volume supports. See the documentation on
     [IOPs](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
     for more information
-- `ami_description` (string) - The description to set for the resulting AMI(s).
-  By default this description is empty.
+-   `ami_description` (string) - The description to set for the
+    resulting AMI(s). By default this description is empty.
 
-- `ami_groups` (array of strings) - A list of groups that have access to launch
-  the resulting AMI(s). By default no groups have permission to launch the AMI.
-  `all` will make the AMI publicly accessible. AWS currently doesn't accept any
-  value other than "all".
+-   `ami_groups` (array of strings) - A list of groups that have access to
+    launch the resulting AMI(s). By default no groups have permission to launch
+    the AMI. `all` will make the AMI publicly accessible. AWS currently doesn't
+    accept any value other than "all".
 
-- `ami_product_codes` (array of strings) - A list of product codes to associate
-  with the AMI. By default no product codes are associated with the AMI.
+-   `ami_product_codes` (array of strings) - A list of product codes to
+    associate with the AMI. By default no product codes are associated with
+    the AMI.
 
-- `ami_regions` (array of strings) - A list of regions to copy the AMI to. Tags
-  and attributes are copied along with the AMI. AMI copying takes time depending
-  on the size of the AMI, but will generally take many minutes.
+-   `ami_regions` (array of strings) - A list of regions to copy the AMI to.
+    Tags and attributes are copied along with the AMI. AMI copying takes time
+    depending on the size of the AMI, but will generally take many minutes.
 
-- `ami_users` (array of strings) - A list of account IDs that have access to
-  launch the resulting AMI(s). By default no additional users other than the
-  user creating the AMI has permissions to launch it.
+-   `ami_users` (array of strings) - A list of account IDs that have access to
+    launch the resulting AMI(s). By default no additional users other than the
+    user creating the AMI has permissions to launch it.
 
-- `ami_virtualization_type` (string) - The type of virtualization for the AMI
-  you are building. This option is required to register HVM images. Can be
-  "paravirtual" (default) or "hvm".
+-   `ami_virtualization_type` (string) - The type of virtualization for the AMI
+    you are building. This option is required to register HVM images. Can be
+    "paravirtual" (default) or "hvm".
 
-- `associate_public_ip_address` (boolean) - If using a non-default VPC, public
-  IP addresses are not provided by default. If this is toggled, your new
-  instance will get a Public IP.
+-   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
+    IP addresses are not provided by default. If this is toggled, your new
+    instance will get a Public IP.
 
-- `availability_zone` (string) - Destination availability zone to launch
-  instance in. Leave this empty to allow Amazon to auto-assign.
+-   `availability_zone` (string) - Destination availability zone to launch
+    instance in. Leave this empty to allow Amazon to auto-assign.
 
-- `bundle_destination` (string) - The directory on the running instance where
-  the bundled AMI will be saved prior to uploading. By default this is "/tmp".
-  This directory must exist and be writable.
+-   `bundle_destination` (string) - The directory on the running instance where
+    the bundled AMI will be saved prior to uploading. By default this is "/tmp".
+    This directory must exist and be writable.
 
-- `bundle_prefix` (string) - The prefix for files created from bundling the
-  root volume. By default this is "image-{{timestamp}}". The `timestamp`
-  variable should be used to make sure this is unique, otherwise it can collide
-  with other created AMIs by Packer in your account.
+-   `bundle_prefix` (string) - The prefix for files created from bundling the
+    root volume. By default this is "image-{{timestamp}}". The `timestamp`
+    variable should be used to make sure this is unique, otherwise it can
+    collide with other created AMIs by Packer in your account.
 
-- `bundle_upload_command` (string) - The command to use to upload the
-  bundled volume. See the "custom bundle commands" section below for
-  more information.
+-   `bundle_upload_command` (string) - The command to use to upload the
+    bundled volume. See the "custom bundle commands" section below for
+    more information.
 
-- `bundle_vol_command` (string) - The command to use to bundle the volume. See
-  the "custom bundle commands" section below for more information.
+-   `bundle_vol_command` (string) - The command to use to bundle the volume. See
+    the "custom bundle commands" section below for more information.
 
-- `enhanced_networking` (boolean) - Enable enhanced networking (SriovNetSupport)
-  on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS
-  IAM policy.
+-   `enhanced_networking` (boolean) - Enable enhanced
+    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
+    `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
-- `force_deregister` (boolean) - Force Packer to first deregister an existing
-  AMI if one with the same name already exists. Default `false`.
+-   `force_deregister` (boolean) - Force Packer to first deregister an existing
+    AMI if one with the same name already exists. Default `false`.
 
-- `iam_instance_profile` (string) - The name of an [IAM instance
-  profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
-  to launch the EC2 instance with.
+-   `iam_instance_profile` (string) - The name of an [IAM instance
+    profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
+    to launch the EC2 instance with.
 
-- `launch_block_device_mappings` (array of block device mappings) - Add the
-  block device mappings to the launch instance. The block device mappings are
-  the same as `ami_block_device_mappings` above.
+-   `launch_block_device_mappings` (array of block device mappings) - Add the
+    block device mappings to the launch instance. The block device mappings are
+    the same as `ami_block_device_mappings` above.
 
-- `run_tags` (object of key/value strings) - Tags to apply to the instance that
-  is *launched* to create the AMI. These tags are *not* applied to the resulting
-  AMI unless they're duplicated in `tags`.
+-   `run_tags` (object of key/value strings) - Tags to apply to the instance
+    that is *launched* to create the AMI. These tags are *not* applied to the
+    resulting AMI unless they're duplicated in `tags`.
 
-- `security_group_id` (string) - The ID (*not* the name) of the security group
-  to assign to the instance. By default this is not set and Packer will
-  automatically create a new temporary security group to allow SSH access. Note
-  that if this is specified, you must be sure the security group allows access
-  to the `ssh_port` given below.
+-   `security_group_id` (string) - The ID (*not* the name) of the security group
+    to assign to the instance. By default this is not set and Packer will
+    automatically create a new temporary security group to allow SSH access.
+    Note that if this is specified, you must be sure the security group allows
+    access to the `ssh_port` given below.
 
-- `security_group_ids` (array of strings) - A list of security groups as
-  described above. Note that if this is specified, you must omit the
-  `security_group_id`.
+-   `security_group_ids` (array of strings) - A list of security groups as
+    described above. Note that if this is specified, you must omit the
+    `security_group_id`.
 
-- `spot_price` (string) - The maximum hourly price to launch a spot instance to
-  create the AMI. It is a type of instances that EC2 starts when the maximum
-  price that you specify exceeds the current spot price. Spot price will be
-  updated based on available spot instance capacity and current spot
-  Instance requests. It may save you some costs. You can set this to "auto" for
-  Packer to automatically discover the best spot price.
+-   `spot_price` (string) - The maximum hourly price to launch a spot instance
+    to create the AMI. It is a type of instances that EC2 starts when the
+    maximum price that you specify exceeds the current spot price. Spot price
+    will be updated based on available spot instance capacity and current spot
+    Instance requests. It may save you some costs. You can set this to "auto"
+    for Packer to automatically discover the best spot price.
 
-- `spot_price_auto_product` (string) - Required if `spot_price` is set
-  to "auto". This tells Packer what sort of AMI you're launching to find the
-  best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
-  `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+-   `spot_price_auto_product` (string) - Required if `spot_price` is set
+    to "auto". This tells Packer what sort of AMI you're launching to find the
+    best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
+    `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
-- `ssh_keypair_name` (string) - If specified, this is the key that will be used
-  for SSH with the machine. By default, this is blank, and Packer will generate
-  a temporary keypair. `ssh_private_key_file` must be specified with this.
+-   `ssh_keypair_name` (string) - If specified, this is the key that will be
+    used for SSH with the machine. By default, this is blank, and Packer will
+    generate a temporary keypair. `ssh_private_key_file` must be specified
+    with this.
 
-- `ssh_private_ip` (boolean) - If true, then SSH will always use the private IP
-  if available.
+-   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
+    IP if available.
 
-- `subnet_id` (string) - If using VPC, the ID of the subnet, such as
-  "subnet-12345def", where Packer will launch the EC2 instance. This field is
-  required if you are using an non-default VPC.
+-   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
+    "subnet-12345def", where Packer will launch the EC2 instance. This field is
+    required if you are using an non-default VPC.
 
-- `tags` (object of key/value strings) - Tags applied to the AMI.
+-   `tags` (object of key/value strings) - Tags applied to the AMI.
 
-- `temporary_key_pair_name` (string) - The name of the temporary keypair
-  to generate. By default, Packer generates a name with a UUID.
+-   `temporary_key_pair_name` (string) - The name of the temporary keypair
+    to generate. By default, Packer generates a name with a UUID.
 
-- `user_data` (string) - User data to apply when launching the instance. Note
-  that you need to be careful about escaping characters due to the templates
-  being JSON. It is often more convenient to use `user_data_file`, instead.
+-   `user_data` (string) - User data to apply when launching the instance. Note
+    that you need to be careful about escaping characters due to the templates
+    being JSON. It is often more convenient to use `user_data_file`, instead.
 
-- `user_data_file` (string) - Path to a file that will be used for the user data
-  when launching the instance.
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance.
 
-- `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID in
-  order to create a temporary security group within the VPC.
+-   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
+    in order to create a temporary security group within the VPC.
 
-- `x509_upload_path` (string) - The path on the remote machine where the X509
-  certificate will be uploaded. This path must already exist and be writable.
-  X509 certificates are uploaded after provisioning is run, so it is perfectly
-  okay to create this directory as part of the provisioning process.
+-   `x509_upload_path` (string) - The path on the remote machine where the X509
+    certificate will be uploaded. This path must already exist and be writable.
+    X509 certificates are uploaded after provisioning is run, so it is perfectly
+    okay to create this directory as part of the provisioning process.
 
-- `windows_password_timeout` (string) - The timeout for waiting for a Windows
-  password for Windows instances. Defaults to 20 minutes. Example value: "10m"
+-   `windows_password_timeout` (string) - The timeout for waiting for a Windows
+    password for Windows instances. Defaults to 20 minutes. Example value: "10m"
 
 ## Basic Example
 

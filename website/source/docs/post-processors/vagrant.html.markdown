@@ -29,13 +29,13 @@ certain builders into proper boxes for their respective providers.
 Currently, the Vagrant post-processor can create boxes for the following
 providers.
 
-- AWS
-- DigitalOcean
-- Hyper-V
-- Parallels
-- QEMU
-- VirtualBox
-- VMware
+-   AWS
+-   DigitalOcean
+-   Hyper-V
+-   Parallels
+-   QEMU
+-   VirtualBox
+-   VMware
 
 -&gt; **Support for additional providers** is planned. If the Vagrant
 post-processor doesn't support creating boxes for a provider you care about,
@@ -51,28 +51,28 @@ However, if you want to configure things a bit more, the post-processor does
 expose some configuration options. The available options are listed below, with
 more details about certain options in following sections.
 
-- `compression_level` (integer) - An integer representing the compression level
-  to use when creating the Vagrant box. Valid values range from 0 to 9, with 0
-  being no compression and 9 being the best compression. By default, compression
-  is enabled at level 6.
+-   `compression_level` (integer) - An integer representing the compression
+    level to use when creating the Vagrant box. Valid values range from 0 to 9,
+    with 0 being no compression and 9 being the best compression. By default,
+    compression is enabled at level 6.
 
-- `include` (array of strings) - Paths to files to include in the Vagrant box.
-  These files will each be copied into the top level directory of the Vagrant
-  box (regardless of their paths). They can then be used from the Vagrantfile.
+-   `include` (array of strings) - Paths to files to include in the Vagrant box.
+    These files will each be copied into the top level directory of the Vagrant
+    box (regardless of their paths). They can then be used from the Vagrantfile.
 
-- `keep_input_artifact` (boolean) - If set to true, do not delete the
-  `output_directory` on a successful build. Defaults to false.
+-   `keep_input_artifact` (boolean) - If set to true, do not delete the
+    `output_directory` on a successful build. Defaults to false.
 
-- `output` (string) - The full path to the box file that will be created by
-  this post-processor. This is a [configuration
-  template](/docs/templates/configuration-templates.html). The variable
-  `Provider` is replaced by the Vagrant provider the box is for. The variable
-  `ArtifactId` is replaced by the ID of the input artifact. The variable
-  `BuildName` is replaced with the name of the build. By default, the value of
-  this config is `packer_{{.BuildName}}_{{.Provider}}.box`.
+-   `output` (string) - The full path to the box file that will be created by
+    this post-processor. This is a [configuration
+    template](/docs/templates/configuration-templates.html). The variable
+    `Provider` is replaced by the Vagrant provider the box is for. The variable
+    `ArtifactId` is replaced by the ID of the input artifact. The variable
+    `BuildName` is replaced with the name of the build. By default, the value of
+    this config is `packer_{{.BuildName}}_{{.Provider}}.box`.
 
-- `vagrantfile_template` (string) - Path to a template to use for the
-  Vagrantfile that is packaged with the box.
+-   `vagrantfile_template` (string) - Path to a template to use for the
+    Vagrantfile that is packaged with the box.
 
 ## Provider-Specific Overrides
 
