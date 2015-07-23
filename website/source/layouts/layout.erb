@@ -52,9 +52,16 @@
               <li>
                 A <a href="http://www.hashicorp.com/">HashiCorp</a> project.
               </li>
-              <li>
-                <a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page.path %>.markdown">Edit this page</a>
-              </li>
+              <% # current_page.path does not have an extension, but
+                 # current_page.source_file does. Also, we don't want to show
+                 # this on the homepage.
+                 if current_page.url != "/"
+                   current_page_source = current_page.path + \
+                     current_page.source_file.split(current_page.path)[1] %>
+               <li>
+                 <a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a>
+               </li>
+               <% end %>
               <a href="http://www.hashicorp.com">
                 <li class="pull-right hashi-logo">&nbps;</li>
               </a>
@@ -63,21 +70,6 @@
         </div>
       </div>
     </footer>
-    <script>
-      (function(i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function() {
-          (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date();
-        a = s.createElement(o),
-          m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
-      })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-      
-      ga('create', 'UA-43075859-1', 'packer.io');
-      ga('send', 'pageview');
-    </script>
+    <%= partial "layouts/google-analytics.html" %>
   </body>
 </html>
