@@ -12,3 +12,6 @@ build: init
 format:
 	bundle exec htmlbeautifier -t 2 source/*.erb
 	bundle exec htmlbeautifier -t 2 source/layouts/*.erb
+	pandoc -v > /dev/null && find . -iname "*.html.markdown" | xargs -I{} bash -c "pandoc -r markdown -w markdown --tab-stop=2 --atx-headers -s --columns=80 {} > {}.new"\; || true
+	pandoc -v > /dev/null && find . -iname "*.html.markdown" | xargs -I{} bash -c "mv {}.new {}"\; || true
+
