@@ -58,18 +58,18 @@
                  if current_page.url != "/"
                    current_page_source = current_page.path + \
                      current_page.source_file.split(current_page.path)[1] %>
-               <li>
-                 <a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a>
-               </li>
-               <% end %>
-              <a href="http://www.hashicorp.com">
-                <li class="pull-right hashi-logo">&nbps;</li>
-              </a>
-            </ul>
-          </div>
+              <li>
+                <a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a>
+              </li>
+            <% end %>
+            <a href="http://www.hashicorp.com">
+              <li class="pull-right hashi-logo">&nbps;</li>
+            </a>
+          </ul>
         </div>
       </div>
-    </footer>
-    <%= partial "layouts/google-analytics.html" %>
-  </body>
+    </div>
+  </footer>
+  <%= partial "layouts/google-analytics.html" %>
+</body>
 </html>
