@@ -25,13 +25,13 @@ location in Atlas.
 
 Here is an example workflow:
 
-1.  Packer builds an AMI with the [Amazon AMI
+1. Packer builds an AMI with the [Amazon AMI
   builder](/docs/builders/amazon.html)
-2.  The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
+2. The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
   The `atlas` post-processor is configured with the name of the AMI, for example
   `hashicorp/foobar`, to create the artifact in Atlas or update the version if
   the artifact already exists
-3.  The new version is ready and available to be used in deployments with a tool
+3. The new version is ready and available to be used in deployments with a tool
   like [Terraform](https://terraform.io)
 
 ## Configuration

@@ -51,12 +51,12 @@ Once the plugin is named properly, Packer automatically discovers plugins in the
 following directories in the given order. If a conflicting plugin is found
 later, it will take precedence over one found earlier.
 
-1.  The directory where `packer` is, or the executable directory.
+1. The directory where `packer` is, or the executable directory.
 
-2.  `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins`
+2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins`
   on Windows.
 
-3.  The current working directory.
+3. The current working directory.
 
 The valid types for plugins are:
 
