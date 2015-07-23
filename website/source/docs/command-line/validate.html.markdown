@@ -29,5 +29,5 @@ Errors validating build 'vmware'. 1 error(s) occurred:
 
 ## Options
 
-- `-syntax-only` - Only the syntax of the template is checked. The configuration
-  is not validated.
+-   `-syntax-only` - Only the syntax of the template is checked. The
+    configuration is not validated.

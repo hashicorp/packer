@@ -37,31 +37,31 @@ each category, the available configuration keys are alphabetized.
 
 ### Required
 
-- `name` (string) - Name of the build configuration in the build service. If
-  this doesn't exist, it will be created (by default).
+-   `name` (string) - Name of the build configuration in the build service. If
+    this doesn't exist, it will be created (by default).
 
 ### Optional
 
-- `address` (string) - The address of the build service to use. By default this
-  is `https://atlas.hashicorp.com`.
+-   `address` (string) - The address of the build service to use. By default
+    this is `https://atlas.hashicorp.com`.
 
-- `base_dir` (string) - The base directory of the files to upload. This will be
-  the current working directory when the build service executes your template.
-  This path is relative to the template.
+-   `base_dir` (string) - The base directory of the files to upload. This will
+    be the current working directory when the build service executes
+    your template. This path is relative to the template.
 
-- `include` (array of strings) - Glob patterns to include relative to the
-  `base_dir`. If this is specified, only files that match the include pattern
-  are included.
+-   `include` (array of strings) - Glob patterns to include relative to the
+    `base_dir`. If this is specified, only files that match the include pattern
+    are included.
 
-- `exclude` (array of strings) - Glob patterns to exclude relative to the
-  `base_dir`.
+-   `exclude` (array of strings) - Glob patterns to exclude relative to the
+    `base_dir`.
 
-- `token` (string) - An access token to use to authenticate to the
-  build service.
+-   `token` (string) - An access token to use to authenticate to the
+    build service.
 
-- `vcs` (boolean) - If true, Packer will detect your VCS (if there is one) and
-  only upload the files that are tracked by the VCS. This is useful for
-  automatically excluding ignored files. This defaults to false.
+-   `vcs` (boolean) - If true, Packer will detect your VCS (if there is one) and
+    only upload the files that are tracked by the VCS. This is useful for
+    automatically excluding ignored files. This defaults to false.
 
 ## Examples
 

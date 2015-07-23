@@ -24,12 +24,14 @@ Within each section, the format of the documentation is the following:
 <br>
 
 <dl>
-  <dt>type-name (data-count)</dt>
-  <dd>
+<dt>
+type-name (data-count)
+</dt>
+<dd>
     <p>Description of the type.</p>
     <p>
     <strong>Data 1: name</strong> - Description.
     </p>
-  </dd>
 
+</dd>
 </dl>

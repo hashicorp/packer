@@ -52,19 +52,19 @@ the following two packages, you're encouraged to use whatever packages you want.
 Because plugins are their own processes, there is no danger of colliding
 dependencies.
 
-- `github.com/mitchellh/packer` - Contains all the interfaces that you have to
-  implement for any given plugin.
+-   `github.com/mitchellh/packer` - Contains all the interfaces that you have to
+    implement for any given plugin.
 
-- `github.com/mitchellh/packer/plugin` - Contains the code to serve the plugin.
-  This handles all the inter-process communication stuff.
+-   `github.com/mitchellh/packer/plugin` - Contains the code to serve
+    the plugin. This handles all the inter-process communication stuff.
 
 There are two steps involved in creating a plugin:
 
-1. Implement the desired interface. For example, if you're building a builder
-  plugin, implement the `packer.Builder` interface.
+1.  Implement the desired interface. For example, if you're building a builder
+    plugin, implement the `packer.Builder` interface.
 
-2. Serve the interface by calling the appropriate plugin serving method in your
-  main method. In the case of a builder, this is `plugin.ServeBuilder`.
+2.  Serve the interface by calling the appropriate plugin serving method in your
+    main method. In the case of a builder, this is `plugin.ServeBuilder`.
 
 A basic example is shown below. In this example, assume the `Builder` struct
 implements the `packer.Builder` interface:

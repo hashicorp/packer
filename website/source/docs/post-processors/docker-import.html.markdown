@@ -24,9 +24,9 @@ registry.
 The configuration for this post-processor is extremely simple. At least a
 repository is required.
 
-- `repository` (string) - The repository of the imported image.
+-   `repository` (string) - The repository of the imported image.
 
-- `tag` (string) - The tag for the imported image. By default this is not set.
+-   `tag` (string) - The tag for the imported image. By default this is not set.
 
 ## Example
 

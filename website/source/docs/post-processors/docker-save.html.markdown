@@ -25,7 +25,7 @@ familiar with this and vice versa.
 
 The configuration for this post-processor is extremely simple.
 
-- `path` (string) - The path to save the image.
+-   `path` (string) - The path to save the image.
 
 ## Example
 

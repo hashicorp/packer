@@ -32,19 +32,19 @@ The file provisioner can upload both single files and complete directories.
 
 The available configuration options are listed below. All elements are required.
 
-- `source` (string) - The path to a local file or directory to upload to
-  the machine. The path can be absolute or relative. If it is relative, it is
-  relative to the working directory when Packer is executed. If this is a
-  directory, the existence of a trailing slash is important. Read below on
-  uploading directories.
+-   `source` (string) - The path to a local file or directory to upload to
+    the machine. The path can be absolute or relative. If it is relative, it is
+    relative to the working directory when Packer is executed. If this is a
+    directory, the existence of a trailing slash is important. Read below on
+    uploading directories.
 
-- `destination` (string) - The path where the file will be uploaded to in
-  the machine. This value must be a writable location and any parent directories
-  must already exist.
+-   `destination` (string) - The path where the file will be uploaded to in
+    the machine. This value must be a writable location and any parent
+    directories must already exist.
 
-- `direction` (string) - The direction of the file transfer. This defaults to
-  "upload." If it is set to "download" then the file "source" in the machine wll
-  be downloaded locally to "destination"
+-   `direction` (string) - The direction of the file transfer. This defaults to
+    "upload." If it is set to "download" then the file "source" in the machine
+    wll be downloaded locally to "destination"
 
 ## Directory Uploads
 

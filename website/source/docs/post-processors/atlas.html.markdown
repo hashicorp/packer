@@ -25,14 +25,14 @@ location in Atlas.
 
 Here is an example workflow:
 
-1. Packer builds an AMI with the [Amazon AMI
-  builder](/docs/builders/amazon.html)
-2. The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
-  The `atlas` post-processor is configured with the name of the AMI, for example
-  `hashicorp/foobar`, to create the artifact in Atlas or update the version if
-  the artifact already exists
-3. The new version is ready and available to be used in deployments with a tool
-  like [Terraform](https://terraform.io)
+1.  Packer builds an AMI with the [Amazon AMI
+    builder](/docs/builders/amazon.html)
+2.  The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
+    The `atlas` post-processor is configured with the name of the AMI, for
+    example `hashicorp/foobar`, to create the artifact in Atlas or update the
+    version if the artifact already exists
+3.  The new version is ready and available to be used in deployments with a tool
+    like [Terraform](https://terraform.io)
 
 ## Configuration
 
@@ -40,32 +40,33 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 ### Required:
 
-- `token` (string) - Your access token for the Atlas API. This can be generated
-  on your [tokens page](https://atlas.hashicorp.com/settings/tokens).
-  Alternatively you can export your Atlas token as an environmental variable and
-  remove it from the configuration.
+-   `token` (string) - Your access token for the Atlas API. This can be
+    generated on your [tokens
+    page](https://atlas.hashicorp.com/settings/tokens). Alternatively you can
+    export your Atlas token as an environmental variable and remove it from
+    the configuration.
 
-- `artifact` (string) - The shorthand tag for your artifact that maps to Atlas,
-  i.e `hashicorp/foobar` for `atlas.hashicorp.com/hashicorp/foobar`. You must
-  have access to the organization, hashicorp in this example, in order to add an
-  artifact to the organization in Atlas.
+-   `artifact` (string) - The shorthand tag for your artifact that maps to
+    Atlas, i.e `hashicorp/foobar` for `atlas.hashicorp.com/hashicorp/foobar`.
+    You must have access to the organization, hashicorp in this example, in
+    order to add an artifact to the organization in Atlas.
 
-- `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will
-  always be `amazon.ami`. This field must be defined because Atlas can host
-  other artifact types, such as Vagrant boxes.
+-   `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will
+    always be `amazon.ami`. This field must be defined because Atlas can host
+    other artifact types, such as Vagrant boxes.
 
 -&gt; **Note:** If you want to upload Vagrant boxes to Atlas, use the [Atlas
 post-processor](/docs/post-processors/atlas.html).
 
 ### Optional:
 
-- `atlas_url` (string) - Override the base URL for Atlas. This is useful if
-  you're using Atlas Enterprise in your own network. Defaults to
-  `https://atlas.hashicorp.com/api/v1`.
+-   `atlas_url` (string) - Override the base URL for Atlas. This is useful if
+    you're using Atlas Enterprise in your own network. Defaults to
+    `https://atlas.hashicorp.com/api/v1`.
 
-- `metadata` (map) - Send metadata about the artifact. If the artifact type is
-  "vagrant.box", you must specify a "provider" metadata about what provider
-  to use.
+-   `metadata` (map) - Send metadata about the artifact. If the artifact type is
+    "vagrant.box", you must specify a "provider" metadata about what provider
+    to use.
 
 ### Example Configuration
 
