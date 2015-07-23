@@ -12,8 +12,10 @@ These are the machine-readable types that can appear in almost any
 machine-readable output and are provided by Packer core itself.
 
 <dl>
-  <dt>ui (2)</dt>
-  <dd>
+<dt>
+ui (2)
+</dt>
+<dd>
     <p>
     Specifies the output and type of output that would've normally
     gone to the console if Packer were running in human-readable
@@ -28,6 +30,6 @@ machine-readable output and are provided by Packer core itself.
     <strong>Data 2: output</strong> - The UI message that would have
     been outputted.
     </p>
-  </dd>
 
+</dd>
 </dl>

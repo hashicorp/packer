@@ -29,7 +29,8 @@ list as contributors come and go.
 
 <div class="people">
 
-  <div class="person">
+<div class="person">
+
     <img class="pull-left" src="http://www.gravatar.com/avatar/54079122b67de9677c1f93933ce8b63a.png?s=125">
     <div class="bio">
       <h3>Mitchell Hashimoto (<a href="https://github.com/mitchellh">@mitchellh</a>)</h3>
@@ -41,9 +42,11 @@ list as contributors come and go.
       described as "automation obsessed."
       </p>
     </div>
-  </div>
 
-  <div class="person">
+</div>
+
+<div class="person">
+
     <img class="pull-left" src="http://www.gravatar.com/avatar/2acc31dd6370a54b18f6755cd0710ce6.png?s=125">
     <div class="bio">
       <h3>Jack Pearkes (<a href="https://github.com/pearkes">@pearkes</a>)</h3>
@@ -52,9 +55,11 @@ list as contributors come and go.
       for Packer. Outside of Packer, Jack is an avid open source
       contributor and software consultant.</p>
     </div>
-  </div>
 
-  <div class="person">
+</div>
+
+<div class="person">
+
     <img class="pull-left" src="http://www.gravatar.com/avatar/2f7fc9cb7558e3ea48f5a86fa90a78da.png?s=125">
     <div class="bio">
       <h3>Mark Peek (<a href="https://github.com/markpeek">@markpeek</a>)</h3>
@@ -65,9 +70,11 @@ list as contributors come and go.
       <a href="https://github.com/ironport">IronPort Python libraries</a>.
       Mark is also a <a href="https://FreeBSD.org">FreeBSD committer</a>.</p>
     </div>
-  </div>
 
-  <div class="person">
+</div>
+
+<div class="person">
+
     <img class="pull-left" src="http://www.gravatar.com/avatar/1fca64df3d7db1e2f258a8956d2b0aff.png?s=125">
     <div class="bio">
       <h3>Ross Smith II (<a href="https://github.com/rasa" target="_blank">@rasa</a>)</h3>
@@ -78,9 +85,11 @@ VMware builder on Windows, and provides other valuable assistance. Ross is an
 open source enthusiast, published author, and freelance consultant.
 </p>
     </div>
-  </div>
 
-  <div class="person">
+</div>
+
+<div class="person">
+
     <img class="pull-left" src="http://www.gravatar.com/avatar/c9f6bf7b5b865012be5eded656ebed7d.png?s=125">
     <div class="bio">
       <h3>Rickard von Essen<br/>(<a href="https://github.com/rickard-von-essen" target="_blank">@rickard-von-essen</a>)</h3>
@@ -90,8 +99,11 @@ Rickard von Essen maintains our Parallels Desktop builder. Rickard is an
 polyglot programmer and consults on Continuous Delivery.
 </p>
     </div>
-  </div>
 
-  <div class="clearfix"></div>
+</div>
+
+<div class="clearfix">
+
+</div>
 
 </div>

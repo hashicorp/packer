@@ -51,21 +51,21 @@ Once the plugin is named properly, Packer automatically discovers plugins in the
 following directories in the given order. If a conflicting plugin is found
 later, it will take precedence over one found earlier.
 
-1. The directory where `packer` is, or the executable directory.
+1.  The directory where `packer` is, or the executable directory.
 
-2. `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins`
-  on Windows.
+2.  `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins`
+    on Windows.
 
-3. The current working directory.
+3.  The current working directory.
 
 The valid types for plugins are:
 
-- `builder` - Plugins responsible for building images for a specific platform.
+-   `builder` - Plugins responsible for building images for a specific platform.
 
-- `command` - A CLI sub-command for `packer`.
+-   `command` - A CLI sub-command for `packer`.
 
-- `post-processor` - A post-processor responsible for taking an artifact from a
-  builder and turning it into something else.
+-   `post-processor` - A post-processor responsible for taking an artifact from
+    a builder and turning it into something else.
 
-- `provisioner` - A provisioner to install software on images created by
-  a builder.
+-   `provisioner` - A provisioner to install software on images created by
+    a builder.

@@ -19,7 +19,7 @@ The fix command will output the changed template to standard out, so you should
 redirect standard using standard OS-specific techniques if you want to save it
 to a file. For example, on Linux systems, you may want to do this:
 
-  $ packer fix old.json > new.json
+\$ packer fix old.json &gt; new.json
 
 If fixing fails for any reason, the fix command will exit with a non-zero exit
 status. Error messages appear on standard error, so if you're redirecting

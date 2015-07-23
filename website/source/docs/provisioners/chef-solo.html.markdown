@@ -36,71 +36,72 @@ directory relative to your working directory.
 The reference of available configuration options is listed below. No
 configuration is actually required, but at least `run_list` is recommended.
 
-- `chef_environment` (string) - The name of the `chef_environment` sent to the
-  Chef server. By default this is empty and will not use an environment
+-   `chef_environment` (string) - The name of the `chef_environment` sent to the
+    Chef server. By default this is empty and will not use an environment
 
-- `config_template` (string) - Path to a template that will be used for the Chef
-  configuration file. By default Packer only sets configuration it needs to
-  match the settings set in the provisioner configuration. If you need to set
-  configurations that the Packer provisioner doesn't support, then you should
-  use a custom configuration template. See the dedicated "Chef Configuration"
-  section below for more details.
+-   `config_template` (string) - Path to a template that will be used for the
+    Chef configuration file. By default Packer only sets configuration it needs
+    to match the settings set in the provisioner configuration. If you need to
+    set configurations that the Packer provisioner doesn't support, then you
+    should use a custom configuration template. See the dedicated "Chef
+    Configuration" section below for more details.
 
-- `cookbook_paths` (array of strings) - This is an array of paths to "cookbooks"
-  directories on your local filesystem. These will be uploaded to the remote
-  machine in the directory specified by the `staging_directory`. By default,
-  this is empty.
+-   `cookbook_paths` (array of strings) - This is an array of paths to
+    "cookbooks" directories on your local filesystem. These will be uploaded to
+    the remote machine in the directory specified by the `staging_directory`. By
+    default, this is empty.
 
-- `data_bags_path` (string) - The path to the "data\_bags" directory on your
-  local filesystem. These will be uploaded to the remote machine in the
-  directory specified by the `staging_directory`. By default, this is empty.
+-   `data_bags_path` (string) - The path to the "data\_bags" directory on your
+    local filesystem. These will be uploaded to the remote machine in the
+    directory specified by the `staging_directory`. By default, this is empty.
 
-- `encrypted_data_bag_secret_path` (string) - The path to the file containing
-  the secret for encrypted data bags. By default, this is empty, so no secret
-  will be available.
+-   `encrypted_data_bag_secret_path` (string) - The path to the file containing
+    the secret for encrypted data bags. By default, this is empty, so no secret
+    will be available.
 
-- `environments_path` (string) - The path to the "environments" directory on
-  your local filesystem. These will be uploaded to the remote machine in the
-  directory specified by the `staging_directory`. By default, this is empty.
+-   `environments_path` (string) - The path to the "environments" directory on
+    your local filesystem. These will be uploaded to the remote machine in the
+    directory specified by the `staging_directory`. By default, this is empty.
 
-- `execute_command` (string) - The command used to execute Chef. This has
-  various [configuration template
-  variables](/docs/templates/configuration-templates.html) available. See below
-  for more information.
+-   `execute_command` (string) - The command used to execute Chef. This has
+    various [configuration template
+    variables](/docs/templates/configuration-templates.html) available. See
+    below for more information.
 
-- `install_command` (string) - The command used to install Chef. This has
-  various [configuration template
-  variables](/docs/templates/configuration-templates.html) available. See below
-  for more information.
+-   `install_command` (string) - The command used to install Chef. This has
+    various [configuration template
+    variables](/docs/templates/configuration-templates.html) available. See
+    below for more information.
 
-- `json` (object) - An arbitrary mapping of JSON that will be available as node
-  attributes while running Chef.
+-   `json` (object) - An arbitrary mapping of JSON that will be available as
+    node attributes while running Chef.
 
-- `prevent_sudo` (boolean) - By default, the configured commands that are
-  executed to install and run Chef are executed with `sudo`. If this is true,
-  then the sudo will be omitted.
+-   `prevent_sudo` (boolean) - By default, the configured commands that are
+    executed to install and run Chef are executed with `sudo`. If this is true,
+    then the sudo will be omitted.
 
-- `remote_cookbook_paths` (array of strings) - A list of paths on the remote
-  machine where cookbooks will already exist. These may exist from a previous
-  provisioner or step. If specified, Chef will be configured to look for
-  cookbooks here. By default, this is empty.
+-   `remote_cookbook_paths` (array of strings) - A list of paths on the remote
+    machine where cookbooks will already exist. These may exist from a previous
+    provisioner or step. If specified, Chef will be configured to look for
+    cookbooks here. By default, this is empty.
 
-- `roles_path` (string) - The path to the "roles" directory on your
-  local filesystem. These will be uploaded to the remote machine in the
-  directory specified by the `staging_directory`. By default, this is empty.
+-   `roles_path` (string) - The path to the "roles" directory on your
+    local filesystem. These will be uploaded to the remote machine in the
+    directory specified by the `staging_directory`. By default, this is empty.
 
-- `run_list` (array of strings) - The [run
-  list](https://docs.chef.io/run_lists.html) for Chef. By default this is empty.
+-   `run_list` (array of strings) - The [run
+    list](https://docs.chef.io/run_lists.html) for Chef. By default this
+    is empty.
 
-- `skip_install` (boolean) - If true, Chef will not automatically be installed
-  on the machine using the Chef omnibus installers.
+-   `skip_install` (boolean) - If true, Chef will not automatically be installed
+    on the machine using the Chef omnibus installers.
 
-- `staging_directory` (string) - This is the directory where all the
-  configuration of Chef by Packer will be placed. By default this
-  is "/tmp/packer-chef-solo". This directory doesn't need to exist but must have
-  proper permissions so that the SSH user that Packer uses is able to create
-  directories and write into this folder. If the permissions are not correct,
-  use a shell provisioner prior to this to configure it properly.
+-   `staging_directory` (string) - This is the directory where all the
+    configuration of Chef by Packer will be placed. By default this
+    is "/tmp/packer-chef-solo". This directory doesn't need to exist but must
+    have proper permissions so that the SSH user that Packer uses is able to
+    create directories and write into this folder. If the permissions are not
+    correct, use a shell provisioner prior to this to configure it properly.
 
 ## Chef Configuration
 
@@ -119,14 +120,14 @@ This template is a [configuration
 template](/docs/templates/configuration-templates.html) and has a set of
 variables available to use:
 
-- `ChefEnvironment` - The current enabled environment. Only non-empty if the
-  environment path is set.
-- `CookbookPaths` is the set of cookbook paths ready to embedded directly into a
-  Ruby array to configure Chef.
-- `DataBagsPath` is the path to the data bags folder.
-- `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
-- `EnvironmentsPath` - The path to the environments folder.
-- `RolesPath` - The path to the roles folder.
+-   `ChefEnvironment` - The current enabled environment. Only non-empty if the
+    environment path is set.
+-   `CookbookPaths` is the set of cookbook paths ready to embedded directly into
+    a Ruby array to configure Chef.
+-   `DataBagsPath` is the path to the data bags folder.
+-   `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
+-   `EnvironmentsPath` - The path to the environments folder.
+-   `RolesPath` - The path to the roles folder.
 
 ## Execute Command
 
@@ -144,10 +145,10 @@ This command can be customized using the `execute_command` configuration. As you
 can see from the default value above, the value of this configuration can
 contain various template variables, defined below:
 
-- `ConfigPath` - The path to the Chef configuration file. file.
-- `JsonPath` - The path to the JSON attributes file for the node.
-- `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
-  value of the `prevent_sudo` configuration.
+-   `ConfigPath` - The path to the Chef configuration file. file.
+-   `JsonPath` - The path to the JSON attributes file for the node.
+-   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
+    value of the `prevent_sudo` configuration.
 
 ## Install Command
 

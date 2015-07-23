@@ -68,42 +68,42 @@ builder.
 
 ### Required:
 
-- `commit` (boolean) - If true, the container will be committed to an image
-  rather than exported. This cannot be set if `export_path` is set.
+-   `commit` (boolean) - If true, the container will be committed to an image
+    rather than exported. This cannot be set if `export_path` is set.
 
-- `export_path` (string) - The path where the final container will be exported
-  as a tar file. This cannot be set if `commit` is set to true.
+-   `export_path` (string) - The path where the final container will be exported
+    as a tar file. This cannot be set if `commit` is set to true.
 
-- `image` (string) - The base image for the Docker container that will
-  be started. This image will be pulled from the Docker registry if it doesn't
-  already exist.
+-   `image` (string) - The base image for the Docker container that will
+    be started. This image will be pulled from the Docker registry if it doesn't
+    already exist.
 
 ### Optional:
 
-- `login` (boolean) - Defaults to false. If true, the builder will login in
-  order to pull the image. The builder only logs in for the duration of
-  the pull. It always logs out afterwards.
+-   `login` (boolean) - Defaults to false. If true, the builder will login in
+    order to pull the image. The builder only logs in for the duration of
+    the pull. It always logs out afterwards.
 
-- `login_email` (string) - The email to use to authenticate to login.
+-   `login_email` (string) - The email to use to authenticate to login.
 
-- `login_username` (string) - The username to use to authenticate to login.
+-   `login_username` (string) - The username to use to authenticate to login.
 
-- `login_password` (string) - The password to use to authenticate to login.
+-   `login_password` (string) - The password to use to authenticate to login.
 
-- `login_server` (string) - The server address to login to.
+-   `login_server` (string) - The server address to login to.
 
-- `pull` (boolean) - If true, the configured image will be pulled using
-  `docker pull` prior to use. Otherwise, it is assumed the image already exists
-  and can be used. This defaults to true if not set.
+-   `pull` (boolean) - If true, the configured image will be pulled using
+    `docker pull` prior to use. Otherwise, it is assumed the image already
+    exists and can be used. This defaults to true if not set.
 
-- `run_command` (array of strings) - An array of arguments to pass to
-  `docker run` in order to run the container. By default this is set to
-  `["-d", "-i", "-t", "{{.Image}}", "/bin/bash"]`. As you can see, you have a
-  couple template variables to customize, as well.
+-   `run_command` (array of strings) - An array of arguments to pass to
+    `docker run` in order to run the container. By default this is set to
+    `["-d", "-i", "-t", "{{.Image}}", "/bin/bash"]`. As you can see, you have a
+    couple template variables to customize, as well.
 
-- `volumes` (map of strings to strings) - A mapping of additional volumes to
-  mount into this container. The key of the object is the host path, the value
-  is the container path.
+-   `volumes` (map of strings to strings) - A mapping of additional volumes to
+    mount into this container. The key of the object is the host path, the value
+    is the container path.
 
 ## Using the Artifact: Export
 
@@ -226,11 +226,11 @@ Dockerfiles have some additional features that Packer doesn't support which are
 able to be worked around. Many of these features will be automated by Packer in
 the future:
 
-- Dockerfiles will snapshot the container at each step, allowing you to go back
-  to any step in the history of building. Packer doesn't do this yet, but
-  inter-step snapshotting is on the way.
+-   Dockerfiles will snapshot the container at each step, allowing you to go
+    back to any step in the history of building. Packer doesn't do this yet, but
+    inter-step snapshotting is on the way.
 
-- Dockerfiles can contain information such as exposed ports, shared volumes, and
-  other metadata. Packer builds a raw Docker container image that has none of
-  this metadata. You can pass in much of this metadata at runtime with
-  `docker run`.
+-   Dockerfiles can contain information such as exposed ports, shared volumes,
+    and other metadata. Packer builds a raw Docker container image that has none
+    of this metadata. You can pass in much of this metadata at runtime with
+    `docker run`.

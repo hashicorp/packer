@@ -79,11 +79,11 @@ creating a new artifact with a single file: the compressed archive.
 The result signature of this method is `(Artifact, bool, error)`. Each return
 value is explained below:
 
-- `Artifact` - The newly created artifact if no errors occurred.
-- `bool` - If true, the input artifact will forcefully be kept. By default,
-  Packer typically deletes all input artifacts, since the user doesn't generally
-  want intermediary artifacts. However, some post-processors depend on the
-  previous artifact existing. If this is `true`, it forces packer to keep the
-  artifact around.
-- `error` - Non-nil if there was an error in any way. If this is the case, the
-  other two return values are ignored.
+-   `Artifact` - The newly created artifact if no errors occurred.
+-   `bool` - If true, the input artifact will forcefully be kept. By default,
+    Packer typically deletes all input artifacts, since the user doesn't
+    generally want intermediary artifacts. However, some post-processors depend
+    on the previous artifact existing. If this is `true`, it forces packer to
+    keep the artifact around.
+-   `error` - Non-nil if there was an error in any way. If this is the case, the
+    other two return values are ignored.

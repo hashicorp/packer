@@ -57,17 +57,17 @@ While some configuration settings have local variables specific to only that
 configuration, a set of functions are available globally for use in *any string*
 in Packer templates. These are listed below for reference.
 
-- `build_name` - The name of the build being run.
-- `build_type` - The type of the builder being used currently.
-- `isotime [FORMAT]` - UTC time, which can be
-  [formatted](http://golang.org/pkg/time/#example_Time_Format). See more
-  examples below.
-- `lower` - Lowercases the string.
-- `pwd` - The working directory while executing Packer.
-- `template_dir` - The directory to the template for the build.
-- `timestamp` - The current Unix timestamp in UTC.
-- `uuid` - Returns a random UUID.
-- `upper` - Uppercases the string.
+-   `build_name` - The name of the build being run.
+-   `build_type` - The type of the builder being used currently.
+-   `isotime [FORMAT]` - UTC time, which can be
+    [formatted](http://golang.org/pkg/time/#example_Time_Format). See more
+    examples below.
+-   `lower` - Lowercases the string.
+-   `pwd` - The working directory while executing Packer.
+-   `template_dir` - The directory to the template for the build.
+-   `timestamp` - The current Unix timestamp in UTC.
+-   `uuid` - Returns a random UUID.
+-   `upper` - Uppercases the string.
 
 ### isotime Format
 
@@ -112,7 +112,8 @@ Timezone
 Numeric
 </th>
 <td align="center">
--
+-   
+
 </td>
 <td align="center">
 01
@@ -147,19 +148,24 @@ Monday (Mon)
 January (Jan)
 </td>
 <td align="center">
--
+-   
+
 </td>
 <td align="center">
--
+-   
+
 </td>
 <td align="center">
--
+-   
+
 </td>
 <td align="center">
--
+-   
+
 </td>
 <td align="center">
--
+-   
+
 </td>
 <td align="center">
 MST
@@ -205,6 +211,6 @@ Please note that double quote characters need escaping inside of templates:
 
 Specific to Amazon builders:
 
-- `clean_ami_name` - AMI names can only contain certain characters. This
-  function will replace illegal characters with a '-" character. Example usage
-  since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
+-   `clean_ami_name` - AMI names can only contain certain characters. This
+    function will replace illegal characters with a '-" character. Example usage
+    since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
