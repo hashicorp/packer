@@ -11,9 +11,15 @@ page_title: 'Atlas Post-Processor'
 
 Type: `atlas`
 
-The Atlas post-processor uploads artifacts from your packer builds to Atlas for hosting. Artifacts hosted in Atlas are are automatically made available for use with Vagrant and Terraform, and Atlas provides additional features for managing versions and releases. [Learn more about packer in Atlas.](https://atlas.hashicorp.com/help/packer/features)
+The Atlas post-processor uploads artifacts from your packer builds to Atlas for
+hosting. Artifacts hosted in Atlas are are automatically made available for use
+with Vagrant and Terraform, and Atlas provides additional features for managing
+versions and releases. [Learn more about packer in
+Atlas.](https://atlas.hashicorp.com/help/packer/features)
 
-You can also use the push command to [run packer builds in Atlas](/docs/command-line/push.html). The push command and Atlas post-processor can be used together or independently.
+You can also use the push command to [run packer builds in
+Atlas](/docs/command-line/push.html). The push command and Atlas post-processor
+can be used together or independently.
 
 ## Workflow
 
@@ -25,7 +31,8 @@ location in Atlas.
 
 Here is an example workflow:
 
-1.  Packer builds an AMI with the [Amazon AMI builder](/docs/builders/amazon.html)
+1.  Packer builds an AMI with the [Amazon AMI
+    builder](/docs/builders/amazon.html)
 2.  The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
     The `atlas` post-processor is configured with the name of the AMI, for
     example `hashicorp/foobar`, to create the artifact in Atlas or update the
@@ -41,12 +48,15 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 -   `token` (string) - Your access token for the Atlas API.
 
--> Login to Atlas to [generate an Atlas Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to configure your token is to set it to the `ATLAS_TOKEN` environment variable, but you can also use `token` configuration option.
+-&gt; Login to Atlas to [generate an Atlas
+Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to
+configure your token is to set it to the `ATLAS_TOKEN` environment variable, but
+you can also use `token` configuration option.
 
 -   `artifact` (string) - The shorthand tag for your artifact that maps to
     Atlas, i.e `hashicorp/foobar` for `atlas.hashicorp.com/hashicorp/foobar`.
-    You must have access to the organization&mdash;hashicorp in this example&mdash;in
-    order to add an artifact to the organization in Atlas.
+    You must have access to the organization—hashicorp in this example—in order
+    to add an artifact to the organization in Atlas.
 
 -   `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will
     always be `amazon.ami`. This field must be defined because Atlas can host
