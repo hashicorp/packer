@@ -58,6 +58,34 @@ If you get an error that `packer` could not be found, then your PATH
 environment variable was not setup properly. Please go back and ensure
 that your PATH variable contains the directory which has Packer installed.
 
+The `packer` binary may conflict with the cracklib-supplied packer binary
+on RPM-based systems like Fedora, RHEL or CentOS. If this happens, running
+`packer` will result in no output or something like this:
+
+```text
+$ packer 
+/usr/share/cracklib/pw_dict.pwd: Permission denied
+/usr/share/cracklib/pw_dict: Permission denied
+```
+
+In this case you may wish to symlink the `packer` binary to `packer.io` 
+and use that instead. e.g.
+
+```text
+ln -s /usr/local/bin/packer /usr/local/bin/packer.io
+```
+
+Then replace `packer` with `packer.io` when following the rest of the
+documentation.
+
+Alternatively you could change your `$PATH` so that the right packer 
+binary is selected first, however this may cause issues when attempting
+to change passwords in the future.
+
+```text
+export PATH="/path/to/packer/directory:$PATH"
+```
+
 Otherwise, Packer is installed and you're ready to go!
 
 ## Alternative Installation Methods
