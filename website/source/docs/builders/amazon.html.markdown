@@ -31,6 +31,35 @@ AMI. Packer supports the following builders at the moment:
 [amazon-ebs builder](/docs/builders/amazon-ebs.html). It is
 much easier to use and Amazon generally recommends EBS-backed images nowadays.
 
+<div id="specifying-amazon-credentials">## Specifying Amazon Credentials</div>
+
+When you use any of the amazon builders, you must provide credentials to the API in the form of an access key id and secret. These look like:
+
+    access key id:     AKIAIOSFODNN7EXAMPLE
+    secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+If you use other AWS tools you may already have these configured. If so, packer will try to use them, *unless* they are specified in your packer template. Credentials are resolved in the following order:
+
+1. Values hard-coded in the packer template are always authoritative.
+2. *Variables* in the packer template may be resolved from command-line flags or from environment variables. Please read about [User Variables](https://packer.io/docs/templates/user-variables.html) for details.
+3. If no credentials are found, packer falls back to automatic lookup.
+
+### Automatic Lookup
+
+If no AWS credentials are found in a packer template, we proceed on to the following steps:
+
+1. Lookup via environment variables.
+    - First `AWS_ACCESS_KEY_ID`, then `AWS_ACCESS_KEY`
+    - First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
+2. Look for [local AWS configuration files](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    - First `~/.aws/credentials`
+    - Next based on `AWS_PROFILE`
+3. Lookup an IAM role for the current EC2 instance (if you're running in EC2)
+
+~> **Subtle details of automatic lookup may change over time.** The most reliable way to specify your configuration is by setting them in template variables (directly or indirectly), or by using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
+
+Environment variables provide the best portability, allowing you to run your packer build on your workstation, in Atlas, or on another build server.
+
 ## Using an IAM Instance Profile
 
 If AWS keys are not specified in the template, Packer will consult the [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file, try the standard AWS environment variables, and then
