@@ -40,34 +40,26 @@ builder.
 
 ### Required:
 
--   `access_key` (string) - The access key used to communicate with AWS. If not
-    specified, Packer will use the key from any
-    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    file or fall back to environment variables `AWS_ACCESS_KEY_ID` or
-    `AWS_ACCESS_KEY` (in that order), if set.
+* `access_key` (string) - The access key used to communicate with AWS. [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `ami_name` (string) - The name of the resulting AMI that will appear when
-    managing AMIs in the AWS console or via APIs. This must be unique. To help
-    make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
+* `ami_name` (string) - The name of the resulting AMI that will appear
+  when managing AMIs in the AWS console or via APIs. This must be unique.
+  To help make this unique, use a function like `timestamp` (see
+  [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
--   `instance_type` (string) - The EC2 instance type to use while building the
-    AMI, such as "m1.small".
+* `instance_type` (string) - The EC2 instance type to use while building
+  the AMI, such as "m1.small".
 
--   `region` (string) - The name of the region, such as "us-east-1", in which to
-    launch the EC2 instance to create the AMI.
+* `region` (string) - The name of the region, such as "us-east-1", in which
+  to launch the EC2 instance to create the AMI.
 
--   `secret_key` (string) - The secret key used to communicate with AWS. If not
-    specified, Packer will use the secret from any
-    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    file or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or
-    `AWS_SECRET_KEY` (in that order), if set.
+* `secret_key` (string) - The secret key used to communicate with AWS. [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `source_ami` (string) - The initial AMI used as a base for the newly
-    created machine.
+* `source_ami` (string) - The initial AMI used as a base for the newly
+  created machine.
 
--   `ssh_username` (string) - The username to use in order to communicate over
-    SSH to the running machine.
+* `ssh_username` (string) - The username to use in order to communicate
+  over SSH to the running machine.
 
 ### Optional:
 
