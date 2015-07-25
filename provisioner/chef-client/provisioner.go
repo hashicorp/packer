@@ -17,7 +17,27 @@ import (
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/mitchellh/packer/provisioner"
 )
+
+type guestOSTypeConfig struct {
+	executeCommand string
+	installCommand string
+	stagingDir     string
+}
+
+var guestOSTypeConfigs = map[string]guestOSTypeConfig{
+	provisioner.UnixOSType: guestOSTypeConfig{
+		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
+		installCommand: "curl -L https://www.chef.io/chef/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		stagingDir:     "/tmp/packer-chef-client",
+	},
+	provisioner.WindowsOSType: guestOSTypeConfig{
+		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
+		installCommand: "(New-Object System.Net.WebClient).DownloadFile('http://www.chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait",
+		stagingDir:     "C:/Windows/Temp/packer-chef-client",
+	},
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -26,6 +46,8 @@ type Config struct {
 	SslVerifyMode        string `mapstructure:"ssl_verify_mode"`
 	ConfigTemplate       string `mapstructure:"config_template"`
 	ExecuteCommand       string `mapstructure:"execute_command"`
+	// The type of OS the guest is running: unix or windows
+	GuestOSType          string `mapstructure:"guest_os_type"`
 	InstallCommand       string `mapstructure:"install_command"`
 	Json                 map[string]interface{}
 	NodeName             string   `mapstructure:"node_name"`
@@ -45,6 +67,8 @@ type Config struct {
 
 type Provisioner struct {
 	config Config
+	guestOSTypeConfig guestOSTypeConfig
+	guestCommands     *provisioner.GuestCommands
 }
 
 type ConfigTemplate struct {
@@ -82,15 +106,28 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	if p.config.GuestOSType == "" {
+		p.config.GuestOSType = provisioner.DefaultOSType
+	}
+	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+
+	var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}chef-client " +
-			"--no-color -c {{.ConfigPath}} -j {{.JsonPath}}"
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
 	if p.config.InstallCommand == "" {
-		p.config.InstallCommand = "curl -L " +
-			"https://www.opscode.com/chef/install.sh | " +
-			"{{if .Sudo}}sudo {{end}}bash"
+		p.config.InstallCommand = p.guestOSTypeConfig.installCommand
 	}
 
 	if p.config.RunList == nil {
@@ -98,7 +135,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = "/tmp/packer-chef-client"
+		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}
 
 	var errs *packer.MultiError
@@ -210,7 +247,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
-		return fmt.Errorf("Error removing /etc/chef directory: %s", err)
+		return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
 	}
 
 	return nil
@@ -337,25 +374,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 
-	mkdirCmd := fmt.Sprintf("mkdir -p '%s'", dir)
-	if !p.config.PreventSudo {
-		mkdirCmd = "sudo " + mkdirCmd
-	}
-
-	cmd := &packer.RemoteCmd{Command: mkdirCmd}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
-		return err
-	}
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status. See output above for more info.")
-	}
-
-	// Chmod the directory to 0777 just so that we can access it as our user
-	mkdirCmd = fmt.Sprintf("chmod 0777 '%s'", dir)
-	if !p.config.PreventSudo {
-		mkdirCmd = "sudo " + mkdirCmd
-	}
-	cmd = &packer.RemoteCmd{Command: mkdirCmd}
+	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
@@ -415,13 +434,8 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 
-	rmCmd := fmt.Sprintf("rm -rf '%s'", dir)
-	if !p.config.PreventSudo {
-		rmCmd = "sudo " + rmCmd
-	}
-
 	cmd := &packer.RemoteCmd{
-		Command: rmCmd,
+		Command: p.guestCommands.RemoveDir(dir),
 	}
 
 	if err := cmd.StartWithUi(comm, ui); err != nil {
