@@ -58,34 +58,6 @@ If you get an error that `packer` could not be found, then your PATH
 environment variable was not setup properly. Please go back and ensure
 that your PATH variable contains the directory which has Packer installed.
 
-The `packer` binary may conflict with the cracklib-supplied packer binary
-on RPM-based systems like Fedora, RHEL or CentOS. If this happens, running
-`packer` will result in no output or something like this:
-
-```text
-$ packer 
-/usr/share/cracklib/pw_dict.pwd: Permission denied
-/usr/share/cracklib/pw_dict: Permission denied
-```
-
-In this case you may wish to symlink the `packer` binary to `packer.io` 
-and use that instead. e.g.
-
-```text
-ln -s /usr/local/bin/packer /usr/local/bin/packer.io
-```
-
-Then replace `packer` with `packer.io` when following the rest of the
-documentation.
-
-Alternatively you could change your `$PATH` so that the right packer 
-binary is selected first, however this may cause issues when attempting
-to change passwords in the future.
-
-```text
-export PATH="/path/to/packer/directory:$PATH"
-```
-
 Otherwise, Packer is installed and you're ready to go!
 
 ## Alternative Installation Methods
@@ -97,6 +69,14 @@ are alternatives available.
 
 If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
-```text
-$ brew install packer
-```
+    $ brew install packer
+
+## Troubleshooting
+
+On some RedHat-based Linux distributions there is another tool named `packer` installed by default. You can check for this using `which -a packer`. If you get an error like this it indicates there is a name conflict.
+
+    $ packer
+    /usr/share/cracklib/pw_dict.pwd: Permission denied
+    /usr/share/cracklib/pw_dict: Permission denied
+
+To fix this, you can create a symlink to packer that uses a different name like `packer.io`, or invoke the `packer` binary you want using its absolute path, e.g. `/usr/local/packer`.
