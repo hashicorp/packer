@@ -70,3 +70,24 @@ The following policy document provides the minimal set permissions necessary for
   }]
 }
 ```
+
+## Troubleshooting
+
+### Attaching IAM Policies to Roles
+
+IAM policies can be associated with user or roles. If you use packer with IAM roles, you may encounter an error like this one:
+
+    ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.
+
+You can read more about why this happens on the [Amazon Security Blog](http://blogs.aws.amazon.com/security/post/Tx3M0IFB5XBOCQX/Granting-Permission-to-Launch-EC2-Instances-with-IAM-Roles-PassRole-Permission). The example policy below may help packer work with IAM roles. Note that this example provides more than the minimal set of permissions needed for packer to work, but specifics will depend on your use-case.
+
+```json
+{
+    "Sid": "PackerIAMPassRole",
+    "Effect": "Allow",
+    "Action": "iam:PassRole",
+    "Resource": [
+        "*"
+    ]
+}
+```
