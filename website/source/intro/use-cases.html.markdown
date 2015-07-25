@@ -1,20 +1,24 @@
 ---
-layout: "intro"
-page_title: "Use Cases"
-prev_url: "/intro/why.html"
-next_url: "/intro/platforms.html"
-next_title: "Supported Platforms"
-description: |-
-  By now you should know what Packer does and what the benefits of image creation are. In this section, we'll enumerate _some_ of the use cases for Packer. Note that this is not an exhaustive list by any means. There are definitely use cases for Packer not listed here. This list is just meant to give you an idea of how Packer may improve your processes.
----
+description: |
+    By now you should know what Packer does and what the benefits of image creation
+    are. In this section, we'll enumerate *some* of the use cases for Packer. Note
+    that this is not an exhaustive list by any means. There are definitely use cases
+    for Packer not listed here. This list is just meant to give you an idea of how
+    Packer may improve your processes.
+layout: intro
+next_title: Supported Platforms
+next_url: '/intro/platforms.html'
+page_title: Use Cases
+prev_url: '/intro/why.html'
+...
 
 # Use Cases
 
-By now you should know what Packer does and what the benefits of image
-creation are. In this section, we'll enumerate _some_ of the use cases
-for Packer. Note that this is not an exhaustive list by any means. There are
-definitely use cases for Packer not listed here. This list is just meant
-to give you an idea of how Packer may improve your processes.
+By now you should know what Packer does and what the benefits of image creation
+are. In this section, we'll enumerate *some* of the use cases for Packer. Note
+that this is not an exhaustive list by any means. There are definitely use cases
+for Packer not listed here. This list is just meant to give you an idea of how
+Packer may improve your processes.
 
 ### Continuous Delivery
 
@@ -24,30 +28,31 @@ can be used to generate new machine images for multiple platforms on every
 change to Chef/Puppet.
 
 As part of this pipeline, the newly created images can then be launched and
-tested, verifying the infrastructure changes work. If the tests pass, you can
-be confident that that image will work when deployed. This brings a new level
-of stability and testability to infrastructure changes.
+tested, verifying the infrastructure changes work. If the tests pass, you can be
+confident that that image will work when deployed. This brings a new level of
+stability and testability to infrastructure changes.
 
 ### Dev/Prod Parity
 
-Packer helps [keep development, staging, and production as similar as possible](http://www.12factor.net/dev-prod-parity).
-Packer can be used to generate images for multiple platforms at the same time.
-So if you use AWS for production and VMware (perhaps with [Vagrant](http://www.vagrantup.com))
-for development, you can generate both an AMI and a VMware machine using
-Packer at the same time from the same template.
+Packer helps [keep development, staging, and production as similar as
+possible](http://www.12factor.net/dev-prod-parity). Packer can be used to
+generate images for multiple platforms at the same time. So if you use AWS for
+production and VMware (perhaps with [Vagrant](http://www.vagrantup.com)) for
+development, you can generate both an AMI and a VMware machine using Packer at
+the same time from the same template.
 
 Mix this in with the continuous delivery use case above, and you have a pretty
-slick system for consistent work environments from development all the
-way through to production.
+slick system for consistent work environments from development all the way
+through to production.
 
 ### Appliance/Demo Creation
 
-Since Packer creates consistent images for multiple platforms in parallel,
-it is perfect for creating [appliances](http://en.wikipedia.org/wiki/Software_appliance)
-and disposable product demos. As your software changes, you can automatically
-create appliances with the software pre-installed. Potential users can then
-get started with your software by deploying it to the environment of their
-choice.
+Since Packer creates consistent images for multiple platforms in parallel, it is
+perfect for creating
+[appliances](http://en.wikipedia.org/wiki/Software_appliance) and disposable
+product demos. As your software changes, you can automatically create appliances
+with the software pre-installed. Potential users can then get started with your
+software by deploying it to the environment of their choice.
 
-Packaging up software with complex requirements has never been so easy.
-Or enjoyable, if you ask me.
+Packaging up software with complex requirements has never been so easy. Or
+enjoyable, if you ask me.

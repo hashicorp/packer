@@ -1,75 +1,58 @@
 ---
-description: |-
-  Packer is a free and open source tool for creating golden images for multiple platforms from a single source configuration.
+description: Packer is a free and open source tool for creating golden images
+  for multiple platforms from a single source configuration.
 ---
 
 <div class="home">
-
-	<header class="dark-background">
-	<div class="container hero">
-		<div class="row">
-			<div class="col-md-4 col-md-offset-1">
-				<h2>
-					<span class="text-green">Packer</span> is a tool for creating machine and container images for multiple platforms from a single source configuration.
-				</h2>
-			</div>
-		</div>
-	</div>
-	</header>
-
-	<section class="belt download">
-	<div class="container">
-		<div class="row download-row">
-		<div class="download-container">
-			<h2 class="uppercase"><a href="/downloads.html">Download v<%= latest_version %></a></h2>
-			</div>
-		</div>
-		</div>
-	</div>
-	</section>
-
-	<section class="marketting padded-lg">
-	<div class="container">
-		<div class="row">
-			<div class="col-md-6">
-        <%= image_tag 'screenshots/vmware_and_virtualbox.png', class: 'img-responsive' %>
-			</div>
-
-			<div class="col-md-6">
-				<h2 class="text-green text-center">Modern, Automated</h2>
-				<p>
-				Packer is easy to use and automates the creation of any type
-				of machine image. It embraces modern configuration management by
-				encouraging you to use automated scripts to install and
-				configure the software within your Packer-made images.
-
-				Packer brings machine images into the modern age, unlocking
-				untapped potential and opening new opportunities.
-				</p>
-			</div>
-		</div>
-	</div>
-	</section>
-
-	<section class="marketting padded-lg">
-	<div class="container">
-		<div class="row">
-			<div class="col-md-6">
-				<h2 class="text-green text-center">Works Great With</h2>
-				<p>
-					Out of the box Packer comes with support to build images for
-					Amazon EC2, DigitalOcean, Docker, Google Compute Engine, QEMU,
-					VirtualBox, VMware, and more. Support for
-					more platforms is on the way, and anyone can add new platforms
-					via plugins.
-				</p>
-			</div>
-
-			<div class="col-md-6">
-        <%= image_tag 'screenshots/works_with.png', class: 'img-responsive' %>
-			</div>
-		</div>
-	</div>
-	</section>
-
-</div> <!-- /.home -->
+  <header class="dark-background">
+    <div class="container hero">
+      <div class="row">
+        <div class="col-md-4 col-md-offset-1">
+          <h2>
+            <span class="text-green">Packer</span> is a tool for creating machine and container images for multiple platforms from a single source configuration.
+          </h2>
+        </div>
+      </div>
+    </div>
+  </header>
+  <section class="belt download">
+    <div class="container">
+      <div class="row download-row">
+        <div class="download-container">
+          <h2 class="uppercase"><a href="/downloads.html">Download v<%= latest_version %></a></h2>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="marketting padded-lg">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <%= image_tag 'screenshots/vmware_and_virtualbox.png', class: 'img-responsive' %>
+        </div>
+        <div class="col-md-6">
+          <h2 class="text-green text-center">Modern, Automated</h2>
+          <p>
+            Packer is easy to use and automates the creation of any type of machine image. It embraces modern configuration management by encouraging you to use automated scripts to install and configure the software within your Packer-made images. Packer brings machine images into the modern age, unlocking untapped potential and opening new opportunities.
+        </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="marketting padded-lg">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h2 class="text-green text-center">Works Great With</h2>
+          <p>
+            Out of the box Packer comes with support to build images for Amazon EC2, DigitalOcean, Docker, Google Compute Engine, QEMU, VirtualBox, VMware, and more. Support for more platforms is on the way, and anyone can add new platforms via plugins.
+        </p>
+        </div>
+        <div class="col-md-6">
+          <%= image_tag 'screenshots/works_with.png', class: 'img-responsive' %>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<!-- /.home -->

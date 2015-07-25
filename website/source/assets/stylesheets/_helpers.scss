@@ -70,17 +70,17 @@ $mono: 'Inconsolata', 'courier new', courier, mono-space;
   background-color: #000;
   color: $white;
 
-	a {
+  a {
     color: inherit;
 
     &:hover {
-		  color: $green;
-		}
+      color: $green;
+    }
 
-		&:active {
-		  color: darken($green, 30%);
-		}
-	}
+    &:active {
+      color: darken($green, 30%);
+    }
+  }
 }
 
 .white-background {
@@ -102,9 +102,9 @@ $mono: 'Inconsolata', 'courier new', courier, mono-space;
   color: $orange;
   font-size: 20px;
 
-	a:hover, a:active, a:visited {
+  a:hover, a:active, a:visited {
     color: inherit;
-	}
+  }
 }
 
 // media queries
@@ -170,13 +170,13 @@ $break-lg: 980px;
 
 @mixin transform-scale($value) {
   -webkit-transform: scale($value);
-  	 -moz-transform: scale($value);
-  				transform: scale($value);
+     -moz-transform: scale($value);
+          transform: scale($value);
 }
 
 @mixin transition($type, $speed, $easing) {
-	-webkit-transition: $type $speed $easing;
-	   -moz-transition: $type $speed $easing;
+  -webkit-transition: $type $speed $easing;
+     -moz-transition: $type $speed $easing;
        -o-transition: $type $speed $easing;
           transition: $type $speed $easing;
 }
