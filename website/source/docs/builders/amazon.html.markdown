@@ -32,11 +32,9 @@ Packer supports the following builders at the moment:
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
-<div id="specifying-amazon-credentials">
+<span id="specifying-amazon-credentials"></span>
 
-\#\# Specifying Amazon Credentials
-
-</div>
+## Specifying Amazon Credentials
 
 When you use any of the amazon builders, you must provide credentials to the API
 in the form of an access key id and secret. These look like:
