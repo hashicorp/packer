@@ -77,10 +77,14 @@ If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
 ## Troubleshooting
 
-On some RedHat-based Linux distributions there is another tool named `packer` installed by default. You can check for this using `which -a packer`. If you get an error like this it indicates there is a name conflict.
+On some RedHat-based Linux distributions there is another tool named `packer`
+installed by default. You can check for this using `which -a packer`. If you get
+an error like this it indicates there is a name conflict.
 
     $ packer
     /usr/share/cracklib/pw_dict.pwd: Permission denied
     /usr/share/cracklib/pw_dict: Permission denied
 
-To fix this, you can create a symlink to packer that uses a different name like `packer.io`, or invoke the `packer` binary you want using its absolute path, e.g. `/usr/local/packer`.
+To fix this, you can create a symlink to packer that uses a different name like
+`packer.io`, or invoke the `packer` binary you want using its absolute path,
+e.g. `/usr/local/packer`.
