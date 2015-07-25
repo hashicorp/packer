@@ -42,10 +42,7 @@ can be configured for this builder.
 
 ### Required:
 
-* `access_key` (string) - The access key used to communicate with AWS.
-  If not specified, Packer will search the standard [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) file using environment variable `AWS_PROFILE` as the profile name, will use the `[default]` entry,
-  or will fall back to environment variables `AWS_ACCESS_KEY_ID` or `AWS_ACCESS_KEY`.
-  Finally, if Packer is running on an EC2 instance it will check the instance metadata for IAM role keys.
+* `access_key` (string) - The access key used to communicate with AWS. [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 * `account_id` (string) - Your AWS account ID. This is required for bundling
   the AMI. This is _not the same_ as the access key. You can find your
@@ -65,9 +62,7 @@ can be configured for this builder.
 * `s3_bucket` (string) - The name of the S3 bucket to upload the AMI.
   This bucket will be created if it doesn't exist.
 
-* `secret_key` (string) - The secret key used to communicate with AWS.
-  Lookup behavior is as above for `access_key` except the variables are `AWS_SECRET_ACCESS_KEY` or `AWS_SECRET_KEY`
-
+* `secret_key` (string) - The secret key used to communicate with AWS. [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 * `source_ami` (string) - The initial AMI used as a base for the newly
   created machine.
