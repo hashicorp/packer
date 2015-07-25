@@ -60,30 +60,19 @@ builder.
 
 ### Required:
 
--   `access_key` (string) - The access key used to communicate with AWS. If not
-    specified, Packer will use the key from any
-    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    file or fall back to environment variables `AWS_ACCESS_KEY_ID` or
-    `AWS_ACCESS_KEY` (in that order), if set. If the environmental variables
-    aren't set and Packer is running on an EC2 instance, Packer will check the
-    instance metadata for IAM role keys.
+* `access_key` (string) - The access key used to communicate with AWS. [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `ami_name` (string) - The name of the resulting AMI that will appear when
-    managing AMIs in the AWS console or via APIs. This must be unique. To help
-    make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
+* `ami_name` (string) - The name of the resulting AMI that will appear
+  when managing AMIs in the AWS console or via APIs. This must be unique.
+  To help make this unique, use a function like `timestamp` (see
+  [configuration templates](/docs/templates/configuration-templates.html) for more info)
 
--   `secret_key` (string) - The secret key used to communicate with AWS. If not
-    specified, Packer will use the secret from any
-    [credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    file or fall back to environment variables `AWS_SECRET_ACCESS_KEY` or
-    `AWS_SECRET_KEY` (in that order), if set. If the environmental variables
-    aren't set and Packer is running on an EC2 instance, Packer will check the
-    instance metadata for IAM role keys.
+* `secret_key` (string) - The secret key used to communicate with AWS.
+  [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `source_ami` (string) - The source AMI whose root volume will be copied and
-    provisioned on the currently running instance. This must be an EBS-backed
-    AMI with a root volume snapshot that you have access to.
+* `source_ami` (string) - The source AMI whose root volume will be copied
+  and provisioned on the currently running instance. This must be an
+  EBS-backed AMI with a root volume snapshot that you have access to.
 
 ### Optional:
 
