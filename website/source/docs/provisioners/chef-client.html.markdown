@@ -55,6 +55,10 @@ configuration is actually required.
     variables](/docs/templates/configuration-templates.html) available. See
     below for more information.
 
+-   `gues_os_type` (string) - The target guest OS type, either "unix" or
+    windows". Setting this to "windows" will cause the provisioner to use
+    Windows friendly paths and commands. By default, this is "unix".
+
 -   `install_command` (string) - The command used to install Chef. This has
     various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
@@ -68,7 +72,8 @@ configuration is actually required.
 
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
-    then the sudo will be omitted.
+    then the sudo will be omitted. This has no effect when guest_os_type is
+    windows.
 
 -   `run_list` (array of strings) - The [run
     list](http://docs.opscode.com/essentials_node_object_run_lists.html)
@@ -87,11 +92,12 @@ configuration is actually required.
     on the machine using the Opscode omnibus installers.
 
 -   `staging_directory` (string) - This is the directory where all the
-    configuration of Chef by Packer will be placed. By default this
-    is "/tmp/packer-chef-client". This directory doesn't need to exist but must
-    have proper permissions so that the SSH user that Packer uses is able to
-    create directories and write into this folder. If the permissions are not
-    correct, use a shell provisioner prior to this to configure it properly.
+    configuration of Chef by Packer will be placed. By default this is
+    "/tmp/packer-chef-client" when guest_os_type unix and "$env:TEMP/packer-chef-client
+    when windows. This directory doesn't need to exist but must have proper
+    permissions so that the user that Packer uses is able to create directories
+    and write into this folder. If the permissions are not correct, use a shell
+    provisioner prior to this to configure it properly.
 
 -   `client_key` (string) - Path to client key. If not set, this defaults to a
     file named client.pem in `staging_directory`.
@@ -152,6 +158,17 @@ readability) to execute Chef:
   -j {{.JsonPath}}
 ```
 
+When guest_os_type is set to "windows", Packer uses the follow command to
+execute Chef. The full path to Chef is required because the PATH environment
+variable changes don't immediately propogate to running processes.
+
+```
+c:/opscode/chef/bin/chef-client.bat \
+  --no-color \
+  -c {{.ConfigPath}} \
+  -j {{.JsonPath}}
+```
+
 This command can be customized using the `execute_command` configuration. As you
 can see from the default value above, the value of this configuration can
 contain various template variables, defined below:
@@ -170,6 +187,13 @@ install Chef in another way.
 ``` {.text}
 curl -L https://www.opscode.com/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
+```
+When guest_os_type is set to "windows", Packer uses the following command to
+install the latest version of Chef:
+
+```
+(New-Object System.Net.WebClient).DownloadFile('http://www.chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');
+Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait
 ```
 
 This command can be customized using the `install_command` configuration.
