@@ -138,54 +138,150 @@ func TestProvisionerPrepare_serverUrl(t *testing.T) {
 	}
 }
 
-func TestProvisioner_createDir(t *testing.T) {
-	p1 := &Provisioner{config: Config{PreventSudo: true}}
-	p2 := &Provisioner{config: Config{PreventSudo: false}}
-	comm := &packer.MockCommunicator{}
-	ui := &packer.BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
+func TestProvisionerPrepare_keyPaths(t *testing.T) {
+	commands := []string{
+		"validation_key_path",
+		"encrypted_data_bag_secret_path",
 	}
 
-	if err := p1.createDir(ui, comm, "/tmp/foo"); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+	for _, command := range commands {
+		var p Provisioner
 
-	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
-		t.Fatalf("createDir should not use sudo, got: \"%s\"", comm.StartCmd.Command)
-	}
+		// Test not set
+		config := testConfig()
+		delete(config, command)
+		err := p.Prepare(config)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if err := p2.createDir(ui, comm, "/tmp/foo"); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		// Test invalid template
+		config = testConfig()
+		config[command] = "{{if NOPE}}"
+		err = p.Prepare(config)
+		if err == nil {
+			t.Fatal("should error")
+		}
 
-	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
-		t.Fatalf("createDir should use sudo, got: \"%s\"", comm.StartCmd.Command)
+		// Test with a file
+		tf, err := ioutil.TempFile("", "packer")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		defer os.Remove(tf.Name())
+
+		config = testConfig()
+		config[command] = tf.Name()
+		err = p.Prepare(config)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 	}
 }
 
-func TestProvisioner_removeDir(t *testing.T) {
-	p1 := &Provisioner{config: Config{PreventSudo: true}}
-	p2 := &Provisioner{config: Config{PreventSudo: false}}
-	comm := &packer.MockCommunicator{}
-	ui := &packer.BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
-	}
+func TestProvisioner_createDir(t *testing.T) {
+	var p Provisioner
 
-	if err := p1.removeDir(ui, comm, "/tmp/foo"); err != nil {
+	for _, prevent_sudo := range []bool{true, false} {
+		config := testConfig()
+		config["prevent_sudo"] = prevent_sudo
+
+		comm := &packer.MockCommunicator{}
+		ui := &packer.BasicUi{
+			Reader: new(bytes.Buffer),
+			Writer: new(bytes.Buffer),
+		}
+
+		err := p.Prepare(config)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if err := p.createDir(ui, comm, "/tmp/foo"); err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if prevent_sudo && strings.HasPrefix(comm.StartCmd.Command, "sudo") {
+			t.Fatalf("createDir should not use sudo, got: \"%s\"", comm.StartCmd.Command)
+		}
+
+		if !prevent_sudo && !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
+			t.Fatalf("createDir should use sudo, got: \"%s\"", comm.StartCmd.Command)
+		}
+	} 	
+}
+
+func TestProvisioner_createDir_removeDir_nix(t *testing.T) {
+	var p Provisioner
+
+	for _, prevent_sudo := range []bool{true, false} {
+		config := testConfig()
+		config["prevent_sudo"] = prevent_sudo
+
+		comm := &packer.MockCommunicator{}
+		ui := &packer.BasicUi{
+			Reader: new(bytes.Buffer),
+			Writer: new(bytes.Buffer),
+		}
+
+		err := p.Prepare(config)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if err := p.createDir(ui, comm, "/tmp/foo"); err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if prevent_sudo && comm.StartCmd.Command != "mkdir -p '/tmp/foo'" {
+			t.Fatalf("bad createDir syntax, got: \"%s\"", comm.StartCmd.Command)
+		}
+
+		if !prevent_sudo && comm.StartCmd.Command != "sudo mkdir -p '/tmp/foo'" {
+			t.Fatalf("bad sudo createDir syntax, got: \"%s\"", comm.StartCmd.Command)
+		}
+
+		if err := p.removeDir(ui, comm, "/tmp/foo"); err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if prevent_sudo && comm.StartCmd.Command != "rm -rf '/tmp/foo'" {
+			t.Fatalf("bad removeDir syntax, got: \"%s\"", comm.StartCmd.Command)
+		}
+
+		if !prevent_sudo && comm.StartCmd.Command != "sudo rm -rf '/tmp/foo'" {
+			t.Fatalf("bad sudo removeDir syntax, got: \"%s\"", comm.StartCmd.Command)
+		}
+ 	}
+ }
+
+func TestProvisioner_createDir_removeDir_windows(t *testing.T) {
+	var p Provisioner
+
+	config := testConfig()
+	config["guest_os_type"] = "windows"
+
+ 	comm := &packer.MockCommunicator{}
+ 	ui := &packer.BasicUi{
+ 		Reader: new(bytes.Buffer),
+ 		Writer: new(bytes.Buffer),
+ 	}
+ 
+	err := p.Prepare(config)
+	if err != nil {
+ 		t.Fatalf("err: %s", err)
+ 	}
+ 
+	if err := p.createDir(ui, comm, "c:/Windows/Temp/foo"); err != nil {
 		t.Fatalf("err: %s", err)
 	}
-
-	if strings.HasPrefix(comm.StartCmd.Command, "sudo") {
-		t.Fatalf("removeDir should not use sudo, got: \"%s\"", comm.StartCmd.Command)
-	}
-
-	if err := p2.removeDir(ui, comm, "/tmp/foo"); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if !strings.HasPrefix(comm.StartCmd.Command, "sudo") {
-		t.Fatalf("removeDir should use sudo, got: \"%s\"", comm.StartCmd.Command)
-	}
+	if comm.StartCmd.Command != "New-Item -ItemType directory -Force -ErrorAction SilentlyContinue -Path c:/Windows/Temp/foo" {
+		t.Fatalf("bad createDir syntax, got: \"%s\"", comm.StartCmd.Command)
+ 	}
+ 
+	if err := p.removeDir(ui, comm, "c:/Windows/Temp/foo"); err != nil {
+ 		t.Fatalf("err: %s", err)
+ 	}
+	if comm.StartCmd.Command != "rm c:/Windows/Temp/foo -recurse -force" {
+		t.Fatalf("bad removeDir syntax, got: \"%s\"", comm.StartCmd.Command)
+ 	}
 }
