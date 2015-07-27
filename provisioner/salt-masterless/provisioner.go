@@ -15,6 +15,8 @@ import (
 )
 
 const DefaultTempConfigDir = "/tmp/salt"
+const DefaultStateTreeDir = "/srv/salt"
+const DefaultPillarRootDir = "/srv/pillar"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -33,6 +35,12 @@ type Config struct {
 
 	// Local path to the salt pillar roots
 	LocalPillarRoots string `mapstructure:"local_pillar_roots"`
+
+	// Remote path to the salt state tree
+	RemoteStateTree string `mapstructure:"remote_state_tree"`
+
+	// Remote path to the salt pillar roots
+	RemotePillarRoots string `mapstructure:"remote_pillar_roots"`
 
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
@@ -58,6 +66,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.TempConfigDir == "" {
 		p.config.TempConfigDir = DefaultTempConfigDir
+	}
+
+	if p.config.RemoteStateTree == "" {
+		p.config.RemoteStateTree = DefaultStateTreeDir
+	}
+
+	if p.config.RemotePillarRoots == "" {
+		p.config.RemotePillarRoots = DefaultPillarRootDir
 	}
 
 	var errs *packer.MultiError
@@ -144,11 +160,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error uploading local state tree to remote: %s", err)
 	}
 
-	// move state tree into /srv/salt
+	// move state tree from temporary directory
 	src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "states"))
-	dst = "/srv/salt"
+	dst = p.config.RemoteStateTree
+	if err = p.removeDir(ui, comm, dst); err != nil {
+		return fmt.Errorf("Unable to clear salt tree: %s", err)
+	}
 	if err = p.moveFile(ui, comm, dst, src); err != nil {
-		return fmt.Errorf("Unable to move %s/states to /srv/salt: %s", p.config.TempConfigDir, err)
+		return fmt.Errorf("Unable to move %s/states to %s: %s", p.config.TempConfigDir, dst, err)
 	}
 
 	if p.config.LocalPillarRoots != "" {
@@ -159,16 +178,19 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error uploading local pillar roots to remote: %s", err)
 		}
 
-		// move pillar tree into /srv/pillar
+		// move pillar root from temporary directory
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "pillar"))
-		dst = "/srv/pillar"
+		dst = p.config.RemotePillarRoots
+		if err = p.removeDir(ui, comm, dst); err != nil {
+			return fmt.Errorf("Unable to clear pillat root: %s", err)
+		}
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Unable to move %s/pillar to /srv/pillar: %s", p.config.TempConfigDir, err)
+			return fmt.Errorf("Unable to move %s/pillar to %s: %s", p.config.TempConfigDir, dst, err)
 		}
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: p.sudo("salt-call --local state.highstate -l info --retcode-passthrough")}
+	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("salt-call --local state.highstate --file-root=%s --pillar-root=%s -l info --retcode-passthrough"),p.config.RemoteStateTree, p.config.RemotePillarRoots)}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -225,6 +247,20 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
+	}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status.")
+	}
+	return nil
+}
+
+func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("rm -rf '%s'", dir),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
