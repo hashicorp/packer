@@ -13,12 +13,12 @@ import (
 )
 
 type StepKeyPair struct {
-	Debug        bool
-	DebugKeyPath string
-	KeyPairName          string
-	PrivateKeyFile       string
+	Debug          bool
+	DebugKeyPath   string
+	KeyPairName    string
+	PrivateKeyFile string
 
-	keyName      string
+	keyName string
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
