@@ -24,8 +24,8 @@ type Communicator struct {
 	HostDir      string
 	ContainerDir string
 	Version      *version.Version
-	Config 	     *Config
-	lock sync.Mutex
+	Config       *Config
+	lock         sync.Mutex
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
