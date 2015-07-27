@@ -67,7 +67,7 @@ array.
   "api_token": "{{user `do_api_token`}}",
   "image": "ubuntu-14-04-x64",
   "region": "nyc3",
-  "size": "512mb",
+  "size": "512mb"
 }
 ```
 
