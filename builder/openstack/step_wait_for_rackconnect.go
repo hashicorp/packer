@@ -39,6 +39,7 @@ func (s *StepWaitForRackConnect) Run(state multistep.StateBag) multistep.StepAct
 		}
 
 		if server.Metadata["rackconnect_automation_status"] == "DEPLOYED" {
+			state.Put("server", server)
 			break
 		}
 
