@@ -130,6 +130,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		// move minion config into /etc/salt
+		ui.Message(fmt.Sprintf("Make sure directory %s exists", "/etc/salt"))
+		if err := p.createDir(ui, comm, "/etc/salt"); err != nil {
+			return fmt.Errorf("Error creating remote salt configuration directory: %s", err)
+		}
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "minion"))
 		dst = "/etc/salt/minion"
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
