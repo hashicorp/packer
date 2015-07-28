@@ -16,7 +16,27 @@ import (
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/mitchellh/packer/provisioner"
 )
+
+type guestOSTypeConfig struct {
+	executeCommand string
+	installCommand string
+	stagingDir     string
+}
+
+var guestOSTypeConfigs = map[string]guestOSTypeConfig{
+	provisioner.UnixOSType: guestOSTypeConfig{
+		executeCommand: "{{if .Sudo}}sudo {{end}}chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
+		installCommand: "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		stagingDir:     "/tmp/packer-chef-solo",
+	},
+	provisioner.WindowsOSType: guestOSTypeConfig{
+		executeCommand: "c:/opscode/chef/bin/chef-solo.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
+		installCommand: "(New-Object System.Net.WebClient).DownloadFile('http://www.getchef.com/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait",
+		stagingDir:     "C:/Windows/Temp/packer-chef-solo",
+	},
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -29,6 +49,8 @@ type Config struct {
 	EncryptedDataBagSecretPath string   `mapstructure:"encrypted_data_bag_secret_path"`
 	EnvironmentsPath           string   `mapstructure:"environments_path"`
 	ExecuteCommand             string   `mapstructure:"execute_command"`
+	// The type of OS the guest is running: unix or windows
+	GuestOSType                string `mapstructure:"guest_os_type"`
 	InstallCommand             string   `mapstructure:"install_command"`
 	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
 	Json                       map[string]interface{}
@@ -42,6 +64,8 @@ type Config struct {
 
 type Provisioner struct {
 	config Config
+	guestOSTypeConfig guestOSTypeConfig
+	guestCommands     *provisioner.GuestCommands
 }
 
 type ConfigTemplate struct {
@@ -86,12 +110,28 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	if p.config.GuestOSType == "" {
+		p.config.GuestOSType = provisioner.DefaultOSType
+	}
+	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+
+	var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "{{if .Sudo}}sudo {{end}}chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}"
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
 	if p.config.InstallCommand == "" {
-		p.config.InstallCommand = "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash"
+		p.config.InstallCommand = p.guestOSTypeConfig.installCommand
 	}
 
 	if p.config.RunList == nil {
@@ -99,7 +139,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = "/tmp/packer-chef-solo"
+		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}
 
 	var errs *packer.MultiError
@@ -374,14 +414,11 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p '%s'", dir),
-	}
-
+	
+	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
-
 	if cmd.ExitStatus != 0 {
 		return fmt.Errorf("Non-zero exit status.")
 	}
