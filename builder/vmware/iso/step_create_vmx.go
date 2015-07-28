@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
@@ -155,7 +156,36 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateVMX) Cleanup(multistep.StateBag) {
+func (s *stepCreateVMX) Cleanup(state multistep.StateBag) {
+	driver := state.Get("driver").(vmwcommon.Driver)
+	config := state.Get("config").(*Config)
+	ui := state.Get("ui").(packer.Ui)
+
+	ui.Say("Unregistering and deleting virtual machine...")
+	var err error = nil
+	for i := 0; i < 5; i++ {
+		// Check if VM is running
+		running, err := driver.IsRunning(config.VMXTemplatePath)
+		// If VM running stop it
+		if err == nil && running {
+			err = driver.Stop(config.VMXTemplatePath)
+		}
+		// If VM not running delete it
+		if err == nil && !running {
+			err = driver.Delete(config.VMXTemplatePath)
+		}
+		// If all good break out of the loop
+		if err == nil {
+			break
+		}
+		// Otherwise wait some time and try again
+		time.Sleep(1 * time.Second * time.Duration(i))
+	}
+
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting virtual machine: %s", err))
+	}
+
 	if s.tempDir != "" {
 		os.RemoveAll(s.tempDir)
 	}
