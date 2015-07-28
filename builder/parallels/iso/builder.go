@@ -46,6 +46,7 @@ type Config struct {
 	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
 	ISOUrls            []string `mapstructure:"iso_urls"`
 	VMName             string   `mapstructure:"vm_name"`
+	TargetPath         string   `mapstructure:"target_path"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
@@ -218,6 +219,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			TargetPath:   b.config.TargetPath,
 		},
 		&parallelscommon.StepOutputDir{
 			Force: b.config.PackerForce,
