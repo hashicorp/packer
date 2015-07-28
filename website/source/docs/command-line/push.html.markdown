@@ -67,3 +67,27 @@ Push a Packer template with a custom token:
 ``` {.shell}
 $ packer push -token ABCD1234 template.json
 ```
+
+## Limits
+
+`push` is limited to 5gb upload when pushing to Atlas. To be clear, packer *can*
+build artifacts larger than 5gb, and Atlas *can* store artifacts larger than
+5gb. However, the initial payload you push to *start* the build cannot exceed
+5gb. If your boot ISO is larger than 5gb (for example if you are building OSX
+images), you will need to put your boot ISO in an external web service and
+download it during the packer run.
+
+The easiest way to host these in a secure fashion is to upload your ISO to
+[Amazon
+S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html)
+or [Google Cloud
+Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl) and
+download it using a signed URL. You can inject the signed URL into your build by
+using a build variable (environment variable) in Atlas. Example:
+
+![Configure your signed URL in the Atlas build variables
+menu](/assets/images/packer-signed-urls.png)
+
+You will also need to [configure your packer
+template](http://stormchaser.local:4567/docs/templates/user-variables.html) to
+use the variable injected by Atlas (or via `push -var`).
