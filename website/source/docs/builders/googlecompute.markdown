@@ -129,6 +129,9 @@ can be configured for this builder.
 
 * `tags` (array of strings)
 
+* `use_internal_ip` (boolean) - If true, use the instance's internal IP instead
+  of its external IP during building.
+
 ## Gotchas
 
 Centos images have root ssh access disabled by default. Set `ssh_username` to any user, which will be created by packer with sudo access.
