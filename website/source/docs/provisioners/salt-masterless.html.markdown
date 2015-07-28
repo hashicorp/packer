@@ -47,7 +47,7 @@ Optional:
     This will be uploaded to the `/srv/salt` on the remote.
 
 -   `minion_config` (string) - The path to your local [minion
-    config](http://docs.saltstack.com/topics/configuration.html). This will be
+    config file](http://docs.saltstack.com/ref/configuration/minion.html). This will be
     uploaded to the `/etc/salt` on the remote.
 
 -   `skip_bootstrap` (boolean) - By default the salt provisioner runs [salt
