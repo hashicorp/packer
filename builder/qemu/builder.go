@@ -105,6 +105,7 @@ type Config struct {
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
+	TargetPath      string     `mapstructure:"target_path"`
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
@@ -384,6 +385,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			TargetPath:   b.config.TargetPath,
 		},
 		new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
