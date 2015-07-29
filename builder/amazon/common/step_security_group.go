@@ -59,8 +59,8 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	req := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupID:    groupResp.GroupID,
 		IPProtocol: aws.String("tcp"),
-		FromPort:   aws.Long(int64(port)),
-		ToPort:     aws.Long(int64(port)),
+		FromPort:   aws.Int64(int64(port)),
+		ToPort:     aws.Int64(int64(port)),
 		CIDRIP:     aws.String("0.0.0.0/0"),
 	}
 

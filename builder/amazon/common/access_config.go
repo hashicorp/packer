@@ -40,9 +40,9 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 	}
 
 	return &aws.Config{
-		Region:      region,
+		Region:      aws.String(region),
 		Credentials: creds,
-		MaxRetries:  11,
+		MaxRetries:  aws.Int(11),
 	}, nil
 }
 
