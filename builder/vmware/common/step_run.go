@@ -38,15 +38,17 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	if s.Headless {
 		vncIpRaw, vncIpOk := state.GetOk("vnc_ip")
 		vncPortRaw, vncPortOk := state.GetOk("vnc_port")
+		vncPasswordRaw, vncPasswordOk := state.GetOk("vnc_password")
 
-		if vncIpOk && vncPortOk {
+		if vncIpOk && vncPortOk && vncPasswordOk {
 			vncIp := vncIpRaw.(string)
 			vncPort := vncPortRaw.(uint)
+			vncPassword := vncPasswordRaw.(string)
 
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+
-					"view the screen of the VM, connect via VNC without a password to\n"+
-					"%s:%d", vncIp, vncPort))
+					"view the screen of the VM, connect via VNC with the password %s to\n"+
+					"%s:%d", vncPassword, vncIp, vncPort))
 		} else {
 			ui.Message("The VM will be run headless, without a GUI, as configured.\n" +
 				"If the run isn't succeeding as you expect, please enable the GUI\n" +
