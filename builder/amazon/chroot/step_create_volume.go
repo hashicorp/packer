@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -52,12 +51,12 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	}
 	createVolume := &ec2.CreateVolumeInput{
 		AvailabilityZone: instance.Placement.AvailabilityZone,
-		Size:             aws.Long(vs),
+		Size:             aws.Int64(vs),
 		SnapshotID:       rootDevice.EBS.SnapshotID,
 		VolumeType:       rootDevice.EBS.VolumeType,
 		IOPS:             rootDevice.EBS.IOPS,
 	}
-	log.Printf("Create args: %s", awsutil.StringValue(createVolume))
+	log.Printf("Create args: %s", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
