@@ -79,9 +79,20 @@ download it during the packer run.
 
 ## Building Private `.iso` and `.dmg` Files
 
-If you want to build a private `.iso` file you can upload the `.iso` to a secure file hosting service like [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html), [Google Cloud Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl), or [Azure File Service](https://msdn.microsoft.com/en-us/library/azure/dn194274.aspx) and download it at build time using a signed URL. You should convert `.dmg` files to `.iso` and follow a similar procedure.
+If you want to build a private `.iso` file you can upload the `.iso` to a secure
+file hosting service like [Amazon
+S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html),
+[Google Cloud
+Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl), or
+[Azure File
+Service](https://msdn.microsoft.com/en-us/library/azure/dn194274.aspx) and
+download it at build time using a signed URL. You should convert `.dmg` files to
+`.iso` and follow a similar procedure.
 
-Once you have added [variables in your packer template](/docs/templates/user-variables.html) you can specify credentials or signed URLs using Atlas environment variables, or via the `-var` flag when you run `push`.
+Once you have added [variables in your packer
+template](/docs/templates/user-variables.html) you can specify credentials or
+signed URLs using Atlas environment variables, or via the `-var` flag when you
+run `push`.
 
 ![Configure your signed URL in the Atlas build variables
 menu](/assets/images/packer-signed-urls.png)
