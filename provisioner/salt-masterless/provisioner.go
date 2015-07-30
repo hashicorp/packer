@@ -116,9 +116,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	ui.Message(fmt.Sprintf("Creating remote directory: %s", p.config.TempConfigDir))
+	ui.Message(fmt.Sprintf("Creating remote temporary directory: %s", p.config.TempConfigDir))
 	if err := p.createDir(ui, comm, p.config.TempConfigDir); err != nil {
-		return fmt.Errorf("Error creating remote salt state directory: %s", err)
+		return fmt.Errorf("Error creating remote temporary directory: %s", err)
 	}
 
 	if p.config.MinionConfig != "" {
@@ -216,7 +216,7 @@ func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst, src 
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
 		}
 
-		return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %s", p.config.TempConfigDir, err)
+		return fmt.Errorf("Unable to move %s to %s: %s", src, dst, err)
 	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 
 	"sync"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -21,7 +22,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
-	ami := amis[ec2conn.Config.Region]
+	ami := amis[*ec2conn.Config.Region]
 
 	if len(s.Regions) == 0 {
 		return multistep.ActionContinue
@@ -33,7 +34,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 	var wg sync.WaitGroup
 	errs := new(packer.MultiError)
 	for _, region := range s.Regions {
-		if region == ec2conn.Config.Region {
+		if region == *ec2conn.Config.Region {
 			ui.Message(fmt.Sprintf(
 				"Avoiding copying AMI to duplicate region %s", region))
 			continue
@@ -44,7 +45,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 
 		go func(region string) {
 			defer wg.Done()
-			id, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, ec2conn.Config.Region)
+			id, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -84,7 +85,7 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	if err != nil {
 		return "", err
 	}
-	awsConfig.Region = target
+	awsConfig.Region = aws.String(target)
 
 	regionconn := ec2.New(awsConfig)
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{

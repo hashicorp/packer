@@ -10,8 +10,9 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	Comm         communicator.Config `mapstructure:",squash"`
-	SSHInterface string              `mapstructure:"ssh_interface"`
+	Comm           communicator.Config `mapstructure:",squash"`
+	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
+	SSHInterface   string              `mapstructure:"ssh_interface"`
 
 	SourceImage      string   `mapstructure:"source_image"`
 	Flavor           string   `mapstructure:"flavor"`

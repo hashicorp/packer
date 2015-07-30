@@ -64,7 +64,7 @@ type TestT interface {
 
 // Test performs an acceptance test on a backend with the given test case.
 //
-// Tests are not run unless an environmental variable "TF_ACC" is
+// Tests are not run unless an environmental variable "PACKER_ACC" is
 // set to some non-empty value. This is to avoid test cases surprising
 // a user by creating real resources.
 //

@@ -90,7 +90,7 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		ui.Say(fmt.Sprintf("Modifying attributes on AMI (%s)...", ami))
 		regionconn := ec2.New(&aws.Config{
 			Credentials: ec2conn.Config.Credentials,
-			Region:      region,
+			Region:      aws.String(region),
 		})
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
