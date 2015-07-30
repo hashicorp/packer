@@ -100,6 +100,9 @@ builder.
     Rackconnect to assign the machine an IP address before connecting via SSH.
     Defaults to false.
 
+-   `metadata` (object of key/value strings) - Glance metadata that will be applied
+    to the image.
+
 ## Basic Example: Rackspace public cloud
 
 Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
