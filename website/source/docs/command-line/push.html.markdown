@@ -77,17 +77,11 @@ build artifacts larger than 5gb, and Atlas *can* store artifacts larger than
 images), you will need to put your boot ISO in an external web service and
 download it during the packer run.
 
-The easiest way to host these in a secure fashion is to upload your ISO to
-[Amazon
-S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html)
-or [Google Cloud
-Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl) and
-download it using a signed URL. You can inject the signed URL into your build by
-using a build variable (environment variable) in Atlas. Example:
+## Building Private `.iso` and `.dmg` Files
+
+If you want to build a private `.iso` file you can upload the `.iso` to a secure file hosting service like [Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html), [Google Cloud Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl), or [Azure File Service](https://msdn.microsoft.com/en-us/library/azure/dn194274.aspx) and download it at build time using a signed URL. You should convert `.dmg` files to `.iso` and follow a similar procedure.
+
+Once you have added [variables in your packer template](/docs/templates/user-variables.html) you can specify credentials or signed URLs using Atlas environment variables, or via the `-var` flag when you run `push`.
 
 ![Configure your signed URL in the Atlas build variables
 menu](/assets/images/packer-signed-urls.png)
-
-You will also need to [configure your packer
-template](http://stormchaser.local:4567/docs/templates/user-variables.html) to
-use the variable injected by Atlas (or via `push -var`).
