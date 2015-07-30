@@ -36,6 +36,7 @@ updatedeps:
 	go list ./... \
 		| xargs go list -f '{{join .Deps "\n"}}' \
 		| grep -v github.com/mitchellh/packer \
+		| grep -v '/internal/' \
 		| sort -u \
 		| xargs go get -f -u -v
 
