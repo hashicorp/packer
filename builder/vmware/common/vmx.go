@@ -17,7 +17,7 @@ import (
 func ParseVMX(contents string) map[string]string {
 	results := make(map[string]string)
 
-	lineRe := regexp.MustCompile(`^(.+?)\s*=\s*"(.*?)"\s*$`)
+	lineRe := regexp.MustCompile(`^(.+?)\s*=\s*"?(.*?)"?\s*$`)
 
 	for _, line := range strings.Split(contents, "\n") {
 		matches := lineRe.FindStringSubmatch(line)
@@ -25,8 +25,7 @@ func ParseVMX(contents string) map[string]string {
 			continue
 		}
 
-		key := strings.ToLower(matches[1])
-		results[key] = matches[2]
+		results[matches[1]] = matches[2]
 	}
 
 	return results
@@ -43,9 +42,22 @@ func EncodeVMX(contents map[string]string) string {
 		i++
 	}
 
+	// a list of VMX key fragments that should not be wrapped in quotes,
+	// fragments because multiple disks can use the virtualSSD suffix
+	noQuotes := []string {
+		"virtualSSD",
+	}
+
 	sort.Strings(keys)
 	for _, k := range keys {
-		buf.WriteString(fmt.Sprintf("%s = \"%s\"\n", k, contents[k]))
+		pat := "%s = \"%s\"\n"
+		for _, q := range noQuotes {
+			if strings.Contains(k, q) {
+				pat = "%s = %s\n"
+				break;
+			}
+		}
+		buf.WriteString(fmt.Sprintf(pat, k, contents[k]))
 	}
 
 	return buf.String()
