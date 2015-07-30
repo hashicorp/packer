@@ -105,11 +105,15 @@ func sshAddrFromPool(s *servers.Server, desired string) string {
 			if address["OS-EXT-IPS:type"] == "floating" {
 				addr = address["addr"].(string)
 			} else {
-				if address["version"].(float64) == 4 {
+				if address["version"].(float64) == 6 {
+					addr = fmt.Sprintf("[%s]", address["addr"].(string))
+				} else {
 					addr = address["addr"].(string)
 				}
 			}
+
 			if addr != "" {
+				log.Printf("[DEBUG] Detected address: %s", addr)
 				return addr
 			}
 		}
