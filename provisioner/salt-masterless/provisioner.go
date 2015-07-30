@@ -34,6 +34,9 @@ type Config struct {
 	// Local path to the salt pillar roots
 	LocalPillarRoots string `mapstructure:"local_pillar_roots"`
 
+        // Grains to be applied before running highstate
+        Grains string `mapstructure:"grains"`
+
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
@@ -165,6 +168,19 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Unable to move %s/pillar to /srv/pillar: %s", p.config.TempConfigDir, err)
 		}
+	}
+
+	if p.config.Grains != "" {
+                ui.Message("Applying grains")
+		src = p.config.Grains
+                cmd := &packer.RemoteCmd{Command: fmt.Sprintf("sudo salt-call --local grains.setvals %s -l info", src)}
+                if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
+                        if err == nil {
+                                err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
+                        }
+
+                        return fmt.Errorf("Error applying grains: %s", err)
+                }
 	}
 
 	ui.Message("Running highstate")
