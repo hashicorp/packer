@@ -38,13 +38,21 @@ Optional:
     has more detailed usage instructions. By default, no arguments are sent to
     the script.
 
+-   `remote_pillar_roots` (string) - The path to your remote [pillar
+    roots](http://docs.saltstack.com/ref/configuration/master.html#pillar-configuration).
+    default: `/srv/pillar`.
+
+-   `remote_state_tree` (string) - The path to your remote [state
+    tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
+    default: `/srv/salt`.
+
 -   `local_pillar_roots` (string) - The path to your local [pillar
     roots](http://docs.saltstack.com/ref/configuration/master.html#pillar-configuration).
-    This will be uploaded to the `/srv/pillar` on the remote.
+    This will be uploaded to the `remote_pillar_roots` on the remote.
 
 -   `local_state_tree` (string) - The path to your local [state
     tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
-    This will be uploaded to the `/srv/salt` on the remote.
+    This will be uploaded to the `remote_state_tree` on the remote.
 
 -   `minion_config` (string) - The path to your local [minion
     config file](http://docs.saltstack.com/ref/configuration/minion.html). This will be
