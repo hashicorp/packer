@@ -90,7 +90,19 @@ it's even better to store and version the AMI output so it can be easily
 deployed by a tool like [Terraform](https://terraform.io). The `atlas`
 [post-processor](/docs/post-processors/atlas.html) makes this process simple:
 
-`javascript {   "variables": ["..."],   "builders": ["..."],   "provisioners": ["..."],   "push": ["..."],   "post-processors": [     {       "type": "atlas",       "artifact": "ATLAS_USERNAME/packer-tutorial",       "artifact_type": "amazon.ami"     }   ] }`
+``` {.javascript}
+{
+  "variables": ["..."],
+  "builders": ["..."],
+  "provisioners": ["..."],
+  "push": ["..."],
+  "post-processors": [{
+    "type": "atlas",
+    "artifact": "ATLAS_USERNAME/packer-tutorial",
+    "artifact_type": "amazon.ami"
+  }]
+}
+```
 
 Update the `post-processors` block with your Atlas username, then
 `packer push example.json` and watch the build kick off in Atlas! When the build
