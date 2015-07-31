@@ -54,8 +54,8 @@ Optional:
     tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
     This will be uploaded to the `remote_state_tree` on the remote.
 
--   `minion_config` (string) - The path to your local [minion
-    config file](http://docs.saltstack.com/ref/configuration/minion.html). This will be
+-   `minion_config` (string) - The path to your local [minion config
+    file](http://docs.saltstack.com/ref/configuration/minion.html). This will be
     uploaded to the `/etc/salt` on the remote.
 
 -   `skip_bootstrap` (boolean) - By default the salt provisioner runs [salt
