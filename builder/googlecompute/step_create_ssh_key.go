@@ -1,15 +1,16 @@
 package googlecompute
 
 import (
-	"code.google.com/p/gosshold/ssh"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"os"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"os"
+	"golang.org/x/crypto/ssh"
 )
 
 // StepCreateSSHKey represents a Packer build step that generates SSH key pairs.
