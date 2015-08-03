@@ -1,8 +1,6 @@
 TEST?=./...
-VETARGS?=-asmdecl -atomic -bool -buildtags -copylocks -methods \
-         -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
 
-default: test
+default: test vet dev
 
 bin:
 	@sh -c "$(CURDIR)/scripts/build.sh"
@@ -41,10 +39,10 @@ updatedeps:
 		| xargs go get -f -u -v
 
 vet:
-	@go tool vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
+	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
-	@go tool vet $(VETARGS) . ; if [ $$? -eq 1 ]; then \
+	@go vet ./... ; if [ $$? -eq 1 ]; then \
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
 		echo "and fix them if necessary before submitting the code for reviewal."; \
