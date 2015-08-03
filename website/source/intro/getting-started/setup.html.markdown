@@ -2,9 +2,9 @@
 description: |
     Packer must first be installed on the machine you want to run it on. To make
     installation easy, Packer is distributed as a binary package for all supported
-    platforms and architectures. This page will not cover how to compile Packer from
-    source, as that is covered in the README and is only recommended for advanced
-    users.
+    platforms and architectures. This page will not cover how to compile Packer
+    from source, as that is covered in the README and is only recommended for
+    advanced users.
 layout: intro
 next_title: Build an Image
 next_url: '/intro/getting-started/build-image.html'
@@ -27,9 +27,10 @@ To install packer, first find the [appropriate package](/downloads.html) for
 your system and download it. Packer is packaged as a "zip" file.
 
 Next, unzip the downloaded package into a directory where Packer will be
-installed. On Unix systems, `~/packer` or `/usr/local/packer` is generally good,
-depending on whether you want to restrict the install to just your user or
-install it system-wide. On Windows systems, you can put it wherever you'd like.
+installed. On Unix systems, `~/packer` or `/usr/local/packer` is generally
+good, depending on whether you want to restrict the install to just your user
+or install it system-wide. On Windows systems, you can put it wherever you'd
+like.
 
 After unzipping the package, the directory should contain a set of binary
 programs, such as `packer`, `packer-build-amazon-ebs`, etc. The final step to
@@ -42,8 +43,8 @@ contains instructions for setting the PATH on Windows.
 
 ## Verifying the Installation
 
-After installing Packer, verify the installation worked by opening a new command
-prompt or console, and checking that `packer` is available:
+After installing Packer, verify the installation worked by opening a new
+command prompt or console, and checking that `packer` is available:
 
 ``` {.text}
 $ packer
@@ -58,16 +59,19 @@ Available commands are:
     version     Prints the Packer version
 ```
 
-If you get an error that `packer` could not be found, then your PATH environment
-variable was not setup properly. Please go back and ensure that your PATH
-variable contains the directory which has Packer installed.
+If you get an error that `packer` could not be found, then your PATH
+environment variable was not setup properly. Please go back and ensure that
+your PATH variable contains the directory which has Packer installed.
 
 Otherwise, Packer is installed and you're ready to go!
 
 ## Alternative Installation Methods
 
-While the binary packages is the only official method of installation, there are
-alternatives available.
+Installation from binary packages provided [here](/downloads.html) is currently
+the only officially supported installation method. The official binary packages
+are guaranteed to be the latest available version and match the proper
+checksums.  However, in addition to the official binaries, there are other
+unofficial 3rd party methods of installation managed by the Packer community:
 
 ### Homebrew
 
@@ -75,11 +79,21 @@ If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
     $ brew install packer
 
+### Chocolatey
+
+If you're using Windows and [Chocolatey](http://chocolatey.org), you can
+install Packer from Windows command line (cmd). Remember that this is updated
+by a 3rd party, so it may not be the latest available version.
+
+``` {.text}
+$ choco install packer
+```
+
 ## Troubleshooting
 
 On some RedHat-based Linux distributions there is another tool named `packer`
-installed by default. You can check for this using `which -a packer`. If you get
-an error like this it indicates there is a name conflict.
+installed by default. You can check for this using `which -a packer`. If you
+get an error like this it indicates there is a name conflict.
 
     $ packer
     /usr/share/cracklib/pw_dict.pwd: Permission denied
