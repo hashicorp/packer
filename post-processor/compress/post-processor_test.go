@@ -150,6 +150,35 @@ func TestCompressOptions(t *testing.T) {
 	}
 }
 
+func TestCompressInterpolation(t *testing.T) {
+	const config = `
+	{
+	    "post-processors": [
+	        {
+	            "type": "compress",
+	            "output": "{{ .BuildName }}.gz"
+	        }
+	    ]
+	}
+	`
+
+	artifact := testArchive(t, config)
+	defer artifact.Destroy()
+
+	filename := "file.gz"
+	archive, err := os.Open(filename)
+	if err != nil {
+		t.Fatalf("Unable to read %s: %s", filename, err)
+	}
+
+	gzipReader, _ := gzip.NewReader(archive)
+	data, _ := ioutil.ReadAll(gzipReader)
+
+	if string(data) != expectedFileContents {
+		t.Errorf("Expected:\n%s\nFound:\n%s\n", expectedFileContents, data)
+	}
+}
+
 // Test Helpers
 
 func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
