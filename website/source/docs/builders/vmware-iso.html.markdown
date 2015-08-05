@@ -378,6 +378,8 @@ the required `remote_*` configurations:
 Additionally, there are some optional configurations that you'll likely have to
 modify as well:
 
+-   `remote_port` - The SSH port of the remote machine
+
 -   `remote_datastore` - The path to the datastore where the VM will be stored
     on the ESXi machine.
 
