@@ -55,9 +55,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{"output"},
 		},
 	}, raws...)
+	if err != nil {
+		return err
+	}
 
 	errs := new(packer.MultiError)
 
@@ -67,16 +70,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.OutputPath == "" {
-		p.config.OutputPath = "packer_{{.BuildName}}_{{.Provider}}"
-	}
-
-	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Error parsing target template: %s", err))
-	}
-
-	templates := map[string]*string{
-		"output": &p.config.OutputPath,
+		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}"
 	}
 
 	if p.config.CompressionLevel > pgzip.BestCompression {
@@ -89,17 +83,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.CompressionLevel = pgzip.DefaultCompression
 	}
 
-	for key, ptr := range templates {
-		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("%s must be set", key))
-		}
-
-		*ptr, err = interpolate.Render(p.config.OutputPath, &p.config.ctx)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", key, err))
-		}
+	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
 
 	p.config.detectFromFilename()
@@ -113,7 +99,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 
-	target := p.config.OutputPath
+	// These are extra variables that will be made available for interpolation.
+	p.config.ctx.Data = map[string]string{
+		"BuildName":   p.config.PackerBuildName,
+		"BuilderType": p.config.PackerBuilderType,
+	}
+
+	target, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
+	if err != nil {
+		return nil, false, fmt.Errorf("Error interpolating output value: %s", err)
+	} else {
+		fmt.Println(target)
+	}
+
 	keep := p.config.KeepInputArtifact
 	newArtifact := &Artifact{Path: target}
 
