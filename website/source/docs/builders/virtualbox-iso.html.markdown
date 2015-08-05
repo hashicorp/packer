@@ -72,6 +72,9 @@ builder.
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
 
+-   `ssh_password` (string) - The password to use to SSH into the machine once
+    the OS is installed.
+
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
