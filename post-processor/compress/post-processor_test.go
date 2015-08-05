@@ -156,7 +156,7 @@ func TestCompressInterpolation(t *testing.T) {
 	    "post-processors": [
 	        {
 	            "type": "compress",
-	            "output": "{{ .BuildName }}.gz"
+	            "output": "{{ build_name}}-{{ .BuildName }}-{{.BuilderType}}.gz"
 	        }
 	    ]
 	}
@@ -165,7 +165,9 @@ func TestCompressInterpolation(t *testing.T) {
 	artifact := testArchive(t, config)
 	defer artifact.Destroy()
 
-	filename := "file.gz"
+	// You can interpolate using the .BuildName variable or build_name global
+	// function. We'll check both.
+	filename := "chocolate-vanilla-file.gz"
 	archive, err := os.Open(filename)
 	if err != nil {
 		t.Fatalf("Unable to read %s: %s", filename, err)
@@ -230,6 +232,13 @@ func testArchive(t *testing.T, config string) packer.Artifact {
 
 	compressor := PostProcessor{}
 	compressor.Configure(tpl.PostProcessors[0][0].Config)
+
+	// I get the feeling these should be automatically available somewhere, but
+	// some of the post-processors construct this manually.
+	compressor.config.ctx.BuildName = "chocolate"
+	compressor.config.PackerBuildName = "vanilla"
+	compressor.config.PackerBuilderType = "file"
+
 	artifactOut, _, err := compressor.PostProcess(ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to compress artifact: %s", err)
