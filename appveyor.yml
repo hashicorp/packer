@@ -31,6 +31,8 @@ install:
 
 build_script:
   - go test -v ./...
+  - go vet ./...
+  - git rev-parse HEAD
 
 test: off
 
