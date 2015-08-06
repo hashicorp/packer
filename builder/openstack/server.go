@@ -92,6 +92,4 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 		log.Printf("Waiting for state to become: %s currently %s (%d%%)", conf.Target, currentState, currentProgress)
 		time.Sleep(2 * time.Second)
 	}
-
-	return
 }
