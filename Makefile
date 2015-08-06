@@ -14,6 +14,7 @@ generate:
 	go generate ./...
 
 test:
+	@echo "Running tests on:"; git symbolic-ref HEAD; git rev-parse HEAD
 	go test $(TEST) $(TESTARGS) -timeout=10s
 	@$(MAKE) vet
 
@@ -29,6 +30,7 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
+	@echo "Updating deps on:"; git symbolic-ref HEAD; git rev-parse HEAD
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go list ./... \
@@ -37,8 +39,10 @@ updatedeps:
 		| grep -v '/internal/' \
 		| sort -u \
 		| xargs go get -f -u -v
+	@echo "Finished updating deps, now on:"; git symbolic-ref HEAD; git rev-parse HEAD
 
 vet:
+	@echo "Running go vet on:"; git symbolic-ref HEAD; git rev-parse HEAD
 	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
