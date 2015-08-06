@@ -20,9 +20,9 @@ usually will stop between each step, waiting for keyboard input before
 continuing. This will allow you to inspect state and so on.
 
 In debug mode once the remote instance is instantiated, Packer will emit to the
-current directory an emphemeral private ssh key as a .pem file. Using that you
+current directory an ephemeral private ssh key as a .pem file. Using that you
 can `ssh -i <key.pem>` into the remote build instance and see what is going on
-for debugging. The emphemeral key will be deleted at the end of the packer run
+for debugging. The ephemeral key will be deleted at the end of the packer run
 during cleanup.
 
 ### Windows
