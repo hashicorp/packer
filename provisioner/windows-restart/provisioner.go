@@ -134,7 +134,6 @@ WaitLoop:
 		case <-p.cancel:
 			close(waitDone)
 			return fmt.Errorf("Interrupt detected, quitting waiting for machine to restart")
-			break WaitLoop
 		}
 	}
 
