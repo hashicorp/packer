@@ -1,11 +1,11 @@
 TEST?=./...
-export GITSHA?=$(shell git rev-parse HEAD)
+GITSHA:=$(shell git rev-parse HEAD)
 
 default: test vet dev
 
 ci: deps test vet
 
-release: deps test vet bin
+release: checkversion deps test vet bin
 
 # `go get` will sometimes revert to master, which is not what we want in CI.
 # We check the git sha when make starts and verify periodically to avoid drift.
@@ -40,13 +40,13 @@ testacc: generate
 testrace:
 	go test -race $(TEST) $(TESTARGS)
 
-updatedeps:
-	@echo ""
-	@echo "Please use `make deps` instead"
-	@echo ""
-	$(MAKE) deps
+checkversion:
+	@grep 'const VersionPrerelease = ""' version.go > /dev/null || \
+		echo "You must remove prerelease tags from version.go prior to release." && \
+		exit 1
 
-deps: verifysha
+# Don't call this directly. Use deps instead.
+depsinternal:
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go list ./... \
@@ -55,7 +55,14 @@ deps: verifysha
 		| grep -v '/internal/' \
 		| sort -u \
 		| xargs go get -f -u -v -d
-	$(MAKE) verifysha
+
+updatedeps:
+	@echo ""
+	@echo "Please use `make deps` instead"
+	@echo ""
+	$(MAKE) deps
+
+deps: verifysha depsinternal verifysha
 
 vet: verifysha
 	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
