@@ -4,24 +4,15 @@ language: go
 
 go:
   - 1.4
+  - 1.5
   - tip
 
-install: make updatedeps
-
 script:
-  - GOMAXPROCS=2 make test
-  #- go test -race ./...
+  - GOMAXPROCS=2 make ci
 
 branches:
   only:
     - master
-
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.org#packer-tool"
-    skip_join: true
-    use_notice: true
 
 matrix:
   fast_finish: true
