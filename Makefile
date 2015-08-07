@@ -47,6 +47,9 @@ checkversion:
 
 # Don't call this directly. Use deps instead.
 depsinternal:
+	@git diff-index --quiet HEAD || \
+		echo "Your git working tree has uncommitted changes. deps will fail. Please stash or commit your changes first.";
+		exit 1
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go list ./... \
@@ -75,4 +78,4 @@ vet: verifysha
 		exit 1; \
 	fi
 
-.PHONY: bin default generate test testacc updatedeps vet deps
+.PHONY: bin default generate test testacc updatedeps vet deps depsinternal checkversion ci verifysha
