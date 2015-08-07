@@ -41,7 +41,10 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
+	@echo ""
 	@echo "Please use `make deps` instead"
+	@echo ""
+	$(MAKE) deps
 
 deps: verifysha
 	go get -u github.com/mitchellh/gox
