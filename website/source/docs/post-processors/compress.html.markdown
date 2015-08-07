@@ -15,10 +15,11 @@ VMware or VirtualBox) and compresses the artifact into a single archive.
 
 ## Configuration
 
-### Required:
+### Optional:
 
-You must specify the output filename. The archive format is derived from the
-filename.
+By default, packer will build archives in `.tar.gz` format with the following
+filename: `packer_{{.BuildName}}_{{.BuilderType}}`. If you want to change this
+you will need to specify the `output` option.
 
 -   `output` (string) - The path to save the compressed archive. The archive
     format is inferred from the filename. E.g. `.tar.gz` will be a
@@ -26,13 +27,9 @@ filename.
     detected packer defaults to `.tar.gz` behavior but will not change
     the filename.
 
-If you are executing multiple builders in parallel you should make sure `output`
-is unique for each one. For example `packer_{{.BuildName}}_{{.Provider}}.zip`.
-
-### Optional:
-
-If you want more control over how the archive is created you can specify the
-following settings:
+    You can use `{{.BuildName}}` and `{{.BuilderType}}` in your output path.
+    If you are executing multiple builders in parallel you should make sure
+    `output` is unique for each one. For example `packer_{{.BuildName}}.zip`.
 
 -   `compression_level` (integer) - Specify the compression level, for
     algorithms that support it, from 1 through 9 inclusive. Typically higher
@@ -61,14 +58,14 @@ configuration:
 ``` {.json}
 {
   "type": "compress",
-  "output": "archive.zip"
+  "output": "{{.BuildName}}_bundle.zip"
 }
 ```
 
 ``` {.json}
 {
   "type": "compress",
-  "output": "archive.gz",
+  "output": "log_{{.BuildName}}.gz",
   "compression": 9
 }
 ```
