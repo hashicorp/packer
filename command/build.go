@@ -19,10 +19,12 @@ type BuildCommand struct {
 }
 
 func (c BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
+	var cfgColor, cfgContinue, cfgCleanup, cfgDebug, cfgForce, cfgParallel bool
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfgColor, "color", true, "")
+	flags.BoolVar(&cfgContinue, "continue", false, "")
+	flags.BoolVar(&cfgCleanup, "cleanup", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
@@ -278,10 +280,12 @@ Usage: packer build [options] TEMPLATE
 
 Options:
 
+  -cleanup                   Delete intermediary or failed artifacts (on by default)
+  -continue                  Debug mode only -- continue without prompting
   -debug                     Debug mode enabled for builds
+  -except=foo,bar,baz        Build all builds other than these
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
-  -except=foo,bar,baz        Build all builds other than these
   -only=foo,bar,baz          Only build the given builds by name
   -parallel=false            Disable parallelization (on by default)
   -var 'key=value'           Variable for templates, can be used multiple times.
