@@ -14,6 +14,7 @@ import (
 type StepRunSourceServer struct {
 	Name             string
 	SourceImage      string
+	SourceImageName  string
 	SecurityGroups   []string
 	Networks         []string
 	AvailabilityZone string
@@ -57,6 +58,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		CreateOptsBuilder: servers.CreateOpts{
 			Name:             s.Name,
 			ImageRef:         s.SourceImage,
+			ImageName:        s.SourceImageName,
 			FlavorRef:        flavor,
 			SecurityGroups:   s.SecurityGroups,
 			Networks:         networks,
