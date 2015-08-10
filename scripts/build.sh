@@ -62,7 +62,16 @@ case $(uname) in
         ;;
 esac
 OLDIFS=$IFS
-IFS=: MAIN_GOPATH=($GOPATH)
+IFS=:
+case $(uname) in
+    MINGW*)
+        IFS=";"
+        ;;
+    MSYS*)
+        IFS=";"
+        ;;
+esac
+MAIN_GOPATH=($GOPATH)
 IFS=$OLDIFS
 
 # Copy our OS/Arch to the bin/ directory
