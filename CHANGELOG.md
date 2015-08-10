@@ -1,5 +1,10 @@
 ## 0.8.3 (Aug 8, 2015)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * VMware VMX options are no longer lowercased internally. This is to support
+    the virtualSSD option which is case-sensitive. See [GH-2309] for details.
+
 FEATURES:
 
   * **[Beta]** Artifice post-processor: Override packer artifacts during post-
@@ -14,11 +19,17 @@ IMPROVEMENTS:
   * builder/openstack: Add support for Glance metadata [GH-2434]
   * builder/qemu and builder/vmware: Packer's VNC connection no longer asks for
       an exclusive connection [GH-2522]
+  * builder/vmware: Add support for virtualSSD option [GH-2309]
   * provisioner/salt-masterless: Can now customize salt remote directories [GH-2519]
 
 BUG FIXES:
 
-  * builder/openstack: track new IP address discovered during RackConnect [GH-2514]
+  * builder/amazon: Improve instance cleanup by storing id sooner [GH-2404]
+  * builder/amazon: Only fetch windows password when using WinRM communicator [GH-2538]
+  * builder/openstack: Support IPv6 SSH address [GH-2450]
+  * builder/openstack: Track new IP address discovered during RackConnect [GH-2514]
+  * builder/qemu: Add 100ms delay between VNC key events. [GH-2415]
+  * builder/vmware: Don't force lowercase all VMX options [GH-2309]
   * post-processor/atlas: atlas_url configuration option works now [GH-2478]
   * post-processor/compress: Now supports interpolation in output config [GH-2414]
   * provisioner/powershell: Elevated runs now receive environment variables [GH-2378]
@@ -26,6 +37,8 @@ BUG FIXES:
       write to the temp directory [GH-2518]
   * provisioner/salt-masterless: Copy state even if /srv/salt exists already [GH-1699]
   * provisioner/salt-masterless: Make sure /etc/salt exists before writing to it [GH-2520]
+  * provisioner/winrm: Connect to the correct port when using NAT with
+      VirtualBox / VMware [GH-2399]
 
 ## 0.8.2 (July 17, 2015)
 
