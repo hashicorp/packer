@@ -49,7 +49,7 @@ builder.
     have `cloud-init` installed so that the keypair gets assigned properly.
 
 -   `source_image_name` (string) - The name of the base image to use. This
-    is an alternative way of providig `source_image` and only either of them
+    is an alternative way of providing `source_image` and only either of them
     can be specified.
 
 -   `username` (string) - The username used to connect to the OpenStack service.
