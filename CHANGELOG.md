@@ -2,8 +2,8 @@
 
 FEATURES:
 
-  * **[Beta] Artifice post-processor:** Override packer artifacts during post-
-      processing. This allows you to **extract artifacts from a packer builder**
+  * **[Beta]** Artifice post-processor: Override packer artifacts during post-
+      processing. This allows you to extract artifacts from a packer builder
       and use them with other post-processors like compress, docker, and Atlas.
 
 IMPROVEMENTS:
