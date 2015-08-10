@@ -15,6 +15,7 @@ type RunConfig struct {
 	SSHInterface   string              `mapstructure:"ssh_interface"`
 
 	SourceImage      string   `mapstructure:"source_image"`
+	SourceImageName  string   `mapstructure:"source_image_name"`
 	Flavor           string   `mapstructure:"flavor"`
 	AvailabilityZone string   `mapstructure:"availability_zone"`
 	RackconnectWait  bool     `mapstructure:"rackconnect_wait"`
@@ -42,8 +43,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
-	if c.SourceImage == "" {
-		errs = append(errs, errors.New("A source_image must be specified"))
+	if c.SourceImage == "" && c.SourceImageName == "" {
+		errs = append(errs, errors.New("Either a source_image or a source_image_name must be specified"))
+	} else if len(c.SourceImage) > 0 && len(c.SourceImageName) > 0 {
+		errs = append(errs, errors.New("Only a source_image or a source_image_name can be specified, not both."))
 	}
 
 	if c.Flavor == "" {
