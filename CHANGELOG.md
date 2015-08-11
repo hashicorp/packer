@@ -1,4 +1,4 @@
-## 0.8.4 (Aug 10, 2015)
+## 0.8.5 (Aug 10, 2015)
 
 FEATURES:
 
@@ -32,6 +32,8 @@ BUG FIXES:
   * provisioner/salt-masterless: Make sure /etc/salt exists before writing to it [GH-2520]
   * provisioner/winrm: Connect to the correct port when using NAT with
       VirtualBox / VMware [GH-2399]
+
+Note: 0.8.3 was pulled and 0.8.4 was skipped.
 
 ## 0.8.2 (July 17, 2015)
 
