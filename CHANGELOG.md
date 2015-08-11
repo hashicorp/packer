@@ -1,9 +1,4 @@
-## 0.8.3 (Aug 8, 2015)
-
-BACKWARDS INCOMPATIBILITIES:
-
-  * VMware VMX options are no longer lowercased internally. This is to support
-    the virtualSSD option which is case-sensitive. See [GH-2309] for details.
+## 0.8.4 (Aug 10, 2015)
 
 FEATURES:
 
@@ -19,7 +14,6 @@ IMPROVEMENTS:
   * builder/openstack: Add support for Glance metadata [GH-2434]
   * builder/qemu and builder/vmware: Packer's VNC connection no longer asks for
       an exclusive connection [GH-2522]
-  * builder/vmware: Add support for virtualSSD option [GH-2309]
   * provisioner/salt-masterless: Can now customize salt remote directories [GH-2519]
 
 BUG FIXES:
@@ -29,7 +23,6 @@ BUG FIXES:
   * builder/openstack: Support IPv6 SSH address [GH-2450]
   * builder/openstack: Track new IP address discovered during RackConnect [GH-2514]
   * builder/qemu: Add 100ms delay between VNC key events. [GH-2415]
-  * builder/vmware: Don't force lowercase all VMX options [GH-2309]
   * post-processor/atlas: atlas_url configuration option works now [GH-2478]
   * post-processor/compress: Now supports interpolation in output config [GH-2414]
   * provisioner/powershell: Elevated runs now receive environment variables [GH-2378]
