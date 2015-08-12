@@ -72,6 +72,10 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error {
 	// Create a temporary file to store the upload
 	tempfile, err := ioutil.TempFile(c.HostDir, "upload")
+	log.Printf("[CBEDNARSKI] HostDir %s", c.HostDir)
+	log.Printf("[CBEDNARSKI] filename %#v", fi)
+	log.Printf("[CBEDNARSKI] source %#v", src)
+	log.Printf("[CBEDNARSKI] tempfile %#v", tempfile)
 	if err != nil {
 		return err
 	}
@@ -90,6 +94,7 @@ func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error 
 		Command: fmt.Sprintf("command cp %s/%s %s", c.ContainerDir,
 			filepath.Base(tempfile.Name()), dst),
 	}
+	log.Printf("[CBEDNARSKI] command %s", cmd.Command)
 
 	if err := c.Start(cmd); err != nil {
 		return err
@@ -195,7 +200,47 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 }
 
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	panic("not implemented")
+
+	// We have a source file, which is a path inside the container, and a
+	// destination, which is an io.Writer. We're going to use docker cp to get
+	// the file out, but we need a target file path to use with cp. We don't
+	// know what the destination filename is, so instead we'll do this:
+	//   docker cp containerid:/source/path /random/temp/file
+	// And then we'll do an io.Copy from /random/temp/file into io.Writer
+	// This is slow (because we copy twice) and kinda janky but it's the only
+	// way to adhere to the Download interface without doing other janky stuff.
+	// Hopefully later we can use a different technique to avoid the 2x copy.
+
+	log.Printf("Creating temp file to download %s", src)
+	tmpDir, err := ioutil.TempDir(c.HostDir, "dirdownload")
+	tmpFilename := tmpDir + "tmpfile"
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	log.Printf("Downloading %s:%s to %s", c.ContainerId, src, tmpFilename)
+	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), tmpFilename)
+	output, err := localCmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	if !localCmd.ProcessState.Success() {
+		return fmt.Errorf("Failed to download '%s' from container: %s", src, output)
+	}
+
+	log.Printf("Copying '%s' temp file to destination file", src)
+	tmpFile, err := os.Open(tmpFilename)
+	if err != nil {
+		return err
+	}
+	numBytes, err := io.Copy(dst, tmpFile)
+	log.Printf("Copied %d bytes for %s", numBytes, src)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // canExec tells us whether `docker exec` is supported
