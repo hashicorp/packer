@@ -1,3 +1,16 @@
+## (Unreleased)
+
+IMPROVEMENTS:
+
+  * builder/docker: Now supports Download so it can be used with the file
+      provisioner to download a file from a container. [GH-2585]
+  * post-processor/vagrant: Like the compress post-processor, vagrant now uses a
+      parallel gzip algorithm to compress vagrant boxes. [GH-2590]
+
+BUG FIXES:
+
+  * builded/parallels: Fix interpolation in parallels_tools_guest_path [GH-2543]
+
 ## 0.8.5 (Aug 10, 2015)
 
 FEATURES:
