@@ -61,8 +61,10 @@ func TestUploadDownload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error preparing download: %s", err)
 	}
-	// Preemptive cleanup
-	defer os.Remove("delicious-cake")
+	// Preemptive cleanup. Honestly I don't know why you would want to get rid
+	// of my strawberry cake. It's so tasty! Do you not like cake? Are you a
+	// cake-hater? Or are you keeping all the cake all for yourself? So selfish!
+	defer os.Remove("my-strawberry-cake")
 
 	// Add hooks so the provisioners run during the build
 	hooks := map[string][]packer.Hook{}
@@ -85,16 +87,18 @@ func TestUploadDownload(t *testing.T) {
 	defer artifact.Destroy()
 
 	// Verify that the thing we downloaded is the same thing we sent up.
-	inputFile, err := ioutil.ReadFile("test-fixtures/cake")
+	// Complain loudly if it isn't.
+	inputFile, err := ioutil.ReadFile("test-fixtures/onecakes/strawberry")
 	if err != nil {
 		t.Fatalf("Unable to read input file: %s", err)
 	}
-	outputFile, err := ioutil.ReadFile("delicious-cake")
+	outputFile, err := ioutil.ReadFile("my-strawberry-cake")
 	if err != nil {
 		t.Fatalf("Unable to read output file: %s", err)
 	}
 	if sha256.Sum256(inputFile) != sha256.Sum256(outputFile) {
-		t.Fatalf("Input and output files do not match\nInput:\n%s\nOutput:\n%s\n", inputFile, outputFile)
+		t.Fatalf("Input and output files do not match\n"+
+			"Input:\n%s\nOutput:\n%s\n", inputFile, outputFile)
 	}
 }
 
@@ -111,13 +115,13 @@ const dockerBuilderConfig = `
   "provisioners": [
     {
       "type": "file",
-      "source": "test-fixtures/cake",
-      "destination": "/chocolate-cake"
+      "source": "test-fixtures/onecakes/strawberry",
+      "destination": "/strawberry-cake"
     },
     {
       "type": "file",
-      "source": "/chocolate-cake",
-      "destination": "delicious-cake",
+      "source": "/strawberry-cake",
+      "destination": "my-strawberry-cake",
       "direction": "download"
     }
   ]
