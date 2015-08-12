@@ -194,8 +194,36 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	return nil
 }
 
+// Download pulls a file out of a container using `docker cp`. We have a source
+// path and want to write to an io.Writer, not a file. We use - to make docker
+// cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	panic("not implemented")
+
+	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
+	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
+
+	pipe, err := localCmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("Failed to open pipe: %s", err)
+	}
+
+	err = localCmd.Start()
+	if err != nil {
+		return fmt.Errorf("Failed to start download: %s", err)
+	}
+
+	numBytes, err := io.Copy(dst, pipe)
+	if err != nil {
+		return fmt.Errorf("Failed to pipe download: %s", err)
+	} else {
+		log.Printf("Copied %d bytes for %s", numBytes, src)
+	}
+
+	if err = localCmd.Wait(); err != nil {
+		return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
+	}
+
+	return nil
 }
 
 // canExec tells us whether `docker exec` is supported
