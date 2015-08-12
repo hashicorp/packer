@@ -198,7 +198,6 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 // path and want to write to an io.Writer, not a file. We use - to make docker
 // cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
-
 	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
 	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
 
