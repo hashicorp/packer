@@ -72,10 +72,6 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error {
 	// Create a temporary file to store the upload
 	tempfile, err := ioutil.TempFile(c.HostDir, "upload")
-	log.Printf("[CBEDNARSKI] HostDir %s", c.HostDir)
-	log.Printf("[CBEDNARSKI] filename %#v", fi)
-	log.Printf("[CBEDNARSKI] source %#v", src)
-	log.Printf("[CBEDNARSKI] tempfile %#v", tempfile)
 	if err != nil {
 		return err
 	}
@@ -94,7 +90,6 @@ func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error 
 		Command: fmt.Sprintf("command cp %s/%s %s", c.ContainerDir,
 			filepath.Base(tempfile.Name()), dst),
 	}
-	log.Printf("[CBEDNARSKI] command %s", cmd.Command)
 
 	if err := c.Start(cmd); err != nil {
 		return err
