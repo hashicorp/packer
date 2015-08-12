@@ -99,7 +99,7 @@ deployed by a tool like [Terraform](https://terraform.io). The `atlas`
   "post-processors": [{
     "type": "atlas",
     "artifact": "ATLAS_USERNAME/packer-tutorial",
-    "artifact_type": "amazon.ami"
+    "artifact_type": "aws.ami"
   }]
 }
 ```
