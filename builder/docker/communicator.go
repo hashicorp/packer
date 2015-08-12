@@ -207,17 +207,15 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 		return fmt.Errorf("Failed to open pipe: %s", err)
 	}
 
-	err = localCmd.Start()
-	if err != nil {
+	if err = localCmd.Start(); err != nil {
 		return fmt.Errorf("Failed to start download: %s", err)
 	}
 
 	numBytes, err := io.Copy(dst, pipe)
 	if err != nil {
 		return fmt.Errorf("Failed to pipe download: %s", err)
-	} else {
-		log.Printf("Copied %d bytes for %s", numBytes, src)
 	}
+	log.Printf("Copied %d bytes for %s", numBytes, src)
 
 	if err = localCmd.Wait(); err != nil {
 		return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
