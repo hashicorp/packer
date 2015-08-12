@@ -59,7 +59,7 @@ you can also use `token` configuration option.
     to add an artifact to the organization in Atlas.
 
 -   `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will
-    always be `amazon.ami`. This field must be defined because Atlas can host
+    always be `aws.ami`. This field must be defined because Atlas can host
     other artifact types, such as Vagrant boxes.
 
 ### Optional:
@@ -105,7 +105,7 @@ you can also use `token` configuration option.
         "type": "atlas",
         "token": "{{user `atlas_token`}}",
         "artifact": "hashicorp/foobar",
-        "artifact_type": "amazon.ami",
+        "artifact_type": "aws.ami",
         "metadata": {
           "created_at": "{{timestamp}}"
         }
