@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"archive/tar"
 	"bytes"
 	"fmt"
 	"io"
@@ -210,7 +211,16 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 		return fmt.Errorf("Failed to start download: %s", err)
 	}
 
-	numBytes, err := io.Copy(dst, pipe)
+	// When you use - to send docker cp to stdout it is streamed as a tar; this
+	// enables it to work with directories. We don't actually support
+	// directories in Download() but we still need to handle the tar format.
+	archive := tar.NewReader(pipe)
+	_, err = archive.Next()
+	if err != nil {
+		return fmt.Errorf("Failed to read header from tar stream: %s", err)
+	}
+
+	numBytes, err := io.Copy(dst, archive)
 	if err != nil {
 		return fmt.Errorf("Failed to pipe download: %s", err)
 	}
