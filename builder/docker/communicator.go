@@ -194,45 +194,33 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	return nil
 }
 
+// Download pulls a file out of a container using `docker cp`. We have a source
+// path and want to write to an io.Writer, not a file. We use - to make docker
+// cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
 
-	// We have a source file, which is a path inside the container, and a
-	// destination, which is an io.Writer. We're going to use docker cp to get
-	// the file out, but we need a target file path to use with cp. We don't
-	// know what the destination filename is, so instead we'll do this:
-	//   docker cp containerid:/source/path /random/temp/file
-	// And then we'll do an io.Copy from /random/temp/file into io.Writer
-	// This is slow (because we copy twice) and kinda janky but it's the only
-	// way to adhere to the Download interface without doing other janky stuff.
-	// Hopefully later we can use a different technique to avoid the 2x copy.
+	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
+	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
 
-	log.Printf("Creating temp file to download %s", src)
-	tmpDir, err := ioutil.TempDir(c.HostDir, "dirdownload")
-	tmpFilename := tmpDir + "tmpfile"
+	pipe, err := localCmd.StdoutPipe()
 	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmpDir)
-
-	log.Printf("Downloading %s:%s to %s", c.ContainerId, src, tmpFilename)
-	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), tmpFilename)
-	output, err := localCmd.CombinedOutput()
-	if err != nil {
-		return err
-	}
-	if !localCmd.ProcessState.Success() {
-		return fmt.Errorf("Failed to download '%s' from container: %s", src, output)
+		return fmt.Errorf("Failed to open pipe: %s", err)
 	}
 
-	log.Printf("Copying '%s' temp file to destination file", src)
-	tmpFile, err := os.Open(tmpFilename)
+	err = localCmd.Start()
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to start download: %s", err)
 	}
-	numBytes, err := io.Copy(dst, tmpFile)
-	log.Printf("Copied %d bytes for %s", numBytes, src)
+
+	numBytes, err := io.Copy(dst, pipe)
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to pipe download: %s", err)
+	} else {
+		log.Printf("Copied %d bytes for %s", numBytes, src)
+	}
+
+	if err = localCmd.Wait(); err != nil {
+		return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
 	}
 
 	return nil
