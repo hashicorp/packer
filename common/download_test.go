@@ -340,6 +340,10 @@ func TestHashForType(t *testing.T) {
 	}
 }
 
+// TestDownloadFileUrl tests a special case where we use a local file for
+// iso_url. In this case we can still verify the checksum but we should not
+// delete the file if the checksum fails. Instead we'll just error and let the
+// user fix the checksum.
 func TestDownloadFileUrl(t *testing.T) {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -361,14 +365,10 @@ func TestDownloadFileUrl(t *testing.T) {
 
 	client := NewDownloadClient(config)
 
-	filename, err := client.Get()
-	defer os.Remove(config.TargetPath)
-	if err != nil {
-		t.Fatalf("Failed to download test file")
-	}
-
-	if sourcePath != filename {
-		t.Errorf("Filename doesn't match; expected %s got %s", sourcePath, filename)
+	// Verify that we fail to match the checksum
+	_, err = client.Get()
+	if err.Error() != "checksums didn't match expected: 6e6f7065" {
+		t.Fatalf("Unexpected failure; expected checksum not to match")
 	}
 
 	if _, err = os.Stat(sourcePath); err != nil {
