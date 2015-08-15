@@ -3,6 +3,7 @@ package common
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -337,4 +338,41 @@ func TestHashForType(t *testing.T) {
 	if HashForType("fake") != nil {
 		t.Fatalf("fake hash is not nil")
 	}
+}
+
+func TestDownloadFileUrl(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unable to detect working directory: %s", err)
+	}
+
+	// source_path is a file path and source is a network path
+	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
+	source := fmt.Sprintf("file://" + sourcePath)
+	t.Logf("Trying to download %s", source)
+
+	config := &DownloadConfig{
+		Url: source,
+		// This should be wrong. We want to make sure we don't delete
+		Checksum: []byte("nope"),
+		Hash:     HashForType("sha256"),
+		CopyFile: false,
+	}
+
+	client := NewDownloadClient(config)
+
+	filename, err := client.Get()
+	defer os.Remove(config.TargetPath)
+	if err != nil {
+		t.Fatalf("Failed to download test file")
+	}
+
+	if sourcePath != filename {
+		t.Errorf("Filename doesn't match; expected %s got %s", sourcePath, filename)
+	}
+
+	if _, err = os.Stat(sourcePath); err != nil {
+		t.Errorf("Could not stat source file: %s", sourcePath)
+	}
+
 }
