@@ -115,7 +115,10 @@ func (d *DownloadClient) Get() (string, error) {
 	// Files when we don't copy the file are special cased.
 	var f *os.File
 	var finalPath string
+	sourcePath := ""
 	if url.Scheme == "file" && !d.config.CopyFile {
+		// This is a special case where we use a source file that already exists
+		// locally and we don't make a copy. Normally we would copy or download.
 		finalPath = url.Path
 		log.Printf("Using local file: %s", finalPath)
 
@@ -123,6 +126,8 @@ func (d *DownloadClient) Get() (string, error) {
 		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
 			finalPath = finalPath[1:len(finalPath)]
 		}
+		// Keep track of the source so we can make sure not to delete this later
+		sourcePath = finalPath
 	} else {
 		finalPath = d.config.TargetPath
 
@@ -150,8 +155,10 @@ func (d *DownloadClient) Get() (string, error) {
 		var verify bool
 		verify, err = d.VerifyChecksum(finalPath)
 		if err == nil && !verify {
-			// Delete the file
-			os.Remove(finalPath)
+			// Only delete the file if we made a copy or downloaded it
+			if sourcePath != finalPath {
+				os.Remove(finalPath)
+			}
 
 			err = fmt.Errorf(
 				"checksums didn't match expected: %s",
