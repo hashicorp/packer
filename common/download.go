@@ -117,6 +117,7 @@ func (d *DownloadClient) Get() (string, error) {
 	var finalPath string
 	if url.Scheme == "file" && !d.config.CopyFile {
 		finalPath = url.Path
+		log.Printf("Using local file: %s", finalPath)
 
 		// Remove forward slash on absolute Windows file URLs before processing
 		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
