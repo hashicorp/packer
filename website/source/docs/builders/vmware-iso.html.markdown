@@ -394,18 +394,22 @@ modify as well:
 
 -   `remote_password` - The SSH password for access to the remote machine.
 
-### Using a floppy for linux kickstart file or preseed
+### Using a Floppy for Linux kickstart file or preseed
 
-Once the vm has been started, and the boot process is in place, sometimes a response file is
-required. For ESXi enviroment, sometimes is easier use a floopy disk:
+Depending on your network configuration, it may be difficult to use packer's
+built-in HTTP server with ESXi. Instead, you can provide a kickstart or preseed
+file by attaching a floppy disk. An example below, based on RHEL:
 
-ie RedHat:
-
-``` {.text}
-          "floppy_files": [
-                "folder/ks.cfg"
-            ],
-            ..
-            "boot_command": "<tab> text ks=floppy <enter><wait>"
+``` {.javascript}
+{
+  "builders": [
+    {
+      "type":"vmware-iso",
+      "floppy_files": [
+        "folder/ks.cfg"
+      ],
+      "boot_command": "<tab> text ks=floppy <enter><wait>"
+    }
+  ]
+}
 ```
-
