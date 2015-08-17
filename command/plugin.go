@@ -24,6 +24,16 @@ import (
 	vmwarevmx "github.com/mitchellh/packer/builder/vmware/vmx"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/mitchellh/packer/post-processor/artifice"
+	"github.com/mitchellh/packer/post-processor/atlas"
+	"github.com/mitchellh/packer/post-processor/compress"
+	"github.com/mitchellh/packer/post-processor/docker-import"
+	"github.com/mitchellh/packer/post-processor/docker-push"
+	"github.com/mitchellh/packer/post-processor/docker-save"
+	"github.com/mitchellh/packer/post-processor/docker-tag"
+	"github.com/mitchellh/packer/post-processor/vagrant"
+	"github.com/mitchellh/packer/post-processor/vagrant-cloud"
+	"github.com/mitchellh/packer/post-processor/vsphere"
 	"github.com/mitchellh/packer/provisioner/ansible-local"
 	"github.com/mitchellh/packer/provisioner/chef-client"
 	"github.com/mitchellh/packer/provisioner/chef-solo"
@@ -76,7 +86,18 @@ var Provisioners = map[string]packer.Provisioner{
 	"windows-shell":     new(windowsshell.Provisioner),
 }
 
-var PostProcessors = map[string]packer.PostProcessor{}
+var PostProcessors = map[string]packer.PostProcessor{
+	"artifice":      new(artifice.PostProcessor),
+	"atlas":         new(atlas.PostProcessor),
+	"compress":      new(compress.PostProcessor),
+	"docker-import": new(dockerimport.PostProcessor),
+	"docker-push":   new(dockerpush.PostProcessor),
+	"docker-save":   new(dockersave.PostProcessor),
+	"docker-tag":    new(dockertag.PostProcessor),
+	"vagrant":       new(vagrant.PostProcessor),
+	"vagrant-cloud": new(vagrantcloud.PostProcessor),
+	"vsphere":       new(vsphere.PostProcessor),
+}
 
 func (c *PluginCommand) Run(args []string) int {
 	// This is an internal call so we're not going to do much error checking.
