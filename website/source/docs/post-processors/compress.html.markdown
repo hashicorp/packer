@@ -27,8 +27,8 @@ you will need to specify the `output` option.
     detected packer defaults to `.tar.gz` behavior but will not change
     the filename.
 
-    You can use `{{.BuildName}}` and `{{.BuilderType}}` in your output path.
-    If you are executing multiple builders in parallel you should make sure
+    You can use `{{.BuildName}}` and `{{.BuilderType}}` in your output path. If
+    you are executing multiple builders in parallel you should make sure
     `output` is unique for each one. For example `packer_{{.BuildName}}.zip`.
 
 -   `compression_level` (integer) - Specify the compression level, for

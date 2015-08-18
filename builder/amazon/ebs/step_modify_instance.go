@@ -21,11 +21,11 @@ func (s *stepModifyInstance) Run(state multistep.StateBag) multistep.StepAction 
 		ui.Say("Enabling Enhanced Networking...")
 		simple := "simple"
 		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
-			InstanceID:      instance.InstanceID,
-			SRIOVNetSupport: &ec2.AttributeValue{Value: &simple},
+			InstanceId:      instance.InstanceId,
+			SriovNetSupport: &ec2.AttributeValue{Value: &simple},
 		})
 		if err != nil {
-			err := fmt.Errorf("Error enabling Enhanced Networking on %s: %s", *instance.InstanceID, err)
+			err := fmt.Errorf("Error enabling Enhanced Networking on %s: %s", *instance.InstanceId, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

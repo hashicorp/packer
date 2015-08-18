@@ -40,7 +40,7 @@ func checkTags() builderT.TestCheckFunc {
 		// describe the image, get block devices with a snapshot
 		ec2conn, _ := testEC2Conn()
 		imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-			ImageIDs: []*string{aws.String(artifact.Amis["us-east-1"])},
+			ImageIds: []*string{aws.String(artifact.Amis["us-east-1"])},
 		})
 
 		if err != nil {
@@ -56,14 +56,14 @@ func checkTags() builderT.TestCheckFunc {
 		// Check only those with a Snapshot ID, i.e. not Ephemeral
 		var snapshots []*string
 		for _, device := range image.BlockDeviceMappings {
-			if device.EBS != nil && device.EBS.SnapshotID != nil {
-				snapshots = append(snapshots, device.EBS.SnapshotID)
+			if device.Ebs != nil && device.Ebs.SnapshotId != nil {
+				snapshots = append(snapshots, device.Ebs.SnapshotId)
 			}
 		}
 
 		// grab matching snapshot info
 		resp, err := ec2conn.DescribeSnapshots(&ec2.DescribeSnapshotsInput{
-			SnapshotIDs: snapshots,
+			SnapshotIds: snapshots,
 		})
 
 		if err != nil {

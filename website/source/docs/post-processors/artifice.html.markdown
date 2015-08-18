@@ -1,8 +1,10 @@
 ---
 description: |
-    The Atlas post-processor for Packer receives an artifact from a Packer build and
-    uploads it to Atlas. Atlas hosts and serves artifacts, allowing you to version
-    and distribute them in a simple way.
+    The artifice post-processor overrides the artifact list from an upstream builder
+    or post-processor. All downstream post-processors will see the new artifacts you
+    specify. The primary use-case is to build artifacts inside a packer builder --
+    for example, spinning up an EC2 instance to build a docker container -- and then
+    extracting the docker container and throwing away the EC2 instance.
 layout: docs
 page_title: 'Atlas Post-Processor'
 ...
@@ -45,8 +47,8 @@ Artifice helps you tie together a few other packer features:
 -   Additional post-processors, which push the artifact to Atlas, Docker
     hub, etc.
 
-You will want to perform as much work as possible inside the VM. Ideally
-the only other post-processor you need after artifice is one that uploads your
+You will want to perform as much work as possible inside the VM. Ideally the
+only other post-processor you need after artifice is one that uploads your
 artifact to the appropriate repository.
 
 ## Configuration
@@ -64,13 +66,14 @@ The configuration allows you to specify which files comprise your artifact.
 
 This minimal example:
 
-1. Spins up a cloned VMware virtual machine
-2. Installs a [consul](https://consul.io/) release
-3. Downloads the consul binary
-4. Packages it into a `.tar.gz` file
-5. Uploads it to Atlas.
+1.  Spins up a cloned VMware virtual machine
+2.  Installs a [consul](https://consul.io/) release
+3.  Downloads the consul binary
+4.  Packages it into a `.tar.gz` file
+5.  Uploads it to Atlas.
 
-VMX is a fast way to build and test locally, but you can easily substitute another builder.
+VMX is a fast way to build and test locally, but you can easily substitute
+another builder.
 
 ``` {.javascript}
 {
@@ -143,5 +146,5 @@ artifact (the vmx file in this case) and it will not have the desired result.
         }
       ]
 
-You can create multiple post-processor chains to handle multiple builders (for example,
-building linux and windows binaries during the same build).
+You can create multiple post-processor chains to handle multiple builders (for
+example, building linux and windows binaries during the same build).
