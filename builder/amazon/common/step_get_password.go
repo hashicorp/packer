@@ -111,7 +111,7 @@ func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-cha
 		}
 
 		resp, err := ec2conn.GetPasswordData(&ec2.GetPasswordDataInput{
-			InstanceID: instance.InstanceID,
+			InstanceId: instance.InstanceId,
 		})
 		if err != nil {
 			err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
