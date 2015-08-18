@@ -126,21 +126,22 @@ func (c *PluginCommand) Run(args []string) int {
 		return 1
 	}
 
-	if pluginType == "builder" {
+	switch pluginType {
+	case "builder":
 		builder, found := Builders[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load builder: %s", pluginName))
 			return 1
 		}
 		server.RegisterBuilder(builder)
-	} else if pluginType == "provisioner" {
+	case "provisioner":
 		provisioner, found := Provisioners[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load provisioner: %s", pluginName))
 			return 1
 		}
 		server.RegisterProvisioner(provisioner)
-	} else if pluginType == "post-processor" {
+	case "post-processor":
 		postProcessor, found := PostProcessors[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load post-processor: %s", pluginName))
