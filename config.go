@@ -16,6 +16,10 @@ import (
 	"github.com/mitchellh/packer/packer/plugin"
 )
 
+// PACKERSPACE is used to represent the spaces that separate args for a command
+// without being confused with spaces in the path to the command itself.
+const PACKERSPACE = "-PACKERSPACE-"
+
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
@@ -80,7 +84,7 @@ func (c *config) Discover() error {
 		return err
 	}
 
-	// Finally, try to use an internal plugin. Note that this will not Override
+	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.
 	if err := c.discoverInternal(); err != nil {
 		return err
@@ -216,7 +220,8 @@ func (c *config) discoverInternal() error {
 		_, found := (c.Builders)[builder]
 		if !found {
 			log.Printf("Using internal plugin for %s", builder)
-			(c.Builders)[builder] = fmt.Sprintf("%s-PACKERSPACE-plugin-PACKERSPACE-packer-builder-%s", packerPath, builder)
+			(c.Builders)[builder] = fmt.Sprintf("%s%splugin%spacker-builder-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, builder)
 		}
 	}
 
@@ -224,7 +229,9 @@ func (c *config) discoverInternal() error {
 		_, found := (c.Provisioners)[provisioner]
 		if !found {
 			log.Printf("Using internal plugin for %s", provisioner)
-			(c.Provisioners)[provisioner] = fmt.Sprintf("%s-PACKERSPACE-plugin-PACKERSPACE-packer-provisioner-%s", packerPath, provisioner)
+			(c.Provisioners)[provisioner] = fmt.Sprintf(
+				"%s%splugin%spacker-provisioner-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
 		}
 	}
 
@@ -232,7 +239,9 @@ func (c *config) discoverInternal() error {
 		_, found := (c.PostProcessors)[postProcessor]
 		if !found {
 			log.Printf("Using internal plugin for %s", postProcessor)
-			(c.PostProcessors)[postProcessor] = fmt.Sprintf("%s-PACKERSPACE-plugin-PACKERSPACE-packer-post-processor-%s", packerPath, postProcessor)
+			(c.PostProcessors)[postProcessor] = fmt.Sprintf(
+				"%s%splugin%spacker-post-processor-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
 		}
 	}
 
@@ -259,8 +268,8 @@ func (c *config) pluginClient(path string) *plugin.Client {
 
 	// Check for special case using `packer plugin PLUGIN`
 	args := []string{}
-	if strings.Contains(path, "-PACKERSPACE-") {
-		parts := strings.Split(path, "-PACKERSPACE-")
+	if strings.Contains(path, PACKERSPACE) {
+		parts := strings.Split(path, PACKERSPACE)
 		path = parts[0]
 		args = parts[1:]
 	}
