@@ -75,7 +75,7 @@ func (a *Artifact) Destroy() error {
 		regionConn := ec2.New(regionConfig)
 
 		input := &ec2.DeregisterImageInput{
-			ImageID: &imageId,
+			ImageId: &imageId,
 		}
 		if _, err := regionConn.DeregisterImage(input); err != nil {
 			errors = append(errors, err)

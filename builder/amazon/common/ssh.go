@@ -17,14 +17,14 @@ func SSHHost(e *ec2.EC2, private bool) func(multistep.StateBag) (string, error) 
 		for j := 0; j < 2; j++ {
 			var host string
 			i := state.Get("instance").(*ec2.Instance)
-			if i.VPCID != nil && *i.VPCID != "" {
-				if i.PublicIPAddress != nil && *i.PublicIPAddress != "" && !private {
-					host = *i.PublicIPAddress
+			if i.VpcId != nil && *i.VpcId != "" {
+				if i.PublicIpAddress != nil && *i.PublicIpAddress != "" && !private {
+					host = *i.PublicIpAddress
 				} else {
-					host = *i.PrivateIPAddress
+					host = *i.PrivateIpAddress
 				}
-			} else if i.PublicDNSName != nil && *i.PublicDNSName != "" {
-				host = *i.PublicDNSName
+			} else if i.PublicDnsName != nil && *i.PublicDnsName != "" {
+				host = *i.PublicDnsName
 			}
 
 			if host != "" {
@@ -32,14 +32,14 @@ func SSHHost(e *ec2.EC2, private bool) func(multistep.StateBag) (string, error) 
 			}
 
 			r, err := e.DescribeInstances(&ec2.DescribeInstancesInput{
-				InstanceIDs: []*string{i.InstanceID},
+				InstanceIds: []*string{i.InstanceId},
 			})
 			if err != nil {
 				return "", err
 			}
 
 			if len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
-				return "", fmt.Errorf("instance not found: %s", *i.InstanceID)
+				return "", fmt.Errorf("instance not found: %s", *i.InstanceId)
 			}
 
 			state.Put("instance", &r.Reservations[0].Instances[0])
