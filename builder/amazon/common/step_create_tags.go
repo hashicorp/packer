@@ -41,7 +41,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 			// Retrieve image list for given AMI
 			imageResp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
-				ImageIDs: resourceIds,
+				ImageIds: resourceIds,
 			})
 
 			if err != nil {
@@ -62,9 +62,9 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 			// Add only those with a Snapshot ID, i.e. not Ephemeral
 			for _, device := range image.BlockDeviceMappings {
-				if device.EBS != nil && device.EBS.SnapshotID != nil {
-					ui.Say(fmt.Sprintf("Tagging snapshot: %s", *device.EBS.SnapshotID))
-					resourceIds = append(resourceIds, device.EBS.SnapshotID)
+				if device.Ebs != nil && device.Ebs.SnapshotId != nil {
+					ui.Say(fmt.Sprintf("Tagging snapshot: %s", *device.Ebs.SnapshotId))
+					resourceIds = append(resourceIds, device.Ebs.SnapshotId)
 				}
 			}
 
