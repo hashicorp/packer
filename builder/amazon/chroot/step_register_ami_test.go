@@ -9,10 +9,10 @@ import (
 
 func testImage() ec2.Image {
 	return ec2.Image{
-		ImageID:      aws.String("ami-abcd1234"),
+		ImageId:      aws.String("ami-abcd1234"),
 		Name:         aws.String("ami_test_name"),
 		Architecture: aws.String("x86_64"),
-		KernelID:     aws.String("aki-abcd1234"),
+		KernelId:     aws.String("aki-abcd1234"),
 	}
 }
 
@@ -38,9 +38,9 @@ func TestStepRegisterAmi_buildRegisterOpts_pv(t *testing.T) {
 		t.Fatalf("Unexpected Name value: expected %s got %s\n", expected, *opts.Name)
 	}
 
-	expected = *image.KernelID
-	if *opts.KernelID != expected {
-		t.Fatalf("Unexpected KernelId value: expected %s got %s\n", expected, *opts.KernelID)
+	expected = *image.KernelId
+	if *opts.KernelId != expected {
+		t.Fatalf("Unexpected KernelId value: expected %s got %s\n", expected, *opts.KernelId)
 	}
 
 }
@@ -67,7 +67,7 @@ func TestStepRegisterAmi_buildRegisterOpts_hvm(t *testing.T) {
 		t.Fatalf("Unexpected Name value: expected %s got %s\n", expected, *opts.Name)
 	}
 
-	if opts.KernelID != nil {
-		t.Fatalf("Unexpected KernelId value: expected nil got %s\n", *opts.KernelID)
+	if opts.KernelId != nil {
+		t.Fatalf("Unexpected KernelId value: expected nil got %s\n", *opts.KernelId)
 	}
 }

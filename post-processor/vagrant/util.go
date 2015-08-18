@@ -3,14 +3,23 @@ package vagrant
 import (
 	"archive/tar"
 	"compress/flate"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
+
+	"github.com/klauspost/pgzip"
+	"github.com/mitchellh/packer/packer"
+)
+
+var (
+	// ErrInvalidCompressionLevel is returned when the compression level passed
+	// to gzip is not in the expected range. See compress/flate for details.
+	ErrInvalidCompressionLevel = fmt.Errorf(
+		"Invalid compression level. Expected an integer from -1 to 9.")
 )
 
 // Copies a file by copying the contents of the file to another place.
@@ -60,10 +69,10 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 	}
 	defer dstF.Close()
 
-	var dstWriter io.Writer = dstF
+	var dstWriter io.WriteCloser = dstF
 	if level != flate.NoCompression {
 		log.Printf("Compressing with gzip compression level: %d", level)
-		gzipWriter, err := gzip.NewWriterLevel(dstWriter, level)
+		gzipWriter, err := makePgzipWriter(dstWriter, level)
 		if err != nil {
 			return err
 		}
@@ -142,4 +151,13 @@ func WriteMetadata(dir string, contents interface{}) error {
 	}
 
 	return nil
+}
+
+func makePgzipWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
+	gzipWriter, err := pgzip.NewWriterLevel(output, compressionLevel)
+	if err != nil {
+		return nil, ErrInvalidCompressionLevel
+	}
+	gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
+	return gzipWriter, nil
 }

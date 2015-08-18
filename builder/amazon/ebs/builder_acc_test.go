@@ -71,7 +71,7 @@ func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
 		ec2conn, _ := testEC2Conn()
 		imageResp, err := ec2conn.DescribeImageAttribute(&ec2.DescribeImageAttributeInput{
 			Attribute: aws.String("launchPermission"),
-			ImageID:   aws.String(artifact.Amis["us-east-1"]),
+			ImageId:   aws.String(artifact.Amis["us-east-1"]),
 		})
 
 		if err != nil {
@@ -86,7 +86,7 @@ func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
 
 		userFound := false
 		for _, lp := range imageResp.LaunchPermissions {
-			if lp.UserID != nil && uid == *lp.UserID {
+			if lp.UserId != nil && uid == *lp.UserId {
 				userFound = true
 			}
 		}
