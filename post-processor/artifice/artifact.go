@@ -3,6 +3,7 @@ package artifice
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -13,13 +14,18 @@ type Artifact struct {
 }
 
 func NewArtifact(files []string) (*Artifact, error) {
+	artifact := &Artifact{}
 	for _, f := range files {
-		if _, err := os.Stat(f); err != nil {
+		globfiles, err := filepath.Glob(f)
+		if err != nil {
 			return nil, err
 		}
-	}
-	artifact := &Artifact{
-		files: files,
+		for _, gf := range globfiles {
+			if _, err := os.Stat(gf); err != nil {
+				return nil, err
+			}
+			artifact.files = append(artifact.files, gf)
+		}
 	}
 	return artifact, nil
 }
