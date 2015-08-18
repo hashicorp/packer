@@ -32,8 +32,8 @@ type Config struct {
 	RunCommand []string `mapstructure:"run_command"`
 	Volumes    map[string]string
 
-	// This is used to login to dockerhub to pull a private base container
-	// For pushing to dockerhub, see the docker post-processors
+	// This is used to login to dockerhub to pull a private base container. For
+	// pushing to dockerhub, see the docker post-processors
 	Login         bool
 	LoginEmail    string `mapstructure:"login_email"`
 	LoginPassword string `mapstructure:"login_password"`
@@ -89,8 +89,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(errs,
-			ErrImageNotSpecified)
+		errs = packer.MultiErrorAppend(errs, ErrImageNotSpecified)
 	}
 
 	if (c.ExportPath != "" && c.Commit) || (c.ExportPath != "" && c.Discard) || (c.Commit && c.Discard) {
