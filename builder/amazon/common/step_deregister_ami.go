@@ -36,7 +36,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		// deregister image(s) by that name
 		for _, i := range resp.Images {
 			_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
-				ImageID: i.ImageID,
+				ImageId: i.ImageId,
 			})
 
 			if err != nil {
@@ -45,7 +45,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-			ui.Say(fmt.Sprintf("Deregistered AMI %s, id: %s", s.AMIName, *i.ImageID))
+			ui.Say(fmt.Sprintf("Deregistered AMI %s, id: %s", s.AMIName, *i.ImageId))
 		}
 	}
 
