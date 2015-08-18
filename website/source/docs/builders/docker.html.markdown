@@ -68,11 +68,17 @@ builder.
 
 ### Required:
 
+You must specify (only) one of `commit`, `discard`, or `export_path`.
+
 -   `commit` (boolean) - If true, the container will be committed to an image
-    rather than exported. This cannot be set if `export_path` is set.
+    rather than exported.
+
+-   `discard` (boolean) - Throw away the container when the build is complete.
+    This is useful for the [artifice
+    post-processor](https://packer.io/docs/post-processors/artifice.html).
 
 -   `export_path` (string) - The path where the final container will be exported
-    as a tar file. This cannot be set if `commit` is set to true.
+    as a tar file.
 
 -   `image` (string) - The base image for the Docker container that will
     be started. This image will be pulled from the Docker registry if it doesn't
