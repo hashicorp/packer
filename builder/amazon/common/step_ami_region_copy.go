@@ -90,7 +90,7 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	regionconn := ec2.New(awsConfig)
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
 		SourceRegion:  &source,
-		SourceImageID: &imageId,
+		SourceImageId: &imageId,
 		Name:          &name,
 	})
 
@@ -102,14 +102,14 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   AMIStateRefreshFunc(regionconn, *resp.ImageID),
+		Refresh:   AMIStateRefreshFunc(regionconn, *resp.ImageId),
 		StepState: state,
 	}
 
 	if _, err := WaitForState(&stateChange); err != nil {
 		return "", fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
-			*resp.ImageID, target, err)
+			*resp.ImageId, target, err)
 	}
 
-	return *resp.ImageID, nil
+	return *resp.ImageId, nil
 }

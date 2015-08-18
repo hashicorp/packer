@@ -25,8 +25,8 @@ func TestBlockDevice(t *testing.T) {
 			Result: &ec2.BlockDeviceMapping{
 				DeviceName:  aws.String("/dev/sdb"),
 				VirtualName: aws.String(""),
-				EBS: &ec2.EBSBlockDevice{
-					SnapshotID:          aws.String("snap-1234"),
+				Ebs: &ec2.EbsBlockDevice{
+					SnapshotId:          aws.String("snap-1234"),
 					VolumeType:          aws.String("standard"),
 					VolumeSize:          aws.Int64(8),
 					DeleteOnTermination: aws.Bool(true),
@@ -42,7 +42,7 @@ func TestBlockDevice(t *testing.T) {
 			Result: &ec2.BlockDeviceMapping{
 				DeviceName:  aws.String("/dev/sdb"),
 				VirtualName: aws.String(""),
-				EBS: &ec2.EBSBlockDevice{
+				Ebs: &ec2.EbsBlockDevice{
 					VolumeType:          aws.String(""),
 					VolumeSize:          aws.Int64(8),
 					DeleteOnTermination: aws.Bool(false),
@@ -61,11 +61,11 @@ func TestBlockDevice(t *testing.T) {
 			Result: &ec2.BlockDeviceMapping{
 				DeviceName:  aws.String("/dev/sdb"),
 				VirtualName: aws.String(""),
-				EBS: &ec2.EBSBlockDevice{
+				Ebs: &ec2.EbsBlockDevice{
 					VolumeType:          aws.String("io1"),
 					VolumeSize:          aws.Int64(8),
 					DeleteOnTermination: aws.Bool(true),
-					IOPS:                aws.Int64(1000),
+					Iops:                aws.Int64(1000),
 				},
 			},
 		},
