@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/mitchellh/packer/builder/amazon/chroot"
@@ -105,7 +104,7 @@ func (c *PluginCommand) Run(args []string) int {
 	log.Printf("args: %#v", args)
 	if len(args) != 1 {
 		c.Ui.Error("Wrong number of args")
-		os.Exit(1)
+		return 1
 	}
 
 	// Plugin should be called like "packer-builder-amazon-ebs" so we'll take it
@@ -124,25 +123,29 @@ func (c *PluginCommand) Run(args []string) int {
 
 	server, err := plugin.Server()
 	if err != nil {
-		panic(err)
+		c.Ui.Error(fmt.Sprintf("Error starting plugin server: %s", err))
+		return 1
 	}
 
 	if pluginType == "builder" {
 		builder, found := Builders[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load builder: %s", pluginName))
+			return 1
 		}
 		server.RegisterBuilder(builder)
 	} else if pluginType == "provisioner" {
 		provisioner, found := Provisioners[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load provisioner: %s", pluginName))
+			return 1
 		}
 		server.RegisterProvisioner(provisioner)
 	} else if pluginType == "post-processor" {
 		postProcessor, found := PostProcessors[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load post-processor: %s", pluginName))
+			return 1
 		}
 		server.RegisterPostProcessor(postProcessor)
 	}
@@ -156,13 +159,14 @@ func (*PluginCommand) Help() string {
 	helpText := `
 Usage: packer plugin PLUGIN
 
-  Runs an internally-compiled version of a plugin from the packer binary. Note
-  that this is an internal command and you should not call it yourself.
+  Runs an internally-compiled version of a plugin from the packer binary.
+
+  NOTE: this is an internal command and you should not call it yourself.
 `
 
 	return strings.TrimSpace(helpText)
 }
 
 func (c *PluginCommand) Synopsis() string {
-	return "call an internal plugin"
+	return "internal plugin command"
 }
