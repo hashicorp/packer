@@ -393,3 +393,23 @@ modify as well:
 -   `remote_username` - The SSH username used to access the remote machine.
 
 -   `remote_password` - The SSH password for access to the remote machine.
+
+### Using a Floppy for Linux kickstart file or preseed
+
+Depending on your network configuration, it may be difficult to use packer's
+built-in HTTP server with ESXi. Instead, you can provide a kickstart or preseed
+file by attaching a floppy disk. An example below, based on RHEL:
+
+``` {.javascript}
+{
+  "builders": [
+    {
+      "type":"vmware-iso",
+      "floppy_files": [
+        "folder/ks.cfg"
+      ],
+      "boot_command": "<tab> text ks=floppy <enter><wait>"
+    }
+  ]
+}
+```
