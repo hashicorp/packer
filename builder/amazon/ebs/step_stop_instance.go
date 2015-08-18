@@ -26,7 +26,7 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	// Stop the instance so we can create an AMI from it
 	ui.Say("Stopping the source instance...")
 	_, err := ec2conn.StopInstances(&ec2.StopInstancesInput{
-		InstanceIDs: []*string{instance.InstanceID},
+		InstanceIds: []*string{instance.InstanceId},
 	})
 	if err != nil {
 		err := fmt.Errorf("Error stopping instance: %s", err)
@@ -40,7 +40,7 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"running", "stopping"},
 		Target:    "stopped",
-		Refresh:   awscommon.InstanceStateRefreshFunc(ec2conn, *instance.InstanceID),
+		Refresh:   awscommon.InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
 		StepState: state,
 	}
 	_, err = awscommon.WaitForState(&stateChange)
