@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/mitchellh/packer/builder/amazon/chroot"
@@ -98,28 +99,26 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"vsphere":       new(vsphere.PostProcessor),
 }
 
+var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
+
 func (c *PluginCommand) Run(args []string) int {
-	// This is an internal call so we're not going to do much error checking.
-	// If there's a problem we'll usually just crash.
+	// This is an internal call (users should not call this directly) so we're
+	// not going to do much input validation. If there's a problem we'll often
+	// just crash. Error handling should be added to facilitate debugging.
 	log.Printf("args: %#v", args)
 	if len(args) != 1 {
 		c.Ui.Error("Wrong number of args")
 		return 1
 	}
 
-	// Plugin should be called like "packer-builder-amazon-ebs" so we'll take it
-	// apart.
-	parts := strings.Split(args[0], "-")
-	pluginType := parts[1]
-	pluginName := ""
-	// Post-processor is split so we'll so some magic here. We could use a
-	// regexp but this is simpler.
-	if pluginType == "post" {
-		pluginType = strings.Join(parts[1:2], "-")
-		pluginName = strings.Join(parts[3:], "-")
-	} else {
-		pluginName = strings.Join(parts[2:], "-")
+	// Plugin will match something like "packer-builder-amazon-ebs"
+	parts := pluginRegexp.FindStringSubmatch(args[0])
+	if len(parts) != 3 {
+		c.Ui.Error(fmt.Sprintf("Error parsing plugin argument [DEBUG]: %#v", parts))
+		return 1
 	}
+	pluginType := parts[1] // capture group 1 (builder|post-processor|provisioner)
+	pluginName := parts[2] // capture group 2 (.+)
 
 	server, err := plugin.Server()
 	if err != nil {
