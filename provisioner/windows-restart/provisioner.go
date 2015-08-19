@@ -13,7 +13,7 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-var DefaultRestartCommand = "powershell \"& {Restart-Computer -force }\""
+var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
 var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
 var retryableSleep = 5 * time.Second
 var TryCheckReboot = "shutdown.exe -f -r -t 60"
