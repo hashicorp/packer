@@ -101,7 +101,7 @@ func (d *DownloadClient) Cancel() {
 func (d *DownloadClient) Get() (string, error) {
 	// If we already have the file and it matches, then just return the target path.
 	if verify, _ := d.VerifyChecksum(d.config.TargetPath); verify {
-		log.Println("Initial checksum matched, no download needed.")
+		log.Println("[DEBUG] Initial checksum matched, no download needed.")
 		return d.config.TargetPath, nil
 	}
 
@@ -120,7 +120,7 @@ func (d *DownloadClient) Get() (string, error) {
 		// This is a special case where we use a source file that already exists
 		// locally and we don't make a copy. Normally we would copy or download.
 		finalPath = url.Path
-		log.Printf("Using local file: %s", finalPath)
+		log.Printf("[DEBUG] Using local file: %s", finalPath)
 
 		// Remove forward slash on absolute Windows file URLs before processing
 		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
@@ -143,7 +143,7 @@ func (d *DownloadClient) Get() (string, error) {
 			return "", err
 		}
 
-		log.Printf("Downloading: %s", url.String())
+		log.Printf("[DEBUG] Downloading: %s", url.String())
 		err = d.downloader.Download(f, url)
 		f.Close()
 		if err != nil {
