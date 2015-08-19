@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	ErrArtifactNotUsed     = fmt.Errorf("No instructions given for handling the artifact; expected commit, discard, or export_path")
-	ErrArtifactUseConflict = fmt.Errorf("Cannot specify more than one of commit, discard, and export_path")
-	ErrExportPathNotFile   = fmt.Errorf("export_path must be a file, not a directory")
-	ErrImageNotSpecified   = fmt.Errorf("Image must be specified")
+	errArtifactNotUsed     = fmt.Errorf("No instructions given for handling the artifact; expected commit, discard, or export_path")
+	errArtifactUseConflict = fmt.Errorf("Cannot specify more than one of commit, discard, and export_path")
+	errExportPathNotFile   = fmt.Errorf("export_path must be a file, not a directory")
+	errImageNotSpecified   = fmt.Errorf("Image must be specified")
 )
 
 type Config struct {
@@ -89,20 +89,20 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(errs, ErrImageNotSpecified)
+		errs = packer.MultiErrorAppend(errs, errImageNotSpecified)
 	}
 
 	if (c.ExportPath != "" && c.Commit) || (c.ExportPath != "" && c.Discard) || (c.Commit && c.Discard) {
-		errs = packer.MultiErrorAppend(errs, ErrArtifactUseConflict)
+		errs = packer.MultiErrorAppend(errs, errArtifactUseConflict)
 	}
 
 	if c.ExportPath == "" && !c.Commit && !c.Discard {
-		errs = packer.MultiErrorAppend(errs, ErrArtifactNotUsed)
+		errs = packer.MultiErrorAppend(errs, errArtifactNotUsed)
 	}
 
 	if c.ExportPath != "" {
 		if fi, err := os.Stat(c.ExportPath); err == nil && fi.IsDir() {
-			errs = packer.MultiErrorAppend(errs, ErrExportPathNotFile)
+			errs = packer.MultiErrorAppend(errs, errExportPathNotFile)
 		}
 	}
 

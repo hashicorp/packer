@@ -65,7 +65,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		log.Printf("[DEBUG] Container will be exported to %s", b.config.ExportPath)
 		steps = append(steps, new(StepExport))
 	} else {
-		return nil, ErrArtifactNotUsed
+		return nil, errArtifactNotUsed
 	}
 
 	// Setup the state bag and initial state for the steps
