@@ -119,7 +119,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 			// Couldnt execute, we asume machine is rebooting already
 			break
 		}
-		if cmd.ExitStatus != 0 {
+		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
 			time.Sleep(10 * time.Second)
