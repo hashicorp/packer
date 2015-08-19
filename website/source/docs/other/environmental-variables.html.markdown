@@ -34,3 +34,8 @@ each can be found below:
     communication with plugins, since plugin communication happens over TCP
     connections on your local host. The default is 10,000. See the [core
     configuration page](/docs/other/core-configuration.html).
+
+-   `CHECKPOINT_DISABLE` - When Packer is invoked it sometimes calls out to
+    [checkpoint.hashicorp.com](https://checkpoint.hashicorp.com/) to look for
+    new versions of Packer. If you want to disable this for security or privacy
+    reasons, you can set this environment variable to `1`.
