@@ -71,7 +71,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			// if we force a certain extension we hash the URL and add
 			// the extension to force it.
 			cacheKey := url
-			if s.Extension != "" { //HERE.
+			if s.Extension != "" {
 				hash := sha1.Sum([]byte(url))
 				cacheKey = fmt.Sprintf(
 					"%s.%s", hex.EncodeToString(hash[:]), s.Extension)
