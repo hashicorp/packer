@@ -70,7 +70,7 @@ func (a *Artifact) Destroy() error {
 
 		regionConfig := &aws.Config{
 			Credentials: a.Conn.Config.Credentials,
-			Region:      region,
+			Region:      aws.String(region),
 		}
 		regionConn := ec2.New(regionConfig)
 
@@ -88,7 +88,7 @@ func (a *Artifact) Destroy() error {
 		if len(errors) == 1 {
 			return errors[0]
 		} else {
-			return &packer.MultiError{errors}
+			return &packer.MultiError{Errors: errors}
 		}
 	}
 
