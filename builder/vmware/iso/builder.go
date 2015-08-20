@@ -49,7 +49,7 @@ type Config struct {
 	VMName              string   `mapstructure:"vm_name"`
 	BootCommand         []string `mapstructure:"boot_command"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
-	TargetPath          string   `mapstructure:"target_path"`
+	TargetPath          string   `mapstructure:"iso_target_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 

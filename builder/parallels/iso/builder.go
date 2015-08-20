@@ -46,7 +46,7 @@ type Config struct {
 	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
 	ISOUrls            []string `mapstructure:"iso_urls"`
 	VMName             string   `mapstructure:"vm_name"`
-	TargetPath         string   `mapstructure:"target_path"`
+	TargetPath         string   `mapstructure:"iso_target_path"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 

@@ -105,7 +105,7 @@ type Config struct {
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
-	TargetPath      string     `mapstructure:"target_path"`
+	TargetPath      string     `mapstructure:"iso_target_path"`
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
