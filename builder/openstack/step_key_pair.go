@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"runtime"
 
@@ -12,12 +13,29 @@ import (
 )
 
 type StepKeyPair struct {
-	Debug        bool
-	DebugKeyPath string
-	keyName      string
+	Debug          bool
+	DebugKeyPath   string
+	KeyPairName    string
+	PrivateKeyFile string
+
+	keyName string
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+	if s.PrivateKeyFile != "" {
+		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		if err != nil {
+			state.Put("error", fmt.Errorf(
+				"Error loading configured private key file: %s", err))
+			return multistep.ActionHalt
+		}
+
+		state.Put("keyPair", s.KeyPairName)
+		state.Put("privateKey", string(privateKeyBytes))
+
+		return multistep.ActionContinue
+	}
+
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -81,6 +99,11 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
+	// If we used an SSH private key file, do not go about deleting
+	// keypairs
+	if s.PrivateKeyFile != "" {
+		return
+	}
 	// If no key name is set, then we never created it, so just return
 	if s.keyName == "" {
 		return

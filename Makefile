@@ -1,8 +1,6 @@
 TEST?=./...
-VETARGS?=-asmdecl -atomic -bool -buildtags -copylocks -methods \
-         -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
 
-default: test
+default: test vet dev
 
 bin:
 	@sh -c "$(CURDIR)/scripts/build.sh"
@@ -16,6 +14,7 @@ generate:
 	go generate ./...
 
 test:
+	@echo "Running tests on:"; git symbolic-ref HEAD; git rev-parse HEAD
 	go test $(TEST) $(TESTARGS) -timeout=10s
 	@$(MAKE) vet
 
@@ -31,19 +30,23 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
+	@echo "Updating deps on:"; git symbolic-ref HEAD; git rev-parse HEAD
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go list ./... \
 		| xargs go list -f '{{join .Deps "\n"}}' \
 		| grep -v github.com/mitchellh/packer \
+		| grep -v '/internal/' \
 		| sort -u \
 		| xargs go get -f -u -v
+	@echo "Finished updating deps, now on:"; git symbolic-ref HEAD; git rev-parse HEAD
 
 vet:
-	@go tool vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
+	@echo "Running go vet on:"; git symbolic-ref HEAD; git rev-parse HEAD
+	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
-	@go tool vet $(VETARGS) . ; if [ $$? -eq 1 ]; then \
+	@go vet ./... ; if [ $$? -eq 1 ]; then \
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
 		echo "and fix them if necessary before submitting the code for reviewal."; \

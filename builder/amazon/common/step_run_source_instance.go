@@ -31,7 +31,7 @@ type StepRunSourceInstance struct {
 	UserData                 string
 	UserDataFile             string
 
-	instance    *ec2.Instance
+	instanceId  string
 	spotRequest *ec2.SpotInstanceRequest
 }
 
@@ -141,8 +141,8 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ImageID:             &s.SourceAMI,
 			InstanceType:        &s.InstanceType,
 			UserData:            &userData,
-			MaxCount:            aws.Long(1),
-			MinCount:            aws.Long(1),
+			MaxCount:            aws.Int64(1),
+			MinCount:            aws.Int64(1),
 			IAMInstanceProfile:  &ec2.IAMInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
@@ -151,11 +151,11 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
 			runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 				&ec2.InstanceNetworkInterfaceSpecification{
-					DeviceIndex:              aws.Long(0),
+					DeviceIndex:              aws.Int64(0),
 					AssociatePublicIPAddress: &s.AssociatePublicIpAddress,
 					SubnetID:                 &s.SubnetId,
 					Groups:                   securityGroupIds,
-					DeleteOnTermination:      aws.Boolean(true),
+					DeleteOnTermination:      aws.Bool(true),
 				},
 			}
 		} else {
@@ -185,11 +185,11 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 				IAMInstanceProfile: &ec2.IAMInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
 					&ec2.InstanceNetworkInterfaceSpecification{
-						DeviceIndex:              aws.Long(0),
+						DeviceIndex:              aws.Int64(0),
 						AssociatePublicIPAddress: &s.AssociatePublicIpAddress,
 						SubnetID:                 &s.SubnetId,
 						Groups:                   securityGroupIds,
-						DeleteOnTermination:      aws.Boolean(true),
+						DeleteOnTermination:      aws.Bool(true),
 					},
 				},
 				Placement: &ec2.SpotPlacement{
@@ -235,6 +235,9 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		instanceId = *spotResp.SpotInstanceRequests[0].InstanceID
 	}
 
+	// Set the instance ID so that the cleanup works properly
+	s.instanceId = instanceId
+
 	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
 	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
 	stateChange := StateChangeConf{
@@ -251,7 +254,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
-	s.instance = latestInstance.(*ec2.Instance)
+	instance := latestInstance.(*ec2.Instance)
 
 	ec2Tags := make([]*ec2.Tag, 1, len(s.Tags)+1)
 	ec2Tags[0] = &ec2.Tag{Key: aws.String("Name"), Value: aws.String("Packer Builder")}
@@ -261,7 +264,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Tags:      ec2Tags,
-		Resources: []*string{s.instance.InstanceID},
+		Resources: []*string{instance.InstanceID},
 	})
 	if err != nil {
 		ui.Message(
@@ -269,20 +272,20 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	if s.Debug {
-		if s.instance.PublicDNSName != nil && *s.instance.PublicDNSName != "" {
-			ui.Message(fmt.Sprintf("Public DNS: %s", *s.instance.PublicDNSName))
+		if instance.PublicDNSName != nil && *instance.PublicDNSName != "" {
+			ui.Message(fmt.Sprintf("Public DNS: %s", *instance.PublicDNSName))
 		}
 
-		if s.instance.PublicIPAddress != nil && *s.instance.PublicIPAddress != "" {
-			ui.Message(fmt.Sprintf("Public IP: %s", *s.instance.PublicIPAddress))
+		if instance.PublicIPAddress != nil && *instance.PublicIPAddress != "" {
+			ui.Message(fmt.Sprintf("Public IP: %s", *instance.PublicIPAddress))
 		}
 
-		if s.instance.PrivateIPAddress != nil && *s.instance.PrivateIPAddress != "" {
-			ui.Message(fmt.Sprintf("Private IP: %s", *s.instance.PrivateIPAddress))
+		if instance.PrivateIPAddress != nil && *instance.PrivateIPAddress != "" {
+			ui.Message(fmt.Sprintf("Private IP: %s", *instance.PrivateIPAddress))
 		}
 	}
 
-	state.Put("instance", s.instance)
+	state.Put("instance", instance)
 
 	return multistep.ActionContinue
 }
@@ -313,16 +316,15 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	// Terminate the source instance if it exists
-	if s.instance != nil {
-
+	if s.instanceId != "" {
 		ui.Say("Terminating the source AWS instance...")
-		if _, err := ec2conn.TerminateInstances(&ec2.TerminateInstancesInput{InstanceIDs: []*string{s.instance.InstanceID}}); err != nil {
+		if _, err := ec2conn.TerminateInstances(&ec2.TerminateInstancesInput{InstanceIDs: []*string{&s.instanceId}}); err != nil {
 			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
 			return
 		}
 		stateChange := StateChangeConf{
 			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, *s.instance.InstanceID),
+			Refresh: InstanceStateRefreshFunc(ec2conn, s.instanceId),
 			Target:  "terminated",
 		}
 

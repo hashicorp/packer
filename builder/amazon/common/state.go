@@ -181,8 +181,6 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 
 		time.Sleep(time.Duration(sleepSeconds) * time.Second)
 	}
-
-	return
 }
 
 func isTransientNetworkError(err error) bool {

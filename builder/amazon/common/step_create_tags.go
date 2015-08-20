@@ -36,7 +36,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 			regionconn := ec2.New(&aws.Config{
 				Credentials: ec2conn.Config.Credentials,
-				Region:      region,
+				Region:      aws.String(region),
 			})
 
 			// Retrieve image list for given AMI

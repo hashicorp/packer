@@ -52,7 +52,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 	defer nc.Close()
 
-	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: true})
+	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
 	if err != nil {
 		err := fmt.Errorf("Error handshaking with VNC: %s", err)
 		state.Put("error", err)
@@ -177,7 +177,9 @@ func vncSendString(c *vnc.ClientConn, original string) {
 		}
 
 		c.KeyEvent(keyCode, true)
+		time.Sleep(time.Second/10)
 		c.KeyEvent(keyCode, false)
+		time.Sleep(time.Second/10)
 
 		if keyShift {
 			c.KeyEvent(KeyLeftShift, false)
