@@ -52,10 +52,11 @@ func TestConfigPrepare_exportPath(t *testing.T) {
 
 	raw := testConfig()
 
-	// No export path
+	// No export path. This is invalid. Previously this would not error during
+	// validation and as a result the failure would happen at build time.
 	delete(raw, "export_path")
 	_, warns, errs := NewConfig(raw)
-	testConfigOk(t, warns, errs)
+	testConfigErr(t, warns, errs)
 
 	// Good export path
 	raw["export_path"] = "good"
@@ -70,14 +71,39 @@ func TestConfigPrepare_exportPath(t *testing.T) {
 
 func TestConfigPrepare_exportPathAndCommit(t *testing.T) {
 	raw := testConfig()
-	raw["commit"] = true
 
-	// No export path
+	// Export but no commit (explicit default)
+	raw["commit"] = false
 	_, warns, errs := NewConfig(raw)
+	testConfigOk(t, warns, errs)
+
+	// Commit AND export specified (invalid)
+	raw["commit"] = true
+	_, warns, errs = NewConfig(raw)
 	testConfigErr(t, warns, errs)
 
-	// No commit
-	raw["commit"] = false
+	// Commit but no export
+	delete(raw, "export_path")
+	_, warns, errs = NewConfig(raw)
+	testConfigOk(t, warns, errs)
+}
+
+func TestConfigPrepare_exportDiscard(t *testing.T) {
+	raw := testConfig()
+
+	// Export but no discard (explicit default)
+	raw["discard"] = false
+	_, warns, errs := NewConfig(raw)
+	testConfigOk(t, warns, errs)
+
+	// Discard AND export (invalid)
+	raw["discard"] = true
+	_, warns, errs = NewConfig(raw)
+	testConfigErr(t, warns, errs)
+
+	// Discard but no export
+	raw["discard"] = true
+	delete(raw, "export_path")
 	_, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
 }
