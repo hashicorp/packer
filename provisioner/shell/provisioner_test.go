@@ -1,15 +1,25 @@
 package shell
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"inline": []interface{}{"foo", "bar"},
+	}
+}
+
+// TestRandomScriptName has to run before other calls that invoke math.rand in
+// order to test correctly.
+func TestRandomScriptName(t *testing.T) {
+	name := randomScriptName()
+	if name == "/tmp/script_8498210.sh" {
+		t.Fatal("math.rand is not seeded properly")
 	}
 }
 
