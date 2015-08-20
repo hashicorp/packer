@@ -1,11 +1,12 @@
 package qemu
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 var testPem = `
@@ -83,7 +84,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad ssh port: %d", b.config.Comm.SSHPort)
 	}
 
-	if b.config.VMName != "packer-foo" {
+	if b.config.VMName != "packer-foo.qcow2" {
 		t.Errorf("bad vm name: %s", b.config.VMName)
 	}
 
