@@ -12,12 +12,12 @@ page_title: 'Chef-Client Provisioner'
 Type: `chef-client`
 
 The Chef Client Packer provisioner installs and configures software on machines
-built by Packer using [chef-client](http://docs.opscode.com/chef_client.html).
+built by Packer using [chef-client](https://docs.chef.io/chef_client.html).
 Packer configures a Chef client to talk to a remote Chef Server to provision the
 machine.
 
 The provisioner will even install Chef onto your machine if it isn't already
-installed, using the official Chef installers provided by Opscode.
+installed, using the official Chef installers provided by Chef.
 
 ## Basic Example
 
@@ -71,7 +71,7 @@ configuration is actually required.
     then the sudo will be omitted.
 
 -   `run_list` (array of strings) - The [run
-    list](http://docs.opscode.com/essentials_node_object_run_lists.html)
+    list](http://docs.chef.io/essentials_node_object_run_lists.html)
     for Chef. By default this is empty, and will use the run list sent down by
     the Chef Server.
 
@@ -84,7 +84,7 @@ configuration is actually required.
     Chef server after it is done running. By default, this is false.
 
 -   `skip_install` (boolean) - If true, Chef will not automatically be installed
-    on the machine using the Opscode omnibus installers.
+    on the machine using the Chef omnibus installers.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this
@@ -168,7 +168,7 @@ readability) to install Chef. This command can be customized if you want to
 install Chef in another way.
 
 ``` {.text}
-curl -L https://www.opscode.com/chef/install.sh | \
+curl -L https://www.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
