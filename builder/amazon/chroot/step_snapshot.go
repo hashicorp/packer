@@ -28,7 +28,7 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	description := fmt.Sprintf("Packer: %s", time.Now().String())
 
 	createSnapResp, err := ec2conn.CreateSnapshot(&ec2.CreateSnapshotInput{
-		VolumeID:    &volumeId,
+		VolumeId:    &volumeId,
 		Description: &description,
 	})
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the snapshot ID so we can delete it later
-	s.snapshotId = *createSnapResp.SnapshotID
+	s.snapshotId = *createSnapResp.SnapshotId
 	ui.Message(fmt.Sprintf("Snapshot ID: %s", s.snapshotId))
 
 	// Wait for the snapshot to be ready
@@ -48,7 +48,7 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		StepState: state,
 		Target:    "completed",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeSnapshots(&ec2.DescribeSnapshotsInput{SnapshotIDs: []*string{&s.snapshotId}})
+			resp, err := ec2conn.DescribeSnapshots(&ec2.DescribeSnapshotsInput{SnapshotIds: []*string{&s.snapshotId}})
 			if err != nil {
 				return nil, "", err
 			}
@@ -86,7 +86,7 @@ func (s *StepSnapshot) Cleanup(state multistep.StateBag) {
 		ec2conn := state.Get("ec2").(*ec2.EC2)
 		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Removing snapshot since we cancelled or halted...")
-		_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{SnapshotID: &s.snapshotId})
+		_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{SnapshotId: &s.snapshotId})
 		if err != nil {
 			ui.Error(fmt.Sprintf("Error: %s", err))
 		}

@@ -9,8 +9,10 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-const BuilderId = "packer.docker"
-const BuilderIdImport = "packer.post-processor.docker-import"
+const (
+	BuilderId       = "packer.docker"
+	BuilderIdImport = "packer.post-processor.docker-import"
+)
 
 type Builder struct {
 	config *Config
@@ -54,10 +56,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 	}
 
-	if b.config.Commit {
+	if b.config.Discard {
+		log.Print("[DEBUG] Container will be discarded")
+	} else if b.config.Commit {
+		log.Print("[DEBUG] Container will be committed")
 		steps = append(steps, new(StepCommit))
-	} else {
+	} else if b.config.ExportPath != "" {
+		log.Printf("[DEBUG] Container will be exported to %s", b.config.ExportPath)
 		steps = append(steps, new(StepExport))
+	} else {
+		return nil, errArtifactNotUsed
 	}
 
 	// Setup the state bag and initial state for the steps

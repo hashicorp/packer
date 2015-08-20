@@ -2,9 +2,10 @@ package docker
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"os"
 )
 
 // StepExport exports the container to a flat tar file.
@@ -16,6 +17,14 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
 	ui := state.Get("ui").(packer.Ui)
+
+	// We should catch this in validation, but guard anyway
+	if config.ExportPath == "" {
+		err := fmt.Errorf("No output file specified, we can't export anything")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	// Open the file that we're going to write to
 	f, err := os.Create(config.ExportPath)

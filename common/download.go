@@ -101,7 +101,7 @@ func (d *DownloadClient) Cancel() {
 func (d *DownloadClient) Get() (string, error) {
 	// If we already have the file and it matches, then just return the target path.
 	if verify, _ := d.VerifyChecksum(d.config.TargetPath); verify {
-		log.Println("Initial checksum matched, no download needed.")
+		log.Println("[DEBUG] Initial checksum matched, no download needed.")
 		return d.config.TargetPath, nil
 	}
 
@@ -115,13 +115,19 @@ func (d *DownloadClient) Get() (string, error) {
 	// Files when we don't copy the file are special cased.
 	var f *os.File
 	var finalPath string
+	sourcePath := ""
 	if url.Scheme == "file" && !d.config.CopyFile {
+		// This is a special case where we use a source file that already exists
+		// locally and we don't make a copy. Normally we would copy or download.
 		finalPath = url.Path
+		log.Printf("[DEBUG] Using local file: %s", finalPath)
 
 		// Remove forward slash on absolute Windows file URLs before processing
 		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
 			finalPath = finalPath[1:len(finalPath)]
 		}
+		// Keep track of the source so we can make sure not to delete this later
+		sourcePath = finalPath
 	} else {
 		finalPath = d.config.TargetPath
 
@@ -137,7 +143,7 @@ func (d *DownloadClient) Get() (string, error) {
 			return "", err
 		}
 
-		log.Printf("Downloading: %s", url.String())
+		log.Printf("[DEBUG] Downloading: %s", url.String())
 		err = d.downloader.Download(f, url)
 		f.Close()
 		if err != nil {
@@ -149,8 +155,10 @@ func (d *DownloadClient) Get() (string, error) {
 		var verify bool
 		verify, err = d.VerifyChecksum(finalPath)
 		if err == nil && !verify {
-			// Delete the file
-			os.Remove(finalPath)
+			// Only delete the file if we made a copy or downloaded it
+			if sourcePath != finalPath {
+				os.Remove(finalPath)
+			}
 
 			err = fmt.Errorf(
 				"checksums didn't match expected: %s",
