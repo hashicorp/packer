@@ -41,7 +41,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			Exclude: []string{
 				"boot_command",
 				"prlctl",
-				"parallel_tools_guest_path",
+				"parallels_tools_guest_path",
 			},
 		},
 	}, raws...)

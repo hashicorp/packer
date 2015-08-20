@@ -53,6 +53,7 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 			Config:      s.Config,
 			Host:        s.Host,
 			WinRMConfig: s.WinRMConfig,
+			WinRMPort:   s.SSHPort,
 		},
 	}
 	for k, v := range s.CustomConnect {

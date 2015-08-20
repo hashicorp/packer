@@ -23,6 +23,7 @@ func CommHost(
 		// If we have a specific interface, try that
 		if sshinterface != "" {
 			if addr := sshAddrFromPool(s, sshinterface); addr != "" {
+				log.Printf("[DEBUG] Using IP address %s from specified interface %s for SSH", addr, sshinterface)
 				return addr, nil
 			}
 		}
@@ -30,15 +31,18 @@ func CommHost(
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingip.FloatingIP)
 		if ip != nil && ip.IP != "" {
+			log.Printf("[DEBUG] Using floating IP %s for SSH", ip.IP)
 			return ip.IP, nil
 		}
 
 		if s.AccessIPv4 != "" {
+			log.Printf("[DEBUG] Using AccessIPv4 %s for SSH", s.AccessIPv4)
 			return s.AccessIPv4, nil
 		}
 
 		// Try to get it from the requested interface
 		if addr := sshAddrFromPool(s, sshinterface); addr != "" {
+			log.Printf("[DEBUG] Using IP address %s for SSH", addr)
 			return addr, nil
 		}
 
@@ -101,11 +105,15 @@ func sshAddrFromPool(s *servers.Server, desired string) string {
 			if address["OS-EXT-IPS:type"] == "floating" {
 				addr = address["addr"].(string)
 			} else {
-				if address["version"].(float64) == 4 {
+				if address["version"].(float64) == 6 {
+					addr = fmt.Sprintf("[%s]", address["addr"].(string))
+				} else {
 					addr = address["addr"].(string)
 				}
 			}
+
 			if addr != "" {
+				log.Printf("[DEBUG] Detected address: %s", addr)
 				return addr
 			}
 		}

@@ -34,7 +34,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			}
 
 			if s.RootVolumeSize > *newDevice.EBS.VolumeSize {
-				newDevice.EBS.VolumeSize = aws.Long(s.RootVolumeSize)
+				newDevice.EBS.VolumeSize = aws.Int64(s.RootVolumeSize)
 			}
 		}
 
@@ -64,7 +64,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	// Set the AMI ID in the state
 	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageID))
 	amis := make(map[string]string)
-	amis[ec2conn.Config.Region] = *registerResp.ImageID
+	amis[*ec2conn.Config.Region] = *registerResp.ImageID
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready

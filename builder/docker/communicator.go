@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"archive/tar"
 	"bytes"
 	"fmt"
 	"io"
@@ -24,8 +25,8 @@ type Communicator struct {
 	HostDir      string
 	ContainerDir string
 	Version      *version.Version
-	Config 	     *Config
-	lock sync.Mutex
+	Config       *Config
+	lock         sync.Mutex
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
@@ -194,8 +195,42 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	return nil
 }
 
+// Download pulls a file out of a container using `docker cp`. We have a source
+// path and want to write to an io.Writer, not a file. We use - to make docker
+// cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	panic("not implemented")
+	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
+	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
+
+	pipe, err := localCmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("Failed to open pipe: %s", err)
+	}
+
+	if err = localCmd.Start(); err != nil {
+		return fmt.Errorf("Failed to start download: %s", err)
+	}
+
+	// When you use - to send docker cp to stdout it is streamed as a tar; this
+	// enables it to work with directories. We don't actually support
+	// directories in Download() but we still need to handle the tar format.
+	archive := tar.NewReader(pipe)
+	_, err = archive.Next()
+	if err != nil {
+		return fmt.Errorf("Failed to read header from tar stream: %s", err)
+	}
+
+	numBytes, err := io.Copy(dst, archive)
+	if err != nil {
+		return fmt.Errorf("Failed to pipe download: %s", err)
+	}
+	log.Printf("Copied %d bytes for %s", numBytes, src)
+
+	if err = localCmd.Wait(); err != nil {
+		return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
+	}
+
+	return nil
 }
 
 // canExec tells us whether `docker exec` is supported
