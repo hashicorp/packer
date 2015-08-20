@@ -3,8 +3,35 @@ package main
 import (
 	"math/rand"
 	"reflect"
+	"strings"
 	"testing"
+
+	"github.com/mitchellh/cli"
+	"github.com/mitchellh/packer/command"
 )
+
+func TestExcludeHelpFunc(t *testing.T) {
+	commands := map[string]cli.CommandFactory{
+		"build": func() (cli.Command, error) {
+			return &command.BuildCommand{
+				Meta: command.Meta{},
+			}, nil
+		},
+
+		"fix": func() (cli.Command, error) {
+			return &command.FixCommand{
+				Meta: command.Meta{},
+			}, nil
+		},
+	}
+
+	helpFunc := excludeHelpFunc(commands, []string{"fix"})
+	helpText := helpFunc(commands)
+
+	if strings.Contains(helpText, "fix") {
+		t.Fatal("Found fix in help text even though we excluded it: \n\n%s\n\n", helpText)
+	}
+}
 
 func TestExtractMachineReadable(t *testing.T) {
 	var args, expected, result []string
