@@ -3,7 +3,6 @@
 package saltmasterless
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -79,28 +78,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	var errs *packer.MultiError
 
 	// require a salt state tree
-	if p.config.LocalStateTree == "" {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("local_state_tree must be supplied"))
-	} else {
-		if _, err := os.Stat(p.config.LocalStateTree); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				errors.New("local_state_tree must exist and be accessible"))
-		}
+	err = validateDirConfig(p.config.LocalStateTree, "local_state_tree", true)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	if p.config.LocalPillarRoots != "" {
-		if _, err := os.Stat(p.config.LocalPillarRoots); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				errors.New("local_pillar_roots must exist and be accessible"))
-		}
+	err = validateDirConfig(p.config.LocalPillarRoots, "local_pillar_roots", false)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	if p.config.MinionConfig != "" {
-		if _, err := os.Stat(p.config.MinionConfig); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				errors.New("minion_config must exist and be accessible"))
-		}
+	err = validateFileConfig(p.config.MinionConfig, "minion_config", false)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -186,7 +176,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "pillar"))
 		dst = p.config.RemotePillarRoots
 		if err = p.removeDir(ui, comm, dst); err != nil {
-			return fmt.Errorf("Unable to clear pillat root: %s", err)
+			return fmt.Errorf("Unable to clear pillar root: %s", err)
 		}
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Unable to move %s/pillar to %s: %s", p.config.TempConfigDir, dst, err)
@@ -219,6 +209,36 @@ func (p *Provisioner) sudo(cmd string) string {
 	}
 
 	return "sudo " + cmd
+}
+
+func validateDirConfig(path string, name string, required bool) error {
+	if required == true && path == "" {
+		return fmt.Errorf("%s cannot be empty", name)
+	} else if required == false && path == "" {
+		return nil
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("%s: path '%s' is invalid: %s", name, path, err)
+	} else if !info.IsDir() {
+		return fmt.Errorf("%s: path '%s' must point to a directory", name, path)
+	}
+	return nil
+}
+
+func validateFileConfig(path string, name string, required bool) error {
+	if required == true && path == "" {
+		return fmt.Errorf("%s cannot be empty", name)
+	} else if required == false && path == "" {
+		return nil
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("%s: path '%s' is invalid: %s", name, path, err)
+	} else if info.IsDir() {
+		return fmt.Errorf("%s: path '%s' must point to a file", name, path)
+	}
+	return nil
 }
 
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
