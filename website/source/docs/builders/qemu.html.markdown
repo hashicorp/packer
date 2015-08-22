@@ -247,10 +247,9 @@ builder and not otherwise conflicting with the qemuargs):
     host port.
 
 -   `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
-    the new virtual machine. By default this is "packer-BUILDNAME.FORMAT", where
-    `BUILDNAME` is the name of the build and `FORMAT` matches the `format`
-    option, above. If you customize this you must specify the file extension or
-    none will be used.
+    the new virtual machine. By default this is "packer-BUILDNAME", where
+    `BUILDNAME` is the name of the build. Currently, no file extension will be
+    used unless it is specified in this option.
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for the VNC port on the host machine which is forwarded to the VNC
