@@ -16,6 +16,9 @@ type RunConfig struct {
 	HTTPPortMin uint   `mapstructure:"http_port_min"`
 	HTTPPortMax uint   `mapstructure:"http_port_max"`
 
+	VRDPPortMin uint `mapstructure:"vrdp_port_min"`
+	VRDPPortMax uint `mapstructure:"vrdp_port_max"`
+
 	BootWait time.Duration ``
 }
 
@@ -32,6 +35,14 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.HTTPPortMax = 9000
 	}
 
+	if c.VRDPPortMin == 0 {
+		c.VRDPPortMin = 5900
+	}
+
+	if c.VRDPPortMax == 0 {
+		c.VRDPPortMax = 6000
+	}
+
 	var errs []error
 	var err error
 	c.BootWait, err = time.ParseDuration(c.RawBootWait)
@@ -42,6 +53,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.HTTPPortMin > c.HTTPPortMax {
 		errs = append(errs,
 			errors.New("http_port_min must be less than http_port_max"))
+	}
+
+	if c.VRDPPortMin > c.VRDPPortMax {
+		errs = append(
+			errs, fmt.Errorf("vrdp_port_min must be less than vrdp_port_max"))
 	}
 
 	return errs
