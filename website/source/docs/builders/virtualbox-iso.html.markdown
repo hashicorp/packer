@@ -242,6 +242,12 @@ builder.
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
+-   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
+    to use for VRDP access to the virtual machine. Packer uses a randomly chosen
+    port in this range that appears available. By default this is 5900 to 6000.
+    The minimum and maximum ports are inclusive.
+
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys to
