@@ -16,7 +16,7 @@ GIT_COMMIT=$(git rev-parse HEAD)
 GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 # If its dev mode, only build for ourself
-if [ "${TF_DEV}x" != "x" ]; then
+if [ "${PACKER_DEV}x" != "x" ]; then
     XC_OS=${XC_OS:-$(go env GOOS)}
     XC_ARCH=${XC_ARCH:-$(go env GOARCH)}
 fi
@@ -27,7 +27,7 @@ XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
 
 # Install dependencies
 echo "==> Getting dependencies..."
-go get ./...
+go get -d ./...
 
 # Delete the old dir
 echo "==> Removing old directory..."
