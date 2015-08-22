@@ -19,6 +19,10 @@ import (
 type Parallels9Driver struct {
 	// This is the path to the "prlctl" application.
 	PrlctlPath string
+
+	// This is the path to the "prlsrvctl" application.
+	PrlsrvctlPath string
+
 	// The path to the parallels_dhcp_leases file
 	dhcp_lease_file string
 }
