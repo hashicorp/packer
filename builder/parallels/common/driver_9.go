@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/going/toolkit/xmlpath"
+	"gopkg.in/xmlpath.v2"
 )
 
 type Parallels9Driver struct {
