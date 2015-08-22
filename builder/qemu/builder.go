@@ -201,13 +201,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.VNCPortMax = 6000
 	}
 
-	if b.config.Format == "" {
-		b.config.Format = "qcow2"
+	if b.config.VMName == "" {
+		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 	}
 
-	if b.config.VMName == "" {
-		b.config.VMName = fmt.Sprintf("packer-%s.%s",
-			b.config.PackerBuildName, b.config.Format)
+	if b.config.Format == "" {
+		b.config.Format = "qcow2"
 	}
 
 	if b.config.FloppyFiles == nil {
