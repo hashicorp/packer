@@ -57,6 +57,7 @@ type Driver interface {
 func NewDriver() (Driver, error) {
 	var drivers map[string]Driver
 	var prlctlPath string
+	var prlsrvctlPath string
 	var supportedVersions []string
 	dhcp_lease_file := "/Library/Preferences/Parallels/parallels_dhcp_leases"
 
@@ -75,21 +76,34 @@ func NewDriver() (Driver, error) {
 
 	log.Printf("prlctl path: %s", prlctlPath)
 
+	if prlsrvctlPath == "" {
+		var err error
+		prlsrvctlPath, err = exec.LookPath("prlsrvctl")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	log.Printf("prlsrvctl path: %s", prlsrvctlPath)
+
 	drivers = map[string]Driver{
-		"11": &Parallels10Driver{
+		"11": &Parallels11Driver{
 			Parallels9Driver: Parallels9Driver{
 				PrlctlPath:      prlctlPath,
+				PrlsrvctlPath:   prlsrvctlPath,
 				dhcp_lease_file: dhcp_lease_file,
 			},
 		},
 		"10": &Parallels10Driver{
 			Parallels9Driver: Parallels9Driver{
 				PrlctlPath:      prlctlPath,
+				PrlsrvctlPath:   prlsrvctlPath,
 				dhcp_lease_file: dhcp_lease_file,
 			},
 		},
 		"9": &Parallels9Driver{
 			PrlctlPath:      prlctlPath,
+			PrlsrvctlPath:   prlsrvctlPath,
 			dhcp_lease_file: dhcp_lease_file,
 		},
 	}
@@ -97,6 +111,9 @@ func NewDriver() (Driver, error) {
 	for v, d := range drivers {
 		version, _ := d.Version()
 		if strings.HasPrefix(version, v) {
+			if err := d.Verify(); err != nil {
+				return nil, err
+			}
 			return d, nil
 		}
 		supportedVersions = append(supportedVersions, v)
