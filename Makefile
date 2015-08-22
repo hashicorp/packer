@@ -6,7 +6,7 @@ GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 
 default: test dev
 
-ci: deps test testrace
+ci: deps test
 
 release: updatedeps test bin
 
@@ -29,10 +29,10 @@ dev: deps
 
 # generate runs `go generate` to build the dynamically generated
 # source files.
-generate:
+generate: deps
 	go generate ./...
 
-test:
+test: deps
 	go test $(TEST) $(TESTARGS) -timeout=15s
 	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
@@ -43,11 +43,11 @@ test:
 	fi
 
 # testacc runs acceptance tests
-testacc: generate
+testacc: deps generate
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
-testrace:
+testrace: deps
 	go test -race $(TEST) $(TESTARGS) -timeout=15s
 
 # `go get -u` causes git to revert packer to the master branch. This causes all
