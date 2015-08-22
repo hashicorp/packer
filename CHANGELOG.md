@@ -1,15 +1,21 @@
-## (Unreleased)
+## 0.8.6 (Unreleased)
 
 IMPROVEMENTS:
 
   * builder/docker: Now supports Download so it can be used with the file
       provisioner to download a file from a container. [GH-2585]
+  * builder/docker: Now verifies that the artifact will be used before the build
+      starts, unless the `discard` option is specified. This prevent failures
+      after the build completes. [GH-2626]
+  * post-processor/artifice: Now supports glob-like syntax for filenames [GH-2619]
   * post-processor/vagrant: Like the compress post-processor, vagrant now uses a
       parallel gzip algorithm to compress vagrant boxes. [GH-2590]
 
 BUG FIXES:
 
-  * builded/parallels: Fix interpolation in parallels_tools_guest_path [GH-2543]
+  * core: When `iso_url` is a local file and the checksum is invalid, the local
+      file will no longer be deleted. [GH-2603]
+  * builder/parallels: Fix interpolation in `parallels_tools_guest_path` [GH-2543]
 
 ## 0.8.5 (Aug 10, 2015)
 
