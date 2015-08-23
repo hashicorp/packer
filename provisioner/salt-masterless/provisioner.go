@@ -46,6 +46,9 @@ type Config struct {
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
+	// Don't exit packer if salt-call returns an error code
+	NoExitOnFailure bool `mapstructure:"no_exit_on_failure"`
+
 	// Command line args passed onto salt-call
 	CmdArgs string ""
 
@@ -92,7 +95,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.MinionConfig != "" && (p.config.RemoteStateTree != "" || p.config.RemotePillarRoots != "") {
 		errs = packer.MultiErrorAppend(errs,
-			errors.New("minion_config option overrides remote_state_tree and remote_pillar_roots"))
+			errors.New("remote_state_tree and remote_pillar_roots only apply when minion_config is not used"))
 	}
 
 	// build the command line args to pass onto salt
@@ -114,6 +117,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			cmd_args.WriteString(" --pillar-root=")
 			cmd_args.WriteString(DefaultPillarRootDir)
 		}
+	}
+
+	if !p.config.NoExitOnFailure {
+		cmd_args.WriteString(" --retcode-passthrough")
 	}
 
 	p.config.CmdArgs = cmd_args.String()
@@ -217,7 +224,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate -l info --retcode-passthrough %s", p.config.CmdArgs))}
+	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate -l info %s", p.config.CmdArgs))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
