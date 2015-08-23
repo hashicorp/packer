@@ -71,3 +71,5 @@ Optional:
 
 -   `no_exit_on_failure` (boolean) - Packer will exit if the Salt highstate command
     fails. Set this option to true to ignore Salt failures.
+
+-   `log_level` (string) - Set the logging level for the Salt highstate run.

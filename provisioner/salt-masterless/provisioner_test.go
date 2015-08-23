@@ -237,3 +237,27 @@ func TestProvisionerPrepare_NoExitOnFailure(t *testing.T) {
 		t.Fatal("--retcode-passthrough should not be set in CmdArgs")
 	}
 }
+
+func TestProvisionerPrepare_LogLevel(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.Contains(p.config.CmdArgs, "-l info") {
+		t.Fatal("-l info should be set in CmdArgs")
+	}
+
+	config["log_level"] = "debug"
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.Contains(p.config.CmdArgs, "-l debug") {
+		t.Fatal("-l debug should be set in CmdArgs")
+	}
+}
