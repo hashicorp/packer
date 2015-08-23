@@ -68,3 +68,6 @@ Optional:
 
 -   `temp_config_dir` (string) - Where your local state tree will be copied
     before moving to the `/srv/salt` directory. Default is `/tmp/salt`.
+
+-   `no_exit_on_failure` (boolean) - Packer will exit if the Salt highstate command
+    fails. Set this option to true to ignore Salt failures.

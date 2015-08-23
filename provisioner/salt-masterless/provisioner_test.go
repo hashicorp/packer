@@ -213,3 +213,27 @@ func TestProvisionerPrepare_RemotePillarRoots_Default(t *testing.T) {
 		t.Fatal("--pillar-root should be set in CmdArgs")
 	}
 }
+
+func TestProvisionerPrepare_NoExitOnFailure(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.Contains(p.config.CmdArgs, "--retcode-passthrough") {
+		t.Fatal("--retcode-passthrough should be set in CmdArgs")
+	}
+
+	config["no_exit_on_failure"] = true
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if strings.Contains(p.config.CmdArgs, "--retcode-passthrough") {
+		t.Fatal("--retcode-passthrough should not be set in CmdArgs")
+	}
+}
