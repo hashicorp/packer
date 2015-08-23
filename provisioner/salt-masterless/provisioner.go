@@ -3,6 +3,8 @@
 package saltmasterless
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -44,6 +46,9 @@ type Config struct {
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
+	// Command line args passed onto salt-call
+	CmdArgs string ""
+
 	ctx interpolate.Context
 }
 
@@ -67,14 +72,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.TempConfigDir = DefaultTempConfigDir
 	}
 
-	if p.config.RemoteStateTree == "" {
-		p.config.RemoteStateTree = DefaultStateTreeDir
-	}
-
-	if p.config.RemotePillarRoots == "" {
-		p.config.RemotePillarRoots = DefaultPillarRootDir
-	}
-
 	var errs *packer.MultiError
 
 	// require a salt state tree
@@ -92,6 +89,34 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
+
+	if p.config.MinionConfig != "" && (p.config.RemoteStateTree != "" || p.config.RemotePillarRoots != "") {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("minion_config option overrides remote_state_tree and remote_pillar_roots"))
+	}
+
+	// build the command line args to pass onto salt
+	var cmd_args bytes.Buffer
+
+	if p.config.MinionConfig == "" {
+		// pass --file-root and --pillar-root if no minion_config is supplied
+		if p.config.RemoteStateTree != "" {
+			cmd_args.WriteString(" --file-root=")
+			cmd_args.WriteString(p.config.RemoteStateTree)
+		} else {
+			cmd_args.WriteString(" --file-root=")
+			cmd_args.WriteString(DefaultStateTreeDir)
+		}
+		if p.config.RemotePillarRoots != "" {
+			cmd_args.WriteString(" --pillar-root=")
+			cmd_args.WriteString(p.config.RemotePillarRoots)
+		} else {
+			cmd_args.WriteString(" --pillar-root=")
+			cmd_args.WriteString(DefaultPillarRootDir)
+		}
+	}
+
+	p.config.CmdArgs = cmd_args.String()
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
@@ -156,7 +181,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// move state tree from temporary directory
 	src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "states"))
-	dst = p.config.RemoteStateTree
+	if p.config.RemoteStateTree != "" {
+		dst = p.config.RemoteStateTree
+	} else {
+		dst = DefaultStateTreeDir
+	}
 	if err = p.removeDir(ui, comm, dst); err != nil {
 		return fmt.Errorf("Unable to clear salt tree: %s", err)
 	}
@@ -174,7 +203,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// move pillar root from temporary directory
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "pillar"))
-		dst = p.config.RemotePillarRoots
+		if p.config.RemotePillarRoots != "" {
+			dst = p.config.RemotePillarRoots
+		} else {
+			dst = DefaultPillarRootDir
+		}
 		if err = p.removeDir(ui, comm, dst); err != nil {
 			return fmt.Errorf("Unable to clear pillar root: %s", err)
 		}
@@ -184,7 +217,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("salt-call --local state.highstate --file-root=%s --pillar-root=%s -l info --retcode-passthrough"), p.config.RemoteStateTree, p.config.RemotePillarRoots)}
+	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate -l info --retcode-passthrough %s", p.config.CmdArgs))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
