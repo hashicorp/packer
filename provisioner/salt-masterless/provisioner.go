@@ -49,6 +49,9 @@ type Config struct {
 	// Don't exit packer if salt-call returns an error code
 	NoExitOnFailure bool `mapstructure:"no_exit_on_failure"`
 
+	// Set the logging level for the salt highstate run
+	LogLevel string `mapstructure:"log_level"`
+
 	// Command line args passed onto salt-call
 	CmdArgs string ""
 
@@ -121,6 +124,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if !p.config.NoExitOnFailure {
 		cmd_args.WriteString(" --retcode-passthrough")
+	}
+
+	if p.config.LogLevel == "" {
+		cmd_args.WriteString(" -l info")
+	} else {
+		cmd_args.WriteString(" -l ")
+		cmd_args.WriteString(p.config.LogLevel)
 	}
 
 	p.config.CmdArgs = cmd_args.String()
@@ -224,7 +234,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate -l info %s", p.config.CmdArgs))}
+	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate %s", p.config.CmdArgs))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
