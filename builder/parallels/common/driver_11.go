@@ -40,7 +40,7 @@ func (d *Parallels11Driver) SetDefaultConfiguration(vmName string) error {
 	commands := make([][]string, 12)
 	commands[0] = []string{"set", vmName, "--cpus", "1"}
 	commands[1] = []string{"set", vmName, "--memsize", "512"}
-	commands[2] = []string{"set", vmName, "--startup-view", "same"}
+	commands[2] = []string{"set", vmName, "--startup-view", "headless"}
 	commands[3] = []string{"set", vmName, "--on-shutdown", "close"}
 	commands[4] = []string{"set", vmName, "--on-window-close", "keep-running"}
 	commands[5] = []string{"set", vmName, "--auto-share-camera", "off"}
