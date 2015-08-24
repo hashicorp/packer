@@ -127,6 +127,7 @@ Fixes that are run:
   pp-vagrant-override Replaces old-style provider overrides for the Vagrant
                       post-processor to new-style as of Packer 0.5.0.
   virtualbox-rename   Updates "virtualbox" builders to "virtualbox-iso"
+  vmware-rename       Updates "vmware" builders to "vmware-iso"
 
 Options:
 
