@@ -74,7 +74,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&parallelscommon.StepRun{
 			BootWait: b.config.BootWait,
-			Headless: b.config.Headless,
 		},
 		&parallelscommon.StepTypeBootCommand{
 			BootCommand:    b.config.BootCommand,
