@@ -55,5 +55,13 @@ to force the log to always go to a specific file when logging is enabled. Note
 that even when `PACKER_LOG_PATH` is set, `PACKER_LOG` must be set in order for
 any logging to be enabled.
 
+### Debugging Packer in Powershell/Windows
+
+In Windows you can set the detailed logs environmental variable `PACKER_LOG` or
+the log variable `PACKER_LOG_PATH` using powershell environment variables. For example:
+
+    $env:PACKER_LOG=1
+    $env:PACKER_LOG_PATH="packerlog.txt" 
+
 If you find a bug with Packer, please include the detailed log by using a
 service such as [gist](http://gist.github.com).
