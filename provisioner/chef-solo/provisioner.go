@@ -91,7 +91,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InstallCommand == "" {
-		p.config.InstallCommand = "curl -L https://www.opscode.com/chef/install.sh | {{if .Sudo}}sudo {{end}}bash"
+		p.config.InstallCommand = "curl -L https://www.chef.io/chef/install.sh | {{if .Sudo}}sudo {{end}}bash"
 	}
 
 	if p.config.RunList == nil {
