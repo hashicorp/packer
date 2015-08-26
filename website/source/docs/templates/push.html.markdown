@@ -39,7 +39,7 @@ each category, the available configuration keys are alphabetized.
 
 -   `name` (string) - Name of the build configuration in the build service. If
     this doesn't exist, it will be created (by default). Note that the name can
-    cannot contain dots. `[a-zA-Z0-9-_]+` are safe.
+    cannot contain dots. `[a-zA-Z0-9-_/]+` are safe.
 
 ### Optional
 
