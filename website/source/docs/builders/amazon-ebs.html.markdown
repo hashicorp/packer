@@ -177,7 +177,7 @@ builder.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
-    probably don't need it. This will also be read from the `AWS_SECURITY_TOKEN`
+    probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
