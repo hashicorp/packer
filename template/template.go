@@ -132,13 +132,11 @@ func (t *Template) Validate() error {
 	}
 
 	// Validate pushes
-	if t.Push != nil {
-		if t.Push.Address != "" {
-			log.Printf(`[WARN] The push configuration "address" has been renamed ` +
-				`to "atlas_endpoint". Please update your Packer template accordingly.`)
-			t.Push.AtlasEndpoint = t.Push.Address
-			t.Push.Address = ""
-		}
+	if t.Push.Address != "" {
+		log.Printf(`[WARN] The push configuration "address" has been renamed ` +
+			`to "atlas_endpoint". Please update your Packer template accordingly.`)
+		t.Push.AtlasEndpoint = t.Push.Address
+		t.Push.Address = ""
 	}
 
 	return err
