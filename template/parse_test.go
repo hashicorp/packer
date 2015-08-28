@@ -299,7 +299,8 @@ func TestParse(t *testing.T) {
 			"parse-push.json",
 			&Template{
 				Push: Push{
-					Name: "foo",
+					AtlasEndpoint: "http://bacon.com",
+					Name:          "foo",
 				},
 			},
 			false,

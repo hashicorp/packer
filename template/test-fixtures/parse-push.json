@@ -1,5 +1,6 @@
 {
     "push": {
+        "atlas_endpoint": "http://bacon.com",
         "name": "foo"
     }
 }
