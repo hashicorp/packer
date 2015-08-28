@@ -42,8 +42,9 @@ each category, the available configuration keys are alphabetized.
 
 ### Optional
 
--   `address` (string) - The address of the build service to use. By default
-    this is `https://atlas.hashicorp.com`.
+-   `atlas_endpoint` (string) - The address of the Atlas server. This defaults
+    to the public Atlas server at atlas.hashicorp.com, but can be customized
+    for private Atlas installations.
 
 -   `base_dir` (string) - The base directory of the files to upload. This will
     be the current working directory when the build service executes
@@ -86,6 +87,17 @@ files to include:
     "include": [
       "other_file/outside_of.vcs"
     ]
+  }
+}
+```
+
+A push configuration specifying the URL to an Atlas server:
+
+``` {.javascript}
+{
+  "push": {
+    "atlas_endpoint": "https://atlas.mycompany.com",
+    "token": "abcd1234"
   }
 }
 ```

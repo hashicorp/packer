@@ -3,6 +3,7 @@ package template
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -56,13 +57,14 @@ type Provisioner struct {
 
 // Push represents the configuration for pushing the template to Atlas.
 type Push struct {
-	Name    string
-	Address string
-	BaseDir string `mapstructure:"base_dir"`
-	Include []string
-	Exclude []string
-	Token   string
-	VCS     bool
+	Name          string
+	AtlasEndpoint string `mapstructure:"atlas_endpoint"`
+	Address       string
+	BaseDir       string `mapstructure:"base_dir"`
+	Include       []string
+	Exclude       []string
+	Token         string
+	VCS           bool
 }
 
 // Variable represents a variable within the template
@@ -127,6 +129,14 @@ func (t *Template) Validate() error {
 				}
 			}
 		}
+	}
+
+	// Validate pushes
+	if t.Push.Address != "" {
+		log.Printf(`[WARN] The push configuration "address" has been renamed ` +
+			`to "atlas_endpoint". Please update your Packer template accordingly.`)
+		t.Push.AtlasEndpoint = t.Push.Address
+		t.Push.Address = ""
 	}
 
 	return err

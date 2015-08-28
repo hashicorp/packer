@@ -31,6 +31,7 @@ type pushUploadFn func(
 	io.Reader, *uploadOpts) (<-chan struct{}, <-chan error, error)
 
 func (c *PushCommand) Run(args []string) int {
+	var atlasEndpoint string
 	var token string
 	var message string
 	var name string
@@ -38,6 +39,7 @@ func (c *PushCommand) Run(args []string) int {
 
 	f := c.Meta.FlagSet("push", FlagSetVars)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
+	f.StringVar(&atlasEndpoint, "atlas-endpoint", "", "atlas-endpoint")
 	f.StringVar(&token, "token", "", "token")
 	f.StringVar(&message, "m", "", "message")
 	f.StringVar(&message, "message", "", "message")
@@ -88,6 +90,11 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Determine our endpoint
+	if atlasEndpoint == "" {
+		atlasEndpoint = push.AtlasEndpoint
+	}
+
 	// Determine our token
 	if token == "" {
 		token = push.Token
@@ -96,8 +103,8 @@ func (c *PushCommand) Run(args []string) int {
 	// Build our client
 	defer func() { c.client = nil }()
 	c.client = atlas.DefaultClient()
-	if push.Address != "" {
-		c.client, err = atlas.NewClient(push.Address)
+	if atlasEndpoint != "" {
+		c.client, err = atlas.NewClient(atlasEndpoint)
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
 				"Error setting up API client: %s", err))
@@ -263,7 +270,9 @@ Options:
   -name=<name>             The destination build in Atlas. This is in a format
                            "username/name".
 
-  -token=<token>           The access token to use to when uploading
+  -atlas-endpoint=<url>    The address to the Atlas server. This defaults to the
+                           public Atlas server at atlas.hashicorp.com.
+  -token=<token>           The access token to use to when uploading.
 
   -var 'key=value'         Variable for templates, can be used multiple times.
 

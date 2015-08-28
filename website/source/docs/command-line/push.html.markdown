@@ -38,6 +38,10 @@ configuration using the options below.
     template much like a VCS commit message. This message will be passed to the
     Packer build service. This option is also available as a short option `-m`.
 
+-   `-atlas-endpoint` - The address of the Atlas server to connect to. By
+    default this is the public Atlas server at atlas.hashicorp.com, but can be
+    configured to connect to a private Atlas instance.
+
 -   `-token` - Your access token for the Atlas API.
 
 -&gt; Login to Atlas to [generate an Atlas
