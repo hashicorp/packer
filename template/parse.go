@@ -11,6 +11,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"strconv"
+	"unicode"
+	"regexp"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
@@ -20,9 +23,12 @@ import (
 // This is what is decoded directly from the file, and then it is turned
 // into a Template object thereafter.
 type rawTemplate struct {
+	Path string
+
 	MinVersion  string `mapstructure:"min_packer_version"`
 	Description string
 
+	Include		   map[string][]string
 	Builders       []map[string]interface{}
 	Push           map[string]interface{}
 	PostProcessors []interface{} `mapstructure:"post-processors"`
@@ -42,6 +48,10 @@ func (r *rawTemplate) Template() (*Template, error) {
 	result.Description = r.Description
 	result.MinVersion = r.MinVersion
 	result.RawContents = r.RawContents
+
+	if err := r.parseInclude(); err != nil {
+		errs = multierror.Append(errs, err)
+	}
 
 	// Gather the variables
 	if len(r.Variables) > 0 {
@@ -201,6 +211,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 		return nil, errs
 	}
 
+	result.Path = r.Path
 	return &result, nil
 }
 
@@ -219,6 +230,139 @@ func (r *rawTemplate) decoder(
 		panic(err)
 	}
 	return d
+}
+
+var validIncludePath = regexp.MustCompile(`^\w+(\[.*\]){0,1}$`)
+
+func parseIncludePath(path string) (string, string, error) {
+	if !validIncludePath.MatchString(path) {
+		return "", "", fmt.Errorf("'%s' bad format", path)
+	}
+	parts := strings.FieldsFunc(path, func(c rune) bool {
+		return c != ' ' && c != '*' && !unicode.IsLetter(c) && !unicode.IsNumber(c)
+	})
+	if parts == nil || len(parts) == 0 {
+		return "", "", fmt.Errorf("cant' parse %s", path)
+	} else if len(parts) == 1 {
+		return strings.ToLower(parts[0]), "", nil
+	} else {
+		return strings.ToLower(parts[0]), parts[1], nil
+	}
+}
+
+func (r *rawTemplate) parseInclude() (error) {
+	var errs error
+
+	for k, rawI := range r.Include {
+		var path = k
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(filepath.Dir(r.Path), k)
+		}
+		include, err := ParseFileToRaw(path)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+		for ii, pathBlock := range rawI {
+			component, key, err := parseIncludePath(pathBlock)
+			if err != nil {
+				errs = multierror.Append(errs,
+					fmt.Errorf("include %s[%d]: %v", k, ii, err))
+				continue
+			}
+			switch component {
+				default:
+					errs = multierror.Append(errs,
+						fmt.Errorf("include %s[%d]: Unexpected type of component: '%s'", k, ii, component))
+					continue
+				case "builders":
+					isFound := false
+					for _, item := range include.Builders {
+						if item["type"] == key || item["name"] == key || key == "*" {
+							r.Builders = append(r.Builders, item)
+							isFound = true
+						}
+					}
+
+					if !isFound {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: builder '%s' not found", k, component, ii, key))
+						continue
+					}
+				case "provisioners":
+					if key == "*" {
+						r.Provisioners = append(r.Provisioners, include.Provisioners...)
+						continue
+					}
+
+					index, err := strconv.Atoi(key)
+					if err != nil  {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: could not parse '%s' as a index: %s", k, component, ii, key, err))
+						continue
+					}
+					if index >= len(include.Provisioners) || index < 0 {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: index %d >= %d or < 0 ", k, component, ii, index, len(include.Provisioners)))
+						continue
+					}
+					r.Provisioners = append(r.Provisioners, include.Provisioners[index])
+				case "variables":
+					copyVariable := func (key string) {
+						if val, ok := r.Variables[key]; ok {
+							errs = multierror.Append(errs,
+								fmt.Errorf("include %s[%s][%d]: variable '%s':'%s' found inside '%s'", k, component, ii, key, val, r.Path))
+						} else if val, ok := include.Variables[key]; ok {
+							if r.Variables == nil {
+								r.Variables = make(map[string]interface{}, 1)
+							}
+							r.Variables[key] = val
+						} else {
+							errs = multierror.Append(errs,
+								fmt.Errorf("include %s[%s][%d]: variable '%s' not found inside '%s'", k, component, ii, key, k))
+						}
+					}
+
+					if key == "*" {
+						for key, _ := range include.Variables {
+							copyVariable(key)
+						}
+					} else {
+						copyVariable(key)
+					}
+				case "postprocessors":
+					if key == "*" {
+						r.PostProcessors = append(r.PostProcessors, include.PostProcessors...)
+						continue
+					}
+
+					index, err := strconv.Atoi(key)
+					if err != nil {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: could not parse '%s' as a index: '%s'", k, component, ii, key, err))
+						continue					}
+					if index >= len(include.PostProcessors) || index < 0 {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: index %d >= %d or < 0 ", k, component, ii, index, len(include.PostProcessors)))
+						continue
+					}
+					r.PostProcessors = append(r.PostProcessors, include.PostProcessors[index])
+				case "push":
+					if r.Push != nil {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: can't include push because '%s' already exists", k, component, ii, r.Path))
+						continue
+					}
+					if include.Push == nil {
+						errs = multierror.Append(errs,
+							fmt.Errorf("include %s[%s][%d]: push not found", k, component, ii))
+						continue
+					}
+					r.Push = include.Push
+			}
+		}
+	}
+	return errs
 }
 
 func (r *rawTemplate) parsePostProcessor(
@@ -260,8 +404,16 @@ func (r *rawTemplate) parsePostProcessor(
 	}
 }
 
-// Parse takes the given io.Reader and parses a Template object out of it.
 func Parse(r io.Reader) (*Template, error) {
+	rawTpl, err := ParseToRaw(r)
+	if err != nil {
+		return nil, err
+	}
+	return rawTpl.Template()
+}
+
+// Parse takes the given io.Reader and parses a RawTemplate object out of it.
+func ParseToRaw(r io.Reader) (*rawTemplate, error) {
 	// Create a buffer to copy what we read
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
@@ -308,13 +460,11 @@ func Parse(r io.Reader) (*Template, error) {
 		return nil, err
 	}
 
-	// Return the template parsed from the raw structure
-	return rawTpl.Template()
+	// Return the raw template parsed from the raw structure
+	return &rawTpl, nil
 }
 
-// ParseFile is the same as Parse but is a helper to automatically open
-// a file for parsing.
-func ParseFile(path string) (*Template, error) {
+func ParseFileToRaw(path string) (*rawTemplate, error) {
 	var f *os.File
 	var err error
 	if path == "-" {
@@ -334,7 +484,7 @@ func ParseFile(path string) (*Template, error) {
 		}
 		defer f.Close()
 	}
-	tpl, err := Parse(f)
+	tpl, err := ParseToRaw(f)
 	if err != nil {
 		syntaxErr, ok := err.(*json.SyntaxError)
 		if !ok {
@@ -357,6 +507,16 @@ func ParseFile(path string) (*Template, error) {
 
 	tpl.Path = path
 	return tpl, nil
+}
+
+// ParseFile is the same as Parse but is a helper to automatically open
+// a file for parsing.
+func ParseFile(path string) (*Template, error) {
+	rawTpl, err := ParseFileToRaw(path)
+	if err != nil {
+		return nil, err
+	}
+	return rawTpl.Template()
 }
 
 // Takes a file and the location in bytes of a parse error
