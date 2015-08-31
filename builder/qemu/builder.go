@@ -111,7 +111,6 @@ type Config struct {
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHKeyPath     string        `mapstructure:"ssh_key_path"`
 	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
 
 	// TODO(mitchellh): deprecate
@@ -222,9 +221,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// TODO: backwards compatibility, write fixer instead
-	if b.config.SSHKeyPath != "" {
-		b.config.Comm.SSHPrivateKey = b.config.SSHKeyPath
-	}
 	if b.config.SSHWaitTimeout != 0 {
 		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
