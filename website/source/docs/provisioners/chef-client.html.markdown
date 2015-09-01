@@ -71,9 +71,9 @@ configuration is actually required.
     then the sudo will be omitted.
 
 -   `run_list` (array of strings) - The [run
-    list](http://docs.chef.io/essentials_node_object_run_lists.html)
-    for Chef. By default this is empty, and will use the run list sent down by
-    the Chef Server.
+    list](http://docs.chef.io/essentials_node_object_run_lists.html) for Chef.
+    By default this is empty, and will use the run list sent down by the
+    Chef Server.
 
 -   `server_url` (string) - The URL to the Chef server. This is required.
 
@@ -186,23 +186,21 @@ directories, append a shell provisioner after Chef to modify them.
 
 ### Chef Client Local Mode
 
-The following example shows how to run the `chef-cilent` provisioner in
-local mode, while passing a `run_list` using a variable.
+The following example shows how to run the `chef-cilent` provisioner in local
+mode, while passing a `run_list` using a variable.
 
 **Local environment variables**
 
-```
-# Machines Chef directory
-export PACKER_CHEF_DIR=/var/chef-packer
-# Comma separated run_list
-export PACKER_CHEF_RUN_LIST="recipe[apt],recipe[nginx]"
-...
-```
+    # Machines Chef directory
+    export PACKER_CHEF_DIR=/var/chef-packer
+    # Comma separated run_list
+    export PACKER_CHEF_RUN_LIST="recipe[apt],recipe[nginx]"
+    ...
 
 **Packer variables**
 
-Set the necessary Packer variables using environment variables or provide a
-[var file](/docs/templates/user-variables.html).
+Set the necessary Packer variables using environment variables or provide a [var
+file](/docs/templates/user-variables.html).
 
 ``` {.liquid}
 "variables": {
@@ -217,10 +215,9 @@ Set the necessary Packer variables using environment variables or provide a
 
 **Setup the** `chef-client` **provisioner**
 
-Make sure we have the correct directories and permissions for the
-`chef-client` provisioner. You will need to bootstrap the Chef run
-by providing the necessary cookbooks using Berkshelf or some other
-means.
+Make sure we have the correct directories and permissions for the `chef-client`
+provisioner. You will need to bootstrap the Chef run by providing the necessary
+cookbooks using Berkshelf or some other means.
 
 ``` {.liquid}
 {
