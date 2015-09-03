@@ -170,44 +170,46 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
 	copy(envVars[2:], p.config.Vars)
 
-	for _, path := range scripts {
-		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", path))
+	for _, file := range artifact.Files() {
+		for _, path := range scripts {
+			// Flatten the environment variables
+			flattendVars := strings.Join(envVars, " ")
 
-		// Flatten the environment variables
-		flattendVars := strings.Join(envVars, " ")
+			path := strings.Join([]string{path, file}, " ")
+			p.config.ctx.Data = &ExecuteCommandTemplate{
+				Vars: flattendVars,
+				Path: path,
+			}
 
-		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars: flattendVars,
-			Path: path,
+			command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+			if err != nil {
+				return nil, false, fmt.Errorf("Error processing command: %s", err)
+			}
+
+			ui.Say(fmt.Sprintf("Post processing with local shell script: %s", command))
+
+			comm := &Communicator{}
+
+			cmd := &packer.RemoteCmd{Command: command}
+
+			ui.Say(fmt.Sprintf(
+				"Executing local script: %s",
+				path))
+			if err := cmd.StartWithUi(comm, ui); err != nil {
+				return nil, false, fmt.Errorf(
+					"Error executing script: %s\n\n"+
+						"Please see output above for more information.",
+					path)
+			}
+			if cmd.ExitStatus != 0 {
+				return nil, false, fmt.Errorf(
+					"Erroneous exit code %d while executing script: %s\n\n"+
+						"Please see output above for more information.",
+					cmd.ExitStatus,
+					path)
+			}
 		}
-
-		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-		if err != nil {
-			return nil, false, fmt.Errorf("Error processing command: %s", err)
-		}
-
-		comm := &Communicator{}
-
-		cmd := &packer.RemoteCmd{Command: command}
-
-		ui.Say(fmt.Sprintf(
-			"Executing local script: %s",
-			path))
-		if err := cmd.StartWithUi(comm, ui); err != nil {
-			return nil, false, fmt.Errorf(
-				"Error executing script: %s\n\n"+
-					"Please see output above for more information.",
-				path)
-		}
-		if cmd.ExitStatus != 0 {
-			return nil, false, fmt.Errorf(
-				"Erroneous exit code %d while executing script: %s\n\n"+
-					"Please see output above for more information.",
-				cmd.ExitStatus,
-				path)
-		}
-
 	}
 
-	return nil, true, nil
+	return artifact, true, nil
 }
