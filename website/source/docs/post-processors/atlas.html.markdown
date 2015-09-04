@@ -60,7 +60,8 @@ you can also use `token` configuration option.
 
 -   `artifact_type` (string) - For uploading artifacts to Atlas. `artifact_type`
     can be set to any unique identifier, however, the following are recommended
-    for consistency - `vagrant.box`, `amazon.ami`, `google.image`, and `docker.image`.
+    for consistency - `vagrant.box`, `amazon.ami`, `google.image`, `docker.image`,
+    `vmware.image`, and `virtualbox.image`.
 
 ### Optional:
 
