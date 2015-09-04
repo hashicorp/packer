@@ -59,9 +59,8 @@ you can also use `token` configuration option.
     to add an artifact to the organization in Atlas.
 
 -   `artifact_type` (string) - For uploading artifacts to Atlas. `artifact_type`
-    can be set to any unique identifier, however, we recommend using the
-    following for consistency - `amazon.ami`, `vagrant.box`, `google.image`,
-    and `docker.image`.
+    can be set to any unique identifier, however, the following are recommended
+    for consistency - `vagrant.box`, `amazon.ami`, `google.image`, and `docker.image`.
 
 ### Optional:
 
