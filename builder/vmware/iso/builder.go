@@ -318,6 +318,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 		},
 		&vmwcommon.StepCleanFiles{},
+		&vmwcommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
+		},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
@@ -325,9 +328,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepCleanVMX{},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
-		},
-		&vmwcommon.StepCompactDisk{
-			Skip: b.config.SkipCompaction,
 		},
 	}
 
