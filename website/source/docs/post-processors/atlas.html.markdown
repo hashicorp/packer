@@ -58,9 +58,10 @@ you can also use `token` configuration option.
     You must have access to the organization—hashicorp in this example—in order
     to add an artifact to the organization in Atlas.
 
--   `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will
-    always be `amazon.ami`. This field must be defined because Atlas can host
-    other artifact types, such as Vagrant boxes.
+-   `artifact_type` (string) - For uploading artifacts to Atlas. `artifact_type`
+    can be set to any unique identifier, however, we recommend using the
+    following for consistency - `amazon.ami`, `vagrant.box`, `google.image`,
+    and `docker.image`.
 
 ### Optional:
 
