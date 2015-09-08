@@ -189,7 +189,7 @@ func (d *QemuDriver) Version() (string, error) {
 
 	versionOutput := strings.TrimSpace(stdout.String())
 	log.Printf("Qemu --version output: %s", versionOutput)
-	versionRe := regexp.MustCompile("[0-9]\\.[0-9]\\.[0-9]")
+	versionRe := regexp.MustCompile("[\\.[0-9]+]*")
 	matches := versionRe.FindStringSubmatch(versionOutput)
 	if len(matches) == 0 {
 		return "", fmt.Errorf("No version found: %s", versionOutput)
