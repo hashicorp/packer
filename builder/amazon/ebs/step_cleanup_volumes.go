@@ -62,9 +62,9 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	var vl []*string
 	volList := make(map[string]string)
 	for _, bdm := range instance.BlockDeviceMappings {
-		if bdm.EBS != nil {
-			vl = append(vl, bdm.EBS.VolumeID)
-			volList[*bdm.EBS.VolumeID] = *bdm.DeviceName
+		if bdm.Ebs != nil {
+			vl = append(vl, bdm.Ebs.VolumeId)
+			volList[*bdm.Ebs.VolumeId] = *bdm.DeviceName
 		}
 	}
 
@@ -88,7 +88,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	// available, remove them from the list of volumes
 	for _, v := range resp.Volumes {
 		if v.State != nil && *v.State != "available" {
-			delete(volList, *v.VolumeID)
+			delete(volList, *v.VolumeId)
 		}
 	}
 
@@ -109,7 +109,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	// Destroy remaining volumes
 	for k, _ := range volList {
 		ui.Say(fmt.Sprintf("Destroying volume (%s)...", k))
-		_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeID: aws.String(k)})
+		_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(k)})
 		if err != nil {
 			ui.Say(fmt.Sprintf("Error deleting volume: %s", k))
 		}

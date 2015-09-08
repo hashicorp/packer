@@ -11,7 +11,9 @@ import (
 )
 
 // StepRegisterAMI creates the AMI.
-type StepRegisterAMI struct{}
+type StepRegisterAMI struct {
+	RootVolumeSize int64
+}
 
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
@@ -24,12 +26,22 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	blockDevices := make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
 	for i, device := range image.BlockDeviceMappings {
 		newDevice := device
-		if newDevice.DeviceName == image.RootDeviceName {
-			if newDevice.EBS != nil {
-				newDevice.EBS.SnapshotID = &snapshotId
+		if *newDevice.DeviceName == *image.RootDeviceName {
+			if newDevice.Ebs != nil {
+				newDevice.Ebs.SnapshotId = aws.String(snapshotId)
 			} else {
-				newDevice.EBS = &ec2.EBSBlockDevice{SnapshotID: &snapshotId}
+				newDevice.Ebs = &ec2.EbsBlockDevice{SnapshotId: aws.String(snapshotId)}
 			}
+
+			if s.RootVolumeSize > *newDevice.Ebs.VolumeSize {
+				newDevice.Ebs.VolumeSize = aws.Int64(s.RootVolumeSize)
+			}
+		}
+
+		// assume working from a snapshot, so we unset the Encrypted field if set,
+		// otherwise AWS API will return InvalidParameter
+		if newDevice.Ebs != nil && newDevice.Ebs.Encrypted != nil {
+			newDevice.Ebs.Encrypted = nil
 		}
 
 		blockDevices[i] = newDevice
@@ -39,7 +51,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
-		registerOpts.SRIOVNetSupport = aws.String("simple")
+		registerOpts.SriovNetSupport = aws.String("simple")
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -50,16 +62,16 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the AMI ID in the state
-	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageID))
+	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageId))
 	amis := make(map[string]string)
-	amis[ec2conn.Config.Region] = *registerResp.ImageID
+	amis[*ec2conn.Config.Region] = *registerResp.ImageId
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageID),
+		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageId),
 		StepState: state,
 	}
 
@@ -82,12 +94,16 @@ func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.Blo
 		Architecture:        image.Architecture,
 		RootDeviceName:      image.RootDeviceName,
 		BlockDeviceMappings: blockDevices,
-		VirtualizationType:  &config.AMIVirtType,
+		VirtualizationType:  image.VirtualizationType,
+	}
+
+	if config.AMIVirtType != "" {
+		registerOpts.VirtualizationType = aws.String(config.AMIVirtType)
 	}
 
 	if config.AMIVirtType != "hvm" {
-		registerOpts.KernelID = image.KernelID
-		registerOpts.RAMDiskID = image.RAMDiskID
+		registerOpts.KernelId = image.KernelId
+		registerOpts.RamdiskId = image.RamdiskId
 	}
 
 	return registerOpts

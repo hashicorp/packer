@@ -89,7 +89,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.InstallCommand == "" {
 		p.config.InstallCommand = "curl -L " +
-			"https://www.opscode.com/chef/install.sh | " +
+			"https://www.chef.io/chef/install.sh | " +
 			"{{if .Sudo}}sudo {{end}}bash"
 	}
 
@@ -187,14 +187,20 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	err = p.executeChef(ui, comm, configPath, jsonPath)
+
+	knifeConfigPath, err2 := p.createKnifeConfig(
+		ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
+	if err2 != nil {
+		return fmt.Errorf("Error creating knife config on node: %s", err2)
+	}
 	if !p.config.SkipCleanNode {
-		if err2 := p.cleanNode(ui, comm, nodeName); err2 != nil {
+		if err2 := p.cleanNode(ui, comm, nodeName, knifeConfigPath); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef node: %s", err2)
 		}
 	}
 
 	if !p.config.SkipCleanClient {
-		if err2 := p.cleanClient(ui, comm, nodeName); err2 != nil {
+		if err2 := p.cleanClient(ui, comm, nodeName, knifeConfigPath); err2 != nil {
 			return fmt.Errorf("Error cleaning up chef client: %s", err2)
 		}
 	}
@@ -273,6 +279,32 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 	return remotePath, nil
 }
 
+func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string) (string, error) {
+	ui.Message("Creating configuration file 'knife.rb'")
+
+	// Read the template
+	tpl := DefaultKnifeTemplate
+
+	ctx := p.config.ctx
+	ctx.Data = &ConfigTemplate{
+		NodeName:      nodeName,
+		ServerUrl:     serverUrl,
+		ClientKey:     clientKey,
+		SslVerifyMode: sslVerifyMode,
+	}
+	configString, err := interpolate.Render(tpl, &ctx)
+	if err != nil {
+		return "", err
+	}
+
+	remotePath := filepath.ToSlash(filepath.Join(p.config.StagingDir, "knife.rb"))
+	if err := comm.Upload(remotePath, bytes.NewReader([]byte(configString)), nil); err != nil {
+		return "", err
+	}
+
+	return remotePath, nil
+}
+
 func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string, error) {
 	ui.Message("Creating JSON attribute file")
 
@@ -334,32 +366,30 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string) error {
+func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
 	ui.Say("Cleaning up chef node...")
 	args := []string{"node", "delete", node}
-	if err := p.knifeExec(ui, comm, node, args); err != nil {
+	if err := p.knifeExec(ui, comm, node, knifeConfigPath, args); err != nil {
 		return fmt.Errorf("Failed to cleanup node: %s", err)
 	}
 
 	return nil
 }
 
-func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string) error {
+func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
 	ui.Say("Cleaning up chef client...")
 	args := []string{"client", "delete", node}
-	if err := p.knifeExec(ui, comm, node, args); err != nil {
+	if err := p.knifeExec(ui, comm, node, knifeConfigPath, args); err != nil {
 		return fmt.Errorf("Failed to cleanup client: %s", err)
 	}
 
 	return nil
 }
 
-func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node string, args []string) error {
+func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node string, knifeConfigPath string, args []string) error {
 	flags := []string{
 		"-y",
-		"-s", fmt.Sprintf("'%s'", p.config.ServerUrl),
-		"-k", fmt.Sprintf("'%s'", p.config.ClientKey),
-		"-u", fmt.Sprintf("'%s'", node),
+		"-c", knifeConfigPath,
 	}
 
 	cmdText := fmt.Sprintf(
@@ -569,6 +599,17 @@ node_name "{{.NodeName}}"
 {{if ne .ChefEnvironment ""}}
 environment "{{.ChefEnvironment}}"
 {{end}}
+{{if ne .SslVerifyMode ""}}
+ssl_verify_mode :{{.SslVerifyMode}}
+{{end}}
+`
+
+var DefaultKnifeTemplate = `
+log_level        :info
+log_location     STDOUT
+chef_server_url  "{{.ServerUrl}}"
+client_key       "{{.ClientKey}}"
+node_name "{{.NodeName}}"
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
 {{end}}

@@ -1,0 +1,7 @@
+{
+    "min_packer_version": "2.1.0",
+
+    "builders": [
+        {"type": "foo"}
+    ]
+}

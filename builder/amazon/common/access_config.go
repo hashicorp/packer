@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -31,7 +32,7 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 		}},
 		&credentials.EnvProvider{},
 		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
-		&credentials.EC2RoleProvider{},
+		&ec2rolecreds.EC2RoleProvider{},
 	})
 
 	region, err := c.Region()
@@ -40,9 +41,9 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 	}
 
 	return &aws.Config{
-		Region:      region,
+		Region:      aws.String(region),
 		Credentials: creds,
-		MaxRetries:  11,
+		MaxRetries:  aws.Int(11),
 	}, nil
 }
 

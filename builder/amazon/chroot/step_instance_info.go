@@ -34,7 +34,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Instance ID: %s", instanceId)
 
 	// Query the entire instance metadata
-	instancesResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{InstanceIDs: []*string{&instanceId}})
+	instancesResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{InstanceIds: []*string{&instanceId}})
 	if err != nil {
 		err := fmt.Errorf("Error getting instance data: %s", err)
 		state.Put("error", err)
@@ -49,7 +49,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	instance := &instancesResp.Reservations[0].Instances[0]
+	instance := instancesResp.Reservations[0].Instances[0]
 	state.Put("instance", instance)
 
 	return multistep.ActionContinue

@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/mitchellh/packer/builder/file"
-	env "github.com/mitchellh/packer/helper/builder/testing"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template"
 )
@@ -151,6 +150,37 @@ func TestCompressOptions(t *testing.T) {
 	}
 }
 
+func TestCompressInterpolation(t *testing.T) {
+	const config = `
+	{
+	    "post-processors": [
+	        {
+	            "type": "compress",
+	            "output": "{{ build_name}}-{{ .BuildName }}-{{.BuilderType}}.gz"
+	        }
+	    ]
+	}
+	`
+
+	artifact := testArchive(t, config)
+	defer artifact.Destroy()
+
+	// You can interpolate using the .BuildName variable or build_name global
+	// function. We'll check both.
+	filename := "chocolate-vanilla-file.gz"
+	archive, err := os.Open(filename)
+	if err != nil {
+		t.Fatalf("Unable to read %s: %s", filename, err)
+	}
+
+	gzipReader, _ := gzip.NewReader(archive)
+	data, _ := ioutil.ReadAll(gzipReader)
+
+	if string(data) != expectedFileContents {
+		t.Errorf("Expected:\n%s\nFound:\n%s\n", expectedFileContents, data)
+	}
+}
+
 // Test Helpers
 
 func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
@@ -187,11 +217,6 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 }
 
 func testArchive(t *testing.T, config string) packer.Artifact {
-	if os.Getenv(env.TestEnvVar) == "" {
-		t.Skip(fmt.Sprintf(
-			"Acceptance tests skipped unless env '%s' set", env.TestEnvVar))
-	}
-
 	ui, artifact, err := setup(t)
 	if err != nil {
 		t.Fatalf("Error bootstrapping test: %s", err)
@@ -207,6 +232,13 @@ func testArchive(t *testing.T, config string) packer.Artifact {
 
 	compressor := PostProcessor{}
 	compressor.Configure(tpl.PostProcessors[0][0].Config)
+
+	// I get the feeling these should be automatically available somewhere, but
+	// some of the post-processors construct this manually.
+	compressor.config.ctx.BuildName = "chocolate"
+	compressor.config.PackerBuildName = "vanilla"
+	compressor.config.PackerBuilderType = "file"
+
 	artifactOut, _, err := compressor.PostProcess(ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to compress artifact: %s", err)

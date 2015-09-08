@@ -10,11 +10,11 @@ import (
 	"os"
 	"runtime"
 
-	"code.google.com/p/gosshold/ssh"
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
 )
 
 type stepCreateSSHKey struct {

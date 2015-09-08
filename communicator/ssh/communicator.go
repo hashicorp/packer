@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,7 +13,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
+
+// ErrHandshakeTimeout is returned from New() whenever we're unable to establish
+// an ssh connection within a certain timeframe. By default the handshake time-
+// out period is 1 minute. You can change it with Config.HandshakeTimeout.
+var ErrHandshakeTimeout = fmt.Errorf("Timeout during SSH handshake")
 
 type comm struct {
 	client  *ssh.Client
@@ -37,6 +44,13 @@ type Config struct {
 
 	// Pty, if true, will request a pty from the remote end.
 	Pty bool
+
+	// DisableAgent, if true, will not forward the SSH agent.
+	DisableAgent bool
+
+	// HandshakeTimeout limits the amount of time we'll wait to handshake before
+	// saying the connection failed.
+	HandshakeTimeout time.Duration
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -270,10 +284,46 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	log.Printf("handshaking with SSH")
-	sshConn, sshChan, req, err := ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+
+	// Default timeout to 1 minute if it wasn't specified (zero value). For
+	// when you need to handshake from low orbit.
+	var duration time.Duration
+	if c.config.HandshakeTimeout == 0 {
+		duration = 1 * time.Minute
+	} else {
+		duration = c.config.HandshakeTimeout
+	}
+
+	connectionEstablished := make(chan struct{}, 1)
+
+	var sshConn ssh.Conn
+	var sshChan <-chan ssh.NewChannel
+	var req <-chan *ssh.Request
+
+	go func() {
+		sshConn, sshChan, req, err = ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+		close(connectionEstablished)
+	}()
+
+	select {
+	case <-connectionEstablished:
+		// We don't need to do anything here. We just want select to block until
+		// we connect or timeout.
+	case <-time.After(duration):
+		if c.conn != nil {
+			c.conn.Close()
+		}
+		if sshConn != nil {
+			sshConn.Close()
+		}
+		return ErrHandshakeTimeout
+	}
+
 	if err != nil {
 		log.Printf("handshake error: %s", err)
+		return
 	}
+	log.Printf("handshake complete!")
 	if sshConn != nil {
 		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
@@ -284,6 +334,11 @@ func (c *comm) reconnect() (err error) {
 
 func (c *comm) connectToAgent() {
 	if c.client == nil {
+		return
+	}
+
+	if c.config.DisableAgent {
+		log.Printf("[INFO] SSH agent forwarding is disabled.")
 		return
 	}
 

@@ -1,13 +1,13 @@
 package rpc
 
 import (
-	"fmt"
-	"github.com/hashicorp/go-msgpack/codec"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net/rpc"
 	"sync/atomic"
+
+	"github.com/hashicorp/go-msgpack/codec"
+	"github.com/mitchellh/packer/packer"
 )
 
 var endpointId uint64
@@ -149,7 +149,7 @@ func (s *Server) Serve() {
 func registerComponent(server *rpc.Server, name string, rcvr interface{}, id bool) string {
 	endpoint := name
 	if id {
-		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
+		log.Printf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
 	}
 
 	server.RegisterName(endpoint, rcvr)

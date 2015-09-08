@@ -34,6 +34,8 @@ type Config struct {
 	DevicePath     string     `mapstructure:"device_path"`
 	MountPath      string     `mapstructure:"mount_path"`
 	SourceAmi      string     `mapstructure:"source_ami"`
+	RootVolumeSize int64      `mapstructure:"root_volume_size"`
+	MountOptions   []string   `mapstructure:"mount_options"`
 
 	ctx interpolate.Context
 }
@@ -159,10 +161,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCheckRootDevice{},
 		&StepFlock{},
 		&StepPrepareDevice{},
-		&StepCreateVolume{},
+		&StepCreateVolume{
+			RootVolumeSize: b.config.RootVolumeSize,
+		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
-		&StepMountDevice{},
+		&StepMountDevice{
+			MountOptions: b.config.MountOptions,
+		},
 		&StepMountExtra{},
 		&StepCopyFiles{},
 		&StepChrootProvision{},
@@ -172,7 +178,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceDeregister: b.config.AMIForceDeregister,
 			AMIName:         b.config.AMIName,
 		},
-		&StepRegisterAMI{},
+		&StepRegisterAMI{
+			RootVolumeSize: b.config.RootVolumeSize,
+		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig: &b.config.AccessConfig,
 			Regions:      b.config.AMIRegions,

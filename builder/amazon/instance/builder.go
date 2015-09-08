@@ -50,6 +50,12 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+	configs := make([]interface{}, len(raws)+1)
+	configs[0] = map[string]interface{}{
+		"bundle_prefix": "image-{{timestamp}}",
+	}
+	copy(configs[1:], raws)
+
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -60,17 +66,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"bundle_vol_command",
 			},
 		},
-	}, raws...)
+	}, configs...)
 	if err != nil {
 		return nil, err
 	}
 
 	if b.config.BundleDestination == "" {
 		b.config.BundleDestination = "/tmp"
-	}
-
-	if b.config.BundlePrefix == "" {
-		b.config.BundlePrefix = "image-{{timestamp}}"
 	}
 
 	if b.config.BundleUploadCommand == "" {
@@ -204,6 +206,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tags:                     b.config.RunTags,
 		},
 		&awscommon.StepGetPassword{
+			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
 			Timeout: b.config.WindowsPasswordTimeout,
 		},

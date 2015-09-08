@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/builder/amazon/common"
 	builderT "github.com/mitchellh/packer/helper/builder/testing"
@@ -42,6 +43,71 @@ func TestBuilderAcc_forceDeregister(t *testing.T) {
 		Builder:  &Builder{},
 		Template: buildForceDeregisterConfig("true", "dereg"),
 	})
+}
+
+func TestBuilderAcc_amiSharing(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: testBuilderAccSharing,
+		Check:    checkAMISharing(2, "932021504756", "all"),
+	})
+}
+
+func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		if len(artifacts) > 1 {
+			return fmt.Errorf("more than 1 artifact")
+		}
+
+		// Get the actual *Artifact pointer so we can access the AMIs directly
+		artifactRaw := artifacts[0]
+		artifact, ok := artifactRaw.(*common.Artifact)
+		if !ok {
+			return fmt.Errorf("unknown artifact: %#v", artifactRaw)
+		}
+
+		// describe the image, get block devices with a snapshot
+		ec2conn, _ := testEC2Conn()
+		imageResp, err := ec2conn.DescribeImageAttribute(&ec2.DescribeImageAttributeInput{
+			Attribute: aws.String("launchPermission"),
+			ImageId:   aws.String(artifact.Amis["us-east-1"]),
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error retrieving Image Attributes for AMI Artifact (%#v) in AMI Sharing Test: %s", artifact, err)
+		}
+
+		// Launch Permissions are in addition to the userid that created it, so if
+		// you add 3 additional ami_users, you expect 2 Launch Permissions here
+		if len(imageResp.LaunchPermissions) != count {
+			return fmt.Errorf("Error in Image Attributes, expected (%d) Launch Permissions, got (%d)", count, len(imageResp.LaunchPermissions))
+		}
+
+		userFound := false
+		for _, lp := range imageResp.LaunchPermissions {
+			if lp.UserId != nil && uid == *lp.UserId {
+				userFound = true
+			}
+		}
+
+		if !userFound {
+			return fmt.Errorf("Error in Image Attributes, expected User ID (%s) to have Launch Permissions, but was not found", uid)
+		}
+
+		groupFound := false
+		for _, lp := range imageResp.LaunchPermissions {
+			if lp.Group != nil && group == *lp.Group {
+				groupFound = true
+			}
+		}
+
+		if !groupFound {
+			return fmt.Errorf("Error in Image Attributes, expected Group ID (%s) to have Launch Permissions, but was not found", group)
+		}
+
+		return nil
+	}
 }
 
 func checkRegionCopy(regions []string) builderT.TestCheckFunc {
@@ -134,6 +200,22 @@ const testBuilderAccForceDeregister = `
 		"ssh_username": "ubuntu",
 		"force_deregister": "%s",
 		"ami_name": "packer-test-%s"
+	}]
+}
+`
+
+// share with catsby
+const testBuilderAccSharing = `
+{
+	"builders": [{
+		"type": "test",
+		"region": "us-east-1",
+		"instance_type": "m3.medium",
+		"source_ami": "ami-76b2a71e",
+		"ssh_username": "ubuntu",
+		"ami_name": "packer-test {{timestamp}}",
+		"ami_users":["932021504756"],
+		"ami_groups":["all"]
 	}]
 }
 `
