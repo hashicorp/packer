@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/multistep"
@@ -62,6 +63,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	vncPort := state.Get("vnc_port").(uint)
 	sshHostPort := state.Get("sshHostPort").(uint)
 	ui := state.Get("ui").(packer.Ui)
+	driver := state.Get("driver").(Driver)
 
 	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	vmName := config.VMName
@@ -82,7 +84,15 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	defaultArgs["-netdev"] = fmt.Sprintf(
 		"user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
 	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
-	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard)
+	qemuVersion, err := driver.Version()
+	if err == nil {
+		parts := strings.Split(qemuVersion, ".")
+		if strconv.Atoi(parts[0]) >= 2 {
+			defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard)
+		}
+	} else {
+		defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache)
+	}
 	if !config.DiskImage {
 		defaultArgs["-cdrom"] = isoPath
 	}
