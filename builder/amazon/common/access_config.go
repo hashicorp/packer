@@ -2,14 +2,11 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-	"unicode"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -47,23 +44,9 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 	}, nil
 }
 
-// Region returns the aws.Region object for access to AWS services, requesting
-// the region from the instance metadata if possible.
 func (c *AccessConfig) Region() (string, error) {
-	if c.RawRegion != "" {
-		if valid := ValidateRegion(c.RawRegion); valid == false {
-			return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
-		}
-		return c.RawRegion, nil
-	}
-
-	md, err := GetInstanceMetaData("placement/availability-zone")
-	if err != nil {
-		return "", err
-	}
-
-	region := strings.TrimRightFunc(string(md), unicode.IsLetter)
-	return region, nil
+	client := ec2metadata.New(&ec2metadata.Config{})
+	return client.Region()
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
@@ -79,25 +62,4 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return nil
-}
-
-func GetInstanceMetaData(path string) (contents []byte, err error) {
-	url := "http://169.254.169.254/latest/meta-data/" + path
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("Code %d returned for url %s", resp.StatusCode, url)
-		return
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-	return []byte(body), err
 }
