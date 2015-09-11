@@ -28,6 +28,7 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+	VolumeRunTags          map[string]string `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -117,6 +118,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
+		},
+		&stepTagEBSVolumes{
+			VolumeRunTags: b.config.VolumeRunTags,
 		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
