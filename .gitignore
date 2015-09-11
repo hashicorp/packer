@@ -8,5 +8,8 @@
 .vagrant
 test/.env
 
+.idea/
+*.iml
+
 website/.bundle
 website/vendor
