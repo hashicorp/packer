@@ -271,6 +271,7 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	waitDone := make(chan bool)
 	go func() {
 		err = waitForCommunicator(p)
+		waitDone <- true
 	}()
 
 	go func() {
@@ -278,6 +279,9 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 		p.Cancel()
 		waitDone <- true
 	}()
+
+	// wait for both cancel gorouting and wait for communicator
+	<-waitDone
 	<-waitDone
 
 	// Expect a Cancel error
@@ -328,12 +332,15 @@ func TestProvision_Cancel(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
 	waitDone := make(chan bool)
+	waitStarted := make(chan bool)
+	testDone := make(chan bool)
 
 	// Block until cancel comes through
 	waitForCommunicator = func(p *Provisioner) error {
+		waitStarted <- true
 		for {
 			select {
-			case <-waitDone:
+			case <-testDone: // wait forever
 			}
 		}
 	}
@@ -346,6 +353,8 @@ func TestProvision_Cancel(t *testing.T) {
 	}()
 
 	go func() {
+		// wait provisioning to start before cancelling
+		<-waitStarted
 		p.Cancel()
 	}()
 	<-waitDone
@@ -354,4 +363,5 @@ func TestProvision_Cancel(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have error")
 	}
+	testDone <- true
 }
