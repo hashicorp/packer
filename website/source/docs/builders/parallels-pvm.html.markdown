@@ -142,6 +142,11 @@ builder.
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
 
+-   `skip_compaction` (boolean) - Virtual disk image is compacted at the end of
+    the build process using `prl_disk_tool` utility. In certain rare cases, this
+    might corrupt the resulting disk image. If you find this to be the case,
+    you can disable compaction using this configuration value.
+
 -   `vm_name` (string) - This is the name of the virtual machine when it is
     imported as well as the name of the PVM directory when the virtual machine
     is exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is the
