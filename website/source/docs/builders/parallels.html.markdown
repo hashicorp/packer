@@ -35,3 +35,6 @@ Virtualization SDK](http://www.parallels.com/downloads/desktop/).
 
 The SDK can be installed by downloading and following the instructions in the
 dmg.
+
+Parallels Desktop for Mac 9 and later is supported, from PD 11 Pro or Business
+edition is required.
