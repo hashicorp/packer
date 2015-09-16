@@ -8,7 +8,6 @@ import (
 )
 
 type RunConfig struct {
-	Headless    bool   `mapstructure:"headless"`
 	RawBootWait string `mapstructure:"boot_wait"`
 
 	BootWait time.Duration ``
