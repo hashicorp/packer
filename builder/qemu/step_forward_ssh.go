@@ -22,7 +22,7 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	log.Printf("Looking for available SSH port between %d and %d", config.SSHHostPortMin, config.SSHHostPortMax)
+	log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d", config.SSHHostPortMin, config.SSHHostPortMax)
 	var sshHostPort uint
 	var offset uint = 0
 
@@ -46,7 +46,7 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		offset++
 	}
-	ui.Say(fmt.Sprintf("Found port for SSH: %d.", sshHostPort))
+	ui.Say(fmt.Sprintf("Found port for communicator (SSH, WinRM, etc): %d.", sshHostPort))
 
 	// Save the port we're using so that future steps can use it
 	state.Put("sshHostPort", sshHostPort)
