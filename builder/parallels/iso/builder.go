@@ -43,10 +43,6 @@ type Config struct {
 	SkipCompaction     bool     `mapstructure:"skip_compaction"`
 	VMName             string   `mapstructure:"vm_name"`
 
-	// Deprecated parameters
-	GuestOSDistribution    string `mapstructure:"guest_os_distribution"`
-	ParallelsToolsHostPath string `mapstructure:"parallels_tools_host_path"`
-
 	ctx interpolate.Context
 }
 
@@ -99,16 +95,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.GuestOSType = "other"
 	}
 
-	if b.config.GuestOSDistribution != "" {
-		// Compatibility with older templates:
-		// Use value of 'guest_os_distribution' if it is defined.
-		b.config.GuestOSType = b.config.GuestOSDistribution
-		warnings = append(warnings,
-			"A 'guest_os_distribution' has been completely replaced with 'guest_os_type'\n"+
-				"It is recommended to remove it and assign the previous value to 'guest_os_type'.\n"+
-				"Run it to see all available values: `prlctl create x -d list` ")
-	}
-
 	if len(b.config.HostInterfaces) == 0 {
 		b.config.HostInterfaces = []string{"en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7",
 			"en8", "en9", "ppp0", "ppp1", "ppp2"}
@@ -128,12 +114,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
-	}
-
-	if b.config.ParallelsToolsHostPath != "" {
-		warnings = append(warnings,
-			"A 'parallels_tools_host_path' has been deprecated and not in use anymore\n"+
-				"You can remove it from your Packer template.")
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

@@ -78,25 +78,6 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_GuestOSType(t *testing.T) {
-	var b Builder
-	config := testConfig()
-	delete(config, "guest_os_distribution")
-
-	// Test deprecated parameter
-	config["guest_os_distribution"] = "bolgenos"
-	warns, err := b.Prepare(config)
-	if len(warns) == 0 {
-		t.Fatalf("should have warning")
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-	if b.config.GuestOSType != "bolgenos" {
-		t.Fatalf("bad: %s", b.config.GuestOSType)
-	}
-}
-
 func TestBuilderPrepare_HardDriveInterface(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -150,21 +131,5 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatal("should have error")
-	}
-}
-
-func TestBuilderPrepare_ParallelsToolsHostPath(t *testing.T) {
-	var b Builder
-	config := testConfig()
-	delete(config, "parallels_tools_host_path")
-
-	// Test that it is deprecated
-	config["parallels_tools_host_path"] = "/path/to/iso"
-	warns, err := b.Prepare(config)
-	if len(warns) == 0 {
-		t.Fatalf("should have warning")
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
 	}
 }
