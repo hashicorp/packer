@@ -20,13 +20,14 @@ var FixerOrder []string
 
 func init() {
 	Fixers = map[string]Fixer{
-		"iso-md5":             new(FixerISOMD5),
-		"createtime":          new(FixerCreateTime),
-		"pp-vagrant-override": new(FixerVagrantPPOverride),
-		"virtualbox-gaattach": new(FixerVirtualBoxGAAttach),
-		"virtualbox-rename":   new(FixerVirtualBoxRename),
-		"vmware-rename":       new(FixerVMwareRename),
-		"parallels-headless":  new(FixerParallelsHeadless),
+		"iso-md5":                new(FixerISOMD5),
+		"createtime":             new(FixerCreateTime),
+		"pp-vagrant-override":    new(FixerVagrantPPOverride),
+		"virtualbox-gaattach":    new(FixerVirtualBoxGAAttach),
+		"virtualbox-rename":      new(FixerVirtualBoxRename),
+		"vmware-rename":          new(FixerVMwareRename),
+		"parallels-headless":     new(FixerParallelsHeadless),
+		"parallels-deprecations": new(FixerParallelsDeprecations),
 	}
 
 	FixerOrder = []string{
@@ -37,5 +38,6 @@ func init() {
 		"virtualbox-rename",
 		"vmware-rename",
 		"parallels-headless",
+		"parallels-deprecations",
 	}
 }
