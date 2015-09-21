@@ -199,12 +199,18 @@ builder.
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
-    used for SSH with the machine. By default, this is blank, and Packer will
-    generate a temporary keypair. `ssh_private_key_file` must be specified
-    with this.
+    used for SSH with the machine. The key must match a key pair name loaded
+    up into Amazon EC2.  By default, this is blank, and Packer will
+    generate a temporary keypair.  `ssh_private_key_file` must be specified
+    when `ssh_keypair_name` is utilized.
 
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
     IP if available.
+
+-   `ssh_private_key_file` (string) - Is required if `ssh_keypair_name` is
+    specified.  This is the name of a private SSH key file located on the
+    same machine running packer so the packer scripts can SSH into the machine
+    being created (eg. - /home/mitchellh/.ssh/id_rsa).
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     "subnet-12345def", where Packer will launch the EC2 instance. This field is
