@@ -165,7 +165,7 @@ storing images at the end of this getting started guide.
 
 After running the above example, your AWS account now has an AMI associated with
 it. AMIs are stored in S3 by Amazon, so unless you want to be charged about
-\$0.01 per month, you'll probably want to remove it. Remove the AMI by first
+$0.01 per month, you'll probably want to remove it. Remove the AMI by first
 deregistering it on the [AWS AMI management
 page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Next,
 delete the associated snapshot on the [AWS snapshot management
