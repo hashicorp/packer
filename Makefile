@@ -67,7 +67,7 @@ updatedeps:
 		| grep -v github.com/mitchellh/packer \
 		| grep -v '/internal/' \
 		| sort -u \
-		| xargs go get -f -u -v -d ; if [ $$? -eq 0 ]; then \
+		| xargs go get -f -u -v -d ; if [ $$? -ne 0 ]; then \
 		echo "ERROR: go get failed. Your git branch may have changed; you were on $(GITBRANCH) ($(GITSHA))."; \
 	fi
 	@if [ "$(GITBRANCH)" != "" ]; then git checkout -q $(GITBRANCH); else git checkout -q $(GITSHA); fi
