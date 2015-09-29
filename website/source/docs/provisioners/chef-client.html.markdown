@@ -50,6 +50,10 @@ configuration is actually required.
     should use a custom configuration template. See the dedicated "Chef
     Configuration" section below for more details.
 
+-   `encrypted_data_bag_secret_path` (string) - The path to the file containing
+    the secret for encrypted data bags. By default, this is empty, so no secret
+    will be available.
+
 -   `execute_command` (string) - The command used to execute Chef. This has
     various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
@@ -136,6 +140,7 @@ This template is a [configuration
 template](/docs/templates/configuration-templates.html) and has a set of
 variables available to use:
 
+-   `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
 -   `NodeName` - The node name set in the configuration.
 -   `ServerUrl` - The URL of the Chef Server set in the configuration.
 -   `ValidationKeyPath` - Path to the validation key, if it is set.
