@@ -66,6 +66,6 @@ configuration:
 {
   "type": "compress",
   "output": "log_{{.BuildName}}.gz",
-  "compression": 9
+  "compression_level": 9
 }
 ```
