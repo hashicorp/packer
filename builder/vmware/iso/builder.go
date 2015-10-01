@@ -260,6 +260,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			Extension:    "iso",
 		},
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,
