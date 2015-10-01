@@ -35,7 +35,6 @@ to files, URLS for ISOs and checksums.
       "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
-      "ssh_wait_timeout": "30s",
       "shutdown_command": "shutdown -P now",
       "disk_size": 5000,
       "format": "qcow2",
