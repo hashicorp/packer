@@ -25,7 +25,7 @@ provisioners are defined, but it will connect to the specified host via ssh.
 ``` {.javascript}
 {
   "type":         "null",
-  "ssh_host":     "127.0.0.1",
+  "host":     "127.0.0.1",
   "ssh_username": "foo",
   "ssh_password": "bar"
 }
