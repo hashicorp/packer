@@ -150,7 +150,8 @@ builder.
     when the current spot price is less than the maximum price you specify. Spot
     price will be updated based on available spot instance capacity and current
     spot instance requests. It may save you some costs. You can set this to
-    "auto" for Packer to automatically discover the best spot price.
+    "auto" for Packer to automatically discover the best spot price or to "0"
+    to use an on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
     to "auto". This tells Packer what sort of AMI you're launching to find the
