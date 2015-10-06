@@ -135,7 +135,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	var instanceId string
 
-	if spotPrice == "" {
+	if spotPrice == "" || spotPrice == "0" {
 		runOpts := &ec2.RunInstancesInput{
 			KeyName:             &keyName,
 			ImageId:             &s.SourceAMI,
