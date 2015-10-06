@@ -62,18 +62,25 @@ specified host you're buiding. The `--limit` argument can be provided in the
 `extra_arguments` option.
 
 An example inventory file may look like:
+```
+[chi-dbservers]
+db-01 ansible_connection=local
+db-02 ansible_connection=local
 
-\`\`\` {.text} \[chi-dbservers\] db-01 ansible\_connection=local db-02
-ansible\_connection=local
+[chi-appservers]
+app-01 ansible_connection=local
+app-02 ansible_connection=local
 
-\[chi-appservers\] app-01 ansible\_connection=local app-02
-ansible\_connection=local
+[chi:children]
+chi-dbservers
+chi-appservers
 
-\[chi:children\] chi-dbservers chi-appservers
+[dbservers:children]
+chi-dbservers
 
-\[dbservers:children\] chi-dbservers
-
-\[appservers:children\] chi-appservers \`\`\`
+[appservers:children]
+chi-appservers
+```
 
 -   `playbook_dir` (string) - a path to the complete ansible directory structure
     on your local system to be copied to the remote machine as the
