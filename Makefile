@@ -11,6 +11,7 @@ ci: deps test
 release: updatedeps test releasebin
 
 bin: deps
+	@echo "WARN: `make bin` is for debug / test builds only. Use `make release` for release builds."
 	@sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
