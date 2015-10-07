@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"io"
 	"log"
 	"os/exec"
@@ -14,6 +13,8 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+
+	"github.com/mitchellh/multistep"
 )
 
 type DriverCancelCallback func(state multistep.StateBag) bool
@@ -188,8 +189,8 @@ func (d *QemuDriver) Version() (string, error) {
 
 	versionOutput := strings.TrimSpace(stdout.String())
 	log.Printf("Qemu --version output: %s", versionOutput)
-	versionRe := regexp.MustCompile("qemu-kvm-[0-9]\\.[0-9]")
-	matches := versionRe.Split(versionOutput, 2)
+	versionRe := regexp.MustCompile("[\\.[0-9]+]*")
+	matches := versionRe.FindStringSubmatch(versionOutput)
 	if len(matches) == 0 {
 		return "", fmt.Errorf("No version found: %s", versionOutput)
 	}

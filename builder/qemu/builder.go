@@ -54,9 +54,10 @@ var netDevice = map[string]bool{
 }
 
 var diskInterface = map[string]bool{
-	"ide":    true,
-	"scsi":   true,
-	"virtio": true,
+	"ide":         true,
+	"scsi":        true,
+	"virtio":      true,
+	"virtio-scsi": true,
 }
 
 var diskCache = map[string]bool{
