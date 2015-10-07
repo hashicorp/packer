@@ -8,9 +8,12 @@ default: test dev
 
 ci: deps test
 
-release: updatedeps test bin
+release: updatedeps test releasebin
 
 bin: deps
+	@sh -c "$(CURDIR)/scripts/build.sh"
+
+releasebin: deps
 	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -ne 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version.go prior to release."; \
 		exit 1; \
@@ -77,4 +80,4 @@ updatedeps:
 	fi
 	@echo "INFO: Currently on $(GITBRANCH) ($(GITSHA))"
 
-.PHONY: bin checkversion ci default deps generate test testacc testrace updatedeps
+.PHONY: bin checkversion ci default deps generate releasebin test testacc testrace updatedeps
