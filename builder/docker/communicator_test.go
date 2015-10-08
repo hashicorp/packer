@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -18,6 +17,7 @@ func TestCommunicator_impl(t *testing.T) {
 	var _ packer.Communicator = new(Communicator)
 }
 
+// TestUploadDownload verifies that basic upload / download functionality works
 func TestUploadDownload(t *testing.T) {
 	ui := packer.TestUi(t)
 	cache := &packer.FileCache{CacheDir: os.TempDir()}
@@ -27,12 +27,8 @@ func TestUploadDownload(t *testing.T) {
 		t.Fatalf("Unable to parse config: %s", err)
 	}
 
-	// Make sure we only run this on linux hosts
 	if os.Getenv("PACKER_ACC") == "" {
 		t.Skip("This test is only run with PACKER_ACC=1")
-	}
-	if runtime.GOOS != "linux" {
-		t.Skip("This test is only supported on linux")
 	}
 	cmd := exec.Command("docker", "-v")
 	cmd.Run()
@@ -102,13 +98,26 @@ func TestUploadDownload(t *testing.T) {
 	}
 }
 
+// TestLargeDownload verifies that files are the apporpriate size after being
+// downloaded. This is to identify and fix the race condition in #2793. You may
+// need to use github.com/cbednarski/rerun to verify since this problem occurs
+// only intermittently.
+func TestLargeDownload(t *testing.T) {
+	// cupcake is 2097152 bytes
+	// weddingcake is 104857600 bytes
+	// we will want to verify the size of the file after we download it
+
+	cupcake
+	weddingcake
+}
+
 const dockerBuilderConfig = `
 {
   "builders": [
     {
       "type": "docker",
       "image": "alpine",
-      "export_path": "alpine.tar",
+      "discard": true,
       "run_command": ["-d", "-i", "-t", "{{.Image}}", "/bin/sh"]
     }
   ],
@@ -122,6 +131,41 @@ const dockerBuilderConfig = `
       "type": "file",
       "source": "/strawberry-cake",
       "destination": "my-strawberry-cake",
+      "direction": "download"
+    }
+  ]
+}
+`
+
+const dockerLargeBuilderConfig = `
+{
+  "builders": [
+    {
+      "type": "docker",
+      "image": "alpine",
+      "discard": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "dd if=/dev/urandom of=/tmp/cupcake bs=1M count=2",
+        "dd if=/dev/urandom of=/tmp/weddingcake bs=1M count=100",
+        "sync",
+        "md5sum /tmp/cupcake /tmp/weddingcake"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "/tmp/cupcake",
+      "destination": "cupcake",
+      "direction": "download"
+    },
+    {
+      "type": "file",
+      "source": "/tmp/weddingcake",
+      "destination": "weddingcake",
       "direction": "download"
     }
   ]
