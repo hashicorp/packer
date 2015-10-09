@@ -38,6 +38,7 @@ type Provisioner struct {
 	comm       packer.Communicator
 	ui         packer.Ui
 	cancel     chan struct{}
+	cancelled  bool
 	cancelLock sync.Mutex
 }
 
@@ -72,8 +73,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	p.cancelLock.Lock()
-	p.cancel = make(chan struct{})
-	p.cancelLock.Unlock()
+	if p.cancelled {
+		p.cancelLock.Unlock()
+		return fmt.Errorf("Machine restart cancelled before initiating")
+	} else {
+		p.cancel = make(chan struct{})
+		p.cancelLock.Unlock()
+	}
 
 	ui.Say("Restarting Machine")
 	p.comm = comm
@@ -172,6 +178,7 @@ func (p *Provisioner) Cancel() {
 
 	p.cancelLock.Lock()
 	defer p.cancelLock.Unlock()
+	p.cancelled = true
 	if p.cancel != nil {
 		close(p.cancel)
 	}

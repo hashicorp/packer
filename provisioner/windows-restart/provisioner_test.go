@@ -271,6 +271,7 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	waitDone := make(chan bool)
 	go func() {
 		err = waitForCommunicator(p)
+		waitDone <- true
 	}()
 
 	go func() {
@@ -278,6 +279,9 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 		p.Cancel()
 		waitDone <- true
 	}()
+
+	// wait for both cancel gorouting and wait for communicator
+	<-waitDone
 	<-waitDone
 
 	// Expect a Cancel error
@@ -328,12 +332,15 @@ func TestProvision_Cancel(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
 	waitDone := make(chan bool)
+	waitStarted := make(chan bool)
+	testDone := make(chan bool)
 
 	// Block until cancel comes through
 	waitForCommunicator = func(p *Provisioner) error {
+		waitStarted <- true
 		for {
 			select {
-			case <-waitDone:
+			case <-testDone: // wait forever
 			}
 		}
 	}
@@ -346,6 +353,44 @@ func TestProvision_Cancel(t *testing.T) {
 	}()
 
 	go func() {
+		// wait provisioning to start before cancelling
+		<-waitStarted
+		p.Cancel()
+	}()
+	<-waitDone
+
+	// Expect interupt error
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	testDone <- true
+}
+
+func TestProvision_CancelBeforeStart(t *testing.T) {
+	config := testConfig()
+
+	// Defaults provided by Packer
+	ui := testUi()
+	p := new(Provisioner)
+
+	var err error
+
+	comm := new(packer.MockCommunicator)
+	p.Prepare(config)
+	waitDone := make(chan bool)
+	cancelled := make(chan bool)
+
+	// Create two go routines to provision and cancel in parallel
+	// Provision will block until cancel happens
+	go func() {
+		<-cancelled // wait before provisioning
+		err = p.Provision(ui, comm)
+		waitDone <- true
+	}()
+
+	go func() {
+		// wait before canceling
+		cancelled <- true
 		p.Cancel()
 	}()
 	<-waitDone
