@@ -180,20 +180,20 @@ func TestLargeDownload(t *testing.T) {
 	// bigcake should be 104857600 bytes
 	cupcake, err := os.Stat("cupcake")
 	if err != nil {
-		t.Fatalf("Unable to stat cupcake file")
+		t.Fatalf("Unable to stat cupcake file: %s", err)
 	}
 	cupcakeExpected := int64(2097152)
 	if cupcake.Size() != cupcakeExpected {
-		t.Errorf("Expected cupcake to be %s bytes; found %s", cupcakeExpected, cupcake.Size())
+		t.Errorf("Expected cupcake to be %d bytes; found %d", cupcakeExpected, cupcake.Size())
 	}
 
 	bigcake, err := os.Stat("bigcake")
 	if err != nil {
-		t.Fatalf("Unable to stat bigcake file")
+		t.Fatalf("Unable to stat bigcake file: %s", err)
 	}
 	bigcakeExpected := int64(104857600)
 	if bigcake.Size() != bigcakeExpected {
-		t.Errorf("Expected bigcake to be %s bytes; found %s", bigcakeExpected, bigcake.Size())
+		t.Errorf("Expected bigcake to be %d bytes; found %d", bigcakeExpected, bigcake.Size())
 	}
 
 	// TODO if we can, calculate a sha inside the container and compare to the
