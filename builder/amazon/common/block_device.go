@@ -1,8 +1,6 @@
 package common
 
 import (
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -30,35 +28,34 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping
 
 	for _, blockDevice := range b {
-		ebsBlockDevice := &ec2.EbsBlockDevice{
-			VolumeType:          aws.String(blockDevice.VolumeType),
-			VolumeSize:          aws.Int64(blockDevice.VolumeSize),
-			DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
-		}
-
-		// IOPS is only valid for SSD Volumes
-		if blockDevice.VolumeType != "" && blockDevice.VolumeType != "standard" && blockDevice.VolumeType != "gp2" {
-			ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
-		}
-
-		// You cannot specify Encrypted if you specify a Snapshot ID
-		if blockDevice.SnapshotId != "" {
-			ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
-		} else if blockDevice.Encrypted {
-			ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
-		}
-
 		mapping := &ec2.BlockDeviceMapping{
-			DeviceName:  aws.String(blockDevice.DeviceName),
-			VirtualName: aws.String(blockDevice.VirtualName),
+			DeviceName: aws.String(blockDevice.DeviceName),
 		}
 
-		if !strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
-			mapping.Ebs = ebsBlockDevice
-		}
-
-		if blockDevice.NoDevice {
+		if blockDevice.VirtualName != "" {
+			mapping.VirtualName = aws.String(blockDevice.VirtualName)
+		} else if blockDevice.NoDevice {
 			mapping.NoDevice = aws.String("")
+		} else {
+			ebsBlockDevice := &ec2.EbsBlockDevice{
+				VolumeType:          aws.String(blockDevice.VolumeType),
+				VolumeSize:          aws.Int64(blockDevice.VolumeSize),
+				DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
+			}
+
+			// IOPS is only valid for SSD Volumes
+			if blockDevice.VolumeType != "" && blockDevice.VolumeType != "standard" && blockDevice.VolumeType != "gp2" {
+				ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
+			}
+
+			// You cannot specify Encrypted if you specify a Snapshot ID
+			if blockDevice.SnapshotId != "" {
+				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
+			} else if blockDevice.Encrypted {
+				ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
+			}
+
+			mapping.Ebs = ebsBlockDevice
 		}
 
 		blockDevices = append(blockDevices, mapping)
