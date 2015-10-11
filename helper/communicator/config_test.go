@@ -30,6 +30,23 @@ func TestConfig_none(t *testing.T) {
 	}
 }
 
+func TestConfig_badtype(t *testing.T) {
+	c := &Config{Type: "foo"}
+	if err := c.Prepare(testContext(t)); len(err) != 1 {
+		t.Fatalf("bad: %#v", err)
+	}
+}
+
+func TestConfig_winrm(t *testing.T) {
+	c := &Config{
+		Type:      "winrm",
+		WinRMUser: "admin",
+	}
+	if err := c.Prepare(testContext(t)); len(err) > 0 {
+		t.Fatalf("bad: %#v", err)
+	}
+}
+
 func testContext(t *testing.T) *interpolate.Context {
 	return nil
 }
