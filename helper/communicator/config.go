@@ -65,7 +65,7 @@ func (c *Config) Prepare(ctx *interpolate.Context) []error {
 		if es := c.prepareWinRM(ctx); len(es) > 0 {
 			errs = append(errs, es...)
 		}
-	case "none":
+	case "docker", "none":
 		break
 	default:
 		return []error{fmt.Errorf("Communicator type %s is invalid", c.Type)}
