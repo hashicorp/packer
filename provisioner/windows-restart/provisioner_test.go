@@ -268,15 +268,18 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	// Run 2 goroutines;
 	//  1st to call waitForCommunicator (that will always fail)
 	//  2nd to cancel the operation
+	waitStart := make(chan bool)
 	waitDone := make(chan bool)
 	go func() {
+		waitStart <- true
 		err = waitForCommunicator(p)
+		waitDone <- true
 	}()
 
 	go func() {
 		time.Sleep(10 * time.Millisecond)
+		<-waitStart
 		p.Cancel()
-		waitDone <- true
 	}()
 	<-waitDone
 
@@ -327,13 +330,15 @@ func TestProvision_Cancel(t *testing.T) {
 
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
+	waitStart := make(chan bool)
 	waitDone := make(chan bool)
 
 	// Block until cancel comes through
 	waitForCommunicator = func(p *Provisioner) error {
+		waitStart <- true
 		for {
 			select {
-			case <-waitDone:
+			case <-p.cancel:
 			}
 		}
 	}
@@ -346,6 +351,7 @@ func TestProvision_Cancel(t *testing.T) {
 	}()
 
 	go func() {
+		<-waitStart
 		p.Cancel()
 	}()
 	<-waitDone
