@@ -56,7 +56,7 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 		VolumeType:       rootDevice.Ebs.VolumeType,
 		Iops:             rootDevice.Ebs.Iops,
 	}
-	log.Printf("Create args: %s", createVolume)
+	log.Printf("Create args: %+v", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
