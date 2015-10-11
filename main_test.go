@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -31,5 +32,11 @@ func TestExtractMachineReadable(t *testing.T) {
 
 	if !mr {
 		t.Fatal("should be mr")
+	}
+}
+
+func TestRandom(t *testing.T) {
+	if rand.Intn(9999999) == 8498210 {
+		t.Fatal("math.rand is not seeded properly")
 	}
 }
