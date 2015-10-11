@@ -102,8 +102,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = fmt.Sprintf(
-			"/tmp/script_%d.sh", rand.Intn(9999))
+		p.config.RemotePath = randomScriptName()
 	}
 
 	if p.config.Scripts == nil {
@@ -330,4 +329,12 @@ func (p *Provisioner) retryable(f func() error) error {
 			time.Sleep(2 * time.Second)
 		}
 	}
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func randomScriptName() string {
+	return fmt.Sprintf("/tmp/script_%d.sh", rand.Intn(9999999))
 }
