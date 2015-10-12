@@ -1,11 +1,12 @@
 package rpc
 
 import (
-	"github.com/hashicorp/go-msgpack/codec"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net/rpc"
+
+	"github.com/mitchellh/packer/packer"
+	"github.com/ugorji/go/codec"
 )
 
 // Client is the client end that communicates with a Packer RPC server.
