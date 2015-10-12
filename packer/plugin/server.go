@@ -13,12 +13,14 @@ import (
 	packrpc "github.com/mitchellh/packer/packer/rpc"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"os/signal"
 	"runtime"
 	"strconv"
 	"sync/atomic"
+	"time"
 )
 
 // This is a count of the number of interrupts the process has received.
@@ -137,4 +139,9 @@ func serverListener_unix() (net.Listener, error) {
 	}
 
 	return net.Listen("unix", path)
+}
+
+func init() {
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
 }
