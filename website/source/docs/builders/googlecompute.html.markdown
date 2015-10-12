@@ -77,7 +77,9 @@ straightforwarded, it is documented here.
 
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will effectively repackage an existing GCE
-image. The account file is obtained in the previous section.
+image. The account_file is obtained in the previous section.  If it parses as
+JSON it is assumed to be the file itself, otherwise it is assumed to be
+the path to the file containing the JSON.
 
 ``` {.javascript}
 {
