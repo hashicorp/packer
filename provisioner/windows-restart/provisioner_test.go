@@ -193,12 +193,14 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 	p.Prepare(config)
 	waitForCommunicatorOld := waitForCommunicator
 	waitDone := make(chan bool)
+	waitContinue := make(chan bool)
 
 	// Block until cancel comes through
 	waitForCommunicator = func(p *Provisioner) error {
 		for {
 			select {
 			case <-waitDone:
+				waitContinue <- true
 			}
 		}
 	}
@@ -207,7 +209,7 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 		err = p.Provision(ui, comm)
 		waitDone <- true
 	}()
-	<-waitDone
+	<-waitContinue
 
 	if err == nil {
 		t.Fatal("should not have error")
