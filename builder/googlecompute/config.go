@@ -131,9 +131,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.stateTimeout = stateTimeout
 
 	if c.AccountFile != "" {
-		if err := loadJSON(&c.account, c.AccountFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing account file: %s", err))
+		if err := processAccountFile(&c.account, c.AccountFile); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
 
