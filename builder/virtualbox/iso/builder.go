@@ -4,9 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/mitchellh/multistep"
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
@@ -211,9 +209,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	// Seed the random number generator
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	// Create the driver that we'll use to communicate with VirtualBox
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {
