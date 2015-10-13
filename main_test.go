@@ -29,7 +29,7 @@ func TestExcludeHelpFunc(t *testing.T) {
 	helpText := helpFunc(commands)
 
 	if strings.Contains(helpText, "fix") {
-		t.Fatal("Found fix in help text even though we excluded it: \n\n%s\n\n", helpText)
+		t.Fatalf("Found fix in help text even though we excluded it: \n\n%s\n\n", helpText)
 	}
 }
 
