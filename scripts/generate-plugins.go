@@ -34,12 +34,12 @@ func main() {
 		log.Fatalf("Failed to discover builders: %s", err)
 	}
 
-	provisioners, _ := discoverProvisioners()
+	provisioners, err := discoverProvisioners()
 	if err != nil {
 		log.Fatalf("Failed to discover provisioners: %s", err)
 	}
 
-	postProcessors, _ := discoverPostProcessors()
+	postProcessors, err := discoverPostProcessors()
 	if err != nil {
 		log.Fatalf("Failed to discover post processors: %s", err)
 	}
