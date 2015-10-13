@@ -139,10 +139,10 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	// Serve a single connection and a single copy
 	streamId := c.mux.NextId()
 
-	waitServer := make(chan bool)
+	waitServer := make(chan struct{})
 	go func() {
 		serveSingleCopy("downloadWriter", c.mux, streamId, w, nil)
-		waitServer <- true
+		close(waitServer)
 	}()
 
 	args := CommunicatorDownloadArgs{
