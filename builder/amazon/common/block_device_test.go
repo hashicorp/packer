@@ -91,12 +91,12 @@ func TestBlockDevice(t *testing.T) {
 		expected := []*ec2.BlockDeviceMapping{tc.Result}
 		got := blockDevices.BuildAMIDevices()
 		if !reflect.DeepEqual(expected, got) {
-			t.Fatalf("Bad block device, \nexpected: %s\n\ngot: %s",
+			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
 				expected, got)
 		}
 
 		if !reflect.DeepEqual(expected, blockDevices.BuildLaunchDevices()) {
-			t.Fatalf("Bad block device, \nexpected: %s\n\ngot: %s",
+			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
 				expected,
 				blockDevices.BuildLaunchDevices())
 		}

@@ -8,9 +8,13 @@ default: test dev
 
 ci: deps test
 
-release: updatedeps test bin
+release: updatedeps test releasebin
 
 bin: deps
+	@echo "WARN: `make bin` is for debug / test builds only. Use `make release` for release builds."
+	@sh -c "$(CURDIR)/scripts/build.sh"
+
+releasebin: deps
 	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -ne 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version.go prior to release."; \
 		exit 1; \
@@ -67,7 +71,7 @@ updatedeps:
 		| grep -v github.com/mitchellh/packer \
 		| grep -v '/internal/' \
 		| sort -u \
-		| xargs go get -f -u -v -d ; if [ $$? -eq 0 ]; then \
+		| xargs go get -f -u -v -d ; if [ $$? -ne 0 ]; then \
 		echo "ERROR: go get failed. Your git branch may have changed; you were on $(GITBRANCH) ($(GITSHA))."; \
 	fi
 	@if [ "$(GITBRANCH)" != "" ]; then git checkout -q $(GITBRANCH); else git checkout -q $(GITSHA); fi
@@ -77,4 +81,4 @@ updatedeps:
 	fi
 	@echo "INFO: Currently on $(GITBRANCH) ($(GITSHA))"
 
-.PHONY: bin checkversion ci default deps generate test testacc testrace updatedeps
+.PHONY: bin checkversion ci default deps generate releasebin test testacc testrace updatedeps

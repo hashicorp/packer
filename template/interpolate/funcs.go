@@ -93,14 +93,14 @@ func funcGenEnv(ctx *Context) interface{} {
 func funcGenIsotime(ctx *Context) interface{} {
 	return func(format ...string) (string, error) {
 		if len(format) == 0 {
-			return time.Now().UTC().Format(time.RFC3339), nil
+			return InitTime.Format(time.RFC3339), nil
 		}
 
 		if len(format) > 1 {
 			return "", fmt.Errorf("too many values, 1 needed: %v", format)
 		}
 
-		return time.Now().UTC().Format(format[0]), nil
+		return InitTime.Format(format[0]), nil
 	}
 }
 

@@ -6,8 +6,8 @@ import (
 	"net/rpc"
 	"sync/atomic"
 
-	"github.com/hashicorp/go-msgpack/codec"
 	"github.com/mitchellh/packer/packer"
+	"github.com/ugorji/go/codec"
 )
 
 var endpointId uint64
