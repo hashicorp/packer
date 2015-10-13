@@ -2,11 +2,12 @@ package rpc
 
 import (
 	"encoding/gob"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net/rpc"
 	"os"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 // An implementation of packer.Communicator where the communicator is actually
@@ -137,7 +138,13 @@ func (c *communicator) UploadDir(dst string, src string, exclude []string) error
 func (c *communicator) Download(path string, w io.Writer) (err error) {
 	// Serve a single connection and a single copy
 	streamId := c.mux.NextId()
-	go serveSingleCopy("downloadWriter", c.mux, streamId, w, nil)
+
+	waitServer := make(chan bool)
+
+	go func() {
+		serveSingleCopy("downloadWriter", c.mux, streamId, w, nil)
+		waitServer <- true
+	}()
 
 	args := CommunicatorDownloadArgs{
 		Path:           path,
@@ -145,6 +152,9 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	}
 
 	err = c.client.Call("Communicator.Download", &args, new(interface{}))
+
+	<-waitServer
+
 	return
 }
 
