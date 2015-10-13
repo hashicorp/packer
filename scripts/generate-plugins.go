@@ -20,6 +20,9 @@ import (
 const target = "command/plugin.go"
 
 func main() {
+	// Normally this is run via go:generate from the command folder so we need
+	// to cd .. first. But when developing it's easier to use go run, so we'll
+	// support that too.
 	wd, _ := os.Getwd()
 	if filepath.Base(wd) != "packer" {
 		os.Chdir("..")
@@ -29,6 +32,7 @@ func main() {
 		}
 	}
 
+	// Collect all of the data we need about plugins we have in the project
 	builders, err := discoverBuilders()
 	if err != nil {
 		log.Fatalf("Failed to discover builders: %s", err)
@@ -44,6 +48,7 @@ func main() {
 		log.Fatalf("Failed to discover post processors: %s", err)
 	}
 
+	// Do some simple code generation and templating
 	output := source
 	output = strings.Replace(output, "IMPORTS", makeImports(builders, provisioners, postProcessors), 1)
 	output = strings.Replace(output, "BUILDERS", makeMap("Builders", "Builder", builders), 1)
@@ -53,22 +58,27 @@ func main() {
 	// TODO sort the lists of plugins so we are not subjected to random OS ordering of the plugin lists
 	// TODO format the file
 
+	// Write our generated code to the command/plugin.go file
 	file, err := os.Create(target)
+	defer file.Close()
 	if err != nil {
 		log.Fatalf("Failed to open %s for writing: %s", target, err)
 	}
-	file.WriteString(output)
-	file.Close()
+
+	_, err = file.WriteString(output)
+	if err != nil {
+		log.Fatalf("Failed writing to %s: %s", target, err)
+	}
 
 	log.Printf("Generated %s", target)
 }
 
 type plugin struct {
-	Package    string
-	PluginName string
-	TypeName   string
-	Path       string
-	ImportName string
+	Package    string // This plugin's package name (iso)
+	PluginName string // Name of plugin (vmware-iso)
+	TypeName   string // Type of plugin (builder)
+	Path       string // Path relative to packer root (builder/vmware/iso)
+	ImportName string // PluginName+TypeName (vmwareisobuilder)
 }
 
 // makeMap creates a map named Name with type packer.Name that looks something
