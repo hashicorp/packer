@@ -140,7 +140,6 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	streamId := c.mux.NextId()
 
 	waitServer := make(chan bool)
-
 	go func() {
 		serveSingleCopy("downloadWriter", c.mux, streamId, w, nil)
 		waitServer <- true
@@ -151,8 +150,10 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 		WriterStreamId: streamId,
 	}
 
+	// Start sending data to the RPC server
 	err = c.client.Call("Communicator.Download", &args, new(interface{}))
 
+	// Wait for the RPC server to finish receiving the data before we return
 	<-waitServer
 
 	return
