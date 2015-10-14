@@ -128,7 +128,10 @@ func (c BuildCommand) Run(args []string) int {
 	// Run all the builds in parallel and wait for them to complete
 	var interruptWg, wg sync.WaitGroup
 	interrupted := false
-	artifacts := make(map[string][]packer.Artifact)
+	var artifacts = struct {
+		sync.RWMutex
+		m map[string][]packer.Artifact
+	}{m: make(map[string][]packer.Artifact)}
 	errors := make(map[string]error)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
@@ -163,7 +166,9 @@ func (c BuildCommand) Run(args []string) int {
 				errors[name] = err
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
-				artifacts[name] = runArtifacts
+				artifacts.Lock()
+				artifacts.m[name] = runArtifacts
+				artifacts.Unlock()
 			}
 		}(b)
 
@@ -213,9 +218,9 @@ func (c BuildCommand) Run(args []string) int {
 		}
 	}
 
-	if len(artifacts) > 0 {
+	if len(artifacts.m) > 0 {
 		c.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
-		for name, buildArtifacts := range artifacts {
+		for name, buildArtifacts := range artifacts.m {
 			// Create a UI for the machine readable stuff to be targetted
 			ui := &packer.TargettedUi{
 				Target: name,
