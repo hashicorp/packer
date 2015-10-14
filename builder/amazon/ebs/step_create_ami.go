@@ -22,7 +22,7 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the AMI: %s", config.AMIName))
 	createOpts := &ec2.CreateImageInput{
-		InstanceID:          instance.InstanceID,
+		InstanceId:          instance.InstanceId,
 		Name:                &config.AMIName,
 		BlockDeviceMappings: config.BlockDevices.BuildAMIDevices(),
 	}
@@ -36,16 +36,16 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the AMI ID in the state
-	ui.Message(fmt.Sprintf("AMI: %s", *createResp.ImageID))
+	ui.Message(fmt.Sprintf("AMI: %s", *createResp.ImageId))
 	amis := make(map[string]string)
-	amis[ec2conn.Config.Region] = *createResp.ImageID
+	amis[*ec2conn.Config.Region] = *createResp.ImageId
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *createResp.ImageID),
+		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *createResp.ImageId),
 		StepState: state,
 	}
 
@@ -57,7 +57,7 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIDs: []*string{createResp.ImageID}})
+	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 	if err != nil {
 		err := fmt.Errorf("Error searching for AMI: %s", err)
 		state.Put("error", err)
@@ -84,7 +84,7 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deregistering the AMI because cancelation or error...")
-	deregisterOpts := &ec2.DeregisterImageInput{ImageID: s.image.ImageID}
+	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
 		return

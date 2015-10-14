@@ -1,3 +1,75 @@
+## 0.8.6 (Aug 22, 2015)
+
+IMPROVEMENTS:
+
+  * builder/docker: Now supports Download so it can be used with the file
+      provisioner to download a file from a container. [GH-2585]
+  * builder/docker: Now verifies that the artifact will be used before the build
+      starts, unless the `discard` option is specified. This prevent failures
+      after the build completes. [GH-2626]
+  * post-processor/artifice: Now supports glob-like syntax for filenames [GH-2619]
+  * post-processor/vagrant: Like the compress post-processor, vagrant now uses a
+      parallel gzip algorithm to compress vagrant boxes. [GH-2590]
+
+BUG FIXES:
+
+  * core: When `iso_url` is a local file and the checksum is invalid, the local
+      file will no longer be deleted. [GH-2603]
+  * builder/parallels: Fix interpolation in `parallels_tools_guest_path` [GH-2543]
+
+## 0.8.5 (Aug 10, 2015)
+
+FEATURES:
+
+  * **[Beta]** Artifice post-processor: Override packer artifacts during post-
+      processing. This allows you to extract artifacts from a packer builder
+      and use them with other post-processors like compress, docker, and Atlas.
+
+IMPROVEMENTS:
+
+  * Many docs have been updated and corrected; big thanks to our contributors!
+  * builder/openstack: Add debug logging for IP addresses used for SSH [GH-2513]
+  * builder/openstack: Add option to use existing SSH keypair [GH-2512]
+  * builder/openstack: Add support for Glance metadata [GH-2434]
+  * builder/qemu and builder/vmware: Packer's VNC connection no longer asks for
+      an exclusive connection [GH-2522]
+  * provisioner/salt-masterless: Can now customize salt remote directories [GH-2519]
+
+BUG FIXES:
+
+  * builder/amazon: Improve instance cleanup by storing id sooner [GH-2404]
+  * builder/amazon: Only fetch windows password when using WinRM communicator [GH-2538]
+  * builder/openstack: Support IPv6 SSH address [GH-2450]
+  * builder/openstack: Track new IP address discovered during RackConnect [GH-2514]
+  * builder/qemu: Add 100ms delay between VNC key events. [GH-2415]
+  * post-processor/atlas: atlas_url configuration option works now [GH-2478]
+  * post-processor/compress: Now supports interpolation in output config [GH-2414]
+  * provisioner/powershell: Elevated runs now receive environment variables [GH-2378]
+  * provisioner/salt-masterless: Clarify error messages when we can't create or
+      write to the temp directory [GH-2518]
+  * provisioner/salt-masterless: Copy state even if /srv/salt exists already [GH-1699]
+  * provisioner/salt-masterless: Make sure /etc/salt exists before writing to it [GH-2520]
+  * provisioner/winrm: Connect to the correct port when using NAT with
+      VirtualBox / VMware [GH-2399]
+
+Note: 0.8.3 was pulled and 0.8.4 was skipped.
+
+## 0.8.2 (July 17, 2015)
+
+IMPROVEMENTS:
+
+  * builder/docker: Add option to use a Pty [GH-2425]
+
+BUG FIXES:
+
+  * core: Fix crash when `min_packer_version` is specified in a template. [GH-2385]
+  * builder/amazon: Fix EC2 devices being included in EBS mappings [GH-2459]
+  * builder/googlecompute: Fix default name for GCE images [GH-2400]
+  * builder/null: Fix error message with missing ssh_host [GH-2407]
+  * builder/virtualbox: Use --portcount on VirtualBox 5.x [GH-2438]
+  * provisioner/puppet: Packer now correctly handles a directory for manifest_file [GH-2463]
+  * provisioner/winrm: Fix potential crash with WinRM [GH-2416]
+
 ## 0.8.1 (July 2, 2015)
 
 IMPROVEMENTS:

@@ -39,7 +39,7 @@ type StateChangeConf struct {
 func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := conn.DescribeImages(&ec2.DescribeImagesInput{
-			ImageIDs: []*string{&imageId},
+			ImageIds: []*string{&imageId},
 		})
 		if err != nil {
 			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidAMIID.NotFound" {
@@ -70,7 +70,7 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 func InstanceStateRefreshFunc(conn *ec2.EC2, instanceId string) StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIDs: []*string{&instanceId},
+			InstanceIds: []*string{&instanceId},
 		})
 		if err != nil {
 			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidInstanceID.NotFound" {
@@ -101,7 +101,7 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, instanceId string) StateRefreshFunc
 func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := conn.DescribeSpotInstanceRequests(&ec2.DescribeSpotInstanceRequestsInput{
-			SpotInstanceRequestIDs: []*string{&spotRequestId},
+			SpotInstanceRequestIds: []*string{&spotRequestId},
 		})
 
 		if err != nil {
@@ -181,8 +181,6 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 
 		time.Sleep(time.Duration(sleepSeconds) * time.Second)
 	}
-
-	return
 }
 
 func isTransientNetworkError(err error) bool {

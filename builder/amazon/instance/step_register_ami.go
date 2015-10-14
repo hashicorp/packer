@@ -31,7 +31,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
-		registerOpts.SRIOVNetSupport = aws.String("simple")
+		registerOpts.SriovNetSupport = aws.String("simple")
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -42,16 +42,16 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the AMI ID in the state
-	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageID))
+	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageId))
 	amis := make(map[string]string)
-	amis[ec2conn.Config.Region] = *registerResp.ImageID
+	amis[*ec2conn.Config.Region] = *registerResp.ImageId
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageID),
+		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageId),
 		StepState: state,
 	}
 

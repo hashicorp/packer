@@ -3,47 +3,49 @@ page_title: "Downloads"
 ---
 
 <header class="dark-background">
-<div class="container header text-center">
-	<h1 class="text-green">Downloads</h1>
-	<span class="text-green">Latest version: <%= latest_version %></span>
-</div>
+  <div class="container header text-center">
+    <h1 class="text-green">Downloads</h1>
+    <span class="text-green">Latest version: <%= latest_version %></span>
+  </div>
 </header>
-
 <section class="downloads">
-<div class="container">
-	<div class="description row">
-		<div class="col-md-8 col-md-offset-2">
-			<p>
-			Below are all available downloads for the latest version of Packer
-			(<%= latest_version %>). Please download the proper package for your
-			operating system and architecture. You can find SHA256 checksums
-			for packages <a href="https://dl.bintray.com/mitchellh/packer/packer_<%= latest_version %>_SHA256SUMS?direct">here</a>.
-			</p>
-		</div>
-	</div>
-	<% product_versions.each do |os, versions| %>
-		<div class="row">
-			<div class="col-md-8 col-md-offset-2 download">
-				<div class="icon pull-left"><%= system_icon(os) %></div>
-				<div class="details">
-					<h2 class="os-name"><%= os %></h2>
-					<ul>
-						<% versions.each do |url| %>
-						<li><a href="<%= url %>"><%= arch_for_filename(url) %></a></li>
-						<% end %>
-					</ul>
-					<div class="clearfix"></div>
-				</div>
-			</div>
-		</div>
-	<% end %>
-
-	<div class="row">
-		<div class="col-md-8 col-md-offset-2 poweredby">
-			<a href='http://www.bintray.com'>
-				<img src='https://www.bintray.com/docs/images/poweredByBintray_ColorTransparent.png'>
-			</a>
-		</div>
-	</div>
-</div>
+  <div class="container">
+    <div class="description row">
+      <div class="col-md-8 col-md-offset-2">
+        <p>
+          Below are all available downloads for the latest version of Packer (
+          <%= latest_version %>). Please download the proper package for your operating system and architecture. You can find SHA256 checksums for packages <a href="https://dl.bintray.com/mitchellh/packer/packer_<%= latest_version %>_SHA256SUMS?direct">here</a>.
+        </p>
+      </div>
+    </div>
+    <% product_versions.each do |os, versions| %>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2 download">
+          <div class="icon pull-left">
+            <%= system_icon(os) %>
+          </div>
+          <div class="details">
+            <h2 class="os-name"><%= os %></h2>
+            <ul>
+              <% versions.each do |url| %>
+                <li>
+                  <a href="<%= url %>">
+                    <%= arch_for_filename(url) %>
+                  </a>
+                </li>
+              <% end %>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2 poweredby">
+        <a href='http://www.bintray.com'>
+          <img src='https://www.bintray.com/docs/images/poweredByBintray_ColorTransparent.png'>
+        </a>
+      </div>
+    </div>
+  </div>
 </section>

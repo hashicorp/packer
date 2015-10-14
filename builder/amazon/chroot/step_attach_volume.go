@@ -35,8 +35,8 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Attaching the root volume to %s", attachVolume))
 	_, err := ec2conn.AttachVolume(&ec2.AttachVolumeInput{
-		InstanceID: instance.InstanceID,
-		VolumeID:   &volumeId,
+		InstanceId: instance.InstanceId,
+		VolumeId:   &volumeId,
 		Device:     &attachVolume,
 	})
 	if err != nil {
@@ -58,7 +58,7 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 		Refresh: func() (interface{}, string, error) {
 			attempts := 0
 			for attempts < 30 {
-				resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIDs: []*string{&volumeId}})
+				resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&volumeId}})
 				if err != nil {
 					return nil, "", err
 				}
@@ -107,7 +107,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Detaching EBS volume...")
-	_, err := ec2conn.DetachVolume(&ec2.DetachVolumeInput{VolumeID: &s.volumeId})
+	_, err := ec2conn.DetachVolume(&ec2.DetachVolumeInput{VolumeId: &s.volumeId})
 	if err != nil {
 		return fmt.Errorf("Error detaching EBS volume: %s", err)
 	}
@@ -120,7 +120,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 		StepState: state,
 		Target:    "detached",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIDs: []*string{&s.volumeId}})
+			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&s.volumeId}})
 			if err != nil {
 				return nil, "", err
 			}

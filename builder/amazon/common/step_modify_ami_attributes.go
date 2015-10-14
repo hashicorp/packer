@@ -66,10 +66,10 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		adds := make([]*ec2.LaunchPermission, len(s.Users))
 		for i, u := range s.Users {
 			users[i] = aws.String(u)
-			adds[i] = &ec2.LaunchPermission{UserID: aws.String(u)}
+			adds[i] = &ec2.LaunchPermission{UserId: aws.String(u)}
 		}
 		options["users"] = &ec2.ModifyImageAttributeInput{
-			UserIDs: users,
+			UserIds: users,
 			LaunchPermission: &ec2.LaunchPermissionModifications{
 				Add: adds,
 			},
@@ -90,11 +90,11 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		ui.Say(fmt.Sprintf("Modifying attributes on AMI (%s)...", ami))
 		regionconn := ec2.New(&aws.Config{
 			Credentials: ec2conn.Config.Credentials,
-			Region:      region,
+			Region:      aws.String(region),
 		})
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
-			input.ImageID = &ami
+			input.ImageId = &ami
 			_, err := regionconn.ModifyImageAttribute(input)
 			if err != nil {
 				err := fmt.Errorf("Error modify AMI attributes: %s", err)

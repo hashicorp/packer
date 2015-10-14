@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -245,9 +244,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-
-	// Seed the random number generator
-	rand.Seed(time.Now().UTC().UnixNano())
 
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{

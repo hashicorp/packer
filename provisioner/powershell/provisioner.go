@@ -399,7 +399,7 @@ func (p *Provisioner) createCommandText() (command string, err error) {
 		Vars: flattenedEnvVars,
 		Path: p.config.RemotePath,
 	}
-	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return "", fmt.Errorf("Error processing command: %s", err)
 	}

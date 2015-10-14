@@ -3,6 +3,7 @@ package common
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -337,4 +338,41 @@ func TestHashForType(t *testing.T) {
 	if HashForType("fake") != nil {
 		t.Fatalf("fake hash is not nil")
 	}
+}
+
+// TestDownloadFileUrl tests a special case where we use a local file for
+// iso_url. In this case we can still verify the checksum but we should not
+// delete the file if the checksum fails. Instead we'll just error and let the
+// user fix the checksum.
+func TestDownloadFileUrl(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unable to detect working directory: %s", err)
+	}
+
+	// source_path is a file path and source is a network path
+	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
+	source := fmt.Sprintf("file://" + sourcePath)
+	t.Logf("Trying to download %s", source)
+
+	config := &DownloadConfig{
+		Url: source,
+		// This should be wrong. We want to make sure we don't delete
+		Checksum: []byte("nope"),
+		Hash:     HashForType("sha256"),
+		CopyFile: false,
+	}
+
+	client := NewDownloadClient(config)
+
+	// Verify that we fail to match the checksum
+	_, err = client.Get()
+	if err.Error() != "checksums didn't match expected: 6e6f7065" {
+		t.Fatalf("Unexpected failure; expected checksum not to match")
+	}
+
+	if _, err = os.Stat(sourcePath); err != nil {
+		t.Errorf("Could not stat source file: %s", sourcePath)
+	}
+
 }

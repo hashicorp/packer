@@ -43,7 +43,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	group := &ec2.CreateSecurityGroupInput{
 		GroupName:   &groupName,
 		Description: aws.String("Temporary group for Packer"),
-		VPCID:       &s.VpcId,
+		VpcId:       &s.VpcId,
 	}
 	groupResp, err := ec2conn.CreateSecurityGroup(group)
 	if err != nil {
@@ -53,15 +53,15 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the group ID so we can delete it later
-	s.createdGroupId = *groupResp.GroupID
+	s.createdGroupId = *groupResp.GroupId
 
 	// Authorize the SSH access for the security group
 	req := &ec2.AuthorizeSecurityGroupIngressInput{
-		GroupID:    groupResp.GroupID,
-		IPProtocol: aws.String("tcp"),
-		FromPort:   aws.Long(int64(port)),
-		ToPort:     aws.Long(int64(port)),
-		CIDRIP:     aws.String("0.0.0.0/0"),
+		GroupId:    groupResp.GroupId,
+		IpProtocol: aws.String("tcp"),
+		FromPort:   aws.Int64(int64(port)),
+		ToPort:     aws.Int64(int64(port)),
+		CidrIp:     aws.String("0.0.0.0/0"),
 	}
 
 	// We loop and retry this a few times because sometimes the security
@@ -105,7 +105,7 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 
 	var err error
 	for i := 0; i < 5; i++ {
-		_, err = ec2conn.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{GroupID: &s.createdGroupId})
+		_, err = ec2conn.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{GroupId: &s.createdGroupId})
 		if err == nil {
 			break
 		}

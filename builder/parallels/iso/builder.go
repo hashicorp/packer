@@ -45,6 +45,7 @@ type Config struct {
 	ISOChecksum        string   `mapstructure:"iso_checksum"`
 	ISOChecksumType    string   `mapstructure:"iso_checksum_type"`
 	ISOUrls            []string `mapstructure:"iso_urls"`
+	SkipCompaction     bool     `mapstructure:"skip_compaction"`
 	VMName             string   `mapstructure:"vm_name"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
@@ -64,7 +65,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			Exclude: []string{
 				"boot_command",
 				"prlctl",
-				"parallel_tools_guest_path",
+				"parallels_tools_guest_path",
 			},
 		},
 	}, raws...)
@@ -241,7 +242,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&parallelscommon.StepRun{
 			BootWait: b.config.BootWait,
-			Headless: b.config.Headless, // TODO: migth work on Enterprise Ed.
 		},
 		&parallelscommon.StepTypeBootCommand{
 			BootCommand:    b.config.BootCommand,
@@ -271,6 +271,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&parallelscommon.StepPrlctl{
 			Commands: b.config.PrlctlPost,
 			Ctx:      b.config.ctx,
+		},
+		&parallelscommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
 		},
 	}
 

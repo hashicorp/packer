@@ -15,7 +15,10 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-const BuildEnvKey = "ATLAS_BUILD_ID"
+const (
+	BuildEnvKey   = "ATLAS_BUILD_ID"
+	CompileEnvKey = "ATLAS_COMPILE_ID"
+)
 
 // Artifacts can return a string for this state key and the post-processor
 // will use automatically use this as the type. The user's value overrides
@@ -35,7 +38,7 @@ type Config struct {
 	TypeOverride bool   `mapstructure:"artifact_type_override"`
 	Metadata     map[string]string
 
-	ServerAddr string `mapstructure:"server_address"`
+	ServerAddr string `mapstructure:"atlas_url"`
 	Token      string
 
 	// This shouldn't ever be set outside of unit tests.
@@ -43,7 +46,8 @@ type Config struct {
 
 	ctx        interpolate.Context
 	user, name string
-	buildId    int
+	buildId     int
+	compileId    int
 }
 
 type PostProcessor struct {
@@ -94,6 +98,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 
 		p.config.buildId = int(raw)
+	}
+
+	// If we have a compile ID, save it
+	if v := os.Getenv(CompileEnvKey); v != "" {
+		raw, err := strconv.ParseInt(v, 0, 0)
+		if err != nil {
+			return fmt.Errorf(
+				"Error parsing compile ID: %s", err)
+		}
+
+		p.config.compileId = int(raw)
 	}
 
 	// Build the client
@@ -150,6 +165,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ID:       artifact.Id(),
 		Metadata: p.metadata(artifact),
 		BuildID:  p.config.buildId,
+		CompileID:  p.config.compileId,
 	}
 
 	if fs := artifact.Files(); len(fs) > 0 {

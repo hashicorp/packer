@@ -89,7 +89,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.InstallCommand == "" {
 		p.config.InstallCommand = "curl -L " +
-			"https://www.opscode.com/chef/install.sh | " +
+			"https://www.chef.io/chef/install.sh | " +
 			"{{if .Sudo}}sudo {{end}}bash"
 	}
 
@@ -287,10 +287,10 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 
 	ctx := p.config.ctx
 	ctx.Data = &ConfigTemplate{
-		NodeName:             nodeName,
-		ServerUrl:            serverUrl,
-		ClientKey:            clientKey,
-		SslVerifyMode:        sslVerifyMode,
+		NodeName:      nodeName,
+		ServerUrl:     serverUrl,
+		ClientKey:     clientKey,
+		SslVerifyMode: sslVerifyMode,
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
 	if err != nil {

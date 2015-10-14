@@ -26,11 +26,10 @@ type StepGetPassword struct {
 
 func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	image := state.Get("source_image").(*ec2.Image)
 
-	// Skip if we're not Windows...
-	if image.Platform == nil || *image.Platform != "windows" {
-		log.Printf("[INFO] Not Windows, skipping get password...")
+	// Skip if we're not using winrm
+	if s.Comm.Type != "winrm" {
+		log.Printf("[INFO] Not using winrm communicator, skipping get password...")
 		return multistep.ActionContinue
 	}
 
@@ -112,7 +111,7 @@ func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-cha
 		}
 
 		resp, err := ec2conn.GetPasswordData(&ec2.GetPasswordDataInput{
-			InstanceID: instance.InstanceID,
+			InstanceId: instance.InstanceId,
 		})
 		if err != nil {
 			err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
