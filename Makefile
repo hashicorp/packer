@@ -37,7 +37,7 @@ generate: deps
 	go generate ./...
 
 test: deps
-	go test $(TEST) $(TESTARGS) -timeout=15s
+	go test $(TEST) $(TESTARGS) -timeout=15s | tee packer-test.log
 	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
@@ -49,10 +49,10 @@ test: deps
 # testacc runs acceptance tests
 testacc: deps generate
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
-	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
+	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m | tee packer-test-acc.log
 
 testrace: deps
-	go test -race $(TEST) $(TESTARGS) -timeout=15s
+	go test -race $(TEST) $(TESTARGS) -timeout=15s | tee packer-test-race.log
 
 # `go get -u` causes git to revert packer to the master branch. This causes all
 # kinds of headaches. We record the git sha when make starts try to correct it
