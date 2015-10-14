@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/masterzen/winrm/winrm"
 	"github.com/mitchellh/packer/packer"
@@ -84,20 +85,28 @@ func (c *Communicator) Start(rc *packer.RemoteCmd) error {
 
 func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 	defer shell.Close()
+	var wg sync.WaitGroup
+
+	copyFunc := func(w io.Writer, r io.Reader) {
+		wg.Add(1)
+		defer wg.Done()
+		io.Copy(w, r)
+	}
 
 	if rc.Stdout != nil && cmd.Stdout != nil {
-		go io.Copy(rc.Stdout, cmd.Stdout)
+		go copyFunc(rc.Stdout, cmd.Stdout)
 	} else {
 		log.Printf("[WARN] Failed to read stdout for command '%s'", rc.Command)
 	}
 
 	if rc.Stderr != nil && cmd.Stderr != nil {
-		go io.Copy(rc.Stderr, cmd.Stderr)
+		go copyFunc(rc.Stderr, cmd.Stderr)
 	} else {
 		log.Printf("[WARN] Failed to read stderr for command '%s'", rc.Command)
 	}
 
 	cmd.Wait()
+	wg.Wait()
 
 	code := cmd.ExitCode()
 	log.Printf("[INFO] command '%s' exited with code: %d", rc.Command, code)
