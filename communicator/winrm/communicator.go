@@ -88,18 +88,19 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 	var wg sync.WaitGroup
 
 	copyFunc := func(w io.Writer, r io.Reader) {
-		wg.Add(1)
 		defer wg.Done()
 		io.Copy(w, r)
 	}
 
 	if rc.Stdout != nil && cmd.Stdout != nil {
+		wg.Add(1)
 		go copyFunc(rc.Stdout, cmd.Stdout)
 	} else {
 		log.Printf("[WARN] Failed to read stdout for command '%s'", rc.Command)
 	}
 
 	if rc.Stderr != nil && cmd.Stderr != nil {
+		wg.Add(1)
 		go copyFunc(rc.Stderr, cmd.Stderr)
 	} else {
 		log.Printf("[WARN] Failed to read stderr for command '%s'", rc.Command)
