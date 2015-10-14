@@ -117,9 +117,19 @@ func (d *DownloadClient) Get() (string, error) {
 	var finalPath string
 	sourcePath := ""
 	if url.Scheme == "file" && !d.config.CopyFile {
+		switch {
+		case url.Path == "" && url.Opaque != "":
+			finalPath = url.Opaque
+		case url.Opaque == "" && url.Path != "":
+			finalPath = url.Path
+		case url.Opaque != "" && url.Path != "":
+			finalPath = url.Path
+		}
+		if _, err = os.Stat(finalPath); err != nil {
+			return "", fmt.Errorf("File stat error: %s", finalPath)
+		}
 		// This is a special case where we use a source file that already exists
 		// locally and we don't make a copy. Normally we would copy or download.
-		finalPath = url.Path
 		log.Printf("[DEBUG] Using local file: %s", finalPath)
 
 		// Remove forward slash on absolute Windows file URLs before processing
