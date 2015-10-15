@@ -65,6 +65,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			Exclude: []string{
 				"boot_command",
 				"prlctl",
+				"prlctl_post",
 				"parallels_tools_guest_path",
 			},
 		},
