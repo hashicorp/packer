@@ -45,6 +45,9 @@ type Config struct {
 	// Where files will be copied before moving to the /srv/salt directory
 	TempConfigDir string `mapstructure:"temp_config_dir"`
 
+        // Override MinionId for state execution
+        MinionId string `mapstructure:"minion_id"`
+
 	ctx interpolate.Context
 }
 
@@ -194,7 +197,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("salt-call --local state.highstate --file-root=%s --pillar-root=%s -l info --retcode-passthrough"),p.config.RemoteStateTree, p.config.RemotePillarRoots)}
+	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("salt-call --local state.highstate --id=%s --file-root=%s --pillar-root=%s -l info --retcode-passthrough"),p.config.MinionId, p.config.RemoteStateTree, p.config.RemotePillarRoots)}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
