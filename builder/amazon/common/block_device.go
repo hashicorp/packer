@@ -30,7 +30,7 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping
 
 	for _, blockDevice := range b {
-		mapping := &ec2.BlockDeviceMapping {
+		mapping := &ec2.BlockDeviceMapping{
 			DeviceName: aws.String(blockDevice.DeviceName),
 		}
 
