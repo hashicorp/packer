@@ -36,8 +36,10 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 
 		if blockDevice.NoDevice {
 			mapping.NoDevice = aws.String("")
-		} else if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
-			mapping.VirtualName = aws.String(blockDevice.VirtualName)
+		} else if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualName = aws.String(blockDevice.VirtualName)
+			}
 		} else {
 			ebsBlockDevice := &ec2.EbsBlockDevice{
 				DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
