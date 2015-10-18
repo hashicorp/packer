@@ -22,15 +22,15 @@ import (
 )
 
 const (
-	DefaultDiskSize = 40000        // ~40GB
-	MinDiskSize     = 10 * 1024    // 10GB
-	MaxDiskSize     = 65536 * 1024 // 64TB
+	DefaultDiskSize = 40 * 1024   // ~40GB
+	MinDiskSize     = 256    // 256MB
+	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
 
-	DefaultRamSize = 1024  // 1GB
-	MinRamSize     = 512   // 512MB
-	MaxRamSize     = 32768 // 32GB
+	DefaultRamSize = 1 * 1024  // 1GB
+	MinRamSize     = 32   // 32MB
+	MaxRamSize     = 32 * 1024 // 32GB
 
-	LowRam = 512 // 512MB
+	LowRam = 384 // 384MB
 
 	DefaultUsername = "vagrant"
 	DefaultPassword = "vagrant"
@@ -416,9 +416,9 @@ func (b *Builder) checkDiskSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
 
 	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size_gb: Windows server requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size_gb: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
 	} else if b.config.DiskSize > MaxDiskSize {
-		return fmt.Errorf("disk_size_gb: Windows server requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size_gb: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
 	}
 
 	return nil
@@ -432,9 +432,9 @@ func (b *Builder) checkRamSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSizeMB))
 
 	if b.config.RamSizeMB < MinRamSize {
-		return fmt.Errorf("ram_size_mb: Windows server requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSizeMB)
+		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSizeMB)
 	} else if b.config.RamSizeMB > MaxRamSize {
-		return fmt.Errorf("ram_size_mb: Windows server requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSizeMB)
+		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSizeMB)
 	}
 
 	return nil
