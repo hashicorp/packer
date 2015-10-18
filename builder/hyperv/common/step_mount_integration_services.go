@@ -112,7 +112,7 @@ func (s *StepMountSecondaryDvdImages) addAndMountDvdDisk(vmName string, isoPath 
 			return properties, err
 		}
 
-		if controllerNumber != "0" || controllerNumber != "1" {
+		if controllerNumber != "0" && controllerNumber != "1" {
 			//There are only 2 ide controllers, try to use the one the hdd is attached too
 			controllerNumber = "0"
 		}
