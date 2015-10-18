@@ -96,7 +96,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 
 	if p.config.ElevatedEnvVarFormat != `$env:%s="%s"; ` {
-		t.Fatalf("Default command should be powershell '$env:%s=\"%s\"; ', but got %s", p.config.ElevatedEnvVarFormat)
+		t.Fatalf(`Default command should be powershell '$env:%%s="%%s"; ', but got %s`, p.config.ElevatedEnvVarFormat)
 	}
 }
 
