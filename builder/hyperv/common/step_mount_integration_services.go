@@ -42,7 +42,7 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 		return multistep.ActionHalt
 	}
 
-	log.Println(fmt.Sprintf("Saving DVD properties %s DVDs", len(dvdProperties)))
+	log.Println(fmt.Sprintf("Saving DVD properties %d DVDs", len(dvdProperties)))
 
 	state.Put("secondary.dvd.properties", dvdProperties)
 
