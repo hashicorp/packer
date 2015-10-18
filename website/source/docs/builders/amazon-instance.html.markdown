@@ -157,6 +157,10 @@ builder.
 -   `bundle_vol_command` (string) - The command to use to bundle the volume. See
     the "custom bundle commands" section below for more information.
 
+-   `ebs_optimized` (boolean) - Mark instance as [EBS
+    Optimized](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
+    Default `false`.
+
 -   `enhanced_networking` (boolean) - Enable enhanced
     networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
