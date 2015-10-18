@@ -116,6 +116,10 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
+-   `ebs_optimized` (boolean) - Mark instance as [EBS
+    Optimized](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
+    Default `false`.
+
 -   `enhanced_networking` (boolean) - Enable enhanced
     networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
