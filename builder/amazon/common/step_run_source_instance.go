@@ -147,7 +147,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
-			EbsOptimized:	     &s.EbsOptimized,
+			EbsOptimized:        &s.EbsOptimized,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
@@ -198,6 +198,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 					AvailabilityZone: &availabilityZone,
 				},
 				BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+				EbsOptimized:        &s.EbsOptimized,
 			},
 		})
 		if err != nil {
