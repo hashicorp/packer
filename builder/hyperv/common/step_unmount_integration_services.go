@@ -25,7 +25,7 @@ func (s *StepUnmountSecondaryDvdImages) Run(state multistep.StateBag) multistep.
 
 	dvdProperties := state.Get("secondary.dvd.properties").([]DvdControllerProperties)
 
-	log.Println(fmt.Sprintf("Found DVD properties %s", len(dvdProperties)))
+	log.Println(fmt.Sprintf("Found DVD properties %d", len(dvdProperties)))
 
 	for _, dvdProperty := range dvdProperties {
 		controllerNumber := dvdProperty.ControllerNumber
