@@ -58,7 +58,7 @@ func TestProvisioner_Impl(t *testing.T) {
 func TestProvisionerPrepare_Defaults(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
-
+	
 	err := p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -79,8 +79,8 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("Default command should be powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}', but got %s", p.config.ExecuteCommand)
 	}
 
-	if p.config.ElevatedExecuteCommand != "{{.Vars}}{{.Path}}" {
-		t.Fatalf("Default command should be powershell {{.Vars}}{{.Path}}, but got %s", p.config.ElevatedExecuteCommand)
+	if p.config.ElevatedExecuteCommand != "powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}'" {
+		t.Fatalf("Default command should be powershell powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}', but got %s", p.config.ElevatedExecuteCommand)
 	}
 
 	if p.config.ValidExitCodes == nil {
@@ -96,7 +96,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 
 	if p.config.ElevatedEnvVarFormat != `$env:%s="%s"; ` {
-		t.Fatalf("Default command should be powershell \"{{.Vars}}{{.Path}}\", but got %s", p.config.ElevatedEnvVarFormat)
+		t.Fatalf("Default command should be powershell '$env:%s=\"%s\"; ', but got %s", p.config.ElevatedEnvVarFormat)
 	}
 }
 
@@ -389,7 +389,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand := `powershell "& { $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; c:/Windows/Temp/inlineScript.bat; exit $LastExitCode}"`
+	expectedCommand := `powershell '& { $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; c:/Windows/Temp/inlineScript.bat; exit $LastExitCode}'`
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommand {
@@ -408,7 +408,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand = `powershell "& { $env:BAR=\"BAZ\"; $env:FOO=\"BAR\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; c:/Windows/Temp/inlineScript.bat; exit $LastExitCode}"`
+	expectedCommand = `powershell '& { $env:BAR="BAZ"; $env:FOO="BAR"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; c:/Windows/Temp/inlineScript.bat; exit $LastExitCode}'`
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommand {
@@ -435,7 +435,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	}
 
 	//powershell -Command "$env:PACKER_BUILDER_TYPE=''"; powershell -Command "$env:PACKER_BUILD_NAME='foobuild'";  powershell -Command c:/Windows/Temp/script.ps1
-	expectedCommand := `powershell "& { $env:PACKER_BUILDER_TYPE=\"footype\"; $env:PACKER_BUILD_NAME=\"foobuild\"; c:/Windows/Temp/script.ps1; exit $LastExitCode}"`
+	expectedCommand := `powershell '& { $env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild"; c:/Windows/Temp/script.ps1; exit $LastExitCode}'`
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommand {
@@ -468,7 +468,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand := `powershell "& { $env:BAR=\"BAZ\"; $env:FOO=\"BAR\"; $env:PACKER_BUILDER_TYPE=\"footype\"; $env:PACKER_BUILD_NAME=\"foobuild\"; c:/Windows/Temp/script.ps1; exit $LastExitCode}"`
+	expectedCommand := `powershell '& { $env:BAR="BAZ"; $env:FOO="BAR"; $env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild"; c:/Windows/Temp/script.ps1; exit $LastExitCode}'`
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommand {
@@ -545,7 +545,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
-	if flattenedEnvVars != "$env:PACKER_BUILDER_TYPE=\\\"iso\\\"; $env:PACKER_BUILD_NAME=\\\"vmware\\\"; " {
+	if flattenedEnvVars != `$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 
@@ -556,7 +556,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
-	if flattenedEnvVars != "$env:FOO=\\\"bar\\\"; $env:PACKER_BUILDER_TYPE=\\\"iso\\\"; $env:PACKER_BUILD_NAME=\\\"vmware\\\"; " {
+	if flattenedEnvVars != `$env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 
@@ -567,7 +567,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
-	if flattenedEnvVars != "$env:BAZ=\\\"qux\\\"; $env:FOO=\\\"bar\\\"; $env:PACKER_BUILDER_TYPE=\\\"iso\\\"; $env:PACKER_BUILD_NAME=\\\"vmware\\\"; " {
+	if flattenedEnvVars != `$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 }
@@ -582,7 +582,7 @@ func TestProvision_createCommandText(t *testing.T) {
 
 	// Non-elevated
 	cmd, _ := p.createCommandText()
-	if cmd != "powershell \"& { $env:PACKER_BUILDER_TYPE=\\\"\\\"; $env:PACKER_BUILD_NAME=\\\"\\\"; c:/Windows/Temp/script.ps1; exit $LastExitCode}\"" {
+	if cmd != `powershell '& { $env:PACKER_BUILDER_TYPE=""; $env:PACKER_BUILD_NAME=""; c:/Windows/Temp/script.ps1; exit $LastExitCode}'` {
 		t.Fatalf("Got unexpected non-elevated command: %s", cmd)
 	}
 
