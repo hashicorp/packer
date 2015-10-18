@@ -116,7 +116,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ElevatedEnvVarFormat == "" {
-		p.config.ElevatedEnvVarFormat = `$env:%s=\"%s\"; `
+		p.config.ElevatedEnvVarFormat = `$env:%s="%s"; `
 	}
 
 	if p.config.ExecuteCommand == "" {
@@ -124,7 +124,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `{{.Vars}}{{.Path}}`
+		p.config.ElevatedExecuteCommand = `powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}'`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
