@@ -47,6 +47,7 @@ type Config struct {
 	ISOUrls            []string `mapstructure:"iso_urls"`
 	SkipCompaction     bool     `mapstructure:"skip_compaction"`
 	VMName             string   `mapstructure:"vm_name"`
+	TargetPath         string   `mapstructure:"iso_target_path"`
 
 	RawSingleISOUrl string `mapstructure:"iso_url"`
 
@@ -220,6 +221,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			TargetPath:   b.config.TargetPath,
 		},
 		&parallelscommon.StepOutputDir{
 			Force: b.config.PackerForce,
