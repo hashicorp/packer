@@ -246,7 +246,7 @@ func (d *ESX5Driver) getIPAddress(vmName string) (string, error) {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	return record["Address"], nil
+	return record["IPAddress"], nil
 }
 
 func (d *ESX5Driver) getIPAddressCompat() (string, error) {
