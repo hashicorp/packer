@@ -170,6 +170,10 @@ builder.
     to, defaults to "ide". When set to "sata", the drive is attached to an AHCI
     SATA controller.
 
+-   `iso_target_path` (string) - The path where the iso should be saved after
+    download. By default will go in the packer cache, with a hash of the
+    original filename as its name.
+
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to
     download or while downloading a single URL, it will move on to the next. All
