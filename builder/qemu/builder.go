@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -22,10 +21,10 @@ import (
 const BuilderId = "transcend.qemu"
 
 var accels = map[string]struct{}{
-	"none": struct{}{},
-	"kvm":  struct{}{},
-	"tcg":  struct{}{},
-	"xen":  struct{}{},
+	"none": {},
+	"kvm":  {},
+	"tcg":  {},
+	"xen":  {},
 }
 
 var netDevice = map[string]bool{
@@ -80,6 +79,7 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	common.ISOConfig    `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	Accelerator     string     `mapstructure:"accelerator"`
@@ -95,9 +95,6 @@ type Config struct {
 	HTTPDir         string     `mapstructure:"http_directory"`
 	HTTPPortMin     uint       `mapstructure:"http_port_min"`
 	HTTPPortMax     uint       `mapstructure:"http_port_max"`
-	ISOChecksum     string     `mapstructure:"iso_checksum"`
-	ISOChecksumType string     `mapstructure:"iso_checksum_type"`
-	ISOUrls         []string   `mapstructure:"iso_urls"`
 	MachineType     string     `mapstructure:"machine_type"`
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
@@ -106,7 +103,6 @@ type Config struct {
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
-	TargetPath      string     `mapstructure:"iso_target_path"`
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
@@ -120,7 +116,6 @@ type Config struct {
 	RunOnce bool `mapstructure:"run_once"`
 
 	RawBootWait        string `mapstructure:"boot_wait"`
-	RawSingleISOUrl    string `mapstructure:"iso_url"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 
 	bootWait        time.Duration ``
@@ -234,6 +229,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
 
+	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
+	warnings = append(warnings, isoWarnings...)
+	errs = packer.MultiErrorAppend(errs, isoErrs...)
+
 	if es := b.config.Comm.Prepare(&b.config.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
@@ -271,45 +270,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.HTTPPortMin > b.config.HTTPPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("http_port_min must be less than http_port_max"))
-	}
-
-	if b.config.ISOChecksumType == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("The iso_checksum_type must be specified."))
-	} else {
-		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
-		if b.config.ISOChecksumType != "none" {
-			if b.config.ISOChecksum == "" {
-				errs = packer.MultiErrorAppend(
-					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-			} else {
-				b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
-			}
-
-			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
-				errs = packer.MultiErrorAppend(
-					errs,
-					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
-			}
-		}
-	}
-
-	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("One of iso_url or iso_urls must be specified."))
-	} else if b.config.RawSingleISOUrl != "" && len(b.config.ISOUrls) > 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
-	} else if b.config.RawSingleISOUrl != "" {
-		b.config.ISOUrls = []string{b.config.RawSingleISOUrl}
-	}
-
-	for i, url := range b.config.ISOUrls {
-		b.config.ISOUrls[i], err = common.DownloadableURL(url)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
-		}
 	}
 
 	if !b.config.PackerForce {
@@ -350,12 +310,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.QemuArgs = make([][]string, 0)
 	}
 
-	if b.config.ISOChecksumType == "none" {
-		warnings = append(warnings,
-			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
-				"a checksum is highly recommended.")
-	}
-
 	if errs != nil && len(errs.Errors) > 0 {
 		return warnings, errs
 	}
@@ -384,9 +338,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
+			Extension:    "iso",
 			ResultKey:    "iso_path",
-			Url:          b.config.ISOUrls,
 			TargetPath:   b.config.TargetPath,
+			Url:          b.config.ISOUrls,
 		},
 		new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
