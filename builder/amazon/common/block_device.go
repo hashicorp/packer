@@ -30,35 +30,42 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping
 
 	for _, blockDevice := range b {
-		ebsBlockDevice := &ec2.EbsBlockDevice{
-			VolumeType:          aws.String(blockDevice.VolumeType),
-			VolumeSize:          aws.Int64(blockDevice.VolumeSize),
-			DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
-		}
-
-		// IOPS is only valid for SSD Volumes
-		if blockDevice.VolumeType != "" && blockDevice.VolumeType != "standard" && blockDevice.VolumeType != "gp2" {
-			ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
-		}
-
-		// You cannot specify Encrypted if you specify a Snapshot ID
-		if blockDevice.SnapshotId != "" {
-			ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
-		} else if blockDevice.Encrypted {
-			ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
-		}
-
 		mapping := &ec2.BlockDeviceMapping{
-			DeviceName:  aws.String(blockDevice.DeviceName),
-			VirtualName: aws.String(blockDevice.VirtualName),
-		}
-
-		if !strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
-			mapping.Ebs = ebsBlockDevice
+			DeviceName: aws.String(blockDevice.DeviceName),
 		}
 
 		if blockDevice.NoDevice {
 			mapping.NoDevice = aws.String("")
+		} else if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualName = aws.String(blockDevice.VirtualName)
+			}
+		} else {
+			ebsBlockDevice := &ec2.EbsBlockDevice{
+				DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
+			}
+
+			if blockDevice.VolumeType != "" {
+				ebsBlockDevice.VolumeType = aws.String(blockDevice.VolumeType)
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				ebsBlockDevice.VolumeSize = aws.Int64(blockDevice.VolumeSize)
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
+			}
+
+			// You cannot specify Encrypted if you specify a Snapshot ID
+			if blockDevice.SnapshotId != "" {
+				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
+			} else if blockDevice.Encrypted {
+				ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
+			}
+
+			mapping.Ebs = ebsBlockDevice
 		}
 
 		blockDevices = append(blockDevices, mapping)

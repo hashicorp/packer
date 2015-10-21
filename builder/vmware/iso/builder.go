@@ -48,6 +48,7 @@ type Config struct {
 	VMName              string   `mapstructure:"vm_name"`
 	BootCommand         []string `mapstructure:"boot_command"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
+	TargetPath          string   `mapstructure:"iso_target_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 
@@ -256,6 +257,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
+			Extension:    "iso",
+			TargetPath:   b.config.TargetPath,
 		},
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,

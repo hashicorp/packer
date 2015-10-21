@@ -51,7 +51,12 @@ Optional:
     packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
     will generate an Ansible inventory like:
 
-`{.text}   [my_group_1]   127.0.0.1   [my_group_2]   127.0.0.1`
+```{.text}
+[my_group_1]
+127.0.0.1
+[my_group_2]
+127.0.0.1
+```
 
 -   `inventory_file` (string) - The inventory file to be used by ansible. This
     file must exist on your local system and will be uploaded to the
@@ -62,18 +67,25 @@ specified host you're buiding. The `--limit` argument can be provided in the
 `extra_arguments` option.
 
 An example inventory file may look like:
+```{.text}
+[chi-dbservers]
+db-01 ansible_connection=local
+db-02 ansible_connection=local
 
-\`\`\` {.text} \[chi-dbservers\] db-01 ansible\_connection=local db-02
-ansible\_connection=local
+[chi-appservers]
+app-01 ansible_connection=local
+app-02 ansible_connection=local
 
-\[chi-appservers\] app-01 ansible\_connection=local app-02
-ansible\_connection=local
+[chi:children]
+chi-dbservers
+chi-appservers
 
-\[chi:children\] chi-dbservers chi-appservers
+[dbservers:children]
+chi-dbservers
 
-\[dbservers:children\] chi-dbservers
-
-\[appservers:children\] chi-appservers \`\`\`
+[appservers:children]
+chi-appservers
+```
 
 -   `playbook_dir` (string) - a path to the complete ansible directory structure
     on your local system to be copied to the remote machine as the
