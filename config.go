@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -10,9 +11,14 @@ import (
 	"strings"
 
 	"github.com/mitchellh/osext"
+	"github.com/mitchellh/packer/command"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 )
+
+// PACKERSPACE is used to represent the spaces that separate args for a command
+// without being confused with spaces in the path to the command itself.
+const PACKERSPACE = "-PACKERSPACE-"
 
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
@@ -73,8 +79,14 @@ func (c *config) Discover() error {
 		}
 	}
 
-	// Last, look in the CWD.
+	// Next, look in the CWD.
 	if err := c.discover("."); err != nil {
+		return err
+	}
+
+	// Finally, try to use an internal plugin. Note that this will not override
+	// any previously-loaded plugins.
+	if err := c.discoverInternal(); err != nil {
 		return err
 	}
 
@@ -196,6 +208,46 @@ func (c *config) discoverSingle(glob string, m *map[string]string) error {
 	return nil
 }
 
+func (c *config) discoverInternal() error {
+	// Get the packer binary path
+	packerPath, err := osext.Executable()
+	if err != nil {
+		log.Printf("[ERR] Error loading exe directory: %s", err)
+		return err
+	}
+
+	for builder := range command.Builders {
+		_, found := (c.Builders)[builder]
+		if !found {
+			log.Printf("Using internal plugin for %s", builder)
+			(c.Builders)[builder] = fmt.Sprintf("%s%splugin%spacker-builder-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, builder)
+		}
+	}
+
+	for provisioner := range command.Provisioners {
+		_, found := (c.Provisioners)[provisioner]
+		if !found {
+			log.Printf("Using internal plugin for %s", provisioner)
+			(c.Provisioners)[provisioner] = fmt.Sprintf(
+				"%s%splugin%spacker-provisioner-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
+		}
+	}
+
+	for postProcessor := range command.PostProcessors {
+		_, found := (c.PostProcessors)[postProcessor]
+		if !found {
+			log.Printf("Using internal plugin for %s", postProcessor)
+			(c.PostProcessors)[postProcessor] = fmt.Sprintf(
+				"%s%splugin%spacker-post-processor-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
+		}
+	}
+
+	return nil
+}
+
 func (c *config) pluginClient(path string) *plugin.Client {
 	originalPath := path
 
@@ -214,6 +266,14 @@ func (c *config) pluginClient(path string) *plugin.Client {
 		}
 	}
 
+	// Check for special case using `packer plugin PLUGIN`
+	args := []string{}
+	if strings.Contains(path, PACKERSPACE) {
+		parts := strings.Split(path, PACKERSPACE)
+		path = parts[0]
+		args = parts[1:]
+	}
+
 	// If everything failed, just use the original path and let the error
 	// bubble through.
 	if path == "" {
@@ -222,7 +282,7 @@ func (c *config) pluginClient(path string) *plugin.Client {
 
 	log.Printf("Creating plugin client for path: %s", path)
 	var config plugin.ClientConfig
-	config.Cmd = exec.Command(path)
+	config.Cmd = exec.Command(path, args...)
 	config.Managed = true
 	config.MinPort = c.PluginMinPort
 	config.MaxPort = c.PluginMaxPort
