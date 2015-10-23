@@ -202,6 +202,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
+	if b.config.Format != "" {
+		if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("format must be one of ova, ovf, or vmx"))
+		}
+	}
+
 	// Warnings
 	if b.config.ISOChecksumType == "none" {
 		warnings = append(warnings,
