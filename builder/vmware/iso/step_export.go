@@ -17,6 +17,20 @@ type StepExport struct {
 	Format string
 }
 
+func (s *StepExport) generateArgs(c *Config, outputPath string, hidePassword bool) []string {
+	password := url.QueryEscape(c.RemotePassword)
+	if hidePassword {
+		password = "****"
+	}
+	return []string{
+		"--noSSLVerify=true",
+		"--skipManifestCheck",
+		"-tt=" + s.Format,
+		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + c.VMName,
+		outputPath,
+	}
+}
+
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -44,18 +58,10 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 		os.MkdirAll(outputPath, 0755)
 	}
 
-	args := []string{
-		"--noSSLVerify=true",
-		"--skipManifestCheck",
-		"-tt=" + s.Format,
-		"vi://" + c.RemoteUser + ":" + url.QueryEscape(c.RemotePassword) + "@" + c.RemoteHost + "/" + c.VMName,
-		outputPath,
-	}
-
 	ui.Say("Exporting virtual machine...")
-	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(args, " ")))
+	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(s.generateArgs(c, outputPath, true), " ")))
 	var out bytes.Buffer
-	cmd := exec.Command(ovftool, args...)
+	cmd := exec.Command(ovftool, s.generateArgs(c, outputPath, false)...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf("Error exporting virtual machine: %s\n%s\n", err, out.String())
