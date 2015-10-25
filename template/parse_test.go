@@ -350,3 +350,23 @@ func TestParse_contents(t *testing.T) {
 		t.Fatalf("bad: %s\n\n%s", actual, expected)
 	}
 }
+
+func TestParse_bad(t *testing.T) {
+	cases := []struct {
+		File     string
+		Expected string
+	}{
+		{"error-beginning.json", "line 1, char 1"},
+		{"error-middle.json", "line 5, char 5"},
+		{"error-end.json", "line 1, char 30"},
+	}
+	for _, tc := range cases {
+		_, err := ParseFile(fixtureDir(tc.File))
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+		if !strings.Contains(err.Error(), tc.Expected) {
+			t.Fatalf("file: %s\nExpected: %s\n%s\n", tc.File, tc.Expected, err.Error())
+		}
+	}
+}
