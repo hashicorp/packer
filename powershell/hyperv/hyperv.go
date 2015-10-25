@@ -15,7 +15,7 @@ if ($HostVMAdapter){
     if ($HostNetAdapter){
         $HostNetAdapterConfiguration =  @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE' AND InterfaceIndex=$($HostNetAdapter.ifIndex)")
         if ($HostNetAdapterConfiguration){
-            return $HostNetAdapterConfiguration.IpAddress[$addressIndex]
+            return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
         }
     }
 }
@@ -477,7 +477,7 @@ func TurnOff(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -TurnOff -Confirm:$false
+  Stop-VM -Name $vmName -TurnOff -Confirm:$false -Force
 }
 `
 
@@ -492,7 +492,7 @@ func ShutDown(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -Confirm:$false
+  Stop-VM -Name $vmName -Confirm:$false -Force
 }
 `
 
