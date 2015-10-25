@@ -23,6 +23,7 @@ import (
 	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	filebuilder "github.com/mitchellh/packer/builder/file"
 	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
+	hypervbuilder "github.com/mitchellh/packer/builder/hyperv"
 	nullbuilder "github.com/mitchellh/packer/builder/null"
 	oneandonebuilder "github.com/mitchellh/packer/builder/oneandone"
 	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
@@ -79,6 +80,7 @@ var Builders = map[string]packer.Builder{
 	"docker":           new(dockerbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"googlecompute":    new(googlecomputebuilder.Builder),
+	"hyperv":   	   new(hypervbuilder.Builder),
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
 	"openstack":        new(openstackbuilder.Builder),
