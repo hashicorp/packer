@@ -16,6 +16,15 @@ if [ -z $VERSION ]; then
     exit 1
 fi
 
+# Export BINTRAY_USER to override
+BINTRAY_USER=${BINTRAY_USER:=mitchellh}
+
+# Export BINTRAY_REPOSITORY to override
+BINTRAY_REPOSITORY=${BINTRAY_REPOSITORY:=packer}
+
+# Export BINTRAY_ARTIFACT to override
+BINTRAY_ARTIFACT=${BINTRAY_ARTIFACT:=packer}
+
 # Make sure we have a bintray API key
 if [ -z $BINTRAY_API_KEY ]; then
     echo "Please set your bintray API key in the BINTRAY_API_KEY env var."
@@ -52,6 +61,6 @@ for ARCHIVE in ./pkg/dist/*; do
     echo Uploading: $ARCHIVE_NAME
     curl \
         -T ${ARCHIVE} \
-        -umitchellh:${BINTRAY_API_KEY} \
-        "https://api.bintray.com/content/mitchellh/packer/packer/${VERSION}/${ARCHIVE_NAME}"
+        -u${BINTRAY_USER}:${BINTRAY_API_KEY} \
+        "https://api.bintray.com/content/${BINTRAY_USER}/${BINTRAY_REPOSITORY}/${BINTRAY_ARTIFACT}/${VERSION}/${ARCHIVE_NAME}"
 done
