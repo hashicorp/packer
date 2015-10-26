@@ -13,9 +13,11 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-var DefaultRestartCommand = "powershell \"& {Restart-Computer -force }\""
+var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
 var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
 var retryableSleep = 5 * time.Second
+var TryCheckReboot = "shutdown.exe -f -r -t 60"
+var AbortReboot = "shutdown.exe -a"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -94,15 +96,41 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Restart script exited with non-zero exit status: %d", cmd.ExitStatus)
 	}
 
-	return waitForRestart(p)
+	return waitForRestart(p, comm)
 }
 
-var waitForRestart = func(p *Provisioner) error {
+var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 	ui := p.ui
 	ui.Say("Waiting for machine to restart...")
 	waitDone := make(chan bool, 1)
 	timeout := time.After(p.config.RestartTimeout)
 	var err error
+
+	p.comm = comm
+	var cmd *packer.RemoteCmd
+	trycommand := TryCheckReboot
+	abortcommand := AbortReboot
+	// Stolen from Vagrant reboot checker
+	for {
+		log.Printf("Check if machine is rebooting...")
+		cmd = &packer.RemoteCmd{Command: trycommand}
+		err = cmd.StartWithUi(comm, ui)
+		if err != nil {
+			// Couldnt execute, we asume machine is rebooting already
+			break
+		}
+		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
+			// Reboot already in progress but not completed
+			log.Printf("Reboot already in progress, waiting...")
+			time.Sleep(10 * time.Second)
+		}
+		if cmd.ExitStatus == 0 {
+			// Cancel reboot we created to test if machine was already rebooting
+			cmd = &packer.RemoteCmd{Command: abortcommand}
+			cmd.StartWithUi(comm, ui)
+			break
+		}
+	}
 
 	go func() {
 		log.Printf("Waiting for machine to become available...")
