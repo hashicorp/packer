@@ -1,15 +1,9 @@
-#-------------------------------------------------------------------------
-# Configure Middleman
-#-------------------------------------------------------------------------
-
 set :base_url, "https://www.packer.io/"
 
 activate :breadcrumbs
 
 activate :hashicorp do |h|
-  h.version         = ENV["PACKER_VERSION"]
-  h.bintray_enabled = ENV["BINTRAY_ENABLED"]
-  h.bintray_repo    = "mitchellh/packer"
-  h.bintray_user    = "mitchellh"
-  h.bintray_key     = ENV["BINTRAY_API_KEY"]
+  h.name        = "packer"
+  h.version     = "0.8.6"
+  h.github_slug = "mitchellh/packer"
 end
