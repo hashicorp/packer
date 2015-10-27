@@ -31,19 +31,6 @@ type config struct {
 	Provisioners   map[string]string
 }
 
-// ConfigFile returns the default path to the configuration file. On
-// Unix-like systems this is the ".packerconfig" file in the home directory.
-// On Windows, this is the "packer.config" file in the application data
-// directory.
-func ConfigFile() (string, error) {
-	return configFile()
-}
-
-// ConfigDir returns the configuration directory for Packer.
-func ConfigDir() (string, error) {
-	return configDir()
-}
-
 // Decodes configuration in JSON format from the given io.Reader into
 // the config object pointed to.
 func decodeConfig(r io.Reader, c *config) error {
@@ -70,7 +57,7 @@ func (c *config) Discover() error {
 	}
 
 	// Next, look in the plugins directory.
-	dir, err := ConfigDir()
+	dir, err := packer.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
 	} else {
