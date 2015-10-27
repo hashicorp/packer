@@ -244,7 +244,7 @@ func loadConfig() (*config, error) {
 	configFilePath := os.Getenv("PACKER_CONFIG")
 	if configFilePath == "" {
 		var err error
-		configFilePath, err = configFile()
+		configFilePath, err = packer.ConfigFile()
 
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)

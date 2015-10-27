@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-checkpoint"
 	"github.com/mitchellh/packer/command"
+	"github.com/mitchellh/packer/packer"
 )
 
 func init() {
@@ -25,7 +26,7 @@ func runCheckpoint(c *config) {
 		return
 	}
 
-	configDir, err := ConfigDir()
+	configDir, err := packer.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Checkpoint setup error: %s", err)
 		checkpointResult <- nil
