@@ -5,8 +5,8 @@ import (
 )
 
 func TestAMITemplatePrepare_clean(t *testing.T) {
-	origName := "AMZamz09(),/-_:&^ $%"
-	expected := "AMZamz09(),/-_--- --"
+	origName := "AMZamz09()./-_:&^ $%[]#'@"
+	expected := "AMZamz09()./-_--- --[]-'@"
 
 	name := templateCleanAMIName(origName)
 
