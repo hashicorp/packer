@@ -53,13 +53,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Direction must be one of: download, upload."))
 	}
 
-	if p.config.Direction == "upload" {
-		if _, err := os.Stat(p.config.Source); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
-		}
-	}
-
 	if p.config.Destination == "" {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Destination must be specified."))
