@@ -6,7 +6,7 @@ description: |
     for example, spinning up an EC2 instance to build a docker container -- and then
     extracting the docker container and throwing away the EC2 instance.
 layout: docs
-page_title: 'Atlas Post-Processor'
+page_title: 'Artifice Post-Processor'
 ...
 
 # Artifice Post-Processor
