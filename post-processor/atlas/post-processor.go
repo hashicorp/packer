@@ -204,7 +204,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		opts.FileSize = r.Size
 	}
 
-	ui.Message(fmt.Sprintf("Uploading artifact (Size: %v)", opts.FileSize))
+	fileSizeMB := float64(opts.FileSize / 1000000)
+	ui.Message(fmt.Sprintf("Uploading artifact (Size: %.2fMB)", fileSizeMB))
 	var av *atlas.ArtifactVersion
 	doneCh := make(chan struct{})
 	errCh := make(chan error, 1)
@@ -220,7 +221,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	select {
 	case err := <-errCh:
-		return nil, false, fmt.Errorf("Error uploading (Size: %v): %s", opts.FileSize, err)
+		return nil, false, fmt.Errorf("Error uploading (Size: %.2fMB): %s", fileSizeMB, err)
 	case <-doneCh:
 	}
 
