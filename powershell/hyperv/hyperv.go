@@ -273,7 +273,7 @@ func StopVirtualMachine(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-    Stop-VM -VM $vm -Confirm:$false
+    Stop-VM -VM $vm -Force -Confirm:$false
 }
 `
 
@@ -477,7 +477,7 @@ func TurnOff(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -TurnOff -Confirm:$false -Force
+  Stop-VM -Name $vmName -TurnOff -Force -Confirm:$false
 }
 `
 
@@ -492,7 +492,7 @@ func ShutDown(vmName string) error {
 param([string]$vmName)
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -Confirm:$false -Force
+  Stop-VM -Name $vmName -Force -Confirm:$false
 }
 `
 
