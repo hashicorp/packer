@@ -58,10 +58,36 @@ any logging to be enabled.
 ### Debugging Packer in Powershell/Windows
 
 In Windows you can set the detailed logs environmental variable `PACKER_LOG` or
-the log variable `PACKER_LOG_PATH` using powershell environment variables. For example:
+the log variable `PACKER_LOG_PATH` using powershell environment variables. For
+example:
 
     $env:PACKER_LOG=1
     $env:PACKER_LOG_PATH="packerlog.txt" 
 
 If you find a bug with Packer, please include the detailed log by using a
 service such as [gist](http://gist.github.com).
+
+## Issues Installing Ubuntu Packages
+
+Issues may arise using and building Ubuntu AMIs where common packages that
+*should* be installed from Ubuntu's Main repository are not found during a
+provisioner step:
+
+    amazon-ebs: No candidate version found for build-essential
+    amazon-ebs: No candidate version found for build-essential
+
+This, obviously can cause problems where a build is unable to finish
+successfully as the proper packages cannot be provisioned correctly. The problem
+arises when cloud-init has not finished fully running on the source AMI by the
+time that packer starts any provisioning steps.
+
+Adding the following provisioner to the packer template, allows for the
+cloud-init process to fully finish before packer starts provisioning the source
+AMI.
+
+    {
+      "type": "shell",
+      "inline": [
+        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
+      ]
+    }
