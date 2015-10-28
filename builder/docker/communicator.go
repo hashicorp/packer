@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/ActiveState/tail"
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/packer"
 )
@@ -200,35 +201,79 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 // cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
 	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
-	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
 
-	pipe, err := localCmd.StdoutPipe()
+	client, err := docker.NewClientFromEnv()
 	if err != nil {
-		return fmt.Errorf("Failed to open pipe: %s", err)
+		return fmt.Errorf("Unable to connect to docker daemon: %s", err)
 	}
 
-	if err = localCmd.Start(); err != nil {
-		return fmt.Errorf("Failed to start download: %s", err)
-	}
+	// Docker download gives us a writer with tarball data. We want to read this
+	// with the tar reader so we can extract the file we're downloading. Since
+	// tar reader expects a reader interface, we need to setup a pipe.
+	tarRead, tarWrite := io.Pipe()
 
-	// When you use - to send docker cp to stdout it is streamed as a tar; this
-	// enables it to work with directories. We don't actually support
-	// directories in Download() but we still need to handle the tar format.
-	archive := tar.NewReader(pipe)
-	_, err = archive.Next()
-	if err != nil {
-		return fmt.Errorf("Failed to read header from tar stream: %s", err)
-	}
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+	log.Printf("wait group")
 
-	numBytes, err := io.Copy(dst, archive)
-	if err != nil {
-		return fmt.Errorf("Failed to pipe download: %s", err)
-	}
-	log.Printf("Copied %d bytes for %s", numBytes, src)
+	go func() {
+		// Download the data as a tarball
+		log.Printf("before download")
+		err = client.DownloadFromContainer(c.ContainerId, docker.DownloadFromContainerOptions{
+			Path:         src,
+			OutputStream: tarWrite,
+		})
+		log.Printf("after download")
+		if err != nil {
+			log.Printf("download fail: %s", err)
+			// return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
+		}
+		wg.Done()
+		log.Printf("stop waiting for download")
+	}()
 
-	if err = localCmd.Wait(); err != nil {
-		return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
-	}
+	go func() {
+		// Read the file from the tarball
+		log.Printf("start tarball")
+		archive := tar.NewReader(tarRead)
+		// defer tarRead.Close()
+		log.Printf("tarball headers")
+		_, err = archive.Next()
+		if err != nil {
+			log.Printf("tar header fail: %s", err)
+			// return fmt.Errorf("Failed to read header from tar stream: %s", err)
+		}
+
+		log.Printf("copying data from tarball")
+		numBytes, err := io.Copy(dst, archive)
+		if err != nil {
+			log.Printf("pipe fail: %s", err)
+			// return fmt.Errorf("Failed to pipe download: %s", err)
+		}
+		log.Printf("Copied %d bytes for %s", numBytes, src)
+
+		// Exhaust the rest of the tar so we can close the reader. We don't
+		// actually do anything with this data but if we don't do this the
+		// downloader will hang or error.
+		//
+		// If at some point in the future we support multiple files in one
+		// download we would care about the rest of this data.
+		for {
+			_, err := archive.Next()
+			if err == io.EOF {
+				break
+			}
+			// Drain and dump
+			ioutil.ReadAll(archive)
+		}
+
+		wg.Done()
+		log.Printf("stop waiting for tarball")
+	}()
+
+	log.Printf("waiting for wg")
+	wg.Wait()
+	log.Printf("done waiting for wg")
 
 	return nil
 }
