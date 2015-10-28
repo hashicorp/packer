@@ -107,7 +107,7 @@ you can also use `token` configuration option.
         "type": "atlas",
         "token": "{{user `atlas_token`}}",
         "artifact": "hashicorp/foobar",
-        "artifact_type": "amazon.ami",
+        "artifact_type": "amazon.image",
         "metadata": {
           "created_at": "{{timestamp}}"
         }
