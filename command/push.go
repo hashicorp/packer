@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -38,16 +39,23 @@ type pushUploadFn func(
 
 func (c *PushCommand) Run(args []string) int {
 	var token string
+	var message string
 	var name string
 	var create bool
 
 	f := c.Meta.FlagSet("push", FlagSetVars)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
 	f.StringVar(&token, "token", "", "token")
+	f.StringVar(&message, "m", "", "message")
+	f.StringVar(&message, "message", "", "message")
 	f.StringVar(&name, "name", "", "name")
 	f.BoolVar(&create, "create", false, "create (deprecated)")
 	if err := f.Parse(args); err != nil {
 		return 1
+	}
+
+	if message != "" {
+		log.Printf("[WARN] -m/-message is deprecated and will be removed in a future Packer release")
 	}
 
 	args = f.Args()
