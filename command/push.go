@@ -38,15 +38,12 @@ type pushUploadFn func(
 
 func (c *PushCommand) Run(args []string) int {
 	var token string
-	var message string
 	var name string
 	var create bool
 
 	f := c.Meta.FlagSet("push", FlagSetVars)
 	f.Usage = func() { c.Ui.Error(c.Help()) }
 	f.StringVar(&token, "token", "", "token")
-	f.StringVar(&message, "m", "", "message")
-	f.StringVar(&message, "message", "", "message")
 	f.StringVar(&name, "name", "", "name")
 	f.BoolVar(&create, "create", false, "create (deprecated)")
 	if err := f.Parse(args); err != nil {
@@ -186,9 +183,6 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Add the upload metadata
 	metadata := make(map[string]interface{})
-	if message != "" {
-		metadata["message"] = message
-	}
 	metadata["template"] = tpl.RawContents
 	metadata["template_name"] = filepath.Base(args[0])
 	uploadOpts.Metadata = metadata
@@ -267,9 +261,6 @@ Usage: packer push [options] TEMPLATE
   see the online documentation for more information about these configurables.
 
 Options:
-
-  -m, -message=<detail>    A message to identify the purpose or changes in this
-                           Packer template much like a VCS commit message
 
   -name=<name>             The destination build in Atlas. This is in a format
                            "username/name".
