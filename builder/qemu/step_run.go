@@ -19,11 +19,12 @@ type stepRun struct {
 }
 
 type qemuArgsTemplateData struct {
-	HTTPIP    string
-	HTTPPort  uint
-	HTTPDir   string
-	OutputDir string
-	Name      string
+	HTTPIP      string
+	HTTPPort    uint
+	HTTPDir     string
+	OutputDir   string
+	Name        string
+	SSHHostPort uint
 }
 
 func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
@@ -148,6 +149,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 			config.HTTPDir,
 			config.OutputDir,
 			config.VMName,
+			sshHostPort,
 		}
 		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
 		if err != nil {
