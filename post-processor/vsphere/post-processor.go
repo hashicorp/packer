@@ -121,7 +121,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
 
-	options := []string{
+	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
 		fmt.Sprintf("--name=%s", p.config.VMName),
@@ -135,25 +135,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	args := []string{
-		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("%s", ovftool_uri),
-	}
-
 	if p.config.Overwrite == true {
-		options = append(options, "--overwrite")
+		args = append(args, "--overwrite")
 	}
 
 	if len(p.config.Options) > 0 {
-		options = append(options, p.config.Options...)
+		args = append(args, p.config.Options...)
 	}
 
-	command := append(options, args...)
-
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 	var out bytes.Buffer
-	log.Printf("Starting ovftool with parameters: %s", strings.Join(command, " "))
-	cmd := exec.Command("ovftool", command...)
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
+	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		return nil, false, fmt.Errorf("Failed: %s\nStdout: %s", err, out.String())
