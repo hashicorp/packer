@@ -22,10 +22,10 @@ func (s *StepUnmountFloppyDrive) Run(state multistep.StateBag) multistep.StepAct
 		return multistep.ActionContinue
 	}
 
-	errorMsg := "Error Unmounting floppy drive: %s"
 	vmName := state.Get("vmName").(string)
-
 	ui.Say("Unmounting floppy drive (Run)...")
+	
+	errorMsg := "Error Unmounting floppy drive: %s"
 
 	err := driver.UnmountFloppyDrive(vmName)
 	if err != nil {

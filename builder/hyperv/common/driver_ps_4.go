@@ -217,12 +217,20 @@ func (d *HypervPS4Driver) MountDvdDriveByLocation(vmName string, path string, co
 	return hyperv.MountDvdDriveByLocation(vmName, path, controllerNumber, controllerLocation)
 }
 
+func (d *HypervPS4Driver) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
+	return hyperv.SetBootDvdDrive(vmName, controllerNumber, controllerLocation)
+}
+
 func (d *HypervPS4Driver) UnmountDvdDrive(vmName string) error {
 	return hyperv.UnmountDvdDrive(vmName)
 }
 
-func (d *HypervPS4Driver) DeleteDvdDrive(vmName string, controllerNumber string, controllerLocation string) error {
+func (d *HypervPS4Driver) DeleteDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	return hyperv.DeleteDvdDrive(vmName, controllerNumber, controllerLocation)
+}
+
+func (d *HypervPS4Driver) MountFloppyDrive(vmName string, path string) error {
+	return hyperv.MountFloppyDrive(vmName, path)
 }
 
 func (d *HypervPS4Driver) UnmountFloppyDrive(vmName string) error {
