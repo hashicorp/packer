@@ -153,7 +153,20 @@ Get-VMDvdDrive -VMName $vmName | Set-VMDvdDrive  -Path $null
 	return err
 }
 
-func DeleteDvdDrive(vmName string, controllerNumber string, controllerLocation string) error {
+func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
+	var script = `
+param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
+$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
+Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	return err
+}
+
+func DeleteDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	var script = `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
 $vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
@@ -162,7 +175,7 @@ Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Controlle
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, controllerNumber, controllerLocation)
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 

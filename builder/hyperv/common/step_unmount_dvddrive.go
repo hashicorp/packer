@@ -15,20 +15,31 @@ type StepUnmountDvdDrive struct {
 
 func (s *StepUnmountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
+	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	vmName := state.Get("vmName").(string)
-
-	ui.Say("Unmounting dvd drive...")
-
-	err := driver.UnmountDvdDrive(vmName)
-	if err != nil {
-		err := fmt.Errorf("Error unmounting dvd drive: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	ui.Say("Unmounting os dvd drive...")
+		
+	dvdController := state.Get("os.dvd.properties").(DvdControllerProperties)
+	
+	if dvdController.Existing {
+		err := driver.UnmountDvdDrive(vmName)
+		if err != nil {
+			err := fmt.Errorf("Error unmounting os dvd drive: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	} else {
+		err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
+		if err != nil {
+			err := fmt.Errorf("Error deleting os dvd drive: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
-
+	
 	return multistep.ActionContinue
 }
 

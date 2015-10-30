@@ -19,6 +19,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"os"
 )
 
 const (
@@ -84,12 +85,21 @@ type Config struct {
 	// either an HTTP URL or a file URL (or path to a file). If this is an
 	// HTTP URL, Packer will download it and cache it between runs.
 	RawSingleISOUrl string `mapstructure:"iso_url"`
+	
 	// Multiple URLs for the ISO to download. Packer will try these in order.
 	// If anything goes wrong attempting to download or while downloading a
 	// single URL, it will move on to the next. All URLs must point to the
 	// same file (same checksum). By default this is empty and iso_url is
 	// used. Only one of iso_url or iso_urls can be specified.
 	ISOUrls []string `mapstructure:"iso_urls"`
+	
+	TargetPath           string   `mapstructure:"iso_target_path"`	
+	
+	// Should integration services iso be mounted
+	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
+	
+	// The path to the integration services iso
+	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
 
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
@@ -234,6 +244,50 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	log.Println(fmt.Sprintf("%s: %v", "RawSingleISOUrl", b.config.RawSingleISOUrl))
 
+	if b.config.GuestAdditionsMode == "" {
+		b.config.GuestAdditionsMode = "attach"
+	}
+
+	if b.config.GuestAdditionsPath == "" {
+		b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
+	}
+	
+	for _, isoPath := range b.config.SecondaryDvdImages {
+		if _, err := os.Stat(isoPath); os.IsNotExist(err) {
+		    if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Secondary Dvd image does not exist: %s", err))
+			}
+		}
+	}
+	
+	numberOfIsos := len(b.config.SecondaryDvdImages)
+	
+	if b.config.GuestAdditionsMode == "attach" {
+		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
+		    if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Guest additions iso does not exist: %s", err))
+			}
+		}		
+				
+		numberOfIsos = numberOfIsos + 1
+	}
+	
+	if b.config.Generation < 2 && numberOfIsos > 2 {
+		if b.config.GuestAdditionsMode == "attach" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+		}
+	} else if b.config.Generation > 1 && len(b.config.SecondaryDvdImages) > 16 {
+		if b.config.GuestAdditionsMode == "attach" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))		
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))		
+		}
+	}
+
 	// Warnings
 	if b.config.ISOChecksumType == "none" {
 		warnings = append(warnings,
@@ -275,12 +329,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	steps := []multistep.Step{
+	steps := []multistep.Step{	
 		&hypervcommon.StepCreateTempDir{},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
+		&common.StepDownload{
+			Checksum:     b.config.ISOChecksum,
+			ChecksumType: b.config.ISOChecksumType,
+			Description:  "ISO",
+			ResultKey:    "iso_path",
+			Url:          b.config.ISOUrls,
+			Extension:    "iso",
+			TargetPath:   b.config.TargetPath,
+		},			
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
@@ -304,12 +367,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepEnableIntegrationService{},
 
 		&hypervcommon.StepMountDvdDrive{
-			RawSingleISOUrl: b.config.RawSingleISOUrl,
+			Generation: b.config.Generation,
 		},
-		&hypervcommon.StepMountFloppydrive{},
+		&hypervcommon.StepMountFloppydrive{
+			Generation: b.config.Generation,
+		},
+
+		&hypervcommon.StepMountGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsPath: b.config.GuestAdditionsPath,
+			Generation: b.config.Generation,
+		},
 
 		&hypervcommon.StepMountSecondaryDvdImages{
-			Files:      b.config.SecondaryDvdImages,
+			IsoPaths:      b.config.SecondaryDvdImages,
 			Generation: b.config.Generation,
 		},
 
@@ -341,15 +412,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		// wait for the vm to be powered off
 		&hypervcommon.StepWaitForPowerOff{},
-
-		// remove the integration services dvd drive
+		
+		// remove the secondary dvd images
 		// after we power down
 		&hypervcommon.StepUnmountSecondaryDvdImages{},
+		&hypervcommon.StepUnmountGuestAdditions{},
+		&hypervcommon.StepUnmountDvdDrive{},
 		&hypervcommon.StepUnmountFloppyDrive{
 			Generation: b.config.Generation,
 		},
-		&hypervcommon.StepUnmountDvdDrive{},
-
 		&hypervcommon.StepExportVm{
 			OutputDir:      b.config.OutputDir,
 			SkipCompaction: b.config.SkipCompaction,

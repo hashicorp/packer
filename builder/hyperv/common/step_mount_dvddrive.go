@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	powershell "github.com/mitchellh/packer/powershell"
+	"log"
 )
 
 type StepMountDvdDrive struct {
-	RawSingleISOUrl string
-	path            string
+	Generation    uint
+	cleanup bool
+	dvdProperties DvdControllerProperties
 }
 
 func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
@@ -22,39 +23,37 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 
 	errorMsg := "Error mounting dvd drive: %s"
 	vmName := state.Get("vmName").(string)
-	isoPath := s.RawSingleISOUrl
+	isoPath := state.Get("iso_path").(string)
+	
+	// should be able to mount up to 60 additional iso images using SCSI
+	// but Windows would only allow a max of 22 due to available drive letters
+	// Will Windows assign DVD drives to A: and B: ?
 
-	// Check that there is a virtual dvd drive
-	var script powershell.ScriptBuilder
-	powershell := new(powershell.PowerShellCmd)
+	// For IDE, there are only 2 controllers (0,1) with 2 locations each (0,1)
 
-	script.Reset()
-	script.WriteLine("param([string]$vmName)")
-	script.WriteLine("(Get-VMDvdDrive -VMName $vmName).ControllerNumber")
-	controllerNumber, err := powershell.Output(script.String(), vmName)
+	var dvdControllerProperties DvdControllerProperties
+	controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, s.Generation)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if controllerNumber == "" {
-		// Add a virtual dvd drive as there is none
-		script.Reset()
-		script.WriteLine("param([string]$vmName)")
-		script.WriteLine("Add-VMDvdDrive -VMName $vmName")
-		script.WriteLine("$dvdDrive = Get-VMDvdDrive -VMName $vmName | Select-Object -first 1")
-		script.WriteLine("Set-VMFirmware -VMName $vmName -FirstBootDevice $dvdDrive")
-		err = powershell.Run(script.String(), vmName)
-		if err != nil {
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	}
-
-	ui.Say("Mounting dvd drive...")
-
+	dvdControllerProperties.ControllerNumber = controllerNumber
+	dvdControllerProperties.ControllerLocation = controllerLocation
+	s.cleanup = true
+	s.dvdProperties = dvdControllerProperties
+	
+	ui.Say("Setting boot drive to os dvd drive %s ...")
+	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation)
+	if err != nil {
+		err := fmt.Errorf(errorMsg, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}	
+		
+	ui.Say(fmt.Sprintf("Mounting os dvd drive %s ...", isoPath))
 	err = driver.MountDvdDrive(vmName, isoPath)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
@@ -62,28 +61,39 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	s.path = isoPath
+	
+	state.Put("os.dvd.properties", dvdControllerProperties)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
-	if s.path == "" {
+	if !s.cleanup {
 		return
 	}
 
 	driver := state.Get("driver").(Driver)
 
-	errorMsg := "Error unmounting dvd drive: %s"
+	errorMsg := "Error unmounting os dvd drive: %s"
 
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Unmounting dvd drive...")
-
-	err := driver.UnmountDvdDrive(vmName)
-	if err != nil {
-		ui.Error(fmt.Sprintf(errorMsg, err))
+	ui.Say("Clean up os dvd drive...")
+	
+	dvdControllerProperties := s.dvdProperties
+	
+	if dvdControllerProperties.Existing {
+		err := driver.UnmountDvdDrive(vmName)
+		if err != nil {
+			err := fmt.Errorf("Error unmounting dvd drive: %s", err)
+			log.Print(fmt.Sprintf(errorMsg, err))
+		}
+	} else {
+		err := driver.DeleteDvdDrive(vmName, dvdControllerProperties.ControllerNumber, dvdControllerProperties.ControllerLocation)
+		if err != nil {
+			err := fmt.Errorf("Error deleting dvd drive: %s", err)
+			log.Print(fmt.Sprintf(errorMsg, err))
+		}
 	}
 }
