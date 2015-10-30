@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -88,10 +89,12 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 
 	for region, ami := range amis {
 		ui.Say(fmt.Sprintf("Modifying attributes on AMI (%s)...", ami))
-		regionconn := ec2.New(&aws.Config{
+		awsConfig := aws.Config{
 			Credentials: ec2conn.Config.Credentials,
 			Region:      aws.String(region),
-		})
+		}
+		session := session.New(&awsConfig)
+		regionconn := ec2.New(session)
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
 			input.ImageId = &ami
