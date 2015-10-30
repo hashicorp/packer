@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	powershell "github.com/mitchellh/packer/powershell"
+	hyperv "github.com/mitchellh/packer/powershell/hyperv"
 	"log"
 	"os"
+	"strconv"
 )
 
 type StepMountSecondaryDvdImages struct {
@@ -88,67 +89,22 @@ func (s *StepMountSecondaryDvdImages) addAndMountIntegrationServicesSetupDisk(vm
 }
 
 func (s *StepMountSecondaryDvdImages) addAndMountDvdDisk(vmName string, isoPath string) (DvdControllerProperties, error) {
-
 	var properties DvdControllerProperties
-	var script powershell.ScriptBuilder
-	powershell := new(powershell.PowerShellCmd)
 
-	controllerNumber := "0"
-	if s.Generation < 2 {
-		// get the controller number that the OS install disk is mounted on
-		// generation 1 requires dvd to be added to ide controller, generation 2 uses scsi for dvd drives
-		script.Reset()
-		script.WriteLine("param([string]$vmName)")
-		script.WriteLine("$dvdDrives = (Get-VMDvdDrive -VMName $vmName)")
-		script.WriteLine("$lastControllerNumber = $dvdDrives | Sort-Object ControllerNumber | Select-Object -Last 1 | %{$_.ControllerNumber}")
-		script.WriteLine("if (!$lastControllerNumber) {")
-		script.WriteLine("	$lastControllerNumber = 0")
-		script.WriteLine("} elseif (!$lastControllerNumber -or ($dvdDrives | ?{ $_.ControllerNumber -eq $lastControllerNumber} | measure).count -gt 1) {")
-		script.WriteLine("	$lastControllerNumber += 1")
-		script.WriteLine("}")
-		script.WriteLine("$lastControllerNumber")
-		controllerNumber, err := powershell.Output(script.String(), vmName)
-		if err != nil {
-			return properties, err
-		}
-
-		if controllerNumber != "0" && controllerNumber != "1" {
-			//There are only 2 ide controllers, try to use the one the hdd is attached too
-			controllerNumber = "0"
-		}
-	}
-
-	script.Reset()
-	script.WriteLine("param([string]$vmName,[int]$controllerNumber)")
-	script.WriteLine("Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber")
-	err := powershell.Run(script.String(), vmName, controllerNumber)
+	controllerNumber, controllerLocation, err := hyperv.CreateDvdDrive(vmName, s.Generation)
 	if err != nil {
 		return properties, err
 	}
 
-	// we could try to get the controller location and number in one call, but this way we do not
-	// need to parse the output
-	script.Reset()
-	script.WriteLine("param([string]$vmName)")
-	script.WriteLine("(Get-VMDvdDrive -VMName $vmName | Where-Object {$_.Path -eq $null}).ControllerLocation")
-	controllerLocation, err := powershell.Output(script.String(), vmName)
-	if err != nil {
-		return properties, err
-	}
+	properties.ControllerNumber = strconv.FormatInt(int64(controllerNumber), 10)
+	properties.ControllerLocation = strconv.FormatInt(int64(controllerLocation), 10)
 
-	script.Reset()
-	script.WriteLine("param([string]$vmName,[string]$path,[string]$controllerNumber,[string]$controllerLocation)")
-	script.WriteLine("Set-VMDvdDrive -VMName $vmName -Path $path -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation")
-
-	err = powershell.Run(script.String(), vmName, isoPath, controllerNumber, controllerLocation)
+	err = hyperv.MountDvdDriveByLocation(vmName, isoPath, controllerNumber, controllerLocation)
 	if err != nil {
 		return properties, err
 	}
 
 	log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber, controllerLocation))
-
-	properties.ControllerNumber = controllerNumber
-	properties.ControllerLocation = controllerLocation
 
 	return properties, nil
 }

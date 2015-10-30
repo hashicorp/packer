@@ -8,20 +8,14 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/powershell/hyperv"
-)
-
-
-const(
-	vlanId = "1724"
 )
 
 type StepConfigureVlan struct {
+	vlanId string
 }
 
 func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
-	//config := state.Get("config").(*config)
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error configuring vlan: %s"
@@ -30,7 +24,13 @@ func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Configuring vlan...")
 
-	err := hyperv.SetNetworkAdapterVlanId(switchName, vlanId)
+	vlanId := s.vlanId
+
+	if vlanId == "" {
+		vlanId = "1724"
+	}
+
+	err := driver.SetNetworkAdapterVlanId(switchName, vlanId)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
@@ -38,7 +38,7 @@ func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	err = hyperv.SetVirtualMachineVlanId(vmName, vlanId)
+	err = driver.SetVirtualMachineVlanId(vmName, vlanId)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)

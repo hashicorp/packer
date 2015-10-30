@@ -2,6 +2,7 @@ package hyperv
 
 import (
 	"github.com/mitchellh/packer/powershell"
+	"strconv"
 	"strings"
 )
 
@@ -50,6 +51,73 @@ $ip
 	return cmdOut, err
 }
 
+func CreateDvdDrive(vmName string, generation uint) (uint, uint, error) {
+	var ps powershell.PowerShellCmd
+	var script string
+	var controllerNumber uint
+	controllerNumber = 0
+	if generation < 2 {
+		// get the controller number that the OS install disk is mounted on
+		// generation 1 requires dvd to be added to ide controller, generation 2 uses scsi for dvd drives
+		script = `
+param([string]$vmName)
+$dvdDrives = (Get-VMDvdDrive -VMName $vmName)
+$lastControllerNumber = $dvdDrives | Sort-Object ControllerNumber | Select-Object -Last 1 | %{$_.ControllerNumber}
+if (!$lastControllerNumber) {
+	$lastControllerNumber = 0
+} elseif (!$lastControllerNumber -or ($dvdDrives | ?{ $_.ControllerNumber -eq $lastControllerNumber} | measure).count -gt 1) {
+	$lastControllerNumber += 1
+}
+$lastControllerNumber	
+`
+		cmdOut, err := ps.Output(script, vmName)
+		if err != nil {
+			return 0, 0, err
+		}
+
+		controllerNumberTemp, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 64)
+		if err != nil {
+			return 0, 0, err
+		}
+
+		controllerNumber = uint(controllerNumberTemp)
+
+		if controllerNumber != 0 && controllerNumber != 1 {
+			//There are only 2 ide controllers, try to use the one the hdd is attached too
+			controllerNumber = 0
+		}
+	}
+
+	script = `
+param([string]$vmName,[int]$controllerNumber)
+Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber
+`
+	cmdOut, err := ps.Output(script, vmName)
+	if err != nil {
+		return controllerNumber, 0, err
+	}
+
+	// we could try to get the controller location and number in one call, but this way we do not
+	// need to parse the output
+	script = `
+param([string]$vmName)
+(Get-VMDvdDrive -VMName $vmName | Where-Object {$_.Path -eq $null}).ControllerLocation
+`
+
+	cmdOut, err = ps.Output(script, vmName)
+	if err != nil {
+		return controllerNumber, 0, err
+	}
+
+	controllerLocationTemp, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 64)
+	if err != nil {
+		return controllerNumber, 0, err
+	}
+
+	controllerLocation := uint(controllerLocationTemp)
+	return controllerNumber, controllerLocation, err
+}
+
 func MountDvdDrive(vmName string, path string) error {
 
 	var script = `
@@ -62,6 +130,18 @@ Set-VMDvdDrive -VMName $vmName -Path $path
 	return err
 }
 
+func MountDvdDriveByLocation(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
+
+	var script = `
+param([string]$vmName,[string]$path,[string]$controllerNumber,[string]$controllerLocation)
+Set-VMDvdDrive -VMName $vmName -Path $path -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, path, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	return err
+}
+
 func UnmountDvdDrive(vmName string) error {
 	var script = `
 param([string]$vmName)
@@ -70,6 +150,19 @@ Get-VMDvdDrive -VMName $vmName | Set-VMDvdDrive  -Path $null
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName)
+	return err
+}
+
+func DeleteDvdDrive(vmName string, controllerNumber string, controllerLocation string) error {
+	var script = `
+param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
+$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
+Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, controllerNumber, controllerLocation)
 	return err
 }
 
@@ -96,9 +189,9 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, ram string, diskSize string, switchName string, generation string) error {
+func CreateVirtualMachine(vmName string, path string, ram int64, diskSize int64, switchName string, generation uint) error {
 
-	if generation == "2" {
+	if generation == 2 {
 		var script = `
 param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
 $vhdx = $vmName + '.vhdx'
@@ -106,7 +199,7 @@ $vhdPath = Join-Path -Path $path -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, ram, diskSize, switchName, generation)
+		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
 		return err
 	} else {
 		var script = `
@@ -116,12 +209,12 @@ $vhdPath = Join-Path -Path $path -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, ram, diskSize, switchName)
+		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
 		return err
 	}
 }
 
-func SetVirtualMachineCpu(vmName string, cpu string) error {
+func SetVirtualMachineCpu(vmName string, cpu uint) error {
 
 	var script = `
 param([string]$vmName, [int]$cpu)
@@ -129,7 +222,7 @@ Set-VMProcessor -VMName $vmName -Count $cpu
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, cpu)
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10))
 	return err
 }
 
@@ -425,8 +518,51 @@ $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 
 	var ps powershell.PowerShellCmd
 	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return false, err
+	}
+
 	var isRunning = strings.TrimSpace(cmdOut) == "True"
 	return isRunning, err
+}
+
+func IsOff(vmName string) (bool, error) {
+
+	var script = `
+param([string]$vmName)
+$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off
+`
+
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return false, err
+	}
+
+	var isRunning = strings.TrimSpace(cmdOut) == "True"
+	return isRunning, err
+}
+
+func Uptime(vmName string) (uint64, error) {
+
+	var script = `
+param([string]$vmName)
+$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm.Uptime.TotalSeconds
+`
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return 0, err
+	}
+
+	uptime, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 64)
+
+	return uptime, err
 }
 
 func Mac(vmName string) (string, error) {

@@ -9,14 +9,13 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"time"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 type StepRebootVm struct {
 }
 
 func (s *StepRebootVm) Run(state multistep.StateBag) multistep.StepAction {
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error rebooting vm: %s"
@@ -24,7 +23,7 @@ func (s *StepRebootVm) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Rebooting vm...")
 
-	err := hyperv.RestartVirtualMachine(vmName)
+	err := driver.RestartVirtualMachine(vmName)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)

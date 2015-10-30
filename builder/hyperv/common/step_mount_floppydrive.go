@@ -6,28 +6,24 @@ package common
 
 import (
 	"fmt"
-	"os"
-	"strings"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/powershell"
 	"github.com/mitchellh/packer/powershell/hyperv"
-	"log"
 	"io"
 	"io/ioutil"
+	"log"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
-
-const(
+const (
 	FloppyFileName = "assets.vfd"
 )
 
-
-
-
 type StepSetUnattendedProductKey struct {
-	Files []string
+	Files      []string
 	ProductKey string
 }
 
@@ -36,15 +32,15 @@ func (s *StepSetUnattendedProductKey) Run(state multistep.StateBag) multistep.St
 
 	if s.ProductKey == "" {
 		ui.Say("No product key specified...")
-		return multistep.ActionContinue 
+		return multistep.ActionContinue
 	}
 
 	index := -1
 	for i, value := range s.Files {
-    	if s.caseInsensitiveContains(value, "Autounattend.xml") {
-    		index = i
-    		break
-    	}
+		if s.caseInsensitiveContains(value, "Autounattend.xml") {
+			index = i
+			break
+		}
 	}
 
 	ui.Say("Setting product key in Autounattend.xml...")
@@ -59,10 +55,9 @@ func (s *StepSetUnattendedProductKey) Run(state multistep.StateBag) multistep.St
 	return multistep.ActionContinue
 }
 
-
 func (s *StepSetUnattendedProductKey) caseInsensitiveContains(str, substr string) bool {
-    str, substr = strings.ToUpper(str), strings.ToUpper(substr)
-    return strings.Contains(str, substr)
+	str, substr = strings.ToUpper(str), strings.ToUpper(substr)
+	return strings.Contains(str, substr)
 }
 
 func (s *StepSetUnattendedProductKey) copyAutounattend(path string) (string, error) {
@@ -92,11 +87,8 @@ func (s *StepSetUnattendedProductKey) copyAutounattend(path string) (string, err
 	return autounattend, nil
 }
 
-
 func (s *StepSetUnattendedProductKey) Cleanup(state multistep.StateBag) {
 }
-
-
 
 type StepMountFloppydrive struct {
 	floppyPath string
@@ -119,7 +111,7 @@ func (s *StepMountFloppydrive) Run(state multistep.StateBag) multistep.StepActio
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error preparing floppy: %s", err))
 		return multistep.ActionHalt
-	}	
+	}
 
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -135,7 +127,8 @@ func (s *StepMountFloppydrive) Run(state multistep.StateBag) multistep.StepActio
 	// Track the path so that we can unregister it from Hyper-V later
 	s.floppyPath = floppyPath
 
-	return multistep.ActionContinue}
+	return multistep.ActionContinue
+}
 
 func (s *StepMountFloppydrive) Cleanup(state multistep.StateBag) {
 	if s.floppyPath == "" {
