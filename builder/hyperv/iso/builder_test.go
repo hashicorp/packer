@@ -8,13 +8,14 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"iso_checksum":      "foo",
-		"iso_checksum_type": "md5",
-		"iso_url":           "http://www.packer.io",
-		"shutdown_command":  "yes",
-		"ssh_username":      "foo",
-		"ram_size_mb":       64,
-		"disk_size":       	 256,
+		"iso_checksum":            "foo",
+		"iso_checksum_type":       "md5",
+		"iso_url":                 "http://www.packer.io",
+		"shutdown_command":        "yes",
+		"ssh_username":            "foo",
+		"ram_size_mb":             64,
+		"disk_size":               256,
+		"guest_additions_mode":    "none",
 		packer.BuildNameConfigKey: "foo",
 	}
 }
@@ -56,7 +57,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		t.Fatalf("bad err: %s", err)
 	}
 
-	if b.config.DiskSize != 40 * 1024 {
+	if b.config.DiskSize != 40*1024 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
 	}
 
