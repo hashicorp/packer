@@ -5,15 +5,14 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"time"
-//	"net"
 	"log"
 	"os/exec"
 	"strings"
-	"bytes"
+	"time"
 )
 
 const port string = "13000"
@@ -29,36 +28,6 @@ func (s *StepPollingInstalation) Run(state multistep.StateBag) multistep.StepAct
 	vmIp := state.Get("ip").(string)
 
 	ui.Say("Start polling VM to check the installation is complete...")
-/*
-	count := 30
-	var minutes time.Duration = 1
-	sleepMin := time.Minute * minutes
-	host := vmIp + ":" + port
-
-	timeoutSec := time.Second * 15
-
-	for count > 0 {
-		ui.Say(fmt.Sprintf("Connecting vm (%s)...", host ))
-		conn, err := net.DialTimeout("tcp", host, timeoutSec)
-		if err == nil {
-			ui.Say("Done!")
-			conn.Close()
-			break;
-		}
-
-		log.Println(err)
-		ui.Say(fmt.Sprintf("Waiting more %v minutes...", uint(minutes)))
-		time.Sleep(sleepMin)
-		count--
-	}
-
-	if count == 0 {
-		err := fmt.Errorf(errorMsg, "a signal from vm was not received in a given time period ")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-*/
 	host := "'" + vmIp + "'," + port
 
 	var blockBuffer bytes.Buffer
@@ -73,7 +42,7 @@ func (s *StepPollingInstalation) Run(state multistep.StateBag) multistep.StepAct
 	var res string
 
 	for count > 0 {
-		log.Println(fmt.Sprintf("Connecting vm (%s)...", host ))
+		log.Println(fmt.Sprintf("Connecting vm (%s)...", host))
 		cmd := exec.Command("powershell", blockBuffer.String())
 		cmdOut, err := cmd.Output()
 		if err != nil {
@@ -88,8 +57,8 @@ func (s *StepPollingInstalation) Run(state multistep.StateBag) multistep.StepAct
 		if res != "False" {
 			ui.Say("Signal was received from the VM")
 			// Sleep before starting provision
-			time.Sleep(time.Second*30)
-			break;
+			time.Sleep(time.Second * 30)
+			break
 		}
 
 		log.Println(fmt.Sprintf("Slipping for more %v seconds...", uint(duration)))
