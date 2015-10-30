@@ -1,3 +1,21 @@
+## 0.9.0 (Unreleased)
+
+BACKWARDS INCOMPATIBILITIES:
+
+  * Packer now ships as a single binary, including plugins. If you install packer 0.9.0 over a previous packer installation, **you must delete all of the packer-* plugin files** or packer will load out-of-date plugins from disk.
+
+FEATURES:
+
+  *
+
+IMPROVEMENTS:
+
+  * Packer plugins are now compiled into the main binary, reducing file size and build times, and making packer easier to install. The overall plugin architecture has not changed and third-party plugins can still be loaded from disk. Please make sure your plugins are up-to-date!
+
+BUG FIXES:
+
+  *
+
 ## 0.8.6 (Aug 22, 2015)
 
 IMPROVEMENTS:
