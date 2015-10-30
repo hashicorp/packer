@@ -9,7 +9,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	powershell "github.com/mitchellh/packer/powershell"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 type StepMountDvdDrive struct {
@@ -18,7 +17,7 @@ type StepMountDvdDrive struct {
 }
 
 func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error mounting dvd drive: %s"
@@ -56,7 +55,7 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Mounting dvd drive...")
 
-	err = hyperv.MountDvdDrive(vmName, isoPath)
+	err = driver.MountDvdDrive(vmName, isoPath)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
@@ -74,6 +73,8 @@ func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	driver := state.Get("driver").(Driver)
+
 	errorMsg := "Error unmounting dvd drive: %s"
 
 	vmName := state.Get("vmName").(string)
@@ -81,7 +82,7 @@ func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Unmounting dvd drive...")
 
-	err := hyperv.UnmountDvdDrive(vmName)
+	err := driver.UnmountDvdDrive(vmName)
 	if err != nil {
 		ui.Error(fmt.Sprintf(errorMsg, err))
 	}

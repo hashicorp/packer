@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 type StepEnableIntegrationService struct {
@@ -16,13 +15,14 @@ type StepEnableIntegrationService struct {
 }
 
 func (s *StepEnableIntegrationService) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Enabling Integration Service...")
 
 	vmName := state.Get("vmName").(string)
 	s.name = "Guest Service Interface"
 
-	err := hyperv.EnableVirtualMachineIntegrationService(vmName, s.name)
+	err := driver.EnableVirtualMachineIntegrationService(vmName, s.name)
 
 	if err != nil {
 		err := fmt.Errorf("Error enabling Integration Service: %s", err)

@@ -8,19 +8,16 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 	"strings"
 	"time"
-	"log"
-	powershell "github.com/mitchellh/packer/powershell"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
-
 
 type StepConfigureIp struct {
 }
 
 func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
-//	driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error configuring ip address: %s"
@@ -34,7 +31,7 @@ func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
 	var ip string
 
 	for count != 0 {
-		cmdOut, err := hyperv.GetVirtualMachineNetworkAdapterAddress(vmName)
+		cmdOut, err := driver.GetVirtualMachineNetworkAdapterAddress(vmName)
 		if err != nil {
 			err := fmt.Errorf(errorMsg, err)
 			state.Put("error", err)
@@ -45,7 +42,7 @@ func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
 		ip = strings.TrimSpace(string(cmdOut))
 
 		if ip != "False" {
-			break;
+			break
 		}
 
 		log.Println(fmt.Sprintf("Waiting for another %v minutes...", uint(duration)))
@@ -53,7 +50,7 @@ func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
 		count--
 	}
 
-	if(count == 0){
+	if count == 0 {
 		err := fmt.Errorf(errorMsg, "IP address assigned to the adapter is empty")
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -62,7 +59,7 @@ func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("ip address is " + ip)
 
-	hostName, err := powershell.GetHostName(ip);
+	hostName, err := driver.GetHostName(ip)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -80,4 +77,3 @@ func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
 func (s *StepConfigureIp) Cleanup(state multistep.StateBag) {
 	// do nothing
 }
-

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/powershell/hyperv"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -24,6 +23,7 @@ type StepExportVm struct {
 }
 
 func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	var err error
@@ -45,7 +45,7 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Exporting vm...")
 
-	err = hyperv.ExportVirtualMachine(vmName, vmExportPath)
+	err = driver.ExportVirtualMachine(vmName, vmExportPath)
 	if err != nil {
 		errorMsg = "Error exporting vm: %s"
 		err := fmt.Errorf(errorMsg, err)
@@ -61,7 +61,7 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Skipping disk compaction...")
 	} else {
 		ui.Say("Compacting disks...")
-		err = hyperv.CompactDisks(expPath, vhdDir)
+		err = driver.CompactDisks(expPath, vhdDir)
 		if err != nil {
 			errorMsg = "Error compacting disks: %s"
 			err := fmt.Errorf(errorMsg, err)
@@ -72,7 +72,7 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say("Coping to output dir...")
-	err = hyperv.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
+	err = driver.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
 	if err != nil {
 		errorMsg = "Error exporting vm: %s"
 		err := fmt.Errorf(errorMsg, err)

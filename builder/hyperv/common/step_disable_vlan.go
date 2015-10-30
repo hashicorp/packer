@@ -8,15 +8,13 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 type StepDisableVlan struct {
 }
 
 func (s *StepDisableVlan) Run(state multistep.StateBag) multistep.StepAction {
-	//config := state.Get("config").(*config)
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error disabling vlan: %s"
@@ -25,7 +23,7 @@ func (s *StepDisableVlan) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Disabling vlan...")
 
-	err := hyperv.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
+	err := driver.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 type StepUnmountFloppyDrive struct {
@@ -16,7 +15,7 @@ type StepUnmountFloppyDrive struct {
 }
 
 func (s *StepUnmountFloppyDrive) Run(state multistep.StateBag) multistep.StepAction {
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.Generation > 1 {
@@ -28,7 +27,7 @@ func (s *StepUnmountFloppyDrive) Run(state multistep.StateBag) multistep.StepAct
 
 	ui.Say("Unmounting floppy drive (Run)...")
 
-	err := hyperv.UnmountFloppyDrive(vmName)
+	err := driver.UnmountFloppyDrive(vmName)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	powershell "github.com/mitchellh/packer/powershell"
 	"log"
 )
 
@@ -16,6 +15,7 @@ type StepUnmountSecondaryDvdImages struct {
 }
 
 func (s *StepUnmountSecondaryDvdImages) Run(state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Unmounting Integration Services Setup Disk...")
 
@@ -28,17 +28,7 @@ func (s *StepUnmountSecondaryDvdImages) Run(state multistep.StateBag) multistep.
 	log.Println(fmt.Sprintf("Found DVD properties %d", len(dvdProperties)))
 
 	for _, dvdProperty := range dvdProperties {
-		controllerNumber := dvdProperty.ControllerNumber
-		controllerLocation := dvdProperty.ControllerLocation
-
-		var script powershell.ScriptBuilder
-		powershell := new(powershell.PowerShellCmd)
-
-		script.WriteLine("param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)")
-		script.WriteLine("$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation")
-		script.WriteLine("if (!$vmDvdDrive) {throw 'unable to find dvd drive'}")
-		script.WriteLine("Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation")
-		err := powershell.Run(script.String(), vmName, controllerNumber, controllerLocation)
+		err := driver.DeleteDvdDrive(vmName, dvdProperty.ControllerNumber, dvdProperty.ControllerLocation)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())

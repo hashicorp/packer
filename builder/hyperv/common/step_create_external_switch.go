@@ -5,11 +5,10 @@
 package common
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"code.google.com/p/go-uuid/uuid"
-	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 // This step creates switch for VM.
@@ -17,12 +16,12 @@ import (
 // Produces:
 //   SwitchName string - The name of the Switch
 type StepCreateExternalSwitch struct {
-	SwitchName string
+	SwitchName    string
 	oldSwitchName string
 }
 
 func (s *StepCreateExternalSwitch) Run(state multistep.StateBag) multistep.StepAction {
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	vmName := state.Get("vmName").(string)
@@ -33,16 +32,16 @@ func (s *StepCreateExternalSwitch) Run(state multistep.StateBag) multistep.StepA
 
 	packerExternalSwitchName := "paes_" + uuid.New()
 
-	err = hyperv.CreateExternalVirtualSwitch(vmName, packerExternalSwitchName)
+	err = driver.CreateExternalVirtualSwitch(vmName, packerExternalSwitchName)
 	if err != nil {
 		err := fmt.Errorf("Error creating switch: %s", err)
 		state.Put(errorMsg, err)
 		ui.Error(err.Error())
-		s.SwitchName = "";
+		s.SwitchName = ""
 		return multistep.ActionHalt
 	}
-	
-	switchName, err := hyperv.GetVirtualMachineSwitchName(vmName)
+
+	switchName, err := driver.GetVirtualMachineSwitchName(vmName)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
@@ -59,10 +58,10 @@ func (s *StepCreateExternalSwitch) Run(state multistep.StateBag) multistep.StepA
 
 	ui.Say("External switch name is: '" + switchName + "'")
 
-	if(switchName != packerExternalSwitchName){
+	if switchName != packerExternalSwitchName {
 		s.SwitchName = ""
 	} else {
-		s.SwitchName =  packerExternalSwitchName
+		s.SwitchName = packerExternalSwitchName
 		s.oldSwitchName = state.Get("SwitchName").(string)
 	}
 
@@ -76,7 +75,7 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 	if s.SwitchName == "" {
 		return
 	}
-	//driver := state.Get("driver").(Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
@@ -92,7 +91,7 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	err = hyperv.ConnectVirtualMachineNetworkAdapterToSwitch(vmName, s.oldSwitchName)
+	err = driver.ConnectVirtualMachineNetworkAdapterToSwitch(vmName, s.oldSwitchName)
 	if err != nil {
 		ui.Error(fmt.Sprintf(errMsg, err))
 		return
@@ -100,7 +99,7 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 
 	state.Put("SwitchName", s.oldSwitchName)
 
-	err = hyperv.DeleteVirtualSwitch(s.SwitchName)
+	err = driver.DeleteVirtualSwitch(s.SwitchName)
 	if err != nil {
 		ui.Error(fmt.Sprintf(errMsg, err))
 	}
