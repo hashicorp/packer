@@ -40,7 +40,7 @@ type Config struct {
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
 	FloppyFiles         []string `mapstructure:"floppy_files"`
-	Format              string   `mapstruture:"format"`
+	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
 	Version             string   `mapstructure:"version"`
 	VMName              string   `mapstructure:"vm_name"`
