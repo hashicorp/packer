@@ -13,7 +13,7 @@ import (
 
 type StepMountDvdDrive struct {
 	Generation    uint
-	cleanup bool
+	cleanup       bool
 	dvdProperties DvdControllerProperties
 }
 
@@ -24,7 +24,7 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	errorMsg := "Error mounting dvd drive: %s"
 	vmName := state.Get("vmName").(string)
 	isoPath := state.Get("iso_path").(string)
-	
+
 	// should be able to mount up to 60 additional iso images using SCSI
 	// but Windows would only allow a max of 22 due to available drive letters
 	// Will Windows assign DVD drives to A: and B: ?
@@ -43,16 +43,16 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	dvdControllerProperties.ControllerLocation = controllerLocation
 	s.cleanup = true
 	s.dvdProperties = dvdControllerProperties
-	
-	ui.Say("Setting boot drive to os dvd drive %s ...")
+
+	ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ..."), isoPath)
 	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}	
-		
+	}
+
 	ui.Say(fmt.Sprintf("Mounting os dvd drive %s ...", isoPath))
 	err = driver.MountDvdDrive(vmName, isoPath)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	
+
 	state.Put("os.dvd.properties", dvdControllerProperties)
 
 	return multistep.ActionContinue
@@ -80,9 +80,9 @@ func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Clean up os dvd drive...")
-	
+
 	dvdControllerProperties := s.dvdProperties
-	
+
 	if dvdControllerProperties.Existing {
 		err := driver.UnmountDvdDrive(vmName)
 		if err != nil {
