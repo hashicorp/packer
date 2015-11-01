@@ -40,6 +40,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 		var stdout, stderr bytes.Buffer
 		cmd := &packer.RemoteCmd{
+			ExitStatus: 0,
 			Command: s.Command,
 			Stdout:  &stdout,
 			Stderr:  &stderr,
@@ -57,18 +58,13 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		// If the command failed to run, notify the user in some way.
 		if cmd.ExitStatus != 0 {
 			state.Put("error", fmt.Errorf(
-				"Shutdown command has non-zero exit status.\n\nStdout: %s\n\nStderr: %s",
-				stdout.String(), stderr.String()))
+				"Shutdown command has non-zero exit status.\n\nExitStatus: %d\n\nStdout: %s\n\nStderr: %s",
+				cmd.ExitStatus, stdout.String(), stderr.String()))
 			return multistep.ActionHalt
 		}
 
-		if stdout.Len() > 0 {
-			log.Printf("Shutdown stdout: %s", stdout.String())
-		}
-
-		if stderr.Len() > 0 {
-			log.Printf("Shutdown stderr: %s", stderr.String())
-		}
+		log.Printf("Shutdown stdout: %s", stdout.String())
+		log.Printf("Shutdown stderr: %s", stderr.String())
 
 		// Wait for the machine to actually shut down
 		log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
