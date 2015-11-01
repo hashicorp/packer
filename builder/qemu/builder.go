@@ -88,6 +88,8 @@ type Config struct {
 	DiskSize        uint       `mapstructure:"disk_size"`
 	DiskCache       string     `mapstructure:"disk_cache"`
 	DiskDiscard     string     `mapstructure:"disk_discard"`
+	SkipCompaction  bool       `mapstructure:"skip_compaction"`
+	DiskCompression bool       `mapstructure:"disk_compression"`
 	FloppyFiles     []string   `mapstructure:"floppy_files"`
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
@@ -242,6 +244,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("invalid format, only 'qcow2' or 'raw' are allowed"))
 	}
 
+	if b.config.Format != "qcow2" {
+		b.config.SkipCompaction = true
+		b.config.DiskCompression = false
+	}
+
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
@@ -364,6 +371,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
+		new(stepConvertDisk),
 	}
 
 	// Setup the state bag
