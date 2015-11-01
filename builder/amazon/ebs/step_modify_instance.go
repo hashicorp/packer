@@ -16,6 +16,20 @@ func (s *stepModifyInstance) Run(state multistep.StateBag) multistep.StepAction 
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
+	attr, err := ec2conn.DescribeInstanceAttribute(&ec2.DescribeInstanceAttributeInput{
+		InstanceId:      instance.InstanceId,
+		Attribute:       aws.String(ec2.InstanceAttributeNameSriovNetSupport),
+	})
+	if err != nil {
+		err := fmt.Errorf("Error describing Enhanced Networking attribute on %s: %s", *instance.InstanceId, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	if *attr.SriovNetSupport.Value == "simple" {
+		return multistep.ActionContinue
+	}
+
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
 		ui.Say("Enabling Enhanced Networking...")
