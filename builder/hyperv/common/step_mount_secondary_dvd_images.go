@@ -14,8 +14,6 @@ import (
 type StepMountSecondaryDvdImages struct {
 	IsoPaths         []string
 	Generation    uint
-	cleanup bool
-	dvdProperties []DvdControllerProperties
 }
 
 type DvdControllerProperties struct {
@@ -50,13 +48,12 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 	
 		properties.ControllerNumber = controllerNumber
 		properties.ControllerLocation = controllerLocation
-		
-		s.cleanup = true
+		properties.Existing = false
 		dvdProperties = append(dvdProperties, properties)
-		s.dvdProperties = dvdProperties		
+		state.Put("secondary.dvd.properties", dvdProperties)	
 	
 		ui.Say(fmt.Sprintf("Mounting secondary dvd drive %s ...", isoPath))
-		err = driver.MountDvdDriveByLocation(vmName, isoPath, controllerNumber, controllerLocation)
+		err = driver.MountDvdDrive(vmName, isoPath, controllerNumber, controllerLocation)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -66,33 +63,33 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber, controllerLocation))
 	}
 
-	state.Put("secondary.dvd.properties", dvdProperties)
-	
 	return multistep.ActionContinue
 }
 
 func (s *StepMountSecondaryDvdImages) Cleanup(state multistep.StateBag) {
-	if (!s.cleanup){
+	dvdControllersState := state.Get("secondary.dvd.properties")
+	
+	if dvdControllersState == nil {
 		return
 	}
 	
+	dvdControllers := dvdControllersState.([]DvdControllerProperties)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+	vmName := state.Get("vmName").(string)
+	errorMsg := "Error unmounting secondary dvd drive: %s"
+	
 	ui.Say("Clean up secondary dvd drives...")
 
-	vmName := state.Get("vmName").(string)
-
-	errorMsg := "Error unmounting secondary dvd drive: %s"
-
-	for _, dvdControllerProperties := range s.dvdProperties {
+	for _, dvdController := range dvdControllers {
 		
-		if dvdControllerProperties.Existing {
-			err := driver.UnmountDvdDrive(vmName)
+		if dvdController.Existing {
+			err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 			if err != nil {
 				log.Print(fmt.Sprintf(errorMsg, err))
 			}
 		} else {
-			err := driver.DeleteDvdDrive(vmName, dvdControllerProperties.ControllerNumber, dvdControllerProperties.ControllerLocation)
+			err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 			if err != nil {
 				log.Print(fmt.Sprintf(errorMsg, err))
 			}
