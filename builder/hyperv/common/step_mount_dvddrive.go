@@ -13,8 +13,6 @@ import (
 
 type StepMountDvdDrive struct {
 	Generation    uint
-	cleanup       bool
-	dvdProperties DvdControllerProperties
 }
 
 func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
@@ -41,10 +39,11 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 
 	dvdControllerProperties.ControllerNumber = controllerNumber
 	dvdControllerProperties.ControllerLocation = controllerLocation
-	s.cleanup = true
-	s.dvdProperties = dvdControllerProperties
+	dvdControllerProperties.Existing = false
+	
+	state.Put("os.dvd.properties", dvdControllerProperties)
 
-	ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ..."), isoPath)
+	ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
 	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
@@ -54,7 +53,7 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say(fmt.Sprintf("Mounting os dvd drive %s ...", isoPath))
-	err = driver.MountDvdDrive(vmName, isoPath)
+	err = driver.MountDvdDrive(vmName, isoPath, controllerNumber, controllerLocation)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
@@ -62,35 +61,32 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	state.Put("os.dvd.properties", dvdControllerProperties)
-
 	return multistep.ActionContinue
 }
 
-func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
-	if !s.cleanup {
+func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {	
+	dvdControllerState := state.Get("os.dvd.properties")
+	
+	if dvdControllerState == nil {
 		return
 	}
-
+	
+	dvdController := dvdControllerState.(DvdControllerProperties)	
 	driver := state.Get("driver").(Driver)
-
-	errorMsg := "Error unmounting os dvd drive: %s"
-
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)
+	errorMsg := "Error unmounting os dvd drive: %s"
 
 	ui.Say("Clean up os dvd drive...")
 
-	dvdControllerProperties := s.dvdProperties
-
-	if dvdControllerProperties.Existing {
-		err := driver.UnmountDvdDrive(vmName)
+	if dvdController.Existing {
+		err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			err := fmt.Errorf("Error unmounting dvd drive: %s", err)
 			log.Print(fmt.Sprintf(errorMsg, err))
 		}
 	} else {
-		err := driver.DeleteDvdDrive(vmName, dvdControllerProperties.ControllerNumber, dvdControllerProperties.ControllerLocation)
+		err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			err := fmt.Errorf("Error deleting dvd drive: %s", err)
 			log.Print(fmt.Sprintf(errorMsg, err))

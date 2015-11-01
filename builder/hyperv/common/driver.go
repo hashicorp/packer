@@ -88,13 +88,11 @@ type Driver interface {
 
 	CreateDvdDrive(string, uint) (uint, uint, error)
 
-	MountDvdDrive(string, string) error
-
-	MountDvdDriveByLocation(string, string, uint, uint) error
+	MountDvdDrive(string, string, uint, uint) error
 	
 	SetBootDvdDrive(string, uint, uint) error
-
-	UnmountDvdDrive(string) error
+	
+	UnmountDvdDrive(string, uint, uint) error
 
 	DeleteDvdDrive(string, uint, uint) error
 
