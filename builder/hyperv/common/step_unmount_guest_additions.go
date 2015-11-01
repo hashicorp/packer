@@ -18,12 +18,19 @@ func (s *StepUnmountGuestAdditions) Run(state multistep.StateBag) multistep.Step
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Unmounting Integration Services dvd drive...")
-		
-	dvdController := state.Get("guest.dvd.properties").(DvdControllerProperties)
+	ui.Say("Unmount/delete Integration Services dvd drive...")
+
+	dvdControllerState := state.Get("guest.dvd.properties")
+	
+	if dvdControllerState == nil {
+		return multistep.ActionContinue
+	}
+	
+	dvdController := dvdControllerState.(DvdControllerProperties)
 	
 	if dvdController.Existing {
-		err := driver.UnmountDvdDrive(vmName)
+		ui.Say(fmt.Sprintf("Unmounting Integration Services dvd drives controller %d location %d ...", dvdController.ControllerNumber, dvdController.ControllerLocation))
+		err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			err := fmt.Errorf("Error unmounting Integration Services dvd drive: %s", err)
 			state.Put("error", err)
@@ -31,6 +38,7 @@ func (s *StepUnmountGuestAdditions) Run(state multistep.StateBag) multistep.Step
 			return multistep.ActionHalt
 		}
 	} else {
+		ui.Say(fmt.Sprintf("Delete Integration Services dvd drives controller %d location %d ...", dvdController.ControllerNumber, dvdController.ControllerLocation))
 		err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			err := fmt.Errorf("Error deleting Integration Services dvd drive: %s", err)
@@ -39,6 +47,8 @@ func (s *StepUnmountGuestAdditions) Run(state multistep.StateBag) multistep.Step
 			return multistep.ActionHalt
 		}
 	}
+	
+	state.Put("guest.dvd.properties", nil)
 	
 	return multistep.ActionContinue
 }

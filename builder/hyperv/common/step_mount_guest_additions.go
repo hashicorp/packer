@@ -15,8 +15,6 @@ type StepMountGuestAdditions struct {
 	GuestAdditionsMode string
 	GuestAdditionsPath string
 	Generation    uint
-	cleanup bool
-	dvdProperties DvdControllerProperties
 }
 
 func (s *StepMountGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
@@ -49,11 +47,11 @@ func (s *StepMountGuestAdditions) Run(state multistep.StateBag) multistep.StepAc
 
 	dvdControllerProperties.ControllerNumber = controllerNumber
 	dvdControllerProperties.ControllerLocation = controllerLocation
-	s.cleanup = true
-	s.dvdProperties = dvdControllerProperties
+	dvdControllerProperties.Existing = false
+	state.Put("guest.dvd.properties", dvdControllerProperties)
 
 	ui.Say(fmt.Sprintf("Mounting Integration Services dvd drive %s ...", s.GuestAdditionsPath))
-	err = driver.MountDvdDriveByLocation(vmName, s.GuestAdditionsPath, controllerNumber, controllerLocation)
+	err = driver.MountDvdDrive(vmName, s.GuestAdditionsPath, controllerNumber, controllerLocation)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -62,33 +60,35 @@ func (s *StepMountGuestAdditions) Run(state multistep.StateBag) multistep.StepAc
 
 	log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", s.GuestAdditionsPath, controllerNumber, controllerLocation))
 	
-	state.Put("guest.dvd.properties", dvdControllerProperties)
-
 	return multistep.ActionContinue
 }
 
 func (s *StepMountGuestAdditions) Cleanup(state multistep.StateBag) {
-	if !s.cleanup || s.GuestAdditionsMode != "attach" {
+	if s.GuestAdditionsMode != "attach" {
 		return
 	}
+	
+	dvdControllerState := state.Get("guest.dvd.properties")
+	
+	if dvdControllerState == nil {
+		return
+	}
+	
+	dvdController := dvdControllerState.(DvdControllerProperties)	
 	ui := state.Get("ui").(packer.Ui)
-	
-	driver := state.Get("driver").(Driver)
-	ui.Say("Cleanup Integration Services dvd drive...")
-
+	driver := state.Get("driver").(Driver)	
 	vmName := state.Get("vmName").(string)
-
-	dvdControllerProperties := s.dvdProperties
-	
 	errorMsg := "Error unmounting Integration Services dvd drive: %s"
 	
-	if dvdControllerProperties.Existing {
-		err := driver.UnmountDvdDrive(vmName)
+	ui.Say("Cleanup Integration Services dvd drive...")
+	
+	if dvdController.Existing {
+		err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			log.Print(fmt.Sprintf(errorMsg, err))
 		}
 	} else {
-		err := driver.DeleteDvdDrive(vmName, dvdControllerProperties.ControllerNumber, dvdControllerProperties.ControllerLocation)
+		err := driver.DeleteDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 		if err != nil {
 			log.Print(fmt.Sprintf(errorMsg, err))
 		}

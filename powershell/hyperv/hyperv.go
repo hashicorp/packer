@@ -118,23 +118,13 @@ param([string]$vmName)
 	return controllerNumber, controllerLocation, err
 }
 
-func MountDvdDrive(vmName string, path string) error {
-
-	var script = `
-param([string]$vmName,[string]$path)
-Set-VMDvdDrive -VMName $vmName -Path $path
-`
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, path)
-	return err
-}
-
-func MountDvdDriveByLocation(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
+func MountDvdDrive(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
 
 	var script = `
 param([string]$vmName,[string]$path,[string]$controllerNumber,[string]$controllerLocation)
-Set-VMDvdDrive -VMName $vmName -Path $path -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
+Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -Path $path
 `
 
 	var ps powershell.PowerShellCmd
@@ -142,14 +132,16 @@ Set-VMDvdDrive -VMName $vmName -Path $path -ControllerNumber $controllerNumber -
 	return err
 }
 
-func UnmountDvdDrive(vmName string) error {
+func UnmountDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	var script = `
-param([string]$vmName)
-Get-VMDvdDrive -VMName $vmName | Set-VMDvdDrive  -Path $null
+param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
+$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
+Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -Path $null
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName)
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 

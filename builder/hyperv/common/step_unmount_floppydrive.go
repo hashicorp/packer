@@ -23,7 +23,7 @@ func (s *StepUnmountFloppyDrive) Run(state multistep.StateBag) multistep.StepAct
 	}
 
 	vmName := state.Get("vmName").(string)
-	ui.Say("Unmounting floppy drive (Run)...")
+	ui.Say("Unmount/delete floppy drive (Run)...")
 	
 	errorMsg := "Error Unmounting floppy drive: %s"
 
