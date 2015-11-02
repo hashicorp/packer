@@ -233,6 +233,10 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 	return nil
 }
 
+func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
+	return fmt.Errorf("DownloadDir is not implemented for docker")
+}
+
 // canExec tells us whether `docker exec` is supported
 func (c *Communicator) canExec() bool {
 	execConstraint, err := version.NewConstraint(">= 1.4.0")
