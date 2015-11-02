@@ -72,7 +72,7 @@ function SlurpOutput($l) {
   if (Test-Path $log) {
     Get-Content $log | select -skip $l | ForEach {
       $l += 1
-      Write-Host "$_"
+      Write-Output "$_"
     }
   }
   return $l
