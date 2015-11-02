@@ -37,7 +37,7 @@ func TestOutput(t *testing.T) {
 
 func TestRunFile(t *testing.T) {
 	var blockBuffer bytes.Buffer
-	blockBuffer.WriteString("param([string]$a, [string]$b, [int]$x, [int]$y) $n = $x + $y; Write-Host $a, $b, $n")
+	blockBuffer.WriteString(`param([string]$a, [string]$b, [int]$x, [int]$y) $ProgressPreference='SilentlyContinue'; $n = $x + $y; Write-Output "$a $b $n";`)
 
 	var ps PowerShellCmd
 	cmdOut, err := ps.Output(blockBuffer.String(), "a", "b", "5", "10")
