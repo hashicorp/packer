@@ -57,3 +57,7 @@ func (c *Communicator) UploadDir(string, string, []string) error {
 func (c *Communicator) Download(string, io.Writer) error {
 	return fmt.Errorf("download not supported")
 }
+
+func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
+	return fmt.Errorf("downloadDir not supported")
+}
