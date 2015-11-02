@@ -120,11 +120,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}'`
+		p.config.ExecuteCommand = `powershell '& {$ProgressPreference='SilentlyContinue'; {{.Vars}}{{.Path}}; exit $LastExitCode}'`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `powershell '& { {{.Vars}}{{.Path}}; exit $LastExitCode}'`
+		p.config.ElevatedExecuteCommand = `powershell '& {$ProgressPreference='SilentlyContinue'; {{.Vars}}{{.Path}}; exit $LastExitCode}'`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -425,7 +425,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		Password:        p.config.ElevatedPassword,
 		TaskDescription: "Packer elevated task",
 		TaskName:        fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
-		EncodedCommand:  powershellEncode([]byte(command + "; exit $LASTEXITCODE")),
+		EncodedCommand:  powershellEncode([]byte("$ProgressPreference='SilentlyContinue'; " + command + "; exit $LASTEXITCODE")),
 	})
 
 	if err != nil {
