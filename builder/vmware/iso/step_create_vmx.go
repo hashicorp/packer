@@ -43,6 +43,11 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
+	// Convert the iso_path into a path relative to the .vmx file if possible
+	if relativeIsoPath,err := filepath.Rel(config.VMXTemplatePath, filepath.FromSlash(isoPath)); err == nil {
+		isoPath = relativeIsoPath
+	}
+
 	ui.Say("Building and writing VMX file")
 
 	vmxTemplate := DefaultVMXTemplate

@@ -56,77 +56,109 @@ func DownloadableURL(original string) (string, error) {
 		// for more info about valid windows URIs
 		idx := strings.Index(original, ":")
 		if idx == 1 {
-			original = "file:///" + original
+			original = "file://" + filepath.ToSlash(original)
 		}
 	}
-	u, err := url.Parse(original)
+
+	// XXX: The validation here is later re-parsed in common/download.go and
+	//      thus any modifications here must remain consistent over there too.
+	uri, err := url.Parse(original)
 	if err != nil {
 		return "", err
 	}
 
-	if u.Scheme == "" {
-		u.Scheme = "file"
+	if uri.Scheme == "" {
+		uri.Scheme = "file"
 	}
 
-	if u.Scheme == "file" {
-		// Windows file handling is all sorts of tricky...
+	const UNCPrefix = string(os.PathSeparator)+string(os.PathSeparator)
+	if uri.Scheme == "file" {
+		var ospath string	// os-formatted pathname
 		if runtime.GOOS == "windows" {
-			// If the path is using Windows-style slashes, URL parses
-			// it into the host field.
-			if u.Path == "" && strings.Contains(u.Host, `\`) {
-				u.Path = u.Host
-				u.Host = ""
+			// Move any extra path components that were mis-parsed into the Host
+			// field back into the uri.Path field
+			if len(uri.Host) >= len(UNCPrefix) && uri.Host[:len(UNCPrefix)] == UNCPrefix {
+				idx := strings.Index(uri.Host[len(UNCPrefix):], string(os.PathSeparator))
+				if idx > -1 {
+					uri.Path = filepath.ToSlash(uri.Host[idx+len(UNCPrefix):]) + uri.Path
+					uri.Host = uri.Host[:idx+len(UNCPrefix)]
+				}
 			}
+			// Now all we need to do to convert the uri to a platform-specific path
+			// is to trade it's slashes for some os.PathSeparator ones.
+			ospath = uri.Host + filepath.FromSlash(uri.Path)
+
+		} else {
+			// Since we're already using sane paths on a sane platform, anything in
+			// uri.Host can be assumed that the user is describing a relative uri.
+			// This means that if we concatenate it with uri.Path, the filepath
+			// transform will still open the file correctly.
+			//     i.e. file://localdirectory/filename -> localdirectory/filename
+			ospath = uri.Host + uri.Path
 		}
 		// Only do the filepath transformations if the file appears
-		// to actually exist.
-		if _, err := os.Stat(u.Path); err == nil {
-			u.Path, err = filepath.Abs(u.Path)
+		// to actually exist. We don't do it on windows, because EvalSymlinks
+		// won't understand how to handle UNC paths and other Windows-specific minutae.
+		if _, err := os.Stat(ospath); err == nil && runtime.GOOS != "windows" {
+			ospath, err = filepath.Abs(ospath)
 			if err != nil {
 				return "", err
 			}
 
-			u.Path, err = filepath.EvalSymlinks(u.Path)
+			ospath, err = filepath.EvalSymlinks(ospath)
 			if err != nil {
 				return "", err
 			}
 
-			u.Path = filepath.Clean(u.Path)
+			ospath = filepath.Clean(ospath)
 		}
 
+		// now that ospath was normalized and such..
 		if runtime.GOOS == "windows" {
-			// Also replace all backslashes with forwardslashes since Windows
-			// users are likely to do this but the URL should actually only
-			// contain forward slashes.
-			u.Path = strings.Replace(u.Path, `\`, `/`, -1)
-			// prepend absolute windows paths with "/" so that when we
-			// compose u.String() below the outcome will be correct
-			// file:///c/blah syntax; otherwise u.String() will only add
-			// file:// which is not technically a correct windows URI
-			if filepath.IsAbs(u.Path) && !strings.HasPrefix(u.Path, "/") {
-				u.Path = "/" + u.Path
+			uri.Host = ""
+			// Check to see if our ospath is unc-prefixed, and if it is then split
+			// the UNC host into uri.Host, leaving the rest in ospath.
+			// This way, our UNC-uri is protected from injury in the call to uri.String()
+			if len(ospath) >= len(UNCPrefix) && ospath[:len(UNCPrefix)] == UNCPrefix {
+				idx := strings.Index(ospath[len(UNCPrefix):], string(os.PathSeparator))
+				if idx > -1 {
+					uri.Host = ospath[:len(UNCPrefix)+idx]
+					ospath = ospath[len(UNCPrefix)+idx:]
+				}
 			}
-
+			// Restore the uri by re-transforming our os-formatted path
+			uri.Path = filepath.ToSlash(ospath)
+		} else {
+			uri.Host = ""
+			uri.Path = filepath.ToSlash(ospath)
 		}
 	}
 
 	// Make sure it is lowercased
-	u.Scheme = strings.ToLower(u.Scheme)
+	uri.Scheme = strings.ToLower(uri.Scheme)
 
 	// Verify that the scheme is something we support in our common downloader.
 	supported := []string{"file", "http", "https"}
 	found := false
 	for _, s := range supported {
-		if u.Scheme == s {
+		if uri.Scheme == s {
 			found = true
 			break
 		}
 	}
 
 	if !found {
-		return "", fmt.Errorf("Unsupported URL scheme: %s", u.Scheme)
+		return "", fmt.Errorf("Unsupported URL scheme: %s", uri.Scheme)
 	}
-	return u.String(), nil
+
+	// explicit check to see if we need to manually replace the uri host with a UNC one
+	if runtime.GOOS == "windows" && uri.Scheme == "file" {
+		if len(uri.Host) >= len(UNCPrefix) && uri.Host[:len(UNCPrefix)] == UNCPrefix {
+			escapedHost := url.QueryEscape(uri.Host)
+			return strings.Replace(uri.String(), escapedHost, uri.Host, 1), nil
+		}
+	}
+	return uri.String(), nil
 }
 
 // FileExistsLocally takes the URL output from DownloadableURL, and determines
