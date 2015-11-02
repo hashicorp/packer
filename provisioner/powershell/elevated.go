@@ -58,7 +58,7 @@ $t.XmlText = @'
   </Actions>
 </Task>
 '@
-$ProgressPreference='SilentlyContinue';
+$ProgressPreference="SilentlyContinue";
 $f = $s.GetFolder("\")
 $f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", "{{.Password}}", 1, $null) | Out-Null
 $t = $f.GetTask("\$name")
