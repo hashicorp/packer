@@ -61,7 +61,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		if !(cmd.ExitStatus == 0 || (cmd.ExitStatus == 1 && len(stderrString) == 0)) {
 			state.Put("error", fmt.Errorf(
 				"Shutdown command has not successful.\n\nExitStatus: %d\n\nStdout: %s\n\nStderr: %s",
-				cmd.ExitStatus, stdoutString), stderrString))
+				cmd.ExitStatus, stdoutString, stderrString))
 			return multistep.ActionHalt
 		}
 
