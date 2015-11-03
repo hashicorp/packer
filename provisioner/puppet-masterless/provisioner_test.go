@@ -180,10 +180,10 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_options(t *testing.T) {
+func TestProvisionerPrepare_extraArguments(t *testing.T) {
 	config := testConfig()
 
-	delete(config, "options")
+	delete(config, "extra_arguments")
 	p := new(Provisioner)
 	err := p.Prepare(config)
 	if err != nil {
@@ -191,14 +191,14 @@ func TestProvisionerPrepare_options(t *testing.T) {
 	}
 
 	// Test with malformed fact
-	config["options"] = "{{}}"
+	config["extra_arguments"] = "{{}}"
 	p = new(Provisioner)
 	err = p.Prepare(config)
 	if err == nil {
 		t.Fatal("should be an error")
 	}
 
-	config["options"] = []string{
+	config["extra_arguments"] = []string{
 		"arg",
 	}
 
@@ -209,18 +209,18 @@ func TestProvisionerPrepare_options(t *testing.T) {
 	}
 }
 
-func TestProvisionerProvision_options(t *testing.T) {
+func TestProvisionerProvision_extraArguments(t *testing.T) {
 	config := testConfig()
 	ui := &packer.MachineReadableUi{
 		Writer: ioutil.Discard,
 	}
 	comm := new(packer.MockCommunicator)
 
-	options := []string{
+	extraArguments := []string{
 		"--some-arg=yup",
 		"--some-other-arg",
 	}
-	config["options"] = options
+	config["extra_arguments"] = extraArguments
 
 	p := new(Provisioner)
 	err := p.Prepare(config)
@@ -233,7 +233,7 @@ func TestProvisionerProvision_options(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expectedArgs := strings.Join(options, " ")
+	expectedArgs := strings.Join(extraArguments, " ")
 
 	if !strings.Contains(comm.StartCmd.Command, expectedArgs) {
 		t.Fatalf("Command %q doesn't contain the expected arguments %q", comm.StartCmd.Command, expectedArgs)

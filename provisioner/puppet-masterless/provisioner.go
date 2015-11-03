@@ -22,8 +22,8 @@ type Config struct {
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
-	// Additional options to pass when executing Puppet
-	Options []string
+	// Additional arguments to pass when executing Puppet
+	ExtraArguments []string `mapstructure:"extra_arguments"`
 
 	// Additional facts to set when executing Puppet
 	Facter map[string]string
@@ -65,7 +65,7 @@ type ExecuteTemplate struct {
 	ManifestFile    string
 	ManifestDir     string
 	Sudo            bool
-	Options         string
+	ExtraArguments  string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -90,7 +90,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
-			"{{.Options}} " +
+			"{{.ExtraArguments}} " +
 			"{{.ManifestFile}}"
 	}
 
@@ -223,7 +223,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		ModulePath:      strings.Join(modulePaths, ":"),
 		Sudo:            !p.config.PreventSudo,
 		WorkingDir:      p.config.WorkingDir,
-		Options:         strings.Join(p.config.Options, " "),
+		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
 	}
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
