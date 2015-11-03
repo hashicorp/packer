@@ -90,7 +90,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
-			"{{.ExtraArguments}} " +
+			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}"
 	}
 
