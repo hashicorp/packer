@@ -3,6 +3,7 @@ package puppetmasterless
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/mitchellh/packer/packer"
@@ -205,5 +206,36 @@ func TestProvisionerPrepare_options(t *testing.T) {
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisionerProvision_options(t *testing.T) {
+	config := testConfig()
+	ui := &packer.MachineReadableUi{
+		Writer: ioutil.Discard,
+	}
+	comm := new(packer.MockCommunicator)
+
+	options := []string{
+		"--some-arg=yup",
+		"--some-other-arg",
+	}
+	config["options"] = options
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = p.Provision(ui, comm)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedArgs := strings.Join(options, " ")
+
+	if !strings.Contains(comm.StartCmd.Command, expectedArgs) {
+		t.Fatalf("Command %q doesn't contain the expected arguments %q", comm.StartCmd.Command, expectedArgs)
 	}
 }
