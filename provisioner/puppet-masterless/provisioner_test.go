@@ -1,10 +1,11 @@
 package puppetmasterless
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -175,5 +176,34 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	err = p.Prepare(config)
 	if p.config.Facter == nil {
 		t.Fatalf("err: Default facts are not set in the Puppet provisioner!")
+	}
+}
+
+func TestProvisionerPrepare_options(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "options")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with malformed fact
+	config["options"] = "{{}}"
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should be an error")
+	}
+
+	config["options"] = []string{
+		"arg",
+	}
+
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }
