@@ -57,8 +57,8 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 			}
 			// Wait for the machine to actually destroy
 			for {
-				exists, _ := remoteDriver.IsDestroyed()
-				if !exists {
+				destroyed, _ := remoteDriver.IsDestroyed()
+				if destroyed {
 					break
 				}
 				time.Sleep(150 * time.Millisecond)
