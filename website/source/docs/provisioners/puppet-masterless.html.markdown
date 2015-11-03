@@ -59,7 +59,7 @@ Optional parameters:
     variables](/docs/templates/configuration-templates.html) available. See
     below for more information.
 
--   `options` (array of strings) - This is an array of additional options to
+-   `extra_arguments` (array of strings) - This is an array of additional options to
     pass to the puppet command when executing puppet. This allows for
     customization of the `execute_command` without having to completely replace
     or include it's contents, making forward-compatible customizations much
