@@ -57,6 +57,7 @@ type Config struct {
 	RemotePort           uint   `mapstructure:"remote_port"`
 	RemoteUser           string `mapstructure:"remote_username"`
 	RemotePassword       string `mapstructure:"remote_password"`
+	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
 
 	ctx interpolate.Context
 }
