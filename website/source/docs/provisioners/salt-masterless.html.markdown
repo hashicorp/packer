@@ -38,6 +38,9 @@ Optional:
     has more detailed usage instructions. By default, no arguments are sent to
     the script.
 
+-   `disable_sudo` (boolean) - By default, the bootstrap install command is prefixed with `sudo`. When using a
+    Docker builder, you will likely want to pass `true` since `sudo` is often not pre-installed.
+
 -   `remote_pillar_roots` (string) - The path to your remote [pillar
     roots](http://docs.saltstack.com/ref/configuration/master.html#pillar-configuration).
     default: `/srv/pillar`.
