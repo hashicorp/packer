@@ -775,7 +775,7 @@ param([string]$vmName, [string]$scanCodes)
 		if ($scanCode.StartsWith('wait')){
 			$timeToWait = $scanCode.Substring(4)
 			if (!$timeToWait){
-				$timeToWait = "10"
+				$timeToWait = "1"
 			}
 			
 			Start-Sleep -s $timeToWait
