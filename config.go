@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/mitchellh/osext"
+	"github.com/kardianos/osext"
 	"github.com/mitchellh/packer/command"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
