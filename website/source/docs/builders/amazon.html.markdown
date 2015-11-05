@@ -101,6 +101,7 @@ Packer to work:
         "ec2:DeleteSecurityGroup",
         "ec2:AuthorizeSecurityGroupIngress",
         "ec2:CreateImage",
+        "ec2:CopyImage",
         "ec2:RunInstances",
         "ec2:TerminateInstances",
         "ec2:StopInstances",
