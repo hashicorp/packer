@@ -83,7 +83,8 @@ builder.
 -   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
     files are so large, this is required and Packer will verify it prior to
     booting a virtual machine with the ISO attached. The type of the checksum is
-    specified with `iso_checksum_type`, documented below.
+    specified with `iso_checksum_type`, documented below. Also can be url that
+    contains checksum file with `iso_checksum_type` type.
 
 -   `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "md5", "sha1", "sha256", or
@@ -176,7 +177,7 @@ builder.
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
     original filename as its name.
-      
+
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to
     download or while downloading a single URL, it will move on to the next. All
