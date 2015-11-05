@@ -136,6 +136,12 @@ builder.
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
+-   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
+    Set this option to `true` to disable compacting. Defaults to `false`.
+
+-   `disk_compression` (boolean) - Apply compression to the QCOW2 disk file
+    using `qemu-img convert`. Defaults to `false`.
+
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
     unattended Windows installs, which look for an `Autounattend.xml` file on

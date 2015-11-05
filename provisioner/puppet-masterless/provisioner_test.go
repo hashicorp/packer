@@ -1,10 +1,12 @@
 package puppetmasterless
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -175,5 +177,88 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	err = p.Prepare(config)
 	if p.config.Facter == nil {
 		t.Fatalf("err: Default facts are not set in the Puppet provisioner!")
+	}
+}
+
+func TestProvisionerPrepare_extraArguments(t *testing.T) {
+	config := testConfig()
+
+	// Test with missing parameter
+	delete(config, "extra_arguments")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with malformed value
+	config["extra_arguments"] = "{{}}"
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should be an error")
+	}
+
+	// Test with valid values
+	config["extra_arguments"] = []string{
+		"arg",
+	}
+
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisionerProvision_extraArguments(t *testing.T) {
+	config := testConfig()
+	ui := &packer.MachineReadableUi{
+		Writer: ioutil.Discard,
+	}
+	comm := new(packer.MockCommunicator)
+
+	extraArguments := []string{
+		"--some-arg=yup",
+		"--some-other-arg",
+	}
+	config["extra_arguments"] = extraArguments
+
+	// Test with valid values
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = p.Provision(ui, comm)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedArgs := strings.Join(extraArguments, " ")
+
+	if !strings.Contains(comm.StartCmd.Command, expectedArgs) {
+		t.Fatalf("Command %q doesn't contain the expected arguments %q", comm.StartCmd.Command, expectedArgs)
+	}
+
+	// Test with missing parameter
+	delete(config, "extra_arguments")
+
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = p.Provision(ui, comm)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Check the expected `extra_arguments` position for an empty value
+	splitCommand := strings.Split(comm.StartCmd.Command, " ")
+	if "" == splitCommand[len(splitCommand)-2] {
+		t.Fatalf("Command %q contains an extra-space which may cause arg parsing issues", comm.StartCmd.Command)
 	}
 }
