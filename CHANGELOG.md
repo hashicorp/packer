@@ -3,18 +3,49 @@
 BACKWARDS INCOMPATIBILITIES:
 
   * Packer now ships as a single binary, including plugins. If you install packer 0.9.0 over a previous packer installation, **you must delete all of the packer-* plugin files** or packer will load out-of-date plugins from disk.
+  * Release binaries are now provided via <https://releases.hashicorp.com>.
+  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support for building with Go 1.4.
 
 FEATURES:
 
-  *
+  * **Artifice post-processor**: Override packer artifacts during post-
+  processing. This allows you to extract artifacts from a packer builder
+  and use them with other post-processors like compress, docker, and Atlas.
+  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or vSphere during the build. [GH-1921]
 
 IMPROVEMENTS:
 
-  * Packer plugins are now compiled into the main binary, reducing file size and build times, and making packer easier to install. The overall plugin architecture has not changed and third-party plugins can still be loaded from disk. Please make sure your plugins are up-to-date!
+  * core: Packer plugins are now compiled into the main binary, reducing file size and build times, and making packer easier to install. The overall plugin architecture has not changed and third-party plugins can still be loaded from disk. Please make sure your plugins are up-to-date! [GH-2854]
+  * core: Packer now indicates line numbers for template parse errors [GH-2742]
+  * core: Scripts are executed via `/usr/bin/env bash` instead of `/bin/bash` for broader compatibility. [GH-2913]
+  * core: `target_path` for builder downloads can now be specified. [GH-2600]
+  * builder/amazon: Add support for `ebs_optimized` [GH-2806]
+  * builder/amazon: You can now specify `0` for `spot_price` to switch to on demand instances [GH-2845]
+  * builder/google: `account_file` can now be provided as a JSON string [GH-2811]
+  * builder/parallels: Improve support for Parallels 11 [GH-2662]
+  * builder/parallels: Parallels disks are now compacted by default [GH-2731]
+  * builder/parallels: Packer will look for Parallels in `/Applications/Parallels Desktop.app` if it is not detected automatically [GH-2839]
+  * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
+  * builder/qemu: qcow2 images are now compacted by default [GH-2748]
+  * builder/qemu: qcow2 images can now be compressed [GH-2748]
+  * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
+  * builder/qemu: Now checks for version-specific options [GH-2376]
+  * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
+  * post-processor/atlas: Added support for compile ID. [GH-2775]
 
 BUG FIXES:
 
-  *
+  * core: Random number generator is now seeded. [GH-2640]
+  * core: Packer should now have a lot less race conditions [GH-2824]
+  * builder/amazon: The `no_device` option for block device mappings is now handled correctly [GH-2398]
+  * builder/amazon: AMI name validation now matches Amazon's spec [GH-2774]
+  * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
+  * builder/parallels: Now supports interpolation in `prlctl_post` [GH-2828]
+  * builder/vmware: `format` option is now read correctly [GH-2892]
+  * provisioner/shell: No longer leaves temp scripts behind [GH-1536]
+  * provisioner/winrm: Now waits for reboot to complete before continuing with provisioning [GH-2568]
+  * post-processor/artifice: Fix truncation of files downloaded from Docker. [GH-2793]
+
 
 ## 0.8.6 (Aug 22, 2015)
 
