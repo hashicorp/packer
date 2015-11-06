@@ -139,3 +139,47 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 		t.Fatalf("should upload with source file's data")
 	}
 }
+
+func TestProvisionerPrepare_InvalidCheck(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	config["source"] = "/this/should/not/exist"
+
+	if err := p.Prepare(config); err == nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_ValidCheck(t *testing.T) {
+	var p Provisioner
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil { 
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	if _, err = tf.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	config := map[string]interface{}{
+		"source":      tf.Name(),
+		"destination": "something",
+	}
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_ValidNoCheck(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+	config["source"] = "/this/should/not/exist"
+	config["check"] = false
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}

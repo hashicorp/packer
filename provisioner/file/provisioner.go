@@ -23,6 +23,8 @@ type Config struct {
 	// Direction
 	Direction string
 
+	Check bool
+
 	ctx interpolate.Context
 }
 
@@ -53,7 +55,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Direction must be one of: download, upload."))
 	}
 
-	if p.config.Direction == "upload" {
+	if p.config.Direction == "upload" && p.config.Check {
 		if _, err := os.Stat(p.config.Source); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
