@@ -46,6 +46,10 @@ The available configuration options are listed below. All elements are required.
     "upload." If it is set to "download" then the file "source" in the machine
     wll be downloaded locally to "destination"
 
+-   `check` (bool) - Check if the file exists when packer starts. This defaults
+    to true. If true packer will check that the files exist before starting the
+    build.
+
 ## Directory Uploads
 
 The file provisioner is also able to upload a complete directory to the remote
