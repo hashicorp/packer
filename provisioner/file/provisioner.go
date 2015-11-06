@@ -11,6 +11,8 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+const DefaultCheck = true
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
