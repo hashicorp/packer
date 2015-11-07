@@ -783,6 +783,7 @@ param([string]$vmName, [string]$scanCodes)
 				$timeToWait = "1"
 			}
 			
+			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
 			Start-Sleep -s $timeToWait
 			
 			if ($scanCodesToSend){
@@ -796,8 +797,10 @@ param([string]$vmName, [string]$scanCodes)
 			$scanCodesToSend = ''
 		} else {
 			if ($scanCodesToSend){
+				write-host "Sending special code '$scanCodesToSend' '$scanCode'"
 				$scanCodesToSend = "$scanCodesToSend $scanCode"
 			} else {
+				write-host "Sending char '$scanCode'"
 				$scanCodesToSend = "$scanCode"
 			}
 		}
