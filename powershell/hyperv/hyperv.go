@@ -215,7 +215,12 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
-		return err
+
+		if err != nil {
+			return err
+		}
+
+		return DeleteDvdDrive(vmName, 1, 0)
 	}
 }
 
