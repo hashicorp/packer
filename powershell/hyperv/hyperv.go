@@ -782,10 +782,7 @@ param([string]$vmName, [string]$scanCodes)
 			if (!$timeToWait){
 				$timeToWait = "1"
 			}
-			
-			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
-			Start-Sleep -s $timeToWait
-			
+						
 			if ($scanCodesToSend){
 				$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
 				
@@ -793,6 +790,9 @@ param([string]$vmName, [string]$scanCodes)
 				    $vmConsole.TypeScancodes($_)
                 }
 			}
+			
+			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
+			Start-Sleep -s $timeToWait
 			
 			$scanCodesToSend = ''
 		} else {
