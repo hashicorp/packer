@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"strings"
 	"unicode"
 	"unicode/utf8"
