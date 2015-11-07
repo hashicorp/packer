@@ -12,7 +12,7 @@ import (
 )
 
 type StepMountDvdDrive struct {
-	Generation    uint
+	Generation uint
 }
 
 func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
@@ -40,11 +40,11 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	dvdControllerProperties.ControllerNumber = controllerNumber
 	dvdControllerProperties.ControllerLocation = controllerLocation
 	dvdControllerProperties.Existing = false
-	
+
 	state.Put("os.dvd.properties", dvdControllerProperties)
 
 	ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
-	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation)
+	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, s.Generation)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
 		state.Put("error", err)
@@ -64,14 +64,14 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {	
+func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
 	dvdControllerState := state.Get("os.dvd.properties")
-	
+
 	if dvdControllerState == nil {
 		return
 	}
-	
-	dvdController := dvdControllerState.(DvdControllerProperties)	
+
+	dvdController := dvdControllerState.(DvdControllerProperties)
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)

@@ -135,17 +135,27 @@ Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLo
 	return err
 }
 
-func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
-	var script = `
+func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint) error {
+
+	if generation < 2 {
+		script := `
+param([string]$vmName)
+Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","Floppy")
+`
+		var ps powershell.PowerShellCmd
+		err := ps.Run(script, vmName)
+		return err
+	} else {
+		script := `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
 $vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
 Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive
 `
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
-	return err
+		var ps powershell.PowerShellCmd
+		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+		return err
+	}
 }
 
 func DeleteDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
