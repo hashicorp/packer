@@ -61,7 +61,7 @@ func CreateDvdDrive(vmName string, generation uint) (uint, uint, error) {
 		// generation 1 requires dvd to be added to ide controller, generation 2 uses scsi for dvd drives
 		script = `
 param([string]$vmName)
-$dvdDrives = (Get-VMDvdDrive -VMName $vmName)
+$dvdDrives = @(Get-VMDvdDrive -VMName $vmName)
 $lastControllerNumber = $dvdDrives | Sort-Object ControllerNumber | Select-Object -Last 1 | %{$_.ControllerNumber}
 if (!$lastControllerNumber) {
 	$lastControllerNumber = 0
@@ -90,21 +90,11 @@ $lastControllerNumber
 
 	script = `
 param([string]$vmName,[int]$controllerNumber)
-Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber
-`
-	cmdOut, err := ps.Output(script, vmName)
-	if err != nil {
-		return controllerNumber, 0, err
-	}
-
-	// we could try to get the controller location and number in one call, but this way we do not
-	// need to parse the output
-	script = `
-param([string]$vmName)
-(Get-VMDvdDrive -VMName $vmName | Where-Object {$_.Path -eq $null}).ControllerLocation
+$dvdController = Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Passthru
+$dvdController.ControllerLocation
 `
 
-	cmdOut, err = ps.Output(script, vmName)
+	cmdOut, err := ps.Output(script, vmName, strconv.FormatInt(int64(controllerNumber), 10))
 	if err != nil {
 		return controllerNumber, 0, err
 	}
