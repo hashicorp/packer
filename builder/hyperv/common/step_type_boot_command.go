@@ -154,19 +154,19 @@ func scancodes(message string) []string {
 		var scancode []string
 
 		if strings.HasPrefix(message, "<wait>") {
-			log.Printf("Special code <wait> found, will sleep 1 second at this point.")
+			//log.Printf("Special code <wait> found, will sleep 1 second at this point.")
 			scancode = []string{"wait"}
 			message = message[len("<wait>"):]
 		}
 
 		if strings.HasPrefix(message, "<wait5>") {
-			log.Printf("Special code <wait5> found, will sleep 5 seconds at this point.")
+			//log.Printf("Special code <wait5> found, will sleep 5 seconds at this point.")
 			scancode = []string{"wait5"}
 			message = message[len("<wait5>"):]
 		}
 
 		if strings.HasPrefix(message, "<wait10>") {
-			log.Printf("Special code <wait10> found, will sleep 10 seconds at this point.")
+			//log.Printf("Special code <wait10> found, will sleep 10 seconds at this point.")
 			scancode = []string{"wait10"}
 			message = message[len("<wait10>"):]
 		}
@@ -174,7 +174,7 @@ func scancodes(message string) []string {
 		if scancode == nil {
 			for specialCode, specialValue := range special {
 				if strings.HasPrefix(message, specialCode) {
-					log.Printf("Special code '%s' found, replacing with: %s", specialCode, specialValue)
+					//log.Printf("Special code '%s' found, replacing with: %s", specialCode, specialValue)
 					scancode = specialValue
 					message = message[len(specialCode):]
 					break
@@ -200,7 +200,7 @@ func scancodes(message string) []string {
 			}
 
 			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt+0x80))
-			log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
+			//log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
 		}
 
 		result = append(result, scancode...)
