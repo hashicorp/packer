@@ -167,11 +167,11 @@ header .header {
 
 .docs-wrapper {
   .docs-body {
+    max-width: 960px;
     @extend .white-background;
 
     .docs-content {
       padding: $docs-top-margin 80px;
-      max-width: 960px;
       display: block;
 
       code {

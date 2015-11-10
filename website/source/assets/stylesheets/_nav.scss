@@ -1,70 +1,87 @@
-nav {
-  height: $nav-height;
-  height: $nav-height;
-  padding: 0;
-  margin: 0;
-  min-width: 940px;
-  text-transform: uppercase;
-  color: $white;
-  font-family: $sans;
-  font-size: 16px;
-  border-bottom: 1px solid $border-dark;
+//
+// Header
+// - Project Specific
+// - edits should be made here
+// --------------------------------------------------
 
-  ul {
-    margin-top: ($baseline * 2);
-    margin-left: $nav-height;
+#header {
+  background-color: $black;
+  .navbar-brand {
+    .logo{
+      font-size: 20px;
+      text-transform: uppercase;
+      background: image-url('../images/logo-header.png') 0 0 no-repeat;
+      @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", $project-logo-width, $project-logo-height);
+      background-position: 0 45%;
 
-    li {
-      display: inline-block;
-      margin-right: 50px;
+      &:hover{
+        opacity: .6;
+      }
     }
-  }
 
-  .packer-logo {
-    background: image-url('logo_nav.png') no-repeat center top;
-    height: 80px;
-    width: 80px;
-    background-size: 34px 50px;
-    text-indent: -999999px;
-    display: inline-block;
-    margin-top: 25px;
-  }
-
-  @media (min-width: $screen-md-min) {
-    ul {
-      li {
-        &.featured {
-          margin: -20px 0 0 10px;
-          float: right;
-
-          a {
-            @include button;
-            font-weight: bold;
+    .by-hashicorp{
+      &:hover{
+        svg{
+          line{
+            opacity: .4;
           }
         }
       }
     }
   }
 
-  @media (max-width: $screen-sm-max) {
-    height: auto;
-    padding: 0;
-    min-width: auto;
+  .buttons{
+    margin-top: 2px; //baseline everything
 
-    ul {
-      margin: 1em 0 1em 80px;
+    .navigation-links{
+        float: right;
+    }
 
+    ul.navbar-nav{
       li {
-        display: block;
-        margin: 0;
-        padding: 1em;
+        svg path{
+          fill: $white;
+        }
       }
     }
   }
 
-  @media (max-width: $screen-xs-max) {
-    button {
+  .main-links,
+  .external-links {
+    li > a {
+      @include project-a-style();
+    }
+  }
+}
 
+@media (max-width: 768px) {
+  #header {
+    .navbar-brand {
+
+    }
+  }
+}
+
+@media (max-width: 414px) {
+  #header {
+    .navbar-brand {
+      .logo{
+        padding-left: 37px;
+        font-size: 18px;
+        @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", $project-logo-width * .75, $project-logo-height * .75);
+        //background-position: 0 45%;
+      }
+    }
+  }
+}
+
+
+@media (max-width: 320px) {
+  #header {
+    .navbar-brand {
+      .logo{
+        font-size: 0 !important; //hide terraform text
+      }
     }
   }
 }
