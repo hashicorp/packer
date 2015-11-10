@@ -172,7 +172,7 @@ header .header {
 
     .docs-content {
       flex-direction: column;
-      padding: $docs-top-margin 120px;
+      padding: $docs-top-margin 120px 150px;
       display: block;
 
       code {
@@ -267,6 +267,9 @@ header .header {
 }
 
 .pagination {
+  position: absolute;
+  width: 100%;
+  bottom: 1px;
   $border: 1px solid $gray-mid;
   height: $nav-height;
   border-top: $border;
