@@ -11,7 +11,7 @@ $project-logo-pad-left: 8px;
 // Mixins
 @mixin project-a-style{
   color: $green;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0;
 
   &:hover{
@@ -21,7 +21,7 @@ $project-logo-pad-left: 8px;
 
 @mixin project-footer-a-style{
   color: $black;
-  font-weight: 600;
+  font-weight: 400;
 
   &:hover{
     color: $green;
@@ -34,7 +34,7 @@ $project-logo-pad-left: 8px;
 
 @mixin project-footer-a-subpage-style{
   color: $white;
-  font-weight: 300;
+  font-weight: 400;
 
   svg path{
     fill: $white;
