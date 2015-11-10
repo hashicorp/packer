@@ -221,8 +221,8 @@ header .header {
         font-size: 17px;
         line-height: 1.5;
         letter-spacing: 1px;
-        margin-left: -95px;
-        margin-right: -95px;
+        margin-left: -135px;
+        margin-right: -135px;
         padding-top: 40px;
         padding-bottom: 40px;
         padding-left: 80px;
@@ -233,8 +233,8 @@ header .header {
       pre {
         border: 0;
         font-size: 14px;
-        margin-left: -95px;
-        margin-right: -95px;
+        margin-left: -135px;
+        margin-right: -135px;
         padding-top: 40px;
         padding-bottom: 40px;
         padding-left: 80px;
@@ -332,6 +332,24 @@ header .header {
 
     .bio {
       padding-left: 150px;
+    }
+  }
+}
+
+@media (max-width:768px){
+  .docs-wrapper {
+    .docs-body {
+      .docs-content {
+        div.alert {
+          margin-left: -15px;
+          margin-right: -15px;
+        }
+
+        pre {
+          margin-left: -15px;
+          margin-right: -15px;
+        }
+      }
     }
   }
 }
