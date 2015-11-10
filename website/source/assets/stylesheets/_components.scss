@@ -171,6 +171,7 @@ header .header {
     @extend .white-background;
 
     .docs-content {
+      flex-direction: column;
       padding: $docs-top-margin 80px;
       display: block;
 
@@ -270,7 +271,7 @@ header .header {
   height: $nav-height;
   border-top: $border;
   font-size: 20px;
-  margin: 0 -15px -40px -15px;
+  margin: 0 -15px 0 -15px;
   display: block;
 
   h4 {
