@@ -21,26 +21,40 @@
     </script>
   </head>
   <body>
-    <nav class="dark-background">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-12">
-            <a href="/" class="packer-logo pull-left">Packer</a>
-            <ul>
-              <li class="featured">
-                <a href="https://github.com/mitchellh/packer" class="primary">GitHub</a>
-              </li>
-              <li class="featured">
-                <a href="/downloads.html" class="primary">Download</a>
-              </li>
+    <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
+    	<div class="container-fluid">
+				<div class="navbar-header">
+					<div class="navbar-brand">
+						<a class="logo" href="/">packer</a>
+						<a class="by-hashicorp white" href="https://hashicorp.com/"><span class="svg-wrap">by</span><%= partial "layouts/svg/svg-by-hashicorp" %><%= partial "layouts/svg/svg-hashicorp-logo" %>Hashicorp</a>
+					</div>
+					<button class="navbar-toggle white" type="button">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+				</div>
+				<div class="buttons hidden-xs">
+					<nav class="navigation-links" role="navigation">
+            <ul class="main-links nav navbar-nav">
               <li><a href="/intro">Intro</a></li>
-              <li><a href="/docs">Documentation</a></li>
+              <li><a href="/docs">Docs</a></li>
               <li><a href="/community">Community</a></li>
             </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+						<ul class="external-links nav navbar-nav">
+							<li class="first download">
+								<a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
+							</li>
+							<li class="github">
+								<a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
+    	</div>
+    </div>
+
     <%= yield %>
     <div class="clearfix"></div>
     <footer class="dark-background">
