@@ -54,6 +54,7 @@
 				</div>
     	</div>
     </div>
+    <%= partial "layouts/sidebar" %>
 
     <%= yield %>
     <div class="clearfix"></div>
@@ -73,9 +74,9 @@
             <% end %>
             <div class="footer-links clearfix">
               <ul class="main-links white nav navbar-nav">
-                <li><a href="/intro/index.html">Intro</a></li>
-                <li><a href="/docs/index.html">Docs</a></li>
-                <li><a href="/community.html">Community</a></li>
+                <li><a href="/intro">Intro</a></li>
+                <li><a href="/docs">Docs</a></li>
+                <li><a href="/community">Community</a></li>
               </ul>
               <ul class="external-links white nav navbar-nav">
                 <li class="first download">
@@ -101,6 +102,7 @@
       </div>
     </div>
   </footer>
+  <%= javascript_include_tag "application" %>
   <%= partial "layouts/google-analytics.html" %>
   <%= partial "layouts/adroll.html" %>
 </body>

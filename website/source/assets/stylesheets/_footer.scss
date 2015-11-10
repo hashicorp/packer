@@ -26,6 +26,16 @@
   }
 }
 
+body{
+  &.page-Community{
+    .edit-page-link{
+      position: absolute;
+      top: -70px;
+      right: 30px;
+    }
+  }
+}
+
 .edit-page-link{
   position: absolute;
   top: -150px;
