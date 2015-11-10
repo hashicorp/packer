@@ -10,19 +10,18 @@ $project-logo-pad-left: 8px;
 
 // Mixins
 @mixin project-a-style{
-  color: $white;
-  font-weight: 400;
-  opacity: .75;
+  color: $green;
+  font-weight: 600;
+  letter-spacing: 0;
 
   &:hover{
     color: $white;
-    opacity: 1;
   }
 }
 
 @mixin project-footer-a-style{
   color: $black;
-  font-weight: 400;
+  font-weight: 600;
 
   &:hover{
     color: $green;
@@ -52,7 +51,7 @@ $project-logo-pad-left: 8px;
 
 @mixin project-svg-external-links-style{
   svg path{
-    fill: $black;
+    fill: $green;
   }
 
   &:hover{
