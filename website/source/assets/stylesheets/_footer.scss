@@ -44,27 +44,22 @@
   }
 }
 
-@media (max-width: 992px) {
-  .footer-links {
-    display: block;
+@media (max-width: 768px) {
+  #footer{
+    padding: 20px 0 80px;
     text-align: center;
-
-    ul{
-      display: inline-block;;
-      float: none !important;
-    }
 
     .footer-hashi{
       display: block;
       float: none !important;
+      .hashicorp-project{
+        margin-left: -30px;
+      }
     }
-  }
-}
 
-@media (max-width: 414px) {
-  #footer{
     ul{
       display: block;
+      width: 100%;
       li{
         display: block;
         float: none;
@@ -72,6 +67,10 @@
 
       &.external-links{
         li{
+          a{
+            padding-left: 0 !important;
+            margin-left: -14px;
+          }
           svg{
             position: relative;
             left: 0;
