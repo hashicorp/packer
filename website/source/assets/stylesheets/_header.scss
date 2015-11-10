@@ -47,6 +47,16 @@
       @include project-a-style();
     }
   }
+
+  .main-links {
+    li > a {
+      color: $white;
+
+      &:hover{
+        color: $green;
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
