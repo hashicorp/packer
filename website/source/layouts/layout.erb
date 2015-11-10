@@ -20,7 +20,7 @@
       } catch (e) {}
     </script>
   </head>
-  <body>
+  <body id="page-<%= current_page.data.page_title ? "#{current_page.data.page_title}" : "home" %>" class="page-<%= current_page.data.page_title ? "#{current_page.data.page_title} layout-#{current_page.data.layout} page-sub" : "home layout-#{current_page.data.layout}" %>">
     <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
     	<div class="container-fluid">
 				<div class="navbar-header">
@@ -57,7 +57,7 @@
 
     <%= yield %>
     <div class="clearfix"></div>
-    <footer class="dark-background">
+    <footer id="footer" class="dark-background">
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-12">
