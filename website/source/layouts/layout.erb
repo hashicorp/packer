@@ -57,29 +57,46 @@
 
     <%= yield %>
     <div class="clearfix"></div>
-    <footer id="footer" class="dark-background">
+    <footer id="footer" class="navigation dark-background white">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-12">
-            <ul>
-              <li class="packer"><a href="/">Packer</a></li>
-              <li>
-                A <a href="http://www.hashicorp.com/">HashiCorp</a> project.
-              </li>
-              <% # current_page.path does not have an extension, but
-                 # current_page.source_file does. Also, we don't want to show
-                 # this on the homepage.
-                 if current_page.url != "/"
-                   current_page_source = current_page.path + \
-                     current_page.source_file.split(current_page.path)[1] %>
-              <li>
-                <a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a>
-              </li>
+          <div class="col-xs-12">
+            <% # current_page.path does not have an extension, but
+               # current_page.source_file does. Also, we don't want to show
+               # this on the homepage.
+               if current_page.url != "/"
+                 current_page_source = current_page.path + \
+                   current_page.source_file.split(current_page.path)[1] %>
+            <% if current_page.url != '/' %>
+              <div class="edit-page-link"><a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a></div>
             <% end %>
-            <a href="http://www.hashicorp.com">
-              <li class="pull-right hashi-logo">&nbps;</li>
-            </a>
-          </ul>
+            <% end %>
+            <div class="footer-links">
+              <ul class="main-links white nav navbar-nav">
+                <li><a href="/intro/index.html">Intro</a></li>
+                <li><a href="/docs/index.html">Docs</a></li>
+                <li><a href="/community.html">Community</a></li>
+              </ul>
+              <ul class="external-links white nav navbar-nav">
+                <li class="first download">
+                  <a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
+                </li>
+                <li class="github">
+                  <a href="https://github.com/micthellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
+                </li>
+              </ul>
+            </  div>
+            <div class="footer-hashi pull-right">
+              <div class="">
+                <a class="hashicorp-project white" href="https://www.hashicorp.com">
+                  <span class="project-text">A </span>
+                  <%= partial "layouts/svg/svg-by-hashicorp" %>
+                  <span class="project-text">Project</span>
+                  <%= partial "layouts/svg/svg-hashicorp-logo" %>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
