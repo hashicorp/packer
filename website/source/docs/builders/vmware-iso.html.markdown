@@ -421,3 +421,19 @@ file by attaching a floppy disk. An example below, based on RHEL:
   ]
 }
 ```
+
+It's also worth noting that `ks=floppy` has been deprecated in the latest versions of Anaconda.  Later versions of Linux may require a different syntax to source a kickstart file from a mounted floppy image.
+
+``` {.javascript}
+{
+  "builders": [
+    {
+      "type":"vmware-iso",
+      "floppy_files": [
+        "folder/ks.cfg"
+      ],
+      "boot_command": "<tab> inst.text inst.ks=hd:fd0:/ks.cfg <enter><wait>"
+    }
+  ]
+}
+```
