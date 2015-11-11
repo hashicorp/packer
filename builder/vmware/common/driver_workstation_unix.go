@@ -51,6 +51,14 @@ func workstationVmnetnatConfPath() string {
 	return ""
 }
 
+func workstationNetmapConfPath(device string) string {
+	return ""	// FIXME
+}
+
+func workstationDhcpConfPath(device string) string {
+	return "/etc/vmware/" + device + "/dhcpd/dhcpd.conf"
+}
+
 func workstationVerifyVersion(version string) error {
 	if runtime.GOOS != "linux" {
 		return fmt.Errorf("The VMware WS version %s driver is only supported on Linux, and Windows, at the moment. Your OS: %s", version, runtime.GOOS)
