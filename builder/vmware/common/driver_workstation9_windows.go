@@ -63,6 +63,14 @@ func workstationVmnetnatConfPath() string {
 	return findFile("vmnetnat.conf", workstationDataFilePaths())
 }
 
+func workstationNetmapConfPath() string {
+	return findFile("netmap.conf", workstationDataFilePaths())
+}
+
+func workstationDhcpConfPath() string {
+	return findFile("vmnetdhcp.conf", workstationDataFilePaths())
+}
+
 // See http://blog.natefinch.com/2012/11/go-win-stuff.html
 //
 // This is used by workstationVMwareRoot in order to read some registry data.

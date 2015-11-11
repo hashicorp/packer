@@ -54,6 +54,16 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
+	var networkType string
+	if _, ok := vmxData["ethernet0.connectionType"]; ok {
+		networkType = vmxData["ethernet0.connectionType"]
+	}
+	if networkType == "" {
+		networkType = "nat"
+		log.Printf("Defaulting to network type : nat")
+	}
+
+	state.Put("vmnetwork", networkType)
 	state.Put("full_disk_path", filepath.Join(s.OutputDir, diskName))
 	state.Put("vmx_path", vmxPath)
 	return multistep.ActionContinue
