@@ -422,7 +422,7 @@ file by attaching a floppy disk. An example below, based on RHEL:
 }
 ```
 
-It's also worth noting that `ks=floppy` has been deprecated in the latest versions of Anaconda.  Later versions of Linux may require a different syntax to source a kickstart file from a mounted floppy image.
+It's also worth noting that `ks=floppy` has been deprecated.  Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
 
 ``` {.javascript}
 {
