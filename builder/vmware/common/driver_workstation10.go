@@ -33,3 +33,4 @@ func (d *Workstation10Driver) Verify() error {
 
 	return workstationVerifyVersion(VMWARE_WS_VERSION)
 }
+

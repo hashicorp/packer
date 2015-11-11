@@ -34,6 +34,26 @@ type DriverMock struct {
 	CommHostResult string
 	CommHostErr    error
 
+	HostAddressCalled bool
+	HostAddressState  multistep.StateBag
+	HostAddressResult string
+	HostAddressErr    error
+
+	HostIPCalled bool
+	HostIPState  multistep.StateBag
+	HostIPResult string
+	HostIPErr    error
+
+	GuestAddressCalled bool
+	GuestAddressState  multistep.StateBag
+	GuestAddressResult string
+	GuestAddressErr    error
+
+	GuestIPCalled bool
+	GuestIPState  multistep.StateBag
+	GuestIPResult string
+	GuestIPErr    error
+
 	StartCalled   bool
 	StartPath     string
 	StartHeadless bool
@@ -57,6 +77,12 @@ type DriverMock struct {
 	DhcpLeasesPathCalled bool
 	DhcpLeasesPathDevice string
 	DhcpLeasesPathResult string
+
+	NetmapPathCalled bool
+	NetmapPathResult string
+
+	DhcpConfPathCalled bool
+	DhcpConfPathResult string
 
 	VerifyCalled bool
 	VerifyErr    error
@@ -98,6 +124,30 @@ func (d *DriverMock) CommHost(state multistep.StateBag) (string, error) {
 	return d.CommHostResult, d.CommHostErr
 }
 
+func (d *DriverMock) HostAddress(state multistep.StateBag) (string, error) {
+	d.HostAddressCalled = true
+	d.HostAddressState = state
+	return d.HostAddressResult, d.HostAddressErr
+}
+
+func (d *DriverMock) HostIP(state multistep.StateBag) (string, error) {
+	d.HostIPCalled = true
+	d.HostIPState = state
+	return d.HostIPResult, d.HostIPErr
+}
+
+func (d *DriverMock) GuestAddress(state multistep.StateBag) (string, error) {
+	d.GuestAddressCalled = true
+	d.GuestAddressState = state
+	return d.GuestAddressResult, d.GuestAddressErr
+}
+
+func (d *DriverMock) GuestIP(state multistep.StateBag) (string, error) {
+	d.GuestIPCalled = true
+	d.GuestIPState = state
+	return d.GuestIPResult, d.GuestIPErr
+}
+
 func (d *DriverMock) Start(path string, headless bool) error {
 	d.StartCalled = true
 	d.StartPath = path
@@ -132,6 +182,16 @@ func (d *DriverMock) DhcpLeasesPath(device string) string {
 	d.DhcpLeasesPathCalled = true
 	d.DhcpLeasesPathDevice = device
 	return d.DhcpLeasesPathResult
+}
+
+func (d *DriverMock) NetmapPath(device string) string {
+	d.NetmapPathCalled = true
+	return d.NetmapPathResult
+}
+
+func (d *DriverMock) DhcpConfPath(device string) string {
+	d.DhcpConfPathCalled = true
+	return d.DhcpConfPathResult
 }
 
 func (d *DriverMock) Verify() error {
