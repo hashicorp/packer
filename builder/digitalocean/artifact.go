@@ -32,7 +32,7 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return strconv.FormatUint(uint64(a.snapshotId), 10)
+	return fmt.Sprintf("%s:%s", a.regionName, strconv.FormatUint(uint64(a.snapshotId), 10))
 }
 
 func (a *Artifact) String() string {
