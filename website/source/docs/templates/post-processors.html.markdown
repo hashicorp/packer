@@ -112,12 +112,20 @@ It is important to sequence post processors when creating and uploading vagrant 
       },
       {
         "type": "atlas",
-        ...
+        "only": ["virtualbox-iso"],
+        "artifact": "dundlermifflin/dwight-schrute",
+        "artifact_type": "vagrant.box",
+        "metadata": {
+          "provider": "virtualbox",
+          "version": "0.0.1"
+        }
       }
     ]
   ]
 }
 ```
+
+More documentation on the Atlas post-processor can be found [here](/docs/post-processors/atlas.html)
 
 ## Input Artifacts
 
