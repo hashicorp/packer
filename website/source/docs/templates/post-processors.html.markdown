@@ -82,7 +82,7 @@ sequence definition. Sequence definitions are used to chain together multiple
 post-processors. An example is shown below, where the artifact of a build is
 compressed then uploaded, but the compressed result is not kept.
 
-It is very important that any post processors that need to be ran in order, be sequenced!
+It is very important that any post processors that need to be run in order, be sequenced!
 
 ``` {.javascript}
 {
