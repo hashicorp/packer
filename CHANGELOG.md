@@ -30,6 +30,7 @@ IMPROVEMENTS:
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
   * builder/qemu: Now checks for version-specific options [GH-2376]
+  * builder/docker-import: Can now import Artifice artifacts [GH-2718]
   * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
 
