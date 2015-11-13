@@ -1,7 +1,7 @@
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
-@import url("//fonts.googleapis.com/css?family=Inconsolata");
+@import url("//fonts.googleapis.com/css?family=Inconsolata|Open+Sans:300,400,600");
 
 @import "_helpers";
 @import "_reset";
@@ -9,7 +9,14 @@
 @import "_columns";
 @import "_buttons";
 @import "_styles";
-@import "_nav";
+
+// Hashicorp Shared Project Styles
+@import 'hashicorp-shared/_project-utility';
+@import 'hashicorp-shared/_hashicorp-utility';
+@import 'hashicorp-shared/_hashicorp-header';
+@import 'hashicorp-shared/_hashicorp-sidebar';
+
+@import "_header";
 @import "_footer";
 @import "_components";
 @import "_sidebar";
