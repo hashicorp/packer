@@ -30,8 +30,8 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Wait for the droplet to become unlocked first. For snapshots
 	// this can end up taking quite a long time, so we hardcode this to
-	// 15 minutes.
-	if err := waitForDropletUnlocked(client, dropletId, 15*time.Minute); err != nil {
+	// 20 minutes.
+	if err := waitForDropletUnlocked(client, dropletId, 20*time.Minute); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
 		state.Put("error", err)
