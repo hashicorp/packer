@@ -88,6 +88,10 @@ Optional parameters:
     system reboot. Set this to a higher value if reboots take a longer amount
     of time.
 
+-   `noclean` (boolean) - If true, specifies that the helper scripts uploaded
+    to the system will not be removed by Packer. This defaults to false
+    (clean scripts from the system).
+
 ## Execute Command Example
 
 To many new users, the `execute_command` is puzzling. However, it provides an
