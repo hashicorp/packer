@@ -59,7 +59,7 @@ type Config struct {
 	RawStartRetryTimeout string `mapstructure:"start_retry_timeout"`
 
 	// Whether to clean scripts up
-	NoClean bool
+	SkipClean bool `mapstructure:"skip_clean"`
 
 	startRetryTimeout time.Duration
 	ctx               interpolate.Context
@@ -274,7 +274,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
 		}
 
-		if !p.config.NoClean {
+		if !p.config.SkipClean {
 
 			// Delete the temporary file we created. We retry this a few times
 			// since if the above rebooted we have to wait until the reboot
