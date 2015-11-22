@@ -1,39 +1,49 @@
 # appveyor.yml reference : http://www.appveyor.com/docs/appveyor-yml
 
-version: "{build}"
-
-skip_tags: true
-
+version: '{build}'
 branches:
   only:
-    - master
-
+  - master
+skip_tags: true
 os: Windows Server 2012 R2
-
+clone_folder: c:\gopath\src\github.com\mitchellh\packer
 environment:
   GOPATH: c:\gopath
   matrix:
   - GOARCH: 386
-    GOVERSION: 1.4.2
+    GOVERSION: 1.5.1
   - GOARCH: amd64
-    GOVERSION: 1.4.2
-
-clone_folder: c:\gopath\src\github.com\mitchellh\packer
-
+    GOVERSION: 1.5.1
 install:
-  - set Path=c:\go\bin;%Path%
-  - echo %Path%
-  - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-%GOARCH%.msi
-  - msiexec /i go%GOVERSION%.windows-%GOARCH%.msi /q
-  - go version
-  - go env
-  - go get -d -v -t ./...
+- cmd: >-
+    echo %Path%
 
+    go version
+
+    go env
+
+    appveyor DownloadFile http://downloads.sourceforge.net/project/gnuwin32/make/3.81/make-3.81-bin.zip
+
+    7z x make-3.81-bin.zip -oC:\make *.exe -r
+
+    appveyor DownloadFile http://downloads.sourceforge.net/project/gnuwin32/make/3.81/make-3.81-dep.zip
+
+    7z x make-3.81-dep.zip -oC:\make *.dll -r
+
+    SET PATH=C:\make\bin;%PATH%
 build_script:
-  - go test -v ./...
-  - go vet ./...
-  - git rev-parse HEAD
+- cmd: >-
+    make updatedeps
 
+    SET PATH=c:\gopath\bin\windows_386;%PATH%
+
+    SET PATH=c:\gopath\bin;%PATH%
+
+    make
 test: off
-
+artifacts:
+- path: pkg\windows_386\packer.exe
+  name: 32-bit
+- path: pkg\windows_amd64\packer.exe
+  name: 64-bit
 deploy: off
