@@ -17,10 +17,12 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+const BuilderId = "packer.post-processor.amazon-import"
+
 // We accept the output from vmware or vmware-esx
 var builtins = map[string]string{
-	"mitchellh.vmware":	"amazon-ova",
-	"mitchellh.vmware-esx":	"amazon-ova",
+	"mitchellh.vmware":	"amazon-import",
+	"mitchellh.vmware-esx":	"amazon-import",
 }
 
 // Configuration of this post processor
@@ -141,7 +143,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Call EC2 image import process
 	ec2conn := ec2.New(session)
-	impres, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
 		Description:	&p.config.ImportTaskDesc,
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
@@ -158,7 +160,44 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
 	}
 
-	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *impres.ImportTaskId))
+	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *import_start.ImportTaskId))
+
+	// Wait for import process to complete, this takess a while
+	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
+
+	stateChange := awscommon.StateChangeConf{
+		Pending: []string{"pending","active"},
+		Refresh: awscommon.ImportImageRefreshFunc(ec2conn, *import_start.ImportTaskId),
+		Target: "completed",
+	}
+	_, err = awscommon.WaitForState(&stateChange)
+
+	if err != nil {
+		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, err)
+	}
+
+	// Extract the AMI ID and return this as the artifact of the
+	// post processor
+	import_result, err := ec2conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
+		ImportTaskIds:	[]*string{
+				import_start.ImportTaskId,
+		},
+	})
+
+	if err != nil {
+		return nil, false, fmt.Errorf("API error for import task id %s: %s", *import_start.ImportTaskId, err)
+	}
+
+	// Add the discvered AMI ID to the artifact list
+	artifact = &awscommon.Artifact{
+		Amis:		map[string]string{
+				*config.Region: *import_result.ImportImageTasks[0].ImageId,
+		},
+		BuilderIdValue:	BuilderId,
+		Conn:		ec2conn,
+	}
 
 	return artifact, false, nil
 }
+
+
