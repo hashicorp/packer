@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"strings"
 	"os"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3"
 // This is bad, it should be pulled out into a common folder across
 // both builders and post-processors
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
@@ -33,6 +35,7 @@ type Config struct {
 // Variables specific to this post processor
 	S3Bucket	string `mapstructure:"s3_bucket_name"`
 	S3Key		string `mapstructure:"s3_key_name"`
+	SkipClean	bool   `mapstructure:"skip_clean"`
 	ImportTaskDesc	string `mapstructure:"import_task_desc"`
 	ImportDiskDesc	string `mapstructure:"import_disk_desc"`
 
@@ -103,6 +106,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Artifact type %s is not supported by this post-processor", artifact.BuilderId())
 	}
 
+	log.Println("Looking for OVA in artifact...")
 	// Locate the files output from the builder
 	source := ""
 	for _, path := range artifact.Files() {
@@ -118,9 +122,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Set up the AWS session
+	log.Println("Creating AWS session...")
 	session := session.New(config)
 
 	// open the source file
+	log.Printf("Opening file %s to upload...", source)
 	file, err := os.Open(source)
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to open %s: %s", source, err)
@@ -139,8 +145,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed to upload %s: %s", source, err)
 	}
 
+	// May as well stop holding this open now
+	file.Close()
+
 	ui.Message(fmt.Sprintf("Completed upload of %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
 
+	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 	// Call EC2 image import process
 	ec2conn := ec2.New(session)
 	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
@@ -170,14 +180,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		Refresh: awscommon.ImportImageRefreshFunc(ec2conn, *import_start.ImportTaskId),
 		Target: "completed",
 	}
+	// Actually do the wait for state change
 	_, err = awscommon.WaitForState(&stateChange)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, err)
 	}
 
-	// Extract the AMI ID and return this as the artifact of the
-	// post processor
+	// Extract the AMI ID from the completed import task
 	import_result, err := ec2conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
 		ImportTaskIds:	[]*string{
 				import_start.ImportTaskId,
@@ -185,10 +195,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	})
 
 	if err != nil {
-		return nil, false, fmt.Errorf("API error for import task id %s: %s", *import_start.ImportTaskId, err)
+		return nil, false, fmt.Errorf("Failed to find import task %s: %s", *import_start.ImportTaskId, err)
 	}
 
-	// Add the discvered AMI ID to the artifact list
+	ui.Message(fmt.Sprintf("Import task %s complete", *import_start.ImportTaskId))
+
+	// Add the reported AMI ID to the artifact list
+	log.Printf("Adding created AMI ID %s in region %s to output artifacts", *import_result.ImportImageTasks[0].ImageId, *config.Region)
 	artifact = &awscommon.Artifact{
 		Amis:		map[string]string{
 				*config.Region: *import_result.ImportImageTasks[0].ImageId,
@@ -197,7 +210,17 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		Conn:		ec2conn,
 	}
 
+        if !p.config.SkipClean {
+                ui.Message(fmt.Sprintf("Deleting import source s3://%s/%s", p.config.S3Bucket, p.config.S3Key))
+                s3conn := s3.New(session)
+                _, err = s3conn.DeleteObject(&s3.DeleteObjectInput{
+                        Bucket:         &p.config.S3Bucket,
+                        Key:            &p.config.S3Key,
+                })
+                if err != nil {
+                        return nil, false, fmt.Errorf("Failed to delete s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
+                }
+        }
+
 	return artifact, false, nil
 }
-
-
