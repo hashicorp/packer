@@ -22,12 +22,6 @@ import (
 
 const BuilderId = "packer.post-processor.amazon-import"
 
-// We accept the output from vmware or vmware-esx
-var builtins = map[string]string{
-	"mitchellh.vmware":	"amazon-import",
-	"mitchellh.vmware-esx":	"amazon-import",
-}
-
 // Configuration of this post processor
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -64,10 +58,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Set defaults
 	if p.config.ImportTaskDesc == "" {
-		p.config.ImportTaskDesc = "packer-amazon-ova task"
+		p.config.ImportTaskDesc = fmt.Sprintf("packer-import-%d", interpolate.InitTime.Unix())
 	}
 	if p.config.ImportDiskDesc == "" {
-		p.config.ImportDiskDesc = "packer-amazon-ova disk"
+		p.config.ImportDiskDesc = fmt.Sprintf("packer-import-ova-%d", interpolate.InitTime.Unix())
+	}
+	if p.config.S3Key == "" {
+		p.config.S3Key = fmt.Sprintf("packer-import-%d.ova", interpolate.InitTime.Unix())
 	}
 
 	errs := new(packer.MultiError)
@@ -78,7 +75,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// define all our required paramaters
 	templates := map[string]*string{
 		"s3_bucket_name":	&p.config.S3Bucket,
-		"s3_key_name":		&p.config.S3Key,
 	}
 	// Check out required params are defined
 	for key, ptr := range templates {
@@ -103,10 +99,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if err != nil {
 		return nil, false, err
 	}
-	// Confirm we're dealing with the result of a builder we like
-	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Artifact type %s is not supported by this post-processor", artifact.BuilderId())
-	}
 
 	log.Println("Looking for OVA in artifact")
 	// Locate the files output from the builder
@@ -120,7 +112,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Hope we found something useful
 	if source == "" {
-		return nil, false, fmt.Errorf("OVA file not found")
+		return nil, false, fmt.Errorf("No OVA file found in artifact from builder")
 	}
 
 	// Set up the AWS session
