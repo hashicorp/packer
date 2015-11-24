@@ -12,29 +12,65 @@ Type: `amazon-import`
 
 The Packer Amazon Import post-processor takes an OVA artifact from the VMware builder and imports it to an AMI available to Amazon Web Services EC2.
 
-\~&gt; This post-processor is for advanced users. Please ensure you read the ["prerequisites for import"](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html) before using this post-processor. You are strongly recommended to understand what behaviour is expected from an AMI before using this post-processor.
+\~&gt; This post-processor is for advanced users. It depends on specific IAM roles inside AWS and is best used with images that operate with the EC2 configuration model (eg, cloud-init for Linux systems). Please ensure you read the [prerequisites for import](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html) before using this post-processor.
 
 ## How Does it Work?
 
 The import process operates by copying the OVA to an S3 bucket, and calling an import task in EC2 on the OVA file. Once completed, an AMI is returned containing the converted virtual machine.
 
-The import process itself run by AWS includes modifications to the image uploaded, to allow it to boot and operate in the AWS EC2 environment. However, not all modifications required to make the machine run well in EC2 are performed. Take care around console output from the machine, as debugging can be very difficult without it.
+The import process itself run by AWS includes modifications to the image uploaded, to allow it to boot and operate in the AWS EC2 environment. However, not all modifications required to make the machine run well in EC2 are performed. Take care around console output from the machine, as debugging can be very difficult without it. You may also want to include tools suitable for instances in EC2 such as cloud-init for Linux.
 
-Further information about the import process can be found in AWS's ["EC2 Import/Export Instance documentation"](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instances_of_your_vm.html).
+Further information about the import process can be found in AWS's [EC2 Import/Export Instance documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instances_of_your_vm.html).
 
 ## Configuration
 
 There are some configuration options available for the post-processor. They are
-segmented below into two categories: required and optional parameters. Within
-each category, the available configuration keys are alphabetized.
+segmented below into three categories: required and optional parameters. 
+Within each category, the available configuration keys are alphabetized.
 
 Required:
 
--   `s3_bucket` (string) - The name of the bucket where the OVA file will be copied to for import.
+-   `access_key` (string) - The access key used to communicate with AWS. [Learn
+    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `s3_key` (string) - The name of the key where the OVA file will be copied to for import.
+-   `region` (string) - The name of the region, such as "us-east-1" in which to upload the OVA file to S3 and create the AMI. A list of valid regions can be obtained with AWS CLI tools or by consulting the AWS website.
+
+-   `s3_bucket_name` (string) - The name of the S3 bucket where the OVA file will be copied to for import. This bucket must exist when the post-processor is run.
+
+-   `s3_key_name` (string) - The name of the key in `s3_bucket` where the OVA file will be copied to for import. This key will be removed after import, unless `skip_clean` is true.
+
+-   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
+    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 Optional:
 
 -   `skip_clean` (boolean) - Whether we should skip removing the OVA file uploaded to S3 after the import process has completed. "true" means that we should leave it in the S3 bucket, "false" means to clean it out. Defaults to "false".
 
+-   `tags` (object of key/value strings) - Tags applied to the created AMI and
+    relevant snapshots.
+
+## Basic Example
+
+Here is a basic example. This assumes that the builder has produced an OVA artifact for us to work with.
+
+``` {.javascript}
+{
+  "type": "amazon-import",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "s3_bucket_name": "importbucket",
+  "s3_key_name": "import.ova",
+  "tags": {
+    "Description": "packer amazon-import {{timestamp}}"
+  }
+}
+```
+
+&gt; **Note:** Packer can also read the access key and secret access key from
+environmental variables. See the configuration reference in the section above
+for more information on what environmental variables Packer will look for.
+
+This will locate the OVA created by the builder, upload it into the S3 bucket called "importbucket" which must exist when the post-process runs, call the OVA file "import.ova" in that bucket, and then kick off an import process into an AMI. The region used for both the S3 upload and the AMI import will be "us-east-1".
+
+Once created, both the AMI and the snapshots associated with it would be tagged with a key called "Description" and a value of "packer amazon-import" with the timestamp appended.
