@@ -6,6 +6,7 @@ import (
 	"os"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -38,6 +39,7 @@ type Config struct {
 	SkipClean	bool   `mapstructure:"skip_clean"`
 	ImportTaskDesc	string `mapstructure:"import_task_desc"`
 	ImportDiskDesc	string `mapstructure:"import_disk_desc"`
+	Tags		map[string]string `mapstructure:"tags"`
 
 	ctx interpolate.Context
 }
@@ -106,7 +108,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Artifact type %s is not supported by this post-processor", artifact.BuilderId())
 	}
 
-	log.Println("Looking for OVA in artifact...")
+	log.Println("Looking for OVA in artifact")
 	// Locate the files output from the builder
 	source := ""
 	for _, path := range artifact.Files() {
@@ -122,11 +124,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Set up the AWS session
-	log.Println("Creating AWS session...")
+	log.Println("Creating AWS session")
 	session := session.New(config)
 
 	// open the source file
-	log.Printf("Opening file %s to upload...", source)
+	log.Printf("Opening file %s to upload", source)
 	file, err := os.Open(source)
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to open %s: %s", source, err)
@@ -200,11 +202,68 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Import task %s complete", *import_start.ImportTaskId))
 
+	createdami := *import_result.ImportImageTasks[0].ImageId
+
+	// If we have tags, then apply them now to both the AMI and snaps
+	// created by the import
+	if len(p.config.Tags) > 0 {
+		var ec2Tags []*ec2.Tag;
+
+		log.Printf("Repacking tags into AWS format")
+
+		for key, value := range p.config.Tags {
+			ui.Message(fmt.Sprintf("Adding tag \"%s\": \"%s\"", key, value))
+			ec2Tags = append(ec2Tags, &ec2.Tag{
+				Key: aws.String(key),
+				Value: aws.String(value),
+			})
+		}
+
+		resourceIds := []*string{&createdami}
+
+		log.Printf("Getting details of %s", createdami)
+
+		imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+			ImageIds:	resourceIds,
+		})
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed to retrieve details for AMI %s: %s", createdami, err)
+		}
+
+		if len(imageResp.Images) == 0 {
+			return nil, false, fmt.Errorf("AMI %s has no images", createdami)
+		}
+
+		image := imageResp.Images[0]
+
+		log.Printf("Walking block device mappings for %s to find snapshots", createdami)
+
+		for _, device := range image.BlockDeviceMappings {
+			if device.Ebs != nil && device.Ebs.SnapshotId != nil {
+				ui.Message(fmt.Sprintf("Tagging snapshot %s", *device.Ebs.SnapshotId))
+				resourceIds = append(resourceIds, device.Ebs.SnapshotId)
+			}
+		}
+
+		ui.Message(fmt.Sprintf("Tagging AMI %s", createdami))
+
+		_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
+			Resources:	resourceIds,
+			Tags:		ec2Tags,
+		})
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed to add tags to resources %#v: %s", resourceIds, err)
+		}
+
+	}
+
 	// Add the reported AMI ID to the artifact list
-	log.Printf("Adding created AMI ID %s in region %s to output artifacts", *import_result.ImportImageTasks[0].ImageId, *config.Region)
+	log.Printf("Adding created AMI ID %s in region %s to output artifacts", createdami, *config.Region)
 	artifact = &awscommon.Artifact{
 		Amis:		map[string]string{
-				*config.Region: *import_result.ImportImageTasks[0].ImageId,
+				*config.Region: createdami,
 		},
 		BuilderIdValue:	BuilderId,
 		Conn:		ec2conn,
