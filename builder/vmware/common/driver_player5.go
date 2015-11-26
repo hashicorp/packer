@@ -62,12 +62,12 @@ func (d *Player5Driver) qemuCompactDisk(diskPath string) error {
 	return nil
 }
 
-func (d *Player5Driver) CreateDisk(output string, size string, type_id string) error {
+func (d *Player5Driver) CreateDisk(output string, size string, adapter_type string, type_id string) error {
 	var cmd *exec.Cmd
 	if d.QemuImgPath != "" {
 		cmd = exec.Command(d.QemuImgPath, "create", "-f", "vmdk", "-o", "compat6", output, size)
 	} else {
-		cmd = exec.Command(d.VdiskManagerPath, "-c", "-s", size, "-a", "lsilogic", "-t", type_id, output)
+		cmd = exec.Command(d.VdiskManagerPath, "-c", "-s", size, "-a", adapter_type, "-t", type_id, output)
 	}
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err

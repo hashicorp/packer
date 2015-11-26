@@ -39,8 +39,8 @@ func (d *Fusion5Driver) CompactDisk(diskPath string) error {
 	return nil
 }
 
-func (d *Fusion5Driver) CreateDisk(output string, size string, type_id string) error {
-	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", "lsilogic", "-t", type_id, output)
+func (d *Fusion5Driver) CreateDisk(output string, size string, adapter_type string, type_id string) error {
+	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", adapter_type, "-t", type_id, output)
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}

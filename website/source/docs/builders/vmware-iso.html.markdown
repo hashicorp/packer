@@ -108,6 +108,13 @@ builder.
     User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
 
+-   `disk_adapter_type` (string) - The adapter type of the VMware virtual disk
+    to create. The default is "lsilogic". This option is for advanced usage,
+    modify only if you know what you're doing. For more information, please
+    consult the [Virtual Disk Manager User's Guide]
+    (http://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop VMware
+    clients. For ESXi, refer to the proper ESXi documentation.
+
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
     unattended Windows installs, which look for an `Autounattend.xml` file on

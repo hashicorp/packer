@@ -18,11 +18,12 @@ type DriverMock struct {
 	CompactDiskPath   string
 	CompactDiskErr    error
 
-	CreateDiskCalled bool
-	CreateDiskOutput string
-	CreateDiskSize   string
-	CreateDiskTypeId string
-	CreateDiskErr    error
+	CreateDiskCalled      bool
+	CreateDiskOutput      string
+	CreateDiskSize        string
+	CreateDiskAdapterType string
+	CreateDiskTypeId      string
+	CreateDiskErr         error
 
 	IsRunningCalled bool
 	IsRunningPath   string
@@ -75,10 +76,11 @@ func (d *DriverMock) CompactDisk(path string) error {
 	return d.CompactDiskErr
 }
 
-func (d *DriverMock) CreateDisk(output string, size string, typeId string) error {
+func (d *DriverMock) CreateDisk(output string, size string, adapterType string, typeId string) error {
 	d.CreateDiskCalled = true
 	d.CreateDiskOutput = output
 	d.CreateDiskSize = size
+	d.CreateDiskAdapterType = adapterType
 	d.CreateDiskTypeId = typeId
 	return d.CreateDiskErr
 }
