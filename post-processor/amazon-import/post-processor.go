@@ -31,8 +31,6 @@ type Config struct {
 	S3Bucket	string `mapstructure:"s3_bucket_name"`
 	S3Key		string `mapstructure:"s3_key_name"`
 	SkipClean	bool   `mapstructure:"skip_clean"`
-	ImportTaskDesc	string `mapstructure:"import_task_desc"`
-	ImportDiskDesc	string `mapstructure:"import_disk_desc"`
 	Tags		map[string]string `mapstructure:"tags"`
 
 	ctx interpolate.Context
@@ -49,7 +47,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		Interpolate:		true,
 		InterpolateContext:	&p.config.ctx,
 		InterpolateFilter:	&interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{
+				"s3_key_name",
+			},
 		},
 	}, raws...)
 	if err != nil {
@@ -57,17 +57,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Set defaults
-	if p.config.ImportTaskDesc == "" {
-		p.config.ImportTaskDesc = fmt.Sprintf("packer-import-%d", interpolate.InitTime.Unix())
-	}
-	if p.config.ImportDiskDesc == "" {
-		p.config.ImportDiskDesc = fmt.Sprintf("packer-import-ova-%d", interpolate.InitTime.Unix())
-	}
 	if p.config.S3Key == "" {
-		p.config.S3Key = fmt.Sprintf("packer-import-%d.ova", interpolate.InitTime.Unix())
+		p.config.S3Key = "packer-import-{{timestamp}}.ova"
 	}
 
 	errs := new(packer.MultiError)
+
+	// Check and render s3_key_name
+	if err = interpolate.Validate(p.config.S3Key, &p.config.ctx); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error parsing s3_key_name template: %s", err))
+	}
 
 	// Check we have AWS access variables defined somewhere
 	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
@@ -99,6 +99,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if err != nil {
 		return nil, false, err
 	}
+
+	// Render this key since we didn't in the configure phase
+        p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
+	if err != nil {
+                return nil, false, fmt.Errorf("Error rendering s3_key_name template: %s", err)
+        }
+	log.Printf("Rendered s3_key_name as %s", p.config.S3Key)
 
 	log.Println("Looking for OVA in artifact")
 	// Locate the files output from the builder
@@ -144,14 +151,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Completed upload of %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
 
-	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 	// Call EC2 image import process
+	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
+
 	ec2conn := ec2.New(session)
 	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
-		Description:	&p.config.ImportTaskDesc,
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
-				Description: &p.config.ImportDiskDesc,
 				UserBucket: &ec2.UserBucket{
 					S3Bucket:	&p.config.S3Bucket,
 					S3Key:		&p.config.S3Key,
@@ -174,14 +180,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		Refresh: awscommon.ImportImageRefreshFunc(ec2conn, *import_start.ImportTaskId),
 		Target: "completed",
 	}
+
 	// Actually do the wait for state change
-	_, err = awscommon.WaitForState(&stateChange)
+	// We ignore errors out of this and check job state in AWS API
+	awscommon.WaitForState(&stateChange)
 
-	if err != nil {
-		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, err)
-	}
-
-	// Extract the AMI ID from the completed import task
+	// Retrieve what the outcome was for the import task
 	import_result, err := ec2conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
 		ImportTaskIds:	[]*string{
 				import_start.ImportTaskId,
@@ -192,8 +196,15 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed to find import task %s: %s", *import_start.ImportTaskId, err)
 	}
 
+	// Check it was actually completed
+	if *import_result.ImportImageTasks[0].Status != "completed" {
+		// The most useful error message is from the job itself
+		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, *import_result.ImportImageTasks[0].StatusMessage)
+	}
+
 	ui.Message(fmt.Sprintf("Import task %s complete", *import_start.ImportTaskId))
 
+	// Pull AMI ID out of the completed job
 	createdami := *import_result.ImportImageTasks[0].ImageId
 
 	// If we have tags, then apply them now to both the AMI and snaps
