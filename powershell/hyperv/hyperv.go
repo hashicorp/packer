@@ -171,6 +171,17 @@ Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Controlle
 	return err
 }
 
+func DeleteAllDvdDrives(vmName string) error {
+	var script = `
+param([string]$vmName)
+Get-VMDvdDrive -VMName $vmName | Remove-VMDvdDrive
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName)
+	return err
+}
+
 func MountFloppyDrive(vmName string, path string) error {
 	var script = `
 param([string]$vmName, [string]$path)
@@ -220,7 +231,7 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 			return err
 		}
 
-		return DeleteDvdDrive(vmName, 1, 0)
+		return DeleteAllDvdDrives(vmName)
 	}
 }
 
