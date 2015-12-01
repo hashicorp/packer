@@ -288,6 +288,98 @@ func ExportVirtualMachine(vmName string, path string) error {
 	var script = `
 param([string]$vmName, [string]$path)
 Export-VM -Name $vmName -Path $path
+
+if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.VMCX')))
+{
+  $vm = Get-VM -Name $vmName
+  $vm_adapter = Get-VMNetworkAdapter -VM $vm | Select -First 1
+
+  $config = [xml]@"
+<?xml version="1.0" ?>
+<configuration>
+  <properties>
+    <subtype type="integer">$($vm.Generation - 1)</subtype>
+    <name type="string">$($vm.Name)</name>
+  </properties>
+  <settings>
+    <processors>
+      <count type="integer">$($vm.ProcessorCount)</count>
+    </processors>
+    <memory>
+      <bank>
+        <dynamic_memory_enabled type="bool">$($vm.DynamicMemoryEnabled)</dynamic_memory_enabled>
+        <limit type="integer">$($vm.MemoryMaximum / 1MB)</limit>
+        <reservation type="integer">$($vm.MemoryMinimum / 1MB)</reservation>
+        <size type="integer">$($vm.MemoryStartup / 1MB)</size>
+      </bank>
+    </memory>
+  </settings>
+  <AltSwitchName type="string">$($vm_adapter.SwitchName)</AltSwitchName>
+  <boot>
+    <device0 type="string">Optical</device0>
+  </boot>
+  <secure_boot_enabled type="bool">False</secure_boot_enabled>
+  <notes type="string">$($vm.Notes)</notes>
+  <vm-controllers/>
+</configuration>
+"@
+
+  if ($vm.Generation -eq 1)
+  {
+    $vm_controllers  = Get-VMIdeController -VM $vm
+    $controller_type = $config.SelectSingleNode('/configuration/vm-controllers')
+    # IDE controllers are not stored in a special XML container
+  }
+  else
+  {
+    $vm_controllers  = Get-VMScsiController -VM $vm
+    $controller_type = $config.CreateElement('scsi')
+    $controller_type.SetAttribute('ChannelInstanceGuid', 'x')
+    # SCSI controllers are stored in the scsi XML container
+    if ((Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
+    {
+      $config.configuration.secure_boot_enabled.'#text' = 'True'
+    }
+    else
+    {
+      $config.configuration.secure_boot_enabled.'#text' = 'False'
+    }
+  }
+
+  $vm_controllers | ForEach {
+    $controller = $config.CreateElement('controller' + $_.ControllerNumber)
+    $_.Drives | ForEach {
+      $drive = $config.CreateElement('drive' + ($_.DiskNumber + 0))
+      $drive_path = $config.CreateElement('pathname')
+      $drive_path.SetAttribute('type', 'string')
+      $drive_path.AppendChild($config.CreateTextNode($_.Path))
+      $drive_type = $config.CreateElement('type')
+      $drive_type.SetAttribute('type', 'string')
+      if ($_ -is [Microsoft.HyperV.PowerShell.HardDiskDrive])
+      {
+        $drive_type.AppendChild($config.CreateTextNode('VHD'))
+      }
+      elseif ($_ -is [Microsoft.HyperV.PowerShell.DvdDrive])
+      {
+        $drive_type.AppendChild($config.CreateTextNode('ISO'))
+      }
+      else
+      {
+        $drive_type.AppendChild($config.CreateTextNode('NONE'))
+      }
+      $drive.AppendChild($drive_path)
+      $drive.AppendChild($drive_type)
+      $controller.AppendChild($drive)
+    }
+    $controller_type.AppendChild($controller)
+  }
+  if ($controller_type.Name -ne 'vm-controllers')
+  {
+    $config.SelectSingleNode('/configuration/vm-controllers').AppendChild($controller_type)
+  }
+
+  $config.Save([IO.Path]::Combine($path, $vm.Name, 'Virtual Machines', 'box.xml'))
+}
 `
 
 	var ps powershell.PowerShellCmd
