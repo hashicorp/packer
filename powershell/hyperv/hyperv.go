@@ -659,6 +659,10 @@ if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
 }
 
 func TypeScanCodes(vmName string, scanCodes string) error {
+	if len(scanCodes) == 0 {
+		return nil
+	}
+
 	var script = `
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
@@ -674,7 +678,7 @@ param([string]$vmName, [string]$scanCodes)
 	
 	    $ErrorActionPreference = "Stop"
 	    
-	    $vm = Get-CimInstance -ComputerName localhost -Namespace "root\virtualization\v2" -ClassName Msvm_ComputerSystem -ErrorAction Ignore -Verbose:$false | where ElementName -eq $VMName | select -first 1
+	    $vm = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName Msvm_ComputerSystem -ErrorAction Ignore -Verbose:$false | where ElementName -eq $VMName | select -first 1
 	    if ($vm -eq $null){
 	        Write-Error ("VirtualMachine({0}) is not found!" -f $VMName)
 	    }
