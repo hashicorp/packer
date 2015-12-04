@@ -67,6 +67,7 @@ specified host you're buiding. The `--limit` argument can be provided in the
 `extra_arguments` option.
 
 An example inventory file may look like:
+
 ```{.text}
 [chi-dbservers]
 db-01 ansible_connection=local
