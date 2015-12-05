@@ -91,7 +91,7 @@ $lastControllerNumber
 	script = `
 param([string]$vmName, [string]$isoPath, [int]$controllerNumber)
 $dvdController = Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -path $isoPath -Passthru
-Set-VMDvdDrive -path $null
+$dvdController | Set-VMDvdDrive -path $null
 $dvdController.ControllerLocation
 `
 
