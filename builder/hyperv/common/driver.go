@@ -86,7 +86,7 @@ type Driver interface {
 
 	RestartVirtualMachine(string) error
 
-	CreateDvdDrive(string, uint) (uint, uint, error)
+	CreateDvdDrive(string, string, uint) (uint, uint, error)
 
 	MountDvdDrive(string, string, uint, uint) error
 

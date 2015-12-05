@@ -51,7 +51,7 @@ $ip
 	return cmdOut, err
 }
 
-func CreateDvdDrive(vmName string, generation uint) (uint, uint, error) {
+func CreateDvdDrive(vmName string, isoPath string, generation uint) (uint, uint, error) {
 	var ps powershell.PowerShellCmd
 	var script string
 	var controllerNumber uint
@@ -89,12 +89,13 @@ $lastControllerNumber
 	}
 
 	script = `
-param([string]$vmName,[int]$controllerNumber)
-$dvdController = Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Passthru
+param([string]$vmName, [string]$isoPath, [int]$controllerNumber)
+$dvdController = Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -path $isoPath -Passthru
+Set-VMDvdDrive -path $null
 $dvdController.ControllerLocation
 `
 
-	cmdOut, err := ps.Output(script, vmName, strconv.FormatInt(int64(controllerNumber), 10))
+	cmdOut, err := ps.Output(script, vmName, isoPath, strconv.FormatInt(int64(controllerNumber), 10))
 	if err != nil {
 		return controllerNumber, 0, err
 	}
