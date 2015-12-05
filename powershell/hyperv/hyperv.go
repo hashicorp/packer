@@ -151,7 +151,7 @@ Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","F
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
 $vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive
+Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
