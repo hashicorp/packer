@@ -39,7 +39,7 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 	for _, isoPath := range s.IsoPaths {
 		var properties DvdControllerProperties
 
-		controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, s.Generation)
+		controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, isoPath, s.Generation)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())

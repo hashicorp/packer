@@ -38,7 +38,7 @@ func (s *StepMountGuestAdditions) Run(state multistep.StateBag) multistep.StepAc
 
 	var dvdControllerProperties DvdControllerProperties
 
-	controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, s.Generation)
+	controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, s.GuestAdditionsPath, s.Generation)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
