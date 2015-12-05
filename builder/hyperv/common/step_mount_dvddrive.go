@@ -30,7 +30,7 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 	// For IDE, there are only 2 controllers (0,1) with 2 locations each (0,1)
 
 	var dvdControllerProperties DvdControllerProperties
-	controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, s.Generation)
+	controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, isoPath, s.Generation)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())

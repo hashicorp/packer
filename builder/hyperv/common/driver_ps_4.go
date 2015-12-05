@@ -205,8 +205,8 @@ func (d *HypervPS4Driver) RestartVirtualMachine(vmName string) error {
 	return hyperv.RestartVirtualMachine(vmName)
 }
 
-func (d *HypervPS4Driver) CreateDvdDrive(vmName string, generation uint) (uint, uint, error) {
-	return hyperv.CreateDvdDrive(vmName, generation)
+func (d *HypervPS4Driver) CreateDvdDrive(vmName string, isoPath string, generation uint) (uint, uint, error) {
+	return hyperv.CreateDvdDrive(vmName, isoPath, generation)
 }
 
 func (d *HypervPS4Driver) MountDvdDrive(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
