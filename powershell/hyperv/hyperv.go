@@ -682,8 +682,17 @@ param([string]$vmName, [string]$scanCodes)
 	    if ($vm -eq $null){
 	        Write-Error ("VirtualMachine({0}) is not found!" -f $VMName)
 	    }
-	
+		
 	    $vmKeyboard = $vm | Get-CimAssociatedInstance -ResultClassName "Msvm_Keyboard" -ErrorAction Ignore -Verbose:$false
+		
+		if ($vmKeyboard -eq $null) {
+			$vmKeyboard = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName Msvm_Keyboard -ErrorAction Ignore -Verbose:$false | where SystemName -eq $vm.Name | select -first 1
+		}
+
+		if ($vmKeyboard -eq $null) {
+			$vmKeyboard = Get-CimInstance -Namespace "root\virtualization" -ClassName Msvm_Keyboard -ErrorAction Ignore -Verbose:$false | where SystemName -eq $vm.Name | select -first 1
+		}
+		
 	    if ($vmKeyboard -eq $null){
 	        Write-Error ("VirtualMachine({0}) keyboard class is not found!" -f $VMName)
 	    }
