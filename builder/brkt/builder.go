@@ -74,10 +74,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvatarEnabled: b.config.WorkloadConfig.MetavisorEnabled,
 			MachineType:   b.config.MachineTypeConfig.MachineType,
 		},
+		&stepGetZone{
+			Zone:          b.config.WorkloadConfig.Zone,
+			ComputingCell: b.config.WorkloadConfig.ComputingCell,
+		},
 		&stepDeployInstance{
 			ImageDefinition:  b.config.WorkloadConfig.ImageDefinition,
 			BillingGroup:     b.config.WorkloadConfig.BillingGroup,
-			Zone:             b.config.WorkloadConfig.Zone,
 			CloudConfig:      b.config.WorkloadConfig.CloudConfig,
 			SecurityGroup:    b.config.WorkloadConfig.SecurityGroup,
 			MetavisorEnabled: b.config.WorkloadConfig.MetavisorEnabled,

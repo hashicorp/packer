@@ -13,7 +13,6 @@ import (
 type stepDeployInstance struct {
 	ImageDefinition  string
 	BillingGroup     string
-	Zone             string
 	SecurityGroup    string
 	CloudConfig      map[string]interface{}
 	MetavisorEnabled bool
@@ -70,12 +69,18 @@ func (s *stepDeployInstance) Run(state multistep.StateBag) multistep.StepAction 
 	}
 	state.Put("privateKey", keypair.PrivateKey)
 
+	zone, ok := state.Get("zone").(string)
+	if !ok {
+		state.Put("error", fmt.Errorf("internal error retrieving zone from state"))
+		return multistep.ActionHalt
+	}
+
 	// deploy ad-hoc workload
 	workload, err := api.CreateWorkload(&brkt.WorkloadDeployPayload{
 		Name:            "image_provisioning_workload",
 		Description:     "This workload is deployed by the Bracket packer plugin and is currently provisioning an image definition.", // BOB: message?
 		BillingGroup:    s.BillingGroup,
-		Zone:            s.Zone,
+		Zone:            zone,
 		LeaseExpireTime: expireTime(),
 	})
 	if err != nil {

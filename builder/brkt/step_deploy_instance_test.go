@@ -74,11 +74,11 @@ func TestStepDeployInstance_Run(t *testing.T) {
 	defer ts.Close()
 
 	state.Put("machineType", MACHINE_TYPE_ID)
+	state.Put("zone", ZONE_ID)
 
 	step := &stepDeployInstance{
 		ImageDefinition: IMAGE_DEFINITION_ID,
 		BillingGroup:    BILLING_GROUP_ID,
-		Zone:            ZONE_ID,
 		CloudConfig:     make(map[string]interface{}),
 	}
 

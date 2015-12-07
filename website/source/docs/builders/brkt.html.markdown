@@ -41,6 +41,9 @@ set.
 -   `billing_group_uuid` (string) - The Billing Group that will be charged for
     launching the provisioning instance.
 
+-   `computing_cell` (string) - The Computing Cell that the provisioning
+    instance will be launched into.
+
 -   `image_definition_uuid` (string) - The initial Image Definition used as a
     base for the newly created machine.
 
@@ -59,9 +62,6 @@ set.
     the instance that will be provisioning the image. This will be combined
     with the `min_cpu_cores` to find a matching `machine_type`.
 
--   `zone_uuid` (string) - The UUID of the Zone to launch the provisioning
-    instance in.
-
 
 ### Optional:
 
@@ -76,6 +76,9 @@ set.
 
 -   `security_group_uuid` (string) - The Security Group to launch this instance
     in.
+
+-   `zone_uuid` (string) - The UUID of the Zone to launch the provisioning
+    instance in.
 
 
 ## Basic Example
@@ -92,7 +95,7 @@ the UUIDs which are unique for your account:
 
   "image_definition_uuid": "YOUR IMAGE DEFINITION UUID HERE",
   "billing_group_uuid": "YOUR BILLING GROUP UUID HERE",
-  "zone_uuid": "YOUR ZONE UUID HERE",
+  "computing_cell_uuid": "YOUR COMPUTING CELL UUID HERE",
   "security_group_uuid": "YOUR SECURITY GROUP UUID HERE",
 
   "min_ram_in_gb": 4,

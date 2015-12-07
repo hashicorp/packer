@@ -33,6 +33,7 @@ func (c *MachineTypeConfig) Prepare(ctx *interpolate.Context) []error {
 type WorkloadConfig struct {
 	ImageDefinition  string                 `mapstructure:"image_definition_uuid"`
 	BillingGroup     string                 `mapstructure:"billing_group_uuid"`
+	ComputingCell    string                 `mapstructure:"computing_cell_uuid"`
 	Zone             string                 `mapstructure:"zone_uuid"`
 	SecurityGroup    string                 `mapstructure:"security_group_uuid"`
 	CloudConfig      map[string]interface{} `mapstructure:"cloud_config"`
@@ -118,8 +119,8 @@ func (c *WorkloadConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.BillingGroup == "" {
 		errs = append(errs, fmt.Errorf("billing_group_uuid required"))
 	}
-	if c.Zone == "" {
-		errs = append(errs, fmt.Errorf("zone_uuid required"))
+	if c.ComputingCell == "" && c.Zone == "" {
+		errs = append(errs, fmt.Errorf("required to provide either zone_uuid or computing_cell_uuid"))
 	}
 
 	// optional argument
