@@ -88,6 +88,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone: b.config.AvailabilityZone,
 			UserData:         b.config.UserData,
 			UserDataFile:     b.config.UserDataFile,
+			ConfigDrive:      b.config.ConfigDrive,
 		},
 		&StepWaitForRackConnect{
 			Wait: b.config.RackconnectWait,
