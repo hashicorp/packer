@@ -103,6 +103,9 @@ builder.
 -   `metadata` (object of key/value strings) - Glance metadata that will be
     applied to the image.
 
+-   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
+     cloud-init metadata.
+
 ## Basic Example: Rackspace public cloud
 
 Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
