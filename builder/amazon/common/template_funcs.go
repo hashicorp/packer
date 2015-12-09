@@ -19,8 +19,10 @@ func isalphanumeric(b byte) bool {
 }
 
 // Clean up AMI name by replacing invalid characters with "-"
+// For allowed characters see docs for Name parameter
+// at http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateImage.html
 func templateCleanAMIName(s string) string {
-	allowed := []byte{'(', ')', ',', '/', '-', '_', ' '}
+	allowed := []byte{'(', ')', '[', ']', ' ', '.', '/', '-', '\'', '@', '_'}
 	b := []byte(s)
 	newb := make([]byte, len(b))
 	for i, c := range b {

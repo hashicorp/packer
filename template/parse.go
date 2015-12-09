@@ -1,10 +1,12 @@
 package template
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -309,17 +311,56 @@ func Parse(r io.Reader) (*Template, error) {
 	return rawTpl.Template()
 }
 
+// Find line number and position based on the offset
+func findLinePos(f *os.File, offset int64) (int64, int64, string) {
+	scanner := bufio.NewScanner(f)
+	count := int64(0)
+	for scanner.Scan() {
+		count += 1
+		scanLength := len(scanner.Text()) + 1
+		if offset < int64(scanLength) {
+			return count, offset, scanner.Text()
+		}
+		offset = offset - int64(scanLength)
+	}
+	if err := scanner.Err(); err != nil {
+		return 0, 0, err.Error()
+	}
+	return 0, 0, ""
+}
+
 // ParseFile is the same as Parse but is a helper to automatically open
 // a file for parsing.
 func ParseFile(path string) (*Template, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
+	var f *os.File
+	var err error
+	if path == "-" {
+		// Create a temp file for stdin in case of errors
+		f, err = ioutil.TempFile(os.TempDir(), "packer")
+		if err != nil {
+			return nil, err
+		}
+		defer os.Remove(f.Name())
+		defer f.Close()
+		io.Copy(f, os.Stdin)
+		f.Seek(0, os.SEEK_SET)
+	} else {
+		f, err = os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
 	}
-	defer f.Close()
-
 	tpl, err := Parse(f)
 	if err != nil {
+		syntaxErr, ok := err.(*json.SyntaxError)
+		if !ok {
+			return nil, err
+		}
+		// Rewind the file and get a better error
+		f.Seek(0, os.SEEK_SET)
+		line, pos, errorLine := findLinePos(f, syntaxErr.Offset)
+		err = fmt.Errorf("Error in line %d, char %d: %s\n%s", line, pos, syntaxErr, errorLine)
 		return nil, err
 	}
 

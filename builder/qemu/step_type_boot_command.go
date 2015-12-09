@@ -177,9 +177,9 @@ func vncSendString(c *vnc.ClientConn, original string) {
 		}
 
 		c.KeyEvent(keyCode, true)
-		time.Sleep(time.Second/10)
+		time.Sleep(time.Second / 10)
 		c.KeyEvent(keyCode, false)
-		time.Sleep(time.Second/10)
+		time.Sleep(time.Second / 10)
 
 		if keyShift {
 			c.KeyEvent(KeyLeftShift, false)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -33,11 +34,13 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 			// Declare list of resources to tag
 			resourceIds := []*string{&ami}
-
-			regionconn := ec2.New(&aws.Config{
+			awsConfig := aws.Config{
 				Credentials: ec2conn.Config.Credentials,
 				Region:      aws.String(region),
-			})
+			}
+			session := session.New(&awsConfig)
+
+			regionconn := ec2.New(session)
 
 			// Retrieve image list for given AMI
 			imageResp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{

@@ -20,6 +20,7 @@ type StepRunSourceInstance struct {
 	AvailabilityZone         string
 	BlockDevices             BlockDevices
 	Debug                    bool
+	EbsOptimized             bool
 	ExpectedRootDevice       string
 	InstanceType             string
 	IamInstanceProfile       string
@@ -135,7 +136,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	var instanceId string
 
-	if spotPrice == "" {
+	if spotPrice == "" || spotPrice == "0" {
 		runOpts := &ec2.RunInstancesInput{
 			KeyName:             &keyName,
 			ImageId:             &s.SourceAMI,
@@ -146,6 +147,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
+			EbsOptimized:        &s.EbsOptimized,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
@@ -196,6 +198,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 					AvailabilityZone: &availabilityZone,
 				},
 				BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+				EbsOptimized:        &s.EbsOptimized,
 			},
 		})
 		if err != nil {

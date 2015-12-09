@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/packer"
 )
@@ -72,7 +73,8 @@ func (a *Artifact) Destroy() error {
 			Credentials: a.Conn.Config.Credentials,
 			Region:      aws.String(region),
 		}
-		regionConn := ec2.New(regionConfig)
+		sess := session.New(regionConfig)
+		regionConn := ec2.New(sess)
 
 		input := &ec2.DeregisterImageInput{
 			ImageId: &imageId,

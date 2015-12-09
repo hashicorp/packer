@@ -1,10 +1,9 @@
 <% wrap_layout :layout do %>
-  <div class="docs-wrapper">
-    <div class="row row-lg-height">
-      <div class="sidebar col-sm-3 col-md-3 col-lg-height col-md-height col-sm-height">
+  <div id="main-content" class="docs-wrapper">
+      <div id="sidebar-docs" class="col-sm-3 col-md-3">
         <%= yield_content :sidebar %>
       </div>
-      <div class="docs-body col-sm-9 col-md-9 col-lg-height col-md-height col-sm-height">
+      <div class="docs-body col-sm-9 col-md-9">
         <div class="docs-content">
           <%= yield %>
         </div>
@@ -24,6 +23,5 @@
           </div>
         <% end %>
       </div>
-    </div>
   </div>
 <% end %>

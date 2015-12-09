@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/packer/builder/amazon/common"
 	builderT "github.com/mitchellh/packer/helper/builder/testing"
@@ -160,7 +161,8 @@ func testEC2Conn() (*ec2.EC2, error) {
 		return nil, err
 	}
 
-	return ec2.New(config), nil
+	session := session.New(config)
+	return ec2.New(session), nil
 }
 
 const testBuilderAccBasic = `

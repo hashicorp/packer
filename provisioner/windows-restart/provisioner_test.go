@@ -35,7 +35,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Errorf("unexpected remote path: %s", p.config.RestartTimeout)
 	}
 
-	if p.config.RestartCommand != "powershell \"& {Restart-Computer -force }\"" {
+	if p.config.RestartCommand != "shutdown /r /f /t 0 /c \"packer restart\"" {
 		t.Errorf("unexpected remote path: %s", p.config.RestartCommand)
 	}
 }
@@ -100,6 +100,10 @@ func TestProvisionerProvision_Success(t *testing.T) {
 	waitForCommunicator = func(p *Provisioner) error {
 		return nil
 	}
+	waitForRestartOld := waitForRestart
+	waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
+		return nil
+	}
 	err := p.Provision(ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
@@ -113,6 +117,7 @@ func TestProvisionerProvision_Success(t *testing.T) {
 	}
 	// Set this back!
 	waitForCommunicator = waitForCommunicatorOld
+	waitForRestart = waitForRestartOld
 }
 
 func TestProvisionerProvision_CustomCommand(t *testing.T) {
@@ -131,6 +136,10 @@ func TestProvisionerProvision_CustomCommand(t *testing.T) {
 	waitForCommunicator = func(p *Provisioner) error {
 		return nil
 	}
+	waitForRestartOld := waitForRestart
+	waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
+		return nil
+	}
 	err := p.Provision(ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
@@ -142,6 +151,7 @@ func TestProvisionerProvision_CustomCommand(t *testing.T) {
 	}
 	// Set this back!
 	waitForCommunicator = waitForCommunicatorOld
+	waitForRestart = waitForRestartOld
 }
 
 func TestProvisionerProvision_RestartCommandFail(t *testing.T) {

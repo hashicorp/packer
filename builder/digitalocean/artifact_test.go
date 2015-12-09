@@ -16,7 +16,7 @@ func TestArtifact_Impl(t *testing.T) {
 
 func TestArtifactId(t *testing.T) {
 	a := &Artifact{"packer-foobar", 42, "San Francisco", nil}
-	expected := "42"
+	expected := "San Francisco:42"
 
 	if a.Id() != expected {
 		t.Fatalf("artifact ID should match: %v", expected)
