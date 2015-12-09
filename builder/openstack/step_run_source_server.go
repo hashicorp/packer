@@ -19,8 +19,8 @@ type StepRunSourceServer struct {
 	AvailabilityZone string
 	UserData         string
 	UserDataFile     string
-
-	server *servers.Server
+	ConfigDrive      bool
+	server           *servers.Server
 }
 
 func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
@@ -62,6 +62,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 			Networks:         networks,
 			AvailabilityZone: s.AvailabilityZone,
 			UserData:         userData,
+			ConfigDrive:      s.ConfigDrive,
 		},
 
 		KeyName: keyName,
