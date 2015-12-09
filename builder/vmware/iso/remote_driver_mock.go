@@ -20,6 +20,13 @@ type RemoteDriverMock struct {
 	UnregisterPath   string
 	UnregisterErr    error
 
+	DestroyCalled bool
+	DestroyErr    error
+
+	IsDestroyedCalled bool
+	IsDestroyedResult bool
+	IsDestroyedErr    error
+
 	uploadErr error
 
 	ReloadVMErr error
@@ -41,6 +48,16 @@ func (d *RemoteDriverMock) Unregister(path string) error {
 	d.UnregisterCalled = true
 	d.UnregisterPath = path
 	return d.UnregisterErr
+}
+
+func (d *RemoteDriverMock) Destroy() error {
+	d.DestroyCalled = true
+	return d.DestroyErr
+}
+
+func (d *RemoteDriverMock) IsDestroyed() (bool, error) {
+	d.DestroyCalled = true
+	return d.IsDestroyedResult, d.IsDestroyedErr
 }
 
 func (d *RemoteDriverMock) upload(dst, src string) error {

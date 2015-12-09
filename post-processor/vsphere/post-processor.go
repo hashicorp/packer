@@ -15,7 +15,8 @@ import (
 )
 
 var builtins = map[string]string{
-	"mitchellh.vmware": "vmware",
+	"mitchellh.vmware":     "vmware",
+	"mitchellh.vmware-esx": "vmware",
 }
 
 type Config struct {
@@ -95,16 +96,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
-	vmx := ""
+	source := ""
 	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".vmx") {
-			vmx = path
+		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
+			source = path
 			break
 		}
 	}
 
-	if vmx == "" {
-		return nil, false, fmt.Errorf("VMX file not found")
+	if source == "" {
+		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
@@ -126,11 +127,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
 		fmt.Sprintf("--network=%s", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
-		fmt.Sprintf("%s", vmx),
+		fmt.Sprintf("%s", source),
 		fmt.Sprintf("%s", ovftool_uri),
 	}
 
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 	var out bytes.Buffer
 	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)

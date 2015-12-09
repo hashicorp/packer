@@ -59,6 +59,12 @@ func init() {
 				CheckFunc:         commandVersionCheck,
 			}, nil
 		},
+
+		"plugin": func() (cli.Command, error) {
+			return &command.PluginCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
 	}
 }
 

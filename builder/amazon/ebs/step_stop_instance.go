@@ -19,7 +19,7 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip when it is a spot instance
-	if s.SpotPrice != "" {
+	if s.SpotPrice != "" && s.SpotPrice != "0" {
 		return multistep.ActionContinue
 	}
 

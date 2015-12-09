@@ -1,0 +1,26 @@
+<!-- Overlay for fixed sidebar -->
+<div class="sidebar-overlay"></div>
+
+<!-- Material sidebar -->
+<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
+    <!-- Sidebar header -->
+    <div class="sidebar-header header-cover">
+        <!-- Sidebar brand image -->
+        <div class="sidebar-image">
+            <img src="<%= image_path('logo-header@2x.png') %>" width="24px" height="34px">
+        </div>
+    </div>
+
+    <!-- Sidebar navigation -->
+    <ul class="main nav sidebar-nav">
+        <li class="first"><a href="/intro">Intro</a></li>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href="/community">Community</a></li>
+    </ul>
+    <div class="divider"></div>
+    <!-- Sidebar navigation 2-->
+    <ul class="external nav sidebar-nav">
+        <li class="first"><a class="v-btn gray sml" href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a></li>
+        <li class=""><a class="v-btn gray sml" href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a></li>
+    </ul>
+</aside>

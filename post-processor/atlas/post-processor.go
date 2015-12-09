@@ -46,8 +46,8 @@ type Config struct {
 
 	ctx        interpolate.Context
 	user, name string
-	buildId     int
-	compileId    int
+	buildId    int
+	compileId  int
 }
 
 type PostProcessor struct {
@@ -159,13 +159,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	opts := &atlas.UploadArtifactOpts{
-		User:     p.config.user,
-		Name:     p.config.name,
-		Type:     p.config.Type,
-		ID:       artifact.Id(),
-		Metadata: p.metadata(artifact),
-		BuildID:  p.config.buildId,
-		CompileID:  p.config.compileId,
+		User:      p.config.user,
+		Name:      p.config.name,
+		Type:      p.config.Type,
+		ID:        artifact.Id(),
+		Metadata:  p.metadata(artifact),
+		BuildID:   p.config.buildId,
+		CompileID: p.config.compileId,
 	}
 
 	if fs := artifact.Files(); len(fs) > 0 {
@@ -204,7 +204,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		opts.FileSize = r.Size
 	}
 
-	ui.Message("Uploading artifact version...")
+	ui.Message(fmt.Sprintf("Uploading artifact (%d bytes)", opts.FileSize))
 	var av *atlas.ArtifactVersion
 	doneCh := make(chan struct{})
 	errCh := make(chan error, 1)
@@ -220,7 +220,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	select {
 	case err := <-errCh:
-		return nil, false, fmt.Errorf("Error uploading: %s", err)
+		return nil, false, fmt.Errorf("Error uploading (%d bytes): %s", opts.FileSize, err)
 	case <-doneCh:
 	}
 
