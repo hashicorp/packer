@@ -16,6 +16,7 @@ import (
 type RunConfig struct {
 	AssociatePublicIpAddress bool              `mapstructure:"associate_public_ip_address"`
 	AvailabilityZone         string            `mapstructure:"availability_zone"`
+	EbsOptimized             bool              `mapstructure:"ebs_optimized"`
 	IamInstanceProfile       string            `mapstructure:"iam_instance_profile"`
 	InstanceType             string            `mapstructure:"instance_type"`
 	RunTags                  map[string]string `mapstructure:"run_tags"`

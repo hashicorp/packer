@@ -12,7 +12,7 @@ page_title: 'Atlas Post-Processor'
 Type: `atlas`
 
 The Atlas post-processor uploads artifacts from your packer builds to Atlas for
-hosting. Artifacts hosted in Atlas are are automatically made available for use
+hosting. Artifacts hosted in Atlas are automatically made available for use
 with Vagrant and Terraform, and Atlas provides additional features for managing
 versions and releases. [Learn more about packer in
 Atlas.](https://atlas.hashicorp.com/help/packer/features)
@@ -107,7 +107,7 @@ you can also use `token` configuration option.
         "type": "atlas",
         "token": "{{user `atlas_token`}}",
         "artifact": "hashicorp/foobar",
-        "artifact_type": "amazon.ami",
+        "artifact_type": "amazon.image",
         "metadata": {
           "created_at": "{{timestamp}}"
         }

@@ -95,6 +95,12 @@ func getAppPath(bundleId string) (string, error) {
 
 	pathOutput := strings.TrimSpace(stdout.String())
 	if pathOutput == "" {
+		if fi, err := os.Stat("/Applications/Parallels Desktop.app"); err == nil {
+			if fi.IsDir() {
+				return "/Applications/Parallels Desktop.app", nil
+			}
+		}
+
 		return "", fmt.Errorf(
 			"Could not detect Parallels Desktop! Make sure it is properly installed.")
 	}

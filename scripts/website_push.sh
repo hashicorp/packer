@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Set the tmpdir
 if [ -z "$TMPDIR" ]; then

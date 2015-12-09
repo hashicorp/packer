@@ -148,6 +148,10 @@ builder.
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
+-   `iso_target_path` (string) - The path where the iso should be saved after
+    download. By default will go in the packer cache, with a hash of the
+    original filename as its name.
+
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to
     download or while downloading a single URL, it will move on to the next. All
@@ -394,6 +398,10 @@ modify as well:
 
 -   `remote_password` - The SSH password for access to the remote machine.
 
+-   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
+    format of the exported virtual machine. This defaults to "ovf".
+    Before using this option, you need to install `ovftool`.
+
 ### Using a Floppy for Linux kickstart file or preseed
 
 Depending on your network configuration, it may be difficult to use packer's
@@ -409,6 +417,22 @@ file by attaching a floppy disk. An example below, based on RHEL:
         "folder/ks.cfg"
       ],
       "boot_command": "<tab> text ks=floppy <enter><wait>"
+    }
+  ]
+}
+```
+
+It's also worth noting that `ks=floppy` has been deprecated.  Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
+
+``` {.javascript}
+{
+  "builders": [
+    {
+      "type":"vmware-iso",
+      "floppy_files": [
+        "folder/ks.cfg"
+      ],
+      "boot_command": "<tab> inst.text inst.ks=hd:fd0:/ks.cfg <enter><wait>"
     }
   ]
 }
