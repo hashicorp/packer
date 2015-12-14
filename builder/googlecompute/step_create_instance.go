@@ -59,6 +59,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Metadata:    config.getInstanceMetadata(sshPublicKey),
 		Name:        name,
 		Network:     config.Network,
+		Preemptible: config.Preemptible,
 		Tags:        config.Tags,
 		Zone:        config.Zone,
 	})
