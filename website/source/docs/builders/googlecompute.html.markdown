@@ -144,6 +144,8 @@ builder.
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
 
+-   `preemptible` (boolean) - If true, launch a preembtible instance.
+
 ## Gotchas
 
 Centos images have root ssh access disabled by default. Set `ssh_username` to
