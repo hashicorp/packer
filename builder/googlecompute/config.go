@@ -31,6 +31,7 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	Preemptible          bool              `mapstructure:"preemptible"`
 	SourceImage          string            `mapstructure:"source_image"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`

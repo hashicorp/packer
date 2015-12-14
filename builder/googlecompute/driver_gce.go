@@ -255,6 +255,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				Network: network.SelfLink,
 			},
 		},
+		Scheduling: &compute.Scheduling{
+			Preemptible: c.Preemptible,
+		},
 		ServiceAccounts: []*compute.ServiceAccount{
 			&compute.ServiceAccount{
 				Email: "default",
