@@ -104,15 +104,14 @@ builder.
 -   `disk_type_id` (string) - The type of VMware virtual disk to create. The
     default is "1", which corresponds to a growable virtual disk split in
     2GB files. This option is for advanced usage, modify only if you know what
-    you're doing. For more information, please consult the [Virtual Disk Manager
-    User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
-    VMware clients. For ESXi, refer to the proper ESXi documentation.
+    you're doing. For more information, please consult the <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"><img src="../../assets/images/Adobe_PDF_file_icon_24x24.png"/> Virtual Disk Manager
+    User's Guide</a> for desktop VMware clients. For ESXi, refer to the proper
+    ESXi documentation.
 
 -   `disk_adapter_type` (string) - The adapter type of the VMware virtual disk
     to create. The default is "lsilogic". This option is for advanced usage,
     modify only if you know what you're doing. For more information, please
-    consult the [Virtual Disk Manager User's Guide]
-    (http://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop VMware
+    consult the <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"><img src="../../assets/images/Adobe_PDF_file_icon_24x24.png"/> Virtual Disk Manager User's Guide</a> for desktop VMware
     clients. For ESXi, refer to the proper ESXi documentation.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
