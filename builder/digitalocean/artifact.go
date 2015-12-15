@@ -36,7 +36,7 @@ func (a *Artifact) Id() string {
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A snapshot was created: '%v' in region '%v'", a.snapshotName, a.regionName)
+	return fmt.Sprintf("A snapshot was created: '%v' (ID: %v) in region '%v'", a.snapshotName, a.snapshotId, a.regionName)
 }
 
 func (a *Artifact) State(name string) interface{} {
