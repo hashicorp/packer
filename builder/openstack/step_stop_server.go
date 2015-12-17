@@ -31,14 +31,14 @@ func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Stopping server...")
+	ui.Say(fmt.Sprintf("Stopping server: %s ...", server.ID))
 	if err := startstop.Stop(client, server.ID).ExtractErr(); err != nil {
 		err = fmt.Errorf("Error stopping server: %s", err)
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
-	ui.Message("Waiting for server to stop...")
+	ui.Message(fmt.Sprintf("Waiting for server to stop: %s ...", server.ID))
 	stateChange := StateChangeConf{
 		Pending:   []string{"ACTIVE"},
 		Target:    []string{"SHUTOFF", "STOPPED"},
