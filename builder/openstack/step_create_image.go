@@ -62,11 +62,19 @@ func (s *stepCreateImage) Cleanup(multistep.StateBag) {
 
 // WaitForImage waits for the given Image ID to become ready.
 func WaitForImage(client *gophercloud.ServiceClient, imageId string) error {
+	maxNumErrors := 10
+	numErrors := 0
+
 	for {
 		image, err := images.Get(client, imageId).Extract()
 		if err != nil {
 			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
 			if ok && errCode.Actual == 500 {
+				numErrors++
+				if numErrors >= maxNumErrors {
+					log.Printf("[ERROR] Maximum number of errors (%d) reached; failing with: %s", numErrors, err)
+					return err
+				}
 				log.Printf("[ERROR] 500 error received, will ignore and retry: %s", err)
 				time.Sleep(2 * time.Second)
 				continue
