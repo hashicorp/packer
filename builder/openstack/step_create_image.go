@@ -45,7 +45,7 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("image", imageId)
 
 	// Wait for the image to become ready
-	ui.Say("Waiting for image to become ready...")
+	ui.Say(fmt.Sprintf("Waiting for image %s (image id: %s) to become ready...", config.ImageName, imageId))
 	if err := WaitForImage(client, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
 		state.Put("error", err)
