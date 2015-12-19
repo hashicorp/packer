@@ -57,6 +57,7 @@ func (c *adapter) Serve() {
 		default:
 			if err != nil {
 				c.ui.Error(fmt.Sprintf("listen.Accept failed: %v", err))
+				continue
 			}
 			go func(conn net.Conn) {
 				errc <- c.Handle(conn, errc)
