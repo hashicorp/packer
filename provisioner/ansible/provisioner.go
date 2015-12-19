@@ -170,6 +170,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
+	ui = newUi(ui)
 	p.adapter = newAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
 
 	defer func() {
@@ -199,12 +200,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}()
 	}
 
-	if err := p.executeAnsible(ui, comm); err != nil {
+	if err := p.executeAnsible(ui); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
 
 	return nil
-
 }
 
 func (p *Provisioner) Cancel() {
@@ -217,7 +217,7 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) executeAnsible(ui packer.Ui) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.inventoryFile
 
@@ -274,4 +274,46 @@ func validateFileConfig(name string, config string, req bool) error {
 		return fmt.Errorf("%s: %s must point to a file", config, name)
 	}
 	return nil
+}
+
+// Ui provides concurrency-safe access to packer.Ui.
+type Ui struct {
+	sem chan int
+	ui  packer.Ui
+}
+
+func newUi(ui packer.Ui) packer.Ui {
+	return &Ui{sem: make(chan int, 1), ui: ui}
+}
+
+func (ui *Ui) Ask(s string) (string, error) {
+	ui.sem <- 1
+	ret, err := ui.ui.Ask(s)
+	<-ui.sem
+
+	return ret, err
+}
+
+func (ui *Ui) Say(s string) {
+	ui.sem <- 1
+	ui.ui.Say(s)
+	<-ui.sem
+}
+
+func (ui *Ui) Message(s string) {
+	ui.sem <- 1
+	ui.ui.Message(s)
+	<-ui.sem
+}
+
+func (ui *Ui) Error(s string) {
+	ui.sem <- 1
+	ui.ui.Error(s)
+	<-ui.sem
+}
+
+func (ui *Ui) Machine(t string, args ...string) {
+	ui.sem <- 1
+	ui.ui.Machine(t, args...)
+	<-ui.sem
 }
