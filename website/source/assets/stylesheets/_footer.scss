@@ -19,6 +19,13 @@
 
   .hashicorp-project{
     margin-top: 24px;
+    &:hover{
+      svg{
+        .svg-bg-line{
+          opacity: .4;
+        }
+      }
+    }
   }
 
   .pull-right{
