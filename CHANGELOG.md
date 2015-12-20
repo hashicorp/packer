@@ -22,6 +22,7 @@ IMPROVEMENTS:
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
   * builder/amazon: You can now specify `0` for `spot_price` to switch to on demand instances [GH-2845]
   * builder/google: `account_file` can now be provided as a JSON string [GH-2811]
+  * builder/google: added support for `preemptible` instances [GH-2982]
   * builder/parallels: Improve support for Parallels 11 [GH-2662]
   * builder/parallels: Parallels disks are now compacted by default [GH-2731]
   * builder/parallels: Packer will look for Parallels in `/Applications/Parallels Desktop.app` if it is not detected automatically [GH-2839]
@@ -30,6 +31,7 @@ IMPROVEMENTS:
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
   * builder/qemu: Now checks for version-specific options [GH-2376]
+  * builder/docker-import: Can now import Artifice artifacts [GH-2718]
   * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
 

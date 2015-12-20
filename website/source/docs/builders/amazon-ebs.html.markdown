@@ -69,7 +69,7 @@ builder.
     device mappings to the AMI. The block device mappings allow for keys:
 
     -   `device_name` (string) - The device name exposed to the instance (for
-         example, "/dev/sdh" or "xvdh")
+         example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
     -   `virtual_name` (string) - The virtual device name. See the documentation on
         [Block Device
         Mapping](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
