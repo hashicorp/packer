@@ -93,6 +93,21 @@ func TestConfigPrepare(t *testing.T) {
 			"SO VERY BAD",
 			true,
 		},
+		{
+			"preemptible",
+			nil,
+			false,
+		},
+		{
+			"preemptible",
+			false,
+			false,
+		},
+		{
+			"preemptible",
+			"SO VERY BAD",
+			true,
+		},
 	}
 
 	for _, tc := range cases {

@@ -18,4 +18,3 @@ matrix:
   fast_finish: true
   allow_failures:
     - go: tip
-    - go: 1.5

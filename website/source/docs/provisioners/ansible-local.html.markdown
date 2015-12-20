@@ -18,6 +18,12 @@ uploaded from your local machine to the remote machine. Ansible is run in [local
 mode](http://docs.ansible.com/playbooks_delegation.html#local-playbooks) via the
 `ansible-playbook` command.
 
+-&gt; **Note:** Ansible will *not* be installed automatically by this
+provisioner. This provisioner expects that Ansible is already installed on the
+machine. It is common practice to use the [shell
+provisioner](/docs/provisioners/shell.html) before the Ansible provisioner to do
+this.
+
 ## Basic Example
 
 The example below is fully functional.
@@ -67,6 +73,7 @@ specified host you're buiding. The `--limit` argument can be provided in the
 `extra_arguments` option.
 
 An example inventory file may look like:
+
 ```{.text}
 [chi-dbservers]
 db-01 ansible_connection=local
