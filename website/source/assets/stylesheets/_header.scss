@@ -25,7 +25,7 @@
     .by-hashicorp{
       &:hover{
         svg{
-          line{
+          .svg-bg-line{
             opacity: .4;
           }
         }
