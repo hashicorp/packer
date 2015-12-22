@@ -39,6 +39,7 @@ type Config struct {
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
+	DiskAdapterType     string   `mapstructure:"disk_adapter_type"`
 	FloppyFiles         []string `mapstructure:"floppy_files"`
 	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
@@ -98,6 +99,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.DiskAdapterType == "" {
+		// Default is lsilogic
+		b.config.DiskAdapterType = "lsilogic"
 	}
 
 	if b.config.DiskTypeId == "" {

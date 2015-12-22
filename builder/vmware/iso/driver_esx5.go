@@ -44,9 +44,9 @@ func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
 	return nil
 }
 
-func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, typeId string) error {
+func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, adapter_type string, typeId string) error {
 	diskPath := d.datastorePath(diskPathLocal)
-	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", "lsilogic", diskPath)
+	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", adapter_type, diskPath)
 }
 
 func (d *ESX5Driver) IsRunning(string) (bool, error) {
