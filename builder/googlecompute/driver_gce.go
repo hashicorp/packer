@@ -13,6 +13,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/compute/v1"
+	"strings"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -214,6 +215,23 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		return nil, err
 	}
 
+	// If given a regional ip, get it
+	accessconfig := compute.AccessConfig{
+		Name: "AccessConfig created by Packer",
+		Type: "ONE_TO_ONE_NAT",
+	}
+
+	if c.Address != "" {
+		d.ui.Message(fmt.Sprintf("Looking up address: %s", c.Address))
+		region_url := strings.Split(zone.Region, "/")
+		region := region_url[len(region_url)-1]
+		address, err := d.service.Addresses.Get(d.projectId, region, c.Address).Do()
+		if err != nil {
+			return nil, err
+		}
+		accessconfig.NatIP = address.Address
+	}
+
 	// Build up the metadata
 	metadata := make([]*compute.MetadataItems, len(c.Metadata))
 	for k, v := range c.Metadata {
@@ -247,10 +265,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		NetworkInterfaces: []*compute.NetworkInterface{
 			&compute.NetworkInterface{
 				AccessConfigs: []*compute.AccessConfig{
-					&compute.AccessConfig{
-						Name: "AccessConfig created by Packer",
-						Type: "ONE_TO_ONE_NAT",
-					},
+					&accessconfig,
 				},
 				Network: network.SelfLink,
 			},
