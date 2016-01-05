@@ -43,7 +43,7 @@ func EncodeVMX(contents map[string]string) string {
 		i++
 	}
 
-	// a list of VMX key fragments that must not be wrapped in quotes
+	// a list of VMX key fragments that the value must not be quoted
 	// fragments are used to cover multliples (i.e. multiple disks)
 	// keys are still lowercase at this point, use lower fragments
 	noQuotes := []string {
