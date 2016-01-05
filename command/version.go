@@ -1,5 +1,7 @@
 package command
 
+//go:generate go run ../scripts/generate-plugins.go
+
 import (
 	"bytes"
 	"fmt"

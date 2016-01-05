@@ -12,7 +12,7 @@ page_title: 'Atlas Post-Processor'
 Type: `atlas`
 
 The Atlas post-processor uploads artifacts from your packer builds to Atlas for
-hosting. Artifacts hosted in Atlas are are automatically made available for use
+hosting. Artifacts hosted in Atlas are automatically made available for use
 with Vagrant and Terraform, and Atlas provides additional features for managing
 versions and releases. [Learn more about packer in
 Atlas.](https://atlas.hashicorp.com/help/packer/features)
@@ -58,9 +58,11 @@ you can also use `token` configuration option.
     You must have access to the organization—hashicorp in this example—in order
     to add an artifact to the organization in Atlas.
 
--   `artifact_type` (string) - For uploading AMIs to Atlas, `artifact_type` will
-    always be `amazon.ami`. This field must be defined because Atlas can host
-    other artifact types, such as Vagrant boxes.
+-   `artifact_type` (string) - For uploading artifacts to Atlas. `artifact_type`
+    can be set to any unique identifier, however, the following are recommended
+    for consistency - `amazon.image`, `digitalocean.image`, `docker.image`,
+    `googlecompute.image`, `openstack.image`, `parallels.image`, `qemu.image`,
+    `virtualbox.image`, `vmware.image`, `custom.image`, and `vagrant.box`.
 
 ### Optional:
 
@@ -105,7 +107,7 @@ you can also use `token` configuration option.
         "type": "atlas",
         "token": "{{user `atlas_token`}}",
         "artifact": "hashicorp/foobar",
-        "artifact_type": "amazon.ami",
+        "artifact_type": "amazon.image",
         "metadata": {
           "created_at": "{{timestamp}}"
         }

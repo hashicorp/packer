@@ -67,7 +67,9 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 	if cmd.ExitStatus != 0 {
 		state.Put("error", fmt.Errorf(
 			"Volume bundling failed. Please see the output above for more\n"+
-				"details on what went wrong."))
+				"details on what went wrong.\n\n"+
+				"One common cause for this error is ec2-bundle-vol not being\n"+
+				"available on the target instance."))
 		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}

@@ -90,7 +90,7 @@ builder.
     device mappings to the AMI. The block device mappings allow for keys:
 
 -   `device_name` (string) - The device name exposed to the instance (for
-    example, "/dev/sdh" or "xvdh")
+    example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
 -   `virtual_name` (string) - The virtual device name. See the documentation on
     [Block Device
     Mapping](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
@@ -157,6 +157,10 @@ builder.
 -   `bundle_vol_command` (string) - The command to use to bundle the volume. See
     the "custom bundle commands" section below for more information.
 
+-   `ebs_optimized` (boolean) - Mark instance as [EBS
+    Optimized](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
+    Default `false`.
+
 -   `enhanced_networking` (boolean) - Enable enhanced
     networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
@@ -191,7 +195,8 @@ builder.
     maximum price that you specify exceeds the current spot price. Spot price
     will be updated based on available spot instance capacity and current spot
     Instance requests. It may save you some costs. You can set this to "auto"
-    for Packer to automatically discover the best spot price.
+    for Packer to automatically discover the best spot price or to "0" to use
+    an on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
     to "auto". This tells Packer what sort of AMI you're launching to find the

@@ -6,10 +6,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/packer/command"
@@ -179,7 +181,7 @@ func wrappedMain() int {
 	cli := &cli.CLI{
 		Args:       args,
 		Commands:   Commands,
-		HelpFunc:   cli.BasicHelpFunc("packer"),
+		HelpFunc:   excludeHelpFunc(Commands, []string{"plugin"}),
 		HelpWriter: os.Stdout,
 		Version:    Version,
 	}
@@ -191,6 +193,27 @@ func wrappedMain() int {
 	}
 
 	return exitCode
+}
+
+// excludeHelpFunc filters commands we don't want to show from the list of
+// commands displayed in packer's help text.
+func excludeHelpFunc(commands map[string]cli.CommandFactory, exclude []string) cli.HelpFunc {
+	// Make search slice into a map so we can use use the `if found` idiom
+	// instead of a nested loop.
+	var excludes = make(map[string]interface{}, len(exclude))
+	for _, item := range exclude {
+		excludes[item] = nil
+	}
+
+	// Create filtered list of commands
+	helpCommands := []string{}
+	for command := range commands {
+		if _, found := excludes[command]; !found {
+			helpCommands = append(helpCommands, command)
+		}
+	}
+
+	return cli.FilteredHelpFunc(helpCommands, cli.BasicHelpFunc("packer"))
 }
 
 // extractMachineReadable checks the args for the machine readable
@@ -221,7 +244,7 @@ func loadConfig() (*config, error) {
 	configFilePath := os.Getenv("PACKER_CONFIG")
 	if configFilePath == "" {
 		var err error
-		configFilePath, err = configFile()
+		configFilePath, err = packer.ConfigFile()
 
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
@@ -291,4 +314,9 @@ func copyOutput(r io.Reader, doneCh chan<- struct{}) {
 	}()
 
 	wg.Wait()
+}
+
+func init() {
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
 }

@@ -47,8 +47,8 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Creating temporary keypair for this instance...")
 	keyName := fmt.Sprintf("packer %s", uuid.TimeOrderedUUID())
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", keyName))
 	keypair, err := keypairs.Create(computeClient, keypairs.CreateOpts{
 		Name: keyName,
 	}).Extract()
@@ -61,6 +61,8 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", fmt.Errorf("The temporary keypair returned was blank"))
 		return multistep.ActionHalt
 	}
+
+	ui.Say(fmt.Sprintf("Created temporary keypair: %s", keyName))
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -120,7 +122,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Say("Deleting temporary keypair...")
+	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.keyName))
 	err = keypairs.Delete(computeClient, s.keyName).ExtractErr()
 	if err != nil {
 		ui.Error(fmt.Sprintf(

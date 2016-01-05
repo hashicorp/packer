@@ -31,6 +31,7 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	Preemptible          bool              `mapstructure:"preemptible"`
 	SourceImage          string            `mapstructure:"source_image"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
@@ -131,9 +132,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.stateTimeout = stateTimeout
 
 	if c.AccountFile != "" {
-		if err := loadJSON(&c.account, c.AccountFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed parsing account file: %s", err))
+		if err := processAccountFile(&c.account, c.AccountFile); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
 

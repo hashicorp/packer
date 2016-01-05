@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -28,6 +26,7 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
+	common.ISOConfig         `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
@@ -41,10 +40,8 @@ type Config struct {
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
 	FloppyFiles         []string `mapstructure:"floppy_files"`
+	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
-	ISOChecksum         string   `mapstructure:"iso_checksum"`
-	ISOChecksumType     string   `mapstructure:"iso_checksum_type"`
-	ISOUrls             []string `mapstructure:"iso_urls"`
 	Version             string   `mapstructure:"version"`
 	VMName              string   `mapstructure:"vm_name"`
 	BootCommand         []string `mapstructure:"boot_command"`
@@ -60,8 +57,6 @@ type Config struct {
 	RemotePort           uint   `mapstructure:"remote_port"`
 	RemoteUser           string `mapstructure:"remote_username"`
 	RemotePassword       string `mapstructure:"remote_password"`
-
-	RawSingleISOUrl string `mapstructure:"iso_url"`
 
 	ctx interpolate.Context
 }
@@ -83,6 +78,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	var errs *packer.MultiError
+	warnings := make([]string, 0)
+
+	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
+	warnings = append(warnings, isoWarnings...)
+	errs = packer.MultiErrorAppend(errs, isoErrs...)
 	errs = packer.MultiErrorAppend(errs, b.config.DriverConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
@@ -91,7 +91,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
-	warnings := make([]string, 0)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -146,45 +145,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.RemotePort = 22
 	}
 
-	if b.config.ISOChecksumType == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("The iso_checksum_type must be specified."))
-	} else {
-		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
-		if b.config.ISOChecksumType != "none" {
-			if b.config.ISOChecksum == "" {
-				errs = packer.MultiErrorAppend(
-					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-			} else {
-				b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
-			}
-
-			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
-				errs = packer.MultiErrorAppend(
-					errs,
-					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
-			}
-		}
-	}
-
-	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("One of iso_url or iso_urls must be specified."))
-	} else if b.config.RawSingleISOUrl != "" && len(b.config.ISOUrls) > 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
-	} else if b.config.RawSingleISOUrl != "" {
-		b.config.ISOUrls = []string{b.config.RawSingleISOUrl}
-	}
-
-	for i, url := range b.config.ISOUrls {
-		b.config.ISOUrls[i], err = common.DownloadableURL(url)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
-		}
-	}
-
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -201,13 +161,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	// Warnings
-	if b.config.ISOChecksumType == "none" {
-		warnings = append(warnings,
-			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
-				"a checksum is highly recommended.")
+	if b.config.Format != "" {
+		if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("format must be one of ova, ovf, or vmx"))
+		}
 	}
 
+	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
@@ -235,6 +196,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+	if b.config.RemoteType != "" && b.config.Format != "" {
+		b.config.OutputDir = b.config.VMName
+	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Setup the state bag
@@ -246,9 +210,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	// Seed the random number generator
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
 			RemoteType:        b.config.RemoteType,
@@ -258,7 +219,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
+			Extension:    "iso",
 			ResultKey:    "iso_path",
+			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
 		},
 		&vmwcommon.StepOutputDir{
@@ -290,7 +253,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VNCPortMin: b.config.VNCPortMin,
 			VNCPortMax: b.config.VNCPortMax,
 		},
-		&StepRegister{},
+		&StepRegister{
+			Format: b.config.Format,
+		},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
@@ -329,6 +294,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
 		},
+		&StepExport{
+			Format: b.config.Format,
+		},
 	}
 
 	// Run!
@@ -358,7 +326,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Compile the artifact list
-	files, err := state.Get("dir").(OutputDir).ListFiles()
+	var files []string
+	if b.config.RemoteType != "" {
+		dir = new(vmwcommon.LocalOutputDir)
+		dir.SetOutputDir(b.config.OutputDir)
+		files, err = dir.ListFiles()
+	} else {
+		files, err = state.Get("dir").(OutputDir).ListFiles()
+	}
 	if err != nil {
 		return nil, err
 	}

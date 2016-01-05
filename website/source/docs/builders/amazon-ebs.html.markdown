@@ -68,27 +68,27 @@ builder.
 -   `ami_block_device_mappings` (array of block device mappings) - Add the block
     device mappings to the AMI. The block device mappings allow for keys:
 
--   `device_name` (string) - The device name exposed to the instance (for
-    example, "/dev/sdh" or "xvdh")
--   `virtual_name` (string) - The virtual device name. See the documentation on
-    [Block Device
-    Mapping](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
-    for more information
--   `snapshot_id` (string) - The ID of the snapshot
--   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-    volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
-    volumes
--   `volume_size` (integer) - The size of the volume, in GiB. Required if not
-    specifying a `snapshot_id`
--   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
-    deleted on instance termination
--   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
--   `no_device` (boolean) - Suppresses the specified device included in the
-    block device mapping of the AMI
--   `iops` (integer) - The number of I/O operations per second (IOPS) that the
-    volume supports. See the documentation on
-    [IOPs](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
-    for more information
+    -   `device_name` (string) - The device name exposed to the instance (for
+         example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
+    -   `virtual_name` (string) - The virtual device name. See the documentation on
+        [Block Device
+        Mapping](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
+        for more information
+    -   `snapshot_id` (string) - The ID of the snapshot
+    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
+        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
+        volumes
+    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+        specifying a `snapshot_id`
+    -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
+        deleted on instance termination
+    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+    -   `no_device` (boolean) - Suppresses the specified device included in the
+        block device mapping of the AMI
+    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+        volume supports. See the documentation on
+        [IOPs](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+        for more information
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty.
 
@@ -115,6 +115,10 @@ builder.
 
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
+
+-   `ebs_optimized` (boolean) - Mark instance as [EBS
+    Optimized](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
+    Default `false`.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
     networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
@@ -150,7 +154,8 @@ builder.
     when the current spot price is less than the maximum price you specify. Spot
     price will be updated based on available spot instance capacity and current
     spot instance requests. It may save you some costs. You can set this to
-    "auto" for Packer to automatically discover the best spot price.
+    "auto" for Packer to automatically discover the best spot price or to "0"
+    to use an on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
     to "auto". This tells Packer what sort of AMI you're launching to find the
@@ -177,7 +182,7 @@ builder.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
-    probably don't need it. This will also be read from the `AWS_SECURITY_TOKEN`
+    probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
@@ -273,7 +278,7 @@ Here is an example using the optional AMI tags. This will add the tags
 
 -&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on
-termiation of the instance building the new image. Packer will attempt to clean
+termination of the instance building the new image. Packer will attempt to clean
 up all residual volumes that are not designated by the user to remain after
 termination. If you need to preserve those source volumes, you can overwrite the
 termination setting by specifying `delete_on_termination=false` in the

@@ -15,7 +15,10 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-const BuildEnvKey = "ATLAS_BUILD_ID"
+const (
+	BuildEnvKey   = "ATLAS_BUILD_ID"
+	CompileEnvKey = "ATLAS_COMPILE_ID"
+)
 
 // Artifacts can return a string for this state key and the post-processor
 // will use automatically use this as the type. The user's value overrides
@@ -44,6 +47,7 @@ type Config struct {
 	ctx        interpolate.Context
 	user, name string
 	buildId    int
+	compileId  int
 }
 
 type PostProcessor struct {
@@ -96,6 +100,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.buildId = int(raw)
 	}
 
+	// If we have a compile ID, save it
+	if v := os.Getenv(CompileEnvKey); v != "" {
+		raw, err := strconv.ParseInt(v, 0, 0)
+		if err != nil {
+			return fmt.Errorf(
+				"Error parsing compile ID: %s", err)
+		}
+
+		p.config.compileId = int(raw)
+	}
+
 	// Build the client
 	p.client = atlas.DefaultClient()
 	if p.config.ServerAddr != "" {
@@ -144,12 +159,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	opts := &atlas.UploadArtifactOpts{
-		User:     p.config.user,
-		Name:     p.config.name,
-		Type:     p.config.Type,
-		ID:       artifact.Id(),
-		Metadata: p.metadata(artifact),
-		BuildID:  p.config.buildId,
+		User:      p.config.user,
+		Name:      p.config.name,
+		Type:      p.config.Type,
+		ID:        artifact.Id(),
+		Metadata:  p.metadata(artifact),
+		BuildID:   p.config.buildId,
+		CompileID: p.config.compileId,
 	}
 
 	if fs := artifact.Files(); len(fs) > 0 {
@@ -188,7 +204,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		opts.FileSize = r.Size
 	}
 
-	ui.Message("Uploading artifact version...")
+	ui.Message(fmt.Sprintf("Uploading artifact (%d bytes)", opts.FileSize))
 	var av *atlas.ArtifactVersion
 	doneCh := make(chan struct{})
 	errCh := make(chan error, 1)
@@ -204,7 +220,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	select {
 	case err := <-errCh:
-		return nil, false, fmt.Errorf("Error uploading: %s", err)
+		return nil, false, fmt.Errorf("Error uploading (%d bytes): %s", opts.FileSize, err)
 	case <-doneCh:
 	}
 

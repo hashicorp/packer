@@ -19,8 +19,8 @@ type StepRunSourceServer struct {
 	AvailabilityZone string
 	UserData         string
 	UserDataFile     string
-
-	server *servers.Server
+	ConfigDrive      bool
+	server           *servers.Server
 }
 
 func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
@@ -62,6 +62,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 			Networks:         networks,
 			AvailabilityZone: s.AvailabilityZone,
 			UserData:         userData,
+			ConfigDrive:      s.ConfigDrive,
 		},
 
 		KeyName: keyName,
@@ -112,7 +113,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Say("Terminating the source server...")
+	ui.Say(fmt.Sprintf("Terminating the source server: %s ...", s.server.ID))
 	if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
 		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
 		return

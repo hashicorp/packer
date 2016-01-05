@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/packer/builder/docker"
-	"github.com/mitchellh/packer/builder/qemu"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/post-processor/artifice"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -44,11 +44,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	switch artifact.BuilderId() {
-	case docker.BuilderId, qemu.BuilderId:
+	case docker.BuilderId, artifice.BuilderId:
 		break
 	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from Docker, Qemu builder artifacts.",
+			"Unknown artifact type: %s\nCan only import from Docker builder and Artifice post-processor artifacts.",
 			artifact.BuilderId())
 		return nil, false, err
 	}

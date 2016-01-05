@@ -138,6 +138,10 @@ builder.
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
+-   `iso_target_path` (string) - The path where the iso should be saved after
+    download. By default will go in the packer cache, with a hash of the
+    original filename as its name.
+
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to
     download or while downloading a single URL, it will move on to the next. All
@@ -195,6 +199,11 @@ builder.
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
+
+-   `skip_compaction` (boolean) - Virtual disk image is compacted at the end of
+    the build process using `prl_disk_tool` utility. In certain rare cases, this
+    might corrupt the resulting disk image. If you find this to be the case,
+    you can disable compaction using this configuration value.
 
 -   `vm_name` (string) - This is the name of the PVM directory for the new
     virtual machine, without the file extension. By default this is

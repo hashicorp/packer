@@ -104,6 +104,18 @@ func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
 }
 
+func (d *ESX5Driver) Destroy() error {
+	return d.sh("vim-cmd", "vmsvc/destroy", d.vmId)
+}
+
+func (d *ESX5Driver) IsDestroyed() (bool, error) {
+	err := d.sh("test", "!", "-e", d.outputDir)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
 func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
 	finalPath := d.cachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {

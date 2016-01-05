@@ -132,6 +132,48 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_DiskCompaction(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Bad
+	config["skip_compaction"] = false
+	config["disk_compression"] = true
+	config["format"] = "img"
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	if b.config.SkipCompaction != true {
+		t.Fatalf("SkipCompaction should be true")
+	}
+	if b.config.DiskCompression != false {
+		t.Fatalf("DiskCompression should be false")
+	}
+
+	// Good
+	config["skip_compaction"] = false
+	config["disk_compression"] = true
+	config["format"] = "qcow2"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if b.config.SkipCompaction != false {
+		t.Fatalf("SkipCompaction should be false")
+	}
+	if b.config.DiskCompression != true {
+		t.Fatalf("DiskCompression should be true")
+	}
+}
+
 func TestBuilderPrepare_DiskSize(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -252,147 +294,6 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatal("should have error")
-	}
-}
-
-func TestBuilderPrepare_ISOChecksum(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test bad
-	config["iso_checksum"] = ""
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test good
-	config["iso_checksum"] = "FOo"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ISOChecksum != "foo" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksum)
-	}
-}
-
-func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test bad
-	config["iso_checksum_type"] = ""
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test good
-	config["iso_checksum_type"] = "mD5"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.ISOChecksumType != "md5" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksumType)
-	}
-
-	// Test unknown
-	config["iso_checksum_type"] = "fake"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-}
-
-func TestBuilderPrepare_ISOUrl(t *testing.T) {
-	var b Builder
-	config := testConfig()
-	delete(config, "iso_url")
-	delete(config, "iso_urls")
-
-	// Test both epty
-	config["iso_url"] = ""
-	b = Builder{}
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test iso_url set
-	config["iso_url"] = "http://www.packer.io"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Errorf("should not have error: %s", err)
-	}
-
-	expected := []string{"http://www.packer.io"}
-	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
-		t.Fatalf("bad: %#v", b.config.ISOUrls)
-	}
-
-	// Test both set
-	config["iso_url"] = "http://www.packer.io"
-	config["iso_urls"] = []string{"http://www.packer.io"}
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test just iso_urls set
-	delete(config, "iso_url")
-	config["iso_urls"] = []string{
-		"http://www.packer.io",
-		"http://www.hashicorp.com",
-	}
-
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Errorf("should not have error: %s", err)
-	}
-
-	expected = []string{
-		"http://www.packer.io",
-		"http://www.hashicorp.com",
-	}
-	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
-		t.Fatalf("bad: %#v", b.config.ISOUrls)
 	}
 }
 

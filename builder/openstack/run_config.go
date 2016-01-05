@@ -25,6 +25,8 @@ type RunConfig struct {
 	UserData         string   `mapstructure:"user_data"`
 	UserDataFile     string   `mapstructure:"user_data_file"`
 
+	ConfigDrive bool `mapstructure:"config_drive"`
+
 	// Not really used, but here for BC
 	OpenstackProvider string `mapstructure:"openstack_provider"`
 	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`

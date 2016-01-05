@@ -17,7 +17,6 @@ import (
 // Produces:
 type StepRun struct {
 	BootWait time.Duration
-	Headless bool
 
 	vmName string
 }
@@ -28,13 +27,6 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	vmName := state.Get("vmName").(string)
 
 	ui.Say("Starting the virtual machine...")
-	//guiArgument := "gui"
-	if s.Headless == true {
-		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
-			"In headless mode, errors during the boot sequence or OS setup\n" +
-			"won't be easily visible. Use at your own discretion.")
-		//guiArgument = "headless"
-	}
 	command := []string{"start", vmName}
 	if err := driver.Prlctl(command...); err != nil {
 		err := fmt.Errorf("Error starting VM: %s", err)

@@ -72,8 +72,8 @@ Replace "ATLAS\_USERNAME" with your username, then run
 automatically starts the build.
 
 This build will fail since neither `aws_access_key` or `aws_secret_key` are set
-in the Atlas environment. To set environment variables in Atlas, navigate to the
-[operations tab](https://atlas.hashicorp.com/operations), click the
+in the Atlas environment. To set environment variables in Atlas, navigate to
+the [Builds tab](https://atlas.hashicorp.com/builds), click the
 "packer-tutorial" build configuration that was just created, and then click
 'variables' in the left navigation. Set `aws_access_key` and `aws_secret_key`
 with their respective values. Now restart the Packer build by either clicking
@@ -99,7 +99,7 @@ deployed by a tool like [Terraform](https://terraform.io). The `atlas`
   "post-processors": [{
     "type": "atlas",
     "artifact": "ATLAS_USERNAME/packer-tutorial",
-    "artifact_type": "amazon.ami"
+    "artifact_type": "amazon.image"
   }]
 }
 ```

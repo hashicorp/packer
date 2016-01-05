@@ -42,15 +42,19 @@ for your operating system or [compile Packer yourself](#developing-packer).
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
 case, we'll create a simple AMI that has Redis pre-installed. Save this
-file as `quick-start.json`. Be sure to replace any credentials with your
-own.
+file as `quick-start.json`. Export your AWS credentials as the
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
 ```json
 {
+  "variables": {
+    "access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
   "builders": [{
     "type": "amazon-ebs",
-    "access_key": "YOUR KEY HERE",
-    "secret_key": "YOUR SECRET KEY HERE",
+    "access_key": "{{user `access_key`}}",
+    "secret_key": "{{user `access_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-de0d9eb7",
     "instance_type": "t1.micro",

@@ -219,7 +219,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	for k, v := range c.Metadata {
 		metadata = append(metadata, &compute.MetadataItems{
 			Key:   k,
-			Value: v,
+			Value: &v,
 		})
 	}
 
@@ -254,6 +254,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				},
 				Network: network.SelfLink,
 			},
+		},
+		Scheduling: &compute.Scheduling{
+			Preemptible: c.Preemptible,
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
 			&compute.ServiceAccount{

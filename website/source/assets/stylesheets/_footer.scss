@@ -1,70 +1,102 @@
-footer {
-  height: $nav-height;
-  max-height: $nav-height;
-  background-color: $black !important;
-  padding: 0;
-  margin: 0;
-  text-transform: uppercase;
-  color: $white;
-  font-family: $sans;
-  @include respond-to(mobile) {
-    margin-right: -20px;
-    margin-left: -20px;
-  }
+#footer{
+  background-color: $black;
+  padding: 20px 0;
 
-  ul {
-    margin-top: 40px;
-    @include respond-to(mobile) {
-      margin-left: $baseline;
-      margin-top: $baseline;
-    }
-
-    li {
-      display: inline;
-      margin-right: 50px;
-      @include respond-to(mobile) {
-        margin-right: 20px;
-        display: list-item;
-      }
-    }
-
-    .hashi-logo {
-      background: image-url('logo_footer.png') no-repeat center top;
-      height: 40px;
-      width: 40px;
-      background-size: 37px 40px;
-      text-indent: -999999px;
-      display: inline-block;
-      margin-top: -10px;
-      margin-right: 0;
-      @include respond-to(mobile) {
-        margin-top: -50px;
-        margin-right: $baseline;
+  &.white{
+    background-color: $black;
+    .footer-links{
+      li > a {
+        @include project-footer-a-subpage-style();
       }
     }
   }
 
-  .active {
-    color: $green;
+  .footer-links{
+    li > a {
+      @include project-footer-a-style();
+    }
   }
 
-  button {
-    margin-top: 20px;
+  .hashicorp-project{
+    margin-top: 24px;
+    &:hover{
+      svg{
+        .svg-bg-line{
+          opacity: .4;
+        }
+      }
+    }
+  }
+
+  .pull-right{
+    padding-right: 15px;
   }
 }
 
-.page-wrap {
-  min-height: 100%;
-  /* equal to footer height */
-  margin-bottom: -($nav-height);
+body{
+  &.page-Community{
+    .edit-page-link{
+      position: absolute;
+      top: -70px;
+      right: 30px;
+    }
+  }
 }
 
-.page-wrap:after {
-  content: "";
-  display: block;
+.edit-page-link{
+  position: absolute;
+  top: -150px;
+  right: 30px;;
+
+  a{
+    text-transform: uppercase;
+    color: $black;
+    font-size: 13px;
+  }
 }
 
-.page-wrap:after {
-  /* .push must be the same height as footer */
-  height: $nav-height;
+@media (min-width: 1500px) {
+  .edit-page-link{
+    top: -56px;
+  }
+}
+
+@media (max-width: 768px) {
+  #footer{
+    padding: 20px 0 80px;
+    text-align: center;
+
+    .footer-hashi{
+      display: block;
+      float: none !important;
+      .hashicorp-project{
+        margin-left: -30px;
+      }
+    }
+
+    ul{
+      display: block;
+      width: 100%;
+      li{
+        display: block;
+        float: none;
+      }
+
+      &.external-links{
+        li{
+          a{
+            padding-left: 0 !important;
+            margin-left: -14px;
+          }
+          svg{
+            position: relative;
+            left: 0;
+            top: 2px;
+            margin-top: 0;
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+  }
 }
