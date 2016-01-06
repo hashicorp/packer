@@ -1,66 +1,109 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title><%= [current_page.data.page_title, "Packer by HashiCorp"].compact.join(" - ") %></title>
+  <head>
+    <title>
+      <%= [current_page.data.page_title, "Packer by HashiCorp"].compact.join(" - ") %>
+    </title>
     <meta name="description" content="<%= current_page.data.description %>" />
-
-		<%= stylesheet_link_tag "application" %>
-
-		<script type="text/javascript" src="//use.typekit.net/apr3jjs.js"></script>
-		<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-	</head>
-	<body>
-		<nav class="dark-background">
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md-12">
-					<a href="/" class="packer-logo pull-left">Packer</a>
-					<ul>
-            <li class="featured">
-              <a href="https://github.com/mitchellh/packer" class="primary">GitHub</a>
-            </li>
-            <li class="featured">
-              <a href="/downloads.html" class="primary">Download</a>
-            </li>
-						<li><a href="/intro">Intro</a></li>
-						<li><a href="/docs">Documentation</a></li>
-						<li><a href="/community">Community</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
-		</nav>
-
-		<%= yield %>
-
-		<div class="clearfix"></div>
-
-		<footer class="dark-background">
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md-12">
-					<ul>
-						<li class="packer"><a href="/">Packer</a></li>
-            <li>
-						  A <a href="http://www.hashicorp.com/">HashiCorp</a> project.
-            </li>
-					  <a href="http://www.hashicorp.com">
-						 <li class="pull-right hashi-logo">&nbps;</li>
-					  </a>
-					</ul>
-				</div>
-			</div>
-		</div>
-		</footer>
-
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-43075859-1', 'packer.io');
-      ga('send', 'pageview');
+    <%= stylesheet_link_tag "application" %>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="shortcut icon" href="<%= image_path(" favicon.ico ") %>" type="image/x-icon">
+    <link rel="icon" href="<%= image_path(" favicon.ico ") %>" type="image/x-icon">
+    <script type="text/javascript" src="//use.typekit.net/apr3jjs.js"></script>
+    <script type="text/javascript">
+      try {
+        Typekit.load();
+      } catch (e) {}
     </script>
-	</body>
+  </head>
+  <body id="page-<%= current_page.data.page_title ? "#{current_page.data.page_title}" : "home" %>" class="page-<%= current_page.data.page_title ? "#{current_page.data.page_title} layout-#{current_page.data.layout} page-sub" : "home layout-#{current_page.data.layout}" %>">
+    <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
+    	<div class="container-fluid">
+				<div class="navbar-header">
+					<div class="navbar-brand">
+						<a class="logo" href="/">Packer</a>
+						<a class="by-hashicorp white" href="https://hashicorp.com/"><span class="svg-wrap">by</span><%= partial "layouts/svg/svg-by-hashicorp" %><%= partial "layouts/svg/svg-hashicorp-logo" %>Hashicorp</a>
+					</div>
+					<button class="navbar-toggle white" type="button">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+				</div>
+				<div class="buttons hidden-xs">
+					<nav class="navigation-links" role="navigation">
+            <ul class="main-links nav navbar-nav">
+              <li><a href="/intro">Intro</a></li>
+              <li><a href="/docs">Docs</a></li>
+              <li><a href="/community">Community</a></li>
+            </ul>
+						<ul class="external-links nav navbar-nav">
+							<li class="first download">
+								<a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
+							</li>
+							<li class="github">
+								<a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
+    	</div>
+    </div>
+    <%= partial "layouts/sidebar" %>
+
+    <%= yield %>
+    <div class="clearfix"></div>
+    <footer id="footer" class="navigation white">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-xs-12">
+            <% # current_page.path does not have an extension, but
+               # current_page.source_file does. Also, we don't want to show
+               # this on the homepage.
+               if current_page.url != "/"
+                 current_page_source = current_page.path + \
+                   current_page.source_file.split(current_page.path)[1] %>
+            <% if current_page.url != '/' %>
+              <div class="edit-page-link"><a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a></div>
+            <% end %>
+            <% end %>
+            <div class="footer-links clearfix">
+              <ul class="main-links white nav navbar-nav">
+                <li><a href="/intro">Intro</a></li>
+                <li><a href="/docs">Docs</a></li>
+                <li><a href="/community">Community</a></li>
+              </ul>
+              <ul class="external-links white nav navbar-nav">
+                <li class="first download">
+                  <a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
+                </li>
+                <li class="github">
+                  <a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
+                </li>
+              </ul>
+            </  div>
+            <div class="footer-hashi pull-right">
+              <div class="">
+                <a class="hashicorp-project white" href="https://www.hashicorp.com">
+                  <span class="project-text">A </span>
+                  <%= partial "layouts/svg/svg-by-hashicorp" %>
+                  <span class="project-text">Project</span>
+                  <%= partial "layouts/svg/svg-hashicorp-logo" %>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <%= javascript_include_tag "application" %>
+  <%= partial "layouts/google-analytics.html" %>
+  <%= partial "layouts/adroll.html" %>
+</body>
 </html>

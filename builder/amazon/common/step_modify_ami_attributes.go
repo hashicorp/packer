@@ -2,8 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -34,37 +36,69 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	// Construct the modify image attribute requests we're going to make.
 	// We need to make each separately since the EC2 API only allows changing
 	// one type at a kind currently.
-	options := make(map[string]*ec2.ModifyImageAttribute)
+	options := make(map[string]*ec2.ModifyImageAttributeInput)
 	if s.Description != "" {
-		options["description"] = &ec2.ModifyImageAttribute{
-			Description: s.Description,
+		options["description"] = &ec2.ModifyImageAttributeInput{
+			Description: &ec2.AttributeValue{Value: &s.Description},
 		}
 	}
 
 	if len(s.Groups) > 0 {
-		options["groups"] = &ec2.ModifyImageAttribute{
-			AddGroups: s.Groups,
+		groups := make([]*string, len(s.Groups))
+		adds := make([]*ec2.LaunchPermission, len(s.Groups))
+		addGroups := &ec2.ModifyImageAttributeInput{
+			LaunchPermission: &ec2.LaunchPermissionModifications{},
 		}
+
+		for i, g := range s.Groups {
+			groups[i] = aws.String(g)
+			adds[i] = &ec2.LaunchPermission{
+				Group: aws.String(g),
+			}
+		}
+		addGroups.UserGroups = groups
+		addGroups.LaunchPermission.Add = adds
+
+		options["groups"] = addGroups
 	}
 
 	if len(s.Users) > 0 {
-		options["users"] = &ec2.ModifyImageAttribute{
-			AddUsers: s.Users,
+		users := make([]*string, len(s.Users))
+		adds := make([]*ec2.LaunchPermission, len(s.Users))
+		for i, u := range s.Users {
+			users[i] = aws.String(u)
+			adds[i] = &ec2.LaunchPermission{UserId: aws.String(u)}
+		}
+		options["users"] = &ec2.ModifyImageAttributeInput{
+			UserIds: users,
+			LaunchPermission: &ec2.LaunchPermissionModifications{
+				Add: adds,
+			},
 		}
 	}
 
 	if len(s.ProductCodes) > 0 {
-		options["product codes"] = &ec2.ModifyImageAttribute{
-			ProductCodes: s.ProductCodes,
+		codes := make([]*string, len(s.ProductCodes))
+		for i, c := range s.ProductCodes {
+			codes[i] = &c
+		}
+		options["product codes"] = &ec2.ModifyImageAttributeInput{
+			ProductCodes: codes,
 		}
 	}
 
 	for region, ami := range amis {
 		ui.Say(fmt.Sprintf("Modifying attributes on AMI (%s)...", ami))
-		regionconn := ec2.New(ec2conn.Auth, aws.Regions[region])
-		for name, opts := range options {
+		awsConfig := aws.Config{
+			Credentials: ec2conn.Config.Credentials,
+			Region:      aws.String(region),
+		}
+		session := session.New(&awsConfig)
+		regionconn := ec2.New(session)
+		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
-			_, err := regionconn.ModifyImageAttribute(ami, opts)
+			input.ImageId = &ami
+			_, err := regionconn.ModifyImageAttribute(input)
 			if err != nil {
 				err := fmt.Errorf("Error modify AMI attributes: %s", err)
 				state.Put("error", err)

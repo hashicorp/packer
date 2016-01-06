@@ -2,11 +2,13 @@ package chroot
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
+	"log"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -15,7 +17,8 @@ import (
 // Produces:
 //   volume_id string - The ID of the created volume
 type StepCreateVolume struct {
-	volumeId string
+	volumeId       string
+	RootVolumeSize int64
 }
 
 func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
@@ -25,11 +28,11 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Determine the root device snapshot
-	log.Printf("Searching for root device of the image (%s)", image.RootDeviceName)
+	log.Printf("Searching for root device of the image (%s)", *image.RootDeviceName)
 	var rootDevice *ec2.BlockDeviceMapping
-	for _, device := range image.BlockDevices {
-		if device.DeviceName == image.RootDeviceName {
-			rootDevice = &device
+	for _, device := range image.BlockDeviceMappings {
+		if *device.DeviceName == *image.RootDeviceName {
+			rootDevice = device
 			break
 		}
 	}
@@ -42,14 +45,18 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say("Creating the root volume...")
-	createVolume := &ec2.CreateVolume{
-		AvailZone:  instance.AvailZone,
-		Size:       rootDevice.VolumeSize,
-		SnapshotId: rootDevice.SnapshotId,
-		VolumeType: rootDevice.VolumeType,
-		IOPS:       rootDevice.IOPS,
+	vs := *rootDevice.Ebs.VolumeSize
+	if s.RootVolumeSize > *rootDevice.Ebs.VolumeSize {
+		vs = s.RootVolumeSize
 	}
-	log.Printf("Create args: %#v", createVolume)
+	createVolume := &ec2.CreateVolumeInput{
+		AvailabilityZone: instance.Placement.AvailabilityZone,
+		Size:             aws.Int64(vs),
+		SnapshotId:       rootDevice.Ebs.SnapshotId,
+		VolumeType:       rootDevice.Ebs.VolumeType,
+		Iops:             rootDevice.Ebs.Iops,
+	}
+	log.Printf("Create args: %+v", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
@@ -60,7 +67,7 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the volume ID so we remember to delete it later
-	s.volumeId = createVolumeResp.VolumeId
+	s.volumeId = *createVolumeResp.VolumeId
 	log.Printf("Volume ID: %s", s.volumeId)
 
 	// Wait for the volume to become ready
@@ -69,13 +76,13 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 		StepState: state,
 		Target:    "available",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.Volumes([]string{s.volumeId}, ec2.NewFilter())
+			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&s.volumeId}})
 			if err != nil {
 				return nil, "", err
 			}
 
 			v := resp.Volumes[0]
-			return v, v.Status, nil
+			return v, *v.State, nil
 		},
 	}
 
@@ -100,7 +107,7 @@ func (s *StepCreateVolume) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting the created EBS volume...")
-	_, err := ec2conn.DeleteVolume(s.volumeId)
+	_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: &s.volumeId})
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting EBS volume: %s", err))
 	}

@@ -7,15 +7,18 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type DockerDriver struct {
 	Ui  packer.Ui
-	Tpl *packer.ConfigTemplate
+	Ctx *interpolate.Context
 
 	l sync.Mutex
 }
@@ -113,6 +116,23 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 	return strings.TrimSpace(stdout.String()), nil
 }
 
+func (d *DockerDriver) IPAddress(id string) (string, error) {
+	var stderr, stdout bytes.Buffer
+	cmd := exec.Command(
+		"docker",
+		"inspect",
+		"--format",
+		"{{ .NetworkSettings.IPAddress }}",
+		id)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("Error: %s\n\nStderr: %s", err, stderr.String())
+	}
+
+	return strings.TrimSpace(stdout.String()), nil
+}
+
 func (d *DockerDriver) Login(repo, email, user, pass string) error {
 	d.l.Lock()
 
@@ -185,6 +205,8 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
 	tplData.Image = config.Image
+	ctx := *d.Ctx
+	ctx.Data = &tplData
 
 	// Args that we're going to pass to Docker
 	args := []string{"run"}
@@ -192,7 +214,7 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
 	}
 	for _, v := range config.RunCommand {
-		v, err := d.Tpl.Process(v, &tplData)
+		v, err := interpolate.Render(v, &ctx)
 		if err != nil {
 			return "", err
 		}
@@ -235,9 +257,15 @@ func (d *DockerDriver) StopContainer(id string) error {
 	return exec.Command("docker", "rm", id).Run()
 }
 
-func (d *DockerDriver) TagImage(id string, repo string) error {
+func (d *DockerDriver) TagImage(id string, repo string, force bool) error {
+	args := []string{"tag"}
+	if force {
+		args = append(args, "-f")
+	}
+	args = append(args, id, repo)
+
 	var stderr bytes.Buffer
-	cmd := exec.Command("docker", "tag", id, repo)
+	cmd := exec.Command("docker", args...)
 	cmd.Stderr = &stderr
 
 	if err := cmd.Start(); err != nil {
@@ -259,4 +287,18 @@ func (d *DockerDriver) Verify() error {
 	}
 
 	return nil
+}
+
+func (d *DockerDriver) Version() (*version.Version, error) {
+	output, err := exec.Command("docker", "-v").Output()
+	if err != nil {
+		return nil, err
+	}
+
+	match := regexp.MustCompile(version.VersionRegexpRaw).FindSubmatch(output)
+	if match == nil {
+		return nil, fmt.Errorf("unknown version: %s", output)
+	}
+
+	return version.NewVersion(string(match[0]))
 }

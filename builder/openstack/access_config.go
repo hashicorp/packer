@@ -3,128 +3,121 @@ package openstack
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"net/http"
-	"net/url"
 	"os"
-	"strings"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack"
 )
 
 // AccessConfig is for common configuration related to openstack access
 type AccessConfig struct {
-	Username  string `mapstructure:"username"`
-	Password  string `mapstructure:"password"`
-	ApiKey    string `mapstructure:"api_key"`
-	Project   string `mapstructure:"project"`
-	Provider  string `mapstructure:"provider"`
-	RawRegion string `mapstructure:"region"`
-	ProxyUrl  string `mapstructure:"proxy_url"`
-	TenantId  string `mapstructure:"tenant_id"`
-	Insecure  bool   `mapstructure:"insecure"`
+	Username         string `mapstructure:"username"`
+	UserID           string `mapstructure:"user_id"`
+	Password         string `mapstructure:"password"`
+	APIKey           string `mapstructure:"api_key"`
+	IdentityEndpoint string `mapstructure:"identity_endpoint"`
+	TenantID         string `mapstructure:"tenant_id"`
+	TenantName       string `mapstructure:"tenant_name"`
+	DomainID         string `mapstructure:"domain_id"`
+	DomainName       string `mapstructure:"domain_name"`
+	Insecure         bool   `mapstructure:"insecure"`
+	Region           string `mapstructure:"region"`
+	EndpointType     string `mapstructure:"endpoint_type"`
+
+	osClient *gophercloud.ProviderClient
 }
 
-// Auth returns a valid Auth object for access to openstack services, or
-// an error if the authentication couldn't be resolved.
-func (c *AccessConfig) Auth() (gophercloud.AccessProvider, error) {
-	c.Username = common.ChooseString(c.Username, os.Getenv("SDK_USERNAME"), os.Getenv("OS_USERNAME"))
-	c.Password = common.ChooseString(c.Password, os.Getenv("SDK_PASSWORD"), os.Getenv("OS_PASSWORD"))
-	c.ApiKey = common.ChooseString(c.ApiKey, os.Getenv("SDK_API_KEY"))
-	c.Project = common.ChooseString(c.Project, os.Getenv("SDK_PROJECT"), os.Getenv("OS_TENANT_NAME"))
-	c.Provider = common.ChooseString(c.Provider, os.Getenv("SDK_PROVIDER"), os.Getenv("OS_AUTH_URL"))
-	c.RawRegion = common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
-	c.TenantId = common.ChooseString(c.TenantId, os.Getenv("OS_TENANT_ID"))
-
-	// OpenStack's auto-generated openrc.sh files do not append the suffix
-	// /tokens to the authentication URL. This ensures it is present when
-	// specifying the URL.
-	if strings.Contains(c.Provider, "://") && !strings.HasSuffix(c.Provider, "/tokens") {
-		c.Provider += "/tokens"
+func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
+	if c.EndpointType != "internal" && c.EndpointType != "internalURL" &&
+		c.EndpointType != "admin" && c.EndpointType != "adminURL" &&
+		c.EndpointType != "public" && c.EndpointType != "publicURL" &&
+		c.EndpointType != "" {
+		return []error{fmt.Errorf("Invalid endpoint type provided")}
 	}
 
-	authoptions := gophercloud.AuthOptions{
-		AllowReauth: true,
-
-		ApiKey:     c.ApiKey,
-		TenantId:   c.TenantId,
-		TenantName: c.Project,
-		Username:   c.Username,
-		Password:   c.Password,
+	if c.Region == "" {
+		c.Region = os.Getenv("OS_REGION_NAME")
 	}
 
-	default_transport := &http.Transport{}
+	// Legacy RackSpace stuff. We're keeping this around to keep things BC.
+	if c.APIKey == "" {
+		c.APIKey = os.Getenv("SDK_API_KEY")
+	}
+	if c.Password == "" {
+		c.Password = os.Getenv("SDK_PASSWORD")
+	}
+	if c.Region == "" {
+		c.Region = os.Getenv("SDK_REGION")
+	}
+	if c.TenantName == "" {
+		c.TenantName = os.Getenv("SDK_PROJECT")
+	}
+	if c.Username == "" {
+		c.Username = os.Getenv("SDK_USERNAME")
+	}
 
+	// Get as much as possible from the end
+	ao, _ := openstack.AuthOptionsFromEnv()
+
+	// Override values if we have them in our config
+	overrides := []struct {
+		From, To *string
+	}{
+		{&c.Username, &ao.Username},
+		{&c.UserID, &ao.UserID},
+		{&c.Password, &ao.Password},
+		{&c.APIKey, &ao.APIKey},
+		{&c.IdentityEndpoint, &ao.IdentityEndpoint},
+		{&c.TenantID, &ao.TenantID},
+		{&c.TenantName, &ao.TenantName},
+		{&c.DomainID, &ao.DomainID},
+		{&c.DomainName, &ao.DomainName},
+	}
+	for _, s := range overrides {
+		if *s.From != "" {
+			*s.To = *s.From
+		}
+	}
+
+	// Build the client itself
+	client, err := openstack.NewClient(ao.IdentityEndpoint)
+	if err != nil {
+		return []error{err}
+	}
+
+	// If we have insecure set, then create a custom HTTP client that
+	// ignores SSL errors.
 	if c.Insecure {
-		cfg := new(tls.Config)
-		cfg.InsecureSkipVerify = true
-		default_transport.TLSClientConfig = cfg
+		config := &tls.Config{InsecureSkipVerify: true}
+		transport := &http.Transport{TLSClientConfig: config}
+		client.HTTPClient.Transport = transport
 	}
 
-	// For corporate networks it may be the case where we want our API calls
-	// to be sent through a separate HTTP proxy than external traffic.
-	if c.ProxyUrl != "" {
-		url, err := url.Parse(c.ProxyUrl)
-		if err != nil {
-			return nil, err
-		}
-
-		// The gophercloud.Context has a UseCustomClient method which
-		// would allow us to override with a new instance of http.Client.
-		default_transport.Proxy = http.ProxyURL(url)
+	// Auth
+	err = openstack.Authenticate(client, ao)
+	if err != nil {
+		return []error{err}
 	}
 
-	if c.Insecure || c.ProxyUrl != "" {
-		http.DefaultTransport = default_transport
-	}
-
-	return gophercloud.Authenticate(c.Provider, authoptions)
-}
-
-func (c *AccessConfig) Region() string {
-	return common.ChooseString(c.RawRegion, os.Getenv("SDK_REGION"), os.Getenv("OS_REGION_NAME"))
-}
-
-func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	templates := map[string]*string{
-		"username":  &c.Username,
-		"password":  &c.Password,
-		"api_key":   &c.ApiKey,
-		"provider":  &c.Provider,
-		"project":   &c.Project,
-		"tenant_id": &c.TenantId,
-		"region":    &c.RawRegion,
-		"proxy_url": &c.ProxyUrl,
-	}
-
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	if strings.HasPrefix(c.Provider, "rackspace") {
-		if c.Region() == "" {
-			errs = append(errs, fmt.Errorf("region must be specified when using rackspace"))
-		}
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
-
+	c.osClient = client
 	return nil
+}
+
+func (c *AccessConfig) computeV2Client() (*gophercloud.ServiceClient, error) {
+	return openstack.NewComputeV2(c.osClient, gophercloud.EndpointOpts{
+		Region:       c.Region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *AccessConfig) getEndpointType() gophercloud.Availability {
+	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
+		return gophercloud.AvailabilityInternal
+	}
+	if c.EndpointType == "admin" || c.EndpointType == "adminURL" {
+		return gophercloud.AvailabilityAdmin
+	}
+	return gophercloud.AvailabilityPublic
 }

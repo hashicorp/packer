@@ -39,7 +39,14 @@ func TestStepCreateInstance(t *testing.T) {
 		t.Fatal("should've deleted instance")
 	}
 	if driver.DeleteInstanceZone != config.Zone {
-		t.Fatalf("bad zone: %#v", driver.DeleteInstanceZone)
+		t.Fatalf("bad instance zone: %#v", driver.DeleteInstanceZone)
+	}
+
+	if driver.DeleteDiskName != config.InstanceName {
+		t.Fatal("should've deleted disk")
+	}
+	if driver.DeleteDiskZone != config.Zone {
+		t.Fatalf("bad disk zone: %#v", driver.DeleteDiskZone)
 	}
 }
 

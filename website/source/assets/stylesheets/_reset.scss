@@ -14,10 +14,10 @@ form, input, textarea, button {
   line-height: 1.0;
   color: inherit;
 
-	&:focus {
-  	line-height: 1.0;
-  	box-shadow: none !important;
-  	outline: none;
-  	vertical-align: middle;
-	}
+  &:focus {
+    line-height: 1.0;
+    box-shadow: none !important;
+    outline: none;
+    vertical-align: middle;
+  }
 }

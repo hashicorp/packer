@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -28,9 +29,9 @@ type Driver interface {
 	// Checks if the VMX file at the given path is running.
 	IsRunning(string) (bool, error)
 
-	// SSHAddress returns the SSH address for the VM that is being
+	// CommHost returns the host address for the VM that is being
 	// managed by this driver.
-	SSHAddress(multistep.StateBag) (string, error)
+	CommHost(multistep.StateBag) (string, error)
 
 	// Start starts a VM specified by the path to the VMX given.
 	Start(string, bool) error
@@ -135,6 +136,18 @@ func runAndLog(cmd *exec.Cmd) (string, string, error) {
 		}
 
 		err = fmt.Errorf("VMware error: %s", message)
+
+		// If "unknown error" is in there, add some additional notes
+		re := regexp.MustCompile(`(?i)unknown error`)
+		if re.MatchString(message) {
+			err = fmt.Errorf(
+				"%s\n\n%s", err,
+				"Packer detected a VMware 'Unknown Error'. Unfortunately VMware\n"+
+					"often has extremely vague error messages such as this and Packer\n"+
+					"itself can't do much about that. Please check the vmware.log files\n"+
+					"created by VMware when a VM is started (in the directory of the\n"+
+					"vmx file), which often contains more detailed error information.")
+		}
 	}
 
 	log.Printf("stdout: %s", stdoutString)

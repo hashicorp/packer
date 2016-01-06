@@ -2,22 +2,28 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
+
+	"sync"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"sync"
 )
 
 type StepAMIRegionCopy struct {
-	Regions []string
+	AccessConfig *AccessConfig
+	Regions      []string
+	Name         string
 }
 
 func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
-	ami := amis[ec2conn.Region.Name]
+	ami := amis[*ec2conn.Config.Region]
 
 	if len(s.Regions) == 0 {
 		return multistep.ActionContinue
@@ -29,13 +35,18 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 	var wg sync.WaitGroup
 	errs := new(packer.MultiError)
 	for _, region := range s.Regions {
+		if region == *ec2conn.Config.Region {
+			ui.Message(fmt.Sprintf(
+				"Avoiding copying AMI to duplicate region %s", region))
+			continue
+		}
+
 		wg.Add(1)
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
 		go func(region string) {
 			defer wg.Done()
-			id, err := amiRegionCopy(state, ec2conn.Auth, ami,
-				aws.Regions[region], ec2conn.Region)
+			id, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -67,32 +78,41 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID or error.
-func amiRegionCopy(state multistep.StateBag, auth aws.Auth, imageId string,
-	target aws.Region, source aws.Region) (string, error) {
+func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, imageId string,
+	target string, source string) (string, error) {
 
 	// Connect to the region where the AMI will be copied to
-	regionconn := ec2.New(auth, target)
-	resp, err := regionconn.CopyImage(&ec2.CopyImage{
-		SourceRegion:  source.Name,
-		SourceImageId: imageId,
+	awsConfig, err := config.Config()
+	if err != nil {
+		return "", err
+	}
+	awsConfig.Region = aws.String(target)
+
+	sess := session.New(awsConfig)
+	regionconn := ec2.New(sess)
+
+	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
+		SourceRegion:  &source,
+		SourceImageId: &imageId,
+		Name:          &name,
 	})
 
 	if err != nil {
 		return "", fmt.Errorf("Error Copying AMI (%s) to region (%s): %s",
-			imageId, target.Name, err)
+			imageId, target, err)
 	}
 
 	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   AMIStateRefreshFunc(regionconn, resp.ImageId),
+		Refresh:   AMIStateRefreshFunc(regionconn, *resp.ImageId),
 		StepState: state,
 	}
 
 	if _, err := WaitForState(&stateChange); err != nil {
 		return "", fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
-			resp.ImageId, target.Name, err)
+			*resp.ImageId, target, err)
 	}
 
-	return resp.ImageId, nil
+	return *resp.ImageId, nil
 }

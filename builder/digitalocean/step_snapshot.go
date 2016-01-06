@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -12,13 +14,13 @@ import (
 type stepSnapshot struct{}
 
 func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(DigitalOceanClient)
+	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(config)
-	dropletId := state.Get("droplet_id").(uint)
+	c := state.Get("config").(Config)
+	dropletId := state.Get("droplet_id").(int)
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
-	err := client.CreateSnapshot(dropletId, c.SnapshotName)
+	_, _, err := client.DropletActions.Snapshot(dropletId, c.SnapshotName)
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
 		state.Put("error", err)
@@ -26,8 +28,20 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	// Wait for the droplet to become unlocked first. For snapshots
+	// this can end up taking quite a long time, so we hardcode this to
+	// 10 minutes.
+	if err := waitForDropletUnlocked(client, dropletId, 10*time.Minute); err != nil {
+		// If we get an error the first time, actually report it
+		err := fmt.Errorf("Error shutting down droplet: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// With the pending state over, verify that we're in the active state
 	ui.Say("Waiting for snapshot to complete...")
-	err = waitForDropletState("active", dropletId, client, c.stateTimeout)
+	err = waitForDropletState("active", dropletId, client, c.StateTimeout)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot to complete: %s", err)
 		state.Put("error", err)
@@ -36,7 +50,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
-	images, err := client.Images()
+	images, _, err := client.Images.ListUser(&godo.ListOptions{PerPage: 200})
 	if err != nil {
 		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
 		state.Put("error", err)
@@ -44,10 +58,10 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	var imageId uint
+	var imageId int
 	for _, image := range images {
 		if image.Name == c.SnapshotName {
-			imageId = image.Id
+			imageId = image.ID
 			break
 		}
 	}
@@ -60,7 +74,6 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Snapshot image ID: %d", imageId)
-
 	state.Put("snapshot_image_id", imageId)
 	state.Put("snapshot_name", c.SnapshotName)
 	state.Put("region", c.Region)

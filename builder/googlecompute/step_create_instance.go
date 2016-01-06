@@ -32,7 +32,7 @@ func (config *Config) getInstanceMetadata(sshPublicKey string) map[string]string
 
 	// Merge any existing ssh keys with our public key
 	sshMetaKey := "sshKeys"
-	sshKeys := fmt.Sprintf("%s:%s", config.SSHUsername, sshPublicKey)
+	sshKeys := fmt.Sprintf("%s:%s", config.Comm.SSHUsername, sshPublicKey)
 	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
 		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 	}
@@ -59,6 +59,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Metadata:    config.getInstanceMetadata(sshPublicKey),
 		Name:        name,
 		Network:     config.Network,
+		Preemptible: config.Preemptible,
 		Tags:        config.Tags,
 		Zone:        config.Zone,
 	})
@@ -125,6 +126,29 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 				"Error: %s", name, err))
 	}
 
+	ui.Message("Instance has been deleted!")
 	state.Put("instance_name", "")
+
+	// Deleting the instance does not remove the boot disk. This cleanup removes
+	// the disk.
+	ui.Say("Deleting disk...")
+	errCh, err = driver.DeleteDisk(config.Zone, config.DiskName)
+	if err == nil {
+		select {
+		case err = <-errCh:
+		case <-time.After(config.stateTimeout):
+			err = errors.New("time out while waiting for disk to delete")
+		}
+	}
+
+	if err != nil {
+		ui.Error(fmt.Sprintf(
+			"Error deleting disk. Please delete it manually.\n\n"+
+				"Name: %s\n"+
+				"Error: %s", config.InstanceName, err))
+	}
+
+	ui.Message("Disk has been deleted!")
+
 	return
 }

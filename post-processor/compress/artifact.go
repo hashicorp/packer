@@ -10,6 +10,7 @@ const BuilderId = "packer.post-processor.compress"
 type Artifact struct {
 	Path     string
 	Provider string
+	files    []string
 }
 
 func NewArtifact(provider, path string) *Artifact {
@@ -19,26 +20,26 @@ func NewArtifact(provider, path string) *Artifact {
 	}
 }
 
-func (*Artifact) BuilderId() string {
+func (a *Artifact) BuilderId() string {
 	return BuilderId
 }
 
-func (self *Artifact) Id() string {
+func (*Artifact) Id() string {
 	return ""
 }
 
-func (self *Artifact) Files() []string {
-	return []string{self.Path}
+func (a *Artifact) Files() []string {
+	return []string{a.Path}
 }
 
-func (self *Artifact) String() string {
-	return fmt.Sprintf("'%s' compressing: %s", self.Provider, self.Path)
+func (a *Artifact) String() string {
+	return fmt.Sprintf("'%s' compressing: %s", a.Provider, a.Path)
 }
 
 func (*Artifact) State(name string) interface{} {
 	return nil
 }
 
-func (self *Artifact) Destroy() error {
-	return os.Remove(self.Path)
+func (a *Artifact) Destroy() error {
+	return os.Remove(a.Path)
 }

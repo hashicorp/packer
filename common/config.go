@@ -2,14 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/mitchellh/packer/packer"
 	"net/url"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
-	"sort"
 	"strings"
 )
 
@@ -18,31 +14,12 @@ import (
 func ScrubConfig(target interface{}, values ...string) string {
 	conf := fmt.Sprintf("Config: %+v", target)
 	for _, value := range values {
+		if value == "" {
+			continue
+		}
 		conf = strings.Replace(conf, value, "<Filtered>", -1)
 	}
 	return conf
-}
-
-// CheckUnusedConfig is a helper that makes sure that the there are no
-// unused configuration keys, properly ignoring keys that don't matter.
-func CheckUnusedConfig(md *mapstructure.Metadata) *packer.MultiError {
-	errs := make([]error, 0)
-
-	if md.Unused != nil && len(md.Unused) > 0 {
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				errs = append(
-					errs, fmt.Errorf("Unknown configuration key: %s", unused))
-			}
-		}
-	}
-
-	if len(errs) > 0 {
-		return &packer.MultiError{errs}
-	}
-
-	return nil
 }
 
 // ChooseString returns the first non-empty value.
@@ -54,42 +31,6 @@ func ChooseString(vals ...string) string {
 	}
 
 	return ""
-}
-
-// DecodeConfig is a helper that handles decoding raw configuration using
-// mapstructure. It returns the metadata and any errors that may happen.
-// If you need extra configuration for mapstructure, you should configure
-// it manually and not use this helper function.
-func DecodeConfig(target interface{}, raws ...interface{}) (*mapstructure.Metadata, error) {
-	decodeHook, err := decodeConfigHook(raws)
-	if err != nil {
-		return nil, err
-	}
-
-	var md mapstructure.Metadata
-	decoderConfig := &mapstructure.DecoderConfig{
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			decodeHook,
-			mapstructure.StringToSliceHookFunc(","),
-		),
-		Metadata:         &md,
-		Result:           target,
-		WeaklyTypedInput: true,
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, raw := range raws {
-		err := decoder.Decode(raw)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &md, nil
 }
 
 // DownloadableURL processes a URL that may also be a file path and returns
@@ -181,63 +122,4 @@ func DownloadableURL(original string) (string, error) {
 	}
 
 	return url.String(), nil
-}
-
-// This returns a mapstructure.DecodeHookFunc that automatically template
-// processes any configuration values that aren't strings but have been
-// provided as strings.
-//
-// For example: "image_id" wants an int and the user uses a string with
-// a user variable like "{{user `image_id`}}". This decode hook makes that
-// work.
-func decodeConfigHook(raws []interface{}) (mapstructure.DecodeHookFunc, error) {
-	// First thing we do is decode PackerConfig so that we can have access
-	// to the user variables so that we can process some templates.
-	var pc PackerConfig
-
-	decoderConfig := &mapstructure.DecoderConfig{
-		Result:           &pc,
-		WeaklyTypedInput: true,
-	}
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	if err != nil {
-		return nil, err
-	}
-	for _, raw := range raws {
-		if err := decoder.Decode(raw); err != nil {
-			return nil, err
-		}
-	}
-
-	tpl, err := packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	tpl.UserVars = pc.PackerUserVars
-
-	return func(f reflect.Kind, t reflect.Kind, v interface{}) (interface{}, error) {
-		if t != reflect.String {
-			// We need to convert []uint8 to string. We have to do this
-			// because internally Packer uses MsgPack for RPC and the MsgPack
-			// codec turns strings into []uint8
-			if f == reflect.Slice {
-				dataVal := reflect.ValueOf(v)
-				dataType := dataVal.Type()
-				elemKind := dataType.Elem().Kind()
-				if elemKind == reflect.Uint8 {
-					v = string(dataVal.Interface().([]uint8))
-				}
-			}
-
-			if sv, ok := v.(string); ok {
-				var err error
-				v, err = tpl.Process(sv, nil)
-				if err != nil {
-					return nil, err
-				}
-			}
-		}
-
-		return v, nil
-	}, nil
 }

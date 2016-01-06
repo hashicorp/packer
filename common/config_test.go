@@ -2,32 +2,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"strings"
 	"testing"
 )
-
-func TestCheckUnusedConfig(t *testing.T) {
-	md := &mapstructure.Metadata{
-		Unused: make([]string, 0),
-	}
-
-	err := CheckUnusedConfig(md)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	md.Unused = []string{"foo", "bar"}
-	err = CheckUnusedConfig(md)
-	if err == nil {
-		t.Fatal("should have error")
-	}
-}
 
 func TestChooseString(t *testing.T) {
 	cases := []struct {
@@ -53,129 +34,6 @@ func TestChooseString(t *testing.T) {
 		if result != tc.Output {
 			t.Fatalf("bad: %#v", tc.Input)
 		}
-	}
-}
-
-func TestDecodeConfig(t *testing.T) {
-	type Local struct {
-		Foo string
-		Bar string
-	}
-
-	raws := []interface{}{
-		map[string]interface{}{
-			"foo": "bar",
-		},
-		map[string]interface{}{
-			"bar": "baz",
-			"baz": "what",
-		},
-	}
-
-	var result Local
-	md, err := DecodeConfig(&result, raws...)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if result.Foo != "bar" {
-		t.Fatalf("invalid: %#v", result.Foo)
-	}
-
-	if result.Bar != "baz" {
-		t.Fatalf("invalid: %#v", result.Bar)
-	}
-
-	if md == nil {
-		t.Fatal("metadata should not be nil")
-	}
-
-	if !reflect.DeepEqual(md.Unused, []string{"baz"}) {
-		t.Fatalf("unused: %#v", md.Unused)
-	}
-}
-
-// This test tests the case that a user var is used for an integer
-// configuration.
-func TestDecodeConfig_stringToSlice(t *testing.T) {
-	type Local struct {
-		Val      []string
-		EmptyVal []string
-	}
-
-	raw := map[string]interface{}{
-		"packer_user_variables": map[string]string{
-			"foo": "bar",
-		},
-
-		"val":      "foo,{{user `foo`}}",
-		"emptyval": "",
-	}
-
-	var result Local
-	_, err := DecodeConfig(&result, raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	expected := []string{"foo", "bar"}
-	if !reflect.DeepEqual(result.Val, expected) {
-		t.Fatalf("invalid: %#v", result.Val)
-	}
-	if len(result.EmptyVal) > 0 {
-		t.Fatalf("invalid: %#v", result.EmptyVal)
-	}
-}
-
-// This test tests the case that a user var is used for an integer
-// configuration.
-func TestDecodeConfig_userVarConversion(t *testing.T) {
-	type Local struct {
-		Val int
-	}
-
-	raw := map[string]interface{}{
-		"packer_user_variables": map[string]string{
-			"foo": "42",
-		},
-
-		"val": "{{user `foo`}}",
-	}
-
-	var result Local
-	_, err := DecodeConfig(&result, raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if result.Val != 42 {
-		t.Fatalf("invalid: %#v", result.Val)
-	}
-}
-
-// This tests the way MessagePack decodes strings (into []uint8) and
-// that we can still decode into the proper types.
-func TestDecodeConfig_userVarConversionUInt8(t *testing.T) {
-	type Local struct {
-		Val int
-	}
-
-	raw := map[string]interface{}{
-		"packer_user_variables": map[string]string{
-			"foo": "42",
-		},
-
-		"val": []uint8("{{user `foo`}}"),
-	}
-
-	var result Local
-	_, err := DecodeConfig(&result, raw)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if result.Val != 42 {
-		t.Fatalf("invalid: %#v", result.Val)
 	}
 }
 

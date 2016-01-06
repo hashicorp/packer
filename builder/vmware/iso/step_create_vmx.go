@@ -2,12 +2,14 @@ package iso
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/mitchellh/multistep"
+	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type vmxTemplateData struct {
@@ -16,6 +18,11 @@ type vmxTemplateData struct {
 	DiskName string
 	ISOPath  string
 	Version  string
+}
+
+type additionalDiskTemplateData struct {
+	DiskNumber int
+	DiskName   string
 }
 
 // This step creates the VMX file for the VM.
@@ -32,19 +39,11 @@ type stepCreateVMX struct {
 }
 
 func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Building and writing VMX file")
-
-	tplData := &vmxTemplateData{
-		Name:     config.VMName,
-		GuestOS:  config.GuestOSType,
-		DiskName: config.DiskName,
-		Version:  config.Version,
-		ISOPath:  isoPath,
-	}
 
 	vmxTemplate := DefaultVMXTemplate
 	if config.VMXTemplatePath != "" {
@@ -68,7 +67,58 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxTemplate = string(rawBytes)
 	}
 
-	vmxContents, err := config.tpl.Process(vmxTemplate, tplData)
+	ctx := config.ctx
+
+	if len(config.AdditionalDiskSize) > 0 {
+		for i, _ := range config.AdditionalDiskSize {
+			ctx.Data = &additionalDiskTemplateData{
+				DiskNumber: i + 1,
+				DiskName:   config.DiskName,
+			}
+
+			diskTemplate := DefaultAdditionalDiskTemplate
+			if config.VMXDiskTemplatePath != "" {
+				f, err := os.Open(config.VMXDiskTemplatePath)
+				if err != nil {
+					err := fmt.Errorf("Error reading VMX disk template: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
+				}
+				defer f.Close()
+
+				rawBytes, err := ioutil.ReadAll(f)
+				if err != nil {
+					err := fmt.Errorf("Error reading VMX disk template: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
+				}
+
+				diskTemplate = string(rawBytes)
+			}
+
+			diskContents, err := interpolate.Render(diskTemplate, &ctx)
+			if err != nil {
+				err := fmt.Errorf("Error preparing VMX template for additional disk: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
+			vmxTemplate += diskContents
+		}
+	}
+
+	ctx.Data = &vmxTemplateData{
+		Name:     config.VMName,
+		GuestOS:  config.GuestOSType,
+		DiskName: config.DiskName,
+		Version:  config.Version,
+		ISOPath:  isoPath,
+	}
+
+	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
 	if err != nil {
 		err := fmt.Errorf("Error procesing VMX template: %s", err)
 		state.Put("error", err)
@@ -187,4 +237,10 @@ vmci0.id = "1861462627"
 vmci0.pciSlotNumber = "35"
 vmci0.present = "TRUE"
 vmotion.checkpointFBSize = "65536000"
+`
+
+const DefaultAdditionalDiskTemplate = `
+scsi0:{{ .DiskNumber }}.fileName = "{{ .DiskName}}-{{ .DiskNumber }}.vmdk"
+scsi0:{{ .DiskNumber }}.present = "TRUE"
+scsi0:{{ .DiskNumber }}.redo = ""
 `

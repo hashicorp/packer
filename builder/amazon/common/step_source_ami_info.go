@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -23,7 +23,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Inspecting the source AMI...")
-	imageResp, err := ec2conn.Images([]string{s.SourceAmi}, ec2.NewFilter())
+	imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{&s.SourceAmi}})
 	if err != nil {
 		err := fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
@@ -38,11 +38,11 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	image := &imageResp.Images[0]
+	image := imageResp.Images[0]
 
 	// Enhanced Networking (SriovNetSupport) can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
-	if s.EnhancedNetworking && image.VirtualizationType != "hvm" {
+	if s.EnhancedNetworking && *image.VirtualizationType != "hvm" {
 		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
 		state.Put("error", err)
 		ui.Error(err.Error())

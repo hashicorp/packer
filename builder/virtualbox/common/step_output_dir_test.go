@@ -45,6 +45,30 @@ func TestStepOutputDir(t *testing.T) {
 	}
 }
 
+func TestStepOutputDir_exists(t *testing.T) {
+	state := testState(t)
+	step := testStepOutputDir(t)
+
+	// Make the dir
+	if err := os.MkdirAll(step.Path, 0755); err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+
+	// Test the run
+	if action := step.Run(state); action != multistep.ActionHalt {
+		t.Fatalf("bad action: %#v", action)
+	}
+	if _, ok := state.GetOk("error"); !ok {
+		t.Fatal("should have error")
+	}
+
+	// Test the cleanup
+	step.Cleanup(state)
+	if _, err := os.Stat(step.Path); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestStepOutputDir_cancelled(t *testing.T) {
 	state := testState(t)
 	step := testStepOutputDir(t)
