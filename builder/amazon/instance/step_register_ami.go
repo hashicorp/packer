@@ -3,7 +3,8 @@ package instance
 import (
 	"fmt"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
@@ -18,16 +19,19 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
-	registerOpts := &ec2.RegisterImage{
-		ImageLocation: manifestPath,
-		Name:          config.AMIName,
-		BlockDevices:  config.BlockDevices.BuildAMIDevices(),
-		VirtType:      config.AMIVirtType,
+	registerOpts := &ec2.RegisterImageInput{
+		ImageLocation:       &manifestPath,
+		Name:                aws.String(config.AMIName),
+		BlockDeviceMappings: config.BlockDevices.BuildAMIDevices(),
+	}
+
+	if config.AMIVirtType != "" {
+		registerOpts.VirtualizationType = aws.String(config.AMIVirtType)
 	}
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
-		registerOpts.SriovNetSupport = "simple"
+		registerOpts.SriovNetSupport = aws.String("simple")
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -38,16 +42,16 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the AMI ID in the state
-	ui.Say(fmt.Sprintf("AMI: %s", registerResp.ImageId))
+	ui.Say(fmt.Sprintf("AMI: %s", *registerResp.ImageId))
 	amis := make(map[string]string)
-	amis[ec2conn.Region.Name] = registerResp.ImageId
+	amis[*ec2conn.Config.Region] = *registerResp.ImageId
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, registerResp.ImageId),
+		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageId),
 		StepState: state,
 	}
 

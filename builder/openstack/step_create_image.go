@@ -2,28 +2,37 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
+	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type stepCreateImage struct{}
 
 func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
-	csp := state.Get("csp").(gophercloud.CloudServersProvider)
-	config := state.Get("config").(config)
-	server := state.Get("server").(*gophercloud.Server)
+	config := state.Get("config").(Config)
+	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
+
+	// We need the v2 compute client
+	client, err := config.computeV2Client()
+	if err != nil {
+		err = fmt.Errorf("Error initializing compute client: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 
 	// Create the image
 	ui.Say(fmt.Sprintf("Creating the image: %s", config.ImageName))
-	createOpts := gophercloud.CreateImage{
-		Name: config.ImageName,
-	}
-	imageId, err := csp.CreateImage(server.Id, createOpts)
+	imageId, err := servers.CreateImage(client, server.ID, servers.CreateImageOpts{
+		Name:     config.ImageName,
+		Metadata: config.ImageMetadata,
+	}).ExtractImageID()
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)
@@ -32,12 +41,12 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the Image ID in the state
-	ui.Say(fmt.Sprintf("Image: %s", imageId))
+	ui.Message(fmt.Sprintf("Image: %s", imageId))
 	state.Put("image", imageId)
 
 	// Wait for the image to become ready
-	ui.Say("Waiting for image to become ready...")
-	if err := WaitForImage(csp, imageId); err != nil {
+	ui.Say(fmt.Sprintf("Waiting for image %s (image id: %s) to become ready...", config.ImageName, imageId))
+	if err := WaitForImage(client, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -52,10 +61,17 @@ func (s *stepCreateImage) Cleanup(multistep.StateBag) {
 }
 
 // WaitForImage waits for the given Image ID to become ready.
-func WaitForImage(csp gophercloud.CloudServersProvider, imageId string) error {
+func WaitForImage(client *gophercloud.ServiceClient, imageId string) error {
 	for {
-		image, err := csp.ImageById(imageId)
+		image, err := images.Get(client, imageId).Extract()
 		if err != nil {
+			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
+			if ok && errCode.Actual == 500 {
+				log.Printf("[ERROR] 500 error received, will ignore and retry: %s", err)
+				time.Sleep(2 * time.Second)
+				continue
+			}
+
 			return err
 		}
 

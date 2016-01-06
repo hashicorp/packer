@@ -2,7 +2,8 @@ package ebs
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
@@ -18,13 +19,15 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip when it is a spot instance
-	if s.SpotPrice != "" {
+	if s.SpotPrice != "" && s.SpotPrice != "0" {
 		return multistep.ActionContinue
 	}
 
 	// Stop the instance so we can create an AMI from it
 	ui.Say("Stopping the source instance...")
-	_, err := ec2conn.StopInstances(instance.InstanceId)
+	_, err := ec2conn.StopInstances(&ec2.StopInstancesInput{
+		InstanceIds: []*string{instance.InstanceId},
+	})
 	if err != nil {
 		err := fmt.Errorf("Error stopping instance: %s", err)
 		state.Put("error", err)
@@ -37,7 +40,7 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"running", "stopping"},
 		Target:    "stopped",
-		Refresh:   awscommon.InstanceStateRefreshFunc(ec2conn, instance),
+		Refresh:   awscommon.InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
 		StepState: state,
 	}
 	_, err = awscommon.WaitForState(&stateChange)

@@ -1,27 +1,20 @@
 package command
 
 import (
-	"flag"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"log"
 	"sort"
 	"strings"
+
+	"github.com/mitchellh/packer/template"
 )
 
-type InspectCommand struct{
+type InspectCommand struct {
 	Meta
 }
 
 func (c *InspectCommand) Run(args []string) int {
-	env, err := c.Meta.Environment()
-	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error initializing environment: %s", err))
-		return 1
-	}
-
-	flags := flag.NewFlagSet("inspect", flag.ContinueOnError)
-	flags.Usage = func() { env.Ui().Say(c.Help()) }
+	flags := c.Meta.FlagSet("inspect", FlagSetNone)
+	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -32,16 +25,15 @@ func (c *InspectCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Read the file into a byte array so that we can parse the template
-	log.Printf("Reading template: %#v", args[0])
-	tpl, err := packer.ParseTemplateFile(args[0], nil)
+	// Parse the template
+	tpl, err := template.ParseFile(args[0])
 	if err != nil {
-		env.Ui().Error(fmt.Sprintf("Failed to parse template: %s", err))
+		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
 	}
 
 	// Convenience...
-	ui := env.Ui()
+	ui := c.Ui
 
 	// Description
 	if tpl.Description != "" {

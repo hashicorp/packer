@@ -6,19 +6,21 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
-const DefaultRemotePath = "/tmp/script.sh"
-
-type config struct {
+type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// If true, the script contains binary and line endings will not be
@@ -56,12 +58,15 @@ type config struct {
 	// This can be set high to allow for reboots.
 	RawStartRetryTimeout string `mapstructure:"start_retry_timeout"`
 
+	// Whether to clean scripts up
+	SkipClean bool `mapstructure:"skip_clean"`
+
 	startRetryTimeout time.Duration
-	tpl               *packer.ConfigTemplate
+	ctx               interpolate.Context
 }
 
 type Provisioner struct {
-	config config
+	config Config
 }
 
 type ExecuteCommandTemplate struct {
@@ -70,19 +75,18 @@ type ExecuteCommandTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"execute_command",
+			},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-	p.config.tpl.UserVars = p.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
@@ -93,7 +97,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh"
+		p.config.InlineShebang = "/bin/sh -e"
 	}
 
 	if p.config.RawStartRetryTimeout == "" {
@@ -101,7 +105,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = DefaultRemotePath
+		p.config.RemotePath = fmt.Sprintf(
+			"/tmp/script_%d.sh", rand.Intn(9999))
 	}
 
 	if p.config.Scripts == nil {
@@ -112,6 +117,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Vars = make([]string, 0)
 	}
 
+	var errs *packer.MultiError
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Only one of script or scripts can be specified."))
@@ -119,39 +125,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Script != "" {
 		p.config.Scripts = []string{p.config.Script}
-	}
-
-	templates := map[string]*string{
-		"inline_shebang":      &p.config.InlineShebang,
-		"script":              &p.config.Script,
-		"start_retry_timeout": &p.config.RawStartRetryTimeout,
-		"remote_path":         &p.config.RemotePath,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	sliceTemplates := map[string][]string{
-		"inline":           p.config.Inline,
-		"scripts":          p.config.Scripts,
-		"environment_vars": p.config.Vars,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = p.config.tpl.Process(elem, nil)
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
 	}
 
 	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
@@ -176,6 +149,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		} else {
+			// Replace single quotes so they parse
+			vs[1] = strings.Replace(vs[1], "'", `'"'"'`, -1)
+
 			// Single quote env var values
 			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
@@ -248,10 +224,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		flattendVars := strings.Join(envVars, " ")
 
 		// Compile the command
-		command, err := p.config.tpl.Process(p.config.ExecuteCommand, &ExecuteCommandTemplate{
+		p.config.ctx.Data = &ExecuteCommandTemplate{
 			Vars: flattendVars,
 			Path: p.config.RemotePath,
-		})
+		}
+		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error processing command: %s", err)
 		}
@@ -277,11 +254,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			}
 
 			cmd = &packer.RemoteCmd{
-				Command: fmt.Sprintf("chmod 0777 %s", p.config.RemotePath),
+				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
 			}
 			if err := comm.Start(cmd); err != nil {
 				return fmt.Errorf(
-					"Error chmodding script file to 0777 in remote "+
+					"Error chmodding script file to 0755 in remote "+
 						"machine: %s", err)
 			}
 			cmd.Wait()
@@ -293,11 +270,36 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return err
 		}
 
-		// Close the original file since we copied it
-		f.Close()
-
 		if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		}
+
+		if !p.config.SkipClean {
+
+			// Delete the temporary file we created. We retry this a few times
+			// since if the above rebooted we have to wait until the reboot
+			// completes.
+			err = p.retryable(func() error {
+				cmd = &packer.RemoteCmd{
+					Command: fmt.Sprintf("rm -f %s", p.config.RemotePath),
+				}
+				if err := comm.Start(cmd); err != nil {
+					return fmt.Errorf(
+						"Error removing temporary script at %s: %s",
+						p.config.RemotePath, err)
+				}
+				cmd.Wait()
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+
+			if cmd.ExitStatus != 0 {
+				return fmt.Errorf(
+					"Error removing temporary script at %s!",
+					p.config.RemotePath)
+			}
 		}
 	}
 

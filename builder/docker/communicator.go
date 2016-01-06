@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"archive/tar"
 	"bytes"
 	"fmt"
 	"io"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/ActiveState/tail"
+	"github.com/hashicorp/go-version"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -22,8 +24,9 @@ type Communicator struct {
 	ContainerId  string
 	HostDir      string
 	ContainerDir string
-
-	lock sync.Mutex
+	Version      *version.Version
+	Config       *Config
+	lock         sync.Mutex
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
@@ -41,7 +44,17 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	// This file will store the exit code of the command once it is complete.
 	exitCodePath := outputFile.Name() + "-exit"
 
-	cmd := exec.Command("docker", "attach", c.ContainerId)
+	var cmd *exec.Cmd
+	if c.canExec() {
+		if c.Config.Pty {
+			cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerId, "/bin/sh")
+		} else {
+			cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh")
+		}
+	} else {
+		cmd = exec.Command("docker", "attach", c.ContainerId)
+	}
+
 	stdin_w, err := cmd.StdinPipe()
 	if err != nil {
 		// We have to do some cleanup since run was never called
@@ -117,7 +130,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 			return os.MkdirAll(hostpath, info.Mode())
 		}
 
-		if info.Mode() & os.ModeSymlink == os.ModeSymlink {
+		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 			dest, err := os.Readlink(path)
 
 			if err != nil {
@@ -182,8 +195,51 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	return nil
 }
 
+// Download pulls a file out of a container using `docker cp`. We have a source
+// path and want to write to an io.Writer, not a file. We use - to make docker
+// cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	panic("not implemented")
+	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
+	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
+
+	pipe, err := localCmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("Failed to open pipe: %s", err)
+	}
+
+	if err = localCmd.Start(); err != nil {
+		return fmt.Errorf("Failed to start download: %s", err)
+	}
+
+	// When you use - to send docker cp to stdout it is streamed as a tar; this
+	// enables it to work with directories. We don't actually support
+	// directories in Download() but we still need to handle the tar format.
+	archive := tar.NewReader(pipe)
+	_, err = archive.Next()
+	if err != nil {
+		return fmt.Errorf("Failed to read header from tar stream: %s", err)
+	}
+
+	numBytes, err := io.Copy(dst, archive)
+	if err != nil {
+		return fmt.Errorf("Failed to pipe download: %s", err)
+	}
+	log.Printf("Copied %d bytes for %s", numBytes, src)
+
+	if err = localCmd.Wait(); err != nil {
+		return fmt.Errorf("Failed to download '%s' from container: %s", src, err)
+	}
+
+	return nil
+}
+
+// canExec tells us whether `docker exec` is supported
+func (c *Communicator) canExec() bool {
+	execConstraint, err := version.NewConstraint(">= 1.4.0")
+	if err != nil {
+		panic(err)
+	}
+	return execConstraint.Check(c.Version)
 }
 
 // Runs the given command and blocks until completion

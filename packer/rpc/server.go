@@ -1,13 +1,13 @@
 package rpc
 
 import (
-	"fmt"
-	"github.com/hashicorp/go-msgpack/codec"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net/rpc"
 	"sync/atomic"
+
+	"github.com/mitchellh/packer/packer"
+	"github.com/ugorji/go/codec"
 )
 
 var endpointId uint64
@@ -19,7 +19,6 @@ const (
 	DefaultCacheEndpoint                = "Cache"
 	DefaultCommandEndpoint              = "Command"
 	DefaultCommunicatorEndpoint         = "Communicator"
-	DefaultEnvironmentEndpoint          = "Environment"
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
 	DefaultProvisionerEndpoint          = "Provisioner"
@@ -95,13 +94,6 @@ func (s *Server) RegisterCommunicator(c packer.Communicator) {
 	})
 }
 
-func (s *Server) RegisterEnvironment(b packer.Environment) {
-	s.server.RegisterName(DefaultEnvironmentEndpoint, &EnvironmentServer{
-		env: b,
-		mux: s.mux,
-	})
-}
-
 func (s *Server) RegisterHook(h packer.Hook) {
 	s.server.RegisterName(DefaultHookEndpoint, &HookServer{
 		hook: h,
@@ -157,7 +149,7 @@ func (s *Server) Serve() {
 func registerComponent(server *rpc.Server, name string, rcvr interface{}, id bool) string {
 	endpoint := name
 	if id {
-		fmt.Sprintf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
+		log.Printf("%s.%d", endpoint, atomic.AddUint64(&endpointId, 1))
 	}
 
 	server.RegisterName(endpoint, rcvr)

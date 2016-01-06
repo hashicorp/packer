@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // stepRun runs the virtual machine
@@ -56,32 +58,62 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 }
 
 func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	vncPort := state.Get("vnc_port").(uint)
 	sshHostPort := state.Get("sshHostPort").(uint)
 	ui := state.Get("ui").(packer.Ui)
+	driver := state.Get("driver").(Driver)
 
 	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	vmName := config.VMName
-	imgPath := filepath.Join(config.OutputDir,
-		fmt.Sprintf("%s.%s", vmName, strings.ToLower(config.Format)))
+	imgPath := filepath.Join(config.OutputDir, vmName)
 
-	defaultArgs := make(map[string]string)
+	defaultArgs := make(map[string]interface{})
+	var deviceArgs []string
+	var driveArgs []string
+
+	defaultArgs["-name"] = vmName
+	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
+	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
+
+	qemuVersion, err := driver.Version()
+	if err != nil {
+		return nil, err
+	}
+	parts := strings.Split(qemuVersion, ".")
+	qemuMajor, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return nil, err
+	}
+	if qemuMajor >= 2 {
+		if config.DiskInterface == "virtio-scsi" {
+			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
+			driveArgs = append(driveArgs, fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s", imgPath, config.DiskCache, config.DiskDiscard))
+		} else {
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard))
+		}
+	} else {
+		defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache)
+	}
+	deviceArgs = append(deviceArgs, fmt.Sprintf("%s,netdev=user.0", config.NetDevice))
 
 	if config.Headless == true {
 		ui.Message("WARNING: The VM will be started in headless mode, as configured.\n" +
 			"In headless mode, errors during the boot sequence or OS setup\n" +
 			"won't be easily visible. Use at your own discretion.")
 	} else {
-		defaultArgs["-display"] = "sdl"
+		if qemuMajor >= 2 {
+			defaultArgs["-display"] = "sdl"
+		} else {
+			ui.Message("WARNING: The version of qemu  on your host doesn't support display mode.\n" +
+				"The display parameter will be ignored.")
+		}
 	}
 
-	defaultArgs["-name"] = vmName
-	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
-	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:22", sshHostPort)
-	defaultArgs["-device"] = fmt.Sprintf("%s,netdev=user.0", config.NetDevice)
-	defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache)
+	defaultArgs["-device"] = deviceArgs
+	defaultArgs["-drive"] = driveArgs
+
 	if !config.DiskImage {
 		defaultArgs["-cdrom"] = isoPath
 	}
@@ -91,7 +123,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	// Append the accelerator to the machine type if it is specified
 	if config.Accelerator != "none" {
-		defaultArgs["-machine"] += fmt.Sprintf(",accel=%s", config.Accelerator)
+		defaultArgs["-machine"] = fmt.Sprintf("%s,accel=%s", defaultArgs["-machine"], config.Accelerator)
 	} else {
 		ui.Message("WARNING: The VM will be started with no hardware acceleration.\n" +
 			"The installation may take considerably longer to finish.\n")
@@ -109,14 +141,15 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
 		httpPort := state.Get("http_port").(uint)
-		tplData := qemuArgsTemplateData{
+		ctx := config.ctx
+		ctx.Data = qemuArgsTemplateData{
 			"10.0.2.2",
 			httpPort,
 			config.HTTPDir,
 			config.OutputDir,
 			config.VMName,
 		}
-		newQemuArgs, err := processArgs(config.QemuArgs, config.tpl, &tplData)
+		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +173,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	for key := range defaultArgs {
 		if _, ok := inArgs[key]; !ok {
 			arg := make([]string, 1)
-			arg[0] = defaultArgs[key]
+			switch defaultArgs[key].(type) {
+			case string:
+				arg[0] = defaultArgs[key].(string)
+			case []string:
+				arg = defaultArgs[key].([]string)
+			}
 			inArgs[key] = arg
 		}
 	}
@@ -160,7 +198,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	return outArgs, nil
 }
 
-func processArgs(args [][]string, tpl *packer.ConfigTemplate, tplData *qemuArgsTemplateData) ([][]string, error) {
+func processArgs(args [][]string, ctx *interpolate.Context) ([][]string, error) {
 	var err error
 
 	if args == nil {
@@ -172,7 +210,7 @@ func processArgs(args [][]string, tpl *packer.ConfigTemplate, tplData *qemuArgsT
 		parms := make([]string, len(rowArgs))
 		newArgs[argsIdx] = parms
 		for i, parm := range rowArgs {
-			parms[i], err = tpl.Process(parm, &tplData)
+			parms[i], err = interpolate.Render(parm, ctx)
 			if err != nil {
 				return nil, err
 			}

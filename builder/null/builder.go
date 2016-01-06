@@ -1,11 +1,12 @@
 package null
 
 import (
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
-	"log"
-	"time"
 )
 
 const BuilderId = "fnoeding.null"
@@ -27,10 +28,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	steps := []multistep.Step{
-		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(b.config.Host, b.config.Port),
-			SSHConfig:      SSHConfig(b.config.SSHUsername, b.config.SSHPassword, b.config.SSHPrivateKeyFile),
-			SSHWaitTimeout: 1 * time.Minute,
+		&communicator.StepConnect{
+			Config: &b.config.CommConfig,
+			Host:   CommHost(b.config.CommConfig.SSHHost),
+			SSHConfig: SSHConfig(
+				b.config.CommConfig.SSHUsername,
+				b.config.CommConfig.SSHPassword,
+				b.config.CommConfig.SSHPrivateKey),
 		},
 		&common.StepProvision{},
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/go-vnc"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
@@ -35,7 +36,7 @@ type bootCommandTemplateData struct {
 type StepTypeBootCommand struct {
 	BootCommand []string
 	VMName      string
-	Tpl         *packer.ConfigTemplate
+	Ctx         interpolate.Context
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
@@ -56,7 +57,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 	defer nc.Close()
 
-	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: true})
+	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
 	if err != nil {
 		err := fmt.Errorf("Error handshaking with VNC: %s", err)
 		state.Put("error", err)
@@ -87,7 +88,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	log.Printf("Host IP for the VMware machine: %s", hostIp)
 
-	tplData := &bootCommandTemplateData{
+	s.Ctx.Data = &bootCommandTemplateData{
 		hostIp,
 		httpPort,
 		s.VMName,
@@ -95,7 +96,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Say("Typing the boot command over VNC...")
 	for _, command := range s.BootCommand {
-		command, err := s.Tpl.Process(command, tplData)
+		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)
@@ -199,8 +200,13 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			c.KeyEvent(KeyLeftShift, true)
 		}
 
+		// Send the key events. We add a 100ms sleep after each key event
+		// to deal with network latency and the OS responding to the keystroke.
+		// It is kind of arbitrary but it is better than nothing.
 		c.KeyEvent(keyCode, true)
+		time.Sleep(100 * time.Millisecond)
 		c.KeyEvent(keyCode, false)
+		time.Sleep(100 * time.Millisecond)
 
 		if keyShift {
 			c.KeyEvent(KeyLeftShift, false)

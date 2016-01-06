@@ -13,12 +13,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/going/toolkit/xmlpath"
+	"gopkg.in/xmlpath.v2"
 )
 
 type Parallels9Driver struct {
 	// This is the path to the "prlctl" application.
 	PrlctlPath string
+
+	// This is the path to the "prlsrvctl" application.
+	PrlsrvctlPath string
+
 	// The path to the parallels_dhcp_leases file
 	dhcp_lease_file string
 }
@@ -91,11 +95,44 @@ func getAppPath(bundleId string) (string, error) {
 
 	pathOutput := strings.TrimSpace(stdout.String())
 	if pathOutput == "" {
+		if fi, err := os.Stat("/Applications/Parallels Desktop.app"); err == nil {
+			if fi.IsDir() {
+				return "/Applications/Parallels Desktop.app", nil
+			}
+		}
+
 		return "", fmt.Errorf(
 			"Could not detect Parallels Desktop! Make sure it is properly installed.")
 	}
 
 	return pathOutput, nil
+}
+
+func (d *Parallels9Driver) CompactDisk(diskPath string) error {
+	prlDiskToolPath, err := exec.LookPath("prl_disk_tool")
+	if err != nil {
+		return err
+	}
+
+	// Analyze the disk content and remove unused blocks
+	command := []string{
+		"compact",
+		"--hdd", diskPath,
+	}
+	if err := exec.Command(prlDiskToolPath, command...).Run(); err != nil {
+		return err
+	}
+
+	// Remove null blocks
+	command = []string{
+		"compact", "--buildmap",
+		"--hdd", diskPath,
+	}
+	if err := exec.Command(prlDiskToolPath, command...).Run(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Parallels9Driver) DeviceAddCdRom(name string, image string) (string, error) {
@@ -119,6 +156,23 @@ func (d *Parallels9Driver) DeviceAddCdRom(name string, image string) (string, er
 
 	device_name := matches[1]
 	return device_name, nil
+}
+
+func (d *Parallels9Driver) DiskPath(name string) (string, error) {
+	out, err := exec.Command(d.PrlctlPath, "list", "-i", name).Output()
+	if err != nil {
+		return "", err
+	}
+
+	hddRe := regexp.MustCompile("hdd0.* image='(.*)' type=*")
+	matches := hddRe.FindStringSubmatch(string(out))
+	if matches == nil {
+		return "", fmt.Errorf(
+			"Could not determine hdd image path in the output:\n%s", string(out))
+	}
+
+	hdd_path := matches[1]
+	return hdd_path, nil
 }
 
 func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
@@ -253,6 +307,25 @@ func prepend(head string, tail []string) []string {
 	}
 	tmp[0] = head
 	return tmp
+}
+
+func (d *Parallels9Driver) SetDefaultConfiguration(vmName string) error {
+	commands := make([][]string, 7)
+	commands[0] = []string{"set", vmName, "--cpus", "1"}
+	commands[1] = []string{"set", vmName, "--memsize", "512"}
+	commands[2] = []string{"set", vmName, "--startup-view", "same"}
+	commands[3] = []string{"set", vmName, "--on-shutdown", "close"}
+	commands[4] = []string{"set", vmName, "--on-window-close", "keep-running"}
+	commands[5] = []string{"set", vmName, "--auto-share-camera", "off"}
+	commands[6] = []string{"set", vmName, "--smart-guard", "off"}
+
+	for _, command := range commands {
+		err := d.Prlctl(command...)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *Parallels9Driver) Mac(vmName string) (string, error) {

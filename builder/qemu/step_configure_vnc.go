@@ -20,7 +20,7 @@ import (
 type stepConfigureVNC struct{}
 
 func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Find an open VNC port. Note that this can still fail later on
@@ -32,7 +32,12 @@ func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	var vncPort uint
 	portRange := int(config.VNCPortMax - config.VNCPortMin)
 	for {
-		vncPort = uint(rand.Intn(portRange)) + config.VNCPortMin
+		if portRange > 0 {
+			vncPort = uint(rand.Intn(portRange)) + config.VNCPortMin
+		} else {
+			vncPort = config.VNCPortMin
+		}
+
 		log.Printf("Trying port: %d", vncPort)
 		l, err := net.Listen("tcp", fmt.Sprintf(":%d", vncPort))
 		if err == nil {

@@ -1,0 +1,14 @@
+{
+    "builders": [{
+        "type": "test"
+    }],
+
+    "provisioners": [{
+        "type": "test",
+        "override": {
+            "test": {
+                "foo": "bar"
+            }
+        }
+    }]
+}

@@ -2,10 +2,15 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"unicode"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to AWS access
@@ -16,66 +21,55 @@ type AccessConfig struct {
 	Token     string `mapstructure:"token"`
 }
 
-// Auth returns a valid aws.Auth object for access to AWS services, or
-// an error if the authentication couldn't be resolved.
-func (c *AccessConfig) Auth() (aws.Auth, error) {
-	auth, err := aws.GetAuth(c.AccessKey, c.SecretKey)
-	if err == nil {
-		// Store the accesskey and secret that we got...
-		c.AccessKey = auth.AccessKey
-		c.SecretKey = auth.SecretKey
-		c.Token = auth.Token
-	}
-	if c.Token != "" {
-		auth.Token = c.Token
+// Config returns a valid aws.Config object for access to AWS services, or
+// an error if the authentication and region couldn't be resolved
+func (c *AccessConfig) Config() (*aws.Config, error) {
+	creds := credentials.NewChainCredentials([]credentials.Provider{
+		&credentials.StaticProvider{Value: credentials.Value{
+			AccessKeyID:     c.AccessKey,
+			SecretAccessKey: c.SecretKey,
+			SessionToken:    c.Token,
+		}},
+		&credentials.EnvProvider{},
+		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
+		&ec2rolecreds.EC2RoleProvider{},
+	})
+
+	region, err := c.Region()
+	if err != nil {
+		return nil, err
 	}
 
-	return auth, err
+	return &aws.Config{
+		Region:      aws.String(region),
+		Credentials: creds,
+		MaxRetries:  aws.Int(11),
+	}, nil
 }
 
 // Region returns the aws.Region object for access to AWS services, requesting
 // the region from the instance metadata if possible.
-func (c *AccessConfig) Region() (aws.Region, error) {
+func (c *AccessConfig) Region() (string, error) {
 	if c.RawRegion != "" {
-		return aws.Regions[c.RawRegion], nil
+		if valid := ValidateRegion(c.RawRegion); valid == false {
+			return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
+		}
+		return c.RawRegion, nil
 	}
 
-	md, err := aws.GetMetaData("placement/availability-zone")
+	md, err := GetInstanceMetaData("placement/availability-zone")
 	if err != nil {
-		return aws.Region{}, err
+		return "", err
 	}
 
 	region := strings.TrimRightFunc(string(md), unicode.IsLetter)
-	return aws.Regions[region], nil
+	return region, nil
 }
 
-func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	templates := map[string]*string{
-		"access_key": &c.AccessKey,
-		"secret_key": &c.SecretKey,
-		"region":     &c.RawRegion,
-	}
-
-	errs := make([]error, 0)
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
+func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
+	var errs []error
 	if c.RawRegion != "" {
-		if _, ok := aws.Regions[c.RawRegion]; !ok {
+		if valid := ValidateRegion(c.RawRegion); valid == false {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
 	}
@@ -85,4 +79,25 @@ func (c *AccessConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	return nil
+}
+
+func GetInstanceMetaData(path string) (contents []byte, err error) {
+	url := "http://169.254.169.254/latest/meta-data/" + path
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("Code %d returned for url %s", resp.StatusCode, url)
+		return
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	return []byte(body), err
 }

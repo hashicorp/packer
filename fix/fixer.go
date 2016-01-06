@@ -26,6 +26,7 @@ func init() {
 		"virtualbox-gaattach": new(FixerVirtualBoxGAAttach),
 		"virtualbox-rename":   new(FixerVirtualBoxRename),
 		"vmware-rename":       new(FixerVMwareRename),
+		"parallels-headless":  new(FixerParallelsHeadless),
 	}
 
 	FixerOrder = []string{
@@ -35,5 +36,6 @@ func init() {
 		"pp-vagrant-override",
 		"virtualbox-rename",
 		"vmware-rename",
+		"parallels-headless",
 	}
 }

@@ -3,13 +3,9 @@ package iso
 import (
 	"bufio"
 	"bytes"
-	gossh "code.google.com/p/go.crypto/ssh"
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/communicator/ssh"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net"
@@ -17,6 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/communicator/ssh"
+	"github.com/mitchellh/packer/packer"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
@@ -101,6 +102,18 @@ func (d *ESX5Driver) SuppressMessages(vmxPath string) error {
 
 func (d *ESX5Driver) Unregister(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/unregister", d.vmId)
+}
+
+func (d *ESX5Driver) Destroy() error {
+	return d.sh("vim-cmd", "vmsvc/destroy", d.vmId)
+}
+
+func (d *ESX5Driver) IsDestroyed() (bool, error) {
+	err := d.sh("test", "!", "-e", d.outputDir)
+	if err != nil {
+		return false, err
+	}
+	return true, err
 }
 
 func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
@@ -217,8 +230,8 @@ func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
 	return d.Host, vncPort, nil
 }
 
-func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(*config)
+func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
+	config := state.Get("config").(*Config)
 
 	if address, ok := state.GetOk("vm_address"); ok {
 		return address.(string), nil
@@ -252,7 +265,7 @@ func (d *ESX5Driver) SSHAddress(state multistep.StateBag) (string, error) {
 		return "", errors.New("VM network port found, but no IP address")
 	}
 
-	address := fmt.Sprintf("%s:%d", record["IPAddress"], config.SSHPort)
+	address := record["IPAddress"]
 	state.Put("vm_address", address)
 	return address, nil
 }
@@ -310,8 +323,8 @@ func (d *ESX5Driver) String() string {
 }
 
 func (d *ESX5Driver) datastorePath(path string) string {
-	baseDir := filepath.Base(filepath.Dir(path))
-	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, baseDir, filepath.Base(path)))
+	dirPath := filepath.Dir(path)
+	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, dirPath, filepath.Base(path)))
 }
 
 func (d *ESX5Driver) cachePath(path string) string {
@@ -334,7 +347,6 @@ func (d *ESX5Driver) connect() error {
 			User: d.Username,
 			Auth: auth,
 		},
-		NoPty: true,
 	}
 
 	comm, err := ssh.New(address, sshConfig)
@@ -396,11 +408,18 @@ func (d *ESX5Driver) upload(dst, src string) error {
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
-	stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
-	_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
-	if err != nil {
-		return false
+	if ctype == "none" {
+		if err := d.sh("stat", file); err != nil {
+			return false
+		}
+	} else {
+		stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
+		_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
+		if err != nil {
+			return false
+		}
 	}
+
 	return true
 }
 

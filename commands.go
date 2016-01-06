@@ -11,64 +11,58 @@ import (
 // Commands is the mapping of all the available Terraform commands.
 var Commands map[string]cli.CommandFactory
 
-// Ui is the cli.Ui used for communicating to the outside world.
-var Ui cli.Ui
+// CommandMeta is the Meta to use for the commands. This must be written
+// before the CLI is started.
+var CommandMeta *command.Meta
 
 const ErrorPrefix = "e:"
 const OutputPrefix = "o:"
 
 func init() {
-	Ui = &cli.PrefixedUi{
-		AskPrefix:    OutputPrefix,
-		OutputPrefix: OutputPrefix,
-		InfoPrefix:   OutputPrefix,
-		ErrorPrefix:  ErrorPrefix,
-		Ui:           &cli.BasicUi{Writer: os.Stdout},
-	}
-
-	meta := command.Meta{
-		EnvConfig: &EnvConfig,
-		Ui:        Ui,
-	}
-
 	Commands = map[string]cli.CommandFactory{
 		"build": func() (cli.Command, error) {
 			return &command.BuildCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"fix": func() (cli.Command, error) {
 			return &command.FixCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"inspect": func() (cli.Command, error) {
 			return &command.InspectCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"push": func() (cli.Command, error) {
 			return &command.PushCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"validate": func() (cli.Command, error) {
 			return &command.ValidateCommand{
-				Meta: meta,
+				Meta: *CommandMeta,
 			}, nil
 		},
 
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
-				Meta:              meta,
+				Meta:              *CommandMeta,
 				Revision:          GitCommit,
 				Version:           Version,
 				VersionPrerelease: VersionPrerelease,
 				CheckFunc:         commandVersionCheck,
+			}, nil
+		},
+
+		"plugin": func() (cli.Command, error) {
+			return &command.PluginCommand{
+				Meta: *CommandMeta,
 			}, nil
 		},
 	}

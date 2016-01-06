@@ -1,0 +1,10 @@
+{
+    "variables": {
+        "var": "{{env `PACKER_TEST_ENV`}}"
+    },
+
+    "builders": [{
+        "type": "test",
+        "value": "{{user `var`}}"
+    }]
+}

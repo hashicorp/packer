@@ -9,11 +9,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // The unique ID for this builder
@@ -38,7 +42,7 @@ type Config struct {
 	X509KeyPath         string `mapstructure:"x509_key_path"`
 	X509UploadPath      string `mapstructure:"x509_upload_path"`
 
-	tpl *packer.ConfigTemplate
+	ctx interpolate.Context
 }
 
 type Builder struct {
@@ -47,40 +51,55 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
-	if err != nil {
-		return nil, err
+	configs := make([]interface{}, len(raws)+1)
+	configs[0] = map[string]interface{}{
+		"bundle_prefix": "image-{{timestamp}}",
 	}
+	copy(configs[1:], raws)
 
-	b.config.tpl, err = packer.NewConfigTemplate()
+	b.config.ctx.Funcs = awscommon.TemplateFuncs
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"bundle_upload_command",
+				"bundle_vol_command",
+			},
+		},
+	}, configs...)
 	if err != nil {
 		return nil, err
 	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
-	b.config.tpl.Funcs(awscommon.TemplateFuncs)
 
 	if b.config.BundleDestination == "" {
 		b.config.BundleDestination = "/tmp"
 	}
 
-	if b.config.BundlePrefix == "" {
-		b.config.BundlePrefix = "image-{{timestamp}}"
-	}
-
 	if b.config.BundleUploadCommand == "" {
-		b.config.BundleUploadCommand = "sudo -n ec2-upload-bundle " +
-			"-b {{.BucketName}} " +
-			"-m {{.ManifestPath}} " +
-			"-a {{.AccessKey}} " +
-			"-s {{.SecretKey}} " +
-			"-d {{.BundleDirectory}} " +
-			"--batch " +
-			"--location {{.Region}} " +
-			"--retry"
+		if b.config.IamInstanceProfile != "" {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		} else {
+			b.config.BundleUploadCommand = "sudo -i -n ec2-upload-bundle " +
+				"-b {{.BucketName}} " +
+				"-m {{.ManifestPath}} " +
+				"-a {{.AccessKey}} " +
+				"-s {{.SecretKey}} " +
+				"-d {{.BundleDirectory}} " +
+				"--batch " +
+				"--region {{.Region}} " +
+				"--retry"
+		}
 	}
 
 	if b.config.BundleVolCommand == "" {
-		b.config.BundleVolCommand = "sudo -n ec2-bundle-vol " +
+		b.config.BundleVolCommand = "sudo -i -n ec2-bundle-vol " +
 			"-k {{.KeyPath}} " +
 			"-u {{.AccountId}} " +
 			"-c {{.CertPath}} " +
@@ -97,43 +116,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
-
-	validates := map[string]*string{
-		"bundle_upload_command": &b.config.BundleUploadCommand,
-		"bundle_vol_command":    &b.config.BundleVolCommand,
-	}
-
-	for n, ptr := range validates {
-		if err := b.config.tpl.Validate(*ptr); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error parsing %s: %s", n, err))
-		}
-	}
-
-	templates := map[string]*string{
-		"account_id":         &b.config.AccountId,
-		"ami_name":           &b.config.AMIName,
-		"bundle_destination": &b.config.BundleDestination,
-		"bundle_prefix":      &b.config.BundlePrefix,
-		"s3_bucket":          &b.config.S3Bucket,
-		"x509_cert_path":     &b.config.X509CertPath,
-		"x509_key_path":      &b.config.X509KeyPath,
-		"x509_upload_path":   &b.config.X509UploadPath,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.AccountId == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
@@ -168,17 +155,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	region, err := b.config.Region()
+	config, err := b.config.Config()
 	if err != nil {
 		return nil, err
 	}
 
-	auth, err := b.config.AccessConfig.Auth()
-	if err != nil {
-		return nil, err
-	}
-
-	ec2conn := ec2.New(auth, region)
+	session := session.New(config)
+	ec2conn := ec2.New(session)
 
 	// If the subnet is specified but not the AZ, try to determine the AZ automatically
 	if b.config.SubnetId != "" && b.config.AvailabilityZone == "" {
@@ -200,19 +183,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepPreValidate{
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
 		&awscommon.StepKeyPair{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:    b.config.TemporaryKeyPairName,
-			PrivateKeyFile: b.config.SSHPrivateKeyFile,
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:          b.config.SSHKeyPairName,
+			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
 		},
 		&awscommon.StepSecurityGroup{
+			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
-			SSHPort:          b.config.SSHPort,
 			VpcId:            b.config.VpcId,
 		},
 		&awscommon.StepRunSourceInstance{
@@ -226,15 +214,23 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceAMI:                b.config.SourceAmi,
 			SubnetId:                 b.config.SubnetId,
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
 		},
-		&common.StepConnectSSH{
-			SSHAddress: awscommon.SSHAddress(
-				ec2conn, b.config.SSHPort, b.config.SSHPrivateIp),
-			SSHConfig:      awscommon.SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
+		&awscommon.StepGetPassword{
+			Debug:   b.config.PackerDebug,
+			Comm:    &b.config.RunConfig.Comm,
+			Timeout: b.config.WindowsPasswordTimeout,
+		},
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: awscommon.SSHHost(
+				ec2conn,
+				b.config.SSHPrivateIp),
+			SSHConfig: awscommon.SSHConfig(
+				b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
 		&StepUploadX509Cert{},
@@ -244,9 +240,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepUploadBundle{
 			Debug: b.config.PackerDebug,
 		},
+		&awscommon.StepDeregisterAMI{
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
+		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
-			Regions: b.config.AMIRegions,
+			AccessConfig: &b.config.AccessConfig,
+			Regions:      b.config.AMIRegions,
+			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:  b.config.AMIDescription,

@@ -2,9 +2,11 @@ package common
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"strings"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type commandTemplate struct {
@@ -22,7 +24,7 @@ type commandTemplate struct {
 // Produces:
 type StepPrlctl struct {
 	Commands [][]string
-	Tpl      *packer.ConfigTemplate
+	Ctx      interpolate.Context
 }
 
 func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
@@ -34,7 +36,7 @@ func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Executing custom prlctl commands...")
 	}
 
-	tplData := &commandTemplate{
+	s.Ctx.Data = &commandTemplate{
 		Name: vmName,
 	}
 
@@ -44,7 +46,7 @@ func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
 
 		for i, arg := range command {
 			var err error
-			command[i], err = s.Tpl.Process(arg, tplData)
+			command[i], err = interpolate.Render(arg, &s.Ctx)
 			if err != nil {
 				err := fmt.Errorf("Error preparing prlctl command: %s", err)
 				state.Put("error", err)

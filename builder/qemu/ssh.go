@@ -1,30 +1,32 @@
 package qemu
 
 import (
-	"fmt"
-
-	gossh "code.google.com/p/go.crypto/ssh"
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
-func sshAddress(state multistep.StateBag) (string, error) {
+func commHost(state multistep.StateBag) (string, error) {
+	return "127.0.0.1", nil
+}
+
+func commPort(state multistep.StateBag) (int, error) {
 	sshHostPort := state.Get("sshHostPort").(uint)
-	return fmt.Sprintf("127.0.0.1:%d", sshHostPort), nil
+	return int(sshHostPort), nil
 }
 
 func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 
 	auth := []gossh.AuthMethod{
-		gossh.Password(config.SSHPassword),
+		gossh.Password(config.Comm.SSHPassword),
 		gossh.KeyboardInteractive(
-			ssh.PasswordKeyboardInteractive(config.SSHPassword)),
+			ssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
 	}
 
-	if config.SSHKeyPath != "" {
-		signer, err := commonssh.FileSigner(config.SSHKeyPath)
+	if config.Comm.SSHPrivateKey != "" {
+		signer, err := commonssh.FileSigner(config.Comm.SSHPrivateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -33,7 +35,7 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 	}
 
 	return &gossh.ClientConfig{
-		User: config.SSHUser,
+		User: config.Comm.SSHUsername,
 		Auth: auth,
 	}, nil
 }

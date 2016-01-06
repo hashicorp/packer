@@ -2,52 +2,40 @@ package openstack
 
 import (
 	"errors"
-	"fmt"
-	"github.com/mitchellh/packer/packer"
-	"time"
+
+	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	SourceImage       string   `mapstructure:"source_image"`
-	Flavor            string   `mapstructure:"flavor"`
-	RawSSHTimeout     string   `mapstructure:"ssh_timeout"`
-	SSHUsername       string   `mapstructure:"ssh_username"`
-	SSHPort           int      `mapstructure:"ssh_port"`
-	SSHInterface      string   `mapstructure:"ssh_interface"`
-	OpenstackProvider string   `mapstructure:"openstack_provider"`
-	UseFloatingIp     bool     `mapstructure:"use_floating_ip"`
-	RackconnectWait   bool     `mapstructure:"rackconnect_wait"`
-	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
-	FloatingIp        string   `mapstructure:"floating_ip"`
-	SecurityGroups    []string `mapstructure:"security_groups"`
-	Networks          []string `mapstructure:"networks"`
+	Comm           communicator.Config `mapstructure:",squash"`
+	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
+	SSHInterface   string              `mapstructure:"ssh_interface"`
 
-	// Unexported fields that are calculated from others
-	sshTimeout time.Duration
+	SourceImage      string   `mapstructure:"source_image"`
+	Flavor           string   `mapstructure:"flavor"`
+	AvailabilityZone string   `mapstructure:"availability_zone"`
+	RackconnectWait  bool     `mapstructure:"rackconnect_wait"`
+	FloatingIpPool   string   `mapstructure:"floating_ip_pool"`
+	FloatingIp       string   `mapstructure:"floating_ip"`
+	SecurityGroups   []string `mapstructure:"security_groups"`
+	Networks         []string `mapstructure:"networks"`
+	UserData         string   `mapstructure:"user_data"`
+	UserDataFile     string   `mapstructure:"user_data_file"`
+
+	ConfigDrive bool `mapstructure:"config_drive"`
+
+	// Not really used, but here for BC
+	OpenstackProvider string `mapstructure:"openstack_provider"`
+	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
 }
 
-func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
+func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Defaults
-	if c.SSHUsername == "" {
-		c.SSHUsername = "root"
-	}
-
-	if c.SSHPort == 0 {
-		c.SSHPort = 22
-	}
-
-	if c.RawSSHTimeout == "" {
-		c.RawSSHTimeout = "5m"
+	if c.Comm.SSHUsername == "" {
+		c.Comm.SSHUsername = "root"
 	}
 
 	if c.UseFloatingIp && c.FloatingIpPool == "" {
@@ -55,8 +43,7 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 	}
 
 	// Validation
-	var err error
-	errs := make([]error, 0)
+	errs := c.Comm.Prepare(ctx)
 	if c.SourceImage == "" {
 		errs = append(errs, errors.New("A source_image must be specified"))
 	}
@@ -65,37 +52,5 @@ func (c *RunConfig) Prepare(t *packer.ConfigTemplate) []error {
 		errs = append(errs, errors.New("A flavor must be specified"))
 	}
 
-	if c.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
-	}
-
-	templates := map[string]*string{
-		"flavor":             &c.Flavor,
-		"ssh_timeout":        &c.RawSSHTimeout,
-		"ssh_username":       &c.SSHUsername,
-		"ssh_interface":      &c.SSHInterface,
-		"source_image":       &c.SourceImage,
-		"openstack_provider": &c.OpenstackProvider,
-		"floating_ip_pool":   &c.FloatingIpPool,
-		"floating_ip":        &c.FloatingIp,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = t.Process(*ptr, nil)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	c.sshTimeout, err = time.ParseDuration(c.RawSSHTimeout)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
-	}
-
 	return errs
-}
-
-func (c *RunConfig) SSHTimeout() time.Duration {
-	return c.sshTimeout
 }

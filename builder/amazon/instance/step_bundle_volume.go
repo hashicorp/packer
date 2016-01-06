@@ -3,9 +3,10 @@ package instance
 import (
 	"fmt"
 
-	"github.com/mitchellh/goamz/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type bundleCmdData struct {
@@ -32,15 +33,16 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Bundle the volume
 	var err error
-	config.BundleVolCommand, err = config.tpl.Process(config.BundleVolCommand, bundleCmdData{
+	config.ctx.Data = bundleCmdData{
 		AccountId:    config.AccountId,
-		Architecture: instance.Architecture,
+		Architecture: *instance.Architecture,
 		CertPath:     x509RemoteCertPath,
 		Destination:  config.BundleDestination,
 		KeyPath:      x509RemoteKeyPath,
 		Prefix:       config.BundlePrefix,
 		PrivatePath:  config.X509UploadPath,
-	})
+	}
+	config.BundleVolCommand, err = interpolate.Render(config.BundleVolCommand, &config.ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle volume command: %s", err)
 		state.Put("error", err)
@@ -65,7 +67,9 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 	if cmd.ExitStatus != 0 {
 		state.Put("error", fmt.Errorf(
 			"Volume bundling failed. Please see the output above for more\n"+
-				"details on what went wrong."))
+				"details on what went wrong.\n\n"+
+				"One common cause for this error is ec2-bundle-vol not being\n"+
+				"available on the target instance."))
 		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}

@@ -2,11 +2,12 @@ package chroot
 
 import (
 	"fmt"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/amazon/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 // StepInstanceInfo verifies that this builder is running on an EC2 instance.
@@ -18,7 +19,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Get our own instance ID
 	ui.Say("Gathering information about this EC2 instance...")
-	instanceIdBytes, err := aws.GetMetaData("instance-id")
+	instanceIdBytes, err := common.GetInstanceMetaData("instance-id")
 	if err != nil {
 		log.Printf("Error: %s", err)
 		err := fmt.Errorf(
@@ -33,7 +34,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Instance ID: %s", instanceId)
 
 	// Query the entire instance metadata
-	instancesResp, err := ec2conn.Instances([]string{instanceId}, ec2.NewFilter())
+	instancesResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{InstanceIds: []*string{&instanceId}})
 	if err != nil {
 		err := fmt.Errorf("Error getting instance data: %s", err)
 		state.Put("error", err)
@@ -48,7 +49,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	instance := &instancesResp.Reservations[0].Instances[0]
+	instance := instancesResp.Reservations[0].Instances[0]
 	state.Put("instance", instance)
 
 	return multistep.ActionContinue

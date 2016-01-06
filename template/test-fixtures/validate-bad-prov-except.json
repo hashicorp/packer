@@ -1,0 +1,10 @@
+{
+    "builders": [{
+        "type": "foo"
+    }],
+
+    "provisioners": [{
+        "type": "bar",
+        "except": ["bar"]
+    }]
+}
