@@ -135,17 +135,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	session := session.New(config)
 	ec2conn := ec2.New(session)
 
-	// If the subnet is specified but not the AZ, try to determine the AZ automatically
-	if b.config.SubnetId != "" && b.config.AvailabilityZone == "" {
-		log.Printf("[INFO] Finding AZ for the given subnet '%s'", b.config.SubnetId)
-		resp, err := ec2conn.DescribeSubnets([]string{b.config.SubnetId}, nil)
-		if err != nil {
-			return nil, err
-		}
-		b.config.AvailabilityZone = resp.Subnets[0].AvailabilityZone
-		log.Printf("[INFO] AZ found: '%s'", b.config.AvailabilityZone)
-	}
-
 	wrappedCommand := func(command string) (string, error) {
 		ctx := b.config.ctx
 		ctx.Data = &wrappedCommandTemplate{Command: command}
