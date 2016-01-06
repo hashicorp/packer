@@ -166,11 +166,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// If the subnet is specified but not the AZ, try to determine the AZ automatically
 	if b.config.SubnetId != "" && b.config.AvailabilityZone == "" {
 		log.Printf("[INFO] Finding AZ for the given subnet '%s'", b.config.SubnetId)
-		resp, err := ec2conn.DescribeSubnets([]string{b.config.SubnetId}, nil)
+		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []string{b.config.SubnetId}})
 		if err != nil {
 			return nil, err
 		}
-		b.config.AvailabilityZone = resp.Subnets[0].AvailabilityZone
+		b.config.AvailabilityZone = *resp.Subnets[0].AvailabilityZone
 		log.Printf("[INFO] AZ found: '%s'", b.config.AvailabilityZone)
 	}
 
