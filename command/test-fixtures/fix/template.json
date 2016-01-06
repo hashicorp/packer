@@ -1,0 +1,7 @@
+{
+    "builders": [{"type": "dummy"}],
+
+    "push": {
+        "name": "foo/bar"
+    }
+}

@@ -1,10 +1,11 @@
 package common
 
 import (
-	"fmt"
+	"strings"
 
-	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/packer/packer"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // BlockDevice
@@ -25,74 +26,61 @@ type BlockDevices struct {
 	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
-func buildBlockDevices(b []BlockDevice) []ec2.BlockDeviceMapping {
-	var blockDevices []ec2.BlockDeviceMapping
+func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
+	var blockDevices []*ec2.BlockDeviceMapping
 
 	for _, blockDevice := range b {
-		blockDevices = append(blockDevices, ec2.BlockDeviceMapping{
-			DeviceName:          blockDevice.DeviceName,
-			VirtualName:         blockDevice.VirtualName,
-			SnapshotId:          blockDevice.SnapshotId,
-			VolumeType:          blockDevice.VolumeType,
-			VolumeSize:          blockDevice.VolumeSize,
-			DeleteOnTermination: blockDevice.DeleteOnTermination,
-			IOPS:                blockDevice.IOPS,
-			NoDevice:            blockDevice.NoDevice,
-			Encrypted:           blockDevice.Encrypted,
-		})
+		mapping := &ec2.BlockDeviceMapping{
+			DeviceName: aws.String(blockDevice.DeviceName),
+		}
+
+		if blockDevice.NoDevice {
+			mapping.NoDevice = aws.String("")
+		} else if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualName = aws.String(blockDevice.VirtualName)
+			}
+		} else {
+			ebsBlockDevice := &ec2.EbsBlockDevice{
+				DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
+			}
+
+			if blockDevice.VolumeType != "" {
+				ebsBlockDevice.VolumeType = aws.String(blockDevice.VolumeType)
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				ebsBlockDevice.VolumeSize = aws.Int64(blockDevice.VolumeSize)
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
+			}
+
+			// You cannot specify Encrypted if you specify a Snapshot ID
+			if blockDevice.SnapshotId != "" {
+				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
+			} else if blockDevice.Encrypted {
+				ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
+			}
+
+			mapping.Ebs = ebsBlockDevice
+		}
+
+		blockDevices = append(blockDevices, mapping)
 	}
 	return blockDevices
 }
 
-func (b *BlockDevices) Prepare(t *packer.ConfigTemplate) []error {
-	if t == nil {
-		var err error
-		t, err = packer.NewConfigTemplate()
-		if err != nil {
-			return []error{err}
-		}
-	}
-
-	lists := map[string][]BlockDevice{
-		"ami_block_device_mappings":    b.AMIMappings,
-		"launch_block_device_mappings": b.LaunchMappings,
-	}
-
-	var errs []error
-	for outer, bds := range lists {
-		for i := 0; i < len(bds); i++ {
-			templates := map[string]*string{
-				"device_name":  &bds[i].DeviceName,
-				"snapshot_id":  &bds[i].SnapshotId,
-				"virtual_name": &bds[i].VirtualName,
-				"volume_type":  &bds[i].VolumeType,
-			}
-
-			errs := make([]error, 0)
-			for n, ptr := range templates {
-				var err error
-				*ptr, err = t.Process(*ptr, nil)
-				if err != nil {
-					errs = append(
-						errs, fmt.Errorf(
-							"Error processing %s[%d].%s: %s",
-							outer, i, n, err))
-				}
-			}
-		}
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
-
+func (b *BlockDevices) Prepare(ctx *interpolate.Context) []error {
 	return nil
 }
 
-func (b *BlockDevices) BuildAMIDevices() []ec2.BlockDeviceMapping {
+func (b *BlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.AMIMappings)
 }
 
-func (b *BlockDevices) BuildLaunchDevices() []ec2.BlockDeviceMapping {
+func (b *BlockDevices) BuildLaunchDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.LaunchMappings)
 }

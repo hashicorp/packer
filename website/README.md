@@ -16,9 +16,18 @@ Running the site locally is simple. Clone this repo and run the following
 commands:
 
 ```
-$ bundle
-$ PACKER_DISABLE_DOWNLOAD_FETCH=true PACKER_VERSION=1.0 bundle exec middleman server
+make dev
 ```
 
 Then open up `localhost:4567`. Note that some URLs you may need to append
 ".html" to make them work (in the navigation and such).
+
+## Keeping Tidy
+
+To keep the source code nicely formatted, there is a `make format` target. This
+runs `htmlbeautify` and `pandoc` to reformat the source code so it's nicely formatted.
+
+    make format
+
+Note that you will need to install pandoc yourself. `make format` will skip it
+if you don't have it installed.

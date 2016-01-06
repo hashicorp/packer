@@ -8,14 +8,16 @@ import (
 	"strings"
 
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	tpl                 *packer.ConfigTemplate
+	ctx                 interpolate.Context
 
 	// The command to run ansible
 	Command string
@@ -47,6 +49,9 @@ type Config struct {
 
 	// The optional inventory file
 	InventoryFile string `mapstructure:"inventory_file"`
+
+	// The optional inventory groups
+	InventoryGroups []string `mapstructure:"inventory_groups"`
 }
 
 type Provisioner struct {
@@ -54,20 +59,16 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	md, err := common.DecodeConfig(&p.config, raws...)
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{},
+		},
+	}, raws...)
 	if err != nil {
 		return err
 	}
-
-	p.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return err
-	}
-
-	p.config.tpl.UserVars = p.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
 
 	// Defaults
 	if p.config.Command == "" {
@@ -78,44 +79,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = DefaultStagingDir
 	}
 
-	// Templates
-	templates := map[string]*string{
-		"command":        &p.config.Command,
-		"group_vars":     &p.config.GroupVars,
-		"host_vars":      &p.config.HostVars,
-		"playbook_file":  &p.config.PlaybookFile,
-		"playbook_dir":   &p.config.PlaybookDir,
-		"staging_dir":    &p.config.StagingDir,
-		"inventory_file": &p.config.InventoryFile,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = p.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	sliceTemplates := map[string][]string{
-		"extra_arguments": p.config.ExtraArguments,
-		"playbook_paths":  p.config.PlaybookPaths,
-		"role_paths":      p.config.RolePaths,
-	}
-
-	for n, slice := range sliceTemplates {
-		for i, elem := range slice {
-			var err error
-			slice[i], err = p.config.tpl.Process(elem, nil)
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
-			}
-		}
-	}
-
 	// Validation
+	var errs *packer.MultiError
 	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
@@ -196,7 +161,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		defer os.Remove(tf.Name())
-		_, err = tf.Write([]byte("127.0.0.1"))
+		if len(p.config.InventoryGroups) != 0 {
+			content := ""
+			for _, group := range p.config.InventoryGroups {
+				content += fmt.Sprintf("[%s]\n127.0.0.1\n", group)
+			}
+			_, err = tf.Write([]byte(content))
+		} else {
+			_, err = tf.Write([]byte("127.0.0.1"))
+		}
 		if err != nil {
 			tf.Close()
 			return fmt.Errorf("Error preparing inventory file: %s", err)

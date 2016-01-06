@@ -2,6 +2,8 @@ package docker
 
 import (
 	"io"
+
+	"github.com/hashicorp/go-version"
 )
 
 // MockDriver is a driver implementation that can be used for tests.
@@ -20,6 +22,11 @@ type MockDriver struct {
 	ImportRepo   string
 	ImportId     string
 	ImportErr    error
+
+	IPAddressCalled bool
+	IPAddressID     string
+	IPAddressResult string
+	IPAddressErr    error
 
 	LoginCalled   bool
 	LoginEmail    string
@@ -44,6 +51,7 @@ type MockDriver struct {
 	TagImageCalled  bool
 	TagImageImageId string
 	TagImageRepo    string
+	TagImageForce   bool
 	TagImageErr     error
 
 	ExportReader io.Reader
@@ -63,6 +71,9 @@ type MockDriver struct {
 	StopCalled   bool
 	StopID       string
 	VerifyCalled bool
+
+	VersionCalled  bool
+	VersionVersion string
 }
 
 func (d *MockDriver) Commit(id string) (string, error) {
@@ -96,6 +107,12 @@ func (d *MockDriver) Import(path, repo string) (string, error) {
 	d.ImportPath = path
 	d.ImportRepo = repo
 	return d.ImportId, d.ImportErr
+}
+
+func (d *MockDriver) IPAddress(id string) (string, error) {
+	d.IPAddressCalled = true
+	d.IPAddressID = id
+	return d.IPAddressResult, d.IPAddressErr
 }
 
 func (d *MockDriver) Login(r, e, u, p string) error {
@@ -151,14 +168,20 @@ func (d *MockDriver) StopContainer(id string) error {
 	return d.StopError
 }
 
-func (d *MockDriver) TagImage(id string, repo string) error {
+func (d *MockDriver) TagImage(id string, repo string, force bool) error {
 	d.TagImageCalled = true
 	d.TagImageImageId = id
 	d.TagImageRepo = repo
+	d.TagImageForce = force
 	return d.TagImageErr
 }
 
 func (d *MockDriver) Verify() error {
 	d.VerifyCalled = true
 	return d.VerifyError
+}
+
+func (d *MockDriver) Version() (*version.Version, error) {
+	d.VersionCalled = true
+	return version.NewVersion(d.VersionVersion)
 }

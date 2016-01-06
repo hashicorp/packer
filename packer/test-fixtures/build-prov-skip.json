@@ -1,0 +1,13 @@
+{
+    "builders": [{
+        "type": "test"
+    }, {
+        "name": "foo",
+        "type": "test"
+    }],
+
+    "provisioners": [{
+        "type": "test",
+        "only": ["foo"]
+    }]
+}

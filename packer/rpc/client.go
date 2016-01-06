@@ -1,11 +1,12 @@
 package rpc
 
 import (
-	"github.com/hashicorp/go-msgpack/codec"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"net/rpc"
+
+	"github.com/mitchellh/packer/packer"
+	"github.com/ugorji/go/codec"
 )
 
 // Client is the client end that communicates with a Packer RPC server.
@@ -95,13 +96,6 @@ func (c *Client) Cache() packer.Cache {
 
 func (c *Client) Communicator() packer.Communicator {
 	return &communicator{
-		client: c.client,
-		mux:    c.mux,
-	}
-}
-
-func (c *Client) Environment() packer.Environment {
-	return &Environment{
 		client: c.client,
 		mux:    c.mux,
 	}

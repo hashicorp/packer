@@ -103,3 +103,28 @@ func TestProvisionerPrepare_LocalPillarRoots(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestProvisionerSudo(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	withSudo := p.sudo("echo hello")
+	if withSudo != "sudo echo hello" {
+		t.Fatalf("sudo command not generated correctly")
+	}
+
+	config["disable_sudo"] = true
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	withoutSudo := p.sudo("echo hello")
+	if withoutSudo != "echo hello" {
+		t.Fatalf("sudo-less command not generated correctly")
+	}
+}

@@ -4,236 +4,39 @@
 package digitalocean
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"os"
-	"time"
 
+	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
+	"golang.org/x/oauth2"
 )
-
-// see https://api.digitalocean.com/images/?client_id=[client_id]&api_key=[api_key]
-// name="Ubuntu 12.04.4 x64", id=6374128,
-const DefaultImage = "ubuntu-12-04-x64"
-
-// see https://api.digitalocean.com/regions/?client_id=[client_id]&api_key=[api_key]
-// name="New York 3", id=8
-const DefaultRegion = "nyc3"
-
-// see https://api.digitalocean.com/sizes/?client_id=[client_id]&api_key=[api_key]
-// name="512MB", id=66 (the smallest droplet size)
-const DefaultSize = "512mb"
 
 // The unique id for the builder
 const BuilderId = "pearkes.digitalocean"
 
-// Configuration tells the builder the credentials
-// to use while communicating with DO and describes the image
-// you are creating
-type config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	ClientID string `mapstructure:"client_id"`
-	APIKey   string `mapstructure:"api_key"`
-	APIURL   string `mapstructure:"api_url"`
-	APIToken string `mapstructure:"api_token"`
-	RegionID uint   `mapstructure:"region_id"`
-	SizeID   uint   `mapstructure:"size_id"`
-	ImageID  uint   `mapstructure:"image_id"`
-
-	Region string `mapstructure:"region"`
-	Size   string `mapstructure:"size"`
-	Image  string `mapstructure:"image"`
-
-	PrivateNetworking bool   `mapstructure:"private_networking"`
-	SnapshotName      string `mapstructure:"snapshot_name"`
-	DropletName       string `mapstructure:"droplet_name"`
-	SSHUsername       string `mapstructure:"ssh_username"`
-	SSHPort           uint   `mapstructure:"ssh_port"`
-
-	RawSSHTimeout   string `mapstructure:"ssh_timeout"`
-	RawStateTimeout string `mapstructure:"state_timeout"`
-
-	// These are unexported since they're set by other fields
-	// being set.
-	sshTimeout   time.Duration
-	stateTimeout time.Duration
-
-	tpl *packer.ConfigTemplate
-}
-
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
-	if err != nil {
-		return nil, err
+	c, warnings, errs := NewConfig(raws...)
+	if errs != nil {
+		return warnings, errs
 	}
+	b.config = *c
 
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
-
-	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-
-	// Optional configuration with defaults
-	if b.config.APIKey == "" {
-		// Default to environment variable for api_key, if it exists
-		b.config.APIKey = os.Getenv("DIGITALOCEAN_API_KEY")
-	}
-
-	if b.config.ClientID == "" {
-		// Default to environment variable for client_id, if it exists
-		b.config.ClientID = os.Getenv("DIGITALOCEAN_CLIENT_ID")
-	}
-
-	if b.config.APIURL == "" {
-		// Default to environment variable for api_url, if it exists
-		b.config.APIURL = os.Getenv("DIGITALOCEAN_API_URL")
-	}
-
-	if b.config.APIToken == "" {
-		// Default to environment variable for api_token, if it exists
-		b.config.APIToken = os.Getenv("DIGITALOCEAN_API_TOKEN")
-	}
-
-	if b.config.Region == "" {
-		if b.config.RegionID != 0 {
-			b.config.Region = fmt.Sprintf("%v", b.config.RegionID)
-		} else {
-			b.config.Region = DefaultRegion
-		}
-	}
-
-	if b.config.Size == "" {
-		if b.config.SizeID != 0 {
-			b.config.Size = fmt.Sprintf("%v", b.config.SizeID)
-		} else {
-			b.config.Size = DefaultSize
-		}
-	}
-
-	if b.config.Image == "" {
-		if b.config.ImageID != 0 {
-			b.config.Image = fmt.Sprintf("%v", b.config.ImageID)
-		} else {
-			b.config.Image = DefaultImage
-		}
-	}
-
-	if b.config.SnapshotName == "" {
-		// Default to packer-{{ unix timestamp (utc) }}
-		b.config.SnapshotName = "packer-{{timestamp}}"
-	}
-
-	if b.config.DropletName == "" {
-		// Default to packer-[time-ordered-uuid]
-		b.config.DropletName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
-	}
-
-	if b.config.SSHUsername == "" {
-		// Default to "root". You can override this if your
-		// SourceImage has a different user account then the DO default
-		b.config.SSHUsername = "root"
-	}
-
-	if b.config.SSHPort == 0 {
-		// Default to port 22 per DO default
-		b.config.SSHPort = 22
-	}
-
-	if b.config.RawSSHTimeout == "" {
-		// Default to 1 minute timeouts
-		b.config.RawSSHTimeout = "1m"
-	}
-
-	if b.config.RawStateTimeout == "" {
-		// Default to 6 minute timeouts waiting for
-		// desired state. i.e waiting for droplet to become active
-		b.config.RawStateTimeout = "6m"
-	}
-
-	templates := map[string]*string{
-		"region":        &b.config.Region,
-		"size":          &b.config.Size,
-		"image":         &b.config.Image,
-		"client_id":     &b.config.ClientID,
-		"api_key":       &b.config.APIKey,
-		"api_url":       &b.config.APIURL,
-		"api_token":     &b.config.APIToken,
-		"snapshot_name": &b.config.SnapshotName,
-		"droplet_name":  &b.config.DropletName,
-		"ssh_username":  &b.config.SSHUsername,
-		"ssh_timeout":   &b.config.RawSSHTimeout,
-		"state_timeout": &b.config.RawStateTimeout,
-	}
-
-	for n, ptr := range templates {
-		var err error
-		*ptr, err = b.config.tpl.Process(*ptr, nil)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Error processing %s: %s", n, err))
-		}
-	}
-
-	if b.config.APIToken == "" {
-		// Required configurations that will display errors if not set
-		if b.config.ClientID == "" {
-			errs = packer.MultiErrorAppend(
-				errs, errors.New("a client_id for v1 auth or api_token for v2 auth must be specified"))
-		}
-
-		if b.config.APIKey == "" {
-			errs = packer.MultiErrorAppend(
-				errs, errors.New("a api_key for v1 auth or api_token for v2 auth must be specified"))
-		}
-	}
-
-	if b.config.APIURL == "" {
-		b.config.APIURL = "https://api.digitalocean.com"
-	}
-
-	sshTimeout, err := time.ParseDuration(b.config.RawSSHTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing ssh_timeout: %s", err))
-	}
-	b.config.sshTimeout = sshTimeout
-
-	stateTimeout, err := time.ParseDuration(b.config.RawStateTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
-	}
-	b.config.stateTimeout = stateTimeout
-
-	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
-	}
-
-	common.ScrubConfig(b.config, b.config.ClientID, b.config.APIKey)
 	return nil, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	var client DigitalOceanClient
-	// Initialize the DO API client
-	if b.config.APIToken == "" {
-		client = DigitalOceanClientNewV1(b.config.ClientID, b.config.APIKey, b.config.APIURL)
-	} else {
-		client = DigitalOceanClientNewV2(b.config.APIToken, b.config.APIURL)
-	}
+	client := godo.NewClient(oauth2.NewClient(oauth2.NoContext, &apiTokenSource{
+		AccessToken: b.config.APIToken,
+	}))
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
@@ -244,13 +47,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		new(stepCreateSSHKey),
+		&stepCreateSSHKey{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("do_%s.pem", b.config.PackerBuildName),
+		},
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
-		&common.StepConnectSSH{
-			SSHAddress:     sshAddress,
-			SSHConfig:      sshConfig,
-			SSHWaitTimeout: 5 * time.Minute,
+		&communicator.StepConnect{
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: sshConfig,
 		},
 		new(common.StepProvision),
 		new(stepShutdown),
@@ -280,26 +86,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, nil
 	}
 
-	sregion := state.Get("region")
-
-	var region string
-
-	if sregion != nil {
-		region = sregion.(string)
-	} else {
-		region = fmt.Sprintf("%v", state.Get("region_id").(uint))
-	}
-
-	found_region, err := client.Region(region)
-
-	if err != nil {
-		return nil, err
-	}
-
 	artifact := &Artifact{
 		snapshotName: state.Get("snapshot_name").(string),
-		snapshotId:   state.Get("snapshot_image_id").(uint),
-		regionName:   found_region.Name,
+		snapshotId:   state.Get("snapshot_image_id").(int),
+		regionName:   state.Get("region").(string),
 		client:       client,
 	}
 

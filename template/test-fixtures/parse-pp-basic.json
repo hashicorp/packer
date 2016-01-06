@@ -1,0 +1,6 @@
+{
+    "post-processors": [{
+        "type": "foo",
+        "foo": "bar"
+    }]
+}

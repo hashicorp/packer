@@ -1,16 +1,15 @@
 package googlecompute
 
 import (
-	"code.google.com/p/go.crypto/ssh"
 	"fmt"
+
 	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
 )
 
-// sshAddress returns the ssh address.
-func sshAddress(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(*Config)
+func commHost(state multistep.StateBag) (string, error) {
 	ipAddress := state.Get("instance_ip").(string)
-	return fmt.Sprintf("%s:%d", ipAddress, config.SSHPort), nil
+	return ipAddress, nil
 }
 
 // sshConfig returns the ssh configuration.
@@ -24,7 +23,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 	}
 
 	return &ssh.ClientConfig{
-		User: config.SSHUsername,
+		User: config.Comm.SSHUsername,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},

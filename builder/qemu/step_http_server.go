@@ -25,7 +25,7 @@ type stepHTTPServer struct {
 }
 
 func (s *stepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	var httpPort uint = 0

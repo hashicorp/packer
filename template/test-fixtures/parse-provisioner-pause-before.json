@@ -1,0 +1,8 @@
+{
+    "provisioners": [
+        {
+            "type": "something",
+            "pause_before": "1s"
+        }
+    ]
+}

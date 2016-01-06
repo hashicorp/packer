@@ -1,0 +1,22 @@
+{
+    "builders": [
+        {
+            "name":"chocolate",
+            "type":"file",
+            "content":"chocolate",
+            "target":"chocolate.txt"
+        },
+        {
+            "name":"vanilla",
+            "type":"file",
+            "content":"vanilla",
+            "target":"vanilla.txt"
+        },
+        {
+            "name":"cherry",
+            "type":"file",
+            "content":"cherry",
+            "target":"cherry.txt"
+        }
+    ]
+}

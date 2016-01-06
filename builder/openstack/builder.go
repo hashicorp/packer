@@ -5,48 +5,48 @@ package openstack
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 
-	"github.com/mitchellh/gophercloud-fork-40444fb"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/mitchellh/packer/helper/config"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // The unique ID for this builder
 const BuilderId = "mitchellh.openstack"
 
-type config struct {
+type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	AccessConfig        `mapstructure:",squash"`
-	ImageConfig         `mapstructure:",squash"`
-	RunConfig           `mapstructure:",squash"`
 
-	tpl *packer.ConfigTemplate
+	AccessConfig `mapstructure:",squash"`
+	ImageConfig  `mapstructure:",squash"`
+	RunConfig    `mapstructure:",squash"`
+
+	ctx interpolate.Context
 }
 
 type Builder struct {
-	config config
+	config Config
 	runner multistep.Runner
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	md, err := common.DecodeConfig(&b.config, raws...)
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
+	}, raws...)
 	if err != nil {
 		return nil, err
 	}
-
-	b.config.tpl, err = packer.NewConfigTemplate()
-	if err != nil {
-		return nil, err
-	}
-	b.config.tpl.UserVars = b.config.PackerUserVars
 
 	// Accumulate any errors
-	errs := common.CheckUnusedConfig(md)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ImageConfig.Prepare(b.config.tpl)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(b.config.tpl)...)
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ImageConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
@@ -57,57 +57,55 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	auth, err := b.config.AccessConfig.Auth()
+	computeClient, err := b.config.computeV2Client()
 	if err != nil {
-		return nil, err
-	}
-	//fetches the api requisites from gophercloud for the appropriate
-	//openstack variant
-	api, err := gophercloud.PopulateApi(b.config.RunConfig.OpenstackProvider)
-	if err != nil {
-		return nil, err
-	}
-	api.Region = b.config.AccessConfig.Region()
-
-	csp, err := gophercloud.ServersApi(auth, api)
-	if err != nil {
-		log.Printf("Region: %s", b.config.AccessConfig.Region())
-		return nil, err
+		return nil, fmt.Errorf("Error initializing compute client: %s", err)
 	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
-	state.Put("csp", csp)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	// Build the steps
 	steps := []multistep.Step{
+		&StepLoadExtensions{},
+		&StepLoadFlavor{
+			Flavor: b.config.Flavor,
+		},
 		&StepKeyPair{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
+			Debug:          b.config.PackerDebug,
+			DebugKeyPath:   fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
+			KeyPairName:    b.config.SSHKeyPairName,
+			PrivateKeyFile: b.config.RunConfig.Comm.SSHPrivateKey,
 		},
 		&StepRunSourceServer{
-			Name:           b.config.ImageName,
-			Flavor:         b.config.Flavor,
-			SourceImage:    b.config.SourceImage,
-			SecurityGroups: b.config.SecurityGroups,
-			Networks:       b.config.Networks,
+			Name:             b.config.ImageName,
+			SourceImage:      b.config.SourceImage,
+			SecurityGroups:   b.config.SecurityGroups,
+			Networks:         b.config.Networks,
+			AvailabilityZone: b.config.AvailabilityZone,
+			UserData:         b.config.UserData,
+			UserDataFile:     b.config.UserDataFile,
+			ConfigDrive:      b.config.ConfigDrive,
 		},
 		&StepWaitForRackConnect{
-			Wait:           b.config.RackconnectWait,
+			Wait: b.config.RackconnectWait,
 		},
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
 			FloatingIp:     b.config.FloatingIp,
 		},
-		&common.StepConnectSSH{
-			SSHAddress:     SSHAddress(csp, b.config.SSHInterface, b.config.SSHPort),
-			SSHConfig:      SSHConfig(b.config.SSHUsername),
-			SSHWaitTimeout: b.config.SSHTimeout(),
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: CommHost(
+				computeClient,
+				b.config.SSHInterface),
+			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
+		&StepStopServer{},
 		&stepCreateImage{},
 	}
 
@@ -137,7 +135,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		ImageId:        state.Get("image").(string),
 		BuilderIdValue: BuilderId,
-		Conn:           csp,
+		Client:         computeClient,
 	}
 
 	return artifact, nil

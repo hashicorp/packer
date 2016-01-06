@@ -2,9 +2,11 @@ package common
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"os"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type toolsUploadPathTemplate struct {
@@ -15,20 +17,20 @@ type StepUploadTools struct {
 	RemoteType        string
 	ToolsUploadFlavor string
 	ToolsUploadPath   string
-	Tpl               *packer.ConfigTemplate
+	Ctx               interpolate.Context
 }
 
 func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
+	if c.ToolsUploadFlavor == "" {
+		return multistep.ActionContinue
+	}
+
 	if c.RemoteType == "esx5" {
 		if err := driver.ToolsInstall(); err != nil {
 			state.Put("error", fmt.Errorf("Couldn't mount VMware tools ISO. Please check the 'guest_os_type' in your template.json."))
 		}
-		return multistep.ActionContinue
-	}
-
-	if c.ToolsUploadFlavor == "" {
 		return multistep.ActionContinue
 	}
 
@@ -44,10 +46,10 @@ func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
 	}
 	defer f.Close()
 
-	tplData := &toolsUploadPathTemplate{
+	c.Ctx.Data = &toolsUploadPathTemplate{
 		Flavor: c.ToolsUploadFlavor,
 	}
-	c.ToolsUploadPath, err = c.Tpl.Process(c.ToolsUploadPath, tplData)
+	c.ToolsUploadPath, err = interpolate.Render(c.ToolsUploadPath, &c.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error preparing upload path: %s", err)
 		state.Put("error", err)

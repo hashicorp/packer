@@ -5,6 +5,7 @@ import (
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type uploadCmdData struct {
@@ -35,14 +36,15 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	config.BundleUploadCommand, err = config.tpl.Process(config.BundleUploadCommand, uploadCmdData{
+	config.ctx.Data = uploadCmdData{
 		AccessKey:       config.AccessKey,
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
-		Region:          region.Name,
+		Region:          region,
 		SecretKey:       config.SecretKey,
-	})
+	}
+	config.BundleUploadCommand, err = interpolate.Render(config.BundleUploadCommand, &config.ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing bundle upload command: %s", err)
 		state.Put("error", err)

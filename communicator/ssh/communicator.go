@@ -3,18 +3,27 @@ package ssh
 import (
 	"bufio"
 	"bytes"
-	"code.google.com/p/go.crypto/ssh"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
+	"time"
+
+	"github.com/mitchellh/packer/packer"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
+
+// ErrHandshakeTimeout is returned from New() whenever we're unable to establish
+// an ssh connection within a certain timeframe. By default the handshake time-
+// out period is 1 minute. You can change it with Config.HandshakeTimeout.
+var ErrHandshakeTimeout = fmt.Errorf("Timeout during SSH handshake")
 
 type comm struct {
 	client  *ssh.Client
@@ -33,8 +42,15 @@ type Config struct {
 	// case an error occurs.
 	Connection func() (net.Conn, error)
 
-	// NoPty, if true, will not request a pty from the remote end.
-	NoPty bool
+	// Pty, if true, will request a pty from the remote end.
+	Pty bool
+
+	// DisableAgent, if true, will not forward the SSH agent.
+	DisableAgent bool
+
+	// HandshakeTimeout limits the amount of time we'll wait to handshake before
+	// saying the connection failed.
+	HandshakeTimeout time.Duration
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -65,7 +81,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	session.Stdout = cmd.Stdout
 	session.Stderr = cmd.Stderr
 
-	if !c.config.NoPty {
+	if c.config.Pty {
 		// Request a PTY
 		termModes := ssh.TerminalModes{
 			ssh.ECHO:          0,     // do not echo
@@ -170,8 +186,57 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 	return c.scpSession("scp -rvt "+dst, scpFunc)
 }
 
-func (c *comm) Download(string, io.Writer) error {
-	panic("not implemented yet")
+func (c *comm) Download(path string, output io.Writer) error {
+	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
+		fmt.Fprint(w, "\x00")
+
+		// read file info
+		fi, err := stdoutR.ReadString('\n')
+		if err != nil {
+			return err
+		}
+
+		if len(fi) < 0 {
+			return fmt.Errorf("empty response from server")
+		}
+
+		switch fi[0] {
+		case '\x01', '\x02':
+			return fmt.Errorf("%s", fi[1:len(fi)])
+		case 'C':
+		case 'D':
+			return fmt.Errorf("remote file is directory")
+		default:
+			return fmt.Errorf("unexpected server response (%x)", fi[0])
+		}
+
+		var mode string
+		var size int64
+
+		n, err := fmt.Sscanf(fi, "%6s %d ", &mode, &size)
+		if err != nil || n != 2 {
+			return fmt.Errorf("can't parse server response (%s)", fi)
+		}
+		if size < 0 {
+			return fmt.Errorf("negative file size")
+		}
+
+		fmt.Fprint(w, "\x00")
+
+		if _, err := io.CopyN(output, stdoutR, size); err != nil {
+			return err
+		}
+
+		fmt.Fprint(w, "\x00")
+
+		if err := checkSCPStatus(stdoutR); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return c.scpSession("scp -vf "+strconv.Quote(path), scpFunc)
 }
 
 func (c *comm) newSession() (session *ssh.Session, err error) {
@@ -219,14 +284,104 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	log.Printf("handshaking with SSH")
-	sshConn, sshChan, req, err := ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+
+	// Default timeout to 1 minute if it wasn't specified (zero value). For
+	// when you need to handshake from low orbit.
+	var duration time.Duration
+	if c.config.HandshakeTimeout == 0 {
+		duration = 1 * time.Minute
+	} else {
+		duration = c.config.HandshakeTimeout
+	}
+
+	connectionEstablished := make(chan struct{}, 1)
+
+	var sshConn ssh.Conn
+	var sshChan <-chan ssh.NewChannel
+	var req <-chan *ssh.Request
+
+	go func() {
+		sshConn, sshChan, req, err = ssh.NewClientConn(c.conn, c.address, c.config.SSHConfig)
+		close(connectionEstablished)
+	}()
+
+	select {
+	case <-connectionEstablished:
+		// We don't need to do anything here. We just want select to block until
+		// we connect or timeout.
+	case <-time.After(duration):
+		if c.conn != nil {
+			c.conn.Close()
+		}
+		if sshConn != nil {
+			sshConn.Close()
+		}
+		return ErrHandshakeTimeout
+	}
+
 	if err != nil {
 		log.Printf("handshake error: %s", err)
+		return
 	}
+	log.Printf("handshake complete!")
 	if sshConn != nil {
 		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
+	c.connectToAgent()
 
+	return
+}
+
+func (c *comm) connectToAgent() {
+	if c.client == nil {
+		return
+	}
+
+	if c.config.DisableAgent {
+		log.Printf("[INFO] SSH agent forwarding is disabled.")
+		return
+	}
+
+	// open connection to the local agent
+	socketLocation := os.Getenv("SSH_AUTH_SOCK")
+	if socketLocation == "" {
+		log.Printf("[INFO] no local agent socket, will not connect agent")
+		return
+	}
+	agentConn, err := net.Dial("unix", socketLocation)
+	if err != nil {
+		log.Printf("[ERROR] could not connect to local agent socket: %s", socketLocation)
+		return
+	}
+
+	// create agent and add in auth
+	forwardingAgent := agent.NewClient(agentConn)
+	if forwardingAgent == nil {
+		log.Printf("[ERROR] Could not create agent client")
+		agentConn.Close()
+		return
+	}
+
+	// add callback for forwarding agent to SSH config
+	// XXX - might want to handle reconnects appending multiple callbacks
+	auth := ssh.PublicKeysCallback(forwardingAgent.Signers)
+	c.config.SSHConfig.Auth = append(c.config.SSHConfig.Auth, auth)
+	agent.ForwardToAgent(c.client, forwardingAgent)
+
+	// Setup a session to request agent forwarding
+	session, err := c.newSession()
+	if err != nil {
+		return
+	}
+	defer session.Close()
+
+	err = agent.RequestAgentForwarding(session)
+	if err != nil {
+		log.Printf("[ERROR] RequestAgentForwarding: %#v", err)
+		return
+	}
+
+	log.Printf("[INFO] agent forwarding enabled")
 	return
 }
 

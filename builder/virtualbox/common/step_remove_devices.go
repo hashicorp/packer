@@ -38,6 +38,19 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+
+		// Don't forget to remove the floppy controller as well
+		command = []string{
+			"storagectl", vmName,
+			"--name", "Floppy Controller",
+			"--remove",
+		}
+		if err := driver.VBoxManage(command...); err != nil {
+			err := fmt.Errorf("Error removing floppy controller: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	if _, ok := state.GetOk("attachedIso"); ok {

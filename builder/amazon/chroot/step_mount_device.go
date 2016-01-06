@@ -3,12 +3,15 @@ package chroot
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type mountPathData struct {
@@ -21,6 +24,8 @@ type mountPathData struct {
 //   mount_path string - The location where the volume was mounted.
 //   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
+	MountOptions []string
+
 	mountPath string
 }
 
@@ -31,9 +36,9 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	device := state.Get("device").(string)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
-	mountPath, err := config.tpl.Process(config.MountPath, &mountPathData{
-		Device: filepath.Base(device),
-	})
+	ctx := config.ctx
+	ctx.Data = &mountPathData{Device: filepath.Base(device)}
+	mountPath, err := interpolate.Render(config.MountPath, &ctx)
 
 	if err != nil {
 		err := fmt.Errorf("Error preparing mount directory: %s", err)
@@ -59,17 +64,24 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Source image virtualization type is: %s", image.VirtualizationType)
+	log.Printf("Source image virtualization type is: %s", *image.VirtualizationType)
 	deviceMount := device
-	if image.VirtualizationType == "hvm" {
+	if *image.VirtualizationType == "hvm" {
 		deviceMount = fmt.Sprintf("%s%d", device, 1)
 	}
 	state.Put("deviceMount", deviceMount)
 
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
+
+	// build mount options from mount_options config, usefull for nouuid options
+	// or other specific device type settings for mount
+	opts := ""
+	if len(s.MountOptions) > 0 {
+		opts = "-o " + strings.Join(s.MountOptions, " -o ")
+	}
 	mountCommand, err := wrappedCommand(
-		fmt.Sprintf("mount %s %s", deviceMount, mountPath))
+		fmt.Sprintf("mount %s %s %s", opts, deviceMount, mountPath))
 	if err != nil {
 		err := fmt.Errorf("Error creating mount command: %s", err)
 		state.Put("error", err)

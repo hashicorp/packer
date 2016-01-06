@@ -2,11 +2,12 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step cleans up the VMX by removing or changing this prior to
@@ -53,7 +54,11 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 		vmxData[ide+"devicetype"] = "cdrom-raw"
 		vmxData[ide+"filename"] = "auto detect"
+		vmxData[ide+"clientdevice"] = "TRUE"
 	}
+
+	ui.Message("Disabling VNC server...")
+	vmxData["remotedisplay.vnc.enabled"] = "FALSE"
 
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {

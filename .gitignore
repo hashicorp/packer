@@ -7,3 +7,8 @@
 .DS_Store
 .vagrant
 test/.env
+
+website/.bundle
+website/vendor
+
+packer-test*.log

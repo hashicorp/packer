@@ -3,11 +3,13 @@ package chroot
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/goamz/ec2"
+	"strings"
+	"time"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
-	"strings"
 )
 
 // StepAttachVolume attaches the previously created volume to an
@@ -32,7 +34,11 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 	attachVolume := strings.Replace(device, "/xvd", "/sd", 1)
 
 	ui.Say(fmt.Sprintf("Attaching the root volume to %s", attachVolume))
-	_, err := ec2conn.AttachVolume(volumeId, instance.InstanceId, attachVolume)
+	_, err := ec2conn.AttachVolume(&ec2.AttachVolumeInput{
+		InstanceId: instance.InstanceId,
+		VolumeId:   &volumeId,
+		Device:     &attachVolume,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error attaching volume: %s", err)
 		state.Put("error", err)
@@ -50,17 +56,26 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 		StepState: state,
 		Target:    "attached",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.Volumes([]string{volumeId}, ec2.NewFilter())
-			if err != nil {
-				return nil, "", err
+			attempts := 0
+			for attempts < 30 {
+				resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&volumeId}})
+				if err != nil {
+					return nil, "", err
+				}
+				if len(resp.Volumes[0].Attachments) > 0 {
+					a := resp.Volumes[0].Attachments[0]
+					return a, *a.State, nil
+				}
+				// When Attachment on volume is not present sleep for 2s and retry
+				attempts += 1
+				ui.Say(fmt.Sprintf(
+					"Volume %s show no attachments. Attempt %d/30. Sleeping for 2s and will retry.",
+					volumeId, attempts))
+				time.Sleep(2 * time.Second)
 			}
 
-			if len(resp.Volumes[0].Attachments) == 0 {
-				return nil, "", errors.New("No attachments on volume.")
-			}
-
-			a := resp.Volumes[0].Attachments[0]
-			return a, a.Status, nil
+			// Attachment on volume is not present after all attempts
+			return nil, "", errors.New("No attachments on volume.")
 		},
 	}
 
@@ -92,7 +107,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Detaching EBS volume...")
-	_, err := ec2conn.DetachVolume(s.volumeId)
+	_, err := ec2conn.DetachVolume(&ec2.DetachVolumeInput{VolumeId: &s.volumeId})
 	if err != nil {
 		return fmt.Errorf("Error detaching EBS volume: %s", err)
 	}
@@ -105,14 +120,14 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 		StepState: state,
 		Target:    "detached",
 		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.Volumes([]string{s.volumeId}, ec2.NewFilter())
+			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&s.volumeId}})
 			if err != nil {
 				return nil, "", err
 			}
 
 			v := resp.Volumes[0]
 			if len(v.Attachments) > 0 {
-				return v, v.Attachments[0].Status, nil
+				return v, *v.Attachments[0].State, nil
 			} else {
 				return v, "detached", nil
 			}

@@ -1,6 +1,7 @@
 # Packer
 
 [![Build Status](https://travis-ci.org/mitchellh/packer.svg?branch=master)](https://travis-ci.org/mitchellh/packer)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true)](https://ci.appveyor.com/project/hashicorp/packer)
 
 * Website: http://www.packer.io
 * IRC: `#packer-tool` on Freenode
@@ -41,15 +42,19 @@ for your operating system or [compile Packer yourself](#developing-packer).
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
 case, we'll create a simple AMI that has Redis pre-installed. Save this
-file as `quick-start.json`. Be sure to replace any credentials with your
-own.
+file as `quick-start.json`. Export your AWS credentials as the
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
 ```json
 {
+  "variables": {
+    "access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
   "builders": [{
     "type": "amazon-ebs",
-    "access_key": "YOUR KEY HERE",
-    "secret_key": "YOUR SECRET KEY HERE",
+    "access_key": "{{user `access_key`}}",
+    "secret_key": "{{user `access_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-de0d9eb7",
     "instance_type": "t1.micro",
@@ -81,7 +86,7 @@ http://www.packer.io/docs
 ## Developing Packer
 
 If you wish to work on Packer itself or any of its built-in providers,
-you'll first need [Go](http://www.golang.org) installed (version 1.2+ is
+you'll first need [Go](http://www.golang.org) installed (version 1.4+ is
 _required_). Make sure Go is properly installed, including setting up
 a [GOPATH](http://golang.org/doc/code.html#GOPATH).
 
@@ -121,3 +126,35 @@ package by specifying the `TEST` variable. For example below, only
 
     $ make test TEST=./packer
     ...
+
+### Acceptance Tests
+
+Packer has comprehensive [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
+covering the builders of Packer.
+
+If you're working on a feature of a builder or a new builder and want
+verify it is functioning (and also hasn't broken anything else), we recommend
+running the acceptance tests.
+
+**Warning:** The acceptance tests create/destroy/modify *real resources*, which
+may incur real costs in some cases. In the presence of a bug, it is technically
+possible that broken backends could leave dangling data behind. Therefore,
+please run the acceptance tests at your own risk. At the very least,
+we recommend running them in their own private account for whatever builder
+you're testing.
+
+To run the acceptance tests, invoke `make testacc`:
+
+```sh
+$ make testacc TEST=./builder/amazon/ebs
+...
+```
+
+The `TEST` variable is required, and you should specify the folder where the
+backend is. The `TESTARGS` variable is recommended to filter down to a specific
+resource to test, since testing all of them at once can sometimes take a very
+long time.
+
+Acceptance tests typically require other environment variables to be set for
+things such as access keys. The test itself should error early and tell
+you what to set, so it is not documented here.

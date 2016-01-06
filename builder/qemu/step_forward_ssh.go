@@ -19,7 +19,7 @@ import (
 type stepForwardSSH struct{}
 
 func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	log.Printf("Looking for available SSH port between %d and %d", config.SSHHostPortMin, config.SSHHostPortMax)
@@ -34,12 +34,17 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 
 	for {
 		sshHostPort = offset + config.SSHHostPortMin
+		if sshHostPort >= config.SSHHostPortMax {
+			offset = 0
+			sshHostPort = config.SSHHostPortMin
+		}
 		log.Printf("Trying port: %d", sshHostPort)
 		l, err := net.Listen("tcp", fmt.Sprintf(":%d", sshHostPort))
 		if err == nil {
 			defer l.Close()
 			break
 		}
+		offset++
 	}
 	ui.Say(fmt.Sprintf("Found port for SSH: %d.", sshHostPort))
 

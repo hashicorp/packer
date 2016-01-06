@@ -6,12 +6,15 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/mitchellh/cli"
+	"github.com/mitchellh/packer/command"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 	"github.com/mitchellh/panicwrap"
@@ -139,15 +142,14 @@ func wrappedMain() int {
 
 	defer plugin.CleanupClients()
 
-	// Create the environment configuration
-	EnvConfig = *packer.DefaultEnvironmentConfig()
-	EnvConfig.Cache = cache
-	EnvConfig.Components.Builder = config.LoadBuilder
-	EnvConfig.Components.Hook = config.LoadHook
-	EnvConfig.Components.PostProcessor = config.LoadPostProcessor
-	EnvConfig.Components.Provisioner = config.LoadProvisioner
+	// Setup the UI if we're being machine-readable
+	var ui packer.Ui = &packer.BasicUi{
+		Reader:      os.Stdin,
+		Writer:      os.Stdout,
+		ErrorWriter: os.Stdout,
+	}
 	if machineReadable {
-		EnvConfig.Ui = &packer.MachineReadableUi{
+		ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
 
@@ -159,12 +161,27 @@ func wrappedMain() int {
 		}
 	}
 
+	// Create the CLI meta
+	CommandMeta = &command.Meta{
+		CoreConfig: &packer.CoreConfig{
+			Components: packer.ComponentFinder{
+				Builder:       config.LoadBuilder,
+				Hook:          config.LoadHook,
+				PostProcessor: config.LoadPostProcessor,
+				Provisioner:   config.LoadProvisioner,
+			},
+			Version: Version,
+		},
+		Cache: cache,
+		Ui:    ui,
+	}
+
 	//setupSignalHandlers(env)
 
 	cli := &cli.CLI{
 		Args:       args,
 		Commands:   Commands,
-		HelpFunc:   cli.BasicHelpFunc("packer"),
+		HelpFunc:   excludeHelpFunc(Commands, []string{"plugin"}),
 		HelpWriter: os.Stdout,
 		Version:    Version,
 	}
@@ -176,6 +193,27 @@ func wrappedMain() int {
 	}
 
 	return exitCode
+}
+
+// excludeHelpFunc filters commands we don't want to show from the list of
+// commands displayed in packer's help text.
+func excludeHelpFunc(commands map[string]cli.CommandFactory, exclude []string) cli.HelpFunc {
+	// Make search slice into a map so we can use use the `if found` idiom
+	// instead of a nested loop.
+	var excludes = make(map[string]interface{}, len(exclude))
+	for _, item := range exclude {
+		excludes[item] = nil
+	}
+
+	// Create filtered list of commands
+	helpCommands := []string{}
+	for command := range commands {
+		if _, found := excludes[command]; !found {
+			helpCommands = append(helpCommands, command)
+		}
+	}
+
+	return cli.FilteredHelpFunc(helpCommands, cli.BasicHelpFunc("packer"))
 }
 
 // extractMachineReadable checks the args for the machine readable
@@ -203,12 +241,10 @@ func loadConfig() (*config, error) {
 		return nil, err
 	}
 
-	mustExist := true
 	configFilePath := os.Getenv("PACKER_CONFIG")
 	if configFilePath == "" {
 		var err error
-		configFilePath, err = configFile()
-		mustExist = false
+		configFilePath, err = packer.ConfigFile()
 
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
@@ -226,11 +262,7 @@ func loadConfig() (*config, error) {
 			return nil, err
 		}
 
-		if mustExist {
-			return nil, err
-		}
-
-		log.Println("File doesn't exist, but doesn't need to. Ignoring.")
+		log.Printf("[WARN] Config file doesn't exist: %s", configFilePath)
 		return &config, nil
 	}
 	defer f.Close()
@@ -282,4 +314,9 @@ func copyOutput(r io.Reader, doneCh chan<- struct{}) {
 	}()
 
 	wg.Wait()
+}
+
+func init() {
+	// Seed the random number generator
+	rand.Seed(time.Now().UTC().UnixNano())
 }

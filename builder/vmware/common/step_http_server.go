@@ -49,7 +49,7 @@ func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		httpPort = offset + s.HTTPPortMin
-		httpAddr = fmt.Sprintf(":%d", httpPort)
+		httpAddr = fmt.Sprintf("0.0.0.0:%d", httpPort)
 		log.Printf("Trying port: %d", httpPort)
 		s.l, err = net.Listen("tcp", httpAddr)
 		if err == nil {
