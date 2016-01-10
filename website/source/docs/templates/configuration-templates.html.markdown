@@ -199,7 +199,7 @@ Please note that double quote characters need escaping inside of templates:
       "secret_key": "...",
       "region": "us-east-1",
       "source_ami": "ami-de0d9eb7",
-      "instance_type": "t1.micro",
+      "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
       "ami_name": "packer {{isotime \"2006-01-02\"}}"
     }

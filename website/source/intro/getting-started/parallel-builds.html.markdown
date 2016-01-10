@@ -96,7 +96,7 @@ The entire template should now look like this:
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-de0d9eb7",
-    "instance_type": "t1.micro",
+    "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
   },{
