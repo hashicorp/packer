@@ -30,6 +30,13 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 
+	c.AMIRegions = []string{"ap-northeast-1", "ap-southeast-1", "ap-southeast-2",
+		"cn-north-1", "eu-central-1", "eu-west-1", "sa-east-1",
+		"us-east-1", "us-gov-west-1", "us-west-1", "us-west-2"}
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
+
 	c.AMIRegions = []string{"foo"}
 	if err := c.Prepare(nil); err == nil {
 		t.Fatal("should have error")
