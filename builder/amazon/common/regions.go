@@ -3,8 +3,9 @@ package common
 // IsValidRegion returns true if the supplied region is a valid AWS
 // region and false if it's not.
 func ValidateRegion(region string) bool {
-	var regions = [11]string{
+	var regions = [12]string{
 		"ap-northeast-1",
+		"ap-northeast-2",
 		"ap-southeast-1",
 		"ap-southeast-2",
 		"cn-north-1",
