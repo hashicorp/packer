@@ -37,6 +37,9 @@ on supported configuration parameters and usage, please see the appropriate
     [EC2](https://aws.amazon.com/ec2/), optionally distributed to
     multiple regions.
 
+-   ***CloudStack***. Images for [CloudStack](https://cloudstack.apache.org/)
+    that can be used to start pre-configured CloudStack servers.
+
 -   ***DigitalOcean***. Snapshots for
     [DigitalOcean](https://www.digitalocean.com/) that can be used to start a
     pre-configured DigitalOcean instance of any size.
