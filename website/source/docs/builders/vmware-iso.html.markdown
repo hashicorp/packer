@@ -187,6 +187,10 @@ builder.
     the remote machine. By default this is empty. This only has an effect if
     `remote_type` is enabled.
 
+-   `remote_private_key_file` (string) - The path to the PEM encoded private key
+    file for the user used to access the remote machine. By default this is empty.
+    This only has an effect if `remote_type` is enabled.
+
 -   `remote_type` (string) - The type of remote machine that will be used to
     build this VM rather than a local desktop product. The only value accepted
     for this currently is "esx5". If this is not set, a desktop product will
@@ -397,6 +401,8 @@ modify as well:
 -   `remote_username` - The SSH username used to access the remote machine.
 
 -   `remote_password` - The SSH password for access to the remote machine.
+
+-   `remote_private_key_file` - The SSH key for access to the remote machine.
 
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
