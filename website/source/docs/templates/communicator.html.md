@@ -111,3 +111,8 @@ The WinRM communicator has the following options.
   * `winrm_timeout` (string) - The amount of time to wait for WinRM to
     become available. This defaults to "30m" since setting up a Windows
     machine generally takes a long time.
+
+  * `winrm_use_ssl` (boolean) - If true, use HTTPS for WinRM
+
+  * `winrm_insecure` (boolean) - If true, do not check server certificate
+    chain and host name
