@@ -72,7 +72,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if err := waitForDropletUnlocked(client, dropletId, 2*time.Minute); err != nil {
+	if err := waitForDropletUnlocked(client, dropletId, 4*time.Minute); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
 		state.Put("error", err)
