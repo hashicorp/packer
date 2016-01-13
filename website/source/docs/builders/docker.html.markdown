@@ -214,6 +214,42 @@ nearly-identical sequence definitions, as demonstrated by the example below:
 }
 ```
 
+<span id="amazon-ec2-container-registry"></span>
+
+## Amazon EC2 Container Registry
+
+Packer can tag and push images for use in
+[Amazon EC2 Container Registry](https://aws.amazon.com/ecr/). The post
+processors work as described above and example configuration properties are
+shown below:
+
+``` {.javascript}
+{
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "12345.dkr.ecr.us-east-1.amazonaws.com/packer",
+        "tag": "0.7"
+      },
+      {
+        "type": "docker-push",
+        "login": true,
+        "login_email": "none",
+        "login_username": "AWS",
+        "login_password": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "login_server": "https://12345.dkr.ecr.us-east-1.amazonaws.com/"
+      }
+    ]
+  ]
+}
+```
+
+See the
+[AWS documentation](http://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html)
+for steps to obtain Amazon ECR registry credentials.
+
+
 ## Dockerfiles
 
 This builder allows you to build Docker images *without* Dockerfiles.
