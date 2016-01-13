@@ -2,32 +2,49 @@
 
 BACKWARDS INCOMPATIBILITIES:
 
-  * Packer now ships as a single binary, including plugins. If you install packer 0.9.0 over a previous packer installation, **you must delete all of the packer-* plugin files** or packer will load out-of-date plugins from disk.
+  * Packer now ships as a single binary, including plugins. If you install
+    packer 0.9.0 over a previous packer installation, **you must delete all of
+    the packer-* plugin files** or packer will load out-of-date plugins from
+    disk.
   * Release binaries are now provided via <https://releases.hashicorp.com>.
-  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support for building with Go 1.4.
+  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support
+    for building with Go 1.4.
 
 FEATURES:
 
   * **Artifice post-processor**: Override packer artifacts during post-
-  processing. This allows you to extract artifacts from a packer builder
-  and use them with other post-processors like compress, docker, and Atlas.
-  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or vSphere during the build. [GH-1921]
+    processing. This allows you to extract artifacts from a packer builder and
+    use them with other post-processors like compress, docker, and Atlas.
+  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or
+    vSphere during the build. [GH-1921]
 
 IMPROVEMENTS:
 
-  * core: Packer plugins are now compiled into the main binary, reducing file size and build times, and making packer easier to install. The overall plugin architecture has not changed and third-party plugins can still be loaded from disk. Please make sure your plugins are up-to-date! [GH-2854]
+  * core: Packer plugins are now compiled into the main binary, reducing file
+    size and build times, and making packer easier to install. The overall
+    plugin architecture has not changed and third-party plugins can still be
+    loaded from disk. Please make sure your plugins are up-to-date! [GH-2854]
   * core: Packer now indicates line numbers for template parse errors [GH-2742]
-  * core: Scripts are executed via `/usr/bin/env bash` instead of `/bin/bash` for broader compatibility. [GH-2913]
+  * core: Scripts are executed via `/usr/bin/env bash` instead of `/bin/bash`
+    for broader compatibility. [GH-2913]
   * core: `target_path` for builder downloads can now be specified. [GH-2600]
   * core: WinRM communicator now supports HTTPS protocol [GH-3061]
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
-  * builder/amazon: You can now specify `0` for `spot_price` to switch to on demand instances [GH-2845]
+  * builder/amazon: You can now specify `0` for `spot_price` to switch to on
+    demand instances [GH-2845]
   * builder/amazon: Added `ap-northeast-2` (Seoul) [GH-3056]
-  * builder/google: `account_file` can now be provided as a JSON string [GH-2811]
+  * builder/amazon: packer will try to derive the AZ if only a subnet is
+    specified [GH-3037]
+  * builder/google: `account_file` can now be provided as a JSON string
+    [GH-2811]
   * builder/google: added support for `preemptible` instances [GH-2982]
+  * builder/google: added support for static external IPs via `address` option
+    [GH-3030]
   * builder/parallels: Improve support for Parallels 11 [GH-2662]
   * builder/parallels: Parallels disks are now compacted by default [GH-2731]
-  * builder/parallels: Packer will look for Parallels in `/Applications/Parallels Desktop.app` if it is not detected automatically [GH-2839]
+  * builder/parallels: Packer will look for Parallels in
+    `/Applications/Parallels Desktop.app` if it is not detected automatically
+    [GH-2839]
   * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
   * builder/qemu: qcow2 images are now compacted by default [GH-2748]
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
