@@ -97,6 +97,7 @@ Packer to work:
         "ec2:DeleteVolume",
         "ec2:CreateKeypair",
         "ec2:DeleteKeypair",
+        "ec2:DescribeSubnets",
         "ec2:CreateSecurityGroup",
         "ec2:DeleteSecurityGroup",
         "ec2:AuthorizeSecurityGroupIngress",
