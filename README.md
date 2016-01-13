@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/mitchellh/packer.svg?branch=master)](https://travis-ci.org/mitchellh/packer)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true)](https://ci.appveyor.com/project/hashicorp/packer)
 
-* Website: http://www.packer.io
+* Website: https://www.packer.io/
 * IRC: `#packer-tool` on Freenode
 * Mailing list: [Google Groups](http://groups.google.com/group/packer-tool)
 
@@ -26,7 +26,7 @@ Packer comes out of the box with support for the following platforms:
 Support for other platforms can be added via plugins.
 
 The images that Packer creates can easily be turned into
-[Vagrant](http://www.vagrantup.com) boxes.
+[Vagrant](https://www.vagrantup.com/) boxes.
 
 ## Quick Start
 
@@ -86,15 +86,15 @@ http://www.packer.io/docs
 ## Developing Packer
 
 If you wish to work on Packer itself or any of its built-in providers,
-you'll first need [Go](http://www.golang.org) installed (version 1.4+ is
+you'll first need [Go](https://golang.org/) installed (version 1.4+ is
 _required_). Make sure Go is properly installed, including setting up
-a [GOPATH](http://golang.org/doc/code.html#GOPATH).
+a [GOPATH](https://golang.org/doc/code.html#GOPATH).
 
 Next, install the following software packages, which are needed for some dependencies:
 
 - [Bazaar](http://bazaar.canonical.com/en/)
 - [Git](http://git-scm.com/)
-- [Mercurial](http://mercurial.selenic.com/)
+- [Mercurial](https://www.mercurial-scm.org/)
 
 Then, install [Gox](https://github.com/mitchellh/gox), which is used
 as a compilation tool on top of Go:
