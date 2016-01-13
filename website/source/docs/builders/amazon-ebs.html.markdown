@@ -208,8 +208,8 @@ Here is a basic example. It is completely valid except for the access keys:
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "source_ami": "ami-de0d9eb7",
-  "instance_type": "t1.micro",
+  "source_ami": "ami-72b9e018",
+  "instance_type": "t2.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}"
 }
@@ -237,8 +237,8 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "source_ami": "ami-de0d9eb7",
-  "instance_type": "t1.micro",
+  "source_ami": "ami-72b9e018",
+  "instance_type": "t2.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
   "ami_block_device_mappings": [
@@ -265,8 +265,8 @@ Here is an example using the optional AMI tags. This will add the tags
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "source_ami": "ami-de0d9eb7",
-  "instance_type": "t1.micro",
+  "source_ami": "ami-72b9e018",
+  "instance_type": "t2.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
   "tags": {
