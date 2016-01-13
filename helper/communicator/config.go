@@ -36,6 +36,8 @@ type Config struct {
 	WinRMHost     string        `mapstructure:"winrm_host"`
 	WinRMPort     int           `mapstructure:"winrm_port"`
 	WinRMTimeout  time.Duration `mapstructure:"winrm_timeout"`
+	WinRMUseSSL   bool          `mapstructure:"winrm_use_ssl"`
+	WinRMInsecure bool          `mapstructure:"winrm_insecure"`
 }
 
 // Port returns the port that will be used for access based on config.
