@@ -1,9 +1,7 @@
 package common
 
-// ValidateRegion returns true if the supplied region is a valid AWS
-// region and false if it's not.
-func ValidateRegion(region string) bool {
-	var regions = [12]string{
+func listEC2Regions() []string {
+	return []string{
 		"ap-northeast-1",
 		"ap-northeast-2",
 		"ap-southeast-1",
@@ -17,8 +15,12 @@ func ValidateRegion(region string) bool {
 		"us-west-1",
 		"us-west-2",
 	}
+}
 
-	for _, valid := range regions {
+// ValidateRegion returns true if the supplied region is a valid AWS
+// region and false if it's not.
+func ValidateRegion(region string) bool {
+	for _, valid := range listEC2Regions() {
 		if region == valid {
 			return true
 		}
