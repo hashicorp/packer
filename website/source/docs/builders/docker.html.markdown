@@ -75,7 +75,7 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 -   `discard` (boolean) - Throw away the container when the build is complete.
     This is useful for the [artifice
-    post-processor](https://packer.io/docs/post-processors/artifice.html).
+    post-processor](https://www.packer.io/docs/post-processors/artifice.html).
 
 -   `export_path` (string) - The path where the final container will be exported
     as a tar file.

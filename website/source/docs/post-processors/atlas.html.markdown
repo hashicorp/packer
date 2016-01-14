@@ -38,7 +38,7 @@ Here is an example workflow:
     example `hashicorp/foobar`, to create the artifact in Atlas or update the
     version if the artifact already exists
 3.  The new version is ready and available to be used in deployments with a tool
-    like [Terraform](https://terraform.io)
+    like [Terraform](https://www.terraform.io)
 
 ## Configuration
 
