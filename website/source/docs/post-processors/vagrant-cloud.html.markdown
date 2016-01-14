@@ -23,7 +23,7 @@ to version and distribute boxes to an organization in a simple way.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
 enable box hosting, and be distributing your box via the [shorthand
-name](http://docs.vagrantup.com/v2/cli/box.html) configuration.
+name](https://docs.vagrantup.com/v2/cli/box.html) configuration.
 
 ## Workflow
 

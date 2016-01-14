@@ -81,7 +81,7 @@ download it during the packer run.
 
 If you want to build a private `.iso` file you can upload the `.iso` to a secure
 file hosting service like [Amazon
-S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html),
+S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html),
 [Google Cloud
 Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl), or
 [Azure File

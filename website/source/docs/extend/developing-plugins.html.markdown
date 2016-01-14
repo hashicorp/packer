@@ -14,7 +14,7 @@ reading this, it is assumed that you're comfortable with Packer and also know
 the [basics of how Plugins work](/docs/extend/plugins.html), from a user
 standpoint.
 
-Packer plugins must be written in [Go](http://golang.org/), so it is also
+Packer plugins must be written in [Go](https://golang.org/), so it is also
 assumed that you're familiar with the language. This page will not be a Go
 language tutorial. Thankfully, if you are familiar with Go, the Go toolchain
 makes it extremely easy to develop Packer plugins.
@@ -36,7 +36,7 @@ uses, because they're completely isolated into the process space of the plugin
 itself.
 
 And, thanks to Go's
-[interfaces](http://golang.org/doc/effective_go.html#interfaces_and_types), it
+[interfaces](https://golang.org/doc/effective_go.html#interfaces_and_types), it
 doesn't even look like inter-process communication is occurring. You just use
 the interfaces like normal, but in fact they're being executed in a remote
 process. Pretty cool.

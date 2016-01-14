@@ -157,7 +157,7 @@ it would be convenient to cache the file. This sort of caching is a core part of
 Packer that is exposed to builders.
 
 The cache interface is `packer.Cache`. It behaves much like a Go
-[RWMutex](http://golang.org/pkg/sync/#RWMutex). The builder requests a "lock" on
+[RWMutex](https://golang.org/pkg/sync/#RWMutex). The builder requests a "lock" on
 certain cache keys, and is given exclusive access to that key for the duration
 of the lock. This locking mechanism allows multiple builders to share cache data
 even though they're running in parallel.

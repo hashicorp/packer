@@ -72,7 +72,7 @@ Optional parameters:
     `Vars`, which is the list of `environment_vars`, if configured.
 
 -   `inline_shebang` (string) - The
-    [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
+    [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
     you're not using `inline`, then this configuration has no effect.
     **Important:** If you customize this, be sure to include something like the
@@ -196,8 +196,8 @@ git@github.com:exampleorg/myprivaterepo.git" \] }
 *My shell script doesn't work correctly on Ubuntu*
 
 -   On Ubuntu, the `/bin/sh` shell is
-    [dash](http://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
-    has [bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
+    [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
+    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
     in it, then put `#!/bin/bash` at the top of your script. Differences between
     dash and bash can be found on the
     [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.

@@ -11,7 +11,7 @@ page_title: Docker Builder
 
 Type: `docker`
 
-The `docker` Packer builder builds [Docker](http://www.docker.io) images using
+The `docker` Packer builder builds [Docker](https://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within this
 container, then exports the container for reuse or commits the image.
 
@@ -26,7 +26,7 @@ the section on [Dockerfiles](#toc_8).
 The Docker builder must run on a machine that has Docker installed. Therefore
 the builder only works on machines that support Docker (modern Linux machines).
 If you want to use Packer to build Docker containers on another platform, use
-[Vagrant](http://www.vagrantup.com) to start a Linux environment, then run
+[Vagrant](https://www.vagrantup.com) to start a Linux environment, then run
 Packer within that environment.
 
 ## Basic Example: Export
@@ -246,7 +246,7 @@ shown below:
 ```
 
 See the
-[AWS documentation](http://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html)
+[AWS documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html)
 for steps to obtain Amazon ECR registry credentials.
 
 
