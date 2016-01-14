@@ -26,7 +26,7 @@ both the post-processor and push commands can be used independently.
 scripts, to Atlas. Take care not to upload files that you don't intend to, like
 secrets or large binaries. **If you have secrets in your Packer template, you
 should [move them into environment
-variables](https://packer.io/docs/templates/user-variables.html).**
+variables](https://www.packer.io/docs/templates/user-variables.html).**
 
 Most push behavior is [configured in your packer
 template](/docs/templates/push.html). You can override or supplement your

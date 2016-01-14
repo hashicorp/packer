@@ -49,7 +49,7 @@ Credentials are resolved in the following order:
 1.  Values hard-coded in the packer template are always authoritative.
 2.  *Variables* in the packer template may be resolved from command-line flags
     or from environment variables. Please read about [User
-    Variables](https://packer.io/docs/templates/user-variables.html)
+    Variables](https://www.packer.io/docs/templates/user-variables.html)
     for details.
 3.  If no credentials are found, packer falls back to automatic lookup.
 
