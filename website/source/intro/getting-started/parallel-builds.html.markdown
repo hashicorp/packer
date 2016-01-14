@@ -23,7 +23,7 @@ able to make an AMI and a VMware virtual machine in parallel provisioned with
 the *same scripts*, resulting in near-identical images. The AMI can be used for
 production, the VMware machine can be used for development. Or, another example,
 if you're using Packer to build [software
-appliances](http://en.wikipedia.org/wiki/Software_appliance), then you can build
+appliances](https://en.wikipedia.org/wiki/Software_appliance), then you can build
 the appliance for every supported platform all in parallel, all configured from
 a single template.
 

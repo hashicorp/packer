@@ -13,10 +13,10 @@ page_title: 'Amazon AMI Builder (EBS backed)'
 Type: `amazon-ebs`
 
 The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
-volumes for use in [EC2](http://aws.amazon.com/ec2/). For more information on
+volumes for use in [EC2](https://aws.amazon.com/ec2/). For more information on
 the difference between EBS-backed instances and instance-store backed instances,
 see the ["storage for the root device" section in the EC2
-documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
+documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
 
 This builder builds an AMI by launching an EC2 instance from a source AMI,
 provisioning that running machine, and then creating an AMI from that machine.
@@ -72,7 +72,7 @@ builder.
          example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
     -   `virtual_name` (string) - The virtual device name. See the documentation on
         [Block Device
-        Mapping](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
+        Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
     -   `snapshot_id` (string) - The ID of the snapshot
     -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
@@ -87,7 +87,7 @@ builder.
         block device mapping of the AMI
     -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
-        [IOPs](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+        [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty.
@@ -117,7 +117,7 @@ builder.
     instance in. Leave this empty to allow Amazon to auto-assign.
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
-    Optimized](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
+    Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
@@ -128,7 +128,7 @@ builder.
     AMI if one with the same name already exists. Default `false`.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
-    profile](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
+    profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
 -   `launch_block_device_mappings` (array of block device mappings) - Add the

@@ -9,7 +9,7 @@ page_title: Parallels Builder
 # Parallels Builder
 
 The Parallels Packer builder is able to create [Parallels Desktop for
-Mac](http://www.parallels.com/products/desktop/) virtual machines and export
+Mac](https://www.parallels.com/products/desktop/) virtual machines and export
 them in the PVM format.
 
 Packer actually comes with multiple builders able to create Parallels machines,
@@ -30,8 +30,8 @@ the following Parallels builders:
 ## Requirements
 
 In addition to [Parallels Desktop for
-Mac](http://www.parallels.com/products/desktop/) this requires the [Parallels
-Virtualization SDK](http://www.parallels.com/downloads/desktop/).
+Mac](https://www.parallels.com/products/desktop/) this requires the [Parallels
+Virtualization SDK](https://www.parallels.com/downloads/desktop/).
 
 The SDK can be installed by downloading and following the instructions in the
 dmg.

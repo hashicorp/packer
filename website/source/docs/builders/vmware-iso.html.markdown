@@ -15,12 +15,12 @@ Type: `vmware-iso`
 
 This VMware Packer builder is able to create VMware virtual machines from an ISO
 file as a source. It currently supports building virtual machines on hosts
-running [VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for
+running [VMware Fusion](https://www.vmware.com/products/fusion/overview.html) for
 OS X, [VMware
-Workstation](http://www.vmware.com/products/workstation/overview.html) for Linux
-and Windows, and [VMware Player](http://www.vmware.com/products/player/) on
+Workstation](https://www.vmware.com/products/workstation/overview.html) for Linux
+and Windows, and [VMware Player](https://www.vmware.com/products/player/) on
 Linux. It can also build machines directly on [VMware vSphere
-Hypervisor](http://www.vmware.com/products/vsphere-hypervisor/) using SSH as
+Hypervisor](https://www.vmware.com/products/vsphere-hypervisor/) using SSH as
 opposed to the vSphere API.
 
 The builder builds a virtual machine by creating a new virtual machine from
@@ -105,7 +105,7 @@ builder.
     default is "1", which corresponds to a growable virtual disk split in
     2GB files. This option is for advanced usage, modify only if you know what
     you're doing. For more information, please consult the [Virtual Disk Manager
-    User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
+    User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
