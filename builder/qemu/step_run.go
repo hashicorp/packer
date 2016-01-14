@@ -75,7 +75,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
-	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
+	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d,hostname=%s", sshHostPort, config.Comm.Port(), vmName)
 
 	qemuVersion, err := driver.Version()
 	if err != nil {
