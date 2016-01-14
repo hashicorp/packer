@@ -14,13 +14,13 @@ prev_url: '/intro/getting-started/setup.html'
 # Build an Image
 
 With Packer installed, let's just dive right into it and build our first image.
-Our first image will be an [Amazon EC2 AMI](http://aws.amazon.com/ec2/) with
+Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) with
 Redis pre-installed. This is just an example. Packer can create images for [many
 platforms](/intro/platforms.html) with anything pre-installed.
 
-If you don't have an AWS account, [create one now](http://aws.amazon.com/free/).
+If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
 For the example, we'll use a "t2.micro" instance to build our image, which
-qualifies under the AWS [free-tier](http://aws.amazon.com/free/), meaning it
+qualifies under the AWS [free-tier](https://aws.amazon.com/free/), meaning it
 will be free. If you already have an AWS account, you may be charged some amount
 of money, but it shouldn't be more than a few cents.
 
@@ -30,7 +30,7 @@ few cents, but we're not responsible if it ends up being more.
 
 Packer can build images for [many platforms](/intro/platforms.html) other than
 AWS, but AWS requires no additional software installed on your computer and
-their [free-tier](http://aws.amazon.com/free/) makes it free to use for most
+their [free-tier](https://aws.amazon.com/free/) makes it free to use for most
 people. This is why we chose to use AWS for the example. If you're uncomfortable
 setting up an AWS account, feel free to follow along as the basic principles
 apply to the other platforms as well.

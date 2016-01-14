@@ -23,7 +23,7 @@ Packer supports the following builders at the moment:
 
 -   [amazon-chroot](/docs/builders/amazon-chroot.html) - Create EBS-backed AMIs
     from an existing EC2 instance by mounting the root device and using a
-    [Chroot](http://en.wikipedia.org/wiki/Chroot) environment to provision
+    [Chroot](https://en.wikipedia.org/wiki/Chroot) environment to provision
     that device. This is an **advanced builder and should not be used by
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
@@ -63,7 +63,7 @@ following steps:
     -   First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
 
 2.  Look for [local AWS configuration
-    files](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
     -   First `~/.aws/credentials`
     -   Next based on `AWS_PROFILE`
 
@@ -80,7 +80,7 @@ packer build on your workstation, in Atlas, or on another build server.
 ## Using an IAM Instance Profile
 
 If AWS keys are not specified in the template, a
-[credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+[credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
 file or through environment variables Packer will use credentials provided by
 the instance's IAM profile, if it has one.
 
@@ -132,7 +132,7 @@ roles, you may encounter an error like this one:
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.
 
 You can read more about why this happens on the [Amazon Security
-Blog](http://blogs.aws.amazon.com/security/post/Tx3M0IFB5XBOCQX/Granting-Permission-to-Launch-EC2-Instances-with-IAM-Roles-PassRole-Permission).
+Blog](https://blogs.aws.amazon.com/security/post/Tx3M0IFB5XBOCQX/Granting-Permission-to-Launch-EC2-Instances-with-IAM-Roles-PassRole-Permission).
 The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.

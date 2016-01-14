@@ -35,9 +35,9 @@ After unzipping the package, the directory should contain a set of binary
 programs, such as `packer`, `packer-build-amazon-ebs`, etc. The final step to
 installation is to make sure the directory you installed Packer to is on the
 PATH. See [this
-page](http://stackoverflow.com/questions/14637979/how-to-permanently-set-path-on-linux)
+page](https://stackoverflow.com/questions/14637979/how-to-permanently-set-path-on-linux)
 for instructions on setting the PATH on Linux and Mac. [This
-page](http://stackoverflow.com/questions/1618280/where-can-i-set-path-to-make-exe-on-windows)
+page](https://stackoverflow.com/questions/1618280/where-can-i-set-path-to-make-exe-on-windows)
 contains instructions for setting the PATH on Windows.
 
 ## Verifying the Installation
