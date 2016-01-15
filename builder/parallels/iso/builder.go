@@ -23,6 +23,7 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
+	common.HTTPConfig                   `mapstructure:",squash"`
 	common.ISOConfig                    `mapstructure:",squash"`
 	parallelscommon.FloppyConfig        `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
@@ -39,9 +40,6 @@ type Config struct {
 	GuestOSType        string   `mapstructure:"guest_os_type"`
 	HardDriveInterface string   `mapstructure:"hard_drive_interface"`
 	HostInterfaces     []string `mapstructure:"host_interfaces"`
-	HTTPDir            string   `mapstructure:"http_directory"`
-	HTTPPortMin        uint     `mapstructure:"http_port_min"`
-	HTTPPortMax        uint     `mapstructure:"http_port_max"`
 	SkipCompaction     bool     `mapstructure:"skip_compaction"`
 	VMName             string   `mapstructure:"vm_name"`
 
@@ -77,6 +75,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
+	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
@@ -110,14 +109,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"Run it to see all available values: `prlctl create x -d list` ")
 	}
 
-	if b.config.HTTPPortMin == 0 {
-		b.config.HTTPPortMin = 8000
-	}
-
-	if b.config.HTTPPortMax == 0 {
-		b.config.HTTPPortMax = 9000
-	}
-
 	if len(b.config.HostInterfaces) == 0 {
 		b.config.HostInterfaces = []string{"en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7",
 			"en8", "en9", "ppp0", "ppp1", "ppp2"}
@@ -130,11 +121,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
-	}
-
-	if b.config.HTTPPortMin > b.config.HTTPPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
 	// Warnings
@@ -185,7 +171,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
-		new(stepHTTPServer),
+		&common.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		new(stepSetBootOrder),
