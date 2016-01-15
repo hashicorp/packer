@@ -25,11 +25,11 @@ sudo chown -R vagrant:vagrant $SRCROOT
 sudo chown -R vagrant:vagrant /opt/gopath
 
 # Install some other stuff we need
-sudo apt-get install -y curl git-core zip
+sudo apt-get install -y curl git bzr zip
 SCRIPT
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "bento/ubuntu-12.04"
+  config.vm.box = "bento/ubuntu-14.04"
 
   config.vm.provision "shell", inline: $script
 
