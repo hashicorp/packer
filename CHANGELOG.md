@@ -71,6 +71,8 @@ BUG FIXES:
   * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
   * builder/parallels: Now supports interpolation in `prlctl_post` [GH-2828]
   * builder/vmware: `format` option is now read correctly [GH-2892]
+  * builder/vmware-esxi: Correct endless loop in destroy validation logic
+    [GH-2911]
   * provisioner/shell: No longer leaves temp scripts behind [GH-1536]
   * provisioner/winrm: Now waits for reboot to complete before continuing with provisioning [GH-2568]
   * post-processor/artifice: Fix truncation of files downloaded from Docker. [GH-2793]
