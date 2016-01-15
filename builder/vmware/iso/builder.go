@@ -26,6 +26,7 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
+	common.HTTPConfig        `mapstructure:",squash"`
 	common.ISOConfig         `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
@@ -84,6 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
+	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.DriverConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
@@ -245,7 +247,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
-		&vmwcommon.StepHTTPServer{
+		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
