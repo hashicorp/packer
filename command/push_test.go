@@ -204,8 +204,10 @@ func TestPush_vars(t *testing.T) {
 	}
 
 	args := []string{
+		"-var-file", filepath.Join(testFixture("push-vars"), "vars.json"),
 		"-var", "name=foo/bar",
 		"-var", "one=two",
+		"-var", "overridden=yes",
 		filepath.Join(testFixture("push-vars"), "template.json"),
 	}
 	if code := c.Run(args); code != 0 {
@@ -217,8 +219,11 @@ func TestPush_vars(t *testing.T) {
 	}
 
 	expected := map[string]string{
-		"name": "foo/bar",
-		"one":  "two",
+		"bar":        "baz",
+		"name":       "foo/bar",
+		"null":       "",
+		"one":        "two",
+		"overridden": "yes",
 	}
 	if !reflect.DeepEqual(actualOpts.Vars, expected) {
 		t.Fatalf("bad: %#v", actualOpts.Vars)
