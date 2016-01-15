@@ -6,8 +6,9 @@ SRCROOT="/opt/go"
 
 # Install Go
 sudo apt-get update
-sudo apt-get install -y build-essential mercurial
-sudo hg clone -u release https://code.google.com/p/go ${SRCROOT}
+sudo apt-get install -y build-essential git
+sudo git clone --branch release-branch.go1.5 --single-branch --depth 1 \
+  https://github.com/golang/go ${SRCROOT}
 cd ${SRCROOT}/src
 sudo ./all.bash
 
@@ -25,7 +26,7 @@ sudo chown -R vagrant:vagrant $SRCROOT
 sudo chown -R vagrant:vagrant /opt/gopath
 
 # Install some other stuff we need
-sudo apt-get install -y curl git bzr zip
+sudo apt-get install -y curl mercurial bzr zip
 SCRIPT
 
 Vagrant.configure(2) do |config|
