@@ -34,10 +34,6 @@ configuration using the options below.
 
 ## Options
 
--   `-message` - A message to identify the purpose or changes in this Packer
-    template much like a VCS commit message. This message will be passed to the
-    Packer build service. This option is also available as a short option `-m`.
-
 -   `-token` - Your access token for the Atlas API.
 
 -&gt; Login to Atlas to [generate an Atlas
@@ -59,7 +55,7 @@ you can also use `-token` on the command line.
 Push a Packer template:
 
 ``` {.shell}
-$ packer push -m "Updating the apache version" template.json
+$ packer push template.json
 ```
 
 Push a Packer template with a custom token:
