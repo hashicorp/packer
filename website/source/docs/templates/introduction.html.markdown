@@ -93,8 +93,8 @@ just missing valid AWS access keys. Otherwise, it would work properly with
       "access_key": "...",
       "secret_key": "...",
       "region": "us-east-1",
-      "source_ami": "ami-de0d9eb7",
-      "instance_type": "t1.micro",
+      "source_ami": "ami-72b9e018",
+      "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
       "ami_name": "packer {{timestamp}}"
     }

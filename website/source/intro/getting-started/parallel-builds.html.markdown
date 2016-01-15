@@ -23,7 +23,7 @@ able to make an AMI and a VMware virtual machine in parallel provisioned with
 the *same scripts*, resulting in near-identical images. The AMI can be used for
 production, the VMware machine can be used for development. Or, another example,
 if you're using Packer to build [software
-appliances](http://en.wikipedia.org/wiki/Software_appliance), then you can build
+appliances](https://en.wikipedia.org/wiki/Software_appliance), then you can build
 the appliance for every supported platform all in parallel, all configured from
 a single template.
 
@@ -95,8 +95,8 @@ The entire template should now look like this:
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-de0d9eb7",
-    "instance_type": "t1.micro",
+    "source_ami": "ami-72b9e018",
+    "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
   },{

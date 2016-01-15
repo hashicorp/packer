@@ -22,23 +22,24 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	ChefEnvironment      string `mapstructure:"chef_environment"`
-	SslVerifyMode        string `mapstructure:"ssl_verify_mode"`
-	ConfigTemplate       string `mapstructure:"config_template"`
-	ExecuteCommand       string `mapstructure:"execute_command"`
-	InstallCommand       string `mapstructure:"install_command"`
-	Json                 map[string]interface{}
-	NodeName             string   `mapstructure:"node_name"`
-	PreventSudo          bool     `mapstructure:"prevent_sudo"`
-	RunList              []string `mapstructure:"run_list"`
-	ServerUrl            string   `mapstructure:"server_url"`
-	SkipCleanClient      bool     `mapstructure:"skip_clean_client"`
-	SkipCleanNode        bool     `mapstructure:"skip_clean_node"`
-	SkipInstall          bool     `mapstructure:"skip_install"`
-	StagingDir           string   `mapstructure:"staging_directory"`
-	ClientKey            string   `mapstructure:"client_key"`
-	ValidationKeyPath    string   `mapstructure:"validation_key_path"`
-	ValidationClientName string   `mapstructure:"validation_client_name"`
+	ChefEnvironment            string `mapstructure:"chef_environment"`
+	EncryptedDataBagSecretPath string `mapstructure:"encrypted_data_bag_secret_path"`
+	SslVerifyMode              string `mapstructure:"ssl_verify_mode"`
+	ConfigTemplate             string `mapstructure:"config_template"`
+	ExecuteCommand             string `mapstructure:"execute_command"`
+	InstallCommand             string `mapstructure:"install_command"`
+	Json                       map[string]interface{}
+	NodeName                   string   `mapstructure:"node_name"`
+	PreventSudo                bool     `mapstructure:"prevent_sudo"`
+	RunList                    []string `mapstructure:"run_list"`
+	ServerUrl                  string   `mapstructure:"server_url"`
+	SkipCleanClient            bool     `mapstructure:"skip_clean_client"`
+	SkipCleanNode              bool     `mapstructure:"skip_clean_node"`
+	SkipInstall                bool     `mapstructure:"skip_install"`
+	StagingDir                 string   `mapstructure:"staging_directory"`
+	ClientKey                  string   `mapstructure:"client_key"`
+	ValidationKeyPath          string   `mapstructure:"validation_key_path"`
+	ValidationClientName       string   `mapstructure:"validation_client_name"`
 
 	ctx interpolate.Context
 }
@@ -48,13 +49,15 @@ type Provisioner struct {
 }
 
 type ConfigTemplate struct {
-	NodeName             string
-	ServerUrl            string
-	ClientKey            string
-	ValidationKeyPath    string
-	ValidationClientName string
-	ChefEnvironment      string
-	SslVerifyMode        string
+	NodeName                      string
+	ServerUrl                     string
+	ClientKey                     string
+	ValidationKeyPath             string
+	ValidationClientName          string
+	EncryptedDataBagSecretPath    string
+	ChefEnvironment               string
+	SslVerifyMode                 string
+	HasEncryptedDataBagSecretPath bool
 }
 
 type ExecuteTemplate struct {
@@ -118,6 +121,15 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("server_url must be set"))
 	}
 
+	if p.config.EncryptedDataBagSecretPath != "" {
+		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
+
+		if err != nil || pFileInfo.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecretPath, err))
+		}
+	}
+
 	jsonValid := true
 	for k, v := range p.config.Json {
 		p.config.Json[k], err = p.deepJsonFix(k, v)
@@ -175,8 +187,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
+	encryptedDataBagSecretPath := ""
+	if p.config.EncryptedDataBagSecretPath != "" {
+		encryptedDataBagSecretPath = fmt.Sprintf("%s/encrypted_data_bag_secret", p.config.StagingDir)
+		if err := p.uploadFile(ui, comm, encryptedDataBagSecretPath, p.config.EncryptedDataBagSecretPath); err != nil {
+			return fmt.Errorf("Error uploading encrypted data bag secret: %s", err)
+		}
+	}
+
 	configPath, err := p.createConfig(
-		ui, comm, nodeName, serverUrl, p.config.ClientKey, remoteValidationKeyPath, p.config.ValidationClientName, p.config.ChefEnvironment, p.config.SslVerifyMode)
+		ui, comm, nodeName, serverUrl, p.config.ClientKey, remoteValidationKeyPath, p.config.ValidationClientName, encryptedDataBagSecretPath, p.config.ChefEnvironment, p.config.SslVerifyMode)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -236,7 +256,17 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, remoteKeyPath string, validationClientName string, chefEnvironment string, sslVerifyMode string) (string, error) {
+func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return comm.Upload(dst, f, nil)
+}
+
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, remoteKeyPath string, validationClientName string, encryptedDataBagSecretPath string, chefEnvironment string, sslVerifyMode string) (string, error) {
 	ui.Message("Creating configuration file 'client.rb'")
 
 	// Read the template
@@ -258,13 +288,15 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, nodeN
 
 	ctx := p.config.ctx
 	ctx.Data = &ConfigTemplate{
-		NodeName:             nodeName,
-		ServerUrl:            serverUrl,
-		ClientKey:            clientKey,
-		ValidationKeyPath:    remoteKeyPath,
-		ValidationClientName: validationClientName,
-		ChefEnvironment:      chefEnvironment,
-		SslVerifyMode:        sslVerifyMode,
+		NodeName:                      nodeName,
+		ServerUrl:                     serverUrl,
+		ClientKey:                     clientKey,
+		ValidationKeyPath:             remoteKeyPath,
+		ValidationClientName:          validationClientName,
+		ChefEnvironment:               chefEnvironment,
+		SslVerifyMode:                 sslVerifyMode,
+		EncryptedDataBagSecretPath:    encryptedDataBagSecretPath,
+		HasEncryptedDataBagSecretPath: encryptedDataBagSecretPath != "",
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
 	if err != nil {
@@ -587,6 +619,9 @@ log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
 client_key       "{{.ClientKey}}"
+{{if .HasEncryptedDataBagSecretPath}}
+encrypted_data_bag_secret "{{.EncryptedDataBagSecretPath}}"
+{{end}}
 {{if ne .ValidationClientName ""}}
 validation_client_name "{{.ValidationClientName}}"
 {{else}}

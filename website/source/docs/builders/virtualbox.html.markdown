@@ -9,7 +9,7 @@ page_title: VirtualBox Builder
 # VirtualBox Builder
 
 The VirtualBox Packer builder is able to create
-[VirtualBox](http://www.virtualbox.org) virtual machines and export them in the
+[VirtualBox](https://www.virtualbox.org) virtual machines and export them in the
 OVA or OVF format.
 
 Packer actually comes with multiple builders able to create VirtualBox machines,

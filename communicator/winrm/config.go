@@ -11,4 +11,6 @@ type Config struct {
 	Username string
 	Password string
 	Timeout  time.Duration
+	Https    bool
+	Insecure bool
 }
