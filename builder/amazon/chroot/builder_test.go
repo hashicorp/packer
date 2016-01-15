@@ -80,7 +80,22 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have error")
 	}
+
+	config["chroot_mounts"] = [][]string{
+		[]string{"tmpfs", "tmpfs", "/dev/shm"},
+	}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+	if len(b.config.ChrootMounts) != 6 {
+		t.Errorf("defaults not added to chroot_mounts")
+	}
 }
+
 func TestBuilderPrepare_SourceAmi(t *testing.T) {
 	b := &Builder{}
 	config := testConfig()

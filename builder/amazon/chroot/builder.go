@@ -66,23 +66,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	// Defaults
 	if b.config.ChrootMounts == nil {
 		b.config.ChrootMounts = make([][]string, 0)
 	}
 
+	// Add Defaults
+	b.config.ChrootMounts = append(b.config.ChrootMounts,
+		[]string{"proc", "proc", "/proc"},
+		[]string{"sysfs", "sysfs", "/sys"},
+		[]string{"bind", "/dev", "/dev"},
+		[]string{"devpts", "devpts", "/dev/pts"},
+		[]string{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
+	)
+
 	if b.config.CopyFiles == nil {
 		b.config.CopyFiles = make([]string, 0)
-	}
-
-	if len(b.config.ChrootMounts) == 0 {
-		b.config.ChrootMounts = [][]string{
-			[]string{"proc", "proc", "/proc"},
-			[]string{"sysfs", "sysfs", "/sys"},
-			[]string{"bind", "/dev", "/dev"},
-			[]string{"devpts", "devpts", "/dev/pts"},
-			[]string{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
-		}
 	}
 
 	if len(b.config.CopyFiles) == 0 {
