@@ -23,7 +23,7 @@ Packer supports the following builders at the moment:
 
 -   [amazon-chroot](/docs/builders/amazon-chroot.html) - Create EBS-backed AMIs
     from an existing EC2 instance by mounting the root device and using a
-    [Chroot](http://en.wikipedia.org/wiki/Chroot) environment to provision
+    [Chroot](https://en.wikipedia.org/wiki/Chroot) environment to provision
     that device. This is an **advanced builder and should not be used by
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
@@ -49,7 +49,7 @@ Credentials are resolved in the following order:
 1.  Values hard-coded in the packer template are always authoritative.
 2.  *Variables* in the packer template may be resolved from command-line flags
     or from environment variables. Please read about [User
-    Variables](https://packer.io/docs/templates/user-variables.html)
+    Variables](https://www.packer.io/docs/templates/user-variables.html)
     for details.
 3.  If no credentials are found, packer falls back to automatic lookup.
 
@@ -63,7 +63,7 @@ following steps:
     -   First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
 
 2.  Look for [local AWS configuration
-    files](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
     -   First `~/.aws/credentials`
     -   Next based on `AWS_PROFILE`
 
@@ -80,7 +80,7 @@ packer build on your workstation, in Atlas, or on another build server.
 ## Using an IAM Instance Profile
 
 If AWS keys are not specified in the template, a
-[credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+[credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
 file or through environment variables Packer will use credentials provided by
 the instance's IAM profile, if it has one.
 
@@ -97,6 +97,7 @@ Packer to work:
         "ec2:DeleteVolume",
         "ec2:CreateKeypair",
         "ec2:DeleteKeypair",
+        "ec2:DescribeSubnets",
         "ec2:CreateSecurityGroup",
         "ec2:DeleteSecurityGroup",
         "ec2:AuthorizeSecurityGroupIngress",
@@ -131,7 +132,7 @@ roles, you may encounter an error like this one:
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.
 
 You can read more about why this happens on the [Amazon Security
-Blog](http://blogs.aws.amazon.com/security/post/Tx3M0IFB5XBOCQX/Granting-Permission-to-Launch-EC2-Instances-with-IAM-Roles-PassRole-Permission).
+Blog](https://blogs.aws.amazon.com/security/post/Tx3M0IFB5XBOCQX/Granting-Permission-to-Launch-EC2-Instances-with-IAM-Roles-PassRole-Permission).
 The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.

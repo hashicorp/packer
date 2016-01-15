@@ -13,7 +13,7 @@ page_title: 'Vagrant Post-Processor'
 Type: `vagrant`
 
 The Packer Vagrant post-processor takes a build and converts the artifact into a
-valid [Vagrant](http://www.vagrantup.com) box, if it can. This lets you use
+valid [Vagrant](https://www.vagrantup.com) box, if it can. This lets you use
 Packer to automatically create arbitrarily complex Vagrant boxes, and is in fact
 how the official boxes distributed by Vagrant are created.
 
@@ -22,7 +22,7 @@ If you've never used a post-processor before, please read the documentation on
 knowledge will be expected for the remainder of this document.
 
 Because Vagrant boxes are
-[provider-specific](http://docs.vagrantup.com/v2/boxes/format.html), the Vagrant
+[provider-specific](https://docs.vagrantup.com/v2/boxes/format.html), the Vagrant
 post-processor is hardcoded to understand how to convert the artifacts of
 certain builders into proper boxes for their respective providers.
 

@@ -38,7 +38,7 @@ Here is an example workflow:
     example `hashicorp/foobar`, to create the artifact in Atlas or update the
     version if the artifact already exists
 3.  The new version is ready and available to be used in deployments with a tool
-    like [Terraform](https://terraform.io)
+    like [Terraform](https://www.terraform.io)
 
 ## Configuration
 
@@ -88,8 +88,8 @@ you can also use `token` configuration option.
         "access_key": "{{user `aws_access_key`}}",
         "secret_key": "{{user `aws_secret_key`}}",
         "region": "us-east-1",
-        "source_ami": "ami-de0d9eb7",
-        "instance_type": "t1.micro",
+        "source_ami": "ami-72b9e018",
+        "instance_type": "t2.micro",
         "ssh_username": "ubuntu",
         "ami_name": "atlas-example {{timestamp}}"
     }],

@@ -226,7 +226,7 @@ directory of the SSH user.
 
 In order to perform extra customization of the virtual machine, a template can
 define extra calls to `VBoxManage` to perform.
-[VBoxManage](http://www.virtualbox.org/manual/ch08.html) is the command-line
+[VBoxManage](https://www.virtualbox.org/manual/ch08.html) is the command-line
 interface to VirtualBox where you can completely control VirtualBox. It can be
 used to do things such as set RAM, CPUs, etc.
 

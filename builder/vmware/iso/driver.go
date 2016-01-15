@@ -21,6 +21,7 @@ func NewDriver(config *Config) (vmwcommon.Driver, error) {
 			Port:           config.RemotePort,
 			Username:       config.RemoteUser,
 			Password:       config.RemotePassword,
+			PrivateKey:     config.RemotePrivateKey,
 			Datastore:      config.RemoteDatastore,
 			CacheDatastore: config.RemoteCacheDatastore,
 			CacheDirectory: config.RemoteCacheDirectory,

@@ -14,7 +14,7 @@ page_title: DigitalOcean Builder
 Type: `digitalocean`
 
 The `digitalocean` Packer builder is able to create new images for use with
-[DigitalOcean](http://www.digitalocean.com). The builder takes a source image,
+[DigitalOcean](https://www.digitalocean.com). The builder takes a source image,
 runs any provisioning necessary on the image after launching it, then snapshots
 it into a reusable image. This reusable image can then be used as the foundation
 of new servers that are launched within DigitalOcean.

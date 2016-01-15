@@ -66,7 +66,7 @@ Optional parameters:
     easier.
 
 -   `facter` (object of key/value strings) - Additional
-    [facts](http://puppetlabs.com/puppet/related-projects/facter) to make
+    [facts](https://puppetlabs.com/facter) to make
     available when Puppet is running.
 
 -   `hiera_config_path` (string) - The path to a local file with hiera

@@ -50,6 +50,10 @@ configuration is actually required.
     should use a custom configuration template. See the dedicated "Chef
     Configuration" section below for more details.
 
+-   `encrypted_data_bag_secret_path` (string) - The path to the file containing
+    the secret for encrypted data bags. By default, this is empty, so no secret
+    will be available.
+
 -   `execute_command` (string) - The command used to execute Chef. This has
     various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
@@ -71,9 +75,9 @@ configuration is actually required.
     then the sudo will be omitted.
 
 -   `run_list` (array of strings) - The [run
-    list](http://docs.chef.io/essentials_node_object_run_lists.html)
-    for Chef. By default this is empty, and will use the run list sent down by
-    the Chef Server.
+    list](http://docs.chef.io/essentials_node_object_run_lists.html) for Chef.
+    By default this is empty, and will use the run list sent down by the
+    Chef Server.
 
 -   `server_url` (string) - The URL to the Chef server. This is required.
 
@@ -136,6 +140,7 @@ This template is a [configuration
 template](/docs/templates/configuration-templates.html) and has a set of
 variables available to use:
 
+-   `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
 -   `NodeName` - The node name set in the configuration.
 -   `ServerUrl` - The URL of the Chef Server set in the configuration.
 -   `ValidationKeyPath` - Path to the validation key, if it is set.
@@ -181,3 +186,65 @@ to 777. This is to ensure that Packer can upload and make use of that directory.
 However, once the machine is created, you usually don't want to keep these
 directories with those permissions. To change the permissions on the
 directories, append a shell provisioner after Chef to modify them.
+
+## Examples
+
+### Chef Client Local Mode
+
+The following example shows how to run the `chef-cilent` provisioner in local
+mode, while passing a `run_list` using a variable.
+
+**Local environment variables**
+
+    # Machines Chef directory
+    export PACKER_CHEF_DIR=/var/chef-packer
+    # Comma separated run_list
+    export PACKER_CHEF_RUN_LIST="recipe[apt],recipe[nginx]"
+    ...
+
+**Packer variables**
+
+Set the necessary Packer variables using environment variables or provide a [var
+file](/docs/templates/user-variables.html).
+
+``` {.liquid}
+"variables": {
+  "chef_dir": "{{env `PACKER_CHEF_DIR`}}",
+  "chef_run_list": "{{env `PACKER_CHEF_RUN_LIST`}}",
+  "chef_client_config_tpl": "{{env `PACKER_CHEF_CLIENT_CONFIG_TPL`}}",
+  "packer_chef_bootstrap_dir": "{{env `PACKER_CHEF_BOOTSTRAP_DIR`}}" ,
+  "packer_uid": "{{env `PACKER_UID`}}",
+  "packer_gid": "{{env `PACKER_GID`}}"
+}
+```
+
+**Setup the** `chef-client` **provisioner**
+
+Make sure we have the correct directories and permissions for the `chef-client`
+provisioner. You will need to bootstrap the Chef run by providing the necessary
+cookbooks using Berkshelf or some other means.
+
+``` {.liquid}
+{
+  "type": "file",
+  "source": "{{user `packer_chef_bootstrap_dir`}}",
+  "destination": "/tmp/bootstrap"
+},
+{
+  "type": "shell",
+  "inline": [
+    "sudo mkdir -p {{user `chef_dir`}}",
+    "sudo mkdir -p /tmp/packer-chef-client",
+    "sudo chown {{user `packer_uid`}}.{{user `packer_gid`}} /tmp/packer-chef-client",
+    "sudo sh /tmp/bootstrap/bootstrap.sh"
+  ]
+},
+{
+  "type": "chef-client",
+  "server_url": "http://localhost:8889",
+  "config_template": "{{user `chef_client_config_tpl`}}/client.rb.tpl",
+  "skip_clean_node": true,
+  "skip_clean_client": true,
+  "run_list": "{{user `chef_run_list`}}"
+}
+```

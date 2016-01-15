@@ -15,10 +15,10 @@ Type: `vmware-vmx`
 This VMware Packer builder is able to create VMware virtual machines from an
 existing VMware virtual machine (a VMX file). It currently supports building
 virtual machines on hosts running [VMware Fusion
-Professional](http://www.vmware.com/products/fusion-professional/) for OS X,
-[VMware Workstation](http://www.vmware.com/products/workstation/overview.html)
+Professional](https://www.vmware.com/products/fusion-professional/) for OS X,
+[VMware Workstation](https://www.vmware.com/products/workstation/overview.html)
 for Linux and Windows, and [VMware
-Player](http://www.vmware.com/products/player/) on Linux.
+Player](https://www.vmware.com/products/player/) on Linux.
 
 The builder builds a virtual machine by cloning the VMX file using the clone
 capabilities introduced in VMware Fusion Professional 6, Workstation 10, and

@@ -37,7 +37,7 @@ stability and testability to infrastructure changes.
 Packer helps [keep development, staging, and production as similar as
 possible](http://www.12factor.net/dev-prod-parity). Packer can be used to
 generate images for multiple platforms at the same time. So if you use AWS for
-production and VMware (perhaps with [Vagrant](http://www.vagrantup.com)) for
+production and VMware (perhaps with [Vagrant](https://www.vagrantup.com)) for
 development, you can generate both an AMI and a VMware machine using Packer at
 the same time from the same template.
 
@@ -49,7 +49,7 @@ through to production.
 
 Since Packer creates consistent images for multiple platforms in parallel, it is
 perfect for creating
-[appliances](http://en.wikipedia.org/wiki/Software_appliance) and disposable
+[appliances](https://en.wikipedia.org/wiki/Software_appliance) and disposable
 product demos. As your software changes, you can automatically create appliances
 with the software pre-installed. Potential users can then get started with your
 software by deploying it to the environment of their choice.
