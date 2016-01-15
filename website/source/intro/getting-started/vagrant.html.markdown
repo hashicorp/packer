@@ -12,7 +12,7 @@ prev_url: '/intro/getting-started/parallel-builds.html'
 # Vagrant Boxes
 
 Packer also has the ability to take the results of a builder (such as an AMI or
-plain VMware image) and turn it into a [Vagrant](http://www.vagrantup.com) box.
+plain VMware image) and turn it into a [Vagrant](https://www.vagrantup.com) box.
 
 This is done using [post-processors](/docs/templates/post-processors.html).
 These take an artifact created by a previous builder or post-processor and

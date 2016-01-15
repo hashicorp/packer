@@ -138,6 +138,49 @@ func TestProvisionerPrepare_serverUrl(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_encryptedDataBagSecretPath(t *testing.T) {
+	var err error
+	var p Provisioner
+
+	// Test no config template
+	config := testConfig()
+	delete(config, "encrypted_data_bag_secret_path")
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with a file
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config = testConfig()
+	config["encrypted_data_bag_secret_path"] = tf.Name()
+	p = Provisioner{}
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Test with a directory
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.RemoveAll(td)
+
+	config = testConfig()
+	config["encrypted_data_bag_secret_path"] = td
+	p = Provisioner{}
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have err")
+	}
+}
+
 func TestProvisioner_createDir(t *testing.T) {
 	p1 := &Provisioner{config: Config{PreventSudo: true}}
 	p2 := &Provisioner{config: Config{PreventSudo: false}}

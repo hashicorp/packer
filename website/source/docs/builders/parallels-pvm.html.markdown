@@ -12,7 +12,7 @@ page_title: 'Parallels Builder (from a PVM)'
 Type: `parallels-pvm`
 
 This Parallels builder is able to create [Parallels Desktop for
-Mac](http://www.parallels.com/products/desktop/) virtual machines and export
+Mac](https://www.parallels.com/products/desktop/) virtual machines and export
 them in the PVM format, starting from an existing PVM (exported virtual machine
 image).
 

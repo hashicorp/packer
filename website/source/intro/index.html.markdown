@@ -30,5 +30,5 @@ use tools like Chef or Puppet to install software onto the image.
 A *machine image* is a single static unit that contains a pre-configured
 operating system and installed software which is used to quickly create new
 running machines. Machine image formats change for each platform. Some examples
-include [AMIs](http://en.wikipedia.org/wiki/Amazon_Machine_Image) for EC2,
+include [AMIs](https://en.wikipedia.org/wiki/Amazon_Machine_Image) for EC2,
 VMDK/VMX files for VMware, OVF exports for VirtualBox, etc.

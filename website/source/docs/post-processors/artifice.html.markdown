@@ -25,9 +25,9 @@ extracting the docker container and throwing away the EC2 instance.
 
 After overriding the artifact with artifice, you can use it with other
 post-processors like
-[compress](https://packer.io/docs/post-processors/compress.html),
-[docker-push](https://packer.io/docs/post-processors/docker-push.html),
-[Atlas](https://packer.io/docs/post-processors/atlas.html), or a third-party
+[compress](https://www.packer.io/docs/post-processors/compress.html),
+[docker-push](https://www.packer.io/docs/post-processors/docker-push.html),
+[Atlas](https://www.packer.io/docs/post-processors/atlas.html), or a third-party
 post-processor.
 
 Artifice allows you to use the familiar packer workflow to create a fresh,
@@ -67,7 +67,7 @@ The configuration allows you to specify which files comprise your artifact.
 This minimal example:
 
 1.  Spins up a cloned VMware virtual machine
-2.  Installs a [consul](https://consul.io/) release
+2.  Installs a [consul](https://www.consul.io/) release
 3.  Downloads the consul binary
 4.  Packages it into a `.tar.gz` file
 5.  Uploads it to Atlas.
