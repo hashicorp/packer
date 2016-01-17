@@ -10,8 +10,10 @@ GOROOT="${UNTARPATH}/go"
 GOPATH="${UNTARPATH}/gopath"
 
 # Install Go
-sudo wget --progress=bar:force --output-document - ${TARBALL} |\
-  tar xfz - -C ${UNTARPATH}
+if [ ! -d ${GOROOT} ]; then
+  sudo wget --progress=bar:force --output-document - ${TARBALL} |\
+    tar xfz - -C ${UNTARPATH}
+fi
 
 # Setup the GOPATH
 sudo mkdir -p ${GOPATH}
@@ -28,7 +30,7 @@ sudo chown -R vagrant:vagrant ${GOPATH}
 
 # Install some other stuff we need
 sudo apt-get update
-sudo apt-get install -y curl git mercurial bzr zip
+sudo apt-get install -y curl make git mercurial bzr zip
 SCRIPT
 
 Vagrant.configure(2) do |config|
