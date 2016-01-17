@@ -2,30 +2,28 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
-SRCROOT="/opt/go"
+TARBALL="https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz"
 
 # Install Go
-sudo apt-get update
-sudo apt-get install -y build-essential mercurial
-sudo hg clone -u release https://code.google.com/p/go ${SRCROOT}
-cd ${SRCROOT}/src
-sudo ./all.bash
+sudo wget --progress=bar:force --output-document - ${TARBALL} |\
+  tar xfz - -C /opt
 
 # Setup the GOPATH
 sudo mkdir -p /opt/gopath
 cat <<EOF >/tmp/gopath.sh
+export GOROOT="/opt/go"
 export GOPATH="/opt/gopath"
-export PATH="/opt/go/bin:\$GOPATH/bin:\$PATH"
+export PATH="/opt/go/bin:/opt/gopath/bin:\$PATH"
 EOF
 sudo mv /tmp/gopath.sh /etc/profile.d/gopath.sh
-sudo chmod 0755 /etc/profile.d/gopath.sh
 
 # Make sure the gopath is usable by vagrant
-sudo chown -R vagrant:vagrant $SRCROOT
+sudo chown -R vagrant:vagrant /opt/go
 sudo chown -R vagrant:vagrant /opt/gopath
 
 # Install some other stuff we need
-sudo apt-get install -y curl git bzr zip
+sudo apt-get update
+sudo apt-get install -y curl git mercurial bzr zip
 SCRIPT
 
 Vagrant.configure(2) do |config|
