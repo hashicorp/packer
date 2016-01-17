@@ -2,24 +2,29 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
-TARBALL="https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz"
+# Fetch from https://golang.org/dl
+TARBALL="https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz"
+
+UNTARPATH="/opt"
+GOROOT="${UNTARPATH}/go"
+GOPATH="${UNTARPATH}/gopath"
 
 # Install Go
 sudo wget --progress=bar:force --output-document - ${TARBALL} |\
-  tar xfz - -C /opt
+  tar xfz - -C ${UNTARPATH}
 
 # Setup the GOPATH
-sudo mkdir -p /opt/gopath
+sudo mkdir -p ${GOPATH}
 cat <<EOF >/tmp/gopath.sh
-export GOROOT="/opt/go"
-export GOPATH="/opt/gopath"
-export PATH="/opt/go/bin:/opt/gopath/bin:\$PATH"
+export GOROOT="${GOROOT}"
+export GOPATH="${GOPATH}"
+export PATH="${GOROOT}/bin:${GOPATH}/bin:\$PATH"
 EOF
 sudo mv /tmp/gopath.sh /etc/profile.d/gopath.sh
 
-# Make sure the gopath is usable by vagrant
-sudo chown -R vagrant:vagrant /opt/go
-sudo chown -R vagrant:vagrant /opt/gopath
+# Make sure the GOPATH is usable by vagrant
+sudo chown -R vagrant:vagrant ${GOROOT}
+sudo chown -R vagrant:vagrant ${GOPATH}
 
 # Install some other stuff we need
 sudo apt-get update
