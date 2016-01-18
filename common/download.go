@@ -101,6 +101,44 @@ func (d *DownloadClient) Cancel() {
 	// TODO(mitchellh): Implement
 }
 
+// Take a uri and convert it to a path that makes sense on the Windows platform
+func NormalizeWindowsURL(basepath string, url url.URL) string {
+	// This logic must correspond to the same logic in the NormalizeWindowsURL
+	// function found in common/config.go since that function _also_ checks that
+	// the url actually exists in file form.
+
+	const UNCPrefix = string(os.PathSeparator)+string(os.PathSeparator)
+
+	// move any extra path components that were parsed into Host due
+	// to UNC into the url.Path field so that it's PathSeparators get
+	// normalized
+	if len(url.Host) >= len(UNCPrefix) && url.Host[:len(UNCPrefix)] == UNCPrefix {
+		idx := strings.Index(url.Host[len(UNCPrefix):], string(os.PathSeparator))
+		if idx > -1 {
+			url.Path = filepath.ToSlash(url.Host[idx+len(UNCPrefix):]) + url.Path
+			url.Host = url.Host[:idx+len(UNCPrefix)]
+		}
+	}
+
+	// clean up backward-slashes since they only matter when part of a unc path
+	urlPath := filepath.ToSlash(url.Path)
+
+	// semi-absolute path (current drive letter) -- file:///absolute/path
+	if url.Host == "" && len(urlPath) > 0 && urlPath[0] == '/' {
+		return path.Join(filepath.VolumeName(basepath), urlPath)
+
+	// relative path -- file://./relative/path
+	//					file://relative/path
+	} else if url.Host == "" || (len(url.Host) > 0 && url.Host[0] == '.') {
+		return path.Join(filepath.ToSlash(basepath), urlPath)
+	}
+
+	// absolute path
+		// UNC -- file://\\host/share/whatever
+		// drive -- file://c:/absolute/path
+	return path.Join(url.Host, urlPath)
+}
+
 func (d *DownloadClient) Get() (string, error) {
 	// If we already have the file and it matches, then just return the target path.
 	if verify, _ := d.VerifyChecksum(d.config.TargetPath); verify {
@@ -133,49 +171,17 @@ func (d *DownloadClient) Get() (string, error) {
 		// locally and we don't make a copy. Normally we would copy or download.
 		log.Printf("[DEBUG] Using local file: %s", finalPath)
 
-		// FIXME:
-		//	cwd should point to the path relative to client.json, but
-		//	since this isn't exposed to us anywhere, we use os.Getwd()
-		//	to figure it out.
-		cwd,err := os.Getwd()
-		if err != nil {
-			return "", fmt.Errorf("Unable to get working directory")
-		}
-
-		// convert the actual file uri to a windowsy path
-		// (this logic must correspond to the same logic in common/config.go)
+		// transform the actual file uri to a windowsy path if we're being windowsy.
 		if runtime.GOOS == "windows" {
-			const UNCPrefix = string(os.PathSeparator)+string(os.PathSeparator)
-
-			// move any extra path components that were parsed into Host due
-			// to UNC into the url.Path field so that it's PathSeparators get
-			// normalized
-			if len(url.Host) >= len(UNCPrefix) && url.Host[:len(UNCPrefix)] == UNCPrefix {
-				idx := strings.Index(url.Host[len(UNCPrefix):], string(os.PathSeparator))
-				if idx > -1 {
-					url.Path = filepath.ToSlash(url.Host[idx+len(UNCPrefix):]) + url.Path
-					url.Host = url.Host[:idx+len(UNCPrefix)]
-				}
+			// FIXME: cwd should point to a path relative to the TEMPLATE path,
+			//        but since this isn't exposed to us anywhere, we use os.Getwd()
+			//        and assume the user ran packer in the same directory that
+			//        any relative files are located at.
+			cwd,err := os.Getwd()
+			if err != nil {
+				return "", fmt.Errorf("Unable to get working directory")
 			}
-
-			// clean up backward-slashes since they only matter when part of a unc path
-			urlPath := filepath.ToSlash(url.Path)
-
-			// semi-absolute path (current drive letter) -- file:///absolute/path
-			if url.Host == "" && len(urlPath) > 0 && urlPath[0] == '/' {
-				finalPath = path.Join(filepath.VolumeName(cwd), urlPath)
-
-			// relative path -- file://./relative/path
-			//					file://relative/path
-			} else if url.Host == "" || (len(url.Host) > 0 && url.Host[0] == '.') {
-				finalPath = path.Join(filepath.ToSlash(cwd), urlPath)
-
-			// absolute path
-			} else {
-				// UNC -- file://\\host/share/whatever
-				// drive -- file://c:/absolute/path
-				finalPath = path.Join(url.Host, urlPath)
-			}
+			finalPath = NormalizeWindowsURL(cwd, *url)
 		}
 
 		// Keep track of the source so we can make sure not to delete this later
