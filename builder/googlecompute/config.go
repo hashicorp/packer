@@ -81,6 +81,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Unable to parse image name: %s ", err))
+		} else {
 			c.ImageName = img
 		}
 	}
