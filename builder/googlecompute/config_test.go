@@ -160,6 +160,9 @@ func TestConfigDefaults(t *testing.T) {
 
 func TestImageName(t *testing.T) {
 	c, _, _ := NewConfig(testConfig(t))
+	if !strings.HasPrefix(c.ImageName, "packer-") {
+		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
+	}
 	if strings.Contains(c.ImageName, "{{timestamp}}") {
 		t.Errorf("ImageName should be interpolated; found %s", c.ImageName)
 	}
