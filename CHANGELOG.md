@@ -12,7 +12,6 @@ FEATURES:
   processing. This allows you to extract artifacts from a packer builder
   and use them with other post-processors like compress, docker, and Atlas.
   * **New `vmware-esxi` feature**: Packer can now export images from vCloud or vSphere during the build. [GH-1921]
-  * builder/vmware: The root hard drive adapter type can now be specified with "disk_adapter_type" for advanced users. [GH-1242]
 
 IMPROVEMENTS:
 
