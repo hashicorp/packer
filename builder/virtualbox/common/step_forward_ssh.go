@@ -35,7 +35,7 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	guestPort := s.CommConfig.Port()
 	sshHostPort := guestPort
 	if !s.SkipNatMapping {
-		log.Printf("Looking for available SSH port between %d and %d",
+		log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d",
 			s.HostPortMin, s.HostPortMax)
 		offset := 0
 
@@ -61,11 +61,11 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		// Create a forwarded port mapping to the VM
-		ui.Say(fmt.Sprintf("Creating forwarded port mapping for SSH (host port %d)", sshHostPort))
+		ui.Say(fmt.Sprintf("Creating forwarded port mapping for communicator (SSH, WinRM, etc) (host port %d)", sshHostPort))
 		command := []string{
 			"modifyvm", vmName,
 			"--natpf1",
-			fmt.Sprintf("packerssh,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
+			fmt.Sprintf("packercomm,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
 		}
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error creating port forwarding rule: %s", err)
