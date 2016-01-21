@@ -36,9 +36,9 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	// Clear out the Packer-created forwarding rule
 	if !s.SkipNatMapping {
 		ui.Message(fmt.Sprintf(
-			"Deleting forwarded port mapping for SSH (host port %d)",
+			"Deleting forwarded port mapping for the communicator (SSH, WinRM, etc) (host port %d)",
 			state.Get("sshHostPort")))
-		command := []string{"modifyvm", vmName, "--natpf1", "delete", "packerssh"}
+		command := []string{"modifyvm", vmName, "--natpf1", "delete", "packercomm"}
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error deleting port forwarding rule: %s", err)
 			state.Put("error", err)
