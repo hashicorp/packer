@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -9,7 +10,9 @@ import (
 	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
-type StepStopServer struct{}
+type StepStopServer struct {
+	PollDelay time.Duration
+}
 
 func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
@@ -45,7 +48,7 @@ func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
 		Refresh:   ServerStateRefreshFunc(client, server),
 		StepState: state,
 	}
-	if _, err := WaitForState(&stateChange); err != nil {
+	if _, err := WaitForState(&stateChange, s.PollDelay); err != nil {
 		err := fmt.Errorf("Error waiting for server (%s) to stop: %s", server.ID, err)
 		state.Put("error", err)
 		ui.Error(err.Error())

@@ -89,6 +89,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			UserData:         b.config.UserData,
 			UserDataFile:     b.config.UserDataFile,
 			ConfigDrive:      b.config.ConfigDrive,
+			PollDelay:        b.config.PollDelay,
 		},
 		&StepWaitForRackConnect{
 			Wait: b.config.RackconnectWait,
@@ -105,7 +106,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername),
 		},
 		&common.StepProvision{},
-		&StepStopServer{},
+		&StepStopServer{
+			PollDelay: b.config.PollDelay,
+		},
 		&stepCreateImage{},
 	}
 
