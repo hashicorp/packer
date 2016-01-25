@@ -13,16 +13,19 @@ type VMXConfig struct {
 	VMXDataPost map[string]string `mapstructure:"vmx_data_post"`
 }
 
-func (c *VMXConfig) Prepare(ctx *interpolate.Context) []error {
+func (c *VMXConfig) Prepare(ctx *interpolate.Context, remoteType string) []error {
 	var errs []error
 	var err error
 	var desiredMem uint64
 
-	for k, v := range c.VMXData {
-		if k == "memsize" {
-			desiredMem, err = strconv.ParseUint(v, 10, 64)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("Error parsing string: %s", err))
+	// Validate memory resources, only on local hosts
+	if remoteType == "" {
+		for k, v := range c.VMXData {
+			if k == "memsize" {
+				desiredMem, err = strconv.ParseUint(v, 10, 64)
+				if err != nil {
+					errs = append(errs, fmt.Errorf("Error parsing string: %s", err))
+				}
 			}
 		}
 	}
