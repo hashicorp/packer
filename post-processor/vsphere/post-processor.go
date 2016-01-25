@@ -122,11 +122,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	args := []string{
 		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=%s", p.config.VMName),
-		fmt.Sprintf("--datastore=%s", p.config.Datastore),
-		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
-		fmt.Sprintf("--network=%s", p.config.VMNetwork),
-		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
+		fmt.Sprintf("--name=\"%s\"", p.config.VMName),
+		fmt.Sprintf("--datastore=\"%s\"", p.config.Datastore),
+		fmt.Sprintf("--diskMode=\"%s\"", p.config.DiskMode),
+		fmt.Sprintf("--network=\"%s\"", p.config.VMNetwork),
+		fmt.Sprintf("--vmFolder=\"%s\"", p.config.VMFolder),
 		fmt.Sprintf("%s", source),
 		fmt.Sprintf("%s", ovftool_uri),
 	}
