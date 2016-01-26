@@ -133,6 +133,9 @@ builder.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
+-   `mount_partition` (integer) - The partition number containing the /
+    partition. By default this is the first partition of the volume.
+
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
     to the `mount` command ran by Packer. Because this command is ran in a
