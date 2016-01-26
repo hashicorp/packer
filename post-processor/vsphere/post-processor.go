@@ -128,7 +128,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--network=\"%s\"", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=\"%s\"", p.config.VMFolder),
 		fmt.Sprintf("%s", source),
-		fmt.Sprintf("%s", ovftool_uri),
+		fmt.Sprintf("\"%s\"", ovftool_uri),
 	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
