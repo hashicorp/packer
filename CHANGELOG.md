@@ -29,6 +29,7 @@ IMPROVEMENTS:
     for broader compatibility. [GH-2913]
   * core: `target_path` for builder downloads can now be specified. [GH-2600]
   * core: WinRM communicator now supports HTTPS protocol [GH-3061]
+  * core: Local linux builds will attempt to verify that sufficient resources are available prior to starting the build [GH-3096]
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
   * builder/amazon: You can now specify `0` for `spot_price` to switch to on
     demand instances [GH-2845]
@@ -54,6 +55,7 @@ IMPROVEMENTS:
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
   * builder/qemu: Now checks for version-specific options [GH-2376]
+  * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
   * builder/docker-import: Can now import Artifice artifacts [GH-2718]
   * builder/vmware-esxi: Now supports private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
