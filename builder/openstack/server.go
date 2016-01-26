@@ -54,7 +54,7 @@ func ServerStateRefreshFunc(
 
 // WaitForState watches an object and waits for it to achieve a certain
 // state.
-func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
+func WaitForState(conf *StateChangeConf, sleepDuration time.Duration) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
 	for {
@@ -90,6 +90,6 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 		}
 
 		log.Printf("Waiting for state to become: %s currently %s (%d%%)", conf.Target, currentState, currentProgress)
-		time.Sleep(2 * time.Second)
+		time.Sleep(sleepDuration)
 	}
 }

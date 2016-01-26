@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"errors"
+	"time"
 
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -14,16 +15,17 @@ type RunConfig struct {
 	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
 	SSHInterface   string              `mapstructure:"ssh_interface"`
 
-	SourceImage      string   `mapstructure:"source_image"`
-	Flavor           string   `mapstructure:"flavor"`
-	AvailabilityZone string   `mapstructure:"availability_zone"`
-	RackconnectWait  bool     `mapstructure:"rackconnect_wait"`
-	FloatingIpPool   string   `mapstructure:"floating_ip_pool"`
-	FloatingIp       string   `mapstructure:"floating_ip"`
-	SecurityGroups   []string `mapstructure:"security_groups"`
-	Networks         []string `mapstructure:"networks"`
-	UserData         string   `mapstructure:"user_data"`
-	UserDataFile     string   `mapstructure:"user_data_file"`
+	SourceImage      string        `mapstructure:"source_image"`
+	Flavor           string        `mapstructure:"flavor"`
+	AvailabilityZone string        `mapstructure:"availability_zone"`
+	RackconnectWait  bool          `mapstructure:"rackconnect_wait"`
+	FloatingIpPool   string        `mapstructure:"floating_ip_pool"`
+	FloatingIp       string        `mapstructure:"floating_ip"`
+	SecurityGroups   []string      `mapstructure:"security_groups"`
+	Networks         []string      `mapstructure:"networks"`
+	UserData         string        `mapstructure:"user_data"`
+	UserDataFile     string        `mapstructure:"user_data_file"`
+	PollDelay        time.Duration `mapstructure:"poll_delay"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`
 
@@ -40,6 +42,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.UseFloatingIp && c.FloatingIpPool == "" {
 		c.FloatingIpPool = "public"
+	}
+
+	if c.PollDelay == 0 {
+		c.PollDelay = 2 * time.Second
 	}
 
 	// Validation

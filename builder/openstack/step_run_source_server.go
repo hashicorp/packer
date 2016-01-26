@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
@@ -21,6 +22,7 @@ type StepRunSourceServer struct {
 	UserDataFile     string
 	ConfigDrive      bool
 	server           *servers.Server
+	PollDelay        time.Duration
 }
 
 func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
@@ -77,14 +79,14 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	ui.Message(fmt.Sprintf("Server ID: %s", s.server.ID))
 	log.Printf("server id: %s", s.server.ID)
 
-	ui.Say("Waiting for server to become ready...")
+	ui.Say(fmt.Sprintf("Waiting for server to become ready (PollDelay = %s)...", s.PollDelay))
 	stateChange := StateChangeConf{
 		Pending:   []string{"BUILD"},
 		Target:    []string{"ACTIVE"},
 		Refresh:   ServerStateRefreshFunc(computeClient, s.server),
 		StepState: state,
 	}
-	latestServer, err := WaitForState(&stateChange)
+	latestServer, err := WaitForState(&stateChange, s.PollDelay)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for server (%s) to become ready: %s", s.server.ID, err)
 		state.Put("error", err)
@@ -125,5 +127,5 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		Target:  []string{"DELETED"},
 	}
 
-	WaitForState(&stateChange)
+	WaitForState(&stateChange, s.PollDelay)
 }
