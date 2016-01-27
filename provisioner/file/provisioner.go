@@ -115,19 +115,19 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 	}
 
 	if len(det) == 0 {
-		return fmt.Errorf("Didn't recognise the source type")
+		return errors.New("Don't recognise the source type")
 	}
 
 	dir, err := ioutil.TempDir("", "packer")
 	if err != nil {
-		return fmt.Errorf("Unable to create temp dir")
+		return errors.New("Unable to create temp dir")
 	}
 
 	defer os.RemoveAll(dir)
 
 	source := filepath.Join(dir, filepath.Base(p.config.Source))
 	if err := gg.GetFile(source, p.config.Source); err != nil {
-		return fmt.Errorf("Some error: %v", err)
+		return fmt.Errorf("There was a problem getting the file: %v", err)
 	}
 
 	// We're uploading a file...

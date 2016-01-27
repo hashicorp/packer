@@ -34,17 +34,6 @@ func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_InvalidSource(t *testing.T) {
-	var p Provisioner
-	config := testConfig()
-	config["source"] = "/this/should/not/exist"
-
-	err := p.Prepare(config)
-	if err == nil {
-		t.Fatalf("should require existing file")
-	}
-}
-
 func TestProvisionerPrepare_ValidSource(t *testing.T) {
 	var p Provisioner
 
