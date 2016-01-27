@@ -3,12 +3,16 @@ package file
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
+
+	gg "github.com/hashicorp/go-getter"
 )
 
 type Config struct {
@@ -53,12 +57,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Direction must be one of: download, upload."))
 	}
 
-	if p.config.Direction == "upload" {
-		if _, err := os.Stat(p.config.Source); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
-		}
-	}
+	// if p.config.Direction == "upload" {
+	// 	if _, err := os.Stat(p.config.Source); err != nil {
+	// 		errs = packer.MultiErrorAppend(errs,
+	// 			fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
+	// 	}
+	// }
 
 	if p.config.Destination == "" {
 		errs = packer.MultiErrorAppend(errs,
@@ -98,18 +102,43 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 
 func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say(fmt.Sprintf("Uploading %s => %s", p.config.Source, p.config.Destination))
-	info, err := os.Stat(p.config.Source)
-	if err != nil {
-		return err
+
+	info, _ := os.Stat(p.config.Source)
+	if info != nil {
+		// If we're uploading a directory, short circuit and do that
+		if info.IsDir() {
+			return comm.UploadDir(p.config.Destination, p.config.Source, nil)
+		}
 	}
 
-	// If we're uploading a directory, short circuit and do that
-	if info.IsDir() {
-		return comm.UploadDir(p.config.Destination, p.config.Source, nil)
+	pwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("Couldn't get the current working directory")
+	}
+
+	det, err := gg.Detect(p.config.Source, pwd, gg.Detectors)
+	if err != nil {
+		return fmt.Errorf("Couldn't detect file source type: %v", err)
+	}
+
+	if len(det) == 0 {
+		return fmt.Errorf("Didn't recognise the source type")
+	}
+
+	dir, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		return fmt.Errorf("Unable to create temp dir")
+	}
+
+	defer os.RemoveAll(dir)
+
+	source := filepath.Join(dir, filepath.Base(p.config.Source))
+	if err := gg.GetFile(source, p.config.Source); err != nil {
+		return fmt.Errorf("Some error: %v", err)
 	}
 
 	// We're uploading a file...
-	f, err := os.Open(p.config.Source)
+	f, err := os.Open(source)
 	if err != nil {
 		return err
 	}
