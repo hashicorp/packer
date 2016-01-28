@@ -49,6 +49,8 @@ IMPROVEMENTS:
   * builder/google: added support for static external IPs via `address` option
     [GH-3030]
   * builder/openstack: added retry on WaitForImage 404 [GH-3009]
+  * builder/openstack: Can specify `source_image_name` instead of the ID
+    [GH-2577]
   * builder/parallels: Improve support for Parallels 11 [GH-2662]
   * builder/parallels: Parallels disks are now compacted by default [GH-2731]
   * builder/parallels: Packer will look for Parallels in
