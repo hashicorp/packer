@@ -12,11 +12,12 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+  * **Chef on Windows**: The chef provisioner now has native support for Windows using Powershell and WinRM [GH-1215]
+  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or
+    vSphere during the build. [GH-1921]
   * **Artifice post-processor**: Override packer artifacts during post-
     processing. This allows you to extract artifacts from a packer builder and
     use them with other post-processors like compress, docker, and Atlas.
-  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or
-    vSphere during the build. [GH-1921]
 
 IMPROVEMENTS:
 
