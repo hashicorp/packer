@@ -92,6 +92,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if _, err := strconv.ParseUint(p.config.LocalPort, 10, 16); err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %s must be a valid port", p.config.LocalPort))
 		}
+	} else {
+		p.config.LocalPort = "0"
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -149,19 +151,28 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	config.AddHostKey(private)
 
 	localListener, err := func() (net.Listener, error) {
-		port, _ := strconv.ParseUint(p.config.LocalPort, 10, 16)
-		if port == 0 {
-			port = 2200
+		port, err := strconv.ParseUint(p.config.LocalPort, 10, 16)
+		if err != nil {
+			return nil, err
 		}
-		for i := 0; i < 10; i++ {
-			port++
-			l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
-			if err == nil {
-				p.config.LocalPort = strconv.FormatUint(port, 10)
-				return l, nil
-			}
 
-			ui.Say(err.Error())
+		tries := 1
+		if port != 0 {
+			tries = 10
+		}
+		for i := 0; i < tries; i++ {
+			l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+			port++
+			if err != nil {
+				ui.Say(err.Error())
+				continue
+			}
+			_, p.config.LocalPort, err = net.SplitHostPort(l.Addr().String())
+			if err != nil {
+				ui.Say(err.Error())
+				continue
+			}
+			return l, nil
 		}
 		return nil, errors.New("Error setting up SSH proxy connection")
 	}()
@@ -205,6 +216,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	return nil
+
 }
 
 func (p *Provisioner) Cancel() {
