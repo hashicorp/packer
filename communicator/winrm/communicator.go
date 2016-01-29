@@ -26,8 +26,10 @@ type Communicator struct {
 // New creates a new communicator implementation over WinRM.
 func New(config *Config) (*Communicator, error) {
 	endpoint := &winrm.Endpoint{
-		Host: config.Host,
-		Port: config.Port,
+		Host:     config.Host,
+		Port:     config.Port,
+		HTTPS:    config.Https,
+		Insecure: config.Insecure,
 
 		/*
 			TODO
@@ -145,6 +147,8 @@ func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 			User:     c.config.Username,
 			Password: c.config.Password,
 		},
+		Https: c.config.Https,
+		Insecure: c.config.Insecure,
 		OperationTimeout:      c.config.Timeout,
 		MaxOperationsPerShell: 15, // lowest common denominator
 	})

@@ -24,7 +24,8 @@ type mountPathData struct {
 //   mount_path string - The location where the volume was mounted.
 //   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
-	MountOptions []string
+	MountOptions   []string
+	MountPartition int
 
 	mountPath string
 }
@@ -67,7 +68,7 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Source image virtualization type is: %s", *image.VirtualizationType)
 	deviceMount := device
 	if *image.VirtualizationType == "hvm" {
-		deviceMount = fmt.Sprintf("%s%d", device, 1)
+		deviceMount = fmt.Sprintf("%s%d", device, s.MountPartition)
 	}
 	state.Put("deviceMount", deviceMount)
 

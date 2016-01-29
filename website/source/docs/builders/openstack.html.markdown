@@ -48,6 +48,10 @@ builder.
     Unless you specify completely custom SSH settings, the source image must
     have `cloud-init` installed so that the keypair gets assigned properly.
 
+-   `source_image_name` (string) - The name of the base image to use. This
+    is an alternative way of providing `source_image` and only either of them
+    can be specified.
+
 -   `username` (string) - The username used to connect to the OpenStack service.
     If not specified, Packer will use the environment variable `OS_USERNAME`,
     if set.
@@ -82,6 +86,10 @@ builder.
     instance into. Some OpenStack installations require this. If not specified,
     Packer will use the environment variable `OS_TENANT_NAME`, if set.
 
+-   `domain_name` or `domain_id` (string) - The Domain name or ID you are 
+    authenticating with. OpenStack installations require this if identity v3 is used.
+    Packer will use the environment variable `OS_DOMAIN_NAME` or `OS_DOMAIN_ID`, if set.
+
 -   `security_groups` (array of strings) - A list of security groups by name to
     add to this instance.
 
@@ -102,6 +110,9 @@ builder.
 
 -   `metadata` (object of key/value strings) - Glance metadata that will be
     applied to the image.
+
+-   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
+     cloud-init metadata.
 
 ## Basic Example: Rackspace public cloud
 
@@ -145,3 +156,24 @@ environment variables like:
 -   `OS_TENANT_ID`
 -   `OS_USERNAME`
 -   `OS_PASSWORD`
+
+This is slightly different when identity v3 is used:
+
+-   `OS_AUTH_URL`
+-   `OS_USERNAME`
+-   `OS_PASSWORD`
+-   `OS_DOMAIN_NAME`
+-   `OS_TENANT_NAME`
+
+This will authenticate the user on the domain and scope you to the project. 
+A tenant is the same as a project. It's optional to use names or IDs in v3. 
+This means you can use `OS_USERNAME` or `OS_USERID`,  `OS_TENANT_ID` or 
+`OS_TENANT_NAME` and `OS_DOMAIN_ID` or `OS_DOMAIN_NAME`.
+
+The above example would be equivalent to an RC file looking like this :
+
+    export OS_AUTH_URL="https://identity.myprovider/v3"
+    export OS_USERNAME="myuser"
+    export OS_PASSWORD="password"
+    export OS_USER_DOMAIN_NAME="mydomain"
+    export OS_PROJECT_DOMAIN_NAME="mydomain"

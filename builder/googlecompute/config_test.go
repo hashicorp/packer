@@ -93,6 +93,21 @@ func TestConfigPrepare(t *testing.T) {
 			"SO VERY BAD",
 			true,
 		},
+		{
+			"preemptible",
+			nil,
+			false,
+		},
+		{
+			"preemptible",
+			false,
+			false,
+		},
+		{
+			"preemptible",
+			"SO VERY BAD",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -145,6 +160,9 @@ func TestConfigDefaults(t *testing.T) {
 
 func TestImageName(t *testing.T) {
 	c, _, _ := NewConfig(testConfig(t))
+	if !strings.HasPrefix(c.ImageName, "packer-") {
+		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
+	}
 	if strings.Contains(c.ImageName, "{{timestamp}}") {
 		t.Errorf("ImageName should be interpolated; found %s", c.ImageName)
 	}

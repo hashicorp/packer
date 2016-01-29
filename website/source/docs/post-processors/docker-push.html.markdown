@@ -29,6 +29,11 @@ This post-processor has only optional configuration:
 
 -   `login_server` (string) - The server address to login to.
 
+Note: When using _Docker Hub_ or _Quay_ registry servers, `login` must to be 
+set to `true` and `login_email`, `login_username`, **and** `login_password` 
+must to be set to your registry credentials. When using Docker Hub, 
+`login_server` can be omitted.
+
 -&gt; **Note:** If you login using the credentials above, the post-processor
 will automatically log you out afterwards (just the server specified).
 

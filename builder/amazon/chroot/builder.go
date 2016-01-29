@@ -37,6 +37,7 @@ type Config struct {
 	SourceAmi      string     `mapstructure:"source_ami"`
 	RootVolumeSize int64      `mapstructure:"root_volume_size"`
 	MountOptions   []string   `mapstructure:"mount_options"`
+	MountPartition int        `mapstructure:"mount_partition"`
 
 	ctx interpolate.Context
 }
@@ -95,6 +96,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.MountPath == "" {
 		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
+	}
+
+	if b.config.MountPartition == 0 {
+		b.config.MountPartition = 1
 	}
 
 	// Accumulate any errors
@@ -169,7 +174,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
 		&StepMountDevice{
-			MountOptions: b.config.MountOptions,
+			MountOptions:   b.config.MountOptions,
+			MountPartition: b.config.MountPartition,
 		},
 		&StepMountExtra{},
 		&StepCopyFiles{},
@@ -189,9 +195,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
-			Description: b.config.AMIDescription,
-			Users:       b.config.AMIUsers,
-			Groups:      b.config.AMIGroups,
+			Description:  b.config.AMIDescription,
+			Users:        b.config.AMIUsers,
+			Groups:       b.config.AMIGroups,
+			ProductCodes: b.config.AMIProductCodes,
 		},
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,

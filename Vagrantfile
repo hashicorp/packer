@@ -2,34 +2,39 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
-SRCROOT="/opt/go"
+# Fetch from https://golang.org/dl
+TARBALL="https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz"
+
+UNTARPATH="/opt"
+GOROOT="${UNTARPATH}/go"
+GOPATH="${UNTARPATH}/gopath"
 
 # Install Go
-sudo apt-get update
-sudo apt-get install -y build-essential mercurial
-sudo hg clone -u release https://code.google.com/p/go ${SRCROOT}
-cd ${SRCROOT}/src
-sudo ./all.bash
+if [ ! -d ${GOROOT} ]; then
+  sudo wget --progress=bar:force --output-document - ${TARBALL} |\
+    tar xfz - -C ${UNTARPATH}
+fi
 
 # Setup the GOPATH
-sudo mkdir -p /opt/gopath
+sudo mkdir -p ${GOPATH}
 cat <<EOF >/tmp/gopath.sh
-export GOPATH="/opt/gopath"
-export PATH="/opt/go/bin:\$GOPATH/bin:\$PATH"
+export GOROOT="${GOROOT}"
+export GOPATH="${GOPATH}"
+export PATH="${GOROOT}/bin:${GOPATH}/bin:\$PATH"
 EOF
 sudo mv /tmp/gopath.sh /etc/profile.d/gopath.sh
-sudo chmod 0755 /etc/profile.d/gopath.sh
 
-# Make sure the gopath is usable by vagrant
-sudo chown -R vagrant:vagrant $SRCROOT
-sudo chown -R vagrant:vagrant /opt/gopath
+# Make sure the GOPATH is usable by vagrant
+sudo chown -R vagrant:vagrant ${GOROOT}
+sudo chown -R vagrant:vagrant ${GOPATH}
 
 # Install some other stuff we need
-sudo apt-get install -y curl git-core zip
+sudo apt-get update
+sudo apt-get install -y curl make git mercurial bzr zip
 SCRIPT
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "chef/ubuntu-12.04"
+  config.vm.box = "bento/ubuntu-14.04"
 
   config.vm.provision "shell", inline: $script
 

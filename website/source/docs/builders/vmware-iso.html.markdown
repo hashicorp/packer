@@ -15,12 +15,12 @@ Type: `vmware-iso`
 
 This VMware Packer builder is able to create VMware virtual machines from an ISO
 file as a source. It currently supports building virtual machines on hosts
-running [VMware Fusion](http://www.vmware.com/products/fusion/overview.html) for
+running [VMware Fusion](https://www.vmware.com/products/fusion/overview.html) for
 OS X, [VMware
-Workstation](http://www.vmware.com/products/workstation/overview.html) for Linux
-and Windows, and [VMware Player](http://www.vmware.com/products/player/) on
+Workstation](https://www.vmware.com/products/workstation/overview.html) for Linux
+and Windows, and [VMware Player](https://www.vmware.com/products/player/) on
 Linux. It can also build machines directly on [VMware vSphere
-Hypervisor](http://www.vmware.com/products/vsphere-hypervisor/) using SSH as
+Hypervisor](https://www.vmware.com/products/vsphere-hypervisor/) using SSH as
 opposed to the vSphere API.
 
 The builder builds a virtual machine by creating a new virtual machine from
@@ -106,7 +106,7 @@ builder.
     default is "1", which corresponds to a growable virtual disk split in
     2GB files. This option is for advanced usage, modify only if you know what
     you're doing. For more information, please consult the [Virtual Disk Manager
-    User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
+    User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
@@ -187,6 +187,10 @@ builder.
 -   `remote_password` (string) - The SSH password for the user used to access
     the remote machine. By default this is empty. This only has an effect if
     `remote_type` is enabled.
+
+-   `remote_private_key_file` (string) - The path to the PEM encoded private key
+    file for the user used to access the remote machine. By default this is empty.
+    This only has an effect if `remote_type` is enabled.
 
 -   `remote_type` (string) - The type of remote machine that will be used to
     build this VM rather than a local desktop product. The only value accepted
@@ -399,6 +403,8 @@ modify as well:
 
 -   `remote_password` - The SSH password for access to the remote machine.
 
+-   `remote_private_key_file` - The SSH key for access to the remote machine.
+
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
     Before using this option, you need to install `ovftool`.
@@ -418,6 +424,22 @@ file by attaching a floppy disk. An example below, based on RHEL:
         "folder/ks.cfg"
       ],
       "boot_command": "<tab> text ks=floppy <enter><wait>"
+    }
+  ]
+}
+```
+
+It's also worth noting that `ks=floppy` has been deprecated.  Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
+
+``` {.javascript}
+{
+  "builders": [
+    {
+      "type":"vmware-iso",
+      "floppy_files": [
+        "folder/ks.cfg"
+      ],
+      "boot_command": "<tab> inst.text inst.ks=hd:fd0:/ks.cfg <enter><wait>"
     }
   ]
 }

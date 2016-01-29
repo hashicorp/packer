@@ -174,6 +174,9 @@ builder.
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
+-   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
+    curl block device.
+
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
     original filename as its name.

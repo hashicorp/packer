@@ -12,7 +12,7 @@ page_title: 'Atlas Post-Processor'
 Type: `atlas`
 
 The Atlas post-processor uploads artifacts from your packer builds to Atlas for
-hosting. Artifacts hosted in Atlas are are automatically made available for use
+hosting. Artifacts hosted in Atlas are automatically made available for use
 with Vagrant and Terraform, and Atlas provides additional features for managing
 versions and releases. [Learn more about packer in
 Atlas.](https://atlas.hashicorp.com/help/packer/features)
@@ -38,7 +38,7 @@ Here is an example workflow:
     example `hashicorp/foobar`, to create the artifact in Atlas or update the
     version if the artifact already exists
 3.  The new version is ready and available to be used in deployments with a tool
-    like [Terraform](https://terraform.io)
+    like [Terraform](https://www.terraform.io)
 
 ## Configuration
 
@@ -88,8 +88,8 @@ you can also use `token` configuration option.
         "access_key": "{{user `aws_access_key`}}",
         "secret_key": "{{user `aws_secret_key`}}",
         "region": "us-east-1",
-        "source_ami": "ami-de0d9eb7",
-        "instance_type": "t1.micro",
+        "source_ami": "ami-72b9e018",
+        "instance_type": "t2.micro",
         "ssh_username": "ubuntu",
         "ami_name": "atlas-example {{timestamp}}"
     }],

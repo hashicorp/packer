@@ -72,21 +72,26 @@ Optional parameters:
     `Vars`, which is the list of `environment_vars`, if configured.
 
 -   `inline_shebang` (string) - The
-    [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
+    [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
     you're not using `inline`, then this configuration has no effect.
     **Important:** If you customize this, be sure to include something like the
     `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
--   `remote_path` (string) - The path where the script will be uploaded to in
-    the machine. This defaults to "/tmp/script.sh". This value must be a
-    writable location and any parent directories must already exist.
+-   `remote_path` (string) - The filename where the script will be uploaded
+    to in the machine. This defaults to `/tmp/script_nnn.sh` where "nnn" is
+    a randomly generated number. This value must be a writable location and
+    any parent directories must already exist.
 
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
-    the remote process. By default this is "5m" or 5 minutes. This setting
+    the remote process. By default this is `5m` or 5 minutes. This setting
     exists in order to deal with times when SSH may restart, such as a
     system reboot. Set this to a higher value if reboots take a longer amount
     of time.
+
+-   `skip_clean` (boolean) - If true, specifies that the helper scripts 
+    uploaded to the system will not be removed by Packer. This defaults to 
+    false (clean scripts from the system).
 
 ## Execute Command Example
 
@@ -191,8 +196,8 @@ git@github.com:exampleorg/myprivaterepo.git" \] }
 *My shell script doesn't work correctly on Ubuntu*
 
 -   On Ubuntu, the `/bin/sh` shell is
-    [dash](http://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
-    has [bash](http://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
+    [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
+    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
     in it, then put `#!/bin/bash` at the top of your script. Differences between
     dash and bash can be found on the
     [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.

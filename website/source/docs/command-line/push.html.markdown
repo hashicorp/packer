@@ -26,17 +26,13 @@ both the post-processor and push commands can be used independently.
 scripts, to Atlas. Take care not to upload files that you don't intend to, like
 secrets or large binaries. **If you have secrets in your Packer template, you
 should [move them into environment
-variables](https://packer.io/docs/templates/user-variables.html).**
+variables](https://www.packer.io/docs/templates/user-variables.html).**
 
 Most push behavior is [configured in your packer
 template](/docs/templates/push.html). You can override or supplement your
 configuration using the options below.
 
 ## Options
-
--   `-message` - A message to identify the purpose or changes in this Packer
-    template much like a VCS commit message. This message will be passed to the
-    Packer build service. This option is also available as a short option `-m`.
 
 -   `-token` - Your access token for the Atlas API.
 
@@ -59,7 +55,7 @@ you can also use `-token` on the command line.
 Push a Packer template:
 
 ``` {.shell}
-$ packer push -m "Updating the apache version" template.json
+$ packer push template.json
 ```
 
 Push a Packer template with a custom token:
@@ -81,7 +77,7 @@ download it during the packer run.
 
 If you want to build a private `.iso` file you can upload the `.iso` to a secure
 file hosting service like [Amazon
-S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html),
+S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html),
 [Google Cloud
 Storage](https://cloud.google.com/storage/docs/gsutil/commands/signurl), or
 [Azure File

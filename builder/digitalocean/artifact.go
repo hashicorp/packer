@@ -32,11 +32,11 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return strconv.FormatUint(uint64(a.snapshotId), 10)
+	return fmt.Sprintf("%s:%s", a.regionName, strconv.FormatUint(uint64(a.snapshotId), 10))
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A snapshot was created: '%v' in region '%v'", a.snapshotName, a.regionName)
+	return fmt.Sprintf("A snapshot was created: '%v' (ID: %v) in region '%v'", a.snapshotName, a.snapshotId, a.regionName)
 }
 
 func (a *Artifact) State(name string) interface{} {

@@ -260,45 +260,6 @@ func TestBuilderPrepare_HardDriveInterface(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_HTTPPort(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Bad
-	config["http_port_min"] = 1000
-	config["http_port_max"] = 500
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Bad
-	config["http_port_min"] = -500
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Good
-	config["http_port_min"] = 500
-	config["http_port_max"] = 1000
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
 	config := testConfig()

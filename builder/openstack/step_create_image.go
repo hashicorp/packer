@@ -45,7 +45,7 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("image", imageId)
 
 	// Wait for the image to become ready
-	ui.Say("Waiting for image to become ready...")
+	ui.Say(fmt.Sprintf("Waiting for image %s (image id: %s) to become ready...", config.ImageName, imageId))
 	if err := WaitForImage(client, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
 		state.Put("error", err)
@@ -62,12 +62,20 @@ func (s *stepCreateImage) Cleanup(multistep.StateBag) {
 
 // WaitForImage waits for the given Image ID to become ready.
 func WaitForImage(client *gophercloud.ServiceClient, imageId string) error {
+	maxNumErrors := 10
+	numErrors := 0
+
 	for {
 		image, err := images.Get(client, imageId).Extract()
 		if err != nil {
 			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
-			if ok && errCode.Actual == 500 {
-				log.Printf("[ERROR] 500 error received, will ignore and retry: %s", err)
+			if ok && (errCode.Actual == 500 || errCode.Actual == 404) {
+				numErrors++
+				if numErrors >= maxNumErrors {
+					log.Printf("[ERROR] Maximum number of errors (%d) reached; failing with: %s", numErrors, err)
+					return err
+				}
+				log.Printf("[ERROR] %d error received, will ignore and retry: %s", errCode.Actual, err)
 				time.Sleep(2 * time.Second)
 				continue
 			}

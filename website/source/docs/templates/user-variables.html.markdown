@@ -145,3 +145,20 @@ specified later override a variable set earlier if it has already been set.
 
 And as mentioned above, no matter where a `-var-file` is specified, a `-var`
 flag on the command line will always override any variables from a file.
+
+# Recipes
+
+## Making a provisioner step conditional on the value of a variable
+
+There is no specific syntax in Packer templates for making a provisioner
+step conditional, depending on the value of a variable. However, you may
+be able to do this by referencing the variable within a command that
+you execute. For example, here is how to make a `shell-local`
+provisioner only run if the `do_nexpose_scan` variable is non-empty.
+
+``` {.javascript}
+{
+  "type": "shell-local",
+  "command": "if [ ! -z \"{{user `do_nexpose_scan`}}\" ]; then python -u trigger_nexpose_scan.py; fi"
+}
+```

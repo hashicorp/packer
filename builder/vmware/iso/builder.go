@@ -26,6 +26,7 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
+	common.HTTPConfig        `mapstructure:",squash"`
 	common.ISOConfig         `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
@@ -57,6 +58,7 @@ type Config struct {
 	RemotePort           uint   `mapstructure:"remote_port"`
 	RemoteUser           string `mapstructure:"remote_username"`
 	RemotePassword       string `mapstructure:"remote_password"`
+	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
 
 	ctx interpolate.Context
 }
@@ -83,6 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
+	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.DriverConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
@@ -90,7 +93,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx, b.config.RemoteType)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -165,6 +168,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("format must be one of ova, ovf, or vmx"))
+		}
+	}
+
+	// Determine if DiskSize is able to be allocated, only when running locally
+	if b.config.RemoteType == "" {
+		if err = common.AvailableDisk(uint64(b.config.DiskSize)); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Unavailable Resources: %s", err))
 		}
 	}
 
@@ -244,7 +255,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXData,
 		},
 		&vmwcommon.StepSuppressMessages{},
-		&vmwcommon.StepHTTPServer{
+		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -283,6 +294,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 		},
 		&vmwcommon.StepCleanFiles{},
+		&vmwcommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
+		},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
@@ -290,9 +304,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepCleanVMX{},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
-		},
-		&vmwcommon.StepCompactDisk{
-			Skip: b.config.SkipCompaction,
 		},
 		&StepExport{
 			Format: b.config.Format,

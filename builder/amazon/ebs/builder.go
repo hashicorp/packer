@@ -29,6 +29,7 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+	VolumeRunTags          map[string]string `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -71,6 +72,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	session := session.New(config)
 	ec2conn := ec2.New(session)
+
+	// If the subnet is specified but not the AZ, try to determine the AZ automatically
+	if b.config.SubnetId != "" && b.config.AvailabilityZone == "" {
+		log.Printf("[INFO] Finding AZ for the given subnet '%s'", b.config.SubnetId)
+		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []*string{&b.config.SubnetId}})
+		if err != nil {
+			return nil, err
+		}
+		b.config.AvailabilityZone = *resp.Subnets[0].AvailabilityZone
+		log.Printf("[INFO] AZ found: '%s'", b.config.AvailabilityZone)
+	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
@@ -121,6 +133,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
 		},
+		&stepTagEBSVolumes{
+			VolumeRunTags: b.config.VolumeRunTags,
+		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
@@ -149,9 +164,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
-			Description: b.config.AMIDescription,
-			Users:       b.config.AMIUsers,
-			Groups:      b.config.AMIGroups,
+			Description:  b.config.AMIDescription,
+			Users:        b.config.AMIUsers,
+			Groups:       b.config.AMIGroups,
+			ProductCodes: b.config.AMIProductCodes,
 		},
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,

@@ -2,34 +2,71 @@
 
 BACKWARDS INCOMPATIBILITIES:
 
-  * Packer now ships as a single binary, including plugins. If you install packer 0.9.0 over a previous packer installation, **you must delete all of the packer-* plugin files** or packer will load out-of-date plugins from disk.
+  * Packer now ships as a single binary, including plugins. If you install
+    packer 0.9.0 over a previous packer installation, **you must delete all of
+    the packer-* plugin files** or packer will load out-of-date plugins from
+    disk.
   * Release binaries are now provided via <https://releases.hashicorp.com>.
-  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support for building with Go 1.4.
+  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support
+    for building with Go 1.4.
 
 FEATURES:
 
+  * **Chef on Windows**: The chef provisioner now has native support for
+    Windows using Powershell and WinRM [GH-1215]
+  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or
+    vSphere during the build. [GH-1921]
+  * **New Ansible Provisioner**: `ansible` provisioner supports remote
+    provisioning to keep your build image cleaner. [GH-1969]
   * **Artifice post-processor**: Override packer artifacts during post-
-  processing. This allows you to extract artifacts from a packer builder
-  and use them with other post-processors like compress, docker, and Atlas.
-  * **New `vmware-esxi` feature**: Packer can now export images from vCloud or vSphere during the build. [GH-1921]
+    processing. This allows you to extract artifacts from a packer builder and
+    use them with other post-processors like compress, docker, and Atlas.
 
 IMPROVEMENTS:
 
-  * core: Packer plugins are now compiled into the main binary, reducing file size and build times, and making packer easier to install. The overall plugin architecture has not changed and third-party plugins can still be loaded from disk. Please make sure your plugins are up-to-date! [GH-2854]
+  * core: Packer plugins are now compiled into the main binary, reducing file
+    size and build times, and making packer easier to install. The overall
+    plugin architecture has not changed and third-party plugins can still be
+    loaded from disk. Please make sure your plugins are up-to-date! [GH-2854]
   * core: Packer now indicates line numbers for template parse errors [GH-2742]
-  * core: Scripts are executed via `/usr/bin/env bash` instead of `/bin/bash` for broader compatibility. [GH-2913]
+  * core: Scripts are executed via `/usr/bin/env bash` instead of `/bin/bash`
+    for broader compatibility. [GH-2913]
   * core: `target_path` for builder downloads can now be specified. [GH-2600]
+  * core: WinRM communicator now supports HTTPS protocol [GH-3061]
+  * core: Local linux builds will attempt to verify that sufficient resources are available prior to starting the build [GH-3096]
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
-  * builder/amazon: You can now specify `0` for `spot_price` to switch to on demand instances [GH-2845]
-  * builder/google: `account_file` can now be provided as a JSON string [GH-2811]
+  * builder/amazon: You can now specify `0` for `spot_price` to switch to on
+    demand instances [GH-2845]
+  * builder/amazon: Added `ap-northeast-2` (Seoul) [GH-3056]
+  * builder/amazon: packer will try to derive the AZ if only a subnet is
+    specified [GH-3037]
+  * builder/digitalocean: doubled instance wait timeouts to power off or
+    shutdown (now 4 minutes) and to complete a snapshot (now 20 minutes)
+    [GH-2939]
+  * builder/google: `account_file` can now be provided as a JSON string
+    [GH-2811]
+  * builder/google: added support for `preemptible` instances [GH-2982]
+  * builder/google: added support for static external IPs via `address` option
+    [GH-3030]
+  * builder/openstack: added retry on WaitForImage 404 [GH-3009]
+  * builder/openstack: Can specify `source_image_name` instead of the ID
+    [GH-2577]
   * builder/parallels: Improve support for Parallels 11 [GH-2662]
   * builder/parallels: Parallels disks are now compacted by default [GH-2731]
-  * builder/parallels: Packer will look for Parallels in `/Applications/Parallels Desktop.app` if it is not detected automatically [GH-2839]
+  * builder/parallels: Packer will look for Parallels in
+    `/Applications/Parallels Desktop.app` if it is not detected automatically
+    [GH-2839]
   * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
   * builder/qemu: qcow2 images are now compacted by default [GH-2748]
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
   * builder/qemu: Now checks for version-specific options [GH-2376]
+  * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
+  * builder/docker-import: Can now import Artifice artifacts [GH-2718]
+  * builder/vmware-esxi: Now supports private key auth for remote builds via
+    `remote_private_key_file` [GH-2912]
+  * provisioner/chef: Now supports `encrypted_data_bag_secret_path` option
+    [GH-2653]
   * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
 
@@ -42,6 +79,8 @@ BUG FIXES:
   * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
   * builder/parallels: Now supports interpolation in `prlctl_post` [GH-2828]
   * builder/vmware: `format` option is now read correctly [GH-2892]
+  * builder/vmware-esxi: Correct endless loop in destroy validation logic
+    [GH-2911]
   * provisioner/shell: No longer leaves temp scripts behind [GH-1536]
   * provisioner/winrm: Now waits for reboot to complete before continuing with provisioning [GH-2568]
   * post-processor/artifice: Fix truncation of files downloaded from Docker. [GH-2793]

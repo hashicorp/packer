@@ -4,7 +4,7 @@ language: go
 
 go:
   - 1.4
-  - 1.5
+  - 1.5.3
   - tip
 
 script:
@@ -18,4 +18,3 @@ matrix:
   fast_finish: true
   allow_failures:
     - go: tip
-    - go: 1.5

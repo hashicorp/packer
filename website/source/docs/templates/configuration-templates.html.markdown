@@ -60,7 +60,7 @@ in Packer templates. These are listed below for reference.
 -   `build_name` - The name of the build being run.
 -   `build_type` - The type of the builder being used currently.
 -   `isotime [FORMAT]` - UTC time, which can be
-    [formatted](http://golang.org/pkg/time/#example_Time_Format). See more
+    [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
     examples below.
 -   `lower` - Lowercases the string.
 -   `pwd` - The working directory while executing Packer.
@@ -198,8 +198,8 @@ Please note that double quote characters need escaping inside of templates:
       "access_key": "...",
       "secret_key": "...",
       "region": "us-east-1",
-      "source_ami": "ami-de0d9eb7",
-      "instance_type": "t1.micro",
+      "source_ami": "ami-72b9e018",
+      "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
       "ami_name": "packer {{isotime \"2006-01-02\"}}"
     }

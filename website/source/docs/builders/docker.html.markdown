@@ -11,7 +11,7 @@ page_title: Docker Builder
 
 Type: `docker`
 
-The `docker` Packer builder builds [Docker](http://www.docker.io) images using
+The `docker` Packer builder builds [Docker](https://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within this
 container, then exports the container for reuse or commits the image.
 
@@ -26,7 +26,7 @@ the section on [Dockerfiles](#toc_8).
 The Docker builder must run on a machine that has Docker installed. Therefore
 the builder only works on machines that support Docker (modern Linux machines).
 If you want to use Packer to build Docker containers on another platform, use
-[Vagrant](http://www.vagrantup.com) to start a Linux environment, then run
+[Vagrant](https://www.vagrantup.com) to start a Linux environment, then run
 Packer within that environment.
 
 ## Basic Example: Export
@@ -75,7 +75,7 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 -   `discard` (boolean) - Throw away the container when the build is complete.
     This is useful for the [artifice
-    post-processor](https://packer.io/docs/post-processors/artifice.html).
+    post-processor](https://www.packer.io/docs/post-processors/artifice.html).
 
 -   `export_path` (string) - The path where the final container will be exported
     as a tar file.
@@ -213,6 +213,42 @@ nearly-identical sequence definitions, as demonstrated by the example below:
   ]
 }
 ```
+
+<span id="amazon-ec2-container-registry"></span>
+
+## Amazon EC2 Container Registry
+
+Packer can tag and push images for use in
+[Amazon EC2 Container Registry](https://aws.amazon.com/ecr/). The post
+processors work as described above and example configuration properties are
+shown below:
+
+``` {.javascript}
+{
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "12345.dkr.ecr.us-east-1.amazonaws.com/packer",
+        "tag": "0.7"
+      },
+      {
+        "type": "docker-push",
+        "login": true,
+        "login_email": "none",
+        "login_username": "AWS",
+        "login_password": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "login_server": "https://12345.dkr.ecr.us-east-1.amazonaws.com/"
+      }
+    ]
+  ]
+}
+```
+
+See the
+[AWS documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html)
+for steps to obtain Amazon ECR registry credentials.
+
 
 ## Dockerfiles
 

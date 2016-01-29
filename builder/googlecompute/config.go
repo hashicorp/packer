@@ -31,6 +31,8 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	Address              string            `mapstructure:"address"`
+	Preemptible          bool              `mapstructure:"preemptible"`
 	SourceImage          string            `mapstructure:"source_image"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
@@ -79,6 +81,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Unable to parse image name: %s ", err))
+		} else {
 			c.ImageName = img
 		}
 	}

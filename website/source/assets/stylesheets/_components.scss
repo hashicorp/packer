@@ -167,11 +167,12 @@ header .header {
 
 .docs-wrapper {
   .docs-body {
+    max-width: 960px;
     @extend .white-background;
 
     .docs-content {
-      padding: $docs-top-margin 80px;
-      max-width: 960px;
+      flex-direction: column;
+      padding: $docs-top-margin 120px 150px;
       display: block;
 
       code {
@@ -220,8 +221,8 @@ header .header {
         font-size: 17px;
         line-height: 1.5;
         letter-spacing: 1px;
-        margin-left: -95px;
-        margin-right: -95px;
+        margin-left: -135px;
+        margin-right: -135px;
         padding-top: 40px;
         padding-bottom: 40px;
         padding-left: 80px;
@@ -232,8 +233,8 @@ header .header {
       pre {
         border: 0;
         font-size: 14px;
-        margin-left: -95px;
-        margin-right: -95px;
+        margin-left: -135px;
+        margin-right: -135px;
         padding-top: 40px;
         padding-bottom: 40px;
         padding-left: 80px;
@@ -266,11 +267,14 @@ header .header {
 }
 
 .pagination {
+  position: absolute;
+  width: 100%;
+  bottom: 1px;
   $border: 1px solid $gray-mid;
   height: $nav-height;
   border-top: $border;
   font-size: 20px;
-  margin: 0 -15px -40px -15px;
+  margin: 0 -15px 0 -15px;
   display: block;
 
   h4 {
@@ -331,6 +335,24 @@ header .header {
 
     .bio {
       padding-left: 150px;
+    }
+  }
+}
+
+@media (max-width:768px){
+  .docs-wrapper {
+    .docs-body {
+      .docs-content {
+        div.alert {
+          margin-left: -15px;
+          margin-right: -15px;
+        }
+
+        pre {
+          margin-left: -15px;
+          margin-right: -15px;
+        }
+      }
     }
   }
 }

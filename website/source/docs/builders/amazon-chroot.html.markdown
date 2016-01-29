@@ -16,7 +16,7 @@ The `amazon-chroot` Packer builder is able to create Amazon AMIs backed by an
 EBS volume as the root device. For more information on the difference between
 instance storage and EBS-backed instances, see the ["storage for the root
 device" section in the EC2
-documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
+documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
 
 The difference between this builder and the `amazon-ebs` builder is that this
 builder is able to build an EBS-backed AMI without launching a new EC2 instance.
@@ -34,7 +34,7 @@ account, it is up to you to use, delete, etc. the AMI.
 
 This builder works by creating a new EBS volume from an existing source AMI and
 attaching it into an already-running EC2 instance. Once attached, a
-[chroot](http://en.wikipedia.org/wiki/Chroot) is used to provision the system
+[chroot](https://en.wikipedia.org/wiki/Chroot) is used to provision the system
 within that volume. After provisioning, the volume is detached, snapshotted, and
 an AMI is made.
 
@@ -132,6 +132,9 @@ builder.
     `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
+
+-   `mount_partition` (integer) - The partition number containing the /
+    partition. By default this is the first partition of the volume.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied

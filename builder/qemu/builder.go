@@ -79,9 +79,11 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	common.HTTPConfig   `mapstructure:",squash"`
 	common.ISOConfig    `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
+	ISOSkipCache    bool       `mapstructure:"iso_skip_cache"`
 	Accelerator     string     `mapstructure:"accelerator"`
 	BootCommand     []string   `mapstructure:"boot_command"`
 	DiskInterface   string     `mapstructure:"disk_interface"`
@@ -94,9 +96,6 @@ type Config struct {
 	Format          string     `mapstructure:"format"`
 	Headless        bool       `mapstructure:"headless"`
 	DiskImage       bool       `mapstructure:"disk_image"`
-	HTTPDir         string     `mapstructure:"http_directory"`
-	HTTPPortMin     uint       `mapstructure:"http_port_min"`
-	HTTPPortMax     uint       `mapstructure:"http_port_max"`
 	MachineType     string     `mapstructure:"machine_type"`
 	NetDevice       string     `mapstructure:"net_device"`
 	OutputDir       string     `mapstructure:"output_directory"`
@@ -158,14 +157,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		} else {
 			b.config.Accelerator = "kvm"
 		}
-	}
-
-	if b.config.HTTPPortMin == 0 {
-		b.config.HTTPPortMin = 8000
-	}
-
-	if b.config.HTTPPortMax == 0 {
-		b.config.HTTPPortMax = 9000
 	}
 
 	if b.config.MachineType == "" {
@@ -231,10 +222,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
 
+	if b.config.ISOSkipCache {
+		b.config.ISOChecksumType = "none"
+	}
+
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
+	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	if es := b.config.Comm.Prepare(&b.config.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
@@ -272,11 +268,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if _, ok := diskDiscard[b.config.DiskDiscard]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("unrecognized disk cache type"))
-	}
-
-	if b.config.HTTPPortMin > b.config.HTTPPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("http_port_min must be less than http_port_max"))
 	}
 
 	if !b.config.PackerForce {
@@ -340,8 +331,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		steprun.Message = "Starting VM, booting disk image"
 	}
 
-	steps := []multistep.Step{
-		&common.StepDownload{
+	steps := []multistep.Step{}
+	if !b.config.ISOSkipCache {
+		steps = append(steps, &common.StepDownload{
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
@@ -350,14 +342,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
 		},
-		new(stepPrepareOutputDir),
+		)
+	} else {
+		steps = append(steps, &stepSetISO{
+			ResultKey: "iso_path",
+			Url:       b.config.ISOUrls,
+		},
+		)
+	}
+
+	steps = append(steps, new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
 		new(stepCreateDisk),
 		new(stepCopyDisk),
 		new(stepResizeDisk),
-		new(stepHTTPServer),
+		&common.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
 		steprun,
@@ -372,7 +377,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(common.StepProvision),
 		new(stepShutdown),
 		new(stepConvertDisk),
-	}
+	)
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)

@@ -15,7 +15,7 @@ the ecosystem HashiCorp has built to make application delivery a versioned,
 auditable, repeatable, and collaborative process. To learn more about our
 beliefs on the qualities of the modern datacenter and responsible application
 delivery, read [The Atlas Mindset: Version Control for
-Infrastructure](https://hashicorp.com/blog/atlas-mindset.html/?utm_source=packer&utm_campaign=HashicorpEcosystem).
+Infrastructure](https://www.hashicorp.com/blog/atlas-mindset.html?utm_source=packer&utm_campaign=HashicorpEcosystem).
 
 If you are using Packer to build machine images and deployable artifacts, it's
 likely that you need a solution for deploying those artifacts. Terraform is our
@@ -33,16 +33,16 @@ is HashiCorp's only commercial product. It unites Packer, Terraform, and Consul
 to make application delivery a versioned, auditable, repeatable, and
 collaborative process.
 
-[Packer](https://packer.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
+[Packer](https://www.packer.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
 is a HashiCorp tool for creating machine images and deployable artifacts such as
 AMIs, OpenStack images, Docker containers, etc.
 
-[Terraform](https://terraform.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
+[Terraform](https://www.terraform.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
 is a HashiCorp tool for creating, combining, and modifying infrastructure. In
 the Atlas workflow Terraform reads from the artifact registry and provisions
 infrastructure.
 
-[Consul](https://consul.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
+[Consul](https://www.consul.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
 is a HashiCorp tool for service discovery, service registry, and health checks.
 In the Atlas workflow Consul is configured at the Packer build stage and
 identifies the service(s) contained in each artifact. Since Consul is configured
@@ -51,7 +51,7 @@ is fully configured with dependencies and service discovery pre-baked. This
 greatly reduces the risk of an unhealthy node in production due to configuration
 failure at runtime.
 
-[Serf](https://serfdom.io/?utm_source=packer&utm_campaign=HashicorpEcosystem) is
+[Serf](https://www.serfdom.io/?utm_source=packer&utm_campaign=HashicorpEcosystem) is
 a HashiCorp tool for cluster membership and failure detection. Consul uses
 Serf's gossip protocol as the foundation for service discovery.
 

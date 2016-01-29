@@ -34,25 +34,25 @@ on supported configuration parameters and usage, please see the appropriate
 [documentation page within the documentation section](/docs).
 
 -   ***Amazon EC2 (AMI)***. Both EBS-backed and instance-store AMIs within
-    [EC2](http://aws.amazon.com/ec2/), optionally distributed to
+    [EC2](https://aws.amazon.com/ec2/), optionally distributed to
     multiple regions.
 
 -   ***DigitalOcean***. Snapshots for
-    [DigitalOcean](http://www.digitalocean.com/) that can be used to start a
+    [DigitalOcean](https://www.digitalocean.com/) that can be used to start a
     pre-configured DigitalOcean instance of any size.
 
--   ***Docker***. Snapshots for [Docker](http://www.docker.io/) that can be used
+-   ***Docker***. Snapshots for [Docker](https://www.docker.io/) that can be used
     to start a pre-configured Docker instance.
 
 -   ***Google Compute Engine***. Snapshots for [Google Compute
     Engine](https://cloud.google.com/products/compute-engine) that can be used
     to start a pre-configured Google Compute Engine instance.
 
--   ***OpenStack***. Images for [OpenStack](http://www.openstack.org/) that can
+-   ***OpenStack***. Images for [OpenStack](https://www.openstack.org/) that can
     be used to start pre-configured OpenStack servers.
 
 -   ***Parallels (PVM)***. Exported virtual machines for
-    [Parallels](http://www.parallels.com/downloads/desktop/), including virtual
+    [Parallels](https://www.parallels.com/downloads/desktop/), including virtual
     machine metadata such as RAM, CPUs, etc. These virtual machines are portable
     and can be started on any platform Parallels runs on.
 
@@ -66,7 +66,7 @@ on supported configuration parameters and usage, please see the appropriate
     be started on any platform VirtualBox runs on.
 
 -   ***VMware (VMX)***. Exported virtual machines for
-    [VMware](http://www.vmware.com/) that can be run within any desktop products
+    [VMware](https://www.vmware.com/) that can be run within any desktop products
     such as Fusion, Player, or Workstation, as well as server products such
     as vSphere.
 

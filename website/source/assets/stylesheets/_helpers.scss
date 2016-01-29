@@ -174,13 +174,6 @@ $break-lg: 980px;
           transform: scale($value);
 }
 
-@mixin transition($type, $speed, $easing) {
-  -webkit-transition: $type $speed $easing;
-     -moz-transition: $type $speed $easing;
-       -o-transition: $type $speed $easing;
-          transition: $type $speed $easing;
-}
-
 @mixin rounded($radius) {
   -webkit-border-radius: $radius;
      -moz-border-radius: $radius;

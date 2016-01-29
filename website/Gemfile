@@ -1,7 +1,4 @@
 source "https://rubygems.org"
 
-ruby "2.2.2"
-
 gem "middleman-hashicorp", github: "hashicorp/middleman-hashicorp"
-gem "middleman-breadcrumbs"
 gem "htmlbeautifier"

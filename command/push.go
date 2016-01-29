@@ -53,6 +53,10 @@ func (c *PushCommand) Run(args []string) int {
 		return 1
 	}
 
+	if message != "" {
+		c.Ui.Say("[DEPRECATED] -m/-message is deprecated and will be removed in a future Packer release")
+	}
+
 	args = f.Args()
 	if len(args) != 1 {
 		f.Usage()
@@ -267,9 +271,6 @@ Usage: packer push [options] TEMPLATE
   see the online documentation for more information about these configurables.
 
 Options:
-
-  -m, -message=<detail>    A message to identify the purpose or changes in this
-                           Packer template much like a VCS commit message
 
   -name=<name>             The destination build in Atlas. This is in a format
                            "username/name".

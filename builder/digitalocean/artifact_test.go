@@ -15,8 +15,8 @@ func TestArtifact_Impl(t *testing.T) {
 }
 
 func TestArtifactId(t *testing.T) {
-	a := &Artifact{"packer-foobar", 42, "San Francisco", nil}
-	expected := "42"
+	a := &Artifact{"packer-foobar", 42, "sfo", nil}
+	expected := "sfo:42"
 
 	if a.Id() != expected {
 		t.Fatalf("artifact ID should match: %v", expected)
@@ -24,8 +24,8 @@ func TestArtifactId(t *testing.T) {
 }
 
 func TestArtifactString(t *testing.T) {
-	a := &Artifact{"packer-foobar", 42, "San Francisco", nil}
-	expected := "A snapshot was created: 'packer-foobar' in region 'San Francisco'"
+	a := &Artifact{"packer-foobar", 42, "sfo", nil}
+	expected := "A snapshot was created: 'packer-foobar' (ID: 42) in region 'sfo'"
 
 	if a.String() != expected {
 		t.Fatalf("artifact string should match: %v", expected)

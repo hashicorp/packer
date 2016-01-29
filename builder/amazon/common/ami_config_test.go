@@ -30,6 +30,11 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 
+	c.AMIRegions = listEC2Regions()
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
+
 	c.AMIRegions = []string{"foo"}
 	if err := c.Prepare(nil); err == nil {
 		t.Fatal("should have error")
