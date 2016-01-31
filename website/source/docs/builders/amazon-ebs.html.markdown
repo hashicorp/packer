@@ -167,8 +167,9 @@ builder.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
-    generate a temporary keypair. `ssh_private_key_file` must be specified
-    with this.
+    generate a temporary keypair.
+    [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
+    must be specified with this.
 
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
     IP if available.
