@@ -10,41 +10,73 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	AccessKey string `mapstructure:"access_key"`
-	SecretKey string `mapstructure:"secret_key"`
-	RawRegion string `mapstructure:"region"`
-	Token     string `mapstructure:"token"`
+	AccessKey   string `mapstructure:"access_key"`
+	SecretKey   string `mapstructure:"secret_key"`
+	RawRegion   string `mapstructure:"region"`
+	Token       string `mapstructure:"token"`
+	ProfileName string `mapstructure:"profile"`
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
 // an error if the authentication and region couldn't be resolved
 func (c *AccessConfig) Config() (*aws.Config, error) {
-	creds := credentials.NewChainCredentials([]credentials.Provider{
-		&credentials.StaticProvider{Value: credentials.Value{
-			AccessKeyID:     c.AccessKey,
-			SecretAccessKey: c.SecretKey,
-			SessionToken:    c.Token,
-		}},
-		&credentials.EnvProvider{},
-		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
-		&ec2rolecreds.EC2RoleProvider{},
-	})
+	var creds *credentials.Credentials
+
+	profile := &CLIConfig{}
+	err := profile.Prepare(c.ProfileName)
+	if err != nil {
+		return nil, err
+	}
 
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
 	}
 
-	return &aws.Config{
-		Region:      aws.String(region),
-		Credentials: creds,
-		MaxRetries:  aws.Int(11),
-	}, nil
+	config := &aws.Config{
+		Region: aws.String(region),
+		MaxRetries: aws.Int(11),
+	}
+
+	if c.ProfileName != "" {
+		creds = c.assumeRoleCreds(config, profile)
+    } else {
+		creds = credentials.NewChainCredentials([]credentials.Provider{
+			&credentials.StaticProvider{Value: credentials.Value{
+				AccessKeyID:     c.AccessKey,
+				SecretAccessKey: c.SecretKey,
+				SessionToken:    c.Token,
+			}},
+			&credentials.EnvProvider{},
+			&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
+			&ec2rolecreds.EC2RoleProvider{},
+		})
+	}
+	return config.WithCredentials(creds), nil
+}
+
+func (c *AccessConfig) assumeRoleCreds(conf *aws.Config, profile *CLIConfig) (*credentials.Credentials) {
+	src_creds := credentials.NewStaticCredentials(
+		profile.Source.AccessKeyID,
+		profile.Source.SecretAccessKey,
+		profile.Source.SessionToken,
+	)
+	role_cfg := aws.NewConfig().WithCredentials(src_creds)
+	role_cfg.MergeIn(conf)
+	sess := session.New(role_cfg)
+	return stscreds.NewCredentials(sess, *profile.AssumeRoleInput.RoleArn, func(p *stscreds.AssumeRoleProvider) {
+		p.RoleSessionName = *profile.AssumeRoleInput.RoleSessionName
+		if extId := *profile.AssumeRoleInput.ExternalId; extId != "" {
+			p.ExternalID = &extId
+		}
+	})
 }
 
 // Region returns the aws.Region object for access to AWS services, requesting
