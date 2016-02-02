@@ -171,12 +171,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	// Determine if DiskSize is able to be allocated
-	if err = common.AvailableDisk(uint64(b.config.DiskSize)); err != nil {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Unavailable Resources: %s", err))
-	}
-
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
