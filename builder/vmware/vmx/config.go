@@ -63,7 +63,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx, c.RemoteType)...)
+	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
