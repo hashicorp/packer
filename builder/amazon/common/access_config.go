@@ -29,12 +29,6 @@ type AccessConfig struct {
 func (c *AccessConfig) Config() (*aws.Config, error) {
 	var creds *credentials.Credentials
 
-	profile := &CLIConfig{}
-	err := profile.Prepare(c.ProfileName)
-	if err != nil {
-		return nil, err
-	}
-
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
@@ -46,6 +40,11 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 	}
 
 	if c.ProfileName != "" {
+        profile := &CLIConfig{}
+        err := profile.Prepare(c.ProfileName)
+        if err != nil {
+            return nil, err
+        }
 		creds = c.assumeRoleCreds(config, profile)
     } else {
 		creds = credentials.NewChainCredentials([]credentials.Provider{
