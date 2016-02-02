@@ -94,6 +94,9 @@ The SSH communicator has the following options:
 
   * `ssh_bastion_private_key_file` (string) - A private key file to use
     to authenticate with the bastion host.
+	
+  * `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
+    copy (default) or SSH File Transfer Protocol.
 
 ## WinRM Communicator
 
