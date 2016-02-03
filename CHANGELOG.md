@@ -76,6 +76,8 @@ BUG FIXES:
   * builder/amazon: The `no_device` option for block device mappings is now handled correctly [GH-2398]
   * builder/amazon: AMI name validation now matches Amazon's spec [GH-2774]
   * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
+  * builder/amazon: Pass AccessKey and SecretKey when uploading bundles for
+    instance-backed AMIs [GH-2596]
   * builder/parallels: Now supports interpolation in `prlctl_post` [GH-2828]
   * builder/vmware: `format` option is now read correctly [GH-2892]
   * builder/vmware-esxi: Correct endless loop in destroy validation logic
