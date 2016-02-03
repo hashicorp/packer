@@ -9,6 +9,7 @@ import (
     "github.com/aws/aws-sdk-go/aws/credentials"
     "github.com/aws/aws-sdk-go/service/sts"
     "github.com/go-ini/ini"
+	"github.com/mitchellh/go-homedir"
 )
 
 type CLIConfig struct {
@@ -64,7 +65,7 @@ func (c *CLIConfig) Prepare(name string) (error) {
 func (c *CLIConfig) config() (*ini.File, error) {
 	config_path := os.Getenv("AWS_CONFIG_FILE")
     if config_path == "" {
-        config_path = path.Join(os.Getenv("HOME"), ".aws", "config")
+        config_path = path.Join(homedir.Dir(), ".aws", "config")
     }
     ini, err := c.readFile(config_path)
 	if err != nil {
@@ -76,8 +77,9 @@ func (c *CLIConfig) config() (*ini.File, error) {
 
 func (c *CLIConfig) credentials() (*ini.File, error) {
 	cred_path := os.Getenv("AWS_SHARED_CREDENTIALS_FILE")
+	home :=
     if cred_path == "" {
-        cred_path = path.Join(os.Getenv("HOME"), ".aws", "credentials")
+        cred_path = path.Join(homedir.Dir(), ".aws", "credentials")
     }
     ini, err := c.readFile(cred_path)
 	if err != nil {
