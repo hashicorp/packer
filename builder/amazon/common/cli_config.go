@@ -2,96 +2,145 @@ package common
 
 import (
 	"fmt"
-    "os"
-    "path"
+	"os"
+	"path"
 
 	"github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/credentials"
-    "github.com/aws/aws-sdk-go/service/sts"
-    "github.com/go-ini/ini"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/go-ini/ini"
 	"github.com/mitchellh/go-homedir"
 )
 
 type CLIConfig struct {
-    SourceProfile   string
+	SourceProfile string
 
-    Source          credentials.Value
-    AssumeRoleInput sts.AssumeRoleInput
+	AssumeRoleInput   *sts.AssumeRoleInput
+	SourceCredentials *credentials.Credentials
+
+	profileCfg  *ini.Section
+	profileCred *ini.Section
+}
+
+// Return a new CLIConfig with stored profile settings
+func NewFromProfile(name string) (*CLIConfig, error) {
+	c := &CLIConfig{}
+	err := c.Prepare(name)
+	if err != nil {
+		return nil, err
+	}
+	arn := aws.String(c.profileCfg.Key("role_arn").Value())
+	sessName, err := c.getSessionName(aws.String(c.profileCfg.Key("role_session_name").Value()))
+	if err != nil {
+		return nil, err
+	}
+	c.AssumeRoleInput = &sts.AssumeRoleInput{
+		RoleSessionName: sessName,
+		RoleArn:         arn,
+	}
+	id := c.profileCfg.Key("external_id").Value()
+	if id != "" {
+		c.AssumeRoleInput.ExternalId = aws.String(id)
+	}
+	c.SourceCredentials = credentials.NewStaticCredentials(
+		c.profileCred.Key("aws_access_key_id").Value(),
+		c.profileCred.Key("aws_secret_access_key").Value(),
+		c.profileCred.Key("aws_session_token").Value(),
+	)
+	return c, nil
+}
+
+// Return AWS Credentials using current profile. Must supply source config
+func (c *CLIConfig) CredentialsFromProfile(conf *aws.Config) (*credentials.Credentials, error) {
+	srcCfg := aws.NewConfig().Copy(conf).WithCredentials(c.SourceCredentials)
+	svc := sts.New(session.New(), srcCfg)
+	res, err := svc.AssumeRole(c.AssumeRoleInput)
+	if err != nil {
+		return nil, err
+	}
+	return credentials.NewStaticCredentials(
+		*res.Credentials.AccessKeyId,
+		*res.Credentials.SecretAccessKey,
+		*res.Credentials.SessionToken,
+	), nil
 }
 
 // Sets params in the struct based on the file section
-func (c *CLIConfig) Prepare(name string) (error) {
-    cfg, err := c.config()
-
-    cfg_profile_name := fmt.Sprintf("profile %s", name)
-    profile_cfg, err := cfg.GetSection(cfg_profile_name)
+func (c *CLIConfig) Prepare(name string) error {
+	var err error
+	c.profileCfg, err = configFromName(name)
 	if err != nil {
 		return err
 	}
-
-	c.SourceProfile = profile_cfg.Key("source_profile").Value();
+	c.SourceProfile = c.profileCfg.Key("source_profile").Value()
 	if c.SourceProfile == "" {
 		c.SourceProfile = name
 	}
-
-    c.AssumeRoleInput.RoleArn = aws.String(profile_cfg.Key("role_arn").Value())
-
-	host, err := os.Hostname()
+	c.profileCred, err = credsFromName(c.SourceProfile)
 	if err != nil {
 		return err
 	}
-
-	sessName := fmt.Sprintf("packer-%s", host)
-    c.AssumeRoleInput.RoleSessionName = &sessName
-	c.AssumeRoleInput.SerialNumber = aws.String(profile_cfg.Key("mfa_serial").Value())
-	if extId := aws.String(profile_cfg.Key("external_id").Value()); extId != nil {
-		c.AssumeRoleInput.ExternalId = extId
-	}
-
-    creds, err := c.credentials()
-    cred_cfg, err := creds.GetSection(c.SourceProfile)
-	if err != nil {
-		return err
-	}
-
-    if len(c.SourceProfile) != 0 {
-        c.Source.AccessKeyID = cred_cfg.Key("aws_access_key_id").Value()
-        c.Source.SecretAccessKey = cred_cfg.Key("aws_secret_access_key").Value()
-        c.Source.SessionToken = cred_cfg.Key("aws_session_token").Value()
-    }
-    return nil
+	return nil
 }
 
-func (c *CLIConfig) config() (*ini.File, error) {
-	config_path := os.Getenv("AWS_CONFIG_FILE")
-    if config_path == "" {
-        config_path = path.Join(homedir.Dir(), ".aws", "config")
-    }
-    ini, err := c.readFile(config_path)
+func (c *CLIConfig) getSessionName(rawName *string) (*string, error) {
+	if rawName != nil {
+		host, err := os.Hostname()
+		if err != nil {
+			return nil, err
+		}
+		return aws.String(fmt.Sprintf("packer-%s", host)), nil
+	} else {
+		return rawName, nil
+	}
+}
+
+func configFromName(name string) (*ini.Section, error) {
+	filePath := os.Getenv("AWS_CONFIG_FILE")
+	if filePath == "" {
+		home, err := homedir.Dir()
+		if err != nil {
+			return nil, err
+		}
+		filePath = path.Join(home, ".aws", "config")
+	}
+	file, err := readFile(filePath)
 	if err != nil {
 		return nil, err
 	}
-
-    return ini, nil
-}
-
-func (c *CLIConfig) credentials() (*ini.File, error) {
-	cred_path := os.Getenv("AWS_SHARED_CREDENTIALS_FILE")
-	home :=
-    if cred_path == "" {
-        cred_path = path.Join(homedir.Dir(), ".aws", "credentials")
-    }
-    ini, err := c.readFile(cred_path)
+	profileName := fmt.Sprintf("profile %s", name)
+	cfg, err := file.GetSection(profileName)
 	if err != nil {
 		return nil, err
 	}
-    return ini, nil
+	return cfg, nil
 }
 
-func (c *CLIConfig) readFile(path string) (*ini.File, error) {
-    cfg, err := ini.Load(path)
+func credsFromName(name string) (*ini.Section, error) {
+	filePath := os.Getenv("AWS_SHARED_CREDENTIALS_FILE")
+	if filePath == "" {
+		home, err := homedir.Dir()
+		if err != nil {
+			return nil, err
+		}
+		filePath = path.Join(home, ".aws", "credentials")
+	}
+	file, err := readFile(filePath)
 	if err != nil {
 		return nil, err
 	}
-    return cfg, nil
+	cfg, err := file.GetSection(name)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func readFile(path string) (*ini.File, error) {
+	cfg, err := ini.Load(path)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
