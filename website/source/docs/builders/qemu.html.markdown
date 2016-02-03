@@ -132,7 +132,7 @@ builder.
     source, resize it according to `disk_size` and boot the image.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of "ide," "scsi", "virtio" or "virtio-scsi". Note also
+    values include any of "ide", "scsi", "virtio" or "virtio-scsi". Note also
     that any boot commands or kickstart type scripts must have proper
     adjustments for resulting device names. The Qemu builder uses "virtio" by
     default.
