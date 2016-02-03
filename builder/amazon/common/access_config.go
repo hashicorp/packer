@@ -10,8 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -33,20 +31,17 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	config := &aws.Config{
-		Region: aws.String(region),
-		MaxRetries: aws.Int(11),
-	}
-
+	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
 	if c.ProfileName != "" {
-        profile := &CLIConfig{}
-        err := profile.Prepare(c.ProfileName)
-        if err != nil {
-            return nil, err
-        }
-		creds = c.assumeRoleCreds(config, profile)
-    } else {
+		profile, err := NewFromProfile(c.ProfileName)
+		if err != nil {
+			return nil, err
+		}
+		creds, err = profile.CredentialsFromProfile(config)
+		if err != nil {
+			return nil, err
+		}
+	} else {
 		creds = credentials.NewChainCredentials([]credentials.Provider{
 			&credentials.StaticProvider{Value: credentials.Value{
 				AccessKeyID:     c.AccessKey,
@@ -59,23 +54,6 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 		})
 	}
 	return config.WithCredentials(creds), nil
-}
-
-func (c *AccessConfig) assumeRoleCreds(conf *aws.Config, profile *CLIConfig) (*credentials.Credentials) {
-	src_creds := credentials.NewStaticCredentials(
-		profile.Source.AccessKeyID,
-		profile.Source.SecretAccessKey,
-		profile.Source.SessionToken,
-	)
-	role_cfg := aws.NewConfig().WithCredentials(src_creds)
-	role_cfg.MergeIn(conf)
-	sess := session.New(role_cfg)
-	return stscreds.NewCredentials(sess, *profile.AssumeRoleInput.RoleArn, func(p *stscreds.AssumeRoleProvider) {
-		p.RoleSessionName = *profile.AssumeRoleInput.RoleSessionName
-		if extId := *profile.AssumeRoleInput.ExternalId; extId != "" {
-			p.ExternalID = &extId
-		}
-	})
 }
 
 // Region returns the aws.Region object for access to AWS services, requesting
