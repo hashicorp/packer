@@ -19,6 +19,7 @@ import (
 	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
+	brktbuilder "github.com/mitchellh/packer/builder/brkt"
 	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
 	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
 	compresspostprocessor "github.com/mitchellh/packer/post-processor/compress"
@@ -62,6 +63,7 @@ var Builders = map[string]packer.Builder{
 	"amazon-chroot":   new(amazonchrootbuilder.Builder),
 	"amazon-ebs":   new(amazonebsbuilder.Builder),
 	"amazon-instance":   new(amazoninstancebuilder.Builder),
+	"brkt":   new(brktbuilder.Builder),
 	"digitalocean":   new(digitaloceanbuilder.Builder),
 	"docker":   new(dockerbuilder.Builder),
 	"file":   new(filebuilder.Builder),
