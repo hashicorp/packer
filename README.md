@@ -101,7 +101,12 @@ as a compilation tool on top of Go:
 
     $ go get -u github.com/mitchellh/gox
 
-Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer`.
+Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer`:
+
+    $ cd $GOPATH/src/github.com/mitchellh
+    $ git clone https://github.com/mitchellh/packer.git
+    $ cd packer
+
 Install the necessary dependencies by running `make updatedeps` and then just
 type `make`. This will compile some more dependencies and then run the tests. If
 this exits with exit status 0, then everything is working!
