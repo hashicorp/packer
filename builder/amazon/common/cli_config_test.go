@@ -1,11 +1,11 @@
 package common
 
 import (
-	"crypto/rand"
 	"io/ioutil"
-	math "math/rand"
+	"math/rand"
 	"os"
 	"path"
+	"strconv"
 	"testing"
 	"time"
 
@@ -71,15 +71,10 @@ func TestAssumeRole(t *testing.T) {
 }
 
 func mockConfig(t *testing.T) string {
-	b := make([]byte, 10)
-	math.Seed(time.Now().UnixNano())
-	c, err := rand.Read(b)
-	if err != nil {
-		t.Error(err)
-	}
-	s := string(b[:c])
-
-	dir, err := ioutil.TempDir("", s)
+	time := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(time)
+	v := r.Intn(9999999999)
+	dir, err := ioutil.TempDir("", strconv.Itoa(v))
 	if err != nil {
 		t.Error(err)
 	}
