@@ -1,10 +1,13 @@
 package common
 
 import (
+	"crypto/rand"
 	"io/ioutil"
+	math "math/rand"
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 )
@@ -68,17 +71,15 @@ func TestAssumeRole(t *testing.T) {
 }
 
 func mockConfig(t *testing.T) string {
-	dir, err := ioutil.TempDir("", "packer-test")
+	b := make([]byte, 10)
+	math.Seed(time.Now().UnixNano())
+	c, err := rand.Read(b)
 	if err != nil {
 		t.Error(err)
 	}
-	cfgFile := path.Join(dir, "config")
-	os.Setenv("AWS_CONFIG_FILE", cfgFile)
+	s := string(b[:c])
 
-	crdFile := path.Join(dir, "credentials")
-	os.Setenv("AWS_SHARED_CREDENTIALS_FILE", crdFile)
-
-	f, err := os.Create(cfgFile)
+	dir, err := ioutil.TempDir("", s)
 	if err != nil {
 		t.Error(err)
 	}
@@ -92,15 +93,12 @@ role_session_name = testsession
 [profile testing2]
 region=us-west-2
 	`)
-	_, err = f.Write(cfg)
+	cfgFile := path.Join(dir, "config")
+	err = ioutil.WriteFile(cfgFile, cfg, 0644)
 	if err != nil {
 		t.Error(err)
 	}
-
-	g, err := os.Create(crdFile)
-	if err != nil {
-		t.Error(err)
-	}
+	os.Setenv("AWS_CONFIG_FILE", cfgFile)
 
 	crd := []byte(`[testingcredentials]
 aws_access_key_id = foo
@@ -110,10 +108,13 @@ aws_secret_access_key = bar
 aws_access_key_id = baz
 aws_secret_access_key = qux
 	`)
-	_, err = g.Write(crd)
+	crdFile := path.Join(dir, "credentials")
+	err = ioutil.WriteFile(crdFile, crd, 0644)
 	if err != nil {
 		t.Error(err)
 	}
+	os.Setenv("AWS_SHARED_CREDENTIALS_FILE", crdFile)
+
 	return dir
 }
 
