@@ -9,7 +9,8 @@ BACKWARDS INCOMPATIBILITIES:
   * Release binaries are now provided via <https://releases.hashicorp.com>.
   * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support
     for building with Go 1.4.
-  * Inline `user_data` for EC2 is now base64 encoded automatically.
+  * builder/amazon: Inline `user_data` for EC2 is now base64 encoded automatically [GH-2539]
+  * builder/parallels: `parallels_tools_host_path` and `guest_os_distribution` have been replaced by `guest_os_type`; use `packer fix` to update your templates [GH-2751]
 
 FEATURES:
 
