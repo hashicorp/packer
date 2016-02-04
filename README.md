@@ -96,11 +96,6 @@ Next, install the following software packages, which are needed for some depende
 - [Git](http://git-scm.com/)
 - [Mercurial](http://mercurial.selenic.com/)
 
-Then, install [Gox](https://github.com/mitchellh/gox), which is used
-as a compilation tool on top of Go:
-
-    $ go get -u github.com/mitchellh/gox
-
 Next, clone this repository into `$GOPATH/src/github.com/mitchellh/packer`.
 Install the necessary dependencies by running `make updatedeps` and then just
 type `make`. This will compile some more dependencies and then run the tests. If
