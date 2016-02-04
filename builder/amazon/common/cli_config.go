@@ -14,6 +14,7 @@ import (
 )
 
 type CLIConfig struct {
+	ProfileName   string
 	SourceProfile string
 
 	AssumeRoleInput   *sts.AssumeRoleInput
@@ -26,18 +27,19 @@ type CLIConfig struct {
 // Return a new CLIConfig with stored profile settings
 func NewFromProfile(name string) (*CLIConfig, error) {
 	c := &CLIConfig{}
+	c.AssumeRoleInput = new(sts.AssumeRoleInput)
 	err := c.Prepare(name)
 	if err != nil {
 		return nil, err
 	}
-	arn := aws.String(c.profileCfg.Key("role_arn").Value())
-	sessName, err := c.getSessionName(aws.String(c.profileCfg.Key("role_session_name").Value()))
+	sessName, err := c.getSessionName(c.profileCfg.Key("role_session_name").Value())
 	if err != nil {
 		return nil, err
 	}
-	c.AssumeRoleInput = &sts.AssumeRoleInput{
-		RoleSessionName: sessName,
-		RoleArn:         arn,
+	c.AssumeRoleInput.RoleSessionName = aws.String(sessName)
+	arn := c.profileCfg.Key("role_arn").Value()
+	if arn != "" {
+		c.AssumeRoleInput.RoleArn = aws.String(arn)
 	}
 	id := c.profileCfg.Key("external_id").Value()
 	if id != "" {
@@ -51,8 +53,13 @@ func NewFromProfile(name string) (*CLIConfig, error) {
 	return c, nil
 }
 
-// Return AWS Credentials using current profile. Must supply source config
+// Return AWS Credentials using current profile. Must supply source config.
 func (c *CLIConfig) CredentialsFromProfile(conf *aws.Config) (*credentials.Credentials, error) {
+	// If the profile name is equal to the source profile, there is no role to assume so return
+	// the source credentials as they were captured.
+	if c.ProfileName == c.SourceProfile {
+		return c.SourceCredentials, nil
+	}
 	srcCfg := aws.NewConfig().Copy(conf).WithCredentials(c.SourceCredentials)
 	svc := sts.New(session.New(), srcCfg)
 	res, err := svc.AssumeRole(c.AssumeRoleInput)
@@ -69,13 +76,14 @@ func (c *CLIConfig) CredentialsFromProfile(conf *aws.Config) (*credentials.Crede
 // Sets params in the struct based on the file section
 func (c *CLIConfig) Prepare(name string) error {
 	var err error
-	c.profileCfg, err = configFromName(name)
+	c.ProfileName = name
+	c.profileCfg, err = configFromName(c.ProfileName)
 	if err != nil {
 		return err
 	}
 	c.SourceProfile = c.profileCfg.Key("source_profile").Value()
 	if c.SourceProfile == "" {
-		c.SourceProfile = name
+		c.SourceProfile = c.ProfileName
 	}
 	c.profileCred, err = credsFromName(c.SourceProfile)
 	if err != nil {
@@ -84,13 +92,14 @@ func (c *CLIConfig) Prepare(name string) error {
 	return nil
 }
 
-func (c *CLIConfig) getSessionName(rawName *string) (*string, error) {
-	if rawName != nil {
+func (c *CLIConfig) getSessionName(rawName string) (string, error) {
+	if rawName == "" {
+		name := "packer-"
 		host, err := os.Hostname()
 		if err != nil {
-			return nil, err
+			return name, err
 		}
-		return aws.String(fmt.Sprintf("packer-%s", host)), nil
+		return fmt.Sprintf("%s%s", name, host), nil
 	} else {
 		return rawName, nil
 	}
