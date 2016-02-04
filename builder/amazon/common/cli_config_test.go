@@ -71,7 +71,7 @@ func TestAssumeRole(t *testing.T) {
 
 func mockConfig(t *testing.T) string {
 	time := time.Now().UnixNano()
-	dir, err := ioutil.TempDir("", strconv.Itoa(time))
+	dir, err := ioutil.TempDir("", strconv.FormatInt(time, 10))
 	if err != nil {
 		t.Error(err)
 	}
