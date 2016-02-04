@@ -2,7 +2,6 @@ package common
 
 import (
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"path"
 	"strconv"
@@ -71,10 +70,8 @@ func TestAssumeRole(t *testing.T) {
 }
 
 func mockConfig(t *testing.T) string {
-	time := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(time)
-	v := r.Intn(9999999999)
-	dir, err := ioutil.TempDir("", strconv.Itoa(v))
+	time := time.Now().UnixNano()
+	dir, err := ioutil.TempDir("", strconv.Itoa(time))
 	if err != nil {
 		t.Error(err)
 	}
