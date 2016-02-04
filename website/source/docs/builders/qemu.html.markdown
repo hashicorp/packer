@@ -120,6 +120,9 @@ builder.
     include any of "writethrough", "writeback", "none", "unsafe"
     or "directsync". By default, this is set to "writeback".
 
+-   `disk_compression` (boolean) - Apply compression to the QCOW2 disk file
+    using `qemu-img convert`. Defaults to `false`.
+
 -   `disk_discard` (string) - The discard mode to use for disk. Allowed values
     include any of "unmap" or "ignore". By default, this is set to "ignore".
 
@@ -129,18 +132,13 @@ builder.
     source, resize it according to `disk_size` and boot the image.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of "ide," "scsi" or "virtio." Note also that any boot
-    commands or kickstart type scripts must have proper adjustments for
-    resulting device names. The Qemu builder uses "virtio" by default.
+    values include any of "ide", "scsi", "virtio" or "virtio-scsi". Note also
+    that any boot commands or kickstart type scripts must have proper
+    adjustments for resulting device names. The Qemu builder uses "virtio" by
+    default.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
-
--   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
-    Set this option to `true` to disable compacting. Defaults to `false`.
-
--   `disk_compression` (boolean) - Apply compression to the QCOW2 disk file
-    using `qemu-img convert`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -191,8 +189,11 @@ builder.
     your system. This defaults to "pc".
 
 -   `net_device` (string) - The driver to use for the network interface. Allowed
-    values "ne2k\_pci," "i82551," "i82557b," "i82559er," "rtl8139," "e1000,"
-    "pcnet" or "virtio." The Qemu builder uses "virtio" by default.
+    values "ne2k\_pci", "i82551", "i82557b", "i82559er", "rtl8139", "e1000",
+    "pcnet", "virtio", "virtio-net", "virtio-net-pci", "usb-net", "i82559a",
+    "i82559b", "i82559c", "i82550", "i82562", "i82557a", "i82557c", "i82801",
+    "vmxnet3", "i82558a" or "i82558b".  The Qemu builder uses "virtio-net" by
+    default.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
@@ -251,6 +252,9 @@ builder and not otherwise conflicting with the qemuargs):
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
+
+-   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
+    Set this option to `true` to disable compacting. Defaults to `false`.
 
 -   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
