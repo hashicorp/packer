@@ -14,25 +14,28 @@ environment:
   GOPATH: c:\gopath
   matrix:
   - GOARCH: 386
-    GOVERSION: 1.4.2
+    GOVERSION: 1.6rc2
   - GOARCH: amd64
-    GOVERSION: 1.4.2
+    GOVERSION: 1.6rc2
 
 clone_folder: c:\gopath\src\github.com\mitchellh\packer
 
 install:
   - set Path=c:\go\bin;%Path%
+  - set GO15VENDOREXPERIMENT=1
   - echo %Path%
   - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-%GOARCH%.msi
   - msiexec /i go%GOVERSION%.windows-%GOARCH%.msi /q
   - go version
   - go env
-  - go get -d -v -t ./...
+  - go get github.com/mitchellh/gox
+  - go get golang.org/x/tools/cmd/stringer
+  - go get golang.org/x/tools/cmd/vet
 
 build_script:
+  - git rev-parse HEAD
   - go test -v ./...
   - go vet ./...
-  - git rev-parse HEAD
 
 test: off
 
