@@ -314,6 +314,9 @@ by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
+-   `<waitXX> ` - Add user defined time.Duration pause before sending any
+    additional keys. For example `<wait10m>` or `<wait1m20s>`
+
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The
 available variables are:
