@@ -53,35 +53,78 @@ it raises the chances we can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to complete the
 following steps in order to be able to compile and test Packer.
 
-1. Install Go. Make sure the Go version is at least Go 1.4. Packer will not work with anything less than
-   Go 1.4. On a Mac, you can `brew install go` to install Go 1.4.
+1. [Download](https://golang.org/dl) and install Go. Make sure your Go version
+   is at least Go 1.5. Packer _may_ work with older versions of Go but these
+   are not supported.
 
-2. Set and export the `GOPATH` environment variable and update your `PATH`.
-   For example, you can add to your `.bash_profile`.
+2. Set and export the `GOPATH` environment variable and update your `PATH`. For
+   example, you can add to your `.bash_profile`. If you're using Go 1.5 also
+   set `GO15VENDOREXPERIMENT`. This is not necessary for Go 1.6 and up.
 
     ```
     export GOPATH=$HOME/Documents/golang
+    export GO15VENDOREXPERIMENT=1
     export PATH=$PATH:$GOPATH/bin
     ```
 
-3. Install and build `gox` with
+3. Download the Packer source (and its dependencies) by running `go get
+   github.com/mitchellh/packer`. This will download the Packer source to
+   `$GOPATH/src/github.com/mitchellh/packer`.
 
-    ```
-    go get github.com/mitchellh/gox
-    cd $GOPATH/src/github.com/mitchellh/gox
-    go build
-    ```
+4. When working on packer `cd $GOPATH/src/github.com/mitchellh/packer` so you
+   can run make and easily access other files.
 
-4. Download the Packer source (and its dependencies) by running
-   `go get github.com/mitchellh/packer`. This will download the Packer
-   source to `$GOPATH/src/github.com/mitchellh/packer`.
+5. Make your changes to the Packer source. You can run `make` in
+   `$GOPATH/src/github.com/mitchellh/packer` to run tests and build the packer
+   binary. Any compilation errors will be shown when the binaries are
+   rebuilding.
 
-5. Make your changes to the Packer source. You can run `make` from the main
-   source directory to recompile all the binaries. Any compilation errors
-   will be shown when the binaries are rebuilding.
-
-6. Test your changes by running `make test` and then running
-   `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine.
+6. After running `make` successfully, use
+   `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine and
+   verify your changes work.
 
 7. If everything works well and the tests pass, run `go fmt` on your code
-   before submitting a pull request.
+   before submitting a pull-request.
+
+### Tips for Working on Packer
+
+#### Godeps
+
+If you are submitting a change that requires a change in dependencies, DO NOT update the `vendor/` folder. This keeps the PR smaller and easier to review. Instead, please indicate which upstream has changed and which version we should be using. You _may_ do this using `Godeps/Godeps.json` but this is not required.
+
+#### Running Unit Tests
+
+You can run tests for individual packages using commands like this:
+
+    $ make test TEST=./builder/amazon/...
+
+#### Running Acceptance Tests
+
+Packer has [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
+for various builders. These typically require an API key (AWS, GCE), or
+additional software to be installed on your computer (VirtualBox, VMware).
+
+If you're working on a feature of a builder or a new builder and want verify it
+is functioning (and also hasn't broken anything else), we recommend running the
+acceptance tests.
+
+**Warning:** The acceptance tests create/destroy/modify *real resources*, which
+may incur real costs in some cases. In the presence of a bug, it is technically
+possible that broken backends could leave dangling data behind. Therefore,
+please run the acceptance tests at your own risk. At the very least, we
+recommend running them in their own private account for whatever builder you're
+testing.
+
+To run the acceptance tests, invoke `make testacc`:
+
+    $ make testacc TEST=./builder/amazon/ebs
+    ...
+
+The `TEST` variable lets you narrow the scope of the acceptance tests to a
+specific package / folder. The `TESTARGS` variable is recommended to filter
+down to a specific resource to test, since testing all of them at once can
+sometimes take a very long time.
+
+Acceptance tests typically require other environment variables to be set for
+things such as access keys. The test itself should error early and tell you
+what to set, so it is not documented here.
