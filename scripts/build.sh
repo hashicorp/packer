@@ -25,10 +25,6 @@ fi
 XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
 XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
 
-# Install dependencies
-echo "==> Getting dependencies..."
-go get -d ./...
-
 # Delete the old dir
 echo "==> Removing old directory..."
 rm -f bin/*
