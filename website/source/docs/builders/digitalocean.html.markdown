@@ -55,6 +55,10 @@ builder.
 
 ### Optional:
 
+-   `api_url` (string) - Non standard api endpoint URL. Set this if you are
+    using a DigitalOcean API compatible service. It can also be specified via
+    environment variable `DIGITALOCEAN_API_URL`.
+
 -   `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
     sets the hostname of the machine to this value.
 
