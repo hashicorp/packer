@@ -45,11 +45,20 @@ Required Parameters:
 
 - `playbook_file` - The playbook file to be run by Ansible.
 
-- `ssh_host_key_file` - The SSH key that will be used to run the SSH server to which Ansible connects.
-
-- `ssh_authorized_key_file` - The SSH public key of the Ansible `ssh_user`.
-
 Optional Parameters:
+
+- `ssh_host_key_file` (string) - The SSH key that will be used to run
+  the SSH server on the host machine to forward commands to the target
+  machine. Ansible connects to this server and will validate the
+  identity of the server using the system known_hosts. The default behaviour is
+  to generate and use a one time key, and disable
+  host_key_verification in ansible to allow it to connect to the
+  server 
+
+- `ssh_authorized_key_file` (string) - The SSH public key of the
+  Ansible `ssh_user`. The default behaviour is to generate and use a
+  one time key. If this file is generated the coorisponding private
+  key will be passed via the `--private-key` option to Ansible.
 
 - `local_port` (string) - The port on which to attempt to listen for SSH
   connections. This value is a starting point.  The provisioner will attempt
@@ -58,10 +67,12 @@ Optional Parameters:
   listen on a system-chosen port.
 
 
-- `sftp_command` (string) - The command to run on the machine to handle the
+- `sftp_command` (string) - The command to run on the provisioned machine to handle the
   SFTP protocol that Ansible will use to transfer files. The command should
   read and write on stdin and stdout, respectively. Defaults to
   `/usr/lib/sftp-server -e`.
+
+- `extra_arguments` (string) - Extra arguments to pass to Ansible
 
 ## Limitations
 
