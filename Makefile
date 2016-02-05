@@ -1,14 +1,14 @@
-TEST?=./...
+TEST?=$(shell go list ./... | grep -v vendor)
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 
-default: test dev
+default: deps generate test dev
 
 ci: deps test
 
-release: updatedeps test releasebin
+release: deps test releasebin
 
 bin: deps
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
@@ -22,7 +22,10 @@ releasebin: deps
 	@sh -c "$(CURDIR)/scripts/build.sh"
 
 deps:
-	go get -v -d ./...
+	go get github.com/mitchellh/gox
+	go get golang.org/x/tools/cmd/stringer
+	go get golang.org/x/tools/cmd/vet
+	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
 
 dev: deps
 	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -34,13 +37,12 @@ dev: deps
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate: deps
-	go generate ./...
+	go generate .
+	go fmt command/plugin.go
 
 test: deps
-	go test $(TEST) $(TESTARGS) -timeout=15s | tee packer-test.log
-	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
-		go get golang.org/x/tools/cmd/vet; \
-	fi
+	@echo "INFO: Test results going to packer-test.log; this may take awhile"
+	@go test $(TEST) $(TESTARGS) -timeout=15s | tee packer-test.log
 	@go vet $(TEST) ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
@@ -52,33 +54,13 @@ testacc: deps generate
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m | tee packer-test-acc.log
 
 testrace: deps
-	go test -race $(TEST) $(TESTARGS) -timeout=15s | tee packer-test-race.log
+	@echo "INFO: Test results going to packer-test-race.log; this may take awhile"
+	@go test -race $(TEST) $(TESTARGS) -timeout=15s | tee packer-test-race.log
 
-# `go get -u` causes git to revert packer to the master branch. This causes all
-# kinds of headaches. We record the git sha when make starts try to correct it
-# if we detect dift. DO NOT use `git checkout -f` for this because it will wipe
-# out your changes without asking.
 updatedeps:
-	@echo "INFO: Currently on $(GITBRANCH) ($(GITSHA))"
-	@git diff-index --quiet HEAD ; if [ $$? -ne 0 ]; then \
-		echo "ERROR: Your git working tree has uncommitted changes. updatedeps will fail. Please stash or commit your changes first."; \
-		exit 1; \
-	fi
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
-	go list ./... \
-		| xargs go list -f '{{join .Deps "\n"}}' \
-		| grep -v github.com/mitchellh/packer \
-		| grep -v '/internal/' \
-		| sort -u \
-		| xargs go get -f -u -v -d ; if [ $$? -ne 0 ]; then \
-		echo "ERROR: go get failed. Your git branch may have changed; you were on $(GITBRANCH) ($(GITSHA))."; \
-	fi
-	@if [ "$(GITBRANCH)" != "" ]; then git checkout -q $(GITBRANCH); else git checkout -q $(GITSHA); fi
-	@if [ `git rev-parse HEAD` != "$(GITSHA)" ]; then \
-		echo "ERROR: git checkout has drifted and we weren't able to correct it. Was $(GITBRANCH) ($(GITSHA))"; \
-		exit 1; \
-	fi
-	@echo "INFO: Currently on $(GITBRANCH) ($(GITSHA))"
+	go get -u golang.org/x/tools/cmd/vet
+	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
 
 .PHONY: bin checkversion ci default deps generate releasebin test testacc testrace updatedeps
