@@ -63,6 +63,8 @@ IMPROVEMENTS:
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
   * builder/qemu: Now checks for version-specific options [GH-2376]
   * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
+  * builder/qemu: `<wait>` in `boot_command` now accepts an arbitrary duration
+    like <wait1m30s> [GH-3129]
   * builder/docker-import: Can now import Artifice artifacts [GH-2718]
   * builder/vmware-esxi: Now supports private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
