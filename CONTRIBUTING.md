@@ -85,3 +85,46 @@ following steps in order to be able to compile and test Packer.
 
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
+
+### Tips for Working on Packer
+
+#### Godeps
+
+If you are submitting a change that requires a change in dependencies, DO NOT update the `vendor/` folder. This keeps the PR smaller and easier to review. Instead, please indicate which upstream has changed and which version we should be using. You _may_ do this using `Godeps/Godeps.json` but this is not required.
+
+#### Running Unit Tests
+
+You can run tests for individual packages using commands like this:
+
+    $ make test TEST=./builder/amazon/...
+
+#### Running Acceptance Tests
+
+Packer has [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
+for various builders. These typically require an API key (AWS, GCE), or
+additional software to be installed on your computer (VirtualBox, VMware).
+
+If you're working on a feature of a builder or a new builder and want verify it
+is functioning (and also hasn't broken anything else), we recommend running the
+acceptance tests.
+
+**Warning:** The acceptance tests create/destroy/modify *real resources*, which
+may incur real costs in some cases. In the presence of a bug, it is technically
+possible that broken backends could leave dangling data behind. Therefore,
+please run the acceptance tests at your own risk. At the very least, we
+recommend running them in their own private account for whatever builder you're
+testing.
+
+To run the acceptance tests, invoke `make testacc`:
+
+    $ make testacc TEST=./builder/amazon/ebs
+    ...
+
+The `TEST` variable lets you narrow the scope of the acceptance tests to a
+specific package / folder. The `TESTARGS` variable is recommended to filter
+down to a specific resource to test, since testing all of them at once can
+sometimes take a very long time.
+
+Acceptance tests typically require other environment variables to be set for
+things such as access keys. The test itself should error early and tell you
+what to set, so it is not documented here.
