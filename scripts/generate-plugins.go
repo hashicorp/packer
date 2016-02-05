@@ -20,16 +20,9 @@ import (
 const target = "command/plugin.go"
 
 func main() {
-	// Normally this is run via go:generate from the command folder so we need
-	// to cd .. first. But when developing it's easier to use go run, so we'll
-	// support that too.
 	wd, _ := os.Getwd()
 	if filepath.Base(wd) != "packer" {
-		os.Chdir("..")
-		wd, _ = os.Getwd()
-		if filepath.Base(wd) != "packer" {
-			log.Fatalf("This program must be invoked in the packer project root; in %s", wd)
-		}
+		log.Fatalf("This program must be invoked in the packer project root; in %s", wd)
 	}
 
 	// Collect all of the data we need about plugins we have in the project
