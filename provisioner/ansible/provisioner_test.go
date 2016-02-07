@@ -157,12 +157,19 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	}
 	defer os.Remove(playbook_file.Name())
 
+	filename := make([]byte, 10)
+	n, err := io.ReadFull(rand.Reader, filename)
+	if n != len(filename) || err != nil {
+		t.Fatal("could not create random file name")
+	}
+
 	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["playbook_file"] = playbook_file.Name()
+	config["ssh_authorized_key_file"] = fmt.Sprintf("%x", filename)
 
 	err = p.Prepare(config)
 	if err == nil {
-		t.Fatal("should have error")
+		t.Errorf("should error if ssh_authorized_key_file does not exist")
 	}
 
 	publickey_file, err := ioutil.TempFile("", "publickey")
@@ -174,7 +181,7 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	config["ssh_authorized_key_file"] = publickey_file.Name()
 	err = p.Prepare(config)
 	if err != nil {
-		t.Fatalf("err: %s", err)
+		t.Errorf("err: %s", err)
 	}
 }
 
