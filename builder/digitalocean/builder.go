@@ -6,6 +6,7 @@ package digitalocean
 import (
 	"fmt"
 	"log"
+	"net/url"
 
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
@@ -37,6 +38,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	client := godo.NewClient(oauth2.NewClient(oauth2.NoContext, &apiTokenSource{
 		AccessToken: b.config.APIToken,
 	}))
+	if b.config.APIURL != "" {
+		u, err := url.Parse(b.config.APIURL)
+		if err != nil {
+			return nil, fmt.Errorf("DigitalOcean: Invalid API URL, %s.", err)
+		}
+		client.BaseURL = u
+	}
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
