@@ -244,6 +244,25 @@ builder and not otherwise conflicting with the qemuargs):
 <pre class="prettyprint">
   qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
+
+You can also use the `SSHHostPort` template variable to produce a packer
+template that can be invoked by `make` in parallel:
+
+``` {.javascript}
+  // ...
+  "qemuargs": [
+          [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+          [ "-device", "virtio-net,netdev=forward,id=net0"],
+          ...
+        ]
+  // ...
+```
+`make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each of which
+will bind to their own SSH port as determined by each process. This will also
+work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
+default port of `5985` or whatever value you have the service set to listen on.
+
+
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine.
