@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -15,6 +17,7 @@ import (
 // ISOConfig contains configuration for downloading ISO images.
 type ISOConfig struct {
 	ISOChecksum     string   `mapstructure:"iso_checksum"`
+	ISOChecksumURL  string   `mapstructure:"iso_checksum_url"`
 	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string `mapstructure:"iso_urls"`
 	TargetPath      string   `mapstructure:"iso_target_path"`
@@ -43,7 +46,7 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 	} else {
 		c.ISOChecksumType = strings.ToLower(c.ISOChecksumType)
 		if c.ISOChecksumType != "none" {
-			if c.ISOChecksum == "" {
+			if c.ISOChecksum == "" && c.ISOChecksumURL == "" {
 				errs = append(
 					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
 				return warnings, errs
@@ -54,59 +57,48 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 					return warnings, errs
 				}
 
-				u, err := url.Parse(c.ISOChecksum)
-				if err != nil {
-					errs = append(errs,
-						fmt.Errorf("Error parsing checksum: %s", err))
-					return warnings, errs
-				}
-				switch u.Scheme {
-				case "http", "https", "ftp", "ftps":
-					res, err := http.Get(c.ISOChecksum)
-					c.ISOChecksum = ""
+				// If iso_checksum has no value use iso_checksum_url instead.
+				if c.ISOChecksum == "" {
+					u, err := url.Parse(c.ISOChecksumURL)
 					if err != nil {
 						errs = append(errs,
-							fmt.Errorf("Error getting checksum from url: %s", c.ISOChecksum))
+							fmt.Errorf("Error parsing checksum: %s", err))
 						return warnings, errs
 					}
-					defer res.Body.Close()
-
-					rd := bufio.NewReader(res.Body)
-					for {
-						line, err := rd.ReadString('\n')
+					switch u.Scheme {
+					case "http", "https", "ftp", "ftps":
+						res, err := http.Get(c.ISOChecksumURL)
+						c.ISOChecksum = ""
 						if err != nil {
 							errs = append(errs,
-								fmt.Errorf("Error getting checksum from url: %s , %s", c.ISOChecksum, err.Error()))
+								fmt.Errorf("Error getting checksum from url: %s", c.ISOChecksumURL))
 							return warnings, errs
 						}
-						parts := strings.Fields(line)
-						if len(parts) < 2 {
-							continue
+						defer res.Body.Close()
+						err = c.parseCheckSumFile(bufio.NewReader(res.Body))
+						if err != nil {
+							errs = append(errs, err)
+							return warnings, errs
 						}
-						if strings.ToLower(parts[0]) == c.ISOChecksumType {
-							// BSD-style checksum
-							if parts[1] == fmt.Sprintf("(%s)", filepath.Base(c.ISOUrls[0])) {
-								c.ISOChecksum = parts[3]
-								break
-							}
-						} else {
-							// Standard checksum
-							if parts[1][0] == '*' {
-								// Binary mode
-								parts[1] = parts[1][1:]
-							}
-							if parts[1] == filepath.Base(c.ISOUrls[0]) {
-								c.ISOChecksum = parts[0]
-								break
-							}
+					case "file":
+						file, err := os.Open(u.Path)
+						if err != nil {
+							errs = append(errs, err)
+							return warnings, errs
 						}
+						err = c.parseCheckSumFile(bufio.NewReader(file))
+						if err != nil {
+							errs = append(errs, err)
+							return warnings, errs
+						}
+
+					case "":
+						break
+					default:
+						errs = append(errs,
+							fmt.Errorf("Error parsing checksum url: %s, scheme not supported: %s", c.ISOChecksumURL, u.Scheme))
+						return warnings, errs
 					}
-				case "":
-					break
-				default:
-					errs = append(errs,
-						fmt.Errorf("Error parsing checksum url, scheme not supported: %s", u.Scheme))
-					return warnings, errs
 				}
 			}
 		}
@@ -130,4 +122,39 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 	}
 
 	return warnings, errs
+}
+
+func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
+	for {
+		line, err := rd.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				return fmt.Errorf("No checksum for \"%s\" found at: %s", filepath.Base(c.ISOUrls[0]), c.ISOChecksumURL)
+			} else {
+				return fmt.Errorf("Error getting checksum from url: %s , %s", c.ISOChecksumURL, err.Error())
+			}
+		}
+		parts := strings.Fields(line)
+		if len(parts) < 2 {
+			continue
+		}
+		if strings.ToLower(parts[0]) == c.ISOChecksumType {
+			// BSD-style checksum
+			if parts[1] == fmt.Sprintf("(%s)", filepath.Base(c.ISOUrls[0])) {
+				c.ISOChecksum = parts[3]
+				break
+			}
+		} else {
+			// Standard checksum
+			if parts[1][0] == '*' {
+				// Binary mode
+				parts[1] = parts[1][1:]
+			}
+			if parts[1] == filepath.Base(c.ISOUrls[0]) {
+				c.ISOChecksum = parts[0]
+				break
+			}
+		}
+	}
+	return nil
 }
