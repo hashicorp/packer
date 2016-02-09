@@ -26,6 +26,13 @@ created. This simplifies configuration quite a bit.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
+\~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
+builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
+installed _if you are using temporary key pairs_, i.g. don't use
+[`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
+[`ssh_password`](/docs/templates/communicator.html#ssh_password). All major
+OS'es have OpenSSL installed by default except Windows.
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
