@@ -32,8 +32,6 @@ sudo chown -R vagrant:vagrant ${GOPATH}
 # Install some other stuff we need
 sudo apt-get update
 sudo apt-get install -y curl make git mercurial bzr zip
-
-go get github.com/mitchellh/packer
 SCRIPT
 
 Vagrant.configure(2) do |config|
