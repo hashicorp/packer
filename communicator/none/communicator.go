@@ -2,13 +2,13 @@ package none
 
 import (
 	"errors"
+	"github.com/mitchellh/packer/packer"
 	"io"
 	"os"
-	"github.com/mitchellh/packer/packer"
 )
 
 type comm struct {
-	config  string
+	config string
 }
 
 // Creates a null packer.Communicator implementation. This takes
@@ -16,7 +16,7 @@ type comm struct {
 func New(config string) (result *comm, err error) {
 	// Establish an initial connection and connect
 	result = &comm{
-		config:  config,
+		config: config,
 	}
 
 	return

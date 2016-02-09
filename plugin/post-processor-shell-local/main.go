@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/mitchellh/packer/post-processor/shell-local"
 	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/mitchellh/packer/post-processor/shell-local"
 )
 
 func main() {
