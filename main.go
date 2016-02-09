@@ -127,6 +127,11 @@ func wrappedMain() int {
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {
 		cacheDir = "packer_cache"
+		// It was empty so take over the env var so we can use it in our templates
+		if err := os.Setenv("PACKER_CACHE_DIR", "packer_cache"); err != nil {
+			fmt.Fprintf(os.Stderr, "Packer failed to set packer cache env var: %s\n", err)
+			return 1
+		}
 	}
 
 	cacheDir, err = filepath.Abs(cacheDir)
