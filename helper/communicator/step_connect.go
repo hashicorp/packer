@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/mitchellh/multistep"
-	gossh "golang.org/x/crypto/ssh"
-	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/communicator/none"
+	"github.com/mitchellh/packer/packer"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 // StepConnect is a multistep Step implementation that connects to
@@ -77,7 +77,7 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		state.Put("communicator",  comm)
+		state.Put("communicator", comm)
 		log.Printf("[INFO] communicator disabled, will not connect")
 		return multistep.ActionContinue
 	}

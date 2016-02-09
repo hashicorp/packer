@@ -147,8 +147,8 @@ func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 			User:     c.config.Username,
 			Password: c.config.Password,
 		},
-		Https: c.config.Https,
-		Insecure: c.config.Insecure,
+		Https:                 c.config.Https,
+		Insecure:              c.config.Insecure,
 		OperationTimeout:      c.config.Timeout,
 		MaxOperationsPerShell: 15, // lowest common denominator
 	})

@@ -216,7 +216,7 @@ func TestProvisioner_removeDir(t *testing.T) {
 	for _, sudo := range []bool{true, false} {
 		config := testConfig()
 		config["prevent_sudo"] = !sudo
-		
+
 		p := &Provisioner{}
 		comm := &packer.MockCommunicator{}
 		ui := &packer.BasicUi{
