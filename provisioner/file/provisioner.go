@@ -11,6 +11,8 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+const DefaultCheck = true
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -23,6 +25,8 @@ type Config struct {
 	// Direction
 	Direction string
 
+	Check bool
+
 	ctx interpolate.Context
 }
 
@@ -31,6 +35,7 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	p.config.Check = true
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -53,7 +58,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Direction must be one of: download, upload."))
 	}
 
-	if p.config.Direction == "upload" {
+	if p.config.Direction == "upload" && p.config.Check {
 		if _, err := os.Stat(p.config.Source); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Bad source '%s': %s", p.config.Source, err))
