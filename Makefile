@@ -25,7 +25,6 @@ deps:
 	go get github.com/mitchellh/gox
 	go get golang.org/x/tools/cmd/stringer
 	go get golang.org/x/tools/cmd/vet
-	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
 
 dev: deps
 	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -41,8 +40,7 @@ generate: deps
 	go fmt command/plugin.go
 
 test: deps
-	@echo "INFO: Test results going to packer-test.log; this may take awhile"
-	@go test $(TEST) $(TESTARGS) -timeout=15s | tee packer-test.log
+	@go test $(TEST) $(TESTARGS) -timeout=15s
 	@go vet $(TEST) ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
@@ -51,11 +49,10 @@ test: deps
 # testacc runs acceptance tests
 testacc: deps generate
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
-	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m | tee packer-test-acc.log
+	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: deps
-	@echo "INFO: Test results going to packer-test-race.log; this may take awhile"
-	@go test -race $(TEST) $(TESTARGS) -timeout=15s | tee packer-test-race.log
+	@go test -race $(TEST) $(TESTARGS) -timeout=15s
 
 updatedeps:
 	go get -u github.com/mitchellh/gox
