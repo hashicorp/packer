@@ -66,7 +66,7 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 						return warnings, errs
 					}
 					switch u.Scheme {
-					case "http", "https", "ftp", "ftps":
+					case "http", "https":
 						res, err := http.Get(c.ISOChecksumURL)
 						c.ISOChecksum = ""
 						if err != nil {
