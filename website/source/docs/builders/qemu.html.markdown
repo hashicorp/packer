@@ -160,7 +160,7 @@ builder.
     the files found in the directory to the floppy.
 
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
-    format of the virtual machine image. This defaults to "qcow2".
+    format of the virtual machine image. This defaults to `qcow2`.
 
 -   `headless` (boolean) - Packer defaults to building QEMU virtual machines by
     launching a GUI that shows the console of the machine being built. When this
@@ -181,7 +181,7 @@ builder.
     port the same. By default the values are 8000 and 9000, respectively.
 
 -   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
-    curl block device.
+    curl block device. This defaults to `false`.
 
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
