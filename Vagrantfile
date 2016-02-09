@@ -20,6 +20,7 @@ sudo mkdir -p ${GOPATH}
 cat <<EOF >/tmp/gopath.sh
 export GOROOT="${GOROOT}"
 export GOPATH="${GOPATH}"
+export GO15VENDOREXPERIMENT="1"  # Not needed for Go 1.6 and up
 export PATH="${GOROOT}/bin:${GOPATH}/bin:\$PATH"
 EOF
 sudo mv /tmp/gopath.sh /etc/profile.d/gopath.sh
