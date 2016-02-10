@@ -50,13 +50,13 @@ Optional Parameters:
 - `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
   server on the host machine to forward commands to the target machine. Ansible
   connects to this server and will validate the identity of the server using
-  the system known_hosts. The default behaviour is to generate and use a one
-  time key, and disable host_key_verification in ansible to allow it to connect
-  to the server 
+  the system known_hosts. The default behaviour is to generate and use a
+  onetime key, and disable host_key_verification in Ansible to allow it to
+  connect to the server.
 
 - `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
-  `ssh_user`. The default behaviour is to generate and use a one time key. If
-  this file is generated the coorisponding private key will be passed via the
+  `ssh_user`. The default behaviour is to generate and use a onetime key. If
+  this file is generated, the corresponding private key will be passed via the
   `--private-key` option to Ansible.
 
 - `local_port` (string) - The port on which to attempt to listen for SSH
@@ -71,7 +71,7 @@ Optional Parameters:
   should read and write on stdin and stdout, respectively. Defaults to
   `/usr/lib/sftp-server -e`.
 
-- `extra_arguments` (string) - Extra arguments to pass to Ansible
+- `extra_arguments` (string) - Extra arguments to pass to Ansible.
 
 ## Limitations
 
