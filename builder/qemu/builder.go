@@ -107,6 +107,7 @@ type Config struct {
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
+	SendKeyComm     string     `mapstructure:"send_key_comm"`
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
@@ -157,6 +158,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		} else {
 			b.config.Accelerator = "kvm"
 		}
+	}
+
+	if b.config.SendKeyComm == "" {
+		b.config.SendKeyComm = "vnc"
 	}
 
 	if b.config.MachineType == "" {
@@ -365,7 +370,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(stepForwardSSH),
 		new(stepConfigureVNC),
-		steprun,
+	)
+
+	switch b.config.SendKeyComm {
+	case "qmp":
+		steps = append(steps, new(stepConfigureQMP))
+	}
+
+	steps = append(steps, steprun,
 		&stepBootWait{},
 		&stepTypeBootCommand{},
 		&communicator.StepConnect{

@@ -1,0 +1,1 @@
+/usr/host/bin/qemu-system-x86_64 -machine type=pc-i440fx-1.7,accel=kvm -cdrom http://ftp.altlinux.ru/pvt/people/boyarsh/spt/altlinux-7.0.5-20151218-spt-x86_64-ru-install-dvd5.iso -boot once=d -netdev user,id=user.0,hostfwd=tcp::2856-:22 -qmp tcp:localhost:50896,server,nowait,nodelay -vnc 0.0.0.0:98 -name ispdn-compute-x86_64 -m 512 -device virtio-net,netdev=user.0
