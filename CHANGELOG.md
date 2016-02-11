@@ -45,6 +45,7 @@ IMPROVEMENTS:
   * builder/digitalocean: doubled instance wait timeouts to power off or
     shutdown (now 4 minutes) and to complete a snapshot (now 20 minutes)
     [GH-2939]
+  * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
   * builder/google: `account_file` can now be provided as a JSON string
     [GH-2811]
   * builder/google: added support for `preemptible` instances [GH-2982]
@@ -58,7 +59,6 @@ IMPROVEMENTS:
   * builder/parallels: Packer will look for Parallels in
     `/Applications/Parallels Desktop.app` if it is not detected automatically
     [GH-2839]
-  * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
   * builder/qemu: qcow2 images are now compacted by default [GH-2748]
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
@@ -66,13 +66,14 @@ IMPROVEMENTS:
   * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
   * builder/qemu: `<wait>` in `boot_command` now accepts an arbitrary duration
     like <wait1m30s> [GH-3129]
-  * builder/docker-import: Can now import Artifice artifacts [GH-2718]
+    * builder/virtualbox: Now supports VRDP for debugging [GH-3188]
   * builder/vmware-esxi: Now supports private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
+  * post-processor/atlas: Added support for compile ID. [GH-2775]
+  * post-processor/docker-import: Can now import Artifice artifacts [GH-2718]
   * provisioner/chef: Now supports `encrypted_data_bag_secret_path` option
     [GH-2653]
   * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
-  * post-processor/atlas: Added support for compile ID. [GH-2775]
 
 BUG FIXES:
 
