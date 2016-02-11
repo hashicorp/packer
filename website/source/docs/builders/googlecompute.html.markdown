@@ -139,8 +139,17 @@ builder.
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
 
+-   `region` (string) - The region in which to launch the instance. Defaults to
+    to the region hosting the specified `zone`.
+
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
+
+-   `subnetwork` (string) - The Google Compute subnetwork to use for the launced
+     instance. Only required if the `network` has been created with custom
+     subnetting.
+     Note, the region of the subnetwork must match the `region` or `zone` in
+     which the VM is launched.
 
 -   `tags` (array of strings)
 
