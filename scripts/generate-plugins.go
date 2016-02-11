@@ -96,15 +96,15 @@ func makeImports(builders, provisioners, postProcessors []plugin) string {
 	plugins := []string{}
 
 	for _, builder := range builders {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", builder.ImportName, builder.Path))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", builder.ImportName, filepath.ToSlash(builder.Path)))
 	}
 
 	for _, provisioner := range provisioners {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", provisioner.ImportName, provisioner.Path))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", provisioner.ImportName, filepath.ToSlash(provisioner.Path)))
 	}
 
 	for _, postProcessor := range postProcessors {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", postProcessor.ImportName, postProcessor.Path))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", postProcessor.ImportName, filepath.ToSlash(postProcessor.Path)))
 	}
 
 	// Make things pretty
