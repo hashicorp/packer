@@ -47,6 +47,13 @@ Required Parameters:
 
 Optional Parameters:
 
+- `groups` (array of strings) - The groups into which the Ansible host
+	should be placed. When unspecified, the host is not associated with any
+	groups.
+
+- `host_alias` (string) - The alias by which the Ansible host should be known.
+	Defaults to `default`.
+
 - `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
   server on the host machine to forward commands to the target machine. Ansible
   connects to this server and will validate the identity of the server using
@@ -71,7 +78,7 @@ Optional Parameters:
   should read and write on stdin and stdout, respectively. Defaults to
   `/usr/lib/sftp-server -e`.
 
-- `extra_arguments` (string) - Extra arguments to pass to Ansible.
+- `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
 
 ## Limitations
 

@@ -39,11 +39,13 @@ type Config struct {
 	ExtraArguments []string `mapstructure:"extra_arguments"`
 
 	// The main playbook file to execute.
-	PlaybookFile         string `mapstructure:"playbook_file"`
-	LocalPort            string `mapstructure:"local_port"`
-	SSHHostKeyFile       string `mapstructure:"ssh_host_key_file"`
-	SSHAuthorizedKeyFile string `mapstructure:"ssh_authorized_key_file"`
-	SFTPCmd              string `mapstructure:"sftp_command"`
+	PlaybookFile         string   `mapstructure:"playbook_file"`
+	Groups               []string `mapstructure:"groups"`
+	HostAlias            string   `mapstructure:"host_alias"`
+	LocalPort            string   `mapstructure:"local_port"`
+	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
+	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
+	SFTPCmd              string   `mapstructure:"sftp_command"`
 	inventoryFile        string
 }
 
@@ -70,6 +72,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Defaults
 	if p.config.Command == "" {
 		p.config.Command = "ansible-playbook"
+	}
+
+	if p.config.HostAlias == "" {
+		p.config.HostAlias = "default"
 	}
 
 	var errs *packer.MultiError
@@ -196,9 +202,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		defer os.Remove(tf.Name())
-		inv := fmt.Sprintf("default ansible_ssh_host=127.0.0.1 ansible_ssh_user=packer-ansible ansible_ssh_port=%s", p.config.LocalPort)
-		_, err = tf.Write([]byte(inv))
-		if err != nil {
+
+		host := fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=packer-ansible ansible_ssh_port=%s\n", p.config.HostAlias, p.config.LocalPort)
+
+		w := bufio.NewWriter(tf)
+		w.WriteString(host)
+		for _, group := range p.config.Groups {
+			fmt.Fprintf(w, "[%s]\n%s", group, host)
+		}
+
+		if err := w.Flush(); err != nil {
 			tf.Close()
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
@@ -214,7 +227,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	return nil
-
 }
 
 func (p *Provisioner) Cancel() {
