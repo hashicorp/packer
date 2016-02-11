@@ -48,10 +48,6 @@ Exactly *one* of the following is required:
 
 Optional parameters:
 
--   `binary` (boolean) - If true, specifies that the script(s) are binary files,
-    and Packer should therefore not convert Windows line endings to Unix line
-    endings (if there are any). By default this is false.
-
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
