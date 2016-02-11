@@ -47,8 +47,10 @@ type InstanceConfig struct {
 	Metadata    map[string]string
 	Name        string
 	Network     string
+	Subnetwork  string
 	Address     string
 	Preemptible bool
 	Tags        []string
+	Region      string
 	Zone        string
 }
