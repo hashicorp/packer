@@ -31,6 +31,7 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	Subnetwork           string            `mapstructure:"subnetwork"`
 	Address              string            `mapstructure:"address"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	SourceImage          string            `mapstructure:"source_image"`
@@ -38,6 +39,7 @@ type Config struct {
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Tags                 []string          `mapstructure:"tags"`
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
+	Region               string            `mapstructure:"region"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
@@ -124,6 +126,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Zone == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a zone must be specified"))
+	}
+	if c.Region == "" && len(c.Zone) > 2 {
+		// get region from Zone
+		region := c.Zone[:len(c.Zone)-2]
+		c.Region = region
 	}
 
 	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
