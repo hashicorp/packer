@@ -9,7 +9,10 @@ description: |-
 
 Type: `ansible`
 
-The `ansible` Packer provisioner allows Ansible playbooks to be run to provision the machine.
+The `ansible` Packer provisioner runs Ansible playbooks. It dynamically creates
+an Ansible inventory file configured to use SSH, runs an SSH server, executes
+`ansible-playbook`, and marshals Ansible plays through the SSH server to the
+machine being provisioned by Packer.
 
 ## Basic Example
 
@@ -21,10 +24,7 @@ DigitalOcean. Replace the mock `api_token` value with your own.
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "./playbook.yml",
-      "extra_arguments": ["--private-key", "./id_packer-ansible", "-v", "-c", "paramiko"],
-      "ssh_authorized_key_file": "./id_packer-ansible.pub",
-      "ssh_host_key_file": "./packer_host_private_key"
+      "playbook_file": "./playbook.yml"
     }
   ],
 
@@ -43,40 +43,39 @@ DigitalOcean. Replace the mock `api_token` value with your own.
 
 Required Parameters:
 
-- `playbook_file` - The playbook file to be run by Ansible.
+- `playbook_file` - The playbook to be run by Ansible.
 
 Optional Parameters:
 
 - `groups` (array of strings) - The groups into which the Ansible host
-	should be placed. When unspecified, the host is not associated with any
-	groups.
+  should be placed. When unspecified, the host is not associated with any
+  groups.
 
 - `host_alias` (string) - The alias by which the Ansible host should be known.
-	Defaults to `default`.
+  Defaults to `default`.
 
 - `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
   server on the host machine to forward commands to the target machine. Ansible
   connects to this server and will validate the identity of the server using
   the system known_hosts. The default behaviour is to generate and use a
-  onetime key, and disable host_key_verification in Ansible to allow it to
-  connect to the server.
+  onetime key. Host key checking is disabled via the
+  `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
 
 - `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
   `ssh_user`. The default behaviour is to generate and use a onetime key. If
-  this file is generated, the corresponding private key will be passed via the
-  `--private-key` option to Ansible.
+  this key is generated, the corresponding private key is passed to
+  `ansible-playbook` with the `--private-key` option.
 
 - `local_port` (string) - The port on which to attempt to listen for SSH
   connections. This value is a starting point.  The provisioner will attempt
   listen for SSH connections on the first available of ten ports, starting at
-  `local_port`. When `local_port` is missing or empty, ansible-provisioner will
-  listen on a system-chosen port.
+  `local_port`. A system-chosen port is used when `local_port` is missing or
+  empty.
 
-
-- `sftp_command` (string) - The command to run on the provisioned machine to
-  handle the SFTP protocol that Ansible will use to transfer files. The command
-  should read and write on stdin and stdout, respectively. Defaults to
-  `/usr/lib/sftp-server -e`.
+- `sftp_command` (string) - The command to run on the machine being provisioned
+  by Packer to handle the SFTP protocol that Ansible will use to transfer
+  files. The command should read and write on stdin and stdout, respectively.
+  Defaults to `/usr/lib/sftp-server -e`.
 
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
 
