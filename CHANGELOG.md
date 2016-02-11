@@ -35,6 +35,7 @@ IMPROVEMENTS:
     for broader compatibility. [GH-2913]
   * core: `target_path` for builder downloads can now be specified. [GH-2600]
   * core: WinRM communicator now supports HTTPS protocol [GH-3061]
+  * core: Template syntax errors now show line, column, offset [GH-3180]
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
   * builder/amazon: You can now specify `0` for `spot_price` to switch to on
     demand instances [GH-2845]
