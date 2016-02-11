@@ -142,6 +142,10 @@ builder.
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
 
+-   `subnetwork` (string) - The Google Compute subnetwork to use for the launced
+     instance. Only required if the `network` has been created with custom
+     subnetting.
+
 -   `tags` (array of strings)
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
