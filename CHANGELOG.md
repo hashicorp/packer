@@ -70,7 +70,8 @@ IMPROVEMENTS:
   * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
   * builder/qemu: `<wait>` in `boot_command` now accepts an arbitrary duration
     like <wait1m30s> [GH-3129]
-    * builder/virtualbox: Added VRDP for debugging [GH-3188]
+  * builder/qemu: Expose `{{ .SSHHostPort }}` in templates [GH-2884]
+  * builder/virtualbox: Added VRDP for debugging [GH-3188]
   * builder/vmware-esxi: Added private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
