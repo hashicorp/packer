@@ -33,6 +33,9 @@ dev: deps
 	fi
 	@PACKER_DEV=1 sh -c "$(CURDIR)/scripts/build.sh"
 
+fmt:
+	go fmt `go list ./... | grep -v vendor`
+
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate: deps
@@ -59,5 +62,11 @@ updatedeps:
 	go get -u golang.org/x/tools/cmd/stringer
 	go get -u golang.org/x/tools/cmd/vet
 	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
+
+# This is used to add new dependencies to packer. If you are submitting a PR
+# that includes new dependencies you will need to run this.
+vendor:
+	godep restore
+	godep save
 
 .PHONY: bin checkversion ci default deps generate releasebin test testacc testrace updatedeps
