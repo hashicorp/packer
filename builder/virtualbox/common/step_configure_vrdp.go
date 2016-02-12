@@ -21,8 +21,8 @@ import (
 // Produces:
 // vrdp_port unit - The port that VRDP is configured to listen on.
 type StepConfigureVRDP struct {
-		VRDPPortMin uint
-		VRDPPortMax uint
+	VRDPPortMin uint
+	VRDPPortMax uint
 }
 
 func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
@@ -32,7 +32,7 @@ func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
 
 	log.Printf("Looking for available port between %d and %d", s.VRDPPortMin, s.VRDPPortMax)
 	var vrdpPort uint
-	portRange := int (s.VRDPPortMax - s.VRDPPortMin)
+	portRange := int(s.VRDPPortMax - s.VRDPPortMin)
 
 	for {
 		if portRange > 0 {

@@ -2,17 +2,17 @@ package amazonimport
 
 import (
 	"fmt"
-	"strings"
-	"os"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3"
-// This is bad, it should be pulled out into a common folder across
-// both builders and post-processors
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	// This is bad, it should be pulled out into a common folder across
+	// both builders and post-processors
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
@@ -24,14 +24,14 @@ const BuilderId = "packer.post-processor.amazon-import"
 
 // Configuration of this post processor
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
+	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
-// Variables specific to this post processor
-	S3Bucket	string `mapstructure:"s3_bucket_name"`
-	S3Key		string `mapstructure:"s3_key_name"`
-	SkipClean	bool   `mapstructure:"skip_clean"`
-	Tags		map[string]string `mapstructure:"tags"`
+	// Variables specific to this post processor
+	S3Bucket  string            `mapstructure:"s3_bucket_name"`
+	S3Key     string            `mapstructure:"s3_key_name"`
+	SkipClean bool              `mapstructure:"skip_clean"`
+	Tags      map[string]string `mapstructure:"tags"`
 
 	ctx interpolate.Context
 }
@@ -44,9 +44,9 @@ type PostProcessor struct {
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate:		true,
-		InterpolateContext:	&p.config.ctx,
-		InterpolateFilter:	&interpolate.RenderFilter{
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"s3_key_name",
 			},
@@ -74,7 +74,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// define all our required paramaters
 	templates := map[string]*string{
-		"s3_bucket_name":	&p.config.S3Bucket,
+		"s3_bucket_name": &p.config.S3Bucket,
 	}
 	// Check out required params are defined
 	for key, ptr := range templates {
@@ -101,10 +101,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Render this key since we didn't in the configure phase
-        p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
+	p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
 	if err != nil {
-                return nil, false, fmt.Errorf("Error rendering s3_key_name template: %s", err)
-        }
+		return nil, false, fmt.Errorf("Error rendering s3_key_name template: %s", err)
+	}
 	log.Printf("Rendered s3_key_name as %s", p.config.S3Key)
 
 	log.Println("Looking for OVA in artifact")
@@ -135,12 +135,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
 
-	// Copy the OVA file into the S3 bucket specified 
+	// Copy the OVA file into the S3 bucket specified
 	uploader := s3manager.NewUploader(session)
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Body:	file,
-		Bucket:	&p.config.S3Bucket,
-		Key:	&p.config.S3Key,
+		Body:   file,
+		Bucket: &p.config.S3Bucket,
+		Key:    &p.config.S3Key,
 	})
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to upload %s: %s", source, err)
@@ -159,8 +159,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
-					S3Bucket:	&p.config.S3Bucket,
-					S3Key:		&p.config.S3Key,
+					S3Bucket: &p.config.S3Bucket,
+					S3Key:    &p.config.S3Key,
 				},
 			},
 		},
@@ -176,9 +176,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
 
 	stateChange := awscommon.StateChangeConf{
-		Pending: []string{"pending","active"},
+		Pending: []string{"pending", "active"},
 		Refresh: awscommon.ImportImageRefreshFunc(ec2conn, *import_start.ImportTaskId),
-		Target: "completed",
+		Target:  "completed",
 	}
 
 	// Actually do the wait for state change
@@ -187,8 +187,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Retrieve what the outcome was for the import task
 	import_result, err := ec2conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
-		ImportTaskIds:	[]*string{
-				import_start.ImportTaskId,
+		ImportTaskIds: []*string{
+			import_start.ImportTaskId,
 		},
 	})
 
@@ -210,14 +210,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// If we have tags, then apply them now to both the AMI and snaps
 	// created by the import
 	if len(p.config.Tags) > 0 {
-		var ec2Tags []*ec2.Tag;
+		var ec2Tags []*ec2.Tag
 
 		log.Printf("Repacking tags into AWS format")
 
 		for key, value := range p.config.Tags {
 			ui.Message(fmt.Sprintf("Adding tag \"%s\": \"%s\"", key, value))
 			ec2Tags = append(ec2Tags, &ec2.Tag{
-				Key: aws.String(key),
+				Key:   aws.String(key),
 				Value: aws.String(value),
 			})
 		}
@@ -227,7 +227,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		log.Printf("Getting details of %s", createdami)
 
 		imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-			ImageIds:	resourceIds,
+			ImageIds: resourceIds,
 		})
 
 		if err != nil {
@@ -252,8 +252,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message(fmt.Sprintf("Tagging AMI %s", createdami))
 
 		_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
-			Resources:	resourceIds,
-			Tags:		ec2Tags,
+			Resources: resourceIds,
+			Tags:      ec2Tags,
 		})
 
 		if err != nil {
@@ -265,24 +265,24 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Add the reported AMI ID to the artifact list
 	log.Printf("Adding created AMI ID %s in region %s to output artifacts", createdami, *config.Region)
 	artifact = &awscommon.Artifact{
-		Amis:		map[string]string{
-				*config.Region: createdami,
+		Amis: map[string]string{
+			*config.Region: createdami,
 		},
-		BuilderIdValue:	BuilderId,
-		Conn:		ec2conn,
+		BuilderIdValue: BuilderId,
+		Conn:           ec2conn,
 	}
 
-        if !p.config.SkipClean {
-                ui.Message(fmt.Sprintf("Deleting import source s3://%s/%s", p.config.S3Bucket, p.config.S3Key))
-                s3conn := s3.New(session)
-                _, err = s3conn.DeleteObject(&s3.DeleteObjectInput{
-                        Bucket:         &p.config.S3Bucket,
-                        Key:            &p.config.S3Key,
-                })
-                if err != nil {
-                        return nil, false, fmt.Errorf("Failed to delete s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
-                }
-        }
+	if !p.config.SkipClean {
+		ui.Message(fmt.Sprintf("Deleting import source s3://%s/%s", p.config.S3Bucket, p.config.S3Key))
+		s3conn := s3.New(session)
+		_, err = s3conn.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: &p.config.S3Bucket,
+			Key:    &p.config.S3Key,
+		})
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed to delete s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
+		}
+	}
 
 	return artifact, false, nil
 }

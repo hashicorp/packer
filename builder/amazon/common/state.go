@@ -7,8 +7,8 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -130,31 +130,31 @@ func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefre
 }
 
 func ImportImageRefreshFunc(conn *ec2.EC2, importTaskId string) StateRefreshFunc {
-        return func() (interface{}, string, error) {
-                resp, err := conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
-                        ImportTaskIds:  []*string{
-                                &importTaskId,
-                        },
-                },
-                )
-                if err != nil {
-                        if ec2err, ok := err.(awserr.Error); ok && strings.HasPrefix(ec2err.Code(),"InvalidConversionTaskId") {
-                                resp = nil
-                        } else if isTransientNetworkError(err) {
-                                resp = nil
-                        } else {
-                                log.Printf("Error on ImportImageRefresh: %s", err)
-                                return nil, "", err
-                        }
-                }
+	return func() (interface{}, string, error) {
+		resp, err := conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
+			ImportTaskIds: []*string{
+				&importTaskId,
+			},
+		},
+		)
+		if err != nil {
+			if ec2err, ok := err.(awserr.Error); ok && strings.HasPrefix(ec2err.Code(), "InvalidConversionTaskId") {
+				resp = nil
+			} else if isTransientNetworkError(err) {
+				resp = nil
+			} else {
+				log.Printf("Error on ImportImageRefresh: %s", err)
+				return nil, "", err
+			}
+		}
 
-                if resp == nil || len(resp.ImportImageTasks) == 0 {
-                        return nil, "", nil
-                }
+		if resp == nil || len(resp.ImportImageTasks) == 0 {
+			return nil, "", nil
+		}
 
-                i := resp.ImportImageTasks[0]
-                return i, *i.Status, nil
-        }
+		i := resp.ImportImageTasks[0]
+		return i, *i.Status, nil
+	}
 }
 
 // WaitForState watches an object and waits for it to achieve a certain

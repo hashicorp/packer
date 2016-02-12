@@ -287,7 +287,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				AccessConfigs: []*compute.AccessConfig{
 					&accessconfig,
 				},
-				Network: network.SelfLink,
+				Network:    network.SelfLink,
 				Subnetwork: subnetworkSelfLink,
 			},
 		},
