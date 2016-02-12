@@ -76,6 +76,10 @@ func (c *Communicator) Download(string, io.Writer) error {
 	return fmt.Errorf("download not supported")
 }
 
+func (c *Communicator) DownloadDir(string, string, []string) error {
+	return fmt.Errorf("downloadDir not supported")
+}
+
 type ExecuteCommandTemplate struct {
 	Command string
 }
