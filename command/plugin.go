@@ -29,6 +29,7 @@ import (
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
+	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
 	compresspostprocessor "github.com/mitchellh/packer/post-processor/compress"
@@ -95,6 +96,7 @@ var Provisioners = map[string]packer.Provisioner{
 }
 
 var PostProcessors = map[string]packer.PostProcessor{
+	"amazon-import": new(amazonimportpostprocessor.PostProcessor),
 	"artifice":      new(artificepostprocessor.PostProcessor),
 	"atlas":         new(atlaspostprocessor.PostProcessor),
 	"compress":      new(compresspostprocessor.PostProcessor),
