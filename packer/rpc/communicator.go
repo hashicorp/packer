@@ -52,6 +52,12 @@ type CommunicatorUploadDirArgs struct {
 	Exclude []string
 }
 
+type CommunicatorDownloadDirArgs struct {
+	Dst     string
+	Src     string
+	Exclude []string
+}
+
 func Communicator(client *rpc.Client) *communicator {
 	return &communicator{client: client}
 }
@@ -128,6 +134,22 @@ func (c *communicator) UploadDir(dst string, src string, exclude []string) error
 
 	var reply error
 	err := c.client.Call("Communicator.UploadDir", args, &reply)
+	if err == nil {
+		err = reply
+	}
+
+	return err
+}
+
+func (c *communicator) DownloadDir(src string, dst string, exclude []string) error {
+	args := &CommunicatorDownloadDirArgs{
+		Dst:     dst,
+		Src:     src,
+		Exclude: exclude,
+	}
+
+	var reply error
+	err := c.client.Call("Communicator.DownloadDir", args, &reply)
 	if err == nil {
 		err = reply
 	}
@@ -251,6 +273,10 @@ func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interfa
 
 func (c *CommunicatorServer) UploadDir(args *CommunicatorUploadDirArgs, reply *error) error {
 	return c.c.UploadDir(args.Dst, args.Src, args.Exclude)
+}
+
+func (c *CommunicatorServer) DownloadDir(args *CommunicatorUploadDirArgs, reply *error) error {
+	return c.c.DownloadDir(args.Src, args.Dst, args.Exclude)
 }
 
 func (c *CommunicatorServer) Download(args *CommunicatorDownloadArgs, reply *interface{}) (err error) {
