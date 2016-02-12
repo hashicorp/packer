@@ -9,8 +9,11 @@ BACKWARDS INCOMPATIBILITIES:
   * Release binaries are now provided via <https://releases.hashicorp.com>.
   * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support
     for building with Go 1.4.
-  * builder/amazon: Inline `user_data` for EC2 is now base64 encoded automatically [GH-2539]
-  * builder/parallels: `parallels_tools_host_path` and `guest_os_distribution` have been replaced by `guest_os_type`; use `packer fix` to update your templates [GH-2751]
+  * builder/amazon: Inline `user_data` for EC2 is now base64 encoded
+    automatically [GH-2539]
+  * builder/parallels: `parallels_tools_host_path` and `guest_os_distribution`
+    have been replaced by `guest_os_type`; use `packer fix` to update your
+    templates [GH-2751]
 
 FEATURES:
 
@@ -66,14 +69,15 @@ IMPROVEMENTS:
   * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
   * builder/qemu: `<wait>` in `boot_command` now accepts an arbitrary duration
     like <wait1m30s> [GH-3129]
-    * builder/virtualbox: Now supports VRDP for debugging [GH-3188]
-  * builder/vmware-esxi: Now supports private key auth for remote builds via
+    * builder/virtualbox: Added VRDP for debugging [GH-3188]
+  * builder/vmware-esxi: Added private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
   * post-processor/docker-import: Can now import Artifice artifacts [GH-2718]
-  * provisioner/chef: Now supports `encrypted_data_bag_secret_path` option
-    [GH-2653]
-  * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
+  * provisioner/chef: Added `encrypted_data_bag_secret_path` option [GH-2653]
+  * provisioner/puppet: Added the `extra_arguments` parameter [GH-2635]
+  * provisioner/salt: Added `no_exit_on_failure`, `log_level`, and improvements
+    to salt command invocation [GH-2660]
 
 BUG FIXES:
 
@@ -84,7 +88,7 @@ BUG FIXES:
   * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
   * builder/amazon: Pass AccessKey and SecretKey when uploading bundles for
     instance-backed AMIs [GH-2596]
-  * builder/parallels: Now supports interpolation in `prlctl_post` [GH-2828]
+  * builder/parallels: Added interpolation in `prlctl_post` [GH-2828]
   * builder/vmware: `format` option is now read correctly [GH-2892]
   * builder/vmware-esxi: Correct endless loop in destroy validation logic
     [GH-2911]
