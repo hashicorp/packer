@@ -140,6 +140,10 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 	return fmt.Errorf("WinRM doesn't support download.")
 }
 
+func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
+	return fmt.Errorf("WinRM doesn't support download dir.")
+}
+
 func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 	addr := fmt.Sprintf("%s:%d", c.endpoint.Host, c.endpoint.Port)
 	return winrmcp.New(addr, &winrmcp.Config{
