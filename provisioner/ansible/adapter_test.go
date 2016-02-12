@@ -140,3 +140,7 @@ func (c communicator) UploadDir(dst string, src string, exclude []string) error 
 func (c communicator) Download(string, io.Writer) error {
 	return errors.New("communicator not supported")
 }
+
+func (c communicator) DownloadDir(src string, dst string, exclude []string) error {
+	return errors.New("communicator not supported")
+}
