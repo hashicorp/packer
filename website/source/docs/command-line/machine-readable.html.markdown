@@ -39,6 +39,8 @@ The format will be covered in more detail later. But as you can see, the output
 immediately becomes machine-friendly. Try some other commands with the
 `-machine-readable` flag to see!
 
+~> `-machine-readable` is designed for automated environments and is mutually-exclusive with the `-debug` flag, which is designed for interactive environments.
+
 ## Format
 
 The machine readable format is a line-oriented, comma-delimited text format.
