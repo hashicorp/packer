@@ -59,19 +59,19 @@ func TestSSHConfigPrepare_SSHHostPort(t *testing.T) {
 	}
 }
 
-func TestSSHConfigPrepare_SSHKeyPath(t *testing.T) {
+func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	var c *SSHConfig
 	var errs []error
 
 	c = testSSHConfig()
-	c.SSHKeyPath = ""
+	c.Comm.SSHPrivateKey = ""
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
 
 	c = testSSHConfig()
-	c.SSHKeyPath = "/i/dont/exist"
+	c.Comm.SSHPrivateKey = "/i/dont/exist"
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) == 0 {
 		t.Fatal("should have error")
@@ -90,7 +90,7 @@ func TestSSHConfigPrepare_SSHKeyPath(t *testing.T) {
 	}
 
 	c = testSSHConfig()
-	c.SSHKeyPath = tf.Name()
+	c.Comm.SSHPrivateKey = tf.Name()
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) == 0 {
 		t.Fatal("should have error")
@@ -101,7 +101,7 @@ func TestSSHConfigPrepare_SSHKeyPath(t *testing.T) {
 	tf.Truncate(0)
 	tf.Write([]byte(testPem))
 	c = testSSHConfig()
-	c.SSHKeyPath = tf.Name()
+	c.Comm.SSHPrivateKey = tf.Name()
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
