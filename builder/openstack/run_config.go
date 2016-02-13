@@ -13,6 +13,7 @@ type RunConfig struct {
 	Comm           communicator.Config `mapstructure:",squash"`
 	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
 	SSHInterface   string              `mapstructure:"ssh_interface"`
+	SSHIPVersion   string              `mapstructure:"ssh_ip_version"`
 
 	SourceImage      string   `mapstructure:"source_image"`
 	SourceImageName  string   `mapstructure:"source_image_name"`
