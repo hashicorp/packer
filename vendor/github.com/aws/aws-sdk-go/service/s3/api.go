@@ -476,6 +476,9 @@ const opGetBucketLifecycle = "GetBucketLifecycle"
 
 // GetBucketLifecycleRequest generates a request for the GetBucketLifecycle operation.
 func (c *S3) GetBucketLifecycleRequest(input *GetBucketLifecycleInput) (req *request.Request, output *GetBucketLifecycleOutput) {
+	if c.Client.Config.Logger != nil {
+		c.Client.Config.Logger.Log("This operation, GetBucketLifecycle, has been deprecated")
+	}
 	op := &request.Operation{
 		Name:       opGetBucketLifecycle,
 		HTTPMethod: "GET",
@@ -585,6 +588,9 @@ const opGetBucketNotification = "GetBucketNotification"
 
 // GetBucketNotificationRequest generates a request for the GetBucketNotification operation.
 func (c *S3) GetBucketNotificationRequest(input *GetBucketNotificationConfigurationRequest) (req *request.Request, output *NotificationConfigurationDeprecated) {
+	if c.Client.Config.Logger != nil {
+		c.Client.Config.Logger.Log("This operation, GetBucketNotification, has been deprecated")
+	}
 	op := &request.Operation{
 		Name:       opGetBucketNotification,
 		HTTPMethod: "GET",
@@ -1191,6 +1197,9 @@ const opPutBucketLifecycle = "PutBucketLifecycle"
 
 // PutBucketLifecycleRequest generates a request for the PutBucketLifecycle operation.
 func (c *S3) PutBucketLifecycleRequest(input *PutBucketLifecycleInput) (req *request.Request, output *PutBucketLifecycleOutput) {
+	if c.Client.Config.Logger != nil {
+		c.Client.Config.Logger.Log("This operation, PutBucketLifecycle, has been deprecated")
+	}
 	op := &request.Operation{
 		Name:       opPutBucketLifecycle,
 		HTTPMethod: "PUT",
@@ -1281,6 +1290,9 @@ const opPutBucketNotification = "PutBucketNotification"
 
 // PutBucketNotificationRequest generates a request for the PutBucketNotification operation.
 func (c *S3) PutBucketNotificationRequest(input *PutBucketNotificationInput) (req *request.Request, output *PutBucketNotificationOutput) {
+	if c.Client.Config.Logger != nil {
+		c.Client.Config.Logger.Log("This operation, PutBucketNotification, has been deprecated")
+	}
 	op := &request.Operation{
 		Name:       opPutBucketNotification,
 		HTTPMethod: "PUT",
@@ -1828,7 +1840,7 @@ type CloudFunctionConfiguration struct {
 	CloudFunction *string `type:"string"`
 
 	// Bucket event for which to send notifications.
-	Event *string `type:"string" enum:"Event"`
+	Event *string `deprecated:"true" type:"string" enum:"Event"`
 
 	Events []*string `locationName:"Event" type:"list" flattened:"true"`
 
@@ -5390,7 +5402,7 @@ type QueueConfigurationDeprecated struct {
 	_ struct{} `type:"structure"`
 
 	// Bucket event for which to send notifications.
-	Event *string `type:"string" enum:"Event"`
+	Event *string `deprecated:"true" type:"string" enum:"Event"`
 
 	Events []*string `locationName:"Event" type:"list" flattened:"true"`
 
@@ -5758,7 +5770,7 @@ type TopicConfigurationDeprecated struct {
 	_ struct{} `type:"structure"`
 
 	// Bucket event for which to send notifications.
-	Event *string `type:"string" enum:"Event"`
+	Event *string `deprecated:"true" type:"string" enum:"Event"`
 
 	Events []*string `locationName:"Event" type:"list" flattened:"true"`
 
