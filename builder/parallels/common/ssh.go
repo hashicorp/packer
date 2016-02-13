@@ -32,7 +32,7 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*ssh.ClientConfig
 				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
 		}
 
-		if config.SSHKeyPath != "" {
+		if config.Comm.SSHPrivateKey != "" {
 			signer, err := commonssh.FileSigner(config.Comm.SSHPrivateKey)
 			if err != nil {
 				return nil, err
