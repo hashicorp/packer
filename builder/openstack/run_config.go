@@ -56,5 +56,9 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("A flavor must be specified"))
 	}
 
+	if c.SSHIPVersion != "" && c.SSHIPVersion != "4" && c.SSHIPVersion != "6" {
+		errs = append(errs, errors.New("SSH IP version must be either 4 or 6"))
+	}
+
 	return errs
 }
