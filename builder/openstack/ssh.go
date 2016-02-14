@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -82,12 +81,6 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 }
 
 func sshAddrFromPool(s *servers.Server, desired string, sshIPVersion string) string {
-
-	ipVersion, err := strconv.Atoi(sshIPVersion)
-	if err != nil {
-		log.Printf("[ERROR] Invalid ssh IP version: %s", sshIPVersion)
-	}
-
 	// Get all the addresses associated with this server. This
 	// was taken directly from Terraform.
 	for pool, networkAddresses := range s.Addresses {
@@ -112,11 +105,11 @@ func sshAddrFromPool(s *servers.Server, desired string, sshIPVersion string) str
 			address := element.(map[string]interface{})
 			if address["OS-EXT-IPS:type"] == "floating" {
 				addr = address["addr"].(string)
-			} else if ipVersion == 4 {
+			} else if sshIPVersion == "4" {
 				if address["version"].(float64) == 4 {
 					addr = address["addr"].(string)
 				}
-			} else if ipVersion == 6 {
+			} else if sshIPVersion == "6" {
 				if address["version"].(float64) == 6 {
 					addr = fmt.Sprintf("[%s]", address["addr"].(string))
 				}
