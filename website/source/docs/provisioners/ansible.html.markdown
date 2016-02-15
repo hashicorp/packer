@@ -34,7 +34,7 @@ DigitalOcean. Replace the mock `api_token` value with your own.
       "api_token": "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb",
       "image": "ubuntu-14-04-x64",
       "region": "sfo1"
-    },
+    }
   ]
 }
 ```
