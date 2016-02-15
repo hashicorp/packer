@@ -79,6 +79,14 @@ Optional Parameters:
 
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
 
+- `ansible_env_vars` (array of strings) - Environment variables to set before running Ansible.
+  If unset, defaults to `ANSIBLE_HOST_KEY_CHECKING=False`.
+  Usage example:
+
+```
+"ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
+```
+
 ## Limitations
 
 The `ansible` provisioner does not support SCP to transfer files.
