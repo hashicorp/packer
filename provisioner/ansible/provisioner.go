@@ -38,6 +38,8 @@ type Config struct {
 	// Extra options to pass to the ansible command
 	ExtraArguments []string `mapstructure:"extra_arguments"`
 
+	AnsibleEnvVars []string `mapstructure:"ansible_env_vars"`
+
 	// The main playbook file to execute.
 	PlaybookFile         string   `mapstructure:"playbook_file"`
 	Groups               []string `mapstructure:"groups"`
@@ -242,17 +244,23 @@ func (p *Provisioner) Cancel() {
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string, checkHostKey bool) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.inventoryFile
+	var envvars []string
 
 	args := []string{playbook, "-i", inventory}
 	if len(privKeyFile) > 0 {
 		args = append(args, "--private-key", privKeyFile)
 	}
 	args = append(args, p.config.ExtraArguments...)
+	if len(p.config.AnsibleEnvVars) > 0 {
+		envvars = append(envvars, p.config.AnsibleEnvVars...)
+	}
 
 	cmd := exec.Command(p.config.Command, args...)
 
-	if !checkHostKey {
+	if len(envvars) > 0 {
 		cmd.Env = os.Environ()
+		cmd.Env = append(cmd.Env, envvars...)
+	} else if !checkHostKey {
 		cmd.Env = append(cmd.Env, "ANSIBLE_HOST_KEY_CHECKING=False")
 	}
 
