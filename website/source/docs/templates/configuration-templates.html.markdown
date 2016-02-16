@@ -188,7 +188,7 @@ isotime = June 7, 7:22:43pm 2014
 {{isotime "Hour15Year200603"}} = Hour19Year201407
 ```
 
-Please note that double quote characters need escaping inside of templates:
+Please note that double quote characters need escaping inside of templates (in this case, on the `ami_name` value):
 
 ``` {.javascript}
 {
@@ -206,6 +206,8 @@ Please note that double quote characters need escaping inside of templates:
   ]
 }
 ```
+
+-&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html) documentation for more information on how to correctly configure the Amazon builder in this example.
 
 ## Amazon Specific Functions
 
