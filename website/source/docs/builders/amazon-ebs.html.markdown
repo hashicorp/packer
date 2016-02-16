@@ -204,7 +204,7 @@ builder.
 
 ## Basic Example
 
-Here is a basic example. It is completely valid except for the access keys:
+Here is a basic example. You will need to provide access keys, and may need to change the AMI IDs according to what images exist at the time the template is run:
 
 ``` {.javascript}
 {
@@ -223,6 +223,8 @@ Here is a basic example. It is completely valid except for the access keys:
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
+Further information on locating AMI IDs and their relationship to instance types and regions can be found in the AWS EC2 Documentation [for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).  
+
 ## Accessing the Instance to Debug
 
 If you need to access the instance to debug for some reason, run the builder
@@ -233,7 +235,7 @@ You can use this information to access the instance as it is running.
 ## AMI Block Device Mappings Example
 
 Here is an example using the optional AMI block device mappings. This will add
-the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
+the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the basic example, you will need to provide access keys and may need to change the source AMI ID based on what images exist when this template is run:
 
 ``` {.javascript}
 {
@@ -261,7 +263,7 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI.
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
-"OS\_Version" and "Release" to the finished AMI.
+"OS\_Version" and "Release" to the finished AMI. As before, your will need to provide your access keys, and may need to change the source AMI ID based on what images exist when this template is run:
 
 ``` {.javascript}
 {
