@@ -263,7 +263,7 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
-"OS\_Version" and "Release" to the finished AMI. As before, your will need to provide your access keys, and may need to change the source AMI ID based on what images exist when this template is run:
+"OS\_Version" and "Release" to the finished AMI. As before, you will need to provide your access keys, and may need to change the source AMI ID based on what images exist when this template is run:
 
 ``` {.javascript}
 {
