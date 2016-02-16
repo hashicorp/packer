@@ -205,13 +205,13 @@ builder.
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
-    "5m", or five minutes.
+    `5m`, or five minutes.
 
 -   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
-    host port.
+    host port. By default this is 2222 to 4444.
 
 -   `ssh_skip_nat_mapping` (boolean) - Defaults to false. When enabled, Packer
     does not setup forwarded port mapping for SSH requests and uses `ssh_port`
