@@ -296,9 +296,10 @@ default port of `5985` or whatever value you have the service set to listen on.
     used unless it is specified in this option.
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
-    to use for the VNC port on the host machine which is forwarded to the VNC
-    port on the guest machine. Because Packer often runs in parallel, Packer
-    will choose a randomly available port in this range to use as the host port.
+    to use for VNC access to the virtual machine. The builder uses VNC to type
+    the initial `boot_command`. Because Packer generally runs in parallel,
+    Packer uses a randomly chosen port in this range that appears available. By
+    default this is 5900 to 6000. The minimum and maximum ports are inclusive.
 
 ## Boot Command
 
