@@ -271,15 +271,18 @@ will bind to their own SSH port as determined by each process. This will also
 work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
 default port of `5985` or whatever value you have the service set to listen on.
 
-
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
-    string, which tells Packer to just forcefully shut down the machine.
+    string, which tells Packer to just forcefully shut down the machine unless a
+    shutdown command takes place inside script so this may safely be omitted. If
+    one or more scripts require a reboot it is suggested to leave this blank
+    since reboots may fail and specify the final shutdown command in your
+    last script.
 
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
-    "5m", or five minutes.
+    `5m`, or five minutes.
 
 -   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
     Set this option to `true` to disable compacting. Defaults to `false`.
@@ -288,7 +291,7 @@ default port of `5985` or whatever value you have the service set to listen on.
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
-    host port.
+    host port. By default this is 2222 to 4444.
 
 -   `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
     the new virtual machine. By default this is "packer-BUILDNAME", where
