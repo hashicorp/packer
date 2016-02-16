@@ -115,3 +115,5 @@ you can also use `token` configuration option.
     ]
 }
 ```
+
+More information on the correct configuration of the `amazon-ebs` builder in this example can be found in the [amazon-ebs builder documentation](/docs/builders/amazon-ebs.html).
