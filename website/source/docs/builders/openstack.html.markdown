@@ -115,6 +115,11 @@ builder.
     useful for Rackspace are "public" or "private", and the default behavior is
     to connect via whichever is returned first from the OpenStack API.
 
+-   `ssh_ip_version` (string) - The IP version to use for SSH connections, valid
+    values are `4` and `6`. Useful on dual stacked instances where the default
+    behaviour is to connect via whichever IP address is returned first from the
+    OpenStack API.
+
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
     generate a temporary keypair.
