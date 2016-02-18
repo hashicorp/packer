@@ -78,13 +78,14 @@ builder.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 -   `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
     install into the VM. Valid values are "win", "lin", "mac", "os2"
     and "other". This can be omitted only if `parallels_tools_mode`
     is "disable".
+
+-   `ssh_username` (string) - The username to use to SSH into the machine once
+    the OS is installed.
+
 
 ### Optional:
 
