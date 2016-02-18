@@ -53,16 +53,16 @@ builder.
 
 ### Required:
 
+-   `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
+    install into the VM. Valid values are "win", "lin", "mac", "os2"
+    and "other". This can be omitted only if `parallels_tools_mode`
+    is "disable".
+
 -   `source_path` (string) - The path to a PVM directory that acts as the source
     of this build.
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
-
--   `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
-    install into the VM. Valid values are "win", "lin", "mac", "os2"
-    and "other". This can be omitted only if `parallels_tools_mode`
-    is "disable".
 
 ### Optional:
 
@@ -85,10 +85,6 @@ builder.
     file on removable media. By default no floppy will be attached. The files
     listed in this configuration will all be put into the root directory of the
     floppy disk; sub-directories are not supported.
-
--   `reassign_mac` (boolean) - If this is "false" the MAC address of the first
-    NIC will reused when imported else a new MAC address will be generated
-    by Parallels. Defaults to "false".
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
@@ -132,6 +128,10 @@ builder.
     the machine. This information can be useful for provisioning. By default
     this is ".prlctl\_version", which will generally upload it into the
     home directory.
+
+-   `reassign_mac` (boolean) - If this is "false" the MAC address of the first
+    NIC will reused when imported else a new MAC address will be generated
+    by Parallels. Defaults to "false".
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
