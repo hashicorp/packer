@@ -80,6 +80,13 @@ builder.
     server in. If this isn't specified, the default enforced by your OpenStack
     cluster will be used. This may be required for some OpenStack clusters.
 
+-   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
+     cloud-init metadata.
+
+-   `domain_name` or `domain_id` (string) - The Domain name or ID you are
+    authenticating with. OpenStack installations require this if identity v3 is used.
+    Packer will use the environment variable `OS_DOMAIN_NAME` or `OS_DOMAIN_ID`, if set.
+
 -   `endpoint_type` (string) - The endpoint type to use. Can be any of "internal",
     "internalURL", "admin", "adminURL", "public", and "publicURL". By default
     this is "public".
@@ -92,24 +99,22 @@ builder.
 -   `insecure` (boolean) - Whether or not the connection to OpenStack can be
     done over an insecure connection. By default this is false.
 
+-   `metadata` (object of key/value strings) - Glance metadata that will be
+    applied to the image.
+
 -   `networks` (array of strings) - A list of networks by UUID to attach to
     this instance.
 
--   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
-    instance into. Some OpenStack installations require this. If not specified,
-    Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
-    is also called Project in later versions of OpenStack.
-
--   `domain_name` or `domain_id` (string) - The Domain name or ID you are
-    authenticating with. OpenStack installations require this if identity v3 is used.
-    Packer will use the environment variable `OS_DOMAIN_NAME` or `OS_DOMAIN_ID`, if set.
-
--   `security_groups` (array of strings) - A list of security groups by name to
-    add to this instance.
+-   `rackconnect_wait` (boolean) - For rackspace, whether or not to wait for
+    Rackconnect to assign the machine an IP address before connecting via SSH.
+    Defaults to false.
 
 -   `region` (string) - The name of the region, such as "DFW", in which to
     launch the server to create the AMI. If not specified, Packer will use the
     environment variable `OS_REGION_NAME`, if set.
+
+-   `security_groups` (array of strings) - A list of security groups by name to
+    add to this instance.
 
 -   `ssh_interface` (string) - The type of interface to connect via SSH. Values
     useful for Rackspace are "public" or "private", and the default behavior is
@@ -126,15 +131,13 @@ builder.
     [`ssh_private_key_file`](docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
+-   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
+    instance into. Some OpenStack installations require this. If not specified,
+    Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
+    is also called Project in later versions of OpenStack.
+
 -   `use_floating_ip` (boolean) - _Deprecated_ use `floating_ip` or `floating_ip_pool`
     instead.
-
--   `rackconnect_wait` (boolean) - For rackspace, whether or not to wait for
-    Rackconnect to assign the machine an IP address before connecting via SSH.
-    Defaults to false.
-
--   `metadata` (object of key/value strings) - Glance metadata that will be
-    applied to the image.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
@@ -142,9 +145,6 @@ builder.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
-
--   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
-     cloud-init metadata.
 
 ## Basic Example: DevStack
 
