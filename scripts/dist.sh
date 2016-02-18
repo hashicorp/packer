@@ -12,13 +12,7 @@ cd $DIR
 # Get the version from the command line
 VERSION=$1
 if [ -z $VERSION ]; then
-    echo "Please specify a version."
-    exit 1
-fi
-
-# Make sure we have a bintray API key
-if [ -z $BINTRAY_API_KEY ]; then
-    echo "Please set your bintray API key in the BINTRAY_API_KEY env var."
+    echo "Please specify version"
     exit 1
 fi
 
@@ -45,13 +39,4 @@ pushd ./pkg/dist >/dev/null 2>&1
 shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
 popd >/dev/null 2>&1
 
-echo "==> Uploading..."
-for ARCHIVE in ./pkg/dist/*; do
-    ARCHIVE_NAME=$(basename ${ARCHIVE})
-
-    echo Uploading: $ARCHIVE_NAME
-    curl \
-        -T ${ARCHIVE} \
-        -umitchellh:${BINTRAY_API_KEY} \
-        "https://api.bintray.com/content/mitchellh/packer/packer/${VERSION}/${ARCHIVE_NAME}"
-done
+echo "==> Push with hc-releases"
