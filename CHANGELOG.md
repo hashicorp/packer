@@ -24,6 +24,9 @@ FEATURES:
   * **New Ansible Provisioner**: `ansible` provisioner supports remote
     provisioning to keep your build image cleaner [GH-1969]
   * **New Amazon Import post-processor**: `amazon-import` allows you to upload an OVA-based VM to Amazon EC2 [GH-2962]
+  * **Shell Local post-processor**: `shell-local` allows you to run shell
+    commands on the host after a build has completed for custom packaging or
+    publishing of your artifacts [GH-2706]
   * **Artifice post-processor**: Override packer artifacts during post-
     processing. This allows you to extract artifacts from a packer builder and
     use them with other post-processors like compress, docker, and Atlas.
