@@ -7,7 +7,7 @@ BACKWARDS INCOMPATIBILITIES:
     the packer-* plugin files** or packer will load out-of-date plugins from
     disk.
   * Release binaries are now provided via <https://releases.hashicorp.com>.
-  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support
+  * Packer 0.9.0 is now built with Go 1.6. Future versions will drop support
     for building with Go 1.4.
   * builder/amazon: Inline `user_data` for EC2 is now base64 encoded
     automatically [GH-2539]

@@ -53,8 +53,8 @@ it raises the chances we can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to complete the
 following steps in order to be able to compile and test Packer.
 
-1. [Download](https://golang.org/dl) and install Go. Make sure your Go version
-   is at least Go 1.5. Packer _may_ work with older versions of Go but these
+1. [Download](https://golang.org/dl) and install Go. Go 1.6 or higher is
+   preferred. Packer _may_ work with versions of Go older than 1.5 but these
    are not supported.
 
 2. Set and export the `GOPATH` environment variable and update your `PATH`. For
