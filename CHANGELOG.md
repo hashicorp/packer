@@ -50,7 +50,6 @@ IMPROVEMENTS:
   * builder/digitalocean: doubled instance wait timeouts to power off or
     shutdown (now 4 minutes) and to complete a snapshot (now 20 minutes)
     [GH-2939]
-  * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
   * builder/google: `account_file` can now be provided as a JSON string
     [GH-2811]
   * builder/google: added support for `preemptible` instances [GH-2982]
