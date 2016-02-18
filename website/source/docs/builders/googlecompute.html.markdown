@@ -118,8 +118,8 @@ builder.
     Not required if you run Packer on a GCE instance with a service account.
     Instructions for creating file or using service accounts are above.
 
--   `address` (string) - The name of a pre-allocated static external IP address. 
-    Note, must be the name and not the actual IP address. 
+-   `address` (string) - The name of a pre-allocated static external IP address.
+    Note, must be the name and not the actual IP address.
 
 -   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
@@ -139,6 +139,8 @@ builder.
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
 
+-   `preemptible` (boolean) - If true, launch a preembtible instance.
+
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 
@@ -155,8 +157,6 @@ builder.
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
-
--   `preemptible` (boolean) - If true, launch a preembtible instance.
 
 ## Gotchas
 
