@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -19,7 +19,8 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Get our own instance ID
 	ui.Say("Gathering information about this EC2 instance...")
-	instanceIdBytes, err := common.GetInstanceMetaData("instance-id")
+	metadataClient := ec2metadata.New(&ec2metadata.Config{})
+	instanceId, err := metadataClient.GetMetadata("instance-id")
 	if err != nil {
 		log.Printf("Error: %s", err)
 		err := fmt.Errorf(
@@ -30,7 +31,6 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	instanceId := string(instanceIdBytes)
 	log.Printf("Instance ID: %s", instanceId)
 
 	// Query the entire instance metadata
