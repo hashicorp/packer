@@ -9,6 +9,8 @@ BACKWARDS INCOMPATIBILITIES:
   * Release binaries are now provided via <https://releases.hashicorp.com>.
   * Packer 0.9.0 is now built with Go 1.6. Future versions will drop support
     for building with Go 1.4.
+  * core: Plugins that implement the Communicator interface must now implement
+    a DownloadDir method [GH-2618]
   * builder/amazon: Inline `user_data` for EC2 is now base64 encoded
     automatically [GH-2539]
   * builder/parallels: `parallels_tools_host_path` and `guest_os_distribution`
