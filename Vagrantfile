@@ -3,7 +3,7 @@
 
 $script = <<SCRIPT
 # Fetch from https://golang.org/dl
-TARBALL="https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz"
+TARBALL="https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz"
 
 UNTARPATH="/opt"
 GOROOT="${UNTARPATH}/go"
@@ -20,7 +20,6 @@ sudo mkdir -p ${GOPATH}
 cat <<EOF >/tmp/gopath.sh
 export GOROOT="${GOROOT}"
 export GOPATH="${GOPATH}"
-export GO15VENDOREXPERIMENT="1"  # Not needed for Go 1.6 and up
 export PATH="${GOROOT}/bin:${GOPATH}/bin:\$PATH"
 EOF
 sudo mv /tmp/gopath.sh /etc/profile.d/gopath.sh
