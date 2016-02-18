@@ -8,18 +8,22 @@ default: deps generate test dev
 
 ci: deps test
 
-release: deps test releasebin
+release: deps test releasebin package
 
 bin: deps
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
 	@sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
-	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -ne 0 ]; then \
+	@grep 'const VersionPrerelease = "dev"' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version.go prior to release."; \
 		exit 1; \
 	fi
 	@sh -c "$(CURDIR)/scripts/build.sh"
+
+package:
+	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
+	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 deps:
 	go get github.com/mitchellh/gox
