@@ -208,7 +208,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if nodeName == "" {
 		nodeName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
-	remoteValidationKeyPath := ""
 	serverUrl := p.config.ServerUrl
 
 	if !p.config.SkipInstall {
