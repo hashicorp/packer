@@ -54,15 +54,37 @@ the SSH agent to the remote host.
 
 The SSH communicator has the following options:
 
+  * `ssh_bastion_host` (string) - A bastion host to use for the actual
+    SSH connection.
+
+  * `ssh_bastion_password` (string) - The password to use to authenticate
+    with the bastion host.
+
+  * `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to
+    22.
+
+  * `ssh_bastion_private_key_file` (string) - A private key file to use
+    to authenticate with the bastion host.
+
+  * `ssh_bastion_username` (string) - The username to connect to the bastion
+    host.
+
+  * `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
+    disabled.
+
+  * `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
+    copy (default) or SSH File Transfer Protocol.
+
+  * `ssh_handshake_attempts` (integer) - The number of handshakes to attempt
+    with SSH once it can connect. This defaults to 10.
+
   * `ssh_host` (string) - The address to SSH to. This usually is automatically
     configured by the builder.
 
-  * `ssh_port` (integer) - The port to connect to SSH. This defaults to 22.
-
-  * `ssh_username` (string) - The username to connect to SSH with.
-
   * `ssh_password` (string) - A plaintext password to use to authenticate
     with SSH.
+
+  * `ssh_port` (integer) - The port to connect to SSH. This defaults to 22.
 
   * `ssh_private_key_file` (string) - Path to a PEM encoded private key
     file to use to authentiate with SSH.
@@ -74,29 +96,7 @@ The SSH communicator has the following options:
     Packer uses this to determine when the machine has booted so this is
     usually quite long. Example value: "10m"
 
-  * `ssh_handshake_attempts` (integer) - The number of handshakes to attempt
-    with SSH once it can connect. This defaults to 10.
-
-  * `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
-    disabled.
-
-  * `ssh_bastion_host` (string) - A bastion host to use for the actual
-    SSH connection.
-
-  * `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to
-    22.
-
-  * `ssh_bastion_username` (string) - The username to connect to the bastion
-    host.
-
-  * `ssh_bastion_password` (string) - The password to use to authenticate
-    with the bastion host.
-
-  * `ssh_bastion_private_key_file` (string) - A private key file to use
-    to authenticate with the bastion host.
-	
-  * `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
-    copy (default) or SSH File Transfer Protocol.
+  * `ssh_username` (string) - The username to connect to SSH with.
 
 ## WinRM Communicator
 
