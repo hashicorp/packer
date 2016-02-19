@@ -43,6 +43,7 @@ type Config struct {
 	// The main playbook file to execute.
 	PlaybookFile         string   `mapstructure:"playbook_file"`
 	Groups               []string `mapstructure:"groups"`
+	EmptyGroups          []string `mapstructure:"empty_groups"`
 	HostAlias            string   `mapstructure:"host_alias"`
 	LocalPort            string   `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
@@ -211,6 +212,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		w.WriteString(host)
 		for _, group := range p.config.Groups {
 			fmt.Fprintf(w, "[%s]\n%s", group, host)
+		}
+
+		for _, group := range p.config.EmptyGroups {
+			fmt.Fprintf(w, "[%s]\n", group)
 		}
 
 		if err := w.Flush(); err != nil {
