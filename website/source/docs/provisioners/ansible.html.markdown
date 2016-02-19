@@ -51,6 +51,9 @@ Optional Parameters:
   should be placed. When unspecified, the host is not associated with any
   groups.
 
+- `empty_groups` (array of strings) - The groups which should be present in
+  inventory file but remain empty.
+
 - `host_alias` (string) - The alias by which the Ansible host should be known.
   Defaults to `default`.
 
