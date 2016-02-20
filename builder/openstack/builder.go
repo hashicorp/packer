@@ -91,6 +91,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			UserDataFile:     b.config.UserDataFile,
 			ConfigDrive:      b.config.ConfigDrive,
 		},
+		&StepGetPassword{
+			Debug:            b.config.PackerDebug,
+			Comm:             &b.config.RunConfig.Comm,
+		},
 		&StepWaitForRackConnect{
 			Wait: b.config.RackconnectWait,
 		},
