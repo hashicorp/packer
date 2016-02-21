@@ -1,3 +1,20 @@
+## UNRELEASED
+
+BACKWARDS INCOMPATIBILITIES:
+
+
+FEATURES:
+
+
+IMPROVEMENTS:
+
+  * builder/openstack: Added support for retrieving the Administrator
+    password when using WinRM if no `winrm_password` is set [GH-3209]
+  * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
+
+BUG FIXES:
+
+
 ## 0.9.0 (February 19, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
