@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -18,6 +19,17 @@ func (c *OutputConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 	}
 
 	var errs []error
+
+	if path.IsAbs(c.OutputDir) {
+		c.OutputDir = path.Clean(c.OutputDir)
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			errs = append(errs, err)
+		}
+		c.OutputDir = path.Clean(path.Join(wd, c.OutputDir))
+	}
+
 	if !pc.PackerForce {
 		if _, err := os.Stat(c.OutputDir); err == nil {
 			errs = append(errs, fmt.Errorf(
