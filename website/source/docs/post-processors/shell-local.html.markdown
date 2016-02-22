@@ -18,7 +18,7 @@ The example below is fully functional.
 
 ``` {.javascript}
 {
-  "type": "shell",
+  "type": "shell-local",
   "inline": ["echo foo"]
 }
 ```
