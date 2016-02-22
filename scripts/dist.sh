@@ -16,27 +16,38 @@ if [ -z $VERSION ]; then
     exit 1
 fi
 
-# Zip and copy to the dist dir
-echo "==> Packaging..."
+# Tag, unless told not to
+if [ -z $NOTAG ]; then
+  echo "==> Tagging..."
+  git commit --allow-empty -a --gpg-sign=348FFC4C -m "Cut version $VERSION"
+  git tag -a -m "Version $VERSION" -s -u 348FFC4C "v${VERSION}" $RELBRANCH
+fi
+
+# Zip all the files
 rm -rf ./pkg/dist
 mkdir -p ./pkg/dist
-for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
-    OSARCH=$(basename ${PLATFORM})
-
-    if [ $OSARCH = "dist" ]; then
-        continue
-    fi
-
-    echo "--> ${OSARCH}"
-    pushd $PLATFORM >/dev/null 2>&1
-    zip ../dist/packer_${VERSION}_${OSARCH}.zip ./*
-    popd >/dev/null 2>&1
+for FILENAME in $(find ./pkg -mindepth 1 -maxdepth 1 -type f); do
+  FILENAME=$(basename $FILENAME)
+  cp ./pkg/${FILENAME} ./pkg/dist/packer_${VERSION}_${FILENAME}
 done
 
-# Make the checksums
-echo "==> Checksumming..."
-pushd ./pkg/dist >/dev/null 2>&1
-shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
-popd >/dev/null 2>&1
+if [ -z $NOSIGN ]; then
+  echo "==> Signing..."
+  pushd ./pkg/dist
+  rm -f ./packer_${VERSION}_SHA256SUMS*
+  shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
+  gpg --default-key 348FFC4C --detach-sig ./packer_${VERSION}_SHA256SUMS
+  popd
+fi
 
-echo "==> Push with hc-releases"
+# Upload
+if [ ! -z $HC_RELEASE ]; then
+  hc-releases -upload $DIR/pkg/dist --publish --purge
+
+  for FILENAME in $(find $DIR/pkg/dist -type f); do
+    FILENAME=$(basename $FILENAME)
+    curl -X PURGE https://releases.hashicorp.com/packer/${VERSION}/${FILENAME}
+  done
+fi
+
+exit 0
