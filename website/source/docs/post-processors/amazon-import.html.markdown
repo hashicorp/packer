@@ -66,7 +66,7 @@ Here is a basic example. This assumes that the builder has produced an OVA artif
 }
 ```
 
-&gt; **Note:** Packer can also read the access key and secret access key from
+-&gt; **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
