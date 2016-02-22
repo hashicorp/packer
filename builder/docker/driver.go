@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/hashicorp/go-version"
@@ -25,6 +26,10 @@ type Driver interface {
 	// IPAddress returns the address of the container that can be used
 	// for external access.
 	IPAddress(id string) (string, error)
+
+	// Build an image with the given Dockerfile and returns the ID for that image,
+	// along with a potential error.
+	BuildImage(dockerfile *bytes.Buffer) (string, error)
 
 	// Login. This will lock the driver from performing another Login
 	// until Logout is called. Therefore, any users MUST call Logout.

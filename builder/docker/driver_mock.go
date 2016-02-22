@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/hashicorp/go-version"
@@ -27,6 +28,10 @@ type MockDriver struct {
 	IPAddressID     string
 	IPAddressResult string
 	IPAddressErr    error
+
+	BuildImageCalled     bool
+	BuildImageDockerfile *bytes.Buffer
+	BuildImageErr        error
 
 	LoginCalled   bool
 	LoginEmail    string
@@ -113,6 +118,12 @@ func (d *MockDriver) IPAddress(id string) (string, error) {
 	d.IPAddressCalled = true
 	d.IPAddressID = id
 	return d.IPAddressResult, d.IPAddressErr
+}
+
+func (d *MockDriver) BuildImage(dockerfile *bytes.Buffer) (string, error) {
+	d.BuildImageCalled = true
+	d.BuildImageDockerfile = dockerfile
+	return "1234567890abcdef", d.BuildImageErr
 }
 
 func (d *MockDriver) Login(r, e, u, p string) error {

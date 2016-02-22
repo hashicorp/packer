@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/post-processor/docker-import"
+	"github.com/mitchellh/packer/post-processor/docker-dockerfile"
 	"github.com/mitchellh/packer/post-processor/docker-tag"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -48,9 +49,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if artifact.BuilderId() != dockerimport.BuilderId &&
+		artifact.BuilderId() != dockerfile.BuilderId &&
 		artifact.BuilderId() != dockertag.BuilderId {
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from docker-import and docker-tag artifacts.",
+			"Unknown artifact type: %s\nCan only import from docker-import, docker-dockerfile, and docker-tag artifacts.",
 			artifact.BuilderId())
 		return nil, false, err
 	}

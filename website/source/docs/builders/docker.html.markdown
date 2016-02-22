@@ -275,4 +275,6 @@ the future:
 -   Dockerfiles can contain information such as exposed ports, shared volumes,
     and other metadata. Packer builds a raw Docker container image that has none
     of this metadata. You can pass in much of this metadata at runtime with
-    `docker run`.
+    `docker run` or you can use the
+    [docker-dockerfile](/docs/post-processors/docker-dockerfile.html)
+    post-processor to add such information to images.
