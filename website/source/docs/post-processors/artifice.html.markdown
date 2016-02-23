@@ -11,10 +11,6 @@ page_title: 'Artifice Post-Processor'
 
 # Artifice Post-Processor
 
-\~&gt; This is a beta feature, and may change significantly before it is
-finalized. Please open a [GitHub issue to provide
-feedback](https://github.com/mitchellh/packer/issues).
-
 Type: `artifice`
 
 The artifice post-processor overrides the artifact list from an upstream builder
