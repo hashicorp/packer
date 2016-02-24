@@ -1,10 +1,12 @@
 PACKER=$GOPATH/src/github.com/mitchellh/packer
-AZURE=$HOME/hashi/packer-azure
+AZURE=/tmp/packer-azure
+
+ls $AZURE || git clone https://github.com/Azure/packer-azure /tmp/packer-azure
 
 # copy things
-cp -r $AZURE/packer/builder/azure $PACKER/builder/azure
+cp -r $AZURE/packer/builder/azure $PACKER/builder/
 cp -r $AZURE/packer/communicator/* $PACKER/communicator/
-cp -r $AZURE/packer/provisioner/azureVmCustomScriptExtension $PACKER/provisioner/azureVmCustomScriptExtension
+cp -r $AZURE/packer/provisioner/azureVmCustomScriptExtension $PACKER/provisioner/
 
 # remove legacy API client
 rm -rf $PACKER/builder/azure/smapi
