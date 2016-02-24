@@ -12,14 +12,14 @@ release: deps test releasebin package
 
 bin: deps
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
 	@grep 'const VersionPrerelease = "dev"' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version.go prior to release."; \
 		exit 1; \
 	fi
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
@@ -29,13 +29,18 @@ deps:
 	go get github.com/mitchellh/gox
 	go get golang.org/x/tools/cmd/stringer
 	go get golang.org/x/tools/cmd/vet
+	@go version | grep 1.4 ; if [ $$? -eq 0 ]; then \
+		echo "Installing godep and restoring dependencies"; \
+		go get github.com/tools/godep; \
+		godep restore; \
+	fi
 
 dev: deps
 	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must add prerelease tags to version.go prior to making a dev build."; \
 		exit 1; \
 	fi
-	@PACKER_DEV=1 sh -c "$(CURDIR)/scripts/build.sh"
+	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 fmt:
 	go fmt `go list ./... | grep -v vendor`
