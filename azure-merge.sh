@@ -9,4 +9,4 @@ cp -r $AZURE/packer/communicator/* $PACKER/communicator/
 cp -r $AZURE/packer/provisioner/azureVmCustomScriptExtension $PACKER/provisioner/azureVmCustomScriptExtension
 
 # fix imports
-find $PACKER/builder/azure/ | grep ".go" | xargs sed -i -e 's/Azure\/azure-sdk-for-go/mitchellh\/packer\/builder/g'
+find $PACKER/builder/azure/ -type f | grep ".go" | xargs sed -i -e 's/Azure\/azure-sdk-for-go/mitchellh\/packer\/builder/g'
