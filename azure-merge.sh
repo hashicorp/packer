@@ -1,7 +1,10 @@
 PACKER=$GOPATH/src/github.com/mitchellh/packer
 AZURE=/tmp/packer-azure
 
-ls $AZURE || git clone https://github.com/Azure/packer-azure /tmp/packer-azure
+ls $AZURE >/dev/null || git clone https://github.com/Azure/packer-azure /tmp/packer-azure
+PWD=`pwd`
+cd $AZURE && git pull
+cd $PWD
 
 # copy things
 cp -r $AZURE/packer/builder/azure $PACKER/builder/
