@@ -22,14 +22,11 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	// owner-alias
 	if s.ForceDeregister {
 		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+			Owners: []*string{aws.String("self")},
 			Filters: []*ec2.Filter{&ec2.Filter{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
 			},
-				&ec2.Filter{
-					Name:   aws.String("owner-alias"),
-					Values: []*string{aws.String("self")},
-				},
 			}})
 
 		if err != nil {
