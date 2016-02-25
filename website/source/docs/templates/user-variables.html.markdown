@@ -1,7 +1,7 @@
 ---
 description: |
     User variables allow your templates to be further configured with variables from
-    the command-line, environmental variables, or files. This lets you parameterize
+    the command-line, environment variables, or files. This lets you parameterize
     your templates so that you can keep secret tokens, environment-specific data,
     and other types of information out of your templates. This maximizes the
     portability and shareability of the template.
@@ -12,7 +12,7 @@ page_title: User Variables in Templates
 # User Variables
 
 User variables allow your templates to be further configured with variables from
-the command-line, environmental variables, or files. This lets you parameterize
+the command-line, environment variables, or files. This lets you parameterize
 your templates so that you can keep secret tokens, environment-specific data,
 and other types of information out of your templates. This maximizes the
 portability and shareability of the template.
@@ -62,11 +62,11 @@ function in the form of <code>{{user \`variable\`}}</code>. This function can be
 used in *any value* within the template, in builders, provisioners, *anything*.
 The user variable is available globally within the template.
 
-## Environmental Variables
+## Environment Variables
 
-Environmental variables can be used within your template using user variables.
+Environment variables can be used within your template using user variables.
 The `env` function is available *only* within the default value of a user
-variable, allowing you to default a user variable to an environmental variable.
+variable, allowing you to default a user variable to an environment variable.
 An example is shown below:
 
 ``` {.javascript}
@@ -79,13 +79,13 @@ An example is shown below:
 }
 ```
 
-This will default "my\_secret" to be the value of the "MY\_SECRET" environmental
+This will default "my\_secret" to be the value of the "MY\_SECRET" environment
 variable (or the empty string if it does not exist).
 
--&gt; **Why can't I use environmental variables elsewhere?** User variables are
+-&gt; **Why can't I use environment variables elsewhere?** User variables are
 the single source of configurable input to a template. We felt that having
-environmental variables used *anywhere* in a template would confuse the user
-about the possible inputs to a template. By allowing environmental variables
+environment variables used *anywhere* in a template would confuse the user
+about the possible inputs to a template. By allowing environment variables
 only within default values for user variables, user variables remain as the
 single source of input to a template that a user can easily discover using
 `packer inspect`.
