@@ -19,12 +19,18 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// check for force deregister
+	// owner-alias
 	if s.ForceDeregister {
 		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 			Filters: []*ec2.Filter{&ec2.Filter{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
-			}}})
+			},
+				&ec2.Filter{
+					Name:   aws.String("owner-alias"),
+					Values: []*string{aws.String("self")},
+				},
+			}})
 
 		if err != nil {
 			err := fmt.Errorf("Error creating AMI: %s", err)
