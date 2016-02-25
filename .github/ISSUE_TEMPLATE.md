@@ -1,0 +1,14 @@
+FOR FEATURES:
+
+Describe the feature you want and your use case.
+
+FOR BUGS:
+
+Describe the problem and include the following information:
+
+- Packer Version
+- Host platform
+- Debug log output from `PACKER_LOG=1 packer builde template.json`.
+  Please paste this in a gist https://gist.github.com
+- The simplest example template and scripts needed to reproduce the bug.
+  Include these in your gist https://gist.github.com
