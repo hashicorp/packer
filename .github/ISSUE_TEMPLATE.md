@@ -8,7 +8,7 @@ Describe the problem and include the following information:
 
 - Packer Version
 - Host platform
-- Debug log output from `PACKER_LOG=1 packer builde template.json`.
+- Debug log output from `PACKER_LOG=1 packer build template.json`.
   Please paste this in a gist https://gist.github.com
 - The simplest example template and scripts needed to reproduce the bug.
   Include these in your gist https://gist.github.com
