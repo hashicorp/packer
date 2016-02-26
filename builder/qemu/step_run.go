@@ -95,7 +95,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard))
 		}
 	} else {
-		defaultArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache)
+		driveArgs["-drive"] = fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache)
 	}
 	deviceArgs = append(deviceArgs, fmt.Sprintf("%s,netdev=user.0", config.NetDevice))
 
