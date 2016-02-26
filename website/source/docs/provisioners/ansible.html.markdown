@@ -90,6 +90,9 @@ Optional Parameters:
 "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
 ```
 
+- `user` (string) - The `ansible_user` to use. Defaults to the user running
+  packer.
+
 ## Limitations
 
 The `ansible` provisioner does not support SCP to transfer files.
