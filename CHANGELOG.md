@@ -14,6 +14,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * builders/parallels: Handle `output_directory` containing . and ..
+    [GH-3239]
 
 ## 0.9.0 (February 19, 2016)
 
