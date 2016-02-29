@@ -137,7 +137,9 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 }
 
 func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
-	if c.WinRMPort == 0 {
+	if c.WinRMPort == 0 && c.WinRMUseSSL {
+		c.WinRMPort = 5986
+	} else if c.WinRMPort == 0 {
 		c.WinRMPort = 5985
 	}
 
