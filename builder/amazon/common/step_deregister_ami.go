@@ -35,7 +35,6 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 				owners[i] = aws.String(o)
 			}
 
-			ui.Say(fmt.Sprintf("The list of owners is : %s", owners))
 			images_imput.Owners = owners
 		}
 
