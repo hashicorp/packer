@@ -1,3 +1,5 @@
+If you are planning to open a pull-request just open the pull-request instead of making an issue first.
+
 FOR FEATURES:
 
 Describe the feature you want and your use case.
