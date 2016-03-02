@@ -19,7 +19,7 @@ const archiveTemplateEntry = ".packer-template"
 
 var (
 	reName         = regexp.MustCompile("^[a-zA-Z0-9-_/]+$")
-	errInvalidName = fmt.Errorf("Your build name can only contain these characters: [a-zA-Z0-9-_]+")
+	errInvalidName = fmt.Errorf("Your build name can only contain these characters: %s", reName.String())
 )
 
 type PushCommand struct {
