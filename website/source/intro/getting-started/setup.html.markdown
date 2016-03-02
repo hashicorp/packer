@@ -21,6 +21,11 @@ compile Packer from source, as that is covered in the
 [README](https://github.com/mitchellh/packer/blob/master/README.md) and is only
 recommended for advanced users.
 
+## Alternative Installation Methods
+
+The binary packages is the only official method of installation, there are
+alternatives available. [link](#brew)
+
 ## Installing Packer
 
 To install packer, first find the [appropriate package](/downloads.html) for
@@ -64,12 +69,7 @@ variable contains the directory which has Packer installed.
 
 Otherwise, Packer is installed and you're ready to go!
 
-## Alternative Installation Methods
-
-While the binary packages is the only official method of installation, there are
-alternatives available.
-
-### Homebrew
+### <a name="brew"></a>Homebrew
 
 If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
