@@ -83,15 +83,15 @@ Optional parameters:
     a randomly generated number. This value must be a writable location and
     any parent directories must already exist.
 
+-   `skip_clean` (boolean) - If true, specifies that the helper scripts 
+    uploaded to the system will not be removed by Packer. This defaults to 
+    false (clean scripts from the system).
+
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is `5m` or 5 minutes. This setting
     exists in order to deal with times when SSH may restart, such as a
     system reboot. Set this to a higher value if reboots take a longer amount
     of time.
-
--   `skip_clean` (boolean) - If true, specifies that the helper scripts 
-    uploaded to the system will not be removed by Packer. This defaults to 
-    false (clean scripts from the system).
 
 ## Execute Command Example
 
