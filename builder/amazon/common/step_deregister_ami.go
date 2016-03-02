@@ -10,8 +10,9 @@ import (
 )
 
 type StepDeregisterAMI struct {
-	ForceDeregister bool
-	AMIName         string
+	ForceDeregister       bool
+	ForceDeregisterOwners []string
+	AMIName               string
 }
 
 func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
@@ -21,13 +22,24 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	// check for force deregister
 	// owner-alias
 	if s.ForceDeregister {
-		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-			Owners: []*string{aws.String("self")},
+		images_imput := &ec2.DescribeImagesInput{
 			Filters: []*ec2.Filter{&ec2.Filter{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
-			},
-			}})
+			}}}
+
+		if len(s.ForceDeregisterOwners) > 0 {
+			owners := make([]*string, len(s.ForceDeregisterOwners))
+
+			for i, o := range s.ForceDeregisterOwners {
+				owners[i] = aws.String(o)
+			}
+
+			ui.Say(fmt.Sprintf("The list of owners is : %s", owners))
+			images_imput.Owners = owners
+		}
+
+		resp, err := ec2conn.DescribeImages(images_imput)
 
 		if err != nil {
 			err := fmt.Errorf("Error creating AMI: %s", err)
