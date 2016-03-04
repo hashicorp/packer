@@ -51,7 +51,7 @@ func (a *Artifact) String() string {
 	}
 
 	sort.Strings(amiStrings)
-	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
+	return fmt.Sprintf("\nAMIs were created:\n%s", strings.Join(amiStrings, "\n"))
 }
 
 func (a *Artifact) State(name string) interface{} {
