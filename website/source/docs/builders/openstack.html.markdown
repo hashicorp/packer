@@ -128,7 +128,7 @@ builder.
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
     generate a temporary keypair.
-    [`ssh_private_key_file`](docs/templates/communicator.html#ssh_private_key_file)
+    [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
