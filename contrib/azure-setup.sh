@@ -178,7 +178,7 @@ showConfigs() {
 setup() {
 	requirements
 
-	# azure login
+	azure login
 
 	askSubscription
 	askName
