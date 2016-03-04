@@ -16,6 +16,7 @@ import (
 	amazonchrootbuilder "github.com/mitchellh/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/mitchellh/packer/builder/amazon/ebs"
 	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
+	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
 	digitaloceanbuilder "github.com/mitchellh/packer/builder/digitalocean"
 	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	filebuilder "github.com/mitchellh/packer/builder/file"
@@ -64,6 +65,7 @@ var Builders = map[string]packer.Builder{
 	"amazon-chroot":   new(amazonchrootbuilder.Builder),
 	"amazon-ebs":      new(amazonebsbuilder.Builder),
 	"amazon-instance": new(amazoninstancebuilder.Builder),
+	"azure-arm":       new(azurearmbuilder.Builder),
 	"digitalocean":    new(digitaloceanbuilder.Builder),
 	"docker":          new(dockerbuilder.Builder),
 	"file":            new(filebuilder.Builder),
