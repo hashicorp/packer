@@ -155,7 +155,10 @@ createServicePrinciple() {
 
 createPermissions() {
 	echo "==> Creating permissions"
-	azure role assignment create --spn http://$meta_name -g $azure_group_name -o "API Management Service Contributor"
+	azure role assignment create -o "Owner" --spn http://$meta_name -c /subscriptions/$azure_subscription_id
+	# We want to use this more conservative scope but it does not work with the
+	# current implementation which uses temporary resource groups
+	# azure role assignment create --spn http://$meta_name -g $azure_group_name -o "API Management Service Contributor"
 	if [ $? -ne 0 ]; then
 		echo "Error creating permissions for: http://$meta_name"
 		exit 1
@@ -189,7 +192,7 @@ setup() {
 	createApplication
 	createServicePrinciple
 	# It seems that if we continue to the next step too quickly this resource
-	# is not actually available, so let's way a few seconds.
+	# is not actually available, so let's wait a few seconds.
 	sleep 5
 	createPermissions
 
