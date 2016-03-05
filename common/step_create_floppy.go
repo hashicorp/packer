@@ -19,7 +19,8 @@ import (
 // The floppy disk doesn't support sub-directories. Only files at the
 // root level are supported.
 type StepCreateFloppy struct {
-	Files []string
+	Files    []string
+	Contents []string
 
 	floppyPath string
 
@@ -27,7 +28,7 @@ type StepCreateFloppy struct {
 }
 
 func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
-	if len(s.Files) == 0 {
+	if len(s.Files) == 0 && len(s.Contents) == 0 {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue
 	}
@@ -85,17 +86,88 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	// Get the root directory to the filesystem
+	// Get the root directory to the filesystem and create a cache for any directories within
 	log.Println("Reading the root directory from the filesystem")
 	rootDir, err := fatFs.RootDir()
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating floppy: %s", err))
 		return multistep.ActionHalt
 	}
+	cache := fsDirectoryCache(rootDir)
+
+	// Utility functions for walking through a directory grabbing all files flatly
+	globFiles := func(files []string, list chan string) {
+		for _,filename := range files {
+			if strings.IndexAny(filename, "*?[") >= 0 {
+				matches,_ := filepath.Glob(filename)
+				if err != nil { continue }
+
+				for _,match := range matches {
+					list <- match
+				}
+				continue
+			}
+			list <- filename
+		}
+		close(list)
+	}
+
+	var crawlDirectoryFiles []string
+	crawlDirectory := func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			crawlDirectoryFiles = append(crawlDirectoryFiles, path)
+			ui.Message(fmt.Sprintf("Adding file: %s", path))
+		}
+		return nil
+	}
+	crawlDirectoryFiles = []string{}
+
+	// Collect files and copy them flatly...because floppy_files is broken on purpose.
+	var filelist chan string
+	filelist = make(chan string)
+	go globFiles(s.Files, filelist)
+
+	ui.Message("Copying files flatly from floppy_files")
+	for {
+		filename, ok := <-filelist
+		if !ok { break }
+
+		finfo,err := os.Stat(filename)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error trying to stat : %s : %s", filename, err))
+			return multistep.ActionHalt
+		}
+
+		// walk through directory adding files to the root of the fs
+		if finfo.IsDir() {
+			ui.Message(fmt.Sprintf("Copying directory: %s", filename))
+
+			err := filepath.Walk(filename, crawlDirectory)
+			if err != nil {
+				state.Put("error", fmt.Errorf("Error adding file from floppy_files : %s : %s", filename, err))
+				return multistep.ActionHalt
+			}
+
+			for _,crawlfilename := range crawlDirectoryFiles {
+				s.Add(cache, crawlfilename)
+				s.FilesAdded[crawlfilename] = true
+			}
+
+			crawlDirectoryFiles = []string{}
+			continue
+		}
+
+		// add just a single file
+		ui.Message(fmt.Sprintf("Copying file: %s", filename))
+		s.Add(cache, filename)
+		s.FilesAdded[filename] = true
+	}
+	ui.Message("Done copying files from floppy_files")
 
 	// Collect all paths (expanding wildcards) into pathqueue
+	ui.Message("Collecting paths from floppy_contents")
 	var pathqueue []string
-	for _,filename := range s.Files {
+	for _,filename := range s.Contents {
 		if strings.IndexAny(filename, "*?[") >= 0 {
 			matches,err := filepath.Glob(filename)
 			if err != nil {
@@ -110,23 +182,18 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		pathqueue = append(pathqueue, filename)
 	}
+	ui.Message(fmt.Sprintf("Resulting paths from floppy_contents : %v", pathqueue))
 
 	// Go over each path in pathqueue and copy it.
-	getDirectory := fsDirectoryCache(rootDir)
 	for _,src := range pathqueue {
-		ui.Message(fmt.Sprintf("Copying: %s", src))
-		err = s.Add(getDirectory, src)
+		ui.Message(fmt.Sprintf("Recursively copying : %s", src))
+		err = s.Add(cache, src)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error adding path %s to floppy: %s", src, err))
 			return multistep.ActionHalt
 		}
-
-		// FIXME: setting this map according to each pathqueue entry breaks
-		// our testcases, because it only keeps track of the number of files
-		// that are set here instead of actually verifying against the
-		// filesystem...heh
-//		s.FilesAdded[src] = true
 	}
+	ui.Message("Done copying paths from floppy_contents")
 
 	// Set the path to the floppy so it can be used later
 	state.Put("floppy_path", s.floppyPath)
@@ -134,7 +201,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateFloppy) Add(dir getFsDirectory, src string) error {
+func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
 	finfo,err := os.Stat(src)
 	if err != nil {
 		return fmt.Errorf("Error adding path to floppy: %s", err)
@@ -146,7 +213,7 @@ func (s *StepCreateFloppy) Add(dir getFsDirectory, src string) error {
 		if err != nil { return err }
 		defer inputF.Close()
 
-		d,err := dir("")
+		d,err := dircache("")
 		if err != nil { return err }
 
 		entry,err := d.AddFile(path.Base(src))
@@ -167,7 +234,7 @@ func (s *StepCreateFloppy) Add(dir getFsDirectory, src string) error {
 		if fi.Mode().IsDir() {
 			base,err := removeBase(basedirectory, pathname)
 			if err != nil { return err }
-			_,err = dir(filepath.ToSlash(base))
+			_,err = dircache(filepath.ToSlash(base))
 			return err
 		}
 		directory,filename := filepath.Split(pathname)
@@ -179,7 +246,7 @@ func (s *StepCreateFloppy) Add(dir getFsDirectory, src string) error {
 		if err != nil { return err }
 		defer inputF.Close()
 
-		wd,err := dir(filepath.ToSlash(base))
+		wd,err := dircache(filepath.ToSlash(base))
 		if err != nil { return err }
 
 		entry,err := wd.AddFile(filename)
@@ -189,7 +256,7 @@ func (s *StepCreateFloppy) Add(dir getFsDirectory, src string) error {
 		if err != nil { return err }
 
 		_,err = io.Copy(fatFile,inputF)
-		s.FilesAdded[filename] = true
+		s.FilesAdded[pathname] = true
 		return err
 	}
 
@@ -233,8 +300,8 @@ func removeBase(base string, path string) (string,error) {
 // entry associated with a given path. If an fs.Directory entry is not found
 // then it will be created relative to the rootDirectory argument that is
 // passed.
-type getFsDirectory func(string) (fs.Directory,error)
-func fsDirectoryCache(rootDirectory fs.Directory) getFsDirectory {
+type directoryCache func(string) (fs.Directory,error)
+func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 	var cache map[string]fs.Directory
 
 	cache = make(map[string]fs.Directory)
