@@ -46,6 +46,7 @@ type Config struct {
 	Groups               []string `mapstructure:"groups"`
 	EmptyGroups          []string `mapstructure:"empty_groups"`
 	HostAlias            string   `mapstructure:"host_alias"`
+	User                 string   `mapstructure:"user"`
 	LocalPort            string   `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
@@ -119,6 +120,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	if p.config.User == "" {
+		p.config.User = os.Getenv("USER")
+	}
+	if p.config.User == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -167,7 +175,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	keyChecker := ssh.CertChecker{
 		UserKeyFallback: func(conn ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
-			if user := conn.User(); user != "packer-ansible" {
+			if user := conn.User(); user != p.config.User {
 				ui.Say(fmt.Sprintf("%s is not a valid user", user))
 				return nil, errors.New("authentication failed")
 			}
@@ -240,9 +248,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 		defer os.Remove(tf.Name())
 
-		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=packer-ansible ansible_port=%s\n", p.config.HostAlias, p.config.LocalPort)
+		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%s\n",
+			p.config.HostAlias, p.config.User, p.config.LocalPort)
 		if p.ansibleMajVersion < 2 {
-			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=packer-ansible ansible_ssh_port=%s\n", p.config.HostAlias, p.config.LocalPort)
+			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%s\n",
+				p.config.HostAlias, p.config.User, p.config.LocalPort)
 		}
 
 		w := bufio.NewWriter(tf)
