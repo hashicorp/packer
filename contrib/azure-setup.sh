@@ -169,12 +169,12 @@ showConfigs() {
 	echo ""
 	echo "Use the following configuration for your packer template:"
 	echo ""
-	echo "      \"tenant_id\": \"$azure_tenant_id\","
-	echo "      \"subscription_id\": \"$azure_subscription_id\","
 	echo "      \"client_id\": \"$azure_client_id\","
 	echo "      \"client_secret\": \"$azure_client_secret\","
 	echo "      \"resource_group_name\": \"$azure_group_name\","
 	echo "      \"storage_account\": \"$azure_storage_name\","
+	echo "      \"subscription_id\": \"$azure_subscription_id\","
+	echo "      \"tenant_id\": \"$azure_tenant_id\","
 	echo ""
 }
 
