@@ -1,10 +1,10 @@
 package vsphere
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -120,17 +120,26 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if p.config.ResourcePool != "" {
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
-
 	args := []string{
-		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=\"%s\"", p.config.VMName),
-		fmt.Sprintf("--datastore=\"%s\"", p.config.Datastore),
-		fmt.Sprintf("--diskMode=\"%s\"", p.config.DiskMode),
-		fmt.Sprintf("--network=\"%s\"", p.config.VMNetwork),
-		fmt.Sprintf("--vmFolder=\"%s\"", p.config.VMFolder),
-		fmt.Sprintf("%s", source),
-		fmt.Sprintf("\"%s\"", ovftool_uri),
+		fmt.Sprintf(`--name=%s`, p.config.VMName),
+		fmt.Sprintf(`--datastore=%s`, p.config.Datastore),
+	}
+
+	if p.config.Insecure {
+		args = append(args, fmt.Sprintf(`--noSSLVerify=%t`, p.config.Insecure))
+	}
+
+	if p.config.DiskMode != "" {
+		args = append(args, fmt.Sprintf(`--diskMode=%s`, p.config.DiskMode))
+	}
+
+	if p.config.VMFolder != "" {
+		args = append(args, fmt.Sprintf(`--vmFolder=%s`, p.config.VMFolder))
+	}
+
+	if p.config.VMNetwork != "" {
+		args = append(args, fmt.Sprintf(`--network=%s`, p.config.VMNetwork))
 	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
@@ -143,16 +152,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		args = append(args, p.config.Options...)
 	}
 
+	args = append(args, fmt.Sprintf(`%s`, source))
+	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
+
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
-	var out bytes.Buffer
+
 	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
-	cmd.Stdout = &out
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\nStdout: %s", err, out.String())
+		return nil, false, fmt.Errorf("Failed: %s\n", err)
 	}
-
-	ui.Message(fmt.Sprintf("%s", out.String()))
 
 	return artifact, false, nil
 }
