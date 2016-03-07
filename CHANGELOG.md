@@ -11,6 +11,9 @@ IMPROVEMENTS:
   * builder/openstack: Added support for retrieving the Administrator
     password when using WinRM if no `winrm_password` is set [GH-3209]
   * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
+  * provisioner/ansible: Added the `user` parameter [GH-3276]
+  * provisioner/ansible: Don't use deprecated ssh option with
+    Ansible 2.0 [GH-3291]
 
 BUG FIXES:
 
