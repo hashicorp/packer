@@ -177,6 +177,8 @@ MST
 
 *The values in parentheses are the abbreviated, or 24-hour clock values*
 
+Note that "-0700" is always formatted into "+0000" because `isotime` is always UTC time.
+
 Here are some example formated time, using the above format options:
 
 ``` {.liquid}
