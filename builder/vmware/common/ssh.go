@@ -44,9 +44,19 @@ func CommHost(config *SSHConfig) func(multistep.StateBag) (string, error) {
 			}
 		}
 
+		vmnet := "vmnet8"
+		connectionType := ""
+		if connectionType, ok = vmxData["ethernet0.connectiontype"]; ok && connectionType == "custom" {
+			log.Printf("Using connection type: %s", connectionType);
+			if vmnet, ok = vmxData["ethernet0.vnet"]; !ok || vmnet == "" {
+				log.Println("No vmnet found, using vmnet8");
+				vmnet = "vmnet8"
+			}
+		}
+
 		ipLookup := &DHCPLeaseGuestLookup{
 			Driver:     driver,
-			Device:     "vmnet8",
+			Device:     vmnet,
 			MACAddress: macAddress,
 		}
 
