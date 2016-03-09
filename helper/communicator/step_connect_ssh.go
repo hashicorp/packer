@@ -115,12 +115,19 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		}
 		first = false
 
-		// First we request the TCP connection information
-		host, err := s.Host(state)
-		if err != nil {
-			log.Printf("[DEBUG] Error getting SSH address: %s", err)
-			continue
+		// if ssh_host exists in config, use it default
+		host := s.Config.SSHHost
+		var err error
+		log.Printf("[DEBUG] Current SSH Host in Config is: %s", host)
+		if s.Config.SSHHost == "" {
+			// First we request the TCP connection information
+			host, err = s.Host(state)
+			if err != nil {
+				log.Printf("[DEBUG] Error getting SSH address: %s", err)
+				continue
+			}
 		}
+
 		port := s.Config.SSHPort
 		if s.SSHPort != nil {
 			port, err = s.SSHPort(state)
