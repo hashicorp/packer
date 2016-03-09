@@ -245,4 +245,5 @@ OS_TENANT_NAME=$OS_PROJECT_NAME` or `export OS_TENANT_ID=$OS_PROJECT_ID`.
 `OS_PROJECT_NAME` and `OS_PROJECT_ID` has no effect in Packer.
 
 To troubleshoot authorization issues test you environment variables with the
-OpenStack cli. It can be installed with ```pip install --user openstack```.
+OpenStack cli. It can be installed with
+```pip install --user python-openstackclient```.
