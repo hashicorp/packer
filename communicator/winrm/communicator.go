@@ -41,6 +41,11 @@ func New(config *Config) (*Communicator, error) {
 
 	// Create the client
 	params := winrm.DefaultParameters()
+
+	if config.TransportDecorator != nil {
+		params.TransportDecorator = config.TransportDecorator
+	}
+
 	params.Timeout = formatDuration(config.Timeout)
 	client, err := winrm.NewClientWithParameters(
 		endpoint, config.Username, config.Password, params)
@@ -155,5 +160,6 @@ func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 		Insecure:              c.config.Insecure,
 		OperationTimeout:      c.config.Timeout,
 		MaxOperationsPerShell: 15, // lowest common denominator
+		TransportDecorator:    c.config.TransportDecorator,
 	})
 }

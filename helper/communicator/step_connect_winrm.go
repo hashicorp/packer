@@ -124,13 +124,14 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 
 		log.Println("[INFO] Attempting WinRM connection...")
 		comm, err = winrm.New(&winrm.Config{
-			Host:     host,
-			Port:     port,
-			Username: user,
-			Password: password,
-			Timeout:  s.Config.WinRMTimeout,
-			Https:    s.Config.WinRMUseSSL,
-			Insecure: s.Config.WinRMInsecure,
+			Host:               host,
+			Port:               port,
+			Username:           user,
+			Password:           password,
+			Timeout:            s.Config.WinRMTimeout,
+			Https:              s.Config.WinRMUseSSL,
+			Insecure:           s.Config.WinRMInsecure,
+			TransportDecorator: s.Config.WinRMTransportDecorator,
 		})
 		if err != nil {
 			log.Printf("[ERROR] WinRM connection err: %s", err)
