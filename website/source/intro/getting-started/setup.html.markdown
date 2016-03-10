@@ -31,8 +31,8 @@ installed. On Unix systems, `~/packer` or `/usr/local/packer` is generally good,
 depending on whether you want to restrict the install to just your user or
 install it system-wide. On Windows systems, you can put it wherever you'd like.
 
-After unzipping the package, the directory should contain a set of binary
-programs, such as `packer`, `packer-build-amazon-ebs`, etc. The final step to
+After unzipping the package, the directory should contain a single binary
+program called `packer`. The final step to
 installation is to make sure the directory you installed Packer to is on the
 PATH. See [this
 page](https://stackoverflow.com/questions/14637979/how-to-permanently-set-path-on-linux)
