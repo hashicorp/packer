@@ -274,6 +274,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				InitializeParams: &compute.AttachedDiskInitializeParams{
 					SourceImage: image.SelfLink,
 					DiskSizeGb:  c.DiskSizeGb,
+					DiskType:    fmt.Sprintf("zones/%s/diskTypes/%s", zone.Name, c.DiskType),
 				},
 			},
 		},
