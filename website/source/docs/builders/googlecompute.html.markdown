@@ -124,6 +124,8 @@ builder.
 -   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
+-   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
+
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
 
