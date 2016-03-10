@@ -8,6 +8,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * builder/google: Added support for `disk_type` [GH-2830]
   * builder/openstack: Added support for retrieving the Administrator
     password when using WinRM if no `winrm_password` is set [GH-3209]
   * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
