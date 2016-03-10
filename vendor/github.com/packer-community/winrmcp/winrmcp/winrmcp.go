@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -24,6 +25,7 @@ type Config struct {
 	CACertBytes           []byte
 	OperationTimeout      time.Duration
 	MaxOperationsPerShell int
+	TransportDecorator    func(*http.Transport) http.RoundTripper
 }
 
 type Auth struct {
@@ -41,6 +43,10 @@ func New(addr string, config *Config) (*Winrmcp, error) {
 	}
 
 	params := winrm.DefaultParameters()
+	if config.TransportDecorator != nil {
+		params.TransportDecorator = config.TransportDecorator
+	}
+
 	if config.OperationTimeout.Seconds() > 0 {
 		params.Timeout = iso8601.FormatDuration(config.OperationTimeout)
 	}
