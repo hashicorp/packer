@@ -2,7 +2,7 @@
 layout: "docs"
 page_title: "Ansible Provisioner"
 description: |-
-  The `ansible` Packer provisioner allows Ansible playbooks to be run to provision the machine. 
+  The `ansible` Packer provisioner allows Ansible playbooks to be run to provision the machine.
 ---
 
 # Ansible Provisioner
@@ -81,6 +81,11 @@ Optional Parameters:
   Defaults to `/usr/lib/sftp-server -e`.
 
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
+  Usage example:
+
+```
+"extra_arguments": [ "--extra-vars", "\"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
+```
 
 - `ansible_env_vars` (array of strings) - Environment variables to set before running Ansible.
   If unset, defaults to `ANSIBLE_HOST_KEY_CHECKING=False`.
