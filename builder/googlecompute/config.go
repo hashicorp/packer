@@ -25,6 +25,7 @@ type Config struct {
 
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
+	DiskType             string            `mapstructure:"disk_type"`
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
 	InstanceName         string            `mapstructure:"instance_name"`
@@ -72,6 +73,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.DiskSizeGb == 0 {
 		c.DiskSizeGb = 10
+	}
+
+	if c.DiskType == "" {
+		c.DiskType = "pd-standard"
 	}
 
 	if c.ImageDescription == "" {
