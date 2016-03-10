@@ -329,7 +329,7 @@
 		},
 		{
 			"ImportPath": "github.com/packer-community/winrmcp/winrmcp",
-			"Rev": "3d184cea22ee1c41ec1697e0d830ff0c78f7ea97"
+			"Rev": "f1bcf36a69fa2945e65dd099eee11b560fbd3346"
 		},
 		{
 			"ImportPath": "github.com/pierrec/lz4",
