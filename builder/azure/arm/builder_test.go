@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
 
 package arm
 
 import (
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"testing"
+
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
