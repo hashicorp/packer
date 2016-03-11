@@ -160,7 +160,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name)
@@ -186,11 +186,11 @@ func (d *driverGCE) GetImageFromProject(project, name string) (*Image, error) {
 		return nil, fmt.Errorf("Image, %s, could not be found in project: %s", name, project)
 	} else {
 		return &Image{
-			Licenses: image.Licenses,
-			Name: image.Name,
+			Licenses:  image.Licenses,
+			Name:      image.Name,
 			ProjectId: project,
-			SelfLink: image.SelfLink,
-			SizeGb: image.DiskSizeGb,
+			SelfLink:  image.SelfLink,
+			SizeGb:    image.DiskSizeGb,
 		}, nil
 	}
 }
@@ -251,7 +251,7 @@ func (d *driverGCE) GetSerialPortOutput(zone, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return output.Contents, nil
 }
 
