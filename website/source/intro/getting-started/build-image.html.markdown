@@ -65,8 +65,8 @@ briefly. Create a file `example.json` and fill it with the following contents:
 }
 ```
 
-When building, you'll pass in the `aws_access_key` and `aws_secret_key` as a
-[user variable](/docs/templates/user-variables.html), keeping your secret keys
+When building, you'll pass in `aws_access_key` and `aws_secret_key` as
+[user variables](/docs/templates/user-variables.html), keeping your secret keys
 out of the template. You can create security credentials on [this
 page](https://console.aws.amazon.com/iam/home?#security_credential). An example
 IAM policy document can be found in the [Amazon EC2 builder
@@ -84,7 +84,7 @@ EBS-backed AMI by launching a source AMI, provisioning on top of that, and
 re-packaging it into a new AMI.
 
 The additional keys within the object are configuration for this builder,
-specifying things such as access keys, the source AMI to build from, and more.
+specifying things such as access keys, the source AMI to build from and more.
 The exact set of configuration variables available for a builder are specific to
 each builder and can be found within the [documentation](/docs).
 
@@ -148,7 +148,7 @@ typically represent an ID (such as in the case of an AMI) or a set of files
 (such as for a VMware virtual machine). In this example, we only have a single
 artifact: the AMI in us-east-1 that was created.
 
-This AMI is ready to use. If you wanted you can go and launch this AMI right now
+This AMI is ready to use. If you wanted you could go and launch this AMI right now
 and it would work great.
 
 -&gt; **Note:** Your AMI ID will surely be different than the one above. If you
@@ -173,5 +173,5 @@ page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Snapshots).
 
 Congratulations! You've just built your first image with Packer. Although the
 image was pretty useless in this case (nothing was changed about it), this page
-should've given you a general idea of how Packer works, what templates are, and
+should've given you a general idea of how Packer works, what templates are and
 how to validate and build templates into machine images.
