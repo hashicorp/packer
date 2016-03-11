@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
 
 package arm
 
@@ -19,13 +19,13 @@ const Linux = `{
       "type": "string"
     },
     "imagePublisher": {
-   	  "type": "string"
+      "type": "string"
     },
     "imageOffer": {
-   	  "type": "string"
+      "type": "string"
     },
     "imageSku": {
-   	  "type": "string"
+      "type": "string"
     },
     "osDiskName": {
       "type": "string"
