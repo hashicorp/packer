@@ -11,8 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	// This is bad, it should be pulled out into a common folder across
-	// both builders and post-processors
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
@@ -89,6 +87,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
+	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey))
 	return nil
 }
 
