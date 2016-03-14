@@ -90,6 +90,10 @@ only within default values for user variables, user variables remain as the
 single source of input to a template that a user can easily discover using
 `packer inspect`.
 
+-&gt; **Why can't I use `~` for home variable?** `~` is an special variable
+that is evaluated by shell during a variable expansion. As packer doesn't run
+inside a shell, it won't expand `~`.
+
 ## Setting Variables
 
 Now that we covered how to define and use variables within a template, the next
@@ -160,5 +164,26 @@ provisioner only run if the `do_nexpose_scan` variable is non-empty.
 {
   "type": "shell-local",
   "command": "if [ ! -z \"{{user `do_nexpose_scan`}}\" ]; then python -u trigger_nexpose_scan.py; fi"
+}
+```
+
+## Using HOME Variable
+
+In order to use `$HOME` variable, you can create a `home` variable in packer:
+
+``` {.javascript}
+"variables" {
+  "home": "{{env `HOME`}}"
+}
+```
+
+And this will be available to be used in the rest of the template, ie:
+
+``` {.javascript}
+{
+  "builders": [{
+    "type":"google",
+    "account_file": "{{ user `home` }}/.secrets/gcp-{{ user `env` }}.json"
+  }]
 }
 ```
