@@ -73,6 +73,9 @@ Optional parameters:
     configuration to be uploaded to the remote machine. Hiera data directories
     must be uploaded using the file provisioner separately.
 
+-   `ignore_exit_codes` (boolean) - If true, Packer will never consider the
+    provisioner a failure.
+
 -   `manifest_dir` (string) - The path to a local directory with manifests to be
     uploaded to the remote machine. This is useful if your main manifest file
     uses imports. This directory doesn't necessarily contain the
