@@ -15,6 +15,8 @@ IMPROVEMENTS:
   * provisioner/ansible: Added the `user` parameter [GH-3276]
   * provisioner/ansible: Don't use deprecated ssh option with
     Ansible 2.0 [GH-3291]
+  * provisioner/puppet-masterless: Add `ignore_exit_codes` parameter
+    [GH-3349]
 
 BUG FIXES:
 
