@@ -11,6 +11,7 @@ import (
 
 type stepStopInstance struct {
 	SpotPrice string
+  DisableStopInstance bool
 }
 
 func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -23,17 +24,21 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
-	// Stop the instance so we can create an AMI from it
-	ui.Say("Stopping the source instance...")
-	_, err := ec2conn.StopInstances(&ec2.StopInstancesInput{
-		InstanceIds: []*string{instance.InstanceId},
-	})
-	if err != nil {
-		err := fmt.Errorf("Error stopping instance: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+  var err error
+
+  if s.DisableStopInstance == false {
+	  // Stop the instance so we can create an AMI from it
+	  ui.Say("Stopping the source instance...")
+	  _, err = ec2conn.StopInstances(&ec2.StopInstancesInput{
+	  	InstanceIds: []*string{instance.InstanceId},
+	  })
+	  if err != nil {
+	  	err := fmt.Errorf("Error stopping instance: %s", err)
+	  	state.Put("error", err)
+	  	ui.Error(err.Error())
+	  	return multistep.ActionHalt
+	  }
+  }
 
 	// Wait for the instance to actual stop
 	ui.Say("Waiting for the instance to stop...")

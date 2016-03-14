@@ -23,7 +23,8 @@ type RunConfig struct {
 	SourceAmi                string            `mapstructure:"source_ami"`
 	SpotPrice                string            `mapstructure:"spot_price"`
 	SpotPriceAutoProduct     string            `mapstructure:"spot_price_auto_product"`
-	SecurityGroupId          string            `mapstructure:"security_group_id"`
+  DisableStopInstance      bool              `mapstructure:"disable_stop_instance"`
+  SecurityGroupId          string            `mapstructure:"security_group_id"`
 	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
 	SubnetId                 string            `mapstructure:"subnet_id"`
 	TemporaryKeyPairName     string            `mapstructure:"temporary_key_pair_name"`
