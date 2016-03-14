@@ -120,6 +120,28 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if p.config.ResourcePool != "" {
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
+
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
+
+	args, err := p.BuildArgs(source, ovftool_uri)
+	if err != nil {
+		ui.Message(fmt.Sprintf("Failed: %s\n", err))
+	}
+
+	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
+
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
+	cmd := exec.Command("ovftool", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return nil, false, fmt.Errorf("Failed: %s\n", err)
+	}
+
+	return artifact, false, nil
+}
+
+func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {
 	args := []string{
 		"--acceptAllEulas",
 		fmt.Sprintf(`--name=%s`, p.config.VMName),
@@ -142,8 +164,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		args = append(args, fmt.Sprintf(`--network=%s`, p.config.VMNetwork))
 	}
 
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
-
 	if p.config.Overwrite == true {
 		args = append(args, "--overwrite")
 	}
@@ -155,15 +175,5 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	args = append(args, fmt.Sprintf(`%s`, source))
 	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
 
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
-
-	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
-	cmd := exec.Command("ovftool", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\n", err)
-	}
-
-	return artifact, false, nil
+	return args, nil
 }
