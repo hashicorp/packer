@@ -181,18 +181,23 @@ showConfigs() {
 setup() {
 	requirements
 
+	azure config mode arm
 	azure login
 
 	askSubscription
 	askName
 	askSecret
 
+	# Some of the resources take a while to converge in the API. To make the
+	# script more reliable we'll add a sleep after we create each resource.
+
 	createResourceGroup
+	sleep 5
 	createStorageAccount
+	sleep 5
 	createApplication
+	sleep 5
 	createServicePrinciple
-	# It seems that if we continue to the next step too quickly this resource
-	# is not actually available, so let's wait a few seconds.
 	sleep 5
 	createPermissions
 
