@@ -71,12 +71,12 @@ Here is a basic example for Azure.
 {
     "type": "azure-arm",
 
-    "client_id": "{{user `client_id`}}",
-    "client_secret": "{{user `client_secret`}}",
-    "resource_group_name": "{{user `resource_group`}}",
-    "storage_account": "{{user `storage_account`}}",
-    "subscription_id": "{{user `subscription_id`}}",
-    "tenant_id": "{{user `tenant_id`}}",
+    "client_id": "fe354398-d7sf-4dc9-87fd-c432cd8a7e09",
+    "client_secret": "keepitsecret&#*$",
+    "resource_group_name": "packerdemo",
+    "storage_account": "virtualmachines",
+    "subscription_id": "44cae533-4247-4093-42cf-897ded6e7823",
+    "tenant_id": "de39842a-caba-497e-a798-7896aea43218",
 
     "capture_container_name": "images",
     "capture_name_prefix": "packer",
