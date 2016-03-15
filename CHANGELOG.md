@@ -1,3 +1,9 @@
+## (Unreleased)
+
+BUG FIXES:
+
+  * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
+
 ## 0.10.0 (March 14, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
