@@ -26,7 +26,7 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 
 	var err error
 
-	if s.DisableStopInstance == false {
+	if !s.DisableStopInstance {
 		// Stop the instance so we can create an AMI from it
 		ui.Say("Stopping the source instance...")
 		_, err = ec2conn.StopInstances(&ec2.StopInstancesInput{
@@ -38,6 +38,8 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+	} else {
+		ui.Say("Automatic instance stop disabled. Please stop instance manually.")
 	}
 
 	// Wait for the instance to actual stop
