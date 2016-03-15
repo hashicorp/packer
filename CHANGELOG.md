@@ -1,5 +1,10 @@
 ## 0.10.0 (March 14, 2016)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * Packer now requires go >= 1.5. If you want to continue building with go 1.4
+    you can remove the `azurearmbuilder` line from `command/plugin.go`.
+
 FEATURES:
 
   * **New `azure-arm` builder**: Build virtual machines in Azure Resource
