@@ -68,7 +68,7 @@ testacc: deps generate
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: deps
-	@go test -race $(TEST) $(TESTARGS) -timeout=15s
+	@go test -race $(TEST) $(TESTARGS) -timeout=1m
 
 updatedeps:
 	go get -u github.com/mitchellh/gox
