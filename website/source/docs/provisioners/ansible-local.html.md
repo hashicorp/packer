@@ -47,6 +47,9 @@ Required:
 
 Optional:
 
+-   `playbook_file_dir` (string) - Directory name (within `staging_directory`) where the
+    `playbook_file` will be copied and then executed.  By default, this is empty.
+
 -   `command` (string) - The command to invoke ansible. Defaults
     to "ansible-playbook".
 
