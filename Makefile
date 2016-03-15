@@ -56,7 +56,7 @@ generate: deps
 	go fmt command/plugin.go
 
 test: deps
-	@go test $(TEST) $(TESTARGS) -timeout=15s
+	@go test $(TEST) $(TESTARGS) -timeout=30s
 	@go vet $(TEST) ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
