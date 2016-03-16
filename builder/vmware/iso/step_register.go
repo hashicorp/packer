@@ -41,6 +41,14 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
+
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if (config.KeepRegistered == true) && (!cancelled && !halted) {
+		ui.Say("Keeping virtual machine registered with ESX host (keep_registered = true)")
+		return
+	}
 
 	if remoteDriver, ok := driver.(RemoteDriver); ok {
 		if s.Format == "" {
