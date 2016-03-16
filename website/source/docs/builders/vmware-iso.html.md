@@ -221,6 +221,11 @@ builder.
     slightly larger. If you find this to be the case, you can disable compaction
     using this configuration value.
 
+-   `keep_registered` (boolean) - Set this to `true` if you would like to keep
+    the VM registered with the remote ESXi server. This is convenient if you
+    use packer to provision VMs on ESXi and don't want to use ovftool to
+    deploy the resulting artifact (VMX or OVA or whatever you used as `format`)
+
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are "darwin", "linux", and "windows". By
     default, this is empty, which means VMware tools won't be uploaded.
