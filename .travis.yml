@@ -3,7 +3,6 @@ sudo: false
 language: go
 
 go:
-  - 1.4.3
   - 1.6
 
 install:
@@ -19,4 +18,4 @@ branches:
 matrix:
   fast_finish: true
   allow_failures:
-    - go: tip
+    - go: 1.4.3

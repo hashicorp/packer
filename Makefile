@@ -45,6 +45,10 @@ dev: deps
 fmt:
 	go fmt `go list ./... | grep -v vendor`
 
+# Install js-beautify with npm install -g js-beautify
+fmt-examples:
+	find examples -name *.json | xargs js-beautify -r -s 2 -n -eol "\n"
+
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate: deps
@@ -52,7 +56,7 @@ generate: deps
 	go fmt command/plugin.go
 
 test: deps
-	@go test $(TEST) $(TESTARGS) -timeout=15s
+	@go test $(TEST) $(TESTARGS) -timeout=30s
 	@go vet $(TEST) ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
@@ -64,7 +68,7 @@ testacc: deps generate
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: deps
-	@go test -race $(TEST) $(TESTARGS) -timeout=15s
+	@go test -race $(TEST) $(TESTARGS) -timeout=1m
 
 updatedeps:
 	go get -u github.com/mitchellh/gox
@@ -78,4 +82,4 @@ vendor:
 	godep restore
 	godep save
 
-.PHONY: bin checkversion ci default deps generate releasebin test testacc testrace updatedeps
+.PHONY: bin checkversion ci default deps fmt fmt-examples generate releasebin test testacc testrace updatedeps

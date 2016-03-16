@@ -1,3 +1,5 @@
+**DELETE THIS TEMPLATE BEFORE SUBMITTING**
+
 Describe the change you are making here!
 
 Please include tests. Check out these examples:

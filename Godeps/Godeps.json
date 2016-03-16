@@ -8,6 +8,51 @@
 			"Rev": "1a0242e795eeefe54261ff308dc685f7d29cc58c"
 		},
 		{
+			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/compute",
+			"Comment": "v1.2-334-g95361a2",
+			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+		},
+		{
+			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/network",
+			"Comment": "v1.2-334-g95361a2",
+			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+		},
+		{
+			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/resources/resources",
+			"Comment": "v1.2-334-g95361a2",
+			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+		},
+		{
+			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/storage",
+			"Comment": "v1.2-334-g95361a2",
+			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+		},
+		{
+			"ImportPath": "github.com/Azure/azure-sdk-for-go/storage",
+			"Comment": "v1.2-334-g95361a2",
+			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+		},
+		{
+			"ImportPath": "github.com/Azure/go-autorest/autorest",
+			"Comment": "v3.0.0-32-gbebca45",
+			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+		},
+		{
+			"ImportPath": "github.com/Azure/go-autorest/autorest/azure",
+			"Comment": "v3.0.0-32-gbebca45",
+			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+		},
+		{
+			"ImportPath": "github.com/Azure/go-autorest/autorest/date",
+			"Comment": "v3.0.0-32-gbebca45",
+			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+		},
+		{
+			"ImportPath": "github.com/Azure/go-autorest/autorest/to",
+			"Comment": "v3.0.0-32-gbebca45",
+			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+		},
+		{
 			"ImportPath": "github.com/armon/go-radix",
 			"Rev": "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2"
 		},
@@ -149,6 +194,11 @@
 		{
 			"ImportPath": "github.com/bgentry/speakeasy",
 			"Rev": "36e9cfdd690967f4f690c6edcc9ffacd006014a0"
+		},
+		{
+			"ImportPath": "github.com/dgrijalva/jwt-go",
+			"Comment": "v2.4.0-11-gf219341",
+			"Rev": "f2193411bd642f7db03249fd79d5292c9b34916a"
 		},
 		{
 			"ImportPath": "github.com/digitalocean/godo",
@@ -329,7 +379,7 @@
 		},
 		{
 			"ImportPath": "github.com/packer-community/winrmcp/winrmcp",
-			"Rev": "3d184cea22ee1c41ec1697e0d830ff0c78f7ea97"
+			"Rev": "f1bcf36a69fa2945e65dd099eee11b560fbd3346"
 		},
 		{
 			"ImportPath": "github.com/pierrec/lz4",

@@ -26,9 +26,17 @@ fi
 # Zip all the files
 rm -rf ./pkg/dist
 mkdir -p ./pkg/dist
-for FILENAME in $(find ./pkg -mindepth 1 -maxdepth 1 -type f); do
-  FILENAME=$(basename $FILENAME)
-  cp ./pkg/${FILENAME} ./pkg/dist/packer_${VERSION}_${FILENAME}
+for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
+  OSARCH=$(basename ${PLATFORM})
+
+  if [ $OSARCH = "dist" ]; then
+    continue
+  fi
+
+  echo "--> ${OSARCH}"
+  pushd $PLATFORM >/dev/null 2>&1
+  zip ../dist/packer_${VERSION}_${OSARCH}.zip ./*
+  popd >/dev/null 2>&1
 done
 
 if [ -z $NOSIGN ]; then
@@ -40,14 +48,6 @@ if [ -z $NOSIGN ]; then
   popd
 fi
 
-# Upload
-if [ ! -z $HC_RELEASE ]; then
-  hc-releases -upload $DIR/pkg/dist --publish --purge
-
-  for FILENAME in $(find $DIR/pkg/dist -type f); do
-    FILENAME=$(basename $FILENAME)
-    curl -X PURGE https://releases.hashicorp.com/packer/${VERSION}/${FILENAME}
-  done
-fi
+hc-releases -upload $DIR/pkg/dist --publish --purge
 
 exit 0

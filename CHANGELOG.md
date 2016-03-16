@@ -1,23 +1,38 @@
-## UNRELEASED
-
-BACKWARDS INCOMPATIBILITIES:
-
-
-FEATURES:
-
-
-IMPROVEMENTS:
-
-  * builder/openstack: Added support for retrieving the Administrator
-    password when using WinRM if no `winrm_password` is set [GH-3209]
-  * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
+## (Unreleased)
 
 BUG FIXES:
 
-  * builders/parallels: Handle `output_directory` containing . and ..
+  * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
+
+## 0.10.0 (March 14, 2016)
+
+BACKWARDS INCOMPATIBILITIES:
+
+  * Packer now requires go >= 1.5. If you want to continue building with go 1.4
+    you can remove the `azurearmbuilder` line from `command/plugin.go`.
+
+FEATURES:
+
+  * **New `azure-arm` builder**: Build virtual machines in Azure Resource
+    Manager
+
+IMPROVEMENTS:
+
+  * builder/google: Added support for `disk_type` [GH-2830]
+  * builder/openstack: Added support for retrieving the Administrator password
+    when using WinRM if no `winrm_password` is set [GH-3209]
+  * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
+  * provisioner/ansible: Added the `user` parameter [GH-3276]
+  * provisioner/ansible: Don't use deprecated ssh option with Ansible 2.0
+    [GH-3291]
+  * provisioner/puppet-masterless: Add `ignore_exit_codes` parameter [GH-3349]
+
+BUG FIXES:
+
+  * builders/parallels: Handle `output_directory` containing `.` and `..`
     [GH-3239]
-  * provisioner/ansible: os.Environ() should always be passed to the
-    ansible command. [GH-3274]
+  * provisioner/ansible: os.Environ() should always be passed to the ansible
+    command. [GH-3274]
 
 ## 0.9.0 (February 19, 2016)
 

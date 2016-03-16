@@ -3,6 +3,7 @@ package communicator
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -32,13 +33,14 @@ type Config struct {
 	SSHFileTransferMethod string        `mapstructure:"ssh_file_transfer_method"`
 
 	// WinRM
-	WinRMUser     string        `mapstructure:"winrm_username"`
-	WinRMPassword string        `mapstructure:"winrm_password"`
-	WinRMHost     string        `mapstructure:"winrm_host"`
-	WinRMPort     int           `mapstructure:"winrm_port"`
-	WinRMTimeout  time.Duration `mapstructure:"winrm_timeout"`
-	WinRMUseSSL   bool          `mapstructure:"winrm_use_ssl"`
-	WinRMInsecure bool          `mapstructure:"winrm_insecure"`
+	WinRMUser               string        `mapstructure:"winrm_username"`
+	WinRMPassword           string        `mapstructure:"winrm_password"`
+	WinRMHost               string        `mapstructure:"winrm_host"`
+	WinRMPort               int           `mapstructure:"winrm_port"`
+	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
+	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
+	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
+	WinRMTransportDecorator func(*http.Transport) http.RoundTripper
 }
 
 // Port returns the port that will be used for access based on config.
@@ -137,7 +139,9 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 }
 
 func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
-	if c.WinRMPort == 0 {
+	if c.WinRMPort == 0 && c.WinRMUseSSL {
+		c.WinRMPort = 5986
+	} else if c.WinRMPort == 0 {
 		c.WinRMPort = 5985
 	}
 
