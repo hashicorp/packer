@@ -88,7 +88,7 @@ you can also use `token` configuration option.
         "access_key": "{{user `aws_access_key`}}",
         "secret_key": "{{user `aws_secret_key`}}",
         "region": "us-east-1",
-        "source_ami": "ami-72b9e018",
+        "source_ami": "ami-fce3c696",
         "instance_type": "t2.micro",
         "ssh_username": "ubuntu",
         "ami_name": "atlas-example {{timestamp}}"
