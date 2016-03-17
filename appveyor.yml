@@ -14,9 +14,9 @@ environment:
   GOPATH: c:\gopath
   matrix:
   - GOARCH: 386
-    GOVERSION: 1.6rc2
+    GOVERSION: 1.6
   - GOARCH: amd64
-    GOVERSION: 1.6rc2
+    GOVERSION: 1.6
 
 clone_folder: c:\gopath\src\github.com\mitchellh\packer
 
