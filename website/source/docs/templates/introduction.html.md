@@ -93,7 +93,7 @@ Below is an example of a basic template that could be invoked with `packer build
       "access_key": "...",
       "secret_key": "...",
       "region": "us-east-1",
-      "source_ami": "ami-72b9e018",
+      "source_ami": "ami-fce3c696",
       "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
       "ami_name": "packer {{timestamp}}"
