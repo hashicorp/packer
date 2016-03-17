@@ -55,7 +55,7 @@ file as `quick-start.json`. Export your AWS credentials as the
   "builders": [{
     "type": "amazon-ebs",
     "access_key": "{{user `access_key`}}",
-    "secret_key": "{{user `access_key`}}",
+    "secret_key": "{{user `secret_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-de0d9eb7",
     "instance_type": "t1.micro",
