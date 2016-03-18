@@ -22,7 +22,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Inspecting the source AMI...")
+	ui.Say(fmt.Sprintf("Inspecting the source AMI (%s)...", s.SourceAmi))
 	imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{&s.SourceAmi}})
 	if err != nil {
 		err := fmt.Errorf("Error querying AMI: %s", err)
