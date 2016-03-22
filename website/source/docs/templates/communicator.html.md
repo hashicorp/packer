@@ -105,7 +105,7 @@ The WinRM communicator has the following options.
   * `winrm_host` (string) - The address for WinRM to connect to.
 
   * `winrm_port` (integer) - The WinRM port to connect to. This defaults to
-    5985 for plain unencrypted connection and 5896 for SSL when `winrm_use_ssl` is set to true.
+    5985 for plain unencrypted connection and 5986 for SSL when `winrm_use_ssl` is set to true.
 
   * `winrm_username` (string) - The username to use to connect to WinRM.
 
