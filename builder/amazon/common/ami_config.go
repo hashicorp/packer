@@ -19,6 +19,7 @@ type AMIConfig struct {
 	AMITags                 map[string]string `mapstructure:"tags"`
 	AMIEnhancedNetworking   bool              `mapstructure:"enhanced_networking"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
+	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
