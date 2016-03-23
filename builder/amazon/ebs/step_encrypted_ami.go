@@ -67,12 +67,40 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 		return multistep.ActionHalt
 	}
 
+	// Get the unencrypted AMI image
+	unencImagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{aws.String(id)}})
+	if err != nil {
+		err := fmt.Errorf("Error searching for AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	unencImage := unencImagesResp.Images[0]
+
 	// Remove unencrypted AMI
 	ui.Say("Deregistering unecrypted AMI")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: aws.String(id)}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
 		return multistep.ActionHalt
+	}
+
+	// Remove associated unencrypted snapshot(s)
+	ui.Say("Deleting unencrypted snapshots")
+
+	for _, blockDevice := range unencImage.BlockDeviceMappings {
+		if blockDevice.Ebs != nil {
+			if blockDevice.Ebs.SnapshotId != nil {
+				ui.Message(fmt.Sprintf("Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
+				deleteSnapOpts := &ec2.DeleteSnapshotInput{
+					SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
+				}
+				if _, err := ec2conn.DeleteSnapshot(deleteSnapOpts); err != nil {
+					ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", err))
+					return multistep.ActionHalt
+				}
+			}
+		}
 	}
 
 	// Replace original AMI ID with Encrypted ID in state
