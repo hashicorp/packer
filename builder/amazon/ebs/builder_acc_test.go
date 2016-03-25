@@ -55,6 +55,15 @@ func TestBuilderAcc_amiSharing(t *testing.T) {
 	})
 }
 
+func TestBuilderAcc_encryptedBoot(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: testBuilderAccEncrypted,
+		Check:    checkBootEncrypted(),
+	})
+}
+
 func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
 		if len(artifacts) > 1 {
@@ -144,6 +153,42 @@ func checkRegionCopy(regions []string) builderT.TestCheckFunc {
 	}
 }
 
+func checkBootEncrypted() builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+
+		// Get the actual *Artifact pointer so we can access the AMIs directly
+		artifactRaw := artifacts[0]
+		artifact, ok := artifactRaw.(*common.Artifact)
+		if !ok {
+			return fmt.Errorf("unknown artifact: %#v", artifactRaw)
+		}
+
+		// describe the image, get block devices with a snapshot
+		ec2conn, _ := testEC2Conn()
+		imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+			ImageIds: []*string{aws.String(artifact.Amis["us-east-1"])},
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error retrieving Image Attributes for AMI (%s) in AMI Encrypted Boot Test: %s", artifact, err)
+		}
+
+		image := imageResp.Images[0] // Only requested a single AMI ID
+
+		rootDeviceName := image.RootDeviceName
+
+		for _, bd := range image.BlockDeviceMappings {
+			if *bd.DeviceName == *rootDeviceName {
+				if *bd.Ebs.Encrypted != true {
+					return fmt.Errorf("volume not encrypted: %s", *bd.Ebs.SnapshotId)
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("AWS_ACCESS_KEY_ID"); v == "" {
 		t.Fatal("AWS_ACCESS_KEY_ID must be set for acceptance tests")
@@ -218,6 +263,20 @@ const testBuilderAccSharing = `
 		"ami_name": "packer-test {{timestamp}}",
 		"ami_users":["932021504756"],
 		"ami_groups":["all"]
+	}]
+}
+`
+
+const testBuilderAccEncrypted = `
+{
+	"builders": [{
+		"type": "test",
+		"region": "us-east-1",
+		"instance_type": "m3.medium",
+		"source_ami":"ami-c15bebaa",
+		"ssh_username": "ubuntu",
+		"ami_name": "packer-enc-test {{timestamp}}",
+		"encrypt_boot": true 
 	}]
 }
 `
