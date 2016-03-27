@@ -12,12 +12,12 @@
   "builders": [{
     "type": "azure-arm",
 
-    "client_id": "{{user `cid`}}",
-    "client_secret": "{{user `cst`}}",
-    "subscription_id": "{{user `sid`}}",
-    "tenant_id": "{{user `tid`}}",
-    "resource_group_name": "{{user `rgn`}}",
-    "storage_account": "{{user `sa`}}",
+    "client_id": "{{user `client_id`}}",
+    "client_secret": "{{user `client_secret`}}",
+    "resource_group_name": "{{user `resource_group`}}",
+    "storage_account": "{{user `storage_account`}}",
+    "subscription_id": "{{user `subscription_id`}}",
+    "tenant_id": "{{user `tenant_id`}}",
 
     "capture_container_name": "images",
     "capture_name_prefix": "packer",
