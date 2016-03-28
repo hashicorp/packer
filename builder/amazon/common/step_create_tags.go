@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -71,16 +72,29 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 				}
 			}
 
-			_, err = regionconn.CreateTags(&ec2.CreateTagsInput{
-				Resources: resourceIds,
-				Tags:      ec2Tags,
-			})
+			// use exponential backoff retry to tag the snapshot
+			retry := 0
+			max_retries := 10
+			for retry < max_retries {
+				retry += 1
+				_, err = regionconn.CreateTags(&ec2.CreateTagsInput{
+					Resources: resourceIds,
+					Tags:      ec2Tags,
+				})
 
-			if err != nil {
-				err := fmt.Errorf("Error adding tags to Resources (%#v): %s", resourceIds, err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
+				if err != nil {
+					err := fmt.Errorf("Error adding tags to Resources (%#v): %s", resourceIds, err)
+					ui.Error(err.Error())
+					if retry == max_retries - 1 {
+						state.Put("error", err)
+						return multistep.ActionHalt
+					}
+				} else {
+					break
+				}
+				delay := retry * retry * 200
+				ui.Say(fmt.Sprintf("Will retry adding tags, in %d ms", delay))
+				time.Sleep(time.Duration(delay))
 			}
 		}
 	}
