@@ -5,9 +5,10 @@
 package common
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"fmt"
+
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -30,7 +31,7 @@ func (s *StepCreateExternalSwitch) Run(state multistep.StateBag) multistep.StepA
 
 	ui.Say("Creating external switch...")
 
-	packerExternalSwitchName := "paes_" + uuid.New()
+	packerExternalSwitchName := "paes_" + uuid.TimeOrderedUUID()
 
 	err = driver.CreateExternalVirtualSwitch(vmName, packerExternalSwitchName)
 	if err != nil {
