@@ -88,8 +88,8 @@ Optional parameters:
      machine. By default this is remote_folder/remote_file, if set this option will
      override both remote_folder and remote_file.
 
--   `skip_clean` (boolean) - If true, specifies that the helper scripts 
-    uploaded to the system will not be removed by Packer. This defaults to 
+-   `skip_clean` (boolean) - If true, specifies that the helper scripts
+    uploaded to the system will not be removed by Packer. This defaults to
     false (clean scripts from the system).
 
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
@@ -192,9 +192,16 @@ provisioner](/docs/provisioners/file.html) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
-{ "type": "shell", "inline": \[ "sudo apt-get install -y git", "ssh-keyscan
-github.com &gt;&gt; \~/.ssh/known\_hosts", "git clone
-git@github.com:exampleorg/myprivaterepo.git" \] }
+``` {.javascript}
+{
+  "type": "shell",
+  "inline": [
+    "sudo apt-get install -y git",
+    "ssh-keyscan github.com >> ~/.ssh/known_hosts",
+    "git clone git@github.com:exampleorg/myprivaterepo.git"
+  ]
+}
+```
 
 ## Troubleshooting
 
