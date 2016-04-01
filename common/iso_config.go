@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/mitchellh/packer/template/interpolate"
@@ -77,7 +78,13 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 							return warnings, errs
 						}
 					case "file":
-						file, err := os.Open(u.Path)
+						path := u.Path
+
+						if runtime.GOOS == "windows" && len(path) > 2 && path[0] == '/' && path[2] == ':' {
+							path = strings.TrimLeft(path, "/")
+						}
+
+						file, err := os.Open(path)
 						if err != nil {
 							errs = append(errs, err)
 							return warnings, errs
