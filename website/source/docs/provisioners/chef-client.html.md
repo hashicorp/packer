@@ -95,6 +95,10 @@ configuration is actually required.
 -   `skip_install` (boolean) - If true, Chef will not automatically be installed
     on the machine using the Chef omnibus installers.
 
+-   `ssl_verify_mode` (string) - Set to "verify\_none" to skip validation of
+    SSL certificates. If not set, this defaults to "verify\_peer" which validates
+    all SSL certifications.
+
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
     "/tmp/packer-chef-client" when guest_os_type unix and
