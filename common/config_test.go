@@ -120,7 +120,7 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	}()
 
 	// Test some cases with and without a schema prefix
-	for _, prefix := range []string{"", "file://"} {
+	for _, prefix := range []string{"", filePrefix} {
 		// Nonexistent file
 		_, err = DownloadableURL(prefix + "i/dont/exist")
 		if err != nil {
