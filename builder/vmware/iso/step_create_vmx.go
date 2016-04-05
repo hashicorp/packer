@@ -89,10 +89,10 @@ func unformat_serial(config string) (*serialUnion,error) {
 			if len(comp) < 3 || len(comp) > 4 {
 				return nil,fmt.Errorf("Unexpected format for serial port : pipe : %s", config)
 			}
-			if res := strings.ToLower(comp[1]); res != "client" || res != "server" {
+			if res := strings.ToLower(comp[1]); res != "client" && res != "server" {
 				return nil,fmt.Errorf("Unexpected format for serial port : pipe : endpoint : %s : %s", res, config)
 			}
-			if res := strings.ToLower(comp[2]); res != "app" || res != "vm" {
+			if res := strings.ToLower(comp[2]); res != "app" && res != "vm" {
 				return nil,fmt.Errorf("Unexpected format for serial port : pipe : host : %s : %s", res, config)
 			}
 			res := &serialConfigPipe{
@@ -104,7 +104,7 @@ func unformat_serial(config string) (*serialUnion,error) {
 			if len(comp) == 4 {
 				res.yield = strings.ToUpper(comp[3])
 			}
-			if res.yield != "TRUE" || res.yield != "FALSE" {
+			if res.yield != "TRUE" && res.yield != "FALSE" {
 				return nil,fmt.Errorf("Unexpected format for serial port : pipe : yield : %s : %s", res.yield, config)
 			}
 			return &serialUnion{serialType:res, pipe:res},nil
