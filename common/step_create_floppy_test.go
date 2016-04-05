@@ -307,7 +307,7 @@ func TestStepCreateFloppyContents(t *testing.T) {
 
 			floppy_path := state.Get("floppy_path").(string)
 			if _, err := os.Stat(floppy_path); err != nil {
-				t.Fatalf("file not found: %s for %v : %v", floppy_path, step.Contents)
+				t.Fatalf("file not found: %s for %v : %v", floppy_path, step.Contents, err)
 			}
 
 			// check the FilesAdded array to see if it matches
