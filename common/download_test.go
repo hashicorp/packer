@@ -58,6 +58,7 @@ func TestDownloadClient_basic(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
+		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -93,6 +94,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
+		CopyFile:   true,
 	})
 	if _, err := client.Get(); err == nil {
 		t.Fatal("should error")
@@ -117,6 +119,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
+        CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -147,6 +150,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		TargetPath: "./test-fixtures/root/another.txt",
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
+		CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -185,6 +189,7 @@ func TestDownloadClient_resume(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL,
 		TargetPath: tf.Name(),
+		CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -242,6 +247,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	config := &DownloadConfig{
 		Url:        server.URL,
 		TargetPath: tf.Name(),
+		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -273,6 +279,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		Url:        server.URL,
 		TargetPath: tf.Name(),
 		UserAgent:  "fancy user agent",
+		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -353,6 +360,7 @@ func TestDownloadFileUrl(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to detect working directory: %s", err)
 	}
+	cwd = filepath.ToSlash(cwd)
 
 	// source_path is a file path and source is a network path
 	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
@@ -455,12 +463,10 @@ func TestFileUriTransforms(t *testing.T) {
 	// ./relative/path -> ./relative/path
 	// /absolute/path -> /absolute/path
 	// c:/windows/absolute -> c:/windows/absolute
-	// \\host/sharename/file -> \\host/sharename/file
 	testcases := []string{
 		"./%s",
 		cwd + "/%s",
 		volume + cwd + "/%s",
-		"\\\\" + host + "/" + share + "/" + cwd[1:] + "/%s",
 	}
 
 	// all regular slashed testcases
@@ -471,19 +477,18 @@ func TestFileUriTransforms(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unable to transform uri '%s' into a path : %v", uri, err)
 		}
-		t.Errorf("TestFileUriTransforms : Result Path '%s'", res)
+		t.Logf("TestFileUriTransforms : Result Path '%s'", res)
 	}
 
 	// ...and finally the oddball windows native path
-	// \\host\sharename\file -> \\host/sharename/file
-	testpath_native := filepath.FromSlash(testpath)
-	testcase_native := "\\\\" + host + "\\" + share + "\\" + filepath.FromSlash(cwd[1:]) + "\\%s"
-	uri := "file://" + fmt.Sprintf(testcase_native, testpath_native)
+	// smb://host/sharename/file -> \\host\sharename\file
+	testcase := host + "/" + share + "/" + cwd[1:] + "/%s"
+	uri := "smb://" + fmt.Sprintf(testcase, testpath)
 	t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
 	res,err := SimulateFileUriDownload(t, uri)
 	if err != nil {
 		t.Errorf("Unable to transform uri '%s' into a path", uri)
 		return
 	}
-	t.Errorf("TestFileUriTransforms : Result Path '%s'", res)
+	t.Logf("TestFileUriTransforms : Result Path '%s'", res)
 }

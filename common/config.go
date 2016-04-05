@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"net/url"
 )
 
 // PackerKeyEnv is used to specify the key interval (delay) between keystrokes
@@ -50,7 +51,7 @@ func DownloadableURL(original string) (string, error) {
 	supported := []string{"file", "http", "https", "ftp", "smb"}
 	found := false
 	for _, s := range supported {
-		if strings.HasPrefix(original, s + "://") {
+		if strings.HasPrefix(strings.ToLower(original), s + "://") {
 			found = true
 			break
 		}
@@ -59,7 +60,15 @@ func DownloadableURL(original string) (string, error) {
 	// If it's properly prefixed with something we support, then we don't need
 	//	to make it a uri.
 	if found {
-		return original, nil
+		original = filepath.ToSlash(original)
+
+		// make sure that it can be parsed though..
+		uri,err := url.Parse(original)
+		if err != nil { return "", err }
+
+		uri.Scheme = strings.ToLower(uri.Scheme)
+
+		return uri.String(), nil
 	}
 
 	// If the file exists, then make it an absolute path
