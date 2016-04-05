@@ -362,7 +362,7 @@ type pParameterBoolean struct {
 	parameter string
 	truancy bool
 }
-func (e pParameterBoolean) repr() string { return fmt.Sprintf("boolean:%s=%s",e.parameter,e.truancy) }
+func (e pParameterBoolean) repr() string { return fmt.Sprintf("boolean:%s=%v",e.parameter,e.truancy) }
 
 type pParameterClientMatch struct {
 	name string
