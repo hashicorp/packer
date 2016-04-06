@@ -149,18 +149,17 @@ func (d *Workstation9Driver) Verify() error {
 		return workstationDhcpLeasesPath(device)
 	}
 
-	d.VmwareDriver.VmnetnatConfPath = func() string {
-		return workstationVmnetnatConfPath()
+	d.VmwareDriver.DhcpConfPath = func(device string) string {
+		return workstationDhcpConfPath(device)
 	}
 
-	d.VmwareDriver.DhcpConfPath = func() string {
-		return workstationDhcpConfPath()
+	d.VmwareDriver.VmnetnatConfPath = func(device string) string {
+		return workstationVmnetnatConfPath(device)
 	}
 
 	d.VmwareDriver.NetmapConfPath = func() string {
 		return workstationNetmapConfPath()
 	}
-
 	return nil
 }
 

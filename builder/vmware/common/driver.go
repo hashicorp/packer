@@ -235,8 +235,8 @@ type VmwareDriver struct {
 	/// files so that the address detection (ip and ethernet) machinery
 	/// works.
 	DhcpLeasesPath func(string) string
-	VmnetnatConfPath func() string
-	DhcpConfPath func() string
+	DhcpConfPath func(string) string
+	VmnetnatConfPath func(string) string
 	NetmapConfPath func() string
 }
 
@@ -359,18 +359,19 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string,error) {
 	netmap,err := readNetmapConfig(pathNetmap)
 	if err != nil { return "",err }
 
-	// parse dhcpd configuration
-	pathDhcpConfig := d.DhcpConfPath()
-	if _, err := os.Stat(pathDhcpConfig); err != nil {
-		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
-	}
-	config,err := readDhcpConfig(pathDhcpConfig)
-	if err != nil { return "",err }
-
 	// convert network to name
 	network := state.Get("vmnetwork").(string)
 	device,err := netmap.NameIntoDevice(network)
 	if err != nil { return "", err }
+
+	// parse dhcpd configuration
+	pathDhcpConfig := d.DhcpConfPath(device)
+	if _, err := os.Stat(pathDhcpConfig); err != nil {
+		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
+	}
+
+	config,err := readDhcpConfig(pathDhcpConfig)
+	if err != nil { return "",err }
 
 	// find the entry configured in the dhcpd
 	interfaceConfig,err := config.HostByName(device)
@@ -404,18 +405,18 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string,error) {
 	netmap,err := readNetmapConfig(pathNetmap)
 	if err != nil { return "",err }
 
+	// convert network to name
+	network := state.Get("vmnetwork").(string)
+	device,err := netmap.NameIntoDevice(network)
+	if err != nil { return "", err }
+
 	// parse dhcpd configuration
-	pathDhcpConfig := d.DhcpConfPath()
+	pathDhcpConfig := d.DhcpConfPath(device)
 	if _, err := os.Stat(pathDhcpConfig); err != nil {
 		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
 	}
 	config,err := readDhcpConfig(pathDhcpConfig)
 	if err != nil { return "",err }
-
-	// convert network to name
-	network := state.Get("vmnetwork").(string)
-	device,err := netmap.NameIntoDevice(network)
-	if err != nil { return "", err }
 
 	// find the entry configured in the dhcpd
 	interfaceConfig,err := config.HostByName(device)

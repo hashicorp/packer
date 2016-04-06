@@ -187,16 +187,18 @@ func (d *Player5Driver) Verify() error {
 	d.VmwareDriver.DhcpLeasesPath = func(device string) string {
 		return playerDhcpLeasesPath(device)
 	}
-	d.VmwareDriver.VmnetnatConfPath = func() string {
-		return playerVmnetnatConfPath()
+
+	d.VmwareDriver.DhcpConfPath = func(device string) string {
+		return playerVmDhcpConfPath(device)
 	}
-	d.VmwareDriver.DhcpConfPath = func() string {
-		return playerVmDhcpConfPath()
+
+	d.VmwareDriver.VmnetnatConfPath = func(device string) string {
+		return playerVmnetnatConfPath(device)
 	}
+
 	d.VmwareDriver.NetmapConfPath = func() string {
 		return playerNetmapConfPath()
 	}
-
 	return nil
 }
 

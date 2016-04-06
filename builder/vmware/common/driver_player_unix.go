@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"path/filepath"
 )
 
 func playerFindVdiskManager() (string, error) {
@@ -28,16 +29,49 @@ func playerFindVmrun() (string, error) {
 	return exec.LookPath("vmrun")
 }
 
-func playerDhcpLeasesPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
-}
-
 func playerToolsIsoPath(flavor string) string {
 	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
 }
 
-func playerVmnetnatConfPath() string {
-	return ""
+// return the base path to vmware's config on the host
+func playerVMwareRoot() (s string, err error) {
+	return "/etc/vmware", nil
+}
+
+func playerDhcpLeasesPath(device string) string {
+	base, err := playerVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "dhcpd/dhcpd.leases")
+}
+
+func playerVmDhcpConfPath(device string) string {
+	base, err := playerVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "dhcp/dhcp.conf")
+}
+
+func playerVmnetnatConfPath(device string) string {
+	base, err := playerVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "nat/nat.conf")
+}
+
+func playerNetmapConfPath() string {
+	base, err := playerVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, "netmap.conf")
 }
 
 func playerVerifyVersion(version string) error {
