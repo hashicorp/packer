@@ -231,7 +231,7 @@ func (c BuildCommand) Run(args []string) int {
 				fmt.Fprintf(&message, "--> %s: ", name)
 
 				if artifact != nil {
-					fmt.Fprintf(&message, artifact.String())
+					fmt.Fprint(&message, artifact.String())
 				} else {
 					fmt.Fprint(&message, "<nothing>")
 				}
