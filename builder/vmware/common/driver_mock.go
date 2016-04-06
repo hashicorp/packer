@@ -78,11 +78,14 @@ type DriverMock struct {
 	DhcpLeasesPathDevice string
 	DhcpLeasesPathResult string
 
-	NetmapPathCalled bool
-	NetmapPathResult string
-
 	DhcpConfPathCalled bool
 	DhcpConfPathResult string
+
+	VmnetnatConfPathCalled bool
+	VmnetnatConfPathResult string
+ 
+	NetmapConfPathCalled bool
+	NetmapConfPathResult string
 
 	VerifyCalled bool
 	VerifyErr    error
@@ -184,14 +187,19 @@ func (d *DriverMock) DhcpLeasesPath(device string) string {
 	return d.DhcpLeasesPathResult
 }
 
-func (d *DriverMock) NetmapPath(device string) string {
-	d.NetmapPathCalled = true
-	return d.NetmapPathResult
-}
-
 func (d *DriverMock) DhcpConfPath(device string) string {
 	d.DhcpConfPathCalled = true
 	return d.DhcpConfPathResult
+}
+
+func (d *DriverMock) VmnetnatConfPath(device string) string {
+	d.VmnetnatConfPathCalled = true
+	return d.VmnetnatConfPathResult
+}
+
+func (d *DriverMock) NetmapConfPath() string {
+	d.NetmapConfPathCalled = true
+	return d.NetmapConfPathResult
 }
 
 func (d *DriverMock) Verify() error {

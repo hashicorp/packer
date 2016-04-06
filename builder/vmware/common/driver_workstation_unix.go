@@ -39,24 +39,49 @@ func workstationFindVmrun() (string, error) {
 	return exec.LookPath("vmrun")
 }
 
+// return the base path to vmware's config on the host
+func workstationVMwareRoot() (s string, err error) {
+	return "/etc/vmware", nil
+}
+
 func workstationDhcpLeasesPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "dhcpd/dhcpd.leases")
+}
+
+func workstationDhcpConfPath(device string) string {
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "dhcp/dhcpd.conf")
+}
+
+func workstationVmnetnatConfPath(device string) string {
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "nat/nat.conf")
+}
+
+func workstationNetmapConfPath() string {
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, "netmap.conf")
 }
 
 func workstationToolsIsoPath(flavor string) string {
 	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
-}
-
-func workstationVmnetnatConfPath() string {
-	return ""
-}
-
-func workstationNetmapConfPath(device string) string {
-	return ""	// FIXME
-}
-
-func workstationDhcpConfPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.conf"
 }
 
 func workstationVerifyVersion(version string) error {
