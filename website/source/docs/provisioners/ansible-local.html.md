@@ -52,6 +52,11 @@ Optional:
 
 -   `extra_arguments` (array of strings) - An array of extra arguments to pass
     to the ansible command. By default, this is empty.
+    Usage example:
+
+```
+"extra_arguments": [ "--extra-vars \"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
+```
 
 -   `inventory_groups` (string) - A comma-separated list of groups to which
     packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
