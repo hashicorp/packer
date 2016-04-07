@@ -94,7 +94,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 		}
 
-		if err = session.RequestPty("xterm", 80, 40, termModes); err != nil {
+		if err = session.RequestPty("xterm", 40, 80, termModes); err != nil {
 			return
 		}
 	}

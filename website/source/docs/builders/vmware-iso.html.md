@@ -84,12 +84,6 @@ builder.
 
 ### Optional:
 
--   `disk_additional_size` (array of integers) - The size(s) of any additional
-    hard disks for the VM in megabytes. If this is not specified then the VM
-    will only contain a primary hard disk. The builder uses expandable, not
-    fixed-size virtual hard disks, so the actual file representing the disk will
-    not use the full size unless it is full.
-
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
     be to type just enough to initialize the operating system installer. Special
@@ -102,6 +96,12 @@ builder.
     a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
+
+-   `disk_additional_size` (array of integers) - The size(s) of any additional
+    hard disks for the VM in megabytes. If this is not specified then the VM
+    will only contain a primary hard disk. The builder uses expandable, not
+    fixed-size virtual hard disks, so the actual file representing the disk will
+    not use the full size unless it is full.
 
 -   `disk_size` (integer) - The size of the hard disk for the VM in megabytes.
     The builder uses expandable, not fixed-size virtual hard disks, so the
@@ -219,12 +219,13 @@ builder.
     compacted at the end of the build process using `vmware-vdiskmanager`. In
     certain rare cases, this might actually end up making the resulting disks
     slightly larger. If you find this to be the case, you can disable compaction
-    using this configuration value.
+    using this configuration value.  Defaults to `false`.
 
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with the remote ESXi server. This is convenient if you
     use packer to provision VMs on ESXi and don't want to use ovftool to
-    deploy the resulting artifact (VMX or OVA or whatever you used as `format`)
+    deploy the resulting artifact (VMX or OVA or whatever you used as `format`).
+    Defaults to `false`.
 
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are "darwin", "linux", and "windows". By
