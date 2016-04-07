@@ -1,4 +1,5 @@
 TEST?=$(shell go list ./... | grep -v vendor)
+VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
@@ -28,7 +29,6 @@ package:
 deps:
 	go get github.com/mitchellh/gox
 	go get golang.org/x/tools/cmd/stringer
-	go get golang.org/x/tools/cmd/vet
 	@go version | grep 1.4 ; if [ $$? -eq 0 ]; then \
 		echo "Installing godep and restoring dependencies"; \
 		go get github.com/tools/godep; \
@@ -57,7 +57,7 @@ generate: deps
 
 test: deps
 	@go test $(TEST) $(TESTARGS) -timeout=30s
-	@go vet $(TEST) ; if [ $$? -eq 1 ]; then \
+	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
 	fi
@@ -73,7 +73,6 @@ testrace: deps
 updatedeps:
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
-	go get -u golang.org/x/tools/cmd/vet
 	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
 
 # This is used to add new dependencies to packer. If you are submitting a PR
