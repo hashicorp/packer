@@ -1,5 +1,7 @@
 **DELETE THIS TEMPLATE BEFORE SUBMITTING**
 
+_Only use Github issues to report bugs or feature requests, see https://www.packer.io/community/_
+
 If you are planning to open a pull-request just open the pull-request instead of making an issue first.
 
 FOR FEATURES:
