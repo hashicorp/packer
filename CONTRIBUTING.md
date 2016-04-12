@@ -51,19 +51,16 @@ it raises the chances we can quickly merge or address your contributions.
 ## Setting up Go to work on Packer
 
 If you have never worked with Go before, you will have to complete the
-following steps in order to be able to compile and test Packer.
+following steps in order to be able to compile and test Packer. These instructions target POSIX-like environments (Mac OS X, Linux, Cygwin, etc.) so you may need to adjust them for Windows or other shells.
 
-1. [Download](https://golang.org/dl) and install Go. Go 1.6 or higher is
-   preferred. Packer _may_ work with versions of Go older than 1.5 but these
-   are not supported.
+1. [Download](https://golang.org/dl) and install Go. The instructions below
+   are for go 1.6. Earlier versions of Go are no longer supported.
 
 2. Set and export the `GOPATH` environment variable and update your `PATH`. For
-   example, you can add to your `.bash_profile`. If you're using Go 1.5 also
-   set `GO15VENDOREXPERIMENT`. This is not necessary for Go 1.6 and up.
+   example, you can add to your `.bash_profile`.
 
     ```
-    export GOPATH=$HOME/Documents/golang
-    export GO15VENDOREXPERIMENT=1
+    export GOPATH=$HOME/go
     export PATH=$PATH:$GOPATH/bin
     ```
 
@@ -72,16 +69,16 @@ following steps in order to be able to compile and test Packer.
    `$GOPATH/src/github.com/mitchellh/packer`.
 
 4. When working on packer `cd $GOPATH/src/github.com/mitchellh/packer` so you
-   can run make and easily access other files.
+   can run `make` and easily access other files.
 
 5. Make your changes to the Packer source. You can run `make` in
    `$GOPATH/src/github.com/mitchellh/packer` to run tests and build the packer
    binary. Any compilation errors will be shown when the binaries are
-   rebuilding.
+   rebuilding. If you don't have `make` you can simply run `go build -o bin/packer .` from the project root.
 
-6. After running `make` successfully, use
+6. After running building packer successfully, use
    `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine and
-   verify your changes work.
+   verify your changes work. For instance: `$GOPATH/src/github.com/mitchellh/packer/bin/packer build template.json`.
 
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
