@@ -6,6 +6,7 @@
 /website/build
 .DS_Store
 .vagrant
+.idea
 test/.env
 
 website/.bundle
