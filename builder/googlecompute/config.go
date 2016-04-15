@@ -48,6 +48,7 @@ type Config struct {
 	Tags                 []string          `mapstructure:"tags"`
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
+	WindowsInstance      bool              `mapstructure:"windows_instance"`
 
 	Account         AccountFile
 	privateKeyBytes []byte

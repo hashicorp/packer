@@ -1,5 +1,7 @@
 package googlecompute
 
+import "time"
+
 // Driver is the interface that has to be implemented to communicate
 // with GCE. The Driver interface exists mostly to allow a mock implementation
 // to be used to test the steps.
@@ -63,4 +65,12 @@ type InstanceConfig struct {
 	Subnetwork          string
 	Tags                []string
 	Zone                string
+}
+
+type WindowsPasswordConfig struct {
+	UserName string    `json:"userName"`
+	Modulus  string    `json:"modulus"`
+	Exponent string    `json:"exponent"`
+	Email    string    `json:"email"`
+	ExpireOn time.Time `json:"expireOn"`
 }

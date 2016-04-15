@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/version"
+
+	"strings"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -390,6 +393,27 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "DONE", d.refreshZoneOp(zone.Name, op))
+	return errCh, nil
+}
+
+func (d *driverGCE) CreateWindowsPassword(instance, zone, project string, c WindowsPasswordConfig) (<-chan error, error) {
+
+	data, err := json.Marshal(c)
+
+	if err != nil {
+		return nil, err
+	}
+	dCopy := string(data)
+	
+	op, err := d.service.Instances.SetMetadata(project, zone, instance, &compute.Metadata{
+		Items: []*compute.MetadataItems{
+			{Key: "windows-key", Value: &dCopy},
+		},
+	}).Do()
+	
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "DONE", d.refreshZoneOp(zone, op))
+	
 	return errCh, nil
 }
 
