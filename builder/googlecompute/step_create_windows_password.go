@@ -1,11 +1,11 @@
 package googlecompute
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"time"
 
@@ -22,6 +22,9 @@ type StepCreateWindowsPassword struct {
 // Run executes the Packer build step that generates SSH key pairs.
 func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	driver := state.Get("driver").(Driver)
+	config := state.Get("config").(*Config)
+	name := state.Get("instance_name").(string)
 
 	ui.Say("Creating windows user for instance...")
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -32,23 +35,40 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 		return multistep.ActionHalt
 	}
 
-	buf := new(bytes.Buffer)
+	buf := make([]byte, 4)
+    binary.BigEndian.PutUint32(buf, uint32(priv.E))
+	
+	data := WindowsPasswordConfig{
+		key:      priv,
+		UserName: config.Comm.WinRMUser,
+		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
+		Exponent: base64.StdEncoding.EncodeToString(buf),
+		Email:    config.account.ClientEmail,
+		ExpireOn: time.Now().Add(time.Minute * 5),
+	}
+    
+    ui.Message(fmt.Sprintf("%#v", data))
 
-	if err := binary.Write(buf, binary.BigEndian, priv.E); err != nil {
-		err := fmt.Errorf("Error creating temporary key: %s", err)
+	errCh, err := driver.CreateOrResetWindowsPassword(name, config.Zone, &data)
+
+	if err == nil {
+		ui.Message("Waiting for windows password to complete...")
+		select {
+		case err = <-errCh:
+		case <-time.After(config.stateTimeout):
+			err = errors.New("time out while waiting for the password to be created")
+		}
+	}
+
+	if err != nil {
+		err := fmt.Errorf("Error creating windows password: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	data := WindowsPasswordConfig{
-		UserName: "pieter_lazzaro",
-		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
-		Exponent: base64.StdEncoding.EncodeToString(buf.Bytes()),
-		Email:    "pieter.lazzaro@pureharvest.com.au",
-		ExpireOn: time.Now().Add(time.Minute * 5),
-	}
-	state.Put("windows-keys", data)
+	ui.Message(fmt.Sprintf("Created password %s", data.password))
+	state.Put("windows_password", data.password)
 
 	return multistep.ActionContinue
 }

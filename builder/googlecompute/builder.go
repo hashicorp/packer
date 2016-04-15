@@ -58,6 +58,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
 		},
+		&StepCreateWindowsPassword{},
 		&StepInstanceInfo{
 			Debug: b.config.PackerDebug,
 		},
