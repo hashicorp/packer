@@ -224,3 +224,18 @@ func (d *DriverMock) WaitForInstance(state, zone, name string) <-chan error {
 
 	return resultCh
 }
+
+func (d *DriverMock) GetWindowsPassword() (string, error) {
+	return "", nil
+}
+
+func (d *DriverMock) CreateOrResetWindowsPassword(instance, zone string, c *WindowsPasswordConfig) (<-chan error, error) {
+		resultCh := d.WaitForInstanceErrCh
+	if resultCh == nil {
+		ch := make(chan error)
+		close(ch)
+		resultCh = ch
+	}
+
+	return resultCh, nil
+}

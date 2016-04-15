@@ -1,6 +1,9 @@
 package googlecompute
 
-import "time"
+import (
+	"crypto/rsa"
+	"time"
+)
 
 // Driver is the interface that has to be implemented to communicate
 // with GCE. The Driver interface exists mostly to allow a mock implementation
@@ -46,6 +49,8 @@ type Driver interface {
 
 	// WaitForInstance waits for an instance to reach the given state.
 	WaitForInstance(state, zone, name string) <-chan error
+
+	CreateOrResetWindowsPassword(zone, name string, config *WindowsPasswordConfig) (<-chan error, error)
 }
 
 type InstanceConfig struct {
@@ -68,9 +73,20 @@ type InstanceConfig struct {
 }
 
 type WindowsPasswordConfig struct {
+	key      *rsa.PrivateKey
+	password string
 	UserName string    `json:"userName"`
 	Modulus  string    `json:"modulus"`
 	Exponent string    `json:"exponent"`
 	Email    string    `json:"email"`
 	ExpireOn time.Time `json:"expireOn"`
+}
+
+type windowsPasswordResponse struct {
+	UserName          string `json:"userName"`
+	PasswordFound     bool   `json:"passwordFound"`
+	EncryptedPassword string `json:"encryptedPassword"`
+	Modulus           string `json:"modulus"`
+	Exponent          string `json:"exponent"`
+	ErrorMessage      string `json:"errorMessage"`
 }
