@@ -3,7 +3,6 @@ package digitalocean
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
