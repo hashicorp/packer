@@ -3,10 +3,13 @@ package googlecompute
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/pem"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -42,12 +45,36 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 		key:      priv,
 		UserName: config.Comm.WinRMUser,
 		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
-		Exponent: base64.StdEncoding.EncodeToString(buf),
+		Exponent: base64.StdEncoding.EncodeToString(buf[1:]),
 		Email:    config.Account.ClientEmail,
 		ExpireOn: time.Now().Add(time.Minute * 5),
 	}
 
 	ui.Message(fmt.Sprintf("%#v", data))
+
+	if s.Debug {
+
+		priv_blk := pem.Block{
+			Type:    "RSA PRIVATE KEY",
+			Headers: nil,
+			Bytes:   x509.MarshalPKCS1PrivateKey(priv),
+		}
+
+		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
+		f, err := os.Create(s.DebugKeyPath)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
+			return multistep.ActionHalt
+		}
+
+		// Write out the key
+		err = pem.Encode(f, &priv_blk)
+		f.Close()
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
+			return multistep.ActionHalt
+		}
+	}
 
 	errCh, err := driver.CreateOrResetWindowsPassword(name, config.Zone, &data)
 

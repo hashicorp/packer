@@ -3,7 +3,7 @@ package googlecompute
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -450,6 +450,8 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 	}
 
 	timeout := time.Now().Add(time.Minute * 3)
+	hash := sha1.New()
+	random := rand.Reader
 
 	for time.Now().Before(timeout) {
 		if passwordResponses, err := d.getPasswordResponses(zone, name); err == nil {
@@ -463,8 +465,11 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 						errCh <- err
 						return
 					}
+					d.ui.Message(fmt.Sprintf("Decrypting: '%#v'", decodedPassword))
+					d.ui.Message(fmt.Sprintf("Checking decrypting with key: '%#v'", c.key))
 
-					password, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, c.key, decodedPassword, []byte("password"))
+					password, err := rsa.DecryptOAEP(hash, random, c.key, decodedPassword, nil)
+
 					if err != nil {
 						errCh <- err
 						return
