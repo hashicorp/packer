@@ -58,7 +58,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
 		},
-		&StepCreateWindowsPassword{},
+		&StepCreateWindowsPassword{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_windows_%s.pem", b.config.PackerBuildName),
+		},
 		&StepInstanceInfo{
 			Debug: b.config.PackerDebug,
 		},
