@@ -1,7 +1,10 @@
 package docker
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -207,6 +210,108 @@ func TestLargeDownload(t *testing.T) {
 
 }
 
+type StdinStdoutProvisioner struct {
+}
+
+func (p *StdinStdoutProvisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	stdin_r, stdin_w := io.Pipe()
+	stdout_r, stdout_w := io.Pipe()
+	defer stdin_r.Close()
+	defer stdout_w.Close()
+	cmd := &packer.RemoteCmd{Command: "read foo; echo $foo", Stdin: stdin_r, Stdout: stdout_w}
+
+	testBytes := []byte("bar\n")
+	if err := comm.Start(cmd); err != nil {
+		return fmt.Errorf("Error running command on remote machine: %s", err)
+	}
+	go func() {
+		defer stdin_w.Close()
+
+		stdin_w.Write(testBytes)
+	}()
+	var output []byte
+	var outputErr error
+	outputDone := make(chan struct{})
+	go func() {
+		defer close(outputDone)
+
+		output, outputErr = ioutil.ReadAll(stdout_r)
+	}()
+	cmd.Wait()
+	stdout_w.Close()
+
+	<-outputDone
+	if outputErr != nil {
+		return fmt.Errorf("Error reading output of command: %s", outputErr)
+	}
+
+	if !bytes.Equal(output, testBytes) {
+		return fmt.Errorf("Unexpected output of command: %#v. Expected: %#v", output, testBytes)
+	}
+
+	return nil
+}
+
+func (p *StdinStdoutProvisioner) Prepare(raws ...interface{}) error {
+	return nil
+}
+
+func (p *StdinStdoutProvisioner) Cancel() {
+}
+
+// TestInteractionByStdinStdout tests communication between process runned in
+// Docker and calling side using standard stdin/stdout protocol.
+func TestInteractionByStdinStdout(t *testing.T) {
+	ui := packer.TestUi(t)
+	cache := &packer.FileCache{CacheDir: os.TempDir()}
+
+	tpl, err := template.Parse(strings.NewReader(dockerStdinStdoutBuilderConfig))
+	if err != nil {
+		t.Fatalf("Unable to parse config: %s", err)
+	}
+
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1")
+	}
+	cmd := exec.Command("docker", "-v")
+	cmd.Run()
+	if !cmd.ProcessState.Success() {
+		t.Error("docker command not found; please make sure docker is installed")
+	}
+
+	// Setup the builder
+	builder := &Builder{}
+	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	if err != nil {
+		t.Fatalf("Error preparing configuration %s", err)
+	}
+	if len(warnings) > 0 {
+		t.Fatal("Encountered configuration warnings; aborting")
+	}
+
+	// Setup the provisioners
+	shell := &StdinStdoutProvisioner{}
+
+	// Add hooks so the provisioners run during the build
+	hooks := map[string][]packer.Hook{}
+	hooks[packer.HookProvision] = []packer.Hook{
+		&packer.ProvisionHook{
+			Provisioners: []packer.Provisioner{
+				shell,
+			},
+		},
+	}
+	hook := &packer.DispatchHook{Mapping: hooks}
+
+	// Run things
+	artifact, err := builder.Run(ui, hook, cache)
+	if err != nil {
+		t.Fatalf("Error running build %s", err)
+	}
+	// Preemptive cleanup
+	defer artifact.Destroy()
+}
+
 const dockerBuilderConfig = `
 {
   "builders": [
@@ -263,6 +368,18 @@ const dockerLargeBuilderConfig = `
       "source": "/tmp/bigcake",
       "destination": "bigcake",
       "direction": "download"
+    }
+  ]
+}
+`
+
+const dockerStdinStdoutBuilderConfig = `
+{
+  "builders": [
+    {
+      "type": "docker",
+      "image": "ubuntu",
+      "discard": true
     }
   ]
 }

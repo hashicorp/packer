@@ -55,17 +55,8 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 		cmd = exec.Command("docker", "attach", c.ContainerId)
 	}
 
-	stdin_w, err := cmd.StdinPipe()
-	if err != nil {
-		// We have to do some cleanup since run was never called
-		os.Remove(outputFile.Name())
-		os.Remove(exitCodePath)
-
-		return err
-	}
-
 	// Run the actual command in a goroutine so that Start doesn't block
-	go c.run(cmd, remote, stdin_w, outputFile, exitCodePath)
+	go c.run(cmd, remote, outputFile, exitCodePath)
 
 	return nil
 }
@@ -247,7 +238,7 @@ func (c *Communicator) canExec() bool {
 }
 
 // Runs the given command and blocks until completion
-func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.WriteCloser, outputFile *os.File, exitCodePath string) {
+func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, outputFile *os.File, exitCodePath string) {
 	// For Docker, remote communication must be serialized since it
 	// only supports single execution.
 	c.lock.Lock()
@@ -276,13 +267,17 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 	// is truly complete (because the file will have data), what the
 	// exit status is (because Docker loses it because of the pty, not
 	// Docker's fault), and get the output (Docker bug).
-	remoteCmd := fmt.Sprintf("(%s) >%s 2>&1; echo $? >%s",
+	remoteCmd := fmt.Sprintf("(%s); echo $? >%s",
 		remote.Command,
-		filepath.Join(c.ContainerDir, filepath.Base(outputFile.Name())),
 		filepath.Join(c.ContainerDir, filepath.Base(exitCodePath)))
 
 	// Start the command
 	log.Printf("Executing in container %s: %#v", c.ContainerId, remoteCmd)
+	cmd.Args = append(cmd.Args, []string{"-c", remoteCmd}...)
+	cmd.Stdout = remote.Stdout
+	cmd.Stderr = remote.Stderr
+	stdin_w, err := cmd.StdinPipe()
+
 	if err := cmd.Start(); err != nil {
 		log.Printf("Error executing: %s", err)
 		remote.SetExited(254)
@@ -299,7 +294,17 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 		// https://github.com/dotcloud/docker/issues/2628
 		time.Sleep(2 * time.Second)
 
-		stdin_w.Write([]byte(remoteCmd + "\n"))
+		r := remote.Stdin
+		if r != nil {
+			buf := make([]byte, 65536)
+
+			written, err := r.Read(buf)
+			for err == nil || written > 0 {
+				log.Printf("%d bytes written to STDIN", written)
+				stdin_w.Write(buf[:written])
+				written, err = r.Read(buf)
+			}
+		}
 	}()
 
 	// Start a goroutine to read all the lines out of the logs. These channels
@@ -336,6 +341,7 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin_w io.W
 	var exitStatus int
 	var exitStatusRaw int64
 	err = cmd.Wait()
+	log.Printf("Command executed")
 	if exitErr, ok := err.(*exec.ExitError); ok {
 		exitStatus = 1
 
