@@ -28,6 +28,25 @@ scratch, booting it, installing an OS, provisioning software within the OS, then
 shutting it down. The result of the VMware builder is a directory containing all
 the files necessary to run the virtual machine.
 
+### VMware Player on Linux
+
+There are (as of 2016-Apr-18) two versions of VMware Player currently available for download:
+
+* [7.0](https://my.vmware.com/en/web/vmware/free#desktop_end_user_computing/vmware_player/7_0)
+* [12.0](https://my.vmware.com/en/web/vmware/free#desktop_end_user_computing/vmware_workstation_player/12_0)
+
+Unfortunately just installing the VMware player is not quite enough to be able to use
+packer. You will also need the `qemu-img` command which is available in the `qemu-utils`
+package on Debian-like systems and on Fedora-like systems in the `qemu` package.
+
+Additionally you will need to the `vmrun` command, which is part of VMware Virtual
+Infrastructure eXtension [(VIX) SDK](https://developercenter.vmware.com/web/sdk/60/vix).
+
+Finally, if you installed a version of VMware player newer than 7.0, you must edit the
+file `/usr/lib/vmware-vix/vixwrapper-config.txt` and change the version specified in
+the fourth column there to be the output of `vmplayer -v`.
+
+
 ## Basic Example
 
 Here is a basic example. This example is not functional. It will start the OS
