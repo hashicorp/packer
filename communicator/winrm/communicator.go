@@ -1,11 +1,14 @@
 package winrm
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"sync"
+
+	"text/template"
 
 	"github.com/masterzen/winrm/winrm"
 	"github.com/mitchellh/packer/packer"
@@ -13,6 +16,7 @@ import (
 
 	// This import is a bit strange, but it's needed so `make updatedeps`
 	// can see and download it
+
 	_ "github.com/dylanmei/winrmtest"
 )
 
@@ -80,7 +84,20 @@ func (c *Communicator) Start(rc *packer.RemoteCmd) error {
 		return err
 	}
 
+	// Interpolate user/password into command for elevated and other usess
+	tmpl, err := template.New("winrm-command").Parse(rc.Command)
+	if err != nil {
+		return err
+	}
+	var interpolatedCommand bytes.Buffer
+	err = tmpl.Execute(&interpolatedCommand, c.config)
+	if err != nil {
+		return err
+	}
+
+	rc.Command = interpolatedCommand.String()
 	log.Printf("[INFO] starting remote command: %s", rc.Command)
+
 	cmd, err := shell.Execute(rc.Command)
 	if err != nil {
 		return err

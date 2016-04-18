@@ -68,7 +68,10 @@ Optional parameters:
 
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
-    Windows user.
+    Windows user. `elevated_password` may be omitted if the `elevated_user`
+    matches the [Communicator](docs/templates/communicator.html#winrm)
+    username (`winrm_username`), this is nice for certain builders (such as the
+    AWS builder) that can automatically detect the password on launch.
 
 -   `remote_path` (string) - The path where the script will be uploaded to in
     the machine. This defaults to "/tmp/script.sh". This value must be a
