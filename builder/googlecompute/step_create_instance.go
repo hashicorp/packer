@@ -31,7 +31,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 	}
 	instanceMetadata[sshMetaKey] = sshKeys
-	
+
 	// Wrap any startup script with our own startup script.
 	if c.StartupScriptFile != "" {
 		var content []byte
@@ -49,6 +49,9 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[StartupScriptKey] = StartupScriptLinux
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
+
+	// Adding the Sysprep script to enable Windows RM
+	instanceMetadata[StartupWindowsSysprepKey] = StartupWinRMScript
 
 	return instanceMetadata, err
 }

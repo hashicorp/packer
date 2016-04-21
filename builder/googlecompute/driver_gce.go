@@ -336,6 +336,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Build up the metadata
 	metadata := make([]*compute.MetadataItems, len(c.Metadata))
 	for k, v := range c.Metadata {
+		d.ui.Message(fmt.Sprintf("%s: %s", k,v))
 		vCopy := v
 		metadata = append(metadata, &compute.MetadataItems{
 			Key:   k,
@@ -389,7 +390,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Items: c.Tags,
 		},
 	}
-
+	
 	d.ui.Message("Requesting instance creation...")
 	op, err := d.service.Instances.Insert(d.projectId, zone.Name, &instance).Do()
 	if err != nil {
@@ -421,13 +422,12 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 	d.ui.Message("Fetching current metadata")
 
 	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
-
+	
+	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &dCopy})
 	d.ui.Message("Uploading metadata: " + dCopy)
 	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
 		Fingerprint: instance.Metadata.Fingerprint,
-		Items: []*compute.MetadataItems{
-			{Key: "windows-keys", Value: &dCopy},
-		},
+		Items: instance.Metadata.Items,
 	}).Do()
 
 	if err != nil {
@@ -456,7 +456,6 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 	for time.Now().Before(timeout) {
 		if passwordResponses, err := d.getPasswordResponses(zone, name); err == nil {
 			for _, response := range passwordResponses {
-				d.ui.Message(fmt.Sprintf("Checking response: '%#v'", response))
 				if response.Modulus == c.Modulus {
 
 					decodedPassword, err := base64.StdEncoding.DecodeString(response.EncryptedPassword)
@@ -465,9 +464,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 						errCh <- err
 						return
 					}
-					d.ui.Message(fmt.Sprintf("Decrypting: '%#v'", decodedPassword))
-					d.ui.Message(fmt.Sprintf("Checking decrypting with key: '%#v'", c.key))
-
+					
 					password, err := rsa.DecryptOAEP(hash, random, c.key, decodedPassword, nil)
 
 					if err != nil {
@@ -494,7 +491,6 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswordResponse, error) {
 	output, err := d.service.Instances.GetSerialPortOutput(d.projectId, zone, instance).Port(4).Do()
 
-	d.ui.Message(fmt.Sprintf("Serial output: '%s'", output.Contents))
 	if err != nil {
 		return nil, err
 	}
