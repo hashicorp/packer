@@ -45,21 +45,21 @@ func NewUsageOperationsClientWithBaseURI(baseURI string, subscriptionID string) 
 // List lists compute usages for a subscription.
 //
 // location is the location upon which resource usage is queried.
-func (client UsageOperationsClient) List(location string) (result ListUsagesResult, ae error) {
+func (client UsageOperationsClient) List(location string) (result ListUsagesResult, err error) {
 	req, err := client.ListPreparer(location)
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "compute/UsageOperationsClient", "List", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "compute.UsageOperationsClient", "List", nil, "Failure preparing request")
 	}
 
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "compute/UsageOperationsClient", "List", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "compute.UsageOperationsClient", "List", resp, "Failure sending request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "compute/UsageOperationsClient", "List", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "compute.UsageOperationsClient", "List", resp, "Failure responding to request")
 	}
 
 	return
@@ -88,7 +88,7 @@ func (client UsageOperationsClient) ListPreparer(location string) (*http.Request
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client UsageOperationsClient) ListSender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // ListResponder handles the response to the List request. The method always
@@ -105,10 +105,10 @@ func (client UsageOperationsClient) ListResponder(resp *http.Response) (result L
 }
 
 // ListNextResults retrieves the next set of results, if any.
-func (client UsageOperationsClient) ListNextResults(lastResults ListUsagesResult) (result ListUsagesResult, ae error) {
+func (client UsageOperationsClient) ListNextResults(lastResults ListUsagesResult) (result ListUsagesResult, err error) {
 	req, err := lastResults.ListUsagesResultPreparer()
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "compute/UsageOperationsClient", "List", nil, "Failure preparing next results request request")
+		return result, autorest.NewErrorWithError(err, "compute.UsageOperationsClient", "List", nil, "Failure preparing next results request request")
 	}
 	if req == nil {
 		return
@@ -117,12 +117,12 @@ func (client UsageOperationsClient) ListNextResults(lastResults ListUsagesResult
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "compute/UsageOperationsClient", "List", resp, "Failure sending next results request request")
+		return result, autorest.NewErrorWithError(err, "compute.UsageOperationsClient", "List", resp, "Failure sending next results request request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "compute/UsageOperationsClient", "List", resp, "Failure responding to next results request request")
+		err = autorest.NewErrorWithError(err, "compute.UsageOperationsClient", "List", resp, "Failure responding to next results request request")
 	}
 
 	return
