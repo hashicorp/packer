@@ -84,7 +84,7 @@ Optional Parameters:
   Usage example:
 
 ```
-"extra_arguments": [ "--extra-vars", "\"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
+"extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
 ```
 
 - `ansible_env_vars` (array of strings) - Environment variables to set before running Ansible.
