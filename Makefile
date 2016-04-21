@@ -16,8 +16,8 @@ bin: deps
 	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
-	@grep 'const VersionPrerelease = "dev"' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
-		echo "ERROR: You must remove prerelease tags from version.go prior to release."; \
+	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
+		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
 	fi
 	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
@@ -36,8 +36,8 @@ deps:
 	fi
 
 dev: deps
-	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
-		echo "ERROR: You must add prerelease tags to version.go prior to making a dev build."; \
+	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
+		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
 		exit 1; \
 	fi
 	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
