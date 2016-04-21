@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -10,9 +10,8 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"time"
-
 	"golang.org/x/crypto/ssh"
+	"time"
 )
 
 const (
