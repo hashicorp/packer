@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepPowerOffComputeShouldFailIfPowerOffFails(t *testing.T) {
 	var testSubject = &StepPowerOffCompute{
-		powerOff: func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		powerOff: func(string, string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
@@ -32,7 +32,7 @@ func TestStepPowerOffComputeShouldFailIfPowerOffFails(t *testing.T) {
 
 func TestStepPowerOffComputeShouldPassIfPowerOffPasses(t *testing.T) {
 	var testSubject = &StepPowerOffCompute{
-		powerOff: func(string, string) error { return nil },
+		powerOff: func(string, string, <-chan struct{}) error { return nil },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
@@ -54,7 +54,7 @@ func TestStepPowerOffComputeShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualComputeName string
 
 	var testSubject = &StepPowerOffCompute{
-		powerOff: func(resourceGroupName string, computeName string) error {
+		powerOff: func(resourceGroupName string, computeName string, cancelCh <-chan struct{}) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 

@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 	var testSubject = &StepValidateTemplate{
+		template: Linux,
 		validate: func(string, string, *TemplateParameters) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:      func(message string) {},
 		error:    func(e error) {},
@@ -33,6 +34,7 @@ func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 	var testSubject = &StepValidateTemplate{
+		template: Linux,
 		validate: func(string, string, *TemplateParameters) error { return nil },
 		say:      func(message string) {},
 		error:    func(e error) {},
@@ -56,6 +58,7 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualTemplateParameters *TemplateParameters
 
 	var testSubject = &StepValidateTemplate{
+		template: Linux,
 		validate: func(resourceGroupName string, deploymentName string, templateParameter *TemplateParameters) error {
 			actualResourceGroupName = resourceGroupName
 			actualDeploymentName = deploymentName
