@@ -95,7 +95,7 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 	}
 
 	ui.Message(fmt.Sprintf("Created password %s", data.password))
-	state.Put("windows_password", data.password)
+	state.Put("winrm_password", data.password)
 
 	return multistep.ActionContinue
 }
