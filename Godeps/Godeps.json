@@ -1,6 +1,7 @@
 {
 	"ImportPath": "github.com/mitchellh/packer",
 	"GoVersion": "go1.6",
+	"GodepVersion": "v62",
 	"Deps": [
 		{
 			"ImportPath": "github.com/ActiveState/tail",
@@ -9,48 +10,57 @@
 		},
 		{
 			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/compute",
-			"Comment": "v1.2-334-g95361a2",
-			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+			"Comment": "v2.1.1-beta",
+			"Rev": "a1883f7b98346e4908a6c25230c95a8a3026a10c"
 		},
 		{
 			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/network",
-			"Comment": "v1.2-334-g95361a2",
-			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+			"Comment": "v2.1.1-beta",
+			"Rev": "a1883f7b98346e4908a6c25230c95a8a3026a10c"
 		},
 		{
 			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/resources/resources",
-			"Comment": "v1.2-334-g95361a2",
-			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+			"Comment": "v2.1.1-beta",
+			"Rev": "a1883f7b98346e4908a6c25230c95a8a3026a10c"
+		},
+		{
+			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/resources/subscriptions",
+			"Comment": "v2.1.1-beta",
+			"Rev": "a1883f7b98346e4908a6c25230c95a8a3026a10c"
 		},
 		{
 			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/storage",
-			"Comment": "v1.2-334-g95361a2",
-			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+			"Comment": "v2.1.1-beta",
+			"Rev": "a1883f7b98346e4908a6c25230c95a8a3026a10c"
 		},
 		{
 			"ImportPath": "github.com/Azure/azure-sdk-for-go/storage",
-			"Comment": "v1.2-334-g95361a2",
-			"Rev": "95361a2573b1fa92a00c5fc2707a80308483c6f9"
+			"Comment": "v2.1.1-beta",
+			"Rev": "a1883f7b98346e4908a6c25230c95a8a3026a10c"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest",
-			"Comment": "v3.0.0-32-gbebca45",
-			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+			"Comment": "v7.0.4",
+			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/azure",
-			"Comment": "v3.0.0-32-gbebca45",
-			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+			"Comment": "v7.0.4",
+			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/date",
-			"Comment": "v3.0.0-32-gbebca45",
-			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+			"Comment": "v7.0.4",
+			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/to",
-			"Comment": "v3.0.0-32-gbebca45",
-			"Rev": "bebca455f60b24bf6a2459e9e862ff42da86f5e0"
+			"Comment": "v7.0.4",
+			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
+		},
+		{
+			"ImportPath": "github.com/Azure/go-ntlmssp",
+			"Rev": "e0b63eb299a769ea4b04dadfe530f6074b277afb"
 		},
 		{
 			"ImportPath": "github.com/armon/go-radix",
@@ -492,6 +502,10 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "1f22c0103821b9390939b6776727195525381532"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/md4",
 			"Rev": "1f22c0103821b9390939b6776727195525381532"
 		},
 		{

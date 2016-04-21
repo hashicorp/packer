@@ -195,6 +195,51 @@ func WithFormData(v url.Values) PrepareDecorator {
 	}
 }
 
+// WithBool returns a PrepareDecorator that encodes the passed bool into the body of the request
+// and sets the Content-Length header.
+func WithBool(v bool) PrepareDecorator {
+	return WithString(fmt.Sprintf("%v", v))
+}
+
+// WithFloat32 returns a PrepareDecorator that encodes the passed float32 into the body of the
+// request and sets the Content-Length header.
+func WithFloat32(v float32) PrepareDecorator {
+	return WithString(fmt.Sprintf("%v", v))
+}
+
+// WithFloat64 returns a PrepareDecorator that encodes the passed float64 into the body of the
+// request and sets the Content-Length header.
+func WithFloat64(v float64) PrepareDecorator {
+	return WithString(fmt.Sprintf("%v", v))
+}
+
+// WithInt32 returns a PrepareDecorator that encodes the passed int32 into the body of the request
+// and sets the Content-Length header.
+func WithInt32(v int32) PrepareDecorator {
+	return WithString(fmt.Sprintf("%v", v))
+}
+
+// WithInt64 returns a PrepareDecorator that encodes the passed int64 into the body of the request
+// and sets the Content-Length header.
+func WithInt64(v int64) PrepareDecorator {
+	return WithString(fmt.Sprintf("%v", v))
+}
+
+// WithString returns a PrepareDecorator that encodes the passed string into the body of the request
+// and sets the Content-Length header.
+func WithString(v string) PrepareDecorator {
+	return func(p Preparer) Preparer {
+		return PreparerFunc(func(r *http.Request) (*http.Request, error) {
+			r, err := p.Prepare(r)
+			if err == nil {
+				r.ContentLength = int64(len(v))
+				r.Body = ioutil.NopCloser(strings.NewReader(v))
+			}
+			return r, err
+		})
+	}
+}
+
 // WithJSON returns a PrepareDecorator that encodes the data passed as JSON into the body of the
 // request and sets the Content-Length header.
 func WithJSON(v interface{}) PrepareDecorator {
