@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package lin
 
@@ -28,11 +28,11 @@ type StepCreateCert struct {
 func (s *StepCreateCert) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Creating Temporary Certificate...")
+	ui.Say("Creating temporary certificate...")
 
 	err := s.createCert(state)
 	if err != nil {
-		err := fmt.Errorf("Error Creating Temporary Certificate: %s", err)
+		err := fmt.Errorf("Error creating temporary certificate: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
