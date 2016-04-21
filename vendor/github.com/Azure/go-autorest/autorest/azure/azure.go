@@ -10,16 +10,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Azure/go-autorest/autorest"
 )
 
 const (
-	// HeaderAsyncOperation is the Azure header containing the location to poll for long-running
-	// operations.
-	HeaderAsyncOperation = "Azure-AsyncOperation"
-
 	// HeaderClientID is the Azure extension header to set a user-specified request ID.
 	HeaderClientID = "x-ms-client-request-id"
 
@@ -36,6 +31,10 @@ const (
 type ServiceError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
+}
+
+func (se ServiceError) Error() string {
+	return fmt.Sprintf("Azure Error: Code=%q Message=%q", se.Code, se.Message)
 }
 
 // RequestError describes an error response returned by Azure service.
@@ -129,57 +128,6 @@ func ExtractClientID(resp *http.Response) string {
 // x-ms-request-id header.
 func ExtractRequestID(resp *http.Response) string {
 	return autorest.ExtractHeaderValue(HeaderRequestID, resp)
-}
-
-// GetAsyncOperation retrieves the long-running URL to poll from the passed response.
-func GetAsyncOperation(resp *http.Response) string {
-	return resp.Header.Get(http.CanonicalHeaderKey(HeaderAsyncOperation))
-}
-
-// ResponseIsLongRunning returns true if the passed response is for an Azure long-running operation.
-func ResponseIsLongRunning(resp *http.Response) bool {
-	return autorest.ResponseRequiresPolling(resp, http.StatusCreated) && GetAsyncOperation(resp) != ""
-}
-
-// NewAsyncPollingRequest allocates and returns a new http.Request to poll an Azure long-running
-// operation. If it successfully creates the request, it will also close the body of the passed
-// response, otherwise the body remains open.
-func NewAsyncPollingRequest(resp *http.Response, c autorest.Client) (*http.Request, error) {
-	location := GetAsyncOperation(resp)
-	if location == "" {
-		return nil, autorest.NewErrorWithResponse("azure", "NewAsyncPollingRequest", resp, "Azure-AsyncOperation header missing from response that requires polling")
-	}
-
-	req, err := autorest.Prepare(&http.Request{},
-		autorest.AsGet(),
-		autorest.WithBaseURL(location))
-	if err != nil {
-		return nil, autorest.NewErrorWithError(err, "azure", "NewAsyncPollingRequest", nil, "Failure creating poll request to %s", location)
-	}
-
-	autorest.Respond(resp,
-		c.ByInspecting(),
-		autorest.ByClosing())
-
-	return req, nil
-}
-
-// WithAsyncPolling will poll until the completion of an Azure long-running operation. The delay
-// time between requests is taken from the HTTP Retry-After header, if present, or the passed
-// delay otherwise. Polling may be canceled by signaling on the optional http.Request channel.
-func WithAsyncPolling(defaultDelay time.Duration) autorest.SendDecorator {
-	return func(s autorest.Sender) autorest.Sender {
-		return autorest.SenderFunc(func(r *http.Request) (*http.Response, error) {
-			resp, err := s.Do(r)
-			for err == nil && ResponseIsLongRunning(resp) {
-				err = autorest.DelayForBackoff(autorest.GetPollingDelay(resp, defaultDelay), 1, r.Cancel)
-				if err == nil {
-					resp, err = s.Do(r)
-				}
-			}
-			return resp, err
-		})
-	}
 }
 
 // WithErrorUnlessStatusCode returns a RespondDecorator that emits an

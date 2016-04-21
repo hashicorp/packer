@@ -75,47 +75,14 @@ func ResponseHasStatusCode(resp *http.Response, codes ...int) bool {
 	return containsInt(codes, resp.StatusCode)
 }
 
-// ResponseRequiresPolling returns true if the passed http.Response requires polling follow-up
-// request (as determined by the status code being in the passed set, which defaults to HTTP 202
-// Accepted).
-func ResponseRequiresPolling(resp *http.Response, codes ...int) bool {
-	if resp.StatusCode == http.StatusOK {
-		return false
-	}
-
-	if len(codes) == 0 {
-		codes = []int{http.StatusAccepted}
-	}
-
-	return ResponseHasStatusCode(resp, codes...)
+// GetLocation retrieves the URL from the Location header of the passed response.
+func GetLocation(resp *http.Response) string {
+	return resp.Header.Get(HeaderLocation)
 }
 
-// NewPollingRequest allocates and returns a new http.Request to poll for the passed response. If
-// it successfully creates the request, it will also close the body of the passed response,
-// otherwise the body remains open.
-func NewPollingRequest(resp *http.Response, c Client) (*http.Request, error) {
-	location := GetPollingLocation(resp)
-	if location == "" {
-		return nil, NewErrorWithResponse("autorest", "NewPollingRequest", resp, "Location header missing from response that requires polling")
-	}
-
-	req, err := Prepare(&http.Request{},
-		AsGet(),
-		WithBaseURL(location))
-	if err != nil {
-		return nil, NewErrorWithError(err, "autorest", "NewPollingRequest", nil, "Failure creating poll request to %s", location)
-	}
-
-	Respond(resp,
-		c.ByInspecting(),
-		ByClosing())
-
-	return req, nil
-}
-
-// GetPollingDelay extracts the polling delay from the Retry-After header of the passed response. If
+// GetRetryAfter extracts the retry delay from the Retry-After header of the passed response. If
 // the header is absent or is malformed, it will return the supplied default delay time.Duration.
-func GetPollingDelay(resp *http.Response, defaultDelay time.Duration) time.Duration {
+func GetRetryAfter(resp *http.Response, defaultDelay time.Duration) time.Duration {
 	retry := resp.Header.Get(HeaderRetryAfter)
 	if retry == "" {
 		return defaultDelay
@@ -129,38 +96,19 @@ func GetPollingDelay(resp *http.Response, defaultDelay time.Duration) time.Durat
 	return d
 }
 
-// GetPollingLocation retrieves the polling URL from the Location header of the passed response.
-func GetPollingLocation(resp *http.Response) string {
-	return resp.Header.Get(HeaderLocation)
-}
-
-// PollForAttempts will retry the passed http.Request until it receives an HTTP status code outside
-// the passed set or has made the specified number of attempts. The set of status codes defaults to
-// HTTP 202 Accepted.
-func PollForAttempts(s Sender, req *http.Request, defaultDelay time.Duration, attempts int, codes ...int) (*http.Response, error) {
-	return SendWithSender(
-		decorateForPolling(s, defaultDelay, codes...),
-		req,
-		DoRetryForAttempts(attempts, time.Duration(0)))
-}
-
-// PollForDuration will retry the passed http.Request until it receives an HTTP status code outside
-// the passed set or the total time meets or exceeds the specified duration. The set of status codes
-// defaults to HTTP 202 Accepted.
-func PollForDuration(s Sender, req *http.Request, defaultDelay time.Duration, total time.Duration, codes ...int) (*http.Response, error) {
-	return SendWithSender(
-		decorateForPolling(s, defaultDelay, codes...),
-		req,
-		DoRetryForDuration(total, time.Duration(0)))
-}
-
-func decorateForPolling(s Sender, defaultDelay time.Duration, codes ...int) Sender {
-	if len(codes) == 0 {
-		codes = []int{http.StatusAccepted}
+// NewPollingRequest allocates and returns a new http.Request to poll for the passed response.
+func NewPollingRequest(resp *http.Response, cancel <-chan struct{}) (*http.Request, error) {
+	location := GetLocation(resp)
+	if location == "" {
+		return nil, NewErrorWithResponse("autorest", "NewPollingRequest", resp, "Location header missing from response that requires polling")
 	}
 
-	return DecorateSender(s,
-		AfterRetryDelay(defaultDelay),
-		DoErrorIfStatusCode(codes...),
-		DoCloseIfError())
+	req, err := Prepare(&http.Request{Cancel: cancel},
+		AsGet(),
+		WithBaseURL(location))
+	if err != nil {
+		return nil, NewErrorWithError(err, "autorest", "NewPollingRequest", nil, "Failure creating poll request to %s", location)
+	}
+
+	return req, nil
 }

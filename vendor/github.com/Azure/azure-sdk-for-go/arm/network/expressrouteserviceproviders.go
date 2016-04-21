@@ -48,21 +48,21 @@ func NewExpressRouteServiceProvidersClientWithBaseURI(baseURI string, subscripti
 
 // List the List ExpressRouteServiceProvider opertion retrieves all the
 // available ExpressRouteServiceProviders.
-func (client ExpressRouteServiceProvidersClient) List() (result ExpressRouteServiceProviderListResult, ae error) {
+func (client ExpressRouteServiceProvidersClient) List() (result ExpressRouteServiceProviderListResult, err error) {
 	req, err := client.ListPreparer()
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "network/ExpressRouteServiceProvidersClient", "List", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "network.ExpressRouteServiceProvidersClient", "List", nil, "Failure preparing request")
 	}
 
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "network/ExpressRouteServiceProvidersClient", "List", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "network.ExpressRouteServiceProvidersClient", "List", resp, "Failure sending request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "network/ExpressRouteServiceProvidersClient", "List", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "network.ExpressRouteServiceProvidersClient", "List", resp, "Failure responding to request")
 	}
 
 	return
@@ -90,7 +90,7 @@ func (client ExpressRouteServiceProvidersClient) ListPreparer() (*http.Request, 
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client ExpressRouteServiceProvidersClient) ListSender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // ListResponder handles the response to the List request. The method always
@@ -107,10 +107,10 @@ func (client ExpressRouteServiceProvidersClient) ListResponder(resp *http.Respon
 }
 
 // ListNextResults retrieves the next set of results, if any.
-func (client ExpressRouteServiceProvidersClient) ListNextResults(lastResults ExpressRouteServiceProviderListResult) (result ExpressRouteServiceProviderListResult, ae error) {
+func (client ExpressRouteServiceProvidersClient) ListNextResults(lastResults ExpressRouteServiceProviderListResult) (result ExpressRouteServiceProviderListResult, err error) {
 	req, err := lastResults.ExpressRouteServiceProviderListResultPreparer()
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "network/ExpressRouteServiceProvidersClient", "List", nil, "Failure preparing next results request request")
+		return result, autorest.NewErrorWithError(err, "network.ExpressRouteServiceProvidersClient", "List", nil, "Failure preparing next results request request")
 	}
 	if req == nil {
 		return
@@ -119,12 +119,12 @@ func (client ExpressRouteServiceProvidersClient) ListNextResults(lastResults Exp
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "network/ExpressRouteServiceProvidersClient", "List", resp, "Failure sending next results request request")
+		return result, autorest.NewErrorWithError(err, "network.ExpressRouteServiceProvidersClient", "List", resp, "Failure sending next results request request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "network/ExpressRouteServiceProvidersClient", "List", resp, "Failure responding to next results request request")
+		err = autorest.NewErrorWithError(err, "network.ExpressRouteServiceProvidersClient", "List", resp, "Failure responding to next results request request")
 	}
 
 	return

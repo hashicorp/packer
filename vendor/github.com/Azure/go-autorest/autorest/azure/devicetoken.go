@@ -91,7 +91,7 @@ func InitiateDeviceAuth(client *autorest.Client, oauthConfig OAuthConfig, client
 		}),
 	)
 
-	resp, err := client.Send(req)
+	resp, err := autorest.SendWithSender(client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%s %s: %s", logPrefix, errCodeSendingFails, err)
 	}
@@ -129,7 +129,7 @@ func CheckForUserCompletion(client *autorest.Client, code *DeviceCode) (*Token, 
 		}),
 	)
 
-	resp, err := client.Send(req)
+	resp, err := autorest.SendWithSender(client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%s %s: %s", logPrefix, errTokenSendingFails, err)
 	}
