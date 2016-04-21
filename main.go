@@ -19,6 +19,7 @@ import (
 	"github.com/mitchellh/packer/command"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/mitchellh/packer/version"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
 )
@@ -105,9 +106,7 @@ func wrappedMain() int {
 
 	log.SetOutput(os.Stderr)
 
-	log.Printf(
-		"[INFO] Packer version: %s %s %s",
-		Version, VersionPrerelease, GitCommit)
+	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("Built with Go Version: %s", runtime.Version())
 
@@ -175,7 +174,7 @@ func wrappedMain() int {
 				PostProcessor: config.LoadPostProcessor,
 				Provisioner:   config.LoadProvisioner,
 			},
-			Version: Version,
+			Version: version.Version,
 		},
 		Cache: cache,
 		Ui:    ui,
@@ -188,7 +187,7 @@ func wrappedMain() int {
 		Commands:   Commands,
 		HelpFunc:   excludeHelpFunc(Commands, []string{"plugin"}),
 		HelpWriter: os.Stdout,
-		Version:    Version,
+		Version:    version.Version,
 	}
 
 	exitCode, err := cli.Run()
