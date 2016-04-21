@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -48,15 +48,29 @@ func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAc
 	s.say(fmt.Sprintf(" -> Location          : '%s'", location))
 
 	err := s.create(resourceGroupName, location)
-	if err != nil {
-		state.Put(constants.Error, err)
-		s.error(err)
-
-		return multistep.ActionHalt
+	if err == nil {
+		state.Put(constants.ArmIsResourceGroupCreated, true)
 	}
 
-	return multistep.ActionContinue
+	return processStepResult(err, s.error, state)
 }
 
-func (*StepCreateResourceGroup) Cleanup(multistep.StateBag) {
+func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
+	_, ok := state.GetOk(constants.ArmIsResourceGroupCreated)
+	if !ok {
+		return
+	}
+
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("\nCleanup requested, deleting resource group ...")
+
+	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
+	_, err := s.client.GroupsClient.Delete(resourceGroupName, nil)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
+			"Name: %s\n"+
+			"Error: %s", resourceGroupName, err))
+	}
+
+	ui.Say("Resource group has been deleted.")
 }

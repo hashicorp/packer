@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
 import (
 	"fmt"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -55,7 +55,7 @@ func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.say(fmt.Sprintf(" -> SSHHost             : '%s'", address))
+	s.say(fmt.Sprintf(" -> Public IP           : '%s'", address))
 	state.Put(constants.SSHHost, address)
 
 	return multistep.ActionContinue
