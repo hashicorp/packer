@@ -25,6 +25,7 @@
     "ssh_username": "{{user `ssh_user`}}",
     "ssh_password": "{{user `ssh_pass`}}",
 
+    "os_type": "Linux",
     "image_publisher": "credativ",
     "image_offer": "Debian",
     "image_sku": "8",
