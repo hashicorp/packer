@@ -29,7 +29,7 @@ change to Chef/Puppet.
 
 As part of this pipeline, the newly created images can then be launched and
 tested, verifying the infrastructure changes work. If the tests pass, you can be
-confident that that image will work when deployed. This brings a new level of
+confident that the image will work when deployed. This brings a new level of
 stability and testability to infrastructure changes.
 
 ### Dev/Prod Parity
