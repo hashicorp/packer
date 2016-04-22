@@ -361,9 +361,9 @@ func vncSendString(c *vnc.ClientConn, original string) {
 		// to deal with network latency and the OS responding to the keystroke.
 		// It is kind of arbitrary but it is better than nothing.
 		c.KeyEvent(keyCode, true)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 		c.KeyEvent(keyCode, false)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 
 		if keyShift {
 			c.KeyEvent(KeyLeftShift, false)
