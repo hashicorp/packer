@@ -73,7 +73,7 @@ func TestStepRegister_WithoutUnregister_remoteDriver(t *testing.T) {
 
 	driver := new(RemoteDriverMock)
 	var config Config
-	config.KeepRegistered = true 
+	config.KeepRegistered = true
 	state.Put("config", &config)
 
 	state.Put("driver", driver)
