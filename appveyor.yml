@@ -13,8 +13,6 @@ os: Windows Server 2012 R2
 environment:
   GOPATH: c:\gopath
   matrix:
-  - GOARCH: 386
-    GOVERSION: 1.6
   - GOARCH: amd64
     GOVERSION: 1.6
 
@@ -30,12 +28,16 @@ install:
   - go env
   - go get github.com/mitchellh/gox
   - go get golang.org/x/tools/cmd/stringer
-  - go get golang.org/x/tools/cmd/vet
 
 build_script:
   - git rev-parse HEAD
-  - go test -v ./...
-  - go vet ./...
+ # go test $(go list ./... | grep -v vendor)
+  - ps: |
+      go.exe test (go.exe list ./... `
+      |? { -not $_.Contains('/vendor/') } `
+      |? { $_ -ne 'github.com/mitchellh/packer/builder/parallels/common' } `
+      |? { $_ -ne 'github.com/mitchellh/packer/common' }`
+      |? { $_ -ne 'github.com/mitchellh/packer/provisioner/ansible' })
 
 test: off
 
