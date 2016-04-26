@@ -78,10 +78,15 @@ Optional parameters:
     **Important:** If you customize this, be sure to include something like the
     `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
--   `remote_path` (string) - The filename where the script will be uploaded
-    to in the machine. This defaults to `/tmp/script_nnn.sh` where "nnn" is
-    a randomly generated number. This value must be a writable location and
-    any parent directories must already exist.
+-   `remote_folder` (string) - The folder where the uploaded script will reside on
+    the machine. This defaults to '/tmp'.
+
+-   `remote_file` (string) - The filename the uploaded script will have on the machine.
+    This defaults to 'script_nnn.sh'.
+
+-   `remote_path` (string) - The full path to the uploaded script will have on the
+     machine. By default this is remote_folder/remote_file, if set this option will
+     override both remote_folder and remote_file.
 
 -   `skip_clean` (boolean) - If true, specifies that the helper scripts 
     uploaded to the system will not be removed by Packer. This defaults to 
