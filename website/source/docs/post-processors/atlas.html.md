@@ -72,8 +72,12 @@ you can also use `token` configuration option.
 
 -   `metadata` (map) - Send metadata about the artifact. If the artifact type is
     "vagrant.box", you must specify a "provider" metadata about what provider
-    to use.
-
+    to use. 
+    - `description` (string) - Inside the metadata blob you can add a information about the uploaded artifact to Atlas.
+        This will be reflected in the box description on Atlas. 
+    - `provider` (string) - Used by Atlas to help determine, what should be used to run the artifact.
+    - `version` (string) - Used by Atlas to give a semantic version to the uploaded artifact. 
+ 
 ### Example Configuration
 
 ``` {.javascript}
