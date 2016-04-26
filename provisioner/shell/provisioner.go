@@ -44,8 +44,17 @@ type Config struct {
 	// your command(s) are executed.
 	Vars []string `mapstructure:"environment_vars"`
 
+	// The remote folder where the local shell script will be uploaded to.
+	// This should be set to a pre-existing directory, it defaults to /tmp
+	RemoteFolder string `mapstructure:"remote_folder"`
+
+	// The remote file name of the local shell script.
+	// This defaults to script_nnn.sh
+	RemoteFile string `mapstructure:"remote_file"`
+
 	// The remote path where the local shell script will be uploaded to.
 	// This should be set to a writable file that is in a pre-existing directory.
+	// This defaults to remote_folder/remote_file
 	RemotePath string `mapstructure:"remote_path"`
 
 	// The command used to execute the script. The '{{ .Path }}' variable
@@ -104,9 +113,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RawStartRetryTimeout = "5m"
 	}
 
+	if p.config.RemoteFolder == "" {
+		p.config.RemoteFolder = "/tmp"
+	}
+
+	if p.config.RemoteFile == "" {
+		p.config.RemoteFile = fmt.Sprintf("script_%d.sh", rand.Intn(9999))
+	}
+
 	if p.config.RemotePath == "" {
 		p.config.RemotePath = fmt.Sprintf(
-			"/tmp/script_%d.sh", rand.Intn(9999))
+			"%s/%s", p.config.RemoteFolder, p.config.RemoteFile)
 	}
 
 	if p.config.Scripts == nil {
