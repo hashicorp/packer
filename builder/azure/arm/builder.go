@@ -17,7 +17,7 @@ import (
 	"github.com/mitchellh/packer/builder/azure/common/lin"
 
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
+	packerCommon "github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
 )
@@ -52,6 +52,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	ui.Say("Preparing builder ...")
+
+	log.Print(":: Configuration")
+	packerAzureCommon.DumpConfig(b.config, func(s string) { log.Print(s) })
 
 	b.stateBag.Put("hook", hook)
 	b.stateBag.Put(constants.Ui, ui)
@@ -93,7 +96,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Host:      lin.SSHHost,
 				SSHConfig: lin.SSHConfig(b.config.UserName),
 			},
-			&common.StepProvision{},
+			&packerCommon.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
 			NewStepCaptureImage(azureClient, ui),
@@ -122,7 +125,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 					}, nil
 				},
 			},
-			&common.StepProvision{},
+			&packerCommon.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
 			NewStepCaptureImage(azureClient, ui),
@@ -179,7 +182,7 @@ func (b *Builder) createRunner(steps *[]multistep.Step, ui packer.Ui) multistep.
 	if b.config.PackerDebug {
 		return &multistep.DebugRunner{
 			Steps:   *steps,
-			PauseFn: common.MultistepDebugFn(ui),
+			PauseFn: packerCommon.MultistepDebugFn(ui),
 		}
 	}
 
