@@ -208,7 +208,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if nodeName == "" {
 		nodeName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
-	remoteValidationKeyPath := ""
 	serverUrl := p.config.ServerUrl
 
 	if !p.config.SkipInstall {
@@ -235,6 +234,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error uploading encrypted data bag secret: %s", err)
 		}
 	}
+
+	remoteValidationKeyPath := ""
+	if p.config.ValidationKeyPath != "" {
+		remoteValidationKeyPath = fmt.Sprintf("%s/validation.pem", p.config.StagingDir)
+		if err := p.uploadFile(ui, comm, remoteValidationKeyPath, p.config.ValidationKeyPath); err != nil {
+			return fmt.Errorf("Error copying validation key: %s", err)
+		}
+	}
+
 	configPath, err := p.createConfig(
 		ui,
 		comm,
@@ -248,13 +256,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		p.config.SslVerifyMode)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
-	}
-
-	if p.config.ValidationKeyPath != "" {
-		remoteValidationKeyPath = fmt.Sprintf("%s/validation.pem", p.config.StagingDir)
-		if err := p.uploadFile(ui, comm, remoteValidationKeyPath, p.config.ValidationKeyPath); err != nil {
-			return fmt.Errorf("Error copying validation key: %s", err)
-		}
 	}
 
 	jsonPath, err := p.createJson(ui, comm)
