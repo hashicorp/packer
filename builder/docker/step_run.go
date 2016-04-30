@@ -20,6 +20,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 		Image:      config.Image,
 		RunCommand: config.RunCommand,
 		Volumes:    make(map[string]string),
+		Privileged: config.Privileged,
 	}
 
 	for host, container := range config.Volumes {
