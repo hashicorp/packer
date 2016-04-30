@@ -210,6 +210,9 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 
 	// Args that we're going to pass to Docker
 	args := []string{"run"}
+	if config.Privileged {
+		args = append(args, "--privileged")
+	}
 	for host, guest := range config.Volumes {
 		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
 	}
