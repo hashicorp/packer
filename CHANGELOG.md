@@ -1,9 +1,14 @@
 ## (Unreleased)
 
+FEATURES:
+
+  * builder/docker: Add `privileged` build option [GH-3475]
+  * provisioner/shell: Add `remote_folder` and `remote_file` options [GH-3462]
+
 BUG FIXES:
 
   * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
-  * builder/docker: Add `privileged` build option [GH-3475]
+  * provisioner/chef: Use custom values for remote validation key path [GH-3468]
 
 ## 0.10.0 (March 14, 2016)
 
