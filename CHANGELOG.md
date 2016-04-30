@@ -3,6 +3,7 @@
 BUG FIXES:
 
   * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
+  * builder/docker: Add `privileged` build option [GH-3475]
 
 ## 0.10.0 (March 14, 2016)
 
