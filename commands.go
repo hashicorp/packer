@@ -33,6 +33,12 @@ func init() {
 			}, nil
 		},
 
+		"get": func() (cli.Command, error) {
+			return &command.GetCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
 		"inspect": func() (cli.Command, error) {
 			return &command.InspectCommand{
 				Meta: *CommandMeta,
