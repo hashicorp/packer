@@ -12,6 +12,7 @@ import (
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/provisioner"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -57,10 +58,35 @@ type Config struct {
 
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
+
+    GuestOSType string `mapstructure:"guest_os_type"`
+	ConfigTemplate             string   `mapstructure:"config_template"`
+}
+
+type guestOSTypeConfig struct {
+	executeCommand string
+	installCommand string
+	stagingDir     string
+}
+
+
+var guestOSTypeConfigs = map[string]guestOSTypeConfig{
+	provisioner.UnixOSType: guestOSTypeConfig{
+		executeCommand: "{{if .Sudo}}sudo {{end}}chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
+		installCommand: "curl -L https://www.chef.io/chef/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		stagingDir:     "/tmp/packer-chef-client",
+	},
+	provisioner.WindowsOSType: guestOSTypeConfig{
+		executeCommand: "c:/opscode/chef/bin/chef-solo.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
+		installCommand: "powershell.exe -Command \"(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait\"",
+		stagingDir:     "C:/Windows/Temp/packer-chef-client",
+	},
 }
 
 type Provisioner struct {
 	config Config
+	guestOSTypeConfig guestOSTypeConfig
+	guestCommands     *provisioner.GuestCommands
 }
 
 type ExecuteTemplate struct {
@@ -157,6 +183,37 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		} else if !info.IsDir() {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("module_path[%d] must point to a directory", i))
+		}
+	}
+
+	if p.config.GuestOSType == "" {
+		p.config.GuestOSType = provisioner.DefaultOSType
+	}
+	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+
+    var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
+	}
+
+	if p.config.ConfigTemplate != "" {
+		fi, err := os.Stat(p.config.ConfigTemplate)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Bad config template path: %s", err))
+		} else if fi.IsDir() {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Config template path must be a file: %s", err))
 		}
 	}
 
@@ -328,9 +385,9 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p '%s'", dir),
-	}
+	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
+
+	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
 
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
