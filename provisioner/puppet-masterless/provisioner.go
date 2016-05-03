@@ -65,16 +65,33 @@ type Config struct {
 
 type guestOSTypeConfig struct {
 	stagingDir     string
+	executeCommand string
 }
 
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: guestOSTypeConfig{
 		stagingDir:     "/tmp/packer-puppet-masterless",
+        executeCommand:    "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
+			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
+			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
+			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			"--detailed-exitcodes " +
+			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
+			"{{.ManifestFile}}",
 	},
 	provisioner.WindowsOSType: guestOSTypeConfig{
 		stagingDir:     "C:/Windows/Temp/packer-puppet-masterless",
-	},
+        executeCommand:    "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}} " +
+			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
+			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
+			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			"--detailed-exitcodes " +
+			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
+			"{{.ManifestFile}}",
+    },
 }
 
 type Provisioner struct {
@@ -110,15 +127,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
-			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
-			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
-			"--detailed-exitcodes " +
-			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
-			"{{.ManifestFile}}"
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
+
 
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = "/tmp/packer-puppet-masterless"
@@ -272,8 +283,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	// Execute Puppet
+    var facterVarsString string
+    if p.config.GuestOSType == provisioner.UnixOSType {
+        facterVarsString = strings.Join(facterVars, " ")
+    } else {
+        facterVarsString = "SET " + strings.Join(facterVars, " && SET ")
+    }
+
+
 	p.config.ctx.Data = &ExecuteTemplate{
-		FacterVars:      strings.Join(facterVars, " "),
+		FacterVars:      facterVarsString,
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
