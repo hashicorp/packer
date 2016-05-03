@@ -33,6 +33,7 @@ import (
 	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
+	checksumpostprocessor "github.com/mitchellh/packer/post-processor/checksum"
 	compresspostprocessor "github.com/mitchellh/packer/post-processor/compress"
 	dockerimportpostprocessor "github.com/mitchellh/packer/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/mitchellh/packer/post-processor/docker-push"
@@ -101,6 +102,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"amazon-import": new(amazonimportpostprocessor.PostProcessor),
 	"artifice":      new(artificepostprocessor.PostProcessor),
 	"atlas":         new(atlaspostprocessor.PostProcessor),
+	"checksum":      new(checksumpostprocessor.PostProcessor),
 	"compress":      new(compresspostprocessor.PostProcessor),
 	"docker-import": new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":   new(dockerpushpostprocessor.PostProcessor),
