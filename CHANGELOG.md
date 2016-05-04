@@ -2,6 +2,7 @@
 
 FEATURES:
 
+  * core: Add support for `ATLAS_CAFILE` and `ATLAS_CAPATH` [GH-3494]
   * builder/docker: Add `privileged` build option [GH-3475]
   * provisioner/shell: Add `remote_folder` and `remote_file` options [GH-3462]
 
