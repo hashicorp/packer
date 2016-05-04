@@ -74,6 +74,12 @@ you can also use `token` configuration option.
     "vagrant.box", you must specify a "provider" metadata about what provider
     to use.
 
+## Environment Variables
+
+-   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public key. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+
+-   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded public key file. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+
 ### Example Configuration
 
 ``` {.javascript}

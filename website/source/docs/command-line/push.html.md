@@ -50,6 +50,12 @@ you can also use `-token` on the command line.
 
 -   `-var-file` - Set template variables from a file.
 
+## Environment Variables
+
+-   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public key. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+
+-   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded public key file. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+
 ## Examples
 
 Push a Packer template:
