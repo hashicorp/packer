@@ -12,18 +12,12 @@ os: Windows Server 2012 R2
 
 environment:
   GOPATH: c:\gopath
-  matrix:
-  - GOARCH: amd64
-    GOVERSION: 1.6
 
 clone_folder: c:\gopath\src\github.com\mitchellh\packer
 
 install:
-  - set Path=c:\go\bin;%Path%
   - set GO15VENDOREXPERIMENT=1
   - echo %Path%
-  - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-%GOARCH%.msi
-  - msiexec /i go%GOVERSION%.windows-%GOARCH%.msi /q
   - go version
   - go env
   - go get github.com/mitchellh/gox
