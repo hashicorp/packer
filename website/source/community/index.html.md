@@ -77,10 +77,10 @@ list as contributors come and go.
 
     <img class="pull-left" src="https://www.gravatar.com/avatar/1fca64df3d7db1e2f258a8956d2b0aff.png?s=125">
     <div class="bio">
-      <h3>Ross Smith II (<a href="https://github.com/rasa" target="_blank">@rasa</a>)</h3>
+      <h3>Ross Smith II (<a href="https://github.com/rasa" target="_blank" rel="nofollow noopener noreferrer">@rasa</a>)</h3>
       <p>
 
-<a href="http://smithii.com/" target="_blank">Ross Smith</a> maintains our
+<a href="http://smithii.com/" target="_blank" rel="nofollow noopener noreferrer">Ross Smith</a> maintains our
 VMware builder on Windows, and provides other valuable assistance. Ross is an
 open source enthusiast, published author, and freelance consultant.
 </p>
@@ -92,7 +92,7 @@ open source enthusiast, published author, and freelance consultant.
 
     <img class="pull-left" src="https://www.gravatar.com/avatar/c9f6bf7b5b865012be5eded656ebed7d.png?s=125">
     <div class="bio">
-      <h3>Rickard von Essen<br/>(<a href="https://github.com/rickard-von-essen" target="_blank">@rickard-von-essen</a>)</h3>
+      <h3>Rickard von Essen<br/>(<a href="https://github.com/rickard-von-essen" target="_blank" rel="nofollow noopener noreferrer">@rickard-von-essen</a>)</h3>
       <p>
 
 Rickard von Essen maintains our Parallels Desktop builder. Rickard is an
