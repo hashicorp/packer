@@ -181,7 +181,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			path = longestCommonPrefix(fs)
 			if path == "" {
 				return nil, false, fmt.Errorf(
-					"No common prefix for achiving files: %v", fs)
+					"No common prefix for archiving files: %v", fs)
 			}
 
 			// Modify the archive options to only include the files
