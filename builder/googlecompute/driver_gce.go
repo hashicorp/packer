@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -68,12 +69,7 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
 	log.Printf("[INFO] Instantiating GCE client...")
 	service, err := compute.New(client)
 	// Set UserAgent
-	versionString := "0.0.0"
-	// TODO(dcunnin): Use Packer's version code from version.go
-	// versionString := main.Version
-	// if main.VersionPrerelease != "" {
-	//      versionString = fmt.Sprintf("%s-%s", versionString, main.VersionPrerelease)
-	// }
+	versionString := version.FormattedVersion()
 	service.UserAgent = fmt.Sprintf(
 		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
 
