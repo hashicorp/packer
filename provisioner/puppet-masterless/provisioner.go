@@ -84,7 +84,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.WindowsOSType: guestOSTypeConfig{
 		stagingDir:     "C:/Windows/Temp/packer-puppet-masterless",
         executeCommand:    "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} " +
+			"{{.FacterVars}} && " +
 			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
@@ -312,7 +312,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	ui.Message(fmt.Sprintf("Running Puppet: %s", command))
 	if err := cmd.StartWithUi(comm, ui); err != nil {
-		return err
+        return fmt.Errorf("Got an error starting command: %s", err)
 	}
 
 	if cmd.ExitStatus != 0 && cmd.ExitStatus != 2 && !p.config.IgnoreExitCodes {
