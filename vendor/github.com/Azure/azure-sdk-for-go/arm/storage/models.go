@@ -199,8 +199,8 @@ type Resource struct {
 // Usage is describes Storage Resource Usage.
 type Usage struct {
 	Unit         UsageUnit  `json:"unit,omitempty"`
-	CurrentValue *int       `json:"currentValue,omitempty"`
-	Limit        *int       `json:"limit,omitempty"`
+	CurrentValue *int32     `json:"currentValue,omitempty"`
+	Limit        *int32     `json:"limit,omitempty"`
 	Name         *UsageName `json:"name,omitempty"`
 }
 

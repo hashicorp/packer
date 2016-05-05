@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
@@ -75,11 +75,11 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedIPAddressName = stateBag.Get(constants.ArmPublicIPAddressName).(string)
 
 	if actualIPAddressName != expectedIPAddressName {
-		t.Fatalf("Expected StepValidateTemplate to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
+		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected StepValidateTemplate to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	expectedIPAddress, ok := stateBag.GetOk(constants.SSHHost)

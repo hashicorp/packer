@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -79,13 +79,13 @@ func TestMalformedTemplatesShouldReturnError(t *testing.T) {
 
 func getTemplateParameters() TemplateParameters {
 	templateParameters := TemplateParameters{
-		AdminUsername:      &TemplateParameter{"adminusername00"},
-		DnsNameForPublicIP: &TemplateParameter{"dnsnameforpublicip00"},
-		OSDiskName:         &TemplateParameter{"osdiskname00"},
-		SshAuthorizedKey:   &TemplateParameter{"sshkeydata00"},
-		StorageAccountName: &TemplateParameter{"storageaccountname00"},
-		VMName:             &TemplateParameter{"vmname00"},
-		VMSize:             &TemplateParameter{"vmsize00"},
+		AdminUsername:              &TemplateParameter{"adminusername00"},
+		DnsNameForPublicIP:         &TemplateParameter{"dnsnameforpublicip00"},
+		OSDiskName:                 &TemplateParameter{"osdiskname00"},
+		SshAuthorizedKey:           &TemplateParameter{"sshkeydata00"},
+		StorageAccountBlobEndpoint: &TemplateParameter{"storageaccountblobendpoint00"},
+		VMName: &TemplateParameter{"vmname00"},
+		VMSize: &TemplateParameter{"vmsize00"},
 	}
 
 	return templateParameters

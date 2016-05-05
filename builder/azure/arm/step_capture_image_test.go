@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -8,15 +8,17 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
-
 	var testSubject = &StepCaptureImage{
-		capture: func(string, string, *compute.VirtualMachineCaptureParameters) error {
+		capture: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error {
 			return fmt.Errorf("!! Unit Test FAIL !!")
+		},
+		get: func(client *AzureClient) *CaptureTemplate {
+			return nil
 		},
 		say:   func(message string) {},
 		error: func(e error) {},
@@ -36,9 +38,12 @@ func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 
 func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		capture: func(string, string, *compute.VirtualMachineCaptureParameters) error { return nil },
-		say:     func(message string) {},
-		error:   func(e error) {},
+		capture: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error { return nil },
+		get: func(client *AzureClient) *CaptureTemplate {
+			return nil
+		},
+		say:   func(message string) {},
+		error: func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepCaptureImage()
@@ -54,17 +59,26 @@ func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 }
 
 func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
+	cancelCh := make(chan<- struct{})
+	defer close(cancelCh)
+
 	var actualResourceGroupName string
 	var actualComputeName string
 	var actualVirtualMachineCaptureParameters *compute.VirtualMachineCaptureParameters
+	actualCaptureTemplate := &CaptureTemplate{
+		Schema: "!! Unit Test !!",
+	}
 
 	var testSubject = &StepCaptureImage{
-		capture: func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters) error {
+		capture: func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 			actualVirtualMachineCaptureParameters = parameters
 
 			return nil
+		},
+		get: func(client *AzureClient) *CaptureTemplate {
+			return actualCaptureTemplate
 		},
 		say:   func(message string) {},
 		error: func(e error) {},
@@ -80,6 +94,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedComputeName = stateBag.Get(constants.ArmComputeName).(string)
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 	var expectedVirtualMachineCaptureParameters = stateBag.Get(constants.ArmVirtualMachineCaptureParameters).(*compute.VirtualMachineCaptureParameters)
+	var expectedCaptureTemplate = stateBag.Get(constants.ArmCaptureTemplate).(*CaptureTemplate)
 
 	if actualComputeName != expectedComputeName {
 		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmComputeName' from the state bag, but it did not.")
@@ -91,6 +106,10 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 
 	if actualVirtualMachineCaptureParameters != expectedVirtualMachineCaptureParameters {
 		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmVirtualMachineCaptureParameters' from the state bag, but it did not.")
+	}
+
+	if actualCaptureTemplate != expectedCaptureTemplate {
+		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmCaptureTemplate' from the state bag, but it did not.")
 	}
 }
 

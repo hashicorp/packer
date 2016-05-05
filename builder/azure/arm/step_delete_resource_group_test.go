@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
 
 package arm
 
@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		delete: func(string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -32,7 +32,7 @@ func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string) error { return nil },
+		delete: func(string, <-chan struct{}) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -53,7 +53,7 @@ func TestStepDeleteResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	var actualResourceGroupName string
 
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(resourceGroupName string) error {
+		delete: func(resourceGroupName string, cancelCh <-chan struct{}) error {
 			actualResourceGroupName = resourceGroupName
 			return nil
 		},
