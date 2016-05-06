@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/mitchellh/packer/common"
@@ -92,6 +93,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		} else {
 			c.ImageName = img
 		}
+	}
+
+	if len(c.ImageFamily) > 63 {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Invalid image family: Must not be longer than 63 characters"))
+	}
+
+	if c.ImageFamily != "" {
+		if !regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`).MatchString(c.ImageFamily) {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("Invalid image family: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"))
+		}
+
 	}
 
 	if c.InstanceName == "" {
