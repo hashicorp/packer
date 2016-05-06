@@ -91,10 +91,11 @@ func (d *driverGCE) ImageExists(name string) bool {
 	return err == nil
 }
 
-func (d *driverGCE) CreateImage(name, description, zone, disk string) <-chan error {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string) <-chan error {
 	image := &compute.Image{
 		Description: description,
 		Name:        name,
+		Family:      family,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
