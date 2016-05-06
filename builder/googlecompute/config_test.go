@@ -123,6 +123,11 @@ func TestConfigPrepare(t *testing.T) {
 			"foo-bar",
 			false,
 		},
+		{
+			"image_family",
+			"foo bar",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
