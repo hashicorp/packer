@@ -6,11 +6,12 @@ type DriverMock struct {
 	ImageExistsName   string
 	ImageExistsResult bool
 
-	CreateImageName  string
-	CreateImageDesc  string
-	CreateImageZone  string
-	CreateImageDisk  string
-	CreateImageErrCh <-chan error
+	CreateImageName   string
+	CreateImageDesc   string
+	CreateImageFamily string
+	CreateImageZone   string
+	CreateImageDisk   string
+	CreateImageErrCh  <-chan error
 
 	DeleteImageName  string
 	DeleteImageErrCh <-chan error
@@ -50,9 +51,10 @@ func (d *DriverMock) ImageExists(name string) bool {
 	return d.ImageExistsResult
 }
 
-func (d *DriverMock) CreateImage(name, description, zone, disk string) <-chan error {
+func (d *DriverMock) CreateImage(name, description, family, zone, disk string) <-chan error {
 	d.CreateImageName = name
 	d.CreateImageDesc = description
+	d.CreateImageFamily = family
 	d.CreateImageZone = zone
 	d.CreateImageDisk = disk
 

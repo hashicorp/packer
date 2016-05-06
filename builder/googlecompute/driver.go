@@ -10,7 +10,7 @@ type Driver interface {
 
 	// CreateImage creates an image from the given disk in Google Compute
 	// Engine.
-	CreateImage(name, description, zone, disk string) <-chan error
+	CreateImage(name, description, family, zone, disk string) <-chan error
 
 	// DeleteImage deletes the image with the given name.
 	DeleteImage(name string) <-chan error
