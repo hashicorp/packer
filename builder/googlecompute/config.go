@@ -28,6 +28,7 @@ type Config struct {
 	DiskType             string            `mapstructure:"disk_type"`
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
+	ImageFamily          string            `mapstructure:"image_family"`
 	InstanceName         string            `mapstructure:"instance_name"`
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
