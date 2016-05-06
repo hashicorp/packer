@@ -54,11 +54,11 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value
-    of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
-    available variables: `Path`, which is the path to the script to run, and
-    `Vars`, which is the list of `environment_vars`, if configured.
+    default this is `chmod +x {{.Script}}; {{.Vars}} {{.Script}} {{.Artifact}}`.
+    The value of this is treated as [configuration template](/docs/templates/configuration-templates.html).
+    There are three available variables: `Script`, which is the path to the script
+    to run, `Vars`, which is the list of `environment_vars`, if configured and
+    `Artifact`, which is path to artifact file.
 
 -   `inline_shebang` (string) - The
     [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
