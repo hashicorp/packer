@@ -1,6 +1,6 @@
 ---
 description: |
-    
+
 layout: docs
 page_title: Azure Resource Manager
 ...
@@ -16,8 +16,6 @@ Unlike most Packer builders, the artifact produced by the ARM builder is a VHD (
 Azure uses a combination of OAuth and Active Directory to authorize requests to the ARM API. Learn how to [authorize access to ARM](/docs/builders/azure-setup.html).
 
 The documentation below references command output from the [Azure CLI](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/).
-
--> At this time packer supports building Linux virtual machines in Azure. Support for building Windows VMs is in progress and will be added in an upcoming release.
 
 ## Configuration Reference
 
@@ -59,9 +57,30 @@ builder.
 
     CLI example `azure location list`
 
--   `vm_size` (string) Size of the VM used for building. This can be changed when you deploy a VM from your VHD. See [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/) information.
+### Optional:
+
+-   `cloud_environment_name` (string) One of `Public`, `China`, or
+    `USGovernment`. Defaults to `Public`. Long forms such as
+    `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
+
+-   `image_version` (string) Specify a specific version of an OS to boot from.
+    Defaults to `latest`.
+
+-   `object_id` (string) Specify an OAuth Object ID to automatically
+    authenticate with the VM. See `Windows` behavior for `os_type`, below.
+
+-   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
+    automatically configure authentication credentials for your machine. For
+    `Linux` this configures an SSH authorized key. For `Windows` this
+    configures your Tenant ID, Object ID, Key Vault Name, Key Vault Secret, and
+    WinRM certificate URL.
+
+-   `vm_size` (string) Size of the VM used for building. This can be changed
+    when you deploy a VM from your VHD. See
+    [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/) information. Defaults to `Standard_A1`.
 
     CLI example `azure vm sizes -l westus`
+
 
 ## Basic Example
 
