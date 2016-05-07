@@ -6,42 +6,44 @@ package arm
 import (
 	"fmt"
 
-	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepDeployTemplate struct {
-	client *AzureClient
-	deploy func(resourceGroupName string, deploymentName string, templateParameters *TemplateParameters) error
-	say    func(message string)
-	error  func(e error)
+	client   *AzureClient
+	template string
+	deploy   func(resourceGroupName string, deploymentName string, templateParameters *TemplateParameters, cancelCh <-chan struct{}) error
+	say      func(message string)
+	error    func(e error)
 }
 
-func NewStepDeployTemplate(client *AzureClient, ui packer.Ui) *StepDeployTemplate {
+func NewStepDeployTemplate(client *AzureClient, ui packer.Ui, template string) *StepDeployTemplate {
 	var step = &StepDeployTemplate{
-		client: client,
-		say:    func(message string) { ui.Say(message) },
-		error:  func(e error) { ui.Error(e.Error()) },
+		client:   client,
+		template: template,
+		say:      func(message string) { ui.Say(message) },
+		error:    func(e error) { ui.Error(e.Error()) },
 	}
 
 	step.deploy = step.deployTemplate
 	return step
 }
 
-func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deploymentName string, templateParameters *TemplateParameters) error {
-	factory := newDeploymentFactory(Linux)
+func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deploymentName string, templateParameters *TemplateParameters, cancelCh <-chan struct{}) error {
+	factory := newDeploymentFactory(s.template)
 	deployment, err := factory.create(*templateParameters)
 	if err != nil {
 		return err
 	}
 
-	res, err := s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment)
+	_, err = s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment, cancelCh)
 	if err != nil {
 		return err
 	}
 
-	s.client.DeploymentsClient.PollAsNeeded(res.Response.Response)
 	poller := NewDeploymentPoller(func() (string, error) {
 		r, e := s.client.DeploymentsClient.Get(resourceGroupName, deploymentName)
 		if r.Properties != nil && r.Properties.ProvisioningState != nil {
@@ -73,15 +75,14 @@ func (s *StepDeployTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> DeploymentName    : '%s'", deploymentName))
 
-	err := s.deploy(resourceGroupName, deploymentName, templateParameters)
-	if err != nil {
-		state.Put(constants.Error, err)
-		s.error(err)
+	result := common.StartInterruptibleTask(
+		func() bool { return common.IsStateCancelled(state) },
+		func(cancelCh <-chan struct{}) error {
+			return s.deploy(resourceGroupName, deploymentName, templateParameters, cancelCh)
+		},
+	)
 
-		return multistep.ActionHalt
-	}
-
-	return multistep.ActionContinue
+	return processInterruptibleResult(result, s.error, state)
 }
 
 func (*StepDeployTemplate) Cleanup(multistep.StateBag) {

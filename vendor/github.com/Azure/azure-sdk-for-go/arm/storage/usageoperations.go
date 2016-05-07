@@ -44,21 +44,21 @@ func NewUsageOperationsClientWithBaseURI(baseURI string, subscriptionID string) 
 
 // List gets the current usage count and the limit for the resources under the
 // subscription.
-func (client UsageOperationsClient) List() (result UsageListResult, ae error) {
+func (client UsageOperationsClient) List() (result UsageListResult, err error) {
 	req, err := client.ListPreparer()
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "storage/UsageOperationsClient", "List", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "storage.UsageOperationsClient", "List", nil, "Failure preparing request")
 	}
 
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "storage/UsageOperationsClient", "List", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "storage.UsageOperationsClient", "List", resp, "Failure sending request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "storage/UsageOperationsClient", "List", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "storage.UsageOperationsClient", "List", resp, "Failure responding to request")
 	}
 
 	return
@@ -86,7 +86,7 @@ func (client UsageOperationsClient) ListPreparer() (*http.Request, error) {
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client UsageOperationsClient) ListSender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // ListResponder handles the response to the List request. The method always

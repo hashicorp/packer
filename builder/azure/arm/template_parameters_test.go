@@ -12,17 +12,17 @@ import (
 
 func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 	params := TemplateParameters{
-		AdminUsername:      &TemplateParameter{"sentinel"},
-		AdminPassword:      &TemplateParameter{"sentinel"},
-		DnsNameForPublicIP: &TemplateParameter{"sentinel"},
-		ImageOffer:         &TemplateParameter{"sentinel"},
-		ImagePublisher:     &TemplateParameter{"sentinel"},
-		ImageSku:           &TemplateParameter{"sentinel"},
-		OSDiskName:         &TemplateParameter{"sentinel"},
-		SshAuthorizedKey:   &TemplateParameter{"sentinel"},
-		StorageAccountName: &TemplateParameter{"sentinel"},
-		VMName:             &TemplateParameter{"sentinel"},
-		VMSize:             &TemplateParameter{"sentinel"},
+		AdminUsername:              &TemplateParameter{"sentinel"},
+		AdminPassword:              &TemplateParameter{"sentinel"},
+		DnsNameForPublicIP:         &TemplateParameter{"sentinel"},
+		ImageOffer:                 &TemplateParameter{"sentinel"},
+		ImagePublisher:             &TemplateParameter{"sentinel"},
+		ImageSku:                   &TemplateParameter{"sentinel"},
+		OSDiskName:                 &TemplateParameter{"sentinel"},
+		SshAuthorizedKey:           &TemplateParameter{"sentinel"},
+		StorageAccountBlobEndpoint: &TemplateParameter{"sentinel"},
+		VMName: &TemplateParameter{"sentinel"},
+		VMSize: &TemplateParameter{"sentinel"},
 	}
 
 	bs, err := json.Marshal(params)
@@ -46,7 +46,7 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 		"imageSku",
 		"osDiskName",
 		"sshAuthorizedKey",
-		"storageAccountName",
+		"storageAccountBlobEndpoint",
 		"vmSize",
 		"vmName",
 	}
@@ -61,17 +61,17 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 
 func TestParameterValuesShouldBeSet(t *testing.T) {
 	params := TemplateParameters{
-		AdminUsername:      &TemplateParameter{"adminusername00"},
-		AdminPassword:      &TemplateParameter{"adminpassword00"},
-		DnsNameForPublicIP: &TemplateParameter{"dnsnameforpublicip00"},
-		ImageOffer:         &TemplateParameter{"imageoffer00"},
-		ImagePublisher:     &TemplateParameter{"imagepublisher00"},
-		ImageSku:           &TemplateParameter{"imagesku00"},
-		OSDiskName:         &TemplateParameter{"osdiskname00"},
-		SshAuthorizedKey:   &TemplateParameter{"sshauthorizedkey00"},
-		StorageAccountName: &TemplateParameter{"storageaccountname00"},
-		VMName:             &TemplateParameter{"vmname00"},
-		VMSize:             &TemplateParameter{"vmsize00"},
+		AdminUsername:              &TemplateParameter{"adminusername00"},
+		AdminPassword:              &TemplateParameter{"adminpassword00"},
+		DnsNameForPublicIP:         &TemplateParameter{"dnsnameforpublicip00"},
+		ImageOffer:                 &TemplateParameter{"imageoffer00"},
+		ImagePublisher:             &TemplateParameter{"imagepublisher00"},
+		ImageSku:                   &TemplateParameter{"imagesku00"},
+		OSDiskName:                 &TemplateParameter{"osdiskname00"},
+		SshAuthorizedKey:           &TemplateParameter{"sshauthorizedkey00"},
+		StorageAccountBlobEndpoint: &TemplateParameter{"storageaccountblobendpoint00"},
+		VMName: &TemplateParameter{"vmname00"},
+		VMSize: &TemplateParameter{"vmsize00"},
 	}
 
 	bs, err := json.Marshal(params)

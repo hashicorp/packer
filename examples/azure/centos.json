@@ -25,9 +25,11 @@
     "ssh_username": "{{user `ssh_user`}}",
     "ssh_password": "{{user `ssh_pass`}}",
 
+    "os_type": "Linux",
     "image_publisher": "OpenLogic",
     "image_offer": "CentOS",
-    "image_sku": "7.1",
+    "image_sku": "7.2",
+    "image_version": "latest",
     "ssh_pty": "true",
 
     "location": "South Central US",
