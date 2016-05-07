@@ -48,21 +48,21 @@ func NewDeploymentOperationsClientWithBaseURI(baseURI string, subscriptionID str
 // resourceGroupName is the name of the resource group. The name is case
 // insensitive. deploymentName is the name of the deployment. operationID is
 // operation Id.
-func (client DeploymentOperationsClient) Get(resourceGroupName string, deploymentName string, operationID string) (result DeploymentOperation, ae error) {
+func (client DeploymentOperationsClient) Get(resourceGroupName string, deploymentName string, operationID string) (result DeploymentOperation, err error) {
 	req, err := client.GetPreparer(resourceGroupName, deploymentName, operationID)
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "Get", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "Get", nil, "Failure preparing request")
 	}
 
 	resp, err := client.GetSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "Get", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "Get", resp, "Failure sending request")
 	}
 
 	result, err = client.GetResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "Get", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "Get", resp, "Failure responding to request")
 	}
 
 	return
@@ -93,7 +93,7 @@ func (client DeploymentOperationsClient) GetPreparer(resourceGroupName string, d
 // GetSender sends the Get request. The method will close the
 // http.Response Body if it receives an error.
 func (client DeploymentOperationsClient) GetSender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // GetResponder handles the response to the Get request. The method always
@@ -114,28 +114,28 @@ func (client DeploymentOperationsClient) GetResponder(resp *http.Response) (resu
 // resourceGroupName is the name of the resource group. The name is case
 // insensitive. deploymentName is the name of the deployment. top is query
 // parameters.
-func (client DeploymentOperationsClient) List(resourceGroupName string, deploymentName string, top *int) (result DeploymentOperationsListResult, ae error) {
+func (client DeploymentOperationsClient) List(resourceGroupName string, deploymentName string, top *int32) (result DeploymentOperationsListResult, err error) {
 	req, err := client.ListPreparer(resourceGroupName, deploymentName, top)
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "List", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "List", nil, "Failure preparing request")
 	}
 
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "List", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "List", resp, "Failure sending request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "List", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "List", resp, "Failure responding to request")
 	}
 
 	return
 }
 
 // ListPreparer prepares the List request.
-func (client DeploymentOperationsClient) ListPreparer(resourceGroupName string, deploymentName string, top *int) (*http.Request, error) {
+func (client DeploymentOperationsClient) ListPreparer(resourceGroupName string, deploymentName string, top *int32) (*http.Request, error) {
 	pathParameters := map[string]interface{}{
 		"deploymentName":    url.QueryEscape(deploymentName),
 		"resourceGroupName": url.QueryEscape(resourceGroupName),
@@ -161,7 +161,7 @@ func (client DeploymentOperationsClient) ListPreparer(resourceGroupName string, 
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client DeploymentOperationsClient) ListSender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // ListResponder handles the response to the List request. The method always
@@ -178,10 +178,10 @@ func (client DeploymentOperationsClient) ListResponder(resp *http.Response) (res
 }
 
 // ListNextResults retrieves the next set of results, if any.
-func (client DeploymentOperationsClient) ListNextResults(lastResults DeploymentOperationsListResult) (result DeploymentOperationsListResult, ae error) {
+func (client DeploymentOperationsClient) ListNextResults(lastResults DeploymentOperationsListResult) (result DeploymentOperationsListResult, err error) {
 	req, err := lastResults.DeploymentOperationsListResultPreparer()
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "List", nil, "Failure preparing next results request request")
+		return result, autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "List", nil, "Failure preparing next results request request")
 	}
 	if req == nil {
 		return
@@ -190,12 +190,12 @@ func (client DeploymentOperationsClient) ListNextResults(lastResults DeploymentO
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "List", resp, "Failure sending next results request request")
+		return result, autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "List", resp, "Failure sending next results request request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "resources/DeploymentOperationsClient", "List", resp, "Failure responding to next results request request")
+		err = autorest.NewErrorWithError(err, "resources.DeploymentOperationsClient", "List", resp, "Failure responding to next results request request")
 	}
 
 	return

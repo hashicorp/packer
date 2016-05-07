@@ -45,21 +45,21 @@ func NewVirtualMachineSizesClientWithBaseURI(baseURI string, subscriptionID stri
 // List lists virtual-machine-sizes available in a location for a subscription.
 //
 // location is the location upon which virtual-machine-sizes is queried.
-func (client VirtualMachineSizesClient) List(location string) (result VirtualMachineSizeListResult, ae error) {
+func (client VirtualMachineSizesClient) List(location string) (result VirtualMachineSizeListResult, err error) {
 	req, err := client.ListPreparer(location)
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "compute/VirtualMachineSizesClient", "List", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "compute.VirtualMachineSizesClient", "List", nil, "Failure preparing request")
 	}
 
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "compute/VirtualMachineSizesClient", "List", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "compute.VirtualMachineSizesClient", "List", resp, "Failure sending request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "compute/VirtualMachineSizesClient", "List", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "compute.VirtualMachineSizesClient", "List", resp, "Failure responding to request")
 	}
 
 	return
@@ -88,7 +88,7 @@ func (client VirtualMachineSizesClient) ListPreparer(location string) (*http.Req
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client VirtualMachineSizesClient) ListSender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // ListResponder handles the response to the List request. The method always
@@ -105,10 +105,10 @@ func (client VirtualMachineSizesClient) ListResponder(resp *http.Response) (resu
 }
 
 // ListNextResults retrieves the next set of results, if any.
-func (client VirtualMachineSizesClient) ListNextResults(lastResults VirtualMachineSizeListResult) (result VirtualMachineSizeListResult, ae error) {
+func (client VirtualMachineSizesClient) ListNextResults(lastResults VirtualMachineSizeListResult) (result VirtualMachineSizeListResult, err error) {
 	req, err := lastResults.VirtualMachineSizeListResultPreparer()
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "compute/VirtualMachineSizesClient", "List", nil, "Failure preparing next results request request")
+		return result, autorest.NewErrorWithError(err, "compute.VirtualMachineSizesClient", "List", nil, "Failure preparing next results request request")
 	}
 	if req == nil {
 		return
@@ -117,12 +117,12 @@ func (client VirtualMachineSizesClient) ListNextResults(lastResults VirtualMachi
 	resp, err := client.ListSender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "compute/VirtualMachineSizesClient", "List", resp, "Failure sending next results request request")
+		return result, autorest.NewErrorWithError(err, "compute.VirtualMachineSizesClient", "List", resp, "Failure sending next results request request")
 	}
 
 	result, err = client.ListResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "compute/VirtualMachineSizesClient", "List", resp, "Failure responding to next results request request")
+		err = autorest.NewErrorWithError(err, "compute.VirtualMachineSizesClient", "List", resp, "Failure responding to next results request request")
 	}
 
 	return

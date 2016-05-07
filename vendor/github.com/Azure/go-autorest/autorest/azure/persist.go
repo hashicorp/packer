@@ -43,6 +43,9 @@ func SaveToken(path string, mode os.FileMode, token Token) error {
 	if json.NewEncoder(newFile).Encode(token); err != nil {
 		return fmt.Errorf("failed to encode token to file (%s) while saving token: %v", tempPath, err)
 	}
+	if err := newFile.Close(); err != nil {
+		return fmt.Errorf("failed to close temp file %s: %v", tempPath, err)
+	}
 
 	// Atomic replace to avoid multi-writer file corruptions
 	if err := os.Rename(tempPath, path); err != nil {

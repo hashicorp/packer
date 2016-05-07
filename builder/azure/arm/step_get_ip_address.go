@@ -6,8 +6,8 @@ package arm
 import (
 	"fmt"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -55,7 +55,7 @@ func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.say(fmt.Sprintf(" -> SSHHost             : '%s'", address))
+	s.say(fmt.Sprintf(" -> Public IP           : '%s'", address))
 	state.Put(constants.SSHHost, address)
 
 	return multistep.ActionContinue
