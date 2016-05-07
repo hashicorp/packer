@@ -24,7 +24,6 @@ BUG FIXES:
   * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
   * provisioner/chef: Use custom values for remote validation key path
     [GH-3468]
-  * provisioner/winrm: Update winrmcp to fix Windows path issue [GH-3488]
 
 ## 0.10.0 (March 14, 2016)
 
