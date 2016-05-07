@@ -42,12 +42,7 @@ func New(addr string, config *Config) (*Winrmcp, error) {
 		config = &Config{}
 	}
 
-	params := winrm.NewParameters(
-		winrm.DefaultParameters.Timeout,
-		winrm.DefaultParameters.Locale,
-		winrm.DefaultParameters.EnvelopeSize,
-	)
-
+	params := winrm.DefaultParameters()
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
 	}
