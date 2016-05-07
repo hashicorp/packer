@@ -4,14 +4,16 @@
 package arm
 
 import (
-	"testing"
-
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"testing"
 )
 
 func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 	var testSubject = &Builder{}
-	testSubject.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	_, err := testSubject.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("failed to prepare: %s", err)
+	}
 
 	var expectedStateBagKeys = []string{
 		constants.AuthorizedKey,
@@ -21,6 +23,7 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 		constants.ArmDeploymentName,
 		constants.ArmLocation,
 		constants.ArmResourceGroupName,
+		constants.ArmStorageAccountName,
 		constants.ArmTemplateParameters,
 		constants.ArmVirtualMachineCaptureParameters,
 		constants.ArmPublicIPAddressName,

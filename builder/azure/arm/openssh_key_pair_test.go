@@ -4,10 +4,13 @@
 package arm
 
 import (
-	"testing"
-
 	"golang.org/x/crypto/ssh"
+	"testing"
 )
+
+func TestFart(t *testing.T) {
+
+}
 
 func TestAuthorizedKeyShouldParse(t *testing.T) {
 	testSubject, err := NewOpenSshKeyPairWithSize(512)

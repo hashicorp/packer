@@ -95,7 +95,7 @@ func TestStepGetOSDiskShouldTakeValidateArgumentsFromStateBag(t *testing.T) {
 	}
 
 	if expectedOSDiskVhd != "test.vhd" {
-		t.Fatalf("Expected the value of stateBag[%s] to be '127.0.0.1', but got '%s'.", constants.ArmOSDiskVhd, expectedOSDiskVhd)
+		t.Fatalf("Expected the value of stateBag[%s] to be 'test.vhd', but got '%s'.", constants.ArmOSDiskVhd, expectedOSDiskVhd)
 	}
 }
 

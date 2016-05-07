@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepDeleteOSDiskShouldFailIfGetFails(t *testing.T) {
