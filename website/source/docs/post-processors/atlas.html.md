@@ -37,8 +37,8 @@ Here is an example workflow:
     The `atlas` post-processor is configured with the name of the AMI, for
     example `hashicorp/foobar`, to create the artifact in Atlas or update the
     version if the artifact already exists
-3.  The new version is ready and available to be used in deployments with a tool
-    like [Terraform](https://www.terraform.io)
+3.  The new version is ready and available to be used in deployments with a
+    tool like [Terraform](https://www.terraform.io)
 
 ## Configuration
 
@@ -58,11 +58,12 @@ you can also use `token` configuration option.
     You must have access to the organization—hashicorp in this example—in order
     to add an artifact to the organization in Atlas.
 
--   `artifact_type` (string) - For uploading artifacts to Atlas. `artifact_type`
-    can be set to any unique identifier, however, the following are recommended
-    for consistency - `amazon.image`, `digitalocean.image`, `docker.image`,
-    `googlecompute.image`, `openstack.image`, `parallels.image`, `qemu.image`,
-    `virtualbox.image`, `vmware.image`, `custom.image`, and `vagrant.box`.
+-   `artifact_type` (string) - For uploading artifacts to Atlas.
+    `artifact_type` can be set to any unique identifier, however, the following
+    are recommended for consistency - `amazon.image`, `digitalocean.image`,
+    `docker.image`, `googlecompute.image`, `openstack.image`,
+    `parallels.image`, `qemu.image`, `virtualbox.image`, `vmware.image`,
+    `custom.image`, and `vagrant.box`.
 
 ### Optional:
 
@@ -70,9 +71,19 @@ you can also use `token` configuration option.
     you're using Atlas Enterprise in your own network. Defaults to
     `https://atlas.hashicorp.com/api/v1`.
 
--   `metadata` (map) - Send metadata about the artifact. If the artifact type is
-    "vagrant.box", you must specify a "provider" metadata about what provider
-    to use.
+-   `metadata` (map) - Send metadata about the artifact. If the artifact type
+    is `vagrant.box`, you must specify a `provider` metadata about what
+    provider to use.
+
+    -   `description` (string) - Inside the metadata blob you can add a information
+        about the uploaded artifact to Atlas. This will be reflected in the box
+        description on Atlas.
+
+    -   `provider` (string) - Used by Atlas to help determine, what should be used
+        to run the artifact.
+
+    -   `version` (string) - Used by Atlas to give a semantic version to the
+        uploaded artifact.
 
 ## Environment Variables
 
