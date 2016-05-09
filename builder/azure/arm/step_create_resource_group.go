@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -56,8 +56,8 @@ func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAc
 }
 
 func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
-	_, ok := state.GetOk(constants.ArmIsResourceGroupCreated)
-	if !ok {
+	isCreated, ok := state.GetOk(constants.ArmIsResourceGroupCreated)
+	if !ok || !isCreated.(bool) {
 		return
 	}
 
