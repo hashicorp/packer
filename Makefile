@@ -56,7 +56,7 @@ generate: deps
 	go fmt command/plugin.go
 
 test: deps
-	@go test $(TEST) $(TESTARGS) -timeout=30s
+	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
@@ -68,7 +68,7 @@ testacc: deps generate
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: deps
-	@go test -race $(TEST) $(TESTARGS) -timeout=1m
+	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
 	go get -u github.com/mitchellh/gox

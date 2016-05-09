@@ -4,11 +4,14 @@
 package arm
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/packer/packer"
 )
 
 // List of configuration parameters that are required by the ARM builder.
@@ -21,6 +24,7 @@ var requiredConfigValues = []string{
 	"image_publisher",
 	"image_sku",
 	"location",
+	"os_type",
 	"storage_account",
 	"subscription_id",
 	"tenant_id",
@@ -41,21 +45,23 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	if c.VMSize == "" {
 		t.Errorf("Expected 'VMSize' to be populated, but it was empty!")
 	}
+
+	if c.ObjectID != "" {
+		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
+	}
 }
 
 func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
-	builderValues := make(map[string]string)
-
-	// Populate the dictionary with all of the required values.
-	for _, v := range requiredConfigValues {
-		builderValues[v] = "--some-value--"
-	}
-
+	builderValues := getArmBuilderConfiguration()
 	builderValues["ssh_password"] = "override_password"
 	builderValues["ssh_username"] = "override_username"
 	builderValues["vm_size"] = "override_vm_size"
 
-	c, _, _ := newConfig(getArmBuilderConfigurationFromMap(builderValues), getPackerConfiguration())
+	c, _, err := newConfig(builderValues, getPackerConfiguration())
+
+	if err != nil {
+		t.Fatalf("newConfig failed: %s", err)
+	}
 
 	if c.Password != "override_password" {
 		t.Errorf("Expected 'Password' to be set to 'override_password', but found '%s'!", c.Password)
@@ -74,7 +80,7 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	}
 
 	if c.VMSize != "override_vm_size" {
-		t.Errorf("Expected 'vm_size' to be set to 'override_username', but found '%s'!", c.VMSize)
+		t.Errorf("Expected 'vm_size' to be set to 'override_vm_size', but found '%s'!", c.VMSize)
 	}
 }
 
@@ -86,16 +92,77 @@ func TestConfigShouldDefaultVMSizeToStandardA1(t *testing.T) {
 	}
 }
 
-func TestUserShouldProvideRequiredValues(t *testing.T) {
-	builderValues := make(map[string]string)
+func TestConfigShouldDefaultImageVersionToLatest(t *testing.T) {
+	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
-	// Populate the dictionary with all of the required values.
-	for _, v := range requiredConfigValues {
-		builderValues[v] = "--some-value--"
+	if c.ImageVersion != "latest" {
+		t.Errorf("Expected 'ImageVersion' to default to 'latest', but got '%s'.", c.ImageVersion)
+	}
+}
+
+func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
+	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+
+	if c.CloudEnvironmentName != "Public" {
+		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.CloudEnvironmentName)
 	}
 
+	if c.cloudEnvironment == nil || c.cloudEnvironment.Name != "AzurePublicCloud" {
+		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.cloudEnvironment)
+	}
+}
+
+func TestConfigInstantiatesCorrectAzureEnvironment(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	// user input is fun :)
+	var table = []struct {
+		name            string
+		environmentName string
+	}{
+		{"China", "AzureChinaCloud"},
+		{"ChinaCloud", "AzureChinaCloud"},
+		{"AzureChinaCloud", "AzureChinaCloud"},
+		{"aZuReChInAcLoUd", "AzureChinaCloud"},
+
+		{"USGovernment", "AzureUSGovernmentCloud"},
+		{"USGovernmentCloud", "AzureUSGovernmentCloud"},
+		{"AzureUSGovernmentCloud", "AzureUSGovernmentCloud"},
+		{"aZuReUsGoVeRnMeNtClOuD", "AzureUSGovernmentCloud"},
+
+		{"Public", "AzurePublicCloud"},
+		{"PublicCloud", "AzurePublicCloud"},
+		{"AzurePublicCloud", "AzurePublicCloud"},
+		{"aZuRePuBlIcClOuD", "AzurePublicCloud"},
+	}
+
+	packerConfiguration := getPackerConfiguration()
+
+	for _, x := range table {
+		config["cloud_environment_name"] = x.name
+		c, _, _ := newConfig(config, packerConfiguration)
+
+		if c.cloudEnvironment == nil || c.cloudEnvironment.Name != x.environmentName {
+			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.cloudEnvironment)
+		}
+	}
+}
+
+func TestUserShouldProvideRequiredValues(t *testing.T) {
+	builderValues := getArmBuilderConfiguration()
+
 	// Ensure we can successfully create a config.
-	_, _, err := newConfig(getArmBuilderConfigurationFromMap(builderValues), getPackerConfiguration())
+	_, _, err := newConfig(builderValues, getPackerConfiguration())
 	if err != nil {
 		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
 		t.Fatalf(" -> %+v\n", builderValues)
@@ -103,15 +170,16 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 
 	// Take away a required element, and ensure construction fails.
 	for _, v := range requiredConfigValues {
+		originalValue := builderValues[v]
 		delete(builderValues, v)
 
-		_, _, err := newConfig(getArmBuilderConfigurationFromMap(builderValues), getPackerConfiguration())
+		_, _, err := newConfig(builderValues, getPackerConfiguration())
 		if err == nil {
 			t.Errorf("Expected configuration creation to fail, but it succeeded!\n")
 			t.Fatalf(" -> %+v\n", builderValues)
 		}
 
-		builderValues[v] = "--some-value--"
+		builderValues[v] = originalValue
 	}
 }
 
@@ -167,8 +235,8 @@ func TestConfigShouldTransformToTemplateParameters(t *testing.T) {
 		t.Errorf("Expected OSDiskName to be equal to config's OSDiskName, but they were '%s' and '%s' respectively.", templateParameters.OSDiskName.Value, c.tmpOSDiskName)
 	}
 
-	if templateParameters.StorageAccountName.Value != c.StorageAccount {
-		t.Errorf("Expected StorageAccountName to be equal to config's StorageAccountName, but they were '%s' and '%s' respectively.", templateParameters.StorageAccountName.Value, c.StorageAccount)
+	if templateParameters.StorageAccountBlobEndpoint.Value != c.storageAccountBlobEndpoint {
+		t.Errorf("Expected StorageAccountBlobEndpoint to be equal to config's storageAccountBlobEndpoint, but they were '%s' and '%s' respectively.", templateParameters.StorageAccountBlobEndpoint.Value, c.storageAccountBlobEndpoint)
 	}
 
 	if templateParameters.VMName.Value != c.tmpComputeName {
@@ -177,6 +245,50 @@ func TestConfigShouldTransformToTemplateParameters(t *testing.T) {
 
 	if templateParameters.VMSize.Value != c.VMSize {
 		t.Errorf("Expected VMSize to be equal to config's VMSize, but they were '%s' and '%s' respectively.", templateParameters.VMSize.Value, c.VMSize)
+	}
+}
+
+func TestConfigShouldTransformToTemplateParametersLinux(t *testing.T) {
+	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c.OSType = constants.Target_Linux
+	templateParameters := c.toTemplateParameters()
+
+	if templateParameters.KeyVaultSecretValue != nil {
+		t.Errorf("Expected KeyVaultSecretValue to be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+
+	if templateParameters.ObjectId != nil {
+		t.Errorf("Expected ObjectId to be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+
+	if templateParameters.TenantId != nil {
+		t.Errorf("Expected TenantId to be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+}
+
+func TestConfigShouldTransformToTemplateParametersWindows(t *testing.T) {
+	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c.OSType = constants.Target_Windows
+	templateParameters := c.toTemplateParameters()
+
+	if templateParameters.SshAuthorizedKey != nil {
+		t.Errorf("Expected SshAuthorizedKey to be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+
+	if templateParameters.KeyVaultName == nil {
+		t.Errorf("Expected KeyVaultName to not be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+
+	if templateParameters.KeyVaultSecretValue == nil {
+		t.Errorf("Expected KeyVaultSecretValue to not be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+
+	if templateParameters.ObjectId == nil {
+		t.Errorf("Expected ObjectId to not be empty for an os_type == '%s', but it was not.", c.OSType)
+	}
+
+	if templateParameters.TenantId == nil {
+		t.Errorf("Expected TenantId to not be empty for an os_type == '%s', but it was not.", c.OSType)
 	}
 }
 
@@ -216,30 +328,67 @@ func TestConfigShouldSupportPackersConfigElements(t *testing.T) {
 	}
 }
 
-func getArmBuilderConfiguration() interface{} {
+func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("failed to use device login for Linux: %s", err)
+	}
+}
+
+func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Windows,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatalf("Expected test to fail, but it succeeded")
+	}
+
+	multiError, _ := err.(*packer.MultiError)
+	if len(multiError.Errors) != 3 {
+		t.Errorf("Expected to find 3 errors, but found %d errors", len(multiError.Errors))
+	}
+
+	if !strings.Contains(err.Error(), "client_id must be specified") {
+		t.Errorf("Expected to find error for 'client_id must be specified")
+	}
+	if !strings.Contains(err.Error(), "client_secret must be specified") {
+		t.Errorf("Expected to find error for 'client_secret must be specified")
+	}
+	if !strings.Contains(err.Error(), "tenant_id must be specified") {
+		t.Errorf("Expected to find error for 'tenant_id must be specified")
+	}
+}
+
+func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
 		m[v] = fmt.Sprintf("%s00", v)
 	}
 
-	return getArmBuilderConfigurationFromMap(m)
-}
-
-func getArmBuilderConfigurationFromMap(kvp map[string]string) interface{} {
-	bs := bytes.NewBufferString("{")
-
-	for k, v := range kvp {
-		bs.WriteString(fmt.Sprintf("\"%s\": \"%s\",\n", k, v))
-	}
-
-	// remove the trailing ",\n" because JSON
-	bs.Truncate(bs.Len() - 2)
-	bs.WriteString("}")
-
-	var config interface{}
-	json.Unmarshal([]byte(bs.String()), &config)
-
-	return config
+	m["os_type"] = constants.Target_Linux
+	return m
 }
 
 func getPackerConfiguration() interface{} {
@@ -260,14 +409,11 @@ func getPackerConfiguration() interface{} {
 	return config
 }
 
-func getPackerCommunicatorConfiguration() interface{} {
-	var doc = `{
-		"ssh_timeout": "1h",
-		"winrm_timeout": "2h"
-	}`
-
-	var config interface{}
-	json.Unmarshal([]byte(doc), &config)
+func getPackerCommunicatorConfiguration() map[string]string {
+	config := map[string]string{
+		"ssh_timeout":   "1h",
+		"winrm_timeout": "2h",
+	}
 
 	return config
 }

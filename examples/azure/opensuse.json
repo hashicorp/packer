@@ -25,6 +25,7 @@
     "ssh_username": "{{user `ssh_user`}}",
     "ssh_password": "{{user `ssh_pass`}}",
 
+    "os_type": "Linux",
     "image_publisher": "SUSE",
     "image_offer": "openSUSE",
     "image_sku": "13.2",

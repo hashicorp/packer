@@ -79,13 +79,13 @@ func TestMalformedTemplatesShouldReturnError(t *testing.T) {
 
 func getTemplateParameters() TemplateParameters {
 	templateParameters := TemplateParameters{
-		AdminUsername:      &TemplateParameter{"adminusername00"},
-		DnsNameForPublicIP: &TemplateParameter{"dnsnameforpublicip00"},
-		OSDiskName:         &TemplateParameter{"osdiskname00"},
-		SshAuthorizedKey:   &TemplateParameter{"sshkeydata00"},
-		StorageAccountName: &TemplateParameter{"storageaccountname00"},
-		VMName:             &TemplateParameter{"vmname00"},
-		VMSize:             &TemplateParameter{"vmsize00"},
+		AdminUsername:              &TemplateParameter{"adminusername00"},
+		DnsNameForPublicIP:         &TemplateParameter{"dnsnameforpublicip00"},
+		OSDiskName:                 &TemplateParameter{"osdiskname00"},
+		SshAuthorizedKey:           &TemplateParameter{"sshkeydata00"},
+		StorageAccountBlobEndpoint: &TemplateParameter{"storageaccountblobendpoint00"},
+		VMName: &TemplateParameter{"vmname00"},
+		VMSize: &TemplateParameter{"vmsize00"},
 	}
 
 	return templateParameters

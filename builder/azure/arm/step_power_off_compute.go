@@ -6,14 +6,15 @@ package arm
 import (
 	"fmt"
 
-	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepPowerOffCompute struct {
 	client   *AzureClient
-	powerOff func(resourceGroupName string, computeName string) error
+	powerOff func(resourceGroupName string, computeName string, cancelCh <-chan struct{}) error
 	say      func(message string)
 	error    func(e error)
 }
@@ -29,13 +30,12 @@ func NewStepPowerOffCompute(client *AzureClient, ui packer.Ui) *StepPowerOffComp
 	return step
 }
 
-func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeName string) error {
-	res, err := s.client.PowerOff(resourceGroupName, computeName)
+func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeName string, cancelCh <-chan struct{}) error {
+	_, err := s.client.PowerOff(resourceGroupName, computeName, cancelCh)
 	if err != nil {
 		return err
 	}
 
-	s.client.VirtualMachinesClient.PollAsNeeded(res.Response)
 	return nil
 }
 
@@ -48,15 +48,11 @@ func (s *StepPowerOffCompute) Run(state multistep.StateBag) multistep.StepAction
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> ComputeName       : '%s'", computeName))
 
-	err := s.powerOff(resourceGroupName, computeName)
-	if err != nil {
-		state.Put(constants.Error, err)
-		s.error(err)
+	result := common.StartInterruptibleTask(
+		func() bool { return common.IsStateCancelled(state) },
+		func(cancelCh <-chan struct{}) error { return s.powerOff(resourceGroupName, computeName, cancelCh) })
 
-		return multistep.ActionHalt
-	}
-
-	return multistep.ActionContinue
+	return processInterruptibleResult(result, s.error, state)
 }
 
 func (*StepPowerOffCompute) Cleanup(multistep.StateBag) {

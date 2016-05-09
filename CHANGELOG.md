@@ -1,15 +1,37 @@
-## (Unreleased)
+## 0.10.1 (May 7, 2016)
+
+FEATURES:
+
+  * `azure-arm` builder: Can now build Windows images, and supports additional
+    configuration. Please refer to the documentation for details.
+
+IMPROVEMENTS:
+
+  * core: Added support for `ATLAS_CAFILE` and `ATLAS_CAPATH` [GH-3494]
+  * builder/azure: Improved build cancellation and cleanup of partially-
+    provisioned resources [GH-3461]
+  * builder/azure: Improved logging [GH-3461]
+  * builder/azure: Added support for US Government and China clouds [GH-3461]
+  * builder/azure: Users may now specify an image version [GH-3461]
+  * builder/azure: Added device login [GH-3461]
+  * builder/docker: Added `privileged` build option [GH-3475]
+  * builder/google: Packer now identifies its version to the service [GH-3465]
+  * provisioner/shell: Added `remote_folder` and `remote_file` options
+    [GH-3462]
 
 BUG FIXES:
 
   * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
+  * provisioner/chef: Use custom values for remote validation key path
+    [GH-3468]
 
 ## 0.10.0 (March 14, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
 
-  * Packer now requires go >= 1.5. If you want to continue building with go 1.4
-    you can remove the `azurearmbuilder` line from `command/plugin.go`.
+  * Building Packer now requires go >= 1.5 (>= 1.6 is recommended). If you want
+    to continue building with go 1.4 you can remove the `azurearmbuilder` line
+    from `command/plugin.go`.
 
 FEATURES:
 

@@ -20,9 +20,10 @@
     "capture_container_name": "images",
     "capture_name_prefix": "packer",
 
+    "os_type": "Linux",
     "image_publisher": "Canonical",
     "image_offer": "UbuntuServer",
-    "image_sku": "14.04.3-LTS",
+    "image_sku": "16.04.0-LTS",
 
     "location": "West US",
     "vm_size": "Standard_A2"

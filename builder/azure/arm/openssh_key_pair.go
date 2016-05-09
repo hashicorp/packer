@@ -10,9 +10,8 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"time"
-
 	"golang.org/x/crypto/ssh"
+	"time"
 )
 
 const (

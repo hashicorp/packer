@@ -6,10 +6,9 @@ package lin
 import (
 	"bytes"
 	"fmt"
-	"log"
-
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"log"
 )
 
 type StepGeneralizeOS struct {

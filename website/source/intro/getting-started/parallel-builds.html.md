@@ -45,10 +45,10 @@ this example.
 
 In order to do this, you'll need an account with DigitalOcean. [Sign up for an
 account now](https://www.digitalocean.com/). It is free to sign up. Because the
-"droplets" (servers) are charged hourly, you *will* be charged \$0.01 for every
+"droplets" (servers) are charged hourly, you *will* be charged $0.01 for every
 image you create with Packer. If you're not okay with this, just follow along.
 
-!&gt; **Warning!** You *will* be charged \$0.01 by DigitalOcean per image
+!&gt; **Warning!** You *will* be charged $0.01 by DigitalOcean per image
 created with Packer because of the time the "droplet" is running.
 
 Once you sign up for an account, grab your API token from the [DigitalOcean API

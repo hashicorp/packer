@@ -4,7 +4,7 @@
 // The Microsoft Azure Network management API provides a RESTful set of web
 // services that interact with Microsoft Azure Networks service to manage
 // your network resrources. The API has entities that capture the
-// relationship between an end user and the Microsoft Azure Networks service..
+// relationship between an end user and the Microsoft Azure Networks service.
 package network
 
 // Copyright (c) Microsoft and contributors.  All rights reserved.
@@ -67,21 +67,21 @@ func NewWithBaseURI(baseURI string, subscriptionID string) ManagementClient {
 // location is the location of the domain name domainNameLabel is the domain
 // name to be verified. It must conform to the following regular expression:
 // ^[a-z][a-z0-9-]{1,61}[a-z0-9]$.
-func (client ManagementClient) CheckDNSNameAvailability(location string, domainNameLabel string) (result DNSNameAvailabilityResult, ae error) {
+func (client ManagementClient) CheckDNSNameAvailability(location string, domainNameLabel string) (result DNSNameAvailabilityResult, err error) {
 	req, err := client.CheckDNSNameAvailabilityPreparer(location, domainNameLabel)
 	if err != nil {
-		return result, autorest.NewErrorWithError(err, "network/ManagementClient", "CheckDNSNameAvailability", nil, "Failure preparing request")
+		return result, autorest.NewErrorWithError(err, "network.ManagementClient", "CheckDNSNameAvailability", nil, "Failure preparing request")
 	}
 
 	resp, err := client.CheckDNSNameAvailabilitySender(req)
 	if err != nil {
 		result.Response = autorest.Response{Response: resp}
-		return result, autorest.NewErrorWithError(err, "network/ManagementClient", "CheckDNSNameAvailability", resp, "Failure sending request")
+		return result, autorest.NewErrorWithError(err, "network.ManagementClient", "CheckDNSNameAvailability", resp, "Failure sending request")
 	}
 
 	result, err = client.CheckDNSNameAvailabilityResponder(resp)
 	if err != nil {
-		ae = autorest.NewErrorWithError(err, "network/ManagementClient", "CheckDNSNameAvailability", resp, "Failure responding to request")
+		err = autorest.NewErrorWithError(err, "network.ManagementClient", "CheckDNSNameAvailability", resp, "Failure responding to request")
 	}
 
 	return
@@ -113,7 +113,7 @@ func (client ManagementClient) CheckDNSNameAvailabilityPreparer(location string,
 // CheckDNSNameAvailabilitySender sends the CheckDNSNameAvailability request. The method will close the
 // http.Response Body if it receives an error.
 func (client ManagementClient) CheckDNSNameAvailabilitySender(req *http.Request) (*http.Response, error) {
-	return client.Send(req)
+	return autorest.SendWithSender(client, req)
 }
 
 // CheckDNSNameAvailabilityResponder handles the response to the CheckDNSNameAvailability request. The method always

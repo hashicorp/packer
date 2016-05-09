@@ -6,23 +6,25 @@ package arm
 import (
 	"fmt"
 
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepValidateTemplate struct {
 	client   *AzureClient
+	template string
 	validate func(resourceGroupName string, deploymentName string, templateParameters *TemplateParameters) error
 	say      func(message string)
 	error    func(e error)
 }
 
-func NewStepValidateTemplate(client *AzureClient, ui packer.Ui) *StepValidateTemplate {
+func NewStepValidateTemplate(client *AzureClient, ui packer.Ui, template string) *StepValidateTemplate {
 	var step = &StepValidateTemplate{
-		client: client,
-		say:    func(message string) { ui.Say(message) },
-		error:  func(e error) { ui.Error(e.Error()) },
+		client:   client,
+		template: template,
+		say:      func(message string) { ui.Say(message) },
+		error:    func(e error) { ui.Error(e.Error()) },
 	}
 
 	step.validate = step.validateTemplate
@@ -30,7 +32,7 @@ func NewStepValidateTemplate(client *AzureClient, ui packer.Ui) *StepValidateTem
 }
 
 func (s *StepValidateTemplate) validateTemplate(resourceGroupName string, deploymentName string, templateParameters *TemplateParameters) error {
-	factory := newDeploymentFactory(Linux)
+	factory := newDeploymentFactory(s.template)
 	deployment, err := factory.create(*templateParameters)
 
 	if err != nil {
@@ -52,14 +54,7 @@ func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepActio
 	s.say(fmt.Sprintf(" -> DeploymentName    : '%s'", deploymentName))
 
 	err := s.validate(resourceGroupName, deploymentName, templateParameters)
-	if err != nil {
-		state.Put(constants.Error, err)
-		s.error(err)
-
-		return multistep.ActionHalt
-	}
-
-	return multistep.ActionContinue
+	return processStepResult(err, s.error, state)
 }
 
 func (*StepValidateTemplate) Cleanup(multistep.StateBag) {

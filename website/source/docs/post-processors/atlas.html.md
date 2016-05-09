@@ -63,21 +63,22 @@ you can also use `token` configuration option.
     for consistency - `amazon.image`, `digitalocean.image`, `docker.image`,
     `googlecompute.image`, `openstack.image`, `parallels.image`, `qemu.image`,
     `virtualbox.image`, `vmware.image`, `custom.image`, and `vagrant.box`.
+    Optional:
 
-### Optional:
+    `atlas_url` (string) - Override the base URL for Atlas. This is useful if you're using Atlas Enterprise in your own network. Defaults to https://atlas.hashicorp.com/api/v1.
 
--   `atlas_url` (string) - Override the base URL for Atlas. This is useful if
-    you're using Atlas Enterprise in your own network. Defaults to
-    `https://atlas.hashicorp.com/api/v1`.
+    `metadata` (map) - Send metadata about the artifact. If the artifact type is "vagrant.box", you must specify a "provider" metadata about what provider to use.
 
--   `metadata` (map) - Send metadata about the artifact. If the artifact type is
-    "vagrant.box", you must specify a "provider" metadata about what provider
-    to use. 
-    - `description` (string) - Inside the metadata blob you can add a information about the uploaded artifact to Atlas.
-        This will be reflected in the box description on Atlas. 
-    - `provider` (string) - Used by Atlas to help determine, what should be used to run the artifact.
-    - `version` (string) - Used by Atlas to give a semantic version to the uploaded artifact. 
- 
+    `description` (string) - Inside the metadata blob you can add a information about the uploaded artifact to Atlas. This will be reflected in the box description on Atlas.
+    provider (string) - Used by Atlas to help determine, what should be used to run the artifact.
+    version (string) - Used by Atlas to give a semantic version to the uploaded artifact.
+
+## Environment Variables
+
+-   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public key. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+
+-   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded public key file. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+
 ### Example Configuration
 
 ``` {.javascript}
