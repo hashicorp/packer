@@ -40,7 +40,7 @@ func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting the temporary OS disk ...")
 
 	var osDisk = state.Get(constants.ArmOSDiskVhd).(string)
-	s.say(fmt.Sprintf(" -> OS Disk             : '%s'", osDisk))
+	s.say(fmt.Sprintf(" -> OS Disk : '%s'", osDisk))
 
 	u, err := url.Parse(osDisk)
 	if err != nil {
