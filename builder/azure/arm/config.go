@@ -152,7 +152,7 @@ func (c *Config) createCertificate() (string, error) {
 
 	host := fmt.Sprintf("%s.cloudapp.net", c.tmpComputeName)
 	notBefore := time.Now()
-	notAfter := notBefore.Add(365 * 24 * time.Hour)
+	notAfter := notBefore.Add(24 * time.Hour)
 
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
