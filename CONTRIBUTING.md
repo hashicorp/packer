@@ -91,6 +91,8 @@ If you are submitting a change that requires new or updated dependencies, please
 
 Note that you will need to use [Godep](https://github.com/tools/godep) to do this. This step is recommended but not required; if you don't use Godep please indicate in your PR which dependencies have changed and to what versions.
 
+Please only apply the minimal vendor changes to get your PR to work. Packer does not attempt to track the latest version for each dependency.
+
 #### Running Unit Tests
 
 You can run tests for individual packages using commands like this:
