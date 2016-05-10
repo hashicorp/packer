@@ -1,4 +1,62 @@
-## 0.9.0 (Unreleased)
+## 0.10.1 (May 7, 2016)
+
+FEATURES:
+
+  * `azure-arm` builder: Can now build Windows images, and supports additional
+    configuration. Please refer to the documentation for details.
+
+IMPROVEMENTS:
+
+  * core: Added support for `ATLAS_CAFILE` and `ATLAS_CAPATH` [GH-3494]
+  * builder/azure: Improved build cancellation and cleanup of partially-
+    provisioned resources [GH-3461]
+  * builder/azure: Improved logging [GH-3461]
+  * builder/azure: Added support for US Government and China clouds [GH-3461]
+  * builder/azure: Users may now specify an image version [GH-3461]
+  * builder/azure: Added device login [GH-3461]
+  * builder/docker: Added `privileged` build option [GH-3475]
+  * builder/google: Packer now identifies its version to the service [GH-3465]
+  * provisioner/shell: Added `remote_folder` and `remote_file` options
+    [GH-3462]
+
+BUG FIXES:
+
+  * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
+  * provisioner/chef: Use custom values for remote validation key path
+    [GH-3468]
+
+## 0.10.0 (March 14, 2016)
+
+BACKWARDS INCOMPATIBILITIES:
+
+  * Building Packer now requires go >= 1.5 (>= 1.6 is recommended). If you want
+    to continue building with go 1.4 you can remove the `azurearmbuilder` line
+    from `command/plugin.go`.
+
+FEATURES:
+
+  * **New `azure-arm` builder**: Build virtual machines in Azure Resource
+    Manager
+
+IMPROVEMENTS:
+
+  * builder/google: Added support for `disk_type` [GH-2830]
+  * builder/openstack: Added support for retrieving the Administrator password
+    when using WinRM if no `winrm_password` is set [GH-3209]
+  * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
+  * provisioner/ansible: Added the `user` parameter [GH-3276]
+  * provisioner/ansible: Don't use deprecated ssh option with Ansible 2.0
+    [GH-3291]
+  * provisioner/puppet-masterless: Add `ignore_exit_codes` parameter [GH-3349]
+
+BUG FIXES:
+
+  * builders/parallels: Handle `output_directory` containing `.` and `..`
+    [GH-3239]
+  * provisioner/ansible: os.Environ() should always be passed to the ansible
+    command. [GH-3274]
+
+## 0.9.0 (February 19, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
 
@@ -7,17 +65,27 @@ BACKWARDS INCOMPATIBILITIES:
     the packer-* plugin files** or packer will load out-of-date plugins from
     disk.
   * Release binaries are now provided via <https://releases.hashicorp.com>.
-  * Packer 0.9.0 is now built with Go 1.5. Future versions will drop support
-    for building with Go 1.4.
+  * Packer 0.9.0 is now built with Go 1.6.
+  * core: Plugins that implement the Communicator interface must now implement
+    a DownloadDir method [GH-2618]
+  * builder/amazon: Inline `user_data` for EC2 is now base64 encoded
+    automatically [GH-2539]
+  * builder/parallels: `parallels_tools_host_path` and `guest_os_distribution`
+    have been replaced by `guest_os_type`; use `packer fix` to update your
+    templates [GH-2751]
 
 FEATURES:
 
   * **Chef on Windows**: The chef provisioner now has native support for
     Windows using Powershell and WinRM [GH-1215]
   * **New `vmware-esxi` feature**: Packer can now export images from vCloud or
-    vSphere during the build. [GH-1921]
+    vSphere during the build [GH-1921]
   * **New Ansible Provisioner**: `ansible` provisioner supports remote
-    provisioning to keep your build image cleaner. [GH-1969]
+    provisioning to keep your build image cleaner [GH-1969]
+  * **New Amazon Import post-processor**: `amazon-import` allows you to upload an OVA-based VM to Amazon EC2 [GH-2962]
+  * **Shell Local post-processor**: `shell-local` allows you to run shell
+    commands on the host after a build has completed for custom packaging or
+    publishing of your artifacts [GH-2706]
   * **Artifice post-processor**: Override packer artifacts during post-
     processing. This allows you to extract artifacts from a packer builder and
     use them with other post-processors like compress, docker, and Atlas.
@@ -33,7 +101,8 @@ IMPROVEMENTS:
     for broader compatibility. [GH-2913]
   * core: `target_path` for builder downloads can now be specified. [GH-2600]
   * core: WinRM communicator now supports HTTPS protocol [GH-3061]
-  * core: Local linux builds will attempt to verify that sufficient resources are available prior to starting the build [GH-3096]
+  * core: Template syntax errors now show line, column, offset [GH-3180]
+  * core: SSH communicator now supports downloading directories [GH-2618]
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
   * builder/amazon: You can now specify `0` for `spot_price` to switch to on
     demand instances [GH-2845]
@@ -51,24 +120,29 @@ IMPROVEMENTS:
   * builder/openstack: added retry on WaitForImage 404 [GH-3009]
   * builder/openstack: Can specify `source_image_name` instead of the ID
     [GH-2577]
+  * builder/openstack: added support for SSH over IPv6 [GH-3197]
   * builder/parallels: Improve support for Parallels 11 [GH-2662]
   * builder/parallels: Parallels disks are now compacted by default [GH-2731]
   * builder/parallels: Packer will look for Parallels in
     `/Applications/Parallels Desktop.app` if it is not detected automatically
     [GH-2839]
-  * builder/docker: Now works remote hosts, such as boot2docker [GH-2846]
   * builder/qemu: qcow2 images are now compacted by default [GH-2748]
   * builder/qemu: qcow2 images can now be compressed [GH-2748]
   * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
   * builder/qemu: Now checks for version-specific options [GH-2376]
   * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
-  * builder/docker-import: Can now import Artifice artifacts [GH-2718]
-  * builder/vmware-esxi: Now supports private key auth for remote builds via
+  * builder/qemu: `<wait>` in `boot_command` now accepts an arbitrary duration
+    like <wait1m30s> [GH-3129]
+  * builder/qemu: Expose `{{ .SSHHostPort }}` in templates [GH-2884]
+  * builder/virtualbox: Added VRDP for debugging [GH-3188]
+  * builder/vmware-esxi: Added private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
-  * provisioner/chef: Now supports `encrypted_data_bag_secret_path` option
-    [GH-2653]
-  * provisioner/puppet: Now accepts the `extra_arguments` parameter [GH-2635]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
+  * post-processor/docker-import: Can now import Artifice artifacts [GH-2718]
+  * provisioner/chef: Added `encrypted_data_bag_secret_path` option [GH-2653]
+  * provisioner/puppet: Added the `extra_arguments` parameter [GH-2635]
+  * provisioner/salt: Added `no_exit_on_failure`, `log_level`, and improvements
+    to salt command invocation [GH-2660]
 
 BUG FIXES:
 
@@ -77,7 +151,9 @@ BUG FIXES:
   * builder/amazon: The `no_device` option for block device mappings is now handled correctly [GH-2398]
   * builder/amazon: AMI name validation now matches Amazon's spec [GH-2774]
   * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
-  * builder/parallels: Now supports interpolation in `prlctl_post` [GH-2828]
+  * builder/amazon: Pass AccessKey and SecretKey when uploading bundles for
+    instance-backed AMIs [GH-2596]
+  * builder/parallels: Added interpolation in `prlctl_post` [GH-2828]
   * builder/vmware: `format` option is now read correctly [GH-2892]
   * builder/vmware-esxi: Correct endless loop in destroy validation logic
     [GH-2911]

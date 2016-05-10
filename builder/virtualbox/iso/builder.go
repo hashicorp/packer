@@ -152,12 +152,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.GuestAdditionsSHA256 = strings.ToLower(b.config.GuestAdditionsSHA256)
 	}
 
-	// Determine if DiskSize is able to be allocated
-	if err = common.AvailableDisk(uint64(b.config.DiskSize)); err != nil {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Unavailable Resources: %s", err))
-	}
-
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -213,6 +207,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepAttachISO),
 		&vboxcommon.StepAttachGuestAdditions{
 			GuestAdditionsMode: b.config.GuestAdditionsMode,
+		},
+		&vboxcommon.StepConfigureVRDP{
+			VRDPPortMin: b.config.VRDPPortMin,
+			VRDPPortMax: b.config.VRDPPortMax,
 		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{

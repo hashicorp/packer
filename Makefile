@@ -1,47 +1,63 @@
-TEST?=./...
+TEST?=$(shell go list ./... | grep -v vendor)
+VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 
-default: test dev
+default: deps generate test dev
 
 ci: deps test
 
-release: updatedeps test releasebin
+release: deps test releasebin package
 
 bin: deps
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
-	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -ne 0 ]; then \
-		echo "ERROR: You must remove prerelease tags from version.go prior to release."; \
+	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
+		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
 	fi
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
+
+package:
+	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
+	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 deps:
-	go get -v -d ./...
+	go get github.com/mitchellh/gox
+	go get golang.org/x/tools/cmd/stringer
+	@go version | grep 1.4 ; if [ $$? -eq 0 ]; then \
+		echo "Installing godep and restoring dependencies"; \
+		go get github.com/tools/godep; \
+		godep restore; \
+	fi
 
 dev: deps
-	@grep 'const VersionPrerelease = ""' version.go > /dev/null ; if [ $$? -eq 0 ]; then \
-		echo "ERROR: You must add prerelease tags to version.go prior to making a dev build."; \
+	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
+		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
 		exit 1; \
 	fi
-	@PACKER_DEV=1 sh -c "$(CURDIR)/scripts/build.sh"
+	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
+
+fmt:
+	go fmt `go list ./... | grep -v vendor`
+
+# Install js-beautify with npm install -g js-beautify
+fmt-examples:
+	find examples -name *.json | xargs js-beautify -r -s 2 -n -eol "\n"
 
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate: deps
-	go generate ./...
+	go generate .
+	go fmt command/plugin.go
 
 test: deps
-	go test $(TEST) $(TESTARGS) -timeout=15s | tee packer-test.log
-	@go vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
-		go get golang.org/x/tools/cmd/vet; \
-	fi
-	@go vet $(TEST) ; if [ $$? -eq 1 ]; then \
+	@go test $(TEST) $(TESTARGS) -timeout=2m
+	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
 	fi
@@ -49,37 +65,20 @@ test: deps
 # testacc runs acceptance tests
 testacc: deps generate
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
-	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m | tee packer-test-acc.log
+	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: deps
-	go test -race $(TEST) $(TESTARGS) -timeout=15s | tee packer-test-race.log
+	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
-# `go get -u` causes git to revert packer to the master branch. This causes all
-# kinds of headaches. We record the git sha when make starts try to correct it
-# if we detect dift. DO NOT use `git checkout -f` for this because it will wipe
-# out your changes without asking.
 updatedeps:
-	@echo "INFO: Currently on $(GITBRANCH) ($(GITSHA))"
-	@git diff-index --quiet HEAD ; if [ $$? -ne 0 ]; then \
-		echo "ERROR: Your git working tree has uncommitted changes. updatedeps will fail. Please stash or commit your changes first."; \
-		exit 1; \
-	fi
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
-	go get -u github.com/cloudfoundry/gosigar
-	go list ./... \
-		| xargs go list -f '{{join .Deps "\n"}}' \
-		| grep -v github.com/mitchellh/packer \
-		| grep -v '/internal/' \
-		| sort -u \
-		| xargs go get -f -u -v -d ; if [ $$? -ne 0 ]; then \
-		echo "ERROR: go get failed. Your git branch may have changed; you were on $(GITBRANCH) ($(GITSHA))."; \
-	fi
-	@if [ "$(GITBRANCH)" != "" ]; then git checkout -q $(GITBRANCH); else git checkout -q $(GITSHA); fi
-	@if [ `git rev-parse HEAD` != "$(GITSHA)" ]; then \
-		echo "ERROR: git checkout has drifted and we weren't able to correct it. Was $(GITBRANCH) ($(GITSHA))"; \
-		exit 1; \
-	fi
-	@echo "INFO: Currently on $(GITBRANCH) ($(GITSHA))"
+	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
 
-.PHONY: bin checkversion ci default deps generate releasebin test testacc testrace updatedeps
+# This is used to add new dependencies to packer. If you are submitting a PR
+# that includes new dependencies you will need to run this.
+vendor:
+	godep restore
+	godep save
+
+.PHONY: bin checkversion ci default deps fmt fmt-examples generate releasebin test testacc testrace updatedeps

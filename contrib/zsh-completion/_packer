@@ -30,8 +30,10 @@ __inspect() {
 
 __push() {
   _arguments \
-    '-create[Create the build configuration if it does not exist].' \
-    '-token=[(<token>) Access token to use to upload.]'
+    '-name=[(<name>) The destination build in Atlas.]' \
+    '-token=[(<token>) Access token to use to upload.]' \
+    '-var[("key=value") Variable for templates, can be used multiple times.]' \
+    '-var-file=[(path) JSON file containing user variables.]'
 }
 
 __validate() {

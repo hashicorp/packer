@@ -168,6 +168,13 @@ func TestImageName(t *testing.T) {
 	}
 }
 
+func TestRegion(t *testing.T) {
+	c, _, _ := NewConfig(testConfig(t))
+	if c.Region != "us-east1" {
+		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
+	}
+}
+
 // Helper stuff below
 
 func testConfig(t *testing.T) map[string]interface{} {
@@ -175,7 +182,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"account_file": testAccountFile(t),
 		"project_id":   "hashicorp",
 		"source_image": "foo",
-		"zone":         "us-east-1a",
+		"zone":         "us-east1-a",
 	}
 }
 

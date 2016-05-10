@@ -20,6 +20,7 @@ type Config struct {
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	APIToken string `mapstructure:"api_token"`
+	APIURL   string `mapstructure:"api_url"`
 
 	Region string `mapstructure:"region"`
 	Size   string `mapstructure:"size"`
@@ -57,7 +58,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		// Default to environment variable for api_token, if it exists
 		c.APIToken = os.Getenv("DIGITALOCEAN_API_TOKEN")
 	}
-
+	if c.APIURL == "" {
+		c.APIURL = os.Getenv("DIGITALOCEAN_API_URL")
+	}
 	if c.SnapshotName == "" {
 		def, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {

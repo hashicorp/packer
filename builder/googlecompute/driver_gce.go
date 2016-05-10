@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -68,12 +69,7 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
 	log.Printf("[INFO] Instantiating GCE client...")
 	service, err := compute.New(client)
 	// Set UserAgent
-	versionString := "0.0.0"
-	// TODO(dcunnin): Use Packer's version code from version.go
-	// versionString := main.Version
-	// if main.VersionPrerelease != "" {
-	//      versionString = fmt.Sprintf("%s-%s", versionString, main.VersionPrerelease)
-	// }
+	versionString := version.FormattedVersion()
 	service.UserAgent = fmt.Sprintf(
 		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
 
@@ -215,6 +211,25 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		return nil, err
 	}
 
+	// Subnetwork
+	// Validate Subnetwork config now that we have some info about the network
+	if !network.AutoCreateSubnetworks && len(network.Subnetworks) > 0 {
+		// Network appears to be in "custom" mode, so a subnetwork is required
+		if c.Subnetwork == "" {
+			return nil, fmt.Errorf("a subnetwork must be specified")
+		}
+	}
+	// Get the subnetwork
+	subnetworkSelfLink := ""
+	if c.Subnetwork != "" {
+		d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
+		subnetwork, err := d.service.Subnetworks.Get(d.projectId, c.Region, c.Subnetwork).Do()
+		if err != nil {
+			return nil, err
+		}
+		subnetworkSelfLink = subnetwork.SelfLink
+	}
+
 	// If given a regional ip, get it
 	accessconfig := compute.AccessConfig{
 		Name: "AccessConfig created by Packer",
@@ -235,9 +250,10 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Build up the metadata
 	metadata := make([]*compute.MetadataItems, len(c.Metadata))
 	for k, v := range c.Metadata {
+		vCopy := v
 		metadata = append(metadata, &compute.MetadataItems{
 			Key:   k,
-			Value: &v,
+			Value: &vCopy,
 		})
 	}
 
@@ -254,6 +270,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				InitializeParams: &compute.AttachedDiskInitializeParams{
 					SourceImage: image.SelfLink,
 					DiskSizeGb:  c.DiskSizeGb,
+					DiskType:    fmt.Sprintf("zones/%s/diskTypes/%s", zone.Name, c.DiskType),
 				},
 			},
 		},
@@ -267,7 +284,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				AccessConfigs: []*compute.AccessConfig{
 					&accessconfig,
 				},
-				Network: network.SelfLink,
+				Network:    network.SelfLink,
+				Subnetwork: subnetworkSelfLink,
 			},
 		},
 		Scheduling: &compute.Scheduling{

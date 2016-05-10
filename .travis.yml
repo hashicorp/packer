@@ -3,9 +3,10 @@ sudo: false
 language: go
 
 go:
-  - 1.4
-  - 1.5.3
-  - tip
+  - 1.6
+
+install:
+  - make deps
 
 script:
   - GOMAXPROCS=2 make ci
@@ -17,4 +18,4 @@ branches:
 matrix:
   fast_finish: true
   allow_failures:
-    - go: tip
+    - go: 1.4.3

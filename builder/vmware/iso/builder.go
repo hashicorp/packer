@@ -46,6 +46,7 @@ type Config struct {
 	Version             string   `mapstructure:"version"`
 	VMName              string   `mapstructure:"vm_name"`
 	BootCommand         []string `mapstructure:"boot_command"`
+	KeepRegistered      bool     `mapstructure:"keep_registered"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
@@ -93,7 +94,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx, b.config.RemoteType)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -147,7 +148,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.RemotePort == 0 {
 		b.config.RemotePort = 22
 	}
-
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -168,14 +168,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("format must be one of ova, ovf, or vmx"))
-		}
-	}
-
-	// Determine if DiskSize is able to be allocated, only when running locally
-	if b.config.RemoteType == "" {
-		if err = common.AvailableDisk(uint64(b.config.DiskSize)); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Unavailable Resources: %s", err))
 		}
 	}
 

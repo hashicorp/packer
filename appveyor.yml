@@ -12,27 +12,26 @@ os: Windows Server 2012 R2
 
 environment:
   GOPATH: c:\gopath
-  matrix:
-  - GOARCH: 386
-    GOVERSION: 1.4.2
-  - GOARCH: amd64
-    GOVERSION: 1.4.2
 
 clone_folder: c:\gopath\src\github.com\mitchellh\packer
 
 install:
-  - set Path=c:\go\bin;%Path%
+  - set GO15VENDOREXPERIMENT=1
   - echo %Path%
-  - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-%GOARCH%.msi
-  - msiexec /i go%GOVERSION%.windows-%GOARCH%.msi /q
   - go version
   - go env
-  - go get -d -v -t ./...
+  - go get github.com/mitchellh/gox
+  - go get golang.org/x/tools/cmd/stringer
 
 build_script:
-  - go test -v ./...
-  - go vet ./...
   - git rev-parse HEAD
+ # go test $(go list ./... | grep -v vendor)
+  - ps: |
+      go.exe test (go.exe list ./... `
+      |? { -not $_.Contains('/vendor/') } `
+      |? { $_ -ne 'github.com/mitchellh/packer/builder/parallels/common' } `
+      |? { $_ -ne 'github.com/mitchellh/packer/common' }`
+      |? { $_ -ne 'github.com/mitchellh/packer/provisioner/ansible' })
 
 test: off
 

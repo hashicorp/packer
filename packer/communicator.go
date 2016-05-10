@@ -75,6 +75,8 @@ type Communicator interface {
 	// with the contents writing to the given writer. This method will
 	// block until it completes.
 	Download(string, io.Writer) error
+
+	DownloadDir(src string, dst string, exclude []string) error
 }
 
 // StartWithUi runs the remote command and streams the output to any

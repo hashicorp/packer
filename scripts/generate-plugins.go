@@ -20,16 +20,9 @@ import (
 const target = "command/plugin.go"
 
 func main() {
-	// Normally this is run via go:generate from the command folder so we need
-	// to cd .. first. But when developing it's easier to use go run, so we'll
-	// support that too.
 	wd, _ := os.Getwd()
 	if filepath.Base(wd) != "packer" {
-		os.Chdir("..")
-		wd, _ = os.Getwd()
-		if filepath.Base(wd) != "packer" {
-			log.Fatalf("This program must be invoked in the packer project root; in %s", wd)
-		}
+		log.Fatalf("This program must be invoked in the packer project root; in %s", wd)
 	}
 
 	// Collect all of the data we need about plugins we have in the project
@@ -103,15 +96,15 @@ func makeImports(builders, provisioners, postProcessors []plugin) string {
 	plugins := []string{}
 
 	for _, builder := range builders {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", builder.ImportName, builder.Path))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", builder.ImportName, filepath.ToSlash(builder.Path)))
 	}
 
 	for _, provisioner := range provisioners {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", provisioner.ImportName, provisioner.Path))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", provisioner.ImportName, filepath.ToSlash(provisioner.Path)))
 	}
 
 	for _, postProcessor := range postProcessors {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", postProcessor.ImportName, postProcessor.Path))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", postProcessor.ImportName, filepath.ToSlash(postProcessor.Path)))
 	}
 
 	// Make things pretty

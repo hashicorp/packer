@@ -422,6 +422,15 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
+	// Chmod the directory to 0777 just so that we can access it as our user
+	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status. See output above for more info.")
+	}
+
 	return nil
 }
 

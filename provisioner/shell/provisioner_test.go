@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"strings"
+	"regexp"
 )
 
 func testConfig() map[string]interface{} {
@@ -215,5 +217,133 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	expectedValue = "keytwo='value\ntwo'"
 	if p.config.Vars[1] != expectedValue {
 		t.Fatalf("%s should be equal to %s", p.config.Vars[1], expectedValue)
+	}
+}
+
+func TestProvisioner_RemoteFolderSetSuccessfully(t *testing.T) {
+	config := testConfig()
+
+	expectedRemoteFolder := "/example/path"
+	config["remote_folder"] = expectedRemoteFolder
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !strings.Contains(p.config.RemotePath, expectedRemoteFolder) {
+		t.Fatalf("remote path does not contain remote_folder")
+	}
+}
+
+func TestProvisioner_RemoteFolderDefaultsToTmp(t *testing.T) {
+	config := testConfig()
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if p.config.RemoteFolder != "/tmp" {
+		t.Fatalf("remote_folder did not default to /tmp")
+	}
+
+	if !strings.Contains(p.config.RemotePath, "/tmp") {
+		t.Fatalf("remote path does not contain remote_folder")
+	}
+}
+
+func TestProvisioner_RemoteFileSetSuccessfully(t *testing.T) {
+	config := testConfig()
+
+	expectedRemoteFile := "example.sh"
+	config["remote_file"] = expectedRemoteFile
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !strings.Contains(p.config.RemotePath, expectedRemoteFile) {
+		t.Fatalf("remote path does not contain remote_file")
+	}
+}
+
+func TestProvisioner_RemoteFileDefaultsToScriptnnnn(t *testing.T) {
+	config := testConfig()
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	remoteFileRegex := regexp.MustCompile("script_[0-9]{4}.sh")
+
+	if !remoteFileRegex.MatchString(p.config.RemoteFile) {
+		t.Fatalf("remote_file did not default to script_nnnn.sh")
+	}
+
+	if !remoteFileRegex.MatchString(p.config.RemotePath) {
+		t.Fatalf("remote_path did not match script_nnnn.sh")
+	}
+}
+
+func TestProvisioner_RemotePathSetViaRemotePathAndRemoteFile(t *testing.T) {
+	config := testConfig()
+
+	expectedRemoteFile := "example.sh"
+	expectedRemoteFolder := "/example/path"
+	config["remote_file"] = expectedRemoteFile
+	config["remote_folder"] = expectedRemoteFolder
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if p.config.RemotePath != expectedRemoteFolder + "/" + expectedRemoteFile {
+		t.Fatalf("remote path does not contain remote_file")
+	}
+}
+
+func TestProvisioner_RemotePathOverridesRemotePathAndRemoteFile(t *testing.T) {
+	config := testConfig()
+
+	expectedRemoteFile := "example.sh"
+	expectedRemoteFolder := "/example/path"
+	expectedRemotePath := "/example/remote/path/script.sh"
+	config["remote_file"] = expectedRemoteFile
+	config["remote_folder"] = expectedRemoteFolder
+	config["remote_path"] = expectedRemotePath
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if p.config.RemotePath != expectedRemotePath {
+		t.Fatalf("remote path does not contain remote_path")
+	}
+}
+
+func TestProvisionerRemotePathDefaultsSuccessfully(t *testing.T) {
+	config := testConfig()
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	remotePathRegex := regexp.MustCompile("/tmp/script_[0-9]{4}.sh")
+
+	if !remotePathRegex.MatchString(p.config.RemotePath) {
+		t.Fatalf("remote path does not match the expected default regex")
 	}
 }

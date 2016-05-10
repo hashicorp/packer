@@ -356,9 +356,9 @@ func TestParse_bad(t *testing.T) {
 		File     string
 		Expected string
 	}{
-		{"error-beginning.json", "line 1, char 1"},
-		{"error-middle.json", "line 5, char 5"},
-		{"error-end.json", "line 1, char 30"},
+		{"error-beginning.json", "line 1, column 1 (offset 1)"},
+		{"error-middle.json", "line 5, column 6 (offset 50)"},
+		{"error-end.json", "line 1, column 30 (offset 30)"},
 	}
 	for _, tc := range cases {
 		_, err := ParseFile(fixtureDir(tc.File))

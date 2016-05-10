@@ -54,14 +54,17 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	errCh, err := driver.RunInstance(&InstanceConfig{
 		Description: "New instance created by Packer",
 		DiskSizeGb:  config.DiskSizeGb,
+		DiskType:    config.DiskType,
 		Image:       config.getImage(),
 		MachineType: config.MachineType,
 		Metadata:    config.getInstanceMetadata(sshPublicKey),
 		Name:        name,
 		Network:     config.Network,
+		Subnetwork:  config.Subnetwork,
 		Address:     config.Address,
 		Preemptible: config.Preemptible,
 		Tags:        config.Tags,
+		Region:      config.Region,
 		Zone:        config.Zone,
 	})
 

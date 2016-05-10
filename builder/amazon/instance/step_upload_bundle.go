@@ -36,13 +36,24 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	accessKey := config.AccessKey
+	secretKey := config.SecretKey
+	accessConfig, err := config.AccessConfig.Config()
+	if err == nil && accessKey == "" && secretKey == "" {
+		credentials, err := accessConfig.Credentials.Get()
+		if err == nil {
+			accessKey = credentials.AccessKeyID
+			secretKey = credentials.SecretAccessKey
+		}
+	}
+
 	config.ctx.Data = uploadCmdData{
-		AccessKey:       config.AccessKey,
+		AccessKey:       accessKey,
 		BucketName:      config.S3Bucket,
 		BundleDirectory: config.BundleDestination,
 		ManifestPath:    manifestPath,
 		Region:          region,
-		SecretKey:       config.SecretKey,
+		SecretKey:       secretKey,
 	}
 	config.BundleUploadCommand, err = interpolate.Render(config.BundleUploadCommand, &config.ctx)
 	if err != nil {

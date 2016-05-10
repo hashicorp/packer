@@ -3,7 +3,6 @@ package chroot
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 // Communicator is a special communicator that works by executing
@@ -112,6 +113,10 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	}
 
 	return err
+}
+
+func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
+	return fmt.Errorf("DownloadDir is not implemented for amazon-chroot")
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {

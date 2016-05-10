@@ -41,6 +41,11 @@ func New(config *Config) (*Communicator, error) {
 
 	// Create the client
 	params := winrm.DefaultParameters()
+
+	if config.TransportDecorator != nil {
+		params.TransportDecorator = config.TransportDecorator
+	}
+
 	params.Timeout = formatDuration(config.Timeout)
 	client, err := winrm.NewClientWithParameters(
 		endpoint, config.Username, config.Password, params)
@@ -140,6 +145,10 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 	return fmt.Errorf("WinRM doesn't support download.")
 }
 
+func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
+	return fmt.Errorf("WinRM doesn't support download dir.")
+}
+
 func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 	addr := fmt.Sprintf("%s:%d", c.endpoint.Host, c.endpoint.Port)
 	return winrmcp.New(addr, &winrmcp.Config{
@@ -147,9 +156,10 @@ func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 			User:     c.config.Username,
 			Password: c.config.Password,
 		},
-		Https: c.config.Https,
-		Insecure: c.config.Insecure,
+		Https:                 c.config.Https,
+		Insecure:              c.config.Insecure,
 		OperationTimeout:      c.config.Timeout,
 		MaxOperationsPerShell: 15, // lowest common denominator
+		TransportDecorator:    c.config.TransportDecorator,
 	})
 }

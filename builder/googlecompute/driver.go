@@ -42,13 +42,16 @@ type Image struct {
 type InstanceConfig struct {
 	Description string
 	DiskSizeGb  int64
+	DiskType    string
 	Image       Image
 	MachineType string
 	Metadata    map[string]string
 	Name        string
 	Network     string
+	Subnetwork  string
 	Address     string
 	Preemptible bool
 	Tags        []string
+	Region      string
 	Zone        string
 }

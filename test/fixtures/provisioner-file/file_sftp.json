@@ -1,0 +1,23 @@
+{
+    "builders": [{
+        "type": "amazon-ebs",
+        "ami_name": "packer-test {{timestamp}}",
+        "instance_type": "t2.micro",
+        "region": "us-east-1",
+        "ssh_username": "ec2-user",
+	"ssh_file_transfer_method": "sftp",
+        "source_ami": "ami-8da458e6",
+        "tags": {
+            "packer-test": "true"
+        }
+    }],
+
+    "provisioners": [{
+        "type": "file",
+        "source": "file.txt",
+        "destination": "/tmp/file.txt"
+    }, {
+        "type": "shell",
+        "inline": ["cat /tmp/file.txt"]
+    }]
+}

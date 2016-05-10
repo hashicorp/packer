@@ -6,13 +6,28 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/mitchellh/packer/packer"
 )
 
-func testConfig() map[string]interface{} {
+// Be sure to remove the Ansible stub file in each test with:
+//   defer os.Remove(config["command"].(string))
+func testConfig(t *testing.T) map[string]interface{} {
 	m := make(map[string]interface{})
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	ansible_stub := path.Join(wd, "packer-ansible-stub.sh")
+
+	err = ioutil.WriteFile(ansible_stub, []byte("#!/usr/bin/env bash\necho ansible 1.6.0"), 0777)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	m["command"] = ansible_stub
+
 	return m
 }
 
@@ -26,7 +41,8 @@ func TestProvisioner_Impl(t *testing.T) {
 
 func TestProvisionerPrepare_Defaults(t *testing.T) {
 	var p Provisioner
-	config := testConfig()
+	config := testConfig(t)
+	defer os.Remove(config["command"].(string))
 
 	err := p.Prepare(config)
 	if err == nil {
@@ -62,7 +78,8 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 
 func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 	var p Provisioner
-	config := testConfig()
+	config := testConfig(t)
+	defer os.Remove(config["command"].(string))
 
 	hostkey_file, err := ioutil.TempFile("", "hostkey")
 	if err != nil {
@@ -99,7 +116,8 @@ func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 
 func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 	var p Provisioner
-	config := testConfig()
+	config := testConfig(t)
+	defer os.Remove(config["command"].(string))
 
 	publickey_file, err := ioutil.TempFile("", "publickey")
 	if err != nil {
@@ -143,7 +161,8 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 
 func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	var p Provisioner
-	config := testConfig()
+	config := testConfig(t)
+	defer os.Remove(config["command"].(string))
 
 	hostkey_file, err := ioutil.TempFile("", "hostkey")
 	if err != nil {
@@ -157,12 +176,19 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	}
 	defer os.Remove(playbook_file.Name())
 
+	filename := make([]byte, 10)
+	n, err := io.ReadFull(rand.Reader, filename)
+	if n != len(filename) || err != nil {
+		t.Fatal("could not create random file name")
+	}
+
 	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["playbook_file"] = playbook_file.Name()
+	config["ssh_authorized_key_file"] = fmt.Sprintf("%x", filename)
 
 	err = p.Prepare(config)
 	if err == nil {
-		t.Fatal("should have error")
+		t.Errorf("should error if ssh_authorized_key_file does not exist")
 	}
 
 	publickey_file, err := ioutil.TempFile("", "publickey")
@@ -174,13 +200,14 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	config["ssh_authorized_key_file"] = publickey_file.Name()
 	err = p.Prepare(config)
 	if err != nil {
-		t.Fatalf("err: %s", err)
+		t.Errorf("err: %s", err)
 	}
 }
 
 func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	var p Provisioner
-	config := testConfig()
+	config := testConfig(t)
+	defer os.Remove(config["command"].(string))
 
 	hostkey_file, err := ioutil.TempFile("", "hostkey")
 	if err != nil {

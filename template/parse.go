@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
@@ -311,24 +312,6 @@ func Parse(r io.Reader) (*Template, error) {
 	return rawTpl.Template()
 }
 
-// Find line number and position based on the offset
-func findLinePos(f *os.File, offset int64) (int64, int64, string) {
-	scanner := bufio.NewScanner(f)
-	count := int64(0)
-	for scanner.Scan() {
-		count += 1
-		scanLength := len(scanner.Text()) + 1
-		if offset < int64(scanLength) {
-			return count, offset, scanner.Text()
-		}
-		offset = offset - int64(scanLength)
-	}
-	if err := scanner.Err(); err != nil {
-		return 0, 0, err.Error()
-	}
-	return 0, 0, ""
-}
-
 // ParseFile is the same as Parse but is a helper to automatically open
 // a file for parsing.
 func ParseFile(path string) (*Template, error) {
@@ -359,8 +342,9 @@ func ParseFile(path string) (*Template, error) {
 		}
 		// Rewind the file and get a better error
 		f.Seek(0, os.SEEK_SET)
-		line, pos, errorLine := findLinePos(f, syntaxErr.Offset)
-		err = fmt.Errorf("Error in line %d, char %d: %s\n%s", line, pos, syntaxErr, errorLine)
+		// Grab the error location, and return a string to point to offending syntax error
+		line, col, highlight := highlightPosition(f, syntaxErr.Offset)
+		err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, syntaxErr.Offset, highlight)
 		return nil, err
 	}
 
@@ -373,4 +357,47 @@ func ParseFile(path string) (*Template, error) {
 
 	tpl.Path = path
 	return tpl, nil
+}
+
+// Takes a file and the location in bytes of a parse error
+// from json.SyntaxError.Offset and returns the line, column,
+// and pretty-printed context around the error with an arrow indicating the exact
+// position of the syntax error.
+func highlightPosition(f *os.File, pos int64) (line, col int, highlight string) {
+	// Modified version of the function in Camlistore by Brad Fitzpatrick
+	// https://github.com/camlistore/camlistore/blob/4b5403dd5310cf6e1ae8feb8533fd59262701ebc/vendor/go4.org/errorutil/highlight.go
+	line = 1
+	// New io.Reader for file
+	br := bufio.NewReader(f)
+	// Initialize lines
+	lastLine := ""
+	thisLine := new(bytes.Buffer)
+	// Loop through template to find line, column
+	for n := int64(0); n < pos; n++ {
+		// read byte from io.Reader
+		b, err := br.ReadByte()
+		if err != nil {
+			break
+		}
+		// If end of line, save line as previous line in case next line is offender
+		if b == '\n' {
+			lastLine = thisLine.String()
+			thisLine.Reset()
+			line++
+			col = 1
+		} else {
+			// Write current line, until line is safe, or error point is encountered
+			col++
+			thisLine.WriteByte(b)
+		}
+	}
+
+	// Populate highlight string to place a '^' char at offending column
+	if line > 1 {
+		highlight += fmt.Sprintf("%5d: %s\n", line-1, lastLine)
+	}
+
+	highlight += fmt.Sprintf("%5d: %s\n", line, thisLine.String())
+	highlight += fmt.Sprintf("%s^\n", strings.Repeat(" ", col+5))
+	return
 }

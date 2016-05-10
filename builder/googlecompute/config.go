@@ -25,12 +25,14 @@ type Config struct {
 
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
+	DiskType             string            `mapstructure:"disk_type"`
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
 	InstanceName         string            `mapstructure:"instance_name"`
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	Subnetwork           string            `mapstructure:"subnetwork"`
 	Address              string            `mapstructure:"address"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	SourceImage          string            `mapstructure:"source_image"`
@@ -38,6 +40,7 @@ type Config struct {
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Tags                 []string          `mapstructure:"tags"`
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
+	Region               string            `mapstructure:"region"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
@@ -70,6 +73,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.DiskSizeGb == 0 {
 		c.DiskSizeGb = 10
+	}
+
+	if c.DiskType == "" {
+		c.DiskType = "pd-standard"
 	}
 
 	if c.ImageDescription == "" {
@@ -124,6 +131,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Zone == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a zone must be specified"))
+	}
+	if c.Region == "" && len(c.Zone) > 2 {
+		// get region from Zone
+		region := c.Zone[:len(c.Zone)-2]
+		c.Region = region
 	}
 
 	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)

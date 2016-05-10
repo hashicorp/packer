@@ -11,7 +11,7 @@ func TestVMXConfigPrepare(t *testing.T) {
 		"two": "bar",
 	}
 
-	errs := c.Prepare(testConfigTemplate(t), "")
+	errs := c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)
 	}

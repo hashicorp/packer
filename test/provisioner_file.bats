@@ -32,3 +32,21 @@ teardown() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"337 miles"* ]]
 }
+
+@test "file provisioner: single file through sftp" {
+    run packer build $FIXTURE_ROOT/file_sftp.json
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"24901 miles"* ]]
+}
+
+@test "file provisioner: directory through sftp (no trailing slash)" {
+    run packer build $FIXTURE_ROOT/dir_no_trailing_sftp.json
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"337 miles"* ]]
+}
+
+@test "file provisioner: directory through sftp (with trailing slash)" {
+    run packer build $FIXTURE_ROOT/dir_with_trailing_sftp.json
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"337 miles"* ]]
+}

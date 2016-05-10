@@ -1,0 +1,13 @@
+language: go
+
+script:
+  - go test -race -v ./...
+
+go:
+  - 1.3.3
+  - 1.4.3
+  - 1.5.2
+
+install:
+  - go get gopkg.in/fsnotify.v1
+  - go get gopkg.in/tomb.v1

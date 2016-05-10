@@ -25,6 +25,10 @@ type MockCommunicator struct {
 	UploadDirSrc     string
 	UploadDirExclude []string
 
+	DownloadDirDst     string
+	DownloadDirSrc     string
+	DownloadDirExclude []string
+
 	DownloadCalled bool
 	DownloadPath   string
 	DownloadData   string
@@ -95,6 +99,14 @@ func (c *MockCommunicator) Download(path string, w io.Writer) error {
 	c.DownloadCalled = true
 	c.DownloadPath = path
 	w.Write([]byte(c.DownloadData))
+
+	return nil
+}
+
+func (c *MockCommunicator) DownloadDir(src string, dst string, excl []string) error {
+	c.DownloadDirDst = dst
+	c.DownloadDirSrc = src
+	c.DownloadDirExclude = excl
 
 	return nil
 }

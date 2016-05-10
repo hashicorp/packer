@@ -16,14 +16,15 @@ import (
 // CommHost looks up the host for the communicator.
 func CommHost(
 	client *gophercloud.ServiceClient,
-	sshinterface string) func(multistep.StateBag) (string, error) {
+	sshinterface string,
+	sshipversion string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		s := state.Get("server").(*servers.Server)
 
 		// If we have a specific interface, try that
 		if sshinterface != "" {
-			if addr := sshAddrFromPool(s, sshinterface); addr != "" {
-				log.Printf("[DEBUG] Using IP address %s from specified interface %s for SSH", addr, sshinterface)
+			if addr := sshAddrFromPool(s, sshinterface, sshipversion); addr != "" {
+				log.Printf("[DEBUG] Using IP address %s from specified interface %s to connect", addr, sshinterface)
 				return addr, nil
 			}
 		}
@@ -31,18 +32,18 @@ func CommHost(
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingip.FloatingIP)
 		if ip != nil && ip.IP != "" {
-			log.Printf("[DEBUG] Using floating IP %s for SSH", ip.IP)
+			log.Printf("[DEBUG] Using floating IP %s to connect", ip.IP)
 			return ip.IP, nil
 		}
 
 		if s.AccessIPv4 != "" {
-			log.Printf("[DEBUG] Using AccessIPv4 %s for SSH", s.AccessIPv4)
+			log.Printf("[DEBUG] Using AccessIPv4 %s to connect", s.AccessIPv4)
 			return s.AccessIPv4, nil
 		}
 
 		// Try to get it from the requested interface
-		if addr := sshAddrFromPool(s, sshinterface); addr != "" {
-			log.Printf("[DEBUG] Using IP address %s for SSH", addr)
+		if addr := sshAddrFromPool(s, sshinterface, sshipversion); addr != "" {
+			log.Printf("[DEBUG] Using IP address %s to connect", addr)
 			return addr, nil
 		}
 
@@ -79,7 +80,7 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 	}
 }
 
-func sshAddrFromPool(s *servers.Server, desired string) string {
+func sshAddrFromPool(s *servers.Server, desired string, sshIPVersion string) string {
 	// Get all the addresses associated with this server. This
 	// was taken directly from Terraform.
 	for pool, networkAddresses := range s.Addresses {
@@ -104,6 +105,14 @@ func sshAddrFromPool(s *servers.Server, desired string) string {
 			address := element.(map[string]interface{})
 			if address["OS-EXT-IPS:type"] == "floating" {
 				addr = address["addr"].(string)
+			} else if sshIPVersion == "4" {
+				if address["version"].(float64) == 4 {
+					addr = address["addr"].(string)
+				}
+			} else if sshIPVersion == "6" {
+				if address["version"].(float64) == 6 {
+					addr = fmt.Sprintf("[%s]", address["addr"].(string))
+				}
 			} else {
 				if address["version"].(float64) == 6 {
 					addr = fmt.Sprintf("[%s]", address["addr"].(string))

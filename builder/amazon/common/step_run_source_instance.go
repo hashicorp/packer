@@ -55,14 +55,13 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			return multistep.ActionHalt
 		}
 
-		// Test if it is encoded already, and if not, encode it
-		if _, err := base64.StdEncoding.DecodeString(string(contents)); err != nil {
-			log.Printf("[DEBUG] base64 encoding user data...")
-			contents = []byte(base64.StdEncoding.EncodeToString(contents))
-		}
-
 		userData = string(contents)
+	}
 
+	// Test if it is encoded already, and if not, encode it
+	if _, err := base64.StdEncoding.DecodeString(userData); err != nil {
+		log.Printf("[DEBUG] base64 encoding user data...")
+		userData = base64.StdEncoding.EncodeToString([]byte(userData))
 	}
 
 	ui.Say("Launching a source AWS instance...")

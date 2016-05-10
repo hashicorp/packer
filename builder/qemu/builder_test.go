@@ -357,11 +357,11 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_sshKeyPath(t *testing.T) {
+func TestBuilderPrepare_SSHPrivateKey(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	config["ssh_key_path"] = ""
+	config["ssh_private_key_file"] = ""
 	b = Builder{}
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -371,7 +371,7 @@ func TestBuilderPrepare_sshKeyPath(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	config["ssh_key_path"] = "/i/dont/exist"
+	config["ssh_private_key_file"] = "/i/dont/exist"
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -393,7 +393,7 @@ func TestBuilderPrepare_sshKeyPath(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	config["ssh_key_path"] = tf.Name()
+	config["ssh_private_key_file"] = tf.Name()
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -407,7 +407,7 @@ func TestBuilderPrepare_sshKeyPath(t *testing.T) {
 	tf.Seek(0, 0)
 	tf.Truncate(0)
 	tf.Write([]byte(testPem))
-	config["ssh_key_path"] = tf.Name()
+	config["ssh_private_key_file"] = tf.Name()
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {

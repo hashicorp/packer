@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -152,6 +153,19 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			time.Sleep(10 * time.Second)
 			original = original[len("<wait10>"):]
 			continue
+		}
+
+		if strings.HasPrefix(original, "<wait") && strings.HasSuffix(original, ">") {
+			re := regexp.MustCompile(`<wait([0-9hms]+)>$`)
+			dstr := re.FindStringSubmatch(original)
+			if len(dstr) > 1 {
+				log.Printf("Special code %s found, sleeping", dstr[0])
+				if dt, err := time.ParseDuration(dstr[1]); err == nil {
+					time.Sleep(dt)
+					original = original[len(dstr[0]):]
+					continue
+				}
+			}
 		}
 
 		for specialCode, specialValue := range special {

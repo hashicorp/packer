@@ -76,6 +76,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepAttachGuestAdditions{
 			GuestAdditionsMode: b.config.GuestAdditionsMode,
 		},
+		&vboxcommon.StepConfigureVRDP{
+			VRDPPortMin: b.config.VRDPPortMin,
+			VRDPPortMax: b.config.VRDPPortMax,
+		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
 			CommConfig:     &b.config.SSHConfig.Comm,

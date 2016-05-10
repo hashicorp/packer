@@ -3,7 +3,7 @@
 
 $script = <<SCRIPT
 # Fetch from https://golang.org/dl
-TARBALL="https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz"
+TARBALL="https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz"
 
 UNTARPATH="/opt"
 GOROOT="${UNTARPATH}/go"
