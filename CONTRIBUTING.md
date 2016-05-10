@@ -87,7 +87,9 @@ following steps in order to be able to compile and test Packer. These instructio
 
 #### Godeps
 
-If you are submitting a change that requires a change in dependencies, DO NOT update the `vendor/` folder. This keeps the PR smaller and easier to review. Instead, please indicate which upstream has changed and which version we should be using. You _may_ do this using `Godeps/Godeps.json` but this is not required.
+If you are submitting a change that requires new or updated dependencies, please include them in `Godeps/Godeps.json` and in the `vendor/` folder.  This helps everything get tested properly in CI.
+
+Note that you will need to use [Godep](https://github.com/tools/godep) to do this. This step is recommended but not required; if you don't use Godep please indicate in your PR which dependencies have changed and to what versions.
 
 #### Running Unit Tests
 
@@ -101,16 +103,11 @@ Packer has [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
 for various builders. These typically require an API key (AWS, GCE), or
 additional software to be installed on your computer (VirtualBox, VMware).
 
-If you're working on a feature of a builder or a new builder and want verify it
-is functioning (and also hasn't broken anything else), we recommend running the
+If you're working on a new builder or builder feature and want verify it is functioning (and also hasn't broken anything else), we recommend running the
 acceptance tests.
 
 **Warning:** The acceptance tests create/destroy/modify *real resources*, which
-may incur real costs in some cases. In the presence of a bug, it is technically
-possible that broken backends could leave dangling data behind. Therefore,
-please run the acceptance tests at your own risk. At the very least, we
-recommend running them in their own private account for whatever builder you're
-testing.
+may incur costs for real money. In the presence of a bug, it is possible that resources may be left behind, which can cost money even though you were not using them. We recommend running tests in an account used only for that purpose so it is easy to see if there are any dangling resources, and so production resources are not accidentally destroyed or overwritten during testing.
 
 To run the acceptance tests, invoke `make testacc`:
 
