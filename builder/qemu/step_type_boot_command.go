@@ -1,6 +1,8 @@
 package qemu
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -36,33 +38,62 @@ type bootCommandTemplateData struct {
 //   <nothing>
 type stepTypeBootCommand struct{}
 
+type keyComm interface{}
+
+type qmpSender struct {
+	c *bufio.ReadWriter
+}
+
+type vncSender struct {
+	c *vnc.ClientConn
+}
+
 func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
-	vncPort := state.Get("vnc_port").(uint)
+	var comm keyComm
+	port := uint(0)
 
-	// Connect to VNC
-	ui.Say("Connecting to VM via VNC")
-	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", vncPort))
+	switch config.SendKeyComm {
+	case "vnc":
+		port = state.Get("vnc_port").(uint)
+	case "qmp":
+		port = state.Get("qmp_port").(uint)
+	}
+
+	ui.Say("Connecting to VM via " + config.SendKeyComm)
+	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	if err != nil {
-		err := fmt.Errorf("Error connecting to VNC: %s", err)
+		err := fmt.Errorf("Error connecting to %s: %s", config.SendKeyComm, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 	defer nc.Close()
-
-	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
-	if err != nil {
-		err := fmt.Errorf("Error handshaking with VNC: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	switch config.SendKeyComm {
+	case "vnc":
+		c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
+		if err != nil {
+			err := fmt.Errorf("Error handshaking with VNC: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		defer c.Close()
+		comm = &vncSender{c: c}
+		log.Printf("Connected to VNC desktop: %s", c.DesktopName)
+	case "qmp":
+		var banner []byte
+		comm = &qmpSender{c: bufio.NewReadWriter(bufio.NewReader(nc), bufio.NewWriter(nc))}
+		n, err := comm.(*qmpSender).c.Read(banner)
+		if err != nil {
+			log.Printf("qemu qmp banner err: %s\n", err.Error())
+			return multistep.ActionHalt
+		}
+		log.Printf("Connected to QMP monitor: 127.0.0.1:%d", port)
+		log.Printf("qemu qmp banner: %s\n", banner[:n])
 	}
-	defer c.Close()
-
-	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
 	ctx := config.ctx
 	ctx.Data = &bootCommandTemplateData{
@@ -71,7 +102,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		config.VMName,
 	}
 
-	ui.Say("Typing the boot command over VNC...")
+	ui.Say("Typing the boot command...")
 	for _, command := range config.BootCommand {
 		command, err := interpolate.Render(command, &ctx)
 		if err != nil {
@@ -87,7 +118,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 			return multistep.ActionHalt
 		}
 
-		vncSendString(c, command)
+		sendString(comm, command)
 	}
 
 	return multistep.ActionContinue
@@ -95,7 +126,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
-func vncSendString(c *vnc.ClientConn, original string) {
+func sendString(c keyComm, original string) {
 	// Scancodes reference: https://github.com/qemu/qemu/blob/master/ui/vnc_keysym.h
 	special := make(map[string]uint32)
 	special["<bs>"] = 0xFF08
@@ -186,20 +217,39 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			log.Printf("Sending char '%c', code %d, shift %v", r, keyCode, keyShift)
 		}
 
-		if keyShift {
-			c.KeyEvent(KeyLeftShift, true)
+		switch c.(type) {
+		case *vncSender:
+			keyc := c.(*vncSender)
+			if keyShift {
+				keyc.c.KeyEvent(KeyLeftShift, true)
+			}
+			keyc.c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+			keyc.c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+			if keyShift {
+				keyc.c.KeyEvent(KeyLeftShift, false)
+			}
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+		case *qmpSender:
+			keyc := c.(*qmpSender)
+			req := struct {
+				Execute   string `json:"execute"`
+				Arguments struct {
+					Keys     []uint32 `json:"keys"`
+					HoldTime uint     `json:"hold-time,omitempty"`
+				} `json:"arguments"`
+			}{Execute: "send-key"} //, Arguments: {HoldTime: 100}}
+			if keyShift {
+				req.Arguments.Keys = append(req.Arguments.Keys, KeyLeftShift)
+			}
+			req.Arguments.Keys = append(req.Arguments.Keys, keyCode)
+			buf, _ := json.Marshal(req)
+			buf = append(buf, byte('\n'))
+			log.Printf("%s", buf)
+			keyc.c.Write(buf)
+			keyc.c.Flush()
 		}
-
-		c.KeyEvent(keyCode, true)
-		time.Sleep(time.Second / 10)
-		c.KeyEvent(keyCode, false)
-		time.Sleep(time.Second / 10)
-
-		if keyShift {
-			c.KeyEvent(KeyLeftShift, false)
-		}
-
-		// qemu is picky, so no matter what, wait a small period
-		time.Sleep(100 * time.Millisecond)
 	}
 }

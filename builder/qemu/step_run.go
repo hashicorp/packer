@@ -61,12 +61,10 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
-	vncPort := state.Get("vnc_port").(uint)
 	sshHostPort := state.Get("sshHostPort").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 
-	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	vmName := config.VMName
 	imgPath := filepath.Join(config.OutputDir, vmName)
 
@@ -74,6 +72,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	var deviceArgs []string
 	var driveArgs []string
 
+	//	defaultArgs["-nodefaults"] = ""
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
 	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
@@ -90,9 +89,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	if qemuMajor >= 2 {
 		if config.DiskInterface == "virtio-scsi" {
 			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
-			driveArgs = append(driveArgs, fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s", imgPath, config.DiskCache, config.DiskDiscard))
+			driveArgs = append(driveArgs, fmt.Sprintf("format=%s,if=none,file=%s,id=drive0,cache=%s,discard=%s", config.Format, imgPath, config.DiskCache, config.DiskDiscard))
 		} else {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard))
+			driveArgs = append(driveArgs, fmt.Sprintf("format=%s,file=%s,if=%s,cache=%s,discard=%s", config.Format, imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard))
 		}
 	} else {
 		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache))
@@ -120,7 +119,21 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	}
 	defaultArgs["-boot"] = bootDrive
 	defaultArgs["-m"] = "512M"
+	vncPort := state.Get("vnc_port").(uint)
+	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
 	defaultArgs["-vnc"] = vnc
+
+	switch config.SendKeyComm {
+	case "qmp":
+		qmpPort := state.Get("qmp_port").(uint)
+		//		defaultArgs["-chardev"] = fmt.Sprintf("socket,id=charmonitor,host=127.0.0.1,port=%d,ipv4,server,nowait", qmpPort)
+		//		defaultArgs["-mon"] = "chardev=charmonitor,id=monitor,mode=control"
+		//		defaultArgs["-qmp"] = fmt.Sprintf("tcp:localhost:%d,server,nowait,nodelay", qmpPort)
+		//		defaultArgs["--monitor"] = "stdio"
+		defaultArgs["-chardev"] = fmt.Sprintf("socket,id=mon1,host=localhost,port=%d,server,nowait", qmpPort)
+		defaultArgs["-mon"] = "chardev=mon1,mode=control"
+
+	}
 
 	// Append the accelerator to the machine type if it is specified
 	if config.Accelerator != "none" {

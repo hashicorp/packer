@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -80,7 +81,7 @@ func (d *QemuDriver) Qemu(qemuArgs ...string) error {
 	cmd := exec.Command(d.QemuPath, qemuArgs...)
 	cmd.Stdout = stdout_w
 	cmd.Stderr = stderr_w
-
+	cmd.Stdin = os.Stdin
 	err := cmd.Start()
 	if err != nil {
 		err = fmt.Errorf("Error starting VM: %s", err)
