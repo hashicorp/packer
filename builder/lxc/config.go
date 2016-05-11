@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 	"time"
+	"os"
 )
 
 type Config struct {
@@ -60,6 +61,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	c.InitTimeout, err = time.ParseDuration(c.RawInitTimeout)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing init_timeout: %s", err))
+	}
+
+	if _, err := os.Stat(c.ConfigFile); os.IsNotExist(err) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("LXC Config file appears to be missing: %s", c.ConfigFile))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
