@@ -41,6 +41,14 @@ builder.
 
 -   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and `PREFIX-vmTemplate.UUID`.
 
+-   `location` (string) Azure datacenter in which your VM will build.
+
+    CLI example `azure location list`
+
+#### Image Source:
+
+Images can be used from the marketplace or from a VHD, stored in an ARM storage account in the same subscription.
+
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
     CLI example `azure vm image list-publishers -l westus`
@@ -53,9 +61,10 @@ builder.
 
     CLI example `azure vm image list-skus -l westus -p Canonical -o UbuntuServer`
 
--   `location` (string) Azure datacenter in which your VM will build.
+##### or:
 
-    CLI example `azure location list`
+-   `image_uri` (string) The full URL to a generalised VHD to use as a source (currently only for linux)
+
 
 ### Optional:
 

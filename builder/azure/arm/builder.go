@@ -86,23 +86,45 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var steps []multistep.Step
 
 	if b.config.OSType == constants.Target_Linux {
-		steps = []multistep.Step{
-			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, Linux),
-			NewStepDeployTemplate(azureClient, ui, Linux),
-			NewStepGetIPAddress(azureClient, ui),
-			&communicator.StepConnectSSH{
-				Config:    &b.config.Comm,
-				Host:      lin.SSHHost,
-				SSHConfig: lin.SSHConfig(b.config.UserName),
-			},
-			&packerCommon.StepProvision{},
-			NewStepGetOSDisk(azureClient, ui),
-			NewStepPowerOffCompute(azureClient, ui),
-			NewStepCaptureImage(azureClient, ui),
-			NewStepDeleteResourceGroup(azureClient, ui),
-			NewStepDeleteOSDisk(azureClient, ui),
-		}
+		if b.config.ImageUri == "" {
+			// use marketplace template
+			steps = []multistep.Step{
+				NewStepCreateResourceGroup(azureClient, ui),			
+				NewStepValidateTemplate(azureClient, ui, Linux),
+				NewStepDeployTemplate(azureClient, ui, Linux),
+				NewStepGetIPAddress(azureClient, ui),
+				&communicator.StepConnectSSH{
+					Config:    &b.config.Comm,
+					Host:      lin.SSHHost,
+					SSHConfig: lin.SSHConfig(b.config.UserName),
+				},
+				&packerCommon.StepProvision{},
+				NewStepGetOSDisk(azureClient, ui),
+				NewStepPowerOffCompute(azureClient, ui),
+				NewStepCaptureImage(azureClient, ui),
+				NewStepDeleteResourceGroup(azureClient, ui),
+				NewStepDeleteOSDisk(azureClient, ui),
+			}
+			} else {
+			// use vhd template
+				steps = []multistep.Step{
+					NewStepCreateResourceGroup(azureClient, ui),			
+					NewStepValidateTemplate(azureClient, ui, LinuxVHD),
+					NewStepDeployTemplate(azureClient, ui, LinuxVHD),
+					NewStepGetIPAddress(azureClient, ui),
+					&communicator.StepConnectSSH{
+						Config:    &b.config.Comm,
+						Host:      lin.SSHHost,
+						SSHConfig: lin.SSHConfig(b.config.UserName),
+					},
+					&packerCommon.StepProvision{},
+					NewStepGetOSDisk(azureClient, ui),
+					NewStepPowerOffCompute(azureClient, ui),
+					NewStepCaptureImage(azureClient, ui),
+					NewStepDeleteResourceGroup(azureClient, ui),
+					NewStepDeleteOSDisk(azureClient, ui),
+				}
+			}
 	} else if b.config.OSType == constants.Target_Windows {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),

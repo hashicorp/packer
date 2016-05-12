@@ -30,6 +30,19 @@ var requiredConfigValues = []string{
 	"tenant_id",
 }
 
+var requiredConfigValuesVHD = []string{
+	"capture_name_prefix",
+	"capture_container_name",
+	"client_id",
+	"client_secret",
+	"image_uri",
+	"location",
+	"os_type",
+	"storage_account",
+	"subscription_id",
+	"tenant_id",
+}
+
 func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	c, _, err := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
@@ -48,6 +61,19 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 
 	if c.ObjectID != "" {
 		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
+	}
+}
+
+func TestConfigForCustomVHDSource(t *testing.T) {
+	c, _, err := newConfig(getArmBuilderVhdConfiguration(), getPackerConfiguration())
+
+	if err != nil {
+		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
+		t.Fatalf(" errors: %s\n", err)
+	}
+
+	if c.ImageUri == "" {
+		t.Errorf("Expected 'ImageUri' to be populated, but it was empty!")
 	}
 }
 
@@ -384,6 +410,16 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
+		m[v] = fmt.Sprintf("%s00", v)
+	}
+
+	m["os_type"] = constants.Target_Linux
+	return m
+}
+
+func getArmBuilderVhdConfiguration() map[string]string {
+	m := make(map[string]string)
+	for _, v := range requiredConfigValuesVHD {
 		m[v] = fmt.Sprintf("%s00", v)
 	}
 
