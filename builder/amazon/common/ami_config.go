@@ -55,6 +55,10 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 		c.AMIRegions = regions
 	}
 
+	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
+		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
+	}
+
 	if len(errs) > 0 {
 		return errs
 	}
