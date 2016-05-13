@@ -14,6 +14,8 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
+
 // Config is the configuration structure for the GCE builder. It stores
 // both the publicly settable state as well as the privately generated
 // state of the config object.
@@ -101,7 +103,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ImageFamily != "" {
-		if !regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`).MatchString(c.ImageFamily) {
+		if !reImageFamily.MatchString(c.ImageFamily) {
 			errs = packer.MultiErrorAppend(errs,
 				errors.New("Invalid image family: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"))
 		}
