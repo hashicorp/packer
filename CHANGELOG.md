@@ -18,6 +18,8 @@ IMPROVEMENTS:
   * builder/google: Packer now identifies its version to the service [GH-3465]
   * provisioner/shell: Added `remote_folder` and `remote_file` options
     [GH-3462]
+  * post-processor/compress: Added support for `bgzf` format and added
+    `format` option [GH-3501]
 
 BUG FIXES:
 
