@@ -85,74 +85,78 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 
+	commonLinuxSteps := []multistep.Step{
+		NewStepGetIPAddress(azureClient, ui),
+		&communicator.StepConnectSSH{
+			Config:    &b.config.Comm,
+			Host:      lin.SSHHost,
+			SSHConfig: lin.SSHConfig(b.config.UserName),
+		},
+		&packerCommon.StepProvision{},
+		NewStepGetOSDisk(azureClient, ui),
+		NewStepPowerOffCompute(azureClient, ui),
+		NewStepCaptureImage(azureClient, ui),
+		NewStepDeleteResourceGroup(azureClient, ui),
+		NewStepDeleteOSDisk(azureClient, ui),
+	}
+
+	initialCommonWindowsSteps := []multistep.Step{
+		NewStepCreateResourceGroup(azureClient, ui),
+		NewStepValidateTemplate(azureClient, ui, KeyVault),
+		NewStepDeployTemplate(azureClient, ui, KeyVault),
+		NewStepGetCertificate(azureClient, ui),
+		NewStepSetCertificate(b.config, ui),
+	}
+
+	finalCommonWindowsSteps := []multistep.Step{
+		NewStepGetIPAddress(azureClient, ui),
+		&communicator.StepConnectWinRM{
+			Config: &b.config.Comm,
+			Host: func(stateBag multistep.StateBag) (string, error) {
+				return stateBag.Get(constants.SSHHost).(string), nil
+			},
+			WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
+				return &communicator.WinRMConfig{
+					Username: b.config.UserName,
+					Password: b.config.tmpAdminPassword,
+				}, nil
+			},
+		},
+		&packerCommon.StepProvision{},
+		NewStepGetOSDisk(azureClient, ui),
+		NewStepPowerOffCompute(azureClient, ui),
+		NewStepCaptureImage(azureClient, ui),
+		NewStepDeleteResourceGroup(azureClient, ui),
+		NewStepDeleteOSDisk(azureClient, ui),
+	}
+
 	if b.config.OSType == constants.Target_Linux {
 		if b.config.ImageUri == "" {
 			// use marketplace template
-			steps = []multistep.Step{
-				NewStepCreateResourceGroup(azureClient, ui),			
+			steps := []multistep.Step{
+				NewStepCreateResourceGroup(azureClient, ui),
 				NewStepValidateTemplate(azureClient, ui, Linux),
 				NewStepDeployTemplate(azureClient, ui, Linux),
-				NewStepGetIPAddress(azureClient, ui),
-				&communicator.StepConnectSSH{
-					Config:    &b.config.Comm,
-					Host:      lin.SSHHost,
-					SSHConfig: lin.SSHConfig(b.config.UserName),
-				},
-				&packerCommon.StepProvision{},
-				NewStepGetOSDisk(azureClient, ui),
-				NewStepPowerOffCompute(azureClient, ui),
-				NewStepCaptureImage(azureClient, ui),
-				NewStepDeleteResourceGroup(azureClient, ui),
-				NewStepDeleteOSDisk(azureClient, ui),
 			}
-			} else {
-			// use vhd template
-				steps = []multistep.Step{
-					NewStepCreateResourceGroup(azureClient, ui),			
-					NewStepValidateTemplate(azureClient, ui, LinuxVHD),
-					NewStepDeployTemplate(azureClient, ui, LinuxVHD),
-					NewStepGetIPAddress(azureClient, ui),
-					&communicator.StepConnectSSH{
-						Config:    &b.config.Comm,
-						Host:      lin.SSHHost,
-						SSHConfig: lin.SSHConfig(b.config.UserName),
-					},
-					&packerCommon.StepProvision{},
-					NewStepGetOSDisk(azureClient, ui),
-					NewStepPowerOffCompute(azureClient, ui),
-					NewStepCaptureImage(azureClient, ui),
-					NewStepDeleteResourceGroup(azureClient, ui),
-					NewStepDeleteOSDisk(azureClient, ui),
+			steps = append(steps, commonLinuxSteps...)
+		} else {
+				// use vhd template
+				steps := []multistep.Step{
+					NewStepCreateResourceGroup(azureClient, ui),
+					NewStepValidateTemplate(azureClient, ui, LinuxVhd),
+					NewStepDeployTemplate(azureClient, ui, LinuxVhd),
 				}
+				steps = append(steps, commonLinuxSteps...)
 			}
 	} else if b.config.OSType == constants.Target_Windows {
-		steps = []multistep.Step{
-			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, KeyVault),
-			NewStepDeployTemplate(azureClient, ui, KeyVault),
-			NewStepGetCertificate(azureClient, ui),
-			NewStepSetCertificate(b.config, ui),
-			NewStepValidateTemplate(azureClient, ui, Windows),
-			NewStepDeployTemplate(azureClient, ui, Windows),
-			NewStepGetIPAddress(azureClient, ui),
-			&communicator.StepConnectWinRM{
-				Config: &b.config.Comm,
-				Host: func(stateBag multistep.StateBag) (string, error) {
-					return stateBag.Get(constants.SSHHost).(string), nil
-				},
-				WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
-					return &communicator.WinRMConfig{
-						Username: b.config.UserName,
-						Password: b.config.tmpAdminPassword,
-					}, nil
-				},
-			},
-			&packerCommon.StepProvision{},
-			NewStepGetOSDisk(azureClient, ui),
-			NewStepPowerOffCompute(azureClient, ui),
-			NewStepCaptureImage(azureClient, ui),
-			NewStepDeleteResourceGroup(azureClient, ui),
-			NewStepDeleteOSDisk(azureClient, ui),
+		if b.config.ImageUri == "" {
+			steps = initialCommonWindowsSteps
+			steps = append(steps, NewStepValidateTemplate(azureClient, ui, Windows), NewStepDeployTemplate(azureClient, ui, Windows))
+			steps = append(steps, finalCommonWindowsSteps...)
+		} else {
+			steps = initialCommonWindowsSteps
+			steps = append(steps, NewStepValidateTemplate(azureClient, ui, WindowsVhd), NewStepDeployTemplate(azureClient, ui, WindowsVhd))
+			steps = append(steps, finalCommonWindowsSteps...)
 		}
 	} else {
 		return nil, fmt.Errorf("Builder does not support the os_type '%s'", b.config.OSType)

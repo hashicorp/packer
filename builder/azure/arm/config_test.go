@@ -30,7 +30,7 @@ var requiredConfigValues = []string{
 	"tenant_id",
 }
 
-var requiredConfigValuesVHD = []string{
+var requiredConfigValuesVhd = []string{
 	"capture_name_prefix",
 	"capture_container_name",
 	"client_id",
@@ -64,7 +64,7 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	}
 }
 
-func TestConfigForCustomVHDSource(t *testing.T) {
+func TestConfigForCustomVhdSource(t *testing.T) {
 	c, _, err := newConfig(getArmBuilderVhdConfiguration(), getPackerConfiguration())
 
 	if err != nil {
@@ -419,7 +419,7 @@ func getArmBuilderConfiguration() map[string]string {
 
 func getArmBuilderVhdConfiguration() map[string]string {
 	m := make(map[string]string)
-	for _, v := range requiredConfigValuesVHD {
+	for _, v := range requiredConfigValuesVhd {
 		m[v] = fmt.Sprintf("%s00", v)
 	}
 

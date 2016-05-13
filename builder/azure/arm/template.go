@@ -185,7 +185,7 @@ const Linux = `{
   ]
 }`
 
-const LinuxVHD = `{
+const LinuxVhd = `{
   "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -391,9 +391,6 @@ const KeyVault = `{
       "type": "string"
     },
     "imageVersion": {
-      "type": "string"
-    },
-    "imageUri": {
       "type": "string"
     },
     "keyVaultName": {
@@ -656,6 +653,208 @@ const Windows = `{
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "false"
+          }
+        }
+      }
+    }
+  ]
+}`
+
+const WindowsVhd = `{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUserName": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "dnsNameForPublicIP": {
+      "type": "string"
+    },
+    "imageOffer": {
+      "type": "string"
+    },
+    "imagePublisher": {
+      "type": "string"
+    },
+    "imageSku": {
+      "type": "string"
+    },
+    "imageVersion": {
+      "type": "string"
+    },
+    "imageUri": {
+      "type": "string"
+    },
+    "keyVaultName": {
+      "type": "string"
+    },
+    "keyVaultSecretValue": {
+      "type": "securestring"
+    },
+    "objectId": {
+     "type": "string"
+    },
+    "osDiskName": {
+      "type": "string"
+    },
+    "storageAccountBlobEndpoint": {
+      "type": "string"
+    },
+    "tenantId": {
+      "type": "string"
+    },
+    "vmName": {
+      "type": "string"
+    },
+    "vmSize": {
+      "type": "string"
+    },
+    "winRMCertificateUrl": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "addressPrefix": "10.0.0.0/16",
+    "apiVersion": "2015-06-15",
+    "location": "[resourceGroup().location]",
+    "nicName": "packerNic",
+    "publicIPAddressName": "packerPublicIP",
+    "publicIPAddressType": "Dynamic",
+    "subnetName": "packerSubnet",
+    "subnetAddressPrefix": "10.0.0.0/24",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "virtualNetworkName": "packerNetwork",
+    "vmStorageAccountContainerName": "images",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetAddressPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "secrets": [
+            {
+              "sourceVault": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+              },
+              "vaultCertificates": [
+                {
+                  "certificateUrl": "[parameters('winRMCertificateUrl')]",
+                  "certificateStore": "My"
+                }
+              ]
+            }
+          ],
+	  "windowsConfiguration": {
+            "provisionVMAgent": "true",
+            "winRM": {
+              "listeners": [{
+                  "protocol": "https",
+                  "certificateUrl": "[parameters('winRMCertificateUrl')]"
+                }
+              ]
+            },
+            "enableAutomaticUpdates": "true"
+          }
+        },
+        "storageProfile": {
+          "osDisk": {
+            "name": "osdisk",
+            "image": {
+              "uri": "[parameters('imageUri')]"
+            },
+            "vhd": {
+              "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+            "osType": "windows"
           }
         },
         "networkProfile": {
