@@ -108,6 +108,26 @@ func TestConfigPrepare(t *testing.T) {
 			"SO VERY BAD",
 			true,
 		},
+		{
+			"image_family",
+			nil,
+			false,
+		},
+		{
+			"image_family",
+			"",
+			false,
+		},
+		{
+			"image_family",
+			"foo-bar",
+			false,
+		},
+		{
+			"image_family",
+			"foo bar",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -182,6 +202,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"account_file": testAccountFile(t),
 		"project_id":   "hashicorp",
 		"source_image": "foo",
+		"image_family": "bar",
 		"zone":         "us-east1-a",
 	}
 }

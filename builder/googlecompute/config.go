@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/mitchellh/packer/common"
@@ -12,6 +13,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
+
+var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
 
 // Config is the configuration structure for the GCE builder. It stores
 // both the publicly settable state as well as the privately generated
@@ -28,6 +31,7 @@ type Config struct {
 	DiskType             string            `mapstructure:"disk_type"`
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
+	ImageFamily          string            `mapstructure:"image_family"`
 	InstanceName         string            `mapstructure:"instance_name"`
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
@@ -91,6 +95,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		} else {
 			c.ImageName = img
 		}
+	}
+
+	if len(c.ImageFamily) > 63 {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Invalid image family: Must not be longer than 63 characters"))
+	}
+
+	if c.ImageFamily != "" {
+		if !reImageFamily.MatchString(c.ImageFamily) {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("Invalid image family: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"))
+		}
+
 	}
 
 	if c.InstanceName == "" {

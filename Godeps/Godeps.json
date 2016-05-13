@@ -562,7 +562,7 @@
 		},
 		{
 			"ImportPath": "google.golang.org/api/compute/v1",
-			"Rev": "ddff2aff599105a55549cf173852507dfa094b7f"
+			"Rev": "ff0a1ff302946b997eb1832381419d1f95143483"
 		},
 		{
 			"ImportPath": "google.golang.org/api/gensupport",
