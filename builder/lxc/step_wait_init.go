@@ -92,6 +92,9 @@ func (s *StepWaitInit) waitForInit(state multistep.StateBag, cancel <-chan struc
 		if currentRunlevel == targetRunlevel {
 			log.Printf("Container finished init.")
 			break
+		} else if currentRunlevel > targetRunlevel {
+			log.Printf("Expected Runlevel %d, Got Runlevel %s, continuing", targetRunlevel, currentRunlevel)
+			break
 		}
 
 		/*log.Println("Attempting SSH connection...")
