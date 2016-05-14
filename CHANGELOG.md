@@ -1,3 +1,9 @@
+## (Unreleased)
+
+IMPROVEMENTS:
+
+  * builder/google: Added support for `image_family` [GH-3503]
+
 ## 0.10.1 (May 7, 2016)
 
 FEATURES:
