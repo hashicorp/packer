@@ -317,8 +317,12 @@
 		},
 		{
 			"ImportPath": "github.com/klauspost/pgzip",
-			"Rev": "47f36e165cecae5382ecf1ec28ebf7d4679e307d"
+			"Rev": "95e8170c5d4da28db9c64dfc9ec3138ea4466fd4"
 		},
+		{
+			"ImportPath": "github.com/biogo/hts/bgzf",
+			"Rev": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
+                },
 		{
 			"ImportPath": "github.com/kr/fs",
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
