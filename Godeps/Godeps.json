@@ -329,11 +329,11 @@
 		},
 		{
 			"ImportPath": "github.com/masterzen/winrm/soap",
-			"Rev": "54ea5d01478cfc2afccec1504bd0dfcd8c260cfa"
+			"Rev": "fd2972cf6b1f5a74ef41955fb3b6b6e227df301c"
 		},
 		{
 			"ImportPath": "github.com/masterzen/winrm/winrm",
-			"Rev": "fd2972cf6b1f5a74ef41955fb3b6b6e227df301c"
+			"Rev": "3bcd362f63ba55f1c01757da148e6a4cdad5e996"
 		},
 		{
 			"ImportPath": "github.com/masterzen/xmlpath",

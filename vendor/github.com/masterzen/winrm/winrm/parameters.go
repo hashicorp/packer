@@ -4,6 +4,8 @@ import (
 	"net/http"
 )
 
+// Parameters struct defines
+// metadata information and http transport config
 type Parameters struct {
 	Timeout            string
 	Locale             string
@@ -11,10 +13,16 @@ type Parameters struct {
 	TransportDecorator func(*http.Transport) http.RoundTripper
 }
 
-func DefaultParameters() *Parameters {
-	return NewParameters("PT60S", "en-US", 153600)
-}
+// DefaultParameters return constant config
+// of type Parameters
+var DefaultParameters = NewParameters("PT60S", "en-US", 153600)
 
-func NewParameters(timeout string, locale string, envelopeSize int) *Parameters {
-	return &Parameters{Timeout: timeout, Locale: locale, EnvelopeSize: envelopeSize}
+// NewParameters return new struct of type Parameters
+// this struct makes the configuration for the request, size message, etc.
+func NewParameters(timeout, locale string, envelopeSize int) *Parameters {
+	return &Parameters{
+		Timeout:      timeout,
+		Locale:       locale,
+		EnvelopeSize: envelopeSize,
+	}
 }

@@ -22,12 +22,12 @@ type commandReader struct {
 // Command represents a given command running on a Shell. This structure allows to get access
 // to the various stdout, stderr and stdin pipes.
 type Command struct {
-	client    *Client
-	shell     *Shell
-	commandId string
-	exitCode  int
-	finished  bool
-	err       error
+	client   *Client
+	shell    *Shell
+	ID       string
+	exitCode int
+	finished bool
+	err      error
 
 	Stdin  *commandWriter
 	Stdout *commandReader
@@ -37,10 +37,22 @@ type Command struct {
 	cancel chan struct{}
 }
 
-func newCommand(shell *Shell, commandId string) *Command {
-	command := &Command{shell: shell, client: shell.client, commandId: commandId, exitCode: 1, err: nil, done: make(chan struct{}), cancel: make(chan struct{})}
-	command.Stdin = &commandWriter{Command: command, eof: false}
+func newCommand(shell *Shell, id string) *Command {
+	command := &Command{
+		shell:    shell,
+		client:   shell.client,
+		ID:       id,
+		exitCode: 1,
+		err:      nil,
+		done:     make(chan struct{}),
+		cancel:   make(chan struct{}),
+	}
+
 	command.Stdout = newCommandReader("stdout", command)
+	command.Stdin = &commandWriter{
+		Command: command,
+		eof:     false,
+	}
 	command.Stderr = newCommandReader("stderr", command)
 
 	go fetchOutput(command)
@@ -50,7 +62,12 @@ func newCommand(shell *Shell, commandId string) *Command {
 
 func newCommandReader(stream string, command *Command) *commandReader {
 	read, write := io.Pipe()
-	return &commandReader{Command: command, stream: stream, write: write, read: read}
+	return &commandReader{
+		Command: command,
+		stream:  stream,
+		write:   write,
+		read:    read,
+	}
 }
 
 func fetchOutput(command *Command) {
@@ -71,7 +88,7 @@ func fetchOutput(command *Command) {
 }
 
 func (command *Command) check() (err error) {
-	if command.commandId == "" {
+	if command.ID == "" {
 		return errors.New("Command has already been closed")
 	}
 	if command.shell == nil {
@@ -95,7 +112,7 @@ func (command *Command) Close() (err error) {
 		close(command.cancel)
 	}
 
-	request := NewSignalRequest(command.client.url, command.shell.ShellId, command.commandId, &command.client.Parameters)
+	request := NewSignalRequest(command.client.url, command.shell.ID, command.ID, &command.client.Parameters)
 	defer request.Free()
 
 	_, err = command.client.sendRequest(request)
@@ -109,7 +126,7 @@ func (command *Command) slurpAllOutput() (finished bool, err error) {
 		return true, err
 	}
 
-	request := NewGetOutputRequest(command.client.url, command.shell.ShellId, command.commandId, "stdout stderr", &command.client.Parameters)
+	request := NewGetOutputRequest(command.client.url, command.shell.ID, command.ID, "stdout stderr", &command.client.Parameters)
 	defer request.Free()
 
 	response, err := command.client.sendRequest(request)
@@ -152,7 +169,7 @@ func (command *Command) sendInput(data []byte) (err error) {
 		return err
 	}
 
-	request := NewSendInputRequest(command.client.url, command.shell.ShellId, command.commandId, data, &command.client.Parameters)
+	request := NewSendInputRequest(command.client.url, command.shell.ID, command.ID, data, &command.client.Parameters)
 	defer request.Free()
 
 	_, err = command.client.sendRequest(request)
@@ -164,13 +181,14 @@ func (command *Command) ExitCode() int {
 	return command.exitCode
 }
 
-// Calling this function will block the current goroutine until the remote command terminates.
+// Wait function will block the current goroutine until the remote command terminates.
 func (command *Command) Wait() {
 	// block until finished
 	<-command.done
 }
 
 // Write data to this Pipe
+// commandWriter implements io.Writer interface
 func (w *commandWriter) Write(data []byte) (written int, err error) {
 	for len(data) > 0 {
 		if w.eof {
@@ -183,7 +201,7 @@ func (w *commandWriter) Write(data []byte) (written int, err error) {
 			break
 		}
 		data = data[n:]
-		written += int(n)
+		written += n
 	}
 	return
 }
@@ -195,6 +213,8 @@ func min(a int, b int) int {
 	return b
 }
 
+// Close method wrapper
+// commandWriter implements io.Closer interface
 func (w *commandWriter) Close() error {
 	w.eof = true
 	return w.Close()
