@@ -14,23 +14,24 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/Azure/go-ntlmssp"
+
 	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/builder/azure/pkcs12"
-
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 
-	"github.com/Azure/go-autorest/autorest/azure"
 	"golang.org/x/crypto/ssh"
-	"strings"
 )
 
 const (
@@ -38,6 +39,11 @@ const (
 	DefaultImageVersion         = "latest"
 	DefaultUserName             = "packer"
 	DefaultVMSize               = "Standard_A1"
+)
+
+var (
+	reCaptureContainerName = regexp.MustCompile("^[a-z0-9][a-z0-9\\-]{2,62}$")
+	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
 )
 
 type Config struct {
@@ -399,11 +405,31 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	/////////////////////////////////////////////
 	// Capture
 	if c.CaptureContainerName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An capture_container_name must be specified"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must be specified"))
+	}
+
+	if !reCaptureContainerName.MatchString(c.CaptureContainerName) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must satisfy the regular expression %q.", reCaptureContainerName.String()))
+	}
+
+	if strings.HasSuffix(c.CaptureContainerName, "-") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not end with a hyphen, e.g. '-'."))
+	}
+
+	if strings.Contains(c.CaptureContainerName, "--") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not contain consecutive hyphens, e.g. '--'."))
 	}
 
 	if c.CaptureNamePrefix == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An capture_name_prefix must be specified"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must be specified"))
+	}
+
+	if !reCaptureNamePrefix.MatchString(c.CaptureNamePrefix) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must satisfy the regular expression %q.", reCaptureNamePrefix.String()))
+	}
+
+	if strings.HasSuffix(c.CaptureNamePrefix, "-") || strings.HasSuffix(c.CaptureNamePrefix, ".") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must not end with a hyphen or period."))
 	}
 
 	/////////////////////////////////////////////
