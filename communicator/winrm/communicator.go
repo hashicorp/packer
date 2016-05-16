@@ -40,7 +40,7 @@ func New(config *Config) (*Communicator, error) {
 	}
 
 	// Create the client
-	params := winrm.DefaultParameters()
+	params := winrm.DefaultParameters
 
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
