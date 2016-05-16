@@ -93,7 +93,7 @@ func (s *StepWaitInit) waitForInit(state multistep.StateBag, cancel <-chan struc
 			log.Printf("Container finished init.")
 			break
 		} else if currentRunlevel > targetRunlevel {
-			log.Printf("Expected Runlevel %d, Got Runlevel %s, continuing", targetRunlevel, currentRunlevel)
+			log.Printf("Expected Runlevel %s, Got Runlevel %s, continuing", targetRunlevel, currentRunlevel)
 			break
 		}
 
