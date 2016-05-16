@@ -333,7 +333,7 @@
 		},
 		{
 			"ImportPath": "github.com/masterzen/winrm/winrm",
-			"Rev": "54ea5d01478cfc2afccec1504bd0dfcd8c260cfa"
+			"Rev": "fd2972cf6b1f5a74ef41955fb3b6b6e227df301c"
 		},
 		{
 			"ImportPath": "github.com/masterzen/xmlpath",
