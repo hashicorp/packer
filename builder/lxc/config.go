@@ -50,6 +50,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.ContainerName = fmt.Sprintf("packer-%s", c.PackerBuildName)
 	}
 
+	if c.TargetRunlevel == 0 {
+		c.TargetRunlevel = 3
+	}
+
 	if c.CommandWrapper == "" {
 		c.CommandWrapper = "{{.Command}}"
 	}
