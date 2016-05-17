@@ -56,6 +56,7 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	builderValues["ssh_password"] = "override_password"
 	builderValues["ssh_username"] = "override_username"
 	builderValues["vm_size"] = "override_vm_size"
+	builderValues["communicator"] = "ssh"
 
 	c, _, err := newConfig(builderValues, getPackerConfiguration())
 
@@ -123,6 +124,7 @@ func TestConfigInstantiatesCorrectAzureEnvironment(t *testing.T) {
 		"storage_account":        "ignore",
 		"subscription_id":        "ignore",
 		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
 	}
 
 	// user input is fun :)
@@ -328,6 +330,22 @@ func TestConfigShouldSupportPackersConfigElements(t *testing.T) {
 	}
 }
 
+func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
+	config := getArmBuilderConfiguration()
+	config["communicator"] = "winrm"
+	config["winrm_username"] = "username"
+	config["winrm_password"] = "password"
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.Comm.WinRMTransportDecorator == nil {
+		t.Errorf("Expected WinRMTransportDecorator to be set, but it was nil")
+	}
+}
+
 func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 	config := map[string]string{
 		"capture_name_prefix":    "ignore",
@@ -339,6 +357,7 @@ func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 		"storage_account":        "ignore",
 		"subscription_id":        "ignore",
 		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
 	}
 
 	_, _, err := newConfig(config, getPackerConfiguration())
@@ -358,6 +377,7 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 		"storage_account":        "ignore",
 		"subscription_id":        "ignore",
 		"os_type":                constants.Target_Windows,
+		"communicator":           "none",
 	}
 
 	_, _, err := newConfig(config, getPackerConfiguration())
@@ -387,6 +407,7 @@ func getArmBuilderConfiguration() map[string]string {
 		m[v] = fmt.Sprintf("%s00", v)
 	}
 
+	m["communicator"] = "none"
 	m["os_type"] = constants.Target_Linux
 	return m
 }
