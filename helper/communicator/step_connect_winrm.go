@@ -128,6 +128,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 			Port:               port,
 			Username:           user,
 			Password:           password,
+			ConnectTimeout:     s.Config.WinRMConnectTimeout,
 			Timeout:            s.Config.WinRMTimeout,
 			Https:              s.Config.WinRMUseSSL,
 			Insecure:           s.Config.WinRMInsecure,

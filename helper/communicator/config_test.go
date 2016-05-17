@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/packer/template/interpolate"
+	"time"
 )
 
 func testConfig() *Config {
@@ -99,6 +100,24 @@ func TestConfig_winrm_port_ssl(t *testing.T) {
 		t.Fatalf("WinRMPort doesn't match custom port 5510 when SSL is enabled.")
 	}
 
+}
+
+func TestConfig_winrm_timeout(t *testing.T) {
+	c := &Config{
+		Type:      "winrm",
+		WinRMUser: "admin",
+	}
+	if err := c.Prepare(testContext(t)); len(err) > 0 {
+		t.Fatalf("bad: %#v", err)
+	}
+
+	if c.WinRMConnectTimeout != 60 * time.Second {
+		t.Fatalf("WinRMConnectTimeout doesn't match default value of 60s.")
+	}
+
+	if c.WinRMTimeout != 30 * time.Minute {
+		t.Fatalf("WinRMTimeout doesn't match default value of 30m.")
+	}
 }
 
 func TestConfig_winrm(t *testing.T) {

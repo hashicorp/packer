@@ -23,6 +23,7 @@ type Config struct {
 	Https                 bool
 	Insecure              bool
 	CACertBytes           []byte
+	ConnectTimeout        time.Duration
 	OperationTimeout      time.Duration
 	MaxOperationsPerShell int
 	TransportDecorator    func(*http.Transport) http.RoundTripper
@@ -42,7 +43,17 @@ func New(addr string, config *Config) (*Winrmcp, error) {
 		config = &Config{}
 	}
 
-	params := winrm.DefaultParameters()
+	connectTimeout := winrm.DefaultParameters.Timeout
+	if config.ConnectTimeout.Seconds() > 0 {
+		connectTimeout = iso8601.FormatDuration(config.ConnectTimeout)
+	}
+
+	params := winrm.NewParameters(
+		connectTimeout,
+		winrm.DefaultParameters.Locale,
+		winrm.DefaultParameters.EnvelopeSize,
+	)
+
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
 	}
