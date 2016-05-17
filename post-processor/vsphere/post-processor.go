@@ -122,15 +122,15 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	args := []string{
-		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=\"%s\"", p.config.VMName),
-		fmt.Sprintf("--datastore=\"%s\"", p.config.Datastore),
-		fmt.Sprintf("--diskMode=\"%s\"", p.config.DiskMode),
-		fmt.Sprintf("--network=\"%s\"", p.config.VMNetwork),
-		fmt.Sprintf("--vmFolder=\"%s\"", p.config.VMFolder),
+		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
+		fmt.Sprintf("--datastore=%s", p.config.Datastore),
+		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
+		fmt.Sprintf("--name=%s", p.config.VMName),
+		fmt.Sprintf("--network=%s", p.config.VMNetwork),
+		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
 		fmt.Sprintf("%s", source),
-		fmt.Sprintf("\"%s\"", ovftool_uri),
+		fmt.Sprintf("%s", ovftool_uri),
 	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
@@ -146,7 +146,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 	var out bytes.Buffer
 	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
-	cmd := exec.Command("ovftool", args...)
+	cmd := exec.Command("ovftool", args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8])
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		return nil, false, fmt.Errorf("Failed: %s\nStdout: %s", err, out.String())
