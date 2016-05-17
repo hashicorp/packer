@@ -223,14 +223,21 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, err
 	}
 
-	err = setSshValues(&c)
-	if err != nil {
-		return nil, nil, err
+	// NOTE: if the user did not specify a communicator, then default to both
+	// SSH and WinRM.  This is for backwards compatibility because the code did
+	// not specifically force the user to specify a value.
+	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "ssh") {
+		err = setSshValues(&c)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
-	err = setWinRMCertificate(&c)
-	if err != nil {
-		return nil, nil, err
+	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "winrm") {
+		err = setWinRMCertificate(&c)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	var errs *packer.MultiError
@@ -276,14 +283,14 @@ func setSshValues(c *Config) error {
 		c.sshPrivateKey = sshKeyPair.PrivateKey()
 	}
 
-	c.Comm.WinRMTransportDecorator = func(t *http.Transport) http.RoundTripper {
-		return &ntlmssp.Negotiator{RoundTripper: t}
-	}
-
 	return nil
 }
 
 func setWinRMCertificate(c *Config) error {
+	c.Comm.WinRMTransportDecorator = func(t *http.Transport) http.RoundTripper {
+		return &ntlmssp.Negotiator{RoundTripper: t}
+	}
+
 	cert, err := c.createCertificate()
 	c.winrmCertificate = cert
 
