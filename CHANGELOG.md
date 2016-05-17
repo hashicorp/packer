@@ -3,6 +3,8 @@
 IMPROVEMENTS:
 
   * builder/google: Added support for `image_family` [GH-3503]
+  * builder/virtualbox: Added pause between `boot_command` when running with `-debug` [GH-3542]
+  * builder/vmware: Added pause between `boot_command` when running with `-debug` [GH-3542]
 
 ## 0.10.1 (May 7, 2016)
 
