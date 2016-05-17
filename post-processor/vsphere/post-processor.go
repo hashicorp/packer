@@ -129,11 +129,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Sprintf("--diskMode=\"%s\"", p.config.DiskMode),
 		fmt.Sprintf("--network=\"%s\"", p.config.VMNetwork),
 		fmt.Sprintf("--vmFolder=\"%s\"", p.config.VMFolder),
-		fmt.Sprintf("%s", source),
-		fmt.Sprintf("\"%s\"", ovftool_uri),
 	}
-
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
 	if p.config.Overwrite == true {
 		args = append(args, "--overwrite")
@@ -142,6 +138,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if len(p.config.Options) > 0 {
 		args = append(args, p.config.Options...)
 	}
+
+  args = append(args, fmt.Sprintf("%s", source), fmt.Sprintf("\"%s\"", ovftool_uri))
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 	var out bytes.Buffer
