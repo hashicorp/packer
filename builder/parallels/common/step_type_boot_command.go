@@ -40,9 +40,15 @@ type StepTypeBootCommand struct {
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
+
+	var pauseFn multistep.DebugPauseFn
+	if debug {
+		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
+	}
 
 	hostIp := "0.0.0.0"
 
@@ -69,7 +75,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Say("Typing the boot command...")
-	for _, command := range s.BootCommand {
+	for i, command := range s.BootCommand {
 		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
@@ -123,6 +129,11 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 			}
 			codes = append(codes, code)
 		}
+
+		if pauseFn != nil {
+			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
+		}
+
 		log.Printf("Sending scancodes: %#v", codes)
 		if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
 			err := fmt.Errorf("Error sending boot command: %s", err)
