@@ -192,9 +192,16 @@ provisioner](/docs/provisioners/file.html) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
-{ "type": "shell", "inline": \[ "sudo apt-get install -y git", "ssh-keyscan
-github.com &gt;&gt; \~/.ssh/known\_hosts", "git clone
-git@github.com:exampleorg/myprivaterepo.git" \] }
+``` {.javascript}
+{
+  "type": "shell",
+  "inline": [
+    "sudo apt-get install -y git",
+    "ssh-keyscangithub.com >> ~/.ssh/known_hosts",
+    "git clone git@github.com:exampleorg/myprivaterepo.git"
+  ]
+}
+```
 
 ## Troubleshooting
 
