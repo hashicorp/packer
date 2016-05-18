@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 type Config struct {
@@ -46,8 +47,9 @@ type PostProcessor struct {
 }
 
 type ExecuteCommandTemplate struct {
-	Vars string
-	Path string
+	Vars     string
+	Script   string
+	Artifact string
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -65,7 +67,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
+		p.config.ExecuteCommand = "chmod +x {{.Script}}; {{.Vars}} {{.Script}} {{.Artifact}}"
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -171,14 +173,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	copy(envVars[2:], p.config.Vars)
 
 	for _, file := range artifact.Files() {
-		for _, path := range scripts {
+		for _, script := range scripts {
 			// Flatten the environment variables
 			flattendVars := strings.Join(envVars, " ")
 
-			path := strings.Join([]string{path, file}, " ")
 			p.config.ctx.Data = &ExecuteCommandTemplate{
-				Vars: flattendVars,
-				Path: path,
+				Vars:     flattendVars,
+				Script:   script,
+				Artifact: file,
 			}
 
 			command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
@@ -194,19 +196,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 			ui.Say(fmt.Sprintf(
 				"Executing local script: %s",
-				path))
+				script))
 			if err := cmd.StartWithUi(comm, ui); err != nil {
 				return nil, false, fmt.Errorf(
 					"Error executing script: %s\n\n"+
 						"Please see output above for more information.",
-					path)
+					script)
 			}
 			if cmd.ExitStatus != 0 {
 				return nil, false, fmt.Errorf(
 					"Erroneous exit code %d while executing script: %s\n\n"+
 						"Please see output above for more information.",
 					cmd.ExitStatus,
-					path)
+					script)
 			}
 		}
 	}
