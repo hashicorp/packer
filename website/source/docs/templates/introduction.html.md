@@ -57,7 +57,7 @@ Along with each key, it is noted whether it is required or not.
     configure a provisioner, read the sub-section on [configuring provisioners
     in templates](/docs/templates/provisioners.html).
 
--   `variables` (optional) is an array of one or more key/value strings that
+-   `variables` (optional) is an object of one or more key/value strings that
     defines user variables contained in the template. If it is not specified,
     then no variables are defined. For more information on how to define and use
     user variables, read the sub-section on [user variables in
