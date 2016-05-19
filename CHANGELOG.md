@@ -6,9 +6,18 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * builder/azure: Now pre-validates `capture_container_name` and `capture_name_prefix` [GH-3537]
   * builder/google: Added support for `image_family` [GH-3503]
+  * builder/null: Can now be used with WinRM [GH-2525]
+  * builder/parallels: Added pause between `boot_command` when running with `-debug` [GH-3547]
   * builder/virtualbox: Added pause between `boot_command` when running with `-debug` [GH-3542]
   * builder/vmware: Added pause between `boot_command` when running with `-debug` [GH-3542]
+  * builder/qemu: Added pause between `boot_command` when running with `-debug` [GH-3547]
+  * post-processor/compress: Added support for bgzf compression [GH-3501]
+
+BUG FIXES:
+
+  * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
 
 ## 0.10.1 (May 7, 2016)
 
