@@ -4,7 +4,6 @@
 package arm
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -401,10 +400,107 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 	}
 }
 
+func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
+	config := map[string]string{
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	wellFormedCaptureNamePrefix := []string{
+		"packer",
+		"AbcdefghijklmnopqrstuvwX",
+		"hypen-hypen",
+		"0leading-number",
+		"v1.core.local",
+	}
+
+	for _, x := range wellFormedCaptureNamePrefix {
+		config["capture_name_prefix"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err != nil {
+			t.Errorf("Expected test to pass, but it failed with the well-formed capture_name_prefix set to %q.", x)
+		}
+	}
+
+	malformedCaptureNamePrefix := []string{
+		"-leading-hypen",
+		"trailing-hypen-",
+		"trailing-period.",
+		"_leading-underscore",
+		"punc-!@#$%^&*()_+-=-punc",
+		"There-are-too-many-characters-in-the-name-and-the-limit-is-twenty-four",
+	}
+
+	for _, x := range malformedCaptureNamePrefix {
+		config["capture_name_prefix"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_name_prefix set to %q.", x)
+		}
+	}
+}
+
+func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix": "ignore",
+		"image_offer":         "ignore",
+		"image_publisher":     "ignore",
+		"image_sku":           "ignore",
+		"location":            "ignore",
+		"storage_account":     "ignore",
+		"subscription_id":     "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	wellFormedCaptureContainerName := []string{
+		"0leading",
+		"aleading",
+		"hype-hypen",
+		"abcdefghijklmnopqrstuvwxyz0123456789-abcdefghijklmnopqrstuvwxyz", // 63 characters
+	}
+
+	for _, x := range wellFormedCaptureContainerName {
+		config["capture_container_name"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err != nil {
+			t.Errorf("Expected test to pass, but it failed with the well-formed capture_container_name set to %q.", x)
+		}
+	}
+
+	malformedCaptureContainerName := []string{
+		"No-Capitals",
+		"double--hypens",
+		"-leading-hypen",
+		"trailing-hypen-",
+		"punc-!@#$%^&*()_+-=-punc",
+		"there-are-over-63-characters-in-this-string-and-that-is-a-bad-container-name",
+	}
+
+	for _, x := range malformedCaptureContainerName {
+		config["capture_container_name"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_container_name set to %q.", x)
+		}
+	}
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
-		m[v] = fmt.Sprintf("%s00", v)
+		m[v] = fmt.Sprintf("ignored00")
 	}
 
 	m["communicator"] = "none"
@@ -413,19 +509,13 @@ func getArmBuilderConfiguration() map[string]string {
 }
 
 func getPackerConfiguration() interface{} {
-	var doc = `{
-		"packer_user_variables": {
-			"sa": "my_storage_account"
-		},
+	config := map[string]interface{}{
 		"packer_build_name": "azure-arm-vm",
 		"packer_builder_type": "azure-arm-vm",
 		"packer_debug": "false",
 		"packer_force": "false",
-		"packer_template_path": "/home/jenkins/azure-arm-vm/template.json"
-	}`
-
-	var config interface{}
-	json.Unmarshal([]byte(doc), &config)
+		"packer_template_path": "/home/jenkins/azure-arm-vm/template.json",
+	}
 
 	return config
 }

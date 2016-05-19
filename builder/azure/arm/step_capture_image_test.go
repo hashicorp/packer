@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
