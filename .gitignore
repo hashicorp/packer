@@ -9,6 +9,7 @@
 .idea
 test/.env
 *~
+*.swp
 
 website/.bundle
 website/vendor
