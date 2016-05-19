@@ -51,6 +51,16 @@ Below is a fully functioning example.
       "template_environment_vars": [
         "SUITE=jessie"
       ]
+    },
+    {
+      "type": "lxc",
+      "name": "lxc-centos-7-x64",
+      "config_file": "/tmp/lxc/config",
+      "template_name": "centos",
+      "template_parameters": [
+        "-R","7",
+        "-a","x86_64"
+       ],
     }
   ]
 }
@@ -78,5 +88,5 @@ Below is a fully functioning example.
 
 -  `init_timeout` (string) - The timeout in seconds to wait for the the container to start.
 
--  `template_parameters` (array of strings) - Environmental variables for running `lxc-create`.
+-  `template_parameters` (array of strings) - Options to pass to the given `lxc-template` command, usually located in `/usr/share/lxc/templates/lxc-<template_name>``. Note: This gets passed as ARGV to the template command. Ensure you have an array of strings, as a single string with spaces probably won't work.
 
