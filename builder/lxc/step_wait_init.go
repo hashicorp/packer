@@ -98,30 +98,6 @@ func (s *StepWaitInit) waitForInit(state multistep.StateBag, cancel <-chan struc
 			log.Printf("Expected Runlevel %s, Got Runlevel %s, continuing", targetRunlevel, currentRunlevel)
 			break
 		}
-
-		/*log.Println("Attempting SSH connection...")
-		comm, err = ssh.New(config)
-		if err != nil {
-			log.Printf("SSH handshake err: %s", err)
-
-			// Only count this as an attempt if we were able to attempt
-			// to authenticate. Note this is very brittle since it depends
-			// on the string of the error... but I don't see any other way.
-			if strings.Contains(err.Error(), "authenticate") {
-				log.Printf("Detected authentication error. Increasing handshake attempts.")
-				handshakeAttempts += 1
-			}
-
-			if handshakeAttempts < 10 {
-				// Try to connect via SSH a handful of times
-				continue
-			}
-
-			return nil, err
-		}
-
-		break
-		*/
 	}
 
 	return nil
