@@ -5,6 +5,7 @@
 /website/.sass-cache
 /website/build
 .DS_Store
+*.swp
 .vagrant
 .idea
 test/.env
