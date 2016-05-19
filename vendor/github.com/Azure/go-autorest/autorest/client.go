@@ -2,6 +2,7 @@ package autorest
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -53,7 +54,9 @@ func (li LoggingInspector) WithInspection() PrepareDecorator {
 			defer r.Body.Close()
 
 			r.Body = ioutil.NopCloser(io.TeeReader(r.Body, &body))
-			r.Write(&b)
+			if err := r.Write(&b); err != nil {
+				return nil, fmt.Errorf("Failed to write response: %v", err)
+			}
 
 			li.Logger.Printf(requestFormat, b.String())
 
@@ -76,7 +79,9 @@ func (li LoggingInspector) ByInspecting() RespondDecorator {
 			defer resp.Body.Close()
 
 			resp.Body = ioutil.NopCloser(io.TeeReader(resp.Body, &body))
-			resp.Write(&b)
+			if err := resp.Write(&b); err != nil {
+				return fmt.Errorf("Failed to write response: %v", err)
+			}
 
 			li.Logger.Printf(responseFormat, b.String())
 

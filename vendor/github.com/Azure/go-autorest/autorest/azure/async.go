@@ -39,6 +39,10 @@ func DoPollForAsynchronous(delay time.Duration) autorest.SendDecorator {
 			if err != nil {
 				return resp, err
 			}
+			pollingCodes := []int{http.StatusAccepted, http.StatusCreated, http.StatusOK}
+			if !autorest.ResponseHasStatusCode(resp, pollingCodes...) {
+				return resp, nil
+			}
 
 			ps := pollingState{}
 			for err == nil {
@@ -224,10 +228,6 @@ func updatePollingState(resp *http.Response, ps *pollingState) error {
 				ps.uri = req.URL.String()
 			}
 		}
-
-		if ps.uri == "" {
-			return autorest.NewError("azure", "updatePollingState", "Azure Polling Error - Unable to obtain polling URI for %s %s", req.Method, req.RequestURI)
-		}
 	}
 
 	// Read and interpret the response (saving the Body in case no polling is necessary)
@@ -260,6 +260,10 @@ func updatePollingState(resp *http.Response, ps *pollingState) error {
 		default:
 			ps.state = operationFailed
 		}
+	}
+
+	if ps.state == operationInProgress && ps.uri == "" {
+		return autorest.NewError("azure", "updatePollingState", "Azure Polling Error - Unable to obtain polling URI for %s %s", resp.Request.Method, resp.Request.URL)
 	}
 
 	// For failed operation, check for error code and message in
