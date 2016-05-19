@@ -2,7 +2,7 @@
 
 FEATURES:
 
-  * **New post-processor `checksum`** allows you to create a checksum file as part of your build.
+  * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]
 
 IMPROVEMENTS:
 
