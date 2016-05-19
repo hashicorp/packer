@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+FEATURES:
+
+  * **New post-processor `checksum`** allows you to create a checksum file as part of your build.
+
 IMPROVEMENTS:
 
   * builder/google: Added support for `image_family` [GH-3503]
