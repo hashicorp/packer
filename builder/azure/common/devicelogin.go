@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/mitchellh/packer/version"
 	"github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/packer/version"
 )
 
 var (
