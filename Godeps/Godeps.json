@@ -1,7 +1,6 @@
 {
 	"ImportPath": "github.com/mitchellh/packer",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v62",
 	"Deps": [
 		{
 			"ImportPath": "github.com/ActiveState/tail",
@@ -40,23 +39,23 @@
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest",
-			"Comment": "v7.0.4",
-			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
+			"Comment": "v7.0.5",
+			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/azure",
-			"Comment": "v7.0.4",
-			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
+			"Comment": "v7.0.5",
+			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/date",
-			"Comment": "v7.0.4",
-			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
+			"Comment": "v7.0.5",
+			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/to",
-			"Comment": "v7.0.4",
-			"Rev": "b01ec2b60f95678fa759f796bac3c6b9bceaead4"
+			"Comment": "v7.0.5",
+			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-ntlmssp",
