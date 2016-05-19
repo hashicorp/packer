@@ -7,9 +7,9 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
