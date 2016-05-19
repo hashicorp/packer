@@ -18,6 +18,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
+  * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
 
 ## 0.10.1 (May 7, 2016)
 
