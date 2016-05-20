@@ -78,6 +78,10 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
+Note that you will need to set `"headless": true` if you are running Packer
+on a Linux server without X11; or if you are connected via ssh to a remote
+Linux server and have not enabled X11 forwarding (`ssh -X`).
+
 ### Required:
 
 -   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
@@ -166,6 +170,9 @@ builder.
 -   `headless` (boolean) - Packer defaults to building QEMU virtual machines by
     launching a GUI that shows the console of the machine being built. When this
     value is set to true, the machine will start without a console.
+
+    You can still see the console if you make a note of the VNC display
+    number chosen, and then connect using `vncviewer -Shared <host>:<display>`
 
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that

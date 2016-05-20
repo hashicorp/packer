@@ -538,7 +538,7 @@ BUG FIXES:
   * builder/parallels: Disconnect cdrom0 [GH-1605]
   * builder/qemu: Don't use `-redir` flag anymore, replace with
       `hostfwd` options. [GH-1561]
-  * builder/qmeu: Use `pc` as default machine type instead of `pc-1.0`.
+  * builder/qemu: Use `pc` as default machine type instead of `pc-1.0`.
   * providers/aws: Ignore transient network errors. [GH-1579]
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
   * provisioner/ansible: Use inventory file always to avoid potentially
