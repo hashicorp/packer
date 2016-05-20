@@ -154,6 +154,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if runtime.GOOS == "windows" {
 			b.config.Accelerator = "tcg"
 		} else {
+			// /dev/kvm is a kernel module that may be loaded if kvm is
+			// installed and the host supports VT-x extensions. To make sure
+			// this will actually work we need to os.Open() it. If os.Open fails
+			// the kernel module was not installed or loaded correctly.
 			if fp, err := os.Open("/dev/kvm"); err != nil {
 				b.config.Accelerator = "tcg"
 			} else {
