@@ -11,6 +11,7 @@ import (
 	"github.com/masterzen/winrm/soap"
 )
 
+// Client struct
 type Client struct {
 	Parameters
 	username  string
@@ -24,12 +25,11 @@ type Client struct {
 // NewClient will create a new remote client on url, connecting with user and password
 // This function doesn't connect (connection happens only when CreateShell is called)
 func NewClient(endpoint *Endpoint, user, password string) (client *Client, err error) {
-	params := DefaultParameters()
-	client, err = NewClientWithParameters(endpoint, user, password, params)
+	client, err = NewClientWithParameters(endpoint, user, password, DefaultParameters)
 	return
 }
 
-// NewClient will create a new remote client on url, connecting with user and password
+// NewClientWithParameters will create a new remote client on url, connecting with user and password
 // This function doesn't connect (connection happens only when CreateShell is called)
 func NewClientWithParameters(endpoint *Endpoint, user, password string, params *Parameters) (client *Client, err error) {
 	transport, err := newTransport(endpoint)
@@ -56,6 +56,7 @@ func newTransport(endpoint *Endpoint) (*http.Transport, error) {
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: endpoint.Insecure,
 		},
+		ResponseHeaderTimeout: endpoint.Timeout,
 	}
 
 	if endpoint.CACert != nil && len(*endpoint.CACert) > 0 {
@@ -82,18 +83,27 @@ func readCACerts(certs *[]byte) (*x509.CertPool, error) {
 
 // CreateShell will create a WinRM Shell, which is the prealable for running
 // commands.
-func (client *Client) CreateShell() (shell *Shell, err error) {
+func (client *Client) CreateShell() (*Shell, error) {
 	request := NewOpenShellRequest(client.url, &client.Parameters)
 	defer request.Free()
 
 	response, err := client.sendRequest(request)
-	if err == nil {
-		var shellId string
-		if shellId, err = ParseOpenShellResponse(response); err == nil {
-			shell = &Shell{client: client, ShellId: shellId}
-		}
+	if err != nil {
+		return nil, err
 	}
-	return
+
+	shellID, err := ParseOpenShellResponse(response)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.NewShell(shellID), nil
+
+}
+
+// NewShell will create a new WinRM Shell for the given shellID
+func (client *Client) NewShell(shellID string) *Shell {
+	return &Shell{client: client, ID: shellID}
 }
 
 func (client *Client) sendRequest(request *soap.SoapMessage) (response string, err error) {
@@ -119,7 +129,7 @@ func (client *Client) Run(command string, stdout io.Writer, stderr io.Writer) (e
 	return cmd.ExitCode(), cmd.err
 }
 
-// Run will run command on the the remote host, returning the process stdout and stderr
+// RunWithString will run command on the the remote host, returning the process stdout and stderr
 // as strings, and using the input stdin string as the process input
 func (client *Client) RunWithString(command string, stdin string) (stdout string, stderr string, exitCode int, err error) {
 	shell, err := client.CreateShell()
@@ -142,7 +152,7 @@ func (client *Client) RunWithString(command string, stdin string) (stdout string
 	return outWriter.String(), errWriter.String(), cmd.ExitCode(), cmd.err
 }
 
-// Run will run command on the the remote host, writing the process stdout and stderr to
+// RunWithInput will run command on the the remote host, writing the process stdout and stderr to
 // the given writers, and injecting the process stdin with the stdin reader.
 // Warning stdin (not stdout/stderr) are bufferized, which means reading only one byte in stdin will
 // send a winrm http packet to the remote host. If stdin is a pipe, it might be better for

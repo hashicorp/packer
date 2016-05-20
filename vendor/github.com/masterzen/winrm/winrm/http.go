@@ -9,30 +9,29 @@ import (
 	"github.com/masterzen/winrm/soap"
 )
 
-var soapXML string = "application/soap+xml"
+var soapXML = "application/soap+xml"
 
+// HttpPost type func for handling http requests
 type HttpPost func(*Client, *soap.SoapMessage) (string, error)
 
-func body(response *http.Response) (content string, err error) {
-	contentType := response.Header.Get("Content-Type")
-	if strings.HasPrefix(contentType, soapXML) {
-		var body []byte
-		body, err = ioutil.ReadAll(response.Body)
-		response.Body.Close()
+// body func reads the response body and return it as a string
+func body(response *http.Response) (string, error) {
+
+	// if we recived the content we expected
+	if strings.Contains(response.Header.Get("Content-Type"), "application/soap+xml") {
+		body, err := ioutil.ReadAll(response.Body)
+		defer response.Body.Close()
 		if err != nil {
-			err = fmt.Errorf("error while reading request body %s", err)
-			return
+			return "", fmt.Errorf("error while reading request body %s", err)
 		}
 
-		content = string(body)
-		return
-	} else {
-		err = fmt.Errorf("invalid content-type: %s", contentType)
-		return
+		return string(body), nil
 	}
-	return
+
+	return "", fmt.Errorf("invalid content type")
 }
 
+// Http_post make post to the winrm soap service
 func Http_post(client *Client, request *soap.SoapMessage) (response string, err error) {
 	httpClient := &http.Client{Transport: client.transport}
 
@@ -45,16 +44,13 @@ func Http_post(client *Client, request *soap.SoapMessage) (response string, err 
 	req.SetBasicAuth(client.username, client.password)
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		err = fmt.Errorf("unknown error %s", err)
-		return
+		return "", fmt.Errorf("unknown error %s", err)
 	}
 
-	if resp.StatusCode == 200 {
-		response, err = body(resp)
-	} else {
-		body, _ := ioutil.ReadAll(resp.Body)
-		err = fmt.Errorf("http error: %d - %s", resp.StatusCode, body)
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("http error: %d", resp.StatusCode)
 	}
 
-	return
+	return body(resp)
+
 }
