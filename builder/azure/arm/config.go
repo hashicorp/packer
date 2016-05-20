@@ -59,7 +59,7 @@ type Config struct {
 	ImageOffer     string `mapstructure:"image_offer"`
 	ImageSku       string `mapstructure:"image_sku"`
 	ImageVersion   string `mapstructure:"image_version"`
-	ImageUri	   string `mapstructure:"image_uri"`
+	ImageUri	     string `mapstructure:"image_uri"`
 
 	Location       string `mapstructure:"location"`
 	VMSize         string `mapstructure:"vm_size"`
@@ -120,16 +120,15 @@ func (c *Config) toTemplateParameters() *TemplateParameters {
 		StorageAccountBlobEndpoint: &TemplateParameter{c.storageAccountBlobEndpoint},
 		VMSize: &TemplateParameter{c.VMSize},
 		VMName: &TemplateParameter{c.tmpComputeName},
+		ImageUri: &TemplateParameter{c.ImageUri},
 	}
 
 	switch c.OSType {
 	case constants.Target_Linux:
 		templateParameters.SshAuthorizedKey = &TemplateParameter{c.sshAuthorizedKey}
-		templateParameters.ImageUri = &TemplateParameter{c.ImageUri}
 	case constants.Target_Windows:
 		templateParameters.TenantId = &TemplateParameter{c.TenantID}
 		templateParameters.ObjectId = &TemplateParameter{c.ObjectID}
-		templateParameters.ImageUri = &TemplateParameter{c.ImageUri}
 		templateParameters.KeyVaultName = &TemplateParameter{c.tmpKeyVaultName}
 		templateParameters.KeyVaultSecretValue = &TemplateParameter{c.winrmCertificate}
 		templateParameters.WinRMCertificateUrl = &TemplateParameter{c.tmpWinRMCertificateUrl}
@@ -340,6 +339,7 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
+	// only provide default value if not using vhd source.
 	if c.ImageVersion == "" && c.ImageUri == "" {
 		c.ImageVersion = DefaultImageVersion
 	}

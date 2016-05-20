@@ -47,7 +47,9 @@ builder.
 
 #### Image Source:
 
-Images can be used from the marketplace or from a VHD, stored in an ARM storage account in the same subscription.
+Images can be used from the marketplace or from a VHD, stored in an ARM storage account in the same subscription. To use a marketplace image, use `image_publisher`, `image_offer` and `image_sku` or in order to use a VHD, supply only the `image_uri`.
+
+##### Marketplace Image
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
@@ -61,9 +63,9 @@ Images can be used from the marketplace or from a VHD, stored in an ARM storage 
 
     CLI example `azure vm image list-skus -l westus -p Canonical -o UbuntuServer`
 
-##### or:
+##### VHD
 
--   `image_uri` (string) The full URL to a generalised VHD to use as a source (currently only for linux)
+-   `image_uri` (string) The full URL to a generalised VHD to use as a source
 
 
 ### Optional:
@@ -72,7 +74,7 @@ Images can be used from the marketplace or from a VHD, stored in an ARM storage 
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
--   `image_version` (string) Specify a specific version of an OS to boot from.
+-   `image_version` (string) Specify a specific version of an OS to boot from (when using marketplace images).
     Defaults to `latest`.
 
 -   `object_id` (string) Specify an OAuth Object ID to automatically

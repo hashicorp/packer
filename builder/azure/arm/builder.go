@@ -85,6 +85,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 
+	// wouldn't have bothered with putting these linux steps out, but directly creating this initial slice
+	// where this is used didn't seem to work.
+	linuxMarketplaceSteps := []multistep.Step{
+		NewStepCreateResourceGroup(azureClient, ui),
+		NewStepValidateTemplate(azureClient, ui, Linux),
+		NewStepDeployTemplate(azureClient, ui, Linux),
+	}
+
+	linuxVhdSteps := []multistep.Step{
+		NewStepCreateResourceGroup(azureClient, ui),
+		NewStepValidateTemplate(azureClient, ui, LinuxVhd),
+		NewStepDeployTemplate(azureClient, ui, LinuxVhd),
+	}
+
 	commonLinuxSteps := []multistep.Step{
 		NewStepGetIPAddress(azureClient, ui),
 		&communicator.StepConnectSSH{
@@ -133,21 +147,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.OSType == constants.Target_Linux {
 		if b.config.ImageUri == "" {
 			// use marketplace template
-			steps := []multistep.Step{
-				NewStepCreateResourceGroup(azureClient, ui),
-				NewStepValidateTemplate(azureClient, ui, Linux),
-				NewStepDeployTemplate(azureClient, ui, Linux),
-			}
+			steps = linuxMarketplaceSteps
 			steps = append(steps, commonLinuxSteps...)
 		} else {
-				// use vhd template
-				steps := []multistep.Step{
-					NewStepCreateResourceGroup(azureClient, ui),
-					NewStepValidateTemplate(azureClient, ui, LinuxVhd),
-					NewStepDeployTemplate(azureClient, ui, LinuxVhd),
-				}
-				steps = append(steps, commonLinuxSteps...)
-			}
+			// use vhd template
+			steps = linuxVhdSteps
+			steps = append(steps, commonLinuxSteps...)
+		}
 	} else if b.config.OSType == constants.Target_Windows {
 		if b.config.ImageUri == "" {
 			steps = initialCommonWindowsSteps

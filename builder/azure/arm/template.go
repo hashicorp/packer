@@ -390,6 +390,9 @@ const KeyVault = `{
     "imageSku": {
       "type": "string"
     },
+    "imageUri": {
+      "type": "string"
+    },
     "imageVersion": {
       "type": "string"
     },
@@ -644,7 +647,7 @@ const Windows = `{
             "publisher": "[parameters('imagePublisher')]",
             "offer": "[parameters('imageOffer')]",
             "sku": "[parameters('imageSku')]",
-	    "version": "[parameters('imageVersion')]"
+	          "version": "[parameters('imageVersion')]"
           },
           "osDisk": {
             "name": "osdisk",
@@ -853,7 +856,7 @@ const WindowsVhd = `{
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
             },
             "caching": "ReadWrite",
-            "createOption": "FromImage"
+            "createOption": "FromImage",
             "osType": "windows"
           }
         },
