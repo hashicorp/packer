@@ -68,6 +68,23 @@ from an unknown source. Place this file in the http directory with the proper
 name. For the example above, it should go into "httpdir" with a name of
 "centos6-ks.cfg".
 
+## Security note
+
+During the build, the qemu console port is accessible over the network via
+VNC for debugging purposes.
+
+If you are running in an untrusted environment then you may want to block this.
+You can do this by binding the VNC service to localhost:
+
+~~~
+      "qemuargs": [
+        [ "-vnc", "127.0.0.1:{{ .VNCDisplay }}" ]
+      ]
+~~~
+
+Alternatively you may firewall off the VNC TCP port range (default 5900 to
+6000 inclusive)
+
 ## Configuration Reference
 
 There are many configuration options available for the Qemu builder. They are
