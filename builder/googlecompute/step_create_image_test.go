@@ -31,6 +31,9 @@ func TestStepCreateImage(t *testing.T) {
 	if driver.CreateImageDesc != config.ImageDescription {
 		t.Fatalf("bad: %#v", driver.CreateImageDesc)
 	}
+	if driver.CreateImageFamily != config.ImageFamily {
+		t.Fatalf("bad: %#v", driver.CreateImageFamily)
+	}
 	if driver.CreateImageZone != config.Zone {
 		t.Fatalf("bad: %#v", driver.CreateImageZone)
 	}

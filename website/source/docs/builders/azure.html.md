@@ -77,8 +77,10 @@ Images can be used from the marketplace or from a VHD, stored in an ARM storage 
 -   `image_version` (string) Specify a specific version of an OS to boot from (when using marketplace images).
     Defaults to `latest`.
 
--   `object_id` (string) Specify an OAuth Object ID to automatically
-    authenticate with the VM. See `Windows` behavior for `os_type`, below.
+-   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
+    created at runtime.  This variable is required when creating images based on
+    Windows; this variable is not used by non-Windows builds.  See `Windows`
+    behavior for `os_type`, below.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for your machine. For
@@ -111,13 +113,91 @@ Here is a basic example for Azure.
     "capture_container_name": "images",
     "capture_name_prefix": "packer",
 
+    "os_type": "Linux",
     "image_publisher": "Canonical",
     "image_offer": "UbuntuServer",
-    "image_sku": "14.04.3-LTS",
+    "image_sku": "14.04.4-LTS",
 
     "location": "West US",
     "vm_size": "Standard_A2"
 }
 ```
 
-See the [examples/azure](https://github.com/mitchellh/packer/tree/master/examples/azure) folder in the packer project for more examples.
+## Implementation
+
+\~&gt; **Warning!** This is an advanced topic. You do not need to understand the implementation to use the Azure
+builder.
+
+The Azure builder uses ARM
+[templates](https://azure.microsoft.com/en-us/documentation/articles/resource-group-authoring-templates/) to deploy
+resources.  ARM templates make it easy to express the what without having to express the how.
+
+The Azure builder works under the assumption that it creates everything it needs to execute a build.  When the build has
+completed it simply deletes the resource group to cleanup any runtime resources.  Resource groups are named using the
+form `packer-Resource-Group-<random>`. The value `<random>` is a random value that is generated at every invocation of
+packer.  The `<random>` value is re-used as much as possible when naming resources, so users can better identify and
+group these transient resources when seen in their subscription.
+
+ > The VHD is created on a user specified storage account, not a random one created at runtime.  When a virtual machine
+ is captured the resulting VHD is stored on the same storage account as the source VHD.  The VHD created by Packer must
+ persist after a build is complete, which is why the storage account is set by the user.
+
+The basic steps for a build are:
+
+ 1. Create a resource group.
+ 1. Validate and deploy a VM template.
+ 1. Execute provision - defined by the user; typically shell commands.
+ 1. Power off and capture the VM.
+ 1. Delete the resource group.
+ 1. Delete the temporary VM's OS disk.
+
+The templates used for a build are currently fixed in the code.  There is a template for Linux, Windows, and KeyVault.
+The templates are themselves templated with place holders for names, passwords, SSH keys, certificates, etc.
+
+### What's Randomized?
+
+The Azure builder creates the following random values at runtime.
+
+ * Administrator Password: a random 32-character value using the *password alphabet*.
+ * Certificate: a 2,048-bit certificate used to secure WinRM communication.  The certificate is valid for 24-hours, which starts roughly at invocation time.
+ * Certificate Password: a random 32-character value using the *password alphabet* used to protect the private key of the certificate.
+ * Compute Name: a random 15-character name prefixed with pkrvm; the name of the VM.
+ * Deployment Name: a random 15-character name prefixed with pkfdp; the name of the deployment.
+ * KeyVault Name: a random 15-character name prefixed with pkrkv.
+ * OS Disk Name: a random 15-character name prefixed with pkros.
+ * Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
+ * SSH Key Pair: a 2,048-bit asymmetric key pair; can be overriden by the user.
+
+The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**.  The alphabet was reduced (no
+vowels) to prevent running afoul of Azure decency controls.
+
+The password alphabet used for random values is **0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ**.
+
+### Windows
+
+The Windows implementation is very similar to the Linux build, with the exception that it deploys a template to
+configure KeyVault. Packer communicates with a Windows VM using the WinRM protocol.  Windows VMs on Azure default to
+using both password and certificate based authentication for WinRM.  The password is easily set via the VM ARM template,
+but the certificate requires an intermediary. The intermediary for Azure is KeyVault.  The certificate is uploaded to a
+new KeyVault provisioned in the same resource group as the VM.  When the Windows VM is deployed, it links to the
+certificate in KeyVault, and Azure will ensure the certificate is injected as part of deployment.
+
+The basic steps for a Windows build are:
+
+  1. Create a resource group.
+  1. Validate and deploy a KeyVault template.
+  1. Validate and deploy a VM template.
+  1. Execute provision - defined by the user; typically shell commands.
+  1. Power off and capture the VM.
+  1. Delete the resource group.
+  1. Delete the temporary VM's OS disk.
+
+A Windows build requires two templates and two deployments.  Unfortunately, the KeyVault and VM cannot be deployed at
+the same time hence the need for two templates and deployments.  The time required to deploy a KeyVault template is
+minimal, so overall impact is small.
+
+ > The KeyVault certificate is protected using the object_id of the SPN.  This is why Windows builds require object_id,
+ and an SPN.  The KeyVault is deleted when the resource group is deleted.
+
+See the [examples/azure](https://github.com/mitchellh/packer/tree/master/examples/azure) folder in the packer project
+for more examples.

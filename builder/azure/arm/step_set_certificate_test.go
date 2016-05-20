@@ -6,8 +6,8 @@ package arm
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepSetCertificateShouldPassIfGetPasses(t *testing.T) {

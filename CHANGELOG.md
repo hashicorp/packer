@@ -1,3 +1,25 @@
+## (Unreleased)
+
+FEATURES:
+
+  * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]
+
+IMPROVEMENTS:
+
+  * builder/azure: Now pre-validates `capture_container_name` and `capture_name_prefix` [GH-3537]
+  * builder/google: Added support for `image_family` [GH-3503]
+  * builder/null: Can now be used with WinRM [GH-2525]
+  * builder/parallels: Added pause between `boot_command` when running with `-debug` [GH-3547]
+  * builder/virtualbox: Added pause between `boot_command` when running with `-debug` [GH-3542]
+  * builder/vmware: Added pause between `boot_command` when running with `-debug` [GH-3542]
+  * builder/qemu: Added pause between `boot_command` when running with `-debug` [GH-3547]
+  * post-processor/compress: Added support for bgzf compression [GH-3501]
+
+BUG FIXES:
+
+  * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
+  * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
+
 ## 0.10.1 (May 7, 2016)
 
 FEATURES:
@@ -18,6 +40,8 @@ IMPROVEMENTS:
   * builder/google: Packer now identifies its version to the service [GH-3465]
   * provisioner/shell: Added `remote_folder` and `remote_file` options
     [GH-3462]
+  * post-processor/compress: Added support for `bgzf` format and added
+    `format` option [GH-3501]
 
 BUG FIXES:
 

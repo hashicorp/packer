@@ -95,7 +95,9 @@ func ByClosing() RespondDecorator {
 		return ResponderFunc(func(resp *http.Response) error {
 			err := r.Respond(resp)
 			if resp != nil && resp.Body != nil {
-				resp.Body.Close()
+				if err := resp.Body.Close(); err != nil {
+					return fmt.Errorf("Error closing the response body: %v", err)
+				}
 			}
 			return err
 		})
@@ -109,7 +111,9 @@ func ByClosingIfError() RespondDecorator {
 		return ResponderFunc(func(resp *http.Response) error {
 			err := r.Respond(resp)
 			if err != nil && resp != nil && resp.Body != nil {
-				resp.Body.Close()
+				if err := resp.Body.Close(); err != nil {
+					return fmt.Errorf("Error closing the response body: %v", err)
+				}
 			}
 			return err
 		})

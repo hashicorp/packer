@@ -38,10 +38,16 @@ type StepTypeBootCommand struct {
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
+
+	var pauseFn multistep.DebugPauseFn
+	if debug {
+		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
+	}
 
 	s.Ctx.Data = &bootCommandTemplateData{
 		"10.0.2.2",
@@ -50,7 +56,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Say("Typing the boot command...")
-	for _, command := range s.BootCommand {
+	for i, command := range s.BootCommand {
 		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
@@ -79,6 +85,10 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 			// in between each character.
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				return multistep.ActionHalt
+			}
+
+			if pauseFn != nil {
+				pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
 			}
 
 			if err := driver.VBoxManage("controlvm", vmName, "keyboardputscancode", code); err != nil {
