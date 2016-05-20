@@ -85,10 +85,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	m, _ := regexp.MatchString("(stop|terminate)", c.InstanceInitiatedShutdownBehavior)
+	var reShutdownBehavior = regexp.MustCompile("(stop|terminate)")
 	if c.InstanceInitiatedShutdownBehavior == "" {
 		c.InstanceInitiatedShutdownBehavior = "stop"
-	} else if !m {
+	} else if !reShutdownBehavior.MatchString(c.InstanceInitiatedShutdownBehavior) {
 		errs = append(errs, fmt.Errorf("shutdown_behaviour only accepts 'stop' or 'terminate' values."))
 	}
 
