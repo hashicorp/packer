@@ -333,7 +333,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Compile the artifact list
 	var files []string
-	if b.config.RemoteType != "" {
+	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
 		dir.SetOutputDir(b.config.OutputDir)
 		files, err = dir.ListFiles()
