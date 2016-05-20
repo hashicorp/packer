@@ -108,9 +108,10 @@ builder.
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
-    This may have a value of either "none", "kvm", "tcg", or "xen" and you must
-    have that support in on the machine on which you run the builder. By default
-    "kvm" is used.
+    This may be `none`, `kvm`, `tcg`, or `xen`. The appropriate software must
+    already been installed on your build machine to use the accelerator you
+    specified. When no accelerator is specified, Packer will try to use `kvm`
+    if it is available but will default to `tcg` otherwise.
 
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
