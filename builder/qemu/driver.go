@@ -123,7 +123,7 @@ func (d *QemuDriver) Qemu(qemuArgs ...string) error {
 	select {
 	case exit := <-endCh:
 		if exit != 0 {
-			return fmt.Errorf("Qemu failed to start. Please run with logs to get more info.")
+			return fmt.Errorf("Qemu failed to start. Please run with PACKER_LOG=1 to get more info.")
 		}
 	case <-time.After(2 * time.Second):
 	}
