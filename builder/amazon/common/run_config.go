@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"regexp"
 
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/helper/communicator"
@@ -32,6 +33,7 @@ type RunConfig struct {
 	UserDataFile             string            `mapstructure:"user_data_file"`
 	WindowsPasswordTimeout   time.Duration     `mapstructure:"windows_password_timeout"`
 	VpcId                    string            `mapstructure:"vpc_id"`
+	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behaviour"`
 
 	// Communicator settings
 	Comm           communicator.Config `mapstructure:",squash"`
@@ -82,6 +84,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			c.SecurityGroupIds = []string{c.SecurityGroupId}
 			c.SecurityGroupId = ""
 		}
+	}
+
+	m, _ := regexp.MatchString("(stop|terminate)", c.InstanceInitiatedShutdownBehavior)
+	if c.InstanceInitiatedShutdownBehavior == "" {
+		c.InstanceInitiatedShutdownBehavior = "stop"
+	} else if !m {
+		errs = append(errs, fmt.Errorf("shutdown_behaviour only accepts 'stop' or 'terminate' values."))
 	}
 
 	return errs
