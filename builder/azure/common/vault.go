@@ -55,7 +55,6 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 		return nil, err
 	}
 
-	//resp, err := v.Send(req, http.StatusOK)
 	resp, err := autorest.SendWithSender(client, req)
 	if err != nil {
 		return nil, err
