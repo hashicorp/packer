@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
 
-package arm
+package template
 
 import (
 	"encoding/json"
@@ -15,11 +15,7 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 		AdminUsername:              &TemplateParameter{"sentinel"},
 		AdminPassword:              &TemplateParameter{"sentinel"},
 		DnsNameForPublicIP:         &TemplateParameter{"sentinel"},
-		ImageOffer:                 &TemplateParameter{"sentinel"},
-		ImagePublisher:             &TemplateParameter{"sentinel"},
-		ImageSku:                   &TemplateParameter{"sentinel"},
 		OSDiskName:                 &TemplateParameter{"sentinel"},
-		SshAuthorizedKey:           &TemplateParameter{"sentinel"},
 		StorageAccountBlobEndpoint: &TemplateParameter{"sentinel"},
 		VMName: &TemplateParameter{"sentinel"},
 		VMSize: &TemplateParameter{"sentinel"},
@@ -41,11 +37,7 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 		"adminUsername",
 		"adminPassword",
 		"dnsNameForPublicIP",
-		"imageOffer",
-		"imagePublisher",
-		"imageSku",
 		"osDiskName",
-		"sshAuthorizedKey",
 		"storageAccountBlobEndpoint",
 		"vmSize",
 		"vmName",
@@ -64,11 +56,7 @@ func TestParameterValuesShouldBeSet(t *testing.T) {
 		AdminUsername:              &TemplateParameter{"adminusername00"},
 		AdminPassword:              &TemplateParameter{"adminpassword00"},
 		DnsNameForPublicIP:         &TemplateParameter{"dnsnameforpublicip00"},
-		ImageOffer:                 &TemplateParameter{"imageoffer00"},
-		ImagePublisher:             &TemplateParameter{"imagepublisher00"},
-		ImageSku:                   &TemplateParameter{"imagesku00"},
 		OSDiskName:                 &TemplateParameter{"osdiskname00"},
-		SshAuthorizedKey:           &TemplateParameter{"sshauthorizedkey00"},
 		StorageAccountBlobEndpoint: &TemplateParameter{"storageaccountblobendpoint00"},
 		VMName: &TemplateParameter{"vmname00"},
 		VMSize: &TemplateParameter{"vmsize00"},
