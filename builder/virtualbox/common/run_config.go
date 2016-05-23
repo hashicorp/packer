@@ -11,8 +11,9 @@ type RunConfig struct {
 	Headless    bool   `mapstructure:"headless"`
 	RawBootWait string `mapstructure:"boot_wait"`
 
-	VRDPPortMin uint `mapstructure:"vrdp_port_min"`
-	VRDPPortMax uint `mapstructure:"vrdp_port_max"`
+	VRDPBindAddress string `mapstructure:"vrdp_bind_address"`
+	VRDPPortMin     uint   `mapstructure:"vrdp_port_min"`
+	VRDPPortMax     uint   `mapstructure:"vrdp_port_max"`
 
 	BootWait time.Duration ``
 }
@@ -20,6 +21,10 @@ type RunConfig struct {
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"
+	}
+
+	if c.VRDPBindAddress == "" {
+		c.VRDPBindAddress = "127.0.0.1"
 	}
 
 	if c.VRDPPortMin == 0 {
