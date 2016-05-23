@@ -21,8 +21,9 @@ import (
 // Produces:
 // vrdp_port unit - The port that VRDP is configured to listen on.
 type StepConfigureVRDP struct {
-	VRDPPortMin uint
-	VRDPPortMax uint
+	VRDPBindAddress string
+	VRDPPortMin     uint
+	VRDPPortMax     uint
 }
 
 func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
@@ -30,7 +31,7 @@ func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	log.Printf("Looking for available port between %d and %d", s.VRDPPortMin, s.VRDPPortMax)
+	log.Printf("Looking for available port between %d and %d on %s", s.VRDPPortMin, s.VRDPPortMax, s.VRDPBindAddress)
 	var vrdpPort uint
 	portRange := int(s.VRDPPortMax - s.VRDPPortMin)
 
@@ -42,7 +43,7 @@ func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		log.Printf("Trying port: %d", vrdpPort)
-		l, err := net.Listen("tcp", fmt.Sprintf(":%d", vrdpPort))
+		l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.VRDPBindAddress, vrdpPort))
 		if err == nil {
 			defer l.Close()
 			break
@@ -51,7 +52,7 @@ func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
 
 	command := []string{
 		"modifyvm", vmName,
-		"--vrdeaddress", "127.0.0.1",
+		"--vrdeaddress", fmt.Sprintf("%s", s.VRDPBindAddress),
 		"--vrdeauthtype", "null",
 		"--vrde", "on",
 		"--vrdeport",
@@ -64,7 +65,7 @@ func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	state.Put("vrdpIp", "127.0.0.1")
+	state.Put("vrdpIp", s.VRDPBindAddress)
 	state.Put("vrdpPort", vrdpPort)
 
 	return multistep.ActionContinue
