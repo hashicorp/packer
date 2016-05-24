@@ -25,13 +25,15 @@ AWS account. The builder will create temporary keypairs, security group rules,
 etc. that provide it temporary access to the instance while the image is being
 created. This simplifies configuration quite a bit.
 
-The builder does *not* manage AMIs. Once it creates an AMI and stores it in your
-account, it is up to you to use, delete, etc. the AMI.
+The builder does *not* manage AMIs. Once it creates an AMI and stores it in
+your account, it is up to you to use, delete, etc. the AMI.
 
--&gt; **Note** This builder requires that the [Amazon EC2 AMI
-Tools](https://aws.amazon.com/developertools/368) are installed onto the machine.
-This can be done within a provisioner, but must be done before the builder
-finishes running.
+-> **Note:** This builder requires that the [Amazon EC2 AMI
+Tools](https://aws.amazon.com/developertools/368) are installed onto the
+machine. This can be done within a provisioner, but must be done before the
+builder finishes running.
+
+~> Instance builds are not supported for Windows. Use [`amazon-ebs`](amazon-ebs.html) instead.
 
 ## Configuration Reference
 
