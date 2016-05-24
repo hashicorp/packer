@@ -25,6 +25,8 @@ type qemuArgsTemplateData struct {
 	OutputDir   string
 	Name        string
 	SSHHostPort uint
+	VNCPort     uint
+	VNCDisplay  uint
 }
 
 func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
@@ -66,7 +68,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 
-	vnc := fmt.Sprintf("0.0.0.0:%d", vncPort-5900)
+	vnc := fmt.Sprintf("127.0.0.1:%d", vncPort-5900)
 	vmName := config.VMName
 	imgPath := filepath.Join(config.OutputDir, vmName)
 
@@ -150,6 +152,8 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 			config.OutputDir,
 			config.VMName,
 			sshHostPort,
+			vncPort,
+			vncPort-5900,
 		}
 		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
 		if err != nil {

@@ -1,5 +1,10 @@
 ## (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * builder/qemu: for security, VNC console access is now limited to 127.0.0.1.  To re-enable
+    open console, specify `"qemuargs": [ "-vnc", "0.0.0.0:{{ .VNCDisplay }}" ]` [GH-3533]
+
 FEATURES:
 
   * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]
