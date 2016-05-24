@@ -172,7 +172,18 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     value is set to true, the machine will start without a console.
 
     You can still see the console if you make a note of the VNC display
-    number chosen, and then connect using `vncviewer -Shared <host>:<display>`
+    number chosen, and then connect using `vncviewer -Shared 127.0.0.1:<display>`
+
+    If you are running in a trusted environment, you can allow access over the
+    network to the console as follows:
+
+    ~~~
+          "qemuargs": [
+            [ "-vnc", "0.0.0.0:{{ .VNCDisplay }}" ]
+          ]
+    ~~~
+
+    You can then connect with `vncviewer -Shared <host>:<display>`
 
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
