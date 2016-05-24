@@ -312,7 +312,9 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	cmd.Env = os.Environ()
 	if len(envvars) > 0 {
 		cmd.Env = append(cmd.Env, envvars...)
-	} else if !checkHostKey {
+	}
+
+	if !checkHostKey {
 		cmd.Env = append(cmd.Env, "ANSIBLE_HOST_KEY_CHECKING=False")
 	}
 
