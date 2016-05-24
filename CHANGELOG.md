@@ -19,6 +19,8 @@ BUG FIXES:
 
   * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
   * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
+  * provisioner/ansible: Properly set host key checking even when a custom ENV
+    is specified [GH-3568]
 
 ## 0.10.1 (May 7, 2016)
 
