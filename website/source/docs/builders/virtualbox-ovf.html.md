@@ -207,6 +207,9 @@ builder.
     is exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is the
     name of the build.
 
+-   `vrdp_bind_address` (string / IP address) - The IP address that should be binded
+     to for VRDP. By default packer will use 127.0.0.1 for this.
+
 -   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
