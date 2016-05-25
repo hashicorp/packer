@@ -18,13 +18,35 @@ func TestStepCreateImage(t *testing.T) {
 
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(*DriverMock)
+	driver.CreateImageProjectId = "createimage-project"
+	driver.CreateImageSizeGb = 100
 
 	// run the step
 	if action := step.Run(state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
+	
+	uncastImage, ok := state.GetOk("image")
+	if !ok {
+		t.Fatal("should have image")
+	}
+	image, ok := uncastImage.(Image)
+	if !ok {
+		t.Fatal("image is not an Image")
+	}
+	
+	// Verify created Image results.
+	if image.Name != config.ImageName {
+		t.Fatalf("Created image name, %s, does not match config name, %s.", image.Name, config.ImageName)
+	}
+	if driver.CreateImageProjectId != image.ProjectId {
+		t.Fatalf("Created image project ID, %s, does not match driver project ID, %s.", image.ProjectId, driver.CreateImageProjectId)
+	}
+	if driver.CreateImageSizeGb != image.SizeGb {
+		t.Fatalf("Created image size, %d, does not match the expected test value, %d.", image.SizeGb, driver.CreateImageSizeGb)
+	}
 
-	// Verify state
+	// Verify proper args passed to driver.CreateImage.
 	if driver.CreateImageName != config.ImageName {
 		t.Fatalf("bad: %#v", driver.CreateImageName)
 	}
@@ -39,16 +61,6 @@ func TestStepCreateImage(t *testing.T) {
 	}
 	if driver.CreateImageDisk != config.DiskName {
 		t.Fatalf("bad: %#v", driver.CreateImageDisk)
-	}
-
-	nameRaw, ok := state.GetOk("image_name")
-	if !ok {
-		t.Fatal("should have name")
-	}
-	if name, ok := nameRaw.(string); !ok {
-		t.Fatal("name is not a string")
-	} else if name != config.ImageName {
-		t.Fatalf("bad name: %s", name)
 	}
 }
 

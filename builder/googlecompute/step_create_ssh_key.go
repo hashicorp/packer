@@ -20,6 +20,8 @@ type StepCreateSSHKey struct {
 }
 
 // Run executes the Packer build step that generates SSH key pairs.
+// The key pairs are added to the multistep state as "ssh_private_key" and
+// "ssh_public_key".
 func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
