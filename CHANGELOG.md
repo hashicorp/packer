@@ -1,5 +1,11 @@
 ## (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * VNC and VRDP-like features in VirtualBox, VMware, and QEMU now configurable
+    but bind to 127.0.0.1 by default to improve security. See the relevant
+    builder docs for more info.
+
 FEATURES:
 
   * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]
@@ -8,13 +14,21 @@ IMPROVEMENTS:
 
   * builder/amazon: Added `disable_stop_instance` option to prevent automatic
     shutdown when the build is complete [GH-3352]
-  * builder/azure: Now pre-validates `capture_container_name` and `capture_name_prefix` [GH-3537]
+  * builder/azure: Now pre-validates `capture_container_name` and
+    `capture_name_prefix` [GH-3537]
   * builder/google: Added support for `image_family` [GH-3503]
   * builder/null: Can now be used with WinRM [GH-2525]
-  * builder/parallels: Added pause between `boot_command` when running with `-debug` [GH-3547]
-  * builder/virtualbox: Added pause between `boot_command` when running with `-debug` [GH-3542]
-  * builder/vmware: Added pause between `boot_command` when running with `-debug` [GH-3542]
-  * builder/qemu: Added pause between `boot_command` when running with `-debug` [GH-3547]
+  * builder/parallels: Now pauses between `boot_command` entries when running
+    with `-debug` [GH-3547]
+  * builder/qemu: Added `vnc_bind_address` option [GH-3574]
+  * builder/virtualbox: Now pauses between `boot_command` entries when running
+    with `-debug` [GH-3542]
+  * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
+  * builder/vmware: Now paused between `boot_command` entries when running with
+    `-debug` [GH-3542]
+  * builder/vmware: Added `vnc_bind_address` option [GH-3565]
+  * builder/qemu: Now pauses between `boot_command` entries running with
+    `-debug` [GH-3547]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
 
 BUG FIXES:
