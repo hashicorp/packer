@@ -132,6 +132,25 @@ func TestBuilderPrepare_BootWait(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_VNCBindAddress(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default boot_wait
+	delete(config, "vnc_bind_address")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.VNCBindAddress != "127.0.0.1" {
+		t.Fatalf("bad value: %s", b.config.VNCBindAddress)
+	}
+}
+
 func TestBuilderPrepare_DiskCompaction(t *testing.T) {
 	var b Builder
 	config := testConfig()
