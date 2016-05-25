@@ -104,6 +104,7 @@ type Config struct {
 	ShutdownCommand string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin  uint       `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax  uint       `mapstructure:"ssh_host_port_max"`
+	VNCBindAddress  string     `mapstructure:"vnc_bind_address"`
 	VNCPortMin      uint       `mapstructure:"vnc_port_min"`
 	VNCPortMax      uint       `mapstructure:"vnc_port_max"`
 	VMName          string     `mapstructure:"vm_name"`
@@ -192,6 +193,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.SSHHostPortMax == 0 {
 		b.config.SSHHostPortMax = 4444
+	}
+
+	if b.config.VNCBindAddress == "" {
+		b.config.VNCBindAddress = "127.0.0.1"
 	}
 
 	if b.config.VNCPortMin == 0 {

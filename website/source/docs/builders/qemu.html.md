@@ -306,6 +306,10 @@ default port of `5985` or whatever value you have the service set to listen on.
     `BUILDNAME` is the name of the build. Currently, no file extension will be
     used unless it is specified in this option.
 
+-   `vnc_bind_address` (string / IP address) - The IP address that should be binded
+    to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
+    to all interfaces use 0.0.0.0
+
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
