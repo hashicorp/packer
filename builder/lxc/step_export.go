@@ -1,16 +1,16 @@
 package lxc
 
 import (
-	"github.com/mitchellh/multistep"
-	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"bytes"
-	"os/exec"
-	"log"
-	"strings"
-	"path/filepath"
-	"os"
+	"fmt"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 	"io"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 type stepExport struct{}
@@ -74,7 +74,6 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepExport) Cleanup(state multistep.StateBag) {}
-
 
 func (s *stepExport) SudoCommand(args ...string) error {
 	var stdout, stderr bytes.Buffer
