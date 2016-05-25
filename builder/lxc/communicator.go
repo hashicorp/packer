@@ -9,8 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 	"strings"
+	"syscall"
 )
 
 type LxcAttachCommunicator struct {
@@ -105,7 +105,7 @@ func (c *LxcAttachCommunicator) Download(src string, w io.Writer) error {
 }
 
 func (c *LxcAttachCommunicator) DownloadDir(src string, dst string, exclude []string) error {
-        return fmt.Errorf("DownloadDir is not implemented for lxc")
+	return fmt.Errorf("DownloadDir is not implemented for lxc")
 }
 
 func (c *LxcAttachCommunicator) Execute(commandString string) (*exec.Cmd, error) {
