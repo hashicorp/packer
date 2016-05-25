@@ -27,7 +27,7 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
-       return nil
+	return nil
 }
 
 func (a *Artifact) Destroy() error {

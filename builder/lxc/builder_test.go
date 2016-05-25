@@ -1,8 +1,8 @@
 package lxc
 
 import (
-	"testing"
 	"os"
+	"testing"
 
 	"github.com/mitchellh/packer/packer"
 )
