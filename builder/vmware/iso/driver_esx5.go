@@ -176,7 +176,7 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(portMin, portMax uint) (string, uint, error) {
+func (d *ESX5Driver) VNCAddress(vncBindIP string, portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
 
 	//Process ports ESXi is listening on to determine which are available
