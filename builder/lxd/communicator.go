@@ -14,7 +14,6 @@ import (
 )
 
 type Communicator struct {
-	RootFs        string
 	ContainerName string
 	CmdWrapper    CommandWrapper
 }
@@ -48,7 +47,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 		}
 
 		log.Printf(
-			"lxc-attach execution exited with '%d': '%s'",
+			"lxc exec execution exited with '%d': '%s'",
 			exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
 	}()
@@ -57,51 +56,46 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 }
 
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
-	dst = filepath.Join(c.RootFs, dst)
-	log.Printf("Uploading to rootfs: %s", dst)
-	tf, err := ioutil.TempFile("", "packer-lxc-attach")
-	if err != nil {
-		return fmt.Errorf("Error uploading file to rootfs: %s", err)
-	}
-	defer os.Remove(tf.Name())
-	io.Copy(tf, r)
-
-	cpCmd, err := c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", tf.Name(), dst))
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("lxc file push - %s", filepath.Join(c.ContainerName, dst)))
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Running copy command: %s", dst)
+	log.Printf("Running copy command: %s", cpCmd)
+	command := ShellCommand(cpCmd)
+	command.Stdin = r
 
-	return ShellCommand(cpCmd).Run()
+	return command.Run()
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	// TODO: remove any file copied if it appears in `exclude`
-	dest := filepath.Join(c.RootFs, dst)
+	// XXX FIXME. lxc file push doesn't yet support directory uploads
+
+	// TODO: make a tar tmpfile of the source, upload it to the dest, then untar it on the remote.
+	// This approach would work when the LXD host is not the localhost.
+	dest := filepath.Join("/var/lib/lxd/containers/", c.ContainerName, "rootfs", dst)
 	log.Printf("Uploading directory '%s' to rootfs '%s'", src, dest)
 	cpCmd, err := c.CmdWrapper(fmt.Sprintf("sudo cp -R %s/. %s", src, dest))
 	if err != nil {
+		log.Printf("Error when uploading directory '%s' to rootfs '%s': %s", src, dest, err)
 		return err
 	}
 
+	log.Printf("Running copy command: %s", cpCmd)
 	return ShellCommand(cpCmd).Run()
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
-	src = filepath.Join(c.RootFs, src)
-	log.Printf("Downloading from rootfs dir: %s", src)
-	f, err := os.Open(src)
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("lxc file pull %s -", filepath.Join(c.ContainerName, src)))
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	if _, err := io.Copy(w, f); err != nil {
-		return err
-	}
+	log.Printf("Running copy command: %s", cpCmd)
+	command := ShellCommand(cpCmd)
+	command.Stdout = w
 
-	return nil
+	return command.Run()
 }
 
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
@@ -109,15 +103,15 @@ func (c *Communicator) DownloadDir(src string, dst string, exclude []string) err
 }
 
 func (c *Communicator) Execute(commandString string) (*exec.Cmd, error) {
-	log.Printf("Executing with lxc-attach in container: %s %s %s", c.ContainerName, c.RootFs, commandString)
+	log.Printf("Executing with lxc exec in container: %s %s", c.ContainerName, commandString)
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("sudo lxc-attach --name %s -- /bin/sh -c \"%s\"", c.ContainerName, commandString))
+		fmt.Sprintf("sudo lxc exec %s -- /bin/sh -c \"%s\"", c.ContainerName, commandString))
 	if err != nil {
 		return nil, err
 	}
 
 	localCmd := ShellCommand(command)
-	log.Printf("Executing lxc-attach: %s %#v", localCmd.Path, localCmd.Args)
+	log.Printf("Executing lxc exec: %s %#v", localCmd.Path, localCmd.Args)
 
 	return localCmd, nil
 }
