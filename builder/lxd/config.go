@@ -18,9 +18,7 @@ type Config struct {
 	CommandWrapper string `mapstructure:"command_wrapper"`
 	RawInitTimeout string `mapstructure:"init_timeout"`
 	Image          string `mapstructure:"image"`
-	Remote         string `mapstructure:"remote"`
 	//EnvVars             []string `mapstructure:"template_environment_vars"`
-	//TargetRunlevel      int      `mapstructure:"target_runlevel"`
 	InitTimeout time.Duration
 
 	ctx interpolate.Context
