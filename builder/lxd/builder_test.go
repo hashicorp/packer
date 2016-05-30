@@ -6,10 +6,11 @@ import (
 
 	"github.com/mitchellh/packer/packer"
 )
+
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"output_dir": "foo",
-		"image":       "bar",
+		"image":      "bar",
 	}
 }
 

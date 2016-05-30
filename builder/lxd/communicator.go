@@ -69,20 +69,44 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	// XXX FIXME. lxc file push doesn't yet support directory uploads
+	// NOTE:lxc file push doesn't yet support directory uploads.
+	// As a work around, we tar up the folder, upload it as a file, then extract it
 
-	// TODO: make a tar tmpfile of the source, upload it to the dest, then untar it on the remote.
-	// This approach would work when the LXD host is not the localhost.
-	dest := filepath.Join("/var/lib/lxd/containers/", c.ContainerName, "rootfs", dst)
-	log.Printf("Uploading directory '%s' to rootfs '%s'", src, dest)
-	cpCmd, err := c.CmdWrapper(fmt.Sprintf("sudo cp -R %s/. %s", src, dest))
+	os.Chdir(src)
+	tar, err := c.CmdWrapper("tar -czf - .")
 	if err != nil {
-		log.Printf("Error when uploading directory '%s' to rootfs '%s': %s", src, dest, err)
 		return err
 	}
 
-	log.Printf("Running copy command: %s", cpCmd)
-	return ShellCommand(cpCmd).Run()
+	cp, err := c.CmdWrapper(fmt.Sprintf("lxc exec %s -- tar -xzf - -C %s ", c.ContainerName, dst))
+	if err != nil {
+		return err
+	}
+
+	tarCmd := ShellCommand(tar)
+	cpCmd := ShellCommand(cp)
+
+	cpCmd.Stdin, _ = tarCmd.StdoutPipe()
+	log.Printf("Starting tar command: %s", tar)
+	err = tarCmd.Start()
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Running cp command: %s", cp)
+	err = cpCmd.Run()
+	if err != nil {
+		log.Printf("Error running cp command: %s", err)
+		return err
+	}
+
+	err = tarCmd.Wait()
+	if err != nil {
+		log.Printf("Error running tar command: %s", err)
+		return err
+	}
+
+	return nil
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
@@ -99,6 +123,7 @@ func (c *Communicator) Download(src string, w io.Writer) error {
 }
 
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
+	// TODO This could probably be "lxc exec <container> -- cd <src> && tar -czf - | tar -xzf - -C <dst>"
 	return fmt.Errorf("DownloadDir is not implemented for lxc")
 }
 
