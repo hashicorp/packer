@@ -9,8 +9,8 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"output_dir": "foo",
-		"image":      "bar",
+		"output_image": "foo",
+		"image":        "bar",
 	}
 }
 

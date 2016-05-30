@@ -43,9 +43,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps := []multistep.Step{
-		new(stepLxdLaunch),
-		new(StepProvision),
-		new(stepPublish),
+		&stepLxdLaunch{},
+		&StepProvision{},
+		&stepPublish{},
 	}
 
 	// Setup the state bag

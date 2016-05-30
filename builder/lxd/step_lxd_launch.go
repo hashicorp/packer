@@ -19,17 +19,10 @@ func (s *stepLxdLaunch) Run(state multistep.StateBag) multistep.StepAction {
 
 	name := config.ContainerName
 	image := config.Image
-	remote := config.Remote
 
-	commands := make([][]string, 1)
-	if remote == "" {
-		commands[0] = []string{"lxc", "launch", image, name}
-	} else {
-
-		commands[0] = []string{"lxc", "launch", fmt.Sprintf("%s:%s", remote, image), name}
+	commands := [][]string{
+		{"lxc", "launch", image, name},
 	}
-	//commands[0] = append(commands[0], config.Parameters...)
-	// todo: wait for init to finish before moving on to provisioning instead of this
 
 	ui.Say("Creating container...")
 	for _, command := range commands {
@@ -42,7 +35,9 @@ func (s *stepLxdLaunch) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 	}
-	time.Sleep(2 * time.Second)
+	// TODO: Should we check `lxc info <container>` for "Running"?
+	// We have to do this so /tmp doens't get cleared and lose our provisioner scripts.
+	time.Sleep(1 * time.Second)
 
 	return multistep.ActionContinue
 }

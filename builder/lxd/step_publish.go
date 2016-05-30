@@ -18,21 +18,16 @@ func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
 
 	name := config.ContainerName
 
-	//outputPath := filepath.Join(config.OutputDir, "rootfs.tar.gz")
-
-	commands := make([][]string, 2)
-	commands[0] = []string{
-		"lxc", "stop", "--force", name,
-	}
-	commands[1] = []string{
-		"lxc", "publish", name,
+	commands := [][]string{
+		{"lxc", "stop", "--force", name},
+		{"lxc", "publish", name, "--alias", config.OutputImage},
 	}
 
 	ui.Say("Publishing container...")
 	for _, command := range commands {
 		err := s.SudoCommand(command...)
 		if err != nil {
-			err := fmt.Errorf("Error exporting container: %s", err)
+			err := fmt.Errorf("Error publishing container: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
