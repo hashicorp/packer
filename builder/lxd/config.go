@@ -13,15 +13,15 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	///ConfigFile          string   `mapstructure:"config_file"`
-	OutputDir           string   `mapstructure:"output_dir"`
-	ContainerName       string   `mapstructure:"container_name"`
-	CommandWrapper      string   `mapstructure:"command_wrapper"`
-	RawInitTimeout      string   `mapstructure:"init_timeout"`
-	Image               string   `mapstructure:"image"`
-	Remote              string   `mapstructure:"remote"`
+	OutputImage    string `mapstructure:"output_image"`
+	ContainerName  string `mapstructure:"container_name"`
+	CommandWrapper string `mapstructure:"command_wrapper"`
+	RawInitTimeout string `mapstructure:"init_timeout"`
+	Image          string `mapstructure:"image"`
+	Remote         string `mapstructure:"remote"`
 	//EnvVars             []string `mapstructure:"template_environment_vars"`
 	//TargetRunlevel      int      `mapstructure:"target_runlevel"`
-	InitTimeout         time.Duration
+	InitTimeout time.Duration
 
 	ctx interpolate.Context
 }
@@ -41,12 +41,12 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 
-	if c.OutputDir == "" {
-		c.OutputDir = fmt.Sprintf("output-%s", c.PackerBuildName)
-	}
-
 	if c.ContainerName == "" {
 		c.ContainerName = fmt.Sprintf("packer-%s", c.PackerBuildName)
+	}
+
+	if c.OutputImage == "" {
+		c.OutputImage = c.ContainerName
 	}
 
 	if c.CommandWrapper == "" {

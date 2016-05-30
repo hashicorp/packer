@@ -7,8 +7,6 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 	"log"
-	"os"
-	"path/filepath"
 	"runtime"
 )
 
@@ -45,10 +43,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps := []multistep.Step{
-		new(stepPrepareOutputDir),
 		new(stepLxdLaunch),
 		new(StepProvision),
-		new(stepExport),
+		new(stepPublish),
 	}
 
 	// Setup the state bag
@@ -85,23 +82,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	// Compile the artifact list
-	files := make([]string, 0, 5)
-	visit := func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			files = append(files, path)
-		}
-
-		return err
-	}
-
-	if err := filepath.Walk(b.config.OutputDir, visit); err != nil {
-		return nil, err
-	}
-
 	artifact := &Artifact{
-		dir: b.config.OutputDir,
-		f:   files,
+	//	dir: b.config.OutputDir,
+	//	f:   files,
 	}
 
 	return artifact, nil

@@ -7,13 +7,12 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
-type stepExport struct{}
+type stepPublish struct{}
 
-func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -21,21 +20,15 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 
 	//outputPath := filepath.Join(config.OutputDir, "rootfs.tar.gz")
 
-	commands := make([][]string, 3)
+	commands := make([][]string, 2)
 	commands[0] = []string{
-		"lxc", "stop", name,
+		"lxc", "stop", "--force", name,
 	}
 	commands[1] = []string{
-		"lxc", "export",
-	}
-	//commands[1] = []string{
-	//	"tar", "-C", containerDir, "--numeric-owner", "--anchored", "--exclude=./rootfs/dev/log", "-czf", outputPath, "./rootfs",
-	//}
-	commands[2] = []string{
-		"sh", "-c", "chown $USER:`id -gn` " + filepath.Join(config.OutputDir, "*"),
+		"lxc", "publish", name,
 	}
 
-	ui.Say("Exporting container...")
+	ui.Say("Publishing container...")
 	for _, command := range commands {
 		err := s.SudoCommand(command...)
 		if err != nil {
@@ -49,9 +42,9 @@ func (s *stepExport) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepExport) Cleanup(state multistep.StateBag) {}
+func (s *stepPublish) Cleanup(state multistep.StateBag) {}
 
-func (s *stepExport) SudoCommand(args ...string) error {
+func (s *stepPublish) SudoCommand(args ...string) error {
 	var stdout, stderr bytes.Buffer
 
 	log.Printf("Executing sudo command: %#v", args)

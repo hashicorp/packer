@@ -2,7 +2,6 @@ package lxd
 
 import (
 	"fmt"
-	"os"
 )
 
 type Artifact struct {
@@ -23,7 +22,7 @@ func (*Artifact) Id() string {
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("Container files in directory: %s", a.dir)
+	return fmt.Sprintf("Container: %s", a.dir)
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -31,5 +30,6 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	return os.RemoveAll(a.dir)
+	//return os.RemoveAll(a.dir)
+	return nil
 }

@@ -12,3 +12,9 @@ func TestCommunicator_ImplementsCommunicator(t *testing.T) {
 		t.Fatalf("Communicator should be a communicator")
 	}
 }
+
+// Acceptance tests
+// TODO Execute a command
+// TODO Upload a file
+// TODO Download a file
+// TODO Upload a Directory
