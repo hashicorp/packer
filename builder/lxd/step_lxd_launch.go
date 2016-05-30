@@ -8,6 +8,7 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type stepLxdLaunch struct{}
@@ -41,8 +42,7 @@ func (s *stepLxdLaunch) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 	}
-
-	//state.Put("mount_path", rootfs)
+	time.Sleep(2 * time.Second)
 
 	return multistep.ActionContinue
 }

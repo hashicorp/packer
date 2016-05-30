@@ -18,7 +18,6 @@ func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
 	// Create our communicator
 	comm := &Communicator{
 		ContainerName: config.ContainerName,
-		//RootFs:        mountPath,
 		CmdWrapper:    wrappedCommand,
 	}
 
