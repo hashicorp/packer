@@ -267,9 +267,10 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, outputFile *
 	// is truly complete (because the file will have data), what the
 	// exit status is (because Docker loses it because of the pty, not
 	// Docker's fault), and get the output (Docker bug).
-	remoteCmd := fmt.Sprintf("(%s); echo $? >%s",
+	remoteCmd := fmt.Sprintf("(%s); echo $? > %s/%s",
 		remote.Command,
-		filepath.Join(c.ContainerDir, filepath.Base(exitCodePath)))
+		c.ContainerDir,
+		filepath.Base(exitCodePath))
 
 	// Start the command
 	log.Printf("Executing in container %s: %#v", c.ContainerId, remoteCmd)
