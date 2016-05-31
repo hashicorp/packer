@@ -32,6 +32,28 @@ func TestBuilderPrepare_ConfigFile(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
+	// Good, remote image
+	config = testConfig()
+	config["image"] = "remote:bar"
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Good, remote output image
+	config = testConfig()
+	config["output_image"] = "remote:foo"
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
 	// Bad, missing image name
 	config = testConfig()
 	delete(config, "image")
