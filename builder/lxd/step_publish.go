@@ -7,47 +7,28 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"log"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
 type stepPublish struct{}
 
 func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
+	var stdout, stderr bytes.Buffer
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	name := config.ContainerName
 
-	commands := [][]string{
-		{"lxc", "stop", "--force", name},
-		{"lxc", "publish", name, "--alias", config.OutputImage},
+	args := []string{
+		"lxc", "publish", "--force", name, "--alias", config.OutputImage,
 	}
 
 	ui.Say("Publishing container...")
-	for _, command := range commands {
-		err := s.SudoCommand(command...)
-		if err != nil {
-			err := fmt.Errorf("Error publishing container: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	}
-
-	return multistep.ActionContinue
-}
-
-func (s *stepPublish) Cleanup(state multistep.StateBag) {}
-
-func (s *stepPublish) SudoCommand(args ...string) error {
-	var stdout, stderr bytes.Buffer
-
-	log.Printf("Executing sudo command: %#v", args)
 	cmd := exec.Command("sudo", args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
-
 	stdoutString := strings.TrimSpace(stdout.String())
 	stderrString := strings.TrimSpace(stderr.String())
 
@@ -58,5 +39,20 @@ func (s *stepPublish) SudoCommand(args ...string) error {
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
-	return err
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	r := regexp.MustCompile("([0-9a-fA-F]+)$")
+	fingerprint := r.FindAllStringSubmatch(stdoutString, -1)[0][0]
+
+	ui.Say(fmt.Sprintf("Created image: %s", fingerprint))
+
+	state.Put("imageFingerprint", fingerprint)
+
+	return multistep.ActionContinue
 }
+
+func (s *stepPublish) Cleanup(state multistep.StateBag) {}
