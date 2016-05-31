@@ -212,7 +212,8 @@ func compareVersions(versionFound string, versionWanted string, product string) 
 	return nil
 }
 
-// helper functions that read configuration information from a file
+/// helper functions that read configuration information from a file
+// read the network<->device configuration out of the specified path
 func readNetmapConfig(path string) (NetworkMap,error) {
 	fd,err := os.Open(path)
 	if err != nil { return nil, err }
@@ -220,11 +221,42 @@ func readNetmapConfig(path string) (NetworkMap,error) {
 	return ReadNetworkMap(fd)
 }
 
+// read the dhcp configuration out of the specified path
 func readDhcpConfig(path string) (DhcpConfiguration,error) {
 	fd,err := os.Open(path)
 	if err != nil { return nil, err }
 	defer fd.Close()
 	return ReadDhcpConfiguration(fd)
+}
+
+// read the VMX configuration from the specified path
+func readVMXConfig(path string) (map[string]string,error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return map[string]string{}, err
+	}
+	defer f.Close()
+
+	vmxBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return ParseVMX(string(vmxBytes)), nil
+}
+
+// read the connection type out of a vmx configuration
+func readCustomDeviceName(vmxData map[string]string) (string,error) {
+
+	connectionType, ok := vmxData["ethernet0.connectiontype"]
+	if !ok || connectionType != "custom" {
+		return "", fmt.Errorf("Unable to determine the device name for the connection type : %s", connectionType)
+	}
+
+	device, ok := vmxData["ethernet0.vnet"]
+	if !ok || device == "" {
+		return "", fmt.Errorf("Unable to determine the device name for the connection type \"%s\" : %s", connectionType, device)
+	}
+	return device, nil
 }
 
 // This VmwareDriver is a base class that contains default methods
@@ -244,17 +276,8 @@ func (d *VmwareDriver) GuestAddress(state multistep.StateBag) (string,error) {
 	vmxPath := state.Get("vmx_path").(string)
 
 	log.Println("Lookup up IP information...")
-	f, err := os.Open(vmxPath)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	vmxBytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		return "", err
-	}
-	vmxData := ParseVMX(string(vmxBytes))
+	vmxData, err := readVMXConfig(vmxPath)
+	if err != nil { return "", err }
 
 	var ok bool
 	macAddress := ""
@@ -283,7 +306,17 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string,error) {
 	// convert the stashed network to a device
 	network := state.Get("vmnetwork").(string)
 	device,err := netmap.NameIntoDevice(network)
-	if err != nil { return "", err }
+
+	// we were unable to find the device, maybe it's a custom one...
+	// so, check to see if it's in the .vmx configuration
+	if err != nil || network == "custom" {
+		vmxPath := state.Get("vmx_path").(string)
+		vmxData, err := readVMXConfig(vmxPath)
+		if err != nil { return "", err }
+
+		device, err = readCustomDeviceName(vmxData)
+		if err != nil { return "", err }
+	}
 
 	// figure out our MAC address for looking up the guest address
 	MACAddress,err := d.GuestAddress(state)
@@ -362,7 +395,17 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string,error) {
 	// convert network to name
 	network := state.Get("vmnetwork").(string)
 	device,err := netmap.NameIntoDevice(network)
-	if err != nil { return "", err }
+
+	// we were unable to find the device, maybe it's a custom one...
+	// so, check to see if it's in the .vmx configuration
+	if err != nil || network == "custom" {
+		vmxPath := state.Get("vmx_path").(string)
+		vmxData, err := readVMXConfig(vmxPath)
+		if err != nil { return "", err }
+
+		device, err = readCustomDeviceName(vmxData)
+		if err != nil { return "", err }
+	}
 
 	// parse dhcpd configuration
 	pathDhcpConfig := d.DhcpConfPath(device)
@@ -408,7 +451,17 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string,error) {
 	// convert network to name
 	network := state.Get("vmnetwork").(string)
 	device,err := netmap.NameIntoDevice(network)
-	if err != nil { return "", err }
+
+	// we were unable to find the device, maybe it's a custom one...
+	// so, check to see if it's in the .vmx configuration
+	if err != nil || network == "custom" {
+		vmxPath := state.Get("vmx_path").(string)
+		vmxData, err := readVMXConfig(vmxPath)
+		if err != nil { return "", err }
+
+		device, err = readCustomDeviceName(vmxData)
+		if err != nil { return "", err }
+	}
 
 	// parse dhcpd configuration
 	pathDhcpConfig := d.DhcpConfPath(device)
