@@ -83,8 +83,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-	//	dir: b.config.OutputDir,
-	//	f:   files,
+		id: state.Get("imageFingerprint").(string),
 	}
 
 	return artifact, nil
