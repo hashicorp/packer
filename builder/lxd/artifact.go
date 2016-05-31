@@ -5,8 +5,7 @@ import (
 )
 
 type Artifact struct {
-	dir string
-	f   []string
+	id string
 }
 
 func (*Artifact) BuilderId() string {
@@ -14,15 +13,15 @@ func (*Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Files() []string {
-	return a.f
+	return nil
 }
 
-func (*Artifact) Id() string {
-	return "Container"
+func (a *Artifact) Id() string {
+	return a.id
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("Container: %s", a.dir)
+	return fmt.Sprintf("image: %s", a.id)
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -31,5 +30,6 @@ func (a *Artifact) State(name string) interface{} {
 
 func (a *Artifact) Destroy() error {
 	//return os.RemoveAll(a.dir)
+	//TODO
 	return nil
 }
