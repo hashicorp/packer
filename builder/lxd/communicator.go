@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"github.com/mitchellh/packer/packer"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"syscall"
 )
 
@@ -139,32 +137,4 @@ func (c *Communicator) Execute(commandString string) (*exec.Cmd, error) {
 	log.Printf("Executing lxc exec: %s %#v", localCmd.Path, localCmd.Args)
 
 	return localCmd, nil
-}
-
-func (c *Communicator) CheckInit() (string, error) {
-	log.Printf("Debug runlevel exec")
-	localCmd, err := c.Execute("/sbin/runlevel")
-
-	if err != nil {
-		return "", err
-	}
-
-	pr, _ := localCmd.StdoutPipe()
-	if err = localCmd.Start(); err != nil {
-		return "", err
-	}
-
-	output, err := ioutil.ReadAll(pr)
-
-	if err != nil {
-		return "", err
-	}
-
-	err = localCmd.Wait()
-
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(string(output)), nil
 }
