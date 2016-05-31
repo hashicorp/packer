@@ -21,6 +21,8 @@ func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
 	name := config.ContainerName
 
 	args := []string{
+		// If we use `lxc stop <container>`, an ephemeral container would die forever.
+		// `lxc publish` has special logic to handle this case.
 		"lxc", "publish", "--force", name, "--alias", config.OutputImage,
 	}
 
