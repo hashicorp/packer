@@ -12,14 +12,11 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	///ConfigFile          string   `mapstructure:"config_file"`
-	OutputImage    string `mapstructure:"output_image"`
-	ContainerName  string `mapstructure:"container_name"`
-	CommandWrapper string `mapstructure:"command_wrapper"`
-	RawInitTimeout string `mapstructure:"init_timeout"`
-	Image          string `mapstructure:"image"`
-	//EnvVars             []string `mapstructure:"template_environment_vars"`
-	InitTimeout time.Duration
+	OutputImage         string `mapstructure:"output_image"`
+	ContainerName       string `mapstructure:"container_name"`
+	CommandWrapper      string `mapstructure:"command_wrapper"`
+	Image               string `mapstructure:"image"`
+	InitTimeout         time.Duration
 
 	ctx interpolate.Context
 }
@@ -51,17 +48,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.CommandWrapper = "{{.Command}}"
 	}
 
-	if c.RawInitTimeout == "" {
-		c.RawInitTimeout = "20s"
-	}
-
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("`image` is a required parameter for LXD."))
-	}
-
-	c.InitTimeout, err = time.ParseDuration(c.RawInitTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing init_timeout: %s", err))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("`image` is a required parameter for LXD. Please specify an image by alias or fingerprint. e.g. `ubuntu-daily:x`"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
