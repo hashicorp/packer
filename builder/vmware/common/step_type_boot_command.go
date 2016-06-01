@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -360,10 +361,15 @@ func vncSendString(c *vnc.ClientConn, original string) {
 		// Send the key events. We add a 100ms sleep after each key event
 		// to deal with network latency and the OS responding to the keystroke.
 		// It is kind of arbitrary but it is better than nothing.
+		keyInterval := 100 * time.Millisecond
+		if envInterval, err := time.ParseDuration(os.Getenv("PACKER_KEY_INTERVAL")); err == nil {
+			keyInterval = envInterval
+		}
+
 		c.KeyEvent(keyCode, true)
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(keyInterval)
 		c.KeyEvent(keyCode, false)
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(keyInterval)
 
 		if keyShift {
 			c.KeyEvent(KeyLeftShift, false)
