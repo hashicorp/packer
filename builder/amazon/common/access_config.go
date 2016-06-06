@@ -20,6 +20,7 @@ type AccessConfig struct {
 	AccessKey   string `mapstructure:"access_key"`
 	SecretKey   string `mapstructure:"secret_key"`
 	RawRegion   string `mapstructure:"region"`
+	SkipValidation bool `mapstructure:"skip_region_validation"`
 	Token       string `mapstructure:"token"`
 	ProfileName string `mapstructure:"profile"`
 }
@@ -65,8 +66,10 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 // the region from the instance metadata if possible.
 func (c *AccessConfig) Region() (string, error) {
 	if c.RawRegion != "" {
-		if valid := ValidateRegion(c.RawRegion); valid == false {
-			return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
+		if(c.SkipValidation == false) {
+			if valid := ValidateRegion(c.RawRegion); valid == false {
+				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
+			}
 		}
 		return c.RawRegion, nil
 	}
@@ -83,8 +86,10 @@ func (c *AccessConfig) Region() (string, error) {
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	if c.RawRegion != "" {
-		if valid := ValidateRegion(c.RawRegion); valid == false {
-			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
+		if(c.SkipValidation == false) {
+			if valid := ValidateRegion(c.RawRegion); valid == false {
+				errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
+			}
 		}
 	}
 
