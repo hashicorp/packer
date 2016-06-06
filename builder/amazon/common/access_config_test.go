@@ -37,5 +37,4 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 	}
 	c.SkipValidation = false
 
-
 }
