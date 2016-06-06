@@ -15,6 +15,7 @@ type AMIConfig struct {
 	AMIGroups             []string          `mapstructure:"ami_groups"`
 	AMIProductCodes       []string          `mapstructure:"ami_product_codes"`
 	AMIRegions            []string          `mapstructure:"ami_regions"`
+	AMISkipRegionValidation bool			`mapstructure:"skip_region_validation"`
 	AMITags               map[string]string `mapstructure:"tags"`
 	AMIEnhancedNetworking bool              `mapstructure:"enhanced_networking"`
 	AMIForceDeregister    bool              `mapstructure:"force_deregister"`
@@ -40,9 +41,11 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 			regionSet[region] = struct{}{}
 
 			// Verify the region is real
-			if valid := ValidateRegion(region); valid == false {
-				errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-				continue
+			if c.AMISkipRegionValidation == false {
+				if valid := ValidateRegion(region); valid == false {
+					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
+					continue
+				}
 			}
 
 			regions = append(regions, region)
