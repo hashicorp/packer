@@ -8,17 +8,17 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	AMIName               string            `mapstructure:"ami_name"`
-	AMIDescription        string            `mapstructure:"ami_description"`
-	AMIVirtType           string            `mapstructure:"ami_virtualization_type"`
-	AMIUsers              []string          `mapstructure:"ami_users"`
-	AMIGroups             []string          `mapstructure:"ami_groups"`
-	AMIProductCodes       []string          `mapstructure:"ami_product_codes"`
-	AMIRegions            []string          `mapstructure:"ami_regions"`
-	AMISkipRegionValidation bool			`mapstructure:"skip_region_validation"`
-	AMITags               map[string]string `mapstructure:"tags"`
-	AMIEnhancedNetworking bool              `mapstructure:"enhanced_networking"`
-	AMIForceDeregister    bool              `mapstructure:"force_deregister"`
+	AMIName                 string            `mapstructure:"ami_name"`
+	AMIDescription          string            `mapstructure:"ami_description"`
+	AMIVirtType             string            `mapstructure:"ami_virtualization_type"`
+	AMIUsers                []string          `mapstructure:"ami_users"`
+	AMIGroups               []string          `mapstructure:"ami_groups"`
+	AMIProductCodes         []string          `mapstructure:"ami_product_codes"`
+	AMIRegions              []string          `mapstructure:"ami_regions"`
+	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
+	AMITags                 map[string]string `mapstructure:"tags"`
+	AMIEnhancedNetworking   bool              `mapstructure:"enhanced_networking"`
+	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {

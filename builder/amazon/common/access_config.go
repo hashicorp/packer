@@ -17,12 +17,12 @@ import (
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	AccessKey   string `mapstructure:"access_key"`
-	SecretKey   string `mapstructure:"secret_key"`
-	RawRegion   string `mapstructure:"region"`
-	SkipValidation bool `mapstructure:"skip_region_validation"`
-	Token       string `mapstructure:"token"`
-	ProfileName string `mapstructure:"profile"`
+	AccessKey      string `mapstructure:"access_key"`
+	SecretKey      string `mapstructure:"secret_key"`
+	RawRegion      string `mapstructure:"region"`
+	SkipValidation bool   `mapstructure:"skip_region_validation"`
+	Token          string `mapstructure:"token"`
+	ProfileName    string `mapstructure:"profile"`
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
@@ -66,7 +66,7 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 // the region from the instance metadata if possible.
 func (c *AccessConfig) Region() (string, error) {
 	if c.RawRegion != "" {
-		if(c.SkipValidation == false) {
+		if c.SkipValidation == false {
 			if valid := ValidateRegion(c.RawRegion); valid == false {
 				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
 			}
@@ -86,7 +86,7 @@ func (c *AccessConfig) Region() (string, error) {
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	if c.RawRegion != "" {
-		if(c.SkipValidation == false) {
+		if c.SkipValidation == false {
 			if valid := ValidateRegion(c.RawRegion); valid == false {
 				errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 			}
