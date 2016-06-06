@@ -146,6 +146,9 @@ builder.
 -   `root_volume_size` (integer) - The size of the root volume for the chroot
     environment, and the resulting AMI
 
+-   `skip_region_validation` (boolean) - Set to true if you want to skip 
+    validation of the ami_regions configuration option.  Defaults to false.
+
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
 ## Basic Example
