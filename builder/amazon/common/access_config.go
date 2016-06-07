@@ -66,7 +66,7 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 // the region from the instance metadata if possible.
 func (c *AccessConfig) Region() (string, error) {
 	if c.RawRegion != "" {
-		if c.SkipValidation == false {
+		if !c.SkipValidation {
 			if valid := ValidateRegion(c.RawRegion); valid == false {
 				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
 			}
@@ -85,11 +85,9 @@ func (c *AccessConfig) Region() (string, error) {
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
-	if c.RawRegion != "" {
-		if c.SkipValidation == false {
-			if valid := ValidateRegion(c.RawRegion); valid == false {
-				errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
-			}
+	if c.RawRegion != "" && !c.SkipValidation {
+		if valid := ValidateRegion(c.RawRegion); valid == false {
+			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
 	}
 
