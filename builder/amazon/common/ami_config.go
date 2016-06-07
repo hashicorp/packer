@@ -40,8 +40,8 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 			// Mark that we saw the region
 			regionSet[region] = struct{}{}
 
-			// Verify the region is real
-			if c.AMISkipRegionValidation == false {
+			if !c.AMISkipRegionValidation {
+				// Verify the region is real
 				if valid := ValidateRegion(region); valid == false {
 					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
 					continue
