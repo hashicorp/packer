@@ -24,4 +24,17 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 	if err := c.Prepare(nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
+
+	c.RawRegion = "custom"
+	if err := c.Prepare(nil); err == nil {
+		t.Fatalf("should have err")
+	}
+
+	c.RawRegion = "custom"
+	c.SkipValidation = true
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
+	c.SkipValidation = false
+
 }
