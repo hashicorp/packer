@@ -31,7 +31,6 @@ func (s *StepSetCertificate) Run(state multistep.StateBag) multistep.StepAction 
 	var winRMCertificateUrl = state.Get(constants.ArmCertificateUrl).(string)
 	s.config.tmpWinRMCertificateUrl = winRMCertificateUrl
 
-	state.Put(constants.ArmTemplateParameters, s.config.toTemplateParameters())
 	return multistep.ActionContinue
 }
 

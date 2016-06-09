@@ -101,6 +101,47 @@ func TestConfigShouldDefaultImageVersionToLatest(t *testing.T) {
 	}
 }
 
+func TestConfigShouldNotDefaultImageVersionIfCustomImage(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	c, _, _ := newConfig(config, getPackerConfiguration())
+	if c.ImageVersion != "" {
+		t.Errorf("Expected 'ImageVersion' to empty, but got '%s'.", c.ImageVersion)
+	}
+}
+
+func TestConfigShouldRejectCustomImageAndMarketPlace(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+	packerConfiguration := getPackerConfiguration()
+	marketPlace := []string{"image_publisher", "image_offer", "image_sku"}
+
+	for _, x := range marketPlace {
+		config[x] = "ignore"
+		_, _, err := newConfig(config, packerConfiguration)
+		if err == nil {
+			t.Errorf("Expected Config to reject image_url and %s, but it did not", x)
+		}
+	}
+}
+
 func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
@@ -210,91 +251,6 @@ func TestSystemShouldDefineRuntimeValues(t *testing.T) {
 
 	if c.tmpOSDiskName == "" {
 		t.Errorf("Expected tmpOSDiskName to not be empty, but it was '%s'!", c.tmpOSDiskName)
-	}
-}
-
-func TestConfigShouldTransformToTemplateParameters(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	templateParameters := c.toTemplateParameters()
-
-	if templateParameters.AdminUsername.Value != c.UserName {
-		t.Errorf("Expected AdminUsername to be equal to config's AdminUsername, but they were '%s' and '%s' respectively.", templateParameters.AdminUsername.Value, c.UserName)
-	}
-
-	if templateParameters.DnsNameForPublicIP.Value != c.tmpComputeName {
-		t.Errorf("Expected DnsNameForPublicIP to be equal to config's DnsNameForPublicIP, but they were '%s' and '%s' respectively.", templateParameters.DnsNameForPublicIP.Value, c.tmpComputeName)
-	}
-
-	if templateParameters.ImageOffer.Value != c.ImageOffer {
-		t.Errorf("Expected ImageOffer to be equal to config's ImageOffer, but they were '%s' and '%s' respectively.", templateParameters.ImageOffer.Value, c.ImageOffer)
-	}
-
-	if templateParameters.ImagePublisher.Value != c.ImagePublisher {
-		t.Errorf("Expected ImagePublisher to be equal to config's ImagePublisher, but they were '%s' and '%s' respectively.", templateParameters.ImagePublisher.Value, c.ImagePublisher)
-	}
-
-	if templateParameters.ImageSku.Value != c.ImageSku {
-		t.Errorf("Expected ImageSku to be equal to config's ImageSku, but they were '%s' and '%s' respectively.", templateParameters.ImageSku.Value, c.ImageSku)
-	}
-
-	if templateParameters.OSDiskName.Value != c.tmpOSDiskName {
-		t.Errorf("Expected OSDiskName to be equal to config's OSDiskName, but they were '%s' and '%s' respectively.", templateParameters.OSDiskName.Value, c.tmpOSDiskName)
-	}
-
-	if templateParameters.StorageAccountBlobEndpoint.Value != c.storageAccountBlobEndpoint {
-		t.Errorf("Expected StorageAccountBlobEndpoint to be equal to config's storageAccountBlobEndpoint, but they were '%s' and '%s' respectively.", templateParameters.StorageAccountBlobEndpoint.Value, c.storageAccountBlobEndpoint)
-	}
-
-	if templateParameters.VMName.Value != c.tmpComputeName {
-		t.Errorf("Expected VMName to be equal to config's VMName, but they were '%s' and '%s' respectively.", templateParameters.VMName.Value, c.tmpComputeName)
-	}
-
-	if templateParameters.VMSize.Value != c.VMSize {
-		t.Errorf("Expected VMSize to be equal to config's VMSize, but they were '%s' and '%s' respectively.", templateParameters.VMSize.Value, c.VMSize)
-	}
-}
-
-func TestConfigShouldTransformToTemplateParametersLinux(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	c.OSType = constants.Target_Linux
-	templateParameters := c.toTemplateParameters()
-
-	if templateParameters.KeyVaultSecretValue != nil {
-		t.Errorf("Expected KeyVaultSecretValue to be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-
-	if templateParameters.ObjectId != nil {
-		t.Errorf("Expected ObjectId to be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-
-	if templateParameters.TenantId != nil {
-		t.Errorf("Expected TenantId to be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-}
-
-func TestConfigShouldTransformToTemplateParametersWindows(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	c.OSType = constants.Target_Windows
-	templateParameters := c.toTemplateParameters()
-
-	if templateParameters.SshAuthorizedKey != nil {
-		t.Errorf("Expected SshAuthorizedKey to be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-
-	if templateParameters.KeyVaultName == nil {
-		t.Errorf("Expected KeyVaultName to not be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-
-	if templateParameters.KeyVaultSecretValue == nil {
-		t.Errorf("Expected KeyVaultSecretValue to not be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-
-	if templateParameters.ObjectId == nil {
-		t.Errorf("Expected ObjectId to not be empty for an os_type == '%s', but it was not.", c.OSType)
-	}
-
-	if templateParameters.TenantId == nil {
-		t.Errorf("Expected TenantId to not be empty for an os_type == '%s', but it was not.", c.OSType)
 	}
 }
 
@@ -514,6 +470,20 @@ func getArmBuilderConfiguration() map[string]string {
 
 	m["communicator"] = "none"
 	m["os_type"] = constants.Target_Linux
+	return m
+}
+
+func getArmBuilderConfigurationWithWindows() map[string]string {
+	m := make(map[string]string)
+	for _, v := range requiredConfigValues {
+		m[v] = fmt.Sprintf("ignored00")
+	}
+
+	m["object_id"] = "ignored00"
+	m["tenant_id"] = "ignored00"
+	m["winrm_username"] = "ignored00"
+	m["communicator"] = "winrm"
+	m["os_type"] = constants.Target_Windows
 	return m
 }
 

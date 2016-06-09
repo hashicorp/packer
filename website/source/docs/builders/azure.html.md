@@ -63,8 +63,14 @@ builder.
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
--   `image_version` (string) Specify a specific version of an OS to boot from.
-    Defaults to `latest`.
+-   `image_version` (string) Specify a specific version of an OS to boot from. Defaults to `latest`.  There may be a
+     difference in versions available across regions due to image synchronization latency.  To ensure a consistent
+     version across regions set this value to one that is available in all regions where you are deploying.
+
+    CLI example `azure vm image list -l westus -p Canonical -o UbuntuServer -k 16.04.0-LTS`
+
+-   `image_url` (string) Specify a custom VHD to use.  If this value is set, do not set image_publisher, image_offer,
+     image_sku, or image_version.
 
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime.  This variable is required when creating images based on
