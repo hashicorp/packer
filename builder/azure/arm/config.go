@@ -65,6 +65,7 @@ type Config struct {
 	ImageOffer     string `mapstructure:"image_offer"`
 	ImageSku       string `mapstructure:"image_sku"`
 	ImageVersion   string `mapstructure:"image_version"`
+	ImageUrl       string `mapstructure:"image_url"`
 	Location       string `mapstructure:"location"`
 	VMSize         string `mapstructure:"vm_size"`
 
@@ -107,38 +108,6 @@ type keyVaultCertificate struct {
 	Data     string `json:"data"`
 	DataType string `json:"dataType"`
 	Password string `json:"password,omitempty"`
-}
-
-// If we ever feel the need to support more templates consider moving this
-// method to its own factory class.
-func (c *Config) toTemplateParameters() *TemplateParameters {
-	templateParameters := &TemplateParameters{
-		AdminUsername:              &TemplateParameter{c.UserName},
-		AdminPassword:              &TemplateParameter{c.Password},
-		DnsNameForPublicIP:         &TemplateParameter{c.tmpComputeName},
-		ImageOffer:                 &TemplateParameter{c.ImageOffer},
-		ImagePublisher:             &TemplateParameter{c.ImagePublisher},
-		ImageSku:                   &TemplateParameter{c.ImageSku},
-		ImageVersion:               &TemplateParameter{c.ImageVersion},
-		OSDiskName:                 &TemplateParameter{c.tmpOSDiskName},
-		StorageAccountBlobEndpoint: &TemplateParameter{c.storageAccountBlobEndpoint},
-		VMSize: &TemplateParameter{c.VMSize},
-		VMName: &TemplateParameter{c.tmpComputeName},
-	}
-
-	switch c.OSType {
-	case constants.Target_Linux:
-		templateParameters.SshAuthorizedKey = &TemplateParameter{c.sshAuthorizedKey}
-	case constants.Target_Windows:
-		templateParameters.TenantId = &TemplateParameter{c.TenantID}
-		templateParameters.ObjectId = &TemplateParameter{c.ObjectID}
-
-		templateParameters.KeyVaultName = &TemplateParameter{c.tmpKeyVaultName}
-		templateParameters.KeyVaultSecretValue = &TemplateParameter{c.winrmCertificate}
-		templateParameters.WinRMCertificateUrl = &TemplateParameter{c.tmpWinRMCertificateUrl}
-	}
-
-	return templateParameters
 }
 
 func (c *Config) toVirtualMachineCaptureParameters() *compute.VirtualMachineCaptureParameters {
@@ -231,7 +200,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// NOTE: if the user did not specify a communicator, then default to both
 	// SSH and WinRM.  This is for backwards compatibility because the code did
-	// not specifically force the user to specify a value.
+	// not specifically force the user to set a communicator.
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "ssh") {
 		err = setSshValues(&c)
 		if err != nil {
@@ -350,7 +319,7 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
-	if c.ImageVersion == "" {
+	if c.ImageUrl == "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
 
@@ -434,16 +403,22 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Compute
-	if c.ImagePublisher == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A image_publisher must be specified"))
-	}
+	if c.ImageUrl == "" {
+		if c.ImagePublisher == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
+		}
 
-	if c.ImageOffer == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A image_offer must be specified"))
-	}
+		if c.ImageOffer == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_offer must be specified"))
+		}
 
-	if c.ImageSku == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A image_sku must be specified"))
+		if c.ImageSku == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified"))
+		}
+	} else {
+		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" || c.ImageVersion != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_url must not be specified if image_publisher, image_offer, image_sku, or image_version is specified"))
+		}
 	}
 
 	if c.Location == "" {
