@@ -455,6 +455,9 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	if c.StorageAccount == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A storage_account must be specified"))
 	}
+	if c.ResourceGroupName == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group_name must be specified"))
+	}
 
 	/////////////////////////////////////////////
 	// OS
