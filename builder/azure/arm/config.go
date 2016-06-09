@@ -65,6 +65,8 @@ type Config struct {
 	ImageOffer     string `mapstructure:"image_offer"`
 	ImageSku       string `mapstructure:"image_sku"`
 	ImageVersion   string `mapstructure:"image_version"`
+	ImageUri	     string `mapstructure:"image_uri"`
+
 	Location       string `mapstructure:"location"`
 	VMSize         string `mapstructure:"vm_size"`
 
@@ -124,6 +126,7 @@ func (c *Config) toTemplateParameters() *TemplateParameters {
 		StorageAccountBlobEndpoint: &TemplateParameter{c.storageAccountBlobEndpoint},
 		VMSize: &TemplateParameter{c.VMSize},
 		VMName: &TemplateParameter{c.tmpComputeName},
+		ImageUri: &TemplateParameter{c.ImageUri},
 	}
 
 	switch c.OSType {
@@ -132,7 +135,6 @@ func (c *Config) toTemplateParameters() *TemplateParameters {
 	case constants.Target_Windows:
 		templateParameters.TenantId = &TemplateParameter{c.TenantID}
 		templateParameters.ObjectId = &TemplateParameter{c.ObjectID}
-
 		templateParameters.KeyVaultName = &TemplateParameter{c.tmpKeyVaultName}
 		templateParameters.KeyVaultSecretValue = &TemplateParameter{c.winrmCertificate}
 		templateParameters.WinRMCertificateUrl = &TemplateParameter{c.tmpWinRMCertificateUrl}
@@ -350,7 +352,8 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
-	if c.ImageVersion == "" {
+	// only provide default value if not using vhd source.
+	if c.ImageVersion == "" && c.ImageUri == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
 
@@ -434,16 +437,20 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Compute
-	if c.ImagePublisher == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A image_publisher must be specified"))
+	if c.ImageUri != "" && (c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("image_publisher, image_offer and image_sku must not be specified when an image_uri is specified"))
 	}
 
-	if c.ImageOffer == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A image_offer must be specified"))
+	if c.ImagePublisher == "" && c.ImageUri == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified when an image_uri is not present"))
 	}
 
-	if c.ImageSku == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A image_sku must be specified"))
+	if c.ImageOffer == "" && c.ImageUri == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_offer must be specified when an image_uri is not present"))
+	}
+
+	if c.ImageSku == "" && c.ImageUri == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified when an image_uri is not present"))
 	}
 
 	if c.Location == "" {

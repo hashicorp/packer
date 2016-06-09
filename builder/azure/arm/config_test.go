@@ -29,6 +29,19 @@ var requiredConfigValues = []string{
 	"tenant_id",
 }
 
+var requiredConfigValuesVhd = []string{
+	"capture_name_prefix",
+	"capture_container_name",
+	"client_id",
+	"client_secret",
+	"image_uri",
+	"location",
+	"os_type",
+	"storage_account",
+	"subscription_id",
+	"tenant_id",
+}
+
 func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	c, _, err := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
@@ -47,6 +60,117 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 
 	if c.ObjectID != "" {
 		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
+	}
+}
+
+func TestConfigForCustomVhdSource(t *testing.T) {
+	c, _, err := newConfig(getArmBuilderVhdConfiguration(), getPackerConfiguration())
+
+	if err != nil {
+		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
+		t.Fatalf(" errors: %s\n", err)
+	}
+
+	if c.ImageUri == "" {
+		t.Errorf("Expected 'ImageUri' to be populated, but it was empty!")
+	}
+}
+
+func TestErrorWhenWindowsImageUriAndMarketplaceDetailsPresent(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"image_uri":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"client_id":        	  "ignore",
+		"tenant_id":        	  "ignore",
+		"client_secret":          "ignore",
+		"os_type":                constants.Target_Windows,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatalf("failed to error for both image sources provided: %s", err)
+	}
+}
+
+func TestErrorWhenImageUriAndImageOfferPresent(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_uri":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatalf("failed to error for both image sources provided: %s", err)
+	}
+}
+
+func TestErrorWhenImageUriAndImagePublisherPresent(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_publisher":        "ignore",
+		"image_uri":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatalf("failed to error for both image sources provided: %s", err)
+	}
+}
+
+func TestErrorWhenImageUriAndImageSkuPresent(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_sku":              "ignore",
+		"image_uri":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatalf("failed to error for both image sources provided: %s", err)
+	}
+}
+
+func TestErrorWhenNoImageSourcePresent(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatalf("failed to error when no image sources are specified: %s", err)
+	}
+	
+	multiError, _ := err.(*packer.MultiError)
+	if len(multiError.Errors) != 3 {
+		t.Errorf("Expected to find 3 errors, but found %d errors", len(multiError.Errors))
 	}
 }
 
@@ -500,6 +624,17 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
+		m[v] = fmt.Sprintf("ignored00")
+	}
+
+	m["communicator"] = "none"
+	m["os_type"] = constants.Target_Linux
+	return m
+}
+
+func getArmBuilderVhdConfiguration() map[string]string {
+	m := make(map[string]string)
+	for _, v := range requiredConfigValuesVhd {
 		m[v] = fmt.Sprintf("ignored00")
 	}
 
