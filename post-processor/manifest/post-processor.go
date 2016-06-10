@@ -73,14 +73,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	// Read the current manifest file from disk
 	contents := []byte{}
 	if contents, err = ioutil.ReadFile(p.config.Filename); err != nil && !os.IsNotExist(err) {
-		return nil, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.Filename, err)
+		return source, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.Filename, err)
 	}
 
 	// Parse the manifest file JSON, if we have some
 	manifestFile := &ManifestFile{}
 	if len(contents) > 0 {
 		if err = json.Unmarshal(contents, manifestFile); err != nil {
-			return nil, true, fmt.Errorf("Unable to parse content from %s: %s", p.config.Filename, err)
+			return source, true, fmt.Errorf("Unable to parse content from %s: %s", p.config.Filename, err)
 		}
 	}
 
@@ -88,13 +88,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	manifestFile.Builds = append(manifestFile.Builds, *artifact)
 
 	// Write JSON to disk
-	if out, err := json.Marshal(manifestFile); err == nil {
+	if out, err := json.MarshalIndent(manifestFile, "", "  "); err == nil {
 		if err := ioutil.WriteFile(p.config.Filename, out, 0664); err != nil {
-			return nil, true, fmt.Errorf("Unable to write %s: %s", p.config.Filename, err)
+			return source, true, fmt.Errorf("Unable to write %s: %s", p.config.Filename, err)
 		}
 	} else {
-		return nil, true, fmt.Errorf("Unable to marshal JSON %s", err)
+		return source, true, fmt.Errorf("Unable to marshal JSON %s", err)
 	}
 
-	return artifact, true, err
+	return source, true, err
 }
