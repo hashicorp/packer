@@ -7,9 +7,7 @@ const BuilderId = "packer.post-processor.manifest"
 type Artifact struct {
 	BuildName     string   `json:"name"`
 	BuilderType   string   `json:"builder_type"`
-	InputType     string   `json:"input_type"`
 	BuildTime     int64    `json:"build_time"`
-	Description   string   `json:"description"`
 	ArtifactFiles []string `json:"files"`
 	ArtifactId    string   `json:"artifact_id"`
 }
