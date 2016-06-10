@@ -40,6 +40,7 @@ BUG FIXES:
   * provisioner/ansible: Properly set host key checking even when a custom ENV
     is specified [GH-3568]
   * builder/azure: check for empty resource group [GH-3606]
+  * builder/azure: fix token validity test [GH-3609]
 
 ## 0.10.1 (May 7, 2016)
 
