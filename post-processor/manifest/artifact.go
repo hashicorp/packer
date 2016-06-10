@@ -10,6 +10,7 @@ type Artifact struct {
 	BuildTime     int64    `json:"build_time"`
 	ArtifactFiles []string `json:"files"`
 	ArtifactId    string   `json:"artifact_id"`
+	PackerRunUUID string   `json:"packer_run_uuid"`
 }
 
 func (a *Artifact) BuilderId() string {
