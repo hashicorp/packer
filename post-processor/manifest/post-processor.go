@@ -13,12 +13,6 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-// The artifact-override post-processor allows you to specify arbitrary files as
-// artifacts. These will override any other artifacts created by the builder.
-// This allows you to use a builder and provisioner to create some file, such as
-// a compiled binary or tarball, extract it from the builder (VM or container)
-// and then save that binary or tarball and throw away the builder.
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -58,18 +52,24 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	artifact := &Artifact{}
 
 	// Create the current artifact.
-	artifact.BuildFiles = source.Files()
-	artifact.BuildId = source.Id()
-	artifact.BuildName = source.BuilderId()
+	artifact.ArtifactFiles = source.Files()
+	artifact.ArtifactId = source.Id()
+	artifact.InputType = source.BuilderId()
+	artifact.BuilderType = p.config.PackerBuilderType
+	artifact.BuildName = p.config.PackerBuildName
 	artifact.BuildTime = time.Now().Unix()
 	artifact.Description = source.String()
 
 	// Create a lock file with exclusive access. If this fails we will retry
 	// after a delay
+	// TODO add retry
 	lockFilename := p.config.Filename + ".lock"
 	_, err := os.OpenFile(lockFilename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
 	defer os.Remove(lockFilename)
 
+	// TODO fix error on first run:
+	// * Post-processor failed: open packer-manifest.json: no such file or directory
+	//
 	// Read the current manifest file from disk
 	contents := []byte{}
 	if contents, err = ioutil.ReadFile(p.config.Filename); err != nil && !os.IsNotExist(err) {
