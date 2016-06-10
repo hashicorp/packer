@@ -1,6 +1,7 @@
 {
 	"ImportPath": "github.com/mitchellh/packer",
 	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
 	"Deps": [
 		{
 			"ImportPath": "github.com/ActiveState/tail",
@@ -203,6 +204,10 @@
 		{
 			"ImportPath": "github.com/bgentry/speakeasy",
 			"Rev": "36e9cfdd690967f4f690c6edcc9ffacd006014a0"
+		},
+		{
+			"ImportPath": "github.com/biogo/hts/bgzf",
+			"Rev": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
 		},
 		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",
@@ -565,15 +570,15 @@
 		},
 		{
 			"ImportPath": "google.golang.org/api/gensupport",
-			"Rev": "ddff2aff599105a55549cf173852507dfa094b7f"
+			"Rev": "ff0a1ff302946b997eb1832381419d1f95143483"
 		},
 		{
 			"ImportPath": "google.golang.org/api/googleapi",
-			"Rev": "ddff2aff599105a55549cf173852507dfa094b7f"
+			"Rev": "ff0a1ff302946b997eb1832381419d1f95143483"
 		},
 		{
 			"ImportPath": "google.golang.org/api/googleapi/internal/uritemplates",
-			"Rev": "ddff2aff599105a55549cf173852507dfa094b7f"
+			"Rev": "ff0a1ff302946b997eb1832381419d1f95143483"
 		},
 		{
 			"ImportPath": "google.golang.org/appengine",
