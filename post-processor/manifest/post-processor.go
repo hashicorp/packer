@@ -54,11 +54,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	// Create the current artifact.
 	artifact.ArtifactFiles = source.Files()
 	artifact.ArtifactId = source.Id()
-	artifact.InputType = source.BuilderId()
 	artifact.BuilderType = p.config.PackerBuilderType
 	artifact.BuildName = p.config.PackerBuildName
 	artifact.BuildTime = time.Now().Unix()
-	artifact.Description = source.String()
 
 	// Create a lock file with exclusive access. If this fails we will retry
 	// after a delay
