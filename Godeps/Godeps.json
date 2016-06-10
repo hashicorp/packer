@@ -39,23 +39,23 @@
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest",
-			"Comment": "v7.0.5",
-			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
+			"Comment": "v7.0.6",
+			"Rev": "451ba0760a7fd73d7175e2d3d1c3911020619561"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/azure",
-			"Comment": "v7.0.5",
-			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
+			"Comment": "v7.0.6",
+			"Rev": "451ba0760a7fd73d7175e2d3d1c3911020619561"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/date",
-			"Comment": "v7.0.5",
-			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
+			"Comment": "v7.0.6",
+			"Rev": "451ba0760a7fd73d7175e2d3d1c3911020619561"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-autorest/autorest/to",
-			"Comment": "v7.0.5",
-			"Rev": "4bdf29b663ebad9598d2c391b73a4b46bdedbf42"
+			"Comment": "v7.0.6",
+			"Rev": "451ba0760a7fd73d7175e2d3d1c3911020619561"
 		},
 		{
 			"ImportPath": "github.com/Azure/go-ntlmssp",
