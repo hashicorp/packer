@@ -197,8 +197,7 @@ func mkTokenCallback(path string) azure.TokenRefreshCallback {
 // expired). This check is essentially to make sure refresh_token is good.
 func validateToken(env azure.Environment, token *azure.ServicePrincipalToken) error {
 	c := subscriptionsClient(env.ResourceManagerEndpoint)
-	// WTF(chrboum)
-	//c.Authorizer = token
+	c.Authorizer = token
 	_, err := c.List()
 	if err != nil {
 		return fmt.Errorf("Token validity check failed: %v", err)
