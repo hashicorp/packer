@@ -16,6 +16,9 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
+	
+	// The command used to execute Puppet.
+	ExecuteCommand string `mapstructure:"execute_command"`
 
 	// Additional facts to set when executing Puppet
 	Facter map[string]string
@@ -65,13 +68,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{
+				"execute_command",
+			},
 		},
 	}, raws...)
 	if err != nil {
 		return err
 	}
-
+	
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = p.commandTemplate()
+	}
+	
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = "/tmp/packer-puppet-server"
 	}
@@ -153,7 +162,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		Options:              p.config.Options,
 		Sudo:                 !p.config.PreventSudo,
 	}
-	command, err := interpolate.Render(p.commandTemplate(), &p.config.ctx)
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
