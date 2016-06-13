@@ -74,3 +74,18 @@ listed below:
     must have proper permissions so that the SSH user that Packer uses is able
     to create directories and write into this folder. If the permissions are not
     correct, use a shell provisioner prior to this to configure it properly.
+
+-   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
+    various [configuration template
+    variables](/docs/templates/configuration-templates.html) available. See
+    below for more information. By default, Packer uses the following command:
+
+    ``` {{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
+		"puppet agent --onetime --no-daemonize " +
+		"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
+		"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
+		"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
+		"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
+		"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
+		"--detailed-exitcodes
+```
