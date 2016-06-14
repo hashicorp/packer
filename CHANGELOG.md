@@ -32,7 +32,7 @@ IMPROVEMENTS:
   * builder/vmware: Now paused between `boot_command` entries when running with
     `-debug` [GH-3542]
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
-  * builder/qemu: Now pauses between `boot_command` entries running with
+  * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
   * provisioner/chef: Added `knife_command` option and added a correct default
     value for Windows [GH-3622]
