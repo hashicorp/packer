@@ -14,8 +14,10 @@ IMPROVEMENTS:
 
   * builder/amazon: Added `disable_stop_instance` option to prevent automatic
     shutdown when the build is complete [GH-3352]
-  * builder/amazon: Added `skip_region_validation` option to allow newer or custom AWS regions [GH-3598]
-  * builder/amazon: Added `shutdown_behavior` option to support `stop` or `terminate` at the end of the build [GH-3556]
+  * builder/amazon: Added `skip_region_validation` option to allow newer or
+    custom AWS regions [GH-3598]
+  * builder/amazon: Added `shutdown_behavior` option to support `stop` or
+    `terminate` at the end of the build [GH-3556]
   * builder/azure: Now pre-validates `capture_container_name` and
     `capture_name_prefix` [GH-3537]
   * builder/azure: Support for custom images [GH-3575]
@@ -32,6 +34,8 @@ IMPROVEMENTS:
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
   * builder/qemu: Now pauses between `boot_command` entries running with
     `-debug` [GH-3547]
+  * provisioner/chef: Added `knife_command` option and added a correct default
+    value for Windows [GH-3622]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
 
