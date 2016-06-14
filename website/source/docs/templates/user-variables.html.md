@@ -172,7 +172,7 @@ provisioner only run if the `do_nexpose_scan` variable is non-empty.
 In order to use `$HOME` variable, you can create a `home` variable in packer:
 
 ``` {.javascript}
-"variables" {
+"variables": {
   "home": "{{env `HOME`}}"
 }
 ```
