@@ -31,6 +31,7 @@ IMPROVEMENTS:
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
   * builder/qemu: Now pauses between `boot_command` entries running with
     `-debug` [GH-3547]
+  * provisioner/puppet: Added `execute_command` option [GH-3614]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
 
 BUG FIXES:
