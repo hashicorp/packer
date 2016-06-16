@@ -2,7 +2,6 @@ package dockerpush
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
@@ -81,17 +80,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}()
 	}
 
-	// Get the name. We strip off any tags from the name because the
-	// push doesn't use those.
+	// Get the name.
 	name := artifact.Id()
-
-	if i := strings.Index(name, "/"); i >= 0 {
-		// This should always be true because the / is required. But we have
-		// to get the index to this so we don't accidentally strip off the port
-		if j := strings.Index(name[i:], ":"); j >= 0 {
-			name = name[:i+j]
-		}
-	}
 
 	ui.Message("Pushing: " + name)
 	if err := driver.Push(name); err != nil {
