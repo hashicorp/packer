@@ -38,6 +38,7 @@ IMPROVEMENTS:
     value for Windows [GH-3622]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
+  * post-processor/docker: Preserve tags when running docker push [GH-3631]
 
 BUG FIXES:
 
