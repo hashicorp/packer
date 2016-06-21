@@ -41,29 +41,7 @@ func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deployment
 	}
 
 	_, err = s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment, cancelCh)
-	if err != nil {
-		return err
-	}
-
-	poller := NewDeploymentPoller(func() (string, error) {
-		r, e := s.client.DeploymentsClient.Get(resourceGroupName, deploymentName)
-		if r.Properties != nil && r.Properties.ProvisioningState != nil {
-			return *r.Properties.ProvisioningState, e
-		}
-
-		return "UNKNOWN", e
-	})
-
-	pollStatus, err := poller.PollAsNeeded()
-	if err != nil {
-		return err
-	}
-
-	if pollStatus != DeploySucceeded {
-		return fmt.Errorf("Deployment failed with a status of '%s'.", pollStatus)
-	}
-
-	return nil
+	return err
 }
 
 func (s *StepDeployTemplate) Run(state multistep.StateBag) multistep.StepAction {
