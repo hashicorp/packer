@@ -52,7 +52,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	ui.Say("Preparing builder ...")
+	ui.Say("Running builder ...")
+
+	if err := newConfigRetriever().FillParameters(b.config); err != nil {
+		return nil, err
+	}
 
 	log.Print(":: Configuration")
 	packerAzureCommon.DumpConfig(b.config, func(s string) { log.Print(s) })
@@ -224,7 +228,7 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePri
 	var err error
 
 	if b.config.useDeviceLogin {
-		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.SubscriptionID, say)
+		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.SubscriptionID, b.config.TenantID, say)
 		if err != nil {
 			return nil, nil, err
 		}

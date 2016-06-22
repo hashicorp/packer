@@ -5,7 +5,6 @@
     "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
     "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
     "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
-    "tenant_id": "{{env `ARM_TENANT_ID`}}",
     "object_id": "{{env `ARM_OBJECT_ID`}}"
   },
   "builders": [{
@@ -17,7 +16,6 @@
     "storage_account": "{{user `storage_account`}}",
     "subscription_id": "{{user `subscription_id`}}",
     "object_id": "{{user `object_id`}}",
-    "tenant_id": "{{user `tenant_id`}}",
 
 
             "capture_container_name": "images",
