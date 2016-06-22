@@ -362,10 +362,6 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_secret must be specified"))
 		}
 
-		if c.TenantID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A tenant_id must be specified"))
-		}
-
 		if c.SubscriptionID == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
 		}
