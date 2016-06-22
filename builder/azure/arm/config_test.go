@@ -27,7 +27,6 @@ var requiredConfigValues = []string{
 	"storage_account",
 	"resource_group_name",
 	"subscription_id",
-	"tenant_id",
 }
 
 func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
@@ -350,8 +349,8 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 	}
 
 	multiError, _ := err.(*packer.MultiError)
-	if len(multiError.Errors) != 3 {
-		t.Errorf("Expected to find 3 errors, but found %d errors", len(multiError.Errors))
+	if len(multiError.Errors) != 2 {
+		t.Errorf("Expected to find 2 errors, but found %d errors", len(multiError.Errors))
 	}
 
 	if !strings.Contains(err.Error(), "client_id must be specified") {
@@ -359,9 +358,6 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "client_secret must be specified") {
 		t.Errorf("Expected to find error for 'client_secret must be specified")
-	}
-	if !strings.Contains(err.Error(), "tenant_id must be specified") {
-		t.Errorf("Expected to find error for 'tenant_id must be specified")
 	}
 }
 
