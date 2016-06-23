@@ -174,7 +174,6 @@ showConfigs() {
 	echo "      \"resource_group_name\": \"$azure_group_name\","
 	echo "      \"storage_account\": \"$azure_storage_name\","
 	echo "      \"subscription_id\": \"$azure_subscription_id\","
-	echo "      \"tenant_id\": \"$azure_tenant_id\","
 	echo ""
 }
 
