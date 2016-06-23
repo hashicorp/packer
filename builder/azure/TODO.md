@@ -7,7 +7,7 @@ Here's a list of things we like to get done in no particular order:
 - [ ] support cross-storage account image source (ie. pre-build blob copy)
 - [ ] look up object id when using device code (graph api /me ?)
 - [ ] device flow support for Windows
-- [ ] look up tenant id in all cases (see device flow code)
+- [x] look up tenant id in all cases (see device flow code)
 - [ ] look up resource group of storage account
 - [ ] include all _data_ disks in artifact too
 - [ ] windows sysprep provisioner (since it seems to generate a certain issue volume)

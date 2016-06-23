@@ -9,7 +9,6 @@ page_title: Authorizing Packer Builds in Azure
 
 In order to build VMs in Azure Packer needs 6 configuration options to be specified:
 
-- `tenant_id` - UUID identifying your Azure account (where you login)
 - `subscription_id` - UUID identifying your Azure subscription (where billing is handled)
 - `client_id` - UUID identifying the Active Directory service principal that will run your Packer builds
 - `client_secret` - service principal secret / password
@@ -35,7 +34,7 @@ There are three pieces of information you must provide to enable device login mo
  1. Resource Group - parent resource group that Packer uses to build an image.
  1. Storage Account - storage account where the image will be placed.
 
-> Device login mode is enabled by not setting client_id, client_secret, and tenant_id.
+> Device login mode is enabled by not setting client_id and client_secret.
 
 The device login flow asks that you open a web browser, navigate to http://aka.ms/devicelogin, and input the supplied
 code. This authorizes the Packer for Azure application to act on your behalf. An OAuth token will be created, and stored
@@ -71,16 +70,15 @@ Get your account information
 
     azure account list --json | jq .[].name
     azure account set ACCOUNTNAME
-    azure account show --json | jq ".[] | .tenantId, .id"
+    azure account show --json | jq ".[] | .id"
 
--> Throughout this document when you see a command pipe to `jq` you may instead omit `--json` and everything after it, but the output will be more verbose. For example you can simply run `azure account list` instead._
+-> Throughout this document when you see a command pipe to `jq` you may instead omit `--json` and everything after it, but the output will be more verbose. For example you can simply run `azure account list` instead.
 
-This will print out two lines that look like this:
+This will print out one line that look like this:
 
     "4f562e88-8caf-421a-b4da-e3f6786c52ec"
-    "b68319b-2180-4c3e-ac1f-d44f5af2c6907"
 
-The first one is your `tenant_id`. The second is your `subscription_id`. Note these for later.
+This is your `subscription_id`. Note it for later.
 
 ### Create a Resource Group
 
@@ -138,9 +136,9 @@ There are a lot of pre-defined roles and you can define your own with more granu
 
 Now (finally) everything has been setup in Azure. Let's get our configuration keys together:
 
-Get `tenant_id` and `subscription_id`:
+Get `subscription_id`:
 
-    azure account show --json | jq ".[] | .tenantId, .id"
+    azure account show --json | jq ".[] | .id"
 
 Get `client_id`
 
