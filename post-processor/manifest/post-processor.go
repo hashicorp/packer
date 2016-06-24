@@ -61,19 +61,26 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	artifact.BuilderType = p.config.PackerBuilderType
 	artifact.BuildName = p.config.PackerBuildName
 	artifact.BuildTime = time.Now().Unix()
+	// Since each post-processor runs in a different process we need a way to
+	// coordinate between various post-processors in a single packer run. We do
+	// this by setting a UUID per run and tracking this in the manifest file.
+	// When we detect that the UUID in the file is the same, we know that we are
+	// part of the same run and we simply add our data to the list. If the UUID
+	// is different we will check the -force flag and decide whether to truncate
+	// the file before we proceed.
 	artifact.PackerRunUUID = os.Getenv("PACKER_RUN_UUID")
 
 	// Create a lock file with exclusive access. If this fails we will retry
 	// after a delay.
 	lockFilename := p.config.Filename + ".lock"
 	for i := 0; i < 3; i++ {
+		// The file should not be locked for very long so we'll keep this short.
+		time.Sleep((time.Duration(i) * 200 * time.Millisecond))
 		_, err = os.OpenFile(lockFilename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
 		if err == nil {
 			break
 		}
 		log.Printf("Error locking manifest file for reading and writing. Will sleep and retry. %s", err)
-		// The file should not be locked for very long so we'll keep this short.
-		time.Sleep((time.Duration(i+1) * 200 * time.Millisecond))
 	}
 	defer os.Remove(lockFilename)
 
