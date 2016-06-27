@@ -148,7 +148,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			BlockDeviceMappings:               s.BlockDevices.BuildLaunchDevices(),
 			Placement:                         &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
 			EbsOptimized:                      &s.EbsOptimized,
-			InstanceInitiatedShutdownBehavior: &s.InstanceInitiatedShutdownBehavior,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
@@ -164,6 +163,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		} else {
 			runOpts.SubnetId = &s.SubnetId
 			runOpts.SecurityGroupIds = securityGroupIds
+		}
+
+		if s.ExpectedRootDevice == "ebs" {
+			runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
 		}
 
 		runResp, err := ec2conn.RunInstances(runOpts)
