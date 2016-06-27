@@ -45,6 +45,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
 	for i, sg := range tempSecurityGroupIds {
+		for i := 0; i < 5; i++ {
+			log.Printf("Describing tempSecurityGroup to ensure it is available: %s", sg)
+			_, err := ec2conn.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+				GroupIds: []*string{aws.String(sg)},
+			})
+			if err == nil {
+				log.Printf("Found security group %s", sg)
+				break			
+			}       
+			log.Printf("Error in querying security group %s", err)
+                	time.Sleep(5 * time.Second)
+		}
 		securityGroupIds[i] = aws.String(sg)
 	}
 
