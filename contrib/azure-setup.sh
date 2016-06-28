@@ -126,7 +126,7 @@ createResourceGroup() {
 
 createStorageAccount() {
 	echo "==> Creating storage account"
-	azure storage account create -g $meta_name -l westus --type LRS $meta_name
+	azure storage account create -g $meta_name -l westus --sku-name LRS --kind Storage $meta_name
 	if [ $? -eq 0 ]; then
 		azure_storage_name=$meta_name
 	else
