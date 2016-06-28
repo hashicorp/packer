@@ -120,5 +120,5 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 		return source, true, fmt.Errorf("Unable to marshal JSON %s", err)
 	}
 
-	return source, true, err
+	return source, true, nil
 }
