@@ -115,6 +115,11 @@ The WinRM communicator has the following options.
     become available. This defaults to "30m" since setting up a Windows
     machine generally takes a long time.
 
+  * `winrm_connect_timeout` (string) - The amount of time to wait for WinRM to connect.  When
+    the Windows firewall is on, and WinRM is not blocked, the connection will be accepted, but
+    no response will be sent by the WinRM server.  In this case, WinRM will wait indefinitely.
+    This prevents WinRM from waiting unnecessarily.  This defaults to "60s".
+
   * `winrm_use_ssl` (boolean) - If true, use HTTPS for WinRM
 
   * `winrm_insecure` (boolean) - If true, do not check server certificate

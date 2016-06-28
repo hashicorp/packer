@@ -46,11 +46,12 @@ func TestStart(t *testing.T) {
 	defer wrm.Close()
 
 	c, err := New(&Config{
-		Host:     wrm.Host,
-		Port:     wrm.Port,
-		Username: "user",
-		Password: "pass",
-		Timeout:  30 * time.Second,
+		Host:           wrm.Host,
+		Port:           wrm.Port,
+		Username:       "user",
+		Password:       "pass",
+		ConnectTimeout: 10 * time.Second,
+		Timeout:        30 * time.Second,
 	})
 	if err != nil {
 		t.Fatalf("error creating communicator: %s", err)
@@ -77,11 +78,12 @@ func TestUpload(t *testing.T) {
 	defer wrm.Close()
 
 	c, err := New(&Config{
-		Host:     wrm.Host,
-		Port:     wrm.Port,
-		Username: "user",
-		Password: "pass",
-		Timeout:  30 * time.Second,
+		Host:           wrm.Host,
+		Port:           wrm.Port,
+		Username:       "user",
+		Password:       "pass",
+		ConnectTimeout: 10 * time.Second,
+		Timeout:        30 * time.Second,
 	})
 	if err != nil {
 		t.Fatalf("error creating communicator: %s", err)

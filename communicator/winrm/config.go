@@ -11,6 +11,7 @@ type Config struct {
 	Port               int
 	Username           string
 	Password           string
+	ConnectTimeout     time.Duration
 	Timeout            time.Duration
 	Https              bool
 	Insecure           bool

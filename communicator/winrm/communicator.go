@@ -30,17 +30,16 @@ func New(config *Config) (*Communicator, error) {
 		Port:     config.Port,
 		HTTPS:    config.Https,
 		Insecure: config.Insecure,
+		Timeout:  config.ConnectTimeout,
 
 		/*
 			TODO
-			HTTPS:    connInfo.HTTPS,
-			Insecure: connInfo.Insecure,
 			CACert:   connInfo.CACert,
 		*/
 	}
 
 	// Create the client
-	params := winrm.DefaultParameters()
+	params := winrm.DefaultParameters
 
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
@@ -158,6 +157,7 @@ func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 		},
 		Https:                 c.config.Https,
 		Insecure:              c.config.Insecure,
+		ConnectTimeout:        c.config.ConnectTimeout,
 		OperationTimeout:      c.config.Timeout,
 		MaxOperationsPerShell: 15, // lowest common denominator
 		TransportDecorator:    c.config.TransportDecorator,

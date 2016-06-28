@@ -37,6 +37,7 @@ type Config struct {
 	WinRMPassword           string        `mapstructure:"winrm_password"`
 	WinRMHost               string        `mapstructure:"winrm_host"`
 	WinRMPort               int           `mapstructure:"winrm_port"`
+	WinRMConnectTimeout     time.Duration `mapstructure:"winrm_connect_timeout"`
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
@@ -179,6 +180,10 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 		c.WinRMPort = 5986
 	} else if c.WinRMPort == 0 {
 		c.WinRMPort = 5985
+	}
+
+	if c.WinRMConnectTimeout == 0 {
+		c.WinRMConnectTimeout = 60 * time.Second
 	}
 
 	if c.WinRMTimeout == 0 {
