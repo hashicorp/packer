@@ -47,6 +47,7 @@ type Builder struct {
 type Config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	common.HTTPConfig           `mapstructure:",squash"`
+	common.ISOConfig            `mapstructure:",squash"`
 	hypervcommon.FloppyConfig   `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
@@ -71,30 +72,6 @@ type Config struct {
 	FloppyFiles []string `mapstructure:"floppy_files"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
-
-	// The checksum for the OS ISO file. Because ISO files are so large,
-	// this is required and Packer will verify it prior to booting a virtual
-	// machine with the ISO attached. The type of the checksum is specified
-	// with iso_checksum_type, documented below.
-	ISOChecksum string `mapstructure:"iso_checksum"`
-	// The type of the checksum specified in iso_checksum. Valid values are
-	// "none", "md5", "sha1", "sha256", or "sha512" currently. While "none"
-	// will skip checksumming, this is not recommended since ISO files are
-	// generally large and corruption does happen from time to time.
-	ISOChecksumType string `mapstructure:"iso_checksum_type"`
-	// A URL to the ISO containing the installation image. This URL can be
-	// either an HTTP URL or a file URL (or path to a file). If this is an
-	// HTTP URL, Packer will download it and cache it between runs.
-	RawSingleISOUrl string `mapstructure:"iso_url"`
-
-	// Multiple URLs for the ISO to download. Packer will try these in order.
-	// If anything goes wrong attempting to download or while downloading a
-	// single URL, it will move on to the next. All URLs must point to the
-	// same file (same checksum). By default this is empty and iso_url is
-	// used. Only one of iso_url or iso_urls can be specified.
-	ISOUrls []string `mapstructure:"iso_urls"`
-
-	TargetPath string `mapstructure:"iso_target_path"`
 
 	// Should integration services iso be mounted
 	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
@@ -141,13 +118,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	var errs *packer.MultiError
+	warnings := make([]string, 0)
+
+	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
+	warnings = append(warnings, isoWarnings...)
+	errs = packer.MultiErrorAppend(errs, isoErrs...)
+
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-	warnings := make([]string, 0)
 
 	err = b.checkDiskSize()
 	if err != nil {
@@ -205,47 +187,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	log.Println(fmt.Sprintf("%s: %v", "Communicator", b.config.Communicator))
 
 	// Errors
-	if b.config.ISOChecksumType == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("The iso_checksum_type must be specified."))
-	} else {
-		b.config.ISOChecksumType = strings.ToLower(b.config.ISOChecksumType)
-		if b.config.ISOChecksumType != "none" {
-			if b.config.ISOChecksum == "" {
-				errs = packer.MultiErrorAppend(
-					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-			} else {
-				b.config.ISOChecksum = strings.ToLower(b.config.ISOChecksum)
-			}
-
-			if h := common.HashForType(b.config.ISOChecksumType); h == nil {
-				errs = packer.MultiErrorAppend(
-					errs,
-					fmt.Errorf("Unsupported checksum type: %s", b.config.ISOChecksumType))
-			}
-		}
-	}
-
-	if b.config.RawSingleISOUrl == "" && len(b.config.ISOUrls) == 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("One of iso_url or iso_urls must be specified."))
-	} else if b.config.RawSingleISOUrl != "" && len(b.config.ISOUrls) > 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
-	} else if b.config.RawSingleISOUrl != "" {
-		b.config.ISOUrls = []string{b.config.RawSingleISOUrl}
-	}
-
-	for i, url := range b.config.ISOUrls {
-		b.config.ISOUrls[i], err = common.DownloadableURL(url)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
-		}
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "RawSingleISOUrl", b.config.RawSingleISOUrl))
-
 	if b.config.GuestAdditionsMode == "" {
 		b.config.GuestAdditionsMode = "attach"
 	}
@@ -291,11 +232,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Warnings
-	if b.config.ISOChecksumType == "none" {
-		warnings = append(warnings,
-			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
-				"a checksum is highly recommended.")
-	}
 
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -328,6 +264,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("cache", cache)
 	state.Put("config", &b.config)
+	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -434,13 +371,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run the steps.
 	if b.config.PackerDebug {
+		pauseFn := common.MultistepDebugFn(ui)
+		state.Put("pauseFn", pauseFn)
 		b.runner = &multistep.DebugRunner{
 			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
+			PauseFn: pauseFn,
 		}
 	} else {
 		b.runner = &multistep.BasicRunner{Steps: steps}
 	}
+
 	b.runner.Run(state)
 
 	// Report any errors.
