@@ -4,6 +4,7 @@
 package arm
 
 import (
+	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
@@ -530,6 +531,69 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_container_name set to %q.", x)
 		}
+	}
+}
+
+// newConfig should fail if the ARM template patch is invalid.
+func TestConfigShouldValidateArmTemplatePatchIsInvalid(t *testing.T) {
+	config := map[string]string{
+		"capture_container_name": "ignore",
+		"capture_name_prefix":    "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	config["arm_template_patch"] = "__patch_file_does_not_exist__"
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected newConfig to fail")
+	}
+}
+
+// newConfig should succeed if the patch file is valid
+func TestConfigShouldValidateArmTemplatePatchIsJsonPatch(t *testing.T) {
+	config := map[string]string{
+		"capture_container_name": "ignore",
+		"capture_name_prefix":    "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	patch := `[{
+    "op": "add",
+    "path": "/resources/3/plan",
+    "value": {
+        "name": "MyName",
+        "product": "MyProduct",
+        "publisher": "MyPublisher"
+    }
+}]`
+
+	filename := "test_arm_template_patch.json"
+	ioutil.WriteFile(filename, []byte(patch), 0644)
+	config["arm_template_patch"] = filename
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.armTemplatePatch == nil {
+		t.Fatal("expect c.armTemplatePatch to be non-nil")
 	}
 }
 

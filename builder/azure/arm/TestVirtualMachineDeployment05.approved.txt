@@ -27,7 +27,47 @@
   "resources": [
     {
       "apiVersion": "[variables('apiVersion')]",
+<<<<<<< b7954bc5d9bffce6f22085a3808dea6b48090ab6
       "dependsOn": [],
+=======
+      "location": "[variables('location')]",
+      "name": "[variables('publicIPAddressName')]",
+      "properties": {
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        },
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+      },
+      "type": "Microsoft.Network/publicIPAddresses"
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[variables('virtualNetworkName')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetAddressPrefix')]"
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/virtualNetworks"
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+>>>>>>> Support patching an ARM template.
       "location": "[variables('location')]",
       "name": "[variables('nicName')]",
       "properties": {
@@ -36,6 +76,12 @@
             "name": "ipconfig",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
+<<<<<<< b7954bc5d9bffce6f22085a3808dea6b48090ab6
+=======
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              },
+>>>>>>> Support patching an ARM template.
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -52,6 +98,14 @@
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
+<<<<<<< b7954bc5d9bffce6f22085a3808dea6b48090ab6
+=======
+      "plan": {
+        "name": "MySKU",
+        "product": "MyOffer",
+        "publisher": "MyPublisher"
+      },
+>>>>>>> Support patching an ARM template.
       "properties": {
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -110,11 +164,19 @@
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "subnetAddressPrefix": "10.0.0.0/24",
+<<<<<<< b7954bc5d9bffce6f22085a3808dea6b48090ab6
     "subnetName": "ignore",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "ignore",
     "virtualNetworkResourceGroup": "ignore",
     "vmStorageAccountContainerName": "images",
     "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+=======
+    "subnetName": "packerSubnet",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "virtualNetworkName": "packerNetwork",
+    "vmStorageAccountContainerName": "images",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+>>>>>>> Support patching an ARM template.
   }
 }

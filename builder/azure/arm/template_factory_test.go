@@ -2,6 +2,7 @@ package arm
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
@@ -176,6 +177,56 @@ func TestVirtualMachineDeployment05(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// Ensure that patches are applied.
+func TestVirtualMachineDeployment06(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "https://localhost/custom.vhd",
+		"resource_group_name":    "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	patch := `[{
+    "op": "add",
+    "path": "/resources/3/plan",
+    "value": {
+        "name": "MySKU",
+        "product": "MyOffer",
+        "publisher": "MyPublisher"
+    }
+}]`
+
+	filename := "test_virtual_machine_deployment05.json"
+	ioutil.WriteFile(filename, []byte(patch), 0644)
+	config["arm_template_patch"] = filename
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// TODO(chrboum): create a test case for negative behavior.
+// Validate that GetVirtualMachineDeployment properly handles the case when a
+// patch fails. All of the failures that I can think of now would be caught by
+// newConfig, which is desirable because it fails faster.  Not so good, when
+// you are trying to create a failing test case.
 
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {

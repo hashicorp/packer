@@ -57,6 +57,8 @@ builder.
 
 ### Optional:
 
+-   `arm_template_patch` (string) file name of a JSON patch to be applied to the VM template prior to deployment.
+
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
@@ -130,6 +132,69 @@ Here is a basic example for Azure.
     "vm_size": "Standard_A2"
 }
 ```
+
+## Template Patching
+
+\~&gt; **Warning!** This is an advanced topic. It is highly unlikely you not need template patching to use the Azure
+builder.
+
+The Azure builder creates a JSON template describing the VM and its properties.  These properties describe the VM's
+subnet, NIC, image to install, the name of the storage account, etc.  For most users the template is an implementation
+detail that can be safely ignored.  There are some use cases that require the template to be modified before it is
+processed by Azure.  For example, if you have created custom images for the Azure Marketplace there may be additional
+metadata that needs to be passed in via the template.
+
+The Azure builder allows users to define [RFC6902][rfc6902] compliant JSON patches to modify the template before it is
+submitted to Azure.  The following patch updates the VM resource with a plan snippet.
+
+```json
+[{
+    "op": "add",
+    "path": "/resources/3/plan",
+    "value": {
+       "name": "MySKU",
+       "product": "MyOffer",
+       "publisher": "MyPublisher"
+    }
+}]
+```
+
+Here's the snippet that is added to the document.
+
+```json
+{
+      "plan": {
+        "name": "[parameters('imageSKU')]",
+        "product": "[variables('imageOffer')]",
+        "publisher": "[variables('imagePublisher')]"
+      },
+}
+```
+
+### My First Patch
+
+Template patching can be tricky to get right.  The Packer code base ships with good samples to use when constructing a
+a patch, and validating it applies as expected.  These templates are also used to validate the Azure builder code, so
+they are known to be good and current.
+
+* [Windows Template][windows-template]
+* [Linux Template][linux-template]
+
+The Azure builder tries to fail fast when processing patches.  It validates the patch before executing any part of the
+build.  These checks ensure the patch is valid JSON, and a valid [RFC6902][rfc6902] patch.  The real test of the patch
+is when it is applied to the VM template.  This occurs right before the VM is deployed.  It typically takes a few
+minutes for the builder to reach VM deployment.
+
+> Please you the existing Packer [debugging][debug] techniques when developing patches.  These techniques allow you to
+see the document after it has been patched, and before it has been sent to Azure for processing.
+
+The path of a patch is defined using a [JSON Pointer][rfc6901].  JSON Pointer syntax is much less precise than
+[JSONPath][jsonpath].  For example, the patch example above uses a path of "/resources/3/plan", which means the third
+resource element in the array of resources.  The path does not clearly state that it is destined for the resource with
+type Microsoft.Compute/virtualMachines even though it is.  The Azure builder has test cases to ensure the document is
+consistently constructed to ensure patching work as expected.  Any change in the document structure will be treated with
+the utmost care to ensure backward compatibility is not broken.
+
 
 ## Implementation
 
@@ -209,3 +274,11 @@ minimal, so overall impact is small.
 
 See the [examples/azure](https://github.com/mitchellh/packer/tree/master/examples/azure) folder in the packer project
 for more examples.
+
+[debug]: https://www.packer.io/docs/other/debugging.html
+[rfc6901]: http://tools.ietf.org/html/rfc6901
+[rfc6902]: http://tools.ietf.org/html/rfc6902
+[jsonpath]: http://goessner.net/articles/JsonPath/index.html
+[windows-template]: https://raw.githubusercontent.com/mitchellh/packer/master/builder/azure/common/template/TestBuildWindows00.approved.txt
+[linux-template]: https://raw.githubusercontent.com/mitchellh/packer/master/builder/azure/common/template/TestBuildLinux00.approved.txt
+

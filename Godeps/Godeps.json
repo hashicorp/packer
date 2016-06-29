@@ -239,6 +239,10 @@
 			"ImportPath": "github.com/dylanmei/winrmtest",
 			"Rev": "025617847eb2cf9bd1d851bc3b22ed28e6245ce5"
 		},
+                {
+                        "ImportPath": "github.com/evanphx/json-patch",
+                        "Rev": "b7afc301965f33c78a36dea7bc4fca6ca693393f"
+                },
 		{
 			"ImportPath": "github.com/go-ini/ini",
 			"Comment": "v1.8.6",

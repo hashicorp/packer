@@ -31,7 +31,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 
+	"github.com/evanphx/json-patch"
 	"golang.org/x/crypto/ssh"
+	"os"
 )
 
 const (
@@ -78,6 +80,8 @@ type Config struct {
 	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
 	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
 	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
+	ArmTemplatePatchFile            string `mapstructure:"arm_template_patch"`
+	armTemplatePatch                *jsonpatch.Patch
 
 	// OS
 	OSType string `mapstructure:"os_type"`
@@ -196,9 +200,13 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	provideDefaultValues(&c)
 	setRuntimeValues(&c)
 	setUserNamePassword(&c)
+	err = setArmTemplatePatch(&c)
+	if err != nil {
+		return nil, nil, fmt.Errorf("patch failure: %s", err)
+	}
 	err = setCloudEnvironment(&c)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("cloud environment: %s", err)
 	}
 
 	// NOTE: if the user did not specify a communicator, then default to both
@@ -299,6 +307,32 @@ func setUserNamePassword(c *Config) {
 	} else {
 		c.Password = c.tmpAdminPassword
 	}
+}
+
+// Set the ARM template patch if there is one.  If the user did set one
+// process it completely so the code fails fast.
+func setArmTemplatePatch(c *Config) error {
+	if c.ArmTemplatePatchFile == "" {
+		return nil
+	}
+
+	fh, err := os.Open(c.ArmTemplatePatchFile)
+	if err != nil {
+		return err
+	}
+
+	bs, err := ioutil.ReadAll(fh)
+	if err != nil {
+		return err
+	}
+
+	patch, err := jsonpatch.DecodePatch(bs)
+	if err != nil {
+		return err
+	}
+
+	c.armTemplatePatch = &patch
+	return nil
 }
 
 func setCloudEnvironment(c *Config) error {

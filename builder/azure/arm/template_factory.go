@@ -59,7 +59,26 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	doc, _ := builder.ToJSON()
+	doc, err := patchArmTemplate(config, doc)
+	if err != nil {
+		return nil, err
+	}
+
 	return createDeploymentParameters(*doc, params)
+}
+
+func patchArmTemplate(config *Config, doc *string) (*string, error) {
+	if config.armTemplatePatch == nil {
+		return doc, nil
+	}
+
+	bs, err := config.armTemplatePatch.ApplyIndent([]byte(*doc), "  ")
+	if err != nil {
+		return nil, err
+	}
+
+	patched := string(bs)
+	return &patched, nil
 }
 
 func createDeploymentParameters(doc string, parameters *template.TemplateParameters) (*resources.Deployment, error) {
