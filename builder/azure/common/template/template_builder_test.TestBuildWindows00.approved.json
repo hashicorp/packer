@@ -168,7 +168,8 @@
     "subnetName": "packerSubnet",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "packerNetwork",
+    "virtualNetworkResourceGroup": "[resourceGroup().name]",
     "vmStorageAccountContainerName": "images",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+    "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
   }
 }

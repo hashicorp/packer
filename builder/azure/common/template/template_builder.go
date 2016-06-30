@@ -13,8 +13,11 @@ const (
 	jsonPrefix = ""
 	jsonIndent = "  "
 
-	resourceVirtualMachine = "Microsoft.Compute/virtualMachines"
-	resourceKeyVaults      = "Microsoft.KeyVault/vaults"
+	resourceKeyVaults         = "Microsoft.KeyVault/vaults"
+	resourceNetworkInterfaces = "Microsoft.Network/networkInterfaces"
+	resourcePublicIPAddresses = "Microsoft.Network/publicIPAddresses"
+	resourceVirtualMachine    = "Microsoft.Compute/virtualMachines"
+	resourceVirtualNetworks   = "Microsoft.Network/virtualNetworks"
 
 	variableSshKeyPath = "sshKeyPath"
 )
@@ -125,6 +128,28 @@ func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingS
 	return nil
 }
 
+func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
+	s.setVariable("virtualNetworkResourceGroup", virtualNetworkResourceGroup)
+	s.setVariable("virtualNetworkName", virtualNetworkName)
+	s.setVariable("subnetName", subnetName)
+
+	s.deleteResourceByType(resourceVirtualNetworks)
+	s.deleteResourceByType(resourcePublicIPAddresses)
+	resource, err := s.getResourceByType(resourceNetworkInterfaces)
+	if err != nil {
+		return err
+	}
+
+	s.deleteResourceDependency(resource, func(s string) bool {
+		return strings.Contains(s, "Microsoft.Network/virtualNetworks") ||
+			strings.Contains(s, "Microsoft.Network/publicIPAddresses")
+	})
+
+	(*resource.Properties.IPConfigurations)[0].Properties.PublicIPAddress = nil
+
+	return nil
+}
+
 func (s *TemplateBuilder) ToJSON() (*string, error) {
 	bs, err := json.MarshalIndent(s.template, jsonPrefix, jsonIndent)
 
@@ -144,6 +169,10 @@ func (s *TemplateBuilder) getResourceByType(t string) (*Resource, error) {
 	return nil, fmt.Errorf("template: could not find a resource of type %s", t)
 }
 
+func (s *TemplateBuilder) setVariable(name string, value string) {
+	(*s.template.Variables)[name] = value
+}
+
 func (s *TemplateBuilder) toKeyVaultID(name string) string {
 	return s.toResourceID(resourceKeyVaults, name)
 }
@@ -154,6 +183,31 @@ func (s *TemplateBuilder) toResourceID(id, name string) string {
 
 func (s *TemplateBuilder) toVariable(name string) string {
 	return fmt.Sprintf("[variables('%s')]", name)
+}
+
+func (s *TemplateBuilder) deleteResourceByType(resourceType string) {
+	resources := make([]Resource, 0)
+
+	for _, resource := range *s.template.Resources {
+		if *resource.Type == resourceType {
+			continue
+		}
+		resources = append(resources, resource)
+	}
+
+	s.template.Resources = &resources
+}
+
+func (s *TemplateBuilder) deleteResourceDependency(resource *Resource, predicate func(string) bool) {
+	deps := make([]string, 0)
+
+	for _, dep := range *resource.DependsOn {
+		if !predicate(dep) {
+			deps = append(deps, dep)
+		}
+	}
+
+	*resource.DependsOn = deps
 }
 
 const basicTemplate = `{
@@ -194,8 +248,9 @@ const basicTemplate = `{
     "subnetAddressPrefix": "10.0.0.0/24",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "packerNetwork",
+    "virtualNetworkResourceGroup": "[resourceGroup().name]",
     "vmStorageAccountContainerName": "images",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+    "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
   },
   "resources": [
     {

@@ -145,6 +145,38 @@ func TestVirtualMachineDeployment04(t *testing.T) {
 	}
 }
 
+func TestVirtualMachineDeployment05(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":                 "ignore",
+		"capture_container_name":              "ignore",
+		"location":                            "ignore",
+		"image_url":                           "https://localhost/custom.vhd",
+		"resource_group_name":                 "ignore",
+		"storage_account":                     "ignore",
+		"subscription_id":                     "ignore",
+		"os_type":                             constants.Target_Linux,
+		"communicator":                        "none",
+		"virtual_network_name":                "virtualNetworkName",
+		"virtual_network_resource_group_name": "virtualNetworkResourceGroupName",
+		"virtual_network_subnet_name":         "virtualNetworkSubnetName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())

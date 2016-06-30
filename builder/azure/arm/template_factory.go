@@ -51,6 +51,13 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	}
 
+	if config.VirtualNetworkName != "" {
+		builder.SetVirtualNetwork(
+			config.VirtualNetworkResourceGroupName,
+			config.VirtualNetworkName,
+			config.VirtualNetworkSubnetName)
+	}
+
 	doc, _ := builder.ToJSON()
 	return createDeploymentParameters(*doc, params)
 }
