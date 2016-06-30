@@ -5,20 +5,20 @@
 package powershell
 
 import (
+	"bytes"
 	"fmt"
-	"log"
 	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
-	"strings"
-	"bytes"
-	"io/ioutil"
 	"strconv"
+	"strings"
 )
 
 const (
 	powerShellFalse = "False"
-	powerShellTrue = "True"
+	powerShellTrue  = "True"
 )
 
 type PowerShellCmd struct {
@@ -31,14 +31,14 @@ func (ps *PowerShellCmd) Run(fileContents string, params ...string) error {
 	return err
 }
 
-// Output runs the PowerShell command and returns its standard output. 
+// Output runs the PowerShell command and returns its standard output.
 func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, error) {
-	path, err := ps.getPowerShellPath();
+	path, err := ps.getPowerShellPath()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
-	filename, err := saveScript(fileContents);
+	filename, err := saveScript(fileContents)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, 
 	if !debug {
 		defer os.Remove(filename)
 	}
-	
+
 	args := createArgs(filename, params...)
 
 	if verbose {
@@ -93,13 +93,23 @@ func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, 
 		log.Printf("stderr: %s", stderrString)
 	}
 
-	return stdoutString, err;	
+	return stdoutString, err
+}
+
+func IsPowershellAvailable() (bool, string, error) {
+	path, err := exec.LookPath("powershell")
+	if err != nil {
+		return false, "", err
+	} else {
+		return false, path, err
+	}
 }
 
 func (ps *PowerShellCmd) getPowerShellPath() (string, error) {
-	path, err := exec.LookPath("powershell")
-	if err != nil {
-		log.Fatal("Cannot find PowerShell in the path", err)
+	powershellAvailable, path, err := IsPowershellAvailable()
+
+	if !powershellAvailable {
+		log.Fatal("Cannot find PowerShell in the path")
 		return "", err
 	}
 
@@ -111,7 +121,7 @@ func saveScript(fileContents string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	_, err = file.Write([]byte(fileContents))
 	if err != nil {
 		return "", err
@@ -132,7 +142,7 @@ func saveScript(fileContents string) (string, error) {
 }
 
 func createArgs(filename string, params ...string) []string {
-	args := make([]string,len(params)+4)
+	args := make([]string, len(params)+4)
 	args[0] = "-ExecutionPolicy"
 	args[1] = "Bypass"
 
@@ -141,9 +151,9 @@ func createArgs(filename string, params ...string) []string {
 
 	for key, value := range params {
 		args[key+4] = value
-	}	
+	}
 
-	return args;
+	return args
 }
 
 func GetHostAvailableMemory() float64 {
@@ -157,7 +167,6 @@ func GetHostAvailableMemory() float64 {
 
 	return freeMB
 }
-
 
 func GetHostName(ip string) (string, error) {
 
@@ -174,7 +183,7 @@ try {
 
 	//
 	var ps PowerShellCmd
-	cmdOut, err := ps.Output(script, ip);
+	cmdOut, err := ps.Output(script, ip)
 	if err != nil {
 		return "", err
 	}
@@ -190,8 +199,8 @@ $administratorRole = [System.Security.Principal.WindowsBuiltInRole]::Administrat
 return $principal.IsInRole($administratorRole)
 `
 
-    var ps PowerShellCmd
-	cmdOut, err := ps.Output(script);
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(script)
 	if err != nil {
 		return false, err
 	}
@@ -200,14 +209,13 @@ return $principal.IsInRole($administratorRole)
 	return res == powerShellTrue, nil
 }
 
-
 func ModuleExists(moduleName string) (bool, error) {
 
 	var script = `
 param([string]$moduleName)
 (Get-Module -Name $moduleName) -ne $null
 `
-    var ps PowerShellCmd
+	var ps PowerShellCmd
 	cmdOut, err := ps.Output(script)
 	if err != nil {
 		return false, err
@@ -215,7 +223,7 @@ param([string]$moduleName)
 
 	res := strings.TrimSpace(string(cmdOut))
 
-	if(res == powerShellFalse){
+	if res == powerShellFalse {
 		err := fmt.Errorf("PowerShell %s module is not loaded. Make sure %s feature is on.", moduleName, moduleName)
 		return false, err
 	}
@@ -249,7 +257,7 @@ $productKeyNode.InnerText = $productKey
 $unattend.Save($path)
 `
 
-  var ps PowerShellCmd
-  err := ps.Run(script, path, productKey)
-  return err
+	var ps PowerShellCmd
+	err := ps.Run(script, path, productKey)
+	return err
 }

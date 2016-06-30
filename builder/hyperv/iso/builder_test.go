@@ -1,9 +1,10 @@
 package iso
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"reflect"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -31,6 +32,7 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 func TestBuilderPrepare_Defaults(t *testing.T) {
 	var b Builder
 	config := testConfig()
+
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
