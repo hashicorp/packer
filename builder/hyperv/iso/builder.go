@@ -7,6 +7,11 @@ package iso
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
 	"github.com/mitchellh/packer/common"
@@ -16,10 +21,6 @@ import (
 	powershell "github.com/mitchellh/packer/powershell"
 	"github.com/mitchellh/packer/powershell/hyperv"
 	"github.com/mitchellh/packer/template/interpolate"
-	"log"
-	"os"
-	"strings"
-	"time"
 )
 
 const (
@@ -148,13 +149,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	log.Println(fmt.Sprintf("%s: %v", "VMName", b.config.VMName))
 
 	if b.config.SwitchName == "" {
-		// no switch name, try to get one attached to a online network adapter
-		onlineSwitchName, err := hyperv.GetExternalOnlineVirtualSwitch()
-		if onlineSwitchName == "" || err != nil {
-			b.config.SwitchName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
-		} else {
-			b.config.SwitchName = onlineSwitchName
-		}
+		b.config.SwitchName = b.detectSwitchName()
 	}
 
 	if b.config.Cpu < 1 {
@@ -455,11 +450,29 @@ func (b *Builder) checkRamSize() error {
 }
 
 func (b *Builder) checkHostAvailableMemory() string {
-	freeMB := powershell.GetHostAvailableMemory()
+	powershellAvailable, _, _ := powershell.IsPowershellAvailable()
 
-	if (freeMB - float64(b.config.RamSizeMB)) < LowRam {
-		return fmt.Sprintf("Hyper-V might fail to create a VM if there is not enough free memory in the system.")
+	if powershellAvailable {
+		freeMB := powershell.GetHostAvailableMemory()
+
+		if (freeMB - float64(b.config.RamSizeMB)) < LowRam {
+			return fmt.Sprintf("Hyper-V might fail to create a VM if there is not enough free memory in the system.")
+		}
 	}
 
 	return ""
+}
+
+func (b *Builder) detectSwitchName() string {
+	powershellAvailable, _, _ := powershell.IsPowershellAvailable()
+
+	if powershellAvailable {
+		// no switch name, try to get one attached to a online network adapter
+		onlineSwitchName, err := hyperv.GetExternalOnlineVirtualSwitch()
+		if onlineSwitchName != "" && err == nil {
+			return onlineSwitchName
+		}
+	}
+
+	return fmt.Sprintf("packer-%s", b.config.PackerBuildName)
 }
