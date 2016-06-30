@@ -142,6 +142,78 @@ func TestConfigShouldRejectCustomImageAndMarketPlace(t *testing.T) {
 	}
 }
 
+func TestConfigVirtualNetworkNameIsOptional(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+		"virtual_network_name":   "MyVirtualNetwork",
+	}
+
+	c, _, _ := newConfig(config, getPackerConfiguration())
+	if c.VirtualNetworkName != "MyVirtualNetwork" {
+		t.Errorf("Expected Config to set virtual_network_name to MyVirtualNetwork, but got %q", c.VirtualNetworkName)
+	}
+	if c.VirtualNetworkResourceGroupName != "" {
+		t.Errorf("Expected Config to leave virtual_network_resource_group_name to '', but got %q", c.VirtualNetworkResourceGroupName)
+	}
+	if c.VirtualNetworkSubnetName != "" {
+		t.Errorf("Expected Config to leave virtual_network_subnet_name to '', but got %q", c.VirtualNetworkSubnetName)
+	}
+}
+
+// The user can pass the value virtual_network_resource_group_name to avoid the lookup of
+// a virtual network's resource group, or to help with disambiguation.  The value should
+// only be set if virtual_network_name was set.
+func TestConfigVirtualNetworkResourceGroupNameMustBeSetWithVirtualNetworkName(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":                 "ignore",
+		"capture_container_name":              "ignore",
+		"location":                            "ignore",
+		"image_url":                           "ignore",
+		"storage_account":                     "ignore",
+		"resource_group_name":                 "ignore",
+		"subscription_id":                     "ignore",
+		"os_type":                             constants.Target_Linux,
+		"communicator":                        "none",
+		"virtual_network_resource_group_name": "MyVirtualNetworkRG",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Error("Expected Config to reject virtual_network_resource_group_name, if virtual_network_name is not set.")
+	}
+}
+
+// The user can pass the value virtual_network_subnet_name to avoid the lookup of
+// a virtual network subnet's name, or to help with disambiguation.  The value should
+// only be set if virtual_network_name was set.
+func TestConfigVirtualNetworkSubnetNameMustBeSetWithVirtualNetworkName(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":         "ignore",
+		"capture_container_name":      "ignore",
+		"location":                    "ignore",
+		"image_url":                   "ignore",
+		"storage_account":             "ignore",
+		"resource_group_name":         "ignore",
+		"subscription_id":             "ignore",
+		"os_type":                     constants.Target_Linux,
+		"communicator":                "none",
+		"virtual_network_subnet_name": "MyVirtualNetworkRG",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Error("Expected Config to reject virtual_network_subnet_name, if virtual_network_name is not set.")
+	}
+}
+
 func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	packerAzureCommon "github.com/mitchellh/packer/builder/azure/common"
@@ -20,7 +21,6 @@ import (
 	packerCommon "github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
-	"strings"
 )
 
 type Builder struct {
@@ -30,6 +30,7 @@ type Builder struct {
 }
 
 const (
+	DefaultNicName             = "packerNic"
 	DefaultPublicIPAddressName = "packerPublicIP"
 	DefaultSasBlobContainer    = "system/Microsoft.Compute"
 	DefaultSasBlobPermission   = "r"
@@ -82,9 +83,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
+	resolver := newResourceResolver(azureClient)
+	if err := resolver.Resolve(b.config); err != nil {
+		return nil, err
+	}
+
 	b.config.storageAccountBlobEndpoint, err = b.getBlobEndpoint(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
 	if err != nil {
 		return nil, err
+	}
+
+	endpointConnectType := PublicEndpoint
+	if b.isPrivateNetworkCommunication() {
+		endpointConnectType = PrivateEndpoint
 	}
 
 	b.setTemplateParameters(b.stateBag)
@@ -95,7 +106,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
 			NewStepDeployTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepGetIPAddress(azureClient, ui),
+			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectSSH{
 				Config:    &b.config.Comm,
 				Host:      lin.SSHHost,
@@ -117,7 +128,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepSetCertificate(b.config, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
 			NewStepDeployTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepGetIPAddress(azureClient, ui),
+			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -176,6 +187,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	return &Artifact{}, nil
 }
 
+func (b *Builder) isPrivateNetworkCommunication() bool {
+	return b.config.VirtualNetworkName != ""
+}
+
 func (b *Builder) Cancel() {
 	if b.runner != nil {
 		log.Println("Cancelling the step runner...")
@@ -213,6 +228,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
 	stateBag.Put(constants.ArmLocation, b.config.Location)
+	stateBag.Put(constants.ArmNicName, DefaultNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
 	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
