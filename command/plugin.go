@@ -35,6 +35,7 @@ import (
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
+
 	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
@@ -50,6 +51,7 @@ import (
 	vagrantpostprocessor "github.com/mitchellh/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/mitchellh/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/mitchellh/packer/post-processor/vsphere"
+
 	ansibleprovisioner "github.com/mitchellh/packer/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
 	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
