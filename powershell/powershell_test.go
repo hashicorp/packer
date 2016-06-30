@@ -7,6 +7,13 @@ import (
 
 func TestOutput(t *testing.T) {
 	var ps PowerShellCmd
+
+	powerShellPath, err := ps.getPowerShellPath()
+	if err != nil {
+		t.Skipf("powershell not installed: %s", err)
+		return
+	}
+
 	cmdOut, err := ps.Output("")
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
@@ -40,6 +47,13 @@ func TestRunFile(t *testing.T) {
 	blockBuffer.WriteString(`param([string]$a, [string]$b, [int]$x, [int]$y) if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}; $n = $x + $y; Write-Output "$a $b $n";`)
 
 	var ps PowerShellCmd
+	
+	powerShellPath, err := ps.getPowerShellPath()
+	if err != nil {
+		t.Skipf("powershell not installed: %s", err)
+		return
+	}
+	
 	cmdOut, err := ps.Output(blockBuffer.String(), "a", "b", "5", "10")
 
 	if err != nil {
