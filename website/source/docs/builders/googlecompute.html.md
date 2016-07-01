@@ -164,7 +164,7 @@ builder.
 
 ## Gotchas
 
-Centos images have root ssh access disabled by default. Set `ssh_username` to
+Centos and recent Debian images have root ssh access disabled by default. Set `ssh_username` to
 any user, which will be created by packer with sudo access.
 
 The machine type must have a scratch disk, which means you can't use an

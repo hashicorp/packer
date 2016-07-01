@@ -30,8 +30,9 @@ func TestStepSetCertificateShouldPassIfGetPasses(t *testing.T) {
 }
 
 func TestStepSetCertificateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
+	config := new(Config)
 	var testSubject = &StepSetCertificate{
-		config: new(Config),
+		config: config,
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -43,9 +44,8 @@ func TestStepSetCertificateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	_, ok := stateBag.GetOk(constants.ArmTemplateParameters)
-	if !ok {
-		t.Fatalf("Expected the state bag to have a value for '%s', but it did not.", constants.ArmTemplateParameters)
+	if config.tmpWinRMCertificateUrl != stateBag.Get(constants.ArmCertificateUrl) {
+		t.Fatalf("Expected config.tmpWinRMCertificateUrl to be %s, but got %s'", stateBag.Get(constants.ArmCertificateUrl), config.tmpWinRMCertificateUrl)
 	}
 }
 

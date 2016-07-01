@@ -59,7 +59,7 @@ func (s *StepCreateCert) createCert(state multistep.StateBag) error {
 		Bytes: x509.MarshalPKCS1PrivateKey(priv),
 	}))
 
-	// Set the private key in the statebag for later
+	// Set the private key in the state bag for later
 	state.Put(constants.PrivateKey, privkey)
 	log.Printf("createCert: Private key:\n%s", privkey)
 

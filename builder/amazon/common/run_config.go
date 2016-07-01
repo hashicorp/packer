@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/mitchellh/packer/common/uuid"
@@ -11,27 +12,30 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
+
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	AssociatePublicIpAddress bool              `mapstructure:"associate_public_ip_address"`
-	AvailabilityZone         string            `mapstructure:"availability_zone"`
-	EbsOptimized             bool              `mapstructure:"ebs_optimized"`
-	IamInstanceProfile       string            `mapstructure:"iam_instance_profile"`
-	InstanceType             string            `mapstructure:"instance_type"`
-	RunTags                  map[string]string `mapstructure:"run_tags"`
-	SourceAmi                string            `mapstructure:"source_ami"`
-	SpotPrice                string            `mapstructure:"spot_price"`
-	SpotPriceAutoProduct     string            `mapstructure:"spot_price_auto_product"`
-	DisableStopInstance      bool              `mapstructure:"disable_stop_instance"`
-	SecurityGroupId          string            `mapstructure:"security_group_id"`
-	SecurityGroupIds         []string          `mapstructure:"security_group_ids"`
-	SubnetId                 string            `mapstructure:"subnet_id"`
-	TemporaryKeyPairName     string            `mapstructure:"temporary_key_pair_name"`
-	UserData                 string            `mapstructure:"user_data"`
-	UserDataFile             string            `mapstructure:"user_data_file"`
-	WindowsPasswordTimeout   time.Duration     `mapstructure:"windows_password_timeout"`
-	VpcId                    string            `mapstructure:"vpc_id"`
+	AssociatePublicIpAddress          bool              `mapstructure:"associate_public_ip_address"`
+	AvailabilityZone                  string            `mapstructure:"availability_zone"`
+	EbsOptimized                      bool              `mapstructure:"ebs_optimized"`
+	IamInstanceProfile                string            `mapstructure:"iam_instance_profile"`
+	InstanceType                      string            `mapstructure:"instance_type"`
+	RunTags                           map[string]string `mapstructure:"run_tags"`
+	SourceAmi                         string            `mapstructure:"source_ami"`
+	SpotPrice                         string            `mapstructure:"spot_price"`
+	SpotPriceAutoProduct              string            `mapstructure:"spot_price_auto_product"`
+	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
+	SecurityGroupId                   string            `mapstructure:"security_group_id"`
+	SecurityGroupIds                  []string          `mapstructure:"security_group_ids"`
+	SubnetId                          string            `mapstructure:"subnet_id"`
+	TemporaryKeyPairName              string            `mapstructure:"temporary_key_pair_name"`
+	UserData                          string            `mapstructure:"user_data"`
+	UserDataFile                      string            `mapstructure:"user_data_file"`
+	WindowsPasswordTimeout            time.Duration     `mapstructure:"windows_password_timeout"`
+	VpcId                             string            `mapstructure:"vpc_id"`
+	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behaviour"`
 
 	// Communicator settings
 	Comm           communicator.Config `mapstructure:",squash"`
@@ -82,6 +86,12 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			c.SecurityGroupIds = []string{c.SecurityGroupId}
 			c.SecurityGroupId = ""
 		}
+	}
+
+	if c.InstanceInitiatedShutdownBehavior == "" {
+		c.InstanceInitiatedShutdownBehavior = "stop"
+	} else if !reShutdownBehavior.MatchString(c.InstanceInitiatedShutdownBehavior) {
+		errs = append(errs, fmt.Errorf("shutdown_behaviour only accepts 'stop' or 'terminate' values."))
 	}
 
 	return errs

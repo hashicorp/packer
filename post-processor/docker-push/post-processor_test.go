@@ -108,7 +108,7 @@ func TestPostProcessor_PostProcess_tags(t *testing.T) {
 	if !driver.PushCalled {
 		t.Fatal("should call push")
 	}
-	if driver.PushName != "hashicorp/ubuntu" {
+	if driver.PushName != "hashicorp/ubuntu:precise" {
 		t.Fatalf("bad name: %s", driver.PushName)
 	}
 }
