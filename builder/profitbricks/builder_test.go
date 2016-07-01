@@ -46,7 +46,6 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Add a random key
 	config["i_should_not_be_valid"] = true
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -61,7 +60,6 @@ func TestBuilderPrepare_Servername(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test default
 	delete(config, "servername")
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -73,7 +71,6 @@ func TestBuilderPrepare_Servername(t *testing.T) {
 
 	expected := "packer"
 
-	// Test set
 	config["servername"] = expected
 	b = Builder{}
 	warnings, err = b.Prepare(config)

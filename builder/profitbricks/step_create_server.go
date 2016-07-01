@@ -24,7 +24,6 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Creating Virutal datacenter...")
 
-	//Create a Virtual datacenter
 	datacenter := profitbricks.CreateDatacenter(profitbricks.CreateDatacenterRequest{
 		DCProperties: profitbricks.DCProperties{
 			Name:     c.ServerName,

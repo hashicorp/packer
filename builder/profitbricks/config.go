@@ -99,14 +99,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.Comm.SSHPort = 22
 
 	if c.PBUsername == "" {
-		// Required configurations that will display errors if not set
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ProfitBricks username is required"))
 	}
 
 	if c.PBPassword == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Profitbricks passwrod is required"))
+			errs, errors.New("ProfitBricks password is required"))
 	}
 
 	if c.ServerName == "" {

@@ -13,13 +13,11 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// StepCreateSSHKey represents a Packer build step that generates SSH key pairs.
 type StepCreateSSHKey struct {
 	Debug        bool
 	DebugKeyPath string
 }
 
-// Run executes the Packer build step that generates SSH key pairs.
 func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
@@ -45,7 +43,6 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	//fmt.Println("PUTTING")
 	state.Put("privateKey", string(pem.EncodeToMemory(&priv_blk)))
 	state.Put("publicKey", string(ssh.MarshalAuthorizedKey(pub)))
 
@@ -57,7 +54,6 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Write out the key
 		err = pem.Encode(f, &priv_blk)
 		f.Close()
 		if err != nil {
@@ -68,5 +64,4 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-// Nothing to clean up. SSH keys are associated with a single GCE instance.
 func (s *StepCreateSSHKey) Cleanup(state multistep.StateBag) {}

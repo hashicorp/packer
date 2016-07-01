@@ -4,9 +4,7 @@ import (
 	"fmt"
 )
 
-// dummy Artifact implementation - does nothing
 type Artifact struct {
-	// The name of the snapshot
 	snapshotData string
 }
 
