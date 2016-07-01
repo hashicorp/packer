@@ -7,15 +7,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
-
 	var testSubject = &StepValidateTemplate{
-		template: Linux,
-		validate: func(string, string, *TemplateParameters) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		validate: func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
@@ -34,8 +32,7 @@ func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 	var testSubject = &StepValidateTemplate{
-		template: Linux,
-		validate: func(string, string, *TemplateParameters) error { return nil },
+		validate: func(string, string) error { return nil },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
@@ -55,14 +52,11 @@ func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualResourceGroupName string
 	var actualDeploymentName string
-	var actualTemplateParameters *TemplateParameters
 
 	var testSubject = &StepValidateTemplate{
-		template: Linux,
-		validate: func(resourceGroupName string, deploymentName string, templateParameter *TemplateParameters) error {
+		validate: func(resourceGroupName string, deploymentName string) error {
 			actualResourceGroupName = resourceGroupName
 			actualDeploymentName = deploymentName
-			actualTemplateParameters = templateParameter
 
 			return nil
 		},
@@ -79,7 +73,6 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 
 	var expectedDeploymentName = stateBag.Get(constants.ArmDeploymentName).(string)
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
-	var expectedTemplateParameters = stateBag.Get(constants.ArmTemplateParameters).(*TemplateParameters)
 
 	if actualDeploymentName != expectedDeploymentName {
 		t.Fatalf("Expected the step to source 'constants.ArmDeploymentName' from the state bag, but it did not.")
@@ -88,10 +81,6 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	if actualResourceGroupName != expectedResourceGroupName {
 		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
-
-	if actualTemplateParameters != expectedTemplateParameters {
-		t.Fatalf("Expected the step to source 'constants.ArmTemplateParameters' from the state bag, but it did not.")
-	}
 }
 
 func createTestStateBagStepValidateTemplate() multistep.StateBag {
@@ -99,7 +88,6 @@ func createTestStateBagStepValidateTemplate() multistep.StateBag {
 
 	stateBag.Put(constants.ArmDeploymentName, "Unit Test: DeploymentName")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
-	stateBag.Put(constants.ArmTemplateParameters, &TemplateParameters{})
 
 	return stateBag
 }

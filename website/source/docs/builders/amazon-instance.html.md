@@ -25,13 +25,15 @@ AWS account. The builder will create temporary keypairs, security group rules,
 etc. that provide it temporary access to the instance while the image is being
 created. This simplifies configuration quite a bit.
 
-The builder does *not* manage AMIs. Once it creates an AMI and stores it in your
-account, it is up to you to use, delete, etc. the AMI.
+The builder does *not* manage AMIs. Once it creates an AMI and stores it in
+your account, it is up to you to use, delete, etc. the AMI.
 
--&gt; **Note** This builder requires that the [Amazon EC2 AMI
-Tools](https://aws.amazon.com/developertools/368) are installed onto the machine.
-This can be done within a provisioner, but must be done before the builder
-finishes running.
+-> **Note:** This builder requires that the [Amazon EC2 AMI
+Tools](https://aws.amazon.com/developertools/368) are installed onto the
+machine. This can be done within a provisioner, but must be done before the
+builder finishes running.
+
+~> Instance builds are not supported for Windows. Use [`amazon-ebs`](amazon-ebs.html) instead.
 
 ## Configuration Reference
 
@@ -189,6 +191,9 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `skip_region_validation` (boolean) - Set to true if you want to skip 
+    validation of the region configuration option.  Defaults to false.
+
 -   `spot_price` (string) - The maximum hourly price to launch a spot instance
     to create the AMI. It is a type of instances that EC2 starts when the
     maximum price that you specify exceeds the current spot price. Spot price
@@ -238,6 +243,10 @@ builder.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
+
+-   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    default is stop.
 
 ## Basic Example
 

@@ -116,6 +116,19 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
+-   `disable_stop_instance` (boolean) - Packer normally stops the build instance
+    after all provisioners have run. For Windows instances, it is sometimes
+    desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
+    which will stop the instance for you. If this is set to true, Packer *will not*
+    stop the instance and will wait for you to stop it manually. You can do this
+    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+
+    ``` {.javascript}
+    {
+      "type": "windows-shell",
+      "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
+    }```
+
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
@@ -152,6 +165,9 @@ builder.
 -   `security_group_ids` (array of strings) - A list of security groups as
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
+
+-   `skip_region_validation` (boolean) - Set to true if you want to skip 
+    validation of the region configuration option.  Defaults to false.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
@@ -203,6 +219,10 @@ builder.
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
 
+-   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    default is stop.
+
 ## Basic Example
 
 Here is a basic example. You will need to provide access keys, and may need to change the AMI IDs according to what images exist at the time the template is run:
@@ -224,7 +244,7 @@ Here is a basic example. You will need to provide access keys, and may need to c
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
-Further information on locating AMI IDs and their relationship to instance types and regions can be found in the AWS EC2 Documentation [for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).  
+Further information on locating AMI IDs and their relationship to instance types and regions can be found in the AWS EC2 Documentation [for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
 
 ## Accessing the Instance to Debug
 

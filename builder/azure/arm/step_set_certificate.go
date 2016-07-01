@@ -4,8 +4,8 @@
 package arm
 
 import (
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -31,7 +31,6 @@ func (s *StepSetCertificate) Run(state multistep.StateBag) multistep.StepAction 
 	var winRMCertificateUrl = state.Get(constants.ArmCertificateUrl).(string)
 	s.config.tmpWinRMCertificateUrl = winRMCertificateUrl
 
-	state.Put(constants.ArmTemplateParameters, s.config.toTemplateParameters())
 	return multistep.ActionContinue
 }
 

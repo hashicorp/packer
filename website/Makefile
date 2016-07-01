@@ -13,5 +13,5 @@ format:
 	bundle exec htmlbeautifier -t 2 source/*.erb
 	bundle exec htmlbeautifier -t 2 source/layouts/*.erb
 	@pandoc -v > /dev/null || echo "pandoc must be installed in order to format markdown content"
-	pandoc -v > /dev/null && find . -iname "*.html.markdown" | xargs -I{} bash -c "pandoc -r markdown -w markdown --tab-stop=4 --atx-headers -s --columns=80 {} > {}.new"\; || true
-	pandoc -v > /dev/null && find . -iname "*.html.markdown" | xargs -I{} bash -c "mv {}.new {}"\; || true
+	pandoc -v > /dev/null && find . -iname "*.html.md" | xargs -I{} bash -c "pandoc -r markdown -w markdown --tab-stop=4 --atx-headers -s --columns=80 {} > {}.new"\; || true
+	pandoc -v > /dev/null && find . -iname "*.html.md" | xargs -I{} bash -c "mv {}.new {}"\; || true

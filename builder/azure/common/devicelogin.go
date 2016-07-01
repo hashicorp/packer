@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/mitchellh/packer/version"
 	"github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/packer/version"
 )
 
 var (
@@ -39,20 +39,11 @@ var (
 
 // Authenticate fetches a token from the local file cache or initiates a consent
 // flow and waits for token to be obtained.
-func Authenticate(env azure.Environment, subscriptionID string, say func(string)) (*azure.ServicePrincipalToken, error) {
+func Authenticate(env azure.Environment, subscriptionID, tenantID string, say func(string)) (*azure.ServicePrincipalToken, error) {
 	clientID, ok := clientIDs[env.Name]
 	if !ok {
 		return nil, fmt.Errorf("packer-azure application not set up for Azure environment %q", env.Name)
 	}
-
-	// First we locate the tenant ID of the subscription as we store tokens per
-	// tenant (which could have multiple subscriptions)
-	say(fmt.Sprintf("Looking up AAD Tenant ID: subscriptionID=%s.", subscriptionID))
-	tenantID, err := findTenantID(env, subscriptionID)
-	if err != nil {
-		return nil, err
-	}
-	say(fmt.Sprintf("Found AAD Tenant ID: tenantID=%s", tenantID))
 
 	oauthCfg, err := env.OAuthConfigForTenant(tenantID)
 	if err != nil {
@@ -197,8 +188,7 @@ func mkTokenCallback(path string) azure.TokenRefreshCallback {
 // expired). This check is essentially to make sure refresh_token is good.
 func validateToken(env azure.Environment, token *azure.ServicePrincipalToken) error {
 	c := subscriptionsClient(env.ResourceManagerEndpoint)
-	// WTF(chrboum)
-	//c.Authorizer = token
+	c.Authorizer = token
 	_, err := c.List()
 	if err != nil {
 		return fmt.Errorf("Token validity check failed: %v", err)
@@ -206,10 +196,10 @@ func validateToken(env azure.Environment, token *azure.ServicePrincipalToken) er
 	return nil
 }
 
-// findTenantID figures out the AAD tenant ID of the subscription by making an
+// FindTenantID figures out the AAD tenant ID of the subscription by making an
 // unauthenticated request to the Get Subscription Details endpoint and parses
 // the value from WWW-Authenticate header.
-func findTenantID(env azure.Environment, subscriptionID string) (string, error) {
+func FindTenantID(env azure.Environment, subscriptionID string) (string, error) {
 	const hdrKey = "WWW-Authenticate"
 	c := subscriptionsClient(env.ResourceManagerEndpoint)
 

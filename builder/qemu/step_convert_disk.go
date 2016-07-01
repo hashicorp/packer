@@ -31,7 +31,6 @@ func (s *stepConvertDisk) Run(state multistep.StateBag) multistep.StepAction {
 
 	command := []string{
 		"convert",
-		"-q",
 	}
 
 	if config.DiskCompression {

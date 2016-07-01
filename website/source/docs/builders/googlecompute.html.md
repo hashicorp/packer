@@ -126,10 +126,12 @@ builder.
 
 -   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
 
+-   `image_description` (string) - The description of the resulting image.
+
+-   `image_family` (string) - The name of the image family to which the resulting image belongs. You can create disks by specifying an image family instead of a specific image name. The image family always returns its latest image that is not deprecated.
+
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
-
--   `image_description` (string) - The description of the resulting image.
 
 -   `instance_name` (string) - A name to give the launched instance. Beware that
     this must be unique. Defaults to `"packer-{{uuid}}"`.
@@ -162,7 +164,7 @@ builder.
 
 ## Gotchas
 
-Centos images have root ssh access disabled by default. Set `ssh_username` to
+Centos and recent Debian images have root ssh access disabled by default. Set `ssh_username` to
 any user, which will be created by packer with sudo access.
 
 The machine type must have a scratch disk, which means you can't use an

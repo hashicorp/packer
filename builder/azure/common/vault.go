@@ -7,6 +7,7 @@
 package common
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -55,10 +56,18 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 		return nil, err
 	}
 
-	//resp, err := v.Send(req, http.StatusOK)
 	resp, err := autorest.SendWithSender(client, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(
+			"Failed to fetch secret from %s/%s, HTTP status code=%d (%s)",
+			vaultName,
+			secretName,
+			resp.StatusCode,
+			http.StatusText(resp.StatusCode))
 	}
 
 	var secret Secret

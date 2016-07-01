@@ -115,7 +115,12 @@ Packer to work:
         "ec2:DescribeImages",
         "ec2:RegisterImage",
         "ec2:CreateTags",
-        "ec2:ModifyImageAttribute"
+        "ec2:ModifyImageAttribute",
+        "ec2:GetPasswordData",
+        "ec2:DescribeTags",
+        "ec2:DescribeImageAttribute",
+        "ec2:CopyImage",
+        "ec2:DescribeRegions"
       ],
       "Resource" : "*"
   }]

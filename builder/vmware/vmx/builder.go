@@ -46,6 +46,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
+	state.Put("debug", b.config.PackerDebug)
 	state.Put("dir", dir)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
@@ -78,8 +79,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
-			VNCPortMin: b.config.VNCPortMin,
-			VNCPortMax: b.config.VNCPortMax,
+			VNCBindAddress: b.config.VNCBindAddress,
+			VNCPortMin:     b.config.VNCPortMin,
+			VNCPortMax:     b.config.VNCPortMax,
 		},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
@@ -120,9 +122,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run the steps.
 	if b.config.PackerDebug {
+		pauseFn := common.MultistepDebugFn(ui)
+		state.Put("pauseFn", pauseFn)
 		b.runner = &multistep.DebugRunner{
 			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
+			PauseFn: pauseFn,
 		}
 	} else {
 		b.runner = &multistep.BasicRunner{Steps: steps}

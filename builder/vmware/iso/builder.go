@@ -208,6 +208,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("cache", cache)
 	state.Put("config", &b.config)
+	state.Put("debug", b.config.PackerDebug)
 	state.Put("dir", dir)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
@@ -253,8 +254,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
-			VNCPortMin: b.config.VNCPortMin,
-			VNCPortMax: b.config.VNCPortMax,
+			VNCBindAddress: b.config.VNCBindAddress,
+			VNCPortMin:     b.config.VNCPortMin,
+			VNCPortMax:     b.config.VNCPortMax,
 		},
 		&StepRegister{
 			Format: b.config.Format,
@@ -304,9 +306,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run!
 	if b.config.PackerDebug {
+		pauseFn := common.MultistepDebugFn(ui)
+		state.Put("pauseFn", pauseFn)
 		b.runner = &multistep.DebugRunner{
 			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
+			PauseFn: pauseFn,
 		}
 	} else {
 		b.runner = &multistep.BasicRunner{Steps: steps}
@@ -330,7 +334,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Compile the artifact list
 	var files []string
-	if b.config.RemoteType != "" {
+	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
 		dir.SetOutputDir(b.config.OutputDir)
 		files, err = dir.ListFiles()
