@@ -43,7 +43,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepTakeSnapshot),
 	}
 
-	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 
 	state.Put("config", b.config)
@@ -61,12 +60,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	b.runner.Run(state)
 
-	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
 
-	// No errors, must've worked
 	artifact := &Artifact{
 		snapshotData: state.Get("snapshotname").(string),
 	}
