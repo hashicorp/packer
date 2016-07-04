@@ -101,7 +101,7 @@ func IsPowershellAvailable() (bool, string, error) {
 	if err != nil {
 		return false, "", err
 	} else {
-		return false, path, err
+		return true, path, err
 	}
 }
 

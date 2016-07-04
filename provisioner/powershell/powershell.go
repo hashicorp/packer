@@ -15,3 +15,9 @@ func powershellEncode(buffer []byte) string {
 	input := []uint8(wideCmd)
 	return base64.StdEncoding.EncodeToString(input)
 }
+
+func powershellDecode(message string) (retour string) {
+	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(message)))
+	base64.StdEncoding.Decode(base64Text, []byte(message))
+	return string(base64Text)
+}
