@@ -107,24 +107,25 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			},
 		},
 	}, raws...)
+
 	if err != nil {
 		return err
 	}
 
 	if p.config.EnvVarFormat == "" {
-		p.config.EnvVarFormat = `$env:%s=\"%s\"; `
+		p.config.EnvVarFormat = `$env:%s="%s"; `
 	}
 
 	if p.config.ElevatedEnvVarFormat == "" {
-		p.config.ElevatedEnvVarFormat = `$env:%s=\"%s\"; `
+		p.config.ElevatedEnvVarFormat = `$env:%s="%s"; `
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `powershell '& {if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; {{.Vars}}{{.Path}}; exit $LastExitCode}'`
+		p.config.ExecuteCommand = `{{.Vars}}{{.Path}}`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `powershell '& {if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; {{.Vars}}{{.Path}}; exit $LastExitCode}'`
+		p.config.ElevatedExecuteCommand = `{{.Vars}}{{.Path}}'`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -374,28 +375,41 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string, e
 }
 
 func (p *Provisioner) createCommandText() (command string, err error) {
+	// Return the interpolated command
+	if p.config.ElevatedUser == "" {
+		return p.createCommandTextNonPrivileged()
+	} else {
+		return p.createCommandTextPrivileged()
+	}
+}
+
+func (p *Provisioner) createCommandTextNonPrivileged() (command string, err error) {
 	// Create environment variables to set before executing the command
 	flattenedEnvVars, err := p.createFlattenedEnvVars(false)
 	if err != nil {
 		return "", err
 	}
-
 	p.config.ctx.Data = &ExecuteCommandTemplate{
 		Vars: flattenedEnvVars,
 		Path: p.config.RemotePath,
 	}
 	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+
 	if err != nil {
 		return "", fmt.Errorf("Error processing command: %s", err)
 	}
 
-	// Return the interpolated command
-	if p.config.ElevatedUser == "" {
-		return command, nil
-	}
+	encodedCommand := "powershell -executionpolicy bypass -encodedCommand " + powershellEncode([]byte("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; "+command+"; exit $LastExitCode"))
 
+	return encodedCommand, err
+}
+
+func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
 	// Can't double escape the env vars, lets create shiny new ones
-	flattenedEnvVars, err = p.createFlattenedEnvVars(true)
+	flattenedEnvVars, err := p.createFlattenedEnvVars(true)
+	if err != nil {
+		return "", err
+	}
 	p.config.ctx.Data = &ExecuteCommandTemplate{
 		Vars: flattenedEnvVars,
 		Path: p.config.RemotePath,
@@ -412,7 +426,7 @@ func (p *Provisioner) createCommandText() (command string, err error) {
 	// Return the path to the elevated shell wrapper
 	command = fmt.Sprintf("powershell -executionpolicy bypass -file \"%s\"", path)
 
-	return
+	return command, err
 }
 
 func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath string, err error) {
@@ -425,7 +439,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		Password:        p.config.ElevatedPassword,
 		TaskDescription: "Packer elevated task",
 		TaskName:        fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
-		EncodedCommand:  powershellEncode([]byte("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LASTEXITCODE")),
+		EncodedCommand:  powershellEncode([]byte("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LastExitCode")),
 	})
 
 	if err != nil {
