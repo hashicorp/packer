@@ -83,6 +83,20 @@ following steps in order to be able to compile and test Packer. These instructio
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
 
+### Opening an Pull Request
+
+When you are ready to open a pull-request, you will need to [fork packer](https://github.com/mitchellh/packer#fork-destination-box), push your changes to your fork, and then open a pull-request.
+
+For example, my github username is `cbednarski` so I would do the following:
+
+    git checkout -b f-my-feature
+    // develop a patch
+    git push https://github.com/cbednarski/packer f-my-feature
+
+From there, open your fork in your browser to open a new pull-request.
+
+**Note** Go infers package names from their filepaths. This means `go build` will break if you `git clone` your fork instead of using `go get` on the main packer project.
+
 ### Tips for Working on Packer
 
 #### Godeps
@@ -122,5 +136,5 @@ down to a specific resource to test, since testing all of them at once can
 sometimes take a very long time.
 
 Acceptance tests typically require other environment variables to be set for
-things such as access keys. The test itself should error early and tell you
-what to set, so it is not documented here.
+things such as API tokens and keys. Each test should error and tell you which
+credentials are missing, so those are not documented here.
