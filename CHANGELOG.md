@@ -27,6 +27,8 @@ IMPROVEMENTS:
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3547]
+  * builder/parallels: Support future versions of Parallels by using the latest
+    driver [GH-3673]
   * builder/qemu: Added `vnc_bind_address` option [GH-3574]
   * builder/virtualbox: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3542]
