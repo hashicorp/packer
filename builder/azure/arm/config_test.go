@@ -371,6 +371,7 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 		"storage_account":        "ignore",
 		"resource_group_name":    "ignore",
 		"subscription_id":        "ignore",
+		"communicator":           "none",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
 	}
@@ -421,6 +422,7 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 		"storage_account":     "ignore",
 		"resource_group_name": "ignore",
 		"subscription_id":     "ignore",
+		"communicator":        "none",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
 	}
