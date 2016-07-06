@@ -376,19 +376,40 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
-		new(stepForwardSSH),
+	)
+
+	if b.config.Comm.Type != "none" {
+		steps = append(steps,
+			new(stepForwardSSH),
+		)
+	}
+
+	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
 		&stepBootWait{},
 		&stepTypeBootCommand{},
-		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
-			SSHPort:   commPort,
-		},
+	)
+
+	if b.config.Comm.Type != "none" {
+		steps = append(steps,
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      commHost,
+				SSHConfig: sshConfig,
+				SSHPort:   commPort,
+			},
+		)
+	}
+
+	steps = append(steps,
 		new(common.StepProvision),
+	)
+	steps = append(steps,
 		new(stepShutdown),
+	)
+
+	steps = append(steps,
 		new(stepConvertDisk),
 	)
 
