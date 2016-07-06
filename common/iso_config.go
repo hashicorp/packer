@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -125,14 +124,11 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 }
 
 func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
+	errNotFound := fmt.Errorf("No checksum for %q found at: %s", filepath.Base(c.ISOUrls[0]), c.ISOChecksumURL)
 	for {
 		line, err := rd.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				return fmt.Errorf("No checksum for \"%s\" found at: %s", filepath.Base(c.ISOUrls[0]), c.ISOChecksumURL)
-			} else {
-				return fmt.Errorf("Error getting checksum from url: %s , %s", c.ISOChecksumURL, err.Error())
-			}
+		if err != nil && line == "" {
+			break
 		}
 		parts := strings.Fields(line)
 		if len(parts) < 2 {
@@ -142,7 +138,7 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 			// BSD-style checksum
 			if parts[1] == fmt.Sprintf("(%s)", filepath.Base(c.ISOUrls[0])) {
 				c.ISOChecksum = parts[3]
-				break
+				return nil
 			}
 		} else {
 			// Standard checksum
@@ -152,9 +148,9 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 			}
 			if parts[1] == filepath.Base(c.ISOUrls[0]) {
 				c.ISOChecksum = parts[0]
-				break
+				return nil
 			}
 		}
 	}
-	return nil
+	return errNotFound
 }
