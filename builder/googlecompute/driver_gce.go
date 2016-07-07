@@ -26,7 +26,7 @@ type driverGCE struct {
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
+func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	var err error
 
 	var client *http.Client

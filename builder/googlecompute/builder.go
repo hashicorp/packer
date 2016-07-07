@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // representing a GCE machine image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, &b.config.account)
+		ui, b.config.ProjectId, &b.config.Account)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +95,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		image:  state.Get("image").(Image),
 		driver: driver,
+		config: b.config,
 	}
 	return artifact, nil
 }
