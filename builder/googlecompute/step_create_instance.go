@@ -80,7 +80,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		OmitExternalIP:      config.OmitExternalIP,
 		Preemptible:         config.Preemptible,
 		Region:              config.Region,
-		ServiceAccountEmail: config.account.ClientEmail,
+		ServiceAccountEmail: config.Account.ClientEmail,
 		Subnetwork:          config.Subnetwork,
 		Tags:                config.Tags,
 		Zone:                config.Zone,
