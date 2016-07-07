@@ -214,7 +214,8 @@ builder.
     data when launching the instance.
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
-    in order to create a temporary security group within the VPC.
+    in order to create a temporary security group within the VPC. Requires `subnet_id`
+    to be set.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
