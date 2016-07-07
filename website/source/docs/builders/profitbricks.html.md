@@ -1,71 +1,66 @@
----
-description: |
-    The `profitbricks` Packer builder is able to create new images for use with
-    ProfitBricks. The builder takes a source image, runs any provisioning necessary
-    on the image after launching it, then snapshots it into a reusable image. This
-    reusable image can then be used as the foundation for new servers that are
-    launched within ProfitBricks.
-layout: docs
-page_title: ProfitBricks Builder
-...
+# Profitbricks packer builder
 
-# ProfitBricks Builder
+This builder plugin extends packer.io to support building images for ProfitBricks. 
 
-Type: `profitbricks`
+You can check out Packer [here](https://packer.io).
 
-The `profitbricks` Packer builder is able to create new images for use with
-[ProfitBricks](https://www.profitbricks.com). The builder takes a source image,
-runs any provisioning necessary on the image after launching it, then snapshots
-it into a reusable image. This reusable image can then be used as the foundation
-for new servers that are launched within ProfitBricks.
 
-The builder does *not* manage images. Once it creates an image, it is up to you
-to either use it or delete it.
+## Dependencies
+* Packer >= v0.10.1 (https://packer.io)
+* Golang (tested with 1.6) 
+* Godep >= v62
 
-## Configuration Reference
 
-There are many configuration options available for the builder. They are
-divided into two categories: required and optional parameters. Within
-each category, the available configuration keys are alphabetized.
+## Install Go
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+Follow these instructions to install Go(lang) on your system:
+* https://golang.org/doc/install
 
-### Required:
+## Install Packer
 
--   `pbpasswrod` (string) - ProfitBricks password. It
-    can also be specified via the environment variable `PROFITBRICKS_PASSWORD`,
-    if set.
-    
--   `pbusername` (string) - ProfitBricks username. It
-    can also be specified via the environment variable `PROFITBRICKS_USERNAME`,
-    if set.
+Follow these instructions to install Packer: 
+* https://www.packer.io/intro/getting-started/setup.html
 
--   `servername` (string) - The name of the server that will be created.
+## Compile the plugin
 
-### Optional:
+Once you have installed Packer, you must compile this plugin and install the
+resulting binary.
 
--   `cores` (int) - Number of server cores. Default value is 4.
+```shell
+go get https://github.com/profitbricks/packer-builder-profitbricks
+cd $GOPATH/src/github.com/profitbricks/packer-builder-profitbricks
+make install
+```
 
--   `disksize` (string) - Desired disk size. Default value is 50GB.
+If the build is successful, you should now have the `packer-builder-profitbricks`
+binary in:
 
--   `disktype` (string) - Desired disk type. The default value is "HDD".
+* Linux/Mac: the `~/.packer.d/plugins` directory.
+* Windows: the `%APPDATA%/packer.d/plugins` directory.
 
--   `image` (string) - ProfitBricks volume image. The default value is `Ubuntu-16.04`.
+If this binary is in the right location, you are ready to get started with Packer.
 
--   `pburl` (string) - ProfitBricks REST Url.
+## Download the plugin
 
--   `ram` (int) - RAM size for the server. The default value is 2048.
+Alternatively, you can download prebuilt binaries from https://github.com/profitbricks/packer-builder-profitbricks/releases/tag/v1.0.0. 
 
--   `region` (string) - ProfitBricks region. The default value is "us/las".
+After you have downloaded the binary for your operating system:
 
-## Basic Example
+* Linux/Mac: Place the binary in the  `~/.packer.d/plugins` directory.
+* Windows: Place the binary in the `%APPDATA%/packer.d/plugins` directory.
 
-Here is a basic example. It is completely valid as soon as you enter your own
-access tokens:
+## Example
 
-``` {.javascript}
+Once you have set everything up, you are ready to start with an example.
+To get a quick start run:
+
+```shell
+cd $GOPATH/src/github.com/profitbricks/packer-builder-profitbricks
+```
+
+There you will find example `config.json`
+
+```
 {
   "builders": [
     {
@@ -77,3 +72,66 @@ access tokens:
     }
 }
 ```
+
+To validate `config.json` run:
+
+```shell
+packer validate config.json
+```
+
+Or if you want to get suggestions on how to fix your config, run:
+
+```shell
+packer fix config.json
+```
+
+To build a ProfitBricks Packer image run: 
+
+```shell
+packer build config.json
+
+==> profitbricks: Creating temporary SSH key for instance...
+==> profitbricks: Creating Virutal Data Center...
+==> profitbricks: Creating ProfitBricks server...
+==> profitbricks: Creating a volume
+==> profitbricks: Creating a LAN
+==> profitbricks: Creating a NIC
+==> profitbricks: Waiting for SSH to become available...
+==> profitbricks: Creating ProfitBricks snapshot...
+==> profitbricks: Removing Virtual Data Center
+Build 'profitbricks' finished.
+
+
+==> Builds finished. The artifacts of successful builds are:
+--> profitbricks: A snapshot was created: 'packerSnapshot'
+
+```
+
+## Available config parameters
+
+Required parameters:
+
+```shell
+"type"          -   Builder type 
+"username"      -   ProfitBricks username 
+"password"      -   ProfitiBricks password 
+```
+
+Optional parameters:
+
+```shell
+"snapshot_password" - Snapshot password
+"snapshot_name"     - Snapshot name. If snapshot name is not provided Packer will generate it
+"sshkey_path"       - Path to private SSHkey. If no path to the key is provided Packer will create one under the name [snapshot_name] 
+"url"               - ProfitBricks REST Url
+"image"             - ProfitBricks volume image 
+"region"            - ProfitBricks region default value "us/las" 
+"disksize"          - Desired disk size default value 50gb 
+"disktype"          - Desired disk type default value "HDD" 
+"cores"             - Number of server cores default value 4 
+"ram"               - RAM size for the server default value "2048" 
+```
+
+## Support
+
+You are welcome to contact us with questions or comments at [ProfitBricks DevOps Central](https://devops.profitbricks.com/). Please report any issues via [GitHub's issue tracker](https://github.com/profitbricks/docker-machine-driver-profitbricks/issues).

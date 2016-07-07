@@ -22,11 +22,11 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	profitbricks.SetAuth(c.PBUsername, c.PBPassword)
 
-	ui.Say("Creating Virutal datacenter...")
+	ui.Say("Creating Virutal Data Center...")
 
 	datacenter := profitbricks.CreateDatacenter(profitbricks.CreateDatacenterRequest{
 		DCProperties: profitbricks.DCProperties{
-			Name:     c.ServerName,
+			Name:     c.SnapshotName,
 			Location: c.Region,
 		},
 	})
@@ -45,7 +45,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	server := profitbricks.CreateServer(datacenter.Id, profitbricks.CreateServerRequest{
 		ServerProperties: profitbricks.ServerProperties{
-			Name:  c.ServerName,
+			Name:  c.SnapshotName,
 			Ram:   c.Ram,
 			Cores: c.Cores,
 		},
@@ -68,10 +68,11 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	volume := profitbricks.CreateVolume(datacenter.Id, profitbricks.CreateVolumeRequest{
 		VolumeProperties: profitbricks.VolumeProperties{
 			Size:   c.DiskSize,
-			Name:   c.ServerName,
+			Name:   c.SnapshotName,
 			Image:  img,
 			Type:   c.DiskType,
 			SshKey: []string{c.SSHKey},
+			ImagePassword: c.SnapshotPassword,
 		},
 	})
 
@@ -91,7 +92,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	lan := profitbricks.CreateLan(datacenter.Id, profitbricks.CreateLanRequest{
 		LanProperties: profitbricks.LanProperties{
 			Public: true,
-			Name:   c.ServerName,
+			Name:   c.SnapshotName,
 		},
 	})
 
@@ -107,7 +108,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	nic := profitbricks.CreateNic(datacenter.Id, server.Id, profitbricks.NicCreateRequest{
 		NicProperties: profitbricks.NicProperties{
-			Name: c.ServerName,
+			Name: c.SnapshotName,
 			Lan:  lan.Id,
 			Dhcp: true,
 		},
