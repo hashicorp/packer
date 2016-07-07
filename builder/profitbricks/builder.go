@@ -31,7 +31,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&StepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("pb_%s.pem", b.config.ServerName),
+			DebugKeyPath: fmt.Sprintf("pb_%s", b.config.SnapshotName),
 		},
 		new(stepCreateServer),
 		&communicator.StepConnect{

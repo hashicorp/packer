@@ -13,23 +13,25 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	Comm                communicator.Config `mapstructure:",squash"`
+	Comm             communicator.Config `mapstructure:",squash"`
 
-	PBUsername string `mapstructure:"pbusername"`
-	PBPassword string `mapstructure:"pbpassword"`
-	PBUrl      string `mapstructure:"pburl"`
+	PBUsername       string `mapstructure:"username"`
+	PBPassword       string `mapstructure:"password"`
+	PBUrl            string `mapstructure:"url"`
 
-	Region     string `mapstructure:"region"`
-	Image      string `mapstructure:"image"`
-	SSHKey     string `mapstructure:"sshkey"`
-	ServerName string `mapstructure:"servername"`
-	DiskSize   int    `mapstructure:"disksize"`
-	DiskType   string `mapstructure:"disktype"`
-	Cores      int    `mapstructure:"cores"`
-	Ram        int    `mapstructure:"ram"`
+	Region           string `mapstructure:"region"`
+	Image            string `mapstructure:"image"`
+	SSHKey           string
+	SSHKey_path           string `mapstructure:"sshkey_path"`
+	SnapshotName     string `mapstructure:"snapshot_name"`
+	SnapshotPassword string `mapstructure:"snapshot_password"`
+	DiskSize         int    `mapstructure:"disksize"`
+	DiskType         string `mapstructure:"disktype"`
+	Cores            int    `mapstructure:"cores"`
+	Ram              int    `mapstructure:"ram"`
 
-	CommConfig communicator.Config `mapstructure:",squash"`
-	ctx        interpolate.Context
+	CommConfig       communicator.Config `mapstructure:",squash"`
+	ctx              interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -57,12 +59,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	c.Comm.SSHPort = 22
 
-	if c.PBUsername == ""{
-		c.PBUsername =  os.Getenv("PROFITBRICKS_USERNAME")
+	if c.SnapshotName == "" {
+		def, err := interpolate.Render("packer-{{timestamp}}", nil)
+		if err != nil {
+			panic(err)
+		}
+
+		// Default to packer-{{ unix timestamp (utc) }}
+		c.SnapshotName = def
 	}
 
-	if c.PBPassword == ""{
-		c.PBPassword =  os.Getenv("PROFITBRICKS_PASSWORD")
+	if c.PBUsername == "" {
+		c.PBUsername = os.Getenv("PROFITBRICKS_USERNAME")
+	}
+
+	if c.PBPassword == "" {
+		c.PBPassword = os.Getenv("PROFITBRICKS_PASSWORD")
 	}
 
 	if c.PBUrl == "" {
@@ -106,11 +118,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.PBPassword == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ProfitBricks password is required"))
-	}
-
-	if c.ServerName == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("Server Name is required"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

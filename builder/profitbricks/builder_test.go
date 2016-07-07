@@ -81,7 +81,7 @@ func TestBuilderPrepare_Servername(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.ServerName != expected {
-		t.Errorf("found %s, expected %s", b.config.ServerName, expected)
+	if b.config.SnapshotName != expected {
+		t.Errorf("found %s, expected %s", b.config.SnapshotName, expected)
 	}
 }
