@@ -103,7 +103,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			if _, err := os.Stat(checksumFile); err != nil {
 				newartifact.files = append(newartifact.files, checksumFile)
 			}
-
+			if err := os.MkdirAll(filepath.Dir(checksumFile), os.FileMode(0755)); err != nil {
+				return nil, false, fmt.Errorf("unable to create dir: %s", err.Error())
+			}
 			fw, err := os.OpenFile(checksumFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.FileMode(0644))
 			if err != nil {
 				return nil, false, fmt.Errorf("unable to create file %s: %s", checksumFile, err.Error())
