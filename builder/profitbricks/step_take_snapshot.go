@@ -23,9 +23,9 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	dcId := state.Get("datacenter_id").(string)
 	volumeId := state.Get("volume_id").(string)
 
-	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.ServerName+"Snapshot")
+	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName)
 
-	state.Put("snapshotname", c.ServerName+"Snapshot")
+	state.Put("snapshotname", c.SnapshotName)
 
 	err := s.checkForErrors(snapshot)
 	if err != nil {
