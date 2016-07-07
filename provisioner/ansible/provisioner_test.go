@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -242,4 +243,33 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+}
+
+func TestAnsibleGetVersion(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 and it requires Ansible to be installed")
+	}
+
+	var p Provisioner
+	p.config.Command = "ansible-playbook"
+	p.getVersion()
+}
+
+func TestAnsibleLongMessages(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 and it requires Ansible to be installed")
+	}
+
+	var p Provisioner
+	p.config.Command = "ansible-playbook"
+	p.config.PlaybookFile = "./test-fixtures/long-debug-message.yml"
+	p.Prepare()
+
+	comm := &packer.MockCommunicator{}
+	ui := &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
+
+	p.Provision(ui, comm)
 }
