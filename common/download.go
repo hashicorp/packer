@@ -105,21 +105,29 @@ func (d *DownloadClient) Get() (string, error) {
 		return d.config.TargetPath, nil
 	}
 
-	url, err := url.Parse(d.config.Url)
+	u, err := url.Parse(d.config.Url)
 	if err != nil {
 		return "", err
 	}
 
-	log.Printf("Parsed URL: %#v", url)
+	log.Printf("Parsed URL: %#v", u)
 
 	// Files when we don't copy the file are special cased.
 	var f *os.File
 	var finalPath string
 	sourcePath := ""
-	if url.Scheme == "file" && !d.config.CopyFile {
+	if u.Scheme == "file" && !d.config.CopyFile {
+		// This is special case for relative path in this case user specify
+		// file:../ and after parse destination goes to Opaque
+		if u.Path != "" {
+			// If url.Path is set just use this
+			finalPath = u.Path
+		} else if u.Opaque != "" {
+			// otherwise try url.Opaque
+			finalPath = u.Opaque
+		}
 		// This is a special case where we use a source file that already exists
 		// locally and we don't make a copy. Normally we would copy or download.
-		finalPath = url.Path
 		log.Printf("[DEBUG] Using local file: %s", finalPath)
 
 		// Remove forward slash on absolute Windows file URLs before processing
@@ -128,13 +136,16 @@ func (d *DownloadClient) Get() (string, error) {
 		}
 		// Keep track of the source so we can make sure not to delete this later
 		sourcePath = finalPath
+		if _, err = os.Stat(finalPath); err != nil {
+			return "", err
+		}
 	} else {
 		finalPath = d.config.TargetPath
 
 		var ok bool
-		d.downloader, ok = d.config.DownloaderMap[url.Scheme]
+		d.downloader, ok = d.config.DownloaderMap[u.Scheme]
 		if !ok {
-			return "", fmt.Errorf("No downloader for scheme: %s", url.Scheme)
+			return "", fmt.Errorf("No downloader for scheme: %s", u.Scheme)
 		}
 
 		// Otherwise, download using the downloader.
@@ -143,8 +154,8 @@ func (d *DownloadClient) Get() (string, error) {
 			return "", err
 		}
 
-		log.Printf("[DEBUG] Downloading: %s", url.String())
-		err = d.downloader.Download(f, url)
+		log.Printf("[DEBUG] Downloading: %s", u.String())
+		err = d.downloader.Download(f, u)
 		f.Close()
 		if err != nil {
 			return "", err
