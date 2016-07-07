@@ -1,7 +1,6 @@
 package file
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -163,7 +162,6 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
-	fmt.Println(tf.Name())
 	defer os.Remove(tf.Name())
 
 	config := map[string]interface{}{
