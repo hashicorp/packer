@@ -38,3 +38,7 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 func (c *comm) Download(path string, output io.Writer) error {
 	return errors.New("Download is not implemented when communicator = 'none'")
 }
+
+func (c *comm) DownloadDir(dst string, src string, excl []string) error {
+	return errors.New("DownloadDir is not implemented when communicator = 'none'")
+}
