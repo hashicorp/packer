@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/mitchellh/packer",
+	"ImportPath": "github.com/StackPointCloud/packer",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v74",
 	"Deps": [
@@ -380,6 +380,371 @@
 			"Rev": "162146fc57112954184d90266f4733e900ed05a5"
 		},
 		{
+			"ImportPath": "github.com/mitchellh/packer/builder/amazon/chroot",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/amazon/common",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/amazon/ebs",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/amazon/instance",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/arm",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/common",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/common/constants",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/common/lin",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/common/logutil",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/common/template",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/pkcs12",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/azure/pkcs12/rc2",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/digitalocean",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/docker",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/file",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/googlecompute",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/null",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/openstack",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/parallels/common",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/parallels/iso",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/parallels/pvm",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/qemu",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/virtualbox/common",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/virtualbox/iso",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/virtualbox/ovf",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/vmware/common",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/vmware/iso",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/builder/vmware/vmx",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/command",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/common",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/common/ssh",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/common/uuid",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/communicator/none",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/communicator/ssh",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/communicator/winrm",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/fix",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/helper/communicator",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/helper/config",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/helper/flag-kv",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/helper/flag-slice",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/packer",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/packer/plugin",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/packer/rpc",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/amazon-import",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/artifice",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/atlas",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/checksum",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/compress",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/docker-import",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/docker-push",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/docker-save",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/docker-tag",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/shell-local",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/vagrant",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/vagrant-cloud",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/post-processor/vsphere",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/ansible",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/ansible-local",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/chef-client",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/chef-solo",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/file",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/powershell",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/puppet-masterless",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/puppet-server",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/salt-masterless",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/shell",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/shell-local",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/windows-restart",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/provisioner/windows-shell",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/template",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/template/interpolate",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/version",
+			"Comment": "v0.10.1-120-gc8f68af",
+			"Rev": "c8f68afa5c3b39259fd7ec74877ab80640358e0f"
+		},
+		{
 			"ImportPath": "github.com/mitchellh/panicwrap",
 			"Rev": "a1e50bc201f387747a45ffff020f1af2d8759e88"
 		},
@@ -635,7 +1000,7 @@
 		},
 		{
 			"ImportPath": "github.com/profitbricks/profitbricks-sdk-go",
-			"Rev": "04e83add0882eb67a163231899300f97b91f248d"
+			"Rev": "9dea2c24a0dc0740d93fd621ce845a1faede6826"
 		}
 	]
 }

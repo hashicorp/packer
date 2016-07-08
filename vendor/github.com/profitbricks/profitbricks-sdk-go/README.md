@@ -109,6 +109,63 @@ request := profitbricks.CreateDatacenterRequest{
 response := profitbricks.CreateDatacenter(request)
 ```
 
+## How To: Create Data Center with Multiple Resources
+
+To create a complex Data Center you would do this. As you can see, you can create quite a few of the objects you will need later all in one request.:
+
+```go
+datacenter := model.Datacenter{
+		Properties: model.DatacenterProperties{
+			Name: "composite test",
+			Location:location,
+		},
+		Entities:model.DatacenterEntities{
+			Servers: &model.Servers{
+				Items:[]model.Server{
+					model.Server{
+						Properties: model.ServerProperties{
+							Name : "server1",
+							Ram: 2048,
+							Cores: 1,
+						},
+						Entities:model.ServerEntities{
+							Volumes: &model.AttachedVolumes{
+								Items:[]model.Volume{
+									model.Volume{
+										Properties: model.VolumeProperties{
+											Type_:"HDD",
+											Size:10,
+											Name:"volume1",
+											Image:"1f46a4a3-3f47-11e6-91c6-52540005ab80",
+											Bus:"VIRTIO",
+											ImagePassword:"test1234",
+											SshKeys: []string{"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCoLVLHON4BSK3D8L4H79aFo+0cj7VM2NiRR/K9wrfkK/XiTc7FlEU4Bs8WLZcsIOxbCGWn2zKZmrLaxYlY+/3aJrxDxXYCy8lRUMnqcQ2JCFY6tpZt/DylPhS9L6qYNpJ0F4FlqRsWxsjpF8TDdJi64k2JFJ8TkvX36P2/kqyFfI+N0/axgjhqV3BgNgApvMt9jxWB5gi8LgDpw9b+bHeMS7TrAVDE7bzT86dmfbTugtiME8cIday8YcRb4xAFgRH8XJVOcE3cs390V/dhgCKy1P5+TjQMjKbFIy2LJoxb7bd38kAl1yafZUIhI7F77i7eoRidKV71BpOZsaPEbWUP jasmin@Jasmins-MBP"},
+										},
+									},
+								},
+							},
+							Nics: &model.Nics{
+								Items: []model.Nic{
+									model.Nic{
+										Properties: model.NicProperties{
+											Name : "nic",
+											Lan : "1",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	
+dc := CompositeCreateDatacenter(datacenter)
+
+```
+
+
 ## How To: Delete Data Center
 
 You will want to exercise a bit of caution here. Removing a data center will destroy all objects contained within that data center -- servers, volumes, snapshots, and so on.
