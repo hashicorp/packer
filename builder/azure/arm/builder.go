@@ -74,6 +74,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.config.SubscriptionID,
 		b.config.ResourceGroupName,
 		b.config.StorageAccount,
+		b.config.cloudEnvironment,
 		spnCloud,
 		spnKeyVault)
 
@@ -240,7 +241,9 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePri
 			return nil, nil, err
 		}
 
-		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(packerAzureCommon.AzureVaultScope)
+		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(
+			strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
+
 		if err != nil {
 			return nil, nil, err
 		}
