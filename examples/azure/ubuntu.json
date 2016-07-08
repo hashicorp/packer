@@ -4,7 +4,7 @@
     "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
     "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
     "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
-    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}"
   },
   "builders": [{
     "type": "azure-arm",
