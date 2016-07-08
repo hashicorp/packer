@@ -49,12 +49,12 @@ func CreateSnapshot(dcid string, volid string, name string) Resp {
 	var path = volume_path(dcid, volid)
 	path = path + "/create-snapshot"
 
-	return is_command(path, "name="+name)
+	return is_command(path, "name=" + name)
 }
 
 func RestoreSnapshot(dcid string, volid string, snapshotId string) Resp {
 	var path = volume_path(dcid, volid)
 	path = path + "/restore-snapshot"
 
-	return is_command(path, "snapshotId="+snapshotId)
+	return is_command(path, "snapshotId=" + snapshotId)
 }

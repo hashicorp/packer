@@ -2,7 +2,10 @@ package profitbricks
 
 import "net/http"
 import "fmt"
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/profitbricks/profitbricks-sdk-go/model"
+)
 
 func MkJson(i interface{}) string {
 	jason, err := json.MarshalIndent(&i, "", "    ")
@@ -50,6 +53,15 @@ func toInstance(resp Resp) Instance {
 	json.Unmarshal(resp.Body, &ins)
 	ins.Resp = resp
 	return ins
+}
+
+func toDataCenter(resp Resp) model.Datacenter {
+	var dc model.Datacenter
+	json.Unmarshal(resp.Body, &dc)
+	dc.Response = string(resp.Body)
+	dc.Headers = &resp.Headers
+	dc.StatusCode = resp.StatusCode
+	return dc
 }
 
 type Instance struct {

@@ -1,6 +1,9 @@
 package profitbricks
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/profitbricks/profitbricks-sdk-go/model"
+)
 
 type CreateDatacenterRequest struct {
 	DCProperties `json:"properties"`
@@ -23,6 +26,12 @@ func CreateDatacenter(dc CreateDatacenterRequest) Instance {
 	obj, _ := json.Marshal(dc)
 	path := dc_col_path()
 	return is_post(path, obj)
+}
+
+func CompositeCreateDatacenter(datacenter model.Datacenter) model.Datacenter {
+	obj, _ := json.Marshal(datacenter)
+	path := dc_col_path()
+	return is_composite_post(path, obj)
 }
 
 // GetDatacenter returns a Instance struct where id == dcid
