@@ -303,6 +303,8 @@ func setCloudEnvironment(c *Config) error {
 	switch name {
 	case "CHINA", "CHINACLOUD", "AZURECHINACLOUD":
 		c.cloudEnvironment = &azure.ChinaCloud
+	case "GERMAN", "GERMANCLOUD", "AZUREGERMANCLOUD":
+		c.cloudEnvironment = &azure.GermanCloud
 	case "PUBLIC", "PUBLICCLOUD", "AZUREPUBLICCLOUD":
 		c.cloudEnvironment = &azure.PublicCloud
 	case "USGOVERNMENT", "USGOVERNMENTCLOUD", "AZUREUSGOVERNMENTCLOUD":

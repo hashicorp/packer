@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -102,6 +103,7 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 }
 
 func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string,
+	cloud *azure.Environment,
 	servicePrincipalToken, servicePrincipalTokenVault *azure.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
@@ -113,32 +115,42 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.DeploymentsClient.RequestInspector = withInspection(maxlen)
 	azureClient.DeploymentsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.DeploymentsClient.UserAgent += packerUserAgent
+	azureClient.DeploymentsClient.BaseURI = cloud.ResourceManagerEndpoint
 
 	azureClient.GroupsClient = resources.NewGroupsClient(subscriptionID)
 	azureClient.GroupsClient.Authorizer = servicePrincipalToken
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
 	azureClient.GroupsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.GroupsClient.UserAgent += packerUserAgent
+	azureClient.GroupsClient.BaseURI = cloud.ResourceManagerEndpoint
 
 	azureClient.PublicIPAddressesClient = network.NewPublicIPAddressesClient(subscriptionID)
 	azureClient.PublicIPAddressesClient.Authorizer = servicePrincipalToken
 	azureClient.PublicIPAddressesClient.RequestInspector = withInspection(maxlen)
 	azureClient.PublicIPAddressesClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.PublicIPAddressesClient.UserAgent += packerUserAgent
+	azureClient.PublicIPAddressesClient.BaseURI = cloud.ResourceManagerEndpoint
 
 	azureClient.VirtualMachinesClient = compute.NewVirtualMachinesClient(subscriptionID)
 	azureClient.VirtualMachinesClient.Authorizer = servicePrincipalToken
 	azureClient.VirtualMachinesClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualMachinesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient))
 	azureClient.VirtualMachinesClient.UserAgent += packerUserAgent
+	azureClient.VirtualMachinesClient.BaseURI = cloud.ResourceManagerEndpoint
 
 	azureClient.AccountsClient = armStorage.NewAccountsClient(subscriptionID)
 	azureClient.AccountsClient.Authorizer = servicePrincipalToken
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
 	azureClient.AccountsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.AccountsClient.UserAgent += packerUserAgent
+	azureClient.AccountsClient.BaseURI = cloud.ResourceManagerEndpoint
 
-	azureClient.VaultClient = common.VaultClient{}
+	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	azureClient.VaultClient = common.NewVaultClient(*keyVaultURL)
 	azureClient.VaultClient.Authorizer = servicePrincipalTokenVault
 	azureClient.VaultClient.RequestInspector = withInspection(maxlen)
 	azureClient.VaultClient.ResponseInspector = byInspecting(maxlen)
@@ -149,7 +161,13 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 		return nil, err
 	}
 
-	storageClient, err := storage.NewBasicClient(storageAccountName, *accountKeys.Key1)
+	storageClient, err := storage.NewClient(
+		storageAccountName,
+		*(*accountKeys.Keys)[0].Value,
+		cloud.StorageEndpointSuffix,
+		storage.DefaultAPIVersion,
+		true /*useHttps*/)
+
 	if err != nil {
 		return nil, err
 	}
