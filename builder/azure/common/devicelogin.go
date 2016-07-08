@@ -231,7 +231,13 @@ func FindTenantID(env azure.Environment, subscriptionID string) (string, error) 
 }
 
 func subscriptionsClient(baseURI string) subscriptions.Client {
-	c := subscriptions.NewClientWithBaseURI(baseURI, "") // used only for unauthenticated requests for generic subs IDs
-	c.Client.UserAgent += userAgent
-	return c
+	client := subscriptions.Client{
+		subscriptions.ManagementClient{
+			Client:     autorest.NewClientWithUserAgent(subscriptions.UserAgent() + userAgent),
+			BaseURI:    baseURI,
+			APIVersion: subscriptions.APIVersion,
+		},
+	}
+
+	return client
 }
