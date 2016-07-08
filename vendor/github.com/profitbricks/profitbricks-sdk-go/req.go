@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"github.com/profitbricks/profitbricks-sdk-go/model"
 )
 
 //FullHeader is the standard header to include with all http requests except is_patch and is_command
@@ -108,6 +109,13 @@ func is_post(path string, jason []byte) Instance {
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jason))
 	req.Header.Add("Content-Type", FullHeader)
 	return toInstance(do(req))
+}
+
+func is_composite_post(path string, jason []byte) model.Datacenter {
+	url := mk_url(path)+ `?depth=` + Depth
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jason))
+	req.Header.Add("Content-Type", FullHeader)
+	return toDataCenter(do(req))
 }
 
 // is_command performs an http.NewRequest POST and returns a Resp struct
