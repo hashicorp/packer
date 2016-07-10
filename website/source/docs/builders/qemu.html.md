@@ -262,22 +262,13 @@ builder and not otherwise conflicting with the qemuargs):
   qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
-\~&gt; **Windows Users:** While [QEMU for Windows](https://qemu.weilnetz.de/) builds are available, issues relating to stdout in the 
-Windows builds cause packer to fail due to being unable to determine the QEMU version from the command line. [QEMU on Windows](http://lassauge.free.fr/qemu/)
-also provides QEMU binaries for Windows will work with Packer but the builds are experimental and only provide support for QEMU 2.5.0.
+\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
+to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
 
-The following shows a sample usage for Windows QEMU suuport:
+The following shows the environment variable that needs to be set for Windows QEMU support:
 
 ```json
-  // ...
-  "qemu_binary": "qemu-system-x86_64",
-  "qemuargs": [
-    [
-      "-L",
-      "C:\\Program Files\\qemu\\Bios"
-    ],
-    // ...
-  ]
+  setx SDL_STDIO_REDIRECT=1
 ```
 
 You can also use the `SSHHostPort` template variable to produce a packer
