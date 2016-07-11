@@ -268,7 +268,7 @@ to be set for QEMU for Windows to redirect stdout to the console instead of stdo
 The following shows the environment variable that needs to be set for Windows QEMU support:
 
 ```json
-  setx SDL_STDIO_REDIRECT=1
+  setx SDL_STDIO_REDIRECT=0
 ```
 
 You can also use the `SSHHostPort` template variable to produce a packer
