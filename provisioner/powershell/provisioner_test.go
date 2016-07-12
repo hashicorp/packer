@@ -390,14 +390,27 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; c:/Windows/Temp/inlineScript.bat; exit $LastExitCode`
+	expectedCommandUtf8, err := powershellUtf8(expectedCommand)
+	if err != nil {
+		t.Fatal("should not have error when Utf 8 encoding")
+	}
+	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSJTaWxlbnRseUNvbnRpbnVlIn07ICRlbnY6UEFDS0VSX0JVSUxERVJfVFlQRT0iaXNvIjsgJGVudjpQQUNLRVJfQlVJTERfTkFNRT0idm13YXJlIjsgYzovV2luZG93cy9UZW1wL2lubGluZVNjcmlwdC5iYXQ7IGV4aXQgJExhc3RFeGl0Q29kZQ==`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
-	expectedCommandEncoded := expectedCommandPrefix + powershellEncode([]byte(expectedCommand))
+	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
+
+	actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
+	actualCommandDecoded, err := powershellDecode(actualCommandWithoutPrefix)
+	if err != nil {
+		t.Fatal("should not have error when base64 decoding")
+	}
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommandEncoded {
-		actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
-		actualCommandDecoded := powershellDecode(actualCommandWithoutPrefix)
-		t.Fatalf("Expect command to be: %s, got %s. Expected decoded: %s, got %s", expectedCommandEncoded, comm.StartCmd.Command, expectedCommand, actualCommandDecoded)
+		t.Fatalf("Expect command to be: %s, got %s.", expectedCommandEncoded, comm.StartCmd.Command)
+	}
+
+	if actualCommandDecoded != expectedCommandUtf8 {
+		t.Fatalf("Expected decoded:%s, %s, got %s", expectedCommandEncoded, len(expectedCommandUtf8), len(actualCommandDecoded))
 	}
 
 	envVars := make([]string, 2)
@@ -413,14 +426,27 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	expectedCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}; $env:BAR="BAZ"; $env:FOO="BAR"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; c:/Windows/Temp/inlineScript.bat; exit $LastExitCode`
+	expectedCommandUtf8, err = powershellUtf8(expectedCommand)
+	if err != nil {
+		t.Fatal("should not have error when Utf 8 encoding")
+	}
+	expectedCommandBase64Encoded = `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSJTaWxlbnRseUNvbnRpbnVlIn07ICRlbnY6QkFSPSJCQVoiOyAkZW52OkZPTz0iQkFSIjsgJGVudjpQQUNLRVJfQlVJTERFUl9UWVBFPSJpc28iOyAkZW52OlBBQ0tFUl9CVUlMRF9OQU1FPSJ2bXdhcmUiOyBjOi9XaW5kb3dzL1RlbXAvaW5saW5lU2NyaXB0LmJhdDsgZXhpdCAkTGFzdEV4aXRDb2Rl`
 	expectedCommandPrefix = `powershell -executionpolicy bypass -encodedCommand `
-	expectedCommandEncoded = expectedCommandPrefix + powershellEncode([]byte(expectedCommand))
+	expectedCommandEncoded = expectedCommandPrefix + expectedCommandBase64Encoded
+
+	actualCommandWithoutPrefix = strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
+	actualCommandDecoded, err = powershellDecode(actualCommandWithoutPrefix)
+	if err != nil {
+		t.Fatal("should not have error when base64 decoding")
+	}
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommandEncoded {
-		actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
-		actualCommandDecoded := powershellDecode(actualCommandWithoutPrefix)
-		t.Fatalf("Expect command to be: %s, got %s. Expected decoded: %s, got %s", expectedCommandEncoded, comm.StartCmd.Command, expectedCommand, actualCommandDecoded)
+		t.Fatalf("Expect command to be: %s, got %s.", expectedCommandEncoded, comm.StartCmd.Command)
+	}
+
+	if actualCommandDecoded != expectedCommandUtf8 {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommandUtf8, actualCommandDecoded)
 	}
 }
 
@@ -443,14 +469,27 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	}
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}; $env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild"; c:/Windows/Temp/script.ps1; exit $LastExitCode`
+	expectedCommandUtf8, err := powershellUtf8(expectedCommand)
+	if err != nil {
+		t.Fatal("should not have error when Utf 8 encoding")
+	}
+	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSJTaWxlbnRseUNvbnRpbnVlIn07ICRlbnY6UEFDS0VSX0JVSUxERVJfVFlQRT0iZm9vdHlwZSI7ICRlbnY6UEFDS0VSX0JVSUxEX05BTUU9ImZvb2J1aWxkIjsgYzovV2luZG93cy9UZW1wL3NjcmlwdC5wczE7IGV4aXQgJExhc3RFeGl0Q29kZQ==`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
-	expectedCommandEncoded := expectedCommandPrefix + powershellEncode([]byte(expectedCommand))
+	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
+
+	actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
+	actualCommandDecoded, err := powershellDecode(actualCommandWithoutPrefix)
+	if err != nil {
+		t.Fatal("should not have error when base64 decoding")
+	}
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommandEncoded {
-		actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
-		actualCommandDecoded := powershellDecode(actualCommandWithoutPrefix)
-		t.Fatalf("Expect command to be: %s, got %s. Expected decoded: %s, got %s", expectedCommandEncoded, comm.StartCmd.Command, expectedCommand, actualCommandDecoded)
+		t.Fatalf("Expect command to be: %s, got %s.", expectedCommandEncoded, comm.StartCmd.Command)
+	}
+
+	if actualCommandDecoded != expectedCommandUtf8 {
+		t.Fatalf("Expected decoded: %n, got %n", len(expectedCommandUtf8), len(actualCommandDecoded))
 	}
 }
 
@@ -480,14 +519,27 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	}
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}; $env:BAR="BAZ"; $env:FOO="BAR"; $env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild"; c:/Windows/Temp/script.ps1; exit $LastExitCode`
+	expectedCommandUtf8, err := powershellUtf8(expectedCommand)
+	if err != nil {
+		t.Fatal("should not have error when Utf 8 encoding")
+	}
+	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSJTaWxlbnRseUNvbnRpbnVlIn07ICRlbnY6QkFSPSJCQVoiOyAkZW52OkZPTz0iQkFSIjsgJGVudjpQQUNLRVJfQlVJTERFUl9UWVBFPSJmb290eXBlIjsgJGVudjpQQUNLRVJfQlVJTERfTkFNRT0iZm9vYnVpbGQiOyBjOi9XaW5kb3dzL1RlbXAvc2NyaXB0LnBzMTsgZXhpdCAkTGFzdEV4aXRDb2Rl`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
-	expectedCommandEncoded := expectedCommandPrefix + powershellEncode([]byte(expectedCommand))
+	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
+
+	actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
+	actualCommandDecoded, err := powershellDecode(actualCommandWithoutPrefix)
+	if err != nil {
+		t.Fatal("should not have error when base64 decoding")
+	}
 
 	// Should run the command without alteration
 	if comm.StartCmd.Command != expectedCommandEncoded {
-		actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
-		actualCommandDecoded := powershellDecode(actualCommandWithoutPrefix)
-		t.Fatalf("Expect command to be: %s, got %s. Expected decoded: %s, got %s", expectedCommandEncoded, comm.StartCmd.Command, expectedCommand, actualCommandDecoded)
+		t.Fatalf("Expect command to be: %s, got %s.", expectedCommandEncoded, comm.StartCmd.Command)
+	}
+
+	if actualCommandDecoded != expectedCommandUtf8 {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommandUtf8, actualCommandDecoded)
 	}
 }
 
@@ -599,14 +651,24 @@ func TestProvision_createCommandText(t *testing.T) {
 	cmd, _ := p.createCommandText()
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}; $env:PACKER_BUILDER_TYPE=""; $env:PACKER_BUILD_NAME=""; c:/Windows/Temp/script.ps1; exit $LastExitCode`
+	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSJTaWxlbnRseUNvbnRpbnVlIn07ICRlbnY6UEFDS0VSX0JVSUxERVJfVFlQRT0iIjsgJGVudjpQQUNLRVJfQlVJTERfTkFNRT0iIjsgYzovV2luZG93cy9UZW1wL3NjcmlwdC5wczE7IGV4aXQgJExhc3RFeGl0Q29kZQ==`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
-	expectedCommandEncoded := expectedCommandPrefix + powershellEncode([]byte(expectedCommand))
+	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
+
+	actualCommandWithoutPrefix := strings.Replace(cmd, expectedCommandPrefix, "", -1)
+
+	actualCommandDecoded, err := powershellDecode(actualCommandWithoutPrefix)
+	if err != nil {
+		t.Fatal("should not have error when base64 decoding")
+	}
 
 	// Should run the command without alteration
 	if cmd != expectedCommandEncoded {
-		actualCommandWithoutPrefix := strings.Replace(comm.StartCmd.Command, expectedCommandPrefix, "", -1)
-		actualCommandDecoded := powershellDecode(actualCommandWithoutPrefix)
-		t.Fatalf("Expect command to be: %s, got %s. Expected decoded: %s, got %s", expectedCommandEncoded, comm.StartCmd.Command, expectedCommand, actualCommandDecoded)
+		t.Fatalf("Expect command to be: %s, got %s.", expectedCommandEncoded, cmd)
+	}
+
+	if actualCommandDecoded != expectedCommand {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommand, actualCommandDecoded)
 	}
 
 	// Elevated

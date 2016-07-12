@@ -399,9 +399,25 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 		return "", fmt.Errorf("Error processing command: %s", err)
 	}
 
-	encodedCommand := "powershell -executionpolicy bypass -encodedCommand " + powershellEncode([]byte("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; "+command+"; exit $LastExitCode"))
+	commandText, err := p.generateCommandLineRunner(command)
+	if err != nil {
+		return "", fmt.Errorf("Error generating command line runner: %s", err)
+	}
 
-	return encodedCommand, err
+	return commandText, err
+}
+
+func (p *Provisioner) generateCommandLineRunner(command string) (commandText string, err error) {
+	log.Printf("Building command line for: %s", command)
+
+	base64EncodedCommand, err := powershellEncode("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LastExitCode")
+	if err != nil {
+		return "", fmt.Errorf("Error encoding command: %s", err)
+	}
+
+	commandText = "powershell -executionpolicy bypass -encodedCommand " + base64EncodedCommand
+
+	return commandText, nil
 }
 
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
@@ -422,6 +438,9 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	// OK so we need an elevated shell runner to wrap our command, this is going to have its own path
 	// generate the script and update the command runner in the process
 	path, err := p.generateElevatedRunner(command)
+	if err != nil {
+		return "", fmt.Errorf("Error generating elevated runner: %s", err)
+	}
 
 	// Return the path to the elevated shell wrapper
 	command = fmt.Sprintf("powershell -executionpolicy bypass -file \"%s\"", path)
@@ -434,12 +453,18 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 
 	// generate command
 	var buffer bytes.Buffer
+
+	base64EncodedCommand, err := powershellEncode("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LastExitCode")
+	if err != nil {
+		return "", fmt.Errorf("Error encoding command: %s", err)
+	}
+
 	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
 		User:            p.config.ElevatedUser,
 		Password:        p.config.ElevatedPassword,
 		TaskDescription: "Packer elevated task",
 		TaskName:        fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
-		EncodedCommand:  powershellEncode([]byte("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LastExitCode")),
+		EncodedCommand:  base64EncodedCommand,
 	})
 
 	if err != nil {

@@ -2,22 +2,33 @@ package powershell
 
 import (
 	"encoding/base64"
+
+	"golang.org/x/text/encoding/unicode"
 )
 
-func powershellEncode(buffer []byte) string {
-	// 2 byte chars to make PowerShell happy
-	wideCmd := ""
-	for _, b := range buffer {
-		wideCmd += string(b) + "\x00"
+func powershellUtf8(message string) (string, error) {
+	utf8 := unicode.UTF8
+	utfEncoder := utf8.NewEncoder()
+	utf8EncodedMessage, err := utfEncoder.String(message)
+
+	return utf8EncodedMessage, err
+}
+
+func powershellEncode(message string) (string, error) {
+	utf8EncodedMessage, err := powershellUtf8(message)
+	if err != nil {
+		return "", err
 	}
 
 	// Base64 encode the command
-	input := []uint8(wideCmd)
-	return base64.StdEncoding.EncodeToString(input)
+	input := []uint8(utf8EncodedMessage)
+	return base64.StdEncoding.EncodeToString(input), nil
 }
 
-func powershellDecode(message string) (retour string) {
-	base64Text := make([]byte, base64.StdEncoding.DecodedLen(len(message)))
-	base64.StdEncoding.Decode(base64Text, []byte(message))
-	return string(base64Text)
+func powershellDecode(message string) (retour string, err error) {
+	data, err := base64.StdEncoding.DecodeString(message)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
