@@ -98,6 +98,9 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 -   `login_server` (string) - The server address to login to.
 
+-   `privileged` (boolean) - If true, run the docker container with the
+    `--privileged` flag. This defaults to false if not set.
+
 -   `pull` (boolean) - If true, the configured image will be pulled using
     `docker pull` prior to use. Otherwise, it is assumed the image already
     exists and can be used. This defaults to true if not set.
