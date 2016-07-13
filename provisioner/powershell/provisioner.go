@@ -121,11 +121,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `{{.Vars}}{{.Path}}`
+		p.config.ExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `{{.Vars}}{{.Path}}'`
+		p.config.ElevatedExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -410,7 +410,7 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 func (p *Provisioner) generateCommandLineRunner(command string) (commandText string, err error) {
 	log.Printf("Building command line for: %s", command)
 
-	base64EncodedCommand, err := powershellEncode("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LastExitCode")
+	base64EncodedCommand, err := powershellEncode(command)
 	if err != nil {
 		return "", fmt.Errorf("Error encoding command: %s", err)
 	}
@@ -454,7 +454,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	// generate command
 	var buffer bytes.Buffer
 
-	base64EncodedCommand, err := powershellEncode("if (Test-Path variable:global:ProgressPreference){$ProgressPreference=\"SilentlyContinue\"}; " + command + "; exit $LastExitCode")
+	base64EncodedCommand, err := powershellEncode(command)
 	if err != nil {
 		return "", fmt.Errorf("Error encoding command: %s", err)
 	}
