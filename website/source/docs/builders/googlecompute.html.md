@@ -83,11 +83,15 @@ the path to the file containing the JSON.
 
 ``` {.javascript}
 {
-  "type": "googlecompute",
-  "account_file": "account.json",
-  "project_id": "my-project",
-  "source_image": "debian-7-wheezy-v20150127",
-  "zone": "us-central1-a"
+  "builders": [
+    {
+      	"type": "googlecompute",
+		"account_file": "account.json",
+		"project_id": "my project",
+		"source_image": "debian-7-wheezy-v20150127",
+		"zone": "us-central1-a"
+    }
+  ]
 }
 ```
 
