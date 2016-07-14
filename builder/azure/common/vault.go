@@ -27,13 +27,6 @@ type VaultClient struct {
 type Secret struct {
 	ID         *string          `json:"id,omitempty"`
 	Value      string           `json:"value"`
-	Attributes SecretAttributes `json:"attributes"`
-}
-
-type SecretAttributes struct {
-	Enabled bool    `json:"enabled"`
-	Created *string `json:"created"`
-	Updated *string `json:"updated"`
 }
 
 func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, error) {
