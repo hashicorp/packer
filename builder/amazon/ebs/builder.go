@@ -128,6 +128,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			IamInstanceProfile:                b.config.IamInstanceProfile,
 			SubnetId:                          b.config.SubnetId,
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
+			EipAllocId:                        b.config.EipAllocId,
+			EipAllowReassociation:             b.config.EipAllowReassociation,
 			EbsOptimized:                      b.config.EbsOptimized,
 			AvailabilityZone:                  b.config.AvailabilityZone,
 			BlockDevices:                      b.config.BlockDevices,
