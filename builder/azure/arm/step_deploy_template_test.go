@@ -77,11 +77,11 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 
 	if actualDeploymentName != expectedDeploymentName {
-		t.Fatalf("Expected StepValidateTemplate to source 'constants.ArmDeploymentName' from the state bag, but it did not.")
+		t.Fatal("Expected StepValidateTemplate to source 'constants.ArmDeploymentName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 }
 

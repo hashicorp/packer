@@ -75,11 +75,11 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedIPAddressName = stateBag.Get(constants.ArmPublicIPAddressName).(string)
 
 	if actualIPAddressName != expectedIPAddressName {
-		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
+		t.Fatal("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	expectedIPAddress, ok := stateBag.GetOk(constants.SSHHost)
