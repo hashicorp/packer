@@ -109,12 +109,7 @@ func TestVirtualMachineDeployment03(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = approvaltests.VerifyJSONBytes(t, bs)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,12 +139,7 @@ func TestVirtualMachineDeployment04(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = approvaltests.VerifyJSONBytes(t, bs)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -240,12 +230,7 @@ func TestKeyVaultDeployment03(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = approvaltests.VerifyJSONBytes(t, bs)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
