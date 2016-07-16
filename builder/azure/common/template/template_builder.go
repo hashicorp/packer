@@ -46,7 +46,7 @@ func (s *TemplateBuilder) BuildLinux(sshAuthorizedKey string) error {
 	profile.LinuxConfiguration = &compute.LinuxConfiguration{
 		SSH: &compute.SSHConfiguration{
 			PublicKeys: &[]compute.SSHPublicKey{
-				compute.SSHPublicKey{
+				{
 					Path:    to.StringPtr(s.toVariable(variableSshKeyPath)),
 					KeyData: to.StringPtr(sshAuthorizedKey),
 				},
@@ -66,12 +66,12 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 	profile := resource.Properties.OsProfile
 
 	profile.Secrets = &[]compute.VaultSecretGroup{
-		compute.VaultSecretGroup{
+		{
 			SourceVault: &compute.SubResource{
 				ID: to.StringPtr(s.toResourceID(resourceKeyVaults, keyVaultName)),
 			},
 			VaultCertificates: &[]compute.VaultCertificate{
-				compute.VaultCertificate{
+				{
 					CertificateStore: to.StringPtr("My"),
 					CertificateURL:   to.StringPtr(winRMCertificateUrl),
 				},
@@ -83,7 +83,7 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 		ProvisionVMAgent: to.BoolPtr(true),
 		WinRM: &compute.WinRMConfiguration{
 			Listeners: &[]compute.WinRMListener{
-				compute.WinRMListener{
+				{
 					Protocol:       "https",
 					CertificateURL: to.StringPtr(winRMCertificateUrl),
 				},

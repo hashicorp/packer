@@ -228,7 +228,7 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePri
 	var err error
 
 	if b.config.useDeviceLogin {
-		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.SubscriptionID, b.config.TenantID, say)
+		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say)
 		if err != nil {
 			return nil, nil, err
 		}
