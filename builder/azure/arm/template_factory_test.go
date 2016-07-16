@@ -2,11 +2,10 @@ package arm
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/mitchellh/packer/builder/azure/common/approvals"
+	"github.com/approvals/go-approval-tests"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/builder/azure/common/template"
 )
@@ -110,13 +109,7 @@ func TestVirtualMachineDeployment03(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reader := strings.NewReader(string(bs))
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,13 +139,7 @@ func TestVirtualMachineDeployment04(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reader := strings.NewReader(string(bs))
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,13 +230,7 @@ func TestKeyVaultDeployment03(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reader := strings.NewReader(string(bs))
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}

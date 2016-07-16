@@ -1,11 +1,10 @@
 package template
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/mitchellh/packer/builder/azure/common/approvals"
+	"github.com/approvals/go-approval-tests"
 )
 
 // Ensure that a Linux template is configured as expected.
@@ -31,9 +30,7 @@ func TestBuildLinux00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reader := strings.NewReader(*doc)
-
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,9 +58,7 @@ func TestBuildLinux01(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reader := strings.NewReader(*doc)
-
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,9 +88,7 @@ func TestBuildWindows00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reader := strings.NewReader(*doc)
-
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
 	if err != nil {
 		t.Fatal(err)
 	}
