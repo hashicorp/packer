@@ -74,16 +74,16 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	if actualLocation != expectedLocation {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	_, ok := stateBag.GetOk(constants.ArmIsResourceGroupCreated)
 	if !ok {
-		t.Fatalf("Expected the step to add item to stateBag['constants.ArmIsResourceGroupCreated'], but it did not.")
+		t.Fatal("Expected the step to add item to stateBag['constants.ArmIsResourceGroupCreated'], but it did not.")
 	}
 }
 

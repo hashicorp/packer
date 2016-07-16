@@ -121,7 +121,7 @@ func (c *Config) toVirtualMachineCaptureParameters() *compute.VirtualMachineCapt
 func (c *Config) createCertificate() (string, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		err := fmt.Errorf("Failed to Generate Private Key: %s", err)
+		err = fmt.Errorf("Failed to Generate Private Key: %s", err)
 		return "", err
 	}
 
@@ -131,7 +131,7 @@ func (c *Config) createCertificate() (string, error) {
 
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
-		err := fmt.Errorf("Failed to Generate Serial Number: %v", err)
+		err = fmt.Errorf("Failed to Generate Serial Number: %v", err)
 		return "", err
 	}
 
