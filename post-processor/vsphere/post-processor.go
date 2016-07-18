@@ -121,8 +121,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
 
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
-
 	args, err := p.BuildArgs(source, ovftool_uri)
 	if err != nil {
 		ui.Message(fmt.Sprintf("Failed: %s\n", err))
