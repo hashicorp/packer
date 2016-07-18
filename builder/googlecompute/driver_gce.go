@@ -325,7 +325,7 @@ func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
 }
 
 func (d *driverGCE) getImage(img Image) (image *compute.Image, err error) {
-	projects := []string{img.ProjectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud"}
+	projects := []string{img.ProjectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	for _, project := range projects {
 		image, err = d.service.Images.Get(project, img.Name).Do()
 		if err == nil && image != nil && image.SelfLink != "" {
