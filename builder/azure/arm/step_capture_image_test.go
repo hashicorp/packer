@@ -97,19 +97,19 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedCaptureTemplate = stateBag.Get(constants.ArmCaptureTemplate).(*CaptureTemplate)
 
 	if actualComputeName != expectedComputeName {
-		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmComputeName' from the state bag, but it did not.")
+		t.Fatal("Expected StepCaptureImage to source 'constants.ArmComputeName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected StepCaptureImage to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	if actualVirtualMachineCaptureParameters != expectedVirtualMachineCaptureParameters {
-		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmVirtualMachineCaptureParameters' from the state bag, but it did not.")
+		t.Fatal("Expected StepCaptureImage to source 'constants.ArmVirtualMachineCaptureParameters' from the state bag, but it did not.")
 	}
 
 	if actualCaptureTemplate != expectedCaptureTemplate {
-		t.Fatalf("Expected StepCaptureImage to source 'constants.ArmCaptureTemplate' from the state bag, but it did not.")
+		t.Fatal("Expected StepCaptureImage to source 'constants.ArmCaptureTemplate' from the state bag, but it did not.")
 	}
 }
 
