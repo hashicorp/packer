@@ -25,8 +25,8 @@ type VaultClient struct {
 }
 
 type Secret struct {
-	ID         *string          `json:"id,omitempty"`
-	Value      string           `json:"value"`
+	ID    *string `json:"id,omitempty"`
+	Value string  `json:"value"`
 }
 
 func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, error) {
