@@ -77,10 +77,10 @@ func TestStepGetCertificateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedKeyVaultName = stateBag.Get(constants.ArmKeyVaultName).(string)
 
 	if actualKeyVaultName != expectedKeyVaultName {
-		t.Fatalf("Expected StepGetCertificate to source 'constants.ArmKeyVaultName' from the state bag, but it did not.")
+		t.Fatal("Expected StepGetCertificate to source 'constants.ArmKeyVaultName' from the state bag, but it did not.")
 	}
 	if actualSecretName != DefaultSecretName {
-		t.Fatalf("Expected StepGetCertificate to use default value for secret, but it did not.")
+		t.Fatal("Expected StepGetCertificate to use default value for secret, but it did not.")
 	}
 
 	expectedCertificateUrl, ok := stateBag.GetOk(constants.ArmCertificateUrl)
