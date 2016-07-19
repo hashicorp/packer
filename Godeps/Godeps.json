@@ -67,6 +67,18 @@
 			"Rev": "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2"
 		},
 		{
+			"ImportPath": "github.com/approvals/go-approval-tests",
+			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
+		},
+		{
+			"ImportPath": "github.com/approvals/go-approval-tests/reporters",
+			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
+		},
+		{
+			"ImportPath": "github.com/approvals/go-approval-tests/utils",
+			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
+		},
+		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
 			"Comment": "v1.1.2",
 			"Rev": "8041be5461786460d86b4358305fbdf32d37cfb2"

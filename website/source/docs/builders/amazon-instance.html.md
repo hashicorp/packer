@@ -251,10 +251,6 @@ builder.
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
 
--   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
-    default is stop.
-
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
