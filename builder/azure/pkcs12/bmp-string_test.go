@@ -29,7 +29,7 @@ func decodeBMPString(bmpString []byte) (string, error) {
 func TestBMPStringDecode(t *testing.T) {
 	_, err := decodeBMPString([]byte("a"))
 	if err == nil {
-		t.Fatalf("expected decode to fail, but it succeeded")
+		t.Fatal("expected decode to fail, but it succeeded")
 	}
 }
 

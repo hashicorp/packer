@@ -29,7 +29,7 @@ func (s *StepGeneralizeOS) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if err := comm.Start(cmd); err != nil {
-		err := fmt.Errorf("Failed executing OS generalization command: %s", err)
+		err = fmt.Errorf("Failed executing OS generalization command: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
