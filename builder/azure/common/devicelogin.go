@@ -39,7 +39,7 @@ var (
 
 // Authenticate fetches a token from the local file cache or initiates a consent
 // flow and waits for token to be obtained.
-func Authenticate(env azure.Environment, subscriptionID, tenantID string, say func(string)) (*azure.ServicePrincipalToken, error) {
+func Authenticate(env azure.Environment, tenantID string, say func(string)) (*azure.ServicePrincipalToken, error) {
 	clientID, ok := clientIDs[env.Name]
 	if !ok {
 		return nil, fmt.Errorf("packer-azure application not set up for Azure environment %q", env.Name)
@@ -81,7 +81,7 @@ func Authenticate(env azure.Environment, subscriptionID, tenantID string, say fu
 		//      will go stale every 14 days and we will delete the token file,
 		//      re-initiate the device flow.
 		say("Validating the token.")
-		if err := validateToken(env, spt); err != nil {
+		if err = validateToken(env, spt); err != nil {
 			say(fmt.Sprintf("Error: %v", err))
 			say("Stored Azure credentials expired. Please reauthenticate.")
 			say(fmt.Sprintf("Deleting %s", tokenPath))
@@ -96,7 +96,7 @@ func Authenticate(env azure.Environment, subscriptionID, tenantID string, say fu
 
 	// Start an OAuth 2.0 device flow
 	say(fmt.Sprintf("Initiating device flow: %s", tokenPath))
-	spt, err = tokenFromDeviceFlow(say, *oauthCfg, tokenPath, clientID, apiScope)
+	spt, err = tokenFromDeviceFlow(say, *oauthCfg, clientID, apiScope)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func tokenFromFile(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clie
 // consent application on a browser and in the meanwhile the authentication
 // endpoint is polled until user gives consent, denies or the flow times out.
 // Returned token must be saved.
-func tokenFromDeviceFlow(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clientID, resource string) (*azure.ServicePrincipalToken, error) {
+func tokenFromDeviceFlow(say func(string), oauthCfg azure.OAuthConfig, clientID, resource string) (*azure.ServicePrincipalToken, error) {
 	cl := autorest.NewClientWithUserAgent(userAgent)
 	deviceCode, err := azure.InitiateDeviceAuth(&cl, oauthCfg, clientID, resource)
 	if err != nil {

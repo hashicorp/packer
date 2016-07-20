@@ -54,10 +54,6 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
-
 ### Required:
 
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn

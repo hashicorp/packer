@@ -63,7 +63,7 @@ func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *t
 
 	value, ok := stateBag.GetOk(constants.ArmIsResourceGroupCreated)
 	if !ok {
-		t.Fatalf("Expected the resource bag value arm.IsResourceGroupCreated to exist")
+		t.Fatal("Expected the resource bag value arm.IsResourceGroupCreated to exist")
 	}
 
 	if value.(bool) {
