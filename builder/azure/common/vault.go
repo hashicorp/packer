@@ -9,19 +9,24 @@ package common
 import (
 	"fmt"
 	"net/http"
-	"strings"
+	"net/url"
 
 	"github.com/Azure/go-autorest/autorest"
 )
 
 const (
-	AzureVaultApiVersion     = "2015-06-01"
-	AzureVaultScope          = "https://vault.azure.net"
-	AzureVaultSecretTemplate = "https://{vault-name}.vault.azure.net/secrets/{secret-name}"
+	AzureVaultApiVersion = "2015-06-01"
 )
 
 type VaultClient struct {
 	autorest.Client
+	keyVaultEndpoint url.URL
+}
+
+func NewVaultClient(keyVaultEndpoint url.URL) VaultClient {
+	return VaultClient{
+		keyVaultEndpoint: keyVaultEndpoint,
+	}
 }
 
 type Secret struct {
@@ -31,18 +36,17 @@ type Secret struct {
 
 func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, error) {
 	p := map[string]interface{}{
-		"secret-name": secretName,
+		"secret-name": autorest.Encode("path", secretName),
 	}
 	q := map[string]interface{}{
 		"api-version": AzureVaultApiVersion,
 	}
 
-	secretURL := strings.Replace(AzureVaultSecretTemplate, "{vault-name}", vaultName, -1)
-
-	req, err := autorest.Prepare(&http.Request{},
+	req, err := autorest.Prepare(
+		&http.Request{},
 		autorest.AsGet(),
-		autorest.WithBaseURL(secretURL),
-		autorest.WithPathParameters(p),
+		autorest.WithBaseURL(client.getVaultUrl(vaultName)),
+		autorest.WithPathParameters("/secrets/{secret-name}", p),
 		autorest.WithQueryParameters(q))
 
 	if err != nil {
@@ -73,4 +77,8 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 	}
 
 	return &secret, nil
+}
+
+func (client *VaultClient) getVaultUrl(vaultName string) string {
+	return fmt.Sprintf("%s://%s.%s/", client.keyVaultEndpoint.Scheme, vaultName, client.keyVaultEndpoint.Host)
 }
