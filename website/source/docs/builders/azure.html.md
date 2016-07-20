@@ -57,7 +57,7 @@ builder.
 
 ### Optional:
 
--   `cloud_environment_name` (string) One of `Public`, `China`, `German`, or
+-   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 

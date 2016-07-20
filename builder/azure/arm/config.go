@@ -299,21 +299,37 @@ func setUserNamePassword(c *Config) {
 }
 
 func setCloudEnvironment(c *Config) error {
+	lookup := map[string]string{
+		"CHINA":           "AzureChinaCloud",
+		"CHINACLOUD":      "AzureChinaCloud",
+		"AZURECHINACLOUD": "AzureChinaCloud",
+
+		"GERMAN":           "AzureGermanCloud",
+		"GERMANCLOUD":      "AzureGermanCloud",
+		"AZUREGERMANCLOUD": "AzureGermanCloud",
+
+		"GERMANY":           "AzureGermanCloud",
+		"GERMANYCLOUD":      "AzureGermanCloud",
+		"AZUREGERMANYCLOUD": "AzureGermanCloud",
+
+		"PUBLIC":           "AzurePublicCloud",
+		"PUBLICCLOUD":      "AzurePublicCloud",
+		"AZUREPUBLICCLOUD": "AzurePublicCloud",
+
+		"USGOVERNMENT":           "AzureUSGovernmentCloud",
+		"USGOVERNMENTCLOUD":      "AzureUSGovernmentCloud",
+		"AZUREUSGOVERNMENTCLOUD": "AzureUSGovernmentCloud",
+	}
+
 	name := strings.ToUpper(c.CloudEnvironmentName)
-	switch name {
-	case "CHINA", "CHINACLOUD", "AZURECHINACLOUD":
-		c.cloudEnvironment = &azure.ChinaCloud
-	case "GERMAN", "GERMANCLOUD", "AZUREGERMANCLOUD":
-		c.cloudEnvironment = &azure.GermanCloud
-	case "PUBLIC", "PUBLICCLOUD", "AZUREPUBLICCLOUD":
-		c.cloudEnvironment = &azure.PublicCloud
-	case "USGOVERNMENT", "USGOVERNMENTCLOUD", "AZUREUSGOVERNMENTCLOUD":
-		c.cloudEnvironment = &azure.USGovernmentCloud
-	default:
+	envName, ok := lookup[name]
+	if !ok {
 		return fmt.Errorf("There is no cloud envionment matching the name '%s'!", c.CloudEnvironmentName)
 	}
 
-	return nil
+	env, err := azure.EnvironmentFromName(envName)
+	c.cloudEnvironment = &env
+	return err
 }
 
 func provideDefaultValues(c *Config) {
