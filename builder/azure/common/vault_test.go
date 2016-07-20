@@ -24,4 +24,3 @@ func TestVaultClientKeyVaultEndpointPreserveScheme(t *testing.T) {
 		t.Errorf("expected \"http://my.vault.azure.net/\", got %q", vaultUrl)
 	}
 }
-
