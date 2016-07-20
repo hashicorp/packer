@@ -61,6 +61,8 @@ type Config struct {
 	RemotePassword       string `mapstructure:"remote_password"`
 	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
 
+	CommConfig communicator.Config `mapstructure:",squash"`
+
 	ctx interpolate.Context
 }
 
