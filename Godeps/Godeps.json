@@ -283,6 +283,10 @@
 			"Rev": "6bb64b370b90e7ef1fa532be9e591a81c3493e00"
 		},
 		{
+			"ImportPath": "github.com/hashicorp/go-uuid",
+			"Rev": "73d19cdc2bf00788cc25f7d5fd74347d48ada9ac"
+		},
+		{
 			"ImportPath": "github.com/hashicorp/go-version",
 			"Rev": "7e3c02b30806fa5779d3bdfc152ce4c6f40e7b38"
 		},
