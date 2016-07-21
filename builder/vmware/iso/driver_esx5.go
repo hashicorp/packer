@@ -176,7 +176,7 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(vncBindIP string, portMin, portMax uint) (string, uint, error) {
+func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
 
 	//Process ports ESXi is listening on to determine which are available
@@ -230,6 +230,13 @@ func (d *ESX5Driver) VNCAddress(vncBindIP string, portMin, portMax uint) (string
 	}
 
 	return d.Host, vncPort, nil
+}
+
+// UpdateVMX, adds the VNC port to the VMX data.
+func (ESX5Driver) UpdateVMX(_ string, port uint, data map[string]string) {
+	// Do not set remotedisplay.vnc.ip - this breaks ESXi.
+	data["remotedisplay.vnc.enabled"] = "TRUE"
+	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
 }
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
