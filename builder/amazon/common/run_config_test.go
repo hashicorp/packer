@@ -3,6 +3,7 @@ package common
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/mitchellh/packer/helper/communicator"
@@ -141,6 +142,10 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 
 	if c.TemporaryKeyPairName == "" {
 		t.Fatal("keypair name is empty")
+	}
+
+	if !strings.Contains(c.TemporaryKeyPairName, "packer_") {
+		t.Fatal("keypair name is not valid")
 	}
 
 	c.TemporaryKeyPairName = "ssh-key-123"

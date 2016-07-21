@@ -50,7 +50,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.SSHKeyPairName == "" {
 		if c.TemporaryKeyPairName == "" {
 			c.TemporaryKeyPairName = fmt.Sprintf(
-				"packer %s", uuid.TimeOrderedUUID())
+				"packer_%s", uuid.TimeOrderedUUID())
 		}
 	}
 
