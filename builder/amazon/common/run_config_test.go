@@ -3,7 +3,7 @@ package common
 import (
 	"io/ioutil"
 	"os"
-	"strings"
+	"regexp"
 	"testing"
 
 	"github.com/mitchellh/packer/helper/communicator"
@@ -144,7 +144,9 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 		t.Fatal("keypair name is empty")
 	}
 
-	if !strings.Contains(c.TemporaryKeyPairName, "packer_") {
+	// Match prefix and UUID, e.g. "packer_5790d491-a0b8-c84c-c9d2-2aea55086550".
+	r := regexp.MustCompile(`\Apacker_(?:(?i)[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}?)\z`)
+	if !r.MatchString(c.TemporaryKeyPairName) {
 		t.Fatal("keypair name is not valid")
 	}
 
