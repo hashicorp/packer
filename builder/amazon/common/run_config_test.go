@@ -140,6 +140,15 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 	}
 
 	if c.TemporaryKeyPairName == "" {
-		t.Fatal("keypair empty")
+		t.Fatal("keypair name is empty")
+	}
+
+	c.TemporaryKeyPairName = "ssh-key-123"
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.TemporaryKeyPairName != "ssh-key-123" {
+		t.Fatal("keypair name does not match")
 	}
 }
