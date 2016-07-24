@@ -390,11 +390,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; &'c:/Windows/Temp/inlineScript.ps1';exit $LastExitCode`
-	expectedCommandUtf8, err := powershellUtf8(expectedCommand)
-	if err != nil {
-		t.Fatal("should not have error when Utf 8 encoding")
-	}
-	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSdTaWxlbnRseUNvbnRpbnVlJ307JGVudjpQQUNLRVJfQlVJTERFUl9UWVBFPSJpc28iOyAkZW52OlBBQ0tFUl9CVUlMRF9OQU1FPSJ2bXdhcmUiOyAmJ2M6L1dpbmRvd3MvVGVtcC9pbmxpbmVTY3JpcHQucHMxJztleGl0ICRMYXN0RXhpdENvZGU=`
+	expectedCommandBase64Encoded := `aQBmACAAKABUAGUAcwB0AC0AUABhAHQAaAAgAHYAYQByAGkAYQBiAGwAZQA6AGcAbABvAGIAYQBsADoAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAKQB7ACQAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAPQAnAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUAJwB9ADsAJABlAG4AdgA6AFAAQQBDAEsARQBSAF8AQgBVAEkATABEAEUAUgBfAFQAWQBQAEUAPQAiAGkAcwBvACIAOwAgACQAZQBuAHYAOgBQAEEAQwBLAEUAUgBfAEIAVQBJAEwARABfAE4AQQBNAEUAPQAiAHYAbQB3AGEAcgBlACIAOwAgACYAJwBjADoALwBXAGkAbgBkAG8AdwBzAC8AVABlAG0AcAAvAGkAbgBsAGkAbgBlAFMAYwByAGkAcAB0AC4AcABzADEAJwA7AGUAeABpAHQAIAAkAEwAYQBzAHQARQB4AGkAdABDAG8AZABlAA==`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
 	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
 
@@ -404,8 +400,8 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 		t.Fatal("should not have error when base64 decoding")
 	}
 
-	if actualCommandDecoded != expectedCommandUtf8 {
-		t.Fatalf("Expected decoded:%s, %s, got %s", expectedCommandEncoded, expectedCommandUtf8, actualCommandDecoded)
+	if actualCommandDecoded != expectedCommand {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommand, actualCommandDecoded)
 	}
 
 	if comm.StartCmd.Command != expectedCommandEncoded {
@@ -425,11 +421,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	expectedCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:BAR="BAZ"; $env:FOO="BAR"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; &'c:/Windows/Temp/inlineScript.ps1';exit $LastExitCode`
-	expectedCommandUtf8, err = powershellUtf8(expectedCommand)
-	if err != nil {
-		t.Fatal("should not have error when Utf 8 encoding")
-	}
-	expectedCommandBase64Encoded = `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSdTaWxlbnRseUNvbnRpbnVlJ307JGVudjpCQVI9IkJBWiI7ICRlbnY6Rk9PPSJCQVIiOyAkZW52OlBBQ0tFUl9CVUlMREVSX1RZUEU9ImlzbyI7ICRlbnY6UEFDS0VSX0JVSUxEX05BTUU9InZtd2FyZSI7ICYnYzovV2luZG93cy9UZW1wL2lubGluZVNjcmlwdC5wczEnO2V4aXQgJExhc3RFeGl0Q29kZQ==`
+	expectedCommandBase64Encoded = `aQBmACAAKABUAGUAcwB0AC0AUABhAHQAaAAgAHYAYQByAGkAYQBiAGwAZQA6AGcAbABvAGIAYQBsADoAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAKQB7ACQAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAPQAnAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUAJwB9ADsAJABlAG4AdgA6AEIAQQBSAD0AIgBCAEEAWgAiADsAIAAkAGUAbgB2ADoARgBPAE8APQAiAEIAQQBSACIAOwAgACQAZQBuAHYAOgBQAEEAQwBLAEUAUgBfAEIAVQBJAEwARABFAFIAXwBUAFkAUABFAD0AIgBpAHMAbwAiADsAIAAkAGUAbgB2ADoAUABBAEMASwBFAFIAXwBCAFUASQBMAEQAXwBOAEEATQBFAD0AIgB2AG0AdwBhAHIAZQAiADsAIAAmACcAYwA6AC8AVwBpAG4AZABvAHcAcwAvAFQAZQBtAHAALwBpAG4AbABpAG4AZQBTAGMAcgBpAHAAdAAuAHAAcwAxACcAOwBlAHgAaQB0ACAAJABMAGEAcwB0AEUAeABpAHQAQwBvAGQAZQA=`
 	expectedCommandPrefix = `powershell -executionpolicy bypass -encodedCommand `
 	expectedCommandEncoded = expectedCommandPrefix + expectedCommandBase64Encoded
 
@@ -439,8 +431,8 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 		t.Fatal("should not have error when base64 decoding")
 	}
 
-	if actualCommandDecoded != expectedCommandUtf8 {
-		t.Fatalf("Expected decoded: %s, got %s", expectedCommandUtf8, actualCommandDecoded)
+	if actualCommandDecoded != expectedCommand {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommand, actualCommandDecoded)
 	}
 
 	if comm.StartCmd.Command != expectedCommandEncoded {
@@ -467,11 +459,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	}
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild"; &'c:/Windows/Temp/script.ps1';exit $LastExitCode`
-	expectedCommandUtf8, err := powershellUtf8(expectedCommand)
-	if err != nil {
-		t.Fatal("should not have error when Utf 8 encoding")
-	}
-	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSdTaWxlbnRseUNvbnRpbnVlJ307JGVudjpQQUNLRVJfQlVJTERFUl9UWVBFPSJmb290eXBlIjsgJGVudjpQQUNLRVJfQlVJTERfTkFNRT0iZm9vYnVpbGQiOyAmJ2M6L1dpbmRvd3MvVGVtcC9zY3JpcHQucHMxJztleGl0ICRMYXN0RXhpdENvZGU=`
+	expectedCommandBase64Encoded := `aQBmACAAKABUAGUAcwB0AC0AUABhAHQAaAAgAHYAYQByAGkAYQBiAGwAZQA6AGcAbABvAGIAYQBsADoAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAKQB7ACQAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAPQAnAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUAJwB9ADsAJABlAG4AdgA6AFAAQQBDAEsARQBSAF8AQgBVAEkATABEAEUAUgBfAFQAWQBQAEUAPQAiAGYAbwBvAHQAeQBwAGUAIgA7ACAAJABlAG4AdgA6AFAAQQBDAEsARQBSAF8AQgBVAEkATABEAF8ATgBBAE0ARQA9ACIAZgBvAG8AYgB1AGkAbABkACIAOwAgACYAJwBjADoALwBXAGkAbgBkAG8AdwBzAC8AVABlAG0AcAAvAHMAYwByAGkAcAB0AC4AcABzADEAJwA7AGUAeABpAHQAIAAkAEwAYQBzAHQARQB4AGkAdABDAG8AZABlAA==`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
 	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
 
@@ -481,8 +469,8 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 		t.Fatal("should not have error when base64 decoding")
 	}
 
-	if actualCommandDecoded != expectedCommandUtf8 {
-		t.Fatalf("Expected decoded: %s, got %s", expectedCommandUtf8, actualCommandDecoded)
+	if actualCommandDecoded != expectedCommand {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommand, actualCommandDecoded)
 	}
 
 	if comm.StartCmd.Command != expectedCommandEncoded {
@@ -516,11 +504,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	}
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:BAR="BAZ"; $env:FOO="BAR"; $env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild"; &'c:/Windows/Temp/script.ps1';exit $LastExitCode`
-	expectedCommandUtf8, err := powershellUtf8(expectedCommand)
-	if err != nil {
-		t.Fatal("should not have error when Utf 8 encoding")
-	}
-	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSdTaWxlbnRseUNvbnRpbnVlJ307JGVudjpCQVI9IkJBWiI7ICRlbnY6Rk9PPSJCQVIiOyAkZW52OlBBQ0tFUl9CVUlMREVSX1RZUEU9ImZvb3R5cGUiOyAkZW52OlBBQ0tFUl9CVUlMRF9OQU1FPSJmb29idWlsZCI7ICYnYzovV2luZG93cy9UZW1wL3NjcmlwdC5wczEnO2V4aXQgJExhc3RFeGl0Q29kZQ==`
+	expectedCommandBase64Encoded := `aQBmACAAKABUAGUAcwB0AC0AUABhAHQAaAAgAHYAYQByAGkAYQBiAGwAZQA6AGcAbABvAGIAYQBsADoAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAKQB7ACQAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAPQAnAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUAJwB9ADsAJABlAG4AdgA6AEIAQQBSAD0AIgBCAEEAWgAiADsAIAAkAGUAbgB2ADoARgBPAE8APQAiAEIAQQBSACIAOwAgACQAZQBuAHYAOgBQAEEAQwBLAEUAUgBfAEIAVQBJAEwARABFAFIAXwBUAFkAUABFAD0AIgBmAG8AbwB0AHkAcABlACIAOwAgACQAZQBuAHYAOgBQAEEAQwBLAEUAUgBfAEIAVQBJAEwARABfAE4AQQBNAEUAPQAiAGYAbwBvAGIAdQBpAGwAZAAiADsAIAAmACcAYwA6AC8AVwBpAG4AZABvAHcAcwAvAFQAZQBtAHAALwBzAGMAcgBpAHAAdAAuAHAAcwAxACcAOwBlAHgAaQB0ACAAJABMAGEAcwB0AEUAeABpAHQAQwBvAGQAZQA=`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
 	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
 
@@ -530,8 +514,8 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 		t.Fatal("should not have error when base64 decoding")
 	}
 
-	if actualCommandDecoded != expectedCommandUtf8 {
-		t.Fatalf("Expected decoded: %s, got %s", expectedCommandUtf8, actualCommandDecoded)
+	if actualCommandDecoded != expectedCommand {
+		t.Fatalf("Expected decoded: %s, got %s", expectedCommand, actualCommandDecoded)
 	}
 
 	if comm.StartCmd.Command != expectedCommandEncoded {
@@ -647,7 +631,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	cmd, _ := p.createCommandText()
 
 	expectedCommand := `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:PACKER_BUILDER_TYPE=""; $env:PACKER_BUILD_NAME=""; &'c:/Windows/Temp/script.ps1';exit $LastExitCode`
-	expectedCommandBase64Encoded := `aWYgKFRlc3QtUGF0aCB2YXJpYWJsZTpnbG9iYWw6UHJvZ3Jlc3NQcmVmZXJlbmNlKXskUHJvZ3Jlc3NQcmVmZXJlbmNlPSdTaWxlbnRseUNvbnRpbnVlJ307JGVudjpQQUNLRVJfQlVJTERFUl9UWVBFPSIiOyAkZW52OlBBQ0tFUl9CVUlMRF9OQU1FPSIiOyAmJ2M6L1dpbmRvd3MvVGVtcC9zY3JpcHQucHMxJztleGl0ICRMYXN0RXhpdENvZGU=`
+	expectedCommandBase64Encoded := `aQBmACAAKABUAGUAcwB0AC0AUABhAHQAaAAgAHYAYQByAGkAYQBiAGwAZQA6AGcAbABvAGIAYQBsADoAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAKQB7ACQAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAPQAnAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUAJwB9ADsAJABlAG4AdgA6AFAAQQBDAEsARQBSAF8AQgBVAEkATABEAEUAUgBfAFQAWQBQAEUAPQAiACIAOwAgACQAZQBuAHYAOgBQAEEAQwBLAEUAUgBfAEIAVQBJAEwARABfAE4AQQBNAEUAPQAiACIAOwAgACYAJwBjADoALwBXAGkAbgBkAG8AdwBzAC8AVABlAG0AcAAvAHMAYwByAGkAcAB0AC4AcABzADEAJwA7AGUAeABpAHQAIAAkAEwAYQBzAHQARQB4AGkAdABDAG8AZABlAA==`
 	expectedCommandPrefix := `powershell -executionpolicy bypass -encodedCommand `
 	expectedCommandEncoded := expectedCommandPrefix + expectedCommandBase64Encoded
 
