@@ -32,7 +32,7 @@ const (
 	MinRamSize     = 32        // 32MB
 	MaxRamSize     = 32 * 1024 // 32GB
 
-	LowRam = 384 // 384MB
+	LowRam = 256 // 256MB
 
 	DefaultUsername = "vagrant"
 	DefaultPassword = "vagrant"
