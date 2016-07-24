@@ -2,33 +2,53 @@ package powershell
 
 import (
 	"encoding/base64"
+	"encoding/binary"
+	"unicode/utf16"
+	"unicode/utf8"
 
 	"golang.org/x/text/encoding/unicode"
 )
 
-func powershellUtf8(message string) (string, error) {
-	utf8 := unicode.UTF8
-	utfEncoder := utf8.NewEncoder()
-	utf8EncodedMessage, err := utfEncoder.String(message)
+func convertUtf8ToUtf16LE(message string) (string, error) {
+	utf16le := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
+	utfEncoder := utf16le.NewEncoder()
+	ut16LeEncodedMessage, err := utfEncoder.String(message)
 
-	return utf8EncodedMessage, err
+	return ut16LeEncodedMessage, err
+}
+
+// UTF16BytesToString converts UTF-16 encoded bytes, in big or little endian byte order,
+// to a UTF-8 encoded string.
+func UTF16BytesToString(b []byte, o binary.ByteOrder) string {
+	utf := make([]uint16, (len(b)+(2-1))/2)
+	for i := 0; i+(2-1) < len(b); i += 2 {
+		utf[i/2] = o.Uint16(b[i:])
+	}
+	if len(b)/2 < len(utf) {
+		utf[len(utf)-1] = utf8.RuneError
+	}
+	return string(utf16.Decode(utf))
 }
 
 func powershellEncode(message string) (string, error) {
-	utf8EncodedMessage, err := powershellUtf8(message)
+	utf16LEEncodedMessage, err := convertUtf8ToUtf16LE(message)
 	if err != nil {
 		return "", err
 	}
 
 	// Base64 encode the command
-	input := []uint8(utf8EncodedMessage)
+	input := []uint8(utf16LEEncodedMessage)
 	return base64.StdEncoding.EncodeToString(input), nil
 }
 
-func powershellDecode(message string) (retour string, err error) {
-	data, err := base64.StdEncoding.DecodeString(message)
+func powershellDecode(messageBase64 string) (retour string, err error) {
+	messageUtf16LeByteArray, err := base64.StdEncoding.DecodeString(messageBase64)
+
 	if err != nil {
 		return "", err
 	}
-	return string(data), nil
+
+	message := UTF16BytesToString(messageUtf16LeByteArray, binary.LittleEndian)
+
+	return message, nil
 }
