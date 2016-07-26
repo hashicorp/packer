@@ -26,9 +26,9 @@ type Config struct {
 	common.PackerConfig             `mapstructure:",squash"`
 	common.HTTPConfig               `mapstructure:",squash"`
 	common.ISOConfig                `mapstructure:",squash"`
+	common.FloppyConfig             `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.ExportOpts           `mapstructure:",squash"`
-	vboxcommon.FloppyConfig         `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
 	vboxcommon.RunConfig            `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig       `mapstructure:",squash"`

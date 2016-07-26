@@ -82,6 +82,7 @@ type Config struct {
 	common.HTTPConfig   `mapstructure:",squash"`
 	common.ISOConfig    `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
+	common.FloppyConfig `mapstructure:",squash"`
 
 	ISOSkipCache    bool       `mapstructure:"iso_skip_cache"`
 	Accelerator     string     `mapstructure:"accelerator"`
@@ -138,6 +139,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	var errs *packer.MultiError
+	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -215,9 +219,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Format = "qcow2"
 	}
 
-	if b.config.FloppyFiles == nil {
-		b.config.FloppyFiles = make([]string, 0)
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.NetDevice == "" {
 		b.config.NetDevice = "virtio-net"
@@ -231,9 +233,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.SSHWaitTimeout != 0 {
 		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
-
-	var errs *packer.MultiError
-	warnings := make([]string, 0)
 
 	if b.config.ISOSkipCache {
 		b.config.ISOChecksumType = "none"
