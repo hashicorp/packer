@@ -23,6 +23,8 @@ func SSHHost(e *ec2.EC2, private bool) func(multistep.StateBag) (string, error) 
 				} else {
 					host = *i.PrivateIpAddress
 				}
+			} else if private {
+				host = *i.PrivateIpAddress
 			} else if i.PublicDnsName != nil && *i.PublicDnsName != "" {
 				host = *i.PublicDnsName
 			}
