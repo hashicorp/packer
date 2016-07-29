@@ -70,8 +70,9 @@ type Config struct {
 	VMSize         string `mapstructure:"vm_size"`
 
 	// Deployment
-	ResourceGroupName               string `mapstructure:"resource_group_name"`
-	StorageAccount                  string `mapstructure:"storage_account"`
+	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
+	ResourceGroupName               string             `mapstructure:"resource_group_name"`
+	StorageAccount                  string             `mapstructure:"storage_account"`
 	storageAccountBlobEndpoint      string
 	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
 	cloudEnvironment                *azure.Environment
@@ -222,6 +223,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(c.ctx)...)
 
 	assertRequiredParametersSet(&c, errs)
+	assertTagProperties(&c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
@@ -346,6 +348,21 @@ func provideDefaultValues(c *Config) {
 
 	if c.CloudEnvironmentName == "" {
 		c.CloudEnvironmentName = DefaultCloudEnvironmentName
+	}
+}
+
+func assertTagProperties(c *Config, errs *packer.MultiError) {
+	if len(c.AzureTags) > 15 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("a max of 15 tags are supported, but %d were provided", len(c.AzureTags)))
+	}
+
+	for k, v := range c.AzureTags {
+		if len(k) > 512 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
+		}
+		if len(*v) > 256 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", v, len(*v)))
+		}
 	}
 }
 
