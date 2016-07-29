@@ -1,5 +1,12 @@
 package arm
 
+// Method to resolve information about the user so that a client can be
+// constructed to communicated with Azure.
+//
+// The following data are resolved.
+//
+// 1. TenantID
+
 import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/mitchellh/packer/builder/azure/common"
@@ -11,7 +18,9 @@ type configRetriever struct {
 }
 
 func newConfigRetriever() configRetriever {
-	return configRetriever{common.FindTenantID}
+	return configRetriever{
+		common.FindTenantID,
+	}
 }
 
 func (cr configRetriever) FillParameters(c *Config) error {
@@ -22,5 +31,6 @@ func (cr configRetriever) FillParameters(c *Config) error {
 		}
 		c.TenantID = tenantID
 	}
+
 	return nil
 }

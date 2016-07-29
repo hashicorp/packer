@@ -91,6 +91,11 @@
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
+      "plan": {
+        "name": "MySKU",
+        "product": "MyOffer",
+        "publisher": "MyPublisher"
+      },
       "properties": {
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -115,7 +120,7 @@
             "ssh": {
               "publicKeys": [
                 {
-                  "keyData": "--test-ssh-authorized-key--",
+                  "keyData": "",
                   "path": "[variables('sshKeyPath')]"
                 }
               ]
@@ -123,16 +128,14 @@
           }
         },
         "storageProfile": {
-          "imageReference": {
-            "offer": "UbuntuServer",
-            "publisher": "Canonical",
-            "sku": "16.04",
-            "version": "latest"
-          },
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
+            "image": {
+              "uri": "https://localhost/custom.vhd"
+            },
             "name": "osdisk",
+            "osType": "Linux",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
             }
