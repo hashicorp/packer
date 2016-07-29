@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"time"
 
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/version"
@@ -210,7 +211,7 @@ func (d *driverGCE) GetSerialPortOutput(zone, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return output.Contents, nil
 }
 
@@ -284,7 +285,6 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Build up the metadata
 	metadata := make([]*compute.MetadataItems, len(c.Metadata))
 	for k, v := range c.Metadata {
-		d.ui.Message(fmt.Sprintf("%s: %s", k,v))
 		vCopy := v
 		metadata = append(metadata, &compute.MetadataItems{
 			Key:   k,
@@ -340,7 +340,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Items: c.Tags,
 		},
 	}
-	
+
 	d.ui.Message("Requesting instance creation...")
 	op, err := d.service.Instances.Insert(d.projectId, zone.Name, &instance).Do()
 	if err != nil {
@@ -368,16 +368,18 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 		errCh <- err
 		return
 	}
-	dCopy := string(data)
-	d.ui.Message("Fetching current metadata")
+
+	// Add the key needed for creating a windows password to the metadata.
 
 	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
-	
+
+	dCopy := string(data)
+
 	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &dCopy})
-	d.ui.Message("Uploading metadata: " + dCopy)
+
 	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
 		Fingerprint: instance.Metadata.Fingerprint,
-		Items: instance.Metadata.Items,
+		Items:       instance.Metadata.Items,
 	}).Do()
 
 	if err != nil {
@@ -391,7 +393,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 	select {
 	case err = <-newErrCh:
 	case <-time.After(time.Second * 30):
-		err = errors.New("time out while waiting for instance to create")
+		err = errors.New("time out while waiting to update instance metadata")
 	}
 
 	if err != nil {
@@ -399,10 +401,12 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 		return
 	}
 
+	// The password can take some time to create. 3 minutes might be a bit excessive though
 	timeout := time.Now().Add(time.Minute * 3)
 	hash := sha1.New()
 	random := rand.Reader
 
+	// Every 2 seconds check to see if the password has been created
 	for time.Now().Before(timeout) {
 		if passwordResponses, err := d.getPasswordResponses(zone, name); err == nil {
 			for _, response := range passwordResponses {
@@ -414,7 +418,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 						errCh <- err
 						return
 					}
-					
+
 					password, err := rsa.DecryptOAEP(hash, random, c.key, decodedPassword, nil)
 
 					if err != nil {
@@ -431,6 +435,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 
 		time.Sleep(2 * time.Second)
 	}
+
 	err = errors.New("Could not retrieve password. Timed out.")
 
 	errCh <- err
@@ -438,6 +443,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 
 }
 
+// getPasswordResponses checks the serial port output for the password.
 func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswordResponse, error) {
 	output, err := d.service.Instances.GetSerialPortOutput(d.projectId, zone, instance).Port(4).Do()
 

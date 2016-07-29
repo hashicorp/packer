@@ -41,6 +41,7 @@ type Driver interface {
 	// WaitForInstance waits for an instance to reach the given state.
 	WaitForInstance(state, zone, name string) <-chan error
 
+	// CreateOrResetWindowsPassword creates or resets the password for a user on an Windows instance.
 	CreateOrResetWindowsPassword(zone, name string, config *WindowsPasswordConfig) (<-chan error, error)
 }
 
@@ -68,6 +69,8 @@ type InstanceConfig struct {
 	Zone                string
 }
 
+// WindowsPasswordConfig is the data structue that GCE needs to encrypt the created
+// windows password.
 type WindowsPasswordConfig struct {
 	key      *rsa.PrivateKey
 	password string

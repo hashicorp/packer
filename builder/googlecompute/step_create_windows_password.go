@@ -16,13 +16,13 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// StepCreateWindowsPassword represents a Packer build step that generates SSH key pairs.
+// StepCreateWindowsPassword represents a Packer build step that sets the windows password on a Windows GCE instance.
 type StepCreateWindowsPassword struct {
 	Debug        bool
 	DebugKeyPath string
 }
 
-// Run executes the Packer build step that generates SSH key pairs.
+// Run executes the Packer build step that sets the windows password on a Windows GCE instance.
 func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
@@ -49,8 +49,6 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 		Email:    config.account.ClientEmail,
 		ExpireOn: time.Now().Add(time.Minute * 5),
 	}
-
-	ui.Message(fmt.Sprintf("%#v", data))
 
 	if s.Debug {
 
@@ -100,5 +98,5 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 	return multistep.ActionContinue
 }
 
-// Nothing to clean up. SSH keys are associated with a single GCE instance.
+// Nothing to clean up. The windows password is only created on the single instance.
 func (s *StepCreateWindowsPassword) Cleanup(state multistep.StateBag) {}

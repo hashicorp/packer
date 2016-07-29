@@ -48,7 +48,6 @@ type Config struct {
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 	WindowsInstance      bool              `mapstructure:"windows_instance"`
-	WindowsUsername      string            `mapstructure:"windows_username"`
 	account              accountFile
 	privateKeyBytes      []byte
 	stateTimeout         time.Duration
