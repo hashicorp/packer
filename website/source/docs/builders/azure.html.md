@@ -83,6 +83,19 @@ builder.
     configures your Tenant ID, Object ID, Key Vault Name, Key Vault Secret, and
     WinRM certificate URL.
 
+-   `virtual_network_name` (string) Use a pre-existing virtual network for the VM.  This option enables private
+    communication with the VM, no public IP address is **used** or **provisioned**.  This value should only be set if
+    Packer is executed from a host on the same subnet / virtual network.
+
+-   `virtual_network_resource_group_name` (string) If virtual_network_name is set, this value **may** also be set.  If
+    virtual_network_name is set, and this value is not set the builder attempts to determine the resource group
+    containing the virtual network.  If the resource group cannot be found, or it cannot be disambiguated, this value
+    should be set.
+
+-   `virtual_network_subnet_name` (string) If virtual_network_name is set, this value **may** also be set.  If
+     virtual_network_name is set, and this value is not set the builder attempts to determine the subnet to use with
+     the virtual network.  If the subnet cannot be found, or it cannot be disambiguated, this value should be set.
+
 -   `vm_size` (string) Size of the VM used for building. This can be changed
     when you deploy a VM from your VHD. See
     [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/) information. Defaults to `Standard_A1`.

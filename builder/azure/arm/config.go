@@ -70,11 +70,14 @@ type Config struct {
 	VMSize         string `mapstructure:"vm_size"`
 
 	// Deployment
-	ResourceGroupName          string `mapstructure:"resource_group_name"`
-	StorageAccount             string `mapstructure:"storage_account"`
-	storageAccountBlobEndpoint string
-	CloudEnvironmentName       string `mapstructure:"cloud_environment_name"`
-	cloudEnvironment           *azure.Environment
+	ResourceGroupName               string `mapstructure:"resource_group_name"`
+	StorageAccount                  string `mapstructure:"storage_account"`
+	storageAccountBlobEndpoint      string
+	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
+	cloudEnvironment                *azure.Environment
+	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
+	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
+	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
 
 	// OS
 	OSType string `mapstructure:"os_type"`
@@ -446,6 +449,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 	if c.ResourceGroupName == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group_name must be specified"))
+	}
+	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
+	}
+	if c.VirtualNetworkName == "" && c.VirtualNetworkSubnetName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
 	}
 
 	/////////////////////////////////////////////
