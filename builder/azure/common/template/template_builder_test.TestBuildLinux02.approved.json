@@ -27,43 +27,7 @@
   "resources": [
     {
       "apiVersion": "[variables('apiVersion')]",
-      "location": "[variables('location')]",
-      "name": "[variables('publicIPAddressName')]",
-      "properties": {
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
-        },
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-      },
-      "type": "Microsoft.Network/publicIPAddresses"
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "location": "[variables('location')]",
-      "name": "[variables('virtualNetworkName')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetAddressPrefix')]"
-            }
-          }
-        ]
-      },
-      "type": "Microsoft.Network/virtualNetworks"
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
+      "dependsOn": [],
       "location": "[variables('location')]",
       "name": "[variables('nicName')]",
       "properties": {
@@ -72,9 +36,6 @@
             "name": "ipconfig",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
-              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -123,16 +84,14 @@
           }
         },
         "storageProfile": {
-          "imageReference": {
-            "offer": "UbuntuServer",
-            "publisher": "Canonical",
-            "sku": "16.04",
-            "version": "latest"
-          },
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
+            "image": {
+              "uri": "http://azure/custom.vhd"
+            },
             "name": "osdisk",
+            "osType": "Linux",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
             }
@@ -151,10 +110,10 @@
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "subnetAddressPrefix": "10.0.0.0/24",
-    "subnetName": "packerSubnet",
+    "subnetName": "--subnet-name--",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "virtualNetworkName": "packerNetwork",
-    "virtualNetworkResourceGroup": "[resourceGroup().name]",
+    "virtualNetworkName": "--virtual-network--",
+    "virtualNetworkResourceGroup": "--virtual-network-resource-group--",
     "vmStorageAccountContainerName": "images",
     "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
   }

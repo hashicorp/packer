@@ -36,6 +36,9 @@ type AzureClient struct {
 	resources.DeploymentsClient
 	resources.GroupsClient
 	network.PublicIPAddressesClient
+	network.InterfacesClient
+	network.SubnetsClient
+	network.VirtualNetworksClient
 	compute.VirtualMachinesClient
 	common.VaultClient
 	armStorage.AccountsClient
@@ -121,6 +124,24 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
 	azureClient.GroupsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.GroupsClient.UserAgent += packerUserAgent
+
+	azureClient.InterfacesClient = network.NewInterfacesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.InterfacesClient.Authorizer = servicePrincipalToken
+	azureClient.InterfacesClient.RequestInspector = withInspection(maxlen)
+	azureClient.InterfacesClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.InterfacesClient.UserAgent += packerUserAgent
+
+	azureClient.SubnetsClient = network.NewSubnetsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.SubnetsClient.Authorizer = servicePrincipalToken
+	azureClient.SubnetsClient.RequestInspector = withInspection(maxlen)
+	azureClient.SubnetsClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.SubnetsClient.UserAgent += packerUserAgent
+
+	azureClient.VirtualNetworksClient = network.NewVirtualNetworksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.VirtualNetworksClient.Authorizer = servicePrincipalToken
+	azureClient.VirtualNetworksClient.RequestInspector = withInspection(maxlen)
+	azureClient.VirtualNetworksClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.VirtualNetworksClient.UserAgent += packerUserAgent
 
 	azureClient.PublicIPAddressesClient = network.NewPublicIPAddressesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.PublicIPAddressesClient.Authorizer = servicePrincipalToken
