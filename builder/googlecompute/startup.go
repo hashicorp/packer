@@ -54,6 +54,8 @@ echo $(echo %s | base64 --decode)
 exit $RETVAL
 `, StartupScriptStartLog, StartupWrappedScriptKey, StartupScriptDoneLogBase64)
 
+// Modified Ansible WinRM script. Changed to write to Serial-Port
+
 var StartupWinRMScript = `# Configure a Windows host for remote management with Ansible
 # -----------------------------------------------------------
 #

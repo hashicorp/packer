@@ -50,9 +50,6 @@ func (config *Config) getInstanceMetadata(sshPublicKey string) (map[string]strin
 	}
 	instanceMetadata[StartupScriptKey] = StartupScript
 
-	// Adding the Sysprep script to enable Windows RM
-	instanceMetadata[StartupWindowsSysprepKey] = StartupWinRMScript
-
 	return instanceMetadata, err
 }
 
@@ -60,16 +57,36 @@ func (config *Config) getInstanceMetadata(sshPublicKey string) (map[string]strin
 func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	sshPublicKey := state.Get("ssh_public_key").(string)
 	ui := state.Get("ui").(packer.Ui)
-
-	ui.Say("Creating instance...")
-	name := config.InstanceName
 
 	var errCh <-chan error
 	var err error
 	var metadata map[string]string
-	metadata, err = config.getInstanceMetadata(sshPublicKey)
+
+	if config.Comm.Type == "winrm" {
+		metadata = make(map[string]string)
+
+		// Copy metadata from config.
+		for k, v := range config.Metadata {
+			metadata[k] = v
+		}
+
+		if _, exists := metadata[StartupWindowsSysprepKey]; !exists {
+			metadata[StartupWindowsSysprepKey] = StartupWinRMScript
+		} else {
+			ui.Say("Sysprep script already exists. Please ensure WinRM is enabled.")
+		}
+
+	} else {
+		sshPublicKey := state.Get("ssh_public_key").(string)
+
+		metadata, err = config.getInstanceMetadata(sshPublicKey)
+
+	}
+
+	ui.Say("Creating instance...")
+	name := config.InstanceName
+
 	errCh, err = driver.RunInstance(&InstanceConfig{
 		Address:             config.Address,
 		Description:         "New instance created by Packer",
