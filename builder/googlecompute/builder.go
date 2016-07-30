@@ -48,33 +48,58 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	// Build the steps.
-	steps := []multistep.Step{
-		new(StepCheckExistingImage),
-		&StepCreateSSHKey{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
-		},
-		&StepCreateInstance{
-			Debug: b.config.PackerDebug,
-		},
-		&StepCreateWindowsPassword{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("gce_windows_%s.pem", b.config.PackerBuildName),
-		},
-		&StepInstanceInfo{
-			Debug: b.config.PackerDebug,
-		},
-		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
-			WinRMConfig: winrmConfig,
-		},
-		new(common.StepProvision),
-		new(StepWaitInstanceStartup),
-		new(StepTeardownInstance),
-		new(StepCreateImage),
+	var steps []multistep.Step
+
+	if b.config.Comm.Type == "winrm" {
+
+		// Build the steps.
+		steps = []multistep.Step{
+			new(StepCheckExistingImage),
+			&StepCreateInstance{
+				Debug: b.config.PackerDebug,
+			},
+			&StepCreateWindowsPassword{
+				Debug:        b.config.PackerDebug,
+				DebugKeyPath: fmt.Sprintf("gce_windows_%s.pem", b.config.PackerBuildName),
+			},
+			&StepInstanceInfo{
+				Debug: b.config.PackerDebug,
+			},
+			&communicator.StepConnect{
+				Config:      &b.config.Comm,
+				Host:        commHost,
+				WinRMConfig: winrmConfig,
+			},
+			new(common.StepProvision),
+			new(StepTeardownInstance),
+			new(StepCreateImage),
+		}
+	} else {
+
+		// Build the steps.
+		steps = []multistep.Step{
+			new(StepCheckExistingImage),
+			&StepCreateSSHKey{
+				Debug:        b.config.PackerDebug,
+				DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+			},
+			&StepCreateInstance{
+				Debug: b.config.PackerDebug,
+			},
+			&StepInstanceInfo{
+				Debug: b.config.PackerDebug,
+			},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      commHost,
+				SSHConfig: sshConfig,
+			},
+			new(common.StepProvision),
+			new(StepWaitInstanceStartup),
+			new(StepTeardownInstance),
+			new(StepCreateImage),
+		}
+
 	}
 
 	// Run the steps.

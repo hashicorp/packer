@@ -45,13 +45,11 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		// Mark the startup script as done.
 		instanceMetadata[StartupScriptKey] = StartupScriptWindows
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusDone
+
 	} else {
 		instanceMetadata[StartupScriptKey] = StartupScriptLinux
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
-
-	// Adding the Sysprep script to enable Windows RM
-	instanceMetadata[StartupWindowsSysprepKey] = StartupWinRMScript
 
 	return instanceMetadata, err
 }
@@ -84,7 +82,9 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	var errCh <-chan error
 	var metadata map[string]string
+
 	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
+
 	errCh, err = d.RunInstance(&InstanceConfig{
 		Address:             c.Address,
 		Description:         "New instance created by Packer",
