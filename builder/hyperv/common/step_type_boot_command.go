@@ -124,6 +124,12 @@ func scancodes(message string) []string {
 	special["<end>"] = []string{"4f", "cf"}
 	special["<pageUp>"] = []string{"49", "c9"}
 	special["<pageDown>"] = []string{"51", "d1"}
+	special["<leftAlt>"] = []string{"38", "b8"}
+	special["<leftCtrl>"] = []string{"1d", "9d"}
+	special["<leftShift>"] = []string{"2a", "aa"}
+	special["<rightAlt>"] = []string{"e038", "e0b8"}
+	special["<rightCtrl>"] = []string{"e01d", "e09d"}
+	special["<rightShift>"] = []string{"36", "b6"}
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
@@ -152,6 +158,66 @@ func scancodes(message string) []string {
 	result := make([]string, 0, len(message)*2)
 	for len(message) > 0 {
 		var scancode []string
+
+		if strings.HasPrefix(message, "<leftAltOn>") {
+			scancode = []string{"38"}
+			message = message[len("<leftAltOn>"):]
+		}
+
+		if strings.HasPrefix(message, "<leftCtrlOn>") {
+			scancode = []string{"1d"}
+			message = message[len("<leftCtrlOn>"):]
+		}
+
+		if strings.HasPrefix(message, "<leftShiftOn>") {
+			scancode = []string{"2a"}
+			message = message[len("<leftShiftOn>"):]
+		}
+
+		if strings.HasPrefix(message, "<leftAltOff>") {
+			scancode = []string{"b8"}
+			message = message[len("<leftAltOff>"):]
+		}
+
+		if strings.HasPrefix(message, "<leftCtrlOff>") {
+			scancode = []string{"9d"}
+			message = message[len("<leftCtrlOff>"):]
+		}
+
+		if strings.HasPrefix(message, "<leftShiftOff>") {
+			scancode = []string{"aa"}
+			message = message[len("<leftShiftOff>"):]
+		}
+
+		if strings.HasPrefix(message, "<rightAltOn>") {
+			scancode = []string{"e038"}
+			message = message[len("<rightAltOn>"):]
+		}
+
+		if strings.HasPrefix(message, "<rightCtrlOn>") {
+			scancode = []string{"e01d"}
+			message = message[len("<rightCtrlOn>"):]
+		}
+
+		if strings.HasPrefix(message, "<rightShiftOn>") {
+			scancode = []string{"36"}
+			message = message[len("<rightShiftOn>"):]
+		}
+
+		if strings.HasPrefix(message, "<rightAltOff>") {
+			scancode = []string{"e0b8"}
+			message = message[len("<rightAltOff>"):]
+		}
+
+		if strings.HasPrefix(message, "<rightCtrlOff>") {
+			scancode = []string{"e09d"}
+			message = message[len("<rightCtrlOff>"):]
+		}
+
+		if strings.HasPrefix(message, "<rightShiftOff>") {
+			scancode = []string{"b6"}
+			message = message[len("<rightShiftOff>"):]
+		}
 
 		if strings.HasPrefix(message, "<wait>") {
 			//log.Printf("Special code <wait> found, will sleep 1 second at this point.")
