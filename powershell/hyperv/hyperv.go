@@ -1,9 +1,11 @@
 package hyperv
 
 import (
-	"github.com/mitchellh/packer/powershell"
+	"errors"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/packer/powershell"
 )
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
@@ -54,58 +56,37 @@ $ip
 func CreateDvdDrive(vmName string, isoPath string, generation uint) (uint, uint, error) {
 	var ps powershell.PowerShellCmd
 	var script string
-	var controllerNumber uint
-	controllerNumber = 0
-	if generation < 2 {
-		// get the controller number that the OS install disk is mounted on
-		// generation 1 requires dvd to be added to ide controller, generation 2 uses scsi for dvd drives
-		script = `
-param([string]$vmName)
-$dvdDrives = @(Get-VMDvdDrive -VMName $vmName)
-$lastControllerNumber = $dvdDrives | Sort-Object ControllerNumber | Select-Object -Last 1 | %{$_.ControllerNumber}
-if (!$lastControllerNumber) {
-	$lastControllerNumber = 0
-} elseif (!$lastControllerNumber -or ($dvdDrives | ?{ $_.ControllerNumber -eq $lastControllerNumber} | measure).count -gt 1) {
-	$lastControllerNumber += 1
-}
-$lastControllerNumber	
-`
-		cmdOut, err := ps.Output(script, vmName)
-		if err != nil {
-			return 0, 0, err
-		}
-
-		controllerNumberTemp, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 64)
-		if err != nil {
-			return 0, 0, err
-		}
-
-		controllerNumber = uint(controllerNumberTemp)
-
-		if controllerNumber != 0 && controllerNumber != 1 {
-			//There are only 2 ide controllers, try to use the one the hdd is attached too
-			controllerNumber = 0
-		}
-	}
 
 	script = `
-param([string]$vmName, [string]$isoPath, [int]$controllerNumber)
-$dvdController = Add-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -path $isoPath -Passthru
+param([string]$vmName, [string]$isoPath)
+$dvdController = Add-VMDvdDrive -VMName $vmName -path $isoPath -Passthru
 $dvdController | Set-VMDvdDrive -path $null
-$dvdController.ControllerLocation
+$result = "$($dvdController.ControllerNumber),$($dvdController.ControllerLocation)"
+$result
 `
 
-	cmdOut, err := ps.Output(script, vmName, isoPath, strconv.FormatInt(int64(controllerNumber), 10))
+	cmdOut, err := ps.Output(script, vmName, isoPath)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	cmdOutArray := strings.Split(cmdOut, ",")
+	if len(cmdOutArray) != 2 {
+		return 0, 0, errors.New("Did not return controller number and controller location")
+	}
+
+	controllerNumberTemp, err := strconv.ParseUint(strings.TrimSpace(cmdOutArray[0]), 10, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	controllerNumber := uint(controllerNumberTemp)
+
+	controllerLocationTemp, err := strconv.ParseUint(strings.TrimSpace(cmdOutArray[1]), 10, 64)
 	if err != nil {
 		return controllerNumber, 0, err
 	}
-
-	controllerLocationTemp, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 64)
-	if err != nil {
-		return controllerNumber, 0, err
-	}
-
 	controllerLocation := uint(controllerLocationTemp)
+
 	return controllerNumber, controllerLocation, err
 }
 
