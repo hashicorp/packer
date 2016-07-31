@@ -290,9 +290,29 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
+-   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+
+-   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+
+-   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+
+-   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+
+-   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+
+-   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+
+-   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+
 -   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
+
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The
