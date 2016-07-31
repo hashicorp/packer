@@ -41,6 +41,52 @@ func TestStepCreateInstance(t *testing.T) {
 	assert.Equal(t, d.DeleteDiskZone, c.Zone, "Incorrect disk zone passed to driver.")
 }
 
+func TestStepCreateInstance_windows(t *testing.T) {
+
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	config := state.Get("config").(*Config)
+	driver := state.Get("driver").(*DriverMock)
+
+	config.Comm.Type = "winrm"
+
+	// run the step
+	if action := step.Run(state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// Check the metadata was set
+
+	if _, ok := driver.RunInstanceConfig.Metadata[StartupWindowsSysprepKey]; !ok {
+		t.Fatal("Should have set the sysprep script")
+	}
+
+	// Verify state
+	nameRaw, ok := state.GetOk("instance_name")
+	if !ok {
+		t.Fatal("should have instance name")
+	}
+
+	// cleanup
+	step.Cleanup(state)
+
+	if driver.DeleteInstanceName != nameRaw.(string) {
+		t.Fatal("should've deleted instance")
+	}
+	if driver.DeleteInstanceZone != config.Zone {
+		t.Fatalf("bad instance zone: %#v", driver.DeleteInstanceZone)
+	}
+
+	if driver.DeleteDiskName != config.InstanceName {
+		t.Fatal("should've deleted disk")
+	}
+	if driver.DeleteDiskZone != config.Zone {
+		t.Fatalf("bad disk zone: %#v", driver.DeleteDiskZone)
+	}
+}
+
 func TestStepCreateInstance_error(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateInstance)
