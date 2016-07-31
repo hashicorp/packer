@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/masterzen/winrm/winrm"
+	"github.com/masterzen/winrm"
 	"github.com/mitchellh/packer/packer"
 	"github.com/packer-community/winrmcp/winrmcp"
 
@@ -40,7 +40,7 @@ func New(config *Config) (*Communicator, error) {
 	}
 
 	// Create the client
-	params := winrm.DefaultParameters()
+	params := winrm.DefaultParameters
 
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
