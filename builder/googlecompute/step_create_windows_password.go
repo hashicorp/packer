@@ -29,6 +29,17 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 	config := state.Get("config").(*Config)
 	name := state.Get("instance_name").(string)
 
+	if config.Comm.WinRMUser == "" {
+		config.Comm.WinRMUser = "packer"
+	}
+
+	if config.Comm.WinRMPassword != "" {
+		state.Put("winrm_password", config.Comm.WinRMPassword)
+
+		ui.Message("Using specified password")
+		return multistep.ActionContinue
+	}
+
 	ui.Say("Creating windows user for instance...")
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
