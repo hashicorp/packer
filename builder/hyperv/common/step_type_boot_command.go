@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	//"log"
+	"log"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -162,77 +162,89 @@ func scancodes(message string) []string {
 		if strings.HasPrefix(message, "<leftAltOn>") {
 			scancode = []string{"38"}
 			message = message[len("<leftAltOn>"):]
+			log.Printf("Special code '<leftAltOn>' found, replacing with: 38")
 		}
 
 		if strings.HasPrefix(message, "<leftCtrlOn>") {
 			scancode = []string{"1d"}
 			message = message[len("<leftCtrlOn>"):]
+			log.Printf("Special code '<leftCtrlOn>' found, replacing with: 1d")
 		}
 
 		if strings.HasPrefix(message, "<leftShiftOn>") {
 			scancode = []string{"2a"}
 			message = message[len("<leftShiftOn>"):]
+			log.Printf("Special code '<leftShiftOn>' found, replacing with: 2a")
 		}
 
 		if strings.HasPrefix(message, "<leftAltOff>") {
 			scancode = []string{"b8"}
 			message = message[len("<leftAltOff>"):]
+			log.Printf("Special code '<leftAltOff>' found, replacing with: b8")
 		}
 
 		if strings.HasPrefix(message, "<leftCtrlOff>") {
 			scancode = []string{"9d"}
 			message = message[len("<leftCtrlOff>"):]
+			log.Printf("Special code '<leftCtrlOff>' found, replacing with: 9d")
 		}
 
 		if strings.HasPrefix(message, "<leftShiftOff>") {
 			scancode = []string{"aa"}
 			message = message[len("<leftShiftOff>"):]
+			log.Printf("Special code '<leftShiftOff>' found, replacing with: aa")
 		}
 
 		if strings.HasPrefix(message, "<rightAltOn>") {
 			scancode = []string{"e038"}
 			message = message[len("<rightAltOn>"):]
+			log.Printf("Special code '<rightAltOn>' found, replacing with: e038")
 		}
 
 		if strings.HasPrefix(message, "<rightCtrlOn>") {
 			scancode = []string{"e01d"}
 			message = message[len("<rightCtrlOn>"):]
+			log.Printf("Special code '<rightCtrlOn>' found, replacing with: e01d")
 		}
 
 		if strings.HasPrefix(message, "<rightShiftOn>") {
 			scancode = []string{"36"}
 			message = message[len("<rightShiftOn>"):]
+			log.Printf("Special code '<rightShiftOn>' found, replacing with: 36")
 		}
 
 		if strings.HasPrefix(message, "<rightAltOff>") {
 			scancode = []string{"e0b8"}
 			message = message[len("<rightAltOff>"):]
+			log.Printf("Special code '<rightAltOff>' found, replacing with: e0b8")
 		}
 
 		if strings.HasPrefix(message, "<rightCtrlOff>") {
 			scancode = []string{"e09d"}
 			message = message[len("<rightCtrlOff>"):]
+			log.Printf("Special code '<rightCtrlOff>' found, replacing with: e09d")
 		}
 
 		if strings.HasPrefix(message, "<rightShiftOff>") {
 			scancode = []string{"b6"}
 			message = message[len("<rightShiftOff>"):]
+			log.Printf("Special code '<rightShiftOff>' found, replacing with: b6")
 		}
 
 		if strings.HasPrefix(message, "<wait>") {
-			//log.Printf("Special code <wait> found, will sleep 1 second at this point.")
+			log.Printf("Special code <wait> found, will sleep 1 second at this point.")
 			scancode = []string{"wait"}
 			message = message[len("<wait>"):]
 		}
 
 		if strings.HasPrefix(message, "<wait5>") {
-			//log.Printf("Special code <wait5> found, will sleep 5 seconds at this point.")
+			log.Printf("Special code <wait5> found, will sleep 5 seconds at this point.")
 			scancode = []string{"wait5"}
 			message = message[len("<wait5>"):]
 		}
 
 		if strings.HasPrefix(message, "<wait10>") {
-			//log.Printf("Special code <wait10> found, will sleep 10 seconds at this point.")
+			log.Printf("Special code <wait10> found, will sleep 10 seconds at this point.")
 			scancode = []string{"wait10"}
 			message = message[len("<wait10>"):]
 		}
@@ -240,7 +252,7 @@ func scancodes(message string) []string {
 		if scancode == nil {
 			for specialCode, specialValue := range special {
 				if strings.HasPrefix(message, specialCode) {
-					//log.Printf("Special code '%s' found, replacing with: %s", specialCode, specialValue)
+					log.Printf("Special code '%s' found, replacing with: %s", specialCode, specialValue)
 					scancode = specialValue
 					message = message[len(specialCode):]
 					break
@@ -266,7 +278,7 @@ func scancodes(message string) []string {
 			}
 
 			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt+0x80))
-			//log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
+			log.Printf("Sending char '%c', code '%v', shift %v", r, scancode, keyShift)
 		}
 
 		result = append(result, scancode...)
