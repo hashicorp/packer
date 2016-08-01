@@ -26,6 +26,7 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
+	Address              string            `mapstructure:"address"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
 	DiskType             string            `mapstructure:"disk_type"`
@@ -36,15 +37,15 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
-	Subnetwork           string            `mapstructure:"subnetwork"`
-	Address              string            `mapstructure:"address"`
 	Preemptible          bool              `mapstructure:"preemptible"`
+	RawStateTimeout      string            `mapstructure:"state_timeout"`
+	Region               string            `mapstructure:"region"`
 	SourceImage          string            `mapstructure:"source_image"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
-	RawStateTimeout      string            `mapstructure:"state_timeout"`
+	StartupScriptFile    string            `mapstructure:"startup_script_file"`
+	Subnetwork           string            `mapstructure:"subnetwork"`
 	Tags                 []string          `mapstructure:"tags"`
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
-	Region               string            `mapstructure:"region"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile

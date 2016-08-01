@@ -7,7 +7,7 @@ import (
 
 // Artifact represents a GCE image as the result of a Packer build.
 type Artifact struct {
-	imageName string
+	image     Image
 	driver    Driver
 }
 
@@ -18,8 +18,8 @@ func (*Artifact) BuilderId() string {
 
 // Destroy destroys the GCE image represented by the artifact.
 func (a *Artifact) Destroy() error {
-	log.Printf("Destroying image: %s", a.imageName)
-	errCh := a.driver.DeleteImage(a.imageName)
+	log.Printf("Destroying image: %s", a.image.Name)
+	errCh := a.driver.DeleteImage(a.image.Name)
 	return <-errCh
 }
 
@@ -30,12 +30,12 @@ func (*Artifact) Files() []string {
 
 // Id returns the GCE image name.
 func (a *Artifact) Id() string {
-	return a.imageName
+	return a.image.Name
 }
 
 // String returns the string representation of the artifact.
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A disk image was created: %v", a.imageName)
+	return fmt.Sprintf("A disk image was created: %v", a.image.Name)
 }
 
 func (a *Artifact) State(name string) interface{} {

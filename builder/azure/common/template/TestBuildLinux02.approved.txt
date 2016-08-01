@@ -33,55 +33,20 @@
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "subnetAddressPrefix": "10.0.0.0/24",
-    "subnetName": "packerSubnet",
+    "subnetName": "--subnet-name--",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "virtualNetworkName": "packerNetwork",
+    "virtualNetworkName": "--virtual-network--",
+    "virtualNetworkResourceGroup": "--virtual-network-resource-group--",
     "vmStorageAccountContainerName": "images",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+    "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
   },
   "resources": [
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "name": "[variables('publicIPAddressName')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[variables('location')]",
-      "properties": {
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
-        },
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "name": "[variables('virtualNetworkName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[variables('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "properties": {
-              "addressPrefix": "[variables('subnetAddressPrefix')]"
-            },
-            "name": "[variables('subnetName')]"
-          }
-        ]
-      }
-    },
     {
       "apiVersion": "[variables('apiVersion')]",
       "name": "[variables('nicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[variables('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
+      "dependsOn": [],
       "properties": {
         "ipConfigurations": [
           {
@@ -89,9 +54,6 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetRef')]"
-              },
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
               }
             },
             "name": "ipconfig"

@@ -20,7 +20,7 @@ func TestInterruptibleTaskShouldImmediatelyEndOnCancel(t *testing.T) {
 
 	result := testSubject.Run()
 	if result.IsCancelled != true {
-		t.Fatalf("Expected the task to be cancelled, but it was not.")
+		t.Fatal("Expected the task to be cancelled, but it was not.")
 	}
 }
 
