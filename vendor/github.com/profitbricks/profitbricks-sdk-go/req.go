@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"github.com/profitbricks/profitbricks-sdk-go/model"
 )
 
 //FullHeader is the standard header to include with all http requests except is_patch and is_command
@@ -32,10 +31,13 @@ func SetDepth(newdepth string) string {
 //	returns	Endpoint+ path .
 func mk_url(path string) string {
 	if strings.HasPrefix(path, "http") {
+		//REMOVE AFTER TESTING
 		path := strings.Replace(path, "https://api.profitbricks.com/rest/v2", Endpoint, 1)
+		// END REMOVE
 		return path
 	}
 	if strings.HasPrefix(path, "<base>") {
+		//REMOVE AFTER TESTING
 		path := strings.Replace(path, "<base>", Endpoint, 1)
 		return path
 	}
@@ -66,53 +68,6 @@ func is_delete(path string) Resp {
 	req, _ := http.NewRequest("DELETE", url, nil)
 	req.Header.Add("Content-Type", FullHeader)
 	return do(req)
-}
-
-// is_list performs an http.NewRequest GET and returns a Collection struct
-func is_list(path string) Collection {
-	url := mk_url(path) + `?depth=` + Depth
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Content-Type", FullHeader)
-	return toCollection(do(req))
-}
-
-// is_get performs an http.NewRequest GET and returns an Instance struct
-func is_get(path string) Instance {
-	url := mk_url(path) + `?depth=` + Depth
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Content-Type", FullHeader)
-	return toInstance(do(req))
-}
-
-// is_patch performs an http.NewRequest PATCH and returns an Instance struct
-func is_patch(path string, jason []byte) Instance {
-	url := mk_url(path)
-	req, _ := http.NewRequest("PATCH", url, bytes.NewBuffer(jason))
-	req.Header.Add("Content-Type", PatchHeader)
-	return toInstance(do(req))
-}
-
-// is_put performs an http.NewRequest PUT and returns an Instance struct
-func is_put(path string, jason []byte) Instance {
-	url := mk_url(path)
-	req, _ := http.NewRequest("PUT", url, bytes.NewBuffer(jason))
-	req.Header.Add("Content-Type", FullHeader)
-	return toInstance(do(req))
-}
-
-// is_post performs an http.NewRequest POST and returns an Instance struct
-func is_post(path string, jason []byte) Instance {
-	url := mk_url(path)
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jason))
-	req.Header.Add("Content-Type", FullHeader)
-	return toInstance(do(req))
-}
-
-func is_composite_post(path string, jason []byte) model.Datacenter {
-	url := mk_url(path)+ `?depth=` + Depth
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jason))
-	req.Header.Add("Content-Type", FullHeader)
-	return toDataCenter(do(req))
 }
 
 // is_command performs an http.NewRequest POST and returns a Resp struct
