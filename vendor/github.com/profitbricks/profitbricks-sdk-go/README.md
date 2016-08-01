@@ -98,15 +98,15 @@ ProfitBricks introduces the concept of Data Centers. These are logically separat
 The following code example shows you how to programmatically create a data center:
 
 ```go
-request := profitbricks.CreateDatacenterRequest{
-    DCProperties: profitbricks.DCProperties{
-			Name:        "test",
+dcrequest := profitbricks.Datacenter{
+		Properties: profitbricks.DatacenterProperties{
+			Name:        "example.go3",
 			Description: "description",
 			Location:    "us/lasdev",
-	},
-}
+		},
+	}
 
-response := profitbricks.CreateDatacenter(request)
+datacenter := profitbricks.CreateDatacenter(dcrequest)
 ```
 
 ## How To: Create Data Center with Multiple Resources
@@ -139,7 +139,7 @@ datacenter := model.Datacenter{
 											Image:"1f46a4a3-3f47-11e6-91c6-52540005ab80",
 											Bus:"VIRTIO",
 											ImagePassword:"test1234",
-											SshKeys: []string{"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCoLVLHON4BSK3D8L4H79aFo+0cj7VM2NiRR/K9wrfkK/XiTc7FlEU4Bs8WLZcsIOxbCGWn2zKZmrLaxYlY+/3aJrxDxXYCy8lRUMnqcQ2JCFY6tpZt/DylPhS9L6qYNpJ0F4FlqRsWxsjpF8TDdJi64k2JFJ8TkvX36P2/kqyFfI+N0/axgjhqV3BgNgApvMt9jxWB5gi8LgDpw9b+bHeMS7TrAVDE7bzT86dmfbTugtiME8cIday8YcRb4xAFgRH8XJVOcE3cs390V/dhgCKy1P5+TjQMjKbFIy2LJoxb7bd38kAl1yafZUIhI7F77i7eoRidKV71BpOZsaPEbWUP jasmin@Jasmins-MBP"},
+											SshKeys: []string{"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCoLVLHON4BSK3D8L4H79aFo..."},
 										},
 									},
 								},
@@ -183,14 +183,13 @@ The server create method has a list of required parameters followed by a hash of
 The following example shows you how to create a new server in the data center created above:
 
 ```go
-request = CreateServerRequest{
-	ServerProperties: ServerProperties{
-		Name:  "go01",
-		Ram:   1024,
-		Cores: 2,
-	},
+req := profitbricks.Server{
+ 		Properties: profitbricks.ServerProperties{
+ 			Name:  "go01",
+ 			Ram:   1024,
+ 			Cores: 2,
+ 		},
 }
-
 server := CreateServer(datacenter.Id, req)
 ```
 
@@ -209,14 +208,13 @@ This will return a [collection](#Collection) object
 ProfitBricks allows for the creation of multiple storage volumes that can be attached and detached as needed. It is useful to attach an image when creating a storage volume. The storage size is in gigabytes.
 
 ```go
-volumerequest := CreateVolumeRequest{
-	VolumeProperties: VolumeProperties{
-		Size:        1,
-		Name:        "Volume Test",
-		ImageId: "imageid",
-		Type: "HDD",
-		SshKey: []string{"hQGOEJeFL91EG3+l9TtRbWNjzhDVHeLuL3NWee6bekA="},
-	},
+volumerequest := profitbricks.Volume{
+		Properties: profitbricks.VolumeProperties{
+			Size:        1,
+			Name:        "Volume Test",
+			LicenceType: "LINUX",
+			Type:        "HDD",
+		},
 }
 
 storage := CreateVolume(datacenter.Id, volumerequest)
@@ -274,6 +272,8 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
@@ -282,11 +282,11 @@ func main() {
 	//Sets username and password
 	profitbricks.SetAuth("username", "password")
 	//Sets depth.
-	profitbricks.SetDepth(5)
+	profitbricks.SetDepth("5")
 
-	dcrequest := profitbricks.CreateDatacenterRequest{
-		DCProperties: profitbricks.DCProperties{
-			Name:        "test",
+	dcrequest := profitbricks.Datacenter{
+		Properties: profitbricks.DatacenterProperties{
+			Name:        "example.go3",
 			Description: "description",
 			Location:    "us/lasdev",
 		},
@@ -294,25 +294,21 @@ func main() {
 
 	datacenter := profitbricks.CreateDatacenter(dcrequest)
 
-	serverrequest := profitbricks.CreateServerRequest{
-		ServerProperties: profitbricks.ServerProperties{
+	serverrequest := profitbricks.Server{
+		Properties: profitbricks.ServerProperties{
 			Name:  "go01",
 			Ram:   1024,
 			Cores: 2,
 		},
 	}
+	server := profitbricks.CreateServer(datacenter.Id, serverrequest)
 
-    server := profitbricks.CreateServer(datacenter.Id, serverrequest)
-
-	images := profitbricks.ListImages()
-
-	fmt.Println(images.Items)
-
-	volumerequest := profitbricks.CreateVolumeRequest{
-		VolumeProperties: profitbricks.VolumeProperties{
+	volumerequest := profitbricks.Volume{
+		Properties: profitbricks.VolumeProperties{
 			Size:        1,
 			Name:        "Volume Test",
 			LicenceType: "LINUX",
+			Type:        "HDD",
 		},
 	}
 
@@ -324,55 +320,21 @@ func main() {
 		Ram:   256,
 	}
 
-    resp := profitbricks.PatchServer(datacenter.Id, server.Id, serverupdaterequest)
+	profitbricks.PatchServer(datacenter.Id, server.Id, serverupdaterequest)
+	//It takes a moment for a volume to be provisioned so we wait.
+	time.Sleep(60 * time.Second)
+
+	profitbricks.AttachVolume(datacenter.Id, server.Id, storage.Id)
 
 	volumes := profitbricks.ListVolumes(datacenter.Id)
+	fmt.Println(volumes.Items)
 	servers := profitbricks.ListServers(datacenter.Id)
+	fmt.Println(servers.Items)
 	datacenters := profitbricks.ListDatacenters()
+	fmt.Println(datacenters.Items)
 
 	profitbricks.DeleteServer(datacenter.Id, server.Id)
 	profitbricks.DeleteDatacenter(datacenter.Id)
-}
-```
-
-# Return Types
-
-## Resp struct
-* 	Resp is the struct returned by all REST request functions
-
-```go
-type Resp struct {
-    Req        *http.Request
-    StatusCode int
-    Headers    http.Header
-    Body       []byte
-}
-```
-
-## Instance struct
-* 	`Get`, `Create`, and `Patch` functions all return an Instance struct.
-*	A Resp struct is embedded in the Instance struct.
-*	The raw server response is available as `Instance.Resp.Body`.
-
-```go
-type Instance struct {
-    Id_Type_Href
-    MetaData   StringMap           `json:"metaData"`
-    Properties StringIfaceMap      `json:"properties"`
-    Entities   StringCollectionMap `json:"entities"`
-    Resp       Resp                `json:"-"`
-}
-```
-
-## Collection struct
-* 	Collection Structs contain Instance arrays. 
-* 	List functions return Collections
-
-```go
-type Collection struct {
-    Id_Type_Href
-    Items []Instance `json:"items,omitempty"`
-    Resp  Resp       `json:"-"`
 }
 ```
 

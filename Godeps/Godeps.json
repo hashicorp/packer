@@ -1001,6 +1001,11 @@
 		{
 			"ImportPath": "gopkg.in/xmlpath.v2",
 			"Rev": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
+		},
+		{
+			"ImportPath": "github.com/profitbricks/profitbricks-sdk-go",
+			"Comment": "v2.1.0",
+			"Rev": "565df72e7b92b63c68c17b2c305256ba09a251f4"
 		}
 	]
 }
