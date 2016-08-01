@@ -29,10 +29,6 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 	config := state.Get("config").(*Config)
 	name := state.Get("instance_name").(string)
 
-	if config.Comm.WinRMUser == "" {
-		config.Comm.WinRMUser = "packer"
-	}
-
 	if config.Comm.WinRMPassword != "" {
 		state.Put("winrm_password", config.Comm.WinRMPassword)
 
