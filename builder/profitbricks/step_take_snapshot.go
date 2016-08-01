@@ -6,7 +6,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
-	"strings"
 	"time"
 )
 
@@ -27,13 +26,12 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	state.Put("snapshotname", c.SnapshotName)
 
-	err := s.checkForErrors(snapshot)
-	if err != nil {
-		ui.Error(err.Error())
+	if snapshot.StatusCode > 299 {
+		ui.Say(fmt.Sprintf("Error occured %s", snapshot.Response))
 		return multistep.ActionHalt
 	}
 
-	s.waitTillProvisioned(strings.Join(snapshot.Headers["Location"], ""), *c)
+	s.waitTillProvisioned(snapshot.Headers.Get("Location"), *c)
 
 	return multistep.ActionContinue
 }
@@ -50,9 +48,13 @@ func (d *stepTakeSnapshot) checkForErrors(instance profitbricks.Resp) error {
 
 func (d *stepTakeSnapshot) waitTillProvisioned(path string, config Config) {
 	d.setPB(config.PBUsername, config.PBPassword, config.PBUrl)
+	waitCount := 50
+	if config.Timeout > 0 {
+		waitCount = config.Timeout
+	}
 	for i := 0; i < waitCount; i++ {
 		request := profitbricks.GetRequestStatus(path)
-		if request.MetaData["status"] == "DONE" {
+		if request.Metadata.Status == "DONE" {
 			break
 		}
 		time.Sleep(10 * time.Second)

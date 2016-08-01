@@ -6,13 +6,9 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
+	"strconv"
 	"strings"
 	"time"
-	"github.com/profitbricks/profitbricks-sdk-go/model"
-)
-
-const (
-	waitCount = 30
 )
 
 type stepCreateServer struct{}
@@ -25,34 +21,34 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	profitbricks.SetDepth("5")
 	c.SSHKey = state.Get("publicKey").(string)
 
-	ui.Say("Creating Virutal Data Center...")
+	ui.Say("Creating Virtual Data Center...")
 	img := s.getImageId(c.Image, c)
 
-	datacenter := model.Datacenter{
-		Properties: model.DatacenterProperties{
-			Name: c.SnapshotName,
-			Location:c.Region,
+	datacenter := profitbricks.Datacenter{
+		Properties: profitbricks.DatacenterProperties{
+			Name:     c.SnapshotName,
+			Location: c.Region,
 		},
-		Entities:model.DatacenterEntities{
-			Servers: &model.Servers{
-				Items:[]model.Server{
-					model.Server{
-						Properties: model.ServerProperties{
-							Name : c.SnapshotName,
-							Ram: c.Ram,
+		Entities: profitbricks.DatacenterEntities{
+			Servers: &profitbricks.Servers{
+				Items: []profitbricks.Server{
+					{
+						Properties: profitbricks.ServerProperties{
+							Name:  c.SnapshotName,
+							Ram:   c.Ram,
 							Cores: c.Cores,
 						},
-						Entities:model.ServerEntities{
-							Volumes: &model.AttachedVolumes{
-								Items:[]model.Volume{
-									model.Volume{
-										Properties: model.VolumeProperties{
-											Type_:c.DiskType,
-											Size:c.DiskSize,
-											Name:c.SnapshotName,
-											Image:img,
-											ImagePassword: "test1234",
-											SshKeys: []string{c.SSHKey},
+						Entities: &profitbricks.ServerEntities{
+							Volumes: &profitbricks.Volumes{
+								Items: []profitbricks.Volume{
+									{
+										Properties: profitbricks.VolumeProperties{
+											Type:          c.DiskType,
+											Size:          c.DiskSize,
+											Name:          c.SnapshotName,
+											Image:         img,
+											SshKeys:       []string{c.SSHKey},
+											ImagePassword: c.SnapshotPassword,
 										},
 									},
 								},
@@ -73,42 +69,41 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	state.Put("datacenter_id", datacenter.Id)
 
-	lan := profitbricks.CreateLan(datacenter.Id, profitbricks.CreateLanRequest{
-		LanProperties: profitbricks.LanProperties{
+	lan := profitbricks.CreateLan(datacenter.Id, profitbricks.Lan{
+		Properties: profitbricks.LanProperties{
 			Public: true,
 			Name:   c.SnapshotName,
 		},
 	})
 
-	err := s.checkForErrors(lan.Resp)
-	if err != nil {
-		ui.Error(err.Error())
+	if lan.StatusCode > 299 {
+		ui.Error(fmt.Sprintf("Error occured %s", lan.Response))
 		return multistep.ActionHalt
 	}
 
-	s.waitTillProvisioned(strings.Join(lan.Resp.Headers["Location"], ""), *c)
+	s.waitTillProvisioned(lan.Headers.Get("Location"), *c)
 
-	nic := profitbricks.CreateNic(datacenter.Id, datacenter.Entities.Servers.Items[0].Id, profitbricks.NicCreateRequest{
-		NicProperties : profitbricks.NicProperties{
+	lanId, _ := strconv.Atoi(lan.Id)
+	nic := profitbricks.CreateNic(datacenter.Id, datacenter.Entities.Servers.Items[0].Id, profitbricks.Nic{
+		Properties: profitbricks.NicProperties{
 			Name: c.SnapshotName,
-			Lan: lan.Id,
+			Lan:  lanId,
 			Dhcp: true,
 		},
 	})
 
-	err = s.checkForErrors(nic.Resp)
-	if err != nil {
-		ui.Error(err.Error())
+	if lan.StatusCode > 299 {
+		ui.Error(fmt.Sprintf("Error occured %s", nic.Response))
 		return multistep.ActionHalt
 	}
 
-	s.waitTillProvisioned(strings.Join(nic.Resp.Headers["Location"], ""), *c)
+	s.waitTillProvisioned(nic.Headers.Get("Location"), *c)
 
 	state.Put("volume_id", datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Id)
 
 	server := profitbricks.GetServer(datacenter.Id, datacenter.Entities.Servers.Items[0].Id)
 
-	state.Put("server_ip", server.Entities["nics"].Items[0].Properties["ips"].([]interface{})[0].(string))
+	state.Put("server_ip", server.Entities.Nics.Items[0].Properties.Ips[0])
 
 	return multistep.ActionContinue
 }
@@ -126,7 +121,7 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 
 	s.checkForErrors(resp)
 
-	err := s.waitTillProvisioned(strings.Join(resp.Headers["Location"], ""), *c)
+	err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c)
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
@@ -135,13 +130,17 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 
 func (d *stepCreateServer) waitTillProvisioned(path string, config Config) error {
 	d.setPB(config.PBUsername, config.PBPassword, config.PBUrl)
+	waitCount := 50
+	if config.Timeout > 0 {
+		waitCount = config.Timeout
+	}
 	for i := 0; i < waitCount; i++ {
 		request := profitbricks.GetRequestStatus(path)
-		if request.MetaData["status"] == "DONE" {
+		if request.Metadata.Status == "DONE" {
 			return nil
 		}
-		if request.MetaData["status"] == "FAILED" {
-			return errors.New(request.MetaData["message"])
+		if request.Metadata.Status == "FAILED" {
+			return errors.New(request.Metadata.Message)
 		}
 		time.Sleep(10 * time.Second)
 		i++
@@ -168,14 +167,14 @@ func (d *stepCreateServer) getImageId(imageName string, c *Config) string {
 
 	for i := 0; i < len(images.Items); i++ {
 		imgName := ""
-		if images.Items[i].Properties["name"] != nil {
-			imgName = images.Items[i].Properties["name"].(string)
+		if images.Items[i].Properties.Name != "" {
+			imgName = images.Items[i].Properties.Name
 		}
 		diskType := c.DiskType
 		if c.DiskType == "SSD" {
 			diskType = "HDD"
 		}
-		if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && images.Items[i].Properties["imageType"] == diskType && images.Items[i].Properties["location"] == c.Region {
+		if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && images.Items[i].Properties.ImageType == diskType && images.Items[i].Properties.Location == c.Region {
 			return images.Items[i].Id
 		}
 	}

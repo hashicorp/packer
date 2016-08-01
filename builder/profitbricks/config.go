@@ -1,35 +1,35 @@
 package profitbricks
 
 import (
+	"errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
-	"errors"
 	"os"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	Comm             communicator.Config `mapstructure:",squash"`
+	Comm                communicator.Config `mapstructure:",squash"`
 
-	PBUsername       string `mapstructure:"username"`
-	PBPassword       string `mapstructure:"password"`
-	PBUrl            string `mapstructure:"url"`
+	PBUsername string `mapstructure:"username"`
+	PBPassword string `mapstructure:"password"`
+	PBUrl      string `mapstructure:"url"`
 
-	Region           string `mapstructure:"region"`
+	Region           string `mapstructure:"location"`
 	Image            string `mapstructure:"image"`
 	SSHKey           string
-	SSHKey_path           string `mapstructure:"sshkey_path"`
-	SnapshotName     string `mapstructure:"snapshot_name"`
-	SnapshotPassword string `mapstructure:"snapshot_password"`
-	DiskSize         int    `mapstructure:"disksize"`
-	DiskType         string `mapstructure:"disktype"`
-	Cores            int    `mapstructure:"cores"`
-	Ram              int    `mapstructure:"ram"`
-
+	SSHKey_path      string              `mapstructure:"ssh_key_path"`
+	SnapshotName     string              `mapstructure:"snapshot_name"`
+	SnapshotPassword string              `mapstructure:"snapshot_password"`
+	DiskSize         int                 `mapstructure:"disk_size"`
+	DiskType         string              `mapstructure:"disk_type"`
+	Cores            int                 `mapstructure:"cores"`
+	Ram              int                 `mapstructure:"ram"`
+	Timeout          int                 `mapstructure:"timeout"`
 	CommConfig       communicator.Config `mapstructure:",squash"`
 	ctx              interpolate.Context
 }
