@@ -252,7 +252,10 @@ func TestAnsibleGetVersion(t *testing.T) {
 
 	var p Provisioner
 	p.config.Command = "ansible-playbook"
-	p.getVersion()
+	err := p.getVersion()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 }
 
 func TestAnsibleLongMessages(t *testing.T) {
@@ -263,7 +266,10 @@ func TestAnsibleLongMessages(t *testing.T) {
 	var p Provisioner
 	p.config.Command = "ansible-playbook"
 	p.config.PlaybookFile = "./test-fixtures/long-debug-message.yml"
-	p.Prepare()
+	err := p.Prepare()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 
 	comm := &packer.MockCommunicator{}
 	ui := &packer.BasicUi{
@@ -271,5 +277,8 @@ func TestAnsibleLongMessages(t *testing.T) {
 		Writer: new(bytes.Buffer),
 	}
 
-	p.Provision(ui, comm)
+	err = p.Provision(ui, comm)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 }

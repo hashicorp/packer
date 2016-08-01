@@ -35,7 +35,7 @@ func TestRoundTripPkcs8Rsa(t *testing.T) {
 	}
 
 	if actualPrivateKey.Validate() != nil {
-		t.Fatalf("private key did not validate")
+		t.Fatal("private key did not validate")
 	}
 
 	if actualPrivateKey.N.Cmp(privateKey.N) != 0 {

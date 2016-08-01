@@ -18,6 +18,7 @@ const (
 	ArmComputeName                     string = "arm.ComputeName"
 	ArmCertificateUrl                  string = "arm.CertificateUrl"
 	ArmDeploymentName                  string = "arm.DeploymentName"
+	ArmNicName                         string = "arm.NicName"
 	ArmKeyVaultName                    string = "arm.KeyVaultName"
 	ArmLocation                        string = "arm.Location"
 	ArmOSDiskVhd                       string = "arm.OSDiskVhd"
