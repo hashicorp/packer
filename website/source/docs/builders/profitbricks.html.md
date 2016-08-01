@@ -1,138 +1,75 @@
-# Profitbricks packer builder
+---
+description: |
+    The ProfitBricks builder is able to create images for ProfitBricks cloud.
+layout: docs
+page_title: ProfitBricks Builder
+...
 
-This builder plugin extends packer.io to support building images for ProfitBricks. 
+# ProfitBricks Builder
 
-You can check out Packer [here](https://packer.io).
+Type: `profitbricks`
 
+The ProfitBricks Builder is able to create virtual machines for [ProfitBricks](https://www.profitbricks.com).
 
-## Dependencies
-* Packer >= v0.10.1 (https://packer.io)
-* Golang (tested with 1.6) 
-* Godep >= v62
+-> **Note:** This builder is not supported by HashiCorp. Please visit [ProfitBricks DevOps Central](https://devops.profitbricks.com/) for support. You may file issues on [GitHub](https://github.com/profitbricks/docker-machine-driver-profitbricks/issues).
 
+## Configuration Reference
 
-## Install Go
+There are many configuration options available for the builder. They are
+segmented below into two categories: required and optional parameters. Within
+each category, the available configuration keys are alphabetized.
 
-Follow these instructions to install Go(lang) on your system:
-* https://golang.org/doc/install
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html) can be configured for this
+builder.
 
-## Install Packer
+### Required
 
-Follow these instructions to install Packer: 
-* https://www.packer.io/intro/getting-started/setup.html
+-   `username` (string) - ProfitBricks username. This can be specified via environment variable `PROFITBRICKS_USERNAME', if provided. The value definded in the config has precedence over environemnt variable. 
 
-## Compile the plugin
+-   `password` (string) - ProfitBrucks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
 
-Once you have installed Packer, you must compile this plugin and install the
-resulting binary.
+-   `image` (string) - ProfitBricks volume image 
 
-```shell
-go get https://github.com/profitbricks/packer-builder-profitbricks
-cd $GOPATH/src/github.com/profitbricks/packer-builder-profitbricks
-make install
-```
+### Optional
 
-If the build is successful, you should now have the `packer-builder-profitbricks`
-binary in:
+-   `cores` (int) - Amount of CPU cores to use for this build. Defaults to `4`.
 
-* Linux/Mac: the `~/.packer.d/plugins` directory.
-* Windows: the `%APPDATA%/packer.d/plugins` directory.
+-   `disk_size` (string) - Amount of disk space for this image. Defaults to `50gb`
 
-If this binary is in the right location, you are ready to get started with Packer.
+-   `disktype` (string) - Type of disk to use for this image. Defaults to `HDD`.
 
-## Download the plugin
+-   `ram` (int) - Amount of RAM to use for this image. Defalts to `2048`.
 
-Alternatively, you can download prebuilt binaries from https://github.com/profitbricks/packer-builder-profitbricks/releases/tag/v1.0.0. 
+-   `location` (string) - Defaults to `us/las`.
 
-After you have downloaded the binary for your operating system:
+-   `snapshot_name` (string) - If snapshot name is not provided Packer will generate it
 
-* Linux/Mac: Place the binary in the  `~/.packer.d/plugins` directory.
-* Windows: Place the binary in the `%APPDATA%/packer.d/plugins` directory.
+-   `snapshot_password` (string) - ????
+
+-   `ssh_key_path` (string) - Path to private SSHkey. If no path to the key is provided Packer will create one under the name [snapshot_name]
+
+-   `url` (string) - Endpoint for the ProfitBricks REST API
+
+-   `timeout` (string) - An approximate limit on how long packer will continue making status requests while waiting for the build to complete. Set this to an integer where 1 equals 10 seconds. Default value 50.
+
 
 ## Example
 
-Once you have set everything up, you are ready to start with an example.
-To get a quick start run:
+Here is a basic example:
 
-```shell
-cd $GOPATH/src/github.com/profitbricks/packer-builder-profitbricks
-```
-
-There you will find example `config.json`
-
-```
+```json
 {
   "builders": [
     {
-      "type": "profitbricks",
       "image": "Ubuntu-16.04",
-      "pbusername": "pb_username",
-      "pbpassword": "pb_password",
-      "servername": "packer"
+      "type": "profitbricks",
+      "disk_size": "5",
+      "snapshot_name": "double",
+      "ssh_key_path": "/path/to/private/key",
+      "snapshot_password": "test1234",
+      "timeout": 100
     }
+  ]
 }
 ```
-
-To validate `config.json` run:
-
-```shell
-packer validate config.json
-```
-
-Or if you want to get suggestions on how to fix your config, run:
-
-```shell
-packer fix config.json
-```
-
-To build a ProfitBricks Packer image run: 
-
-```shell
-packer build config.json
-
-==> profitbricks: Creating temporary SSH key for instance...
-==> profitbricks: Creating Virutal Data Center...
-==> profitbricks: Creating ProfitBricks server...
-==> profitbricks: Creating a volume
-==> profitbricks: Creating a LAN
-==> profitbricks: Creating a NIC
-==> profitbricks: Waiting for SSH to become available...
-==> profitbricks: Creating ProfitBricks snapshot...
-==> profitbricks: Removing Virtual Data Center
-Build 'profitbricks' finished.
-
-
-==> Builds finished. The artifacts of successful builds are:
---> profitbricks: A snapshot was created: 'packerSnapshot'
-
-```
-
-## Available config parameters
-
-Required parameters:
-
-```shell
-"type"          -   Builder type 
-"username"      -   ProfitBricks username 
-"password"      -   ProfitiBricks password 
-```
-
-
-Optional parameters:
-
-```shell
-"snapshot_password" - Snapshot password
-"snapshot_name"     - Snapshot name. If snapshot name is not provided Packer will generate it
-"sshkey_path"       - Path to private SSHkey. If no path to the key is provided Packer will create one under the name [snapshot_name] 
-"url"               - ProfitBricks REST Url
-"image"             - ProfitBricks volume image 
-"region"            - ProfitBricks region default value "us/las" 
-"disksize"          - Desired disk size default value 50gb 
-"disktype"          - Desired disk type default value "HDD" 
-"cores"             - Number of server cores default value 4 
-"ram"               - RAM size for the server default value "2048" 
-```
-
-## Support
-
-You are welcome to contact us with questions or comments at [ProfitBricks DevOps Central](https://devops.profitbricks.com/). Please report any issues via [GitHub's issue tracker](https://github.com/profitbricks/docker-machine-driver-profitbricks/issues).
