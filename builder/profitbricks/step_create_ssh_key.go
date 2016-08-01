@@ -23,7 +23,7 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 
-	if (c.SSHKey_path == "") {
+	if c.SSHKey_path == "" {
 		ui.Say("Creating temporary SSH key for instance...")
 		priv, err := rsa.GenerateKey(rand.Reader, 2048)
 		if err != nil {
@@ -67,7 +67,7 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say(c.SSHKey_path)
 		pemBytes, err := ioutil.ReadFile(c.SSHKey_path)
 
-		if (err != nil) {
+		if err != nil {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}

@@ -48,6 +48,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	config := state.Get("config").(*Config)
 
 	if b.config.PackerDebug {
 		b.runner = &multistep.DebugRunner{
@@ -65,7 +66,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		snapshotData: state.Get("snapshotname").(string),
+		snapshotData: config.SnapshotName,
 	}
 	return artifact, nil
 }
