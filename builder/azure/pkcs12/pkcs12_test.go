@@ -25,7 +25,7 @@ func TestPfxRoundTriRsa(t *testing.T) {
 
 	actualPrivateKey, ok := key.(*rsa.PrivateKey)
 	if !ok {
-		t.Fatalf("failed to decode private key")
+		t.Fatal("failed to decode private key")
 	}
 
 	if privateKey.D.Cmp(actualPrivateKey.D) != 0 {

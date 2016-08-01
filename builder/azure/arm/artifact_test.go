@@ -16,7 +16,7 @@ func getFakeSasUrl(name string) string {
 func TestArtifactString(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
-			CaptureResources{
+			{
 				Properties: CaptureProperties{
 					StorageProfile: CaptureStorageProfile{
 						OSDisk: CaptureDisk{
@@ -57,7 +57,7 @@ func TestArtifactString(t *testing.T) {
 func TestArtifactProperties(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
-			CaptureResources{
+			{
 				Properties: CaptureProperties{
 					StorageProfile: CaptureStorageProfile{
 						OSDisk: CaptureDisk{
@@ -97,7 +97,7 @@ func TestArtifactProperties(t *testing.T) {
 func TestArtifactOverHypenatedCaptureUri(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
-			CaptureResources{
+			{
 				Properties: CaptureProperties{
 					StorageProfile: CaptureStorageProfile{
 						OSDisk: CaptureDisk{
@@ -134,7 +134,7 @@ func TestArtifactRejectMalformedTemplates(t *testing.T) {
 func TestArtifactRejectMalformedStorageUri(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
-			CaptureResources{
+			{
 				Properties: CaptureProperties{
 					StorageProfile: CaptureStorageProfile{
 						OSDisk: CaptureDisk{

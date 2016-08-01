@@ -11,43 +11,77 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
+type EndpointType int
+
+const (
+	PublicEndpoint EndpointType = iota
+	PrivateEndpoint
+)
+
+var (
+	EndpointCommunicationText = map[EndpointType]string{
+		PublicEndpoint:  "PublicEndpoint",
+		PrivateEndpoint: "PrivateEndpoint",
+	}
+)
+
 type StepGetIPAddress struct {
-	client *AzureClient
-	get    func(resourceGroupName string, ipAddressName string) (string, error)
-	say    func(message string)
-	error  func(e error)
+	client   *AzureClient
+	endpoint EndpointType
+	get      func(resourceGroupName string, ipAddressName string, interfaceName string) (string, error)
+	say      func(message string)
+	error    func(e error)
 }
 
-func NewStepGetIPAddress(client *AzureClient, ui packer.Ui) *StepGetIPAddress {
+func NewStepGetIPAddress(client *AzureClient, ui packer.Ui, endpoint EndpointType) *StepGetIPAddress {
 	var step = &StepGetIPAddress{
-		client: client,
-		say:    func(message string) { ui.Say(message) },
-		error:  func(e error) { ui.Error(e.Error()) },
+		client:   client,
+		endpoint: endpoint,
+		say:      func(message string) { ui.Say(message) },
+		error:    func(e error) { ui.Error(e.Error()) },
 	}
 
-	step.get = step.getIPAddress
+	switch endpoint {
+	case PrivateEndpoint:
+		step.get = step.getPrivateIP
+	case PublicEndpoint:
+		step.get = step.getPublicIP
+	}
+
 	return step
 }
 
-func (s *StepGetIPAddress) getIPAddress(resourceGroupName string, ipAddressName string) (string, error) {
-	res, err := s.client.PublicIPAddressesClient.Get(resourceGroupName, ipAddressName, "")
+func (s *StepGetIPAddress) getPrivateIP(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
+	resp, err := s.client.InterfacesClient.Get(resourceGroupName, interfaceName, "")
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
-	return *res.Properties.IPAddress, nil
+	return *(*resp.Properties.IPConfigurations)[0].Properties.PrivateIPAddress, nil
+}
+
+func (s *StepGetIPAddress) getPublicIP(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
+	resp, err := s.client.PublicIPAddressesClient.Get(resourceGroupName, ipAddressName, "")
+	if err != nil {
+		return "", err
+	}
+
+	return *resp.Properties.IPAddress, nil
 }
 
 func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {
-	s.say("Getting the public IP address ...")
+	s.say("Getting the VM's IP address ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var ipAddressName = state.Get(constants.ArmPublicIPAddressName).(string)
+	var nicName = state.Get(constants.ArmNicName).(string)
 
 	s.say(fmt.Sprintf(" -> ResourceGroupName   : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> PublicIPAddressName : '%s'", ipAddressName))
+	s.say(fmt.Sprintf(" -> NicName             : '%s'", nicName))
+	s.say(fmt.Sprintf(" -> Network Connection  : '%s'", EndpointCommunicationText[s.endpoint]))
 
-	address, err := s.get(resourceGroupName, ipAddressName)
+	address, err := s.get(resourceGroupName, ipAddressName, nicName)
 	if err != nil {
 		state.Put(constants.Error, err)
 		s.error(err)
@@ -55,8 +89,8 @@ func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.say(fmt.Sprintf(" -> Public IP           : '%s'", address))
 	state.Put(constants.SSHHost, address)
+	s.say(fmt.Sprintf(" -> IP Address          : '%s'", address))
 
 	return multistep.ActionContinue
 }
