@@ -256,21 +256,24 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		subnetworkSelfLink = subnetwork.SelfLink
 	}
 
-	// If given a regional ip, get it
-	accessconfig := compute.AccessConfig{
-		Name: "AccessConfig created by Packer",
-		Type: "ONE_TO_ONE_NAT",
-	}
-
-	if c.Address != "" {
-		d.ui.Message(fmt.Sprintf("Looking up address: %s", c.Address))
-		region_url := strings.Split(zone.Region, "/")
-		region := region_url[len(region_url)-1]
-		address, err := d.service.Addresses.Get(d.projectId, region, c.Address).Do()
-		if err != nil {
-			return nil, err
+	var accessconfig *compute.AccessConfig
+	// Use external IP if OmitExternalIP isn't set
+	if !c.OmitExternalIP {
+		accessconfig = &compute.AccessConfig{
+			Name: "AccessConfig created by Packer",
+			Type: "ONE_TO_ONE_NAT",
 		}
-		accessconfig.NatIP = address.Address
+
+		// If given a static IP, use it
+		if c.Address != "" {
+			region_url := strings.Split(zone.Region, "/")
+			region := region_url[len(region_url)-1]
+			address, err := d.service.Addresses.Get(d.projectId, region, c.Address).Do()
+			if err != nil {
+				return nil, err
+			}
+			accessconfig.NatIP = address.Address
+		}
 	}
 
 	// Build up the metadata
@@ -307,11 +310,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		Name: c.Name,
 		NetworkInterfaces: []*compute.NetworkInterface{
 			&compute.NetworkInterface{
-				AccessConfigs: []*compute.AccessConfig{
-					&accessconfig,
-				},
-				Network:    network.SelfLink,
-				Subnetwork: subnetworkSelfLink,
+				AccessConfigs: []*compute.AccessConfig{accessconfig},
+				Network:       network.SelfLink,
+				Subnetwork:    subnetworkSelfLink,
 			},
 		},
 		Scheduling: &compute.Scheduling{
