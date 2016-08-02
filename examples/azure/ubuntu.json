@@ -23,6 +23,11 @@
     "image_offer": "UbuntuServer",
     "image_sku": "16.04.0-LTS",
 
+    "azure_tags": {
+        "dept": "engineering",
+        "task": "image deployment"
+    },
+
     "location": "West US",
     "vm_size": "Standard_A2"
   }],

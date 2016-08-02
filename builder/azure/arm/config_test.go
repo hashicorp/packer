@@ -4,6 +4,7 @@
 package arm
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -32,16 +33,16 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	c, _, err := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
 	if err != nil {
-		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
+		t.Error("Expected configuration creation to succeed, but it failed!\n")
 		t.Fatalf(" errors: %s\n", err)
 	}
 
 	if c.UserName == "" {
-		t.Errorf("Expected 'UserName' to be populated, but it was empty!")
+		t.Error("Expected 'UserName' to be populated, but it was empty!")
 	}
 
 	if c.VMSize == "" {
-		t.Errorf("Expected 'VMSize' to be populated, but it was empty!")
+		t.Error("Expected 'VMSize' to be populated, but it was empty!")
 	}
 
 	if c.ObjectID != "" {
@@ -283,7 +284,7 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 	// Ensure we can successfully create a config.
 	_, _, err := newConfig(builderValues, getPackerConfiguration())
 	if err != nil {
-		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
+		t.Error("Expected configuration creation to succeed, but it failed!\n")
 		t.Fatalf(" -> %+v\n", builderValues)
 	}
 
@@ -294,7 +295,7 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 
 		_, _, err := newConfig(builderValues, getPackerConfiguration())
 		if err == nil {
-			t.Errorf("Expected configuration creation to fail, but it succeeded!\n")
+			t.Error("Expected configuration creation to fail, but it succeeded!\n")
 			t.Fatalf(" -> %+v\n", builderValues)
 		}
 
@@ -374,7 +375,7 @@ func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
 	}
 
 	if c.Comm.WinRMTransportDecorator == nil {
-		t.Errorf("Expected WinRMTransportDecorator to be set, but it was nil")
+		t.Error("Expected WinRMTransportDecorator to be set, but it was nil")
 	}
 }
 
@@ -425,10 +426,10 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 	}
 
 	if !strings.Contains(err.Error(), "client_id must be specified") {
-		t.Errorf("Expected to find error for 'client_id must be specified")
+		t.Error("Expected to find error for 'client_id must be specified")
 	}
 	if !strings.Contains(err.Error(), "client_secret must be specified") {
-		t.Errorf("Expected to find error for 'client_secret must be specified")
+		t.Error("Expected to find error for 'client_secret must be specified")
 	}
 }
 
@@ -530,6 +531,145 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_container_name set to %q.", x)
 		}
+	}
+}
+
+func TestConfigShouldAcceptTags(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+		"azure_tags": map[string]string{
+			"tag01": "value01",
+			"tag02": "value02",
+		},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(c.AzureTags) != 2 {
+		t.Fatalf("expected to find 2 tags, but got %d", len(c.AzureTags))
+	}
+
+	if _, ok := c.AzureTags["tag01"]; !ok {
+		t.Error("expected to find key=\"tag01\", but did not")
+	}
+	if _, ok := c.AzureTags["tag02"]; !ok {
+		t.Error("expected to find key=\"tag02\", but did not")
+	}
+
+	value := c.AzureTags["tag01"]
+	if *value != "value01" {
+		t.Errorf("expected AzureTags[\"tag01\"] to have value \"value01\", but got %q", value)
+	}
+
+	value = c.AzureTags["tag02"]
+	if *value != "value02" {
+		t.Errorf("expected AzureTags[\"tag02\"] to have value \"value02\", but got %q", value)
+	}
+}
+
+func TestConfigShouldRejectTagsInExcessOf15AcceptTags(t *testing.T) {
+	tooManyTags := map[string]string{}
+	for i := 0; i < 16; i++ {
+		tooManyTags[fmt.Sprintf("tag%.2d", i)] = "ignored"
+	}
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type":    constants.Target_Linux,
+		"azure_tags": tooManyTags,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+
+	if err == nil {
+		t.Fatal("expected config to reject based on an excessive amount of tags (> 15)")
+	}
+}
+
+func TestConfigShouldRejectExcessiveTagNameLength(t *testing.T) {
+	nameTooLong := make([]byte, 513)
+	for i := range nameTooLong {
+		nameTooLong[i] = 'a'
+	}
+
+	tags := map[string]string{}
+	tags[string(nameTooLong)] = "ignored"
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type":    constants.Target_Linux,
+		"azure_tags": tags,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject tag name based on length (> 512)")
+	}
+}
+
+func TestConfigShouldRejectExcessiveTagValueLength(t *testing.T) {
+	valueTooLong := make([]byte, 257)
+	for i := range valueTooLong {
+		valueTooLong[i] = 'a'
+	}
+
+	tags := map[string]string{}
+	tags["tag01"] = string(valueTooLong)
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type":    constants.Target_Linux,
+		"azure_tags": tags,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject tag value based on length (> 256)")
 	}
 }
 
