@@ -57,6 +57,10 @@ builder.
 
 ### Optional:
 
+-   `azure_tags` (object of name/value strings) - the user can define up to 15 tags.  Tag names cannot exceed 512 
+    characters, and tag values cannot exceed 256 characters.  Tags are applied to every resource deployed by a Packer
+    build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
@@ -70,7 +74,8 @@ builder.
 -   `image_url` (string) Specify a custom VHD to use.  If this value is set, do not set image_publisher, image_offer,
      image_sku, or image_version.
 
--   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not specified, `tenant_id` will be looked up using `subscription_id`.
+-   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
+     specified, `tenant_id` will be looked up using `subscription_id`.
 
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime.  This variable is required when creating images based on
@@ -125,6 +130,10 @@ Here is a basic example for Azure.
     "image_publisher": "Canonical",
     "image_offer": "UbuntuServer",
     "image_sku": "14.04.4-LTS",
+    
+    "azure_tags": {
+      "dept": "engineering"
+    },
 
     "location": "West US",
     "vm_size": "Standard_A2"

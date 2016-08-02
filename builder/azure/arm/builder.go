@@ -224,6 +224,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.AuthorizedKey, b.config.sshAuthorizedKey)
 	stateBag.Put(constants.PrivateKey, b.config.sshPrivateKey)
 
+	stateBag.Put(constants.ArmTags, &b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
