@@ -25,7 +25,7 @@ func (config *Config) getImage() Image {
 
 func (config *Config) getInstanceMetadata(sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
-  var err error
+	var err error
 
 	// Copy metadata from config.
 	for k, v := range config.Metadata {
@@ -77,6 +77,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Metadata:            metadata,
 		Name:                name,
 		Network:             config.Network,
+		OmitExternalIP:      config.OmitExternalIP,
 		Preemptible:         config.Preemptible,
 		Region:              config.Region,
 		ServiceAccountEmail: config.account.ClientEmail,
