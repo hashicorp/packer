@@ -56,6 +56,11 @@
           "type": "secrets"
         }
       ],
+      "tags": {
+        "tag01": "value01",
+        "tag02": "value02",
+        "tag03": "value03"
+      },
       "type": "Microsoft.KeyVault/vaults"
     }
   ],
