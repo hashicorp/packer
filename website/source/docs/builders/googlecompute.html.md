@@ -146,6 +146,9 @@ builder.
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
 
+-   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
+    `use_internal_ip` must be true if this property is true.
+
 -   `preemptible` (boolean) - If true, launch a preembtible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
