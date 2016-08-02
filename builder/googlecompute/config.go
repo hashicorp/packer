@@ -37,6 +37,7 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
@@ -167,6 +168,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err := processAccountFile(&c.account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	if c.OmitExternalIP && c.Address != "" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("you can not specify an external address when 'omit_external_ip' is true"))
+	}
+
+	if c.OmitExternalIP && !c.UseInternalIP {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
 	}
 
 	// Check for any errors.
