@@ -26,6 +26,7 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
+	Address              string            `mapstructure:"address"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
 	DiskType             string            `mapstructure:"disk_type"`
@@ -36,15 +37,16 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
-	Subnetwork           string            `mapstructure:"subnetwork"`
-	Address              string            `mapstructure:"address"`
+	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
 	Preemptible          bool              `mapstructure:"preemptible"`
+	RawStateTimeout      string            `mapstructure:"state_timeout"`
+	Region               string            `mapstructure:"region"`
 	SourceImage          string            `mapstructure:"source_image"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
-	RawStateTimeout      string            `mapstructure:"state_timeout"`
+	StartupScriptFile    string            `mapstructure:"startup_script_file"`
+	Subnetwork           string            `mapstructure:"subnetwork"`
 	Tags                 []string          `mapstructure:"tags"`
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
-	Region               string            `mapstructure:"region"`
 	Zone                 string            `mapstructure:"zone"`
 
 	account         accountFile
@@ -166,6 +168,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err := processAccountFile(&c.account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	if c.OmitExternalIP && c.Address != "" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("you can not specify an external address when 'omit_external_ip' is true"))
+	}
+
+	if c.OmitExternalIP && !c.UseInternalIP {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
 	}
 
 	// Check for any errors.

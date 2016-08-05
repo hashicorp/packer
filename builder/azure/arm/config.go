@@ -70,11 +70,15 @@ type Config struct {
 	VMSize         string `mapstructure:"vm_size"`
 
 	// Deployment
-	ResourceGroupName          string `mapstructure:"resource_group_name"`
-	StorageAccount             string `mapstructure:"storage_account"`
-	storageAccountBlobEndpoint string
-	CloudEnvironmentName       string `mapstructure:"cloud_environment_name"`
-	cloudEnvironment           *azure.Environment
+	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
+	ResourceGroupName               string             `mapstructure:"resource_group_name"`
+	StorageAccount                  string             `mapstructure:"storage_account"`
+	storageAccountBlobEndpoint      string
+	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
+	cloudEnvironment                *azure.Environment
+	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
+	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
+	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
 
 	// OS
 	OSType string `mapstructure:"os_type"`
@@ -121,7 +125,7 @@ func (c *Config) toVirtualMachineCaptureParameters() *compute.VirtualMachineCapt
 func (c *Config) createCertificate() (string, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		err := fmt.Errorf("Failed to Generate Private Key: %s", err)
+		err = fmt.Errorf("Failed to Generate Private Key: %s", err)
 		return "", err
 	}
 
@@ -131,7 +135,7 @@ func (c *Config) createCertificate() (string, error) {
 
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
-		err := fmt.Errorf("Failed to Generate Serial Number: %v", err)
+		err = fmt.Errorf("Failed to Generate Serial Number: %v", err)
 		return "", err
 	}
 
@@ -219,6 +223,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(c.ctx)...)
 
 	assertRequiredParametersSet(&c, errs)
+	assertTagProperties(&c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
@@ -299,19 +304,37 @@ func setUserNamePassword(c *Config) {
 }
 
 func setCloudEnvironment(c *Config) error {
+	lookup := map[string]string{
+		"CHINA":           "AzureChinaCloud",
+		"CHINACLOUD":      "AzureChinaCloud",
+		"AZURECHINACLOUD": "AzureChinaCloud",
+
+		"GERMAN":           "AzureGermanCloud",
+		"GERMANCLOUD":      "AzureGermanCloud",
+		"AZUREGERMANCLOUD": "AzureGermanCloud",
+
+		"GERMANY":           "AzureGermanCloud",
+		"GERMANYCLOUD":      "AzureGermanCloud",
+		"AZUREGERMANYCLOUD": "AzureGermanCloud",
+
+		"PUBLIC":           "AzurePublicCloud",
+		"PUBLICCLOUD":      "AzurePublicCloud",
+		"AZUREPUBLICCLOUD": "AzurePublicCloud",
+
+		"USGOVERNMENT":           "AzureUSGovernmentCloud",
+		"USGOVERNMENTCLOUD":      "AzureUSGovernmentCloud",
+		"AZUREUSGOVERNMENTCLOUD": "AzureUSGovernmentCloud",
+	}
+
 	name := strings.ToUpper(c.CloudEnvironmentName)
-	switch name {
-	case "CHINA", "CHINACLOUD", "AZURECHINACLOUD":
-		c.cloudEnvironment = &azure.ChinaCloud
-	case "PUBLIC", "PUBLICCLOUD", "AZUREPUBLICCLOUD":
-		c.cloudEnvironment = &azure.PublicCloud
-	case "USGOVERNMENT", "USGOVERNMENTCLOUD", "AZUREUSGOVERNMENTCLOUD":
-		c.cloudEnvironment = &azure.USGovernmentCloud
-	default:
+	envName, ok := lookup[name]
+	if !ok {
 		return fmt.Errorf("There is no cloud envionment matching the name '%s'!", c.CloudEnvironmentName)
 	}
 
-	return nil
+	env, err := azure.EnvironmentFromName(envName)
+	c.cloudEnvironment = &env
+	return err
 }
 
 func provideDefaultValues(c *Config) {
@@ -325,6 +348,21 @@ func provideDefaultValues(c *Config) {
 
 	if c.CloudEnvironmentName == "" {
 		c.CloudEnvironmentName = DefaultCloudEnvironmentName
+	}
+}
+
+func assertTagProperties(c *Config, errs *packer.MultiError) {
+	if len(c.AzureTags) > 15 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("a max of 15 tags are supported, but %d were provided", len(c.AzureTags)))
+	}
+
+	for k, v := range c.AzureTags {
+		if len(k) > 512 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
+		}
+		if len(*v) > 256 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", v, len(*v)))
+		}
 	}
 }
 
@@ -428,6 +466,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 	if c.ResourceGroupName == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group_name must be specified"))
+	}
+	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
+	}
+	if c.VirtualNetworkName == "" && c.VirtualNetworkSubnetName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
 	}
 
 	/////////////////////////////////////////////

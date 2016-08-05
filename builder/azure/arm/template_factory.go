@@ -20,7 +20,11 @@ func GetKeyVaultDeployment(config *Config) (*resources.Deployment, error) {
 		TenantId:            &template.TemplateParameter{Value: config.TenantID},
 	}
 
-	return createDeploymentParameters(KeyVault, params)
+	builder, _ := template.NewTemplateBuilder(template.KeyVault)
+	builder.SetTags(&config.AzureTags)
+
+	doc, _ := builder.ToJSON()
+	return createDeploymentParameters(*doc, params)
 }
 
 func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) {
@@ -34,7 +38,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		VMName: &template.TemplateParameter{Value: config.tmpComputeName},
 	}
 
-	builder, _ := template.NewTemplateBuilder()
+	builder, _ := template.NewTemplateBuilder(template.BasicTemplate)
 	osType := compute.Linux
 
 	switch config.OSType {
@@ -51,6 +55,14 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	}
 
+	if config.VirtualNetworkName != "" {
+		builder.SetVirtualNetwork(
+			config.VirtualNetworkResourceGroupName,
+			config.VirtualNetworkName,
+			config.VirtualNetworkSubnetName)
+	}
+
+	builder.SetTags(&config.AzureTags)
 	doc, _ := builder.ToJSON()
 	return createDeploymentParameters(*doc, params)
 }

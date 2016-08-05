@@ -97,6 +97,6 @@ func TestRoundTripPkcs8ShroudedKeyBag(t *testing.T) {
 
 	actualPrivateKey := key.(*rsa.PrivateKey)
 	if actualPrivateKey.D.Cmp(privateKey.D) != 0 {
-		t.Fatalf("failed to round-trip rsa.PrivateKey.D")
+		t.Fatal("failed to round-trip rsa.PrivateKey.D")
 	}
 }

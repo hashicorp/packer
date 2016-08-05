@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/packer/command"
 	"github.com/mitchellh/packer/packer"
@@ -36,6 +37,12 @@ func realMain() int {
 	var wrapConfig panicwrap.WrapConfig
 
 	if !panicwrap.Wrapped(&wrapConfig) {
+		// Generate a UUID for this packer run and pass it to the environment.
+		// GenerateUUID always returns a nil error (based on rand.Read) so we'll
+		// just ignore it.
+		UUID, _ := uuid.GenerateUUID()
+		os.Setenv("PACKER_RUN_UUID", UUID)
+
 		// Determine where logs should go in general (requested by the user)
 		logWriter, err := logOutput()
 		if err != nil {

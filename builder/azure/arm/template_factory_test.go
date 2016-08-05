@@ -2,11 +2,10 @@ package arm
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/mitchellh/packer/builder/azure/common/approvals"
+	"github.com/approvals/go-approval-tests"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/builder/azure/common/template"
 )
@@ -24,19 +23,19 @@ func TestVirtualMachineDeployment00(t *testing.T) {
 	}
 
 	if deployment.Properties.ParametersLink != nil {
-		t.Errorf("Expected the ParametersLink to be nil!")
+		t.Error("Expected the ParametersLink to be nil!")
 	}
 
 	if deployment.Properties.TemplateLink != nil {
-		t.Errorf("Expected the TemplateLink to be nil!")
+		t.Error("Expected the TemplateLink to be nil!")
 	}
 
 	if deployment.Properties.Parameters == nil {
-		t.Errorf("Expected the Parameters to not be nil!")
+		t.Error("Expected the Parameters to not be nil!")
 	}
 
 	if deployment.Properties.Template == nil {
-		t.Errorf("Expected the Template to not be nil!")
+		t.Error("Expected the Template to not be nil!")
 	}
 }
 
@@ -110,13 +109,7 @@ func TestVirtualMachineDeployment03(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reader := strings.NewReader(string(bs))
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,13 +139,74 @@ func TestVirtualMachineDeployment04(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestVirtualMachineDeployment05(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":                 "ignore",
+		"capture_container_name":              "ignore",
+		"location":                            "ignore",
+		"image_url":                           "https://localhost/custom.vhd",
+		"resource_group_name":                 "ignore",
+		"storage_account":                     "ignore",
+		"subscription_id":                     "ignore",
+		"os_type":                             constants.Target_Linux,
+		"communicator":                        "none",
+		"virtual_network_name":                "virtualNetworkName",
+		"virtual_network_resource_group_name": "virtualNetworkResourceGroupName",
+		"virtual_network_subnet_name":         "virtualNetworkSubnetName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reader := strings.NewReader(string(bs))
-	err = approvals.Verify(t, reader)
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Verify that tags are properly applied to every resource
+func TestVirtualMachineDeployment06(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "https://localhost/custom.vhd",
+		"resource_group_name":    "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+		"azure_tags": map[string]string{
+			"tag01": "value01",
+			"tag02": "value02",
+			"tag03": "value03",
+		},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,19 +225,19 @@ func TestKeyVaultDeployment00(t *testing.T) {
 	}
 
 	if deployment.Properties.ParametersLink != nil {
-		t.Errorf("Expected the ParametersLink to be nil!")
+		t.Error("Expected the ParametersLink to be nil!")
 	}
 
 	if deployment.Properties.TemplateLink != nil {
-		t.Errorf("Expected the TemplateLink to be nil!")
+		t.Error("Expected the TemplateLink to be nil!")
 	}
 
 	if deployment.Properties.Parameters == nil {
-		t.Errorf("Expected the Parameters to not be nil!")
+		t.Error("Expected the Parameters to not be nil!")
 	}
 
 	if deployment.Properties.Template == nil {
-		t.Errorf("Expected the Template to not be nil!")
+		t.Error("Expected the Template to not be nil!")
 	}
 }
 
@@ -235,21 +289,23 @@ func TestKeyVaultDeployment02(t *testing.T) {
 	}
 }
 
-// Ensure the KeyVault template is correct.
+// Ensure the KeyVault template is correct when tags are supplied.
 func TestKeyVaultDeployment03(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
+	tags := map[string]interface{}{
+		"azure_tags": map[string]string{
+			"tag01": "value01",
+			"tag02": "value02",
+			"tag03": "value03",
+		},
+	}
+
+	c, _, _ := newConfig(tags, getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
 	deployment, err := GetKeyVaultDeployment(c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	bs, err := json.MarshalIndent(deployment.Properties.Template, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reader := strings.NewReader(string(bs))
-	err = approvals.Verify(t, reader)
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -14,7 +14,7 @@ import (
 func TestProcessStepResultShouldContinueForNonErrors(t *testing.T) {
 	stateBag := new(multistep.BasicStateBag)
 
-	code := processStepResult(nil, func(error) { t.Fatalf("Should not be called!") }, stateBag)
+	code := processStepResult(nil, func(error) { t.Fatal("Should not be called!") }, stateBag)
 	if _, ok := stateBag.GetOk(constants.Error); ok {
 		t.Errorf("Error was nil, but was still in the state bag.")
 	}
@@ -49,7 +49,7 @@ func TestProcessStepResultShouldContinueOnSuccessfulTask(t *testing.T) {
 		Err:         nil,
 	}
 
-	code := processInterruptibleResult(result, func(error) { t.Fatalf("Should not be called!") }, stateBag)
+	code := processInterruptibleResult(result, func(error) { t.Fatal("Should not be called!") }, stateBag)
 	if _, ok := stateBag.GetOk(constants.Error); ok {
 		t.Errorf("Error was nil, but was still in the state bag.")
 	}
@@ -66,7 +66,7 @@ func TestProcessStepResultShouldHaltWhenTaskIsCancelled(t *testing.T) {
 		Err:         nil,
 	}
 
-	code := processInterruptibleResult(result, func(error) { t.Fatalf("Should not be called!") }, stateBag)
+	code := processInterruptibleResult(result, func(error) { t.Fatal("Should not be called!") }, stateBag)
 	if _, ok := stateBag.GetOk(constants.Error); ok {
 		t.Errorf("Error was nil, but was still in the state bag.")
 	}

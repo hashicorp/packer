@@ -33,16 +33,16 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	c, _, err := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
 	if err != nil {
-		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
+		t.Error("Expected configuration creation to succeed, but it failed!\n")
 		t.Fatalf(" errors: %s\n", err)
 	}
 
 	if c.UserName == "" {
-		t.Errorf("Expected 'UserName' to be populated, but it was empty!")
+		t.Error("Expected 'UserName' to be populated, but it was empty!")
 	}
 
 	if c.VMSize == "" {
-		t.Errorf("Expected 'VMSize' to be populated, but it was empty!")
+		t.Error("Expected 'VMSize' to be populated, but it was empty!")
 	}
 
 	if c.ObjectID != "" {
@@ -143,6 +143,78 @@ func TestConfigShouldRejectCustomImageAndMarketPlace(t *testing.T) {
 	}
 }
 
+func TestConfigVirtualNetworkNameIsOptional(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+		"virtual_network_name":   "MyVirtualNetwork",
+	}
+
+	c, _, _ := newConfig(config, getPackerConfiguration())
+	if c.VirtualNetworkName != "MyVirtualNetwork" {
+		t.Errorf("Expected Config to set virtual_network_name to MyVirtualNetwork, but got %q", c.VirtualNetworkName)
+	}
+	if c.VirtualNetworkResourceGroupName != "" {
+		t.Errorf("Expected Config to leave virtual_network_resource_group_name to '', but got %q", c.VirtualNetworkResourceGroupName)
+	}
+	if c.VirtualNetworkSubnetName != "" {
+		t.Errorf("Expected Config to leave virtual_network_subnet_name to '', but got %q", c.VirtualNetworkSubnetName)
+	}
+}
+
+// The user can pass the value virtual_network_resource_group_name to avoid the lookup of
+// a virtual network's resource group, or to help with disambiguation.  The value should
+// only be set if virtual_network_name was set.
+func TestConfigVirtualNetworkResourceGroupNameMustBeSetWithVirtualNetworkName(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":                 "ignore",
+		"capture_container_name":              "ignore",
+		"location":                            "ignore",
+		"image_url":                           "ignore",
+		"storage_account":                     "ignore",
+		"resource_group_name":                 "ignore",
+		"subscription_id":                     "ignore",
+		"os_type":                             constants.Target_Linux,
+		"communicator":                        "none",
+		"virtual_network_resource_group_name": "MyVirtualNetworkRG",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Error("Expected Config to reject virtual_network_resource_group_name, if virtual_network_name is not set.")
+	}
+}
+
+// The user can pass the value virtual_network_subnet_name to avoid the lookup of
+// a virtual network subnet's name, or to help with disambiguation.  The value should
+// only be set if virtual_network_name was set.
+func TestConfigVirtualNetworkSubnetNameMustBeSetWithVirtualNetworkName(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":         "ignore",
+		"capture_container_name":      "ignore",
+		"location":                    "ignore",
+		"image_url":                   "ignore",
+		"storage_account":             "ignore",
+		"resource_group_name":         "ignore",
+		"subscription_id":             "ignore",
+		"os_type":                     constants.Target_Linux,
+		"communicator":                "none",
+		"virtual_network_subnet_name": "MyVirtualNetworkRG",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Error("Expected Config to reject virtual_network_subnet_name, if virtual_network_name is not set.")
+	}
+}
+
 func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
@@ -212,7 +284,7 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 	// Ensure we can successfully create a config.
 	_, _, err := newConfig(builderValues, getPackerConfiguration())
 	if err != nil {
-		t.Errorf("Expected configuration creation to succeed, but it failed!\n")
+		t.Error("Expected configuration creation to succeed, but it failed!\n")
 		t.Fatalf(" -> %+v\n", builderValues)
 	}
 
@@ -223,7 +295,7 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 
 		_, _, err := newConfig(builderValues, getPackerConfiguration())
 		if err == nil {
-			t.Errorf("Expected configuration creation to fail, but it succeeded!\n")
+			t.Error("Expected configuration creation to fail, but it succeeded!\n")
 			t.Fatalf(" -> %+v\n", builderValues)
 		}
 
@@ -303,7 +375,7 @@ func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
 	}
 
 	if c.Comm.WinRMTransportDecorator == nil {
-		t.Errorf("Expected WinRMTransportDecorator to be set, but it was nil")
+		t.Error("Expected WinRMTransportDecorator to be set, but it was nil")
 	}
 }
 
@@ -345,7 +417,7 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
-		t.Fatalf("Expected test to fail, but it succeeded")
+		t.Fatal("Expected test to fail, but it succeeded")
 	}
 
 	multiError, _ := err.(*packer.MultiError)
@@ -354,10 +426,10 @@ func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
 	}
 
 	if !strings.Contains(err.Error(), "client_id must be specified") {
-		t.Errorf("Expected to find error for 'client_id must be specified")
+		t.Error("Expected to find error for 'client_id must be specified")
 	}
 	if !strings.Contains(err.Error(), "client_secret must be specified") {
-		t.Errorf("Expected to find error for 'client_secret must be specified")
+		t.Error("Expected to find error for 'client_secret must be specified")
 	}
 }
 
@@ -371,6 +443,7 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 		"storage_account":        "ignore",
 		"resource_group_name":    "ignore",
 		"subscription_id":        "ignore",
+		"communicator":           "none",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
 	}
@@ -421,6 +494,7 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 		"storage_account":     "ignore",
 		"resource_group_name": "ignore",
 		"subscription_id":     "ignore",
+		"communicator":        "none",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
 	}
@@ -460,10 +534,149 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 	}
 }
 
+func TestConfigShouldAcceptTags(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+		"azure_tags": map[string]string{
+			"tag01": "value01",
+			"tag02": "value02",
+		},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(c.AzureTags) != 2 {
+		t.Fatalf("expected to find 2 tags, but got %d", len(c.AzureTags))
+	}
+
+	if _, ok := c.AzureTags["tag01"]; !ok {
+		t.Error("expected to find key=\"tag01\", but did not")
+	}
+	if _, ok := c.AzureTags["tag02"]; !ok {
+		t.Error("expected to find key=\"tag02\", but did not")
+	}
+
+	value := c.AzureTags["tag01"]
+	if *value != "value01" {
+		t.Errorf("expected AzureTags[\"tag01\"] to have value \"value01\", but got %q", value)
+	}
+
+	value = c.AzureTags["tag02"]
+	if *value != "value02" {
+		t.Errorf("expected AzureTags[\"tag02\"] to have value \"value02\", but got %q", value)
+	}
+}
+
+func TestConfigShouldRejectTagsInExcessOf15AcceptTags(t *testing.T) {
+	tooManyTags := map[string]string{}
+	for i := 0; i < 16; i++ {
+		tooManyTags[fmt.Sprintf("tag%.2d", i)] = "ignored"
+	}
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type":    constants.Target_Linux,
+		"azure_tags": tooManyTags,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+
+	if err == nil {
+		t.Fatal("expected config to reject based on an excessive amount of tags (> 15)")
+	}
+}
+
+func TestConfigShouldRejectExcessiveTagNameLength(t *testing.T) {
+	nameTooLong := make([]byte, 513)
+	for i := range nameTooLong {
+		nameTooLong[i] = 'a'
+	}
+
+	tags := map[string]string{}
+	tags[string(nameTooLong)] = "ignored"
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type":    constants.Target_Linux,
+		"azure_tags": tags,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject tag name based on length (> 512)")
+	}
+}
+
+func TestConfigShouldRejectExcessiveTagValueLength(t *testing.T) {
+	valueTooLong := make([]byte, 257)
+	for i := range valueTooLong {
+		valueTooLong[i] = 'a'
+	}
+
+	tags := map[string]string{}
+	tags["tag01"] = string(valueTooLong)
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type":    constants.Target_Linux,
+		"azure_tags": tags,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject tag value based on length (> 256)")
+	}
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
-		m[v] = fmt.Sprintf("ignored00")
+		m[v] = "ignored00"
 	}
 
 	m["communicator"] = "none"
@@ -474,7 +687,7 @@ func getArmBuilderConfiguration() map[string]string {
 func getArmBuilderConfigurationWithWindows() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
-		m[v] = fmt.Sprintf("ignored00")
+		m[v] = "ignored00"
 	}
 
 	m["object_id"] = "ignored00"
