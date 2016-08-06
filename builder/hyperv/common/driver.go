@@ -72,7 +72,7 @@ type Driver interface {
 
 	DeleteVirtualMachine(string) error
 
-	SetVirtualMachineCpu(string, uint) error
+	SetVirtualMachineCpu(string, uint, bool) error
 
 	SetSecureBoot(string, bool) error
 

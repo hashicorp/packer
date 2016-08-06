@@ -89,6 +89,7 @@ type Config struct {
 	Cpu              uint     `mapstructure:"cpu"`
 	Generation       uint     `mapstructure:"generation"`
 	EnableSecureBoot bool     `mapstructure:"enable_secure_boot"`
+	EnableVirtualizationExtensions `mapstructure:"enable_virtualization_extensions`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -298,6 +299,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Generation:      b.config.Generation,
 			Cpu:             b.config.Cpu,
 			EnableSecureBoot: b.config.EnableSecureBoot,
+			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
