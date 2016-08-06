@@ -13,8 +13,11 @@ const (
 	jsonPrefix = ""
 	jsonIndent = "  "
 
-	resourceVirtualMachine = "Microsoft.Compute/virtualMachines"
-	resourceKeyVaults      = "Microsoft.KeyVault/vaults"
+	resourceKeyVaults         = "Microsoft.KeyVault/vaults"
+	resourceNetworkInterfaces = "Microsoft.Network/networkInterfaces"
+	resourcePublicIPAddresses = "Microsoft.Network/publicIPAddresses"
+	resourceVirtualMachine    = "Microsoft.Compute/virtualMachines"
+	resourceVirtualNetworks   = "Microsoft.Network/virtualNetworks"
 
 	variableSshKeyPath = "sshKeyPath"
 )
@@ -23,10 +26,10 @@ type TemplateBuilder struct {
 	template *Template
 }
 
-func NewTemplateBuilder() (*TemplateBuilder, error) {
+func NewTemplateBuilder(template string) (*TemplateBuilder, error) {
 	var t Template
 
-	err := json.Unmarshal([]byte(basicTemplate), &t)
+	err := json.Unmarshal([]byte(template), &t)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +49,7 @@ func (s *TemplateBuilder) BuildLinux(sshAuthorizedKey string) error {
 	profile.LinuxConfiguration = &compute.LinuxConfiguration{
 		SSH: &compute.SSHConfiguration{
 			PublicKeys: &[]compute.SSHPublicKey{
-				compute.SSHPublicKey{
+				{
 					Path:    to.StringPtr(s.toVariable(variableSshKeyPath)),
 					KeyData: to.StringPtr(sshAuthorizedKey),
 				},
@@ -66,12 +69,12 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 	profile := resource.Properties.OsProfile
 
 	profile.Secrets = &[]compute.VaultSecretGroup{
-		compute.VaultSecretGroup{
+		{
 			SourceVault: &compute.SubResource{
 				ID: to.StringPtr(s.toResourceID(resourceKeyVaults, keyVaultName)),
 			},
 			VaultCertificates: &[]compute.VaultCertificate{
-				compute.VaultCertificate{
+				{
 					CertificateStore: to.StringPtr("My"),
 					CertificateURL:   to.StringPtr(winRMCertificateUrl),
 				},
@@ -83,7 +86,7 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 		ProvisionVMAgent: to.BoolPtr(true),
 		WinRM: &compute.WinRMConfiguration{
 			Listeners: &[]compute.WinRMListener{
-				compute.WinRMListener{
+				{
 					Protocol:       "https",
 					CertificateURL: to.StringPtr(winRMCertificateUrl),
 				},
@@ -125,6 +128,39 @@ func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingS
 	return nil
 }
 
+func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
+	s.setVariable("virtualNetworkResourceGroup", virtualNetworkResourceGroup)
+	s.setVariable("virtualNetworkName", virtualNetworkName)
+	s.setVariable("subnetName", subnetName)
+
+	s.deleteResourceByType(resourceVirtualNetworks)
+	s.deleteResourceByType(resourcePublicIPAddresses)
+	resource, err := s.getResourceByType(resourceNetworkInterfaces)
+	if err != nil {
+		return err
+	}
+
+	s.deleteResourceDependency(resource, func(s string) bool {
+		return strings.Contains(s, "Microsoft.Network/virtualNetworks") ||
+			strings.Contains(s, "Microsoft.Network/publicIPAddresses")
+	})
+
+	(*resource.Properties.IPConfigurations)[0].Properties.PublicIPAddress = nil
+
+	return nil
+}
+
+func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
+	if tags == nil || len(*tags) == 0 {
+		return nil
+	}
+
+	for i := range *s.template.Resources {
+		(*s.template.Resources)[i].Tags = tags
+	}
+	return nil
+}
+
 func (s *TemplateBuilder) ToJSON() (*string, error) {
 	bs, err := json.MarshalIndent(s.template, jsonPrefix, jsonIndent)
 
@@ -144,6 +180,10 @@ func (s *TemplateBuilder) getResourceByType(t string) (*Resource, error) {
 	return nil, fmt.Errorf("template: could not find a resource of type %s", t)
 }
 
+func (s *TemplateBuilder) setVariable(name string, value string) {
+	(*s.template.Variables)[name] = value
+}
+
 func (s *TemplateBuilder) toKeyVaultID(name string) string {
 	return s.toResourceID(resourceKeyVaults, name)
 }
@@ -156,7 +196,106 @@ func (s *TemplateBuilder) toVariable(name string) string {
 	return fmt.Sprintf("[variables('%s')]", name)
 }
 
-const basicTemplate = `{
+func (s *TemplateBuilder) deleteResourceByType(resourceType string) {
+	resources := make([]Resource, 0)
+
+	for _, resource := range *s.template.Resources {
+		if *resource.Type == resourceType {
+			continue
+		}
+		resources = append(resources, resource)
+	}
+
+	s.template.Resources = &resources
+}
+
+func (s *TemplateBuilder) deleteResourceDependency(resource *Resource, predicate func(string) bool) {
+	deps := make([]string, 0)
+
+	for _, dep := range *resource.DependsOn {
+		if !predicate(dep) {
+			deps = append(deps, dep)
+		}
+	}
+
+	*resource.DependsOn = deps
+}
+
+// See https://github.com/Azure/azure-quickstart-templates for a extensive list of templates.
+
+// Template to deploy a KeyVault.
+//
+// This template is still hard-coded unlike the ARM templates used for VMs for
+// a couple of reasons.
+//
+//  1. The SDK defines no types for a Key Vault
+//  2. The Key Vault template is relatively simple, and is static.
+//
+const KeyVault = `{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+      "type": "string"
+    },
+    "keyVaultSecretValue": {
+      "type": "securestring"
+    },
+    "objectId": {
+     "type": "string"
+    },
+    "tenantId": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "apiVersion": "2015-06-01",
+    "location": "[resourceGroup().location]",
+    "keyVaultSecretName": "packerKeyVaultSecret"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[parameters('keyVaultName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "enabledForDeployment": "true",
+        "enabledForTemplateDeployment": "true",
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": [
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[parameters('objectId')]",
+            "permissions": {
+              "keys": [ "all" ],
+              "secrets": [ "all" ]
+            }
+          }
+        ],
+        "sku": {
+          "name": "standard",
+          "family": "A"
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "[variables('apiVersion')]",
+          "type": "secrets",
+          "name": "[variables('keyVaultSecretName')]",
+          "dependsOn": [
+            "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+          ],
+          "properties": {
+            "value": "[parameters('keyVaultSecretValue')]"
+          }
+        }
+      ]
+    }
+  ]
+}`
+
+const BasicTemplate = `{
   "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -194,8 +333,9 @@ const basicTemplate = `{
     "subnetAddressPrefix": "10.0.0.0/24",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "packerNetwork",
+    "virtualNetworkResourceGroup": "[resourceGroup().name]",
     "vmStorageAccountContainerName": "images",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+    "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
   },
   "resources": [
     {

@@ -27,6 +27,8 @@ func (s *StepTeardownInstance) Run(state multistep.StateBag) multistep.StepActio
 	}
 
 	ui.Say("Deleting instance...")
+	instanceLog, _ := driver.GetSerialPortOutput(config.Zone, name)
+	state.Put("instance_log", instanceLog)
 	errCh, err := driver.DeleteInstance(config.Zone, name)
 	if err == nil {
 		select {
@@ -43,7 +45,6 @@ func (s *StepTeardownInstance) Run(state multistep.StateBag) multistep.StepActio
 				"Error: %s", name, err))
 		return multistep.ActionHalt
 	}
-
 	ui.Message("Instance has been deleted!")
 	state.Put("instance_name", "")
 

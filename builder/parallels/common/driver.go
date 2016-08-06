@@ -5,6 +5,7 @@ import (
 	"log"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -123,6 +124,14 @@ func NewDriver() (Driver, error) {
 			return d, nil
 		}
 		supportedVersions = append(supportedVersions, v)
+	}
+
+	latestDriver := 11
+	version, _ := drivers[strconv.Itoa(latestDriver)].Version()
+	majVer, _ := strconv.Atoi(strings.SplitN(version, ".", 2)[0])
+	if majVer > latestDriver {
+		log.Printf("Your version of Parallels Desktop for Mac is %s, Packer will use driver for version %d.", version, latestDriver)
+		return drivers[strconv.Itoa(latestDriver)], nil
 	}
 
 	return nil, fmt.Errorf(

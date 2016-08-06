@@ -57,7 +57,11 @@ builder.
 
 ### Optional:
 
--   `cloud_environment_name` (string) One of `Public`, `China`, or
+-   `azure_tags` (object of name/value strings) - the user can define up to 15 tags.  Tag names cannot exceed 512 
+    characters, and tag values cannot exceed 256 characters.  Tags are applied to every resource deployed by a Packer
+    build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+
+-   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
@@ -70,7 +74,8 @@ builder.
 -   `image_url` (string) Specify a custom VHD to use.  If this value is set, do not set image_publisher, image_offer,
      image_sku, or image_version.
 
--   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not specified, `tenant_id` will be looked up using `subscription_id`.
+-   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
+     specified, `tenant_id` will be looked up using `subscription_id`.
 
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime.  This variable is required when creating images based on
@@ -82,6 +87,19 @@ builder.
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures your Tenant ID, Object ID, Key Vault Name, Key Vault Secret, and
     WinRM certificate URL.
+
+-   `virtual_network_name` (string) Use a pre-existing virtual network for the VM.  This option enables private
+    communication with the VM, no public IP address is **used** or **provisioned**.  This value should only be set if
+    Packer is executed from a host on the same subnet / virtual network.
+
+-   `virtual_network_resource_group_name` (string) If virtual_network_name is set, this value **may** also be set.  If
+    virtual_network_name is set, and this value is not set the builder attempts to determine the resource group
+    containing the virtual network.  If the resource group cannot be found, or it cannot be disambiguated, this value
+    should be set.
+
+-   `virtual_network_subnet_name` (string) If virtual_network_name is set, this value **may** also be set.  If
+     virtual_network_name is set, and this value is not set the builder attempts to determine the subnet to use with
+     the virtual network.  If the subnet cannot be found, or it cannot be disambiguated, this value should be set.
 
 -   `vm_size` (string) Size of the VM used for building. This can be changed
     when you deploy a VM from your VHD. See
@@ -112,6 +130,10 @@ Here is a basic example for Azure.
     "image_publisher": "Canonical",
     "image_offer": "UbuntuServer",
     "image_sku": "14.04.4-LTS",
+    
+    "azure_tags": {
+      "dept": "engineering"
+    },
 
     "location": "West US",
     "vm_size": "Standard_A2"

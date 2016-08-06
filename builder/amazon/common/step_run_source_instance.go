@@ -45,7 +45,25 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
 	for i, sg := range tempSecurityGroupIds {
-		securityGroupIds[i] = aws.String(sg)
+		found := false
+		for i := 0; i < 5; i++ {
+			time.Sleep(time.Duration(i) * 5 * time.Second)
+			log.Printf("[DEBUG] Describing tempSecurityGroup to ensure it is available: %s", sg)
+			_, err := ec2conn.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+				GroupIds: []*string{aws.String(sg)},
+			})
+			if err == nil {
+				log.Printf("[DEBUG] Found security group %s", sg)
+				found = true
+				break
+			}
+			log.Printf("[DEBUG] Error in querying security group %s", err)
+		}
+		if found {
+			securityGroupIds[i] = aws.String(sg)
+		} else {
+			state.Put("error", fmt.Errorf("Timeout waiting for security group %s to become available", sg))
+		}
 	}
 
 	userData := s.UserData
@@ -148,7 +166,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			BlockDeviceMappings:               s.BlockDevices.BuildLaunchDevices(),
 			Placement:                         &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
 			EbsOptimized:                      &s.EbsOptimized,
-			InstanceInitiatedShutdownBehavior: &s.InstanceInitiatedShutdownBehavior,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
@@ -164,6 +181,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		} else {
 			runOpts.SubnetId = &s.SubnetId
 			runOpts.SecurityGroupIds = securityGroupIds
+		}
+
+		if s.ExpectedRootDevice == "ebs" {
+			runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
 		}
 
 		runResp, err := ec2conn.RunInstances(runOpts)

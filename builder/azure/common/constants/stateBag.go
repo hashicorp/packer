@@ -18,6 +18,7 @@ const (
 	ArmComputeName                     string = "arm.ComputeName"
 	ArmCertificateUrl                  string = "arm.CertificateUrl"
 	ArmDeploymentName                  string = "arm.DeploymentName"
+	ArmNicName                         string = "arm.NicName"
 	ArmKeyVaultName                    string = "arm.KeyVaultName"
 	ArmLocation                        string = "arm.Location"
 	ArmOSDiskVhd                       string = "arm.OSDiskVhd"
@@ -25,5 +26,6 @@ const (
 	ArmResourceGroupName               string = "arm.ResourceGroupName"
 	ArmIsResourceGroupCreated          string = "arm.IsResourceGroupCreated"
 	ArmStorageAccountName              string = "arm.StorageAccountName"
+	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
 )
