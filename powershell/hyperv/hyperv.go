@@ -220,12 +220,13 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 func SetVirtualMachineCpu(vmName string, cpu uint, enableVirtualizationExtensions bool) error {
 
 	var script = `
-param([string]$vmName, [int]$cpu, [bool]$exposeVirtualizationExtensions)
-Set-VMProcessor -VMName $vmName -Count $cpu -exposeVirtualizationExtensions $exposeVirtualizationExtensions
+param([string]$vmName, [int]$cpu, [string]$exposeVirtualizationExtensions)
+$nested = [System.Boolean]::Parse($exposeVirtualizationExtensions)
+Set-VMProcessor -VMName $vmName -Count $cpu -exposeVirtualizationExtensions $nested
 `
-	exposeVirtualizationExtensionsString := "$False"
+	exposeVirtualizationExtensionsString := "False"
 	if enableVirtualizationExtensions {
-		exposeVirtualizationExtensionsString = "$True"
+		exposeVirtualizationExtensionsString = "True"
 	} 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10), exposeVirtualizationExtensionsString)
