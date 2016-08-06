@@ -177,8 +177,8 @@ func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {
 	return hyperv.DeleteVirtualMachine(vmName)
 }
 
-func (d *HypervPS4Driver) SetVirtualMachineCpu(vmName string, cpu uint) error {
-	return hyperv.SetVirtualMachineCpu(vmName, cpu)
+func (d *HypervPS4Driver) SetVirtualMachineCpu(vmName string, cpu uint, exposeVirtualizationExtensions bool) error {
+	return hyperv.SetVirtualMachineCpu(vmName, cpu, exposeVirtualizationExtensions)
 }
 
 func (d *HypervPS4Driver) SetSecureBoot(vmName string, enable bool) error {
