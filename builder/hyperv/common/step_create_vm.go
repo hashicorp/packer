@@ -22,7 +22,7 @@ type StepCreateVM struct {
 	Generation      uint
 	Cpu             uint
 	EnableSecureBoot bool
-	ExposeVirtualizationExtensions bool
+	EnableVirtualizationExtensions bool
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -47,7 +47,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	err = driver.SetVirtualMachineCpu(s.VMName, s.Cpu, s.ExposeVirtualizationExtensions)
+	err = driver.SetVirtualMachineCpu(s.VMName, s.Cpu, s.EnableVirtualizationExtensions)
 	if err != nil {
 		err := fmt.Errorf("Error creating setting virtual machine cpu: %s", err)
 		state.Put("error", err)
