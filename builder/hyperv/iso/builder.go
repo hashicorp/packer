@@ -297,7 +297,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DiskSize:        b.config.DiskSize,
 			Generation:      b.config.Generation,
 			Cpu:             b.config.Cpu,
-			EnabeSecureBoot: b.config.EnableSecureBoot,
+			EnableSecureBoot: b.config.EnableSecureBoot,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
