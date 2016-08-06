@@ -21,7 +21,7 @@ type StepCreateVM struct {
 	DiskSize        uint
 	Generation      uint
 	Cpu             uint
-	EnabeSecureBoot bool
+	EnableSecureBoot bool
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -36,7 +36,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
 	switchName := s.SwitchName
-	enabeSecureBoot := s.EnabeSecureBoot
+	enableSecureBoot := s.EnableSecureBoot
 
 	err := driver.CreateVirtualMachine(s.VMName, path, ram, diskSize, switchName, s.Generation)
 	if err != nil {
@@ -55,7 +55,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if s.Generation == 2 {
-		err = driver.SetSecureBoot(s.VMName, enabeSecureBoot)
+		err = driver.SetSecureBoot(s.VMName, enableSecureBoot)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
 			state.Put("error", err)
