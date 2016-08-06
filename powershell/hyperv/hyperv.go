@@ -217,15 +217,18 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 	}
 }
 
-func SetVirtualMachineCpu(vmName string, cpu uint, exposeVirtualizationExtensions bool) error {
+func SetVirtualMachineCpu(vmName string, cpu uint, enableVirtualizationExtensions bool) error {
 
 	var script = `
 param([string]$vmName, [int]$cpu, [bool]$exposeVirtualizationExtensions)
 Set-VMProcessor -VMName $vmName -Count $cpu -exposeVirtualizationExtensions $exposeVirtualizationExtensions
 `
-
+	exposeVirtualizationExtensionsString := "$False"
+	if enableVirtualizationExtensions {
+		exposeVirtualizationExtensionsString = "$True"
+	} 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10))
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10), exposeVirtualizationExtensionsString)
 	return err
 }
 
