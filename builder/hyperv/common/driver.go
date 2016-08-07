@@ -72,9 +72,15 @@ type Driver interface {
 
 	DeleteVirtualMachine(string) error
 
-	SetVirtualMachineCpu(string, uint, bool) error
+	SetVirtualMachineCpuCount(string, uint) error
 
-	SetSecureBoot(string, bool) error
+	SetVirtualMachineMacSpoofing(string, bool) error
+
+	SetVirtualMachineDynamicMemory(string, bool) error
+
+	SetVirtualMachineSecureBoot(string, bool) error
+
+	SetVirtualMachineVirtualizationExtensions(string, bool) error
 
 	EnableVirtualMachineIntegrationService(string, string) error
 

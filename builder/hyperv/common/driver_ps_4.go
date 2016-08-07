@@ -6,12 +6,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/powershell"
-	"github.com/mitchellh/packer/powershell/hyperv"
 	"log"
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/packer/powershell"
+	"github.com/mitchellh/packer/powershell/hyperv"
 )
 
 type HypervPS4Driver struct {
@@ -177,12 +178,24 @@ func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {
 	return hyperv.DeleteVirtualMachine(vmName)
 }
 
-func (d *HypervPS4Driver) SetVirtualMachineCpu(vmName string, cpu uint, exposeVirtualizationExtensions bool) error {
-	return hyperv.SetVirtualMachineCpu(vmName, cpu, exposeVirtualizationExtensions)
+func (d *HypervPS4Driver) SetVirtualMachineCpuCount(vmName string, cpu uint) error {
+	return hyperv.SetVirtualMachineCpuCount(vmName, cpu)
 }
 
-func (d *HypervPS4Driver) SetSecureBoot(vmName string, enable bool) error {
-	return hyperv.SetSecureBoot(vmName, enable)
+func (d *HypervPS4Driver) SetVirtualMachineMacSpoofing(vmName string, enable bool) error {
+	return hyperv.SetVirtualMachineMacSpoofing(vmName, enable)
+}
+
+func (d *HypervPS4Driver) SetVirtualMachineDynamicMemory(vmName string, enable bool) error {
+	return hyperv.SetVirtualMachineDynamicMemory(vmName, enable)
+}
+
+func (d *HypervPS4Driver) SetVirtualMachineSecureBoot(vmName string, enable bool) error {
+	return hyperv.SetVirtualMachineSecureBoot(vmName, enable)
+}
+
+func (d *HypervPS4Driver) SetVirtualMachineVirtualizationExtensions(vmName string, enable bool) error {
+	return hyperv.SetVirtualMachineVirtualizationExtensions(vmName, enable)
 }
 
 func (d *HypervPS4Driver) EnableVirtualMachineIntegrationService(vmName string, integrationServiceName string) error {
