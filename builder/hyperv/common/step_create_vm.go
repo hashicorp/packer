@@ -6,6 +6,7 @@ package common
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -15,13 +16,15 @@ import (
 // Produces:
 //   VMName string - The name of the VM
 type StepCreateVM struct {
-	VMName          string
-	SwitchName      string
-	RamSizeMB       uint
-	DiskSize        uint
-	Generation      uint
-	Cpu             uint
-	EnableSecureBoot bool
+	VMName                         string
+	SwitchName                     string
+	RamSizeMB                      uint
+	DiskSize                       uint
+	Generation                     uint
+	Cpu                            uint
+	EnableMacSpoofing              bool
+	EnableDynamicMemory            bool
+	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
 }
 
@@ -36,10 +39,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ram := int64(s.RamSizeMB * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	switchName := s.SwitchName
-	enableSecureBoot := s.EnableSecureBoot
-
-	err := driver.CreateVirtualMachine(s.VMName, path, ram, diskSize, switchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, ram, diskSize, s.SwitchName, s.Generation)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
@@ -47,7 +47,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	err = driver.SetVirtualMachineCpu(s.VMName, s.Cpu, s.EnableVirtualizationExtensions)
+	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)
 	if err != nil {
 		err := fmt.Errorf("Error creating setting virtual machine cpu: %s", err)
 		state.Put("error", err)
@@ -55,10 +55,41 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	if s.EnableDynamicMemory {
+		err = driver.SetVirtualMachineDynamicMemory(s.VMName, s.EnableDynamicMemory)
+		if err != nil {
+			err := fmt.Errorf("Error creating setting virtual machine dynamic memory: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	if s.EnableMacSpoofing {
+		err = driver.SetVirtualMachineMacSpoofing(s.VMName, s.EnableMacSpoofing)
+		if err != nil {
+			err := fmt.Errorf("Error creating setting virtual machine mac spoofing: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	if s.Generation == 2 {
-		err = driver.SetSecureBoot(s.VMName, enableSecureBoot)
+		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	if s.EnableVirtualizationExtensions {
+		//This is only supported on Windows 10 and Windows Server 2016 onwards
+		err = driver.SetVirtualMachineVirtualizationExtensions(s.VMName, s.EnableVirtualizationExtensions)
+		if err != nil {
+			err := fmt.Errorf("Error creating setting virtual machine virtualization extensions: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

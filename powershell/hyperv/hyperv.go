@@ -217,23 +217,67 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 	}
 }
 
-func SetVirtualMachineCpu(vmName string, cpu uint, enableVirtualizationExtensions bool) error {
+func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
 
 	var script = `
-param([string]$vmName, [int]$cpu, [string]$exposeVirtualizationExtensions)
-$nested = [System.Boolean]::Parse($exposeVirtualizationExtensions)
-Set-VMProcessor -VMName $vmName -Count $cpu -exposeVirtualizationExtensions $nested
+param([string]$vmName, [int]$cpu)
+Set-VMProcessor -VMName $vmName -Count $cpu
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10))
+	return err
+}
+
+func SetVirtualMachineVirtualizationExtensions(vmName string, enableVirtualizationExtensions bool) error {
+
+	var script = `
+param([string]$vmName, [string]$exposeVirtualizationExtensionsString)
+$exposeVirtualizationExtensions = [System.Boolean]::Parse($exposeVirtualizationExtensionsString)
+Set-VMProcessor -VMName $vmName -ExposeVirtualizationExtensions $exposeVirtualizationExtensions
 `
 	exposeVirtualizationExtensionsString := "False"
 	if enableVirtualizationExtensions {
 		exposeVirtualizationExtensionsString = "True"
-	} 
+	}
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10), exposeVirtualizationExtensionsString)
+	err := ps.Run(script, vmName, exposeVirtualizationExtensionsString)
 	return err
 }
 
-func SetSecureBoot(vmName string, enable bool) error {
+func SetVirtualMachineDynamicMemory(vmName string, enableDynamicMemory bool) error {
+
+	var script = `
+param([string]$vmName, [string]$enableDynamicMemoryString)
+$enableDynamicMemory = [System.Boolean]::Parse($enableDynamicMemoryString)
+Set-VMMemory -VMName $vmName -DynamicMemoryEnabled $enableDynamicMemory
+`
+	enableDynamicMemoryString := "False"
+	if enableDynamicMemory {
+		enableDynamicMemoryString = "True"
+	}
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, enableDynamicMemoryString)
+	return err
+}
+
+func SetVirtualMachineMacSpoofing(vmName string, enableMacSpoofing bool) error {
+	var script = `
+param([string]$vmName, $enableMacSpoofing)
+Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoofing
+`
+
+	var ps powershell.PowerShellCmd
+
+	enableMacSpoofingString := "Off"
+	if enableMacSpoofing {
+		enableMacSpoofingString = "On"
+	}
+
+	err := ps.Run(script, vmName, enableMacSpoofingString)
+	return err
+}
+
+func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool) error {
 	var script = `
 param([string]$vmName, $enableSecureBoot)
 Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
@@ -241,12 +285,12 @@ Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
 
 	var ps powershell.PowerShellCmd
 
-	enableSecureBoot := "Off"
-	if enable {
-		enableSecureBoot = "On"
+	enableSecureBootString := "Off"
+	if enableSecureBoot {
+		enableSecureBootString = "On"
 	}
 
-	err := ps.Run(script, vmName, enableSecureBoot)
+	err := ps.Run(script, vmName, enableSecureBootString)
 	return err
 }
 
