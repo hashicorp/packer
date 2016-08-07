@@ -128,7 +128,7 @@ func (c *Communicator) DownloadDir(src string, dst string, exclude []string) err
 func (c *Communicator) Execute(commandString string) (*exec.Cmd, error) {
 	log.Printf("Executing with lxc exec in container: %s %s", c.ContainerName, commandString)
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("sudo lxc exec %s -- /bin/sh -c \"%s\"", c.ContainerName, commandString))
+		fmt.Sprintf("lxc exec %s -- /bin/sh -c \"%s\"", c.ContainerName, commandString))
 	if err != nil {
 		return nil, err
 	}
