@@ -231,6 +231,23 @@ param([string]$moduleName)
 	return true, nil
 }
 
+func HasVirtualMachineVirtualizationExtensions() (bool, error) {
+
+	var script = `	
+(GET-Command Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
+`
+
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(script)
+
+	if err != nil {
+		return false, err
+	}
+
+	var hasVirtualMachineVirtualizationExtensions = strings.TrimSpace(cmdOut) == "True"
+	return hasVirtualMachineVirtualizationExtensions, err
+}
+
 func SetUnattendedProductKey(path string, productKey string) error {
 
 	var script = `

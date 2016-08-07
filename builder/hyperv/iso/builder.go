@@ -28,9 +28,10 @@ const (
 	MinDiskSize     = 256              // 256MB
 	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
 
-	DefaultRamSize = 1 * 1024  // 1GB
-	MinRamSize     = 32        // 32MB
-	MaxRamSize     = 32 * 1024 // 32GB
+	DefaultRamSize                 = 1 * 1024  // 1GB
+	MinRamSize                     = 32        // 32MB
+	MaxRamSize                     = 32 * 1024 // 32GB
+	MinNestedVirtualizationRamSize = 4 * 1024  // 4GB
 
 	LowRam = 256 // 256MB
 
@@ -84,12 +85,14 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
-	BootCommand      []string `mapstructure:"boot_command"`
-	SwitchName       string   `mapstructure:"switch_name"`
-	Cpu              uint     `mapstructure:"cpu"`
-	Generation       uint     `mapstructure:"generation"`
-	EnableSecureBoot bool     `mapstructure:"enable_secure_boot"`
-	EnableVirtualizationExtensions bool `mapstructure:"enable_virtualization_extensions"`
+	BootCommand                    []string `mapstructure:"boot_command"`
+	SwitchName                     string   `mapstructure:"switch_name"`
+	Cpu                            uint     `mapstructure:"cpu"`
+	Generation                     uint     `mapstructure:"generation"`
+	EnableMacSpoofing              bool     `mapstructure:"enable_mac_spoofing"`
+	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
+	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
+	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -227,6 +230,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
+	if b.config.EnableVirtualizationExtensions {
+		hasVirtualMachineVirtualizationExtensions, err := powershell.HasVirtualMachineVirtualizationExtensions()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine virtualization extensions support: %s", err))
+		} else {
+			if !hasVirtualMachineVirtualizationExtensions {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 or newer."))
+			}
+		}
+	}
+
 	// Warnings
 
 	if b.config.ShutdownCommand == "" {
@@ -238,6 +252,23 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	warning := b.checkHostAvailableMemory()
 	if warning != "" {
 		warnings = appendWarnings(warnings, warning)
+	}
+
+	if b.config.EnableVirtualizationExtensions {
+		if b.config.EnableDynamicMemory {
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, dynamic memory should not be allowed.")
+			warnings = appendWarnings(warnings, warning)
+		}
+
+		if !b.config.EnableMacSpoofing {
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, mac spoofing should be allowed.")
+			warnings = appendWarnings(warnings, warning)
+		}
+
+		if b.config.RamSizeMB < MinNestedVirtualizationRamSize {
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start any nested VMs.")
+			warnings = appendWarnings(warnings, warning)
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -292,13 +323,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepCreateVM{
-			VMName:          b.config.VMName,
-			SwitchName:      b.config.SwitchName,
-			RamSizeMB:       b.config.RamSizeMB,
-			DiskSize:        b.config.DiskSize,
-			Generation:      b.config.Generation,
-			Cpu:             b.config.Cpu,
-			EnableSecureBoot: b.config.EnableSecureBoot,
+			VMName:                         b.config.VMName,
+			SwitchName:                     b.config.SwitchName,
+			RamSizeMB:                      b.config.RamSizeMB,
+			DiskSize:                       b.config.DiskSize,
+			Generation:                     b.config.Generation,
+			Cpu:                            b.config.Cpu,
+			EnableMacSpoofing:              b.config.EnableMacSpoofing,
+			EnableDynamicMemory:            b.config.EnableDynamicMemory,
+			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
