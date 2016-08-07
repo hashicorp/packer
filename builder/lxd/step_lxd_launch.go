@@ -17,7 +17,7 @@ func (s *stepLxdLaunch) Run(state multistep.StateBag) multistep.StepAction {
 	image := config.Image
 
 	args := []string{
-		"launch", image, name,
+		"launch", "--ephemeral=false", image, name,
 	}
 
 	ui.Say("Creating container...")

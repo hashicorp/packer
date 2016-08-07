@@ -14,15 +14,26 @@ func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	name := config.ContainerName
+	stop_args := []string{
+		// We created the container with "--ephemeral=false" so we know it is safe to stop.
+		"stop", name,
+	}
 
-	args := []string{
-		// If we use `lxc stop <container>`, an ephemeral container would die forever.
-		// `lxc publish` has special logic to handle this case.
-		"publish", "--force", name, "--alias", config.OutputImage,
+	ui.Say("Stopping container...")
+	_, err := LXDCommand(stop_args...)
+	if err != nil {
+		err := fmt.Errorf("Error stopping container: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	publish_args := []string{
+		"publish", name, "--alias", config.OutputImage,
 	}
 
 	ui.Say("Publishing container...")
-	stdoutString, err := LXDCommand(args...)
+	stdoutString, err := LXDCommand(publish_args...)
 	if err != nil {
 		err := fmt.Errorf("Error publishing container: %s", err)
 		state.Put("error", err)
