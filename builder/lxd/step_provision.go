@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-// StepProvision provisions the instance within a chroot.
+// StepProvision provisions the container
 type StepProvision struct{}
 
 func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
