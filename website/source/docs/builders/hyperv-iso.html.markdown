@@ -96,8 +96,18 @@ can be configured for this builder.
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
 	for the VM. By default, this is 40000 (about 40 GB).
 
+-   `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual machine.
+	This defaults to false.
+
+-   `enable_dynamic_memory` (bool) - If true enable dynamic memory for virtual machine.
+	This defaults to false.
+
 -   `enable_secure_boot` (bool) - If true enable secure boot for virtual machine.
 	This defaults to false.
+
+-   `enable_virtualization_extensions` (bool) - If true enable virtualization extensions for virtual machine.
+	This defaults to false.	For nested virtualization you need to enable mac spoofing, disable dynamic memory
+	and have at least 4GB of RAM for virtual machine.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
 	disk that is attached when the VM is booted. This is most useful
