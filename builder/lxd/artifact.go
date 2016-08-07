@@ -29,7 +29,6 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	//return os.RemoveAll(a.dir)
-	//TODO
-	return nil
+	_, err := LXDCommand("image", "delete", a.id)
+	return err
 }
