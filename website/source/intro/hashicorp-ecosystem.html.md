@@ -51,7 +51,7 @@ is fully configured with dependencies and service discovery pre-baked. This
 greatly reduces the risk of an unhealthy node in production due to configuration
 failure at runtime.
 
-[Serf](https://www.serfdom.io/?utm_source=packer&utm_campaign=HashicorpEcosystem) is
+[Serf](https://www.serf.io/?utm_source=packer&utm_campaign=HashicorpEcosystem) is
 a HashiCorp tool for cluster membership and failure detection. Consul uses
 Serf's gossip protocol as the foundation for service discovery.
 
