@@ -104,6 +104,10 @@ func (c *LxcAttachCommunicator) Download(src string, w io.Writer) error {
 	return nil
 }
 
+func (c *LxcAttachCommunicator) DownloadDir(src string, dst string, exclude []string) error {
+	return fmt.Errorf("DownloadDir is not implemented for lxc")
+}
+
 func (c *LxcAttachCommunicator) Execute(commandString string) (*exec.Cmd, error) {
 	log.Printf("Executing with lxc-attach in container: %s %s %s", c.ContainerName, c.RootFs, commandString)
 	command, err := c.CmdWrapper(
