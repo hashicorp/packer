@@ -54,9 +54,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	artifact := &Artifact{}
 
 	var err error
+	var fi os.FileInfo
 
 	// Create the current artifact.
-	artifact.ArtifactFiles = source.Files()
+	for _, name := range source.Files() {
+		if fi, err = os.Stat(name); err == nil {
+			artifact.ArtifactFiles = append(artifact.ArtifactFiles, ArtifactFile{Name: name, Size: fi.Size()})
+		} else {
+			artifact.ArtifactFiles = append(artifact.ArtifactFiles, ArtifactFile{Name: name})
+		}
+	}
 	artifact.ArtifactId = source.Id()
 	artifact.BuilderType = p.config.PackerBuilderType
 	artifact.BuildName = p.config.PackerBuildName
