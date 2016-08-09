@@ -157,33 +157,38 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				b.config.RunConfig.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
-		&awscommon.StepStopEBSBackedInstance{
-			SpotPrice:           b.config.SpotPrice,
-			DisableStopInstance: b.config.DisableStopInstance,
-		},
-		&awscommon.StepModifyEBSBackedInstance{
-			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
-		},
-		&awscommon.StepDeregisterAMI{
-			ForceDeregister: b.config.AMIForceDeregister,
-			AMIName:         b.config.AMIName,
-		},
-		&stepCreateAMI{},
-		&stepCreateEncryptedAMICopy{},
-		&awscommon.StepAMIRegionCopy{
-			AccessConfig: &b.config.AccessConfig,
-			Regions:      b.config.AMIRegions,
-			Name:         b.config.AMIName,
-		},
-		&awscommon.StepModifyAMIAttributes{
-			Description:  b.config.AMIDescription,
-			Users:        b.config.AMIUsers,
-			Groups:       b.config.AMIGroups,
-			ProductCodes: b.config.AMIProductCodes,
-		},
-		&awscommon.StepCreateTags{
-			Tags: b.config.AMITags,
-		},
+	}
+
+	if !b.config.AMISkipRegister {
+		steps = append(steps,
+			&awscommon.StepStopEBSBackedInstance{
+				SpotPrice:           b.config.SpotPrice,
+				DisableStopInstance: b.config.DisableStopInstance,
+			},
+			&awscommon.StepModifyEBSBackedInstance{
+				EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
+			},
+			&awscommon.StepDeregisterAMI{
+				ForceDeregister: b.config.AMIForceDeregister,
+				AMIName:         b.config.AMIName,
+			},
+			&stepCreateAMI{},
+			&stepCreateEncryptedAMICopy{},
+			&awscommon.StepAMIRegionCopy{
+				AccessConfig: &b.config.AccessConfig,
+				Regions:      b.config.AMIRegions,
+				Name:         b.config.AMIName,
+			},
+			&awscommon.StepModifyAMIAttributes{
+				Description:  b.config.AMIDescription,
+				Users:        b.config.AMIUsers,
+				Groups:       b.config.AMIGroups,
+				ProductCodes: b.config.AMIProductCodes,
+			},
+			&awscommon.StepCreateTags{
+				Tags: b.config.AMITags,
+			},
+		)
 	}
 
 	// Run!
