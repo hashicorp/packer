@@ -25,9 +25,11 @@ type AMIConfig struct {
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
-	if c.AMIName == "" {
+	if c.AMIName == "" && !c.AMISkipRegister {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
 	}
+
+	// TODO: confirm that bypassed options aren't supplied with skip_register_ami
 
 	if len(c.AMIRegions) > 0 {
 		regionSet := make(map[string]struct{})
