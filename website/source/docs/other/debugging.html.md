@@ -22,8 +22,13 @@ continuing. This will allow you to inspect state and so on.
 In debug mode once the remote instance is instantiated, Packer will emit to the
 current directory an ephemeral private ssh key as a .pem file. Using that you
 can `ssh -i <key.pem>` into the remote build instance and see what is going on
-for debugging. The ephemeral key will be deleted at the end of the packer run
-during cleanup.
+for debugging. The key will only be emitted for cloud-based builders. The
+ephemeral key will be deleted at the end of the packer run during cleanup.
+
+For a local builder, the SSH session initiated will be visible in the detail
+provided when `PACKER_LOG=1` environment variable is set prior to a build,
+and you can connect to the local machine using the userid and password defined
+in the kickstart or debseed associated with initialzing the local VM.
 
 ### Windows
 
