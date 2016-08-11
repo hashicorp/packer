@@ -33,9 +33,17 @@ type StepMountDevice struct {
 func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
-	image := state.Get("source_image").(*ec2.Image)
 	device := state.Get("device").(string)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+
+	var virtualizationType string
+	if config.FromScratch {
+		virtualizationType = config.AMIVirtType
+	} else {
+		image := state.Get("source_image").(*ec2.Image)
+		virtualizationType = *image.VirtualizationType
+		log.Printf("Source image virtualization type is: %s", virtualizationType)
+	}
 
 	ctx := config.ctx
 	ctx.Data = &mountPathData{Device: filepath.Base(device)}
@@ -65,9 +73,8 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Source image virtualization type is: %s", *image.VirtualizationType)
 	deviceMount := device
-	if *image.VirtualizationType == "hvm" {
+	if virtualizationType == "hvm" {
 		deviceMount = fmt.Sprintf("%s%d", device, s.MountPartition)
 	}
 	state.Put("deviceMount", deviceMount)

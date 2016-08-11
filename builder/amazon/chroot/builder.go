@@ -25,19 +25,23 @@ const BuilderId = "mitchellh.amazon.chroot"
 // Config is the configuration that is chained through the steps and
 // settable from the template.
 type Config struct {
-	common.PackerConfig    `mapstructure:",squash"`
-	awscommon.AccessConfig `mapstructure:",squash"`
-	awscommon.AMIConfig    `mapstructure:",squash"`
+	common.PackerConfig       `mapstructure:",squash"`
+	awscommon.AMIBlockDevices `mapstructure:",squash"`
+	awscommon.AMIConfig       `mapstructure:",squash"`
+	awscommon.AccessConfig    `mapstructure:",squash"`
 
-	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
-	CommandWrapper string     `mapstructure:"command_wrapper"`
-	CopyFiles      []string   `mapstructure:"copy_files"`
-	DevicePath     string     `mapstructure:"device_path"`
-	MountPath      string     `mapstructure:"mount_path"`
-	SourceAmi      string     `mapstructure:"source_ami"`
-	RootVolumeSize int64      `mapstructure:"root_volume_size"`
-	MountOptions   []string   `mapstructure:"mount_options"`
-	MountPartition int        `mapstructure:"mount_partition"`
+	ChrootMounts     [][]string `mapstructure:"chroot_mounts"`
+	CommandWrapper   string     `mapstructure:"command_wrapper"`
+	CopyFiles        []string   `mapstructure:"copy_files"`
+	DevicePath       string     `mapstructure:"device_path"`
+	FromScratch      bool       `mapstructure:"from_scratch"`
+	MountOptions     []string   `mapstructure:"mount_options"`
+	MountPartition   int        `mapstructure:"mount_partition"`
+	MountPath        string     `mapstructure:"mount_path"`
+	PreMountCommands []string   `mapstructure:"pre_mount_commands"`
+	RootDeviceName   string     `mapstructure:"root_device_name"`
+	RootVolumeSize   int64      `mapstructure:"root_volume_size"`
+	SourceAmi        string     `mapstructure:"source_ami"`
 
 	ctx interpolate.Context
 }
@@ -59,6 +63,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"command_wrapper",
+				"pre_mount_commands",
 				"mount_path",
 			},
 		},
@@ -86,7 +91,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if len(b.config.CopyFiles) == 0 {
+	if len(b.config.CopyFiles) == 0 && !b.config.FromScratch {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}
 	}
 
@@ -115,8 +120,32 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.SourceAmi == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("source_ami is required."))
+	if b.config.FromScratch {
+		if b.config.RootVolumeSize == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("root_volume_size is required with from_scratch."))
+		}
+		if len(b.config.PreMountCommands) == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("pre_mount_commands is required with from_scratch."))
+		}
+		if b.config.AMIVirtType == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("ami_virtualization_type is required with from_scratch."))
+		}
+		if b.config.RootDeviceName == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("root_device_name is required with from_scratch."))
+		}
+		if len(b.config.AMIMappings) == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("ami_block_device_mappings is required with from_scratch."))
+		}
+	} else {
+		if b.config.SourceAmi == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("source_ami is required."))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -161,11 +190,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceDeregister: b.config.AMIForceDeregister,
 		},
 		&StepInstanceInfo{},
-		&awscommon.StepSourceAMIInfo{
-			SourceAmi:          b.config.SourceAmi,
-			EnhancedNetworking: b.config.AMIEnhancedNetworking,
-		},
-		&StepCheckRootDevice{},
+	}
+
+	if !b.config.FromScratch {
+		steps = append(steps,
+			&awscommon.StepSourceAMIInfo{
+				SourceAmi:          b.config.SourceAmi,
+				EnhancedNetworking: b.config.AMIEnhancedNetworking,
+			},
+			&StepCheckRootDevice{},
+		)
+	}
+
+	steps = append(steps,
 		&StepFlock{},
 		&StepPrepareDevice{},
 		&StepCreateVolume{
@@ -173,6 +210,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
+		&StepPreMountCommands{
+			Commands: b.config.PreMountCommands,
+		},
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
@@ -203,7 +243,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepCreateTags{
 			Tags: b.config.AMITags,
 		},
-	}
+	)
 
 	// Run!
 	if b.config.PackerDebug {
