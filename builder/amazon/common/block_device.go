@@ -22,7 +22,15 @@ type BlockDevice struct {
 }
 
 type BlockDevices struct {
-	AMIMappings    []BlockDevice `mapstructure:"ami_block_device_mappings"`
+	AMIBlockDevices    `mapstructure:",squash"`
+	LaunchBlockDevices `mapstructure:",squash"`
+}
+
+type AMIBlockDevices struct {
+	AMIMappings []BlockDevice `mapstructure:"ami_block_device_mappings"`
+}
+
+type LaunchBlockDevices struct {
 	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
@@ -77,10 +85,10 @@ func (b *BlockDevices) Prepare(ctx *interpolate.Context) []error {
 	return nil
 }
 
-func (b *BlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
+func (b *AMIBlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.AMIMappings)
 }
 
-func (b *BlockDevices) BuildLaunchDevices() []*ec2.BlockDeviceMapping {
+func (b *LaunchBlockDevices) BuildLaunchDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.LaunchMappings)
 }
