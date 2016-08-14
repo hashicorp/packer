@@ -14,6 +14,7 @@ type stepShutdown struct{}
 
 func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
+	c := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(int)
 
@@ -63,7 +64,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}()
 
-	err = waitForDropletState("off", dropletId, client, 2*time.Minute)
+	err = waitForDropletState("off", dropletId, client, c.StateTimeout)
 	if err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
@@ -72,7 +73,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if err := waitForDropletUnlocked(client, dropletId, 4*time.Minute); err != nil {
+	if err := waitForDropletUnlocked(client, dropletId, c.StateTimeout); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
 		state.Put("error", err)
