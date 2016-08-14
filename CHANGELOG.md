@@ -23,6 +23,8 @@ IMPROVEMENTS:
   * builder/azure: Support for custom images [GH-3575]
   * builder/azure: Removed superfluous polling code for deployments [GH-3638]
   * builder/azure: Made `tenant_id` optional [GH-3643]
+  * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
+    [GH-3444]
   * builder/google: Added support for `image_family` [GH-3503]
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
@@ -43,6 +45,7 @@ IMPROVEMENTS:
   * provisioner/puppet: Added `execute_command` option [GH-3614]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
   * post-processor/docker: Preserve tags when running docker push [GH-3631]
+  * scripts: Added `help` target to Makefile [GH-3290]
 
 BUG FIXES:
 
@@ -52,6 +55,7 @@ BUG FIXES:
     is specified [GH-3568]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
+  * website: improved rendering on iPad [GH-3780]
 
 ## 0.10.1 (May 7, 2016)
 
