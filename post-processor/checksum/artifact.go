@@ -12,10 +12,6 @@ type Artifact struct {
 	files []string
 }
 
-func NewArtifact(files []string) *Artifact {
-	return &Artifact{files: files}
-}
-
 func (a *Artifact) BuilderId() string {
 	return BuilderId
 }

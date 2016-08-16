@@ -83,16 +83,16 @@ func getHash(t string) hash.Hash {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	files := artifact.Files()
 	var h hash.Hash
 	var checksumFile string
 
-	newartifact := NewArtifact(artifact.Files())
+	newartifact := &Artifact{}
+	copy(newartifact.files, artifact.Files())
 
 	for _, ct := range p.config.ChecksumTypes {
 		h = getHash(ct)
 
-		for _, art := range files {
+		for _, art := range artifact.Files() {
 			if len(artifact.Files()) > 1 {
 				checksumFile = filepath.Join(filepath.Dir(art), ct+"sums")
 			} else if p.config.OutputPath != "" {
