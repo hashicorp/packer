@@ -9,6 +9,7 @@ azure_group_name=
 azure_storage_name=
 azure_subscription_id= # Derived from the account after login
 azure_tenant_id=       # Derived from the account after login
+location=
 
 showhelp() {
 	echo "azure-setup"
@@ -113,9 +114,17 @@ askSecret() {
 	fi
 }
 
+askLocation() {
+	azure location list
+	echo ""
+	echo "Choose which region your resource group and storage account will be created."
+	echo -n "> "
+	read location
+}
+
 createResourceGroup() {
 	echo "==> Creating resource group"
-	azure group create -n $meta_name -l westus
+	azure group create -n $meta_name -l $location
 	if [ $? -eq 0 ]; then
 		azure_group_name=$meta_name
 	else
@@ -126,7 +135,7 @@ createResourceGroup() {
 
 createStorageAccount() {
 	echo "==> Creating storage account"
-	azure storage account create -g $meta_name -l westus --sku-name LRS --kind Storage $meta_name
+	azure storage account create -g $meta_name -l $location --sku-name LRS --kind Storage $meta_name
 	if [ $? -eq 0 ]; then
 		azure_storage_name=$meta_name
 	else
@@ -186,6 +195,7 @@ setup() {
 	askSubscription
 	askName
 	askSecret
+	askLocation
 
 	# Some of the resources take a while to converge in the API. To make the
 	# script more reliable we'll add a sleep after we create each resource.
