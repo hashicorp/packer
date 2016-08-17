@@ -82,7 +82,7 @@ repackage an existing GCE image. The account_file is obtained in the previous
 section. If it parses as JSON it is assumed to be the file itself, otherwise it
 is assumed to be the path to the file containing the JSON.
 
-``` {.javascript}
+``` {.json}
 {
   "builders": [{
     "type": "googlecompute",
