@@ -17,12 +17,16 @@ import (
 func ParseVMX(contents string) map[string]string {
 	results := make(map[string]string)
 
-	lineRe := regexp.MustCompile(`^(.+?)\s*=\s*"(.*?)"\s*$`)
+	quotedValRe := regexp.MustCompile(`^(.+?)\s*=\s*"(.*?)"\s*$`)
+	bareValRe := regexp.MustCompile(`^(.+?)\s*=\s*([^"]+?)\s*$`)
 
 	for _, line := range strings.Split(contents, "\n") {
-		matches := lineRe.FindStringSubmatch(line)
+		matches := quotedValRe.FindStringSubmatch(line)
 		if matches == nil {
-			continue
+			matches = bareValRe.FindStringSubmatch(line)
+			if matches == nil {
+				continue
+			}
 		}
 
 		key := strings.ToLower(matches[1])
@@ -32,20 +36,40 @@ func ParseVMX(contents string) map[string]string {
 	return results
 }
 
+func encodeVMXLine(k string, v string) string {
+	type CaseSensitiveUnquoted struct {
+		re            *regexp.Regexp
+		correctCasing string
+	}
+
+	// Support for keys that are case-sensitive and with unquoted value
+	noQuotesCaseSensitive := []CaseSensitiveUnquoted{{regexp.MustCompile("(?i)\\.virtualssd$"), ".virtualSSD"}}
+
+	for _, q := range noQuotesCaseSensitive {
+		if q.re.MatchString(k) {
+			s := q.re.ReplaceAllString(k, q.correctCasing)
+			log.Printf("Replacing %s with %s", k, s)
+			return fmt.Sprintf("%s = %s\n", s, v)
+		}
+	}
+	return fmt.Sprintf("%s = \"%s\"\n", k, v)
+}
+
 // EncodeVMX takes a map and turns it into valid VMX contents.
 func EncodeVMX(contents map[string]string) string {
 	var buf bytes.Buffer
 
 	i := 0
 	keys := make([]string, len(contents))
-	for k, _ := range contents {
+	for k := range contents {
 		keys[i] = k
 		i++
 	}
 
 	sort.Strings(keys)
+
 	for _, k := range keys {
-		buf.WriteString(fmt.Sprintf("%s = \"%s\"\n", k, contents[k]))
+		buf.WriteString(encodeVMXLine(k, contents[k]))
 	}
 
 	return buf.String()
