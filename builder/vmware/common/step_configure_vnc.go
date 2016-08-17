@@ -28,6 +28,9 @@ type StepConfigureVNC struct {
 
 type VNCAddressFinder interface {
 	VNCAddress(string, uint, uint) (string, uint, error)
+
+	// UpdateVMX, sets driver specific VNC values to VMX data.
+	UpdateVMX(vncAddress string, vncPort uint, vmxData map[string]string)
 }
 
 func (StepConfigureVNC) VNCAddress(vncBindAddress string, portMin, portMax uint) (string, uint, error) {
@@ -91,9 +94,7 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Found available VNC port: %d", vncPort)
 
 	vmxData := ParseVMX(string(vmxBytes))
-	vmxData["remotedisplay.vnc.enabled"] = "TRUE"
-	vmxData["remotedisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
-	vmxData["remotedisplay.vnc.ip"] = fmt.Sprintf("%s", vncBindAddress)
+	vncFinder.UpdateVMX(vncBindAddress, vncPort, vmxData)
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
@@ -106,6 +107,12 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("vnc_ip", vncBindAddress)
 
 	return multistep.ActionContinue
+}
+
+func (StepConfigureVNC) UpdateVMX(address string, port uint, data map[string]string) {
+	data["remotedisplay.vnc.enabled"] = "TRUE"
+	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
+	data["remotedisplay.vnc.ip"] = address
 }
 
 func (StepConfigureVNC) Cleanup(multistep.StateBag) {
