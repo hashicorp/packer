@@ -71,8 +71,9 @@ func (s *StepTeardownInstance) Cleanup(state multistep.StateBag) {
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error deleting disk. Please delete it manually.\n\n"+
-				"Name: %s\n"+
-				"Error: %s", config.InstanceName, err))
+				"DiskName: %s\n" +
+				"Zone: %s\n" +
+				"Error: %s", config.DiskName, config.Zone, err))
 	}
 
 	ui.Message("Disk has been deleted!")
