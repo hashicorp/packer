@@ -10,6 +10,7 @@ azure_storage_name=
 azure_subscription_id= # Derived from the account after login
 azure_tenant_id=       # Derived from the account after login
 location=
+azure_object_id=
 
 showhelp() {
 	echo "azure-setup"
@@ -89,7 +90,7 @@ askSubscription() {
 
 askName() {
 	echo ""
-	echo "Choose a name for your resource group, storage account, and client"
+	echo "Choose a name for your resource group, storage account and client"
 	echo "client. This is arbitrary, but it must not already be in use by"
 	echo "any of those resources. ALPHANUMERIC ONLY. Ex: mypackerbuild"
 	echo -n "> "
@@ -144,18 +145,10 @@ createStorageAccount() {
 	fi
 }
 
-createApplication() {
-	echo "==> Creating application"
-	azure_client_id=$(azure ad app create -n $meta_name -i http://$meta_name --home-page http://$meta_name -p $azure_client_secret --json | jq -r .appId)
-	if [ $? -ne 0 ]; then
-		echo "Error creating application: $meta_name @ http://$meta_name"
-		exit 1
-	fi
-}
-
 createServicePrinciple() {
 	echo "==> Creating service principal"
-	azure ad sp create $azure_client_id
+	azure_object_id=$(azure ad sp create -n $meta_name --home-page http://$meta_name --identifier-uris http://$meta_name/example -p $azure_client_secret --json | jq -r .objectId)
+	azure_client_id=$(azure ad app show -c $meta_name --json | jq -r .[0].appId)
 	if [ $? -ne 0 ]; then
 		echo "Error creating service principal: $azure_client_id"
 		exit 1
@@ -164,7 +157,7 @@ createServicePrinciple() {
 
 createPermissions() {
 	echo "==> Creating permissions"
-	azure role assignment create -o "Owner" --spn http://$meta_name -c /subscriptions/$azure_subscription_id
+	azure role assignment create --objectId $azure_object_id -o "Owner" -c /subscriptions/$azure_subscription_id
 	# We want to use this more conservative scope but it does not work with the
 	# current implementation which uses temporary resource groups
 	# azure role assignment create --spn http://$meta_name -g $azure_group_name -o "API Management Service Contributor"
@@ -178,11 +171,15 @@ showConfigs() {
 	echo ""
 	echo "Use the following configuration for your packer template:"
 	echo ""
+	echo "{"
 	echo "      \"client_id\": \"$azure_client_id\","
 	echo "      \"client_secret\": \"$azure_client_secret\","
+	echo "      \"object_id\": \"$azure_object_id\","
+	echo "      \"subscription_id\": \"$azure_subscription_id\","
+	echo "      \"tenant_id\": \"$azure_tenant_id\","
 	echo "      \"resource_group_name\": \"$azure_group_name\","
 	echo "      \"storage_account\": \"$azure_storage_name\","
-	echo "      \"subscription_id\": \"$azure_subscription_id\","
+	echo "}"
 	echo ""
 }
 
@@ -203,8 +200,6 @@ setup() {
 	createResourceGroup
 	sleep 5
 	createStorageAccount
-	sleep 5
-	createApplication
 	sleep 5
 	createServicePrinciple
 	sleep 5
