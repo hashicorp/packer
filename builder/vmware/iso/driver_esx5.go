@@ -65,10 +65,8 @@ func (d *ESX5Driver) ReloadVM() error {
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	for i := 0; i < 20; i++ {
-		err := d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
-		if err != nil {
-			return err
-		}
+		//intentionally not checking for error since poweron may fail specially after initial VM registration
+		d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
 		time.Sleep((time.Duration(i) * time.Second) + 1)
 		running, err := d.IsRunning(vmxPathLocal)
 		if err != nil {
