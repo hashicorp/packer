@@ -235,7 +235,9 @@ func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]strin
 	// Do not set remotedisplay.vnc.ip - this breaks ESXi.
 	data["remotedisplay.vnc.enabled"] = "TRUE"
 	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
-	data["remotedisplay.vnc.password"] = password
+	if len(password) > 0 {
+		data["remotedisplay.vnc.password"] = password
+	}
 }
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {

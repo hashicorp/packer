@@ -21,9 +21,10 @@ import (
 // Produces:
 //   vnc_port uint - The port that VNC is configured to listen on.
 type StepConfigureVNC struct {
-	VNCBindAddress string
-	VNCPortMin     uint
-	VNCPortMax     uint
+	VNCBindAddress     string
+	VNCPortMin         uint
+	VNCPortMax         uint
+	VNCDisablePassword bool
 }
 
 type VNCAddressFinder interface {
@@ -56,7 +57,10 @@ func (StepConfigureVNC) VNCAddress(vncBindAddress string, portMin, portMax uint)
 	return vncBindAddress, vncPort, nil
 }
 
-func VNCPassword() string {
+func VNCPassword(skipPassword bool) string {
+	if skipPassword {
+		return ""
+	}
 	length := int(8)
 
 	charSet := []byte("1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./!@#%^*()_+QWERTYUIOP{}|ASDFGHJKL:XCVBNM<>?")
@@ -106,7 +110,7 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	vncPassword := VNCPassword()
+	vncPassword := VNCPassword(s.VNCDisablePassword)
 
 	log.Printf("Found available VNC port: %d", vncPort)
 
@@ -131,7 +135,9 @@ func (StepConfigureVNC) UpdateVMX(address, password string, port uint, data map[
 	data["remotedisplay.vnc.enabled"] = "TRUE"
 	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
 	data["remotedisplay.vnc.ip"] = address
-	data["remotedisplay.vnc.password"] = password
+	if len(password) > 0 {
+		data["remotedisplay.vnc.password"] = password
+	}
 }
 
 func (StepConfigureVNC) Cleanup(multistep.StateBag) {
