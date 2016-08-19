@@ -11,9 +11,10 @@ type RunConfig struct {
 	Headless    bool   `mapstructure:"headless"`
 	RawBootWait string `mapstructure:"boot_wait"`
 
-	VNCBindAddress string `mapstructure:"vnc_bind_address"`
-	VNCPortMin     uint   `mapstructure:"vnc_port_min"`
-	VNCPortMax     uint   `mapstructure:"vnc_port_max"`
+	VNCBindAddress     string `mapstructure:"vnc_bind_address"`
+	VNCPortMin         uint   `mapstructure:"vnc_port_min"`
+	VNCPortMax         uint   `mapstructure:"vnc_port_max"`
+	VNCDisablePassword bool   `mapstructure:"vnc_disable_password"`
 
 	BootWait time.Duration ``
 }
