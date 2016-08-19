@@ -66,10 +66,10 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	var auth []vnc.ClientAuth
 
-	if vncPassword != nil {
+	if vncPassword != nil && len(vncPassword.(string)) > 0 {
 		auth = []vnc.ClientAuth{&vnc.PasswordAuth{Password: vncPassword.(string)}}
 	} else {
-		auth = []vnc.ClientAuth{}
+		auth = []vnc.ClientAuth{new(vnc.ClientAuthNone)}
 	}
 
 	c, err := vnc.Client(nc, &vnc.ClientConfig{Auth: auth, Exclusive: true})
