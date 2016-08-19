@@ -38,6 +38,9 @@ IMPROVEMENTS:
   * builder/vmware: Now paused between `boot_command` entries when running with
     `-debug` [GH-3542]
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
+  * builder/vmware: Adds passwords for VNC [GH-2325]
+  * builder/vmware: Handle connection to VM with more than one NIC on ESXi
+    [GH-3347]
   * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
   * provisioner/chef: Added `knife_command` option and added a correct default
@@ -55,6 +58,11 @@ BUG FIXES:
     is specified [GH-3568]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
+  * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
+  * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
+  * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
+  * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
+    [GH-3740]
   * website: improved rendering on iPad [GH-3780]
 
 ## 0.10.1 (May 7, 2016)
