@@ -268,18 +268,37 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	record, err = r.read()
-	if err != nil {
-		return "", err
-	}
+	// Loop through interfaces
+	for {
+		record, err = r.read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
 
-	if record["IPAddress"] == "0.0.0.0" {
-		return "", errors.New("VM network port found, but no IP address")
+		if record["IPAddress"] == "0.0.0.0" {
+			continue
+		}
+		// When multiple NICs are connected to the same network, choose
+		// one that has a route back. This Dial should ensure that.
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], d.Port), 2*time.Second)
+		if err != nil {
+			if e, ok := err.(*net.OpError); ok {
+				if e.Timeout() {
+					log.Printf("Timeout connecting to %s", record["IPAddress"])
+					continue
+				}
+			}
+		} else {
+			defer conn.Close()
+			address := record["IPAddress"]
+			state.Put("vm_address", address)
+			return address, nil
+		}
 	}
-
-	address := record["IPAddress"]
-	state.Put("vm_address", address)
-	return address, nil
+	return "", errors.New("No interface on the VM has an IP address ready")
 }
 
 //-------------------------------------------------------------------
