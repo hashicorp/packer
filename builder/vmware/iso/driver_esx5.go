@@ -239,6 +239,11 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return address.(string), nil
 	}
 
+	if address := config.CommConfig.Host(); address != "" {
+		state.Put("vm_address", address)
+		return address, nil
+	}
+
 	r, err := d.esxcli("network", "vm", "list")
 	if err != nil {
 		return "", err

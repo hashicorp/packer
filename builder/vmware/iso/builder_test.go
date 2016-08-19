@@ -338,3 +338,61 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
+
+func TestBuilderPrepare_CommConfig(t *testing.T) {
+	// Test Winrm
+	{
+		config := testConfig()
+		config["communicator"] = "winrm"
+		config["winrm_username"] = "username"
+		config["winrm_password"] = "password"
+		config["winrm_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.CommConfig.WinRMUser != "username" {
+			t.Errorf("bad winrm_username: %s", b.config.CommConfig.WinRMUser)
+		}
+		if b.config.CommConfig.WinRMPassword != "password" {
+			t.Errorf("bad winrm_password: %s", b.config.CommConfig.WinRMPassword)
+		}
+		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+
+	// Test SSH
+	{
+		config := testConfig()
+		config["communicator"] = "ssh"
+		config["ssh_username"] = "username"
+		config["ssh_password"] = "password"
+		config["ssh_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.CommConfig.SSHUsername != "username" {
+			t.Errorf("bad ssh_username: %s", b.config.CommConfig.SSHUsername)
+		}
+		if b.config.CommConfig.SSHPassword != "password" {
+			t.Errorf("bad ssh_password: %s", b.config.CommConfig.SSHPassword)
+		}
+		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+}
