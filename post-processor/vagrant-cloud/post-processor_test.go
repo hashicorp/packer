@@ -48,7 +48,7 @@ func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
 	var _ packer.PostProcessor = new(PostProcessor)
 }
 
-func TestproviderFromBuilderName(t *testing.T) {
+func TestProviderFromBuilderName(t *testing.T) {
 	if providerFromBuilderName("foobar") != "foobar" {
 		t.Fatal("should copy unknown provider")
 	}
