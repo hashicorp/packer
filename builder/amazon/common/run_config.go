@@ -14,6 +14,16 @@ import (
 
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
+type DynamicAmiOptions struct {
+	Filters     map[*string]*string
+	Owners      []*string
+	Most_recent bool
+}
+
+func (d *DynamicAmiOptions) Validate() bool {
+	return true
+}
+
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
@@ -24,6 +34,7 @@ type RunConfig struct {
 	InstanceType                      string            `mapstructure:"instance_type"`
 	RunTags                           map[string]string `mapstructure:"run_tags"`
 	SourceAmi                         string            `mapstructure:"source_ami"`
+	DynamicSourceAmi                  DynamicAmiOptions `mapstructure:"dynamic_source_ami"`
 	SpotPrice                         string            `mapstructure:"spot_price"`
 	SpotPriceAutoProduct              string            `mapstructure:"spot_price_auto_product"`
 	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
@@ -57,7 +68,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 	if c.SourceAmi == "" {
-		errs = append(errs, errors.New("A source_ami must be specified"))
+		errs = append(errs, errors.New("A source_ami or dynamic_source_ami must be specified"))
 	}
 
 	if c.InstanceType == "" {
