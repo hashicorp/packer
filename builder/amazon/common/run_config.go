@@ -15,13 +15,13 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type DynamicAmiOptions struct {
-	Filters     map[*string]*string
-	Owners      []*string
-	Most_recent bool
+	Filters    map[*string]*string
+	Owners     []*string
+	MostRecent bool `mapstructure:"most_recent"`
 }
 
-func (d *DynamicAmiOptions) Validate() bool {
-	return true
+func (d *DynamicAmiOptions) Empty() bool {
+	return len(d.Owners) == 0 && len(d.Filters) == 0
 }
 
 // RunConfig contains configuration for running an instance from a source
@@ -67,7 +67,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
-	if c.SourceAmi == "" {
+	if c.SourceAmi == "" && c.DynamicSourceAmi.Empty() {
 		errs = append(errs, errors.New("A source_ami or dynamic_source_ami must be specified"))
 	}
 
