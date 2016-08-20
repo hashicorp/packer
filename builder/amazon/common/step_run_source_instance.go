@@ -84,24 +84,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	ui.Say("Launching a source AWS instance...")
-	imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-		ImageIds: []*string{&s.SourceAMI},
-	})
-	if err != nil {
-		state.Put("error", fmt.Errorf("There was a problem with the source AMI: %s", err))
+	image, ok := state.Get("source_image").(*ec2.Image)
+	if !ok {
+		state.Put("error", fmt.Errorf("source_image type assertion failed"))
 		return multistep.ActionHalt
 	}
+	s.SourceAMI = *image.ImageId
 
-	if len(imageResp.Images) != 1 {
-		state.Put("error", fmt.Errorf("The source AMI '%s' could not be found.", s.SourceAMI))
-		return multistep.ActionHalt
-	}
-
-	if s.ExpectedRootDevice != "" && *imageResp.Images[0].RootDeviceType != s.ExpectedRootDevice {
+	if s.ExpectedRootDevice != "" && *image.RootDeviceType != s.ExpectedRootDevice {
 		state.Put("error", fmt.Errorf(
 			"The provided source AMI has an invalid root device type.\n"+
 				"Expected '%s', got '%s'.",
-			s.ExpectedRootDevice, *imageResp.Images[0].RootDeviceType))
+			s.ExpectedRootDevice, image.RootDeviceType))
 		return multistep.ActionHalt
 	}
 
@@ -156,16 +150,16 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	if spotPrice == "" || spotPrice == "0" {
 		runOpts := &ec2.RunInstancesInput{
-			KeyName:                           &keyName,
-			ImageId:                           &s.SourceAMI,
-			InstanceType:                      &s.InstanceType,
-			UserData:                          &userData,
-			MaxCount:                          aws.Int64(1),
-			MinCount:                          aws.Int64(1),
-			IamInstanceProfile:                &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-			BlockDeviceMappings:               s.BlockDevices.BuildLaunchDevices(),
-			Placement:                         &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
-			EbsOptimized:                      &s.EbsOptimized,
+			KeyName:             &keyName,
+			ImageId:             &s.SourceAMI,
+			InstanceType:        &s.InstanceType,
+			UserData:            &userData,
+			MaxCount:            aws.Int64(1),
+			MinCount:            aws.Int64(1),
+			IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
+			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
+			EbsOptimized:        &s.EbsOptimized,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {

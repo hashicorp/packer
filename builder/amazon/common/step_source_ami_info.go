@@ -16,14 +16,37 @@ import (
 type StepSourceAMIInfo struct {
 	SourceAmi          string
 	EnhancedNetworking bool
+	AmiFilters         DynamicAmiOptions
+}
+
+// Build a slice of AMI filter options from the filters provided.
+func buildAmiFilters(input map[*string]*string) []*ec2.Filter {
+	var filters []*ec2.Filter
+	for k, v := range input {
+		/*m := v.(map[string]interface{})
+		  var filterValues []*string
+		  for _, e := range m["values"].([]interface{}) {
+		      filterValues = append(filterValues, aws.String(e.(string)))
+		  }*/
+		filters = append(filters, &ec2.Filter{
+			Name:   k,
+			Values: []*string{v},
+		})
+	}
+	return filters
 }
 
 func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say(fmt.Sprintf("Inspecting the source AMI (%s)...", s.SourceAmi))
-	imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{&s.SourceAmi}})
+	params := &ec2.DescribeImagesInput{}
+	params.Filters = buildAmiFilters(s.AmiFilters.Filters)
+	params.Owners = s.AmiFilters.Owners
+	ui.Say(fmt.Sprintf("Using AMI Filters %v", params))
+	imageResp, err := ec2conn.DescribeImages(params)
+	//ui.Say(fmt.Sprintf("Inspecting the source AMI (%s)...", s.SourceAmi))
+	//imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{&s.SourceAmi}})
 	if err != nil {
 		err := fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
@@ -39,6 +62,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	image := imageResp.Images[0]
+	ui.Say(fmt.Sprintf("Got Image %v", image))
 
 	// Enhanced Networking (SriovNetSupport) can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
