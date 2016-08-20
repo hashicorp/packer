@@ -19,7 +19,7 @@ import (
 type StepSourceAMIInfo struct {
 	SourceAmi          string
 	EnhancedNetworking bool
-	AmiFilters         DynamicAmiOptions
+	AmiFilters         AmiFilterOptions
 }
 
 // Build a slice of AMI filter options from the filters provided.
