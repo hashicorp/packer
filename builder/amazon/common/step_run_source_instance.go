@@ -95,7 +95,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		state.Put("error", fmt.Errorf(
 			"The provided source AMI has an invalid root device type.\n"+
 				"Expected '%s', got '%s'.",
-			s.ExpectedRootDevice, image.RootDeviceType))
+			s.ExpectedRootDevice, *image.RootDeviceType))
 		return multistep.ActionHalt
 	}
 
