@@ -116,7 +116,6 @@ similar to below. Note that this process typically takes a few minutes.
 -&gt; **Note:** When using packer on Windows, replace the single-quotes in the 
 command below with double-quotes.
 
-
 ``` {.text}
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
