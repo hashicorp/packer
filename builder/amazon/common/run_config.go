@@ -68,7 +68,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 	if c.SourceAmi == "" && c.SourceAmiFilter.Empty() {
-		errs = append(errs, errors.New("A source_ami or dynamic_source_ami must be specified"))
+		errs = append(errs, errors.New("A source_ami or source_ami_filter must be specified"))
 	}
 
 	if c.InstanceType == "" {
