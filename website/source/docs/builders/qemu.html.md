@@ -262,6 +262,15 @@ builder and not otherwise conflicting with the qemuargs):
   qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
+\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
+to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
+
+The following shows the environment variable that needs to be set for Windows QEMU support:
+
+```json
+  setx SDL_STDIO_REDIRECT=0
+```
+
 You can also use the `SSHHostPort` template variable to produce a packer
 template that can be invoked by `make` in parallel:
 
