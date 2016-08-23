@@ -37,6 +37,8 @@ for instructions on setting the PATH on Linux and Mac. [This
 page](https://stackoverflow.com/questions/1618280/where-can-i-set-path-to-make-exe-on-windows)
 contains instructions for setting the PATH on Windows.
 
+\~&gt; **Note:** Packer is now distributed as a single binary. If you are upgrading from an older version, ensure to delete all the packer-* binary.
+
 ## Verifying the Installation
 
 After installing Packer, verify the installation worked by opening a new command
