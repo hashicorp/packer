@@ -115,6 +115,7 @@ Packer to work:
         "ec2:DescribeSnapshots",
         "ec2:DescribeImages",
         "ec2:RegisterImage",
+        "ec2:DeregisterImage",
         "ec2:CreateTags",
         "ec2:ModifyImageAttribute",
         "ec2:GetPasswordData",
