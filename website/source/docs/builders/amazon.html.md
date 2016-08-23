@@ -121,7 +121,8 @@ Packer to work:
         "ec2:DescribeTags",
         "ec2:DescribeImageAttribute",
         "ec2:CopyImage",
-        "ec2:DescribeRegions"
+        "ec2:DescribeRegions",
+        "ec2:ModifyInstanceAttribute"
       ],
       "Resource" : "*"
   }]
