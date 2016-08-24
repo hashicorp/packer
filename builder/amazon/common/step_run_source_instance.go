@@ -28,6 +28,8 @@ type StepRunSourceInstance struct {
 	SpotPrice                         string
 	SpotPriceProduct                  string
 	SubnetId                          string
+	EipAllocId                        string
+	EipAllowReassociation             bool
 	Tags                              map[string]string
 	UserData                          string
 	UserDataFile                      string
@@ -294,6 +296,41 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	if err != nil {
 		ui.Message(
 			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))
+	}
+
+	if s.EipAllocId != "" {
+		_, err := ec2conn.AssociateAddress(&ec2.AssociateAddressInput{
+			AllocationId:       aws.String(s.EipAllocId),
+			AllowReassociation: aws.Bool(s.EipAllowReassociation),
+			InstanceId:         aws.String(*instance.InstanceId),
+		})
+
+		if err != nil {
+			err := fmt.Errorf("Error associating EIP (%s) to instance (%s): %s", s.EipAllocId, instanceId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		// Refresh instance with latest data containing the EIP Address
+		instancesResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{instance.InstanceId},
+		})
+		if err != nil {
+			err := fmt.Errorf("Error getting instance data: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		if len(instancesResp.Reservations) == 0 {
+			err := fmt.Errorf("Error getting instance data: no instance found.")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		instance = instancesResp.Reservations[0].Instances[0]
 	}
 
 	if s.Debug {

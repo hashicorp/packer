@@ -221,6 +221,13 @@ builder.
     in order to create a temporary security group within the VPC. Requires `subnet_id`
     to be set.
 
+-   `eip_alloc_id` (string) - If using VPC, the ID of the Elastic IP, such as
+    "eipalloc-12345def", which the EC2 instance will use to get a Public IP.
+
+-   `eip_allow_reassociation` (boolean) - If using Elastic IP, allow Packer to
+    reassociate the address that is already associated with an instance or network
+    interface.
+
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
 

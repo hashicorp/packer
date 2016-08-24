@@ -35,6 +35,8 @@ type RunConfig struct {
 	UserDataFile                      string            `mapstructure:"user_data_file"`
 	WindowsPasswordTimeout            time.Duration     `mapstructure:"windows_password_timeout"`
 	VpcId                             string            `mapstructure:"vpc_id"`
+	EipAllocId                        string            `mapstructure:"eip_alloc_id"`
+	EipAllowReassociation             bool              `mapstructure:"eip_allow_reassociation"`
 	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behaviour"`
 
 	// Communicator settings

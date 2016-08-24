@@ -236,6 +236,13 @@ builder.
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
     in order to create a temporary security group within the VPC.
 
+-   `eip_alloc_id` (string) - If using VPC, the ID of the Elastic IP, such as
+    "eipalloc-12345def", which the EC2 instance will use to get a Public IP.
+
+-   `eip_allow_reassociation` (boolean) - If using Elastic IP, allow Packer to
+    reassociate the address that is already associated with an instance or network
+    interface.
+
 -   `x509_upload_path` (string) - The path on the remote machine where the X509
     certificate will be uploaded. This path must already exist and be writable.
     X509 certificates are uploaded after provisioning is run, so it is perfectly
