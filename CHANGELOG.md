@@ -43,6 +43,7 @@ IMPROVEMENTS:
     [GH-3347]
   * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
+  * provisioner/ansible: Improved logging and error handling [GH-3477]
   * provisioner/chef: Added `knife_command` option and added a correct default
     value for Windows [GH-3622]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
@@ -58,6 +59,7 @@ BUG FIXES:
     is specified [GH-3568]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
+  * builder/virtualbox: Respect `ssh_host` [GH-3617]
   * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
   * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
   * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
