@@ -156,16 +156,16 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	if spotPrice == "" || spotPrice == "0" {
 		runOpts := &ec2.RunInstancesInput{
-			KeyName:                           &keyName,
-			ImageId:                           &s.SourceAMI,
-			InstanceType:                      &s.InstanceType,
-			UserData:                          &userData,
-			MaxCount:                          aws.Int64(1),
-			MinCount:                          aws.Int64(1),
-			IamInstanceProfile:                &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-			BlockDeviceMappings:               s.BlockDevices.BuildLaunchDevices(),
-			Placement:                         &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
-			EbsOptimized:                      &s.EbsOptimized,
+			KeyName:             &keyName,
+			ImageId:             &s.SourceAMI,
+			InstanceType:        &s.InstanceType,
+			UserData:            &userData,
+			MaxCount:            aws.Int64(1),
+			MinCount:            aws.Int64(1),
+			IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
+			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
+			EbsOptimized:        &s.EbsOptimized,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
