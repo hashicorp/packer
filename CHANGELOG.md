@@ -57,6 +57,7 @@ BUG FIXES:
   * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
   * provisioner/ansible: Properly set host key checking even when a custom ENV
     is specified [GH-3568]
+  * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
   * builder/virtualbox: Respect `ssh_host` [GH-3617]
