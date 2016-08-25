@@ -9,7 +9,7 @@ import (
 )
 
 // accountFile represents the structure of the account file JSON file.
-type accountFile struct {
+type AccountFile struct {
 	PrivateKeyId string `json:"private_key_id"`
 	PrivateKey   string `json:"private_key"`
 	ClientEmail  string `json:"client_email"`
@@ -22,7 +22,7 @@ func parseJSON(result interface{}, text string) error {
 	return dec.Decode(result)
 }
 
-func processAccountFile(account_file *accountFile, text string) error {
+func ProcessAccountFile(account_file *AccountFile, text string) error {
 	// Assume text is a JSON string
 	if err := parseJSON(account_file, text); err != nil {
 		// If text was not JSON, assume it is a file path instead

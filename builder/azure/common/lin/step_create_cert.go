@@ -32,7 +32,7 @@ func (s *StepCreateCert) Run(state multistep.StateBag) multistep.StepAction {
 
 	err := s.createCert(state)
 	if err != nil {
-		err := fmt.Errorf("Error creating temporary certificate: %s", err)
+		err = fmt.Errorf("Error creating temporary certificate: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -45,11 +45,11 @@ func (s *StepCreateCert) Cleanup(state multistep.StateBag) {}
 
 func (s *StepCreateCert) createCert(state multistep.StateBag) error {
 
-	log.Printf("createCert: Generating RSA key pair...")
+	log.Println("createCert: Generating RSA key pair...")
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		err := fmt.Errorf("Failed to Generate Private Key: %s", err)
+		err = fmt.Errorf("Failed to Generate Private Key: %s", err)
 		return err
 	}
 
@@ -59,11 +59,11 @@ func (s *StepCreateCert) createCert(state multistep.StateBag) error {
 		Bytes: x509.MarshalPKCS1PrivateKey(priv),
 	}))
 
-	// Set the private key in the statebag for later
+	// Set the private key in the state bag for later
 	state.Put(constants.PrivateKey, privkey)
 	log.Printf("createCert: Private key:\n%s", privkey)
 
-	log.Printf("createCert: Creating certificate...")
+	log.Println("createCert: Creating certificate...")
 
 	host := fmt.Sprintf("%s.cloudapp.net", s.TmpServiceName)
 	notBefore := time.Now()
@@ -71,7 +71,7 @@ func (s *StepCreateCert) createCert(state multistep.StateBag) error {
 
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
-		err := fmt.Errorf("Failed to Generate Serial Number: %v", err)
+		err = fmt.Errorf("Failed to Generate Serial Number: %v", err)
 		return err
 	}
 
@@ -93,7 +93,7 @@ func (s *StepCreateCert) createCert(state multistep.StateBag) error {
 
 	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 	if err != nil {
-		err := fmt.Errorf("Failed to Create Certificate: %s", err)
+		err = fmt.Errorf("Failed to Create Certificate: %s", err)
 		return err
 	}
 

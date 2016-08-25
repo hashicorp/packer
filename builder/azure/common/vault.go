@@ -7,58 +7,64 @@
 package common
 
 import (
+	"fmt"
 	"net/http"
-	"strings"
+	"net/url"
 
 	"github.com/Azure/go-autorest/autorest"
 )
 
 const (
-	AzureVaultApiVersion     = "2015-06-01"
-	AzureVaultScope          = "https://vault.azure.net"
-	AzureVaultSecretTemplate = "https://{vault-name}.vault.azure.net/secrets/{secret-name}"
+	AzureVaultApiVersion = "2015-06-01"
 )
 
 type VaultClient struct {
 	autorest.Client
+	keyVaultEndpoint url.URL
+}
+
+func NewVaultClient(keyVaultEndpoint url.URL) VaultClient {
+	return VaultClient{
+		keyVaultEndpoint: keyVaultEndpoint,
+	}
 }
 
 type Secret struct {
-	ID         *string          `json:"id,omitempty"`
-	Value      string           `json:"value"`
-	Attributes SecretAttributes `json:"attributes"`
-}
-
-type SecretAttributes struct {
-	Enabled bool    `json:"enabled"`
-	Created *string `json:"created"`
-	Updated *string `json:"updated"`
+	ID    *string `json:"id,omitempty"`
+	Value string  `json:"value"`
 }
 
 func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, error) {
 	p := map[string]interface{}{
-		"secret-name": secretName,
+		"secret-name": autorest.Encode("path", secretName),
 	}
 	q := map[string]interface{}{
 		"api-version": AzureVaultApiVersion,
 	}
 
-	secretURL := strings.Replace(AzureVaultSecretTemplate, "{vault-name}", vaultName, -1)
-
-	req, err := autorest.Prepare(&http.Request{},
+	req, err := autorest.Prepare(
+		&http.Request{},
 		autorest.AsGet(),
-		autorest.WithBaseURL(secretURL),
-		autorest.WithPathParameters(p),
+		autorest.WithBaseURL(client.getVaultUrl(vaultName)),
+		autorest.WithPathParameters("/secrets/{secret-name}", p),
 		autorest.WithQueryParameters(q))
 
 	if err != nil {
 		return nil, err
 	}
 
-	//resp, err := v.Send(req, http.StatusOK)
 	resp, err := autorest.SendWithSender(client, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(
+			"Failed to fetch secret from %s/%s, HTTP status code=%d (%s)",
+			vaultName,
+			secretName,
+			resp.StatusCode,
+			http.StatusText(resp.StatusCode))
 	}
 
 	var secret Secret
@@ -71,4 +77,8 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 	}
 
 	return &secret, nil
+}
+
+func (client *VaultClient) getVaultUrl(vaultName string) string {
+	return fmt.Sprintf("%s://%s.%s/", client.keyVaultEndpoint.Scheme, vaultName, client.keyVaultEndpoint.Host)
 }

@@ -39,20 +39,11 @@ var (
 
 // Authenticate fetches a token from the local file cache or initiates a consent
 // flow and waits for token to be obtained.
-func Authenticate(env azure.Environment, subscriptionID string, say func(string)) (*azure.ServicePrincipalToken, error) {
+func Authenticate(env azure.Environment, tenantID string, say func(string)) (*azure.ServicePrincipalToken, error) {
 	clientID, ok := clientIDs[env.Name]
 	if !ok {
 		return nil, fmt.Errorf("packer-azure application not set up for Azure environment %q", env.Name)
 	}
-
-	// First we locate the tenant ID of the subscription as we store tokens per
-	// tenant (which could have multiple subscriptions)
-	say(fmt.Sprintf("Looking up AAD Tenant ID: subscriptionID=%s.", subscriptionID))
-	tenantID, err := findTenantID(env, subscriptionID)
-	if err != nil {
-		return nil, err
-	}
-	say(fmt.Sprintf("Found AAD Tenant ID: tenantID=%s", tenantID))
 
 	oauthCfg, err := env.OAuthConfigForTenant(tenantID)
 	if err != nil {
@@ -90,7 +81,7 @@ func Authenticate(env azure.Environment, subscriptionID string, say func(string)
 		//      will go stale every 14 days and we will delete the token file,
 		//      re-initiate the device flow.
 		say("Validating the token.")
-		if err := validateToken(env, spt); err != nil {
+		if err = validateToken(env, spt); err != nil {
 			say(fmt.Sprintf("Error: %v", err))
 			say("Stored Azure credentials expired. Please reauthenticate.")
 			say(fmt.Sprintf("Deleting %s", tokenPath))
@@ -105,7 +96,7 @@ func Authenticate(env azure.Environment, subscriptionID string, say func(string)
 
 	// Start an OAuth 2.0 device flow
 	say(fmt.Sprintf("Initiating device flow: %s", tokenPath))
-	spt, err = tokenFromDeviceFlow(say, *oauthCfg, tokenPath, clientID, apiScope)
+	spt, err = tokenFromDeviceFlow(say, *oauthCfg, clientID, apiScope)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +136,7 @@ func tokenFromFile(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clie
 // consent application on a browser and in the meanwhile the authentication
 // endpoint is polled until user gives consent, denies or the flow times out.
 // Returned token must be saved.
-func tokenFromDeviceFlow(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clientID, resource string) (*azure.ServicePrincipalToken, error) {
+func tokenFromDeviceFlow(say func(string), oauthCfg azure.OAuthConfig, clientID, resource string) (*azure.ServicePrincipalToken, error) {
 	cl := autorest.NewClientWithUserAgent(userAgent)
 	deviceCode, err := azure.InitiateDeviceAuth(&cl, oauthCfg, clientID, resource)
 	if err != nil {
@@ -197,8 +188,7 @@ func mkTokenCallback(path string) azure.TokenRefreshCallback {
 // expired). This check is essentially to make sure refresh_token is good.
 func validateToken(env azure.Environment, token *azure.ServicePrincipalToken) error {
 	c := subscriptionsClient(env.ResourceManagerEndpoint)
-	// WTF(chrboum)
-	//c.Authorizer = token
+	c.Authorizer = token
 	_, err := c.List()
 	if err != nil {
 		return fmt.Errorf("Token validity check failed: %v", err)
@@ -206,10 +196,10 @@ func validateToken(env azure.Environment, token *azure.ServicePrincipalToken) er
 	return nil
 }
 
-// findTenantID figures out the AAD tenant ID of the subscription by making an
+// FindTenantID figures out the AAD tenant ID of the subscription by making an
 // unauthenticated request to the Get Subscription Details endpoint and parses
 // the value from WWW-Authenticate header.
-func findTenantID(env azure.Environment, subscriptionID string) (string, error) {
+func FindTenantID(env azure.Environment, subscriptionID string) (string, error) {
 	const hdrKey = "WWW-Authenticate"
 	c := subscriptionsClient(env.ResourceManagerEndpoint)
 
@@ -241,7 +231,6 @@ func findTenantID(env azure.Environment, subscriptionID string) (string, error) 
 }
 
 func subscriptionsClient(baseURI string) subscriptions.Client {
-	c := subscriptions.NewClientWithBaseURI(baseURI, "") // used only for unauthenticated requests for generic subs IDs
-	c.Client.UserAgent += userAgent
-	return c
+	client := subscriptions.NewClientWithBaseURI(baseURI)
+	return client
 }

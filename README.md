@@ -15,6 +15,7 @@ performant, creating machine images for multiple platforms in parallel. Packer
 comes out of the box with support for the following platforms:
 
 * Amazon EC2 (AMI). Both EBS-backed and instance-store AMIs
+* Azure
 * DigitalOcean
 * Docker
 * Google Compute Engine

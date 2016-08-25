@@ -46,6 +46,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	ui := state.Get("ui").(packer.Ui)
 	vncIp := state.Get("vnc_ip").(string)
 	vncPort := state.Get("vnc_port").(uint)
+	vncPassword := state.Get("vnc_password")
 
 	var pauseFn multistep.DebugPauseFn
 	if debug {
@@ -63,7 +64,15 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 	defer nc.Close()
 
-	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
+	var auth []vnc.ClientAuth
+
+	if vncPassword != nil && len(vncPassword.(string)) > 0 {
+		auth = []vnc.ClientAuth{&vnc.PasswordAuth{Password: vncPassword.(string)}}
+	} else {
+		auth = []vnc.ClientAuth{new(vnc.ClientAuthNone)}
+	}
+
+	c, err := vnc.Client(nc, &vnc.ClientConfig{Auth: auth, Exclusive: true})
 	if err != nil {
 		err := fmt.Errorf("Error handshaking with VNC: %s", err)
 		state.Put("error", err)

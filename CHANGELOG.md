@@ -14,12 +14,23 @@ IMPROVEMENTS:
 
   * builder/amazon: Added `disable_stop_instance` option to prevent automatic
     shutdown when the build is complete [GH-3352]
+  * builder/amazon: Added `skip_region_validation` option to allow newer or
+    custom AWS regions [GH-3598]
+  * builder/amazon: Added `shutdown_behavior` option to support `stop` or
+    `terminate` at the end of the build [GH-3556]
   * builder/azure: Now pre-validates `capture_container_name` and
     `capture_name_prefix` [GH-3537]
+  * builder/azure: Support for custom images [GH-3575]
+  * builder/azure: Removed superfluous polling code for deployments [GH-3638]
+  * builder/azure: Made `tenant_id` optional [GH-3643]
+  * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
+    [GH-3444]
   * builder/google: Added support for `image_family` [GH-3503]
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3547]
+  * builder/parallels: Support future versions of Parallels by using the latest
+    driver [GH-3673]
   * builder/qemu: Added `vnc_bind_address` option [GH-3574]
   * builder/virtualbox: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3542]
@@ -27,9 +38,18 @@ IMPROVEMENTS:
   * builder/vmware: Now paused between `boot_command` entries when running with
     `-debug` [GH-3542]
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
-  * builder/qemu: Now pauses between `boot_command` entries running with
+  * builder/vmware: Adds passwords for VNC [GH-2325]
+  * builder/vmware: Handle connection to VM with more than one NIC on ESXi
+    [GH-3347]
+  * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
+  * provisioner/ansible: Improved logging and error handling [GH-3477]
+  * provisioner/chef: Added `knife_command` option and added a correct default
+    value for Windows [GH-3622]
+  * provisioner/puppet: Added `execute_command` option [GH-3614]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
+  * post-processor/docker: Preserve tags when running docker push [GH-3631]
+  * scripts: Added `help` target to Makefile [GH-3290]
 
 BUG FIXES:
 
@@ -37,6 +57,16 @@ BUG FIXES:
   * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
   * provisioner/ansible: Properly set host key checking even when a custom ENV
     is specified [GH-3568]
+  * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
+  * builder/azure: check for empty resource group [GH-3606]
+  * builder/azure: fix token validity test [GH-3609]
+  * builder/virtualbox: Respect `ssh_host` [GH-3617]
+  * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
+  * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
+  * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
+  * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
+    [GH-3740]
+  * website: improved rendering on iPad [GH-3780]
 
 ## 0.10.1 (May 7, 2016)
 

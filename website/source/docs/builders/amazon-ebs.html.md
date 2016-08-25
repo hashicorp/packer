@@ -109,6 +109,10 @@ builder.
     launch the resulting AMI(s). By default no additional users other than the
     user creating the AMI has permissions to launch it.
 
+-   `ami_virtualization_type` (string) - The type of virtualization for the AMI
+    you are building. This option must match the supported virtualization
+    type of `source_ami`. Can be "paravirtual" or "hvm".
+
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
     instance will get a Public IP.
@@ -166,6 +170,9 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `skip_region_validation` (boolean) - Set to true if you want to skip 
+    validation of the region configuration option.  Defaults to false.
+
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
     when the current spot price is less than the maximum price you specify. Spot
@@ -211,10 +218,15 @@ builder.
     data when launching the instance.
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
-    in order to create a temporary security group within the VPC.
+    in order to create a temporary security group within the VPC. Requires `subnet_id`
+    to be set.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
+
+-   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    default is stop.
 
 ## Basic Example
 

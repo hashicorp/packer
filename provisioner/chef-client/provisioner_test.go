@@ -87,6 +87,7 @@ func TestProvisionerPrepare_commands(t *testing.T) {
 	commands := []string{
 		"execute_command",
 		"install_command",
+		"knife_command",
 	}
 
 	for _, command := range commands {

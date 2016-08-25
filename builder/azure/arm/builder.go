@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	packerAzureCommon "github.com/mitchellh/packer/builder/azure/common"
@@ -29,6 +30,7 @@ type Builder struct {
 }
 
 const (
+	DefaultNicName             = "packerNic"
 	DefaultPublicIPAddressName = "packerPublicIP"
 	DefaultSasBlobContainer    = "system/Microsoft.Compute"
 	DefaultSasBlobPermission   = "r"
@@ -51,7 +53,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	ui.Say("Preparing builder ...")
+	ui.Say("Running builder ...")
+
+	if err := newConfigRetriever().FillParameters(b.config); err != nil {
+		return nil, err
+	}
 
 	log.Print(":: Configuration")
 	packerAzureCommon.DumpConfig(b.config, func(s string) { log.Print(s) })
@@ -69,10 +75,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.config.SubscriptionID,
 		b.config.ResourceGroupName,
 		b.config.StorageAccount,
+		b.config.cloudEnvironment,
 		spnCloud,
 		spnKeyVault)
 
 	if err != nil {
+		return nil, err
+	}
+
+	resolver := newResourceResolver(azureClient)
+	if err := resolver.Resolve(b.config); err != nil {
 		return nil, err
 	}
 
@@ -81,16 +93,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	b.setTemplateParameters(b.stateBag)
+	endpointConnectType := PublicEndpoint
+	if b.isPrivateNetworkCommunication() {
+		endpointConnectType = PrivateEndpoint
+	}
 
+	b.setTemplateParameters(b.stateBag)
 	var steps []multistep.Step
 
-	if b.config.OSType == constants.Target_Linux {
+	if strings.EqualFold(b.config.OSType, constants.Target_Linux) {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, Linux),
-			NewStepDeployTemplate(azureClient, ui, Linux),
-			NewStepGetIPAddress(azureClient, ui),
+			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectSSH{
 				Config:    &b.config.Comm,
 				Host:      lin.SSHHost,
@@ -103,16 +119,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 		}
-	} else if b.config.OSType == constants.Target_Windows {
+	} else if strings.EqualFold(b.config.OSType, constants.Target_Windows) {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, KeyVault),
-			NewStepDeployTemplate(azureClient, ui, KeyVault),
+			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
+			NewStepDeployTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
 			NewStepGetCertificate(azureClient, ui),
 			NewStepSetCertificate(b.config, ui),
-			NewStepValidateTemplate(azureClient, ui, Windows),
-			NewStepDeployTemplate(azureClient, ui, Windows),
-			NewStepGetIPAddress(azureClient, ui),
+			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -171,6 +187,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	return &Artifact{}, nil
 }
 
+func (b *Builder) isPrivateNetworkCommunication() bool {
+	return b.config.VirtualNetworkName != ""
+}
+
 func (b *Builder) Cancel() {
 	if b.runner != nil {
 		log.Println("Cancelling the step runner...")
@@ -204,17 +224,18 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.AuthorizedKey, b.config.sshAuthorizedKey)
 	stateBag.Put(constants.PrivateKey, b.config.sshPrivateKey)
 
+	stateBag.Put(constants.ArmTags, &b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
 	stateBag.Put(constants.ArmLocation, b.config.Location)
+	stateBag.Put(constants.ArmNicName, DefaultNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
 	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {
-	stateBag.Put(constants.ArmTemplateParameters, b.config.toTemplateParameters())
 	stateBag.Put(constants.ArmVirtualMachineCaptureParameters, b.config.toVirtualMachineCaptureParameters())
 }
 
@@ -225,7 +246,7 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePri
 	var err error
 
 	if b.config.useDeviceLogin {
-		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.SubscriptionID, say)
+		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -237,7 +258,9 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePri
 			return nil, nil, err
 		}
 
-		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(packerAzureCommon.AzureVaultScope)
+		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(
+			strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
+
 		if err != nil {
 			return nil, nil, err
 		}

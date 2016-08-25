@@ -200,7 +200,7 @@ func makeSalt(saltByteCount int) ([]byte, error) {
 //
 // derBytes is a DER encoded certificate.
 // privateKey is an RSA
-func Encode(derBytes []byte, privateKey interface{}, password string) (pfxBytes []byte, err error) {
+func Encode(derBytes []byte, privateKey interface{}, password string) ([]byte, error) {
 	secret, err := bmpString(password)
 	if err != nil {
 		return nil, ErrIncorrectPassword

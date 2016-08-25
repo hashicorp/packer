@@ -132,6 +132,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
+			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
 		&stepTagEBSVolumes{
 			VolumeRunTags: b.config.VolumeRunTags,

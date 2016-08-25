@@ -191,6 +191,9 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `skip_region_validation` (boolean) - Set to true if you want to skip 
+    validation of the region configuration option.  Defaults to false.
+
 -   `spot_price` (string) - The maximum hourly price to launch a spot instance
     to create the AMI. It is a type of instances that EC2 starts when the
     maximum price that you specify exceeds the current spot price. Spot price

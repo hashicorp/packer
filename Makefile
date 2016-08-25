@@ -9,9 +9,9 @@ default: deps generate test dev
 
 ci: deps test
 
-release: deps test releasebin package
+release: deps test releasebin package ## Build a release build
 
-bin: deps
+bin: deps ## Build debug/test build
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
 	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
@@ -35,14 +35,14 @@ deps:
 		godep restore; \
 	fi
 
-dev: deps
+dev: deps ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
 		exit 1; \
 	fi
 	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
-fmt:
+fmt: ## Format Go code
 	go fmt `go list ./... | grep -v vendor`
 
 # Install js-beautify with npm install -g js-beautify
@@ -51,11 +51,11 @@ fmt-examples:
 
 # generate runs `go generate` to build the dynamically generated
 # source files.
-generate: deps
+generate: deps ## Generate dynamically generated code
 	go generate .
 	go fmt command/plugin.go
 
-test: deps
+test: deps ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
@@ -63,11 +63,11 @@ test: deps
 	fi
 
 # testacc runs acceptance tests
-testacc: deps generate
+testacc: deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
-testrace: deps
+testrace: deps ## Test for race conditions
 	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
@@ -77,8 +77,11 @@ updatedeps:
 
 # This is used to add new dependencies to packer. If you are submitting a PR
 # that includes new dependencies you will need to run this.
-vendor:
+vendor: ## Add new dependencies.
 	godep restore
 	godep save
+
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: bin checkversion ci default deps fmt fmt-examples generate releasebin test testacc testrace updatedeps

@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -22,23 +23,34 @@ func (config *Config) getImage() Image {
 	return Image{Name: config.SourceImage, ProjectId: project}
 }
 
-func (config *Config) getInstanceMetadata(sshPublicKey string) map[string]string {
+func (config *Config) getInstanceMetadata(sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
+	var err error
 
-	// Copy metadata from config
+	// Copy metadata from config.
 	for k, v := range config.Metadata {
 		instanceMetadata[k] = v
 	}
 
-	// Merge any existing ssh keys with our public key
+	// Merge any existing ssh keys with our public key.
 	sshMetaKey := "sshKeys"
 	sshKeys := fmt.Sprintf("%s:%s", config.Comm.SSHUsername, sshPublicKey)
 	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
 		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 	}
 	instanceMetadata[sshMetaKey] = sshKeys
+	
+	// Wrap any startup script with our own startup script.
+	if config.StartupScriptFile != "" {
+		var content []byte
+		content, err = ioutil.ReadFile(config.StartupScriptFile)
+		instanceMetadata[StartupWrappedScriptKey] = string(content)
+	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
+		instanceMetadata[StartupWrappedScriptKey] = wrappedStartupScript
+	}
+	instanceMetadata[StartupScriptKey] = StartupScript
 
-	return instanceMetadata
+	return instanceMetadata, err
 }
 
 // Run executes the Packer build step that creates a GCE instance.
@@ -51,21 +63,27 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Say("Creating instance...")
 	name := config.InstanceName
 
-	errCh, err := driver.RunInstance(&InstanceConfig{
-		Description: "New instance created by Packer",
-		DiskSizeGb:  config.DiskSizeGb,
-		DiskType:    config.DiskType,
-		Image:       config.getImage(),
-		MachineType: config.MachineType,
-		Metadata:    config.getInstanceMetadata(sshPublicKey),
-		Name:        name,
-		Network:     config.Network,
-		Subnetwork:  config.Subnetwork,
-		Address:     config.Address,
-		Preemptible: config.Preemptible,
-		Tags:        config.Tags,
-		Region:      config.Region,
-		Zone:        config.Zone,
+	var errCh <-chan error
+	var err error
+	var metadata map[string]string
+	metadata, err = config.getInstanceMetadata(sshPublicKey)
+	errCh, err = driver.RunInstance(&InstanceConfig{
+		Address:             config.Address,
+		Description:         "New instance created by Packer",
+		DiskSizeGb:          config.DiskSizeGb,
+		DiskType:            config.DiskType,
+		Image:               config.getImage(),
+		MachineType:         config.MachineType,
+		Metadata:            metadata,
+		Name:                name,
+		Network:             config.Network,
+		OmitExternalIP:      config.OmitExternalIP,
+		Preemptible:         config.Preemptible,
+		Region:              config.Region,
+		ServiceAccountEmail: config.Account.ClientEmail,
+		Subnetwork:          config.Subnetwork,
+		Tags:                config.Tags,
+		Zone:                config.Zone,
 	})
 
 	if err == nil {

@@ -54,10 +54,6 @@ There are many configuration options available for the builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
-
 ### Required:
 
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn
@@ -145,6 +141,9 @@ builder.
 
 -   `root_volume_size` (integer) - The size of the root volume for the chroot
     environment, and the resulting AMI
+
+-   `skip_region_validation` (boolean) - Set to true if you want to skip 
+    validation of the ami_regions configuration option.  Defaults to false.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
 
-package arm
+package template
 
 import (
 	"encoding/json"
@@ -12,17 +12,13 @@ import (
 
 func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 	params := TemplateParameters{
-		AdminUsername:              &TemplateParameter{"sentinel"},
-		AdminPassword:              &TemplateParameter{"sentinel"},
-		DnsNameForPublicIP:         &TemplateParameter{"sentinel"},
-		ImageOffer:                 &TemplateParameter{"sentinel"},
-		ImagePublisher:             &TemplateParameter{"sentinel"},
-		ImageSku:                   &TemplateParameter{"sentinel"},
-		OSDiskName:                 &TemplateParameter{"sentinel"},
-		SshAuthorizedKey:           &TemplateParameter{"sentinel"},
-		StorageAccountBlobEndpoint: &TemplateParameter{"sentinel"},
-		VMName: &TemplateParameter{"sentinel"},
-		VMSize: &TemplateParameter{"sentinel"},
+		AdminUsername:              &TemplateParameter{Value: "sentinel"},
+		AdminPassword:              &TemplateParameter{Value: "sentinel"},
+		DnsNameForPublicIP:         &TemplateParameter{Value: "sentinel"},
+		OSDiskName:                 &TemplateParameter{Value: "sentinel"},
+		StorageAccountBlobEndpoint: &TemplateParameter{Value: "sentinel"},
+		VMName: &TemplateParameter{Value: "sentinel"},
+		VMSize: &TemplateParameter{Value: "sentinel"},
 	}
 
 	bs, err := json.Marshal(params)
@@ -41,11 +37,7 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 		"adminUsername",
 		"adminPassword",
 		"dnsNameForPublicIP",
-		"imageOffer",
-		"imagePublisher",
-		"imageSku",
 		"osDiskName",
-		"sshAuthorizedKey",
 		"storageAccountBlobEndpoint",
 		"vmSize",
 		"vmName",
@@ -61,17 +53,13 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 
 func TestParameterValuesShouldBeSet(t *testing.T) {
 	params := TemplateParameters{
-		AdminUsername:              &TemplateParameter{"adminusername00"},
-		AdminPassword:              &TemplateParameter{"adminpassword00"},
-		DnsNameForPublicIP:         &TemplateParameter{"dnsnameforpublicip00"},
-		ImageOffer:                 &TemplateParameter{"imageoffer00"},
-		ImagePublisher:             &TemplateParameter{"imagepublisher00"},
-		ImageSku:                   &TemplateParameter{"imagesku00"},
-		OSDiskName:                 &TemplateParameter{"osdiskname00"},
-		SshAuthorizedKey:           &TemplateParameter{"sshauthorizedkey00"},
-		StorageAccountBlobEndpoint: &TemplateParameter{"storageaccountblobendpoint00"},
-		VMName: &TemplateParameter{"vmname00"},
-		VMSize: &TemplateParameter{"vmsize00"},
+		AdminUsername:              &TemplateParameter{Value: "adminusername00"},
+		AdminPassword:              &TemplateParameter{Value: "adminpassword00"},
+		DnsNameForPublicIP:         &TemplateParameter{Value: "dnsnameforpublicip00"},
+		OSDiskName:                 &TemplateParameter{Value: "osdiskname00"},
+		StorageAccountBlobEndpoint: &TemplateParameter{Value: "storageaccountblobendpoint00"},
+		VMName: &TemplateParameter{Value: "vmname00"},
+		VMSize: &TemplateParameter{Value: "vmsize00"},
 	}
 
 	bs, err := json.Marshal(params)
@@ -101,7 +89,7 @@ func TestParameterValuesShouldBeSet(t *testing.T) {
 
 func TestEmptyValuesShouldBeOmitted(t *testing.T) {
 	params := TemplateParameters{
-		AdminUsername: &TemplateParameter{"adminusername00"},
+		AdminUsername: &TemplateParameter{Value: "adminusername00"},
 	}
 
 	bs, err := json.Marshal(params)
