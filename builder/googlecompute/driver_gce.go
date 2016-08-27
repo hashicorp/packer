@@ -50,15 +50,20 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 		// your service account.
 		client = conf.Client(oauth2.NoContext)
 	} else {
-		log.Printf("[INFO] Requesting Google token via GCE Service Role...")
-		client = &http.Client{
-			Transport: &oauth2.Transport{
-				// Fetch from Google Compute Engine's metadata server to retrieve
-				// an access token for the provided account.
-				// If no account is specified, "default" is used.
-				Source: google.ComputeTokenSource(""),
-			},
-		}
+		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
+		client, err = google.DefaultClient(oauth2.NoContext, DriverScopes...)
+		// The DefaultClient uses the DefaultTokenSource of the google lib.
+		// The DefaultTokenSource uses the "Application Default Credentials"
+		// It looks for credentials in the following places, preferring the first location found:
+		// 1. A JSON file whose path is specified by the
+		//    GOOGLE_APPLICATION_CREDENTIALS environment variable.
+		// 2. A JSON file in a location known to the gcloud command-line tool.
+		//    On Windows, this is %APPDATA%/gcloud/application_default_credentials.json.
+		//    On other systems, $HOME/.config/gcloud/application_default_credentials.json.
+		// 3. On Google App Engine it uses the appengine.AccessToken function.
+		// 4. On Google Compute Engine and Google App Engine Managed VMs, it fetches
+		//    credentials from the metadata server.
+		//    (In this final case any provided scopes are ignored.)
 	}
 
 	if err != nil {
