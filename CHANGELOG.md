@@ -26,6 +26,7 @@ IMPROVEMENTS:
   * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
     [GH-3444]
   * builder/google: Added support for `image_family` [GH-3503]
+  * builder/google: Use gcloud application default credentials. [GH-3655]
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3547]
