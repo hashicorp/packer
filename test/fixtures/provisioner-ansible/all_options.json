@@ -18,7 +18,7 @@
           "-vvvv", "--private-key", "ansible-test-id"
         ],
         "sftp_command": "/usr/lib/sftp-server -e -l INFO",
-        "ansible_env_vars": ["PACKER_ANSIBLE_TEST", "1", "ANSIBLE_HOST_KEY_CHECKING", "False"],
+        "ansible_env_vars": ["PACKER_ANSIBLE_TEST=1", "ANSIBLE_HOST_KEY_CHECKING=False"],
         "groups": ["PACKER_TEST"],
         "empty_groups": ["PACKER_EMPTY_GROUP"],
         "host_alias": "packer-test",
