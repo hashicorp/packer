@@ -3,15 +3,20 @@
     "provisioners": [
       {
         "type":  "ansible",
-        "playbook_file": "./playbook.yml"
+        "playbook_file": "./playbook.yml",
+        "extra_arguments": [
+          "-vvvv"
+        ],
+        "ansible_env_vars": ["ANSIBLE_SCP_IF_SSH=True"],
+        "sftp_command": "/usr/bin/false"
       }
-    ],
+		],
     "builders": [
       {
         "type": "googlecompute",
         "account_file": "{{user `account_file`}}",
         "project_id": "{{user `project_id`}}",
-        "image_name": "packerbats-minimal-{{timestamp}}",
+        "image_name": "packerbats-scp-{{timestamp}}",
         "source_image": "debian-7-wheezy-v20141108",
         "zone": "us-central1-a"
       }
