@@ -56,3 +56,17 @@ teardown() {
     [ "$status" -eq 0 ]
     [ "$(gc_has_image "packerbats-alloptions")" -eq 1 ]
 }
+
+@test "ansible provisioner: build scp.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/scp.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-scp")" -eq 1 ]
+}
+
+@test "ansible provisioner: build sftp.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/sftp.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-sftp")" -eq 1 ]
+}
