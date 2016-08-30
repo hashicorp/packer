@@ -38,8 +38,10 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("triton_key_id is required to use the triton builder"))
 	}
 
-	if c.KeyMaterial == "" {
-		errs = append(errs, fmt.Errorf("triton_key_material is required to use the triton builder"))
+	var err error
+	c.KeyMaterial, err = processKeyMaterial(c.KeyMaterial)
+	if c.KeyMaterial == "" || err != nil {
+		errs = append(errs, fmt.Errorf("valid triton_key_material is required to use the triton builder"))
 	}
 
 	if len(errs) > 0 {
