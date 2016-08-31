@@ -17,7 +17,7 @@ import (
 func ParseVMX(contents string) map[string]string {
 	results := make(map[string]string)
 
-	lineRe := regexp.MustCompile(`^(.+?)\s*=\s*"(.*?)"\s*$`)
+	lineRe := regexp.MustCompile(`^(.+?)\s*=\s*"?(.*?)"?\s*$`)
 
 	for _, line := range strings.Split(contents, "\n") {
 		matches := lineRe.FindStringSubmatch(line)
@@ -43,9 +43,35 @@ func EncodeVMX(contents map[string]string) string {
 		i++
 	}
 
+	// a list of VMX key fragments that the value must not be quoted
+	// fragments are used to cover multliples (i.e. multiple disks)
+	// keys are still lowercase at this point, use lower fragments
+	noQuotes := []string {
+		".virtualssd",
+	}
+
+	// a list of VMX key fragments that are case sensitive
+	// fragments are used to cover multliples (i.e. multiple disks)
+	caseSensitive := []string {
+		".virtualSSD",
+	}
+
 	sort.Strings(keys)
 	for _, k := range keys {
-		buf.WriteString(fmt.Sprintf("%s = \"%s\"\n", k, contents[k]))
+		pat := "%s = \"%s\"\n"
+		// items with no quotes
+		for _, q := range noQuotes {
+			if strings.Contains(k, q) {
+				pat = "%s = %s\n"
+				break;
+			}
+		}
+		key := k
+		// case sensitive key fragments
+		for _, c := range caseSensitive {
+			key = strings.Replace(key, strings.ToLower(c), c, 1)
+		}
+		buf.WriteString(fmt.Sprintf(pat, key, contents[k]))
 	}
 
 	return buf.String()

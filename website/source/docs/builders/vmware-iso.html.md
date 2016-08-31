@@ -267,8 +267,11 @@ builder.
     `vmx_data` first.
 
 -   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-     to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
-     to all interfaces use 0.0.0.0
+    to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
+    to all interfaces use 0.0.0.0
+
+-   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
+    used to secure the VNC communication with the VM.
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type

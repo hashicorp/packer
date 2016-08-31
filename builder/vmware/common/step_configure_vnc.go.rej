@@ -1,0 +1,46 @@
+diff a/builder/vmware/common/step_configure_vnc.go b/builder/vmware/common/step_configure_vnc.go	(rejected hunks)
+@@ -52,6 +52,21 @@ func (StepConfigureVNC) VNCAddress(portMin, portMax uint) (string, uint, error)
+ 	return "127.0.0.1", vncPort, nil
+ }
+ 
++func VNCPassword() (string) {
++	length := int(8)
++
++	charSet := []byte("1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./!@#%^*()_+QWERTYUIOP{}|ASDFGHJKL:XCVBNM<>?")
++	charSetLength := len(charSet)
++
++	password := make([]byte, length)
++
++	for i := 0; i < length; i++ {
++		password[i] = charSet[ rand.Intn(charSetLength) ]
++	}
++
++	return string(password)
++}
++
+ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+ 	driver := state.Get("driver").(Driver)
+ 	ui := state.Get("ui").(packer.Ui)
+@@ -86,12 +101,14 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+ 		ui.Error(err.Error())
+ 		return multistep.ActionHalt
+ 	}
++	vncPassword := VNCPassword()
+ 
+ 	log.Printf("Found available VNC port: %d", vncPort)
+ 
+ 	vmxData := ParseVMX(string(vmxBytes))
+ 	vmxData["remotedisplay.vnc.enabled"] = "TRUE"
+ 	vmxData["remotedisplay.vnc.port"] = fmt.Sprintf("%d", vncPort)
++	vmxData["remotedisplay.vnc.password"] = vncPassword
+ 
+ 	if err := WriteVMX(vmxPath, vmxData); err != nil {
+ 		err := fmt.Errorf("Error writing VMX data: %s", err)
+@@ -102,6 +119,7 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+ 
+ 	state.Put("vnc_port", vncPort)
+ 	state.Put("vnc_ip", vncIp)
++	state.Put("vnc_password", vncPassword)
+ 
+ 	return multistep.ActionContinue
+ }

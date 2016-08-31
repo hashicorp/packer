@@ -61,6 +61,8 @@ type Config struct {
 	RemotePassword       string `mapstructure:"remote_password"`
 	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
 
+	CommConfig communicator.Config `mapstructure:",squash"`
+
 	ctx interpolate.Context
 }
 
@@ -254,9 +256,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
-			VNCBindAddress: b.config.VNCBindAddress,
-			VNCPortMin:     b.config.VNCPortMin,
-			VNCPortMax:     b.config.VNCPortMax,
+			VNCBindAddress:     b.config.VNCBindAddress,
+			VNCPortMin:         b.config.VNCPortMin,
+			VNCPortMax:         b.config.VNCPortMax,
+			VNCDisablePassword: b.config.VNCDisablePassword,
 		},
 		&StepRegister{
 			Format: b.config.Format,

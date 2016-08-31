@@ -4,8 +4,9 @@
 package arm
 
 import (
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"testing"
+
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
@@ -19,6 +20,7 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 		constants.AuthorizedKey,
 		constants.PrivateKey,
 
+		constants.ArmTags,
 		constants.ArmComputeName,
 		constants.ArmDeploymentName,
 		constants.ArmLocation,

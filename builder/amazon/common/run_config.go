@@ -44,10 +44,14 @@ type RunConfig struct {
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
-	// if we are not given an explicit keypairname, create a temporary one
+	// If we are not given an explicit ssh_keypair_name,
+	// then create a temporary one, but only if the
+	// temporary_key_pair_name has not been provided.
 	if c.SSHKeyPairName == "" {
-		c.TemporaryKeyPairName = fmt.Sprintf(
-			"packer %s", uuid.TimeOrderedUUID())
+		if c.TemporaryKeyPairName == "" {
+			c.TemporaryKeyPairName = fmt.Sprintf(
+				"packer_%s", uuid.TimeOrderedUUID())
+		}
 	}
 
 	if c.WindowsPasswordTimeout == 0 {
