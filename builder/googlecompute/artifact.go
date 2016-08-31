@@ -7,8 +7,9 @@ import (
 
 // Artifact represents a GCE image as the result of a Packer build.
 type Artifact struct {
-	image     Image
-	driver    Driver
+	image  Image
+	driver Driver
+	config *Config
 }
 
 // BuilderId returns the builder Id.
@@ -39,5 +40,17 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
+	switch name {
+		case "ImageName":
+			return a.image.Name
+		case "ImageSizeGb":
+			return a.image.SizeGb
+		case "AccountFilePath":
+			return a.config.AccountFile
+		case "ProjectId":
+		  return a.config.ProjectId
+		case "BuildZone":
+			return a.config.Zone
+	}
 	return nil
 }

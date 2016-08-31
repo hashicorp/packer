@@ -147,6 +147,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		} else {
+			// Add 0.5 cents to minimum spot bid to ensure capacity will be available
+			// Avoids price-too-low error in active markets which can fluctuate
+			price = price + 0.005
 		}
 
 		spotPrice = strconv.FormatFloat(price, 'f', -1, 64)
@@ -156,16 +160,16 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	if spotPrice == "" || spotPrice == "0" {
 		runOpts := &ec2.RunInstancesInput{
-			KeyName:                           &keyName,
-			ImageId:                           &s.SourceAMI,
-			InstanceType:                      &s.InstanceType,
-			UserData:                          &userData,
-			MaxCount:                          aws.Int64(1),
-			MinCount:                          aws.Int64(1),
-			IamInstanceProfile:                &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-			BlockDeviceMappings:               s.BlockDevices.BuildLaunchDevices(),
-			Placement:                         &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
-			EbsOptimized:                      &s.EbsOptimized,
+			KeyName:             &keyName,
+			ImageId:             &s.SourceAMI,
+			InstanceType:        &s.InstanceType,
+			UserData:            &userData,
+			MaxCount:            aws.Int64(1),
+			MinCount:            aws.Int64(1),
+			IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
+			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
+			EbsOptimized:        &s.EbsOptimized,
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {

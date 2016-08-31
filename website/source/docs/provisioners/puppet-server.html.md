@@ -68,7 +68,7 @@ listed below:
 -   `puppet_server` (string) - Hostname of the Puppet server. By default
     "puppet" will be used.
 
--   `staging_directory` (string) - This is the directory where all the
+-   `staging_dir` (string) - This is the directory where all the
     configuration of Puppet by Packer will be placed. By default this
     is "/tmp/packer-puppet-server". This directory doesn't need to exist but
     must have proper permissions so that the SSH user that Packer uses is able
