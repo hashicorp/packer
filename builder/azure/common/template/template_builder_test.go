@@ -10,7 +10,7 @@ import (
 // Ensure that a Linux template is configured as expected.
 //  * Include SSH configuration: authorized key, and key path.
 func TestBuildLinux00(t *testing.T) {
-	testSubject, err := NewTemplateBuilder()
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestBuildLinux00(t *testing.T) {
 
 // Ensure that a user can specify a custom VHD when building a Linux template.
 func TestBuildLinux01(t *testing.T) {
-	testSubject, err := NewTemplateBuilder()
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestBuildLinux01(t *testing.T) {
 
 // Ensure that a user can specify an existing Virtual Network
 func TestBuildLinux02(t *testing.T) {
-	testSubject, err := NewTemplateBuilder()
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestBuildLinux02(t *testing.T) {
 //  * Include WinRM configuration.
 //  * Include KeyVault configuration, which is needed for WinRM.
 func TestBuildWindows00(t *testing.T) {
-	testSubject, err := NewTemplateBuilder()
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
 	if err != nil {
 		t.Fatal(err)
 	}

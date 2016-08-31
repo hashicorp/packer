@@ -37,6 +37,7 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
@@ -48,7 +49,7 @@ type Config struct {
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 
-	account         accountFile
+	Account         AccountFile
 	privateKeyBytes []byte
 	stateTimeout    time.Duration
 	ctx             interpolate.Context
@@ -156,17 +157,23 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Region = region
 	}
 
-	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
+	err = c.CalcTimeout()
 	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
+		errs = packer.MultiErrorAppend(errs, err)
 	}
-	c.stateTimeout = stateTimeout
 
 	if c.AccountFile != "" {
-		if err := processAccountFile(&c.account, c.AccountFile); err != nil {
+		if err := ProcessAccountFile(&c.Account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	if c.OmitExternalIP && c.Address != "" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("you can not specify an external address when 'omit_external_ip' is true"))
+	}
+
+	if c.OmitExternalIP && !c.UseInternalIP {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
 	}
 
 	// Check for any errors.
@@ -175,4 +182,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	return c, nil, nil
+}
+
+func (c *Config) CalcTimeout() error {
+	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
+	if err != nil {
+		return fmt.Errorf("Failed parsing state_timeout: %s", err)
+	}
+	c.stateTimeout = stateTimeout
+	return nil
 }

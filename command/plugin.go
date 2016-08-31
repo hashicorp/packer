@@ -15,49 +15,50 @@ import (
 
 	amazonchrootbuilder "github.com/mitchellh/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/mitchellh/packer/builder/amazon/ebs"
-	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
-	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
-	digitaloceanbuilder "github.com/mitchellh/packer/builder/digitalocean"
-	dockerbuilder "github.com/mitchellh/packer/builder/docker"
-	filebuilder "github.com/mitchellh/packer/builder/file"
-	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
-	nullbuilder "github.com/mitchellh/packer/builder/null"
-	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
-	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
-	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
-	profitbricksbuilder "github.com/mitchellh/packer/builder/profitbricks"
-	qemubuilder "github.com/mitchellh/packer/builder/qemu"
-	virtualboxisobuilder "github.com/mitchellh/packer/builder/virtualbox/iso"
-	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
-	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
-	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
 	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
+	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
+	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
+	ansibleprovisioner "github.com/mitchellh/packer/provisioner/ansible"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
+	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
 	checksumpostprocessor "github.com/mitchellh/packer/post-processor/checksum"
+	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
+	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
 	compresspostprocessor "github.com/mitchellh/packer/post-processor/compress"
+	digitaloceanbuilder "github.com/mitchellh/packer/builder/digitalocean"
+	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	dockerimportpostprocessor "github.com/mitchellh/packer/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/mitchellh/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/mitchellh/packer/post-processor/docker-save"
 	dockertagpostprocessor "github.com/mitchellh/packer/post-processor/docker-tag"
-	manifestpostprocessor "github.com/mitchellh/packer/post-processor/manifest"
-	shelllocalpostprocessor "github.com/mitchellh/packer/post-processor/shell-local"
-	vagrantpostprocessor "github.com/mitchellh/packer/post-processor/vagrant"
-	vagrantcloudpostprocessor "github.com/mitchellh/packer/post-processor/vagrant-cloud"
-	vspherepostprocessor "github.com/mitchellh/packer/post-processor/vsphere"
-	ansibleprovisioner "github.com/mitchellh/packer/provisioner/ansible"
-	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
-	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
-	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
+	filebuilder "github.com/mitchellh/packer/builder/file"
 	fileprovisioner "github.com/mitchellh/packer/provisioner/file"
+	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
+	googlecomputeexportpostprocessor "github.com/mitchellh/packer/post-processor/googlecompute-export"
+	manifestpostprocessor "github.com/mitchellh/packer/post-processor/manifest"
+	nullbuilder "github.com/mitchellh/packer/builder/null"
+	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
+	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
+	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
 	powershellprovisioner "github.com/mitchellh/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/mitchellh/packer/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/mitchellh/packer/provisioner/puppet-server"
+	qemubuilder "github.com/mitchellh/packer/builder/qemu"
 	saltmasterlessprovisioner "github.com/mitchellh/packer/provisioner/salt-masterless"
-	shellprovisioner "github.com/mitchellh/packer/provisioner/shell"
+	shelllocalpostprocessor "github.com/mitchellh/packer/post-processor/shell-local"
 	shelllocalprovisioner "github.com/mitchellh/packer/provisioner/shell-local"
+	shellprovisioner "github.com/mitchellh/packer/provisioner/shell"
+	vagrantcloudpostprocessor "github.com/mitchellh/packer/post-processor/vagrant-cloud"
+	vagrantpostprocessor "github.com/mitchellh/packer/post-processor/vagrant"
+	virtualboxisobuilder "github.com/mitchellh/packer/builder/virtualbox/iso"
+	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
+	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
+	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
+	vspherepostprocessor "github.com/mitchellh/packer/post-processor/vsphere"
 	windowsrestartprovisioner "github.com/mitchellh/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/mitchellh/packer/provisioner/windows-shell"
+
 )
 
 type PluginCommand struct {
@@ -66,57 +67,60 @@ type PluginCommand struct {
 
 var Builders = map[string]packer.Builder{
 	"amazon-chroot":   new(amazonchrootbuilder.Builder),
-	"amazon-ebs":      new(amazonebsbuilder.Builder),
-	"amazon-instance": new(amazoninstancebuilder.Builder),
-	"azure-arm":       new(azurearmbuilder.Builder),
-	"digitalocean":    new(digitaloceanbuilder.Builder),
-	"docker":          new(dockerbuilder.Builder),
-	"file":            new(filebuilder.Builder),
+	"amazon-ebs":   new(amazonebsbuilder.Builder),
+	"amazon-instance":   new(amazoninstancebuilder.Builder),
+	"azure-arm":   new(azurearmbuilder.Builder),
+	"digitalocean":   new(digitaloceanbuilder.Builder),
+	"docker":   new(dockerbuilder.Builder),
+	"file":   new(filebuilder.Builder),
 	"googlecompute":   new(googlecomputebuilder.Builder),
-	"null":            new(nullbuilder.Builder),
-	"openstack":       new(openstackbuilder.Builder),
+	"null":   new(nullbuilder.Builder),
+	"openstack":   new(openstackbuilder.Builder),
 	"parallels-iso":   new(parallelsisobuilder.Builder),
 	"parallels-pvm":   new(parallelspvmbuilder.Builder),
-	"profitbricks":    new(profitbricksbuilder.Builder),
-	"qemu":            new(qemubuilder.Builder),
-	"virtualbox-iso":  new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":  new(virtualboxovfbuilder.Builder),
-	"vmware-iso":      new(vmwareisobuilder.Builder),
-	"vmware-vmx":      new(vmwarevmxbuilder.Builder),
+	"qemu":   new(qemubuilder.Builder),
+	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
+	"vmware-iso":   new(vmwareisobuilder.Builder),
+	"vmware-vmx":   new(vmwarevmxbuilder.Builder),
 }
+
 
 var Provisioners = map[string]packer.Provisioner{
-	"ansible":           new(ansibleprovisioner.Provisioner),
-	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
-	"chef-client":       new(chefclientprovisioner.Provisioner),
-	"chef-solo":         new(chefsoloprovisioner.Provisioner),
-	"file":              new(fileprovisioner.Provisioner),
-	"powershell":        new(powershellprovisioner.Provisioner),
-	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
-	"puppet-server":     new(puppetserverprovisioner.Provisioner),
+	"ansible":   new(ansibleprovisioner.Provisioner),
+	"ansible-local":   new(ansiblelocalprovisioner.Provisioner),
+	"chef-client":   new(chefclientprovisioner.Provisioner),
+	"chef-solo":   new(chefsoloprovisioner.Provisioner),
+	"file":   new(fileprovisioner.Provisioner),
+	"powershell":   new(powershellprovisioner.Provisioner),
+	"puppet-masterless":   new(puppetmasterlessprovisioner.Provisioner),
+	"puppet-server":   new(puppetserverprovisioner.Provisioner),
 	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
-	"shell":             new(shellprovisioner.Provisioner),
-	"shell-local":       new(shelllocalprovisioner.Provisioner),
+	"shell":   new(shellprovisioner.Provisioner),
+	"shell-local":   new(shelllocalprovisioner.Provisioner),
 	"windows-restart":   new(windowsrestartprovisioner.Provisioner),
-	"windows-shell":     new(windowsshellprovisioner.Provisioner),
+	"windows-shell":   new(windowsshellprovisioner.Provisioner),
 }
 
+
 var PostProcessors = map[string]packer.PostProcessor{
-	"amazon-import": new(amazonimportpostprocessor.PostProcessor),
-	"artifice":      new(artificepostprocessor.PostProcessor),
-	"atlas":         new(atlaspostprocessor.PostProcessor),
-	"checksum":      new(checksumpostprocessor.PostProcessor),
-	"compress":      new(compresspostprocessor.PostProcessor),
-	"docker-import": new(dockerimportpostprocessor.PostProcessor),
+	"amazon-import":   new(amazonimportpostprocessor.PostProcessor),
+	"artifice":   new(artificepostprocessor.PostProcessor),
+	"atlas":   new(atlaspostprocessor.PostProcessor),
+	"checksum":   new(checksumpostprocessor.PostProcessor),
+	"compress":   new(compresspostprocessor.PostProcessor),
+	"docker-import":   new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":   new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":   new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":    new(dockertagpostprocessor.PostProcessor),
-	"manifest":      new(manifestpostprocessor.PostProcessor),
+	"docker-tag":   new(dockertagpostprocessor.PostProcessor),
+	"googlecompute-export":   new(googlecomputeexportpostprocessor.PostProcessor),
+	"manifest":   new(manifestpostprocessor.PostProcessor),
 	"shell-local":   new(shelllocalpostprocessor.PostProcessor),
-	"vagrant":       new(vagrantpostprocessor.PostProcessor),
-	"vagrant-cloud": new(vagrantcloudpostprocessor.PostProcessor),
-	"vsphere":       new(vspherepostprocessor.PostProcessor),
+	"vagrant":   new(vagrantpostprocessor.PostProcessor),
+	"vagrant-cloud":   new(vagrantcloudpostprocessor.PostProcessor),
+	"vsphere":   new(vspherepostprocessor.PostProcessor),
 }
+
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
 

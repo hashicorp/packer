@@ -26,10 +26,10 @@ type TemplateBuilder struct {
 	template *Template
 }
 
-func NewTemplateBuilder() (*TemplateBuilder, error) {
+func NewTemplateBuilder(template string) (*TemplateBuilder, error) {
 	var t Template
 
-	err := json.Unmarshal([]byte(basicTemplate), &t)
+	err := json.Unmarshal([]byte(template), &t)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +150,17 @@ func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtual
 	return nil
 }
 
+func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
+	if tags == nil || len(*tags) == 0 {
+		return nil
+	}
+
+	for i := range *s.template.Resources {
+		(*s.template.Resources)[i].Tags = tags
+	}
+	return nil
+}
+
 func (s *TemplateBuilder) ToJSON() (*string, error) {
 	bs, err := json.MarshalIndent(s.template, jsonPrefix, jsonIndent)
 
@@ -210,7 +221,81 @@ func (s *TemplateBuilder) deleteResourceDependency(resource *Resource, predicate
 	*resource.DependsOn = deps
 }
 
-const basicTemplate = `{
+// See https://github.com/Azure/azure-quickstart-templates for a extensive list of templates.
+
+// Template to deploy a KeyVault.
+//
+// This template is still hard-coded unlike the ARM templates used for VMs for
+// a couple of reasons.
+//
+//  1. The SDK defines no types for a Key Vault
+//  2. The Key Vault template is relatively simple, and is static.
+//
+const KeyVault = `{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+      "type": "string"
+    },
+    "keyVaultSecretValue": {
+      "type": "securestring"
+    },
+    "objectId": {
+     "type": "string"
+    },
+    "tenantId": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "apiVersion": "2015-06-01",
+    "location": "[resourceGroup().location]",
+    "keyVaultSecretName": "packerKeyVaultSecret"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[parameters('keyVaultName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "enabledForDeployment": "true",
+        "enabledForTemplateDeployment": "true",
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": [
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[parameters('objectId')]",
+            "permissions": {
+              "keys": [ "all" ],
+              "secrets": [ "all" ]
+            }
+          }
+        ],
+        "sku": {
+          "name": "standard",
+          "family": "A"
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "[variables('apiVersion')]",
+          "type": "secrets",
+          "name": "[variables('keyVaultSecretName')]",
+          "dependsOn": [
+            "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+          ],
+          "properties": {
+            "value": "[parameters('keyVaultSecretValue')]"
+          }
+        }
+      ]
+    }
+  ]
+}`
+
+const BasicTemplate = `{
   "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {

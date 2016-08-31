@@ -26,7 +26,7 @@ type driverGCE struct {
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
+func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	var err error
 
 	var client *http.Client
@@ -50,15 +50,20 @@ func NewDriverGCE(ui packer.Ui, p string, a *accountFile) (Driver, error) {
 		// your service account.
 		client = conf.Client(oauth2.NoContext)
 	} else {
-		log.Printf("[INFO] Requesting Google token via GCE Service Role...")
-		client = &http.Client{
-			Transport: &oauth2.Transport{
-				// Fetch from Google Compute Engine's metadata server to retrieve
-				// an access token for the provided account.
-				// If no account is specified, "default" is used.
-				Source: google.ComputeTokenSource(""),
-			},
-		}
+		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
+		client, err = google.DefaultClient(oauth2.NoContext, DriverScopes...)
+		// The DefaultClient uses the DefaultTokenSource of the google lib.
+		// The DefaultTokenSource uses the "Application Default Credentials"
+		// It looks for credentials in the following places, preferring the first location found:
+		// 1. A JSON file whose path is specified by the
+		//    GOOGLE_APPLICATION_CREDENTIALS environment variable.
+		// 2. A JSON file in a location known to the gcloud command-line tool.
+		//    On Windows, this is %APPDATA%/gcloud/application_default_credentials.json.
+		//    On other systems, $HOME/.config/gcloud/application_default_credentials.json.
+		// 3. On Google App Engine it uses the appengine.AccessToken function.
+		// 4. On Google Compute Engine and Google App Engine Managed VMs, it fetches
+		//    credentials from the metadata server.
+		//    (In this final case any provided scopes are ignored.)
 	}
 
 	if err != nil {
@@ -256,21 +261,24 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		subnetworkSelfLink = subnetwork.SelfLink
 	}
 
-	// If given a regional ip, get it
-	accessconfig := compute.AccessConfig{
-		Name: "AccessConfig created by Packer",
-		Type: "ONE_TO_ONE_NAT",
-	}
-
-	if c.Address != "" {
-		d.ui.Message(fmt.Sprintf("Looking up address: %s", c.Address))
-		region_url := strings.Split(zone.Region, "/")
-		region := region_url[len(region_url)-1]
-		address, err := d.service.Addresses.Get(d.projectId, region, c.Address).Do()
-		if err != nil {
-			return nil, err
+	var accessconfig *compute.AccessConfig
+	// Use external IP if OmitExternalIP isn't set
+	if !c.OmitExternalIP {
+		accessconfig = &compute.AccessConfig{
+			Name: "AccessConfig created by Packer",
+			Type: "ONE_TO_ONE_NAT",
 		}
-		accessconfig.NatIP = address.Address
+
+		// If given a static IP, use it
+		if c.Address != "" {
+			region_url := strings.Split(zone.Region, "/")
+			region := region_url[len(region_url)-1]
+			address, err := d.service.Addresses.Get(d.projectId, region, c.Address).Do()
+			if err != nil {
+				return nil, err
+			}
+			accessconfig.NatIP = address.Address
+		}
 	}
 
 	// Build up the metadata
@@ -307,11 +315,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		Name: c.Name,
 		NetworkInterfaces: []*compute.NetworkInterface{
 			&compute.NetworkInterface{
-				AccessConfigs: []*compute.AccessConfig{
-					&accessconfig,
-				},
-				Network:    network.SelfLink,
-				Subnetwork: subnetworkSelfLink,
+				AccessConfigs: []*compute.AccessConfig{accessconfig},
+				Network:       network.SelfLink,
+				Subnetwork:    subnetworkSelfLink,
 			},
 		},
 		Scheduling: &compute.Scheduling{
