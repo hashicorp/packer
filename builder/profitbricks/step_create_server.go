@@ -130,7 +130,7 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 
 func (d *stepCreateServer) waitTillProvisioned(path string, config Config) error {
 	d.setPB(config.PBUsername, config.PBPassword, config.PBUrl)
-	waitCount := 50
+	waitCount := 120
 	if config.Timeout > 0 {
 		waitCount = config.Timeout
 	}
@@ -142,7 +142,7 @@ func (d *stepCreateServer) waitTillProvisioned(path string, config Config) error
 		if request.Metadata.Status == "FAILED" {
 			return errors.New(request.Metadata.Message)
 		}
-		time.Sleep(10 * time.Second)
+		time.Sleep(1 * time.Second)
 		i++
 	}
 	return nil

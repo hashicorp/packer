@@ -11,7 +11,7 @@ Type: `profitbricks`
 
 The ProfitBricks Builder is able to create virtual machines for [ProfitBricks](https://www.profitbricks.com).
 
--> **Note:** This builder is not supported by HashiCorp. Please visit [ProfitBricks DevOps Central](https://devops.profitbricks.com/) for support. You may file issues on [GitHub](https://github.com/profitbricks/docker-machine-driver-profitbricks/issues).
+-> **Note:** This builder is not supported by HashiCorp. Please visit [ProfitBricks DevOps Central](https://devops.profitbricks.com/) for support. You may file issues on [GitHub](https://github.com/profitbricks/packer-builder-profitbricks/issues).
 
 ## Configuration Reference
 
@@ -25,33 +25,32 @@ builder.
 
 ### Required
 
--   `username` (string) - ProfitBricks username. This can be specified via environment variable `PROFITBRICKS_USERNAME', if provided. The value definded in the config has precedence over environemnt variable. 
+-   `image` (string) - ProfitBricks volume image 
 
 -   `password` (string) - ProfitBrucks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
 
--   `image` (string) - ProfitBricks volume image 
+-   `username` (string) - ProfitBricks username. This can be specified via environment variable `PROFITBRICKS_USERNAME', if provided. The value definded in the config has precedence over environemnt variable. 
+
 
 ### Optional
 
--   `cores` (int) - Amount of CPU cores to use for this build. Defaults to `4`.
+-   `cores` (integer) - Amount of CPU cores to use for this build. Defaults to "4".
 
--   `disk_size` (string) - Amount of disk space for this image. Defaults to `50gb`
+-   `disk_size` (string) - Amount of disk space for this image. Defaults to "50gb"
 
--   `disktype` (string) - Type of disk to use for this image. Defaults to `HDD`.
+-   `disk_type` (string) - Type of disk to use for this image. Defaults to "HDD".
 
--   `ram` (int) - Amount of RAM to use for this image. Defalts to `2048`.
+-   `location` (string) - Defaults to "us/las".
 
--   `location` (string) - Defaults to `us/las`.
+-   `ram` (integer) - Amount of RAM to use for this image. Defalts to "2048".
 
 -   `snapshot_name` (string) - If snapshot name is not provided Packer will generate it
 
--   `snapshot_password` (string) - ????
+-   `snapshot_password` (string) - Password for the snapshot.
 
--   `ssh_key_path` (string) - Path to private SSHkey. If no path to the key is provided Packer will create one under the name [snapshot_name]
+-   `timeout` (string) - An approximate limit on how long Packer will continue making status requests while waiting for the build to complete. Default value 120 seconds.
 
--   `url` (string) - Endpoint for the ProfitBricks REST API
-
--   `timeout` (string) - An approximate limit on how long packer will continue making status requests while waiting for the build to complete. Set this to an integer where 1 equals 10 seconds. Default value 50.
+-   `url` (string) - Endpoint for the ProfitBricks REST API. Default URL "https://api.profitbricks.com/rest/v2"
 
 
 ## Example

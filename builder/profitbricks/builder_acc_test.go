@@ -29,9 +29,9 @@ const testBuilderAccBasic = `
 {
 	"builders": [{
 	      "image": "Ubuntu-16.04",
-	      "password": "password",
-	      "username": "username",
-	      "snapshot_name": "packer",
+	      "pbpassword": "password",
+	      "pbusername": "username",
+	      "servername": "packer",
 	      "type": "profitbricks"
    	}]
 }
