@@ -45,6 +45,7 @@ IMPROVEMENTS:
   * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
   * provisioner/ansible: Improved logging and error handling [GH-3477]
+  * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
   * provisioner/chef: Added `knife_command` option and added a correct default
     value for Windows [GH-3622]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
