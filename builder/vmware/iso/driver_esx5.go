@@ -242,6 +242,11 @@ func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]strin
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	config := state.Get("config").(*Config)
+	sshc := config.SSHConfig.Comm
+	port := sshc.SSHPort
+	if sshc.Type == "winrm" {
+		port = sshc.WinRMPort
+	}
 
 	if address, ok := state.GetOk("vm_address"); ok {
 		return address.(string), nil
@@ -286,7 +291,7 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		}
 		// When multiple NICs are connected to the same network, choose
 		// one that has a route back. This Dial should ensure that.
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], d.Port), 2*time.Second)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], port), 2*time.Second)
 		if err != nil {
 			if e, ok := err.(*net.OpError); ok {
 				if e.Timeout() {
