@@ -102,6 +102,11 @@ chi-appservers
     your local system. These will be uploaded to the remote machine under
     `staging_directory`/playbooks. By default, this is empty.
 
+-   `galaxy_file` (string) - A requirements file which provides a way to install
+    roles with the [ansible-galaxy
+    cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
+    on the remote machine. By default, this is empty.
+
 -   `group_vars` (string) - a path to the directory containing ansible group
     variables on your local system to be copied to the remote machine. By
     default, this is empty.
