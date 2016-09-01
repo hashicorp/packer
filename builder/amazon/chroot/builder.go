@@ -30,18 +30,19 @@ type Config struct {
 	awscommon.AMIConfig       `mapstructure:",squash"`
 	awscommon.AccessConfig    `mapstructure:",squash"`
 
-	ChrootMounts     [][]string `mapstructure:"chroot_mounts"`
-	CommandWrapper   string     `mapstructure:"command_wrapper"`
-	CopyFiles        []string   `mapstructure:"copy_files"`
-	DevicePath       string     `mapstructure:"device_path"`
-	FromScratch      bool       `mapstructure:"from_scratch"`
-	MountOptions     []string   `mapstructure:"mount_options"`
-	MountPartition   int        `mapstructure:"mount_partition"`
-	MountPath        string     `mapstructure:"mount_path"`
-	PreMountCommands []string   `mapstructure:"pre_mount_commands"`
-	RootDeviceName   string     `mapstructure:"root_device_name"`
-	RootVolumeSize   int64      `mapstructure:"root_volume_size"`
-	SourceAmi        string     `mapstructure:"source_ami"`
+	ChrootMounts      [][]string `mapstructure:"chroot_mounts"`
+	CommandWrapper    string     `mapstructure:"command_wrapper"`
+	CopyFiles         []string   `mapstructure:"copy_files"`
+	DevicePath        string     `mapstructure:"device_path"`
+	FromScratch       bool       `mapstructure:"from_scratch"`
+	MountOptions      []string   `mapstructure:"mount_options"`
+	MountPartition    int        `mapstructure:"mount_partition"`
+	MountPath         string     `mapstructure:"mount_path"`
+	PostMountCommands []string   `mapstructure:"post_mount_commands"`
+	PreMountCommands  []string   `mapstructure:"pre_mount_commands"`
+	RootDeviceName    string     `mapstructure:"root_device_name"`
+	RootVolumeSize    int64      `mapstructure:"root_volume_size"`
+	SourceAmi         string     `mapstructure:"source_ami"`
 
 	ctx interpolate.Context
 }
@@ -63,6 +64,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"command_wrapper",
+				"post_mount_commands",
 				"pre_mount_commands",
 				"mount_path",
 			},
@@ -216,6 +218,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
+		},
+		&StepPostMountCommands{
+			Commands: b.config.PostMountCommands,
 		},
 		&StepMountExtra{},
 		&StepCopyFiles{},
