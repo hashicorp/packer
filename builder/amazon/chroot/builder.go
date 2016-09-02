@@ -109,8 +109,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.MountPartition = 1
 	}
 
-	// Accumulate any errors
+	// Accumulate any errors or warnings
 	var errs *packer.MultiError
+	var warns []string
+
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
 
@@ -123,6 +125,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.FromScratch {
+		if b.config.SourceAmi != "" {
+			warns = append(warns, "source_ami is unused when from_scratch is true")
+		}
 		if b.config.RootVolumeSize == 0 {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("root_volume_size is required with from_scratch."))
@@ -148,14 +153,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("source_ami is required."))
 		}
+		if len(b.config.AMIMappings) != 0 {
+			warns = append(warns, "ami_block_device_mappings are unused when from_scratch is false")
+		}
+		if b.config.RootDeviceName != "" {
+			warns = append(warns, "root_device_name is unused when from_scratch is false")
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return warns, errs
 	}
 
 	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey))
-	return nil, nil
+	return warns, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
