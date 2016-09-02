@@ -1,0 +1,62 @@
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) 
+and (orientation : portrait) {
+  #main-content {
+    display: flex;
+    flex-direction: row;
+
+    #sidebar-docs {
+      flex: 3;
+      h2 {
+        padding: 0;
+      }
+
+      ul {
+        padding: 0;
+        li {
+          padding: 10px 0;
+        }
+      }
+    }
+    .docs-body {
+      flex: 7;
+      h2 {
+        margin-top: 20px;
+      }
+
+      .docs-content {
+        padding: 0 0 80px;
+        div.alert {
+          padding: 20px 30px;
+        }
+
+        code {
+          font-size: 12px;
+        }
+
+        pre {
+          margin: 0 -15px;
+          padding: 15px;
+        }
+
+        ul {
+          margin-top: 0;
+          margin-left: 30px;
+          margin-bottom: 10px;
+        }
+      }
+    }
+  }
+
+  #footer {
+    padding: 20px 0 30px;
+    .edit-page-link {
+      top: -70px;
+    }
+  }
+
+  p {
+    line-height: 1.5;
+  }
+}

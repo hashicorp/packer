@@ -49,7 +49,7 @@ type Config struct {
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 
-	account         accountFile
+	Account         AccountFile
 	privateKeyBytes []byte
 	stateTimeout    time.Duration
 	ctx             interpolate.Context
@@ -157,15 +157,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Region = region
 	}
 
-	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
+	err = c.CalcTimeout()
 	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
+		errs = packer.MultiErrorAppend(errs, err)
 	}
-	c.stateTimeout = stateTimeout
 
 	if c.AccountFile != "" {
-		if err := processAccountFile(&c.account, c.AccountFile); err != nil {
+		if err := ProcessAccountFile(&c.Account, c.AccountFile); err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
@@ -184,4 +182,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	return c, nil, nil
+}
+
+func (c *Config) CalcTimeout() error {
+	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
+	if err != nil {
+		return fmt.Errorf("Failed parsing state_timeout: %s", err)
+	}
+	c.stateTimeout = stateTimeout
+	return nil
 }

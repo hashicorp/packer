@@ -68,7 +68,7 @@ body{
 
     .footer-hashi{
       display: block;
-      float: none !important;
+      float: right !important;
       .hashicorp-project{
         margin-left: -30px;
       }
@@ -76,10 +76,9 @@ body{
 
     ul{
       display: block;
-      width: 100%;
       li{
         display: block;
-        float: none;
+        float: left;
       }
 
       &.external-links{

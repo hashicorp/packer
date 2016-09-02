@@ -69,7 +69,8 @@ following steps in order to be able to compile and test Packer. These instructio
    `$GOPATH/src/github.com/mitchellh/packer`.
 
 4. When working on packer `cd $GOPATH/src/github.com/mitchellh/packer` so you
-   can run `make` and easily access other files.
+   can run `make` and easily access other files. Run `make help` to get
+   information about make targets.
 
 5. Make your changes to the Packer source. You can run `make` in
    `$GOPATH/src/github.com/mitchellh/packer` to run tests and build the packer

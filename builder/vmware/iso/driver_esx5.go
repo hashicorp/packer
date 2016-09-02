@@ -65,10 +65,8 @@ func (d *ESX5Driver) ReloadVM() error {
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	for i := 0; i < 20; i++ {
-		err := d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
-		if err != nil {
-			return err
-		}
+		//intentionally not checking for error since poweron may fail specially after initial VM registration
+		d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
 		time.Sleep((time.Duration(i) * time.Second) + 1)
 		running, err := d.IsRunning(vmxPathLocal)
 		if err != nil {
@@ -176,7 +174,7 @@ func (d *ESX5Driver) HostIP() (string, error) {
 	return host, err
 }
 
-func (d *ESX5Driver) VNCAddress(vncBindIP string, portMin, portMax uint) (string, uint, error) {
+func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
 
 	//Process ports ESXi is listening on to determine which are available
@@ -232,11 +230,31 @@ func (d *ESX5Driver) VNCAddress(vncBindIP string, portMin, portMax uint) (string
 	return d.Host, vncPort, nil
 }
 
+// UpdateVMX, adds the VNC port to the VMX data.
+func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]string) {
+	// Do not set remotedisplay.vnc.ip - this breaks ESXi.
+	data["remotedisplay.vnc.enabled"] = "TRUE"
+	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
+	if len(password) > 0 {
+		data["remotedisplay.vnc.password"] = password
+	}
+}
+
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	config := state.Get("config").(*Config)
+	sshc := config.SSHConfig.Comm
+	port := sshc.SSHPort
+	if sshc.Type == "winrm" {
+		port = sshc.WinRMPort
+	}
 
 	if address, ok := state.GetOk("vm_address"); ok {
 		return address.(string), nil
+	}
+
+	if address := config.CommConfig.Host(); address != "" {
+		state.Put("vm_address", address)
+		return address, nil
 	}
 
 	r, err := d.esxcli("network", "vm", "list")
@@ -258,18 +276,37 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	record, err = r.read()
-	if err != nil {
-		return "", err
-	}
+	// Loop through interfaces
+	for {
+		record, err = r.read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
 
-	if record["IPAddress"] == "0.0.0.0" {
-		return "", errors.New("VM network port found, but no IP address")
+		if record["IPAddress"] == "0.0.0.0" {
+			continue
+		}
+		// When multiple NICs are connected to the same network, choose
+		// one that has a route back. This Dial should ensure that.
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], port), 2*time.Second)
+		if err != nil {
+			if e, ok := err.(*net.OpError); ok {
+				if e.Timeout() {
+					log.Printf("Timeout connecting to %s", record["IPAddress"])
+					continue
+				}
+			}
+		} else {
+			defer conn.Close()
+			address := record["IPAddress"]
+			state.Put("vm_address", address)
+			return address, nil
+		}
 	}
-
-	address := record["IPAddress"]
-	state.Put("vm_address", address)
-	return address, nil
+	return "", errors.New("No interface on the VM has an IP address ready")
 }
 
 //-------------------------------------------------------------------
