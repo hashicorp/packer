@@ -26,6 +26,7 @@ IMPROVEMENTS:
   * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
     [GH-3444]
   * builder/google: Added support for `image_family` [GH-3503]
+  * builder/google: Use gcloud application default credentials. [GH-3655]
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3547]
@@ -43,6 +44,8 @@ IMPROVEMENTS:
     [GH-3347]
   * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
+  * provisioner/ansible: Improved logging and error handling [GH-3477]
+  * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
   * provisioner/chef: Added `knife_command` option and added a correct default
     value for Windows [GH-3622]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
@@ -56,8 +59,11 @@ BUG FIXES:
   * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
   * provisioner/ansible: Properly set host key checking even when a custom ENV
     is specified [GH-3568]
+  * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
+  * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
+  * builder/virtualbox: Respect `ssh_host` [GH-3617]
   * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
   * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
   * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
