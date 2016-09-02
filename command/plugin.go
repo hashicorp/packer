@@ -40,6 +40,7 @@ import (
 	dockerpushpostprocessor "github.com/mitchellh/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/mitchellh/packer/post-processor/docker-save"
 	dockertagpostprocessor "github.com/mitchellh/packer/post-processor/docker-tag"
+	googlecomputeexportpostprocessor "github.com/mitchellh/packer/post-processor/googlecompute-export"
 	manifestpostprocessor "github.com/mitchellh/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/mitchellh/packer/post-processor/shell-local"
 	vagrantpostprocessor "github.com/mitchellh/packer/post-processor/vagrant"
@@ -102,20 +103,21 @@ var Provisioners = map[string]packer.Provisioner{
 }
 
 var PostProcessors = map[string]packer.PostProcessor{
-	"amazon-import": new(amazonimportpostprocessor.PostProcessor),
-	"artifice":      new(artificepostprocessor.PostProcessor),
-	"atlas":         new(atlaspostprocessor.PostProcessor),
-	"checksum":      new(checksumpostprocessor.PostProcessor),
-	"compress":      new(compresspostprocessor.PostProcessor),
-	"docker-import": new(dockerimportpostprocessor.PostProcessor),
-	"docker-push":   new(dockerpushpostprocessor.PostProcessor),
-	"docker-save":   new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":    new(dockertagpostprocessor.PostProcessor),
-	"manifest":      new(manifestpostprocessor.PostProcessor),
-	"shell-local":   new(shelllocalpostprocessor.PostProcessor),
-	"vagrant":       new(vagrantpostprocessor.PostProcessor),
-	"vagrant-cloud": new(vagrantcloudpostprocessor.PostProcessor),
-	"vsphere":       new(vspherepostprocessor.PostProcessor),
+	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
+	"artifice":             new(artificepostprocessor.PostProcessor),
+	"atlas":                new(atlaspostprocessor.PostProcessor),
+	"checksum":             new(checksumpostprocessor.PostProcessor),
+	"compress":             new(compresspostprocessor.PostProcessor),
+	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
+	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
+	"docker-save":          new(dockersavepostprocessor.PostProcessor),
+	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
+	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
+	"manifest":             new(manifestpostprocessor.PostProcessor),
+	"shell-local":          new(shelllocalpostprocessor.PostProcessor),
+	"vagrant":              new(vagrantpostprocessor.PostProcessor),
+	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
+	"vsphere":              new(vspherepostprocessor.PostProcessor),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
