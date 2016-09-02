@@ -100,4 +100,11 @@ Optional Parameters:
 
 ## Limitations
 
-The `ansible` provisioner does not support SCP to transfer files.
+- The `ansible` provisioner does not support SCP to transfer files.
+
+- Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
+
+```
+==> virtualbox-ovf: starting sftp subsystem
+    virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
+```
