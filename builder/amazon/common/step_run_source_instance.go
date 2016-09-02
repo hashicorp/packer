@@ -141,6 +141,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		} else {
+			// Add 0.5 cents to minimum spot bid to ensure capacity will be available
+			// Avoids price-too-low error in active markets which can fluctuate
+			price = price + 0.005
 		}
 
 		spotPrice = strconv.FormatFloat(price, 'f', -1, 64)

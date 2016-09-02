@@ -21,6 +21,10 @@ type SSHConfig struct {
 }
 
 func (c *SSHConfig) Prepare(ctx *interpolate.Context) []error {
+	if c.Comm.SSHHost == "" {
+		c.Comm.SSHHost = "127.0.0.1"
+	}
+
 	if c.SSHHostPortMin == 0 {
 		c.SSHHostPortMin = 2222
 	}
