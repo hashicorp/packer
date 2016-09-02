@@ -117,7 +117,7 @@ each category, the available configuration keys are alphabetized.
     forces Packer to find an open device automatically.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
+    networking (SriovNetSupport) on HVM-compatible AMIs. If `true`, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
@@ -142,8 +142,8 @@ each category, the available configuration keys are alphabetized.
 -   `root_volume_size` (integer) - The size of the root volume for the chroot
     environment, and the resulting AMI
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the ami_regions configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to `true` if you want to skip
+    validation of the ami_regions configuration option.  Defaults to `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
