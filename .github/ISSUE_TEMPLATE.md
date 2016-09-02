@@ -12,7 +12,7 @@ FOR BUGS:
 
 Describe the problem and include the following information:
 
-- Packer Version
+- Packer version from `packer version`
 - Host platform
 - Debug log output from `PACKER_LOG=1 packer build template.json`.
   Please paste this in a gist https://gist.github.com

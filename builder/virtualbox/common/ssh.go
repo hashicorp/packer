@@ -7,8 +7,10 @@ import (
 	gossh "golang.org/x/crypto/ssh"
 )
 
-func CommHost(state multistep.StateBag) (string, error) {
-	return "127.0.0.1", nil
+func CommHost(host string) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		return host, nil
+	}
 }
 
 func SSHPort(state multistep.StateBag) (int, error) {

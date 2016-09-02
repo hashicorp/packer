@@ -52,6 +52,12 @@ type Config struct {
 
 	// The optional inventory groups
 	InventoryGroups []string `mapstructure:"inventory_groups"`
+
+	// The optional ansible-galaxy requirements file
+	GalaxyFile string `mapstructure:"galaxy_file"`
+
+	// The command to run ansible-galaxy
+	GalaxyCommand string
 }
 
 type Provisioner struct {
@@ -74,6 +80,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.Command == "" {
 		p.config.Command = "ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook"
 	}
+	if p.config.GalaxyCommand == "" {
+		p.config.GalaxyCommand = "ansible-galaxy"
+	}
 
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = DefaultStagingDir
@@ -89,6 +98,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Check that the inventory file exists, if configured
 	if len(p.config.InventoryFile) > 0 {
 		err = validateFileConfig(p.config.InventoryFile, "inventory_file", true)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	// Check that the galaxy file exists, if configured
+	if len(p.config.GalaxyFile) > 0 {
+		err = validateFileConfig(p.config.GalaxyFile, "galaxy_file", true)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -181,6 +198,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}()
 	}
 
+	if len(p.config.GalaxyFile) > 0 {
+		ui.Message("Uploading galaxy file...")
+		src = p.config.GalaxyFile
+		dst = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+		if err := p.uploadFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading galaxy file: %s", err)
+		}
+	}
+
 	ui.Message("Uploading inventory file...")
 	src = p.config.InventoryFile
 	dst = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
@@ -242,6 +268,27 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
+func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
+	rolesDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, "roles"))
+	galaxyFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.GalaxyFile)))
+
+	// ansible-galaxy install -r requirements.yml -p roles/
+	command := fmt.Sprintf("cd %s && %s install -r %s -p %s",
+		p.config.StagingDir, p.config.GalaxyCommand, galaxyFile, rolesDir)
+	ui.Message(fmt.Sprintf("Executing Ansible Galaxy: %s", command))
+	cmd := &packer.RemoteCmd{
+		Command: command,
+	}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+	if cmd.ExitStatus != 0 {
+		// ansible-galaxy version 2.0.0.2 doesn't return exit codes on error..
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+	}
+	return nil
+}
+
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
 	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
@@ -249,6 +296,13 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	extraArgs := ""
 	if len(p.config.ExtraArguments) > 0 {
 		extraArgs = " " + strings.Join(p.config.ExtraArguments, " ")
+	}
+
+	// Fetch external dependencies
+	if len(p.config.GalaxyFile) > 0 {
+		if err := p.executeGalaxy(ui, comm); err != nil {
+			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
+		}
 	}
 
 	command := fmt.Sprintf("cd %s && %s %s%s -c local -i %s",
