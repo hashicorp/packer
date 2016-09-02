@@ -48,6 +48,7 @@ IMPROVEMENTS:
   * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
   * provisioner/chef: Added `knife_command` option and added a correct default
     value for Windows [GH-3622]
+  * provisioner/chef: Installs 64bit chef on Windows if available [GH-3848]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
   * post-processor/docker: Preserve tags when running docker push [GH-3631]
