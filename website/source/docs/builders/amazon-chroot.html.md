@@ -69,7 +69,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `source_ami` (string) - The source AMI whose root volume will be copied and
     provisioned on the currently running instance. This must be an EBS-backed
-    AMI with a root volume snapshot that you have access to.
+    AMI with a root volume snapshot that you have access to.  Note: this is not
+    used when `from_scratch` is set to `true`.
 
 ### Optional:
 
@@ -123,6 +124,20 @@ each category, the available configuration keys are alphabetized.
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
+-   `from_scratch` (boolean) - Build a new volume instead of starting from an
+    existing AMI root volume snapshot.  Default `false`.  If `true`,
+    `source_ami` is no longer used and the following options become required:
+    `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`.  The
+    below options are also required in this mode only:
+
+    -   `ami_block_device_mappings` (array of block device mappings) An entry
+        matching `root_device_name` should be set. See the
+        [amazon-ebs](/docs/builders/amazon-ebs.html) documentation for more
+        details on this parameter.
+
+    -   `root_device_name` (string) - The root device name.  For example,
+        `xvda`.
+
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
     `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
@@ -138,6 +153,17 @@ each category, the available configuration keys are alphabetized.
     shell, user discrestion is advised. See [this manual page for the mount
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
+
+-   `pre_mount_commands` (array of strings) - A series of commands to execute
+    after attaching the root volume and before mounting the chroot.  This is not
+    required unless using `from_scratch`.  If so, this should include any
+    partitioning and filesystem creation commands.  The path to the device is
+    provided by `{{.Device}}`.
+
+-   `post_mount_commands` (array of strings) - As `pre_mount_commands`, but the
+    commands are executed after mounting the root device and before the extra
+    mount and copy steps.  The device and mount path are provided by
+    `{{.Device}}` and `{{.MountPath}}`.
 
 -   `root_volume_size` (integer) - The size of the root volume for the chroot
     environment, and the resulting AMI
@@ -233,6 +259,36 @@ services:
   "type": "shell",
   "inline": [
     "rm -f /usr/sbin/policy-rc.d"
+  ]
+}
+```
+
+# Example using `from_scratch`
+
+This example demonstrates the essentials of building an image from scratch.  A
+15G gp2 (SSD) device is created (overriding the default of standard/magnetic).
+The device setup commands partition the device with one partition for use as an
+HVM image and format it ext4.  This builder block should be followed by
+provisioning commands to install the os and bootloader.
+
+``` {.javascript}
+{
+  "type": "amazon-chroot",
+  "ami_name": "packer-from-scratch {{timestamp}}"
+  "from_scratch": true,
+  "ami_virtualization_type": "hvm",
+  "device_setup_commands": [
+    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on",
+    "mkfs.ext4 {{.Device}}1"
+  ],
+  "root_volume_size": 15,
+  "root_device_name": "xvda",
+  "ami_block_device_mappings": [
+    {
+      "device_name": "xvda",
+      "delete_on_termination": true,
+      "volume_type": "gp2"
+    }
   ]
 }
 ```
