@@ -6,7 +6,7 @@ description: |
     in the EC2 documentation.
 layout: docs
 page_title: 'Amazon AMI Builder (chroot)'
-...
+---
 
 # AMI Builder (chroot)
 
@@ -69,8 +69,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `source_ami` (string) - The source AMI whose root volume will be copied and
     provisioned on the currently running instance. This must be an EBS-backed
-    AMI with a root volume snapshot that you have access to.  Note: this is not
-    used when `from_scratch` is set to `true`.
+    AMI with a root volume snapshot that you have access to. Note: this is not
+    used when `from_scratch` is set to true.
 
 ### Optional:
 
@@ -103,11 +103,11 @@ each category, the available configuration keys are alphabetized.
     section below. Please read that section for more information on how to
     use this.
 
--   `command_wrapper` (string) - How to run shell commands. This defaults
-    to "{{.Command}}". This may be useful to set if you want to set
-    environmental variables or perhaps run it with `sudo` or so on. This is a
-    configuration template where the `.Command` variable is replaced with the
-    command to be run.
+-   `command_wrapper` (string) - How to run shell commands. This defaults to
+    `{{.Command}}`. This may be useful to set if you want to set environmental
+    variables or perhaps run it with `sudo` or so on. This is a configuration
+    template where the `.Command` variable is replaced with the command to
+    be run.
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
     that will be copied into the chroot environment prior to provisioning. This
@@ -118,16 +118,16 @@ each category, the available configuration keys are alphabetized.
     forces Packer to find an open device automatically.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport) on HVM-compatible AMIs. If `true`, add
+    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default `false`.
+    AMI if one with the same name already exists. Default false.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
-    existing AMI root volume snapshot.  Default `false`.  If `true`,
-    `source_ami` is no longer used and the following options become required:
-    `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`.  The
+    existing AMI root volume snapshot. Default false. If true, `source_ami` is
+    no longer used and the following options become required:
+    `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
     below options are also required in this mode only:
 
     -   `ami_block_device_mappings` (array of block device mappings) An entry
@@ -135,8 +135,7 @@ each category, the available configuration keys are alphabetized.
         [amazon-ebs](/docs/builders/amazon-ebs.html) documentation for more
         details on this parameter.
 
-    -   `root_device_name` (string) - The root device name.  For example,
-        `xvda`.
+    -   `root_device_name` (string) - The root device name. For example, `xvda`.
 
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
@@ -144,8 +143,8 @@ each category, the available configuration keys are alphabetized.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (integer) - The partition number containing the /
-    partition. By default this is the first partition of the volume.
+-   `mount_partition` (integer) - The partition number containing the
+    / partition. By default this is the first partition of the volume.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
@@ -155,21 +154,21 @@ each category, the available configuration keys are alphabetized.
     system specific options
 
 -   `pre_mount_commands` (array of strings) - A series of commands to execute
-    after attaching the root volume and before mounting the chroot.  This is not
-    required unless using `from_scratch`.  If so, this should include any
-    partitioning and filesystem creation commands.  The path to the device is
+    after attaching the root volume and before mounting the chroot. This is not
+    required unless using `from_scratch`. If so, this should include any
+    partitioning and filesystem creation commands. The path to the device is
     provided by `{{.Device}}`.
 
 -   `post_mount_commands` (array of strings) - As `pre_mount_commands`, but the
     commands are executed after mounting the root device and before the extra
-    mount and copy steps.  The device and mount path are provided by
+    mount and copy steps. The device and mount path are provided by
     `{{.Device}}` and `{{.MountPath}}`.
 
 -   `root_volume_size` (integer) - The size of the root volume for the chroot
     environment, and the resulting AMI
 
--   `skip_region_validation` (boolean) - Set to `true` if you want to skip
-    validation of the ami_regions configuration option.  Defaults to `false`.
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the `ami_regions` configuration option. Defaults to false.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
@@ -263,12 +262,12 @@ services:
 }
 ```
 
-# Example using `from_scratch`
+## Building From Scratch
 
-This example demonstrates the essentials of building an image from scratch.  A
+This example demonstrates the essentials of building an image from scratch. A
 15G gp2 (SSD) device is created (overriding the default of standard/magnetic).
 The device setup commands partition the device with one partition for use as an
-HVM image and format it ext4.  This builder block should be followed by
+HVM image and format it ext4. This builder block should be followed by
 provisioning commands to install the os and bootloader.
 
 ``` {.javascript}
@@ -278,7 +277,7 @@ provisioning commands to install the os and bootloader.
   "from_scratch": true,
   "ami_virtualization_type": "hvm",
   "device_setup_commands": [
-    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on",
+    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
     "mkfs.ext4 {{.Device}}1"
   ],
   "root_volume_size": 15,
