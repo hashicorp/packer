@@ -1,4 +1,4 @@
-// Package jsonutil provides JSON serialisation of AWS requests and responses.
+// Package jsonutil provides JSON serialization of AWS requests and responses.
 package jsonutil
 
 import (
@@ -120,7 +120,8 @@ func buildStruct(value reflect.Value, buf *bytes.Buffer, tag reflect.StructTag) 
 			name = locName
 		}
 
-		fmt.Fprintf(buf, "%q:", name)
+		writeString(name, buf)
+		buf.WriteString(`:`)
 
 		err := buildAny(member, buf, field.Tag)
 		if err != nil {
@@ -159,7 +160,7 @@ func (sv sortedValues) Less(i, j int) bool { return sv[i].String() < sv[j].Strin
 func buildMap(value reflect.Value, buf *bytes.Buffer, tag reflect.StructTag) error {
 	buf.WriteString("{")
 
-	var sv sortedValues = value.MapKeys()
+	sv := sortedValues(value.MapKeys())
 	sort.Sort(sv)
 
 	for i, k := range sv {
@@ -167,7 +168,9 @@ func buildMap(value reflect.Value, buf *bytes.Buffer, tag reflect.StructTag) err
 			buf.WriteByte(',')
 		}
 
-		fmt.Fprintf(buf, "%q:", k)
+		writeString(k.String(), buf)
+		buf.WriteString(`:`)
+
 		buildAny(value.MapIndex(k), buf, "")
 	}
 
