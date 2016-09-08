@@ -25,6 +25,7 @@ IMPROVEMENTS:
   * builder/azure: Made `tenant_id` optional [GH-3643]
   * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
     [GH-3444]
+  * builder/digitalocean: Fixes timeout waiting for snapshot [GH-3868]
   * builder/google: Added support for `image_family` [GH-3503]
   * builder/google: Use gcloud application default credentials. [GH-3655]
   * builder/null: Can now be used with WinRM [GH-2525]
