@@ -159,26 +159,13 @@ func (c *adapter) handleSession(newChannel ssh.NewChannel) error {
 					if len(sftpCmd) == 0 {
 						sftpCmd = "/usr/lib/sftp-server -e"
 					}
-					cmd := &packer.RemoteCmd{
-						Stdin:   channel,
-						Stdout:  channel,
-						Stderr:  channel.Stderr(),
-						Command: sftpCmd,
-					}
 
 					c.ui.Say("starting sftp subsystem")
-					if err := c.comm.Start(cmd); err != nil {
-						c.ui.Error(err.Error())
-						req.Reply(false, nil)
-						close(done)
-						return
-					}
-
-					req.Reply(true, nil)
 					go func() {
-						cmd.Wait()
+						_ = c.remoteExec(sftpCmd, channel, channel, channel.Stderr())
 						close(done)
 					}()
+					req.Reply(true, nil)
 				default:
 					c.ui.Error(fmt.Sprintf("unsupported subsystem requested: %s", req.Payload))
 					req.Reply(false, nil)
