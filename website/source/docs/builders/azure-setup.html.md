@@ -68,7 +68,7 @@ Login using the Azure CLI
 
 Get your account information
 
-    azure account list --json | jq .[].name
+    azure account list --json | jq '.[].name'
     azure account set ACCOUNTNAME
     azure account show --json | jq ".[] | .id"
 
