@@ -95,7 +95,7 @@ Your storage account (below) will need to use the same `GROUPNAME` and `LOCATION
 We will need to create a storage account where your Packer artifacts will be stored. We will create a `LRS` storage account which is the least expensive price/GB at the time of writing.
 
     azure storage account create -g GROUPNAME \
-        -l LOCATION --type LRS STORAGENAME
+        -l LOCATION --sku-name LRS --kind storage STORAGENAME
 
 -> `LRS` is meant as a literal "LRS" and not as a variable.
 
