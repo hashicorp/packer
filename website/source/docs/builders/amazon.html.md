@@ -129,6 +129,7 @@ Packer to work:
         "ec2:GetPasswordData",
         "ec2:ModifyImageAttribute",
         "ec2:ModifyInstanceAttribute",
+        "ec2:ModifySnapshotAttribute"
         "ec2:RegisterImage",
         "ec2:RunInstances",
         "ec2:StopInstances",
