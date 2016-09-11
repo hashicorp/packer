@@ -123,7 +123,9 @@ Packer to work:
         "ec2:DescribeImageAttribute",
         "ec2:CopyImage",
         "ec2:DescribeRegions",
-        "ec2:ModifyInstanceAttribute"
+        "ec2:ModifyInstanceAttribute",
+        "ec2:DescribeSecurityGroups",
+        "ec2:ModifySnapshotAttribute"
       ],
       "Resource" : "*"
   }]
