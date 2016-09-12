@@ -25,7 +25,7 @@ type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
 	common.HTTPConfig                   `mapstructure:",squash"`
 	common.ISOConfig                    `mapstructure:",squash"`
-	parallelscommon.FloppyConfig        `mapstructure:",squash"`
+	common.FloppyConfig                 `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
