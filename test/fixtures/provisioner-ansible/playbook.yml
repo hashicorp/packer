@@ -1,5 +1,5 @@
 ---
-- hosts: default
+- hosts: default:packer-test
   gather_facts: no
   tasks:
     - raw: touch /root/ansible-raw-test
