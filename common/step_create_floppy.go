@@ -165,7 +165,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Message("Done copying files from floppy_files")
 
 	// Collect all paths (expanding wildcards) into pathqueue
-	ui.Message("Collecting paths from floppy_contents")
+	ui.Message("Collecting paths from floppy_dirs")
 	var pathqueue []string
 	for _,filename := range s.Contents {
 		if strings.IndexAny(filename, "*?[") >= 0 {
@@ -182,7 +182,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		pathqueue = append(pathqueue, filename)
 	}
-	ui.Message(fmt.Sprintf("Resulting paths from floppy_contents : %v", pathqueue))
+	ui.Message(fmt.Sprintf("Resulting paths from floppy_dirs : %v", pathqueue))
 
 	// Go over each path in pathqueue and copy it.
 	for _,src := range pathqueue {
@@ -193,7 +193,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 	}
-	ui.Message("Done copying paths from floppy_contents")
+	ui.Message("Done copying paths from floppy_dirs")
 
 	// Set the path to the floppy so it can be used later
 	state.Put("floppy_path", s.floppyPath)
