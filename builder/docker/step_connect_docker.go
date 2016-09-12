@@ -4,7 +4,9 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-type StepConnectDocker struct{}
+type StepConnectDocker struct {
+	api bool
+}
 
 func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
