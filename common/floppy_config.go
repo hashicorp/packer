@@ -9,7 +9,7 @@ import (
 
 type FloppyConfig struct {
 	FloppyFiles    []string `mapstructure:"floppy_files"`
-	FloppyContents []string `mapstructure:"floppy_contents"`
+	FloppyContents []string `mapstructure:"floppy_dirs"`
 }
 
 func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {
