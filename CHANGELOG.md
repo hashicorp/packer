@@ -72,6 +72,7 @@ BUG FIXES:
     is specified [GH-3568]
   * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
   * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
+  * builder/amazon: Fix packer crash when waiting for SSH. [GH-3865]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
   * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
