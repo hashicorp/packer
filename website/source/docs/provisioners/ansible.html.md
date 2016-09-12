@@ -78,9 +78,11 @@ Optional Parameters:
 - `sftp_command` (string) - The command to run on the machine being provisioned
   by Packer to handle the SFTP protocol that Ansible will use to transfer
   files. The command should read and write on stdin and stdout, respectively.
-  SCP can be used instead of SFTP by setting `ANSIBLE_SCP_IF_SSH=True` in
-  `ansible_env_vars`.
   Defaults to `/usr/lib/sftp-server -e`.
+
+- `use_sftp` (boolean) - Whether to use SFTP. When false,
+  `ANSIBLE_SCP_IF_SSH=True` will be automatically added to `ansible_env_vars`.
+  Defaults to false.
 
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
   Usage example:
@@ -90,8 +92,7 @@ Optional Parameters:
 ```
 
 - `ansible_env_vars` (array of strings) - Environment variables to set before
-  running Ansible.  If unset, defaults to `ANSIBLE_HOST_KEY_CHECKING=False`.
-  Set `ANSIBLE_SCP_IF_SSH=True` to use SCP instead of SFTP.
+  running Ansible.
   Usage example:
 
 ```

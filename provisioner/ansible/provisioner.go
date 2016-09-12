@@ -52,6 +52,7 @@ type Config struct {
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
+	UseSFTP              bool     `mapstructure:"use_sftp"`
 	inventoryFile        string
 }
 
@@ -106,6 +107,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			log.Println(p.config.SSHHostKeyFile, "does not exist")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	} else {
+		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_HOST_KEY_CHECKING=False")
+	}
+
+	if !p.config.UseSFTP {
+		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_SCP_IF_SSH=True")
 	}
 
 	if len(p.config.LocalPort) > 0 {
@@ -277,7 +284,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}()
 	}
 
-	if err := p.executeAnsible(ui, comm, k.privKeyFile, !hostSigner.generated); err != nil {
+	if err := p.executeAnsible(ui, comm, k.privKeyFile); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
 
@@ -294,7 +301,7 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string, checkHostKey bool) error {
+func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.inventoryFile
 	var envvars []string
@@ -313,10 +320,6 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	cmd.Env = os.Environ()
 	if len(envvars) > 0 {
 		cmd.Env = append(cmd.Env, envvars...)
-	}
-
-	if !checkHostKey {
-		cmd.Env = append(cmd.Env, "ANSIBLE_HOST_KEY_CHECKING=False")
 	}
 
 	stdout, err := cmd.StdoutPipe()
@@ -435,7 +438,6 @@ func newUserKey(pubKeyFile string) (*userKey, error) {
 
 type signer struct {
 	ssh.Signer
-	generated bool
 }
 
 func newSigner(privKeyFile string) (*signer, error) {
@@ -464,7 +466,6 @@ func newSigner(privKeyFile string) (*signer, error) {
 	if err != nil {
 		return nil, errors.New("Failed to extract private key from generated key pair")
 	}
-	signer.generated = true
 
 	return signer, nil
 }

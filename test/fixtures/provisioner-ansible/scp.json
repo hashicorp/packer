@@ -7,10 +7,9 @@
         "extra_arguments": [
           "-vvvv"
         ],
-        "ansible_env_vars": ["ANSIBLE_SCP_IF_SSH=True"],
         "sftp_command": "/usr/bin/false"
       }
-		],
+    ],
     "builders": [
       {
         "type": "googlecompute",
