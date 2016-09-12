@@ -7,7 +7,7 @@ import (
 
 // Artifact represents a GCE image as the result of a Packer build.
 type Artifact struct {
-	image  Image
+	image  *Image
 	driver Driver
 	config *Config
 }
