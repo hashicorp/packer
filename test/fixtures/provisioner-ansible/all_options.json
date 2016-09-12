@@ -3,7 +3,7 @@
     "provisioners": [
       {
         "type": "shell-local",
-        "command": "echo 'TODO(bc): write the public key to $HOME/.ssh/known_hosts and stop using ANSIBLE_HOST_KEY_CHECKING=False'"
+        "command": "echo 'TODO(bhcleek): write the public key to $HOME/.ssh/known_hosts and stop using ANSIBLE_HOST_KEY_CHECKING=False'"
       }, {
         "type": "shell",
         "inline": [
@@ -18,11 +18,12 @@
           "-vvvv", "--private-key", "ansible-test-id"
         ],
         "sftp_command": "/usr/lib/sftp-server -e -l INFO",
+        "use_sftp": true,
         "ansible_env_vars": ["PACKER_ANSIBLE_TEST=1", "ANSIBLE_HOST_KEY_CHECKING=False"],
         "groups": ["PACKER_TEST"],
         "empty_groups": ["PACKER_EMPTY_GROUP"],
         "host_alias": "packer-test",
-        "user": "packer", 
+        "user": "packer",
         "local_port": 2222,
         "ssh_host_key_file": "ansible-server.key",
         "ssh_authorized_key_file": "ansible-test-id.pub"

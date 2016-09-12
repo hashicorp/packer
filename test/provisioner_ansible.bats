@@ -48,6 +48,7 @@ teardown() {
     run packer build ${USER_VARS} $FIXTURE_ROOT/minimal.json
     [ "$status" -eq 0 ]
     [ "$(gc_has_image "packerbats-minimal")" -eq 1 ]
+    diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
 }
 
 @test "ansible provisioner: build all_options.json" {
@@ -55,4 +56,22 @@ teardown() {
     run packer build ${USER_VARS} $FIXTURE_ROOT/all_options.json
     [ "$status" -eq 0 ]
     [ "$(gc_has_image "packerbats-alloptions")" -eq 1 ]
+    diff -r dir fetched-dir/packer-test/tmp/remote-dir > /dev/null
 }
+
+@test "ansible provisioner: build scp.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/scp.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-scp")" -eq 1 ]
+    diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
+}
+
+@test "ansible provisioner: build sftp.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/sftp.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-sftp")" -eq 1 ]
+    diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
+}
+
