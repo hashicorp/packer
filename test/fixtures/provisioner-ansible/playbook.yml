@@ -1,12 +1,12 @@
 ---
-- hosts: default
+- hosts: default:packer-test
   gather_facts: no
   tasks:
     - raw: touch /root/ansible-raw-test
     - raw: date
     - command: echo "the command module"
     - command: mkdir /tmp/remote-dir
-      args: 
+      args:
         creates: /tmp/remote-dir
     - copy: src=dir/file.txt dest=/tmp/remote-dir/file.txt
     - fetch: src=/tmp/remote-dir/file.txt dest=fetched-dir validate=yes fail_on_missing=yes
