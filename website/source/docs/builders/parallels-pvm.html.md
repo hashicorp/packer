@@ -86,7 +86,7 @@ builder.
     listed in this configuration will all be put into the root directory of the
     floppy disk; sub-directories are not supported.
 
--   `floppy_contents` (array of strings) - A list of directories to place onto
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
     your floppy disk includes drivers or if you just want to organize it's 
