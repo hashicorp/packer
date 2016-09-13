@@ -25,20 +25,20 @@ func Retry(initialInterval float64, maxInterval float64, numTries uint, function
 	done := false
 	interval := initialInterval
 	for i := uint(0); !done && (numTries == 0 || i < numTries); i++ {
-	done, err = function()
+		done, err = function()
 		if err != nil {
 			return err
 		}
-    
+
 		if !done {
 			// Retry after delay. Calculate next delay.
 			time.Sleep(time.Duration(interval) * time.Second)
-			interval = math.Min(interval * 2, maxInterval)
+			interval = math.Min(interval*2, maxInterval)
 		}
 	}
 
 	if !done {
-	  return RetryExhaustedError
+		return RetryExhaustedError
 	}
 	return nil
 }

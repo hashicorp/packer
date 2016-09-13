@@ -93,7 +93,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		image:  state.Get("image").(Image),
+		image:  state.Get("image").(*Image),
 		driver: driver,
 		config: b.config,
 	}
