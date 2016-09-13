@@ -157,7 +157,8 @@ builder.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
--   `metadata` (object of key/value strings)
+-   `metadata` (object of key/value strings) - Metadata applied to the launched
+    instance.
 
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
