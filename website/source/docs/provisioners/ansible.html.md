@@ -47,6 +47,9 @@ Required Parameters:
 
 Optional Parameters:
 
+- `command` (string) - The command to invoke ansible.
+   Defaults to `ansible-playbook`.
+
 - `groups` (array of strings) - The groups into which the Ansible host
   should be placed. When unspecified, the host is not associated with any
   groups.
