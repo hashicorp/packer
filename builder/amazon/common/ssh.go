@@ -34,7 +34,7 @@ func SSHHost(e ec2Describer, private bool) func(multistep.StateBag) (string, err
 				} else if i.PrivateIpAddress != nil && *i.PrivateIpAddress != "" {
 					host = *i.PrivateIpAddress
 				}
-			} else if private {
+			} else if private && i.PrivateIpAddress != nil && *i.PrivateIpAddress != "" {
 				host = *i.PrivateIpAddress
 			} else if i.PublicDnsName != nil && *i.PublicDnsName != "" {
 				host = *i.PublicDnsName
