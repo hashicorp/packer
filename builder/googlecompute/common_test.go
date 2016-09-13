@@ -18,7 +18,7 @@ func TestRetry(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Passing function should not have returned a retry error. Error: %s", err)
 	}
-  
+
 	// Test that a failing function gets retried (once in this example).
 	numTries = 0
 	results := []bool{false, true}
@@ -33,7 +33,7 @@ func TestRetry(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Successful retried function should not have returned a retry error. Error: %s", err)
 	}
-	
+
 	// Test that a function error gets returned, and the function does not get called again.
 	numTries = 0
 	funcErr := fmt.Errorf("This function had an error!")
@@ -47,7 +47,7 @@ func TestRetry(t *testing.T) {
 	if err != funcErr {
 		t.Fatalf("Errant function did not return the right error %s. Error: %s", funcErr, err)
 	}
-	
+
 	// Test when a function exhausts its retries.
 	numTries = 0
 	expectedTries := uint(3)

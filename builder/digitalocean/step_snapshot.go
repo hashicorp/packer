@@ -20,9 +20,20 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	dropletId := state.Get("droplet_id").(int)
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
-	_, _, err := client.DropletActions.Snapshot(dropletId, c.SnapshotName)
+	action, _, err := client.DropletActions.Snapshot(dropletId, c.SnapshotName)
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// With the pending state over, verify that we're in the active state
+	ui.Say("Waiting for snapshot to complete...")
+	if err := waitForActionState(godo.ActionCompleted, dropletId, action.ID,
+		client, 20*time.Minute); err != nil {
+		// If we get an error the first time, actually report it
+		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -34,16 +45,6 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	if err := waitForDropletUnlocked(client, dropletId, 20*time.Minute); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// With the pending state over, verify that we're in the active state
-	ui.Say("Waiting for snapshot to complete...")
-	err = waitForDropletState("active", dropletId, client, c.StateTimeout)
-	if err != nil {
-		err := fmt.Errorf("Error waiting for snapshot to complete: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

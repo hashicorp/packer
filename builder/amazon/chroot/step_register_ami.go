@@ -18,22 +18,36 @@ type StepRegisterAMI struct {
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	image := state.Get("source_image").(*ec2.Image)
 	snapshotId := state.Get("snapshot_id").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
-	blockDevices := make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
-	for i, device := range image.BlockDeviceMappings {
+
+	var (
+		registerOpts   *ec2.RegisterImageInput
+		blockDevices   []*ec2.BlockDeviceMapping
+		image          *ec2.Image
+		rootDeviceName string
+	)
+
+	if config.FromScratch {
+		blockDevices = config.AMIBlockDevices.BuildAMIDevices()
+		rootDeviceName = config.RootDeviceName
+	} else {
+		image = state.Get("source_image").(*ec2.Image)
+		blockDevices = make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
+		rootDeviceName = *image.RootDeviceName
+	}
+	for i, device := range blockDevices {
 		newDevice := device
-		if *newDevice.DeviceName == *image.RootDeviceName {
+		if *newDevice.DeviceName == rootDeviceName {
 			if newDevice.Ebs != nil {
 				newDevice.Ebs.SnapshotId = aws.String(snapshotId)
 			} else {
 				newDevice.Ebs = &ec2.EbsBlockDevice{SnapshotId: aws.String(snapshotId)}
 			}
 
-			if s.RootVolumeSize > *newDevice.Ebs.VolumeSize {
+			if config.FromScratch || s.RootVolumeSize > *newDevice.Ebs.VolumeSize {
 				newDevice.Ebs.VolumeSize = aws.Int64(s.RootVolumeSize)
 			}
 		}
@@ -47,7 +61,17 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		blockDevices[i] = newDevice
 	}
 
-	registerOpts := buildRegisterOpts(config, image, blockDevices)
+	if config.FromScratch {
+		registerOpts = &ec2.RegisterImageInput{
+			Name:                &config.AMIName,
+			Architecture:        aws.String(ec2.ArchitectureValuesX8664),
+			RootDeviceName:      aws.String(rootDeviceName),
+			VirtualizationType:  aws.String(config.AMIVirtType),
+			BlockDeviceMappings: blockDevices,
+		}
+	} else {
+		registerOpts = buildRegisterOpts(config, image, blockDevices)
+	}
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
@@ -105,6 +129,5 @@ func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.Blo
 		registerOpts.KernelId = image.KernelId
 		registerOpts.RamdiskId = image.RamdiskId
 	}
-
 	return registerOpts
 }

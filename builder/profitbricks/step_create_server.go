@@ -174,7 +174,7 @@ func (d *stepCreateServer) getImageId(imageName string, c *Config) string {
 		if c.DiskType == "SSD" {
 			diskType = "HDD"
 		}
-		if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && images.Items[i].Properties.ImageType == diskType && images.Items[i].Properties.Location == c.Region {
+		if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && images.Items[i].Properties.ImageType == diskType && images.Items[i].Properties.Location == c.Region && images.Items[i].Properties.Public == true {
 			return images.Items[i].Id
 		}
 	}
