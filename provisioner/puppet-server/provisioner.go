@@ -16,7 +16,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
-	
+
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
@@ -76,11 +76,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = p.commandTemplate()
 	}
-	
+
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = "/tmp/packer-puppet-server"
 	}

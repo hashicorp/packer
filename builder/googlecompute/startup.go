@@ -1,37 +1,40 @@
 package googlecompute
 
 import (
-	"encoding/base64"
 	"fmt"
 )
 
-const StartupScriptStartLog string = "Packer startup script starting."
-const StartupScriptDoneLog string = "Packer startup script done."
 const StartupScriptKey string = "startup-script"
+const StartupScriptStatusKey string = "startup-script-status"
 const StartupWrappedScriptKey string = "packer-wrapped-startup-script"
 
-// We have to encode StartupScriptDoneLog because we use it as a sentinel value to indicate
-// that the user-provided startup script is done. If we pass StartupScriptDoneLog as-is, it
-// will be printed early in the instance console log (before the startup script even runs;
-// we print out instance creation metadata which contains this wrapper script).
-var StartupScriptDoneLogBase64 string = base64.StdEncoding.EncodeToString([]byte(StartupScriptDoneLog))
+const StartupScriptStatusDone string = "done"
+const StartupScriptStatusError string = "error"
+const StartupScriptStatusNotDone string = "notdone"
 
-var StartupScript string = fmt.Sprintf(`#!/bin/bash
-echo %s
+var StartupScriptLinux string = fmt.Sprintf(`#!/bin/bash
+echo "Packer startup script starting."
 RETVAL=0
+BASEMETADATAURL=http://metadata/computeMetadata/v1/instance/
 
 GetMetadata () {
-	echo "$(curl -f -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/attributes/$1 2> /dev/null)"
+	echo "$(curl -f -H "Metadata-Flavor: Google" ${BASEMETADATAURL}/${1} 2> /dev/null)"
 }
 
-STARTUPSCRIPT=$(GetMetadata %s)
+ZONE=$(GetMetadata zone | grep -oP "[^/]*$")
+
+SetMetadata () {
+	gcloud compute instances add-metadata ${HOSTNAME} --metadata ${1}=${2} --zone ${ZONE}
+}
+
+STARTUPSCRIPT=$(GetMetadata attributes/%s)
 STARTUPSCRIPTPATH=/packer-wrapped-startup-script
 if [ -f "/var/log/startupscript.log" ]; then
   STARTUPSCRIPTLOGPATH=/var/log/startupscript.log
 else
   STARTUPSCRIPTLOGPATH=/var/log/daemon.log
 fi
-STARTUPSCRIPTLOGDEST=$(GetMetadata startup-script-log-dest)
+STARTUPSCRIPTLOGDEST=$(GetMetadata attributes/startup-script-log-dest)
 
 if [[ ! -z $STARTUPSCRIPT ]]; then
   echo "Executing user-provided startup script..."
@@ -48,6 +51,9 @@ if [[ ! -z $STARTUPSCRIPT ]]; then
   rm ${STARTUPSCRIPTPATH}
 fi
 
-echo $(echo %s | base64 --decode)
+echo "Packer startup script done."
+SetMetadata %s %s
 exit $RETVAL
-`, StartupScriptStartLog, StartupWrappedScriptKey, StartupScriptDoneLogBase64)
+`, StartupWrappedScriptKey, StartupScriptStatusKey, StartupScriptStatusDone)
+
+var StartupScriptWindows string = ""

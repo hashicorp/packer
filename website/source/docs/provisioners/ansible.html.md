@@ -80,6 +80,10 @@ Optional Parameters:
   files. The command should read and write on stdin and stdout, respectively.
   Defaults to `/usr/lib/sftp-server -e`.
 
+- `use_sftp` (boolean) - Whether to use SFTP. When false,
+  `ANSIBLE_SCP_IF_SSH=True` will be automatically added to `ansible_env_vars`.
+  Defaults to false.
+
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
   Usage example:
 
@@ -87,8 +91,8 @@ Optional Parameters:
 "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
 ```
 
-- `ansible_env_vars` (array of strings) - Environment variables to set before running Ansible.
-  If unset, defaults to `ANSIBLE_HOST_KEY_CHECKING=False`.
+- `ansible_env_vars` (array of strings) - Environment variables to set before
+  running Ansible.
   Usage example:
 
 ```
@@ -100,4 +104,9 @@ Optional Parameters:
 
 ## Limitations
 
-The `ansible` provisioner does not support SCP to transfer files.
+- Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
+
+```
+==> virtualbox-ovf: starting sftp subsystem
+    virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
+```

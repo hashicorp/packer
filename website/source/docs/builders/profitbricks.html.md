@@ -36,7 +36,7 @@ builder.
 
 -   `cores` (integer) - Amount of CPU cores to use for this build. Defaults to "4".
 
--   `disk_size` (string) - Amount of disk space for this image. Defaults to "50gb"
+-   `disk_size` (string) - Amount of disk space for this image. Defaults to "50"
 
 -   `disk_type` (string) - Type of disk to use for this image. Defaults to "HDD".
 
