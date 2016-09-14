@@ -35,8 +35,8 @@ func TestSSHHost(t *testing.T) {
 		{2, "", true, true, privateIP},
 		{2, "vpc-id", false, true, publicIP},
 		{2, "vpc-id", true, true, privateIP},
-		{2, "", false, true, publicDNS},
-		{2, "", true, true, privateIP},
+		{3, "", false, false, ""},
+		{3, "", true, false, ""},
 		{3, "vpc-id", false, false, ""},
 		{3, "vpc-id", true, false, ""},
 	}
