@@ -1,6 +1,7 @@
 package profitbricks
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
@@ -62,7 +63,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	datacenter = profitbricks.CompositeCreateDatacenter(datacenter)
 	if datacenter.StatusCode > 299 {
-		ui.Error(datacenter.Response)
+		ui.Error(parseErrorMessage(datacenter.Response))
 		return multistep.ActionHalt
 	}
 	s.waitTillProvisioned(datacenter.Headers.Get("Location"), *c)
@@ -77,7 +78,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	})
 
 	if lan.StatusCode > 299 {
-		ui.Error(fmt.Sprintf("Error occured %s", lan.Response))
+		ui.Error(fmt.Sprintf("Error occured %s", parseErrorMessage(lan.Response)))
 		return multistep.ActionHalt
 	}
 
@@ -93,7 +94,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	})
 
 	if lan.StatusCode > 299 {
-		ui.Error(fmt.Sprintf("Error occured %s", nic.Response))
+		ui.Error(fmt.Sprintf("Error occured %s", parseErrorMessage(nic.Response)))
 		return multistep.ActionHalt
 	}
 
@@ -179,4 +180,18 @@ func (d *stepCreateServer) getImageId(imageName string, c *Config) string {
 		}
 	}
 	return ""
+}
+
+func parseErrorMessage(raw string) (toreturn string) {
+	var tmp map[string]interface{}
+	json.Unmarshal([]byte(raw), &tmp)
+
+	for _, v := range tmp["messages"].([]interface{}) {
+		for index, i := range v.(map[string]interface{}) {
+			if index == "message" {
+				toreturn = toreturn + i.(string) + "\n"
+			}
+		}
+	}
+	return toreturn
 }
