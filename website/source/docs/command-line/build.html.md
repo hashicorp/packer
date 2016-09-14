@@ -47,3 +47,6 @@ artifacts that are created will be outputted at the end of the build.
     comma-separated names. Build names by default are the names of their
     builders, unless a specific `name` attribute is specified within
     the configuration.
+
+-   `-parallel=false` - Disable parallelization of multiple builders (on by
+    default).
