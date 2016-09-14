@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multistep.Runner, interface{}) {
+func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multistep.Runner, multistep.DebugPauseFn) {
 	switch config.PackerOnError {
 	case "cleanup", "":
 	case "abort":
@@ -34,11 +34,17 @@ func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multi
 	}
 }
 
+// NewRunner returns a multistep.Runner that runs steps augmented with support
+// for -debug and -on-error command line arguments.
 func NewRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) multistep.Runner {
 	runner, _ := newRunner(steps, config, ui)
 	return runner
 }
 
+// NewRunnerWithPauseFn returns a multistep.Runner that runs steps augmented
+// with support for -debug and -on-error command line arguments.  With -debug it
+// puts the multistep.DebugPauseFn that will pause execution between steps into
+// the state under the key "pauseFn".
 func NewRunnerWithPauseFn(steps []multistep.Step, config PackerConfig, ui packer.Ui, state multistep.StateBag) multistep.Runner {
 	runner, pauseFn := newRunner(steps, config, ui)
 	if pauseFn != nil {
