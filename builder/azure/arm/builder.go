@@ -157,7 +157,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		ui.Message(fmt.Sprintf("temp admin password: '%s'", b.config.Password))
 	}
 
-	b.runner = b.createRunner(&steps, ui)
+	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(b.stateBag)
 
 	// Report any errors.
@@ -195,19 +195,6 @@ func (b *Builder) Cancel() {
 	if b.runner != nil {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
-	}
-}
-
-func (b *Builder) createRunner(steps *[]multistep.Step, ui packer.Ui) multistep.Runner {
-	if b.config.PackerDebug {
-		return &multistep.DebugRunner{
-			Steps:   *steps,
-			PauseFn: packerCommon.MultistepDebugFn(ui),
-		}
-	}
-
-	return &multistep.BasicRunner{
-		Steps: *steps,
 	}
 }
 
