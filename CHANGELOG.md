@@ -9,7 +9,8 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
-  * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]
+  * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]  
+    [GH-3790]
 
 IMPROVEMENTS:
 
