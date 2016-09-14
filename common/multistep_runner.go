@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -13,7 +14,7 @@ import (
 
 func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multistep.Runner, multistep.DebugPauseFn) {
 	switch config.PackerOnError {
-	case "cleanup", "":
+	case "cleanup":
 	case "abort":
 		for i, step := range steps {
 			steps[i] = abortStep{step, ui}
@@ -23,7 +24,7 @@ func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multi
 			steps[i] = askStep{step, ui}
 		}
 	default:
-		ui.Error(fmt.Sprintf("Ignoring unknown on-error value %q", config.PackerOnError))
+		ui.Error(fmt.Sprintf("Ignoring -on-error=%q argument: unknown on-error value", config.PackerOnError))
 	}
 
 	if config.PackerDebug {
@@ -136,17 +137,18 @@ func ask(ui packer.Ui, name string, state multistep.StateBag) askResponse {
 
 func askPrompt(ui packer.Ui) askResponse {
 	for {
-		line, err := ui.Ask("[C]lean up and exit, [A]bort without cleanup, or [R]etry step (build may fail even if retry succeeds)? [car]")
+		line, err := ui.Ask("[C]lean up and exit, [a]bort without cleanup, or [r]etry step (build may fail even if retry succeeds)?")
 		if err != nil {
 			log.Printf("Error asking for input: %s", err)
 		}
 
-		switch {
-		case len(line) == 0 || line[0] == 'c':
+		input := strings.ToLower(line) + "c"
+		switch input[0] {
+		case 'c':
 			return askCleanup
-		case line[0] == 'a':
+		case 'a':
 			return askAbort
-		case line[0] == 'r':
+		case 'r':
 			return askRetry
 		}
 		ui.Say(fmt.Sprintf("Incorrect input: %#v", line))
