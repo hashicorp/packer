@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/mitchellh/packer/common"
@@ -17,9 +18,9 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Filename string `mapstructure:"filename"`
-
-	ctx interpolate.Context
+	Filename     string `mapstructure:"filename"`
+	StripPath    bool   `mapstructure:"strip_path"`
+	ctx          interpolate.Context
 }
 
 type PostProcessor struct {
@@ -54,9 +55,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	artifact := &Artifact{}
 
 	var err error
+	var fi os.FileInfo
 
 	// Create the current artifact.
-	artifact.ArtifactFiles = source.Files()
+	for _, name := range source.Files() {
+		af := ArtifactFile{}
+		if fi, err = os.Stat(name); err == nil {
+			af.Size = fi.Size()
+		}
+		if p.config.StripPath {
+			af.Name = filepath.Base(name)
+		} else {
+			af.Name = name
+		}
+		artifact.ArtifactFiles = append(artifact.ArtifactFiles, af)
+	}
 	artifact.ArtifactId = source.Id()
 	artifact.BuilderType = p.config.PackerBuilderType
 	artifact.BuildName = p.config.PackerBuildName
