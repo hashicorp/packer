@@ -73,6 +73,7 @@ BUG FIXES:
   * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
   * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
   * builder/amazon: Fix packer crash when waiting for SSH. [GH-3865]
+  * builder/amazon: Honor ssh_private_ip flag in EC2-Classic. [GH-3752]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
   * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
@@ -82,6 +83,7 @@ BUG FIXES:
   * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
   * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
     [GH-3740]
+  * builder/qemu: Don't fail on communicator set to `none`. [GH-3681]
   * website: improved rendering on iPad [GH-3780]
 
 ## 0.10.1 (May 7, 2016)
