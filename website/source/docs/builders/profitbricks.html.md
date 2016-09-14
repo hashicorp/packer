@@ -25,7 +25,7 @@ builder.
 
 ### Required
 
--   `image` (string) - ProfitBricks volume image 
+-   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. Defaults to "Ubuntu-16.04". To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image). 
 
 -   `password` (string) - ProfitBrucks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
 
