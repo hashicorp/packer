@@ -74,7 +74,7 @@ type Build interface {
 	// deleted prior to the build.
 	SetForce(bool)
 
-	// SetOnError will determines what to do when a normal multistep step fails
+	// SetOnError will determine what to do when a normal multistep step fails
 	// - "cleanup" - run cleanup steps
 	// - "abort" - exit without cleanup
 	// - "ask" - ask the user
