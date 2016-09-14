@@ -288,9 +288,9 @@ Options:
   -except=foo,bar,baz        Build all builds other than these
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
-  -on-error=abort            When a builder fails, abort without cleanup
-  -on-error=ask              When a builder fails, prompt for action
-  -on-error=cleanup          When a builder fails, clean up and exit (the default)
+  -on-error=abort            If the build fails, abort without cleanup
+  -on-error=ask              If the build fails, prompt for action
+  -on-error=cleanup          If the build fails, clean up and exit (the default)
   -only=foo,bar,baz          Only build the given builds by name
   -parallel=false            Disable parallelization (on by default)
   -var 'key=value'           Variable for templates, can be used multiple times.

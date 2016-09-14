@@ -36,6 +36,13 @@ artifacts that are created will be outputted at the end of the build.
     remove the artifacts from the previous build. This will allow the user to
     repeat a build without having to manually clean these artifacts beforehand.
 
+-   `-on-error=cleanup` (default), `-on-error=abort`, `-on-error=ask` - Selects
+    what to do when the build fails.  `cleanup` cleans up after the previous
+    steps, deleting temporary files and virtual machines.  `abort` exits without
+    any cleanup, but the next build may require `-force`.  `ask` presents a
+    prompt and waits for you to decide to clean up, abort, or retry the failed
+    step.
+
 -   `-only=foo,bar,baz` - Only build the builds with the given
     comma-separated names. Build names by default are the names of their
     builders, unless a specific `name` attribute is specified within
