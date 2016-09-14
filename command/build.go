@@ -20,11 +20,13 @@ type BuildCommand struct {
 
 func (c BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
+	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfgColor, "color", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
+	flags.StringVar(&cfgOnError, "on-error", "cleanup", "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
 	if err := flags.Parse(args); err != nil {
 		return 1
@@ -99,12 +101,14 @@ func (c BuildCommand) Run(args []string) int {
 
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
+	log.Printf("On error: %v", cfgOnError)
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
+		b.SetOnError(cfgOnError)
 
 		warnings, err := b.Prepare()
 		if err != nil {
@@ -284,6 +288,9 @@ Options:
   -except=foo,bar,baz        Build all builds other than these
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
+  -on-error=abort            When a builder fails, abort without cleanup
+  -on-error=ask              When a builder fails, prompt for action
+  -on-error=cleanup          When a builder fails, clean up and exit (the default)
   -only=foo,bar,baz          Only build the given builds by name
   -parallel=false            Disable parallelization (on by default)
   -var 'key=value'           Variable for templates, can be used multiple times.
