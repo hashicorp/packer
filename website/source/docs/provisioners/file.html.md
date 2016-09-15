@@ -46,6 +46,9 @@ The available configuration options are listed below. All elements are required.
     "upload." If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
 
+-   `generated` (boolean) - If true, check the file existence only before uploading.
+    This allows to upload files created on-the-fly. This defaults to false.
+
 ## Directory Uploads
 
 The file provisioner is also able to upload a complete directory to the remote
