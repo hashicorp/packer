@@ -22,7 +22,7 @@ IMPROVEMENTS:
   * builder/amazon: Added `shutdown_behavior` option to support `stop` or
     `terminate` at the end of the build [GH-3556]
   * builder/amazon: Support building from scratch with amazon-chroot builder.
-    [GH-3855]
+    [GH-3855] [GH-3895]
   * builder/azure: Now pre-validates `capture_container_name` and
     `capture_name_prefix` [GH-3537]
   * builder/azure: Support for custom images [GH-3575]
@@ -67,10 +67,6 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
-  * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
-  * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
-  * provisioner/ansible: Properly set host key checking even when a custom ENV
-    is specified [GH-3568]
   * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
   * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
   * builder/amazon: Fix packer crash when waiting for SSH. [GH-3865]
@@ -85,6 +81,10 @@ BUG FIXES:
   * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
     [GH-3740]
   * builder/qemu: Don't fail on communicator set to `none`. [GH-3681]
+  * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
+  * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
+  * provisioner/ansible: Properly set host key checking even when a custom ENV
+    is specified [GH-3568]
   * website: improved rendering on iPad [GH-3780]
 
 ## 0.10.1 (May 7, 2016)
