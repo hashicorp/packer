@@ -14,7 +14,7 @@ import (
 
 func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multistep.Runner, multistep.DebugPauseFn) {
 	switch config.PackerOnError {
-	case "cleanup":
+	case "", "cleanup":
 	case "abort":
 		for i, step := range steps {
 			steps[i] = abortStep{step, ui}
@@ -23,8 +23,6 @@ func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multi
 		for i, step := range steps {
 			steps[i] = askStep{step, ui}
 		}
-	default:
-		ui.Error(fmt.Sprintf("Ignoring -on-error=%q argument: unknown on-error value", config.PackerOnError))
 	}
 
 	if config.PackerDebug {

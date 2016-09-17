@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mitchellh/packer/helper/enumflag"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template"
 )
@@ -26,7 +27,8 @@ func (c BuildCommand) Run(args []string) int {
 	flags.BoolVar(&cfgColor, "color", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
-	flags.StringVar(&cfgOnError, "on-error", "cleanup", "")
+	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
+	flags.Var(flagOnError, "on-error", "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
 	if err := flags.Parse(args); err != nil {
 		return 1
