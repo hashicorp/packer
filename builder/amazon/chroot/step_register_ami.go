@@ -25,20 +25,22 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	var (
 		registerOpts   *ec2.RegisterImageInput
-		blockDevices   []*ec2.BlockDeviceMapping
+		mappings       []*ec2.BlockDeviceMapping
 		image          *ec2.Image
 		rootDeviceName string
 	)
 
 	if config.FromScratch {
-		blockDevices = config.AMIBlockDevices.BuildAMIDevices()
+		mappings = config.AMIBlockDevices.BuildAMIDevices()
 		rootDeviceName = config.RootDeviceName
 	} else {
 		image = state.Get("source_image").(*ec2.Image)
-		blockDevices = make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
+		mappings = image.BlockDeviceMappings
 		rootDeviceName = *image.RootDeviceName
 	}
-	for i, device := range blockDevices {
+
+	newMappings := make([]*ec2.BlockDeviceMapping, len(mappings))
+	for i, device := range mappings {
 		newDevice := device
 		if *newDevice.DeviceName == rootDeviceName {
 			if newDevice.Ebs != nil {
@@ -58,7 +60,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			newDevice.Ebs.Encrypted = nil
 		}
 
-		blockDevices[i] = newDevice
+		newMappings[i] = newDevice
 	}
 
 	if config.FromScratch {
@@ -67,10 +69,10 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			Architecture:        aws.String(ec2.ArchitectureValuesX8664),
 			RootDeviceName:      aws.String(rootDeviceName),
 			VirtualizationType:  aws.String(config.AMIVirtType),
-			BlockDeviceMappings: blockDevices,
+			BlockDeviceMappings: newMappings,
 		}
 	} else {
-		registerOpts = buildRegisterOpts(config, image, blockDevices)
+		registerOpts = buildRegisterOpts(config, image, newMappings)
 	}
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
@@ -112,12 +114,12 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {}
 
-func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.BlockDeviceMapping) *ec2.RegisterImageInput {
+func buildRegisterOpts(config *Config, image *ec2.Image, mappings []*ec2.BlockDeviceMapping) *ec2.RegisterImageInput {
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
 		Architecture:        image.Architecture,
 		RootDeviceName:      image.RootDeviceName,
-		BlockDeviceMappings: blockDevices,
+		BlockDeviceMappings: mappings,
 		VirtualizationType:  image.VirtualizationType,
 	}
 
