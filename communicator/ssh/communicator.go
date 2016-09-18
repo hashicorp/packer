@@ -160,6 +160,7 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 	log.Printf("Download dir '%s' to '%s'", src, dst)
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
+		dirStack := []string{dst}
 		for {
 			fmt.Fprint(w, "\x00")
 
@@ -178,6 +179,13 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				return fmt.Errorf("%s", fi[1:len(fi)])
 			case 'C', 'D':
 				break
+			case 'E':
+				dirStack = dirStack[:len(dirStack)-1]
+				if len(dirStack) == 1 {
+					fmt.Fprint(w, "\x00")
+					return nil
+				}
+				continue
 			default:
 				return fmt.Errorf("unexpected server response (%x)", fi[0])
 			}
@@ -195,14 +203,16 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 			}
 
 			log.Printf("Download dir mode:%s size:%d name:%s", mode, size, name)
+
+			dst = filepath.Join(dirStack...)
 			switch fi[0] {
 			case 'D':
 				err = os.MkdirAll(filepath.Join(dst, name), os.FileMode(0755))
 				if err != nil {
 					return err
 				}
-				fmt.Fprint(w, "\x00")
-				return nil
+				dirStack = append(dirStack, name)
+				continue
 			case 'C':
 				fmt.Fprint(w, "\x00")
 				err = scpDownloadFile(filepath.Join(dst, name), stdoutR, size, os.FileMode(0644))
