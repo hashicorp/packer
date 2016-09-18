@@ -135,7 +135,7 @@ func ask(ui packer.Ui, name string, state multistep.StateBag) askResponse {
 
 func askPrompt(ui packer.Ui) askResponse {
 	for {
-		line, err := ui.Ask("[C]lean up and exit, [a]bort without cleanup, or [r]etry step (build may fail even if retry succeeds)?")
+		line, err := ui.Ask("[c] Clean up and exit, [a] abort without cleanup, or [r] retry step (build may fail even if retry succeeds)?")
 		if err != nil {
 			log.Printf("Error asking for input: %s", err)
 		}
