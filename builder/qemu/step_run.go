@@ -35,7 +35,7 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 
 	command, err := getCommandArgs(s.BootDrive, state)
 	if err != nil {
-		err := fmt.Errorf("Error processing QemuArggs: %s", err)
+		err := fmt.Errorf("Error processing QemuArgs: %s", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
