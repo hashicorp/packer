@@ -44,16 +44,22 @@ IMPROVEMENTS:
     with `-debug` [GH-3547]
   * builder/parallels: Support future versions of Parallels by using the latest
     driver [GH-3673]
+  * builder/parallels: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/qemu: Added `vnc_bind_address` option [GH-3574]
   * builder/virtualbox: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3542]
   * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
+  * builder/virtualbox: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/vmware: Now paused between `boot_command` entries when running with
     `-debug` [GH-3542]
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
   * builder/vmware: Adds passwords for VNC [GH-2325]
   * builder/vmware: Handle connection to VM with more than one NIC on ESXi
     [GH-3347]
+  * builder/vmware: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/qemu: Now pauses between `boot_command` entries when running with
     `-debug` [GH-3547]
   * provisioner/ansible: Improved logging and error handling [GH-3477]
