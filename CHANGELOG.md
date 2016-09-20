@@ -11,6 +11,8 @@ FEATURES:
 
   * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]  
     [GH-3790]
+  * **New build flag** `-on-error` to allow inspection and keeping artifacts on builder errors. [GH-3885]
+
 
 IMPROVEMENTS:
 
@@ -36,6 +38,7 @@ IMPROVEMENTS:
   * builder/google: Use gcloud application default credentials. [GH-3655]
   * builder/google: Signal that startup script fished via metadata. [GH-3873]
   * builder/google: Add image license metadata. [GH-3873]
+  * builder/google: Enable to select NVMe images. [GH-3338]
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3547]
@@ -74,6 +77,7 @@ BUG FIXES:
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
   * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
+  * builder/docker: Fix file provisioner dotfile matching. [GH-3800]
   * builder/virtualbox: Respect `ssh_host` [GH-3617]
   * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
   * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
