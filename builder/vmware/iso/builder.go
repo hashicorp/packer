@@ -28,6 +28,7 @@ type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
 	common.HTTPConfig        `mapstructure:",squash"`
 	common.ISOConfig         `mapstructure:",squash"`
+	common.FloppyConfig      `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
@@ -40,7 +41,6 @@ type Config struct {
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	FloppyFiles         []string `mapstructure:"floppy_files"`
 	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
 	Version             string   `mapstructure:"version"`
@@ -60,6 +60,8 @@ type Config struct {
 	RemoteUser           string `mapstructure:"remote_username"`
 	RemotePassword       string `mapstructure:"remote_password"`
 	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
+
+	CommConfig communicator.Config `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -95,6 +97,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -111,10 +114,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if b.config.RemoteType == "esx5" {
 			b.config.DiskTypeId = "zeroedthick"
 		}
-	}
-
-	if b.config.FloppyFiles == nil {
-		b.config.FloppyFiles = make([]string, 0)
 	}
 
 	if b.config.GuestOSType == "" {
@@ -208,6 +207,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("cache", cache)
 	state.Put("config", &b.config)
+	state.Put("debug", b.config.PackerDebug)
 	state.Put("dir", dir)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
@@ -253,8 +253,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
-			VNCPortMin: b.config.VNCPortMin,
-			VNCPortMax: b.config.VNCPortMax,
+			VNCBindAddress:     b.config.VNCBindAddress,
+			VNCPortMin:         b.config.VNCPortMin,
+			VNCPortMax:         b.config.VNCPortMax,
+			VNCDisablePassword: b.config.VNCDisablePassword,
 		},
 		&StepRegister{
 			Format: b.config.Format,
@@ -303,15 +305,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run!
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// If there was an error, return that
@@ -330,7 +324,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Compile the artifact list
 	var files []string
-	if b.config.RemoteType != "" {
+	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
 		dir.SetOutputDir(b.config.OutputDir)
 		files, err = dir.ListFiles()

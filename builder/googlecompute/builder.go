@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // representing a GCE machine image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, &b.config.account)
+		ui, b.config.ProjectId, &b.config.Account)
 	if err != nil {
 		return nil, err
 	}
@@ -67,33 +67,28 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig: sshConfig,
 		},
 		new(common.StepProvision),
+		new(StepWaitInstanceStartup),
 		new(StepTeardownInstance),
 		new(StepCreateImage),
 	}
 
 	// Run the steps.
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// Report any errors.
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
-	if _, ok := state.GetOk("image_name"); !ok {
-		log.Println("Failed to find image_name in state. Bug?")
+	if _, ok := state.GetOk("image"); !ok {
+		log.Println("Failed to find image in state. Bug?")
 		return nil, nil
 	}
 
 	artifact := &Artifact{
-		imageName: state.Get("image_name").(string),
-		driver:    driver,
+		image:  state.Get("image").(*Image),
+		driver: driver,
+		config: b.config,
 	}
 	return artifact, nil
 }

@@ -23,7 +23,10 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating image...")
-	errCh := driver.CreateImage(config.ImageName, config.ImageDescription, config.Zone, config.DiskName)
+
+	imageCh, errCh := driver.CreateImage(
+		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
+		config.DiskName)
 	var err error
 	select {
 	case err = <-errCh:
@@ -38,7 +41,7 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	state.Put("image_name", config.ImageName)
+	state.Put("image", <-imageCh)
 	return multistep.ActionContinue
 }
 

@@ -28,7 +28,7 @@ to use it or delete it.
 
 \~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
 builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
-installed _if you are using temporary key pairs_, i.g. don't use
+installed _if you are using temporary key pairs_, i.e. don't use
 [`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
 [`ssh_password`](/docs/templates/communicator.html#ssh_password). All major
 OS'es have OpenSSL installed by default except Windows.

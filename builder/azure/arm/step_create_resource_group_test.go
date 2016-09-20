@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -32,7 +32,7 @@ func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 
 func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string) error { return nil },
+		create: func(string, string, *map[string]*string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -52,11 +52,13 @@ func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualResourceGroupName string
 	var actualLocation string
+	var actualTags *map[string]*string
 
 	var testSubject = &StepCreateResourceGroup{
-		create: func(resourceGroupName string, location string) error {
+		create: func(resourceGroupName string, location string, tags *map[string]*string) error {
 			actualResourceGroupName = resourceGroupName
 			actualLocation = location
+			actualTags = tags
 			return nil
 		},
 		say:   func(message string) {},
@@ -70,20 +72,25 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	var expectedLocation = stateBag.Get(constants.ArmLocation).(string)
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
+	var expectedLocation = stateBag.Get(constants.ArmLocation).(string)
+	var expectedTags = stateBag.Get(constants.ArmTags).(*map[string]*string)
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	if actualLocation != expectedLocation {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+	}
+
+	if len(*expectedTags) != len(*actualTags) && *(*expectedTags)["tag01"] != *(*actualTags)["tag01"] {
+		t.Fatal("Expected the step to source 'constants.ArmTags' from the state bag, but it did not.")
 	}
 
 	_, ok := stateBag.GetOk(constants.ArmIsResourceGroupCreated)
 	if !ok {
-		t.Fatalf("Expected the step to add item to stateBag['constants.ArmIsResourceGroupCreated'], but it did not.")
+		t.Fatal("Expected the step to add item to stateBag['constants.ArmIsResourceGroupCreated'], but it did not.")
 	}
 }
 
@@ -92,6 +99,13 @@ func createTestStateBagStepCreateResourceGroup() multistep.StateBag {
 
 	stateBag.Put(constants.ArmLocation, "Unit Test: Location")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+
+	value := "Unit Test: Tags"
+	tags := map[string]*string{
+		"tag01": &value,
+	}
+
+	stateBag.Put(constants.ArmTags, &tags)
 
 	return stateBag
 }

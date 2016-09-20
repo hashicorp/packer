@@ -89,6 +89,7 @@ Packer to work:
 
 ``` {.javascript}
 {
+  "Version": "2012-10-17",
   "Statement": [{
       "Effect": "Allow",
       "Action" : [
@@ -114,8 +115,15 @@ Packer to work:
         "ec2:DescribeSnapshots",
         "ec2:DescribeImages",
         "ec2:RegisterImage",
+        "ec2:DeregisterImage",
         "ec2:CreateTags",
-        "ec2:ModifyImageAttribute"
+        "ec2:ModifyImageAttribute",
+        "ec2:GetPasswordData",
+        "ec2:DescribeTags",
+        "ec2:DescribeImageAttribute",
+        "ec2:CopyImage",
+        "ec2:DescribeRegions",
+        "ec2:ModifyInstanceAttribute"
       ],
       "Resource" : "*"
   }]

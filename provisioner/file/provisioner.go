@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mitchellh/packer/common"
@@ -95,12 +96,20 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) error {
 	for _, src := range p.config.Sources {
 		ui.Say(fmt.Sprintf("Downloading %s => %s", src, p.config.Destination))
-
-		if strings.HasSuffix(p.config.Destination, "/") {
-			err := os.MkdirAll(p.config.Destination, os.FileMode(0755))
+		// ensure destination dir exists.  p.config.Destination may either be a file or a dir.
+		dir := p.config.Destination
+		// if it doesn't end with a /, set dir as the parent dir
+		if !strings.HasSuffix(p.config.Destination, "/") {
+			dir = filepath.Dir(dir)
+		}
+		if dir != "" {
+			err := os.MkdirAll(dir, os.FileMode(0755))
 			if err != nil {
 				return err
 			}
+		}
+		// if the config.Destination was a dir, download the dir
+		if !strings.HasSuffix(p.config.Destination, "/") {
 			return comm.DownloadDir(src, p.config.Destination, nil)
 		}
 

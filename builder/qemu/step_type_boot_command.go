@@ -38,9 +38,15 @@ type stepTypeBootCommand struct{}
 
 func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
+	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	vncPort := state.Get("vnc_port").(uint)
+
+	var pauseFn multistep.DebugPauseFn
+	if debug {
+		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
+	}
 
 	// Connect to VNC
 	ui.Say("Connecting to VM via VNC")
@@ -72,7 +78,7 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Say("Typing the boot command over VNC...")
-	for _, command := range config.BootCommand {
+	for i, command := range config.BootCommand {
 		command, err := interpolate.Render(command, &ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
@@ -85,6 +91,10 @@ func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		// since this isn't the fastest thing.
 		if _, ok := state.GetOk(multistep.StateCancelled); ok {
 			return multistep.ActionHalt
+		}
+
+		if pauseFn != nil {
+			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
 		}
 
 		vncSendString(c, command)

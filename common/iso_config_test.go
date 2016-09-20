@@ -26,6 +26,14 @@ bAr0 *the-OS.iso
 baZ0  other.iso
 `
 
+var cs_bsd_style_no_newline = `
+MD5 (other.iso) = bAr
+MD5 (the-OS.iso) = baZ`
+
+var cs_gnu_style_no_newline = `
+bAr0 *the-OS.iso
+baZ0  other.iso`
+
 func TestISOConfigPrepare_ISOChecksum(t *testing.T) {
 	i := testISOConfig()
 
@@ -100,6 +108,43 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	if i.ISOChecksum != "bar0" {
 		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
 	}
+
+	// Test good - ISOChecksumURL BSD style no newline
+	i = testISOConfig()
+	i.ISOChecksum = ""
+	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style_no_newline), 0666)
+	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
+	warns, err = i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if i.ISOChecksum != "baz" {
+		t.Fatalf("should've found \"baz\" got: %s", i.ISOChecksum)
+	}
+
+	// Test good - ISOChecksumURL GNU style no newline
+	i = testISOConfig()
+	i.ISOChecksum = ""
+	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style_no_newline), 0666)
+	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
+	warns, err = i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if i.ISOChecksum != "bar0" {
+		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
+	}
+
 }
 
 func TestISOConfigPrepare_ISOChecksumType(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/multistep"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStepCreateImage_impl(t *testing.T) {
@@ -16,37 +17,35 @@ func TestStepCreateImage(t *testing.T) {
 	step := new(StepCreateImage)
 	defer step.Cleanup(state)
 
-	config := state.Get("config").(*Config)
-	driver := state.Get("driver").(*DriverMock)
+	c := state.Get("config").(*Config)
+	d := state.Get("driver").(*DriverMock)
+
+	// These are the values of the image the driver will return.
+	d.CreateImageResultLicenses = []string{"test-license"}
+	d.CreateImageResultProjectId = "test-project"
+	d.CreateImageResultSizeGb = 100
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
-		t.Fatalf("bad action: %#v", action)
-	}
+	action := step.Run(state)
+	assert.Equal(t, action, multistep.ActionContinue, "Step did not pass.")
+	
+	uncastImage, ok := state.GetOk("image")
+	assert.True(t, ok, "State does not have resulting image.")
+	image, ok := uncastImage.(*Image)
+	assert.True(t, ok, "Image in state is not an Image.")
+	
+	// Verify created Image results.
+	assert.Equal(t, image.Licenses, d.CreateImageResultLicenses, "Created image licenses don't match the licenses returned by the driver.")
+	assert.Equal(t, image.Name, c.ImageName, "Created image does not match config name.")
+	assert.Equal(t, image.ProjectId, d.CreateImageResultProjectId, "Created image project does not match driver project.")
+	assert.Equal(t, image.SizeGb, d.CreateImageResultSizeGb, "Created image size does not match the size returned by the driver.")
 
-	// Verify state
-	if driver.CreateImageName != config.ImageName {
-		t.Fatalf("bad: %#v", driver.CreateImageName)
-	}
-	if driver.CreateImageDesc != config.ImageDescription {
-		t.Fatalf("bad: %#v", driver.CreateImageDesc)
-	}
-	if driver.CreateImageZone != config.Zone {
-		t.Fatalf("bad: %#v", driver.CreateImageZone)
-	}
-	if driver.CreateImageDisk != config.DiskName {
-		t.Fatalf("bad: %#v", driver.CreateImageDisk)
-	}
-
-	nameRaw, ok := state.GetOk("image_name")
-	if !ok {
-		t.Fatal("should have name")
-	}
-	if name, ok := nameRaw.(string); !ok {
-		t.Fatal("name is not a string")
-	} else if name != config.ImageName {
-		t.Fatalf("bad name: %s", name)
-	}
+	// Verify proper args passed to driver.CreateImage.
+	assert.Equal(t, d.CreateImageName, c.ImageName, "Incorrect image name passed to driver.")
+	assert.Equal(t, d.CreateImageDesc, c.ImageDescription, "Incorrect image description passed to driver.")
+	assert.Equal(t, d.CreateImageFamily, c.ImageFamily, "Incorrect image family passed to driver.")
+	assert.Equal(t, d.CreateImageZone, c.Zone, "Incorrect image zone passed to driver.")
+	assert.Equal(t, d.CreateImageDisk, c.DiskName, "Incorrect disk passed to driver.")
 }
 
 func TestStepCreateImage_errorOnChannel(t *testing.T) {
@@ -61,14 +60,10 @@ func TestStepCreateImage_errorOnChannel(t *testing.T) {
 	driver.CreateImageErrCh = errCh
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
-		t.Fatalf("bad action: %#v", action)
-	}
-
-	if _, ok := state.GetOk("error"); !ok {
-		t.Fatal("should have error")
-	}
-	if _, ok := state.GetOk("image_name"); ok {
-		t.Fatal("should NOT have image")
-	}
+	action := step.Run(state)
+	assert.Equal(t, action, multistep.ActionHalt, "Step should not have passed.")
+	_, ok := state.GetOk("error")
+	assert.True(t, ok, "State should have an error.")
+	_, ok = state.GetOk("image_name")
+	assert.False(t, ok, "State should not have a resulting image.")
 }

@@ -4,6 +4,7 @@ func listEC2Regions() []string {
 	return []string{
 		"ap-northeast-1",
 		"ap-northeast-2",
+		"ap-south-1",
 		"ap-southeast-1",
 		"ap-southeast-2",
 		"cn-north-1",

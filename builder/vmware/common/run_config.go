@@ -11,8 +11,10 @@ type RunConfig struct {
 	Headless    bool   `mapstructure:"headless"`
 	RawBootWait string `mapstructure:"boot_wait"`
 
-	VNCPortMin uint `mapstructure:"vnc_port_min"`
-	VNCPortMax uint `mapstructure:"vnc_port_max"`
+	VNCBindAddress     string `mapstructure:"vnc_bind_address"`
+	VNCPortMin         uint   `mapstructure:"vnc_port_min"`
+	VNCPortMax         uint   `mapstructure:"vnc_port_max"`
+	VNCDisablePassword bool   `mapstructure:"vnc_disable_password"`
 
 	BootWait time.Duration ``
 }
@@ -28,6 +30,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.VNCPortMax == 0 {
 		c.VNCPortMax = 6000
+	}
+
+	if c.VNCBindAddress == "" {
+		c.VNCBindAddress = "127.0.0.1"
 	}
 
 	var errs []error

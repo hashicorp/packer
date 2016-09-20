@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepPowerOffComputeShouldFailIfPowerOffFails(t *testing.T) {
@@ -75,11 +75,11 @@ func TestStepPowerOffComputeShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 
 	if actualComputeName != expectedComputeName {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 }
 

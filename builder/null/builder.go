@@ -30,7 +30,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&communicator.StepConnect{
 			Config: &b.config.CommConfig,
-			Host:   CommHost(b.config.CommConfig.SSHHost),
+			Host:   CommHost(b.config.CommConfig.Host()),
 			SSHConfig: SSHConfig(
 				b.config.CommConfig.SSHUsername,
 				b.config.CommConfig.SSHPassword,
@@ -46,15 +46,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	// Run!
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// If there was an error, return that

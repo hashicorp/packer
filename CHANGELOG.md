@@ -1,5 +1,98 @@
 ## (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * VNC and VRDP-like features in VirtualBox, VMware, and QEMU now configurable
+    but bind to 127.0.0.1 by default to improve security. See the relevant
+    builder docs for more info.
+  * Docker builder requires Docker > 1.3
+
+FEATURES:
+
+  * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]  
+    [GH-3790]
+  * **New build flag** `-on-error` to allow inspection and keeping artifacts on builder errors. [GH-3885]
+
+
+IMPROVEMENTS:
+
+  * core: Test floppy disk files actually exist [GH-3756]
+  * builder/amazon: Added `disable_stop_instance` option to prevent automatic
+    shutdown when the build is complete [GH-3352]
+  * builder/amazon: Added `skip_region_validation` option to allow newer or
+    custom AWS regions [GH-3598]
+  * builder/amazon: Added `shutdown_behavior` option to support `stop` or
+    `terminate` at the end of the build [GH-3556]
+  * builder/amazon: Support building from scratch with amazon-chroot builder.
+    [GH-3855] [GH-3895]
+  * builder/azure: Now pre-validates `capture_container_name` and
+    `capture_name_prefix` [GH-3537]
+  * builder/azure: Support for custom images [GH-3575]
+  * builder/azure: Removed superfluous polling code for deployments [GH-3638]
+  * builder/azure: Made `tenant_id` optional [GH-3643]
+  * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
+    [GH-3444]
+  * builder/digitalocean: Fixes timeout waiting for snapshot [GH-3868]
+  * builder/docker: Improved support for Docker pull from Amazon ECR. [GH-3856]
+  * builder/google: Added support for `image_family` [GH-3503]
+  * builder/google: Use gcloud application default credentials. [GH-3655]
+  * builder/google: Signal that startup script fished via metadata. [GH-3873]
+  * builder/google: Add image license metadata. [GH-3873]
+  * builder/google: Enable to select NVMe images. [GH-3338]
+  * builder/null: Can now be used with WinRM [GH-2525]
+  * builder/parallels: Now pauses between `boot_command` entries when running
+    with `-debug` [GH-3547]
+  * builder/parallels: Support future versions of Parallels by using the latest
+    driver [GH-3673]
+  * builder/qemu: Added `vnc_bind_address` option [GH-3574]
+  * builder/virtualbox: Now pauses between `boot_command` entries when running
+    with `-debug` [GH-3542]
+  * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
+  * builder/vmware: Now paused between `boot_command` entries when running with
+    `-debug` [GH-3542]
+  * builder/vmware: Added `vnc_bind_address` option [GH-3565]
+  * builder/vmware: Adds passwords for VNC [GH-2325]
+  * builder/vmware: Handle connection to VM with more than one NIC on ESXi
+    [GH-3347]
+  * builder/qemu: Now pauses between `boot_command` entries when running with
+    `-debug` [GH-3547]
+  * provisioner/ansible: Improved logging and error handling [GH-3477]
+  * provisioner/ansible: Support scp [GH-3861]
+  * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
+  * provisioner/chef: Added `knife_command` option and added a correct default
+    value for Windows [GH-3622]
+  * provisioner/chef: Installs 64bit chef on Windows if available [GH-3848]
+  * provisioner/puppet: Added `execute_command` option [GH-3614]
+  * post-processor/compress: Added support for bgzf compression [GH-3501]
+  * post-processor/docker: Preserve tags when running docker push [GH-3631]
+  * post-processor/docker: Improved support for Docker push to Amazon ECR [GH-3856]
+  * scripts: Added `help` target to Makefile [GH-3290]
+
+BUG FIXES:
+
+  * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
+  * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
+  * builder/amazon: Fix packer crash when waiting for SSH. [GH-3865]
+  * builder/amazon: Honor ssh_private_ip flag in EC2-Classic. [GH-3752]
+  * builder/azure: check for empty resource group [GH-3606]
+  * builder/azure: fix token validity test [GH-3609]
+  * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
+  * builder/docker: Fix file provisioner dotfile matching. [GH-3800]
+  * builder/virtualbox: Respect `ssh_host` [GH-3617]
+  * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
+  * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
+  * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
+  * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
+    [GH-3740]
+  * builder/qemu: Don't fail on communicator set to `none`. [GH-3681]
+  * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
+  * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
+  * provisioner/ansible: Properly set host key checking even when a custom ENV
+    is specified [GH-3568]
+  * website: improved rendering on iPad [GH-3780]
+
+## 0.10.1 (May 7, 2016)
+
 FEATURES:
 
   * `azure-arm` builder: Can now build Windows images, and supports additional
@@ -18,6 +111,8 @@ IMPROVEMENTS:
   * builder/google: Packer now identifies its version to the service [GH-3465]
   * provisioner/shell: Added `remote_folder` and `remote_file` options
     [GH-3462]
+  * post-processor/compress: Added support for `bgzf` format and added
+    `format` option [GH-3501]
 
 BUG FIXES:
 
@@ -514,7 +609,7 @@ BUG FIXES:
   * builder/parallels: Disconnect cdrom0 [GH-1605]
   * builder/qemu: Don't use `-redir` flag anymore, replace with
       `hostfwd` options. [GH-1561]
-  * builder/qmeu: Use `pc` as default machine type instead of `pc-1.0`.
+  * builder/qemu: Use `pc` as default machine type instead of `pc-1.0`.
   * providers/aws: Ignore transient network errors. [GH-1579]
   * provisioner/ansible: Don't buffer output so output streams in. [GH-1585]
   * provisioner/ansible: Use inventory file always to avoid potentially

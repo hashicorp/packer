@@ -6,12 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
+	"strings"
 
 	"github.com/mitchellh/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
+// An adapter satisfies SSH requests (from an Ansible client) by delegating SSH
+// exec and subsystem commands to a packer.Communicator.
 type adapter struct {
 	done    <-chan struct{}
 	l       net.Listener
@@ -100,85 +104,71 @@ func (c *adapter) handleSession(newChannel ssh.NewChannel) error {
 		for req := range in {
 			switch req.Type {
 			case "pty-req":
+				log.Println("ansible provisioner pty-req request")
 				// accept pty-req requests, but don't actually do anything. Necessary for OpenSSH and sudo.
 				req.Reply(true, nil)
 
 			case "env":
-				req.Reply(true, nil)
-
 				req, err := newEnvRequest(req)
 				if err != nil {
 					c.ui.Error(err.Error())
+					req.Reply(false, nil)
 					continue
 				}
 				env = append(env, req.Payload)
-			case "exec":
+				log.Printf("new env request: %s", req.Payload)
 				req.Reply(true, nil)
-
+			case "exec":
 				req, err := newExecRequest(req)
 				if err != nil {
 					c.ui.Error(err.Error())
+					req.Reply(false, nil)
 					close(done)
 					continue
 				}
 
-				if len(req.Payload) > 0 {
-					cmd := &packer.RemoteCmd{
-						Stdin:   channel,
-						Stdout:  channel,
-						Stderr:  channel.Stderr(),
-						Command: string(req.Payload),
-					}
+				log.Printf("new exec request: %s", req.Payload)
 
-					if err := c.comm.Start(cmd); err != nil {
-						c.ui.Error(err.Error())
-						close(done)
-						return
-					}
-					go func(cmd *packer.RemoteCmd, channel ssh.Channel) {
-						cmd.Wait()
-
-						exitStatus := make([]byte, 4)
-						binary.BigEndian.PutUint32(exitStatus, uint32(cmd.ExitStatus))
-						channel.SendRequest("exit-status", false, exitStatus)
-						close(done)
-					}(cmd, channel)
+				if len(req.Payload) == 0 {
+					req.Reply(false, nil)
+					close(done)
+					return
 				}
 
+				go func(channel ssh.Channel) {
+					exit := c.exec(string(req.Payload), channel, channel, channel.Stderr())
+
+					exitStatus := make([]byte, 4)
+					binary.BigEndian.PutUint32(exitStatus, uint32(exit))
+					channel.SendRequest("exit-status", false, exitStatus)
+					close(done)
+				}(channel)
+				req.Reply(true, nil)
 			case "subsystem":
 				req, err := newSubsystemRequest(req)
 				if err != nil {
 					c.ui.Error(err.Error())
+					req.Reply(false, nil)
 					continue
 				}
 
+				log.Printf("new subsystem request: %s", req.Payload)
 				switch req.Payload {
 				case "sftp":
-					c.ui.Say("starting sftp subsystem")
-					req.Reply(true, nil)
 					sftpCmd := c.sftpCmd
 					if len(sftpCmd) == 0 {
 						sftpCmd = "/usr/lib/sftp-server -e"
 					}
-					cmd := &packer.RemoteCmd{
-						Stdin:   channel,
-						Stdout:  channel,
-						Stderr:  channel.Stderr(),
-						Command: sftpCmd,
-					}
 
-					if err := c.comm.Start(cmd); err != nil {
-						c.ui.Error(err.Error())
-					}
-
+					c.ui.Say("starting sftp subsystem")
 					go func() {
-						cmd.Wait()
+						_ = c.remoteExec(sftpCmd, channel, channel, channel.Stderr())
 						close(done)
 					}()
-
+					req.Reply(true, nil)
 				default:
+					c.ui.Error(fmt.Sprintf("unsupported subsystem requested: %s", req.Payload))
 					req.Reply(false, nil)
-
 				}
 			default:
 				c.ui.Message(fmt.Sprintf("rejecting %s request", req.Type))
@@ -195,6 +185,57 @@ func (c *adapter) Shutdown() {
 	c.l.Close()
 }
 
+func (c *adapter) exec(command string, in io.Reader, out io.Writer, err io.Writer) int {
+	var exitStatus int
+	switch {
+	case strings.HasPrefix(command, "scp ") && serveSCP(command[4:]):
+		err := c.scpExec(command[4:], in, out, err)
+		if err != nil {
+			log.Println(err)
+			exitStatus = 1
+		}
+	default:
+		exitStatus = c.remoteExec(command, in, out, err)
+	}
+	return exitStatus
+}
+
+func serveSCP(args string) bool {
+	opts, _ := scpOptions(args)
+	return bytes.IndexAny(opts, "tf") >= 0
+}
+
+func (c *adapter) scpExec(args string, in io.Reader, out io.Writer, err io.Writer) error {
+	opts, rest := scpOptions(args)
+
+	if i := bytes.IndexByte(opts, 't'); i >= 0 {
+		return scpUploadSession(opts, rest, in, out, c.comm)
+	}
+
+	if i := bytes.IndexByte(opts, 'f'); i >= 0 {
+		return scpDownloadSession(opts, rest, in, out, c.comm)
+	}
+	return errors.New("no scp mode specified")
+}
+
+func (c *adapter) remoteExec(command string, in io.Reader, out io.Writer, err io.Writer) int {
+	cmd := &packer.RemoteCmd{
+		Stdin:   in,
+		Stdout:  out,
+		Stderr:  err,
+		Command: command,
+	}
+
+	if err := c.comm.Start(cmd); err != nil {
+		c.ui.Error(err.Error())
+		return cmd.ExitStatus
+	}
+
+	cmd.Wait()
+
+	return cmd.ExitStatus
+}
+
 type envRequest struct {
 	*ssh.Request
 	Payload envRequestPayload
@@ -203,6 +244,10 @@ type envRequest struct {
 type envRequestPayload struct {
 	Name  string
 	Value string
+}
+
+func (p envRequestPayload) String() string {
+	return fmt.Sprintf("%s=%s", p.Name, p.Value)
 }
 
 func newEnvRequest(raw *ssh.Request) (*envRequest, error) {
@@ -238,6 +283,10 @@ type execRequest struct {
 
 type execRequestPayload string
 
+func (p execRequestPayload) String() string {
+	return string(p)
+}
+
 func newExecRequest(raw *ssh.Request) (*execRequest, error) {
 	r := new(execRequest)
 	r.Request = raw
@@ -259,6 +308,10 @@ type subsystemRequest struct {
 }
 
 type subsystemRequestPayload string
+
+func (p subsystemRequestPayload) String() string {
+	return string(p)
+}
 
 func newSubsystemRequest(raw *ssh.Request) (*subsystemRequest, error) {
 	r := new(subsystemRequest)

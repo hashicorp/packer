@@ -7,14 +7,14 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepCreateResourceGroup struct {
 	client *AzureClient
-	create func(resourceGroupName string, location string) error
+	create func(resourceGroupName string, location string, tags *map[string]*string) error
 	say    func(message string)
 	error  func(e error)
 }
@@ -30,9 +30,10 @@ func NewStepCreateResourceGroup(client *AzureClient, ui packer.Ui) *StepCreateRe
 	return step
 }
 
-func (s *StepCreateResourceGroup) createResourceGroup(resourceGroupName string, location string) error {
+func (s *StepCreateResourceGroup) createResourceGroup(resourceGroupName string, location string, tags *map[string]*string) error {
 	_, err := s.client.GroupsClient.CreateOrUpdate(resourceGroupName, resources.ResourceGroup{
 		Location: &location,
+		Tags:     tags,
 	})
 
 	return err
@@ -43,11 +44,16 @@ func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAc
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var location = state.Get(constants.ArmLocation).(string)
+	var tags = state.Get(constants.ArmTags).(*map[string]*string)
 
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> Location          : '%s'", location))
+	s.say(fmt.Sprintf(" -> Tags              :"))
+	for k, v := range *tags {
+		s.say(fmt.Sprintf(" ->> %s : %s", k, *v))
+	}
 
-	err := s.create(resourceGroupName, location)
+	err := s.create(resourceGroupName, location, tags)
 	if err == nil {
 		state.Put(constants.ArmIsResourceGroupCreated, true)
 	}
@@ -56,8 +62,8 @@ func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAc
 }
 
 func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
-	_, ok := state.GetOk(constants.ArmIsResourceGroupCreated)
-	if !ok {
+	isCreated, ok := state.GetOk(constants.ArmIsResourceGroupCreated)
+	if !ok || !isCreated.(bool) {
 		return
 	}
 

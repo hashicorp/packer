@@ -26,7 +26,7 @@ func (a *Authenticate) getServicePrincipalToken() (*azure.ServicePrincipalToken,
 }
 
 func (a *Authenticate) getServicePrincipalTokenWithResource(resource string) (*azure.ServicePrincipalToken, error) {
-	oauthConfig, err := newOAuthConfigWithTenant(a.tenantID)
+	oauthConfig, err := a.env.OAuthConfigForTenant(a.tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +38,4 @@ func (a *Authenticate) getServicePrincipalTokenWithResource(resource string) (*a
 		resource)
 
 	return spt, err
-}
-
-func newOAuthConfigWithTenant(tenantID string) (*azure.OAuthConfig, error) {
-	return azure.PublicCloud.OAuthConfigForTenant(tenantID)
 }

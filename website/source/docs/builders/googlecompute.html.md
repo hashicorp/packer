@@ -1,8 +1,9 @@
 ---
 description: |
     The `googlecompute` Packer builder is able to create images for use with Google
-    Compute Engine (GCE) based on existing images. Google Compute Engine doesn't
-    allow the creation of images from scratch.
+    Compute Engine (GCE) based on existing images. Building GCE images from scratch
+    is not possible from Packer at this time. For building images from scratch, please see
+    [Building GCE Images from Scratch](https://cloud.google.com/compute/docs/tutorials/building-images).
 layout: docs
 page_title: Google Compute Builder
 ...
@@ -14,9 +15,9 @@ Type: `googlecompute`
 The `googlecompute` Packer builder is able to create
 [images](https://developers.google.com/compute/docs/images) for use with [Google
 Compute Engine](https://cloud.google.com/products/compute-engine)(GCE) based on
-existing images. Google Compute Engine doesn't allow the creation of images from
-scratch.
-
+existing images. Building GCE images from scratch is not possible from Packer at
+this time. For building images from scratch, please see
+[Building GCE Images from Scratch](https://cloud.google.com/compute/docs/tutorials/building-images).
 ## Authentication
 
 Authenticating with Google Cloud services requires at most one JSON file, called
@@ -73,21 +74,39 @@ straightforwarded, it is documented here.
 4.  Click "Generate new JSON key" for the Service Account you just created. A
     JSON file will be downloaded automatically. This is your *account file*.
 
+### Precedence of Authentication Methods
+
+Packer looks for credentials in the following places, preferring the first location found:
+
+1.  A `account_file` option in your packer file.
+
+2.  A JSON file (Service Account) whose path is specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+3.  A JSON file in a location known to the `gcloud` command-line tool. (`gcloud` creates it when it's configured)
+
+    On Windows, this is: `%APPDATA%/gcloud/application_default_credentials.json`.
+
+    On other systems: `$HOME/.config/gcloud/application_default_credentials.json`.
+
+4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches credentials from the metadata server. (Needs a correct VM authentication scope configuration, see above)
+
 ## Basic Example
 
 Below is a fully functioning example. It doesn't do anything useful, since no
-provisioners are defined, but it will effectively repackage an existing GCE
-image. The account_file is obtained in the previous section.  If it parses as
-JSON it is assumed to be the file itself, otherwise it is assumed to be
-the path to the file containing the JSON.
+provisioners or startup-script metadata are defined, but it will effectively
+repackage an existing GCE image. The account_file is obtained in the previous
+section. If it parses as JSON it is assumed to be the file itself, otherwise it
+is assumed to be the path to the file containing the JSON.
 
-``` {.javascript}
+``` {.json}
 {
-  "type": "googlecompute",
-  "account_file": "account.json",
-  "project_id": "my-project",
-  "source_image": "debian-7-wheezy-v20150127",
-  "zone": "us-central1-a"
+  "builders": [{
+    "type": "googlecompute",
+    "account_file": "account.json",
+    "project_id": "my project",
+    "source_image": "debian-7-wheezy-v20150127",
+    "zone": "us-central1-a"
+  }]
 }
 ```
 
@@ -126,25 +145,34 @@ builder.
 
 -   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
 
+-   `image_description` (string) - The description of the resulting image.
+
+-   `image_family` (string) - The name of the image family to which the resulting image belongs. You can create disks by specifying an image family instead of a specific image name. The image family always returns its latest image that is not deprecated.
+
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
-
--   `image_description` (string) - The description of the resulting image.
 
 -   `instance_name` (string) - A name to give the launched instance. Beware that
     this must be unique. Defaults to `"packer-{{uuid}}"`.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
--   `metadata` (object of key/value strings)
+-   `metadata` (object of key/value strings) - Metadata applied to the launched
+    instance.
 
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
+
+-   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
+    `use_internal_ip` must be true if this property is true.
 
 -   `preemptible` (boolean) - If true, launch a preembtible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
+
+-   `startup_script_file` (string) - The filepath to a startup script to run on 
+    the VM from which the image will be made.
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
@@ -159,10 +187,31 @@ builder.
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
+    
+## Startup Scripts
+
+Startup scripts can be a powerful tool for configuring the instance from which the image is made. 
+The builder will wait for a startup script to terminate. A startup script can be provided via the
+`startup_script_file` or 'startup-script' instance creation `metadata` field. Therefore, the build
+time will vary depending on the duration of the startup script. If `startup_script_file` is set,
+the 'startup-script' `metadata` field will be overwritten. In other words,`startup_script_file`
+takes precedence.
+
+The builder does not check for a pass/fail/error signal from the startup script, at this time. Until
+such support is implemented, startup scripts should be robust, as an image will still be built even
+when a startup script fails.
+
+### Windows
+Startup scripts do not work on Windows builds, at this time.
+
+### Logging
+Startup script logs can be copied to a Google Cloud Storage (GCS) location specified via the
+'startup-script-log-dest' instance creation `metadata` field. The GCS location must be writeable by
+the credentials provided in the builder config's `account_file`.
 
 ## Gotchas
 
-Centos images have root ssh access disabled by default. Set `ssh_username` to
+Centos and recent Debian images have root ssh access disabled by default. Set `ssh_username` to
 any user, which will be created by packer with sudo access.
 
 The machine type must have a scratch disk, which means you can't use an

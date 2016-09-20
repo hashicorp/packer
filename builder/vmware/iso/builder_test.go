@@ -1,6 +1,7 @@
 package iso
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -106,7 +107,8 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
 	}
 
-	config["floppy_files"] = []string{"foo", "bar"}
+	floppies_path := "../../../common/test-fixtures/floppies"
+	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -116,9 +118,24 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	expected := []string{"foo", "bar"}
+	expected := []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	if !reflect.DeepEqual(b.config.FloppyFiles, expected) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
+	}
+}
+
+func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	config["floppy_files"] = []string{"nonexistant.bat", "nonexistant.ps1"}
+	b = Builder{}
+	_, errs := b.Prepare(config)
+	if errs == nil {
+		t.Fatalf("Non existant floppies should trigger multierror")
+	}
+
+	if len(errs.(*packer.MultiError).Errors) != 2 {
+		t.Fatalf("Multierror should work and report 2 errors")
 	}
 }
 
@@ -336,5 +353,63 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_CommConfig(t *testing.T) {
+	// Test Winrm
+	{
+		config := testConfig()
+		config["communicator"] = "winrm"
+		config["winrm_username"] = "username"
+		config["winrm_password"] = "password"
+		config["winrm_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.CommConfig.WinRMUser != "username" {
+			t.Errorf("bad winrm_username: %s", b.config.CommConfig.WinRMUser)
+		}
+		if b.config.CommConfig.WinRMPassword != "password" {
+			t.Errorf("bad winrm_password: %s", b.config.CommConfig.WinRMPassword)
+		}
+		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+
+	// Test SSH
+	{
+		config := testConfig()
+		config["communicator"] = "ssh"
+		config["ssh_username"] = "username"
+		config["ssh_password"] = "password"
+		config["ssh_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.CommConfig.SSHUsername != "username" {
+			t.Errorf("bad ssh_username: %s", b.config.CommConfig.SSHUsername)
+		}
+		if b.config.CommConfig.SSHPassword != "password" {
+			t.Errorf("bad ssh_password: %s", b.config.CommConfig.SSHPassword)
+		}
+		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
 	}
 }

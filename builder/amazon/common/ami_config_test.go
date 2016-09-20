@@ -49,4 +49,12 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	if !reflect.DeepEqual(c.AMIRegions, expected) {
 		t.Fatalf("bad: %#v", c.AMIRegions)
 	}
+
+	c.AMIRegions = []string{"custom"}
+	c.AMISkipRegionValidation = true
+	if err := c.Prepare(nil); err != nil {
+		t.Fatal("shouldn't have error")
+	}
+	c.AMISkipRegionValidation = false
+
 }

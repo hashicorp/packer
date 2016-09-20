@@ -1,7 +1,7 @@
 ---
 description: |
     Within the template, the builders section contains an array of all the builders
-    that Packer should use to generate a machine images for the template.
+    that Packer should use to generate machine images for the template.
 layout: docs
 page_title: 'Templates: Builders'
 ...

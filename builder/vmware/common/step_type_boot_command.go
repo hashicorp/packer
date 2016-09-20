@@ -40,11 +40,18 @@ type StepTypeBootCommand struct {
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	vncIp := state.Get("vnc_ip").(string)
 	vncPort := state.Get("vnc_port").(uint)
+	vncPassword := state.Get("vnc_password")
+
+	var pauseFn multistep.DebugPauseFn
+	if debug {
+		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
+	}
 
 	// Connect to VNC
 	ui.Say("Connecting to VM via VNC")
@@ -57,7 +64,15 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 	defer nc.Close()
 
-	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
+	var auth []vnc.ClientAuth
+
+	if vncPassword != nil && len(vncPassword.(string)) > 0 {
+		auth = []vnc.ClientAuth{&vnc.PasswordAuth{Password: vncPassword.(string)}}
+	} else {
+		auth = []vnc.ClientAuth{new(vnc.ClientAuthNone)}
+	}
+
+	c, err := vnc.Client(nc, &vnc.ClientConfig{Auth: auth, Exclusive: true})
 	if err != nil {
 		err := fmt.Errorf("Error handshaking with VNC: %s", err)
 		state.Put("error", err)
@@ -95,7 +110,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Say("Typing the boot command over VNC...")
-	for _, command := range s.BootCommand {
+	for i, command := range s.BootCommand {
 		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
 			err := fmt.Errorf("Error preparing boot command: %s", err)
@@ -108,6 +123,10 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		// since this isn't the fastest thing.
 		if _, ok := state.GetOk(multistep.StateCancelled); ok {
 			return multistep.ActionHalt
+		}
+
+		if pauseFn != nil {
+			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
 		}
 
 		vncSendString(c, command)

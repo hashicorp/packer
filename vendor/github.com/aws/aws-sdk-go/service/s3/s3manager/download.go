@@ -34,7 +34,7 @@ type Downloader struct {
 	PartSize int64
 
 	// The number of goroutines to spin up in parallel when sending parts.
-	// If this is set to zero, the DefaultConcurrency value will be used.
+	// If this is set to zero, the DefaultDownloadConcurrency value will be used.
 	Concurrency int
 
 	// An S3 client to use when performing downloads.
@@ -49,7 +49,7 @@ type Downloader struct {
 //
 // Example:
 //     // The session the S3 Downloader will use
-//     sess := session.New()
+//     sess, err := session.NewSession()
 //
 //     // Create a downloader with the session and default options
 //     downloader := s3manager.NewDownloader(sess)
@@ -77,8 +77,11 @@ func NewDownloader(c client.ConfigProvider, options ...func(*Downloader)) *Downl
 // to make S3 API calls.
 //
 // Example:
+//     // The session the S3 Downloader will use
+//     sess, err := session.NewSession()
+//
 //     // The S3 client the S3 Downloader will use
-//     s3Svc := s3.new(session.New())
+//     s3Svc := s3.new(sess)
 //
 //     // Create a downloader with the s3 client and default options
 //     downloader := s3manager.NewDownloaderWithClient(s3Svc)
@@ -170,7 +173,7 @@ func (d *downloader) download() (n int64, err error) {
 		// Assign work
 		for d.getErr() == nil {
 			if d.pos >= total {
-				break // We're finished queueing chunks
+				break // We're finished queuing chunks
 			}
 
 			// Queue the next range of bytes to read.

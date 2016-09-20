@@ -78,6 +78,10 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
+Note that you will need to set `"headless": true` if you are running Packer
+on a Linux server without X11; or if you are connected via ssh to a remote
+Linux server and have not enabled X11 forwarding (`ssh -X`).
+
 ### Required:
 
 -   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
@@ -108,9 +112,10 @@ builder.
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
-    This may have a value of either "none", "kvm", "tcg", or "xen" and you must
-    have that support in on the machine on which you run the builder. By default
-    "kvm" is used.
+    This may be `none`, `kvm`, `tcg`, or `xen`. The appropriate software must
+    already been installed on your build machine to use the accelerator you
+    specified. When no accelerator is specified, Packer will try to use `kvm`
+    if it is available but will default to `tcg` otherwise.
 
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
@@ -165,6 +170,9 @@ builder.
 -   `headless` (boolean) - Packer defaults to building QEMU virtual machines by
     launching a GUI that shows the console of the machine being built. When this
     value is set to true, the machine will start without a console.
+
+    You can still see the console if you make a note of the VNC display
+    number chosen, and then connect using `vncviewer -Shared <host>:<display>`
 
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
@@ -254,6 +262,15 @@ builder and not otherwise conflicting with the qemuargs):
   qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
 
+\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
+to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
+
+The following shows the environment variable that needs to be set for Windows QEMU support:
+
+```json
+  setx SDL_STDIO_REDIRECT=0
+```
+
 You can also use the `SSHHostPort` template variable to produce a packer
 template that can be invoked by `make` in parallel:
 
@@ -297,6 +314,10 @@ default port of `5985` or whatever value you have the service set to listen on.
     the new virtual machine. By default this is "packer-BUILDNAME", where
     `BUILDNAME` is the name of the build. Currently, no file extension will be
     used unless it is specified in this option.
+
+-   `vnc_bind_address` (string / IP address) - The IP address that should be binded
+    to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
+    to all interfaces use 0.0.0.0
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type

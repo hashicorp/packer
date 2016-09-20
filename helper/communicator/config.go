@@ -55,6 +55,42 @@ func (c *Config) Port() int {
 	}
 }
 
+// Host returns the port that will be used for access based on config.
+func (c *Config) Host() string {
+	switch c.Type {
+	case "ssh":
+		return c.SSHHost
+	case "winrm":
+		return c.WinRMHost
+	default:
+		return ""
+	}
+}
+
+// User returns the port that will be used for access based on config.
+func (c *Config) User() string {
+	switch c.Type {
+	case "ssh":
+		return c.SSHUsername
+	case "winrm":
+		return c.WinRMUser
+	default:
+		return ""
+	}
+}
+
+// Password returns the port that will be used for access based on config.
+func (c *Config) Password() string {
+	switch c.Type {
+	case "ssh":
+		return c.SSHPassword
+	case "winrm":
+		return c.WinRMPassword
+	default:
+		return ""
+	}
+}
+
 func (c *Config) Prepare(ctx *interpolate.Context) []error {
 	if c.Type == "" {
 		c.Type = "ssh"

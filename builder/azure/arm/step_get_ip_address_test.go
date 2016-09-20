@@ -7,15 +7,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
 	var testSubject = &StepGetIPAddress{
-		get:   func(string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
-		say:   func(message string) {},
-		error: func(e error) {},
+		get:      func(string, string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
+		endpoint: PublicEndpoint,
+		say:      func(message string) {},
+		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepGetIPAddress()
@@ -32,9 +33,10 @@ func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
 
 func TestStepGetIPAddressShouldPassIfGetPasses(t *testing.T) {
 	var testSubject = &StepGetIPAddress{
-		get:   func(string, string) (string, error) { return "", nil },
-		say:   func(message string) {},
-		error: func(e error) {},
+		get:      func(string, string, string) (string, error) { return "", nil },
+		endpoint: PublicEndpoint,
+		say:      func(message string) {},
+		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepGetIPAddress()
@@ -52,16 +54,19 @@ func TestStepGetIPAddressShouldPassIfGetPasses(t *testing.T) {
 func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualResourceGroupName string
 	var actualIPAddressName string
+	var actualNicName string
 
 	var testSubject = &StepGetIPAddress{
-		get: func(resourceGroupName string, ipAddressName string) (string, error) {
+		get: func(resourceGroupName string, ipAddressName string, nicName string) (string, error) {
 			actualResourceGroupName = resourceGroupName
 			actualIPAddressName = ipAddressName
+			actualNicName = nicName
 
 			return "127.0.0.1", nil
 		},
-		say:   func(message string) {},
-		error: func(e error) {},
+		endpoint: PublicEndpoint,
+		say:      func(message string) {},
+		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepGetIPAddress()
@@ -73,13 +78,18 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 	var expectedIPAddressName = stateBag.Get(constants.ArmPublicIPAddressName).(string)
+	var expectedNicName = stateBag.Get(constants.ArmNicName).(string)
 
 	if actualIPAddressName != expectedIPAddressName {
-		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
+		t.Fatal("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		t.Fatal("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+	}
+
+	if actualNicName != expectedNicName {
+		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmNetworkInterfaceName' from the state bag, but it did not.")
 	}
 
 	expectedIPAddress, ok := stateBag.GetOk(constants.SSHHost)
@@ -96,6 +106,7 @@ func createTestStateBagStepGetIPAddress() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
 	stateBag.Put(constants.ArmPublicIPAddressName, "Unit Test: PublicIPAddressName")
+	stateBag.Put(constants.ArmNicName, "Unit Test: NicName")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
 
 	return stateBag

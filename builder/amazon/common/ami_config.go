@@ -8,16 +8,17 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	AMIName               string            `mapstructure:"ami_name"`
-	AMIDescription        string            `mapstructure:"ami_description"`
-	AMIVirtType           string            `mapstructure:"ami_virtualization_type"`
-	AMIUsers              []string          `mapstructure:"ami_users"`
-	AMIGroups             []string          `mapstructure:"ami_groups"`
-	AMIProductCodes       []string          `mapstructure:"ami_product_codes"`
-	AMIRegions            []string          `mapstructure:"ami_regions"`
-	AMITags               map[string]string `mapstructure:"tags"`
-	AMIEnhancedNetworking bool              `mapstructure:"enhanced_networking"`
-	AMIForceDeregister    bool              `mapstructure:"force_deregister"`
+	AMIName                 string            `mapstructure:"ami_name"`
+	AMIDescription          string            `mapstructure:"ami_description"`
+	AMIVirtType             string            `mapstructure:"ami_virtualization_type"`
+	AMIUsers                []string          `mapstructure:"ami_users"`
+	AMIGroups               []string          `mapstructure:"ami_groups"`
+	AMIProductCodes         []string          `mapstructure:"ami_product_codes"`
+	AMIRegions              []string          `mapstructure:"ami_regions"`
+	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
+	AMITags                 map[string]string `mapstructure:"tags"`
+	AMIEnhancedNetworking   bool              `mapstructure:"enhanced_networking"`
+	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
@@ -39,10 +40,12 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 			// Mark that we saw the region
 			regionSet[region] = struct{}{}
 
-			// Verify the region is real
-			if valid := ValidateRegion(region); valid == false {
-				errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-				continue
+			if !c.AMISkipRegionValidation {
+				// Verify the region is real
+				if valid := ValidateRegion(region); valid == false {
+					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
+					continue
+				}
 			}
 
 			regions = append(regions, region)

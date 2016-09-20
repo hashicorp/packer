@@ -6,9 +6,9 @@ package arm
 import (
 	"fmt"
 
+	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/builder/azure/common"
 	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -46,7 +46,10 @@ func (s *StepDeleteResourceGroup) Run(state multistep.StateBag) multistep.StepAc
 		func() bool { return common.IsStateCancelled(state) },
 		func(cancelCh <-chan struct{}) error { return s.delete(resourceGroupName, cancelCh) })
 
-	return processInterruptibleResult(result, s.error, state)
+	stepAction := processInterruptibleResult(result, s.error, state)
+	state.Put(constants.ArmIsResourceGroupCreated, false)
+
+	return stepAction
 }
 
 func (*StepDeleteResourceGroup) Cleanup(multistep.StateBag) {

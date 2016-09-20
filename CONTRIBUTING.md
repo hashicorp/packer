@@ -69,7 +69,8 @@ following steps in order to be able to compile and test Packer. These instructio
    `$GOPATH/src/github.com/mitchellh/packer`.
 
 4. When working on packer `cd $GOPATH/src/github.com/mitchellh/packer` so you
-   can run `make` and easily access other files.
+   can run `make` and easily access other files. Run `make help` to get
+   information about make targets.
 
 5. Make your changes to the Packer source. You can run `make` in
    `$GOPATH/src/github.com/mitchellh/packer` to run tests and build the packer
@@ -83,11 +84,29 @@ following steps in order to be able to compile and test Packer. These instructio
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
 
+### Opening an Pull Request
+
+When you are ready to open a pull-request, you will need to [fork packer](https://github.com/mitchellh/packer#fork-destination-box), push your changes to your fork, and then open a pull-request.
+
+For example, my github username is `cbednarski` so I would do the following:
+
+    git checkout -b f-my-feature
+    // develop a patch
+    git push https://github.com/cbednarski/packer f-my-feature
+
+From there, open your fork in your browser to open a new pull-request.
+
+**Note** Go infers package names from their filepaths. This means `go build` will break if you `git clone` your fork instead of using `go get` on the main packer project.
+
 ### Tips for Working on Packer
 
 #### Godeps
 
-If you are submitting a change that requires a change in dependencies, DO NOT update the `vendor/` folder. This keeps the PR smaller and easier to review. Instead, please indicate which upstream has changed and which version we should be using. You _may_ do this using `Godeps/Godeps.json` but this is not required.
+If you are submitting a change that requires new or updated dependencies, please include them in `Godeps/Godeps.json` and in the `vendor/` folder.  This helps everything get tested properly in CI.
+
+Note that you will need to use [Godep](https://github.com/tools/godep) to do this. This step is recommended but not required; if you don't use Godep please indicate in your PR which dependencies have changed and to what versions.
+
+Please only apply the minimal vendor changes to get your PR to work. Packer does not attempt to track the latest version for each dependency.
 
 #### Running Unit Tests
 
@@ -101,16 +120,11 @@ Packer has [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
 for various builders. These typically require an API key (AWS, GCE), or
 additional software to be installed on your computer (VirtualBox, VMware).
 
-If you're working on a feature of a builder or a new builder and want verify it
-is functioning (and also hasn't broken anything else), we recommend running the
+If you're working on a new builder or builder feature and want verify it is functioning (and also hasn't broken anything else), we recommend running the
 acceptance tests.
 
 **Warning:** The acceptance tests create/destroy/modify *real resources*, which
-may incur real costs in some cases. In the presence of a bug, it is technically
-possible that broken backends could leave dangling data behind. Therefore,
-please run the acceptance tests at your own risk. At the very least, we
-recommend running them in their own private account for whatever builder you're
-testing.
+may incur costs for real money. In the presence of a bug, it is possible that resources may be left behind, which can cost money even though you were not using them. We recommend running tests in an account used only for that purpose so it is easy to see if there are any dangling resources, and so production resources are not accidentally destroyed or overwritten during testing.
 
 To run the acceptance tests, invoke `make testacc`:
 
@@ -123,5 +137,5 @@ down to a specific resource to test, since testing all of them at once can
 sometimes take a very long time.
 
 Acceptance tests typically require other environment variables to be set for
-things such as access keys. The test itself should error early and tell you
-what to set, so it is not documented here.
+things such as API tokens and keys. Each test should error and tell you which
+credentials are missing, so those are not documented here.

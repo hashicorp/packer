@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
@@ -49,12 +49,9 @@ func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 	}
 }
 
-func TestStepDeleteResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T) {
-	var actualResourceGroupName string
-
+func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
 		delete: func(resourceGroupName string, cancelCh <-chan struct{}) error {
-			actualResourceGroupName = resourceGroupName
 			return nil
 		},
 		say:   func(message string) {},
@@ -62,22 +59,22 @@ func TestStepDeleteResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
-	var result = testSubject.Run(stateBag)
+	testSubject.Run(stateBag)
 
-	if result != multistep.ActionContinue {
-		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
+	value, ok := stateBag.GetOk(constants.ArmIsResourceGroupCreated)
+	if !ok {
+		t.Fatal("Expected the resource bag value arm.IsResourceGroupCreated to exist")
 	}
 
-	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
-
-	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatalf("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+	if value.(bool) {
+		t.Fatalf("Expected arm.IsResourceGroupCreated to be false, but got %q", value)
 	}
 }
 
 func DeleteTestStateBagStepDeleteResourceGroup() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+	stateBag.Put(constants.ArmIsResourceGroupCreated, "Unit Test: IsResourceGroupCreated")
 
 	return stateBag
 }
