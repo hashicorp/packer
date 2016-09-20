@@ -20,9 +20,8 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("An image_name must be specified"))
 	}
 
-	if c.ImageInfoFile == "" {
-		c.ImageInfoFile = "openstack-builder.json"
-	}
+	// ImageInfoContent is required but ImageInfoFile is not.
+	// The information file will only be created if ImageInfoFile is not "".
 	if c.ImageInfoContent == "" {
 		c.ImageInfoContent = "{ \"imageName\": \"{{.ImageName}}\", \"imageId\": \"{{.ImageId}}\" }\n"
 	}
