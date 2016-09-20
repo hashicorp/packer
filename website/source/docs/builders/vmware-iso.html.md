@@ -336,7 +336,11 @@ by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
+otherwise they will be held down until the machine reboots. Use lowercase 
+characters as well inside modifiers. 
+
+For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The
