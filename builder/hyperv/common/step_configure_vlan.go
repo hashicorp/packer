@@ -11,7 +11,7 @@ import (
 )
 
 type StepConfigureVlan struct {
-	vlanId string
+	VlanID string
 }
 
 func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
@@ -24,10 +24,11 @@ func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Configuring vlan...")
 
-	vlanId := s.vlanId
+	vlanId := s.VlanID
 
 	if vlanId == "" {
-		vlanId = "1724"
+		// If no vlan ID is specified, do not enable Virtual LAN Identification
+		return multistep.ActionContinue
 	}
 
 	err := driver.SetNetworkAdapterVlanId(switchName, vlanId)
