@@ -97,6 +97,12 @@ BUG FIXES:
     is specified [GH-3568]
   * website: improved rendering on iPad [GH-3780]
 
+## 0.10.2 (September 20, 2016)
+
+BUG FIXES:
+
+  * Rebuilding with OS X Sierra and go 1.7.1 to fix bug  in Sierra
+
 ## 0.10.1 (May 7, 2016)
 
 FEATURES:
@@ -125,12 +131,6 @@ BUG FIXES:
   * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
   * provisioner/chef: Use custom values for remote validation key path
     [GH-3468]
-
-## 0.10.2 (September 20, 2016)
-
-BUG FIXES:
-
-  * Rebuilding with OS X Sierra and go 1.7.1 to fix bug  in Sierra
 
 ## 0.10.0 (March 14, 2016)
 
