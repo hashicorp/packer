@@ -87,6 +87,7 @@ type Config struct {
 
 	BootCommand                    []string `mapstructure:"boot_command"`
 	SwitchName                     string   `mapstructure:"switch_name"`
+	VlandID                        string   `mapstructure:"vlan_id"`
 	Cpu                            uint     `mapstructure:"cpu"`
 	Generation                     uint     `mapstructure:"generation"`
 	EnableMacSpoofing              bool     `mapstructure:"enable_mac_spoofing"`
@@ -352,6 +353,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepMountSecondaryDvdImages{
 			IsoPaths:   b.config.SecondaryDvdImages,
 			Generation: b.config.Generation,
+		},
+		
+		&hypervcommon.StepConfigureVlan{
+			VlanID: b.config.VlandID,
 		},
 
 		&hypervcommon.StepRun{
