@@ -47,6 +47,7 @@ IMPROVEMENTS:
   * builder/parallels: Add support for ctrl, shift and alt keys in `boot_command`.
     [GH-3767]
   * builder/qemu: Added `vnc_bind_address` option [GH-3574]
+  * builder/qemu: Specify disk format when starting qemu [GH-3888]
   * builder/virtualbox: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3542]
   * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
