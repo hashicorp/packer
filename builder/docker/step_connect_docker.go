@@ -19,14 +19,19 @@ func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	// Create the communicator that talks to Docker via various
-	// os/exec tricks.
+	// Create the communicator that talks to Docker via API.
+	client, err := newDockerClient()
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 	comm := &Communicator{
-		ContainerId:  containerId,
+		ContainerID:  containerId,
 		HostDir:      tempDir,
 		ContainerDir: "/packer-files",
 		Version:      version,
 		Config:       config,
+		Client:       client,
 	}
 
 	state.Put("communicator", comm)
