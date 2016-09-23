@@ -97,6 +97,7 @@ BUG FIXES:
   * provisioner/ansible: Properly set host key checking even when a custom ENV
     is specified [GH-3568]
   * website: improved rendering on iPad [GH-3780]
+  * provisioner/file: Fix directory download. [GH-3899]
 
 ## 0.10.2 (September 20, 2016)
 
