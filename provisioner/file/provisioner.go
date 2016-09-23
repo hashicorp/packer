@@ -109,7 +109,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 			}
 		}
 		// if the config.Destination was a dir, download the dir
-		if !strings.HasSuffix(p.config.Destination, "/") {
+		if strings.HasSuffix(p.config.Destination, "/") {
 			return comm.DownloadDir(src, p.config.Destination, nil)
 		}
 
