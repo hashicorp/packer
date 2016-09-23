@@ -19,14 +19,15 @@ func (s *StepCheckExistingImage) Run(state multistep.StateBag) multistep.StepAct
 
 	if !c.PackerForce {
 		ui.Say("Checking image does not exist...")
-		c.imageAlreadyExists = d.ImageExists(c.ImageName)
-		if c.imageAlreadyExists {
-			err := fmt.Errorf("Image %s already exists.\n"+
-				"Use the force flag to delete it prior to building.", c.ImageName)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	}
+
+	c.imageAlreadyExists = d.ImageExists(c.ImageName)
+	if !c.PackerForce && c.imageAlreadyExists {
+		err := fmt.Errorf("Image %s already exists.\n"+
+			"Use the force flag to delete it prior to building.", c.ImageName)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 	return multistep.ActionContinue
 }
