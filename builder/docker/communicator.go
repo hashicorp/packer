@@ -20,13 +20,11 @@ import (
 
 // Communicator is the Docker implementation for packer.Communicator.
 type Communicator struct {
-	ContainerID  string
-	HostDir      string
-	ContainerDir string
-	Version      *version.Version
-	Config       *Config
-	lock         sync.Mutex
-	Client       *docker.Client
+	ContainerID string
+	Version     *version.Version
+	Config      *Config
+	lock        sync.Mutex
+	Client      *docker.Client
 }
 
 // newDockerClient gets a new docker.Client for use with the communicator.

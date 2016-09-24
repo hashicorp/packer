@@ -42,7 +42,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	log.Printf("[DEBUG] Docker version: %s", version.String())
 
 	steps := []multistep.Step{
-		&StepTempDir{},
 		&StepPull{},
 		&StepRun{},
 		&communicator.StepConnect{
