@@ -17,10 +17,7 @@ func (s *StepCheckExistingImage) Run(state multistep.StateBag) multistep.StepAct
 	d := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	if !c.PackerForce {
-		ui.Say("Checking image does not exist...")
-	}
-
+	ui.Say("Checking image does not exist...")
 	c.imageAlreadyExists = d.ImageExists(c.ImageName)
 	if !c.PackerForce && c.imageAlreadyExists {
 		err := fmt.Errorf("Image %s already exists.\n"+
