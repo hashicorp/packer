@@ -15,6 +15,8 @@ func TestStepCreateOrResetWindowsPassword(t *testing.T) {
 
 	// Step is run after the instance is created so we will have an instance name set
 	state.Put("instance_name", "mock_instance")
+	state.Put("create_windows_password", true)
+
 	step := new(StepCreateWindowsPassword)
 	defer step.Cleanup(state)
 
@@ -28,15 +30,15 @@ func TestStepCreateOrResetWindowsPassword(t *testing.T) {
 	}
 }
 
-func TestStepCreateOrResetWindowsPassword_existingPassword(t *testing.T) {
+func TestStepCreateOrResetWindowsPassword_passwordSet(t *testing.T) {
 	state := testState(t)
 
 	// Step is run after the instance is created so we will have an instance name set
 	state.Put("instance_name", "mock_instance")
 
-	config := state.Get("config").(*Config)
+	c := state.Get("config").(*Config)
 
-	config.Comm.WinRMPassword = "password"
+	c.Comm.WinRMPassword = "password"
 
 	step := new(StepCreateWindowsPassword)
 	defer step.Cleanup(state)
@@ -47,8 +49,24 @@ func TestStepCreateOrResetWindowsPassword_existingPassword(t *testing.T) {
 	}
 
 	if password, ok := state.GetOk("winrm_password"); !ok || password.(string) != "password" {
-		t.Fatal("should have not changed the password", password, ok)
+		t.Fatal("should have used existing password", password, ok)
 	}
+}
+
+func TestStepCreateOrResetWindowsPassword_dontNeedPassword(t *testing.T) {
+	state := testState(t)
+
+	// Step is run after the instance is created so we will have an instance name set
+	state.Put("instance_name", "mock_instance")
+
+	step := new(StepCreateWindowsPassword)
+	defer step.Cleanup(state)
+
+	// run the step
+	if action := step.Run(state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
 }
 
 func TestStepCreateOrResetWindowsPassword_debug(t *testing.T) {
@@ -61,6 +79,8 @@ func TestStepCreateOrResetWindowsPassword_debug(t *testing.T) {
 	state := testState(t)
 	// Step is run after the instance is created so we will have an instance name set
 	state.Put("instance_name", "mock_instance")
+	state.Put("create_windows_password", true)
+
 	step := new(StepCreateWindowsPassword)
 
 	step.Debug = true
@@ -87,6 +107,8 @@ func TestStepCreateOrResetWindowsPassword_error(t *testing.T) {
 
 	// Step is run after the instance is created so we will have an instance name set
 	state.Put("instance_name", "mock_instance")
+	state.Put("create_windows_password", true)
+
 	step := new(StepCreateWindowsPassword)
 	defer step.Cleanup(state)
 
@@ -113,6 +135,8 @@ func TestStepCreateOrResetWindowsPassword_errorOnChannel(t *testing.T) {
 
 	// Step is run after the instance is created so we will have an instance name set
 	state.Put("instance_name", "mock_instance")
+	state.Put("create_windows_password", true)
+
 	step := new(StepCreateWindowsPassword)
 	defer step.Cleanup(state)
 

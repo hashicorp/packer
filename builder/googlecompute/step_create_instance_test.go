@@ -41,15 +41,17 @@ func TestStepCreateInstance(t *testing.T) {
 	assert.Equal(t, d.DeleteDiskZone, c.Zone, "Incorrect disk zone passed to driver.")
 }
 
-func TestStepCreateInstance_windows(t *testing.T) {
+func TestStepCreateInstance_windowsNeedsPassword(t *testing.T) {
 
 	state := testState(t)
 	step := new(StepCreateInstance)
 	defer step.Cleanup(state)
 
+	state.Put("ssh_public_key", "key")
+
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(*DriverMock)
-
+	driver.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
 	config.Comm.Type = "winrm"
 
 	// run the step
@@ -57,16 +59,16 @@ func TestStepCreateInstance_windows(t *testing.T) {
 		t.Fatalf("bad action: %#v", action)
 	}
 
-	// Check the metadata was set
-
-	if _, ok := driver.RunInstanceConfig.Metadata[StartupWindowsSysprepKey]; !ok {
-		t.Fatal("Should have set the sysprep script")
-	}
-
 	// Verify state
 	nameRaw, ok := state.GetOk("instance_name")
 	if !ok {
 		t.Fatal("should have instance name")
+	}
+
+	createPassword, ok := state.GetOk("create_windows_password")
+
+	if !ok || !createPassword.(bool) {
+		t.Fatal("should need to create windows password")
 	}
 
 	// cleanup
@@ -87,32 +89,35 @@ func TestStepCreateInstance_windows(t *testing.T) {
 	}
 }
 
-func TestStepCreateInstance_windows(t *testing.T) {
+func TestStepCreateInstance_windowsPasswordSet(t *testing.T) {
 
 	state := testState(t)
 	step := new(StepCreateInstance)
 	defer step.Cleanup(state)
 
+	state.Put("ssh_public_key", "key")
+
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(*DriverMock)
-
+	driver.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
 	config.Comm.Type = "winrm"
+	config.Comm.WinRMPassword = "password"
 
 	// run the step
 	if action := step.Run(state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
-	// Check the metadata was set
-
-	if _, ok := driver.RunInstanceConfig.Metadata[StartupWindowsSysprepKey]; !ok {
-		t.Fatal("Should have set the sysprep script")
-	}
-
 	// Verify state
 	nameRaw, ok := state.GetOk("instance_name")
 	if !ok {
 		t.Fatal("should have instance name")
+	}
+
+	_, ok = state.GetOk("create_windows_password")
+
+	if ok {
+		t.Fatal("should not need to create windows password")
 	}
 
 	// cleanup

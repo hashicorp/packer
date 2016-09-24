@@ -31,11 +31,15 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 
 	if config.Comm.WinRMPassword != "" {
 		state.Put("winrm_password", config.Comm.WinRMPassword)
-
-		ui.Message("Using specified password")
 		return multistep.ActionContinue
 	}
 
+	create, ok := state.GetOk("create_windows_password")
+
+	if !ok || !create.(bool) {
+		return multistep.ActionContinue
+
+	}
 	ui.Say("Creating windows user for instance...")
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
