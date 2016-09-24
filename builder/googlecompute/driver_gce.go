@@ -1,11 +1,18 @@
 package googlecompute
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/version"
@@ -19,9 +26,10 @@ import (
 // driverGCE is a Driver implementation that actually talks to GCE.
 // Create an instance using NewDriverGCE.
 type driverGCE struct {
-	projectId string
-	service   *compute.Service
-	ui        packer.Ui
+	windowsPassword string
+	projectId       string
+	service         *compute.Service
+	ui              packer.Ui
 }
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
@@ -328,6 +336,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// Build up the metadata
 	metadata := make([]*compute.MetadataItems, len(c.Metadata))
 	for k, v := range c.Metadata {
+		d.ui.Message(fmt.Sprintf("%s: %s", k,v))
 		vCopy := v
 		metadata = append(metadata, &compute.MetadataItems{
 			Key:   k,
@@ -381,7 +390,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Items: c.Tags,
 		},
 	}
-
+	
 	d.ui.Message("Requesting instance creation...")
 	op, err := d.service.Instances.Insert(d.projectId, zone.Name, &instance).Do()
 	if err != nil {
@@ -391,6 +400,115 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "DONE", d.refreshZoneOp(zone.Name, op))
 	return errCh, nil
+}
+
+func (d *driverGCE) CreateOrResetWindowsPassword(instance, zone string, c *WindowsPasswordConfig) (<-chan error, error) {
+
+	errCh := make(chan error, 1)
+	go d.createWindowsPassword(errCh, instance, zone, c)
+
+	return errCh, nil
+}
+
+func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string, c *WindowsPasswordConfig) {
+
+	data, err := json.Marshal(c)
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+	dCopy := string(data)
+	d.ui.Message("Fetching current metadata")
+
+	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
+	
+	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &dCopy})
+	d.ui.Message("Uploading metadata: " + dCopy)
+	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
+		Fingerprint: instance.Metadata.Fingerprint,
+		Items: instance.Metadata.Items,
+	}).Do()
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+
+	newErrCh := make(chan error, 1)
+	go waitForState(newErrCh, "DONE", d.refreshZoneOp(zone, op))
+
+	select {
+	case err = <-newErrCh:
+	case <-time.After(time.Second * 30):
+		err = errors.New("time out while waiting for instance to create")
+	}
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+
+	timeout := time.Now().Add(time.Minute * 3)
+	hash := sha1.New()
+	random := rand.Reader
+
+	for time.Now().Before(timeout) {
+		if passwordResponses, err := d.getPasswordResponses(zone, name); err == nil {
+			for _, response := range passwordResponses {
+				if response.Modulus == c.Modulus {
+
+					decodedPassword, err := base64.StdEncoding.DecodeString(response.EncryptedPassword)
+
+					if err != nil {
+						errCh <- err
+						return
+					}
+					
+					password, err := rsa.DecryptOAEP(hash, random, c.key, decodedPassword, nil)
+
+					if err != nil {
+						errCh <- err
+						return
+					}
+
+					c.password = string(password)
+					errCh <- nil
+					return
+				}
+			}
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+	err = errors.New("Could not retrieve password. Timed out.")
+
+	errCh <- err
+	return
+
+}
+
+func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswordResponse, error) {
+	output, err := d.service.Instances.GetSerialPortOutput(d.projectId, zone, instance).Port(4).Do()
+
+	if err != nil {
+		return nil, err
+	}
+
+	responses := strings.Split(output.Contents, "\n")
+
+	passwordResponses := make([]windowsPasswordResponse, 0, len(responses))
+
+	for _, response := range responses {
+		var passwordResponse windowsPasswordResponse
+		if err := json.Unmarshal([]byte(response), &passwordResponse); err != nil {
+			continue
+		}
+
+		passwordResponses = append(passwordResponses, passwordResponse)
+	}
+
+	return passwordResponses, nil
 }
 
 func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {

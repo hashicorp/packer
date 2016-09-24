@@ -31,7 +31,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 	}
 	instanceMetadata[sshMetaKey] = sshKeys
-	
+
 	// Wrap any startup script with our own startup script.
 	if c.StartupScriptFile != "" {
 		var content []byte
@@ -45,6 +45,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		// Mark the startup script as done.
 		instanceMetadata[StartupScriptKey] = StartupScriptWindows
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusDone
+
 	} else {
 		instanceMetadata[StartupScriptKey] = StartupScriptLinux
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
@@ -76,12 +77,18 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
+	if sourceImage.IsWindows() && c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
+		state.Put("create_windows_password", true)
+	}
+
 	ui.Say("Creating instance...")
 	name := c.InstanceName
 
 	var errCh <-chan error
 	var metadata map[string]string
+
 	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
+
 	errCh, err = d.RunInstance(&InstanceConfig{
 		Address:             c.Address,
 		Description:         "New instance created by Packer",

@@ -48,8 +48,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	var steps []multistep.Step
+
 	// Build the steps.
-	steps := []multistep.Step{
+	steps = []multistep.Step{
 		new(StepCheckExistingImage),
 		&StepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
@@ -57,6 +59,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
+		},
+		&StepCreateWindowsPassword{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_windows_%s.pem", b.config.PackerBuildName),
 		},
 		&StepInstanceInfo{
 			Debug: b.config.PackerDebug,

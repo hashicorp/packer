@@ -48,11 +48,12 @@ type Config struct {
 	Tags                 []string          `mapstructure:"tags"`
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
-
-	Account         AccountFile
-	privateKeyBytes []byte
-	stateTimeout    time.Duration
-	ctx             interpolate.Context
+	WindowsInstance      bool              `mapstructure:"windows_instance"`
+	Account              AccountFile
+	privateKeyBytes      []byte
+	stateTimeout         time.Duration
+	ctx                  interpolate.Context
+	WindowsUsername      string `mapstructure:"windows_username"`
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
