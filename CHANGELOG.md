@@ -48,6 +48,10 @@ IMPROVEMENTS:
     [GH-3767]
   * builder/qemu: Added `vnc_bind_address` option [GH-3574]
   * builder/qemu: Specify disk format when starting qemu [GH-3888]
+  * builder/qemu: Now pauses between `boot_command` entries when running with
+    `-debug` [GH-3547]
+  * builder/qemu: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/virtualbox: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3542]
   * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
@@ -61,8 +65,6 @@ IMPROVEMENTS:
     [GH-3347]
   * builder/vmware: Add support for ctrl, shift and alt keys in `boot_command`.
     [GH-3767]
-  * builder/qemu: Now pauses between `boot_command` entries when running with
-    `-debug` [GH-3547]
   * provisioner/ansible: Improved logging and error handling [GH-3477]
   * provisioner/ansible: Support scp [GH-3861]
   * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
