@@ -13,7 +13,6 @@ type StepRun struct {
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	tempDir := state.Get("temp_dir").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	runConfig := ContainerConfig{
@@ -26,7 +25,6 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	for host, container := range config.Volumes {
 		runConfig.Volumes[host] = container
 	}
-	runConfig.Volumes[tempDir] = "/packer-files"
 
 	ui.Say("Starting docker container...")
 	containerId, err := driver.StartContainer(&runConfig)
