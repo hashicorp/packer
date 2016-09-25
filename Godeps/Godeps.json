@@ -261,6 +261,70 @@
 			"Rev": "6ca5b770f203b82a0fca68d0941736458efa8a4f"
 		},
 		{
+			"ImportPath": "github.com/docker/docker/api/types/filters",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/api/types/versions",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/opts",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/archive",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/fileutils",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/homedir",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/idtools",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/ioutils",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/longpath",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/pools",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/promise",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/stdcopy",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/system",
+			"Rev": "4ae7d8ef4df82ea482541223fa0bc6ad2d641db2"
+		},
+		{
+			"ImportPath": "github.com/docker/engine-api/types/mount",
+			"Rev": "4290f40c056686fcaa5c9caf02eac1dde9315adf"
+		},
+		{
+			"ImportPath": "github.com/docker/engine-api/types/swarm",
+			"Rev": "4290f40c056686fcaa5c9caf02eac1dde9315adf"
+		},
+		{
+			"ImportPath": "github.com/docker/go-units",
+			"Rev": "f2145db703495b2e525c59662db69a7344b00bb8"
+		},
+		{
 			"ImportPath": "github.com/dylanmei/iso8601",
 			"Rev": "2075bf119b58e5576c6ed9f867b8f3d17f2e54d4"
 		},
@@ -373,6 +437,10 @@
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 		},
 		{
+			"ImportPath": "github.com/Microsoft/go-winio",
+			"Rev": "ce2922f643c8fd76b46cadc7f404a06282678b34"
+		},
+		{
 			"ImportPath": "github.com/masterzen/simplexml/dom",
 			"Rev": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
@@ -439,6 +507,14 @@
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
 			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/runc/libcontainer/system",
+			"Rev": "e83ccf62aac17bf8656b23655638ad4300ea7adc"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/runc/libcontainer/user",
+			"Rev": "e83ccf62aac17bf8656b23655638ad4300ea7adc"
 		},
 		{
 			"ImportPath": "github.com/packer-community/winrmcp/winrmcp",
@@ -547,6 +623,10 @@
 			"Rev": "53d1dc4400e1ebcd37a0e01d8c1fe2f4db3b99d2"
 		},
 		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Rev": "3ec0642a7fb6488f65b06f9040adc67e3990296a"
+		},
+		{
 			"ImportPath": "github.com/satori/go.uuid",
 			"Rev": "d41af8bb6a7704f00bc3b7cba9355ae6a5a80048"
 		},
@@ -617,7 +697,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "50c6bc5e4292a1d4e65c6e9be5f53be28bcbe28e"
+			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
 		},
 		{
 			"ImportPath": "google.golang.org/api/compute/v1",
