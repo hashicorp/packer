@@ -50,7 +50,12 @@ func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, com
 	}
 	defer os.RemoveAll(d)
 
-	state := &scpUploadState{destRoot: rest, srcRoot: d, comm: comm}
+	// To properly implement scp, rest should be checked to see if it is a
+	// directory on the remote side, but ansible only sends files, so there's no
+	// need to set targetIsDir, because it can be safely assumed that rest is
+	// intended to be a file, and whatever names are used in 'C' commands are
+	// irrelavant.
+	state := &scpUploadState{target: rest, srcRoot: d, comm: comm}
 
 	fmt.Fprintf(out, scpOK) // signal the client to start the transfer.
 	return state.Protocol(bufio.NewReader(in), out)
@@ -117,16 +122,17 @@ func (state *scpDownloadState) FileProtocol(path string, info os.FileInfo, in *b
 }
 
 type scpUploadState struct {
-	comm     packer.Communicator
-	destRoot string // destRoot is the directory on the target
-	srcRoot  string // srcRoot is the directory on the host
-	mtime    time.Time
-	atime    time.Time
-	dir      string // dir is a path relative to the roots
+	comm        packer.Communicator
+	target      string // target is the directory on the target
+	srcRoot     string // srcRoot is the directory on the host
+	mtime       time.Time
+	atime       time.Time
+	dir         string // dir is a path relative to the roots
+	targetIsDir bool
 }
 
 func (scp scpUploadState) DestPath() string {
-	return filepath.Join(scp.destRoot, scp.dir)
+	return filepath.Join(scp.target, scp.dir)
 }
 
 func (scp scpUploadState) SrcPath() string {
@@ -177,7 +183,12 @@ func (state *scpUploadState) FileProtocol(in *bufio.Reader, out io.Writer) error
 
 	var fi os.FileInfo = fileInfo{name: name, size: size, mode: mode, mtime: state.mtime}
 
-	err = state.comm.Upload(filepath.Join(state.DestPath(), fi.Name()), io.LimitReader(in, fi.Size()), &fi)
+	dest := state.DestPath()
+	if state.targetIsDir {
+		dest = filepath.Join(dest, fi.Name())
+	}
+
+	err = state.comm.Upload(dest, io.LimitReader(in, fi.Size()), &fi)
 	if err != nil {
 		fmt.Fprintf(out, scpEmptyError)
 		return err

@@ -339,6 +339,12 @@
 			"revision": "2a60fc2ba6c19de80291203597d752e9ba58e4c0"
 		},
 		{
+			"checksumSHA1": "e/Kc2UOy1lKAy31xWlK37M1r2e8=",
+			"path": "github.com/google/shlex",
+			"revision": "6f45313302b9c56850fc17f99e40caebce98c716",
+			"revisionTime": "2015-01-27T13:39:51Z"
+		},
+		{
 			"checksumSHA1": "FUiF2WLrih0JdHsUTMMDz3DRokw=",
 			"comment": "20141209094003-92-g95fa852",
 			"path": "github.com/hashicorp/atlas-go/archive",
