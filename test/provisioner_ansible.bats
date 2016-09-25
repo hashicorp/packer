@@ -67,6 +67,14 @@ teardown() {
     diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
 }
 
+@test "ansible provisioner: build scp-to-sftp.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/scp-to-sftp.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-scp-to-sftp")" -eq 1 ]
+    diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
+}
+
 @test "ansible provisioner: build sftp.json" {
     cd $FIXTURE_ROOT
     run packer build ${USER_VARS} $FIXTURE_ROOT/sftp.json
@@ -75,3 +83,11 @@ teardown() {
     diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
 }
 
+@test "ansible provisioner: build winrm.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/winrm.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-winrm")" -eq 1 ]
+    echo "packer does not support downloading files from download, skipping verification"
+    #diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
+}

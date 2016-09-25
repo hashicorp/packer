@@ -10,6 +10,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/mitchellh/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
@@ -189,7 +190,7 @@ func (c *adapter) exec(command string, in io.Reader, out io.Writer, err io.Write
 	var exitStatus int
 	switch {
 	case strings.HasPrefix(command, "scp ") && serveSCP(command[4:]):
-		err := c.scpExec(command[4:], in, out, err)
+		err := c.scpExec(command[4:], in, out)
 		if err != nil {
 			log.Println(err)
 			exitStatus = 1
@@ -205,8 +206,15 @@ func serveSCP(args string) bool {
 	return bytes.IndexAny(opts, "tf") >= 0
 }
 
-func (c *adapter) scpExec(args string, in io.Reader, out io.Writer, err io.Writer) error {
+func (c *adapter) scpExec(args string, in io.Reader, out io.Writer) error {
 	opts, rest := scpOptions(args)
+
+	// remove the quoting that ansible added to rest for shell safety.
+	shargs, err := shlex.Split(rest)
+	if err != nil {
+		return err
+	}
+	rest = strings.Join(shargs, "")
 
 	if i := bytes.IndexByte(opts, 't'); i >= 0 {
 		return scpUploadSession(opts, rest, in, out, c.comm)
