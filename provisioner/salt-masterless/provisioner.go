@@ -28,6 +28,9 @@ type Config struct {
 
 	DisableSudo bool `mapstructure:"disable_sudo"`
 
+	// If true, ensure that saltutil:sync_grains is run before salt-call
+	SyncGrains bool `mapstructure:"sync_grains"`
+
 	// Local path to the minion config
 	MinionConfig string `mapstructure:"minion_config"`
 
@@ -232,6 +235,18 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Unable to move %s/pillar to %s: %s", p.config.TempConfigDir, dst, err)
 		}
 	}
+
+        if p.config.SyncGrains {
+           ui.Message("Running sync_grains")
+           cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local saltutil.sync_grains %s", p.config.CmdArgs))}
+           if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
+               if err == nil {
+                   err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
+               }
+
+               return fmt.Errorf("Error executing sync_grains: %s", err)
+           }
+        }
 
 	ui.Message("Running highstate")
 	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate %s", p.config.CmdArgs))}
