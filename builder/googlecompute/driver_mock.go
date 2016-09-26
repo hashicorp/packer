@@ -67,6 +67,12 @@ type DriverMock struct {
 	RunInstanceErrCh  <-chan error
 	RunInstanceErr    error
 
+	CreateOrResetWindowsPasswordZone     string
+	CreateOrResetWindowsPasswordInstance string
+	CreateOrResetWindowsPasswordConfig   *WindowsPasswordConfig
+	CreateOrResetWindowsPasswordErr      error
+	CreateOrResetWindowsPasswordErrCh    <-chan error
+
 	WaitForInstanceState string
 	WaitForInstanceZone  string
 	WaitForInstanceName  string
@@ -223,4 +229,26 @@ func (d *DriverMock) WaitForInstance(state, zone, name string) <-chan error {
 	}
 
 	return resultCh
+}
+
+func (d *DriverMock) GetWindowsPassword() (string, error) {
+	return "", nil
+}
+
+func (d *DriverMock) CreateOrResetWindowsPassword(instance, zone string, c *WindowsPasswordConfig) (<-chan error, error) {
+
+	d.CreateOrResetWindowsPasswordInstance = instance
+	d.CreateOrResetWindowsPasswordZone = zone
+	d.CreateOrResetWindowsPasswordConfig = c
+
+	c.password = "MOCK_PASSWORD"
+
+	resultCh := d.CreateOrResetWindowsPasswordErrCh
+	if resultCh == nil {
+		ch := make(chan error)
+		close(ch)
+		resultCh = ch
+	}
+
+	return resultCh, d.CreateOrResetWindowsPasswordErr
 }
