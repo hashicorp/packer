@@ -76,6 +76,8 @@ IMPROVEMENTS:
   * post-processor/docker: Preserve tags when running docker push [GH-3631]
   * post-processor/docker: Improved support for Docker push to Amazon ECR [GH-3856]
   * scripts: Added `help` target to Makefile [GH-3290]
+  * builder/googlecompute: Add -force option to delete old image before
+      creating new one. [GH-3918]
 
 BUG FIXES:
 
