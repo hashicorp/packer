@@ -19,8 +19,8 @@ fi
 # Tag, unless told not to
 if [ -z $NOTAG ]; then
   echo "==> Tagging..."
-  git commit --allow-empty -a --gpg-sign=348FFC4C -m "Cut version $VERSION"
-  git tag -a -m "Version $VERSION" -s -u 348FFC4C "v${VERSION}" $RELBRANCH
+  git commit --allow-empty -a -m "Cut version $VERSION"
+  git tag -a -m "Version $VERSION" "v${VERSION}" $RELBRANCH
 fi
 
 # Zip all the files
@@ -44,10 +44,7 @@ if [ -z $NOSIGN ]; then
   pushd ./pkg/dist
   rm -f ./packer_${VERSION}_SHA256SUMS*
   shasum -a256 * > ./packer_${VERSION}_SHA256SUMS
-  gpg --default-key 348FFC4C --detach-sig ./packer_${VERSION}_SHA256SUMS
   popd
 fi
-
-hc-releases -upload $DIR/pkg/dist --publish --purge
 
 exit 0
