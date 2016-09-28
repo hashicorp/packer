@@ -31,6 +31,7 @@ type Config struct {
 	StateTimeout      time.Duration `mapstructure:"state_timeout"`
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
+	UserDataFile      string        `mapstructure:"user_data_file"`
 
 	ctx interpolate.Context
 }
@@ -111,6 +112,16 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("image is required"))
+	}
+
+	if c.UserData != "" && c.UserDataFile != "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("only one of user_data or user_data_file can be specified"))
+	} else if c.UserDataFile != "" {
+		if _, err := os.Stat(c.UserDataFile); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
