@@ -6,6 +6,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 )
 
 type stepCreateDroplet struct {
@@ -20,6 +21,18 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Create the droplet based on configuration
 	ui.Say("Creating droplet...")
+
+	userData := c.UserData
+	if c.UserDataFile != "" {
+		contents, err := ioutil.ReadFile(c.UserDataFile)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Problem reading user data file: %s", err))
+			return multistep.ActionHalt
+		}
+
+		userData = string(contents)
+	}
+
 	droplet, _, err := client.Droplets.Create(&godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
@@ -31,7 +44,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 			godo.DropletCreateSSHKey{ID: int(sshKeyId)},
 		},
 		PrivateNetworking: c.PrivateNetworking,
-		UserData:          c.UserData,
+		UserData:          userData,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
