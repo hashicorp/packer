@@ -92,10 +92,6 @@ builder.
     your floppy disk includes drivers or if you just want to organize it's 
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
--   `reassign_mac` (boolean) - If this is "false" the MAC address of the first
-    NIC will reused when imported else a new MAC address will be generated
-    by Parallels. Defaults to "false".
-
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`

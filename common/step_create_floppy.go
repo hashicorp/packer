@@ -16,11 +16,9 @@ import (
 )
 
 // StepCreateFloppy will create a floppy disk with the given files.
-// The floppy disk doesn't support sub-directories. Only files at the
-// root level are supported.
 type StepCreateFloppy struct {
 	Files    []string
-	Contents []string
+	Directories []string
 
 	floppyPath string
 
@@ -28,7 +26,7 @@ type StepCreateFloppy struct {
 }
 
 func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
-	if len(s.Files) == 0 && len(s.Contents) == 0 {
+	if len(s.Files) == 0 && len(s.Directories) == 0 {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue
 	}
@@ -167,7 +165,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Collect all paths (expanding wildcards) into pathqueue
 	ui.Message("Collecting paths from floppy_dirs")
 	var pathqueue []string
-	for _,filename := range s.Contents {
+	for _,filename := range s.Directories {
 		if strings.IndexAny(filename, "*?[") >= 0 {
 			matches,err := filepath.Glob(filename)
 			if err != nil {

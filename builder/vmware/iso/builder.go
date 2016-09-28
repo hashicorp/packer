@@ -232,7 +232,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepCreateFloppy{
 			Files:    b.config.FloppyConfig.FloppyFiles,
-			Contents: b.config.FloppyConfig.FloppyContents,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&stepRemoteUpload{
 			Key:     "floppy_path",
