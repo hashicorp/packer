@@ -33,6 +33,7 @@ IMPROVEMENTS:
   * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
     [GH-3444]
   * builder/digitalocean: Fixes timeout waiting for snapshot [GH-3868]
+  * builder/digitalocean: Added `user_data_file` support. [GH-3933]
   * builder/docker: Improved support for Docker pull from Amazon ECR. [GH-3856]
   * builder/google: Added support for `image_family` [GH-3503]
   * builder/google: Use gcloud application default credentials. [GH-3655]
