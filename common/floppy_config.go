@@ -9,7 +9,7 @@ import (
 
 type FloppyConfig struct {
 	FloppyFiles    []string `mapstructure:"floppy_files"`
-	FloppyContents []string `mapstructure:"floppy_dirs"`
+	FloppyDirectories []string `mapstructure:"floppy_dirs"`
 }
 
 func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {
@@ -25,11 +25,11 @@ func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.FloppyContents == nil {
-		c.FloppyContents = make([]string, 0)
+	if c.FloppyDirectories == nil {
+		c.FloppyDirectories = make([]string, 0)
 	}
 
-	for _, path := range c.FloppyContents {
+	for _, path := range c.FloppyDirectories {
 		if _, err := os.Stat(path); err != nil {
 			errs = append(errs, fmt.Errorf("Bad Floppy disk directory '%s': %s", path, err))
 		}

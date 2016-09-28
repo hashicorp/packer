@@ -365,7 +365,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps, new(stepPrepareOutputDir),
 		&common.StepCreateFloppy{
 			Files:    b.config.FloppyConfig.FloppyFiles,
-			Contents: b.config.FloppyConfig.FloppyContents,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		new(stepCreateDisk),
 		new(stepCopyDisk),
