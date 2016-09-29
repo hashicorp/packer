@@ -104,6 +104,7 @@ BUG FIXES:
   * website: improved rendering on iPad [GH-3780]
   * provisioner/file: Fix directory download. [GH-3899]
   * command/push: Allows dot (`.`) in image names. [GH-3937]
+  * builder/amazon: add retry logic when creating tags.
 
 ## 0.10.2 (September 20, 2016)
 
