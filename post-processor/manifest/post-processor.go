@@ -18,9 +18,9 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Filename     string `mapstructure:"filename"`
-	StripPath    bool   `mapstructure:"strip_path"`
-	ctx          interpolate.Context
+	Filename  string `mapstructure:"filename"`
+	StripPath bool   `mapstructure:"strip_path"`
+	ctx       interpolate.Context
 }
 
 type PostProcessor struct {
