@@ -46,6 +46,8 @@ Optional:
 
 -   `skip_clean` (boolean) - Whether we should skip removing the OVA file uploaded to S3 after the import process has completed. "true" means that we should leave it in the S3 bucket, "false" means to clean it out. Defaults to "false".
 
+-   `ami_name` (string) - The name of the ami within the console. If not specified, this will default to something like `ami-import-sfwerwf`. Please note, specifying this option will result in a slightly longer execution time.
+
 -   `tags` (object of key/value strings) - Tags applied to the created AMI and
     relevant snapshots.
 
