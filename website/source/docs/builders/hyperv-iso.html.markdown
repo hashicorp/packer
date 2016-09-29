@@ -186,7 +186,15 @@ can be configured for this builder.
 	this to an empty string, Packer will try to determine the switch to use by looking for
 	external switch that is up and running.
 
--   `vm_name` (string) - This is the name of the virtua machine for the new virtual
+-   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card. 
+	By default none is set. If none is set then a vlan is not set on the switch's network card.
+	If this value is set it should match the vlan specified in by `vlan_id`.
+
+-   `vlan_id` (string) - This is the vlan of the virtual machine's network card for the new virtual
+	machine. By default none is set. If none is set then vlans are not set on the virtual machine's 
+	network card.
+
+-   `vm_name` (string) - This is the name of the virtual machine for the new virtual
 	machine, without the file extension. By default this is "packer-BUILDNAME",
 	where "BUILDNAME" is the name of the build.
 
