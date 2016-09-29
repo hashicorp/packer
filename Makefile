@@ -53,7 +53,7 @@ fmt-examples:
 # source files.
 generate: deps ## Generate dynamically generated code
 	go generate .
-	go fmt command/plugin.go
+	gofmt -w command/plugin.go
 
 test: deps ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m

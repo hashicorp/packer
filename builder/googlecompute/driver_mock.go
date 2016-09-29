@@ -54,7 +54,7 @@ type DriverMock struct {
 	GetInternalIPName   string
 	GetInternalIPResult string
 	GetInternalIPErr    error
-	
+
 	GetSerialPortOutputZone   string
 	GetSerialPortOutputName   string
 	GetSerialPortOutputResult string

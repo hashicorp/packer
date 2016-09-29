@@ -1,19 +1,19 @@
 package googlecompute
 
-import(
-	"testing"
+import (
 	"fmt"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func StubImage(name, project string, licenses []string, sizeGb int64) *Image {
 	return &Image{
-		Licenses: licenses,
-		Name: name,
+		Licenses:  licenses,
+		Name:      name,
 		ProjectId: project,
-		SelfLink: fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/images/%s", project, name),
-		SizeGb: sizeGb,
+		SelfLink:  fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/images/%s", project, name),
+		SizeGb:    sizeGb,
 	}
 }
 
