@@ -28,12 +28,12 @@ func TestStepCreateImage(t *testing.T) {
 	// run the step
 	action := step.Run(state)
 	assert.Equal(t, action, multistep.ActionContinue, "Step did not pass.")
-	
+
 	uncastImage, ok := state.GetOk("image")
 	assert.True(t, ok, "State does not have resulting image.")
 	image, ok := uncastImage.(*Image)
 	assert.True(t, ok, "Image in state is not an Image.")
-	
+
 	// Verify created Image results.
 	assert.Equal(t, image.Licenses, d.CreateImageResultLicenses, "Created image licenses don't match the licenses returned by the driver.")
 	assert.Equal(t, image.Name, c.ImageName, "Created image does not match config name.")
