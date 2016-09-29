@@ -41,16 +41,16 @@ func (a *Artifact) String() string {
 
 func (a *Artifact) State(name string) interface{} {
 	switch name {
-		case "ImageName":
-			return a.image.Name
-		case "ImageSizeGb":
-			return a.image.SizeGb
-		case "AccountFilePath":
-			return a.config.AccountFile
-		case "ProjectId":
-		  return a.config.ProjectId
-		case "BuildZone":
-			return a.config.Zone
+	case "ImageName":
+		return a.image.Name
+	case "ImageSizeGb":
+		return a.image.SizeGb
+	case "AccountFilePath":
+		return a.config.AccountFile
+	case "ProjectId":
+		return a.config.ProjectId
+	case "BuildZone":
+		return a.config.Zone
 	}
 	return nil
 }

@@ -46,13 +46,13 @@ func EncodeVMX(contents map[string]string) string {
 	// a list of VMX key fragments that the value must not be quoted
 	// fragments are used to cover multliples (i.e. multiple disks)
 	// keys are still lowercase at this point, use lower fragments
-	noQuotes := []string {
+	noQuotes := []string{
 		".virtualssd",
 	}
 
 	// a list of VMX key fragments that are case sensitive
 	// fragments are used to cover multliples (i.e. multiple disks)
-	caseSensitive := []string {
+	caseSensitive := []string{
 		".virtualSSD",
 	}
 
@@ -63,7 +63,7 @@ func EncodeVMX(contents map[string]string) string {
 		for _, q := range noQuotes {
 			if strings.Contains(k, q) {
 				pat = "%s = %s\n"
-				break;
+				break
 			}
 		}
 		key := k
