@@ -31,7 +31,7 @@ type Driver interface {
 
 	// GetNatIP gets the NAT IP address for the instance.
 	GetNatIP(zone, name string) (string, error)
-	
+
 	// GetSerialPortOutput gets the Serial Port contents for the instance.
 	GetSerialPortOutput(zone, name string) (string, error)
 

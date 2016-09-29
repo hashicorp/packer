@@ -2,8 +2,8 @@ package googlecompute
 
 import (
 	"github.com/mitchellh/multistep"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestStepWaitInstanceStartup(t *testing.T) {
@@ -11,7 +11,7 @@ func TestStepWaitInstanceStartup(t *testing.T) {
 	step := new(StepWaitInstanceStartup)
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(*DriverMock)
-	
+
 	testZone := "test-zone"
 	testInstanceName := "test-instance-name"
 
@@ -20,10 +20,10 @@ func TestStepWaitInstanceStartup(t *testing.T) {
 
 	// This step stops when it gets Done back from the metadata.
 	d.GetInstanceMetadataResult = StartupScriptStatusDone
-	
+
 	// Run the step.
 	assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
-	
+
 	// Check that GetInstanceMetadata was called properly.
 	assert.Equal(t, d.GetInstanceMetadataZone, testZone, "Incorrect zone passed to GetInstanceMetadata.")
 	assert.Equal(t, d.GetInstanceMetadataName, testInstanceName, "Incorrect instance name passed to GetInstanceMetadata.")

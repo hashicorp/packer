@@ -81,7 +81,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			RawStateTimeout:      "5m",
 		}
 		exporterConfig.CalcTimeout()
-		
+
 		// Set up credentials and GCE driver.
 		b, err := ioutil.ReadFile(accountKeyFilePath)
 		if err != nil {
