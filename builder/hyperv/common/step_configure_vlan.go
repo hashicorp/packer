@@ -6,12 +6,14 @@ package common
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepConfigureVlan struct {
-	VlanID string
+	VlanId       string
+	SwitchVlanId string
 }
 
 func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
@@ -21,30 +23,29 @@ func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
 	errorMsg := "Error configuring vlan: %s"
 	vmName := state.Get("vmName").(string)
 	switchName := state.Get("SwitchName").(string)
+	vlanId := s.VlanId
+	switchVlanId := s.SwitchVlanId
 
 	ui.Say("Configuring vlan...")
 
-	vlanId := s.VlanID
-
-	if vlanId == "" {
-		// If no vlan ID is specified, do not enable Virtual LAN Identification
-		return multistep.ActionContinue
+	if switchVlanId != "" {
+		err := driver.SetNetworkAdapterVlanId(switchName, vlanId)
+		if err != nil {
+			err := fmt.Errorf(errorMsg, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
-	err := driver.SetNetworkAdapterVlanId(switchName, vlanId)
-	if err != nil {
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	err = driver.SetVirtualMachineVlanId(vmName, vlanId)
-	if err != nil {
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if vlanId != "" {
+		err := driver.SetVirtualMachineVlanId(vmName, vlanId)
+		if err != nil {
+			err := fmt.Errorf(errorMsg, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue
