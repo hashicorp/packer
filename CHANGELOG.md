@@ -33,6 +33,7 @@ IMPROVEMENTS:
   * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
     [GH-3444]
   * builder/digitalocean: Fixes timeout waiting for snapshot [GH-3868]
+  * builder/digitalocean: Added `user_data_file` support. [GH-3933]
   * builder/docker: Improved support for Docker pull from Amazon ECR. [GH-3856]
   * builder/google: Added support for `image_family` [GH-3503]
   * builder/google: Use gcloud application default credentials. [GH-3655]
@@ -44,18 +45,27 @@ IMPROVEMENTS:
     with `-debug` [GH-3547]
   * builder/parallels: Support future versions of Parallels by using the latest
     driver [GH-3673]
+  * builder/parallels: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/qemu: Added `vnc_bind_address` option [GH-3574]
+  * builder/qemu: Specify disk format when starting qemu [GH-3888]
+  * builder/qemu: Now pauses between `boot_command` entries when running with
+    `-debug` [GH-3547]
+  * builder/qemu: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/virtualbox: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3542]
   * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
+  * builder/virtualbox: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * builder/vmware: Now paused between `boot_command` entries when running with
     `-debug` [GH-3542]
   * builder/vmware: Added `vnc_bind_address` option [GH-3565]
   * builder/vmware: Adds passwords for VNC [GH-2325]
   * builder/vmware: Handle connection to VM with more than one NIC on ESXi
     [GH-3347]
-  * builder/qemu: Now pauses between `boot_command` entries when running with
-    `-debug` [GH-3547]
+  * builder/vmware: Add support for ctrl, shift and alt keys in `boot_command`.
+    [GH-3767]
   * provisioner/ansible: Improved logging and error handling [GH-3477]
   * provisioner/ansible: Support scp [GH-3861]
   * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
@@ -67,6 +77,8 @@ IMPROVEMENTS:
   * post-processor/docker: Preserve tags when running docker push [GH-3631]
   * post-processor/docker: Improved support for Docker push to Amazon ECR [GH-3856]
   * scripts: Added `help` target to Makefile [GH-3290]
+  * builder/googlecompute: Add `-force` option to delete old image before
+      creating new one. [GH-3918]
 
 BUG FIXES:
 
@@ -90,6 +102,15 @@ BUG FIXES:
   * provisioner/ansible: Properly set host key checking even when a custom ENV
     is specified [GH-3568]
   * website: improved rendering on iPad [GH-3780]
+  * provisioner/file: Fix directory download. [GH-3899]
+  * command/push: Allows dot (`.`) in image names. [GH-3937]
+  * builder/amazon: add retry logic when creating tags.
+
+## 0.10.2 (September 20, 2016)
+
+BUG FIXES:
+
+  * Rebuilding with OS X Sierra and go 1.7.1 to fix bug  in Sierra
 
 ## 0.10.1 (May 7, 2016)
 

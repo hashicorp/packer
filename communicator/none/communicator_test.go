@@ -13,4 +13,3 @@ func TestCommIsCommunicator(t *testing.T) {
 		t.Fatalf("comm must be a communicator")
 	}
 }
-
