@@ -239,7 +239,8 @@ builder.
 -   `x509_upload_path` (string) - The path on the remote machine where the X509
     certificate will be uploaded. This path must already exist and be writable.
     X509 certificates are uploaded after provisioning is run, so it is perfectly
-    okay to create this directory as part of the provisioning process.
+    okay to create this directory as part of the provisioning process. Defaults to
+    `/tmp`.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
@@ -327,8 +328,9 @@ include those files (see the `--no-filter` option of ec2-bundle-vol).
 ### Bundle Upload Command
 
 The default value for `bundle_upload_command` is shown below. It is split across
-multiple lines for convenience of reading. The bundle upload command is
-responsible for taking the bundled volume and uploading it to S3.
+multiple lines for convenience of reading. Access key and secret key are omitted
+if using instance profile. The bundle upload command is responsible for taking
+the bundled volume and uploading it to S3.
 
 ``` {.text}
 sudo -i -n ec2-upload-bundle \

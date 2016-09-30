@@ -107,11 +107,11 @@ each category, the available configuration keys are alphabetized.
     `{{.Command}}`. This may be useful to set if you want to set environmental
     variables or perhaps run it with `sudo` or so on. This is a configuration
     template where the `.Command` variable is replaced with the command to
-    be run.
+    be run. Defaults to "{{.Command}}".
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
-    that will be copied into the chroot environment prior to provisioning. This
-    is useful, for example, to copy `/etc/resolv.conf` so that DNS lookups work.
+    that will be copied into the chroot environment prior to provisioning. Defaults
+    to `/etc/resolv.conf` so that DNS lookups work.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
@@ -139,7 +139,7 @@ each category, the available configuration keys are alphabetized.
 
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
-    `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
+    `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
