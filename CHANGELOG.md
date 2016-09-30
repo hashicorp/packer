@@ -40,6 +40,7 @@ IMPROVEMENTS:
   * builder/google: Signal that startup script fished via metadata. [GH-3873]
   * builder/google: Add image license metadata. [GH-3873]
   * builder/google: Enable to select NVMe images. [GH-3338]
+  * builder/google: Create passwords for Windows instances. [GH-3932]
   * builder/null: Can now be used with WinRM [GH-2525]
   * builder/parallels: Now pauses between `boot_command` entries when running
     with `-debug` [GH-3547]
