@@ -7,10 +7,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/masterzen/winrm/winrm"
+	"github.com/masterzen/winrm"
 	"github.com/mitchellh/packer/packer"
 	"github.com/packer-community/winrmcp/winrmcp"
-
 	// This import is a bit strange, but it's needed so `make updatedeps`
 	// can see and download it
 	_ "github.com/dylanmei/winrmtest"
@@ -40,7 +39,7 @@ func New(config *Config) (*Communicator, error) {
 	}
 
 	// Create the client
-	params := winrm.DefaultParameters()
+	params := winrm.DefaultParameters
 
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
