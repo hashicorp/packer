@@ -377,12 +377,12 @@
 			"Rev": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
 		{
-			"ImportPath": "github.com/masterzen/winrm/soap",
-			"Rev": "54ea5d01478cfc2afccec1504bd0dfcd8c260cfa"
+			"ImportPath": "github.com/masterzen/winrm",
+			"Rev": "ef3efbb97f99fc204bd9c7edf778a0dbd9781baf"
 		},
 		{
-			"ImportPath": "github.com/masterzen/winrm/winrm",
-			"Rev": "54ea5d01478cfc2afccec1504bd0dfcd8c260cfa"
+			"ImportPath": "github.com/masterzen/winrm/soap",
+			"Rev": "ef3efbb97f99fc204bd9c7edf778a0dbd9781baf"
 		},
 		{
 			"ImportPath": "github.com/masterzen/xmlpath",
@@ -442,7 +442,7 @@
 		},
 		{
 			"ImportPath": "github.com/packer-community/winrmcp/winrmcp",
-			"Rev": "f1bcf36a69fa2945e65dd099eee11b560fbd3346"
+			"Rev": "7f50d16167d327698b91ccd5363d8691865e2580"
 		},
 		{
 			"ImportPath": "github.com/pierrec/lz4",
