@@ -188,16 +188,18 @@ builder.
     }
     ```
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical.
+    NOTE: This will fail unless *exactly* one AMI is returned.
 
--   `source_ami_filter.filters` (map of strings) - filters used to select a `source_ami`.
-    Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-    is valid.
+    -   `filters` (map of strings) - filters used to select a `source_ami`.
+         NOTE: This will fail unless *exactly* one AMI is returned.
+         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+         is valid.
 
--   `source_ami_filter.owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-    This is helpful to limit the AMIs to a trusted third party, or to your own account.
+    -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
+         This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
--   `source_ami_filter.most_recent` (bool) - Selects the newest created image when true.
-    This is most useful for selecting a daily distro build.
+    -   `most_recent` (bool) - Selects the newest created image when true.
+         This is most useful for selecting a daily distro build.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
