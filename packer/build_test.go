@@ -23,6 +23,7 @@ func testBuild() *coreBuild {
 			},
 		},
 		variables: make(map[string]string),
+		onError:   "cleanup",
 	}
 }
 
@@ -32,6 +33,7 @@ func testDefaultPackerConfig() map[string]interface{} {
 		BuilderTypeConfigKey:   "foo",
 		DebugConfigKey:         false,
 		ForceConfigKey:         false,
+		OnErrorConfigKey:       "cleanup",
 		TemplatePathKey:        "",
 		UserVariablesConfigKey: make(map[string]string),
 	}

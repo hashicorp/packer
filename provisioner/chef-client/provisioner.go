@@ -98,9 +98,9 @@ type InstallChefTemplate struct {
 }
 
 type KnifeTemplate struct {
-		Sudo  bool
-		Flags string
-		Args  string
+	Sudo  bool
+	Flags string
+	Args  string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -500,7 +500,7 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 	}
 
 	p.config.ctx.Data = &KnifeTemplate{
-		Sudo: !p.config.PreventSudo,
+		Sudo:  !p.config.PreventSudo,
 		Flags: strings.Join(flags, " "),
 		Args:  strings.Join(args, " "),
 	}

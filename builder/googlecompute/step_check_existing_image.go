@@ -13,19 +13,19 @@ type StepCheckExistingImage int
 
 // Run executes the Packer build step that checks if the image already exists.
 func (s *StepCheckExistingImage) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
-	driver := state.Get("driver").(Driver)
+	c := state.Get("config").(*Config)
+	d := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Checking image does not exist...")
-	exists := driver.ImageExists(config.ImageName)
-	if exists {
-		err := fmt.Errorf("Image %s already exists", config.ImageName)
+	c.imageAlreadyExists = d.ImageExists(c.ImageName)
+	if !c.PackerForce && c.imageAlreadyExists {
+		err := fmt.Errorf("Image %s already exists.\n"+
+			"Use the force flag to delete it prior to building.", c.ImageName)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
 	return multistep.ActionContinue
 }
 

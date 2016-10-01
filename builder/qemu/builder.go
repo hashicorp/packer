@@ -82,6 +82,7 @@ type Config struct {
 	common.HTTPConfig   `mapstructure:",squash"`
 	common.ISOConfig    `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
+	common.FloppyConfig `mapstructure:",squash"`
 
 	ISOSkipCache    bool       `mapstructure:"iso_skip_cache"`
 	Accelerator     string     `mapstructure:"accelerator"`
@@ -138,6 +139,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	var errs *packer.MultiError
+	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -215,9 +219,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Format = "qcow2"
 	}
 
-	if b.config.FloppyFiles == nil {
-		b.config.FloppyFiles = make([]string, 0)
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.NetDevice == "" {
 		b.config.NetDevice = "virtio-net"
@@ -231,9 +233,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.SSHWaitTimeout != 0 {
 		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
-
-	var errs *packer.MultiError
-	warnings := make([]string, 0)
 
 	if b.config.ISOSkipCache {
 		b.config.ISOChecksumType = "none"
@@ -376,19 +375,40 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
-		new(stepForwardSSH),
+	)
+
+	if b.config.Comm.Type != "none" {
+		steps = append(steps,
+			new(stepForwardSSH),
+		)
+	}
+
+	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
 		&stepBootWait{},
 		&stepTypeBootCommand{},
-		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
-			SSHPort:   commPort,
-		},
+	)
+
+	if b.config.Comm.Type != "none" {
+		steps = append(steps,
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      commHost,
+				SSHConfig: sshConfig,
+				SSHPort:   commPort,
+			},
+		)
+	}
+
+	steps = append(steps,
 		new(common.StepProvision),
+	)
+	steps = append(steps,
 		new(stepShutdown),
+	)
+
+	steps = append(steps,
 		new(stepConvertDisk),
 	)
 
@@ -402,17 +422,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	// Run
-	if b.config.PackerDebug {
-		pauseFn := common.MultistepDebugFn(ui)
-		state.Put("pauseFn", pauseFn)
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: pauseFn,
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// If there was an error, return that

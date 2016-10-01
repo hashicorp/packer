@@ -58,13 +58,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
 		},
+		&StepCreateWindowsPassword{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_windows_%s.pem", b.config.PackerBuildName),
+		},
 		&StepInstanceInfo{
 			Debug: b.config.PackerDebug,
 		},
 		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
+			Config:      &b.config.Comm,
+			Host:        commHost,
+			SSHConfig:   sshConfig,
+			WinRMConfig: winrmConfig,
 		},
 		new(common.StepProvision),
 		new(StepWaitInstanceStartup),
@@ -73,14 +78,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run the steps.
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// Report any errors.
@@ -93,7 +91,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		image:  state.Get("image").(Image),
+		image:  state.Get("image").(*Image),
 		driver: driver,
 		config: b.config,
 	}
