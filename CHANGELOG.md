@@ -94,12 +94,14 @@ BUG FIXES:
   * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
   * builder/docker: Fix file provisioner dotfile matching. [GH-3800]
   * builder/virtualbox: Respect `ssh_host` [GH-3617]
+  * builder/virtualbox: Make `ssh_host_port_max` an inclusive bound. [GH-2784]
   * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
   * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
   * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
   * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
     [GH-3740]
   * builder/qemu: Don't fail on communicator set to `none`. [GH-3681]
+  * builder/qemu: Make `ssh_host_port_max` an inclusive bound. [GH-2784]
   * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
   * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
   * provisioner/ansible: Properly set host key checking even when a custom ENV
