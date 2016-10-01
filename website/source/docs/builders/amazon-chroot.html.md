@@ -170,6 +170,33 @@ each category, the available configuration keys are alphabetized.
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Defaults to false.
 
+-   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
+    Example:
+    ``` {.javascript}
+    "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "*ubuntu-xenial-16.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+    }
+    ```
+    This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical.
+    NOTE: This will fail unless *exactly* one AMI is returned.
+
+    -   `filters` (map of strings) - filters used to select a `source_ami`.
+         NOTE: This will fail unless *exactly* one AMI is returned.
+         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+         is valid.
+
+    -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
+         This is helpful to limit the AMIs to a trusted third party, or to your own account.
+
+    -   `most_recent` (bool) - Selects the newest created image when true.
+         This is most useful for selecting a daily distro build.
+
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
 ## Basic Example
