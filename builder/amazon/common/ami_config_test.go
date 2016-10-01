@@ -58,3 +58,12 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	c.AMISkipRegionValidation = false
 
 }
+
+func TestAMIConfigPrepare_EncryptBoot(t *testing.T) {
+	c := testAMIConfig()
+	c.AMIUsers = []string{"testAccountID"}
+	c.AMIEncryptBootVolume = true
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("should have error")
+	}
+}

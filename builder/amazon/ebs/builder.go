@@ -162,6 +162,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AMIName:         b.config.AMIName,
 		},
 		&stepCreateAMI{},
+		&stepCreateEncryptedAMICopy{},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig: &b.config.AccessConfig,
 			Regions:      b.config.AMIRegions,
