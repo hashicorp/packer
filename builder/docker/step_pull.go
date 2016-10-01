@@ -21,7 +21,22 @@ func (s *StepPull) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Pulling Docker image: %s", config.Image))
 
-	if config.Login {
+	if config.EcrLogin {
+		ui.Message("Fetching ECR credentials...")
+
+		username, password, err := config.EcrGetLogin(config.LoginServer)
+		if err != nil {
+			err := fmt.Errorf("Error fetching ECR credentials: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		config.LoginUsername = username
+		config.LoginPassword = password
+	}
+
+	if config.Login || config.EcrLogin {
 		ui.Message("Logging in...")
 		err := driver.Login(
 			config.LoginServer,

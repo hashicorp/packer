@@ -24,20 +24,12 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 
 	log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d", config.SSHHostPortMin, config.SSHHostPortMax)
 	var sshHostPort uint
-	var offset uint = 0
 
-	portRange := int(config.SSHHostPortMax - config.SSHHostPortMin)
-	if portRange > 0 {
-		// Have to check if > 0 to avoid a panic
-		offset = uint(rand.Intn(portRange))
-	}
+	portRange := config.SSHHostPortMax - config.SSHHostPortMin + 1
+	offset := uint(rand.Intn(int(portRange)))
 
 	for {
 		sshHostPort = offset + config.SSHHostPortMin
-		if sshHostPort >= config.SSHHostPortMax {
-			offset = 0
-			sshHostPort = config.SSHHostPortMin
-		}
 		log.Printf("Trying port: %d", sshHostPort)
 		l, err := net.Listen("tcp", fmt.Sprintf(":%d", sshHostPort))
 		if err == nil {
@@ -45,6 +37,9 @@ func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 			break
 		}
 		offset++
+		if offset == portRange {
+			offset = 0
+		}
 	}
 	ui.Say(fmt.Sprintf("Found port for communicator (SSH, WinRM, etc): %d.", sshHostPort))
 

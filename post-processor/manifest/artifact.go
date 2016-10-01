@@ -4,13 +4,18 @@ import "fmt"
 
 const BuilderId = "packer.post-processor.manifest"
 
+type ArtifactFile struct {
+	Name string `json:"name"`
+	Size int64  `json:"size"`
+}
+
 type Artifact struct {
-	BuildName     string   `json:"name"`
-	BuilderType   string   `json:"builder_type"`
-	BuildTime     int64    `json:"build_time"`
-	ArtifactFiles []string `json:"files"`
-	ArtifactId    string   `json:"artifact_id"`
-	PackerRunUUID string   `json:"packer_run_uuid"`
+	BuildName     string         `json:"name"`
+	BuilderType   string         `json:"builder_type"`
+	BuildTime     int64          `json:"build_time"`
+	ArtifactFiles []ArtifactFile `json:"files"`
+	ArtifactId    string         `json:"artifact_id"`
+	PackerRunUUID string         `json:"packer_run_uuid"`
 }
 
 func (a *Artifact) BuilderId() string {
@@ -18,7 +23,11 @@ func (a *Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Files() []string {
-	return a.ArtifactFiles
+	var files []string
+	for _, af := range a.ArtifactFiles {
+		files = append(files, af.Name)
+	}
+	return files
 }
 
 func (a *Artifact) Id() string {

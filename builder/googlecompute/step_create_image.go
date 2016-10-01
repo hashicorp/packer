@@ -22,9 +22,24 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
+	if config.PackerForce && config.imageAlreadyExists {
+		ui.Say("Deleting previous image...")
+
+		errCh := driver.DeleteImage(config.ImageName)
+		err := <-errCh
+		if err != nil {
+			err := fmt.Errorf("Error deleting image: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	ui.Say("Creating image...")
 
-	imageCh, errCh := driver.CreateImage(config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone, config.DiskName)
+	imageCh, errCh := driver.CreateImage(
+		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
+		config.DiskName)
 	var err error
 	select {
 	case err = <-errCh:
