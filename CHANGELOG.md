@@ -25,6 +25,7 @@ IMPROVEMENTS:
     `terminate` at the end of the build [GH-3556]
   * builder/amazon: Support building from scratch with amazon-chroot builder.
     [GH-3855] [GH-3895]
+  * builder/amazon: Support create an AMI with an `encrypted_boot` volume. [GH-3382]
   * builder/azure: Now pre-validates `capture_container_name` and
     `capture_name_prefix` [GH-3537]
   * builder/azure: Support for custom images [GH-3575]
