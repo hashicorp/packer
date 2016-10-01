@@ -30,19 +30,20 @@ type Config struct {
 	awscommon.AMIConfig       `mapstructure:",squash"`
 	awscommon.AccessConfig    `mapstructure:",squash"`
 
-	ChrootMounts      [][]string `mapstructure:"chroot_mounts"`
-	CommandWrapper    string     `mapstructure:"command_wrapper"`
-	CopyFiles         []string   `mapstructure:"copy_files"`
-	DevicePath        string     `mapstructure:"device_path"`
-	FromScratch       bool       `mapstructure:"from_scratch"`
-	MountOptions      []string   `mapstructure:"mount_options"`
-	MountPartition    int        `mapstructure:"mount_partition"`
-	MountPath         string     `mapstructure:"mount_path"`
-	PostMountCommands []string   `mapstructure:"post_mount_commands"`
-	PreMountCommands  []string   `mapstructure:"pre_mount_commands"`
-	RootDeviceName    string     `mapstructure:"root_device_name"`
-	RootVolumeSize    int64      `mapstructure:"root_volume_size"`
-	SourceAmi         string     `mapstructure:"source_ami"`
+	ChrootMounts      [][]string                 `mapstructure:"chroot_mounts"`
+	CommandWrapper    string                     `mapstructure:"command_wrapper"`
+	CopyFiles         []string                   `mapstructure:"copy_files"`
+	DevicePath        string                     `mapstructure:"device_path"`
+	FromScratch       bool                       `mapstructure:"from_scratch"`
+	MountOptions      []string                   `mapstructure:"mount_options"`
+	MountPartition    int                        `mapstructure:"mount_partition"`
+	MountPath         string                     `mapstructure:"mount_path"`
+	PostMountCommands []string                   `mapstructure:"post_mount_commands"`
+	PreMountCommands  []string                   `mapstructure:"pre_mount_commands"`
+	RootDeviceName    string                     `mapstructure:"root_device_name"`
+	RootVolumeSize    int64                      `mapstructure:"root_volume_size"`
+	SourceAmi         string                     `mapstructure:"source_ami"`
+	SourceAmiFilter   awscommon.AmiFilterOptions `mapstructure:"source_ami_filter"`
 
 	ctx interpolate.Context
 }
@@ -125,8 +126,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.FromScratch {
-		if b.config.SourceAmi != "" {
-			warns = append(warns, "source_ami is unused when from_scratch is true")
+		if b.config.SourceAmi != "" || !b.config.SourceAmiFilter.Empty() {
+			warns = append(warns, "source_ami and source_ami_filter are unused when from_scratch is true")
 		}
 		if b.config.RootVolumeSize == 0 {
 			errs = packer.MultiErrorAppend(
@@ -149,9 +150,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				errs, errors.New("ami_block_device_mappings is required with from_scratch."))
 		}
 	} else {
-		if b.config.SourceAmi == "" {
+		if b.config.SourceAmi == "" && b.config.SourceAmiFilter.Empty() {
 			errs = packer.MultiErrorAppend(
-				errs, errors.New("source_ami is required."))
+				errs, errors.New("source_ami or source_ami_filter is required."))
 		}
 		if len(b.config.AMIMappings) != 0 {
 			warns = append(warns, "ami_block_device_mappings are unused when from_scratch is false")
@@ -210,6 +211,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&awscommon.StepSourceAMIInfo{
 				SourceAmi:          b.config.SourceAmi,
 				EnhancedNetworking: b.config.AMIEnhancedNetworking,
+				AmiFilters:         b.config.SourceAmiFilter,
 			},
 			&StepCheckRootDevice{},
 		)
