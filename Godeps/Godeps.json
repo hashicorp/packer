@@ -58,6 +58,18 @@
 			"Rev": "e0b63eb299a769ea4b04dadfe530f6074b277afb"
 		},
 		{
+			"ImportPath": "github.com/approvals/go-approval-tests",
+			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
+		},
+		{
+			"ImportPath": "github.com/approvals/go-approval-tests/reporters",
+			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
+		},
+		{
+			"ImportPath": "github.com/approvals/go-approval-tests/utils",
+			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
+		},
+		{
 			"ImportPath": "github.com/armon/go-radix",
 			"Rev": "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2"
 		},
