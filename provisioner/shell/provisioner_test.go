@@ -4,9 +4,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
-	"testing"
-	"strings"
 	"regexp"
+	"strings"
+	"testing"
 )
 
 func testConfig() map[string]interface{} {
@@ -306,7 +306,7 @@ func TestProvisioner_RemotePathSetViaRemotePathAndRemoteFile(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.RemotePath != expectedRemoteFolder + "/" + expectedRemoteFile {
+	if p.config.RemotePath != expectedRemoteFolder+"/"+expectedRemoteFile {
 		t.Fatalf("remote path does not contain remote_file")
 	}
 }

@@ -15,6 +15,7 @@ import (
 type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
 	common.HTTPConfig        `mapstructure:",squash"`
+	common.FloppyConfig      `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
@@ -24,7 +25,6 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	BootCommand    []string `mapstructure:"boot_command"`
-	FloppyFiles    []string `mapstructure:"floppy_files"`
 	RemoteType     string   `mapstructure:"remote_type"`
 	SkipCompaction bool     `mapstructure:"skip_compaction"`
 	SourcePath     string   `mapstructure:"source_path"`
@@ -64,6 +64,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
