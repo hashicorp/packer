@@ -4,11 +4,6 @@
 	"GodepVersion": "v74",
 	"Deps": [
 		{
-			"ImportPath": "github.com/ActiveState/tail",
-			"Comment": "v0-41-g1a0242e",
-			"Rev": "1a0242e795eeefe54261ff308dc685f7d29cc58c"
-		},
-		{
 			"ImportPath": "github.com/Azure/azure-sdk-for-go/arm/compute",
 			"Comment": "v3.1.0-beta",
 			"Rev": "902d95d9f311ae585ee98cfd18f418b467d60d5a"
@@ -65,18 +60,6 @@
 		{
 			"ImportPath": "github.com/armon/go-radix",
 			"Rev": "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2"
-		},
-		{
-			"ImportPath": "github.com/approvals/go-approval-tests",
-			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
-		},
-		{
-			"ImportPath": "github.com/approvals/go-approval-tests/reporters",
-			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
-		},
-		{
-			"ImportPath": "github.com/approvals/go-approval-tests/utils",
-			"Rev": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
@@ -322,26 +305,6 @@
 		{
 			"ImportPath": "github.com/hashicorp/yamux",
 			"Rev": "df949784da9ed028ee76df44652e42d37a09d7e4"
-		},
-		{
-			"ImportPath": "github.com/hpcloud/tail/ratelimiter",
-			"Comment": "v0-41-g1a0242e",
-			"Rev": "1a0242e795eeefe54261ff308dc685f7d29cc58c"
-		},
-		{
-			"ImportPath": "github.com/hpcloud/tail/util",
-			"Comment": "v0-41-g1a0242e",
-			"Rev": "1a0242e795eeefe54261ff308dc685f7d29cc58c"
-		},
-		{
-			"ImportPath": "github.com/hpcloud/tail/watch",
-			"Comment": "v0-41-g1a0242e",
-			"Rev": "1a0242e795eeefe54261ff308dc685f7d29cc58c"
-		},
-		{
-			"ImportPath": "github.com/hpcloud/tail/winfile",
-			"Comment": "v0-41-g1a0242e",
-			"Rev": "1a0242e795eeefe54261ff308dc685f7d29cc58c"
 		},
 		{
 			"ImportPath": "github.com/jmespath/go-jmespath",
@@ -674,15 +637,6 @@
 		{
 			"ImportPath": "google.golang.org/cloud/internal",
 			"Rev": "5a3b06f8b5da3b7c3a93da43163b872c86c509ef"
-		},
-		{
-			"ImportPath": "gopkg.in/fsnotify.v1",
-			"Comment": "v1.2.9",
-			"Rev": "8611c35ab31c1c28aa903d33cf8b6e44a399b09e"
-		},
-		{
-			"ImportPath": "gopkg.in/tomb.v1",
-			"Rev": "dd632973f1e7218eb1089048e0798ec9ae7dceb8"
 		},
 		{
 			"ImportPath": "gopkg.in/xmlpath.v2",
