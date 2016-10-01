@@ -144,6 +144,10 @@ builder.
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Default `false`.
+
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
