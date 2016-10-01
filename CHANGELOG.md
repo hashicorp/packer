@@ -74,6 +74,8 @@ IMPROVEMENTS:
     value for Windows [GH-3622]
   * provisioner/chef: Installs 64bit chef on Windows if available [GH-3848]
   * provisioner/puppet: Added `execute_command` option [GH-3614]
+  * post-processor/amazon-import: Support `ami_name` for naming imported AMI.
+    [GH-3941]
   * post-processor/compress: Added support for bgzf compression [GH-3501]
   * post-processor/docker: Preserve tags when running docker push [GH-3631]
   * post-processor/docker: Improved support for Docker push to Amazon ECR [GH-3856]
