@@ -251,6 +251,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
+			Delay: b.config.PostShutdownDelay,
 		},
 		new(vboxcommon.StepRemoveDevices),
 		&vboxcommon.StepVBoxManage{
