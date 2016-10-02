@@ -203,30 +203,36 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		ui.Message(fmt.Sprintf(
 			"Requesting spot instance '%s' for: %s",
 			s.InstanceType, spotPrice))
-		runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
+		runOpts := &ec2.RequestSpotInstancesInput{
 			SpotPrice: &spotPrice,
 			LaunchSpecification: &ec2.RequestSpotLaunchSpecification{
-				KeyName:            &keyName,
-				ImageId:            &s.SourceAMI,
-				InstanceType:       &s.InstanceType,
-				UserData:           &userData,
-				IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-					&ec2.InstanceNetworkInterfaceSpecification{
-						DeviceIndex:              aws.Int64(0),
-						AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-						SubnetId:                 &s.SubnetId,
-						Groups:                   securityGroupIds,
-						DeleteOnTermination:      aws.Bool(true),
-					},
-				},
-				Placement: &ec2.SpotPlacement{
-					AvailabilityZone: &availabilityZone,
-				},
+				KeyName:             &keyName,
+				ImageId:             &s.SourceAMI,
+				InstanceType:        &s.InstanceType,
+				UserData:            &userData,
+				IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 				BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+				Placement:           &ec2.SpotPlacement{AvailabilityZone: &availabilityZone},
 				EbsOptimized:        &s.EbsOptimized,
 			},
-		})
+		}
+
+		if s.SubnetId != "" && s.AssociatePublicIpAddress {
+			runOpts.LaunchSpecification.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
+				&ec2.InstanceNetworkInterfaceSpecification{
+					DeviceIndex:              aws.Int64(0),
+					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
+					SubnetId:                 &s.SubnetId,
+					Groups:                   securityGroupIds,
+					DeleteOnTermination:      aws.Bool(true),
+				},
+			}
+		} else {
+			runOpts.LaunchSpecification.SubnetId = &s.SubnetId
+			runOpts.LaunchSpecification.SecurityGroupIds = securityGroupIds
+		}
+
+		runSpotResp, err := ec2conn.RequestSpotInstances(runOpts)
 		if err != nil {
 			err := fmt.Errorf("Error launching source spot instance: %s", err)
 			state.Put("error", err)
