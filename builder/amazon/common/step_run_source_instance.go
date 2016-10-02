@@ -160,7 +160,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	if spotPrice == "" || spotPrice == "0" {
 		runOpts := &ec2.RunInstancesInput{
-			KeyName:             &keyName,
 			ImageId:             &s.SourceAMI,
 			InstanceType:        &s.InstanceType,
 			UserData:            &userData,
@@ -170,6 +169,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
 			EbsOptimized:        &s.EbsOptimized,
+		}
+
+		if keyName != "" {
+			runOpts.KeyName = &keyName
 		}
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
@@ -203,29 +206,35 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		ui.Message(fmt.Sprintf(
 			"Requesting spot instance '%s' for: %s",
 			s.InstanceType, spotPrice))
-		runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
-			SpotPrice: &spotPrice,
-			LaunchSpecification: &ec2.RequestSpotLaunchSpecification{
-				KeyName:            &keyName,
-				ImageId:            &s.SourceAMI,
-				InstanceType:       &s.InstanceType,
-				UserData:           &userData,
-				IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-					&ec2.InstanceNetworkInterfaceSpecification{
-						DeviceIndex:              aws.Int64(0),
-						AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-						SubnetId:                 &s.SubnetId,
-						Groups:                   securityGroupIds,
-						DeleteOnTermination:      aws.Bool(true),
-					},
+
+		runOpts := &ec2.RequestSpotLaunchSpecification{
+			ImageId:            &s.SourceAMI,
+			InstanceType:       &s.InstanceType,
+			UserData:           &userData,
+			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
+			NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
+				&ec2.InstanceNetworkInterfaceSpecification{
+					DeviceIndex:              aws.Int64(0),
+					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
+					SubnetId:                 &s.SubnetId,
+					Groups:                   securityGroupIds,
+					DeleteOnTermination:      aws.Bool(true),
 				},
-				Placement: &ec2.SpotPlacement{
-					AvailabilityZone: &availabilityZone,
-				},
-				BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
-				EbsOptimized:        &s.EbsOptimized,
 			},
+			Placement: &ec2.SpotPlacement{
+				AvailabilityZone: &availabilityZone,
+			},
+			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+			EbsOptimized:        &s.EbsOptimized,
+		}
+
+		if keyName != "" {
+			runOpts.KeyName = &keyName
+		}
+
+		runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
+			SpotPrice:           &spotPrice,
+			LaunchSpecification: runOpts,
 		})
 		if err != nil {
 			err := fmt.Errorf("Error launching source spot instance: %s", err)
