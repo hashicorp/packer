@@ -194,6 +194,11 @@ builder.
     the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
     name of the build.
 
+-   `post_shutdown_delay` (string) - The amount of time to wait after shutting
+    down the virtual machine. If you get the error `Error removing floppy
+    controller`, you might need to set this to `5m` or so. By default, the
+    delay is `0s`, or disabled.
+
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine unless a

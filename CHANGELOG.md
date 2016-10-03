@@ -85,6 +85,8 @@ IMPROVEMENTS:
       creating new one. [GH-3918]
   * builder/virtualbox-iso: Added `keep_registed` option to skip cleaning up
       the image. [GH-3954]
+  * builder/virtualbox: Added `post_shutdown_delay` option to wait after
+      shutting down to prevent issues removing floppy drive. [GH-3952]
 
 BUG FIXES:
 
