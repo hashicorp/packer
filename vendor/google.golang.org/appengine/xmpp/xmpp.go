@@ -22,7 +22,7 @@ To receive messages,
 		// ...
 	}
 */
-package xmpp
+package xmpp // import "google.golang.org/appengine/xmpp"
 
 import (
 	"errors"

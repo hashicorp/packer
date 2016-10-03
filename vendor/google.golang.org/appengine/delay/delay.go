@@ -41,7 +41,7 @@ reserved application path "/_ah/queue/go/delay".
 This path must not be marked as "login: required" in app.yaml;
 it must be marked as "login: admin" or have no access restriction.
 */
-package delay
+package delay // import "google.golang.org/appengine/delay"
 
 import (
 	"bytes"
