@@ -83,6 +83,8 @@ IMPROVEMENTS:
   * scripts: Added `help` target to Makefile [GH-3290]
   * builder/googlecompute: Add `-force` option to delete old image before
       creating new one. [GH-3918]
+  * builder/virtualbox-iso: Added `keep_registed` option to skip cleaning up
+      the image. [GH-3954]
 
 BUG FIXES:
 
