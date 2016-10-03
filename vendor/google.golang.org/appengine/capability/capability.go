@@ -13,7 +13,7 @@ Example:
 		// show user a different page
 	}
 */
-package capability
+package capability // import "google.golang.org/appengine/capability"
 
 import (
 	"golang.org/x/net/context"

@@ -6,7 +6,7 @@
 Package remote_api implements the /_ah/remote_api endpoint.
 This endpoint is used by offline tools such as the bulk loader.
 */
-package remote_api
+package remote_api // import "google.golang.org/appengine/remote_api"
 
 import (
 	"fmt"

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package microsoft provides constants for using OAuth2 to access Windows Live ID.
-package microsoft
+package microsoft // import "golang.org/x/oauth2/microsoft"
 
 import (
 	"golang.org/x/oauth2"

@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache 2.0
 // license that can be found in the LICENSE file.
 
-package search
+package search // import "google.golang.org/appengine/search"
 
 // TODO: let Put specify the document language: "en", "fr", etc. Also: order_id?? storage??
 // TODO: Index.GetAll (or Iterator.GetAll)?

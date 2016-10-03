@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package image provides image services.
-package image
+package image // import "google.golang.org/appengine/image"
 
 import (
 	"fmt"

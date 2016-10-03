@@ -18,7 +18,7 @@ Send sends a message to the client over the channel identified by clientID.
 
 	channel.Send(c, "player1", "Game over!")
 */
-package channel
+package channel // import "google.golang.org/appengine/channel"
 
 import (
 	"encoding/json"
