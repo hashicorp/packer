@@ -90,6 +90,8 @@ BUG FIXES:
   * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
   * builder/amazon: Fix packer crash when waiting for SSH. [GH-3865]
   * builder/amazon: Honor ssh_private_ip flag in EC2-Classic. [GH-3752]
+  * builder/amazon: Allow using `ssh_private_key_file` and `ssh_password`.
+    [GH-3953]
   * builder/azure: check for empty resource group [GH-3606]
   * builder/azure: fix token validity test [GH-3609]
   * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
