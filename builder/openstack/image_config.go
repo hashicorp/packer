@@ -8,25 +8,14 @@ import (
 
 // ImageConfig is for common configuration related to creating Images.
 type ImageConfig struct {
-	ImageName        string            `mapstructure:"image_name"`
-	ImageMetadata    map[string]string `mapstructure:"metadata"`
-	ImageInfoFile    string            `mapstructure:"image_info_file"`
-	ImageInfoContent string            `mapstructure:"image_info_content"`
+	ImageName     string            `mapstructure:"image_name"`
+	ImageMetadata map[string]string `mapstructure:"metadata"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 	errs := make([]error, 0)
 	if c.ImageName == "" {
 		errs = append(errs, fmt.Errorf("An image_name must be specified"))
-	}
-
-	// ImageInfoContent is required but ImageInfoFile is not.
-	// The information file will only be created if ImageInfoFile is not "".
-	if c.ImageInfoContent == "" {
-		c.ImageInfoContent = "{ \"imageName\": \"{{.ImageName}}\", \"imageId\": \"{{.ImageId}}\" }\n"
-	}
-	if c.ImageInfoContent == "" {
-		errs = append(errs, fmt.Errorf("image_info_content must be specified"))
 	}
 
 	// By default, OpenStack seems to create the image with an image_type of

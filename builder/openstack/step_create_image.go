@@ -4,22 +4,15 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"os"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 	"github.com/rackspace/gophercloud"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
 	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type stepCreateImage struct{}
-
-type createImageTemplateData struct {
-	ImageId     string
-	ImageName   string
-}
 
 func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
@@ -58,37 +51,6 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}
-
-	ctx := config.ctx
-	ctx.Data = &createImageTemplateData{
-		imageId,
-		config.ImageName,
-	}
-
-	if config.ImageInfoFile != "" {
-		target, err := os.Create(config.ImageInfoFile)
-		if err != nil {
-			err := fmt.Errorf("Error creating local image information file: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		information, err := interpolate.Render(config.ImageInfoContent, &ctx)
-		if err != nil {
-			err := fmt.Errorf("Failed to process image_info_content: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		_, err = target.WriteString(information)
-		if err != nil {
-			err := fmt.Errorf("Failed to write to image_info_file: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		target.Close()
 	}
 
 	return multistep.ActionContinue
