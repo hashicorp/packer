@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
+	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -64,22 +65,33 @@ func SSHHost(e ec2Describer, private bool) func(multistep.StateBag) (string, err
 }
 
 // SSHConfig returns a function that can be used for the SSH communicator
-// config for connecting to the instance created over SSH using the generated
-// private key.
-func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+// config for connecting to the instance created over SSH using the private key
+// or password.
+func SSHConfig(username, password string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
-		privateKey := state.Get("privateKey").(string)
 
-		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
-		if err != nil {
-			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+		privateKey, hasKey := state.GetOk("privateKey")
+		if hasKey {
+
+			signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.PublicKeys(signer),
+				},
+			}, nil
+
+		} else {
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.Password(password),
+					ssh.KeyboardInteractive(
+						packerssh.PasswordKeyboardInteractive(password)),
+				}}, nil
 		}
-
-		return &ssh.ClientConfig{
-			User: username,
-			Auth: []ssh.AuthMethod{
-				ssh.PublicKeys(signer),
-			},
-		}, nil
 	}
 }

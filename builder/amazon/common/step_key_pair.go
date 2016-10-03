@@ -22,7 +22,10 @@ type StepKeyPair struct {
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
+
 	if s.PrivateKeyFile != "" {
+		ui.Say("Using existing ssh private key")
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
@@ -36,8 +39,13 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
+	if s.TemporaryKeyPairName == "" {
+		ui.Say("Not using temporary keypair")
+		state.Put("keyPair", "")
+		return multistep.ActionContinue
+	}
+
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
 	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
@@ -87,7 +95,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
 	// If we used an SSH private key file, do not go about deleting
 	// keypairs
-	if s.PrivateKeyFile != "" {
+	if s.PrivateKeyFile != "" || s.KeyPairName == "" {
 		return
 	}
 

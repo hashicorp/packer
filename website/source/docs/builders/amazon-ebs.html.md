@@ -60,9 +60,6 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine.
 
--   `ssh_username` (string) - The username to use in order to communicate over
-    SSH to the running machine.
-
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add the block
@@ -192,7 +189,8 @@ builder.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
-    generate a temporary keypair.
+    generate a temporary keypair unless
+    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
