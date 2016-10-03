@@ -60,9 +60,6 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine.
 
--   `ssh_username` (string) - The username to use in order to communicate over
-    SSH to the running machine.
-
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add the block
