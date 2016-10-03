@@ -8,7 +8,7 @@ It also provides a way to run code in a new background context of a module.
 
 This package does not work on Managed VMs.
 */
-package runtime
+package runtime // import "google.golang.org/appengine/runtime"
 
 import (
 	"net/http"
