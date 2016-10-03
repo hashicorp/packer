@@ -207,7 +207,8 @@ builder.
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded
     up into Amazon EC2.  By default, this is blank, and Packer will
-    generate a temporary keypair.
+    generate a temporary keypair unless
+    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified when `ssh_keypair_name` is utilized.
 
