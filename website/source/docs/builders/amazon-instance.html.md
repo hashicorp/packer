@@ -74,9 +74,6 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine.
 
--   `ssh_username` (string) - The username to use in order to communicate over
-    SSH to the running machine.
-
 -   `x509_cert_path` (string) - The local path to a valid X509 certificate for
     your AWS account. This is used for bundling the AMI. This X509 certificate
     must be registered with your account from the security credentials page in
