@@ -223,6 +223,9 @@ builder.
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+-   `keep_registered` (boolean) - Set this to `true` if you would like to keep
+    the VM registered with virtualbox. Defaults to `false`.
+
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
