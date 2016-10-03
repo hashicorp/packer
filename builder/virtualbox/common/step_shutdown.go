@@ -23,6 +23,7 @@ import (
 type StepShutdown struct {
 	Command string
 	Timeout time.Duration
+	Delay time.Duration
 }
 
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
@@ -48,6 +49,12 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		for {
 			running, _ := driver.IsRunning(vmName)
 			if !running {
+
+				if s.Delay.Nanoseconds() > 0 {
+					log.Printf("Delay for %s after shutdown to allow locks to clear...", s.Delay)
+					time.Sleep(s.Delay)
+				}
+
 				break
 			}
 
