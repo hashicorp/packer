@@ -161,7 +161,7 @@ Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
 machine restarts. For this, put use "pause_before" to make Packer wait before executing the next script:
 
-``` {.text}
+``` {.javascript}
 {
   "type": "shell",
   "script": "script.sh",
