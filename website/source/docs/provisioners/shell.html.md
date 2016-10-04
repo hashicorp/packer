@@ -159,12 +159,14 @@ scripts. The amount of time the provisioner will wait is configured using
 
 Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
-machine restarts. For this, put a long `sleep` after the reboot so that SSH will
-eventually be killed automatically:
+machine restarts. For this, put use "pause_before" to make Packer wait before executing the next script:
 
-``` {.text}
-reboot
-sleep 60
+``` {.javascript}
+{
+  "type": "shell",
+  "script": "script.sh",
+  "pause_before": "10s"
+}
 ```
 
 Some OS configurations don't properly kill all network connections on reboot,
