@@ -191,7 +191,7 @@ func (p *Provisioner) Cancel() {
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p '%s'", dir),
+		Command: fmt.Sprintf("command mkdir -p \"%s\" || (pushd \"%s\" && popd || mkdir \"%s\")", dir, dir, dir),
 	}
 
 	if err := cmd.StartWithUi(comm, ui); err != nil {
