@@ -29,7 +29,7 @@ package:
 deps:
 	go get github.com/mitchellh/gox
 	go get golang.org/x/tools/cmd/stringer
-	go get -u github.com/kardianos/govendor
+	go get github.com/kardianos/govendor
 	govendor sync
 
 dev: deps ## Build and install a development build
@@ -70,11 +70,6 @@ testrace: deps ## Test for race conditions
 updatedeps:
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
-	@echo "INFO: Packer deps are managed by govendor. See CONTRIBUTING.md"
-
-# This is used to add new dependencies to packer. If you are submitting a PR
-# that includes new dependencies you will need to run this.
-vendor: ## Add new dependencies.
 	@echo "INFO: Packer deps are managed by govendor. See CONTRIBUTING.md"
 
 help:
