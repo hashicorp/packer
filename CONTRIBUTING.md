@@ -106,6 +106,11 @@ If you are submitting a change that requires new or updated dependencies, please
 
 Note that you will need to use [govendor](https://github.com/kardianos/govendor) to do this. This step is recommended but not required; if you don't use govendor please indicate in your PR which dependencies have changed and to what versions.
 
+Use `govendor fetch <project>` to add dependencies to the project. See
+[govendor quick
+start(https://github.com/kardianos/govendor#quick-start-also-see-the-faq) for
+examples.
+
 Please only apply the minimal vendor changes to get your PR to work. Packer does not attempt to track the latest version for each dependency.
 
 #### Running Unit Tests
