@@ -36,7 +36,7 @@ func New(config *Config) (*Communicator, error) {
 	}
 
 	// Create the client
-	params := winrm.DefaultParameters
+	params := *winrm.DefaultParameters
 
 	if config.TransportDecorator != nil {
 		params.TransportDecorator = config.TransportDecorator
@@ -44,7 +44,7 @@ func New(config *Config) (*Communicator, error) {
 
 	params.Timeout = formatDuration(config.Timeout)
 	client, err := winrm.NewClientWithParameters(
-		endpoint, config.Username, config.Password, params)
+		endpoint, config.Username, config.Password, &params)
 	if err != nil {
 		return nil, err
 	}
