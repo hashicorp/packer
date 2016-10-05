@@ -158,8 +158,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ElevatedUser != "" && p.config.ElevatedPassword == "" {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("Must supply an 'elevated_password' if 'elevated_user' provided"))
+		log.Printf("[DEBUG] Elevated user exists but password is blank. Will attempt " +
+			"to detect password at runtime")
 	}
 
 	if p.config.ElevatedUser == "" && p.config.ElevatedPassword != "" {
@@ -230,13 +230,20 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
 
+	if p.config.ElevatedUser != "" && p.config.ElevatedPassword == "" {
+		ui.Message("You savvy operator - elevated username (`elevated_user`) exists but the password (`elevated_password`) has been left blank. " +
+			"Attempting to detect password dynamically")
+	}
+
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
 	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
+	envVars := make([]string, len(p.config.Vars)+4)
 	envVars[0] = "PACKER_BUILD_NAME=" + p.config.PackerBuildName
 	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
+	envVars[2] = "WINRM_USERNAME={{.User}}"
+	envVars[3] = "WINRM_PASSWORD={{.Password}}"
 	copy(envVars, p.config.Vars)
 
 	if p.config.Inline != nil {
@@ -408,8 +415,13 @@ func (p *Provisioner) createCommandText() (command string, err error) {
 	// generate the script and update the command runner in the process
 	path, err := p.generateElevatedRunner(command)
 
-	// Return the path to the elevated shell wrapper
-	command = fmt.Sprintf("powershell -executionpolicy bypass -file \"%s\"", path)
+	// Return the path to the elevated shell wrapper with passwords in ENV vars if known, or as
+	// golang templates if to be injected by the Communicator
+	if p.config.ElevatedUser != "" && p.config.ElevatedPassword != "" {
+		command = fmt.Sprintf(`set "WINRM_USERNAME=%s" & set "WINRM_PASSWORD=%s" & powershell -executionpolicy bypass -file "%s"`, p.config.ElevatedUser, p.config.ElevatedPassword, path)
+	} else {
+		command = fmt.Sprintf(`set "WINRM_USERNAME={{.Username}}" & set "WINRM_PASSWORD={{.Password}}" & powershell -executionpolicy bypass -file "%s"`, path)
+	}
 
 	return
 }

@@ -59,7 +59,7 @@ $t.XmlText = @'
 </Task>
 '@
 $f = $s.GetFolder("\")
-$f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", "{{.Password}}", 1, $null) | Out-Null
+$f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", $env:WINRM_PASSWORD, 1, $null) | Out-Null
 $t = $f.GetTask("\$name")
 $t.Run($null) | Out-Null
 $timeout = 10

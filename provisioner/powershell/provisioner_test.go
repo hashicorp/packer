@@ -144,8 +144,8 @@ func TestProvisionerPrepare_Elevated(t *testing.T) {
 	config["elevated_user"] = "vagrant"
 	err := p.Prepare(config)
 
-	if err == nil {
-		t.Fatal("should have error (only provided elevated_user)")
+	if err != nil {
+		t.Fatal("should allow elevated_password to be empty for runtime injection by the communicator")
 	}
 
 	config["elevated_password"] = "vagrant"
@@ -590,7 +590,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.config.ElevatedUser = "vagrant"
 	p.config.ElevatedPassword = "vagrant"
 	cmd, _ = p.createCommandText()
-	matched, _ := regexp.MatchString("powershell -executionpolicy bypass -file \"%TEMP%(.{1})packer-elevated-shell.*", cmd)
+	matched, _ := regexp.MatchString("set \"WINRM_USERNAME=vagrant\" & set \"WINRM_PASSWORD=vagrant\" & powershell -executionpolicy bypass -file \"%TEMP%(.{1})packer-elevated-shell.*", cmd)
 	if !matched {
 		t.Fatalf("Got unexpected elevated command: %s", cmd)
 	}
