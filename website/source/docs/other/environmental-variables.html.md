@@ -15,7 +15,7 @@ each can be found below:
     the configuration file is basic JSON. See the [core configuration
     page](/docs/other/core-configuration.html).
 
--   `PACKER_LOG` - Setting this to any value will enable the logger. See the
+-   `PACKER_LOG` - Setting this to any value beside "" (empty string) and "0" will enable the logger. See the
     [debugging page](/docs/other/debugging.html).
 
 -   `PACKER_LOG_PATH` - The location of the log file. Note: `PACKER_LOG` must be
