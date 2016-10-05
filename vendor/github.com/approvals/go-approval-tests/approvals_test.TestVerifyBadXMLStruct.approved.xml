@@ -1,0 +1,7 @@
+error while pretty printing XML
+when using anonymous types be sure to include
+  XMLName xml.Name `xml:"Your_Name_Here"`
+error:
+  xml: unsupported type: struct { Title string }
+XML:
+  {Hello World!}
