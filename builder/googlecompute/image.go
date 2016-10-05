@@ -2,9 +2,6 @@ package googlecompute
 
 import (
 	"strings"
-
-	// To get test dependencies managed by Godeps
-	_ "github.com/stretchr/testify/assert"
 )
 
 type Image struct {

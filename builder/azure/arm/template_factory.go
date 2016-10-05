@@ -8,8 +8,6 @@ import (
 
 	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/builder/azure/common/template"
-
-	_ "github.com/approvals/go-approval-tests"
 )
 
 type templateFactoryFunc func(*Config) (*resources.Deployment, error)

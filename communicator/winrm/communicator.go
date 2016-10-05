@@ -10,9 +10,6 @@ import (
 	"github.com/masterzen/winrm"
 	"github.com/mitchellh/packer/packer"
 	"github.com/packer-community/winrmcp/winrmcp"
-	// This import is a bit strange, but it's needed so `make updatedeps`
-	// can see and download it
-	_ "github.com/dylanmei/winrmtest"
 )
 
 // Communicator represents the WinRM communicator
