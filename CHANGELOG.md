@@ -122,6 +122,8 @@ BUG FIXES:
   * provisioner/file: Fix directory download. [GH-3899]
   * command/push: Allows dot (`.`) in image names. [GH-3937]
   * builder/amazon: add retry logic when creating tags.
+  * communicator/ssh: handle error case where server closes the connection but
+      doesn't give us an error code. [GH-3966]
 
 ## 0.10.2 (September 20, 2016)
 
