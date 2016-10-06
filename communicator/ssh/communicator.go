@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/packer/packer"
@@ -105,11 +104,6 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		return
 	}
 
-	// A channel to keep track of our done state
-	doneCh := make(chan struct{})
-	sessionLock := new(sync.Mutex)
-	timedOut := false
-
 	// Start a goroutine to wait for the session to end and set the
 	// exit boolean and status.
 	go func() {
@@ -130,18 +124,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 				exitStatus = -1
 			}
 		}
-
-		sessionLock.Lock()
-		defer sessionLock.Unlock()
-
-		if timedOut {
-			// We timed out, so set the exit status to -1
-			exitStatus = -1
-		}
-
-		log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
-		close(doneCh)
 	}()
 
 	return
