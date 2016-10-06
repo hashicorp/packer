@@ -90,6 +90,8 @@ IMPROVEMENTS:
   * core: setting `PACKER_LOG=0` now disables logging. [GH-3964]
   * vendor: Moving from Godep to govendor. See `CONTRIBUTING.md` for details.
       [GH-3956]
+  * post-processor/vagrant: Added vsphere-esx hosts to supported machine types.
+      [GH-3967]
 
 BUG FIXES:
 
