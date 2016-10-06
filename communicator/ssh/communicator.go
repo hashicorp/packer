@@ -118,9 +118,16 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		err := session.Wait()
 		exitStatus := 0
 		if err != nil {
-			exitErr, ok := err.(*ssh.ExitError)
-			if ok {
-				exitStatus = exitErr.ExitStatus()
+			switch err.(type) {
+			case *ssh.ExitError:
+				exitStatus = err.(*ssh.ExitError).ExitStatus()
+				log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
+			case *ssh.ExitMissingError:
+				log.Printf(err.Error())
+				exitStatus = -1
+			default:
+				log.Printf("unknown error occurred waiting for ssh session.")
+				exitStatus = -1
 			}
 		}
 
