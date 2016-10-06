@@ -21,7 +21,9 @@ type vmxTemplateData struct {
 	ISOPath  string
 	Version  string
 
-	Network  string
+	Network_Type  string
+	Network_Device  string
+
 	Sound_Present string
 	Usb_Present string
 
@@ -31,10 +33,12 @@ type vmxTemplateData struct {
 	Serial_Host string
 	Serial_Yield string
 	Serial_Filename string
+	Serial_Auto string
 
 	Parallel_Present string
 	Parallel_Bidirectional string
 	Parallel_Filename string
+	Parallel_Auto string
 }
 
 type additionalDiskTemplateData struct {
@@ -65,10 +69,17 @@ type serialConfigPipe struct {
 
 type serialConfigFile struct {
 	filename string
+	yield string
 }
 
 type serialConfigDevice struct {
 	devicename string
+	yield string
+}
+
+type serialConfigAuto struct {
+	devicename string
+	yield string
 }
 
 type serialUnion struct {
@@ -76,16 +87,33 @@ type serialUnion struct {
 	pipe *serialConfigPipe
 	file *serialConfigFile
 	device *serialConfigDevice
+	auto *serialConfigAuto
 }
 
 func unformat_serial(config string) (*serialUnion,error) {
-	comptype := strings.SplitN(config, ":", 2)
-	if len(comptype) < 1 {
+	var defaultSerialPort string
+	if runtime.GOOS == "windows" {
+		defaultSerialPort = "COM1"
+	} else {
+		defaultSerialPort = "/dev/ttyS0"
+	}
+
+	input := strings.SplitN(config, ":", 2)
+	if len(input) < 1 {
 		return nil,fmt.Errorf("Unexpected format for serial port: %s", config)
 	}
-	switch strings.ToUpper(comptype[0]) {
+
+	var formatType, formatOptions string
+	formatType = input[0]
+	if len(input) == 2 {
+		formatOptions = input[1]
+	} else {
+		formatOptions = ""
+	}
+
+	switch strings.ToUpper(formatType) {
 		case "PIPE":
-			comp := strings.Split(comptype[1], ",")
+			comp := strings.Split(formatOptions, ",")
 			if len(comp) < 3 || len(comp) > 4 {
 				return nil,fmt.Errorf("Unexpected format for serial port : pipe : %s", config)
 			}
@@ -110,16 +138,65 @@ func unformat_serial(config string) (*serialUnion,error) {
 			return &serialUnion{serialType:res, pipe:res},nil
 
 		case "FILE":
-			res := &serialConfigFile{ filename : comptype[1] }
+			comp := strings.Split(formatOptions, ",")
+			if len(comp) > 2 {
+				return nil,fmt.Errorf("Unexpected format for serial port : file : %s", config)
+			}
+
+			res := &serialConfigFile{ yield : "FALSE" }
+
+			res.filename = filepath.FromSlash(comp[0])
+
+			res.yield = map[bool]string{true:strings.ToUpper(comp[0]), false:"FALSE"}[len(comp) > 1]
+			if res.yield != "TRUE" && res.yield != "FALSE" {
+				return nil,fmt.Errorf("Unexpected format for serial port : file : yield : %s : %s", res.yield, config)
+			}
+
 			return &serialUnion{serialType:res, file:res},nil
 
 		case "DEVICE":
+			comp := strings.Split(formatOptions, ",")
+			if len(comp) > 2 {
+				return nil,fmt.Errorf("Unexpected format for serial port : device : %s", config)
+			}
+
 			res := new(serialConfigDevice)
-			res.devicename = map[bool]string{true:strings.ToUpper(comptype[1]), false:"COM1"}[len(comptype[1]) > 0]
+
+			if len(comp) == 2 {
+				res.devicename = map[bool]string{true:filepath.FromSlash(comp[0]), false:defaultSerialPort}[len(comp[0]) > 0]
+				res.yield = strings.ToUpper(comp[1])
+			} else if len(comp) == 1 {
+				res.devicename = map[bool]string{true:filepath.FromSlash(comp[0]), false:defaultSerialPort}[len(comp[0]) > 0]
+				res.yield = "FALSE"
+			} else if len(comp) == 0 {
+				res.devicename = defaultSerialPort
+				res.yield = "FALSE"
+			}
+
+			if res.yield != "TRUE" && res.yield != "FALSE" {
+				return nil,fmt.Errorf("Unexpected format for serial port : device : yield : %s : %s", res.yield, config)
+			}
+
 			return &serialUnion{serialType:res, device:res},nil
 
+		case "AUTO":
+			res := new(serialConfigAuto)
+			res.devicename = defaultSerialPort
+
+			if len(formatOptions) > 0 {
+				res.yield = strings.ToUpper(formatOptions)
+			} else {
+				res.yield = "FALSE"
+			}
+
+			if res.yield != "TRUE" && res.yield != "FALSE" {
+				return nil,fmt.Errorf("Unexpected format for serial port : auto : yield : %s : %s", res.yield, config)
+			}
+
+			return &serialUnion{serialType:res, auto:res},nil
+
 		default:
-			return nil,fmt.Errorf("Unknown serial type : %s : %s", strings.ToUpper(comptype[0]), config)
+			return nil,fmt.Errorf("Unknown serial type : %s : %s", strings.ToUpper(formatType), config)
 	}
 }
 
@@ -128,6 +205,7 @@ type parallelUnion struct {
 	parallelType interface{}
 	file *parallelPortFile
 	device *parallelPortDevice
+	auto *parallelPortAuto
 }
 type parallelPortFile struct {
 	filename string
@@ -136,18 +214,30 @@ type parallelPortDevice struct {
 	bidirectional string
 	devicename string
 }
+type parallelPortAuto struct {
+	bidirectional string
+}
 
 func unformat_parallel(config string) (*parallelUnion,error) {
-	comptype := strings.SplitN(config, ":", 2)
-	if len(comptype) < 1 {
+	input := strings.SplitN(config, ":", 2)
+	if len(input) < 1 {
 		return nil,fmt.Errorf("Unexpected format for parallel port: %s", config)
 	}
-	switch strings.ToUpper(comptype[0]) {
+
+	var formatType, formatOptions string
+	formatType = input[0]
+	if len(input) == 2 {
+		formatOptions = input[1]
+	} else {
+		formatOptions = ""
+	}
+
+	switch strings.ToUpper(formatType) {
 		case "FILE":
-			res := &parallelPortFile{ filename: comptype[1] }
+			res := &parallelPortFile{ filename: filepath.FromSlash(formatOptions) }
 			return &parallelUnion{ parallelType:res, file: res},nil
 		case "DEVICE":
-			comp := strings.Split(comptype[1], ",")
+			comp := strings.Split(formatOptions, ",")
 			if len(comp) < 1 || len(comp) > 2 {
 				return nil,fmt.Errorf("Unexpected format for parallel port: %s", config)
 			}
@@ -156,15 +246,24 @@ func unformat_parallel(config string) (*parallelUnion,error) {
 			res.devicename = strings.ToUpper(comp[0])
 			if len(comp) > 1 {
 				switch strings.ToUpper(comp[1]) {
-					case "BI":
-						res.bidirectional = "TRUE"
-					case "UNI":
-						res.bidirectional = "FALSE"
+					case "BI": res.bidirectional = "TRUE"
+					case "UNI": res.bidirectional = "FALSE"
 					default:
 						return nil,fmt.Errorf("Unknown parallel port direction : %s : %s", strings.ToUpper(comp[0]), config)
 				}
 			}
-			return &parallelUnion{ parallelType:res, device: res},nil
+			return &parallelUnion{ parallelType:res, device:res },nil
+
+		case "AUTO":
+			res := new(parallelPortAuto)
+			switch strings.ToUpper(formatOptions) {
+				case "": fallthrough
+				case "UNI": res.bidirectional = "FALSE"
+				case "BI": res.bidirectional = "TRUE"
+				default:
+					return nil,fmt.Errorf("Unknown parallel port direction : %s : %s", strings.ToUpper(formatOptions), config)
+			}
+			return &parallelUnion{ parallelType:res, auto:res },nil
 	}
 	return nil,fmt.Errorf("Unexpected format for parallel port: %s", config)
 }
@@ -249,7 +348,6 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		Version:  config.Version,
 		ISOPath:  isoPath,
 
-		Network:  		config.Network,
 		Sound_Present:	map[bool]string{true:"TRUE",false:"FALSE"}[bool(config.Sound)],
 		Usb_Present:	map[bool]string{true:"TRUE",false:"FALSE"}[bool(config.USB)],
 
@@ -257,10 +355,42 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		Parallel_Present:	"FALSE",
 	}
 
-	// store the network so that we can later figure out what ip address to bind to
-	state.Put("vmnetwork", config.Network)
+	/// Check the network type that the user specified
+	network := config.Network
+	driver := state.Get("driver").(vmwcommon.VmwareDriver)
 
-	// check if serial port has been configured
+	// read netmap config
+	pathNetmap := driver.NetmapConfPath()
+	if _, err := os.Stat(pathNetmap); err != nil {
+		err := fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	netmap,res := vmwcommon.ReadNetmapConfig(pathNetmap)
+	if res != nil {
+		err := fmt.Errorf("Unable to read netmap conf file: %s: %v", pathNetmap, res)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// try and convert the specified network to a device
+	device,err := netmap.NameIntoDevice(network)
+
+	// success. so we know that it's an actual network type inside netmap.conf
+	if err == nil {
+		templateData.Network_Type = network
+		templateData.Network_Device = device
+	// we were unable to find the type, so assume it's a custom network device.
+	} else {
+		templateData.Network_Type = "custom"
+		templateData.Network_Device = network
+	}
+	// store the network so that we can later figure out what ip address to bind to
+	state.Put("vmnetwork", network)
+
+	/// check if serial port has been configured
 	if config.Serial != "" {
 		serial,err := unformat_serial(config.Serial)
 		if err != nil {
@@ -275,6 +405,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.Serial_Yield = ""
 		templateData.Serial_Endpoint = ""
 		templateData.Serial_Host = ""
+		templateData.Serial_Auto = "FALSE"
 
 		switch serial.serialType.(type) {
 			case *serialConfigPipe:
@@ -289,6 +420,12 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 			case *serialConfigDevice:
 				templateData.Serial_Type = "device"
 				templateData.Serial_Filename = filepath.FromSlash(serial.device.devicename)
+			case *serialConfigAuto:
+				templateData.Serial_Type = "device"
+				templateData.Serial_Filename = filepath.FromSlash(serial.auto.devicename)
+				templateData.Serial_Yield = serial.auto.yield
+				templateData.Serial_Auto = "TRUE"
+
 			default:
 				err := fmt.Errorf("Error procesing VMX template: %v", serial)
 				state.Put("error", err)
@@ -297,7 +434,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		}
 	}
 
-	// check if parallel port has been configured
+	/// check if parallel port has been configured
 	if config.Parallel != "" {
 		parallel,err := unformat_parallel(config.Parallel)
 		if err != nil {
@@ -307,6 +444,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 			return multistep.ActionHalt
 		}
 
+		templateData.Parallel_Auto = "FALSE"
 		switch parallel.parallelType.(type) {
 			case *parallelPortFile:
 				templateData.Parallel_Present = "TRUE"
@@ -315,6 +453,10 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 				templateData.Parallel_Present = "TRUE"
 				templateData.Parallel_Bidirectional = parallel.device.bidirectional
 				templateData.Parallel_Filename = filepath.FromSlash(parallel.device.devicename)
+			case *parallelPortAuto:
+				templateData.Parallel_Present = "TRUE"
+				templateData.Parallel_Auto = "TRUE"
+				templateData.Parallel_Bidirectional = parallel.auto.bidirectional
 			default:
 				err := fmt.Errorf("Error procesing VMX template: %v", parallel)
 				state.Put("error", err)
@@ -325,7 +467,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	ctx.Data = &templateData
 
-	// render the .vmx template
+	/// render the .vmx template
 	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
 	if err != nil {
 		err := fmt.Errorf("Error procesing VMX template: %s", err)
@@ -383,7 +525,8 @@ ehci.pciSlotNumber = "34"
 ehci.present = "TRUE"
 ethernet0.addressType = "generated"
 ethernet0.bsdName = "en0"
-ethernet0.connectionType = "{{ .Network }}"
+ethernet0.connectionType = "{{ .Network_Type }}"
+ethernet0.vnet = "{{ .Network_Device }}"
 ethernet0.displayName = "Ethernet"
 ethernet0.linkStatePropagation.enable = "FALSE"
 ethernet0.pciSlotNumber = "33"
@@ -453,7 +596,7 @@ usb_xhci.present = "TRUE"
 serial0.present = "{{ .Serial_Present }}"
 serial0.startConnected = "{{ .Serial_Present }}"
 serial0.fileName = "{{ .Serial_Filename }}"
-serial0.autodetect = "TRUE"
+serial0.autodetect = "{{ .Serial_Auto }}"
 serial0.fileType = "{{ .Serial_Type }}"
 serial0.yieldOnMsrRead = "{{ .Serial_Yield }}"
 serial0.pipe.endPoint = "{{ .Serial_Endpoint }}"
@@ -463,7 +606,7 @@ serial0.tryNoRxLoss = "{{ .Serial_Host }}"
 parallel0.present = "{{ .Parallel_Present }}"
 parallel0.startConnected = "{{ .Parallel_Present }}"
 parallel0.fileName = "{{ .Parallel_Filename }}"
-parallel0.autodetect = "TRUE"
+parallel0.autodetect = "{{ .Parallel_Auto }}"
 parallel0.bidirectional = "{{ .Parallel_Bidirectional }}"
 
 virtualHW.productCompatibility = "hosted"
