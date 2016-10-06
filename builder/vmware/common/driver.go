@@ -214,7 +214,7 @@ func compareVersions(versionFound string, versionWanted string, product string) 
 
 /// helper functions that read configuration information from a file
 // read the network<->device configuration out of the specified path
-func readNetmapConfig(path string) (NetworkMap,error) {
+func ReadNetmapConfig(path string) (NetworkMap,error) {
 	fd,err := os.Open(path)
 	if err != nil { return nil, err }
 	defer fd.Close()
@@ -222,7 +222,7 @@ func readNetmapConfig(path string) (NetworkMap,error) {
 }
 
 // read the dhcp configuration out of the specified path
-func readDhcpConfig(path string) (DhcpConfiguration,error) {
+func ReadDhcpConfig(path string) (DhcpConfiguration,error) {
 	fd,err := os.Open(path)
 	if err != nil { return nil, err }
 	defer fd.Close()
@@ -300,7 +300,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string,error) {
 	if _, err := os.Stat(pathNetmap); err != nil {
 		return "", fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
 	}
-	netmap,err := readNetmapConfig(pathNetmap)
+	netmap,err := ReadNetmapConfig(pathNetmap)
 	if err != nil { return "",err }
 
 	// convert the stashed network to a device
@@ -389,7 +389,7 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string,error) {
 	if _, err := os.Stat(pathNetmap); err != nil {
 		return "", fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
 	}
-	netmap,err := readNetmapConfig(pathNetmap)
+	netmap,err := ReadNetmapConfig(pathNetmap)
 	if err != nil { return "",err }
 
 	// convert network to name
@@ -413,7 +413,7 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string,error) {
 		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
 	}
 
-	config,err := readDhcpConfig(pathDhcpConfig)
+	config,err := ReadDhcpConfig(pathDhcpConfig)
 	if err != nil { return "",err }
 
 	// find the entry configured in the dhcpd
@@ -445,7 +445,7 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string,error) {
 	if _, err := os.Stat(pathNetmap); err != nil {
 		return "", fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
 	}
-	netmap,err := readNetmapConfig(pathNetmap)
+	netmap,err := ReadNetmapConfig(pathNetmap)
 	if err != nil { return "",err }
 
 	// convert network to name
@@ -468,7 +468,7 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string,error) {
 	if _, err := os.Stat(pathDhcpConfig); err != nil {
 		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
 	}
-	config,err := readDhcpConfig(pathDhcpConfig)
+	config,err := ReadDhcpConfig(pathDhcpConfig)
 	if err != nil { return "",err }
 
 	// find the entry configured in the dhcpd
