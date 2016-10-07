@@ -41,6 +41,9 @@ Optional:
 -   `disable_sudo` (boolean) - By default, the bootstrap install command is prefixed with `sudo`. When using a
     Docker builder, you will likely want to pass `true` since `sudo` is often not pre-installed.
 
+-   `sync_grains` (boolean) - Setting this to `true` ensures that `saltutil.sync_grains` is run before
+    calling `salt-call`.  This ensures that custom grains in the `_grains` directory are available for use.
+
 -   `remote_pillar_roots` (string) - The path to your remote [pillar
     roots](http://docs.saltstack.com/ref/configuration/master.html#pillar-configuration).
     default: `/srv/pillar`. This option cannot be used with `minion_config`.
