@@ -71,16 +71,18 @@ alternatives available.
 
 ### Homebrew
 
-If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
+If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
+running:
 
     $ brew install packer
 
 ### Chocolatey
 
-If you're using Windows and [Chocolatey](http://chocolatey.org), you can install Packer:
+If you're using Windows and [Chocolatey](http://chocolatey.org), you can
+install Packer by running:
 
     choco install packer
-    
+
 ## Troubleshooting
 
 On some RedHat-based Linux distributions there is another tool named `packer`
