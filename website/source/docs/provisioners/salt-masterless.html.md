@@ -57,7 +57,7 @@ Optional:
     tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
     This will be uploaded to the `remote_state_tree` on the remote.
 
--   `custom_state` (string) - A state to be ran instead of `state.highstate`.
+-   `custom_state` (string) - A state to be run instead of `state.highstate`.
     Defaults to `state.highstate` if unspecified.
 
 -   `minion_config` (string) - The path to your local [minion config
