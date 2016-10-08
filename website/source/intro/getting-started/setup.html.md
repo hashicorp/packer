@@ -75,6 +75,12 @@ If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
     $ brew install packer
 
+### Chocolatey
+
+If you're using Windows and [Chocolatey](http://chocolatey.org), you can install Packer:
+
+    PS> choco upgrade packer
+    
 ## Troubleshooting
 
 On some RedHat-based Linux distributions there is another tool named `packer`
