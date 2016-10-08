@@ -459,7 +459,8 @@
 		{
 			"checksumSHA1": "mVqDwKcibat0IKAdzAhfGIHPwI8=",
 			"path": "github.com/mitchellh/go-fs",
-			"revision": "a34c1b9334e86165685a9449b782f20465eb8c69"
+			"revision": "4f9d2cb031e44bef60d0c00ccb3f31f68867e85e",
+			"revisionTime": "2016-09-29T19:58:49Z"
 		},
 		{
 			"checksumSHA1": "3ptHw3lJIghPRCAc05e5F4S0UMY=",
