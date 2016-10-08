@@ -27,7 +27,6 @@ type StepRunSourceServer struct {
 func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	flavor := state.Get("flavor_id").(string)
-	keyName := state.Get("keyPair").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
@@ -54,21 +53,31 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Say("Launching server...")
-	s.server, err = servers.Create(computeClient, keypairs.CreateOptsExt{
-		CreateOptsBuilder: servers.CreateOpts{
-			Name:             s.Name,
-			ImageRef:         s.SourceImage,
-			ImageName:        s.SourceImageName,
-			FlavorRef:        flavor,
-			SecurityGroups:   s.SecurityGroups,
-			Networks:         networks,
-			AvailabilityZone: s.AvailabilityZone,
-			UserData:         userData,
-			ConfigDrive:      s.ConfigDrive,
-		},
 
-		KeyName: keyName,
-	}).Extract()
+	serverOpts := servers.CreateOpts{
+		Name:             s.Name,
+		ImageRef:         s.SourceImage,
+		ImageName:        s.SourceImageName,
+		FlavorRef:        flavor,
+		SecurityGroups:   s.SecurityGroups,
+		Networks:         networks,
+		AvailabilityZone: s.AvailabilityZone,
+		UserData:         userData,
+		ConfigDrive:      s.ConfigDrive,
+	}
+
+	var serverOptsExt servers.CreateOptsBuilder
+	keyName, hasKey := state.GetOk("keyPair")
+	if hasKey {
+		serverOptsExt = keypairs.CreateOptsExt{
+			CreateOptsBuilder: serverOpts,
+			KeyName:           keyName.(string),
+		}
+	} else {
+		serverOptsExt = serverOpts
+	}
+
+	s.server, err = servers.Create(computeClient, serverOptsExt).Extract()
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
 		state.Put("error", err)
