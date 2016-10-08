@@ -79,7 +79,7 @@ If you're using OS X and [Homebrew](http://brew.sh), you can install Packer:
 
 If you're using Windows and [Chocolatey](http://chocolatey.org), you can install Packer:
 
-    PS> choco upgrade packer
+    choco install packer
     
 ## Troubleshooting
 
