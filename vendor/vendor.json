@@ -463,9 +463,9 @@
 			"revisionTime": "2016-09-29T19:58:49Z"
 		},
 		{
-			"checksumSHA1": "3ptHw3lJIghPRCAc05e5F4S0UMY=",
+			"checksumSHA1": "Z28nPI+n3iAnsqVSLCt5LZh/Zhg=",
 			"path": "github.com/mitchellh/go-fs/fat",
-			"revision": "a34c1b9334e86165685a9449b782f20465eb8c69"
+			"revision": "4f9d2cb031e44bef60d0c00ccb3f31f68867e85e"
 		},
 		{
 			"checksumSHA1": "z235fRXw4+SW4xWgLTYc8SwkM2M=",
