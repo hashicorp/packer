@@ -92,6 +92,8 @@ IMPROVEMENTS:
       [GH-3956]
   * post-processor/vagrant: Added vsphere-esx hosts to supported machine types.
       [GH-3967]
+  * provisioner/salt: Added `custom_state` to specify state to run instead of
+      `highstate`. [GH-3776]
 
 BUG FIXES:
 
