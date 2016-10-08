@@ -150,6 +150,12 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's 
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+
 -   `format` (string) - Either "ovf" or "ova", this specifies the output format
     of the exported virtual machine. This defaults to "ovf".
 

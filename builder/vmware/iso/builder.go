@@ -231,7 +231,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Force: b.config.PackerForce,
 		},
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:    b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&stepRemoteUpload{
 			Key:     "floppy_path",
