@@ -42,6 +42,11 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
+	if config.Comm.Type == "ssh" && config.Comm.SSHPassword != "" {
+		ui.Say("Not creating temporary keypair when using password.")
+		return multistep.ActionContinue
+	}
+
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {

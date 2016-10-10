@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/packer/packer"
@@ -105,11 +104,6 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		return
 	}
 
-	// A channel to keep track of our done state
-	doneCh := make(chan struct{})
-	sessionLock := new(sync.Mutex)
-	timedOut := false
-
 	// Start a goroutine to wait for the session to end and set the
 	// exit boolean and status.
 	go func() {
@@ -118,23 +112,19 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		err := session.Wait()
 		exitStatus := 0
 		if err != nil {
-			exitErr, ok := err.(*ssh.ExitError)
-			if ok {
-				exitStatus = exitErr.ExitStatus()
+			switch err.(type) {
+			case *ssh.ExitError:
+				exitStatus = err.(*ssh.ExitError).ExitStatus()
+				log.Printf("Remote command exited with '%d': %s", exitStatus, cmd.Command)
+			case *ssh.ExitMissingError:
+				log.Printf("Remote command exited without exit status or exit signal.")
+				exitStatus = -1
+			default:
+				log.Printf("Error occurred waiting for ssh session: %s", err.Error())
+				exitStatus = -1
 			}
 		}
-
-		sessionLock.Lock()
-		defer sessionLock.Unlock()
-
-		if timedOut {
-			// We timed out, so set the exit status to -1
-			exitStatus = -1
-		}
-
-		log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
-		close(doneCh)
 	}()
 
 	return
@@ -160,6 +150,7 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 	log.Printf("Download dir '%s' to '%s'", src, dst)
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
+		dirStack := []string{dst}
 		for {
 			fmt.Fprint(w, "\x00")
 
@@ -178,6 +169,13 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				return fmt.Errorf("%s", fi[1:len(fi)])
 			case 'C', 'D':
 				break
+			case 'E':
+				dirStack = dirStack[:len(dirStack)-1]
+				if len(dirStack) == 1 {
+					fmt.Fprint(w, "\x00")
+					return nil
+				}
+				continue
 			default:
 				return fmt.Errorf("unexpected server response (%x)", fi[0])
 			}
@@ -195,14 +193,16 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 			}
 
 			log.Printf("Download dir mode:%s size:%d name:%s", mode, size, name)
+
+			dst = filepath.Join(dirStack...)
 			switch fi[0] {
 			case 'D':
 				err = os.MkdirAll(filepath.Join(dst, name), os.FileMode(0755))
 				if err != nil {
 					return err
 				}
-				fmt.Fprint(w, "\x00")
-				return nil
+				dirStack = append(dirStack, name)
+				continue
 			case 'C':
 				fmt.Fprint(w, "\x00")
 				err = scpDownloadFile(filepath.Join(dst, name), stdoutR, size, os.FileMode(0644))

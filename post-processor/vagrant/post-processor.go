@@ -23,6 +23,7 @@ var builtins = map[string]string{
 	"mitchellh.amazon.instance": "aws",
 	"mitchellh.virtualbox":      "virtualbox",
 	"mitchellh.vmware":          "vmware",
+	"mitchellh.vmware-esx":      "vmware",
 	"pearkes.digitalocean":      "digitalocean",
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",

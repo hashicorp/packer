@@ -132,6 +132,12 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's 
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+
 -   `format` (string) - Either "ovf" or "ova", this specifies the output format
     of the exported virtual machine. This defaults to "ovf".
 
@@ -194,6 +200,11 @@ builder.
     the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
     name of the build.
 
+-   `post_shutdown_delay` (string) - The amount of time to wait after shutting
+    down the virtual machine. If you get the error `Error removing floppy
+    controller`, you might need to set this to `5m` or so. By default, the
+    delay is `0s`, or disabled.
+
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine unless a
@@ -250,6 +261,91 @@ builder.
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.
+
+## Boot Command
+
+The `boot_command` configuration is very important: it specifies the keys to
+type when the virtual machine is first booted in order to start the OS
+installer. This command is typed after `boot_wait`.
+
+As documented above, the `boot_command` is an array of strings. The strings are
+all typed in sequence. It is an array only to improve readability within the
+template.
+
+The boot command is "typed" character for character over a VNC connection to the
+machine, simulating a human actually typing the keyboard. There are a set of
+special keys available. If these are in your boot command, they will be replaced
+by the proper key:
+
+-   `<bs>` - Backspace
+
+-   `<del>` - Delete
+
+-   `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
+
+-   `<esc>` - Simulates pressing the escape key.
+
+-   `<tab>` - Simulates pressing the tab key.
+
+-   `<f1>` - `<f12>` - Simulates pressing a function key.
+
+-   `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+
+-   `<spacebar>` - Simulates pressing the spacebar.
+
+-   `<insert>` - Simulates pressing the insert key.
+
+-   `<home>` `<end>` - Simulates pressing the home and end keys.
+
+-   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
+
+-   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+
+-   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+
+-   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+
+-   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+
+-   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+
+-   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+
+-   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+
+-   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
+    sending any additional keys. This is useful if you have to generally wait
+    for the UI to update before typing more.
+
+In addition to the special keys, each command to type is treated as a
+[configuration template](/docs/templates/configuration-templates.html). The
+available variables are:
+
+-   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
+    that is started serving the directory specified by the `http_directory`
+    configuration parameter. If `http_directory` isn't specified, these will be
+    blank!
+
+Example boot command. This is actually a working boot command used to start an
+Ubuntu 12.04 installer:
+
+``` {.text}
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
 
 ## Guest Additions
 

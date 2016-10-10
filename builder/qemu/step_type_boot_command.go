@@ -136,6 +136,12 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	special["<end>"] = 0xFF57
 	special["<pageUp>"] = 0xFF55
 	special["<pageDown>"] = 0xFF56
+	special["<leftAlt>"] = 0xFFE9
+	special["<leftCtrl>"] = 0xFFE3
+	special["<leftShift>"] = 0xFFE1
+	special["<rightAlt>"] = 0xFFEA
+	special["<rightCtrl>"] = 0xFFE4
+	special["<rightShift>"] = 0xFFE2
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
@@ -143,6 +149,174 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	for len(original) > 0 {
 		var keyCode uint32
 		keyShift := false
+
+		if strings.HasPrefix(original, "<leftAltOn>") {
+			keyCode = special["<leftAlt>"]
+			original = original[len("<leftAltOn>"):]
+			log.Printf("Special code '<leftAltOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftCtrlOn>") {
+			keyCode = special["<leftCtrlOn>"]
+			original = original[len("<leftCtrlOn>"):]
+			log.Printf("Special code '<leftCtrlOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftShiftOn>") {
+			keyCode = special["<leftShiftOn>"]
+			original = original[len("<leftShiftOn>"):]
+			log.Printf("Special code '<leftShiftOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftAltOff>") {
+			keyCode = special["<leftAltOff>"]
+			original = original[len("<leftAltOff>"):]
+			log.Printf("Special code '<leftAltOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftCtrlOff>") {
+			keyCode = special["<leftCtrlOff>"]
+			original = original[len("<leftCtrlOff>"):]
+			log.Printf("Special code '<leftCtrlOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftShiftOff>") {
+			keyCode = special["<leftShiftOff>"]
+			original = original[len("<leftShiftOff>"):]
+			log.Printf("Special code '<leftShiftOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightAltOn>") {
+			keyCode = special["<rightAltOn>"]
+			original = original[len("<rightAltOn>"):]
+			log.Printf("Special code '<rightAltOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightCtrlOn>") {
+			keyCode = special["<rightCtrlOn>"]
+			original = original[len("<rightCtrlOn>"):]
+			log.Printf("Special code '<rightCtrlOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightShiftOn>") {
+			keyCode = special["<rightShiftOn>"]
+			original = original[len("<rightShiftOn>"):]
+			log.Printf("Special code '<rightShiftOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightAltOff>") {
+			keyCode = special["<rightAltOff>"]
+			original = original[len("<rightAltOff>"):]
+			log.Printf("Special code '<rightAltOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightCtrlOff>") {
+			keyCode = special["<rightCtrlOff>"]
+			original = original[len("<rightCtrlOff>"):]
+			log.Printf("Special code '<rightCtrlOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightShiftOff>") {
+			keyCode = special["<rightShiftOff>"]
+			original = original[len("<rightShiftOff>"):]
+			log.Printf("Special code '<rightShiftOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			// qemu is picky, so no matter what, wait a small period
+			time.Sleep(100 * time.Millisecond)
+
+			continue
+		}
 
 		if strings.HasPrefix(original, "<wait>") {
 			log.Printf("Special code '<wait>' found, sleeping one second")
