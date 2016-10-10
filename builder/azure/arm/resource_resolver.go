@@ -76,7 +76,7 @@ func findVirtualNetworkResourceGroup(client *AzureClient, name string) (string, 
 	}
 
 	if len(resourceGroupNames) > 1 {
-		return "", fmt.Errorf("Found multiple resource groups with a virtual network called %q, please use virtual_network_resource_group_name to disambiguate", name)
+		return "", fmt.Errorf("Found multiple resource groups with a virtual network called %q, please use virtual_network_subnet_name and virtual_network_resource_group_name to disambiguate", name)
 	}
 
 	return resourceGroupNames[0], nil
@@ -93,7 +93,7 @@ func findVirtualNetworkSubnet(client *AzureClient, resourceGroupName string, nam
 	}
 
 	if len(*subnets.Value) > 1 {
-		return "", fmt.Errorf("Found multiple subnets in the resource group %q associated with the  virtual network called %q, please use virtual_network_subnet_name to disambiguate", resourceGroupName, name)
+		return "", fmt.Errorf("Found multiple subnets in the resource group %q associated with the  virtual network called %q, please use virtual_network_subnet_name and virtual_network_resource_group_name to disambiguate", resourceGroupName, name)
 	}
 
 	subnet := (*subnets.Value)[0]

@@ -4,7 +4,7 @@
 
 // Package googleapi contains the common code shared by all Google API
 // libraries.
-package googleapi
+package googleapi // import "google.golang.org/api/googleapi"
 
 import (
 	"bytes"
@@ -220,9 +220,13 @@ type contentTypeOption string
 
 func (ct contentTypeOption) setOptions(o *MediaOptions) {
 	o.ContentType = string(ct)
+	if o.ContentType == "" {
+		o.ForceEmptyContentType = true
+	}
 }
 
-// ContentType returns a MediaOption which sets the content type of data to be uploaded.
+// ContentType returns a MediaOption which sets the Content-Type header for media uploads.
+// If ctype is empty, the Content-Type header will be omitted.
 func ContentType(ctype string) MediaOption {
 	return contentTypeOption(ctype)
 }
@@ -248,8 +252,10 @@ func ChunkSize(size int) MediaOption {
 
 // MediaOptions stores options for customizing media upload.  It is not used by developers directly.
 type MediaOptions struct {
-	ContentType string
-	ChunkSize   int
+	ContentType           string
+	ForceEmptyContentType bool
+
+	ChunkSize int
 }
 
 // ProcessMediaOptions stores options from opts in a MediaOptions.
@@ -414,5 +420,13 @@ func UserIP(ip string) CallOption { return userIP(ip) }
 type userIP string
 
 func (i userIP) Get() (string, string) { return "userIp", string(i) }
+
+// Trace returns a CallOption that enables diagnostic tracing for a call.
+// traceToken is an ID supplied by Google support.
+func Trace(traceToken string) CallOption { return traceTok(traceToken) }
+
+type traceTok string
+
+func (t traceTok) Get() (string, string) { return "trace", "token:" + string(t) }
 
 // TODO: Fields too

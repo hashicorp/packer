@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -21,7 +22,7 @@ func (s *StepWaitInstanceStartup) Run(state multistep.StateBag) multistep.StepAc
 	ui.Say("Waiting for any running startup script to finish...")
 
 	// Keep checking the serial port output to see if the startup script is done.
-	err := Retry(10, 60, 0, func() (bool, error) {
+	err := common.Retry(10, 60, 0, func() (bool, error) {
 		status, err := driver.GetInstanceMetadata(config.Zone,
 			instanceName, StartupScriptStatusKey)
 

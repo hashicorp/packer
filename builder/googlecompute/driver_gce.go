@@ -1,12 +1,20 @@
 package googlecompute
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"runtime"
 	"strings"
+	"time"
 
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/version"
 
@@ -160,7 +168,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name)
@@ -393,6 +401,112 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	return errCh, nil
 }
 
+func (d *driverGCE) CreateOrResetWindowsPassword(instance, zone string, c *WindowsPasswordConfig) (<-chan error, error) {
+
+	errCh := make(chan error, 1)
+	go d.createWindowsPassword(errCh, instance, zone, c)
+
+	return errCh, nil
+}
+
+func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string, c *WindowsPasswordConfig) {
+
+	data, err := json.Marshal(c)
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+	dCopy := string(data)
+
+	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
+	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &dCopy})
+
+	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
+		Fingerprint: instance.Metadata.Fingerprint,
+		Items:       instance.Metadata.Items,
+	}).Do()
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+
+	newErrCh := make(chan error, 1)
+	go waitForState(newErrCh, "DONE", d.refreshZoneOp(zone, op))
+
+	select {
+	case err = <-newErrCh:
+	case <-time.After(time.Second * 30):
+		err = errors.New("time out while waiting for instance to create")
+	}
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+
+	timeout := time.Now().Add(time.Minute * 3)
+	hash := sha1.New()
+	random := rand.Reader
+
+	for time.Now().Before(timeout) {
+		if passwordResponses, err := d.getPasswordResponses(zone, name); err == nil {
+			for _, response := range passwordResponses {
+				if response.Modulus == c.Modulus {
+
+					decodedPassword, err := base64.StdEncoding.DecodeString(response.EncryptedPassword)
+
+					if err != nil {
+						errCh <- err
+						return
+					}
+					password, err := rsa.DecryptOAEP(hash, random, c.key, decodedPassword, nil)
+
+					if err != nil {
+						errCh <- err
+						return
+					}
+
+					c.password = string(password)
+					errCh <- nil
+					return
+				}
+			}
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+	err = errors.New("Could not retrieve password. Timed out.")
+
+	errCh <- err
+	return
+
+}
+
+func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswordResponse, error) {
+	output, err := d.service.Instances.GetSerialPortOutput(d.projectId, zone, instance).Port(4).Do()
+
+	if err != nil {
+		return nil, err
+	}
+
+	responses := strings.Split(output.Contents, "\n")
+
+	passwordResponses := make([]windowsPasswordResponse, 0, len(responses))
+
+	for _, response := range responses {
+		var passwordResponse windowsPasswordResponse
+		if err := json.Unmarshal([]byte(response), &passwordResponse); err != nil {
+			continue
+		}
+
+		passwordResponses = append(passwordResponses, passwordResponse)
+	}
+
+	return passwordResponses, nil
+}
+
 func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, state, d.refreshInstanceState(zone, name))
@@ -458,7 +572,7 @@ type stateRefreshFunc func() (string, error)
 // waitForState will spin in a loop forever waiting for state to
 // reach a certain target.
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
-	err := Retry(2, 2, 0, func() (bool, error) {
+	err := common.Retry(2, 2, 0, func() (bool, error) {
 		state, err := refresh()
 		if err != nil {
 			return false, err
