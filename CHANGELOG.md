@@ -98,6 +98,8 @@ IMPROVEMENTS:
       [GH-3967]
   * provisioner/salt: Added `custom_state` to specify state to run instead of
       `highstate`. [GH-3776]
+  * builder/openstack: Added support for `ssh_password` instead of generating
+      ssh keys. [GH-3976]
 
 BUG FIXES:
 
