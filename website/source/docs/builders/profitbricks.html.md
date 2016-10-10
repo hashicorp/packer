@@ -11,8 +11,6 @@ Type: `profitbricks`
 
 The ProfitBricks Builder is able to create virtual machines for [ProfitBricks](https://www.profitbricks.com).
 
--> **Note:** This builder is not supported by HashiCorp. Please visit [ProfitBricks DevOps Central](https://devops.profitbricks.com/) for support. You may file issues on [GitHub](https://github.com/profitbricks/packer-builder-profitbricks/issues).
-
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are

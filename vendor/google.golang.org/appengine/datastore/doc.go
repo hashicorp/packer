@@ -348,4 +348,4 @@ Example code:
 		}
 	}
 */
-package datastore
+package datastore // import "google.golang.org/appengine/datastore"
