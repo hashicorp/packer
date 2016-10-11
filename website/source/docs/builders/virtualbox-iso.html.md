@@ -55,11 +55,10 @@ builder.
 ### Required:
 
 -   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-    files are so large, this is required and Packer will verify it prior to
-    booting a virtual machine with the ISO attached. The type of the checksum is
-    specified with `iso_checksum_type`, documented below. At least one of
-    `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
-    over `iso_checksum_url` type.
+    files are so large, this is required and Packer will verify it prior to booting
+    a virtual machine with the ISO attached. The type of the checksum is specified
+    with `iso_checksum_type`, documented below. The `iso_checksum` has precedence
+    over the `iso_checksum_url`.
 
 -   `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
@@ -101,9 +100,10 @@ builder.
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `export_opts` (array of strings) - Additional options to pass to the
-    [VBoxManage export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export).
-    This can be useful for passing product information to include in the
-    resulting appliance file. Packer JSON configuration file example:
+    [VBoxManage
+    export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This
+    can be useful for passing product information to include in the resulting
+    appliance file. Packer JSON configuration file example:
 
     ``` {.json}
     {
@@ -119,12 +119,13 @@ builder.
     }
     ```
 
-    A VirtualBox [VM description](https://www.virtualbox.org/manual/ch08.html#idm3756)
-    may contain arbitrary strings; the GUI interprets HTML formatting.
-    However, the JSON format does not allow arbitrary newlines within a
-    value. Add a multi-line description by preparing the string in the
-    shell before the packer call like this (shell `>` continuation
-    character snipped for easier copy & paste):
+    A VirtualBox [VM
+    description](https://www.virtualbox.org/manual/ch08.html#idm3756) may
+    contain arbitrary strings; the GUI interprets HTML formatting. However, the
+    JSON format does not allow arbitrary newlines within a value. Add a
+    multi-line description by preparing the string in the shell before the
+    packer call like this (shell `>` continuation character snipped for easier
+    copy & paste):
 
     ``` {.shell}
 
@@ -228,8 +229,8 @@ builder.
     to, defaults to "ide". When set to "sata", the drive is attached to an AHCI
     SATA controller.
 
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
+-   `iso_target_path` (string) - The path where the iso should be saved
+    after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
@@ -249,9 +250,9 @@ builder.
     name of the build.
 
 -   `post_shutdown_delay` (string) - The amount of time to wait after shutting
-    down the virtual machine. If you get the error `Error removing floppy
-    controller`, you might need to set this to `5m` or so. By default, the
-    delay is `0s`, or disabled.
+    down the virtual machine. If you get the error
+    `Error removing floppy controller`, you might need to set this to `5m`
+    or so. By default, the delay is `0s`, or disabled.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
@@ -301,15 +302,14 @@ builder.
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
--   `vrdp_bind_address` (string / IP address) - The IP address that should be binded
-     to for VRDP. By default packer will use 127.0.0.1 for this. If you wish to bind
-     to all interfaces use 0.0.0.0
+-   `vrdp_bind_address` (string / IP address) - The IP address that should be
+    binded to for VRDP. By default packer will use 127.0.0.1 for this. If you
+    wish to bind to all interfaces use 0.0.0.0
 
 -   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.
-
 
 ## Boot Command
 
@@ -349,19 +349,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
