@@ -8,7 +8,7 @@ import (
 )
 
 type FloppyConfig struct {
-	FloppyFiles    []string `mapstructure:"floppy_files"`
+	FloppyFiles       []string `mapstructure:"floppy_files"`
 	FloppyDirectories []string `mapstructure:"floppy_dirs"`
 }
 

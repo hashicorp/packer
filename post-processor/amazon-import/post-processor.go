@@ -32,7 +32,7 @@ type Config struct {
 	Tags      map[string]string `mapstructure:"tags"`
 	Name      string            `mapstructure:"ami_name"`
 
-	ctx       interpolate.Context
+	ctx interpolate.Context
 }
 
 type PostProcessor struct {
@@ -212,9 +212,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message(fmt.Sprintf("Starting rename of AMI (%s)", createdami))
 
 		resp, err := ec2conn.CopyImage(&ec2.CopyImageInput{
-			Name: &p.config.Name,
+			Name:          &p.config.Name,
 			SourceImageId: &createdami,
-			SourceRegion: config.Region,
+			SourceRegion:  config.Region,
 		})
 
 		if err != nil {
@@ -224,9 +224,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message(fmt.Sprintf("Waiting for AMI rename to complete (may take a while)"))
 
 		stateChange := awscommon.StateChangeConf{
-			Pending:   []string{"pending"},
-			Target:    "available",
-			Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *resp.ImageId),
+			Pending: []string{"pending"},
+			Target:  "available",
+			Refresh: awscommon.AMIStateRefreshFunc(ec2conn, *resp.ImageId),
 		}
 
 		if _, err := awscommon.WaitForState(&stateChange); err != nil {

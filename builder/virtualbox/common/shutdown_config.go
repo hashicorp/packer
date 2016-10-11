@@ -8,11 +8,11 @@ import (
 )
 
 type ShutdownConfig struct {
-	ShutdownCommand    string `mapstructure:"shutdown_command"`
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
+	ShutdownCommand      string `mapstructure:"shutdown_command"`
+	RawShutdownTimeout   string `mapstructure:"shutdown_timeout"`
 	RawPostShutdownDelay string `mapstructure:"post_shutdown_delay"`
 
-	ShutdownTimeout time.Duration ``
+	ShutdownTimeout   time.Duration ``
 	PostShutdownDelay time.Duration ``
 }
 
