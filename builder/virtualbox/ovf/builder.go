@@ -70,9 +70,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
 			Ctx:                  b.config.ctx,
 		},
+		&common.StepDownload{
+			Checksum:     b.config.Checksum,
+			ChecksumType: b.config.ChecksumType,
+			Description:  "OVF/OVA",
+			Extension:    "ova",
+			ResultKey:    "vm_path",
+			TargetPath:   b.config.TargetPath,
+			Url:          []string{b.config.SourcePath},
+		},
 		&StepImport{
 			Name:        b.config.VMName,
-			SourcePath:  b.config.SourcePath,
 			ImportFlags: b.config.ImportFlags,
 		},
 		&vboxcommon.StepAttachGuestAdditions{
