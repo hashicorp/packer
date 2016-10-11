@@ -109,7 +109,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.CustomState == "" {
 		cmd_args.WriteString(" state.highstate")
-	}	else {
+	} else {
 		cmd_args.WriteString(" state.sls ")
 		cmd_args.WriteString(p.config.CustomState)
 	}
