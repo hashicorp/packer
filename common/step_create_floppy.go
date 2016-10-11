@@ -17,7 +17,7 @@ import (
 
 // StepCreateFloppy will create a floppy disk with the given files.
 type StepCreateFloppy struct {
-	Files    []string
+	Files       []string
 	Directories []string
 
 	floppyPath string
@@ -95,12 +95,14 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Utility functions for walking through a directory grabbing all files flatly
 	globFiles := func(files []string, list chan string) {
-		for _,filename := range files {
+		for _, filename := range files {
 			if strings.IndexAny(filename, "*?[") >= 0 {
-				matches,_ := filepath.Glob(filename)
-				if err != nil { continue }
+				matches, _ := filepath.Glob(filename)
+				if err != nil {
+					continue
+				}
 
-				for _,match := range matches {
+				for _, match := range matches {
 					list <- match
 				}
 				continue
@@ -128,9 +130,11 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Message("Copying files flatly from floppy_files")
 	for {
 		filename, ok := <-filelist
-		if !ok { break }
+		if !ok {
+			break
+		}
 
-		finfo,err := os.Stat(filename)
+		finfo, err := os.Stat(filename)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error trying to stat : %s : %s", filename, err))
 			return multistep.ActionHalt
@@ -146,7 +150,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 				return multistep.ActionHalt
 			}
 
-			for _,crawlfilename := range crawlDirectoryFiles {
+			for _, crawlfilename := range crawlDirectoryFiles {
 				s.Add(cache, crawlfilename)
 				s.FilesAdded[crawlfilename] = true
 			}
@@ -165,15 +169,15 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Collect all paths (expanding wildcards) into pathqueue
 	ui.Message("Collecting paths from floppy_dirs")
 	var pathqueue []string
-	for _,filename := range s.Directories {
+	for _, filename := range s.Directories {
 		if strings.IndexAny(filename, "*?[") >= 0 {
-			matches,err := filepath.Glob(filename)
+			matches, err := filepath.Glob(filename)
 			if err != nil {
 				state.Put("error", fmt.Errorf("Error adding path %s to floppy: %s", filename, err))
 				return multistep.ActionHalt
 			}
 
-			for _,filename := range matches {
+			for _, filename := range matches {
 				pathqueue = append(pathqueue, filename)
 			}
 			continue
@@ -183,7 +187,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Message(fmt.Sprintf("Resulting paths from floppy_dirs : %v", pathqueue))
 
 	// Go over each path in pathqueue and copy it.
-	for _,src := range pathqueue {
+	for _, src := range pathqueue {
 		ui.Message(fmt.Sprintf("Recursively copying : %s", src))
 		err = s.Add(cache, src)
 		if err != nil {
@@ -200,7 +204,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
-	finfo,err := os.Stat(src)
+	finfo, err := os.Stat(src)
 	if err != nil {
 		return fmt.Errorf("Error adding path to floppy: %s", err)
 	}
@@ -208,19 +212,27 @@ func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
 	// add a file
 	if !finfo.IsDir() {
 		inputF, err := os.Open(src)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		defer inputF.Close()
 
-		d,err := dircache("")
-		if err != nil { return err }
+		d, err := dircache("")
+		if err != nil {
+			return err
+		}
 
-		entry,err := d.AddFile(path.Base(src))
-		if err != nil { return err }
+		entry, err := d.AddFile(path.Base(src))
+		if err != nil {
+			return err
+		}
 
-		fatFile,err := entry.File()
-		if err != nil { return err }
+		fatFile, err := entry.File()
+		if err != nil {
+			return err
+		}
 
-		_,err = io.Copy(fatFile,inputF)
+		_, err = io.Copy(fatFile, inputF)
 		s.FilesAdded[src] = true
 		return err
 	}
@@ -228,32 +240,46 @@ func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
 	// add a directory and it's subdirectories
 	basedirectory := filepath.Join(src, "..")
 	visit := func(pathname string, fi os.FileInfo, err error) error {
-		if err != nil { return err }
-		if fi.Mode().IsDir() {
-			base,err := removeBase(basedirectory, pathname)
-			if err != nil { return err }
-			_,err = dircache(filepath.ToSlash(base))
+		if err != nil {
 			return err
 		}
-		directory,filename := filepath.Split(pathname)
+		if fi.Mode().IsDir() {
+			base, err := removeBase(basedirectory, pathname)
+			if err != nil {
+				return err
+			}
+			_, err = dircache(filepath.ToSlash(base))
+			return err
+		}
+		directory, filename := filepath.Split(pathname)
 
-		base,err := removeBase(basedirectory, directory)
-		if err != nil { return err }
+		base, err := removeBase(basedirectory, directory)
+		if err != nil {
+			return err
+		}
 
 		inputF, err := os.Open(pathname)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		defer inputF.Close()
 
-		wd,err := dircache(filepath.ToSlash(base))
-		if err != nil { return err }
+		wd, err := dircache(filepath.ToSlash(base))
+		if err != nil {
+			return err
+		}
 
-		entry,err := wd.AddFile(filename)
-		if err != nil { return err }
+		entry, err := wd.AddFile(filename)
+		if err != nil {
+			return err
+		}
 
-		fatFile,err := entry.File()
-		if err != nil { return err }
+		fatFile, err := entry.File()
+		if err != nil {
+			return err
+		}
 
-		_,err = io.Copy(fatFile,inputF)
+		_, err = io.Copy(fatFile, inputF)
 		s.FilesAdded[pathname] = true
 		return err
 	}
@@ -271,47 +297,50 @@ func (s *StepCreateFloppy) Cleanup(multistep.StateBag) {
 // removeBase will take a regular os.PathSeparator-separated path and remove the
 // prefix directory base from it. Both paths are converted to their absolute
 // formats before the stripping takes place.
-func removeBase(base string, path string) (string,error) {
+func removeBase(base string, path string) (string, error) {
 	var idx int
 	var err error
 
-	if res,err := filepath.Abs(path); err == nil {
+	if res, err := filepath.Abs(path); err == nil {
 		path = res
 	}
 	path = filepath.Clean(path)
 
-	if base,err = filepath.Abs(base); err != nil {
-		return path,err
+	if base, err = filepath.Abs(base); err != nil {
+		return path, err
 	}
 
-	c1,c2 := strings.Split(base, string(os.PathSeparator)), strings.Split(path, string(os.PathSeparator))
+	c1, c2 := strings.Split(base, string(os.PathSeparator)), strings.Split(path, string(os.PathSeparator))
 	for idx = 0; idx < len(c1); idx++ {
-		if len(c1[idx]) == 0 && len(c2[idx]) != 0 { break }
+		if len(c1[idx]) == 0 && len(c2[idx]) != 0 {
+			break
+		}
 		if c1[idx] != c2[idx] {
 			return "", fmt.Errorf("Path %s is not prefixed by Base %s", path, base)
 		}
 	}
-	return strings.Join(c2[idx:], string(os.PathSeparator)),nil
+	return strings.Join(c2[idx:], string(os.PathSeparator)), nil
 }
 
 // fsDirectoryCache returns a function that can be used to grab the fs.Directory
 // entry associated with a given path. If an fs.Directory entry is not found
 // then it will be created relative to the rootDirectory argument that is
 // passed.
-type directoryCache func(string) (fs.Directory,error)
+type directoryCache func(string) (fs.Directory, error)
+
 func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 	var cache map[string]fs.Directory
 
 	cache = make(map[string]fs.Directory)
 	cache[""] = rootDirectory
 
-	Input,Output,Error := make(chan string),make(chan fs.Directory),make(chan error)
+	Input, Output, Error := make(chan string), make(chan fs.Directory), make(chan error)
 	go func(Error chan error) {
 		for {
 			input := path.Clean(<-Input)
 
 			// found a directory, so yield it
-			res,ok := cache[input]
+			res, ok := cache[input]
 			if ok {
 				Output <- res
 				continue
@@ -321,19 +350,25 @@ func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 			// directory not cached, so start at the root and walk each component
 			// creating them if they're not in cache
 			var entry fs.Directory
-			for i,_ := range component {
+			for i, _ := range component {
 
 				// join all of our components into a key
 				path := strings.Join(component[:i], "/")
 
 				// check if parent directory is cached
-				res,ok = cache[path]
+				res, ok = cache[path]
 				if !ok {
 					// add directory into cache
-					directory,err := entry.AddDirectory(component[i-1])
-					if err != nil { Error <- err; continue }
-					res,err = directory.Dir()
-					if err != nil { Error <- err; continue }
+					directory, err := entry.AddDirectory(component[i-1])
+					if err != nil {
+						Error <- err
+						continue
+					}
+					res, err = directory.Dir()
+					if err != nil {
+						Error <- err
+						continue
+					}
 					cache[path] = res
 				}
 				// cool, found a directory
@@ -341,10 +376,16 @@ func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 			}
 
 			// finally create our directory
-			directory,err := entry.AddDirectory(component[len(component)-1])
-			if err != nil { Error <- err; continue }
-			res,err = directory.Dir()
-			if err != nil { Error <- err; continue }
+			directory, err := entry.AddDirectory(component[len(component)-1])
+			if err != nil {
+				Error <- err
+				continue
+			}
+			res, err = directory.Dir()
+			if err != nil {
+				Error <- err
+				continue
+			}
 			cache[input] = res
 
 			// ..and yield it
@@ -352,13 +393,13 @@ func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 		}
 	}(Error)
 
-	getFilesystemDirectory := func(input string) (fs.Directory,error) {
+	getFilesystemDirectory := func(input string) (fs.Directory, error) {
 		Input <- input
 		select {
-			case res := <-Output:
-				return res,nil
-			case err := <-Error:
-				return *new(fs.Directory),err
+		case res := <-Output:
+			return res, nil
+		case err := <-Error:
+			return *new(fs.Directory), err
 		}
 	}
 	return getFilesystemDirectory
