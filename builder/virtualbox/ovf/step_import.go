@@ -10,7 +10,6 @@ import (
 // This step imports an OVF VM into VirtualBox.
 type StepImport struct {
 	Name        string
-	SourcePath  string
 	ImportFlags []string
 
 	vmName string
@@ -19,9 +18,10 @@ type StepImport struct {
 func (s *StepImport) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
+	vmPath := state.Get("vm_path").(string)
 
-	ui.Say(fmt.Sprintf("Importing VM: %s", s.SourcePath))
-	if err := driver.Import(s.Name, s.SourcePath, s.ImportFlags); err != nil {
+	ui.Say(fmt.Sprintf("Importing VM: %s", vmPath))
+	if err := driver.Import(s.Name, vmPath, s.ImportFlags); err != nil {
 		err := fmt.Errorf("Error importing VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
