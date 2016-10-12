@@ -25,7 +25,7 @@ builder.
 
 -   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. Defaults to "Ubuntu-16.04". To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image). 
 
--   `password` (string) - ProfitBrucks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
+-   `password` (string) - ProfitBricks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
 
 -   `username` (string) - ProfitBricks username. This can be specified via environment variable `PROFITBRICKS_USERNAME', if provided. The value definded in the config has precedence over environemnt variable. 
 
@@ -34,7 +34,7 @@ builder.
 
 -   `cores` (integer) - Amount of CPU cores to use for this build. Defaults to "4".
 
--   `disk_size` (string) - Amount of disk space for this image. Defaults to "50"
+-   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
 -   `disk_type` (string) - Type of disk to use for this image. Defaults to "HDD".
 

@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"time"
+	"encoding/json"
 )
 
 type stepTakeSnapshot struct{}
@@ -27,7 +28,14 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("snapshotname", c.SnapshotName)
 
 	if snapshot.StatusCode > 299 {
-		ui.Say(fmt.Sprintf("Error occured %s", snapshot.Response))
+		var restError RestError
+		json.Unmarshal([]byte(snapshot.Response), &restError)
+		if ( len(restError.Messages) > 0) {
+			ui.Error(restError.Messages[0].Message)
+		} else {
+			ui.Error(snapshot.Response)
+		}
+
 		return multistep.ActionHalt
 	}
 

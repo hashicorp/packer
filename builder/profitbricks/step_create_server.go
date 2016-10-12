@@ -63,8 +63,16 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	datacenter = profitbricks.CompositeCreateDatacenter(datacenter)
 	if datacenter.StatusCode > 299 {
-		ui.Error(parseErrorMessage(datacenter.Response))
-		return multistep.ActionHalt
+		if datacenter.StatusCode > 299 {
+			var restError RestError
+			json.Unmarshal([]byte(datacenter.Response), &restError)
+			if ( len(restError.Messages) > 0) {
+				ui.Error(restError.Messages[0].Message)
+			} else {
+				ui.Error(datacenter.Response)
+			}
+			return multistep.ActionHalt
+		}
 	}
 	s.waitTillProvisioned(datacenter.Headers.Get("Location"), *c)
 
@@ -116,16 +124,15 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	ui.Say("Removing Virtual Data Center...")
 
 	profitbricks.SetAuth(c.PBUsername, c.PBPassword)
-	dcId := state.Get("datacenter_id").(string)
 
-	resp := profitbricks.DeleteDatacenter(dcId)
-
-	s.checkForErrors(resp)
-
-	err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c)
-	if err != nil {
-		ui.Error(fmt.Sprintf(
-			"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
+	if dcId, ok := state.GetOk("datacenter_id"); ok {
+		resp := profitbricks.DeleteDatacenter(dcId.(string))
+		s.checkForErrors(resp)
+		err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c)
+		if err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
+		}
 	}
 }
 
@@ -159,6 +166,16 @@ func (d *stepCreateServer) checkForErrors(instance profitbricks.Resp) error {
 		return errors.New(fmt.Sprintf("Error occured %s", string(instance.Body)))
 	}
 	return nil
+}
+
+type RestError struct {
+	HttpStatus int `json:"httpStatus,omitempty"`
+	Messages   []Message`json:"messages,omitempty"`
+}
+
+type Message struct {
+	ErrorCode string `json:"errorCode,omitempty"`
+	Message   string`json:"message,omitempty"`
 }
 
 func (d *stepCreateServer) getImageId(imageName string, c *Config) string {
