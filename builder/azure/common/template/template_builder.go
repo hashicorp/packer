@@ -3,10 +3,10 @@ package template
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/Azure/go-autorest/autorest/to"
-	"strings"
 )
 
 const (
@@ -124,6 +124,18 @@ func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingS
 	profile.OsDisk.Image = &compute.VirtualHardDisk{
 		URI: to.StringPtr(imageUrl),
 	}
+
+	return nil
+}
+
+func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Properties.StorageProfile
+	profile.OsDisk.DiskSizeGB = to.Int32Ptr(diskSizeGB)
 
 	return nil
 }

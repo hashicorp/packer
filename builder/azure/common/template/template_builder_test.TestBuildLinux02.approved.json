@@ -87,6 +87,7 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
+            "diskSizeGB": 100,
             "image": {
               "uri": "http://azure/custom.vhd"
             },
