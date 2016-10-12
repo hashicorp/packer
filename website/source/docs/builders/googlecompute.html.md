@@ -171,6 +171,9 @@ builder.
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 
+-   `source_image_project_id` (string) - The project ID of the 
+    project containing the source image.
+
 -   `startup_script_file` (string) - The filepath to a startup script to run on 
     the VM from which the image will be made.
 
