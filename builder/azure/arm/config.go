@@ -81,7 +81,8 @@ type Config struct {
 	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
 
 	// OS
-	OSType string `mapstructure:"os_type"`
+	OSType       string `mapstructure:"os_type"`
+	OSDiskSizeGB int32  `mapstructure:"os_disk_size_gb"`
 
 	// Runtime Values
 	UserName               string
