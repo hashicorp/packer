@@ -55,6 +55,10 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	}
 
+	if config.OSDiskSizeGB > 0 {
+		builder.SetOSDiskSizeGB(config.OSDiskSizeGB)
+	}
+
 	if config.VirtualNetworkName != "" {
 		builder.SetVirtualNetwork(
 			config.VirtualNetworkResourceGroupName,
