@@ -55,7 +55,7 @@ Validate the configuration using `packer validate`.
 ## Using the Post-Processor
 
 Just run a normal `packer build` and it will now use the post-processor. Since
-Packer can't currently make a Vagrant box for DigitalOcean anyways, I recommend
+Packer can't currently make a Vagrant box for DigitalOcean anyway, I recommend
 passing the `-only=amazon-ebs` flag to `packer build` so it only builds the AMI.
 The command should look like the following:
 
