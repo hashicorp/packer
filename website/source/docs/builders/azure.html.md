@@ -86,6 +86,9 @@ builder.
     automatically configure authentication credentials for the provisioned machine. For
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
+    
+-   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are 
+    ignored.
 
 -   `virtual_network_name` (string) Use a pre-existing virtual network for the VM.  This option enables private
     communication with the VM, no public IP address is **used** or **provisioned**.  This value should only be set if
