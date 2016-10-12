@@ -214,7 +214,7 @@ func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
 		d,err := dircache("")
 		if err != nil { return err }
 
-		entry,err := d.AddFile(path.Base(src))
+		entry,err := d.AddFile(path.Base(filepath.ToSlash(src)))
 		if err != nil { return err }
 
 		fatFile,err := entry.File()
@@ -235,9 +235,9 @@ func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
 			_,err = dircache(filepath.ToSlash(base))
 			return err
 		}
-		directory,filename := filepath.Split(pathname)
+		directory,filename := filepath.Split(filepath.ToSlash(pathname))
 
-		base,err := removeBase(basedirectory, directory)
+		base,err := removeBase(basedirectory, filepath.FromSlash(directory))
 		if err != nil { return err }
 
 		inputF, err := os.Open(pathname)
@@ -308,7 +308,8 @@ func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 	Input,Output,Error := make(chan string),make(chan fs.Directory),make(chan error)
 	go func(Error chan error) {
 		for {
-			input := path.Clean(<-Input)
+			input := <-Input
+			if len(input) > 0 { input = path.Clean(input) }
 
 			// found a directory, so yield it
 			res,ok := cache[input]
