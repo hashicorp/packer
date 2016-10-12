@@ -100,6 +100,7 @@ IMPROVEMENTS:
       `highstate`. [GH-3776]
   * builder/openstack: Added support for `ssh_password` instead of generating
       ssh keys. [GH-3976]
+  * builder/azure: Add `os_disk_size_gb`. [GH-3995]
 
 BUG FIXES:
 
