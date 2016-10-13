@@ -38,8 +38,7 @@ for easy referencing.
 -   `Commands` are sub-commands for the `packer` program that perform some job.
     An example command is "build", which is invoked as `packer build`. Packer
     ships with a set of commands out of the box in order to define its
-    command-line interface. Commands can also be created and added to Packer in
-    the form of plugins.
+    command-line interface.
 
 -   `Post-processors` are components of Packer that take the result of a builder
     or another post-processor and process that to create a new artifact.
