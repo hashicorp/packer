@@ -477,7 +477,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// OS
-	if c.OSType != constants.Target_Linux && c.OSType != constants.Target_Windows {
+	if strings.EqualFold(c.OSType, constants.Target_Linux) {
+		c.OSType = constants.Target_Linux
+	} else if strings.EqualFold(c.OSType, constants.Target_Windows) {
+		c.OSType = constants.Target_Windows
+	} else if c.OSType == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An os_type must be specified"))
+	} else {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
 	}
 }
