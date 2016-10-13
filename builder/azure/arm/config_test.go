@@ -119,6 +119,47 @@ func TestConfigShouldNotDefaultImageVersionIfCustomImage(t *testing.T) {
 	}
 }
 
+func TestConfigShouldNormalizeOSTypeCase(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+	}
+
+	os_types := map[string][]string{
+		constants.Target_Linux:   {"linux", "LiNuX"},
+		constants.Target_Windows: {"windows", "WiNdOWs"},
+	}
+
+	for k, v := range os_types {
+		for _, os_type := range v {
+			config["os_type"] = os_type
+			c, _, err := newConfig(config, getPackerConfiguration())
+			if err != nil {
+				t.Fatalf("Expected config to accept the value %q, but it did not", os_type)
+			}
+
+			if c.OSType != k {
+				t.Fatalf("Expected config to normalize the value %q to %q, but it did not", os_type, constants.Target_Linux)
+			}
+		}
+	}
+
+	bad_os_types := []string{"", "does-not-exist"}
+	for _, os_type := range bad_os_types {
+		config["os_type"] = os_type
+		_, _, err := newConfig(config, getPackerConfiguration())
+		if err == nil {
+			t.Fatalf("Expected config to not accept the value %q, but it did", os_type)
+		}
+	}
+}
+
 func TestConfigShouldRejectCustomImageAndMarketPlace(t *testing.T) {
 	config := map[string]string{
 		"capture_name_prefix":    "ignore",
