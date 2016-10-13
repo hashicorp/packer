@@ -140,6 +140,18 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	return nil
 }
 
+func (s *TemplateBuilder) SetCustomData(customData string) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Properties.OsProfile
+	profile.CustomData = to.StringPtr(customData)
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
 	s.setVariable("virtualNetworkResourceGroup", virtualNetworkResourceGroup)
 	s.setVariable("virtualNetworkName", virtualNetworkName)
