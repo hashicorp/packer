@@ -59,6 +59,10 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetOSDiskSizeGB(config.OSDiskSizeGB)
 	}
 
+	if config.customData != "" {
+		builder.SetCustomData(config.customData)
+	}
+
 	if config.VirtualNetworkName != "" {
 		builder.SetVirtualNetwork(
 			config.VirtualNetworkResourceGroupName,
