@@ -79,6 +79,8 @@ type Config struct {
 	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
 	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
 	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
+	CustomDataFile                  string `mapstructure:"custom_data_file"`
+	customData                      string
 
 	// OS
 	OSType       string `mapstructure:"os_type"`
@@ -199,6 +201,11 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	setRuntimeValues(&c)
 	setUserNamePassword(&c)
 	err = setCloudEnvironment(&c)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = setCustomData(&c)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -336,6 +343,20 @@ func setCloudEnvironment(c *Config) error {
 	env, err := azure.EnvironmentFromName(envName)
 	c.cloudEnvironment = &env
 	return err
+}
+
+func setCustomData(c *Config) error {
+	if c.CustomDataFile == "" {
+		return nil
+	}
+
+	b, err := ioutil.ReadFile(c.CustomDataFile)
+	if err != nil {
+		return err
+	}
+
+	c.customData = base64.StdEncoding.EncodeToString(b)
+	return nil
 }
 
 func provideDefaultValues(c *Config) {
