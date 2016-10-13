@@ -101,7 +101,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.setTemplateParameters(b.stateBag)
 	var steps []multistep.Step
 
-	if strings.EqualFold(b.config.OSType, constants.Target_Linux) {
+	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
@@ -119,7 +119,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 		}
-	} else if strings.EqualFold(b.config.OSType, constants.Target_Windows) {
+	} else if b.config.OSType == constants.Target_Windows {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
