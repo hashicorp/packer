@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -46,6 +47,12 @@ func decodeConfig(r io.Reader, c *config) error {
 // Hence, the priority order is the reverse of the search order - i.e., the
 // CWD has the highest priority.
 func (c *config) Discover() error {
+	// If we are already inside a plugin process we should not need to
+	// discover anything.
+	if os.Getenv(plugin.MagicCookieKey) != "" {
+		return nil
+	}
+
 	// First, look in the same directory as the executable.
 	exePath, err := osext.Executable()
 	if err != nil {
