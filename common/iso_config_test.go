@@ -3,6 +3,8 @@ package common
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 )
@@ -215,6 +217,15 @@ func TestISOConfigPrepare_ISOUrl(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have error")
 	}
+
+	// Test iso_url not set but checksum url is
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+	i = testISOConfig()
+	i.RawSingleISOUrl = ""
+	i.ISOChecksum = ""
+	i.ISOChecksumURL = ts.URL + "/basic.txt"
+	warns, err = i.Prepare(nil)
 
 	// Test iso_url set
 	i = testISOConfig()
