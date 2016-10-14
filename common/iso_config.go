@@ -23,18 +23,15 @@ type ISOConfig struct {
 	RawSingleISOUrl string   `mapstructure:"iso_url"`
 }
 
-func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
-	// Validation
-	var errs []error
-	var err error
-	var warnings []string
-
+func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
 	if c.RawSingleISOUrl == "" && len(c.ISOUrls) == 0 {
 		errs = append(
 			errs, errors.New("One of iso_url or iso_urls must be specified."))
+		return
 	} else if c.RawSingleISOUrl != "" && len(c.ISOUrls) > 0 {
 		errs = append(
 			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
+		return
 	} else if c.RawSingleISOUrl != "" {
 		c.ISOUrls = []string{c.RawSingleISOUrl}
 	}
@@ -106,10 +103,12 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 	c.ISOChecksum = strings.ToLower(c.ISOChecksum)
 
 	for i, url := range c.ISOUrls {
-		c.ISOUrls[i], err = DownloadableURL(url)
+		url, err := DownloadableURL(url)
 		if err != nil {
 			errs = append(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
+		} else {
+			c.ISOUrls[i] = url
 		}
 	}
 
