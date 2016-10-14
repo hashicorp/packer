@@ -240,7 +240,11 @@ func (c *comm) newSession() (session *ssh.Session, err error) {
 			return nil, err
 		}
 
-		return c.client.NewSession()
+		if c.client == nil {
+			err = errors.New("client not available")
+		} else {
+			session, err = c.client.NewSession()
+		}
 	}
 
 	return session, nil
