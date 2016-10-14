@@ -49,7 +49,7 @@ func decodeConfig(r io.Reader, c *config) error {
 func (c *config) Discover() error {
 	// If we are already inside a plugin process we should not need to
 	// discover anything.
-	if os.Getenv(plugin.MagicCookieKey) != "" {
+	if os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue {
 		return nil
 	}
 
