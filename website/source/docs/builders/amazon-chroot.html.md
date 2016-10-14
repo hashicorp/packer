@@ -184,7 +184,8 @@ each category, the available configuration keys are alphabetized.
     }
     ```
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical.
-    NOTE: This will fail unless *exactly* one AMI is returned.
+    NOTE: This will fail unless *exactly* one AMI is returned. In the above
+    example, `most_recent` will cause this to succeed by selecting the newest image.
 
     -   `filters` (map of strings) - filters used to select a `source_ami`.
          NOTE: This will fail unless *exactly* one AMI is returned.
