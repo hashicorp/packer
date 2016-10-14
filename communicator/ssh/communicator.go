@@ -267,7 +267,7 @@ func (c *comm) reconnect() (err error) {
 		c.conn = nil
 
 		log.Printf("reconnection error: %s", err)
-		return
+		return err
 	}
 
 	log.Printf("handshaking with SSH")
