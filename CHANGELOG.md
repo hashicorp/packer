@@ -6,6 +6,8 @@ BACKWARDS INCOMPATIBILITIES:
     but bind to 127.0.0.1 by default to improve security. See the relevant
     builder docs for more info.
   * Docker builder requires Docker > 1.3
+  * provisioner/chef-solo: default staging directory renamed to
+      `packer-chef-solo`
 
 FEATURES:
 
@@ -133,6 +135,7 @@ BUG FIXES:
   * builder/amazon: add retry logic when creating tags.
   * communicator/ssh: handle error case where server closes the connection but
       doesn't give us an error code. [GH-3966]
+  * communicator/ssh: fixed possible panic when reconnecting fails [GH-4008]
 
 ## 0.10.2 (September 20, 2016)
 
