@@ -55,6 +55,10 @@ type Config struct {
 	// Packer requires the directory to exist when running puppet.
 	WorkingDir string `mapstructure:"working_directory"`
 
+	// The directory that contains the puppet binary.
+	// E.g. if it can't be found on the standard path.
+	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
+
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
 }
@@ -70,6 +74,7 @@ type ExecuteTemplate struct {
 	ModulePath      string
 	ManifestFile    string
 	ManifestDir     string
+	PuppetBinDir    string
 	Sudo            bool
 	ExtraArguments  string
 }
@@ -92,7 +97,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
+			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet apply " +
+			"--verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
@@ -227,6 +233,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
 		ModulePath:      strings.Join(modulePaths, ":"),
+		PuppetBinDir:    p.config.PuppetBinDir,
 		Sudo:            !p.config.PreventSudo,
 		WorkingDir:      p.config.WorkingDir,
 		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
