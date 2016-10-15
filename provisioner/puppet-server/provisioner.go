@@ -45,6 +45,10 @@ type Config struct {
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_dir"`
 
+	// The directory that contains the puppet binary.
+	// E.g. if it can't be found on the standard path.
+	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
+
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
 }
@@ -60,6 +64,7 @@ type ExecuteTemplate struct {
 	PuppetNode           string
 	PuppetServer         string
 	Options              string
+	PuppetBinDir         string
 	Sudo                 bool
 }
 
@@ -160,6 +165,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		PuppetNode:           p.config.PuppetNode,
 		PuppetServer:         p.config.PuppetServer,
 		Options:              p.config.Options,
+		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
 	}
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
@@ -221,7 +227,8 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 
 func (p *Provisioner) commandTemplate() string {
 	return "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-		"puppet agent --onetime --no-daemonize " +
+		"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet agent " +
+		"--onetime --no-daemonize " +
 		"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
 		"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
 		"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
