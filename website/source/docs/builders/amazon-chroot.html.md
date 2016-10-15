@@ -97,8 +97,8 @@ each category, the available configuration keys are alphabetized.
     you are building. This option is required to register HVM images. Can be
     "paravirtual" (default) or "hvm".
 
--   `chroot_mounts` (array of array of strings) - This is a list of additional
-    devices to mount into the chroot environment. This configuration parameter
+-   `chroot_mounts` (array of array of strings) - This is a list of devices
+    to mount into the chroot environment. This configuration parameter
     requires some additional documentation which is in the "Chroot Mounts"
     section below. Please read that section for more information on how to
     use this.
@@ -188,7 +188,7 @@ Here is a basic example. It is completely valid except for the access keys:
 
 ## Chroot Mounts
 
-The `chroot_mounts` configuration can be used to mount additional devices within
+The `chroot_mounts` configuration can be used to mount specific devices within
 the chroot. By default, the following additional mounts are added into the
 chroot by Packer:
 
@@ -200,7 +200,8 @@ chroot by Packer:
 
 These default mounts are usually good enough for anyone and are sane defaults.
 However, if you want to change or add the mount points, you may using the
-`chroot_mounts` configuration. Here is an example configuration:
+`chroot_mounts` configuration. Here is an example configuration which only
+mounts `/prod` and `/dev`:
 
 ``` {.javascript}
 {
