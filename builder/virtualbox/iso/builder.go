@@ -37,17 +37,19 @@ type Config struct {
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	BootCommand          []string `mapstructure:"boot_command"`
-	DiskSize             uint     `mapstructure:"disk_size"`
-	KeepRegistered       bool     `mapstructure:"keep_registered"`
-	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
-	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
-	GuestOSType          string   `mapstructure:"guest_os_type"`
-	HardDriveInterface   string   `mapstructure:"hard_drive_interface"`
-	ISOInterface         string   `mapstructure:"iso_interface"`
-	VMName               string   `mapstructure:"vm_name"`
+	BootCommand            []string `mapstructure:"boot_command"`
+	DiskSize               uint     `mapstructure:"disk_size"`
+	KeepRegistered         bool     `mapstructure:"keep_registered"`
+	GuestAdditionsMode     string   `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath     string   `mapstructure:"guest_additions_path"`
+	GuestAdditionsURL      string   `mapstructure:"guest_additions_url"`
+	GuestAdditionsSHA256   string   `mapstructure:"guest_additions_sha256"`
+	GuestOSType            string   `mapstructure:"guest_os_type"`
+	HardDriveInterface     string   `mapstructure:"hard_drive_interface"`
+	HardDriveNonrotational bool     `mapstructure:"hard_drive_nonrotational"`
+	HardDriveDiscard       bool     `mapstructure:"hard_drive_discard"`
+	ISOInterface           string   `mapstructure:"iso_interface"`
+	VMName                 string   `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }
