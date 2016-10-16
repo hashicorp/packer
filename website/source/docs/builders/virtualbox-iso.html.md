@@ -153,7 +153,7 @@ builder.
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
+    your floppy disk includes drivers or if you just want to organize its
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `format` (string) - Either "ovf" or "ova", this specifies the output format
@@ -195,6 +195,13 @@ builder.
     hard drive is attached to, defaults to "ide". When set to "sata", the drive
     is attached to an AHCI SATA controller. When set to "scsi", the drive is
     attached to an LsiLogic SCSI controller.
+
+-   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
+    to treat disks as SSDs and stops them from performing disk fragmentation.
+
+-   `hard_drive_discard` (boolean) - When this value is set to true, a VDI
+    image will be shrunk in response to the trim command from the guest OS.
+    The size of the cleared area must be at least 1MB.
 
 -   `headless` (boolean) - Packer defaults to building VirtualBox virtual
     machines by launching a GUI that shows the console of the machine
@@ -348,7 +355,7 @@ by the proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
@@ -362,9 +369,9 @@ by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
-otherwise they will be held down until the machine reboots. Use lowercase 
-characters as well inside modifiers. 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
 
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
