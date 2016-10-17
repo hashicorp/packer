@@ -188,7 +188,7 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option.  Defaults to false.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
@@ -219,6 +219,9 @@ builder.
     -   `most_recent` (bool) - Selects the newest created image when true.
          This is most useful for selecting a daily distro build.
 
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot.
+
 -   `spot_price` (string) - The maximum hourly price to launch a spot instance
     to create the AMI. It is a type of instances that EC2 starts when the
     maximum price that you specify exceeds the current spot price. Spot price
@@ -247,7 +250,7 @@ builder.
     AMI, leave the `ssh_keypair_name` blank. To associate an existing key pair
     in AWS with the source instance, set the `ssh_keypair_name` field to the name
     of the key pair.
-    
+
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
     IP if available.
 

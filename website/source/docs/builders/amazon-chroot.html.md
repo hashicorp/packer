@@ -200,6 +200,9 @@ each category, the available configuration keys are alphabetized.
     -   `most_recent` (bool) - Selects the newest created image when true.
          This is most useful for selecting a daily distro build.
 
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot.
+
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
 ## Basic Example
