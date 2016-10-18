@@ -77,6 +77,8 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
+    -   `kms_key_id` (string) - The ID of the KMS key to use for volume encryption
+
     -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
