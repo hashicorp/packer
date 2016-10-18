@@ -18,9 +18,13 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	config := state.Get("config").(Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
+	kmsKeyId := config.AMIConfig.AMIKmsKeyId
 
 	// Encrypt boot not set, so skip step
 	if !config.AMIConfig.AMIEncryptBootVolume {
+		if kmsKeyId != "" {
+			ui.Say(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
+		}
 		return multistep.ActionContinue
 	}
 
@@ -36,11 +40,16 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 
 	ui.Say(fmt.Sprintf("Copying AMI: %s(%s)", region, id))
 
+	if kmsKeyId != "" {
+		ui.Say(fmt.Sprintf("Encypting with KMS Key ID: %s", kmsKeyId))
+	}
+
 	copyOpts := &ec2.CopyImageInput{
 		Name:          &config.AMIName, // Try to overwrite existing AMI
 		SourceImageId: aws.String(id),
 		SourceRegion:  aws.String(region),
 		Encrypted:     aws.Bool(true),
+		KmsKeyId:      aws.String(kmsKeyId),
 	}
 
 	copyResp, err := ec2conn.CopyImage(copyOpts)

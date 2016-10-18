@@ -21,6 +21,7 @@ type AMIConfig struct {
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
+	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
 }
 
