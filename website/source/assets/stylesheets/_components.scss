@@ -180,7 +180,9 @@ header .header {
         border: 0;
         color: #b1d631;
         font-size: 14px;
-        font-weight: bolder;
+        font-weight: normal;
+        font-family: $mono;
+        text-shadow: 0 0 0;
       }
 
       a {
