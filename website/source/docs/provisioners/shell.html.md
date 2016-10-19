@@ -112,13 +112,11 @@ Some operating systems default to a non-root user. For example if you login as
 `execute_command` to be:
 
 ``` {.text}
-"echo 'packer' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+"echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
 ```
 
 The `-S` flag tells `sudo` to read the password from stdin, which in this case
-is being piped in with the value of `packer`. The `-E` flag tells `sudo` to
-preserve the environment, allowing our environmental variables to work within
-the script.
+is being piped in with the value of `packer`.
 
 By setting the `execute_command` to this, your script(s) can run with root
 privileges without worrying about password prompts.
