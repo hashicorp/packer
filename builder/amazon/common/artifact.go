@@ -79,6 +79,19 @@ func (a *Artifact) Destroy() error {
 		}
 		regionConn := ec2.New(session)
 
+		// Get image metadata
+		imageResp, err := regionConn.DescribeImages(&ec2.DescribeImagesInput{
+			ImageIds: []*string{&imageId},
+		})
+		if err != nil {
+			errors = append(errors, err)
+		}
+		if len(imageResp.Images) == 0 {
+			err := fmt.Errorf("Error retrieving details for AMI (%s), no images found", imageId)
+			errors = append(errors, err)
+		}
+
+		// Deregister ami
 		input := &ec2.DeregisterImageInput{
 			ImageId: &imageId,
 		}
@@ -86,7 +99,19 @@ func (a *Artifact) Destroy() error {
 			errors = append(errors, err)
 		}
 
-		// TODO(mitchellh): Delete the snapshots associated with an AMI too
+		// Delete snapshots associated with image
+		image := imageResp.Images[0]
+		for _, device := range image.BlockDeviceMappings {
+			if device.Ebs != nil && device.Ebs.SnapshotId != nil {
+				log.Printf("Deleting snapshot ID (%s) from region (%s)", *device.Ebs.SnapshotId, region)
+				input := &ec2.DeleteSnapshotInput{
+					SnapshotId: aws.String(*device.Ebs.SnapshotId),
+				}
+				if _, err := regionConn.DeleteSnapshot(input); err != nil {
+					errors = append(errors, err)
+				}
+			}
+		}
 	}
 
 	if len(errors) > 0 {
