@@ -79,6 +79,19 @@ func (a *Artifact) Destroy() error {
 		}
 		regionConn := ec2.New(session)
 
+		// Get image metadata
+		imageResp, err := regionConn.DescribeImages(&ec2.DescribeImagesInput{
+			ImageIds: []*string{&imageId},
+		})
+		if err != nil {
+			errors = append(errors, err)
+		}
+		if len(imageResp.Images) == 0 {
+			err := fmt.Errorf("Error retrieving details for AMI (%s), no images found", imageId)
+			errors = append(errors, err)
+		}
+
+		// Deregister ami
 		input := &ec2.DeregisterImageInput{
 			ImageId: &imageId,
 		}
