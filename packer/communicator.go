@@ -9,6 +9,10 @@ import (
 	"github.com/mitchellh/iochan"
 )
 
+// CmdDisconnect is a sentry value to indicate a RemoteCmd
+// exited because the remote side disconnected us.
+const CmdDisconnect int = 2300218
+
 // RemoteCmd represents a remote command being prepared or run.
 type RemoteCmd struct {
 	// Command is the command to run remotely. This is executed as if
