@@ -115,13 +115,14 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 			switch err.(type) {
 			case *ssh.ExitError:
 				exitStatus = err.(*ssh.ExitError).ExitStatus()
-				log.Printf("Remote command exited with '%d': %s", exitStatus, cmd.Command)
+				log.Printf("Remote command exited with '%d': %s",
+					exitStatus, cmd.Command)
 			case *ssh.ExitMissingError:
-				log.Printf("Remote command exited without exit status or exit signal.")
-				exitStatus = -1
+				log.Printf("Remote command exited without exit status or " +
+					"exit signal. If your ssh server restarted intentionally, " +
+					"you can safely ignore this. Continuing.")
 			default:
-				log.Printf("Error occurred waiting for ssh session: %s", err.Error())
-				exitStatus = -1
+				log.Printf("Error occurred waiting for ssh session: %s. Continuing.", err.Error())
 			}
 		}
 		cmd.SetExited(exitStatus)
