@@ -105,6 +105,8 @@ IMPROVEMENTS:
   * builder/azure: Add `os_disk_size_gb`. [GH-3995]
   * builder/virtualbox-iso: Added `hard_drive_nonrotational` and
       `hard_drive_discard` options to enable trim/discard. [GH-4013]
+  * website: code examples now use inconsolata. Improve code font rendering on
+      linux.
 
 BUG FIXES:
 
