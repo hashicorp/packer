@@ -139,6 +139,8 @@ BUG FIXES:
   * communicator/ssh: handle error case where server closes the connection but
       doesn't give us an error code. [GH-3966]
   * communicator/ssh: fixed possible panic when reconnecting fails [GH-4008]
+  * provisioner/powershell: fixed issue with setting environment variables.
+      [GH-2785]
 
 ## 0.10.2 (September 20, 2016)
 
