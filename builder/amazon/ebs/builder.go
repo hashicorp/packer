@@ -29,6 +29,7 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+	GuestOSType          string   `mapstructure:"guest_os_type"`
 	VolumeRunTags          map[string]string `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
