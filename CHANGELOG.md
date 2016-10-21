@@ -107,6 +107,8 @@ IMPROVEMENTS:
       `hard_drive_discard` options to enable trim/discard. [GH-4013]
   * website: code examples now use inconsolata. Improve code font rendering on
       linux.
+  * provisioner/shell: Added `expect_disconnect` flag to fail if remote
+      unexpectedly disconnects. [GH-4034]
 
 BUG FIXES:
 
