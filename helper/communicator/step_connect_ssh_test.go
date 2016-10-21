@@ -2,22 +2,19 @@ package communicator
 
 import (
 	"bytes"
-	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"testing"
-
-	"golang.org/x/crypto/ssh/agent"
 )
 
-// startAgent executes ssh-agent, and returns a Agent interface to it.
-func startAgent(t *testing.T) (agent.Agent, func()) {
+// startAgent sets ssh-agent environment variables
+func startAgent(t *testing.T) func() {
 	if testing.Short() {
 		// ssh-agent is not always available, and the key
 		// types supported vary by platform.
-		t.Skip("skipping test due to -short")
+		t.Skip("skipping test due to -short or availability")
 	}
 
 	bin, err := exec.LookPath("ssh-agent")
@@ -62,25 +59,19 @@ func startAgent(t *testing.T) (agent.Agent, func()) {
 		t.Fatalf("Atoi(%q): %v", pidStr, err)
 	}
 
-	conn, err := net.Dial("unix", string(socket))
-	if err != nil {
-		t.Fatalf("net.Dial: %v", err)
-	}
-
-	return agent.NewClient(conn), func() {
+	return func() {
 		proc, _ := os.FindProcess(pid)
 		if proc != nil {
 			proc.Kill()
 		}
 
 		os.Setenv("SSH_AUTH_SOCK", origSocket)
-		conn.Close()
 		os.RemoveAll(filepath.Dir(socket))
 	}
 }
 
 func TestSSHAgent(t *testing.T) {
-	_, cleanup := startAgent(t)
+	cleanup := startAgent(t)
 	defer cleanup()
 
 	if auth := sshAgent(); auth == nil {
@@ -104,7 +95,7 @@ func TestSSHBastionConfig(t *testing.T) {
 			in:   &Config{SSHDisableAgent: false},
 			want: 0,
 			fn: func() func() {
-				_, cleanup := startAgent(t)
+				cleanup := startAgent(t)
 				os.Unsetenv("SSH_AUTH_SOCK")
 				return cleanup
 			},
@@ -117,7 +108,7 @@ func TestSSHBastionConfig(t *testing.T) {
 			},
 			want: 4,
 			fn: func() func() {
-				_, cleanup := startAgent(t)
+				cleanup := startAgent(t)
 				return cleanup
 			},
 		},
