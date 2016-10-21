@@ -141,7 +141,6 @@ BUG FIXES:
   * builder/amazon: Honor ssh_private_ip flag in EC2-Classic. [GH-3752]
   * builder/amazon: Properly clean up EBS volumes on failure. [GH-3789]
   * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
-  * builder/amazon: add retry logic when creating tags.
   * builder/amazon: retry creating tags on images since the images might take
       some time to become available. [GH-3938]
   * builder/azure: Fix authorization setup script failing to creating service
