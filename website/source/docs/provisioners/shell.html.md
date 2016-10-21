@@ -71,6 +71,10 @@ Optional parameters:
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
+-   `expect_disconnect` (bool) - Defaults to true. Whether to error if the
+    server disconnects us. A disconnect might happen if you restart the ssh
+    server or reboot the host. May default to false in the future.
+
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
