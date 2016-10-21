@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -13,8 +12,8 @@ import (
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
+	"github.com/xanzy/ssh-agent"
 	gossh "golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 )
 
 // StepConnectSSH is a step that only connects to SSH.
@@ -231,19 +230,17 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 }
 
 func sshAgent() gossh.AuthMethod {
-	socket := os.Getenv("SSH_AUTH_SOCK")
-	if socket == "" {
+	if !sshagent.Available() {
 		log.Println("[DEBUG] Error fetching SSH_AUTH_SOCK.")
 		return nil
 	}
 
-	agentConn, err := net.Dial("unix", socket)
+	agent, _, err := sshagent.New()
 	if err != nil {
-		log.Printf("[WARN] net.Dial: %v", err)
+		log.Printf("[WARN] sshagent.New: %v", err)
 		return nil
 	}
 
 	log.Println("[INFO] Using SSH Agent.")
-	sshAgent := agent.NewClient(agentConn)
-	return gossh.PublicKeysCallback(sshAgent.Signers)
+	return gossh.PublicKeysCallback(agent.Signers)
 }
