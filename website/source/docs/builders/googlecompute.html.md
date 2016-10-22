@@ -171,6 +171,10 @@ builder.
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 
+-   `scopes` (array of strings) - The service account scopes for launched instance.
+    Defaults to
+    `["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"]`.
+
 -   `source_image_project_id` (string) - The project ID of the 
     project containing the source image.
 
