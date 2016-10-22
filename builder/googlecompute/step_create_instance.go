@@ -100,6 +100,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Preemptible:         c.Preemptible,
 		Region:              c.Region,
 		ServiceAccountEmail: c.Account.ClientEmail,
+		Scopes:              c.Scopes,
 		Subnetwork:          c.Subnetwork,
 		Tags:                c.Tags,
 		Zone:                c.Zone,
