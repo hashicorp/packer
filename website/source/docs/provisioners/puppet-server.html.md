@@ -75,6 +75,11 @@ listed below:
     to create directories and write into this folder. If the permissions are not
     correct, use a shell provisioner prior to this to configure it properly.
 
+-   `puppet_bin_dir` (string) - The path to the binary for running `puppet apply`.
+    Usually, this would be found via the `$PATH` or `%PATH%` environment variable,
+    but some builders (notably, the Docker one) do not run profile-setup scripts,
+    therefore the Path is usually empty.
+
 -   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
     various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
