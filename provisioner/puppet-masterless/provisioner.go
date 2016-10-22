@@ -97,7 +97,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet apply " +
+			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply " +
 			"--verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
