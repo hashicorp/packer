@@ -22,12 +22,18 @@ func configFile() (string, error) {
 }
 
 func configDir() (string, error) {
-	dir, err := homeDir()
-	if err != nil {
-		return "", err
-	}
+	// First prefer the PACKER_CONFIG_DIR environmental variable
+	if dir := os.Getenv("PACKER_CONFIG_DIR"); dir != "" {
+		log.Printf("Detected packer config directory from env var: %s", dir)
+		return dir, nil
+	} else {
+		dir, err := homeDir()
+		if err != nil {
+			return "", err
+		}
 
-	return filepath.Join(dir, ".packer.d"), nil
+		return filepath.Join(dir, ".packer.d"), nil
+	}
 }
 
 func homeDir() (string, error) {
