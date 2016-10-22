@@ -227,7 +227,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 
 func (p *Provisioner) commandTemplate() string {
 	return "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-		"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet agent " +
+		"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
 		"--onetime --no-daemonize " +
 		"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
 		"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
