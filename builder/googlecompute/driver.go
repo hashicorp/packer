@@ -67,6 +67,7 @@ type InstanceConfig struct {
 	OmitExternalIP      bool
 	Preemptible         bool
 	Region              string
+	Scopes              []string
 	ServiceAccountEmail string
 	Subnetwork          string
 	Tags                []string
