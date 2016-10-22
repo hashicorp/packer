@@ -2,6 +2,7 @@
 
 IMPROVEMENTS:
 
+  * builder/googlecompute: Support custom scopes. [GH-4043]
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
 
 ## 0.11.0 (October 21, 2016)
