@@ -128,6 +128,21 @@ func TestConfigPrepare(t *testing.T) {
 			"foo bar",
 			true,
 		},
+		{
+			"scopes",
+			[]string{},
+			false,
+		},
+		{
+			"scopes",
+			[]string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control", "https://www.googleapis.com/auth/sqlservice.admin"},
+			false,
+		},
+		{
+			"scopes",
+			[]string{"https://www.googleapis.com/auth/cloud-platform"},
+			false,
+		},
 	}
 
 	for _, tc := range cases {
