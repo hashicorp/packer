@@ -10,7 +10,7 @@ next_title: Supported Platforms
 next_url: '/intro/platforms.html'
 page_title: Use Cases
 prev_url: '/intro/why.html'
-...
+---
 
 # Use Cases
 

@@ -9,7 +9,7 @@ next_title: 'Packer & the HashiCorp Ecosystem'
 next_url: '/intro/hashicorp-ecosystem.html'
 page_title: Supported Platforms
 prev_url: '/intro/use-cases.html'
-...
+---
 
 # Supported Platforms
 
@@ -41,8 +41,8 @@ on supported configuration parameters and usage, please see the appropriate
     [DigitalOcean](https://www.digitalocean.com/) that can be used to start a
     pre-configured DigitalOcean instance of any size.
 
--   ***Docker***. Snapshots for [Docker](https://www.docker.io/) that can be used
-    to start a pre-configured Docker instance.
+-   ***Docker***. Snapshots for [Docker](https://www.docker.io/) that can be
+    used to start a pre-configured Docker instance.
 
 -   ***Google Compute Engine***. Snapshots for [Google Compute
     Engine](https://cloud.google.com/products/compute-engine) that can be used
@@ -66,9 +66,9 @@ on supported configuration parameters and usage, please see the appropriate
     be started on any platform VirtualBox runs on.
 
 -   ***VMware (VMX)***. Exported virtual machines for
-    [VMware](https://www.vmware.com/) that can be run within any desktop products
-    such as Fusion, Player, or Workstation, as well as server products such
-    as vSphere.
+    [VMware](https://www.vmware.com/) that can be run within any desktop
+    products such as Fusion, Player, or Workstation, as well as server products
+    such as vSphere.
 
 As previously mentioned, these are just the target image types that Packer ships
 with out of the box. You can always [extend Packer through

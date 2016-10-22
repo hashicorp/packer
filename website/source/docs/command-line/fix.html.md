@@ -6,7 +6,7 @@ description: |
     run the fix command to make sure your templates work with the new release.
 layout: docs
 page_title: 'Fix - Command-Line'
-...
+---
 
 # Command-Line: Fix
 
@@ -25,7 +25,7 @@ If fixing fails for any reason, the fix command will exit with a non-zero exit
 status. Error messages appear on standard error, so if you're redirecting
 output, you'll still see error messages.
 
--> **Even when Packer fix doesn't do anything** to the template, the template
+-&gt; **Even when Packer fix doesn't do anything** to the template, the template
 will be outputted to standard out. Things such as configuration key ordering and
 indentation may be changed. The output format however, is pretty-printed for
 human readability.

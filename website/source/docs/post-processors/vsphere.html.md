@@ -4,7 +4,7 @@ description: |
     uploads it to a vSphere endpoint.
 layout: docs
 page_title: 'vSphere Post-Processor'
-...
+---
 
 # vSphere Post-Processor
 
@@ -53,11 +53,10 @@ Optional:
 
 -   `vm_folder` (string) - The folder within the datastore to store the VM.
 
--   `vm_network` (string) - The name of the VM network this VM will be
-  added to.
+-   `vm_network` (string) - The name of the VM network this VM will be added to.
 
 -   `overwrite` (boolean) - If it's true force the system to overwrite the
-  existing files instead create new ones. Default is false
+    existing files instead create new ones. Default is false
 
--   `options` (array of strings) - Custom options to add in ovftool. See `ovftool
-  --help` to list all the options
+-   `options` (array of strings) - Custom options to add in ovftool. See
+    `ovftool   --help` to list all the options

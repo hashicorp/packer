@@ -6,7 +6,7 @@ description: |
     artifacts that are created will be outputted at the end of the build.
 layout: docs
 page_title: 'Build - Command-Line'
-...
+---
 
 # Command-Line: Build
 
@@ -37,9 +37,9 @@ artifacts that are created will be outputted at the end of the build.
     repeat a build without having to manually clean these artifacts beforehand.
 
 -   `-on-error=cleanup` (default), `-on-error=abort`, `-on-error=ask` - Selects
-    what to do when the build fails.  `cleanup` cleans up after the previous
-    steps, deleting temporary files and virtual machines.  `abort` exits without
-    any cleanup, which might require the next build to use `-force`.  `ask`
+    what to do when the build fails. `cleanup` cleans up after the previous
+    steps, deleting temporary files and virtual machines. `abort` exits without
+    any cleanup, which might require the next build to use `-force`. `ask`
     presents a prompt and waits for you to decide to clean up, abort, or retry
     the failed step.
 
@@ -48,5 +48,5 @@ artifacts that are created will be outputted at the end of the build.
     builders, unless a specific `name` attribute is specified within
     the configuration.
 
--   `-parallel=false` - Disable parallelization of multiple builders (on by
-    default).
+-   `-parallel=false` - Disable parallelization of multiple builders (on
+    by default).

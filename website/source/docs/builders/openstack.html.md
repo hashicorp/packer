@@ -9,7 +9,7 @@ description: |
     configuration quite a bit.
 layout: docs
 page_title: OpenStack Builder
-...
+---
 
 # OpenStack Builder
 
@@ -28,7 +28,7 @@ to use it or delete it.
 
 \~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
 builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
-installed _if you are using temporary key pairs_, i.e. don't use
+installed *if you are using temporary key pairs*, i.e. don't use
 [`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
 [`ssh_password`](/docs/templates/communicator.html#ssh_password). All major
 OS'es have OpenSSL installed by default except Windows.
@@ -50,8 +50,8 @@ builder.
 
 -   `image_name` (string) - The name of the resulting image.
 
--   `identity_endpoint` (string) - The URL to the OpenStack Identity service.
-    If not specified, Packer will use the environment variables `OS_AUTH_URL`,
+-   `identity_endpoint` (string) - The URL to the OpenStack Identity service. If
+    not specified, Packer will use the environment variables `OS_AUTH_URL`,
     if set.
 
 -   `source_image` (string) - The ID or full URL to the base image to use. This
@@ -59,12 +59,12 @@ builder.
     Unless you specify completely custom SSH settings, the source image must
     have `cloud-init` installed so that the keypair gets assigned properly.
 
--   `source_image_name` (string) - The name of the base image to use. This
-    is an alternative way of providing `source_image` and only either of them
-    can be specified.
+-   `source_image_name` (string) - The name of the base image to use. This is an
+    alternative way of providing `source_image` and only either of them can
+    be specified.
 
--   `username` or `user_id` (string) - The username or id used to connect to
-    the OpenStack service. If not specified, Packer will use the environment
+-   `username` or `user_id` (string) - The username or id used to connect to the
+    OpenStack service. If not specified, Packer will use the environment
     variable `OS_USERNAME` or `OS_USERID`, if set.
 
 -   `password` (string) - The password used to connect to the OpenStack service.
@@ -81,15 +81,16 @@ builder.
     cluster will be used. This may be required for some OpenStack clusters.
 
 -   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
-     cloud-init metadata.
+    cloud-init metadata.
 
 -   `domain_name` or `domain_id` (string) - The Domain name or ID you are
-    authenticating with. OpenStack installations require this if identity v3 is used.
-    Packer will use the environment variable `OS_DOMAIN_NAME` or `OS_DOMAIN_ID`, if set.
+    authenticating with. OpenStack installations require this if identity v3
+    is used. Packer will use the environment variable `OS_DOMAIN_NAME` or
+    `OS_DOMAIN_ID`, if set.
 
--   `endpoint_type` (string) - The endpoint type to use. Can be any of "internal",
-    "internalURL", "admin", "adminURL", "public", and "publicURL". By default
-    this is "public".
+-   `endpoint_type` (string) - The endpoint type to use. Can be any of
+    "internal", "internalURL", "admin", "adminURL", "public", and "publicURL".
+    By default this is "public".
 
 -   `floating_ip` (string) - A specific floating IP to assign to this instance.
 
@@ -133,11 +134,11 @@ builder.
 
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
     instance into. Some OpenStack installations require this. If not specified,
-    Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
-    is also called Project in later versions of OpenStack.
+    Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant is
+    also called Project in later versions of OpenStack.
 
--   `use_floating_ip` (boolean) - _Deprecated_ use `floating_ip` or `floating_ip_pool`
-    instead.
+-   `use_floating_ip` (boolean) - *Deprecated* use `floating_ip` or
+    `floating_ip_pool` instead.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
@@ -165,7 +166,6 @@ Here is a basic example. This is a example to build on DevStack running in a VM.
   "flavor": "m1.tiny",
   "insecure": "true"
 }
-
 ```
 
 ## Basic Example: Rackspace public cloud
@@ -219,9 +219,9 @@ This is slightly different when identity v3 is used:
 -   `OS_DOMAIN_NAME`
 -   `OS_TENANT_NAME`
 
-This will authenticate the user on the domain and scope you to the project.
-A tenant is the same as a project. It's optional to use names or IDs in v3.
-This means you can use `OS_USERNAME` or `OS_USERID`,  `OS_TENANT_ID` or
+This will authenticate the user on the domain and scope you to the project. A
+tenant is the same as a project. It's optional to use names or IDs in v3. This
+means you can use `OS_USERNAME` or `OS_USERID`, `OS_TENANT_ID` or
 `OS_TENANT_NAME` and `OS_DOMAIN_ID` or `OS_DOMAIN_NAME`.
 
 The above example would be equivalent to an RC file looking like this :
@@ -234,16 +234,17 @@ The above example would be equivalent to an RC file looking like this :
 
 ## Notes on OpenStack Authorization
 
-The simplest way to get all settings for authorization agains OpenStack is to
-go into the OpenStack Dashboard (Horizon) select your _Project_ and navigate
-_Project, Access & Security_, select _API Access_ and _Download OpenStack RC
-File v3_. Source the file, and select your wanted region by setting
-environment variable `OS_REGION_NAME` or `OS_REGION_ID` and `export
-OS_TENANT_NAME=$OS_PROJECT_NAME` or `export OS_TENANT_ID=$OS_PROJECT_ID`.
+The simplest way to get all settings for authorization agains OpenStack is to go
+into the OpenStack Dashboard (Horizon) select your *Project* and navigate
+*Project, Access & Security*, select *API Access* and *Download OpenStack RC
+File v3*. Source the file, and select your wanted region by setting environment
+variable `OS_REGION_NAME` or `OS_REGION_ID` and
+`export OS_TENANT_NAME=$OS_PROJECT_NAME` or
+`export OS_TENANT_ID=$OS_PROJECT_ID`.
 
 \~&gt; `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
 `OS_PROJECT_NAME` and `OS_PROJECT_ID` has no effect in Packer.
 
 To troubleshoot authorization issues test you environment variables with the
 OpenStack cli. It can be installed with
-```pip install --user python-openstackclient```.
+`pip install --user python-openstackclient`.

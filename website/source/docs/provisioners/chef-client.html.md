@@ -5,7 +5,7 @@ description: |
     remote Chef Server to provision the machine.
 layout: docs
 page_title: 'Chef-Client Provisioner'
-...
+---
 
 # Chef Client Provisioner
 
@@ -51,17 +51,17 @@ configuration is actually required.
     Configuration" section below for more details.
 
 -   `encrypted_data_bag_secret_path` (string) - The path to the file containing
-    the secret for encrypted data bags. By default, this is empty, so no
-    secret will be available.
+    the secret for encrypted data bags. By default, this is empty, so no secret
+    will be available.
 
 -   `execute_command` (string) - The command used to execute Chef. This has
     various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
     below for more information.
 
--   `guest_os_type` (string) - The target guest OS type, either "unix" or
-    "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
+-   `guest_os_type` (string) - The target guest OS type, either "unix"
+    or "windows". Setting this to "windows" will cause the provisioner to use
+    Windows friendly paths and commands. By default, this is "unix".
 
 -   `install_command` (string) - The command used to install Chef. This has
     various [configuration template
@@ -71,8 +71,8 @@ configuration is actually required.
 -   `json` (object) - An arbitrary mapping of JSON that will be available as
     node attributes while running Chef.
 
--   `knife_command` (string) - The command used to run Knife during node clean-up. This has
-    various [configuration template
+-   `knife_command` (string) - The command used to run Knife during
+    node clean-up. This has various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
     below for more information.
 
@@ -81,8 +81,8 @@ configuration is actually required.
 
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
-    then the sudo will be omitted. This has no effect when guest_os_type is
-    windows.
+    then the sudo will be omitted. This has no effect when guest\_os\_type
+    is windows.
 
 -   `run_list` (array of strings) - The [run
     list](http://docs.chef.io/essentials_node_object_run_lists.html) for Chef.
@@ -101,13 +101,13 @@ configuration is actually required.
     on the machine using the Chef omnibus installers.
 
 -   `ssl_verify_mode` (string) - Set to "verify\_none" to skip validation of
-    SSL certificates. If not set, this defaults to "verify\_peer" which validates
-    all SSL certifications.
+    SSL certificates. If not set, this defaults to "verify\_peer" which
+    validates all SSL certifications.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
-    "/tmp/packer-chef-client" when guest_os_type unix and
-    "$env:TEMP/packer-chef-client" when windows. This directory doesn't need to
+    "/tmp/packer-chef-client" when guest\_os\_type unix and
+    "\$env:TEMP/packer-chef-client" when windows. This directory doesn't need to
     exist but must have proper permissions so that the user that Packer uses is
     able to create directories and write into this folder. By default the
     provisioner will create and chmod 0777 this directory.
@@ -165,7 +165,7 @@ variables available to use:
 
 -   `ChefEnvironment` - The Chef environment name.
 -   `EncryptedDataBagSecretPath` - The path to the secret key file to decrypt
-     encrypted data bags.
+    encrypted data bags.
 -   `NodeName` - The node name set in the configuration.
 -   `ServerUrl` - The URL of the Chef Server set in the configuration.
 -   `SslVerifyMode` - Whether Chef SSL verify mode is on or off.
@@ -184,7 +184,7 @@ readability) to execute Chef:
   -j {{.JsonPath}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
 variable changes don't immediately propogate to running processes.
 
@@ -215,7 +215,7 @@ curl -L https://www.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 install the latest version of Chef:
 
 ``` {.text}
@@ -235,7 +235,7 @@ readability) to execute Chef:
   {{.Flags}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
 variable changes don't immediately propogate to running processes.
 
@@ -253,7 +253,6 @@ contain various template variables, defined below:
 -   `Flags` - The command flags that are getting passed to the Knife command..
 -   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
     value of the `prevent_sudo` configuration.
-
 
 ## Folder Permissions
 

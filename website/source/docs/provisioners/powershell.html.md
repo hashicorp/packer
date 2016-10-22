@@ -5,7 +5,7 @@ description: |
     configured on a machine.
 layout: docs
 page_title: PowerShell Provisioner
-...
+---
 
 # PowerShell Provisioner
 
@@ -71,8 +71,8 @@ Optional parameters:
     Windows user.
 
 -   `remote_path` (string) - The path where the script will be uploaded to in
-    the machine. This defaults to "c:/Windows/Temp/script.ps1". This value must be a
-    writable location and any parent directories must already exist.
+    the machine. This defaults to "c:/Windows/Temp/script.ps1". This value must
+    be a writable location and any parent directories must already exist.
 
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is "5m" or 5 minutes. This setting

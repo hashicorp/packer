@@ -6,7 +6,7 @@ description: |
     doesn't validate, any error messages will be outputted.
 layout: docs
 page_title: 'Validate - Command-Line'
-...
+---
 
 # Command-Line: Validate
 

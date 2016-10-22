@@ -9,7 +9,7 @@ next_title: Next Steps
 next_url: '/intro/getting-started/next.html'
 page_title: Remote Builds and Storage
 prev_url: '/intro/getting-started/vagrant.html'
-...
+---
 
 # Remote Builds and Storage
 
@@ -72,13 +72,13 @@ Replace "ATLAS\_USERNAME" with your username, then run
 automatically starts the build.
 
 This build will fail since neither `aws_access_key` or `aws_secret_key` are set
-in the Atlas environment. To set environment variables in Atlas, navigate to
-the [Builds tab](https://atlas.hashicorp.com/builds), click the
-"packer-tutorial" build configuration that was just created, and then click
-'variables' in the left navigation. Set `aws_access_key` and `aws_secret_key`
-with their respective values. Now restart the Packer build by either clicking
-'rebuild' in the Atlas UI or by running `packer push example.json` again. Now
-when you click on the active build, you can view the logs in real-time.
+in the Atlas environment. To set environment variables in Atlas, navigate to the
+[Builds tab](https://atlas.hashicorp.com/builds), click the "packer-tutorial"
+build configuration that was just created, and then click 'variables' in the
+left navigation. Set `aws_access_key` and `aws_secret_key` with their respective
+values. Now restart the Packer build by either clicking 'rebuild' in the Atlas
+UI or by running `packer push example.json` again. Now when you click on the
+active build, you can view the logs in real-time.
 
 -&gt; **Note:** Whenever a change is made to the Packer template, you must
 `packer push` to update the configuration in Atlas.

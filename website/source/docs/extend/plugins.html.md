@@ -8,7 +8,7 @@ description: |
     as Plugins that are simply hardcoded to load with Packer.
 layout: docs
 page_title: 'Packer Plugins - Extend Packer'
-...
+---
 
 # Packer Plugins
 

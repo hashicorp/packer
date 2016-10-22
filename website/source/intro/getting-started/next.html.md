@@ -6,7 +6,7 @@ description: |
     using Packer in real scenarios.
 layout: intro
 page_title: Next Steps
-...
+---
 
 # Next Steps
 

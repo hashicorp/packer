@@ -5,7 +5,7 @@ description: |
     configured on a machine.
 layout: docs
 page_title: Shell Provisioner
-...
+---
 
 # Shell Provisioner
 
@@ -76,25 +76,26 @@ Optional parameters:
     server or reboot the host. May default to false in the future.
 
 -   `inline_shebang` (string) - The
-    [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
-    running commands specified by `inline`. By default, this is `/bin/sh -e`. If
-    you're not using `inline`, then this configuration has no effect.
-    **Important:** If you customize this, be sure to include something like the
-    `-e` flag, otherwise individual steps failing won't fail the provisioner.
+    [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use
+    when running commands specified by `inline`. By default, this is
+    `/bin/sh -e`. If you're not using `inline`, then this configuration has
+    no effect. **Important:** If you customize this, be sure to include
+    something like the `-e` flag, otherwise individual steps failing won't fail
+    the provisioner.
 
--   `remote_folder` (string) - The folder where the uploaded script will reside on
-    the machine. This defaults to '/tmp'.
+-   `remote_folder` (string) - The folder where the uploaded script will reside
+    on the machine. This defaults to '/tmp'.
 
--   `remote_file` (string) - The filename the uploaded script will have on the machine.
-    This defaults to 'script_nnn.sh'.
+-   `remote_file` (string) - The filename the uploaded script will have on
+    the machine. This defaults to 'script\_nnn.sh'.
 
--   `remote_path` (string) - The full path to the uploaded script will have on the
-     machine. By default this is remote_folder/remote_file, if set this option will
-     override both remote_folder and remote_file.
+-   `remote_path` (string) - The full path to the uploaded script will have on
+    the machine. By default this is remote\_folder/remote\_file, if set this
+    option will override both remote\_folder and remote\_file.
 
--   `skip_clean` (boolean) - If true, specifies that the helper scripts
-    uploaded to the system will not be removed by Packer. This defaults to
-    false (clean scripts from the system).
+-   `skip_clean` (boolean) - If true, specifies that the helper scripts uploaded
+    to the system will not be removed by Packer. This defaults to false (clean
+    scripts from the system).
 
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is `5m` or 5 minutes. This setting
@@ -161,7 +162,8 @@ scripts. The amount of time the provisioner will wait is configured using
 
 Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
-machine restarts. For this, put use "pause_before" to make Packer wait before executing the next script:
+machine restarts. For this, put use "pause\_before" to make Packer wait before
+executing the next script:
 
 ``` {.javascript}
 {
@@ -213,9 +215,9 @@ would be:
 
 -   On Ubuntu, the `/bin/sh` shell is
     [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
-    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
-    in it, then put `#!/bin/bash` at the top of your script. Differences between
-    dash and bash can be found on the
+    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific
+    commands in it, then put `#!/bin/bash` at the top of your script.
+    Differences between dash and bash can be found on the
     [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
 *My shell works when I login but fails with the shell provisioner*

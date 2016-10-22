@@ -6,7 +6,7 @@ description: |
     Workstation for Linux and Windows, and VMware Player on Linux.
 layout: docs
 page_title: VMware Builder from VMX
-...
+---
 
 # VMware Builder (from VMX)
 
@@ -83,11 +83,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option except
+    that the directory structure is preserved. This is useful for when your
+    floppy disk includes drivers or if you just want to organize it's contents
+    as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
     "/Applications/VMware Fusion.app" but this setting allows you to
@@ -162,11 +162,11 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
--   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-     to for VNC. By default packer will use 127.0.0.1 for this.
+-   `vnc_bind_address` (string / IP address) - The IP address that should be
+    binded to for VNC. By default packer will use 127.0.0.1 for this.
 
--   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
-    used to secure the VNC communication with the VM.
+-   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that
+    is used to secure the VNC communication with the VM.
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
@@ -211,21 +211,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl 
-    key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the 
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
     shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 

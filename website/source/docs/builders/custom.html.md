@@ -5,7 +5,7 @@ description: |
     builders is covered in the custom builders page of the Packer plugin section.
 layout: docs
 page_title: Custom Builder
-...
+---
 
 # Custom Builder
 

@@ -6,7 +6,7 @@ description: |
     the root device section in the EC2 documentation.
 layout: docs
 page_title: 'Amazon AMI Builder (EBS backed)'
-...
+---
 
 # AMI Builder (EBS backed)
 
@@ -66,26 +66,26 @@ builder.
     device mappings to the AMI. The block device mappings allow for keys:
 
     -   `device_name` (string) - The device name exposed to the instance (for
-         example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
+        example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
-        volume supports. See the documentation on
+    -   `iops` (integer) - The number of I/O operations per second (IOPS) that
+        the volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
     -   `no_device` (boolean) - Suppresses the specified device included in the
         block device mapping of the AMI
     -   `snapshot_id` (string) - The ID of the snapshot
-    -   `virtual_name` (string) - The virtual device name. See the documentation on
-        [Block Device
+    -   `virtual_name` (string) - The virtual device name. See the documentation
+        on [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
-        specifying a `snapshot_id`
+    -   `volume_size` (integer) - The size of the volume, in GiB. Required if
+        not specifying a `snapshot_id`
     -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
-        volumes
+        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for
+        Magnetic volumes
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty.
 
@@ -107,8 +107,8 @@ builder.
     user creating the AMI has permissions to launch it.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
-    you are building. This option must match the supported virtualization
-    type of `source_ami`. Can be "paravirtual" or "hvm".
+    you are building. This option must match the supported virtualization type
+    of `source_ami`. Can be "paravirtual" or "hvm".
 
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
@@ -119,16 +119,14 @@ builder.
 
 -   `disable_stop_instance` (boolean) - Packer normally stops the build instance
     after all provisioners have run. For Windows instances, it is sometimes
-    desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
-    which will stop the instance for you. If this is set to true, Packer *will not*
-    stop the instance and will wait for you to stop it manually. You can do this
-    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+    desirable to [run
+    Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
+    which will stop the instance for you. If this is set to true, Packer *will
+    not* stop the instance and will wait for you to stop it manually. You can do
+    this with a [windows-shell
+    provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
 
-    ``` {.javascript}
-    {
-      "type": "windows-shell",
-      "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
-    }```
+    `{.javascript} {   "type": "windows-shell",   "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"] }`
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
@@ -141,9 +139,9 @@ builder.
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
--   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
-    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
-    process). Default `false`.
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of
+    the AMI with an encrypted boot volume (discarding the initial unencrypted
+    AMI in the process). Default `false`.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
@@ -157,9 +155,9 @@ builder.
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`.
 
--   `run_volume_tags` (object of key/value strings) - Tags to apply to the volumes
-    that are *launched* to create the AMI. These tags are *not* applied to the
-    resulting AMI unless they're duplicated in `tags`.
+-   `run_volume_tags` (object of key/value strings) - Tags to apply to the
+    volumes that are *launched* to create the AMI. These tags are *not* applied
+    to the resulting AMI unless they're duplicated in `tags`.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security group
     to assign to the instance. By default this is not set and Packer will
@@ -171,16 +169,16 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the region configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the region configuration option. Defaults to false.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
     when the current spot price is less than the maximum price you specify. Spot
     price will be updated based on available spot instance capacity and current
     spot instance requests. It may save you some costs. You can set this to
-    "auto" for Packer to automatically discover the best spot price or to "0"
-    to use an on demand instance (default).
+    "auto" for Packer to automatically discover the best spot price or to "0" to
+    use an on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
     to "auto". This tells Packer what sort of AMI you're launching to find the
@@ -220,19 +218,21 @@ builder.
     data when launching the instance.
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
-    in order to create a temporary security group within the VPC. Requires `subnet_id`
-    to be set.
+    in order to create a temporary security group within the VPC. Requires
+    `subnet_id` to be set.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
 
--   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
-    default is stop.
+-   `shutdown_behaviour` (string) - Automatically terminate instances on
+    shutdown incase packer exits ungracefully. Possible values are "stop" and
+    "terminate", default is stop.
 
 ## Basic Example
 
-Here is a basic example. You will need to provide access keys, and may need to change the AMI IDs according to what images exist at the time the template is run:
+Here is a basic example. You will need to provide access keys, and may need to
+change the AMI IDs according to what images exist at the time the template is
+run:
 
 ``` {.javascript}
 {
@@ -251,7 +251,11 @@ Here is a basic example. You will need to provide access keys, and may need to c
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
-Further information on locating AMI IDs and their relationship to instance types and regions can be found in the AWS EC2 Documentation [for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
+Further information on locating AMI IDs and their relationship to instance types
+and regions can be found in the AWS EC2 Documentation [for
+Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
+or [for
+Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
 
 ## Accessing the Instance to Debug
 
@@ -263,7 +267,9 @@ You can use this information to access the instance as it is running.
 ## AMI Block Device Mappings Example
 
 Here is an example using the optional AMI block device mappings. This will add
-the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the basic example, you will need to provide access keys and may need to change the source AMI ID based on what images exist when this template is run:
+the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the
+basic example, you will need to provide access keys and may need to change the
+source AMI ID based on what images exist when this template is run:
 
 ``` {.javascript}
 {
@@ -291,7 +297,9 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
-"OS\_Version" and "Release" to the finished AMI. As before, you will need to provide your access keys, and may need to change the source AMI ID based on what images exist when this template is run:
+"OS\_Version" and "Release" to the finished AMI. As before, you will need to
+provide your access keys, and may need to change the source AMI ID based on what
+images exist when this template is run:
 
 ``` {.javascript}
 {

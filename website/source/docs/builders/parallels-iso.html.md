@@ -4,7 +4,7 @@ description: |
     machines and export them in the PVM format, starting from an ISO image.
 layout: docs
 page_title: 'Parallels Builder (from an ISO)'
-...
+---
 
 # Parallels Builder (from an ISO)
 
@@ -86,7 +86,6 @@ builder.
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
 
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -115,11 +114,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option except
+    that the directory structure is preserved. This is useful for when your
+    floppy disk includes drivers or if you just want to organize it's contents
+    as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `guest_os_type` (string) - The guest OS type being installed. By default
     this is "other", but you can get *dramatic* performance improvements by
@@ -152,8 +151,8 @@ builder.
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
+-   `iso_target_path` (string) - The path where the iso should be saved
+    after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
@@ -216,8 +215,8 @@ builder.
 
 -   `skip_compaction` (boolean) - Virtual disk image is compacted at the end of
     the build process using `prl_disk_tool` utility. In certain rare cases, this
-    might corrupt the resulting disk image. If you find this to be the case,
-    you can disable compaction using this configuration value.
+    might corrupt the resulting disk image. If you find this to be the case, you
+    can disable compaction using this configuration value.
 
 -   `vm_name` (string) - This is the name of the PVM directory for the new
     virtual machine, without the file extension. By default this is
@@ -262,19 +261,21 @@ proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -284,9 +285,9 @@ proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
-otherwise they will be held down until the machine reboots. Use lowercase 
-characters as well inside modifiers. 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
 
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 

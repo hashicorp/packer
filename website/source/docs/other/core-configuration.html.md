@@ -7,7 +7,7 @@ description: |
     core configuration for now.
 layout: docs
 page_title: Core Configuration
-...
+---
 
 # Core Configuration
 

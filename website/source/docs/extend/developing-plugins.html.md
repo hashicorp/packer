@@ -5,7 +5,7 @@ description: |
     the basics of how Plugins work, from a user standpoint.
 layout: docs
 page_title: Developing Plugins
-...
+---
 
 # Developing Plugins
 

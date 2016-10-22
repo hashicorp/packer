@@ -6,7 +6,7 @@ description: |
     device section in the EC2 documentation.
 layout: docs
 page_title: 'Amazon AMI Builder (instance-store)'
-...
+---
 
 # AMI Builder (instance-store)
 
@@ -25,15 +25,16 @@ AWS account. The builder will create temporary keypairs, security group rules,
 etc. that provide it temporary access to the instance while the image is being
 created. This simplifies configuration quite a bit.
 
-The builder does *not* manage AMIs. Once it creates an AMI and stores it in
-your account, it is up to you to use, delete, etc. the AMI.
+The builder does *not* manage AMIs. Once it creates an AMI and stores it in your
+account, it is up to you to use, delete, etc. the AMI.
 
--> **Note:** This builder requires that the [Amazon EC2 AMI
+-&gt; **Note:** This builder requires that the [Amazon EC2 AMI
 Tools](https://aws.amazon.com/developertools/368) are installed onto the
 machine. This can be done within a provisioner, but must be done before the
 builder finishes running.
 
-~> Instance builds are not supported for Windows. Use [`amazon-ebs`](amazon-ebs.html) instead.
+\~&gt; Instance builds are not supported for Windows. Use
+[`amazon-ebs`](amazon-ebs.html) instead.
 
 ## Configuration Reference
 
@@ -92,22 +93,22 @@ builder.
     -   `device_name` (string) - The device name exposed to the instance (for
         example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
-        volume supports. See the documentation on
+    -   `iops` (integer) - The number of I/O operations per second (IOPS) that
+        the volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
     -   `no_device` (boolean) - Suppresses the specified device included in the
         block device mapping of the AMI
     -   `snapshot_id` (string) - The ID of the snapshot
-    -   `virtual_name` (string) - The virtual device name. See the documentation on
-        [Block Device
+    -   `virtual_name` (string) - The virtual device name. See the documentation
+        on [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
-        specifying a `snapshot_id`
+    -   `volume_size` (integer) - The size of the volume, in GiB. Required if
+        not specifying a `snapshot_id`
     -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
-        volumes
+        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for
+        Magnetic volumes
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty.
 
@@ -188,16 +189,16 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the region configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the region configuration option. Defaults to false.
 
 -   `spot_price` (string) - The maximum hourly price to launch a spot instance
     to create the AMI. It is a type of instances that EC2 starts when the
     maximum price that you specify exceeds the current spot price. Spot price
     will be updated based on available spot instance capacity and current spot
     Instance requests. It may save you some costs. You can set this to "auto"
-    for Packer to automatically discover the best spot price or to "0" to use
-    an on demand instance (default).
+    for Packer to automatically discover the best spot price or to "0" to use an
+    on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
     to "auto". This tells Packer what sort of AMI you're launching to find the
@@ -205,9 +206,9 @@ builder.
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
-    used for SSH with the machine. The key must match a key pair name loaded
-    up into Amazon EC2.  By default, this is blank, and Packer will
-    generate a temporary keypair unless
+    used for SSH with the machine. The key must match a key pair name loaded up
+    into Amazon EC2. By default, this is blank, and Packer will generate a
+    temporary keypair unless
     [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified when `ssh_keypair_name` is utilized.
@@ -237,8 +238,8 @@ builder.
 -   `x509_upload_path` (string) - The path on the remote machine where the X509
     certificate will be uploaded. This path must already exist and be writable.
     X509 certificates are uploaded after provisioning is run, so it is perfectly
-    okay to create this directory as part of the provisioning process. Defaults to
-    `/tmp`.
+    okay to create this directory as part of the provisioning process. Defaults
+    to `/tmp`.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"

@@ -5,7 +5,7 @@ description: |
     be compressing files, uploading artifacts, etc.
 layout: docs
 page_title: 'Templates: Post-Processors'
-...
+---
 
 # Templates: Post-Processors
 
@@ -82,7 +82,8 @@ sequence definition. Sequence definitions are used to chain together multiple
 post-processors. An example is shown below, where the artifact of a build is
 compressed then uploaded, but the compressed result is not kept.
 
-It is very important that any post processors that need to be run in order, be sequenced!
+It is very important that any post processors that need to be run in order, be
+sequenced!
 
 ``` {.javascript}
 {
@@ -100,7 +101,10 @@ simply shortcuts for a **sequence** definition of only one element.
 
 ## Creating Vagrant Boxes in Atlas
 
-It is important to sequence post processors when creating and uploading vagrant boxes to Atlas via Packer. Using a sequence will ensure that the post processors are ran in order and creates the vagrant box prior to uploading the box to Atlas.
+It is important to sequence post processors when creating and uploading vagrant
+boxes to Atlas via Packer. Using a sequence will ensure that the post processors
+are ran in order and creates the vagrant box prior to uploading the box to
+Atlas.
 
 ``` {.javascript}
 {
@@ -125,7 +129,8 @@ It is important to sequence post processors when creating and uploading vagrant 
 }
 ```
 
-More documentation on the Atlas post-processor can be found [here](/docs/post-processors/atlas.html)
+More documentation on the Atlas post-processor can be found
+[here](/docs/post-processors/atlas.html)
 
 ## Input Artifacts
 

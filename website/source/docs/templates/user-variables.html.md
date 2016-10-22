@@ -7,7 +7,7 @@ description: |
     portability and shareability of the template.
 layout: docs
 page_title: User Variables in Templates
-...
+---
 
 # User Variables
 
@@ -64,10 +64,10 @@ The user variable is available globally within the template.
 
 ## Environment Variables
 
-Environment variables can be used within your template using user variables.
-The `env` function is available *only* within the default value of a user
-variable, allowing you to default a user variable to an environment variable.
-An example is shown below:
+Environment variables can be used within your template using user variables. The
+`env` function is available *only* within the default value of a user variable,
+allowing you to default a user variable to an environment variable. An example
+is shown below:
 
 ``` {.javascript}
 {
@@ -84,15 +84,14 @@ variable (or the empty string if it does not exist).
 
 -&gt; **Why can't I use environment variables elsewhere?** User variables are
 the single source of configurable input to a template. We felt that having
-environment variables used *anywhere* in a template would confuse the user
-about the possible inputs to a template. By allowing environment variables
-only within default values for user variables, user variables remain as the
-single source of input to a template that a user can easily discover using
-`packer inspect`.
+environment variables used *anywhere* in a template would confuse the user about
+the possible inputs to a template. By allowing environment variables only within
+default values for user variables, user variables remain as the single source of
+input to a template that a user can easily discover using `packer inspect`.
 
--&gt; **Why can't I use `~` for home variable?** `~` is an special variable
-that is evaluated by shell during a variable expansion. As packer doesn't run
-inside a shell, it won't expand `~`.
+-&gt; **Why can't I use `~` for home variable?** `~` is an special variable that
+is evaluated by shell during a variable expansion. As packer doesn't run inside
+a shell, it won't expand `~`.
 
 ## Setting Variables
 
@@ -154,11 +153,11 @@ flag on the command line will always override any variables from a file.
 
 ## Making a provisioner step conditional on the value of a variable
 
-There is no specific syntax in Packer templates for making a provisioner
-step conditional, depending on the value of a variable. However, you may
-be able to do this by referencing the variable within a command that
-you execute. For example, here is how to make a `shell-local`
-provisioner only run if the `do_nexpose_scan` variable is non-empty.
+There is no specific syntax in Packer templates for making a provisioner step
+conditional, depending on the value of a variable. However, you may be able to
+do this by referencing the variable within a command that you execute. For
+example, here is how to make a `shell-local` provisioner only run if the
+`do_nexpose_scan` variable is non-empty.
 
 ``` {.javascript}
 {

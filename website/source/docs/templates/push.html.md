@@ -4,7 +4,7 @@ description: |
     a remote build service.
 layout: docs
 page_title: 'Templates: Push'
-...
+---
 
 # Templates: Push
 

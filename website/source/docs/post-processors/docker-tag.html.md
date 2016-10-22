@@ -6,7 +6,7 @@ description: |
     registry.
 layout: docs
 page_title: 'docker-tag Post-Processor'
-...
+---
 
 # Docker Tag Post-Processor
 

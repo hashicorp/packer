@@ -7,7 +7,7 @@ description: |
     launched within DigitalOcean.
 layout: docs
 page_title: DigitalOcean Builder
-...
+---
 
 # DigitalOcean Builder
 
@@ -40,17 +40,17 @@ builder.
 
 -   `image` (string) - The name (or slug) of the base image to use. This is the
     image that will be used to launch a new droplet and provision it. See
-    [https://developers.digitalocean.com/documentation/v2/\#list-all-images](https://developers.digitalocean.com/documentation/v2/#list-all-images) for
+    <https://developers.digitalocean.com/documentation/v2/#list-all-images> for
     details on how to get a list of the the accepted image names/slugs.
 
 -   `region` (string) - The name (or slug) of the region to launch the
     droplet in. Consequently, this is the region where the snapshot will
     be available. See
-    [https://developers.digitalocean.com/documentation/v2/\#list-all-regions](https://developers.digitalocean.com/documentation/v2/#list-all-regions) for
+    <https://developers.digitalocean.com/documentation/v2/#list-all-regions> for
     the accepted region names/slugs.
 
 -   `size` (string) - The name (or slug) of the droplet size to use. See
-    [https://developers.digitalocean.com/documentation/v2/\#list-all-sizes](https://developers.digitalocean.com/documentation/v2/#list-all-sizes) for
+    <https://developers.digitalocean.com/documentation/v2/#list-all-sizes> for
     the accepted size names/slugs.
 
 ### Optional:
@@ -77,7 +77,6 @@ builder.
 -   `user_data` (string) - User data to launch with the Droplet.
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
-
 
 ## Basic Example
 

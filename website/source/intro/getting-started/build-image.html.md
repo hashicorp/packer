@@ -9,7 +9,7 @@ next_title: Provision
 next_url: '/intro/getting-started/provision.html'
 page_title: Build an Image
 prev_url: '/intro/getting-started/setup.html'
-...
+---
 
 # Build an Image
 
@@ -18,11 +18,12 @@ Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) with
 Redis pre-installed. This is just an example. Packer can create images for [many
 platforms](/intro/platforms.html) with anything pre-installed.
 
-If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
-For the example, we'll use a "t2.micro" instance to build our image, which
-qualifies under the AWS [free-tier](https://aws.amazon.com/free/), meaning it
-will be free. If you already have an AWS account, you may be charged some amount
-of money, but it shouldn't be more than a few cents.
+If you don't have an AWS account, [create one
+now](https://aws.amazon.com/free/). For the example, we'll use a "t2.micro"
+instance to build our image, which qualifies under the AWS
+[free-tier](https://aws.amazon.com/free/), meaning it will be free. If you
+already have an AWS account, you may be charged some amount of money, but it
+shouldn't be more than a few cents.
 
 -&gt; **Note:** If you're not using an account that qualifies under the AWS
 free-tier, you may be charged to run these examples. The charge should only be a
@@ -65,9 +66,9 @@ briefly. Create a file `example.json` and fill it with the following contents:
 }
 ```
 
-When building, you'll pass in `aws_access_key` and `aws_secret_key` as
-[user variables](/docs/templates/user-variables.html), keeping your secret keys
-out of the template. You can create security credentials on [this
+When building, you'll pass in `aws_access_key` and `aws_secret_key` as [user
+variables](/docs/templates/user-variables.html), keeping your secret keys out of
+the template. You can create security credentials on [this
 page](https://console.aws.amazon.com/iam/home?#security_credential). An example
 IAM policy document can be found in the [Amazon EC2 builder
 docs](/docs/builders/amazon.html).
@@ -113,7 +114,7 @@ With a properly validated template. It is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
--&gt; **Note:** When using packer on Windows, replace the single-quotes in the 
+-&gt; **Note:** When using packer on Windows, replace the single-quotes in the
 command below with double-quotes.
 
 ``` {.text}
@@ -151,8 +152,8 @@ typically represent an ID (such as in the case of an AMI) or a set of files
 (such as for a VMware virtual machine). In this example, we only have a single
 artifact: the AMI in us-east-1 that was created.
 
-This AMI is ready to use. If you wanted you could go and launch this AMI right now
-and it would work great.
+This AMI is ready to use. If you wanted you could go and launch this AMI right
+now and it would work great.
 
 -&gt; **Note:** Your AMI ID will surely be different than the one above. If you
 try to launch the one in the example output above, you will get an error. If you
@@ -168,7 +169,7 @@ storing images at the end of this getting started guide.
 
 After running the above example, your AWS account now has an AMI associated with
 it. AMIs are stored in S3 by Amazon, so unless you want to be charged about
-$0.01 per month, you'll probably want to remove it. Remove the AMI by first
+\$0.01 per month, you'll probably want to remove it. Remove the AMI by first
 deregistering it on the [AWS AMI management
 page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Next,
 delete the associated snapshot on the [AWS snapshot management

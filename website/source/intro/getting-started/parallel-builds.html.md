@@ -9,7 +9,7 @@ next_title: Vagrant Boxes
 next_url: '/intro/getting-started/vagrant.html'
 page_title: Parallel Builds
 prev_url: '/intro/getting-started/provision.html'
-...
+---
 
 # Parallel Builds
 
@@ -23,9 +23,9 @@ able to make an AMI and a VMware virtual machine in parallel provisioned with
 the *same scripts*, resulting in near-identical images. The AMI can be used for
 production, the VMware machine can be used for development. Or, another example,
 if you're using Packer to build [software
-appliances](https://en.wikipedia.org/wiki/Software_appliance), then you can build
-the appliance for every supported platform all in parallel, all configured from
-a single template.
+appliances](https://en.wikipedia.org/wiki/Software_appliance), then you can
+build the appliance for every supported platform all in parallel, all configured
+from a single template.
 
 Once you start taking advantage of this feature, the possibilities begin to
 unfold in front of you.
@@ -45,10 +45,10 @@ this example.
 
 In order to do this, you'll need an account with DigitalOcean. [Sign up for an
 account now](https://www.digitalocean.com/). It is free to sign up. Because the
-"droplets" (servers) are charged hourly, you *will* be charged $0.01 for every
+"droplets" (servers) are charged hourly, you *will* be charged \$0.01 for every
 image you create with Packer. If you're not okay with this, just follow along.
 
-!&gt; **Warning!** You *will* be charged $0.01 by DigitalOcean per image
+!&gt; **Warning!** You *will* be charged \$0.01 by DigitalOcean per image
 created with Packer because of the time the "droplet" is running.
 
 Once you sign up for an account, grab your API token from the [DigitalOcean API

@@ -6,7 +6,7 @@ description: |
     distributed by Vagrant are created.
 layout: docs
 page_title: 'Vagrant Post-Processor'
-...
+---
 
 # Vagrant Post-Processor
 
@@ -22,9 +22,9 @@ If you've never used a post-processor before, please read the documentation on
 knowledge will be expected for the remainder of this document.
 
 Because Vagrant boxes are
-[provider-specific](https://docs.vagrantup.com/v2/boxes/format.html), the Vagrant
-post-processor is hardcoded to understand how to convert the artifacts of
-certain builders into proper boxes for their respective providers.
+[provider-specific](https://docs.vagrantup.com/v2/boxes/format.html), the
+Vagrant post-processor is hardcoded to understand how to convert the artifacts
+of certain builders into proper boxes for their respective providers.
 
 Currently, the Vagrant post-processor can create boxes for the following
 providers.

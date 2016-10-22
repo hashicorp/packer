@@ -4,7 +4,7 @@ description: |
     VMware or VirtualBox) and compresses the artifact into a single archive.
 layout: docs
 page_title: 'compress Post-Processor'
-...
+---
 
 # Compress Post-Processor
 
@@ -31,8 +31,8 @@ you will need to specify the `output` option.
     you are executing multiple builders in parallel you should make sure
     `output` is unique for each one. For example `packer_{{.BuildName}}.zip`.
 
--   `format` (string) - Disable archive format autodetection and use provided
-    string.
+-   `format` (string) - Disable archive format autodetection and use
+    provided string.
 
 -   `compression_level` (integer) - Specify the compression level, for
     algorithms that support it, from 1 through 9 inclusive. Typically higher

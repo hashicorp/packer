@@ -4,7 +4,7 @@ description: |
     Support for Xen is experimental at this time.
 layout: docs
 page_title: QEMU Builder
-...
+---
 
 # QEMU Builder
 
@@ -78,9 +78,9 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
-Note that you will need to set `"headless": true` if you are running Packer
-on a Linux server without X11; or if you are connected via ssh to a remote
-Linux server and have not enabled X11 forwarding (`ssh -X`).
+Note that you will need to set `"headless": true` if you are running Packer on a
+Linux server without X11; or if you are connected via ssh to a remote Linux
+server and have not enabled X11 forwarding (`ssh -X`).
 
 ### Required:
 
@@ -113,9 +113,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
     This may be `none`, `kvm`, `tcg`, or `xen`. The appropriate software must
-    already been installed on your build machine to use the accelerator you
-    specified. When no accelerator is specified, Packer will try to use `kvm`
-    if it is available but will default to `tcg` otherwise.
+    already been installed on your build machine to use the accelerator
+    you specified. When no accelerator is specified, Packer will try to use
+    `kvm` if it is available but will default to `tcg` otherwise.
 
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
@@ -148,8 +148,8 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
     values include any of "ide", "scsi", "virtio" or "virtio-scsi". Note also
     that any boot commands or kickstart type scripts must have proper
-    adjustments for resulting device names. The Qemu builder uses "virtio" by
-    default.
+    adjustments for resulting device names. The Qemu builder uses "virtio"
+    by default.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
@@ -164,11 +164,11 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option except
+    that the directory structure is preserved. This is useful for when your
+    floppy disk includes drivers or if you just want to organize it's contents
+    as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
@@ -177,8 +177,8 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     launching a GUI that shows the console of the machine being built. When this
     value is set to true, the machine will start without a console.
 
-    You can still see the console if you make a note of the VNC display
-    number chosen, and then connect using `vncviewer -Shared <host>:<display>`
+    You can still see the console if you make a note of the VNC display number
+    chosen, and then connect using `vncviewer -Shared <host>:<display>`
 
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
@@ -197,8 +197,8 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
     curl block device. This defaults to `false`.
 
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
+-   `iso_target_path` (string) - The path where the iso should be saved
+    after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
@@ -215,8 +215,8 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     values "ne2k\_pci", "i82551", "i82557b", "i82559er", "rtl8139", "e1000",
     "pcnet", "virtio", "virtio-net", "virtio-net-pci", "usb-net", "i82559a",
     "i82559b", "i82559c", "i82550", "i82562", "i82557a", "i82557c", "i82801",
-    "vmxnet3", "i82558a" or "i82558b".  The Qemu builder uses "virtio-net" by
-    default.
+    "vmxnet3", "i82558a" or "i82558b". The Qemu builder uses "virtio-net"
+    by default.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
@@ -267,13 +267,14 @@ builder and not otherwise conflicting with the qemuargs):
 <pre class="prettyprint">
   qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
 </pre>
+\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds
+are available though an environmental variable does need to be set for QEMU for
+Windows to redirect stdout to the console instead of stdout.txt.
 
-\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
-to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
+The following shows the environment variable that needs to be set for Windows
+QEMU support:
 
-The following shows the environment variable that needs to be set for Windows QEMU support:
-
-```json
+``` {.json}
   setx SDL_STDIO_REDIRECT=0
 ```
 
@@ -289,6 +290,7 @@ template that can be invoked by `make` in parallel:
         ]
   // ...
 ```
+
 `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each of which
 will bind to their own SSH port as determined by each process. This will also
 work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
@@ -307,8 +309,9 @@ default port of `5985` or whatever value you have the service set to listen on.
     doesn't shut down in this time, it is an error. By default, the timeout is
     `5m`, or five minutes.
 
--   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
-    Set this option to `true` to disable compacting. Defaults to `false`.
+-   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using
+    `qemu-img convert`. Set this option to `true` to disable compacting.
+    Defaults to `false`.
 
 -   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
@@ -321,9 +324,9 @@ default port of `5985` or whatever value you have the service set to listen on.
     `BUILDNAME` is the name of the build. Currently, no file extension will be
     used unless it is specified in this option.
 
--   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-    to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
-    to all interfaces use 0.0.0.0
+-   `vnc_bind_address` (string / IP address) - The IP address that should be
+    binded to for VNC. By default packer will use 127.0.0.1 for this. If you
+    wish to bind to all interfaces use 0.0.0.0
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
@@ -369,19 +372,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -391,10 +396,13 @@ by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
--   `<waitXX> ` - Add user defined time.Duration pause before sending any
+-   `<waitXX>` - Add user defined time.Duration pause before sending any
     additional keys. For example `<wait10m>` or `<wait1m20s>`
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers. For example: to simulate ctrl+c use
+`<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The

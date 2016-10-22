@@ -8,7 +8,7 @@ description: |
     plugin interface, and this page documents how to do that.
 layout: docs
 page_title: 'Custom Builder - Extend Packer'
-...
+---
 
 # Custom Builder Development
 
@@ -157,10 +157,10 @@ it would be convenient to cache the file. This sort of caching is a core part of
 Packer that is exposed to builders.
 
 The cache interface is `packer.Cache`. It behaves much like a Go
-[RWMutex](https://golang.org/pkg/sync/#RWMutex). The builder requests a "lock" on
-certain cache keys, and is given exclusive access to that key for the duration
-of the lock. This locking mechanism allows multiple builders to share cache data
-even though they're running in parallel.
+[RWMutex](https://golang.org/pkg/sync/#RWMutex). The builder requests a "lock"
+on certain cache keys, and is given exclusive access to that key for the
+duration of the lock. This locking mechanism allows multiple builders to share
+cache data even though they're running in parallel.
 
 For example, both the VMware and VirtualBox builders support downloading an
 operating system ISO from the internet. Most of the time, this ISO is identical.

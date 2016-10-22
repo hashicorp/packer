@@ -5,7 +5,7 @@ description: |
     virtual machine image).
 layout: docs
 page_title: 'VirtualBox Builder (from an OVF/OVA)'
-...
+---
 
 # VirtualBox Builder (from an OVF/OVA)
 
@@ -83,9 +83,10 @@ builder.
     specified, the default is 10 seconds.
 
 -   `export_opts` (array of strings) - Additional options to pass to the
-    [VBoxManage export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export).
-    This can be useful for passing product information to include in the
-    resulting appliance file. Packer JSON configuration file example:
+    [VBoxManage
+    export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This
+    can be useful for passing product information to include in the resulting
+    appliance file. Packer JSON configuration file example:
 
     ``` {.json}
     {
@@ -101,12 +102,13 @@ builder.
     }
     ```
 
-    A VirtualBox [VM description](https://www.virtualbox.org/manual/ch08.html#idm3756)
-    may contain arbitrary strings; the GUI interprets HTML formatting.
-    However, the JSON format does not allow arbitrary newlines within a
-    value. Add a multi-line description by preparing the string in the
-    shell before the packer call like this (shell `>` continuation
-    character snipped for easier copy & paste):
+    A VirtualBox [VM
+    description](https://www.virtualbox.org/manual/ch08.html#idm3756) may
+    contain arbitrary strings; the GUI interprets HTML formatting. However, the
+    JSON format does not allow arbitrary newlines within a value. Add a
+    multi-line description by preparing the string in the shell before the
+    packer call like this (shell `>` continuation character snipped for easier
+    copy & paste):
 
     ``` {.shell}
 
@@ -132,11 +134,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option except
+    that the directory structure is preserved. This is useful for when your
+    floppy disk includes drivers or if you just want to organize it's contents
+    as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `format` (string) - Either "ovf" or "ova", this specifies the output format
     of the exported virtual machine. This defaults to "ovf".
@@ -201,9 +203,9 @@ builder.
     name of the build.
 
 -   `post_shutdown_delay` (string) - The amount of time to wait after shutting
-    down the virtual machine. If you get the error `Error removing floppy
-    controller`, you might need to set this to `5m` or so. By default, the
-    delay is `0s`, or disabled.
+    down the virtual machine. If you get the error
+    `Error removing floppy controller`, you might need to set this to `5m`
+    or so. By default, the delay is `0s`, or disabled.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
@@ -254,8 +256,8 @@ builder.
     is exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is the
     name of the build.
 
--   `vrdp_bind_address` (string / IP address) - The IP address that should be binded
-     to for VRDP. By default packer will use 127.0.0.1 for this.
+-   `vrdp_bind_address` (string / IP address) - The IP address that should be
+    binded to for VRDP. By default packer will use 127.0.0.1 for this.
 
 -   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
@@ -299,19 +301,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 

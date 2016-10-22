@@ -6,7 +6,7 @@ description: |
     of images and metadata.
 layout: docs
 page_title: 'docker-save Post-Processor'
-...
+---
 
 # Docker Save Post-Processor
 

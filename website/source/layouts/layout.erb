@@ -16,46 +16,45 @@
     <script type="text/javascript" src="//use.typekit.net/apr3jjs.js"></script>
     <script type="text/javascript">
       try {
-        Typekit.load();
-      } catch (e) {}
+                    Typekit.load();
+                  } catch (e) {}
     </script>
   </head>
   <body id="page-<%= current_page.data.page_title ? "#{current_page.data.page_title}" : "home" %>" class="page-<%= current_page.data.page_title ? "#{current_page.data.page_title} layout-#{current_page.data.layout} page-sub" : "home layout-#{current_page.data.layout}" %>">
     <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
-    	<div class="container-fluid">
-				<div class="navbar-header">
-					<div class="navbar-brand">
-						<a class="logo" href="/">Packer</a>
-						<a class="by-hashicorp white" href="https://www.hashicorp.com/"><span class="svg-wrap">by</span><%= partial "layouts/svg/svg-by-hashicorp" %><%= partial "layouts/svg/svg-hashicorp-logo" %>Hashicorp</a>
-					</div>
-					<button class="navbar-toggle white" type="button">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-				</div>
-				<div class="buttons hidden-xs">
-					<nav class="navigation-links" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <div class="navbar-brand">
+            <a class="logo" href="/">Packer</a>
+            <a class="by-hashicorp white" href="https://www.hashicorp.com/"><span class="svg-wrap">by</span><%= partial "layouts/svg/svg-by-hashicorp" %><%= partial "layouts/svg/svg-hashicorp-logo" %>Hashicorp</a>
+          </div>
+          <button class="navbar-toggle white" type="button">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="buttons hidden-xs">
+          <nav class="navigation-links" role="navigation">
             <ul class="main-links nav navbar-nav">
               <li><a href="/intro">Intro</a></li>
               <li><a href="/docs">Docs</a></li>
               <li><a href="/community">Community</a></li>
             </ul>
-						<ul class="external-links nav navbar-nav">
-							<li class="first download">
-								<a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
-							</li>
-							<li class="github">
-								<a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
-							</li>
-						</ul>
-					</nav>
-				</div>
-    	</div>
+            <ul class="external-links nav navbar-nav">
+              <li class="first download">
+                <a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
+              </li>
+              <li class="github">
+                <a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
     </div>
     <%= partial "layouts/sidebar" %>
-
     <%= yield %>
     <div class="clearfix"></div>
     <footer id="footer" class="navigation white">
@@ -71,40 +70,40 @@
             <% if current_page.url != '/' %>
               <div class="edit-page-link"><a href="https://github.com/mitchellh/packer/blob/master/website/source/<%= current_page_source %>">Edit this page</a></div>
             <% end %>
-            <% end %>
-            <div class="footer-links clearfix">
-              <ul class="main-links white nav navbar-nav">
-                <li><a href="/intro">Intro</a></li>
-                <li><a href="/docs">Docs</a></li>
-                <li><a href="/community">Community</a></li>
-              </ul>
-              <ul class="external-links white nav navbar-nav">
-                <li class="first download">
-                  <a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
-                </li>
-                <li class="github">
-                  <a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
-                </li>
-              </ul>
-            </  div>
-            <div class="footer-hashi pull-right">
-              <div class="">
-                <a class="hashicorp-project white" href="https://www.hashicorp.com">
-                  <span class="project-text">A </span>
-                  <%= partial "layouts/svg/svg-by-hashicorp" %>
-                  <span class="project-text">Project</span>
-                  <%= partial "layouts/svg/svg-hashicorp-logo" %>
-                </a>
-              </div>
+          <% end %>
+          <div class="footer-links clearfix">
+            <ul class="main-links white nav navbar-nav">
+              <li><a href="/intro">Intro</a></li>
+              <li><a href="/docs">Docs</a></li>
+              <li><a href="/community">Community</a></li>
+            </ul>
+            <ul class="external-links white nav navbar-nav">
+              <li class="first download">
+                <a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
+              </li>
+              <li class="github">
+                <a href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a>
+              </li>
+            </ul>
+          </  div>
+          <div class="footer-hashi pull-right">
+            <div class="">
+              <a class="hashicorp-project white" href="https://www.hashicorp.com">
+                <span class="project-text">A </span>
+                <%= partial "layouts/svg/svg-by-hashicorp" %>
+                <span class="project-text">Project</span>
+                <%= partial "layouts/svg/svg-hashicorp-logo" %>
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </footer>
-  <%= javascript_include_tag "application" %>
-  <%= partial "layouts/google-analytics.html" %>
-  <%= partial "layouts/adroll.html" %>
-  <%= partial "layouts/structured_data.html" %>
+  </div>
+</footer>
+<%= javascript_include_tag "application" %>
+<%= partial "layouts/google-analytics.html" %>
+<%= partial "layouts/adroll.html" %>
+<%= partial "layouts/structured_data.html" %>
 </body>
 </html>

@@ -1,17 +1,3 @@
----
-description: |
-    Packer must first be installed on the machine you want to run it on. To make
-    installation easy, Packer is distributed as a binary package for all supported
-    platforms and architectures. This page will not cover how to compile Packer from
-    source, as that is covered in the README and is only recommended for advanced
-    users.
-layout: intro
-next_title: Build an Image
-next_url: '/intro/getting-started/build-image.html'
-page_title: Install Packer
-prev_url: '/intro/platforms.html'
-...
-
 # Install Packer
 
 Packer must first be installed on the machine you want to run it on. To make
@@ -32,15 +18,16 @@ depending on whether you want to restrict the install to just your user or
 install it system-wide. On Windows systems, you can put it wherever you'd like.
 
 After unzipping the package, the directory should contain a single binary
-program called `packer`. The final step to
-installation is to make sure the directory you installed Packer to is on the
-PATH. See [this
+program called `packer`. The final step to the installation is to make sure the
+directory you installed Packer to is on the PATH. See [this
 page](https://stackoverflow.com/questions/14637979/how-to-permanently-set-path-on-linux)
 for instructions on setting the PATH on Linux and Mac. [This
 page](https://stackoverflow.com/questions/1618280/where-can-i-set-path-to-make-exe-on-windows)
 contains instructions for setting the PATH on Windows.
 
-## Verifying the Installation
+\~&gt; **NOTE:** Packer is now distributed as a single binary. If you are
+upgrading from an older version, ensure to delete all the packer-\* binary. \#\#
+Verifying the Installation
 
 After installing Packer, verify the installation worked by opening a new command
 prompt or console, and checking that `packer` is available:
@@ -66,22 +53,30 @@ Otherwise, Packer is installed and you're ready to go!
 
 ## Alternative Installation Methods
 
-While the binary packages is the only official method of installation, there are
-alternatives available.
+Installation from binary packages is currently the only officially supported
+installation method. The binary packages are guaranteed to be the latest
+available version and match the proper checksums. However, in addition to the
+official binaries, there are other unofficial 3rd party methods of installation
+managed by the Packer community:
 
 ### Homebrew
 
 If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
 running:
 
+``` {.text}
     $ brew install packer
+```
 
 ### Chocolatey
 
-If you're using Windows and [Chocolatey](http://chocolatey.org), you can
-install Packer by running:
+If you're using Windows and [Chocolatey](http://chocolatey.org), you can install
+Packer from Windows command line (cmd). Remember that this is updated by a 3rd
+party, so it may not be the latest available version.
 
-    choco install packer
+``` {.text}
+    C:\>  choco install packer
+```
 
 ## Troubleshooting
 
