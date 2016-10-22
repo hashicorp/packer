@@ -171,7 +171,16 @@ builder.
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 
--   `source_image_project_id` (string) - The project ID of the 
+-   `scopes` (array of strings) - The service account scopes for launched instance.
+    Defaults to:
+
+``` {.json}
+[ "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/compute",
+  "https://www.googleapis.com/auth/devstorage.full_control" ]
+```
+
+-   `source_image_project_id` (string) - The project ID of the
     project containing the source image.
 
 -   `startup_script_file` (string) - The filepath to a startup script to run on 
@@ -190,10 +199,10 @@ builder.
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
-    
+
 ## Startup Scripts
 
-Startup scripts can be a powerful tool for configuring the instance from which the image is made. 
+Startup scripts can be a powerful tool for configuring the instance from which the image is made.
 The builder will wait for a startup script to terminate. A startup script can be provided via the
 `startup_script_file` or 'startup-script' instance creation `metadata` field. Therefore, the build
 time will vary depending on the duration of the startup script. If `startup_script_file` is set,
