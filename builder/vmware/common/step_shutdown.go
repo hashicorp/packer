@@ -61,7 +61,8 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		cmd.Wait()
 
 		// If the command failed to run, notify the user in some way.
-		if cmd.ExitStatus != 0 {
+		// Ignores disconnect errors.
+		if cmd.ExitStatus != packer.CmdDisconnect && cmd.ExitStatus != 0 {
 			state.Put("error", fmt.Errorf(
 				"Shutdown command has non-zero exit status.\n\nStdout: %s\n\nStderr: %s",
 				stdout.String(), stderr.String()))
