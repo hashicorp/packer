@@ -4,7 +4,7 @@ description: |
     `packer build`.
 layout: 'docs\_machine\_readable'
 page_title: 'Command: build - Machine-Readable Reference'
-...
+---
 
 # Build Command Types
 

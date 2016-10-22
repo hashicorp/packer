@@ -9,7 +9,7 @@ next_title: 'Why Use Packer?'
 next_url: '/intro/why.html'
 page_title: Introduction
 prev_url: '# '
-...
+---
 
 # Introduction to Packer
 

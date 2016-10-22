@@ -97,11 +97,10 @@ each category, the available configuration keys are alphabetized.
     you are building. This option is required to register HVM images. Can be
     "paravirtual" (default) or "hvm".
 
--   `chroot_mounts` (array of array of strings) - This is a list of devices
-    to mount into the chroot environment. This configuration parameter
-    requires some additional documentation which is in the "Chroot Mounts"
-    section below. Please read that section for more information on how to
-    use this.
+-   `chroot_mounts` (array of array of strings) - This is a list of devices to
+    mount into the chroot environment. This configuration parameter requires
+    some additional documentation which is in the "Chroot Mounts" section below.
+    Please read that section for more information on how to use this.
 
 -   `command_wrapper` (string) - How to run shell commands. This defaults to
     `{{.Command}}`. This may be useful to set if you want to set environmental
@@ -110,8 +109,8 @@ each category, the available configuration keys are alphabetized.
     be run. Defaults to "{{.Command}}".
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
-    that will be copied into the chroot environment prior to provisioning. Defaults
-    to `/etc/resolv.conf` so that DNS lookups work.
+    that will be copied into the chroot environment prior to provisioning.
+    Defaults to `/etc/resolv.conf` so that DNS lookups work.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
@@ -139,9 +138,9 @@ each category, the available configuration keys are alphabetized.
 
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
-    `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
-    where the `.Device` variable is replaced with the name of the device where
-    the volume is attached.
+    `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration
+    template where the `.Device` variable is replaced with the name of the
+    device where the volume is attached.
 
 -   `mount_partition` (integer) - The partition number containing the
     / partition. By default this is the first partition of the volume.

@@ -6,7 +6,7 @@ description: |
     templates that can be readily used with Packer by simply converting them.
 layout: docs
 page_title: Convert Veewee Definitions to Packer Templates
-...
+---
 
 # Veewee-to-Packer
 

@@ -4,7 +4,7 @@ description: |
     machine-readable output and are provided by Packer core itself.
 layout: 'docs\_machine\_readable'
 page_title: 'General Types - Machine-Readable Reference'
-...
+---
 
 # General Types
 

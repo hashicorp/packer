@@ -7,7 +7,7 @@ description: |
     scripts to dynamically create or modify templates.
 layout: docs
 page_title: Templates
-...
+---
 
 # Templates
 
@@ -81,9 +81,14 @@ builders, provisioners, etc. will still result in validation errors.
 
 ## Example Template
 
-Below is an example of a basic template that could be invoked with `packer build`. It would create an instance in AWS, and once running copy a script to it and run that script using SSH.
+Below is an example of a basic template that could be invoked with
+`packer build`. It would create an instance in AWS, and once running copy a
+script to it and run that script using SSH.
 
--&gt; **Note:** This example requires an account with Amazon Web Services. There are a number of parameters which need to be provided for a functional build to take place. See the [Amazon builder](/docs/builders/amazon.html) documentation for more information.
+-&gt; **Note:** This example requires an account with Amazon Web Services. There
+are a number of parameters which need to be provided for a functional build to
+take place. See the [Amazon builder](/docs/builders/amazon.html) documentation
+for more information.
 
 ``` {.javascript}
 {

@@ -5,7 +5,7 @@ description: |
     machine to the remote machine or remote paths can be used.
 layout: docs
 page_title: 'Chef-Solo Provisioner'
-...
+---
 
 # Chef Solo Provisioner
 
@@ -68,9 +68,9 @@ configuration is actually required, but at least `run_list` is recommended.
     variables](/docs/templates/configuration-templates.html) available. See
     below for more information.
 
--   `guest_os_type` (string) - The target guest OS type, either "unix" or
-    "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
+-   `guest_os_type` (string) - The target guest OS type, either "unix"
+    or "windows". Setting this to "windows" will cause the provisioner to use
+    Windows friendly paths and commands. By default, this is "unix".
 
 -   `install_command` (string) - The command used to install Chef. This has
     various [configuration template
@@ -82,8 +82,8 @@ configuration is actually required, but at least `run_list` is recommended.
 
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
-    then the sudo will be omitted. This has no effect when guest_os_type is
-    windows.
+    then the sudo will be omitted. This has no effect when guest\_os\_type
+    is windows.
 
 -   `remote_cookbook_paths` (array of strings) - A list of paths on the remote
     machine where cookbooks will already exist. These may exist from a previous
@@ -103,12 +103,12 @@ configuration is actually required, but at least `run_list` is recommended.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
-    "/tmp/packer-chef-solo" when guest_os_type unix and
-    "$env:TEMP/packer-chef-solo" when windows. This directory doesn't need to
+    "/tmp/packer-chef-solo" when guest\_os\_type unix and
+    "\$env:TEMP/packer-chef-solo" when windows. This directory doesn't need to
     exist but must have proper permissions so that the user that Packer uses is
     able to create directories and write into this folder. If the permissions
-    are not correct, use a shell provisioner prior to this to configure it
-    properly.
+    are not correct, use a shell provisioner prior to this to configure
+    it properly.
 
 ## Chef Configuration
 
@@ -148,7 +148,7 @@ readability) to execute Chef:
   -j {{.JsonPath}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
 variable changes don't immediately propogate to running processes.
 
@@ -179,7 +179,7 @@ curl -L https://www.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 install the latest version of Chef:
 
 ``` {.text}

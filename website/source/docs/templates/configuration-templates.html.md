@@ -5,7 +5,7 @@ description: |
     parameter at runtime.
 layout: docs
 page_title: Configuration Templates
-...
+---
 
 # Configuration Templates
 
@@ -177,7 +177,8 @@ MST
 
 *The values in parentheses are the abbreviated, or 24-hour clock values*
 
-Note that "-0700" is always formatted into "+0000" because `isotime` is always UTC time.
+Note that "-0700" is always formatted into "+0000" because `isotime` is always
+UTC time.
 
 Here are some example formated time, using the above format options:
 
@@ -190,7 +191,8 @@ isotime = June 7, 7:22:43pm 2014
 {{isotime "Hour15Year200603"}} = Hour19Year201407
 ```
 
-Please note that double quote characters need escaping inside of templates (in this case, on the `ami_name` value):
+Please note that double quote characters need escaping inside of templates (in
+this case, on the `ami_name` value):
 
 ``` {.javascript}
 {
@@ -209,7 +211,9 @@ Please note that double quote characters need escaping inside of templates (in t
 }
 ```
 
--&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html) documentation for more information on how to correctly configure the Amazon builder in this example.
+-&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html)
+documentation for more information on how to correctly configure the Amazon
+builder in this example.
 
 ## Amazon Specific Functions
 

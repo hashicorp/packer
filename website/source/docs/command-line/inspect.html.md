@@ -7,7 +7,7 @@ description: |
     provisioners it defines and the order they'll run, and more.
 layout: docs
 page_title: 'Inspect - Command-Line'
-...
+---
 
 # Command-Line: Inspect
 

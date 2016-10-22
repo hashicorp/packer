@@ -11,7 +11,7 @@ next_title: Packer Use Cases
 next_url: '/intro/use-cases.html'
 page_title: 'Why Use Packer?'
 prev_url: '/intro/index.html'
-...
+---
 
 # Why Use Packer?
 

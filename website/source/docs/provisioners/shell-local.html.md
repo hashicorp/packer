@@ -5,7 +5,7 @@ description: |
     configured on a machine.
 layout: docs
 page_title: Local Shell Provisioner
-...
+---
 
 # Local Shell Provisioner
 
@@ -39,8 +39,8 @@ Required:
 Optional parameters:
 
 -   `execute_command` (array of strings) - The command to use to execute
-    the script. By default this is `["/bin/sh", "-c", "{{.Command}}"]`. The value
-    is an array of arguments executed directly by the OS. The value of this is
-    treated as [configuration
+    the script. By default this is `["/bin/sh", "-c", "{{.Command}}"]`. The
+    value is an array of arguments executed directly by the OS. The value of
+    this is treated as [configuration
     template](/docs/templates/configuration-templates.html). The only available
     variable is `Command` which is the command to execute.

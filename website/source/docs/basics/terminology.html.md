@@ -7,7 +7,7 @@ description: |
     for easy referencing.
 layout: docs
 page_title: Packer Terminology
-...
+---
 
 # Packer Terminology
 

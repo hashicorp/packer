@@ -7,7 +7,7 @@ description: |
     "SUBCOMMAND" is the actual command you wish to execute.
 layout: docs
 page_title: 'Packer Command-Line'
-...
+---
 
 # Packer Command-Line
 

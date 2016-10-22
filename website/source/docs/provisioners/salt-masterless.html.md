@@ -4,7 +4,7 @@ description: |
     using Salt states, without connecting to a Salt master.
 layout: docs
 page_title: 'Salt (Masterless) Provisioner'
-...
+---
 
 # Salt Masterless Provisioner
 
@@ -38,8 +38,9 @@ Optional:
     has more detailed usage instructions. By default, no arguments are sent to
     the script.
 
--   `disable_sudo` (boolean) - By default, the bootstrap install command is prefixed with `sudo`. When using a
-    Docker builder, you will likely want to pass `true` since `sudo` is often not pre-installed.
+-   `disable_sudo` (boolean) - By default, the bootstrap install command is
+    prefixed with `sudo`. When using a Docker builder, you will likely want to
+    pass `true` since `sudo` is often not pre-installed.
 
 -   `remote_pillar_roots` (string) - The path to your remote [pillar
     roots](http://docs.saltstack.com/ref/configuration/master.html#pillar-configuration).
@@ -72,7 +73,7 @@ Optional:
 -   `temp_config_dir` (string) - Where your local state tree will be copied
     before moving to the `/srv/salt` directory. Default is `/tmp/salt`.
 
--   `no_exit_on_failure` (boolean) - Packer will exit if the `salt-call` command
-    fails. Set this option to true to ignore Salt failures.
+-   `no_exit_on_failure` (boolean) - Packer will exit if the `salt-call`
+    command fails. Set this option to true to ignore Salt failures.
 
 -   `log_level` (string) - Set the logging level for the `salt-call` run.

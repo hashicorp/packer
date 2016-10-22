@@ -5,7 +5,7 @@ description: |
     the container for reuse or commits the image.
 layout: docs
 page_title: Docker Builder
-...
+---
 
 # Docker Builder
 
@@ -87,22 +87,23 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 ### Optional:
 
 -   `aws_access_key` (string) - The AWS access key used to communicate with AWS.
-    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    [Learn how to
+    set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `aws_secret_key` (string) - The AWS secret key used to communicate with AWS.
-    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    [Learn how to
+    set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `aws_token` (string) - The AWS access token to use. This is different from the
-    access key and secret key. If you're not sure what this is, then you
+-   `aws_token` (string) - The AWS access token to use. This is different from
+    the access key and secret key. If you're not sure what this is, then you
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
--   `ecr_login` (boolean) - Defaults to false. If true, the builder will login in
-    order to pull the image from
-    [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).
-    The builder only logs in for the duration of the pull. If true
-    `login_server` is required and `login`, `login_username`, and
-    `login_password` will be ignored.
+-   `ecr_login` (boolean) - Defaults to false. If true, the builder will login
+    in order to pull the image from [Amazon EC2 Container
+    Registry (ECR)](https://aws.amazon.com/ecr/). The builder only logs in for
+    the duration of the pull. If true `login_server` is required and `login`,
+    `login_username`, and `login_password` will be ignored.
 
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image. The builder only logs in for the duration of
@@ -239,10 +240,9 @@ nearly-identical sequence definitions, as demonstrated by the example below:
 
 ## Amazon EC2 Container Registry
 
-Packer can tag and push images for use in
-[Amazon EC2 Container Registry](https://aws.amazon.com/ecr/). The post
-processors work as described above and example configuration properties are
-shown below:
+Packer can tag and push images for use in [Amazon EC2 Container
+Registry](https://aws.amazon.com/ecr/). The post processors work as described
+above and example configuration properties are shown below:
 
 ``` {.javascript}
 {
@@ -265,7 +265,8 @@ shown below:
 }
 ```
 
-[Learn how to set Amazon AWS credentials.](/docs/builders/amazon.html#specifying-amazon-credentials)
+[Learn how to set Amazon AWS
+credentials.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 ## Dockerfiles
 
@@ -278,8 +279,8 @@ etc. to provision your Docker container just like you would a regular
 virtualized or dedicated machine.
 
 While Docker has many features, Packer views Docker simply as an container
-runner. To that end, Packer is able to repeatably build these containers
-using portable provisioning scripts.
+runner. To that end, Packer is able to repeatably build these containers using
+portable provisioning scripts.
 
 Dockerfiles have some additional features that Packer doesn't support which are
 able to be worked around. Many of these features will be automated by Packer in

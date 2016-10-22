@@ -4,7 +4,7 @@ description: |
     `packer inspect`.
 layout: 'docs\_machine\_readable'
 page_title: 'Command: inspect - Machine-Readable Reference'
-...
+---
 
 # Inspect Command Types
 

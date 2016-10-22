@@ -4,7 +4,7 @@ description: |
     dedicated users willing to help through various mediums.
 layout: community
 page_title: Community
-...
+---
 
 # Community
 
@@ -80,9 +80,10 @@ list as contributors come and go.
       <h3>Ross Smith II (<a href="https://github.com/rasa" target="_blank" rel="nofollow noopener noreferrer">@rasa</a>)</h3>
       <p>
 
-<a href="http://smithii.com/" target="_blank" rel="nofollow noopener noreferrer">Ross Smith</a> maintains our
-VMware builder on Windows, and provides other valuable assistance. Ross is an
-open source enthusiast, published author, and freelance consultant.
+<a href="http://smithii.com/" target="_blank" rel="nofollow noopener noreferrer">Ross
+Smith</a> maintains our VMware builder on Windows, and provides other valuable
+assistance. Ross is an open source enthusiast, published author, and freelance
+consultant.
 </p>
     </div>
 

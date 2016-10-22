@@ -4,7 +4,7 @@ description: |
     that Packer should use to generate machine images for the template.
 layout: docs
 page_title: 'Templates: Builders'
-...
+---
 
 # Templates: Builders
 

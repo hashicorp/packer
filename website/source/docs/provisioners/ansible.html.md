@@ -1,8 +1,9 @@
 ---
-layout: "docs"
-page_title: "Ansible Provisioner"
-description: |-
-  The `ansible` Packer provisioner allows Ansible playbooks to be run to provision the machine.
+description: |
+    The `ansible` Packer provisioner allows Ansible playbooks to be run to provision
+    the machine.
+layout: docs
+page_title: Ansible Provisioner
 ---
 
 # Ansible Provisioner
@@ -19,7 +20,7 @@ machine being provisioned by Packer.
 This is a fully functional template that will provision an image on
 DigitalOcean. Replace the mock `api_token` value with your own.
 
-```json
+``` {.json}
 {
   "provisioners": [
     {
@@ -43,73 +44,70 @@ DigitalOcean. Replace the mock `api_token` value with your own.
 
 Required Parameters:
 
-- `playbook_file` - The playbook to be run by Ansible.
+-   `playbook_file` - The playbook to be run by Ansible.
 
 Optional Parameters:
 
-- `command` (string) - The command to invoke ansible.
-   Defaults to `ansible-playbook`.
+-   `command` (string) - The command to invoke ansible. Defaults to
+    `ansible-playbook`.
 
-- `groups` (array of strings) - The groups into which the Ansible host
-  should be placed. When unspecified, the host is not associated with any
-  groups.
+-   `groups` (array of strings) - The groups into which the Ansible host should
+    be placed. When unspecified, the host is not associated with any groups.
 
-- `empty_groups` (array of strings) - The groups which should be present in
-  inventory file but remain empty.
+-   `empty_groups` (array of strings) - The groups which should be present in
+    inventory file but remain empty.
 
-- `host_alias` (string) - The alias by which the Ansible host should be known.
-  Defaults to `default`.
+-   `host_alias` (string) - The alias by which the Ansible host should be known.
+    Defaults to `default`.
 
-- `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
-  server on the host machine to forward commands to the target machine. Ansible
-  connects to this server and will validate the identity of the server using
-  the system known_hosts. The default behaviour is to generate and use a
-  onetime key. Host key checking is disabled via the
-  `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
+-   `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
+    server on the host machine to forward commands to the target machine.
+    Ansible connects to this server and will validate the identity of the server
+    using the system known\_hosts. The default behaviour is to generate and use
+    a onetime key. Host key checking is disabled via the
+    `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
 
-- `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
-  `ssh_user`. The default behaviour is to generate and use a onetime key. If
-  this key is generated, the corresponding private key is passed to
-  `ansible-playbook` with the `--private-key` option.
+-   `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
+    `ssh_user`. The default behaviour is to generate and use a onetime key. If
+    this key is generated, the corresponding private key is passed to
+    `ansible-playbook` with the `--private-key` option.
 
-- `local_port` (string) - The port on which to attempt to listen for SSH
-  connections. This value is a starting point.  The provisioner will attempt
-  listen for SSH connections on the first available of ten ports, starting at
-  `local_port`. A system-chosen port is used when `local_port` is missing or
-  empty.
+-   `local_port` (string) - The port on which to attempt to listen for
+    SSH connections. This value is a starting point. The provisioner will
+    attempt listen for SSH connections on the first available of ten ports,
+    starting at `local_port`. A system-chosen port is used when `local_port` is
+    missing or empty.
 
-- `sftp_command` (string) - The command to run on the machine being provisioned
-  by Packer to handle the SFTP protocol that Ansible will use to transfer
-  files. The command should read and write on stdin and stdout, respectively.
-  Defaults to `/usr/lib/sftp-server -e`.
+-   `sftp_command` (string) - The command to run on the machine being
+    provisioned by Packer to handle the SFTP protocol that Ansible will use to
+    transfer files. The command should read and write on stdin and
+    stdout, respectively. Defaults to `/usr/lib/sftp-server -e`.
 
-- `use_sftp` (boolean) - Whether to use SFTP. When false,
-  `ANSIBLE_SCP_IF_SSH=True` will be automatically added to `ansible_env_vars`.
-  Defaults to false.
+-   `use_sftp` (boolean) - Whether to use SFTP. When false,
+    `ANSIBLE_SCP_IF_SSH=True` will be automatically added to `ansible_env_vars`.
+    Defaults to false.
 
-- `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
-  Usage example:
+-   `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
+    Usage example:
 
-```
-"extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
-```
+<!-- -->
+    "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
 
-- `ansible_env_vars` (array of strings) - Environment variables to set before
-  running Ansible.
-  Usage example:
+-   `ansible_env_vars` (array of strings) - Environment variables to set before
+    running Ansible. Usage example:
 
-```
-"ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
-```
+<!-- -->
+    "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
 
-- `user` (string) - The `ansible_user` to use. Defaults to the user running
-  packer.
+-   `user` (string) - The `ansible_user` to use. Defaults to the user
+    running packer.
 
 ## Limitations
 
-- Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
+-   Redhat / CentOS builds have been known to fail with the following error due
+    to `sftp_command`, which should be set to
+    `/usr/libexec/openssh/sftp-server -e`:
 
-```
-==> virtualbox-ovf: starting sftp subsystem
-    virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
-```
+<!-- -->
+    ==> virtualbox-ovf: starting sftp subsystem
+        virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}

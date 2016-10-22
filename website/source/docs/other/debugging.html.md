@@ -6,7 +6,7 @@ description: |
     what Packer is actually doing.
 layout: docs
 page_title: Debugging Packer
-...
+---
 
 # Debugging Packer Builds
 
@@ -26,9 +26,9 @@ for debugging. The key will only be emitted for cloud-based builders. The
 ephemeral key will be deleted at the end of the packer run during cleanup.
 
 For a local builder, the SSH session initiated will be visible in the detail
-provided when `PACKER_LOG=1` environment variable is set prior to a build,
-and you can connect to the local machine using the userid and password defined
-in the kickstart or preseed associated with initialzing the local VM.
+provided when `PACKER_LOG=1` environment variable is set prior to a build, and
+you can connect to the local machine using the userid and password defined in
+the kickstart or preseed associated with initialzing the local VM.
 
 ### Windows
 

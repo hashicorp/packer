@@ -4,7 +4,7 @@ description: |
     multiple builders depending on the strategy you want to use to build the AMI.
 layout: docs
 page_title: Amazon AMI Builder
-...
+---
 
 # Amazon AMI Builder
 
@@ -160,8 +160,8 @@ work, but specifics will depend on your use-case.
 
 Amazon uses the current time as part of the [request signing
 process](http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html). If
-your system clock is too skewed from the current time, your requests might
-fail. If that's the case, you might see an error like this:
+your system clock is too skewed from the current time, your requests might fail.
+If that's the case, you might see an error like this:
 
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 

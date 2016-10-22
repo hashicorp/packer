@@ -4,7 +4,7 @@ description: |
     Atlas build service, which will run your packer build for you.
 layout: docs
 page_title: 'Push - Command-Line'
-...
+---
 
 # Command-Line: Push
 
@@ -52,9 +52,13 @@ you can also use `-token` on the command line.
 
 ## Environment Variables
 
--   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public key. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+-   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded
+    public key. If specified, this will be used to validate the certificate
+    authority that signed certificates used by an Atlas installation.
 
--   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded public key file. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+-   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded
+    public key file. If specified, this will be used to validate the certificate
+    authority that signed certificates used by an Atlas installation.
 
 ## Examples
 

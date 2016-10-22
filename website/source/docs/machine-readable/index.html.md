@@ -5,7 +5,7 @@ description: |
     general format and usage for the machine-readable output.
 layout: 'docs\_machine\_readable'
 page_title: 'Machine-Readable Reference'
-...
+---
 
 # Machine-Readable Reference
 

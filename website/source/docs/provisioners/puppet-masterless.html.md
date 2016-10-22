@@ -8,7 +8,7 @@ description: |
     master.
 layout: docs
 page_title: 'Puppet (Masterless) Provisioner'
-...
+---
 
 # Puppet (Masterless) Provisioner
 
@@ -59,15 +59,15 @@ Optional parameters:
     variables](/docs/templates/configuration-templates.html) available. See
     below for more information.
 
--   `extra_arguments` (array of strings) - This is an array of additional options to
-    pass to the puppet command when executing puppet. This allows for
+-   `extra_arguments` (array of strings) - This is an array of additional
+    options to pass to the puppet command when executing puppet. This allows for
     customization of the `execute_command` without having to completely replace
-    or include it's contents, making forward-compatible customizations much
-    easier.
+    or include it's contents, making forward-compatible customizations
+    much easier.
 
 -   `facter` (object of key/value strings) - Additional
-    [facts](https://puppetlabs.com/facter) to make
-    available when Puppet is running.
+    [facts](https://puppetlabs.com/facter) to make available when Puppet
+    is running.
 
 -   `hiera_config_path` (string) - The path to a local file with hiera
     configuration to be uploaded to the remote machine. Hiera data directories

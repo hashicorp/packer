@@ -4,7 +4,7 @@ description: |
     export them in the OVA or OVF format.
 layout: docs
 page_title: VirtualBox Builder
-...
+---
 
 # VirtualBox Builder
 

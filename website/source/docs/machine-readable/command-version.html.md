@@ -4,7 +4,7 @@ description: |
     `packer version`.
 layout: 'docs\_machine\_readable'
 page_title: 'Command: version - Machine-Readable Reference'
-...
+---
 
 # Version Command Types
 

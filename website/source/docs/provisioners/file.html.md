@@ -5,7 +5,7 @@ description: |
     use shell provisioner to move them to the proper place, set permissions, etc.
 layout: docs
 page_title: File Provisioner
-...
+---
 
 # File Provisioner
 

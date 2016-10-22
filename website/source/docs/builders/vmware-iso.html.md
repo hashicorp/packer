@@ -7,7 +7,7 @@ description: |
     Hypervisor using SSH as opposed to the vSphere API.
 layout: docs
 page_title: VMware Builder from ISO
-...
+---
 
 # VMware Builder (from ISO)
 
@@ -15,11 +15,11 @@ Type: `vmware-iso`
 
 This VMware Packer builder is able to create VMware virtual machines from an ISO
 file as a source. It currently supports building virtual machines on hosts
-running [VMware Fusion](https://www.vmware.com/products/fusion/overview.html) for
-OS X, [VMware
-Workstation](https://www.vmware.com/products/workstation/overview.html) for Linux
-and Windows, and [VMware Player](https://www.vmware.com/products/player/) on
-Linux. It can also build machines directly on [VMware vSphere
+running [VMware Fusion](https://www.vmware.com/products/fusion/overview.html)
+for OS X, [VMware
+Workstation](https://www.vmware.com/products/workstation/overview.html) for
+Linux and Windows, and [VMware Player](https://www.vmware.com/products/player/)
+on Linux. It can also build machines directly on [VMware vSphere
 Hypervisor](https://www.vmware.com/products/vsphere-hypervisor/) using SSH as
 opposed to the vSphere API.
 
@@ -125,11 +125,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option except
+    that the directory structure is preserved. This is useful for when your
+    floppy disk includes drivers or if you just want to organize it's contents
+    as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
     "/Applications/VMware Fusion.app" but this setting allows you to
@@ -161,8 +161,8 @@ builder.
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
+-   `iso_target_path` (string) - The path where the iso should be saved
+    after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
@@ -201,8 +201,8 @@ builder.
     `remote_type` is enabled.
 
 -   `remote_private_key_file` (string) - The path to the PEM encoded private key
-    file for the user used to access the remote machine. By default this is empty.
-    This only has an effect if `remote_type` is enabled.
+    file for the user used to access the remote machine. By default this
+    is empty. This only has an effect if `remote_type` is enabled.
 
 -   `remote_type` (string) - The type of remote machine that will be used to
     build this VM rather than a local desktop product. The only value accepted
@@ -225,13 +225,13 @@ builder.
     compacted at the end of the build process using `vmware-vdiskmanager`. In
     certain rare cases, this might actually end up making the resulting disks
     slightly larger. If you find this to be the case, you can disable compaction
-    using this configuration value.  Defaults to `false`.
+    using this configuration value. Defaults to `false`.
 
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
-    the VM registered with the remote ESXi server. This is convenient if you
-    use packer to provision VMs on ESXi and don't want to use ovftool to
-    deploy the resulting artifact (VMX or OVA or whatever you used as `format`).
-    Defaults to `false`.
+    the VM registered with the remote ESXi server. This is convenient if you use
+    packer to provision VMs on ESXi and don't want to use ovftool to deploy the
+    resulting artifact (VMX or OVA or whatever you used as `format`). Defaults
+    to `false`.
 
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are "darwin", "linux", and "windows". By
@@ -272,12 +272,12 @@ builder.
     below for more information. For basic VMX modifications, try
     `vmx_data` first.
 
--   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-    to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
-    to all interfaces use 0.0.0.0
+-   `vnc_bind_address` (string / IP address) - The IP address that should be
+    binded to for VNC. By default packer will use 127.0.0.1 for this. If you
+    wish to bind to all interfaces use 0.0.0.0
 
--   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
-    used to secure the VNC communication with the VM.
+-   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that
+    is used to secure the VNC communication with the VM.
 
 -   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
@@ -323,19 +323,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -345,9 +347,9 @@ by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
-otherwise they will be held down until the machine reboots. Use lowercase 
-characters as well inside modifiers. 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
 
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
@@ -455,8 +457,8 @@ modify as well:
 -   `remote_private_key_file` - The SSH key for access to the remote machine.
 
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
-    format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install `ovftool`.
+    format of the exported virtual machine. This defaults to "ovf". Before using
+    this option, you need to install `ovftool`.
 
 ### Using a Floppy for Linux kickstart file or preseed
 
@@ -478,7 +480,9 @@ file by attaching a floppy disk. An example below, based on RHEL:
 }
 ```
 
-It's also worth noting that `ks=floppy` has been deprecated.  Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
+It's also worth noting that `ks=floppy` has been deprecated. Later versions of
+the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a
+different syntax to source a kickstart file from a mounted floppy image.
 
 ``` {.javascript}
 {

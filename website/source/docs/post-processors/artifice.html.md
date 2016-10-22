@@ -7,7 +7,7 @@ description: |
     extracting the docker container and throwing away the EC2 instance.
 layout: docs
 page_title: 'Artifice Post-Processor'
-...
+---
 
 # Artifice Post-Processor
 

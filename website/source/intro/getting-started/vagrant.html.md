@@ -7,7 +7,7 @@ next_title: Remote Builds and Storage
 next_url: '/intro/getting-started/remote-builds.html'
 page_title: Vagrant Boxes
 prev_url: '/intro/getting-started/parallel-builds.html'
-...
+---
 
 # Vagrant Boxes
 
