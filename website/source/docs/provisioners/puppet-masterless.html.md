@@ -86,6 +86,11 @@ Optional parameters:
 This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
 
+-   `puppet_bin_dir` (string) - The path to the binary for running `puppet apply`.
+    Usually, this would be found via the `$PATH` or `%PATH%` environment variable,
+    but some builders (notably, the Docker one) do not run profile-setup scripts,
+    therefore the Path is usually empty.
+
 -   `module_paths` (array of strings) - This is an array of paths to module
     directories on your local filesystem. These will be uploaded to the
     remote machine. By default, this is empty.
@@ -114,7 +119,8 @@ readability) to execute Puppet:
 
 ``` {.liquid}
 cd {{.WorkingDir}} && \
-{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
+{{.FacterVars}}{{if .Sudo}} sudo -E {{end}} \
+{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
   {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
