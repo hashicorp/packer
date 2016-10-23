@@ -38,6 +38,9 @@ The available configuration options are listed below. All elements are required.
     directory, the existence of a trailing slash is important. Read below on
     uploading directories.
 
+-   `sources` (array of strings) - A list of paths or directories to upload to
+    the machine. This is similar to the `source` option.
+
 -   `destination` (string) - The path where the file will be uploaded to in
     the machine. This value must be a writable location and any parent
     directories must already exist.

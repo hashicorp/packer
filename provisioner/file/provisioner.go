@@ -3,6 +3,7 @@ package file
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,14 +60,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Sources = append(p.config.Sources, p.config.Source)
 	}
 
-	if p.config.Direction == "upload" {
-		for _, src := range p.config.Sources {
-			if _, err := os.Stat(src); err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Bad source '%s': %s", src, err))
-			}
-		}
-	}
 
 	if len(p.config.Sources) < 1 {
 		errs = packer.MultiErrorAppend(errs,
@@ -76,6 +69,49 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.Destination == "" {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Destination must be specified."))
+	}
+
+	if p.config.Direction == "upload" {
+		// Download all downloadable files
+		for i, src := range p.config.Sources {
+			// Convert src to valid URL if possible
+			uploadURL, err := common.DownloadableURL(src)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+					"Failed to parse source: %s", src))
+			}
+
+			if !strings.HasPrefix(uploadURL, "file://") {
+				uploadFile, err := ioutil.TempFile("", "packer")
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+						"Failed to create temporary file to store source: %s", err))
+				}
+
+				defer os.Remove(uploadFile.Name())
+				uploadFile.Close()
+
+				// Download file to local temp path
+				config := &common.DownloadConfig{
+					Url: uploadURL,
+					TargetPath: uploadFile.Name(),
+					UserAgent: "Packer",
+				}
+				path, err, _ := download(config)
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+						"Failed to download: %s", uploadURL))
+				}
+
+				// Set new path for current src value
+				p.config.Sources[i] = path
+				src = path
+			}
+			if _, err := os.Stat(src); err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("Bad source '%s': %s", src, err))
+			}
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -129,9 +165,11 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 }
 
 func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
+	// Upload files and directories
 	for _, src := range p.config.Sources {
 		ui.Say(fmt.Sprintf("Uploading %s => %s", src, p.config.Destination))
 
+		// Stat the path to determine whether it's a directory or file
 		info, err := os.Stat(src)
 		if err != nil {
 			return err
@@ -167,4 +205,27 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func download(config *common.DownloadConfig) (string, error, bool) {
+	// Blatantly stolen from common/step_download.go
+	var path string
+	download := common.NewDownloadClient(config)
+
+	downloadCompleteCh := make(chan error, 1)
+	go func() {
+		var err error
+		path, err = download.Get()
+		downloadCompleteCh <- err
+	}()
+
+	for {
+		select {
+		case err := <-downloadCompleteCh:
+			if err != nil {
+				return "", err, true
+			}
+			return path, nil, true
+		}
+	}
 }
