@@ -56,7 +56,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		new(vboxcommon.StepSuppressMessages),
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:       b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -120,6 +121,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
+			Delay:   b.config.PostShutdownDelay,
 		},
 		new(vboxcommon.StepRemoveDevices),
 		&vboxcommon.StepVBoxManage{
@@ -135,16 +137,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run the steps.
-	if b.config.PackerDebug {
-		pauseFn := common.MultistepDebugFn(ui)
-		state.Put("pauseFn", pauseFn)
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: pauseFn,
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// Report any errors.

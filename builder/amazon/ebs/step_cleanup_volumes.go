@@ -30,12 +30,6 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 		instance = instanceRaw.(*ec2.Instance)
 	}
 	ui := state.Get("ui").(packer.Ui)
-	amisRaw := state.Get("amis")
-	if amisRaw == nil {
-		ui.Say("No AMIs to cleanup")
-		return
-	}
-
 	if instance == nil {
 		ui.Say("No volumes to clean up, skipping")
 		return

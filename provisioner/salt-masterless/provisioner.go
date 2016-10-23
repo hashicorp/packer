@@ -1,5 +1,5 @@
 // This package implements a provisioner for Packer that executes a
-// saltstack highstate within the remote machine
+// saltstack state within the remote machine
 package saltmasterless
 
 import (
@@ -28,6 +28,9 @@ type Config struct {
 
 	DisableSudo bool `mapstructure:"disable_sudo"`
 
+	// Custom state to run instead of highstate
+	CustomState string `mapstructure:"custom_state"`
+
 	// Local path to the minion config
 	MinionConfig string `mapstructure:"minion_config"`
 
@@ -49,7 +52,7 @@ type Config struct {
 	// Don't exit packer if salt-call returns an error code
 	NoExitOnFailure bool `mapstructure:"no_exit_on_failure"`
 
-	// Set the logging level for the salt highstate run
+	// Set the logging level for the salt-call run
 	LogLevel string `mapstructure:"log_level"`
 
 	// Command line args passed onto salt-call
@@ -103,6 +106,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// build the command line args to pass onto salt
 	var cmd_args bytes.Buffer
+
+	if p.config.CustomState == "" {
+		cmd_args.WriteString(" state.highstate")
+	} else {
+		cmd_args.WriteString(" state.sls ")
+		cmd_args.WriteString(p.config.CustomState)
+	}
 
 	if p.config.MinionConfig == "" {
 		// pass --file-root and --pillar-root if no minion_config is supplied
@@ -233,14 +243,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	ui.Message("Running highstate")
-	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local state.highstate %s", p.config.CmdArgs))}
+	ui.Message(fmt.Sprintf("Running: salt-call --local %s", p.config.CmdArgs))
+	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local %s", p.config.CmdArgs))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
 		}
 
-		return fmt.Errorf("Error executing highstate: %s", err)
+		return fmt.Errorf("Error executing salt-call: %s", err)
 	}
 
 	return nil

@@ -74,9 +74,6 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine.
 
--   `ssh_username` (string) - The username to use in order to communicate over
-    SSH to the running machine.
-
 -   `x509_cert_path` (string) - The local path to a valid X509 certificate for
     your AWS account. This is used for bundling the AMI. This X509 certificate
     must be registered with your account from the security credentials page in
@@ -210,7 +207,8 @@ builder.
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded
     up into Amazon EC2.  By default, this is blank, and Packer will
-    generate a temporary keypair.
+    generate a temporary keypair unless
+    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified when `ssh_keypair_name` is utilized.
 
@@ -239,7 +237,8 @@ builder.
 -   `x509_upload_path` (string) - The path on the remote machine where the X509
     certificate will be uploaded. This path must already exist and be writable.
     X509 certificates are uploaded after provisioning is run, so it is perfectly
-    okay to create this directory as part of the provisioning process.
+    okay to create this directory as part of the provisioning process. Defaults to
+    `/tmp`.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
@@ -327,8 +326,9 @@ include those files (see the `--no-filter` option of ec2-bundle-vol).
 ### Bundle Upload Command
 
 The default value for `bundle_upload_command` is shown below. It is split across
-multiple lines for convenience of reading. The bundle upload command is
-responsible for taking the bundled volume and uploading it to S3.
+multiple lines for convenience of reading. Access key and secret key are omitted
+if using instance profile. The bundle upload command is responsible for taking
+the bundled volume and uploading it to S3.
 
 ``` {.text}
 sudo -i -n ec2-upload-bundle \

@@ -74,6 +74,22 @@ straightforwarded, it is documented here.
 4.  Click "Generate new JSON key" for the Service Account you just created. A
     JSON file will be downloaded automatically. This is your *account file*.
 
+### Precedence of Authentication Methods
+
+Packer looks for credentials in the following places, preferring the first location found:
+
+1.  A `account_file` option in your packer file.
+
+2.  A JSON file (Service Account) whose path is specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+3.  A JSON file in a location known to the `gcloud` command-line tool. (`gcloud` creates it when it's configured)
+
+    On Windows, this is: `%APPDATA%/gcloud/application_default_credentials.json`.
+
+    On other systems: `$HOME/.config/gcloud/application_default_credentials.json`.
+
+4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches credentials from the metadata server. (Needs a correct VM authentication scope configuration, see above)
+
 ## Basic Example
 
 Below is a fully functioning example. It doesn't do anything useful, since no
@@ -141,7 +157,8 @@ builder.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
--   `metadata` (object of key/value strings)
+-   `metadata` (object of key/value strings) - Metadata applied to the launched
+    instance.
 
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
@@ -153,6 +170,18 @@ builder.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
+
+-   `scopes` (array of strings) - The service account scopes for launched instance.
+    Defaults to:
+
+``` {.json}
+[ "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/compute",
+  "https://www.googleapis.com/auth/devstorage.full_control" ]
+```
+
+-   `source_image_project_id` (string) - The project ID of the
+    project containing the source image.
 
 -   `startup_script_file` (string) - The filepath to a startup script to run on 
     the VM from which the image will be made.
@@ -170,10 +199,10 @@ builder.
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
-    
+
 ## Startup Scripts
 
-Startup scripts can be a powerful tool for configuring the instance from which the image is made. 
+Startup scripts can be a powerful tool for configuring the instance from which the image is made.
 The builder will wait for a startup script to terminate. A startup script can be provided via the
 `startup_script_file` or 'startup-script' instance creation `metadata` field. Therefore, the build
 time will vary depending on the duration of the startup script. If `startup_script_file` is set,

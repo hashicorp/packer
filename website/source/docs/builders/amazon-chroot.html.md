@@ -6,7 +6,7 @@ description: |
     in the EC2 documentation.
 layout: docs
 page_title: 'Amazon AMI Builder (chroot)'
-...
+---
 
 # AMI Builder (chroot)
 
@@ -69,7 +69,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `source_ami` (string) - The source AMI whose root volume will be copied and
     provisioned on the currently running instance. This must be an EBS-backed
-    AMI with a root volume snapshot that you have access to.
+    AMI with a root volume snapshot that you have access to. Note: this is not
+    used when `from_scratch` is set to true.
 
 ### Optional:
 
@@ -96,21 +97,21 @@ each category, the available configuration keys are alphabetized.
     you are building. This option is required to register HVM images. Can be
     "paravirtual" (default) or "hvm".
 
--   `chroot_mounts` (array of array of strings) - This is a list of additional
-    devices to mount into the chroot environment. This configuration parameter
+-   `chroot_mounts` (array of array of strings) - This is a list of devices
+    to mount into the chroot environment. This configuration parameter
     requires some additional documentation which is in the "Chroot Mounts"
     section below. Please read that section for more information on how to
     use this.
 
--   `command_wrapper` (string) - How to run shell commands. This defaults
-    to "{{.Command}}". This may be useful to set if you want to set
-    environmental variables or perhaps run it with `sudo` or so on. This is a
-    configuration template where the `.Command` variable is replaced with the
-    command to be run.
+-   `command_wrapper` (string) - How to run shell commands. This defaults to
+    `{{.Command}}`. This may be useful to set if you want to set environmental
+    variables or perhaps run it with `sudo` or so on. This is a configuration
+    template where the `.Command` variable is replaced with the command to
+    be run. Defaults to "{{.Command}}".
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
-    that will be copied into the chroot environment prior to provisioning. This
-    is useful, for example, to copy `/etc/resolv.conf` so that DNS lookups work.
+    that will be copied into the chroot environment prior to provisioning. Defaults
+    to `/etc/resolv.conf` so that DNS lookups work.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
@@ -121,16 +122,29 @@ each category, the available configuration keys are alphabetized.
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default `false`.
+    AMI if one with the same name already exists. Default false.
+
+-   `from_scratch` (boolean) - Build a new volume instead of starting from an
+    existing AMI root volume snapshot. Default false. If true, `source_ami` is
+    no longer used and the following options become required:
+    `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
+    below options are also required in this mode only:
+
+    -   `ami_block_device_mappings` (array of block device mappings) An entry
+        matching `root_device_name` should be set. See the
+        [amazon-ebs](/docs/builders/amazon-ebs.html) documentation for more
+        details on this parameter.
+
+    -   `root_device_name` (string) - The root device name. For example, `xvda`.
 
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
-    `packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
+    `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (integer) - The partition number containing the /
-    partition. By default this is the first partition of the volume.
+-   `mount_partition` (integer) - The partition number containing the
+    / partition. By default this is the first partition of the volume.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
@@ -139,11 +153,22 @@ each category, the available configuration keys are alphabetized.
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
 
+-   `pre_mount_commands` (array of strings) - A series of commands to execute
+    after attaching the root volume and before mounting the chroot. This is not
+    required unless using `from_scratch`. If so, this should include any
+    partitioning and filesystem creation commands. The path to the device is
+    provided by `{{.Device}}`.
+
+-   `post_mount_commands` (array of strings) - As `pre_mount_commands`, but the
+    commands are executed after mounting the root device and before the extra
+    mount and copy steps. The device and mount path are provided by
+    `{{.Device}}` and `{{.MountPath}}`.
+
 -   `root_volume_size` (integer) - The size of the root volume for the chroot
     environment, and the resulting AMI
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the ami_regions configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the `ami_regions` configuration option. Defaults to false.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
@@ -163,7 +188,7 @@ Here is a basic example. It is completely valid except for the access keys:
 
 ## Chroot Mounts
 
-The `chroot_mounts` configuration can be used to mount additional devices within
+The `chroot_mounts` configuration can be used to mount specific devices within
 the chroot. By default, the following additional mounts are added into the
 chroot by Packer:
 
@@ -175,7 +200,8 @@ chroot by Packer:
 
 These default mounts are usually good enough for anyone and are sane defaults.
 However, if you want to change or add the mount points, you may using the
-`chroot_mounts` configuration. Here is an example configuration:
+`chroot_mounts` configuration. Here is an example configuration which only
+mounts `/prod` and `/dev`:
 
 ``` {.javascript}
 {
@@ -233,6 +259,36 @@ services:
   "type": "shell",
   "inline": [
     "rm -f /usr/sbin/policy-rc.d"
+  ]
+}
+```
+
+## Building From Scratch
+
+This example demonstrates the essentials of building an image from scratch. A
+15G gp2 (SSD) device is created (overriding the default of standard/magnetic).
+The device setup commands partition the device with one partition for use as an
+HVM image and format it ext4. This builder block should be followed by
+provisioning commands to install the os and bootloader.
+
+``` {.javascript}
+{
+  "type": "amazon-chroot",
+  "ami_name": "packer-from-scratch {{timestamp}}"
+  "from_scratch": true,
+  "ami_virtualization_type": "hvm",
+  "device_setup_commands": [
+    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
+    "mkfs.ext4 {{.Device}}1"
+  ],
+  "root_volume_size": 15,
+  "root_device_name": "xvda",
+  "ami_block_device_mappings": [
+    {
+      "device_name": "xvda",
+      "delete_on_termination": true,
+      "volume_type": "gp2"
+    }
   ]
 }
 ```

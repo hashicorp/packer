@@ -60,9 +60,6 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine.
 
--   `ssh_username` (string) - The username to use in order to communicate over
-    SSH to the running machine.
-
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add the block
@@ -144,6 +141,10 @@ builder.
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Default `false`.
+
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
@@ -188,7 +189,8 @@ builder.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
-    generate a temporary keypair.
+    generate a temporary keypair unless
+    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 

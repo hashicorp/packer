@@ -79,9 +79,12 @@ type Config struct {
 	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
 	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
 	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
+	CustomDataFile                  string `mapstructure:"custom_data_file"`
+	customData                      string
 
 	// OS
-	OSType string `mapstructure:"os_type"`
+	OSType       string `mapstructure:"os_type"`
+	OSDiskSizeGB int32  `mapstructure:"os_disk_size_gb"`
 
 	// Runtime Values
 	UserName               string
@@ -198,6 +201,11 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	setRuntimeValues(&c)
 	setUserNamePassword(&c)
 	err = setCloudEnvironment(&c)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = setCustomData(&c)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -335,6 +343,20 @@ func setCloudEnvironment(c *Config) error {
 	env, err := azure.EnvironmentFromName(envName)
 	c.cloudEnvironment = &env
 	return err
+}
+
+func setCustomData(c *Config) error {
+	if c.CustomDataFile == "" {
+		return nil
+	}
+
+	b, err := ioutil.ReadFile(c.CustomDataFile)
+	if err != nil {
+		return err
+	}
+
+	c.customData = base64.StdEncoding.EncodeToString(b)
+	return nil
 }
 
 func provideDefaultValues(c *Config) {
@@ -476,7 +498,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// OS
-	if c.OSType != constants.Target_Linux && c.OSType != constants.Target_Windows {
+	if strings.EqualFold(c.OSType, constants.Target_Linux) {
+		c.OSType = constants.Target_Linux
+	} else if strings.EqualFold(c.OSType, constants.Target_Windows) {
+		c.OSType = constants.Target_Windows
+	} else if c.OSType == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An os_type must be specified"))
+	} else {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
 	}
 }

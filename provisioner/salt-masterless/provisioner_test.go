@@ -48,6 +48,30 @@ func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_CustomeState(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.Contains(p.config.CmdArgs, "state.") {
+		t.Fatal("a state should be specified in CmdArgs")
+	}
+
+	config["custom_state"] = "birb"
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !strings.Contains(p.config.CmdArgs, "state.sls birb") {
+		t.Fatal("birb state should be specified in CmdArgs")
+	}
+}
+
 func TestProvisionerPrepare_MinionConfig(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
