@@ -40,7 +40,7 @@ dev: deps ## Build and install a development build
 	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 fmt: ## Format Go code
-	go fmt `go list ./... | grep -v vendor`
+	@gofmt -s -w `go list -f {{.Dir}} ./... | grep -v "/vendor/"`
 
 # Install js-beautify with npm install -g js-beautify
 fmt-examples:
@@ -52,7 +52,7 @@ generate: deps ## Generate dynamically generated code
 	go generate .
 	gofmt -w command/plugin.go
 
-test: deps ## Run unit tests
+test: fmt deps ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
