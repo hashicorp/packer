@@ -21,6 +21,7 @@ import (
 	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	filebuilder "github.com/mitchellh/packer/builder/file"
 	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
+	lxcbuilder "github.com/mitchellh/packer/builder/lxc"
 	nullbuilder "github.com/mitchellh/packer/builder/null"
 	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
 	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
@@ -73,6 +74,7 @@ var Builders = map[string]packer.Builder{
 	"docker":          new(dockerbuilder.Builder),
 	"file":            new(filebuilder.Builder),
 	"googlecompute":   new(googlecomputebuilder.Builder),
+	"lxc":             new(lxcbuilder.Builder),
 	"null":            new(nullbuilder.Builder),
 	"openstack":       new(openstackbuilder.Builder),
 	"parallels-iso":   new(parallelsisobuilder.Builder),
