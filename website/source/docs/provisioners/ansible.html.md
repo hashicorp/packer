@@ -50,6 +50,11 @@ Optional Parameters:
 - `command` (string) - The command to invoke ansible.
    Defaults to `ansible-playbook`.
 
+- `inventory_file` (string) - The file or directory to use.
+
+- `inventory_path` (string) - The path where to place dynamically generated inventory by packer.
+  Useful when you set `inventory_file` as directory. Defaults to empty string.
+
 - `groups` (array of strings) - The groups into which the Ansible host
   should be placed. When unspecified, the host is not associated with any
   groups.
