@@ -25,13 +25,8 @@ type StepKeyPair struct {
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.SSHAgentAuth {
-		ui.Say("Using SSH Agent")
-		return multistep.ActionContinue
-	}
-
 	if s.PrivateKeyFile != "" {
-		ui.Say("Using existing ssh private key")
+		ui.Say("Using existing SSH private key")
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
@@ -42,6 +37,17 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("keyPair", s.KeyPairName)
 		state.Put("privateKey", string(privateKeyBytes))
 
+		return multistep.ActionContinue
+	}
+
+	if s.SSHAgentAuth && s.KeyPairName == "" {
+		ui.Say("Using SSH Agent with key pair in Source AMI")
+		return multistep.ActionContinue
+	}
+
+	if s.SSHAgentAuth && s.KeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
+		state.Put("keyPair", s.KeyPairName)
 		return multistep.ActionContinue
 	}
 
