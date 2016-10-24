@@ -194,6 +194,12 @@ builder.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
+    authenticate connections to the source instance. No temporary keypair will
+    be created, and the values of `ssh_password` and `ssh_private_key_file` will
+    be ignored. This is suitable for use if the source AMI already has authorized
+    keys configured.
+
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
     IP if available.
 

@@ -13,6 +13,7 @@ import (
 
 type StepKeyPair struct {
 	Debug                bool
+	SSHAgentAuth         bool
 	DebugKeyPath         string
 	TemporaryKeyPairName string
 	KeyPairName          string
@@ -23,6 +24,11 @@ type StepKeyPair struct {
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.SSHAgentAuth {
+		ui.Say("Using SSH Agent")
+		return multistep.ActionContinue
+	}
 
 	if s.PrivateKeyFile != "" {
 		ui.Say("Using existing ssh private key")
