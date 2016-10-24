@@ -188,17 +188,20 @@ builder.
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
-    used for SSH with the machine. By default, this is blank, and Packer will
+    used for SSH with the machine. The key must match a key pair name loaded
+    up into Amazon EC2.  By default, this is blank, and Packer will
     generate a temporary keypair unless
     [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
-    must be specified with this.
+    or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
     authenticate connections to the source instance. No temporary keypair will
     be created, and the values of `ssh_password` and `ssh_private_key_file` will
-    be ignored. This is suitable for use if the source AMI already has authorized
-    keys configured.
+    be ignored. To use this option with a key pair already configured in the source
+    AMI, leave the `ssh_keypair_name` blank. To associate an existing key pair
+    in AWS with the source instance, set the `ssh_keypair_name` field to the name
+    of the key pair.
 
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
     IP if available.
