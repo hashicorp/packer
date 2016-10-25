@@ -101,6 +101,7 @@ Packer to work:
         "ec2:DescribeSubnets",
         "ec2:CreateSecurityGroup",
         "ec2:DeleteSecurityGroup",
+        "ec2:DescribeSecurityGroups",
         "ec2:AuthorizeSecurityGroupIngress",
         "ec2:CreateImage",
         "ec2:CopyImage",
