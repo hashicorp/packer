@@ -30,16 +30,15 @@ The file provisioner can upload both single files and complete directories.
 
 ## Configuration Reference
 
-The available configuration options are listed below. All elements are required.
+The available configuration options are listed below.
+
+### Required
 
 -   `source` (string) - The path to a local file or directory to upload to
     the machine. The path can be absolute or relative. If it is relative, it is
     relative to the working directory when Packer is executed. If this is a
     directory, the existence of a trailing slash is important. Read below on
     uploading directories.
-
--   `sources` (array of strings) - A list of paths or directories to upload to
-    the machine. This is similar to the `source` option.
 
 -   `destination` (string) - The path where the file will be uploaded to in
     the machine. This value must be a writable location and any parent
@@ -48,6 +47,16 @@ The available configuration options are listed below. All elements are required.
 -   `direction` (string) - The direction of the file transfer. This defaults to
     "upload." If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
+
+### Optional
+
+-   `checksum` (string) - The checksum for the file. The checksum is only used
+    when a remote url is defined for the `source`. The type of the checksum is
+    specified with `checksum_type`, documented below.
+
+-   `checksum_type` (string) - The type of the checksum specified in `checksum`.
+    Valid values are "", "md5", "sha1", "sha256", or "sha512" currently.
+    Setting `checksum_type` to "" or not setting at all will skip checksumming.
 
 ## Directory Uploads
 

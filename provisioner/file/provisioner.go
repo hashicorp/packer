@@ -1,9 +1,9 @@
 package file
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,7 +21,10 @@ type Config struct {
 	Source  string
 	Sources []string
 
-	// The remote path where the local file will be uploaded to.
+	Checksum string
+	ChecksumType string `mapstructure:"checksum_type"`
+
+	// The remote path where the file will be uploaded/downloaded to.
 	Destination string
 
 	// Direction
@@ -72,6 +75,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.Direction == "upload" {
+		// Create tempdir for downloads
+		cache := &packer.FileCache{CacheDir: "packer_cache"}
+
 		// Download all downloadable files
 		for i, src := range p.config.Sources {
 			// Convert src to valid URL if possible
@@ -82,32 +88,54 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			}
 
 			if !strings.HasPrefix(uploadURL, "file://") {
-				uploadFile, err := ioutil.TempFile("", "packer")
-				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf(
-						"Failed to create temporary file to store source: %s", err))
+				// Prepare download location
+				cacheKey := filepath.Base(uploadURL)
+				targetPath := cache.Lock(cacheKey)
+				newPath := filepath.Join(filepath.Dir(targetPath), cacheKey)
+				defer cache.Unlock(cacheKey)
+
+				var checksum []byte
+				if p.config.Checksum != "" {
+					var err error
+					checksum, err = hex.DecodeString(p.config.Checksum)
+					if err != nil {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+							"Error parsing checksum: %s", err))
+					}
 				}
 
-				defer os.Remove(uploadFile.Name())
-				uploadFile.Close()
-
-				// Download file to local temp path
-				config := &common.DownloadConfig{
+				// Prepare download config
+				client := common.NewDownloadClient(&common.DownloadConfig{
 					Url: uploadURL,
-					TargetPath: uploadFile.Name(),
+					TargetPath: targetPath,
+					Checksum: checksum,
+					Hash: common.HashForType(p.config.ChecksumType),
 					UserAgent: "Packer",
-				}
-				path, err, _ := download(config)
-				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf(
-						"Failed to download: %s", uploadURL))
+				})
+
+				// Download if local file doesn't exist for checksum invalid
+				if verified, _ := client.VerifyChecksum(newPath); !verified {
+					path, err, _ := download(client)
+					if err != nil {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+							"Failed to download %s: %s", uploadURL, err))
+					}
+
+					// Rename file back to original file name
+					err = os.Rename(path, newPath)
+
+					if err != nil {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+							"Failed to rename downloaded %s: %s", targetPath, err))
+					}
 				}
 
 				// Set new path for current src value
-				p.config.Sources[i] = path
-				src = path
+				p.config.Sources[i] = newPath
 			}
-			if _, err := os.Stat(src); err != nil {
+
+			// Verify that the given source file exists
+			if _, err := os.Stat(p.config.Sources[i]); err != nil {
 				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("Bad source '%s': %s", src, err))
 			}
@@ -207,10 +235,9 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func download(config *common.DownloadConfig) (string, error, bool) {
+func download(download *common.DownloadClient) (string, error, bool) {
 	// Blatantly stolen from common/step_download.go
 	var path string
-	download := common.NewDownloadClient(config)
 
 	downloadCompleteCh := make(chan error, 1)
 	go func() {
