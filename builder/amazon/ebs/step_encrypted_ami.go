@@ -78,7 +78,7 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	unencImage := unencImagesResp.Images[0]
 
 	// Remove unencrypted AMI
-	ui.Say("Deregistering unecrypted AMI")
+	ui.Say("Deregistering unencrypted AMI")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: aws.String(id)}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
