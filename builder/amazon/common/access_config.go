@@ -8,10 +8,10 @@ import (
 	"unicode"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"github.com/aws/aws-sdk-go/aws/session"
+	//"github.com/aws/aws-sdk-go/aws/credentials"
+	// "github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	// "github.com/aws/aws-sdk-go/aws/ec2metadata"
+	// "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -28,41 +28,44 @@ type AccessConfig struct {
 // Config returns a valid aws.Config object for access to AWS services, or
 // an error if the authentication and region couldn't be resolved
 func (c *AccessConfig) Config() (*aws.Config, error) {
-	var creds *credentials.Credentials
+	//var creds *credentials.Credentials
 
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
 	}
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
-	if c.ProfileName != "" {
-		profile, err := NewFromProfile(c.ProfileName)
-		if err != nil {
-			return nil, err
+	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+	/*
+		if c.ProfileName != "" {
+			profile, err := NewFromProfile(c.ProfileName)
+			if err != nil {
+				return nil, err
+			}
+			creds, err = profile.CredentialsFromProfile(config)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			session, err := session.NewSession(config)
+			if err != nil {
+				return nil, err
+			}
+			creds = credentials.NewChainCredentials([]credentials.Provider{
+				&credentials.StaticProvider{Value: credentials.Value{
+					AccessKeyID:     c.AccessKey,
+					SecretAccessKey: c.SecretKey,
+					SessionToken:    c.Token,
+				}},
+				&credentials.EnvProvider{},
+				&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
+				&ec2rolecreds.EC2RoleProvider{
+					Client: ec2metadata.New(session),
+				},
+			})
 		}
-		creds, err = profile.CredentialsFromProfile(config)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		session, err := session.NewSession(config)
-		if err != nil {
-			return nil, err
-		}
-		creds = credentials.NewChainCredentials([]credentials.Provider{
-			&credentials.StaticProvider{Value: credentials.Value{
-				AccessKeyID:     c.AccessKey,
-				SecretAccessKey: c.SecretKey,
-				SessionToken:    c.Token,
-			}},
-			&credentials.EnvProvider{},
-			&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
-			&ec2rolecreds.EC2RoleProvider{
-				Client: ec2metadata.New(session),
-			},
-		})
-	}
-	return config.WithCredentials(creds), nil
+		return config.WithCredentials(creds), nil
+	*/
+	return config, nil
 }
 
 // Region returns the aws.Region object for access to AWS services, requesting

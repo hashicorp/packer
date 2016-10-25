@@ -409,8 +409,12 @@ func (u *uploader) initSize() {
 // does not need to be wrapped in a mutex because nextReader is only called
 // from the main thread.
 func (u *uploader) nextReader() (io.ReadSeeker, int, error) {
+	type readerAtSeeker interface {
+		io.ReaderAt
+		io.ReadSeeker
+	}
 	switch r := u.in.Body.(type) {
-	case io.ReaderAt:
+	case readerAtSeeker:
 		var err error
 
 		n := u.ctx.PartSize
