@@ -283,7 +283,7 @@ for the version of HyperV that is running.
 
 Floppy drives are no longer supported by generation 2 machines. This requires you to 
 take another approach when dealing with preseed or answer files. Two possible options
-are using virtua dvd drives or using the built in web server.
+are using virtual dvd drives or using the built in web server.
 
 When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines. 
 
@@ -333,7 +333,7 @@ if (test-path $isoFolder){
 
 Packer config:
 
-```text
+```javascript
 {
   "builders": [
   {
@@ -389,7 +389,7 @@ Packer config:
 
 autounattend.xml:
 
-```text
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="windowsPE">
@@ -857,7 +857,7 @@ Finish proxy after sysprep -->
 
 Packer config:
 
-```text
+```javascript
 {
   "builders": [
   {
