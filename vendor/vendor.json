@@ -808,6 +808,12 @@
 			"revision": "50c6bc5e4292a1d4e65c6e9be5f53be28bcbe28e"
 		},
 		{
+			"checksumSHA1": "G9LfJI9gySazd+MyyC6QbTHx4to=",
+			"path": "golang.org/x/text/encoding/unicode",
+			"revision": "16e1d1f27f7aba51c74c0aeb7a7ee31a75c5c63c",
+			"revisionTime": "2016-10-12T14:34:48Z"
+		},
+		{
 			"checksumSHA1": "hrUTmck0J+LE+lBtCvHvemNDY8U=",
 			"path": "google.golang.org/api/compute/v1",
 			"revision": "ff0a1ff302946b997eb1832381419d1f95143483"
