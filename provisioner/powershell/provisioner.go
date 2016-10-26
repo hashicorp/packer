@@ -112,7 +112,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.EnvVarFormat == "" {
-		p.config.EnvVarFormat = `$env:%s="%s"; `
+		p.config.EnvVarFormat = `$env:%s=\"%s\"; `
 	}
 
 	if p.config.ElevatedEnvVarFormat == "" {
