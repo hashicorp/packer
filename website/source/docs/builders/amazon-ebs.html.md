@@ -345,4 +345,4 @@ termination of the instance building the new image. Packer will attempt to clean
 up all residual volumes that are not designated by the user to remain after
 termination. If you need to preserve those source volumes, you can overwrite the
 termination setting by specifying `delete_on_termination=false` in the
-`launch_device_mappings` block for the device.
+`launch_block_device_mappings` block for the device.
