@@ -3,7 +3,7 @@ description: |
     The Packer compress post-processor takes an artifact with files (such as from
     VMware or VirtualBox) and compresses the artifact into a single archive.
 layout: docs
-page_title: 'compress Post-Processor'
+page_title: 'Compress Post-Processor'
 ...
 
 # Compress Post-Processor
