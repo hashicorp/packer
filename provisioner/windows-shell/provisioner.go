@@ -308,7 +308,7 @@ func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
 		if len(keyValue) != 2 || keyValue[0] == "" {
 			err = errors.New(fmt.Sprintf("Shell provisioner environment variables must be in key=value format. Currently it is '%s'", envVar))
 			return
-		}		
+		}
 		envVars[keyValue[0]] = keyValue[1]
 	}
 	// Create a list of env var keys in sorted order
