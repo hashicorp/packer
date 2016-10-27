@@ -122,18 +122,19 @@ each category, the available configuration keys are alphabetized.
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default false.
+    AMI if one with the same name already exists. Default `false`.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
-    existing AMI root volume snapshot. Default false. If true, `source_ami` is
+    existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
     no longer used and the following options become required:
     `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
     below options are also required in this mode only:
 
-    -   `ami_block_device_mappings` (array of block device mappings) An entry
-        matching `root_device_name` should be set. See the
-        [amazon-ebs](/docs/builders/amazon-ebs.html) documentation for more
-        details on this parameter.
+    -   `ami_block_device_mappings` (array of block device mappings) - Add the block
+    device mappings to the AMI. A `device_name` entry matching `root_device_name`
+    should be set. The block device mappings allow for keys:
+
+        <%= partial "partials/builders/ami-block-device-mappings" %>
 
     -   `root_device_name` (string) - The root device name. For example, `xvda`.
 
@@ -170,7 +171,7 @@ each category, the available configuration keys are alphabetized.
     this field must be defined.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
-    validation of the `ami_regions` configuration option. Defaults to false.
+    validation of the `ami_regions` configuration option. Default `false`.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
