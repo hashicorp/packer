@@ -164,8 +164,10 @@ each category, the available configuration keys are alphabetized.
     mount and copy steps. The device and mount path are provided by
     `{{.Device}}` and `{{.MountPath}}`.
 
--   `root_volume_size` (integer) - The size of the root volume for the chroot
-    environment, and the resulting AMI
+-   `root_volume_size` (integer) - The size of the root volume in GB for the
+    chroot environment and the resulting AMI. Default size is the snapshot size
+    of the `source_ami` unless `from_scratch` is `true`, in which case
+    this field must be defined.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Defaults to false.
