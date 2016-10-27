@@ -5,6 +5,10 @@ IMPROVEMENTS:
   * builder/amazon: Dynamic source AMI [GH-3817]
   * builder/googlecompute: Support custom scopes. [GH-4043]
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
+  
+BUG FIXES:
+
+  * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
 
 ## 0.11.0 (October 21, 2016)
 
