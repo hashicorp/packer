@@ -95,7 +95,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
 	// If we used an SSH private key file, do not go about deleting
 	// keypairs
-	if s.PrivateKeyFile != "" || s.KeyPairName == "" {
+	if s.PrivateKeyFile != "" || s.KeyPairName != "" {
 		return
 	}
 
