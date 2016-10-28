@@ -39,7 +39,7 @@ will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
 First, [download a pre-built Packer binary](http://www.packer.io/downloads.html)
-for your operating system or [compile Packer yourself](#developing-packer).
+for your operating system or [compile Packer yourself](CONTRIBUTING.md#setting-up-go-to-work-on-packer).
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
