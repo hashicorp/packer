@@ -1,16 +1,15 @@
-// The amazonebs package contains a packer.Builder implementation that
-// builds AMIs for Amazon EC2.
-//
-// In general, there are two types of AMIs that can be created: ebs-backed or
-// instance-store. This builder _only_ builds ebs-backed images.
-package ebs
+// The ebsvolume package contains a packer.Builder implementation that
+// builds EBS volumes for Amazon EC2 using an ephemeral instance,
+package ebsvolume
 
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/errwrap"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
@@ -20,16 +19,13 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-// The unique ID for this builder
-const BuilderId = "mitchellh.amazonebs"
-
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
-	awscommon.AMIConfig    `mapstructure:",squash"`
-	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	VolumeRunTags          map[string]string `mapstructure:"run_volume_tags"`
+
+	VolumeMappings        []BlockDevice `mapstructure:"ebs_volumes"`
+	AMIEnhancedNetworking bool          `mapstructure:"enhanced_networking"`
 
 	ctx interpolate.Context
 }
@@ -52,8 +48,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -70,7 +64,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	session := session.New(config)
+	session, err := session.NewSession(config)
+	if err != nil {
+		return nil, errwrap.Wrapf("Error creating AWS Session: {{err}}", err)
+	}
+
 	ec2conn := ec2.New(session)
 
 	// If the subnet is specified but not the AZ, try to determine the AZ automatically
@@ -91,12 +89,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	launchBlockDevices := commonBlockDevices(b.config.VolumeMappings)
+
+	var volumeIds *[]string
+
 	// Build the steps
 	steps := []multistep.Step{
-		&awscommon.StepPreValidate{
-			DestAmiName:     b.config.AMIName,
-			ForceDeregister: b.config.AMIForceDeregister,
-		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
@@ -114,9 +112,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CommConfig:       &b.config.RunConfig.Comm,
 			VpcId:            b.config.VpcId,
 		},
-		&stepCleanupVolumes{
-			BlockDevices: b.config.BlockDevices,
-		},
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
@@ -131,12 +126,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			EbsOptimized:             b.config.EbsOptimized,
 			AvailabilityZone:         b.config.AvailabilityZone,
-			BlockDevices:             b.config.BlockDevices,
+			BlockDevices:             launchBlockDevices,
 			Tags:                     b.config.RunTags,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
 		&stepTagEBSVolumes{
-			VolumeRunTags: b.config.VolumeRunTags,
+			VolumeMapping: b.config.VolumeMappings,
+			VolumeIDs:     &volumeIds,
 		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
@@ -161,26 +157,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepModifyEBSBackedInstance{
 			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
-		&awscommon.StepDeregisterAMI{
-			ForceDeregister: b.config.AMIForceDeregister,
-			AMIName:         b.config.AMIName,
-		},
-		&stepCreateAMI{},
-		&stepCreateEncryptedAMICopy{},
-		&awscommon.StepAMIRegionCopy{
-			AccessConfig: &b.config.AccessConfig,
-			Regions:      b.config.AMIRegions,
-			Name:         b.config.AMIName,
-		},
-		&awscommon.StepModifyAMIAttributes{
-			Description:  b.config.AMIDescription,
-			Users:        b.config.AMIUsers,
-			Groups:       b.config.AMIGroups,
-			ProductCodes: b.config.AMIProductCodes,
-		},
-		&awscommon.StepCreateTags{
-			Tags: b.config.AMITags,
-		},
 	}
 
 	// Run!
@@ -192,19 +168,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	// If there are no AMIs, then just return
-	if _, ok := state.GetOk("amis"); !ok {
-		return nil, nil
-	}
-
-	// Build the artifact and return it
-	artifact := &awscommon.Artifact{
-		Amis:           state.Get("amis").(map[string]string),
-		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
-	}
-
-	return artifact, nil
+	ui.Say(fmt.Sprintf("Created Volumes: %s", strings.Join(*volumeIds, ", ")))
+	return nil, nil
 }
 
 func (b *Builder) Cancel() {
