@@ -26,6 +26,7 @@ import (
 	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
 	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
+	profitbricksbuilder "github.com/mitchellh/packer/builder/profitbricks"
 	qemubuilder "github.com/mitchellh/packer/builder/qemu"
 	virtualboxisobuilder "github.com/mitchellh/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
@@ -79,6 +80,7 @@ var Builders = map[string]packer.Builder{
 	"openstack":       new(openstackbuilder.Builder),
 	"parallels-iso":   new(parallelsisobuilder.Builder),
 	"parallels-pvm":   new(parallelspvmbuilder.Builder),
+	"profitbricks":    new(profitbricksbuilder.Builder),
 	"qemu":            new(qemubuilder.Builder),
 	"virtualbox-iso":  new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":  new(virtualboxovfbuilder.Builder),
