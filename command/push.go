@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
-	"github.com/mitchellh/packer/helper/flag-kv"
 	"github.com/mitchellh/packer/template"
 )
 
@@ -43,14 +42,14 @@ func (c *PushCommand) Run(args []string) int {
 	var name string
 	var create bool
 
-	f := c.Meta.FlagSet("push", FlagSetVars)
-	f.Usage = func() { c.Ui.Error(c.Help()) }
-	f.StringVar(&token, "token", "", "token")
-	f.StringVar(&message, "m", "", "message")
-	f.StringVar(&message, "message", "", "message")
-	f.StringVar(&name, "name", "", "name")
-	f.BoolVar(&create, "create", false, "create (deprecated)")
-	if err := f.Parse(args); err != nil {
+	flags := c.Meta.FlagSet("push", FlagSetVars)
+	flags.Usage = func() { c.Ui.Error(c.Help()) }
+	flags.StringVar(&token, "token", "", "token")
+	flags.StringVar(&message, "m", "", "message")
+	flags.StringVar(&message, "message", "", "message")
+	flags.StringVar(&name, "name", "", "name")
+	flags.BoolVar(&create, "create", false, "create (deprecated)")
+	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
@@ -58,9 +57,9 @@ func (c *PushCommand) Run(args []string) int {
 		c.Ui.Say("[DEPRECATED] -m/-message is deprecated and will be removed in a future Packer release")
 	}
 
-	args = f.Args()
+	args = flags.Args()
 	if len(args) != 1 {
-		f.Usage()
+		flags.Usage()
 		return 1
 	}
 
@@ -190,15 +189,7 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Collect the variables from CLI args and any var files
-	uploadOpts.Vars = make(map[string]string)
-	if vs := f.Lookup("var"); vs != nil {
-		flags := vs.Value.(*kvflag.Flag)
-		vars := map[string]string(*flags)
-
-		for k, v := range vars {
-			uploadOpts.Vars[k] = v
-		}
-	}
+	uploadOpts.Vars = core.Context().UserVariables
 
 	// Add the upload metadata
 	metadata := make(map[string]interface{})
@@ -332,6 +323,17 @@ func (c *PushCommand) upload(
 		Name:   bc.Name,
 		Builds: make([]atlas.BuildConfigBuild, 0, len(opts.Builds)),
 	}
+
+	// Build the BuildVars struct
+
+	buildVars := atlas.BuildVars{}
+	for k, v := range opts.Vars {
+		buildVars = append(buildVars, atlas.BuildVar{
+			Key:   k,
+			Value: v,
+		})
+	}
+
 	for name, info := range opts.Builds {
 		version.Builds = append(version.Builds, atlas.BuildConfigBuild{
 			Name:     name,
@@ -343,7 +345,7 @@ func (c *PushCommand) upload(
 	// Start the upload
 	doneCh, errCh := make(chan struct{}), make(chan error)
 	go func() {
-		err := c.client.UploadBuildConfigVersion(&version, opts.Metadata, opts.Vars, r, r.Size)
+		err := c.client.UploadBuildConfigVersion(&version, opts.Metadata, buildVars, r, r.Size)
 		if err != nil {
 			errCh <- err
 			return
