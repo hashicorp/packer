@@ -251,7 +251,7 @@ func SleepSeconds() (seconds int) {
 	if override != "" {
 		n, err := strconv.Atoi(override)
 		if err != nil {
-			log.Printf("Invalid timeout seconds '%s', using default", override)
+			log.Printf("Invalid sleep seconds '%s', using default", override)
 		} else {
 			seconds = n
 		}
