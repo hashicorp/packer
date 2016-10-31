@@ -12,6 +12,8 @@ IMPROVEMENTS:
   * builder/amazon: Dynamic source AMI [GH-3817]
   * builder/googlecompute: Support custom scopes. [GH-4043]
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
+  * builder/amazon: Allow polling delay override with `AWS_POLL_DELAY_SECONDS`.
+      [GH-4083]
   
 BUG FIXES:
 
