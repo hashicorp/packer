@@ -3,6 +3,8 @@
 FEATURES:
 * **New builder:** "cloudstack" Can create new templates for use with
     CloudStack taking either an ISO or existing template as input. [GH-3909]
+* **New builder:** "profitbricks" Builder for creating images in the
+    ProfitBricks cloud. [GH-3660]
 
 
 IMPROVEMENTS:
