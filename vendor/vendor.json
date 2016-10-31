@@ -704,6 +704,12 @@
 			"revision": "646ae4a518c1c3be0739df898118d9bccf993858"
 		},
 		{
+			"checksumSHA1": "mWcSPrZfr9TKc4aoQEPlZ7fBdp0=",
+			"path": "github.com/xanzy/go-cloudstack/cloudstack",
+			"revision": "7d6a4449b586546246087e96e5c97dbc450f4917",
+			"revisionTime": "2016-09-28T15:38:44Z"
+		},
+		{
 			"checksumSHA1": "h+pFYiRHBogczS8/F1NoN3Ata44=",
 			"path": "golang.org/x/crypto/curve25519",
 			"revision": "1f22c0103821b9390939b6776727195525381532"
