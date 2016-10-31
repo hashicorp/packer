@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
+	"github.com/mitchellh/packer/helper/flag-kv"
 	"github.com/mitchellh/packer/template"
 )
 
@@ -188,6 +189,17 @@ func (c *PushCommand) Run(args []string) int {
 		uploadOpts.Builds[b.Name] = info
 	}
 
+	// Collect the variables from CLI args and any var files
+	uploadOpts.Vars = make(map[string]string)
+	if vs := f.Lookup("var"); vs != nil {
+		flags := vs.Value.(*kvflag.Flag)
+		vars := map[string]string(*flags)
+
+		for k, v := range vars {
+			uploadOpts.Vars[k] = v
+		}
+	}
+
 	// Add the upload metadata
 	metadata := make(map[string]interface{})
 	if message != "" {
@@ -331,7 +343,7 @@ func (c *PushCommand) upload(
 	// Start the upload
 	doneCh, errCh := make(chan struct{}), make(chan error)
 	go func() {
-		err := c.client.UploadBuildConfigVersion(&version, opts.Metadata, r, r.Size)
+		err := c.client.UploadBuildConfigVersion(&version, opts.Metadata, opts.Vars, r, r.Size)
 		if err != nil {
 			errCh <- err
 			return
@@ -348,6 +360,7 @@ type uploadOpts struct {
 	Slug     string
 	Builds   map[string]*uploadBuildInfo
 	Metadata map[string]interface{}
+	Vars     map[string]string
 }
 
 type uploadBuildInfo struct {

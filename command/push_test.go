@@ -204,16 +204,29 @@ func TestPush_vars(t *testing.T) {
 	}
 
 	args := []string{
+		"-var-file", filepath.Join(testFixture("push-vars"), "vars.json"),
 		"-var", "name=foo/bar",
+		"-var", "one=two",
+		"-var", "overridden=yes",
 		filepath.Join(testFixture("push-vars"), "template.json"),
 	}
 	if code := c.Run(args); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
 
-	expected := "foo/bar"
-	if actualOpts.Slug != expected {
+	if actualOpts.Slug != "foo/bar" {
 		t.Fatalf("bad: %#v", actualOpts.Slug)
+	}
+
+	expected := map[string]string{
+		"bar":        "baz",
+		"name":       "foo/bar",
+		"null":       "",
+		"one":        "two",
+		"overridden": "yes",
+	}
+	if !reflect.DeepEqual(actualOpts.Vars, expected) {
+		t.Fatalf("bad: %#v", actualOpts.Vars)
 	}
 }
 
