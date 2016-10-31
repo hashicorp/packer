@@ -192,6 +192,7 @@ func TestPush_vars(t *testing.T) {
 	var actualOpts *uploadOpts
 	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
 		actualOpts = opts
+		fmt.Printf("opts: %#v\n", opts)
 
 		doneCh := make(chan struct{})
 		close(doneCh)
@@ -204,9 +205,9 @@ func TestPush_vars(t *testing.T) {
 	}
 
 	args := []string{
-		"-var-file", filepath.Join(testFixture("push-vars"), "vars.json"),
 		"-var", "name=foo/bar",
 		"-var", "one=two",
+		"-var-file", filepath.Join(testFixture("push-vars"), "vars.json"),
 		"-var", "overridden=yes",
 		filepath.Join(testFixture("push-vars"), "template.json"),
 	}
@@ -215,7 +216,7 @@ func TestPush_vars(t *testing.T) {
 	}
 
 	if actualOpts.Slug != "foo/bar" {
-		t.Fatalf("bad: %#v", actualOpts.Slug)
+		t.Fatalf("bad slug: %s", actualOpts.Slug)
 	}
 
 	expected := map[string]string{
@@ -226,7 +227,7 @@ func TestPush_vars(t *testing.T) {
 		"overridden": "yes",
 	}
 	if !reflect.DeepEqual(actualOpts.Vars, expected) {
-		t.Fatalf("bad: %#v", actualOpts.Vars)
+		t.Fatalf("bad vars: got %#v\n expected %#v\n", actualOpts.Vars, expected)
 	}
 }
 
