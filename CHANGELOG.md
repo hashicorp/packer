@@ -9,6 +9,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
+  * builder/vmware: Fixed build error when shutting down. [GH-4041]
 
 ## 0.11.0 (October 21, 2016)
 
