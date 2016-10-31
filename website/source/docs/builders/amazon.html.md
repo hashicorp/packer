@@ -32,6 +32,15 @@ Packer supports the following builders at the moment:
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
+# Amazon EBS Volume Builder
+
+Packer is able to create Amazon EBS Volumes which are preinitialized with a
+filesystem and data. 
+
+-   [amazon-ebs](/docs/builders/amazon-ebsv-volume.html) - Create EBS volumes
+    by launching a source AMI with block devices mapped. Provision the instance,
+    then destroy it, retaining the EBS volumes.
+
 <span id="specifying-amazon-credentials"></span>
 
 ## Specifying Amazon Credentials
