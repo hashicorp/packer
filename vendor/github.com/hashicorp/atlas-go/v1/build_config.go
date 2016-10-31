@@ -126,7 +126,7 @@ func (c *Client) CreateBuildConfig(user, name string) (*BuildConfig, error) {
 //
 // Actual API: "Create Build Config Version"
 func (c *Client) UploadBuildConfigVersion(v *BuildConfigVersion, metadata map[string]interface{},
-	data io.Reader, size int64) error {
+	vars map[string]string, data io.Reader, size int64) error {
 
 	log.Printf("[INFO] uploading build configuration version %s (%d bytes), with metadata %q",
 		v.Slug(), size, metadata)
@@ -137,6 +137,7 @@ func (c *Client) UploadBuildConfigVersion(v *BuildConfigVersion, metadata map[st
 	var bodyData bcCreateWrapper
 	bodyData.Version.Builds = v.Builds
 	bodyData.Version.Metadata = metadata
+	bodyData.Version.Vars = vars
 	body, err := json.Marshal(bodyData)
 	if err != nil {
 		return err
@@ -179,5 +180,6 @@ type bcCreateWrapper struct {
 	Version struct {
 		Metadata map[string]interface{} `json:"metadata,omitempty"`
 		Builds   []BuildConfigBuild     `json:"builds"`
+		Vars     map[string]string      `json:"vars,omitempty"`
 	} `json:"version"`
 }
