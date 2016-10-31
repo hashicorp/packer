@@ -1,5 +1,10 @@
 ## (Unreleased)
 
+FEATURES:
+* **New builder:** "cloudstack" Can create new templates for use with
+    CloudStack taking either an ISO or existing template as input. [GH-3909]
+
+
 IMPROVEMENTS:
 
   * builder/amazon: Dynamic source AMI [GH-3817]
