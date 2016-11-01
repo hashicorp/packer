@@ -138,7 +138,7 @@ func checkRegionCopy(regions []string) builderT.TestCheckFunc {
 		for _, r := range regions {
 			regionSet[r] = struct{}{}
 		}
-		for r, _ := range artifact.Amis {
+		for r := range artifact.Amis {
 			if _, ok := regionSet[r]; !ok {
 				return fmt.Errorf("unknown region: %s", r)
 			}

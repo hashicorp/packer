@@ -1,13 +1,13 @@
 package profitbricks
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"time"
-	"encoding/json"
 )
 
 type stepTakeSnapshot struct{}
@@ -30,7 +30,7 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	if snapshot.StatusCode > 299 {
 		var restError RestError
 		json.Unmarshal([]byte(snapshot.Response), &restError)
-		if ( len(restError.Messages) > 0) {
+		if len(restError.Messages) > 0 {
 			ui.Error(restError.Messages[0].Message)
 		} else {
 			ui.Error(snapshot.Response)

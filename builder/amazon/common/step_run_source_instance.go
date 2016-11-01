@@ -171,7 +171,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
 			runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
-				&ec2.InstanceNetworkInterfaceSpecification{
+				{
 					DeviceIndex:              aws.Int64(0),
 					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
 					SubnetId:                 &s.SubnetId,
@@ -207,7 +207,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			UserData:           &userData,
 			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 			NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-				&ec2.InstanceNetworkInterfaceSpecification{
+				{
 					DeviceIndex:              aws.Int64(0),
 					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
 					SubnetId:                 &s.SubnetId,
