@@ -52,7 +52,7 @@ generate: deps ## Generate dynamically generated code
 	go generate .
 	gofmt -w command/plugin.go
 
-test: fmt deps ## Run unit tests
+test: deps ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
