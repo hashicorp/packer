@@ -1,0 +1,54 @@
+-   `access_key` (string) - The access key used to communicate with AWS. [Learn
+    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+
+<% if 'amazon-instance' == current_page.data.builder %>
+-   `account_id` (string) - Your AWS account ID. This is required for bundling
+    the AMI. This is *not the same* as the access key. You can find your account
+    ID in the security credentials page of your AWS account.
+<% end %>
+
+-   `ami_name` (string) - The name of the resulting AMI that will appear when
+    managing AMIs in the AWS console or via APIs. This must be unique. To help
+    make this unique, use a function like `timestamp` (see [configuration
+    templates](/docs/templates/configuration-templates.html) for more info)
+
+<% if ['amazon-instance', 'amazon-ebs'].include? current_page.data.builder %>
+-   `instance_type` (string) - The EC2 instance type to use while building the
+    AMI, such as "m1.small".
+
+-   `region` (string) - The name of the region, such as "us-east-1", in which to
+    launch the EC2 instance to create the AMI.
+<% end %>
+
+<% if 'amazon-instance' == current_page.data.builder %>
+-   `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This
+    bucket will be created if it doesn't exist.
+<% end %>
+
+-   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
+    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+
+<% if 'amazon-instance' == current_page.data.builder %>
+-   `source_ami` (string) - The initial AMI used as a base for the newly
+    created machine.
+<% elsif 'amazon-ebs' == current_page.data.builder %>
+-   `source_ami` (string) - The initial AMI used as a base for the newly
+    created machine. `source_ami_filter` may be used instead to populate this
+    automatically.
+<% elsif 'amazon-chroot' == current_page.data.builder %>
+-   `source_ami` (string) - The source AMI whose root volume will be copied and
+    provisioned on the currently running instance. This must be an EBS-backed
+    AMI with a root volume snapshot that you have access to. Note: this is not
+    used when `from_scratch` is set to true.
+<% end %>
+
+<% if 'amazon-instance' == current_page.data.builder %>
+-   `x509_cert_path` (string) - The local path to a valid X509 certificate for
+    your AWS account. This is used for bundling the AMI. This X509 certificate
+    must be registered with your account from the security credentials page in
+    the AWS console.
+
+-   `x509_key_path` (string) - The local path to the private key for the X509
+    certificate specified by `x509_cert_path`. This is used for bundling
+    the AMI.
+<% end %>

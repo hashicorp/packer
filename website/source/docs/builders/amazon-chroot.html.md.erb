@@ -6,6 +6,7 @@ description: |
     in the EC2 documentation.
 layout: docs
 page_title: 'Amazon AMI Builder (chroot)'
+builder: amazon-chroot
 ---
 
 # AMI Builder (chroot)
@@ -56,21 +57,7 @@ each category, the available configuration keys are alphabetized.
 
 ### Required:
 
--   `access_key` (string) - The access key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `ami_name` (string) - The name of the resulting AMI that will appear when
-    managing AMIs in the AWS console or via APIs. This must be unique. To help
-    make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
-
--   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `source_ami` (string) - The source AMI whose root volume will be copied and
-    provisioned on the currently running instance. This must be an EBS-backed
-    AMI with a root volume snapshot that you have access to. Note: this is not
-    used when `from_scratch` is set to true.
+<%= partial "partials/builders/amazon-required" %>
 
 ### Optional:
 
@@ -122,18 +109,19 @@ each category, the available configuration keys are alphabetized.
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default false.
+    AMI if one with the same name already exists. Default `false`.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
-    existing AMI root volume snapshot. Default false. If true, `source_ami` is
+    existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
     no longer used and the following options become required:
     `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
     below options are also required in this mode only:
 
-    -   `ami_block_device_mappings` (array of block device mappings) An entry
-        matching `root_device_name` should be set. See the
-        [amazon-ebs](/docs/builders/amazon-ebs.html) documentation for more
-        details on this parameter.
+    -   `ami_block_device_mappings` (array of block device mappings) - Add the block
+    device mappings to the AMI. A `device_name` entry matching `root_device_name`
+    should be set. The block device mappings allow for keys:
+
+        <%= partial "partials/builders/ami-block-device-mappings" %>
 
     -   `root_device_name` (string) - The root device name. For example, `xvda`.
 
@@ -170,7 +158,7 @@ each category, the available configuration keys are alphabetized.
     this field must be defined.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
-    validation of the `ami_regions` configuration option. Defaults to false.
+    validation of the `ami_regions` configuration option. Default `false`.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:

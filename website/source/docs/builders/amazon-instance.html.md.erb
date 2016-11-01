@@ -6,6 +6,7 @@ description: |
     device section in the EC2 documentation.
 layout: docs
 page_title: 'Amazon AMI Builder (instance-store)'
+builder: amazon-instance
 ...
 
 # AMI Builder (instance-store)
@@ -47,67 +48,15 @@ builder.
 
 ### Required:
 
--   `access_key` (string) - The access key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `account_id` (string) - Your AWS account ID. This is required for bundling
-    the AMI. This is *not the same* as the access key. You can find your account
-    ID in the security credentials page of your AWS account.
-
--   `ami_name` (string) - The name of the resulting AMI that will appear when
-    managing AMIs in the AWS console or via APIs. This must be unique. To help
-    make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
-
--   `instance_type` (string) - The EC2 instance type to use while building the
-    AMI, such as "m1.small".
-
--   `region` (string) - The name of the region, such as "us-east-1", in which to
-    launch the EC2 instance to create the AMI.
-
--   `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This
-    bucket will be created if it doesn't exist.
-
--   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `source_ami` (string) - The initial AMI used as a base for the newly
-    created machine.
-
--   `x509_cert_path` (string) - The local path to a valid X509 certificate for
-    your AWS account. This is used for bundling the AMI. This X509 certificate
-    must be registered with your account from the security credentials page in
-    the AWS console.
-
--   `x509_key_path` (string) - The local path to the private key for the X509
-    certificate specified by `x509_cert_path`. This is used for bundling
-    the AMI.
+<%= partial "partials/builders/amazon-required" %>
 
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add the block
     device mappings to the AMI. The block device mappings allow for keys:
-    -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
-        deleted on instance termination
-    -   `device_name` (string) - The device name exposed to the instance (for
-        example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
-    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
-        volume supports. See the documentation on
-        [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
-        for more information
-    -   `no_device` (boolean) - Suppresses the specified device included in the
-        block device mapping of the AMI
-    -   `snapshot_id` (string) - The ID of the snapshot
-    -   `virtual_name` (string) - The virtual device name. See the documentation on
-        [Block Device
-        Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
-        for more information
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
-        specifying a `snapshot_id`
-    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
-        volumes
+
+    <%= partial "partials/builders/ami-block-device-mappings" %>
+
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty.
 
@@ -188,8 +137,8 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the region configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the region configuration option.  Default `false`.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
