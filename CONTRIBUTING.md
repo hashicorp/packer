@@ -108,7 +108,7 @@ Note that you will need to use [govendor](https://github.com/kardianos/govendor)
 
 Use `govendor fetch <project>` to add dependencies to the project. See
 [govendor quick
-start(https://github.com/kardianos/govendor#quick-start-also-see-the-faq) for
+start](https://github.com/kardianos/govendor#quick-start-also-see-the-faq) for
 examples.
 
 Please only apply the minimal vendor changes to get your PR to work. Packer does not attempt to track the latest version for each dependency.
