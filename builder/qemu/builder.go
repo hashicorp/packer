@@ -21,10 +21,10 @@ import (
 const BuilderId = "transcend.qemu"
 
 var accels = map[string]struct{}{
-	"none": struct{}{},
-	"kvm":  struct{}{},
-	"tcg":  struct{}{},
-	"xen":  struct{}{},
+	"none": {},
+	"kvm":  {},
+	"tcg":  {},
+	"xen":  {},
 }
 
 var netDevice = map[string]bool{

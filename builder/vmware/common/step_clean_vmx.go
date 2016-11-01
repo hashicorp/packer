@@ -35,7 +35,7 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Delete the floppy0 entries so the floppy is no longer mounted
 	ui.Message("Unmounting floppy from VMX...")
-	for k, _ := range vmxData {
+	for k := range vmxData {
 		if strings.HasPrefix(k, "floppy0.") {
 			log.Printf("Deleting key: %s", k)
 			delete(vmxData, k)

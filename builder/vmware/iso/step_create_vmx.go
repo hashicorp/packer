@@ -70,7 +70,7 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	ctx := config.ctx
 
 	if len(config.AdditionalDiskSize) > 0 {
-		for i, _ := range config.AdditionalDiskSize {
+		for i := range config.AdditionalDiskSize {
 			ctx.Data = &additionalDiskTemplateData{
 				DiskNumber: i + 1,
 				DiskName:   config.DiskName,

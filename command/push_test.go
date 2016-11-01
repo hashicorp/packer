@@ -60,7 +60,7 @@ func TestPush(t *testing.T) {
 	}
 
 	expectedBuilds := map[string]*uploadBuildInfo{
-		"dummy": &uploadBuildInfo{
+		"dummy": {
 			Type: "dummy",
 		},
 	}
@@ -91,11 +91,11 @@ func TestPush_builds(t *testing.T) {
 	}
 
 	expectedBuilds := map[string]*uploadBuildInfo{
-		"dummy": &uploadBuildInfo{
+		"dummy": {
 			Type:     "dummy",
 			Artifact: true,
 		},
-		"foo": &uploadBuildInfo{
+		"foo": {
 			Type: "dummy",
 		},
 	}

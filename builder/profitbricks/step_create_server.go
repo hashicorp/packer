@@ -66,7 +66,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		if datacenter.StatusCode > 299 {
 			var restError RestError
 			json.Unmarshal([]byte(datacenter.Response), &restError)
-			if ( len(restError.Messages) > 0) {
+			if len(restError.Messages) > 0 {
 				ui.Error(restError.Messages[0].Message)
 			} else {
 				ui.Error(datacenter.Response)
@@ -169,13 +169,13 @@ func (d *stepCreateServer) checkForErrors(instance profitbricks.Resp) error {
 }
 
 type RestError struct {
-	HttpStatus int `json:"httpStatus,omitempty"`
-	Messages   []Message`json:"messages,omitempty"`
+	HttpStatus int       `json:"httpStatus,omitempty"`
+	Messages   []Message `json:"messages,omitempty"`
 }
 
 type Message struct {
 	ErrorCode string `json:"errorCode,omitempty"`
-	Message   string`json:"message,omitempty"`
+	Message   string `json:"message,omitempty"`
 }
 
 func (d *stepCreateServer) getImageId(imageName string, c *Config) string {

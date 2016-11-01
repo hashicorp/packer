@@ -8,11 +8,11 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"image":      "Ubuntu-16.04",
-		"password": "password",
-		"username": "username",
+		"image":         "Ubuntu-16.04",
+		"password":      "password",
+		"username":      "username",
 		"snapshot_name": "packer",
-		"type":       "profitbricks",
+		"type":          "profitbricks",
 	}
 }
 

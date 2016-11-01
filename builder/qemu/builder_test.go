@@ -570,7 +570,7 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 
 	// Test with a good one
 	config["qemuargs"] = [][]interface{}{
-		[]interface{}{"foo", "bar", "baz"},
+		{"foo", "bar", "baz"},
 	}
 
 	b = Builder{}
@@ -583,7 +583,7 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 	}
 
 	expected := [][]string{
-		[]string{"foo", "bar", "baz"},
+		{"foo", "bar", "baz"},
 	}
 
 	if !reflect.DeepEqual(b.config.QemuArgs, expected) {
