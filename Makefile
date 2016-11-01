@@ -5,6 +5,7 @@ GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
+
 default: deps generate test dev
 
 ci: deps test
@@ -55,7 +56,7 @@ generate: deps ## Generate dynamically generated code
 	go generate .
 	gofmt -w command/plugin.go
 
-test: deps ## Run unit tests
+test: deps fmt-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
