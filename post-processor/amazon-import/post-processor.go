@@ -124,7 +124,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Set up the AWS session
 	log.Println("Creating AWS session")
-	session := session.New(config)
+	session, err := session.NewSession(config)
+	if err != nil {
+		return nil, false, err
+	}
 
 	// open the source file
 	log.Printf("Opening file %s to upload", source)
