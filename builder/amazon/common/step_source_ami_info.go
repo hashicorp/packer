@@ -96,7 +96,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 		image = imageResp.Images[0]
 	}
 
-	log.Printf(fmt.Sprintf("Got Image %v", image))
+	ui.Message(fmt.Sprintf("Found Image ID: %s", *image.ImageId))
 
 	// Enhanced Networking (SriovNetSupport) can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
