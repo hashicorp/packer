@@ -66,7 +66,7 @@ func (c *InspectCommand) Run(args []string) int {
 		ui.Say("Optional variables and their defaults:\n")
 		keys := make([]string, 0, len(tpl.Variables))
 		max := 0
-		for k, _ := range tpl.Variables {
+		for k := range tpl.Variables {
 			keys = append(keys, k)
 			if len(k) > max {
 				max = len(k)
@@ -98,7 +98,7 @@ func (c *InspectCommand) Run(args []string) int {
 	} else {
 		keys := make([]string, 0, len(tpl.Builders))
 		max := 0
-		for k, _ := range tpl.Builders {
+		for k := range tpl.Builders {
 			keys = append(keys, k)
 			if len(k) > max {
 				max = len(k)

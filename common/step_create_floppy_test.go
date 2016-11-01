@@ -76,12 +76,12 @@ func TestStepCreateFloppy(t *testing.T) {
 
 	lists := [][]string{
 		files,
-		[]string{dir + string(os.PathSeparator) + prefix + "*" + ext},
-		[]string{dir + string(os.PathSeparator) + prefix + "?" + ext},
-		[]string{dir + string(os.PathSeparator) + prefix + "[0123456789]" + ext},
-		[]string{dir + string(os.PathSeparator) + prefix + "[0-9]" + ext},
-		[]string{dir + string(os.PathSeparator)},
-		[]string{dir},
+		{dir + string(os.PathSeparator) + prefix + "*" + ext},
+		{dir + string(os.PathSeparator) + prefix + "?" + ext},
+		{dir + string(os.PathSeparator) + prefix + "[0123456789]" + ext},
+		{dir + string(os.PathSeparator) + prefix + "[0-9]" + ext},
+		{dir + string(os.PathSeparator)},
+		{dir},
 	}
 
 	for _, step.Files = range lists {
@@ -177,12 +177,12 @@ func xxxTestStepCreateFloppy_notfound(t *testing.T) {
 	}
 
 	lists := [][]string{
-		[]string{dir + string(os.PathSeparator) + prefix + "*"},
-		[]string{dir + string(os.PathSeparator) + prefix + "?"},
-		[]string{dir + string(os.PathSeparator) + prefix + "[0123456789]"},
-		[]string{dir + string(os.PathSeparator) + prefix + "[0-9]"},
-		[]string{dir + string(os.PathSeparator)},
-		[]string{dir},
+		{dir + string(os.PathSeparator) + prefix + "*"},
+		{dir + string(os.PathSeparator) + prefix + "?"},
+		{dir + string(os.PathSeparator) + prefix + "[0123456789]"},
+		{dir + string(os.PathSeparator) + prefix + "[0-9]"},
+		{dir + string(os.PathSeparator)},
+		{dir},
 	}
 
 	for _, step.Files = range lists {
@@ -225,22 +225,22 @@ func TestStepCreateFloppyDirectories(t *testing.T) {
 
 	// keep in mind that .FilesAdded doesn't keep track of the target filename or directories, but rather the source filename.
 	directories := [][]contentsTest{
-		[]contentsTest{
-			contentsTest{dirs: []string{"file1", "file2", "file3"}, result: []string{"file1", "file2", "file3"}},
-			contentsTest{dirs: []string{"file?"}, result: []string{"file1", "file2", "file3"}},
-			contentsTest{dirs: []string{"*"}, result: []string{"file1", "file2", "file3"}},
+		{
+			{dirs: []string{"file1", "file2", "file3"}, result: []string{"file1", "file2", "file3"}},
+			{dirs: []string{"file?"}, result: []string{"file1", "file2", "file3"}},
+			{dirs: []string{"*"}, result: []string{"file1", "file2", "file3"}},
 		},
-		[]contentsTest{
-			contentsTest{dirs: []string{"dir1"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
-			contentsTest{dirs: []string{"dir1/file1", "dir1/file2", "dir1/file3"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
-			contentsTest{dirs: []string{"*"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
-			contentsTest{dirs: []string{"*/*"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
+		{
+			{dirs: []string{"dir1"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
+			{dirs: []string{"dir1/file1", "dir1/file2", "dir1/file3"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
+			{dirs: []string{"*"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
+			{dirs: []string{"*/*"}, result: []string{"dir1/file1", "dir1/file2", "dir1/file3"}},
 		},
-		[]contentsTest{
-			contentsTest{dirs: []string{"dir1"}, result: []string{"dir1/file1", "dir1/subdir1/file1", "dir1/subdir1/file2"}},
-			contentsTest{dirs: []string{"dir2/*"}, result: []string{"dir2/subdir1/file1", "dir2/subdir1/file2"}},
-			contentsTest{dirs: []string{"dir2/subdir1"}, result: []string{"dir2/subdir1/file1", "dir2/subdir1/file2"}},
-			contentsTest{dirs: []string{"dir?"}, result: []string{"dir1/file1", "dir1/subdir1/file1", "dir1/subdir1/file2", "dir2/subdir1/file1", "dir2/subdir1/file2"}},
+		{
+			{dirs: []string{"dir1"}, result: []string{"dir1/file1", "dir1/subdir1/file1", "dir1/subdir1/file2"}},
+			{dirs: []string{"dir2/*"}, result: []string{"dir2/subdir1/file1", "dir2/subdir1/file2"}},
+			{dirs: []string{"dir2/subdir1"}, result: []string{"dir2/subdir1/file1", "dir2/subdir1/file2"}},
+			{dirs: []string{"dir?"}, result: []string{"dir1/file1", "dir1/subdir1/file1", "dir1/subdir1/file2", "dir2/subdir1/file1", "dir2/subdir1/file2"}},
 		},
 	}
 

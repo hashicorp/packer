@@ -28,7 +28,7 @@ func TestVBoxManageConfigPrepare_VBoxManage(t *testing.T) {
 	}
 
 	expected := [][]string{
-		[]string{"foo", "bar", "baz"},
+		{"foo", "bar", "baz"},
 	}
 
 	if !reflect.DeepEqual(c.VBoxManage, expected) {

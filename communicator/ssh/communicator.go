@@ -164,7 +164,7 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 
 			switch fi[0] {
 			case '\x01', '\x02':
-				return fmt.Errorf("%s", fi[1:len(fi)])
+				return fmt.Errorf("%s", fi[1:])
 			case 'C', 'D':
 				break
 			case 'E':
@@ -593,7 +593,7 @@ func (c *comm) scpDownloadSession(path string, output io.Writer) error {
 
 		switch fi[0] {
 		case '\x01', '\x02':
-			return fmt.Errorf("%s", fi[1:len(fi)])
+			return fmt.Errorf("%s", fi[1:])
 		case 'C':
 		case 'D':
 			return fmt.Errorf("remote file is directory")

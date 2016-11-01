@@ -21,7 +21,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	// check for force deregister
 	if s.ForceDeregister {
 		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-			Filters: []*ec2.Filter{&ec2.Filter{
+			Filters: []*ec2.Filter{{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
 			}}})
