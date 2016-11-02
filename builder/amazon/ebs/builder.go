@@ -149,6 +149,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				ec2conn,
 				b.config.SSHPrivateIp),
 			SSHConfig: awscommon.SSHConfig(
+				b.config.RunConfig.Comm.SSHAgentAuth,
 				b.config.RunConfig.Comm.SSHUsername,
 				b.config.RunConfig.Comm.SSHPassword),
 		},
