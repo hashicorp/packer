@@ -18,6 +18,7 @@ import (
 	amazonebsvolumebuilder "github.com/mitchellh/packer/builder/amazon/ebsvolume"
 	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
 	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
+	cloudstackbuilder "github.com/mitchellh/packer/builder/cloudstack"
 	digitaloceanbuilder "github.com/mitchellh/packer/builder/digitalocean"
 	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	filebuilder "github.com/mitchellh/packer/builder/file"
@@ -67,25 +68,26 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
-	"amazon-chroot":     new(amazonchrootbuilder.Builder),
-	"amazon-ebs":        new(amazonebsbuilder.Builder),
-	"amazon-ebs-volume": new(amazonebsvolumebuilder.Builder),
-	"amazon-instance":   new(amazoninstancebuilder.Builder),
-	"azure-arm":         new(azurearmbuilder.Builder),
-	"digitalocean":      new(digitaloceanbuilder.Builder),
-	"docker":            new(dockerbuilder.Builder),
-	"file":              new(filebuilder.Builder),
-	"googlecompute":     new(googlecomputebuilder.Builder),
-	"null":              new(nullbuilder.Builder),
-	"openstack":         new(openstackbuilder.Builder),
-	"parallels-iso":     new(parallelsisobuilder.Builder),
-	"parallels-pvm":     new(parallelspvmbuilder.Builder),
-	"profitbricks":      new(profitbricksbuilder.Builder),
-	"qemu":              new(qemubuilder.Builder),
-	"virtualbox-iso":    new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":    new(virtualboxovfbuilder.Builder),
-	"vmware-iso":        new(vmwareisobuilder.Builder),
-	"vmware-vmx":        new(vmwarevmxbuilder.Builder),
+	"amazon-chroot":    new(amazonchrootbuilder.Builder),
+	"amazon-ebs":       new(amazonebsbuilder.Builder),
+	"amazon-ebsvolume": new(amazonebsvolumebuilder.Builder),
+	"amazon-instance":  new(amazoninstancebuilder.Builder),
+	"azure-arm":        new(azurearmbuilder.Builder),
+	"cloudstack":       new(cloudstackbuilder.Builder),
+	"digitalocean":     new(digitaloceanbuilder.Builder),
+	"docker":           new(dockerbuilder.Builder),
+	"file":             new(filebuilder.Builder),
+	"googlecompute":    new(googlecomputebuilder.Builder),
+	"null":             new(nullbuilder.Builder),
+	"openstack":        new(openstackbuilder.Builder),
+	"parallels-iso":    new(parallelsisobuilder.Builder),
+	"parallels-pvm":    new(parallelspvmbuilder.Builder),
+	"profitbricks":     new(profitbricksbuilder.Builder),
+	"qemu":             new(qemubuilder.Builder),
+	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
+	"vmware-iso":       new(vmwareisobuilder.Builder),
+	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
 }
 
 var Provisioners = map[string]packer.Provisioner{
