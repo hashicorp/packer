@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/private/waiter"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -45,24 +46,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
 	for i, sg := range tempSecurityGroupIds {
-		found := false
-		for i := 0; i < 5; i++ {
-			time.Sleep(time.Duration(i) * 5 * time.Second)
-			log.Printf("[DEBUG] Describing tempSecurityGroup to ensure it is available: %s", sg)
-			_, err := ec2conn.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		err := WaitUntilSecurityGroupExists(ec2conn,
+			&ec2.DescribeSecurityGroupsInput{
 				GroupIds: []*string{aws.String(sg)},
-			})
-			if err == nil {
-				log.Printf("[DEBUG] Found security group %s", sg)
-				found = true
-				break
-			}
-			log.Printf("[DEBUG] Error in querying security group %s", err)
-		}
-		if found {
+			},
+		)
+		if err != nil {
+			log.Printf("[DEBUG] Found security group %s", sg)
 			securityGroupIds[i] = aws.String(sg)
 		} else {
+			log.Printf("[DEBUG] Error in querying security group %s", err)
 			state.Put("error", fmt.Errorf("Timeout waiting for security group %s to become available", sg))
+			return multistep.ActionHalt
 		}
 	}
 
@@ -362,4 +357,33 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 
 		WaitForState(&stateChange)
 	}
+}
+
+func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
+	waiterCfg := waiter.Config{
+		Operation:   "DescribeSecurityGroups",
+		Delay:       15,
+		MaxAttempts: 40,
+		Acceptors: []waiter.WaitAcceptor{
+			{
+				State:    "success",
+				Matcher:  "path",
+				Argument: "lenth(SecurityGroups[]) > `0`",
+				Expected: "true",
+			},
+			{
+				State:    "failure",
+				Matcher:  "error",
+				Argument: "",
+				Expected: "InvalidSecurityGroupID.NotFound",
+			},
+		},
+	}
+
+	w := waiter.Waiter{
+		Client: c,
+		Input:  input,
+		Config: waiterCfg,
+	}
+	return w.Wait()
 }
