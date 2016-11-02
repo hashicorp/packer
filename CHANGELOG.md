@@ -17,6 +17,7 @@ IMPROVEMENTS:
   * builder/amazon: Allow polling delay override with `AWS_POLL_DELAY_SECONDS`.
       [GH-4083]
   * builder/amazon: Allow use of local SSH Agent. [GH-4050]
+  * builder/amazon: Show AMI ID found when using `source_ami_filter`. [GH-4096]
   
 BUG FIXES:
 
