@@ -45,24 +45,20 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
 	for i, sg := range tempSecurityGroupIds {
-		found := false
-		for i := 0; i < 5; i++ {
-			time.Sleep(time.Duration(i) * 5 * time.Second)
-			log.Printf("[DEBUG] Describing tempSecurityGroup to ensure it is available: %s", sg)
-			_, err := ec2conn.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		log.Printf("[DEBUG] Waiting for tempSecurityGroup: %s", sg)
+		err := WaitUntilSecurityGroupExists(ec2conn,
+			&ec2.DescribeSecurityGroupsInput{
 				GroupIds: []*string{aws.String(sg)},
-			})
-			if err == nil {
-				log.Printf("[DEBUG] Found security group %s", sg)
-				found = true
-				break
-			}
-			log.Printf("[DEBUG] Error in querying security group %s", err)
-		}
-		if found {
+			},
+		)
+		if err == nil {
+			log.Printf("[DEBUG] Found security group %s", sg)
 			securityGroupIds[i] = aws.String(sg)
 		} else {
-			state.Put("error", fmt.Errorf("Timeout waiting for security group %s to become available", sg))
+			err := fmt.Errorf("Timed out waiting for security group %s", sg)
+			log.Printf("[DEBUG] %s", err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
 		}
 	}
 
@@ -362,4 +358,17 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 
 		WaitForState(&stateChange)
 	}
+}
+
+func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
+	for i := 0; i < 40; i++ {
+		_, err := c.DescribeSecurityGroups(input)
+		if err != nil {
+			log.Printf("[DEBUG] Error querying security group %s: %s", input.GroupIds, err)
+			time.Sleep(15 * time.Second)
+			continue
+		}
+		return nil
+	}
+	return fmt.Errorf("timed out")
 }
