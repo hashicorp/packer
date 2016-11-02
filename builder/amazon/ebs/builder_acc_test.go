@@ -206,7 +206,10 @@ func testEC2Conn() (*ec2.EC2, error) {
 		return nil, err
 	}
 
-	session := session.New(config)
+	session, err := session.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
 	return ec2.New(session), nil
 }
 
