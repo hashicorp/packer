@@ -5,6 +5,8 @@ FEATURES:
     CloudStack taking either an ISO or existing template as input. [GH-3909]
 * **New builder:** "profitbricks" Builder for creating images in the
     ProfitBricks cloud. [GH-3660]
+* **New Builder:** "amazon-ebs" Can create Amazon EBS volumes which are
+    preinitialized with a filesystem and data. [GH-4088]
 
 
 IMPROVEMENTS:
@@ -20,6 +22,9 @@ BUG FIXES:
 
   * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
   * builder/vmware: Fixed build error when shutting down. [GH-4041]
+  * builder/amazon: Fixed an error where we wouldn't fail the build even if we
+      timed out waiting for the temporary security group to become available.
+      [GH-4099]
 
 ## 0.11.0 (October 21, 2016)
 
