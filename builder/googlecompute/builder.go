@@ -72,10 +72,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			WinRMConfig: winrmConfig,
 		},
 		new(common.StepProvision),
-		new(StepWaitInstanceStartup),
-		new(StepTeardownInstance),
-		new(StepCreateImage),
 	}
+	if _, exists := b.config.Metadata[StartupScriptKey]; exists || b.config.StartupScriptFile != "" {
+		steps = append(steps, new(StepWaitStartupScript))
+	}
+	steps = append(steps, new(StepTeardownInstance), new(StepCreateImage))
 
 	// Run the steps.
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)

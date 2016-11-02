@@ -9,11 +9,11 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type StepWaitInstanceStartup int
+type StepWaitStartupScript int
 
 // Run reads the instance metadata and looks for the log entry
 // indicating the startup script finished.
-func (s *StepWaitInstanceStartup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitStartupScript) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -55,4 +55,4 @@ func (s *StepWaitInstanceStartup) Run(state multistep.StateBag) multistep.StepAc
 }
 
 // Cleanup.
-func (s *StepWaitInstanceStartup) Cleanup(state multistep.StateBag) {}
+func (s *StepWaitStartupScript) Cleanup(state multistep.StateBag) {}
