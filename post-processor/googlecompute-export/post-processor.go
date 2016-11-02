@@ -110,7 +110,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			&googlecompute.StepCreateInstance{
 				Debug: p.config.PackerDebug,
 			},
-			new(googlecompute.StepWaitInstanceStartup),
+			new(googlecompute.StepWaitStartupScript),
 			new(googlecompute.StepTeardownInstance),
 		}
 
