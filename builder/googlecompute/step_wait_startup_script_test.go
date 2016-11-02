@@ -6,9 +6,9 @@ import (
 	"testing"
 )
 
-func TestStepWaitInstanceStartup(t *testing.T) {
+func TestStepWaitStartupScript(t *testing.T) {
 	state := testState(t)
-	step := new(StepWaitInstanceStartup)
+	step := new(StepWaitStartupScript)
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(*DriverMock)
 
