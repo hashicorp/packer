@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"fmt"
@@ -8,16 +8,17 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepModifyInstance struct{}
+type StepModifyEBSBackedInstance struct {
+	EnableEnhancedNetworking bool
+}
 
-func (s *stepModifyInstance) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
-	if config.AMIEnhancedNetworking {
+	if s.EnableEnhancedNetworking {
 		ui.Say("Enabling Enhanced Networking...")
 		simple := "simple"
 		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
@@ -35,6 +36,6 @@ func (s *stepModifyInstance) Run(state multistep.StateBag) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *stepModifyInstance) Cleanup(state multistep.StateBag) {
+func (s *StepModifyEBSBackedInstance) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }
