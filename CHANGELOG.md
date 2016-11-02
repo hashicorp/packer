@@ -14,6 +14,7 @@ IMPROVEMENTS:
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
   * builder/amazon: Allow polling delay override with `AWS_POLL_DELAY_SECONDS`.
       [GH-4083]
+  * builder/amazon: Allow use of local SSH Agent. [GH-4050]
   
 BUG FIXES:
 
