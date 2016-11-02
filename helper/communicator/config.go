@@ -23,6 +23,7 @@ type Config struct {
 	SSHPrivateKey         string        `mapstructure:"ssh_private_key_file"`
 	SSHPty                bool          `mapstructure:"ssh_pty"`
 	SSHTimeout            time.Duration `mapstructure:"ssh_timeout"`
+	SSHAgentAuth          bool          `mapstructure:"ssh_agent_auth"`
 	SSHDisableAgent       bool          `mapstructure:"ssh_disable_agent"`
 	SSHHandshakeAttempts  int           `mapstructure:"ssh_handshake_attempts"`
 	SSHBastionHost        string        `mapstructure:"ssh_bastion_host"`
