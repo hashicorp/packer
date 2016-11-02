@@ -52,8 +52,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		new(StepCheckExistingImage),
 		&StepCreateSSHKey{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+			Debug:          b.config.PackerDebug,
+			DebugKeyPath:   fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
 		},
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
