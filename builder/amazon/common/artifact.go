@@ -73,8 +73,11 @@ func (a *Artifact) Destroy() error {
 			Credentials: a.Conn.Config.Credentials,
 			Region:      aws.String(region),
 		}
-		sess := session.New(regionConfig)
-		regionConn := ec2.New(sess)
+		session, err := session.NewSession(regionConfig)
+		if err != nil {
+			return err
+		}
+		regionConn := ec2.New(session)
 
 		input := &ec2.DeregisterImageInput{
 			ImageId: &imageId,
