@@ -26,6 +26,8 @@ BUG FIXES:
   * builder/amazon: Fixed an error where we wouldn't fail the build even if we
       timed out waiting for the temporary security group to become available.
       [GH-4099]
+  * builder/google: Fix issue where we'd hang waiting for a startup script
+      which doesn't exist. [GH-4102]
 
 ## 0.11.0 (October 21, 2016)
 
