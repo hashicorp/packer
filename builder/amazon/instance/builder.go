@@ -160,7 +160,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	session := session.New(config)
+	session, err := session.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
 	ec2conn := ec2.New(session)
 
 	// If the subnet is specified but not the AZ, try to determine the AZ automatically
