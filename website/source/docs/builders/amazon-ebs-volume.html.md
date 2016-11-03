@@ -1,6 +1,6 @@
 ---
 description: |
-    The `amazon-ebs-volume` Packer builder is like the EBS builder, but is
+    The `amazon-ebsvolume` Packer builder is like the EBS builder, but is
     intended to create EBS volumes rather than a machine image.
 layout: docs
 page_title: 'Amazon EBS Volume Builder'
@@ -8,9 +8,9 @@ page_title: 'Amazon EBS Volume Builder'
 
 # EBS Volume Builder
 
-Type: `amazon-ebs-volume`
+Type: `amazon-ebsvolume`
 
-The `amazon-ebs-volume` Packer builder is able to create Amazon Elastic Block
+The `amazon-ebsvolume` Packer builder is able to create Amazon Elastic Block
 Store volumes which are prepopulated with filesystems or data. 
 
 This builder builds EBS volumes by launching an EC2 instance from a source AMI,
@@ -202,7 +202,7 @@ builder.
 
 ```
 {
-   "type" : "amazon-ebsinit",
+   "type" : "amazon-ebsvolume",
    "secret_key" : "YOUR SECRET KEY HERE",
    "access_key" : "YOUR KEY HERE",
    "region" : "us-east-1",

@@ -5,7 +5,7 @@ FEATURES:
     CloudStack taking either an ISO or existing template as input. [GH-3909]
 * **New builder:** "profitbricks" Builder for creating images in the
     ProfitBricks cloud. [GH-3660]
-* **New Builder:** "amazon-ebs-volume" Can create Amazon EBS volumes which are
+* **New Builder:** "amazon-ebsvolume" Can create Amazon EBS volumes which are
     preinitialized with a filesystem and data. [GH-4088]
 
 
