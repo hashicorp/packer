@@ -2,6 +2,7 @@ package googlecompute
 
 import (
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -209,4 +210,34 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	assert.True(t, ok, "State should have an error.")
 	_, ok = state.GetOk("instance_name")
 	assert.False(t, ok, "State should not have an instance name.")
+}
+
+func TestCreateInstanceMetadata(t *testing.T) {
+	state := testState(t)
+	c := state.Get("config").(*Config)
+	image := StubImage("test-image", "test-project", []string{}, 100)
+	key := "abcdefgh12345678"
+
+	// create our metadata
+	metadata, err := c.createInstanceMetadata(image, key)
+
+	assert.True(t, err == nil, "Metadata creation should have succeeded.")
+
+	// ensure our key is listed
+	assert.True(t, strings.Contains(metadata["sshKeys"], key), "Instance metadata should contain provided key")
+}
+
+func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
+	state := testState(t)
+	c := state.Get("config").(*Config)
+	image := StubImage("test-image", "test-project", []string{}, 100)
+	sshKeys := c.Metadata["sshKeys"]
+
+	// create our metadata
+	metadata, err := c.createInstanceMetadata(image, "")
+
+	assert.True(t, err == nil, "Metadata creation should have succeeded.")
+
+	// ensure the ssh metadata hasn't changed
+	assert.Equal(t, metadata["sshKeys"], sshKeys, "Instance metadata should not have been modified")
 }
