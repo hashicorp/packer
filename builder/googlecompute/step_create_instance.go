@@ -24,13 +24,17 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[k] = v
 	}
 
-	// Merge any existing ssh keys with our public key.
-	sshMetaKey := "sshKeys"
-	sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
-	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
-		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+	// Merge any existing ssh keys with our public key, unless there is no
+	// supplied public key. This is possible if a private_key_file was
+	// specified.
+	if sshPublicKey != "" {
+		sshMetaKey := "sshKeys"
+		sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
+		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
+			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+		}
+		instanceMetadata[sshMetaKey] = sshKeys
 	}
-	instanceMetadata[sshMetaKey] = sshKeys
 
 	// Wrap any startup script with our own startup script.
 	if c.StartupScriptFile != "" {
