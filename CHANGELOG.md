@@ -18,6 +18,8 @@ IMPROVEMENTS:
       [GH-4083]
   * builder/amazon: Allow use of local SSH Agent. [GH-4050]
   * builder/amazon: Show AMI ID found when using `source_ami_filter`. [GH-4096]
+  * builder/googlecompute: Support `ssh_private_key_file` in communicator.
+      [GH-4101]
   
 BUG FIXES:
 
