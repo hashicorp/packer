@@ -45,6 +45,8 @@ Required:
 
 Optional:
 
+-   `convert_to_template` (boolean) - Whether or not the VM created in vSphere should be converted to a template.
+
 -   `disk_mode` (string) - Target disk format. See `ovftool` manual for
     available options. By default, "thick" will be used.
 

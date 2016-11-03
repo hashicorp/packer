@@ -12,6 +12,9 @@ import (
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
+	"golang.org/x/net/context"
 )
 
 var builtins = map[string]string{
@@ -22,20 +25,21 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Cluster      string   `mapstructure:"cluster"`
-	Datacenter   string   `mapstructure:"datacenter"`
-	Datastore    string   `mapstructure:"datastore"`
-	DiskMode     string   `mapstructure:"disk_mode"`
-	Host         string   `mapstructure:"host"`
-	Insecure     bool     `mapstructure:"insecure"`
-	Options      []string `mapstructure:"options"`
-	Overwrite    bool     `mapstructure:"overwrite"`
-	Password     string   `mapstructure:"password"`
-	ResourcePool string   `mapstructure:"resource_pool"`
-	Username     string   `mapstructure:"username"`
-	VMFolder     string   `mapstructure:"vm_folder"`
-	VMName       string   `mapstructure:"vm_name"`
-	VMNetwork    string   `mapstructure:"vm_network"`
+	Cluster           string   `mapstructure:"cluster"`
+	ConvertToTemplate bool     `mapstructure:"convert_to_template"`
+	Datacenter        string   `mapstructure:"datacenter"`
+	Datastore         string   `mapstructure:"datastore"`
+	DiskMode          string   `mapstructure:"disk_mode"`
+	Host              string   `mapstructure:"host"`
+	Insecure          bool     `mapstructure:"insecure"`
+	Options           []string `mapstructure:"options"`
+	Overwrite         bool     `mapstructure:"overwrite"`
+	Password          string   `mapstructure:"password"`
+	ResourcePool      string   `mapstructure:"resource_pool"`
+	Username          string   `mapstructure:"username"`
+	VMFolder          string   `mapstructure:"vm_folder"`
+	VMName            string   `mapstructure:"vm_name"`
+	VMNetwork         string   `mapstructure:"vm_network"`
 
 	ctx interpolate.Context
 }
@@ -134,6 +138,43 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		return nil, false, fmt.Errorf("Failed: %s\n", err)
+	}
+
+	if p.config.ConvertToTemplate {
+		sdkURL, err := url.Parse(fmt.Sprintf("https://%s:%s@%s/sdk",
+			url.QueryEscape(p.config.Username),
+			url.QueryEscape(p.config.Password),
+			p.config.Host))
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed: %s\n", err)
+		}
+
+		client, err := govmomi.NewClient(context.TODO(), sdkURL, true)
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed: %s\n", err)
+		}
+
+		finder := find.NewFinder(client.Client, false)
+		datacenter, err := finder.DefaultDatacenter(context.TODO())
+		finder.SetDatacenter(datacenter)
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed: %s\n", err)
+		}
+
+		vm, err := finder.VirtualMachine(context.TODO(), p.config.VMName)
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed: %s\n", err)
+		}
+
+		ui.Message(fmt.Sprintf("Marking as template %s", p.config.VMName))
+		err = vm.MarkAsTemplate(context.TODO())
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Failed: %s\n", err)
+		}
 	}
 
 	return artifact, false, nil

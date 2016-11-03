@@ -15,6 +15,7 @@ func TestArgs(t *testing.T) {
 	p.config.Host = "myhost"
 	p.config.Datacenter = "mydc"
 	p.config.Cluster = "mycluster"
+	p.config.ConvertToTemplate = true
 	p.config.VMName = "my vm"
 	p.config.Datastore = "my datastore"
 	p.config.Insecure = true
