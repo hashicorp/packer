@@ -69,12 +69,8 @@ func getImage(c *Config, d Driver) (*Image, error) {
 func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
+	sshPublicKey := state.Get("ssh_public_key").(string)
 	ui := state.Get("ui").(packer.Ui)
-
-	sshPublicKey := ""
-	if sshPublicKeyRaw, ok := state.GetOk("ssh_public_key"); ok {
-		sshPublicKey = sshPublicKeyRaw.(string)
-	}
 
 	sourceImage, err := getImage(c, d)
 	if err != nil {

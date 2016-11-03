@@ -37,6 +37,7 @@ func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		state.Put("ssh_private_key", string(privateKeyBytes))
+		state.Put("ssh_public_key", "")
 
 		return multistep.ActionContinue
 	}
