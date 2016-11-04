@@ -3,6 +3,10 @@
 	"ignore": "test appengine",
 	"package": [
 		{
+			"path": "context",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "/WG++Jij8INZ80tER+FAiIDMmws=",
 			"comment": "v3.1.0-beta",
 			"path": "github.com/Azure/azure-sdk-for-go/arm/compute",

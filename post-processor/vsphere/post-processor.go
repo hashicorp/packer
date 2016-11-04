@@ -157,11 +157,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 
 		finder := find.NewFinder(client.Client, false)
-		datacenter, err := finder.DefaultDatacenter(context.TODO())
-		finder.SetDatacenter(datacenter)
+
+		datacenter, err := finder.Datacenter(context.TODO(), p.config.Datacenter)
+
 		if err != nil {
 			return nil, false, fmt.Errorf("Failed: %s\n", err)
 		}
+
+		finder.SetDatacenter(datacenter)
 
 		vm, err := finder.VirtualMachine(context.TODO(), p.config.VMName)
 
