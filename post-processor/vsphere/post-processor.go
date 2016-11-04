@@ -150,7 +150,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Failed: %s\n", err)
 		}
 
-		client, err := govmomi.NewClient(context.TODO(), sdkURL, true)
+		client, err := govmomi.NewClient(context.Background(), sdkURL, true)
 
 		if err != nil {
 			return nil, false, fmt.Errorf("Failed: %s\n", err)
@@ -158,7 +158,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		finder := find.NewFinder(client.Client, false)
 
-		datacenter, err := finder.Datacenter(context.TODO(), p.config.Datacenter)
+		datacenter, err := finder.Datacenter(context.Background(), p.config.Datacenter)
 
 		if err != nil {
 			return nil, false, fmt.Errorf("Failed: %s\n", err)
@@ -166,14 +166,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		finder.SetDatacenter(datacenter)
 
-		vm, err := finder.VirtualMachine(context.TODO(), p.config.VMName)
+		vm, err := finder.VirtualMachine(context.Background(), p.config.VMName)
 
 		if err != nil {
 			return nil, false, fmt.Errorf("Failed: %s\n", err)
 		}
 
 		ui.Message(fmt.Sprintf("Marking as template %s", p.config.VMName))
-		err = vm.MarkAsTemplate(context.TODO())
+		err = vm.MarkAsTemplate(context.Background())
 
 		if err != nil {
 			return nil, false, fmt.Errorf("Failed: %s\n", err)
