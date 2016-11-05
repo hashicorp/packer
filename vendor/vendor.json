@@ -509,10 +509,12 @@
 			"revisionTime": "2016-11-02T00:40:33Z"
 		},
 		{
-			"checksumSHA1": "JO0frnamOYodTrq1WMbauPE3h64=",
+			"checksumSHA1": "Wru0e1rWhADRUMUaw6l1sOqpOV0=",
+			"origin": "github.com/cpuguy83/check",
 			"path": "github.com/go-check/check",
-			"revision": "163297374fe15df72fc217b2bdfabb5894c73059",
-			"revisionTime": "2014-04-01T04:08:44Z"
+			"revision": "4ed411733c5785b40214c70bce814c3a3a689609",
+			"revisionTime": "2016-07-27T16:14:07Z",
+			"tree": true
 		},
 		{
 			"checksumSHA1": "PkPgpx/FYoIJCbihlRZEp7oHG9Q=",
