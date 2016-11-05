@@ -19,6 +19,7 @@ IMPROVEMENTS:
   * builder/googlecompute: Support custom scopes. [GH-4043]
   * builder/googlecompute: Support `ssh_private_key_file` in communicator.
       [GH-4101]
+  * provisioner/ansible: Move info messages to log [GH-4123]
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
   * post-processor/vagrant: Fixed inconsistency between vagrant-libvirt driver
       and packer QEMU accelerator. [GH-4104]
