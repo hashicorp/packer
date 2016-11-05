@@ -127,7 +127,7 @@ privileges without worrying about password prompts.
 
 ### FreeBSD Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX sematics. In order
+FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
