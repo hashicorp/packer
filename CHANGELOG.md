@@ -12,26 +12,28 @@ FEATURES:
 IMPROVEMENTS:
 
   * builder/amazon: Dynamic source AMI [GH-3817]
-  * builder/googlecompute: Support custom scopes. [GH-4043]
-  * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
   * builder/amazon: Allow polling delay override with `AWS_POLL_DELAY_SECONDS`.
       [GH-4083]
   * builder/amazon: Allow use of local SSH Agent. [GH-4050]
   * builder/amazon: Show AMI ID found when using `source_ami_filter`. [GH-4096]
+  * builder/googlecompute: Support custom scopes. [GH-4043]
   * builder/googlecompute: Support `ssh_private_key_file` in communicator.
       [GH-4101]
+  * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
   * post-processor/vagrant: Fixed inconsistency between vagrant-libvirt driver
       and packer QEMU accelerator. [GH-4104]
   
 BUG FIXES:
 
-  * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
-  * builder/vmware: Fixed build error when shutting down. [GH-4041]
   * builder/amazon: Fixed an error where we wouldn't fail the build even if we
       timed out waiting for the temporary security group to become available.
       [GH-4099]
   * builder/google: Fix issue where we'd hang waiting for a startup script
       which doesn't exist. [GH-4102]
+  * builder/vmware: Fixed build error when shutting down. [GH-4041]
+  * builder/vmware: Fix keycodes for ctrl, shift and alt keys. [GH-4115]
+  * builder/qemu: Fix keycodes for ctrl, shift and alt keys. [GH-4115]
+  * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
 
 ## 0.11.0 (October 21, 2016)
 
