@@ -23,6 +23,7 @@ IMPROVEMENTS:
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
   * post-processor/vagrant: Fixed inconsistency between vagrant-libvirt driver
       and packer QEMU accelerator. [GH-4104]
+  * communicator/ssh: Improved SSH upload performance. [GH-3940]
   
 BUG FIXES:
 
