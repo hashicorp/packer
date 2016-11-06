@@ -13,7 +13,6 @@ import (
 
 type StepRun struct {
 	BootWait time.Duration
-	Headless bool
 
 	vmName string
 }
