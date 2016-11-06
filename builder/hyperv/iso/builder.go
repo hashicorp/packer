@@ -35,8 +35,8 @@ const (
 
 	LowRam = 256 // 256MB
 
-	DefaultUsername = "vagrant"
-	DefaultPassword = "vagrant"
+	DefaultUsername = ""
+	DefaultPassword = ""
 )
 
 // Builder implements packer.Builder and builds the actual Hyperv
