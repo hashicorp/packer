@@ -1,8 +1,6 @@
 package common
 
 import (
-	"time"
-
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/template/interpolate"
 )
