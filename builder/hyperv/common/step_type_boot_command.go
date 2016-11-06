@@ -81,8 +81,8 @@ func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 func scancodes(message string) []string {
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 	//
-	// Scancodes represent raw keyboard output and are fed to the VM by the
-	// VBoxManage controlvm keyboardputscancode program.
+	// Scancodes represent raw keyboard output and are fed to the VM by using
+	// powershell to use Msvm_Keyboard
 	//
 	// Scancodes are recorded here in pairs. The first entry represents
 	// the key press and the second entry represents the key release and is
