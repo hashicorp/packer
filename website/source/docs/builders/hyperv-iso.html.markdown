@@ -87,12 +87,12 @@ can be configured for this builder.
     the default is 1 cpu.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
-    for the VM. By default, this is 40000 (about 40 GB).
-
--   `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual machine.
-    This defaults to false.
+    for the VM. By default, this is 40 GB.
 
 -   `enable_dynamic_memory` (bool) - If true enable dynamic memory for virtual machine.
+    This defaults to false.
+
+-   `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual machine.
     This defaults to false.
 
 -   `enable_secure_boot` (bool) - If true enable secure boot for virtual machine.
@@ -117,6 +117,12 @@ can be configured for this builder.
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
     drives and dvd drives will also be scsi and not ide. 
 
+-   `guest_additions_mode` (string) - How should guest additions be installed.
+    If value `attach` then attach iso image with by specified by `guest_additions_path`.
+    Otherwise guest additions is not installed.
+
+-   `guest_additions_path` (string) - The path to the iso image for guest additions.
+
 -   `http_directory` (string) - Path to a directory to serve using an HTTP
     server. The files in this directory will be available over HTTP that will
     be requestable from the virtual machine. This is useful for hosting
@@ -132,12 +138,6 @@ can be configured for this builder.
     server to be on one port, make this minimum and maximum port the same.
     By default the values are 8000 and 9000, respectively.
 
--   `ip_address_timeout` (string) - The time to wait after creating the initial virtual
-    machine and waiting for an ip address before assuming there is an error in the process. 
-    The value of this should be a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
-    five seconds and one minute 30 seconds, respectively. If this isn't specified,
-    the default is 10 seconds.
-
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to download
     or while downloading a single URL, it will move on to the next. All URLs
@@ -150,6 +150,9 @@ can be configured for this builder.
     is executed. This directory must not exist or be empty prior to running the builder.
     By default this is "output-BUILDNAME" where "BUILDNAME" is the name
     of the build.
+
+-   `ram_size` (integer) - The size, in megabytes, of the ram to create
+    for the VM. By default, this is 1 GB.
 
 *   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a 
     VM when it is booted. This is most useful for unattended Windows installs, which 
