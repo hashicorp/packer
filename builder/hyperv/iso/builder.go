@@ -61,7 +61,7 @@ type Config struct {
 	DiskSize uint `mapstructure:"disk_size"`
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
-	RamSizeMB uint `mapstructure:"ram_size_mb"`
+	RamSize uint `mapstructure:"ram_size"`
 	// A list of files to place onto a floppy disk that is attached when the
 	// VM is booted. This is most useful for unattended Windows installs,
 	// which look for an Autounattend.xml file on removable media. By default,
@@ -261,7 +261,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			warnings = appendWarnings(warnings, warning)
 		}
 
-		if b.config.RamSizeMB < MinNestedVirtualizationRamSize {
+		if b.config.RamSize < MinNestedVirtualizationRamSize {
 			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start any nested VMs.")
 			warnings = appendWarnings(warnings, warning)
 		}
@@ -328,7 +328,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepCreateVM{
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
-			RamSizeMB:                      b.config.RamSizeMB,
+			RamSize:                        b.config.RamSize,
 			DiskSize:                       b.config.DiskSize,
 			Generation:                     b.config.Generation,
 			Cpu:                            b.config.Cpu,
@@ -477,16 +477,16 @@ func (b *Builder) checkDiskSize() error {
 }
 
 func (b *Builder) checkRamSize() error {
-	if b.config.RamSizeMB == 0 {
-		b.config.RamSizeMB = DefaultRamSize
+	if b.config.RamSize == 0 {
+		b.config.RamSize = DefaultRamSize
 	}
 
-	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSizeMB))
+	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
 
-	if b.config.RamSizeMB < MinRamSize {
-		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSizeMB)
-	} else if b.config.RamSizeMB > MaxRamSize {
-		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSizeMB)
+	if b.config.RamSize < MinRamSize {
+		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
+	} else if b.config.RamSize > MaxRamSize {
+		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
 	}
 
 	return nil
@@ -498,7 +498,7 @@ func (b *Builder) checkHostAvailableMemory() string {
 	if powershellAvailable {
 		freeMB := powershell.GetHostAvailableMemory()
 
-		if (freeMB - float64(b.config.RamSizeMB)) < LowRam {
+		if (freeMB - float64(b.config.RamSize)) < LowRam {
 			return fmt.Sprintf("Hyper-V might fail to create a VM if there is not enough free memory in the system.")
 		}
 	}
