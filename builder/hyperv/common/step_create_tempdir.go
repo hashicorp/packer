@@ -30,10 +30,10 @@ func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.dirPath = packerTempDir;
+	s.dirPath = packerTempDir
 	state.Put("packerTempDir", packerTempDir)
 
-//	ui.Say("packerTempDir = '" + packerTempDir + "'")
+	//	ui.Say("packerTempDir = '" + packerTempDir + "'")
 
 	return multistep.ActionContinue
 }

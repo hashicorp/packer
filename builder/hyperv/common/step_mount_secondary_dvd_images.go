@@ -12,14 +12,14 @@ import (
 )
 
 type StepMountSecondaryDvdImages struct {
-	IsoPaths         []string
-	Generation    uint
+	IsoPaths   []string
+	Generation uint
 }
 
 type DvdControllerProperties struct {
 	ControllerNumber   uint
 	ControllerLocation uint
-	Existing bool
+	Existing           bool
 }
 
 func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.StepAction {
@@ -45,13 +45,13 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-	
+
 		properties.ControllerNumber = controllerNumber
 		properties.ControllerLocation = controllerLocation
 		properties.Existing = false
 		dvdProperties = append(dvdProperties, properties)
-		state.Put("secondary.dvd.properties", dvdProperties)	
-	
+		state.Put("secondary.dvd.properties", dvdProperties)
+
 		ui.Say(fmt.Sprintf("Mounting secondary dvd drive %s ...", isoPath))
 		err = driver.MountDvdDrive(vmName, isoPath, controllerNumber, controllerLocation)
 		if err != nil {
@@ -59,7 +59,7 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-	
+
 		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber, controllerLocation))
 	}
 
@@ -68,21 +68,21 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 
 func (s *StepMountSecondaryDvdImages) Cleanup(state multistep.StateBag) {
 	dvdControllersState := state.Get("secondary.dvd.properties")
-	
+
 	if dvdControllersState == nil {
 		return
 	}
-	
+
 	dvdControllers := dvdControllersState.([]DvdControllerProperties)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 	errorMsg := "Error unmounting secondary dvd drive: %s"
-	
+
 	ui.Say("Clean up secondary dvd drives...")
 
 	for _, dvdController := range dvdControllers {
-		
+
 		if dvdController.Existing {
 			err := driver.UnmountDvdDrive(vmName, dvdController.ControllerNumber, dvdController.ControllerLocation)
 			if err != nil {
@@ -93,6 +93,6 @@ func (s *StepMountSecondaryDvdImages) Cleanup(state multistep.StateBag) {
 			if err != nil {
 				log.Print(fmt.Sprintf(errorMsg, err))
 			}
-		}		
+		}
 	}
 }
