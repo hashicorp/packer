@@ -466,9 +466,9 @@ func (b *Builder) checkDiskSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
 
 	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size_gb: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
 	} else if b.config.DiskSize > MaxDiskSize {
-		return fmt.Errorf("disk_size_gb: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
 	}
 
 	return nil
@@ -482,9 +482,9 @@ func (b *Builder) checkRamSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
 
 	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
+		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
 	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size_mb: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
+		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
 	}
 
 	return nil
