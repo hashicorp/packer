@@ -2,9 +2,9 @@ package common
 
 import (
 	"fmt"
-	"os"
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/template/interpolate"
+	"os"
 )
 
 type OutputConfig struct {
