@@ -364,7 +364,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		&hypervcommon.StepRun{
 			BootWait: b.config.BootWait,
-			Headless: b.config.Headless,
 		},
 
 		&hypervcommon.StepTypeBootCommand{
