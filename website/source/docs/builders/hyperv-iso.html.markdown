@@ -65,7 +65,7 @@ can be configured for this builder.
 
 -   `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file).
-    If this is an HTTP URL, Packer will download it and cache it between
+    If this is an HTTP URL, Packer will download iso and cache it between
     runs.
 
 ### Optional:
