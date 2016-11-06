@@ -18,17 +18,7 @@ type bootCommandTemplateData struct {
 	Name     string
 }
 
-// This step "types" the boot command into the VM via the prltype script, built on the
-// Parallels Virtualization SDK - Python API.
-//
-// Uses:
-//   driver Driver
-//   http_port int
-//   ui     packer.Ui
-//   vmName string
-//
-// Produces:
-//   <nothing>
+// This step "types" the boot command into the VM via the Hyper-V virtual keyboard
 type StepTypeBootCommand struct {
 	BootCommand []string
 	SwitchName  string
