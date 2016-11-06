@@ -9,14 +9,14 @@ type ScriptBuilder struct {
 }
 
 func (b *ScriptBuilder) WriteLine(s string) (n int, err error) {
-	n, err = b.buffer.WriteString(s);
+	n, err = b.buffer.WriteString(s)
 	b.buffer.WriteString("\n")
 
-	return n+1, err
+	return n + 1, err
 }
 
 func (b *ScriptBuilder) WriteString(s string) (n int, err error) {
-	n, err = b.buffer.WriteString(s);
+	n, err = b.buffer.WriteString(s)
 	return n, err
 }
 
@@ -27,4 +27,3 @@ func (b *ScriptBuilder) String() string {
 func (b *ScriptBuilder) Reset() {
 	b.buffer.Reset()
 }
-
