@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/mitchellh/multistep"
 	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
