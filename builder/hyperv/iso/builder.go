@@ -98,12 +98,6 @@ type Config struct {
 
 	Communicator string `mapstructure:"communicator"`
 
-	// The time in seconds to wait for the virtual machine to report an IP address.
-	// This defaults to 120 seconds. This may have to be increased if your VM takes longer to boot.
-	IPAddressTimeout time.Duration `mapstructure:"ip_address_timeout"`
-
-	SSHWaitTimeout time.Duration
-
 	SkipCompaction bool `mapstructure:"skip_compaction"`
 
 	ctx interpolate.Context
