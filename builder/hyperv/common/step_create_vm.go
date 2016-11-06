@@ -18,7 +18,7 @@ import (
 type StepCreateVM struct {
 	VMName                         string
 	SwitchName                     string
-	RamSizeMB                      uint
+	RamSize                        uint
 	DiskSize                       uint
 	Generation                     uint
 	Cpu                            uint
@@ -36,10 +36,10 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	path := state.Get("packerTempDir").(string)
 
 	// convert the MB to bytes
-	ram := int64(s.RamSizeMB * 1024 * 1024)
+	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, ram, diskSize, s.SwitchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, ramSize, diskSize, s.SwitchName, s.Generation)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)

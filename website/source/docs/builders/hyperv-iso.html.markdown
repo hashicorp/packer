@@ -358,7 +358,7 @@ Packer config:
     "winrm_password": "vagrant",
     "winrm_timeout" : "4h",
     "shutdown_command": "f:\\run-sysprep.cmd",  
-    "ram_size_mb": 4096,
+    "ram_size": 4096,
     "cpu": 4,
     "generation": 2,
     "switch_name":"LAN",
@@ -886,7 +886,7 @@ Packer config:
       "initrd=/install/initrd.gz -- <enter>"
     ],
     "shutdown_command": "echo 'vagrant' | sudo -S -E shutdown -P now",
-    "ram_size_mb": 4096,
+    "ram_size": 4096,
     "cpu": 4,
     "generation": 1,
     "switch_name":"LAN"
