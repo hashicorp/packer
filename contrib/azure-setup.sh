@@ -145,7 +145,7 @@ createStorageAccount() {
 	fi
 }
 
-createServicePrinciple() {
+createServicePrincipal() {
 	echo "==> Creating service principal"
 	azure_object_id=$(azure ad sp create -n $meta_name --home-page http://$meta_name --identifier-uris http://$meta_name/example -p $azure_client_secret --json | jq -r .objectId)
 	azure_client_id=$(azure ad app show -c $meta_name --json | jq -r .[0].appId)
@@ -201,7 +201,7 @@ setup() {
 	sleep 5
 	createStorageAccount
 	sleep 5
-	createServicePrinciple
+	createServicePrincipal
 	sleep 5
 	createPermissions
 
