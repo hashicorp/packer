@@ -364,7 +364,7 @@ func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsI
 	for i := 0; i < 40; i++ {
 		_, err := c.DescribeSecurityGroups(input)
 		if err != nil {
-			log.Printf("[DEBUG] Error querying security group %s: %s", input.GroupIds, err)
+			log.Printf("[DEBUG] Error querying security group %v: %s", input.GroupIds, err)
 			time.Sleep(15 * time.Second)
 			continue
 		}
