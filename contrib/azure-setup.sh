@@ -65,6 +65,27 @@ requirements() {
 		echo "https://stedolan.github.io/jq/"
 	fi
 
+	# azure-cli 0.10.5 includes a breaking change
+	# warn if using an incompatible azure-cli version
+	# This is just a work around until a more appropriate fix is available
+	supported_version=true
+	IFS='.' read -ra azureversionsemver <<< "$azureversion"
+	if [ ${azureversionsemver[0]} -gt 0 ]; then
+		supported_version=false 
+	fi
+	if [ ${azureversionsemver[1]} -gt 10 ]; then 
+		supported_version=false 
+	fi
+	if [ ${azureversionsemver[2]} -gt 4 ]; then 
+		supported_version=false 
+	fi
+	
+	echo "supported_version is $supported_version"
+	if [ "${supported_version}" = false ]; then
+		echo "Error: azure-cli must be 0.10.4 or older, see http://bit.ly/2etirbM"
+		exit 1
+	fi
+
 	if [ $found -lt 2 ]; then
 		exit 1
 	fi
