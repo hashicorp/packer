@@ -209,6 +209,8 @@ setup() {
 	sleep 5
 	createStorageAccount
 	sleep 5
+	createApplication
+	sleep 5
 	createServicePrincipal
 	sleep 5
 	createPermissions
