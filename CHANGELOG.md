@@ -24,6 +24,7 @@ IMPROVEMENTS:
   * post-processor/vagrant: Fixed inconsistency between vagrant-libvirt driver
       and packer QEMU accelerator. [GH-4104]
   * communicator/ssh: Improved SSH upload performance. [GH-3940]
+  * contrib/azure-setup.sh: Support for azure-cli 0.10.7. [GH-4133]
   
 BUG FIXES:
 
