@@ -37,6 +37,8 @@ BUG FIXES:
   * builder/vmware: Fix keycodes for ctrl, shift and alt keys. [GH-4115]
   * builder/qemu: Fix keycodes for ctrl, shift and alt keys. [GH-4115]
   * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
+  * common/step_create_floppy: Fixed support for 1.44MB floppies on Windows.
+      [GH-4135]
 
 ## 0.11.0 (October 21, 2016)
 
