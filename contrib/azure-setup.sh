@@ -166,9 +166,9 @@ createServicePrincipal() {
 	fi
 
 	if [ "${newer_syntax}" = true ]; then	
-		azure_object_id=$(azure ad sp create -a $azure_client_id | jq -r .objectId)
+		azure_object_id=$(azure ad sp create -a $azure_client_id --json | jq -r .objectId)
 	else 
-		azure_object_id=$(azure ad sp create $azure_client_id | jq -r .objectId)
+		azure_object_id=$(azure ad sp create $azure_client_id --json | jq -r .objectId)
 	fi
 
 	if [ $? -ne 0 ]; then
