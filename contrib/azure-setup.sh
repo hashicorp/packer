@@ -159,10 +159,10 @@ createServicePrincipal() {
 	echo "==> Creating service principal"
 	# Azure CLI 0.10.2 introduced a breaking change, where appId must be supplied with the -a switch
 	# prior version accepted appId as the only parameter without a switch
-	newer_syntax = false
+	newer_syntax=false
 	IFS='.' read -ra azureversionsemver <<< "$azureversion"
 	if [ ${azureversionsemver[0]} -ge 0 ] && [ ${azureversionsemver[1]} -ge 10 ] && [ ${azureversionsemver[2]} -ge 2 ]; then	
-		newer_syntax = true
+		newer_syntax=true
 	fi
 
 	if [ "${newer_syntax}" = true ]; then	
