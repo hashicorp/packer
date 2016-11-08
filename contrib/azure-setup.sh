@@ -165,7 +165,7 @@ createServicePrincipal() {
 		newer_syntax = true
 	fi
 
-	if [newer_syntax -eq true ]; then	
+	if [ "${newer_syntax}" = true ]; then	
 		azure ad sp create -a $azure_client_id
 	else 
 		azure ad sp create $azure_client_id	
