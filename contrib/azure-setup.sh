@@ -64,7 +64,7 @@ requirements() {
 		echo "jq is missing. Please install jq from"
 		echo "https://stedolan.github.io/jq/"
 	fi
-	
+
 	if [ $found -lt 2 ]; then
 		exit 1
 	fi
@@ -145,10 +145,18 @@ createStorageAccount() {
 	fi
 }
 
+createApplication() {
+	echo "==> Creating application"
+	azure_client_id=$(azure ad app create -n $meta_name -i http://$meta_name --home-page http://$meta_name -p $azure_client_secret --json | jq -r .appId)
+	if [ $? -ne 0 ]; then
+		echo "Error creating application: $meta_name @ http://$meta_name"
+		exit 1
+	fi
+}
+
 createServicePrincipal() {
 	echo "==> Creating service principal"
-	azure_object_id=$(azure ad sp create -n $meta_name --home-page http://$meta_name --identifier-uris http://$meta_name/example -p $azure_client_secret --json | jq -r .objectId)
-	azure_client_id=$(azure ad app show -c $meta_name --json | jq -r .[0].appId)
+	azure ad sp create $azure_client_id
 	if [ $? -ne 0 ]; then
 		echo "Error creating service principal: $azure_client_id"
 		exit 1
