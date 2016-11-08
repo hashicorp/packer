@@ -161,7 +161,7 @@ createServicePrincipal() {
 	# prior version accepted appId as the only parameter without a switch
 	newer_syntax = false
 	IFS='.' read -ra azureversionsemver <<< "$azureversion"
-	if [[ ${azureversionsemver[0]} -ge 0 && ${azureversionsemver[1]} -ge 10 &&  ${azureversionsemver[2]} -ge 2]]; then	
+	if [ ${azureversionsemver[0]} -ge 0 ] && [ ${azureversionsemver[1]} -ge 10 ] && [ ${azureversionsemver[2]} -ge 2 ]; then	
 		newer_syntax = true
 	fi
 
