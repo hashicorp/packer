@@ -73,10 +73,6 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 			p.SetNetworkid(network.Id)
 		}
 
-		if config.Zone != "" {
-			p.SetZoneid(config.Zone)
-		}
-
 		// Associate a new public IP address.
 		ipAddr, err := client.Address.AssociateIpAddress(p)
 		if err != nil {
