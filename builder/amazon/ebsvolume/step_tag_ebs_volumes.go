@@ -11,7 +11,6 @@ import (
 
 type stepTagEBSVolumes struct {
 	VolumeMapping []BlockDevice
-	VolumeIDs     **[]string
 }
 
 func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
@@ -19,15 +18,17 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
-	volumeIds := make([]string, 0, len(s.VolumeMapping))
+	volumes := make(EbsVolumes)
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
 			if configVolumeMapping.DeviceName == *instanceBlockDevices.DeviceName {
-				volumeIds = append(volumeIds, *instanceBlockDevices.Ebs.VolumeId)
+				volumes[*ec2conn.Config.Region] = append(
+					volumes[*ec2conn.Config.Region],
+					*instanceBlockDevices.Ebs.VolumeId)
 			}
 		}
 	}
-	*s.VolumeIDs = &volumeIds
+	state.Put("ebsvolumes", volumes)
 
 	if len(s.VolumeMapping) > 0 {
 		ui.Say("Tagging EBS volumes...")
