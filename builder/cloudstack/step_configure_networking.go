@@ -73,6 +73,10 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 			p.SetNetworkid(network.Id)
 		}
 
+		if config.Zone != "" {
+			p.SetZoneid(config.Zone)
+		}
+
 		// Associate a new public IP address.
 		ipAddr, err := client.Address.AssociateIpAddress(p)
 		if err != nil {
@@ -125,8 +129,8 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		p.SetAclid(network.Aclid)
 		p.SetAction("allow")
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.privatePort)
-		p.SetEndport(s.privatePort)
+		p.SetStartport(s.publicPort)
+		p.SetEndport(s.publicPort)
 		p.SetTraffictype("ingress")
 
 		// Create the network ACL rule.
@@ -146,8 +150,8 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 
 		// Configure the firewall rule.
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.privatePort)
-		p.SetEndport(s.privatePort)
+		p.SetStartport(s.publicPort)
+		p.SetEndport(s.publicPort)
 
 		fwRule, err := client.Firewall.CreateFirewallRule(p)
 		if err != nil {
