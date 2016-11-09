@@ -128,11 +128,11 @@ Packer to work:
         "ec2:DetachVolume",
         "ec2:GetPasswordData",
         "ec2:ModifyImageAttribute",
-        "ec2:ModifyInstanceAttribute"
+        "ec2:ModifyInstanceAttribute",
         "ec2:RegisterImage",
         "ec2:RunInstances",
         "ec2:StopInstances",
-        "ec2:TerminateInstances",
+        "ec2:TerminateInstances"
       ],
       "Resource" : "*"
   }]
