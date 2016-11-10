@@ -1,6 +1,5 @@
 env:
-    - USER=travis
-    - TESTARGS=-test.v
+    - USER=travis TESTARGS=-test.v
 
 sudo: false
 
