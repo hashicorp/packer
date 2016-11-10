@@ -13,6 +13,12 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
+func init() {
+	// ansible depends on this being set, but some testing environments don't
+	// guarantee that it will be.
+	os.Setenv("USER", "packer")
+}
+
 // Be sure to remove the Ansible stub file in each test with:
 //   defer os.Remove(config["command"].(string))
 func testConfig(t *testing.T) map[string]interface{} {
