@@ -2,19 +2,14 @@ package cloudstack
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
-type stepSetupNetworking struct {
-	privatePort int
-	publicPort  int
-}
+type stepSetupNetworking struct{}
 
 func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
@@ -27,20 +22,6 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		ui.Message("Using the local IP address...")
 		ui.Message("Networking has been setup!")
 		return multistep.ActionContinue
-	}
-	// Generate a random public port used to configure our port forward.
-	rand.Seed(time.Now().UnixNano())
-	s.publicPort = 50000 + rand.Intn(10000)
-
-	// Set the currently configured port to be the private port.
-	s.privatePort = config.Comm.Port()
-
-	// Set the SSH or WinRM port to be the randomly generated public port.
-	switch config.Comm.Type {
-	case "ssh":
-		config.Comm.SSHPort = s.publicPort
-	case "winrm":
-		config.Comm.WinRMPort = s.publicPort
 	}
 
 	// Retrieve the instance ID from the previously saved state.
@@ -95,9 +76,9 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	ui.Message("Creating port forward...")
 	p := client.Firewall.NewCreatePortForwardingRuleParams(
 		config.PublicIPAddress,
-		s.privatePort,
+		config.Comm.Port(),
 		"TCP",
-		s.publicPort,
+		config.Comm.Port(),
 		instanceID,
 	)
 
@@ -129,8 +110,8 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		p.SetAclid(network.Aclid)
 		p.SetAction("allow")
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.publicPort)
-		p.SetEndport(s.publicPort)
+		p.SetStartport(config.Comm.Port())
+		p.SetEndport(config.Comm.Port())
 		p.SetTraffictype("ingress")
 
 		// Create the network ACL rule.
@@ -150,8 +131,8 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 
 		// Configure the firewall rule.
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.publicPort)
-		p.SetEndport(s.publicPort)
+		p.SetStartport(config.Comm.Port())
+		p.SetEndport(config.Comm.Port())
 
 		fwRule, err := client.Firewall.CreateFirewallRule(p)
 		if err != nil {
