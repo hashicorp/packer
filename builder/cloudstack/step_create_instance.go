@@ -60,6 +60,10 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		p.SetProjectid(config.Project)
 	}
 
+	if config.Keypair != "" {
+		p.SetKeypair(config.Keypair)
+	}
+
 	if config.UserData != "" {
 		ud, err := getUserData(config.UserData, config.HTTPGetOnly)
 		if err != nil {
