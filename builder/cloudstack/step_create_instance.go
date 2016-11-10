@@ -32,6 +32,10 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	p.SetName(config.InstanceName)
 	p.SetDisplayname("Created by Packer")
 
+	if config.Keypair != "" {
+		p.SetKeypair(config.Keypair)
+	}
+
 	// If we use an ISO, configure the disk offering.
 	if config.SourceISO != "" {
 		p.SetDiskofferingid(config.DiskOffering)
@@ -58,10 +62,6 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// If there is a project supplied, set the project id.
 	if config.Project != "" {
 		p.SetProjectid(config.Project)
-	}
-
-	if config.Keypair != "" {
-		p.SetKeypair(config.Keypair)
 	}
 
 	if config.UserData != "" {
