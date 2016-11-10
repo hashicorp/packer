@@ -1,3 +1,6 @@
+env:
+    - USER=travis
+
 sudo: false
 
 language: go
