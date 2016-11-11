@@ -190,6 +190,11 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 	if c.WinRMUser == "" {
 		errs = append(errs, errors.New("winrm_username must be specified."))
 	}
+	
+	// enable default http proxy for winrm communication
+	c.WinRMTransportDecorator = func(*http.Transport) http.RoundTripper {
+		return http.DefaultTransport
+	}
 
 	return errs
 }
