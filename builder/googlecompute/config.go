@@ -43,6 +43,7 @@ type Config struct {
 	Region               string            `mapstructure:"region"`
 	Scopes               []string          `mapstructure:"scopes"`
 	SourceImage          string            `mapstructure:"source_image"`
+	SourceImageFamily    string            `mapstructure:"source_image_family"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	StartupScriptFile    string            `mapstructure:"startup_script_file"`
 	Subnetwork           string            `mapstructure:"subnetwork"`
@@ -152,9 +153,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.SourceImage == "" {
+	if c.SourceImage == "" && c.SourceImageFamily == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("a source_image must be specified"))
+			errs, errors.New("a source_image or source_image_family must be specified"))
 	}
 
 	if c.Zone == "" {
