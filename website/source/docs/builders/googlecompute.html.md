@@ -125,8 +125,11 @@ builder.
 -   `project_id` (string) - The project ID that will be used to launch instances
     and store images.
 
--   `source_image` (string) - The source image to use to create the new
-    image from. Example: `"debian-7-wheezy-v20150127"`
+-   `source_image` or `source_image_family` (string) - The source image or
+    family to use to create the new image from. The image family always returns
+    its latest image that is not deprecated. If both `source_image` and
+    `source_image_family` are specified, `source_image` takes precedence.
+    Example: `"debian-7-wheezy-v20150127"`, `"debian-7"`.
 
 -   `zone` (string) - The zone in which to launch the instance used to create
     the image. Example: `"us-central1-a"`
@@ -147,7 +150,10 @@ builder.
 
 -   `image_description` (string) - The description of the resulting image.
 
--   `image_family` (string) - The name of the image family to which the resulting image belongs. You can create disks by specifying an image family instead of a specific image name. The image family always returns its latest image that is not deprecated.
+-   `image_family` (string) - The name of the image family to which the
+    resulting image belongs. You can create disks by specifying an image family
+    instead of a specific image name. The image family always returns its
+    latest image that is not deprecated.
 
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
