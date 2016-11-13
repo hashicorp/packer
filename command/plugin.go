@@ -24,6 +24,7 @@ import (
 	filebuilder "github.com/mitchellh/packer/builder/file"
 	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
 	nullbuilder "github.com/mitchellh/packer/builder/null"
+	oneandonebuilder "github.com/mitchellh/packer/builder/oneandone"
 	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
 	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
@@ -79,6 +80,7 @@ var Builders = map[string]packer.Builder{
 	"file":             new(filebuilder.Builder),
 	"googlecompute":    new(googlecomputebuilder.Builder),
 	"null":             new(nullbuilder.Builder),
+	"oneandone":        new(oneandonebuilder.Builder),
 	"openstack":        new(openstackbuilder.Builder),
 	"parallels-iso":    new(parallelsisobuilder.Builder),
 	"parallels-pvm":    new(parallelspvmbuilder.Builder),
