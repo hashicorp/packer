@@ -58,10 +58,16 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
+	name := c.SourceImageFamily
+	fromFamily := true
+	if c.SourceImage != "" {
+		name = c.SourceImage
+		fromFamily = false
+	}
 	if c.SourceImageProjectId == "" {
-		return d.GetImage(c.SourceImage)
+		return d.GetImage(name, fromFamily)
 	} else {
-		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage)
+		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage, fromFamily)
 	}
 }
 
