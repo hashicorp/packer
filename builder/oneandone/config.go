@@ -76,7 +76,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
-	c.Comm.SSHPort = 22
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs

@@ -35,7 +35,7 @@ builder.
 
 -   `image_name` (string) - Resulting image. If "image_name" is not provided Packer will generate it
 
--   `timeout` (string) - An approximate limit on how long Packer will continue making status requests while waiting for the build to complete. Default value "600".
+-   `timeout` (int) - An approximate limit on how long Packer will continue making status requests while waiting for the build to complete. Default value "600".
 
 -   `url` (string) - Endpoint for the 1&1 REST API. Default URL "https://cloudpanel-api.1and1.com/v1"
 
