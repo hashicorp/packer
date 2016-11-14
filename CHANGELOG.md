@@ -77,7 +77,7 @@ IMPROVEMENTS:
       [GH-3663]
   * builder/amazon: Support building from scratch with amazon-chroot builder.
       [GH-3855] [GH-3895]
-  * builder/amazon: Support create an AMI with an `encrypted_boot` volume.
+  * builder/amazon: Support create an AMI with an `encrypt_boot` volume.
       [GH-3382]
   * builder/azure: Add `os_disk_size_gb`. [GH-3995]
   * builder/azure: Add location to setup script. [GH-3803]
