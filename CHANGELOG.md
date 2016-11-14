@@ -124,7 +124,7 @@ IMPROVEMENTS:
   * builder/qemu: Specify disk format when starting qemu. [GH-3888]
   * builder/virtualbox-iso: Added `hard_drive_nonrotational` and
       `hard_drive_discard` options to enable trim/discard. [GH-4013]
-  * builder/virtualbox-iso: Added `keep_registed` option to skip cleaning up
+  * builder/virtualbox-iso: Added `keep_registered` option to skip cleaning up
       the image. [GH-3954]
   * builder/virtualbox: Add support for ctrl, shift and alt keys in
       `boot_command`.  [GH-3767]
