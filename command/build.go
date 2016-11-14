@@ -288,6 +288,7 @@ Options:
   -color=false               Disable color output (on by default)
   -debug                     Debug mode enabled for builds
   -except=foo,bar,baz        Build all builds other than these
+  -only=foo,bar,baz          Build only the specified builds
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask
