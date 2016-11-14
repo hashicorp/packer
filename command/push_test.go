@@ -192,7 +192,6 @@ func TestPush_vars(t *testing.T) {
 	var actualOpts *uploadOpts
 	uploadFn := func(r io.Reader, opts *uploadOpts) (<-chan struct{}, <-chan error, error) {
 		actualOpts = opts
-		fmt.Printf("opts: %#v\n", opts)
 
 		doneCh := make(chan struct{})
 		close(doneCh)
