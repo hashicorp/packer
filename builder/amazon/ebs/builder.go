@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 
+	//"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
@@ -65,15 +66,31 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	log.Printf("[INFO] Loading config, profile: %s", b.config.ProfileName)
 	config, err := b.config.Config()
 	if err != nil {
 		return nil, err
 	}
 
-	session, err := session.NewSession(config)
+	// config = config.WithCredentialsChainVerboseErrors(true)
+
+	// TODO AWS-keys in the template does not work
+	// TODO AWS-EC2 instance profile does not work
+
+	log.Printf("[INFO] Loading session")
+	//region, _ := b.config.Region()
+	session, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Profile:           b.config.ProfileName,
+		// Config: aws.Config{
+		// 	Region: aws.String(region),
+		// },
+		Config: *config,
+	})
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[INFO] Creating EC2 service")
 	ec2conn := ec2.New(session)
 
 	// If the subnet is specified but not the AZ, try to determine the AZ automatically
