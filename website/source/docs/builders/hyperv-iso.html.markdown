@@ -351,7 +351,6 @@ Packer config:
     "boot_command": [
       "a<wait>a<wait>a"
     ],
-    "headless": false,
     "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
     "iso_checksum_type": "md5",
     "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
@@ -866,7 +865,6 @@ Packer config:
     "vm_name":"ubuntu-vivid",
     "type": "hyperv-iso",
     "disk_size": 61440,
-    "headless": false,
     "iso_url": "http://releases.ubuntu.com/15.04/ubuntu-15.04-server-amd64.iso",
     "iso_checksum_type": "sha1",
     "iso_checksum": "D10248965C2C749DF6BCCE9F2F90F16A2E75E843",
