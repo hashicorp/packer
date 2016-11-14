@@ -182,11 +182,30 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Errors
 	if b.config.GuestAdditionsMode == "" {
-		b.config.GuestAdditionsMode = "attach"
+		if b.config.GuestAdditionsPath != "" {
+			b.config.GuestAdditionsMode = "attach"
+		} else {
+			b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
+
+			if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
+				if err != nil {
+					b.config.GuestAdditionsPath = ""
+					b.config.GuestAdditionsMode = "none"
+				} else {
+					b.config.GuestAdditionsMode = "attach"
+				}
+			}
+		}
 	}
 
-	if b.config.GuestAdditionsPath == "" {
+	if b.config.GuestAdditionsPath == "" && b.config.GuestAdditionsMode == "attach" {
 		b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
+
+		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
+			if err != nil {
+				b.config.GuestAdditionsPath = ""
+			}
+		}
 	}
 
 	for _, isoPath := range b.config.SecondaryDvdImages {
