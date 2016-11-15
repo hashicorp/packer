@@ -146,7 +146,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	// Validation
 	var errs []error
 	if c.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
+		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
 
 	if c.SSHPrivateKey != "" {

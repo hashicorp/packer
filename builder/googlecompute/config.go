@@ -130,10 +130,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RawStateTimeout = "5m"
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
-
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}

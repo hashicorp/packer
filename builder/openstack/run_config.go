@@ -35,10 +35,6 @@ type RunConfig struct {
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
-	// Defaults
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
 
 	if c.UseFloatingIp && c.FloatingIpPool == "" {
 		c.FloatingIpPool = "public"
