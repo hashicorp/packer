@@ -28,6 +28,7 @@ IMPROVEMENTS:
   * contrib/azure-setup.sh: Support for azure-cli 0.10.7. [GH-4133]
   * command/push: Fix variable pushes to Atlas. Still needs Atlas server to be
       updated before the issue will be fixed completely. [GH-4089]
+  * docs: Fix command line variable docs. [GH-4143]
   
 BUG FIXES:
 
@@ -43,6 +44,7 @@ BUG FIXES:
   * common/step_create_floppy: Fixed support for 1.44MB floppies on Windows.
       [GH-4135]
   * post-processor/googlecompute-export: Fixes scopes. [GH-4147]
+  * builder/amazon: Properly cleanup temporary key pairs. [GH-4080]
 
 ## 0.11.0 (October 21, 2016)
 
