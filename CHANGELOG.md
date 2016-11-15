@@ -1,4 +1,4 @@
-## (Unreleased)
+## 0.12.0 (November 15, 2016)
 
 FEATURES:
 * **New builder:** "cloudstack" Can create new templates for use with
