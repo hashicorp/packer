@@ -18,6 +18,8 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	api := oneandone.New(token, c.Url)
 
 	serverId := state.Get("server_id").(string)
+	ui.Say("Snapshot Name " + c.SnapshotName)
+	ui.Say("server id " + serverId)
 
 	req := oneandone.ImageConfig{
 		Name:        c.SnapshotName,
@@ -32,12 +34,13 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	if err != nil {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	} else {
-		api.WaitForState(img, "ENABLED", 1, c.Timeout)
-		if err != nil {
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	}
+
+	err = api.WaitForState(img, "ENABLED", 10, c.Retries)
+
+	if err != nil {
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	state.Put("snapshot_id", img_id)
