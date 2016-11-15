@@ -21,6 +21,7 @@ IMPROVEMENTS:
       [GH-4101]
   * provisioner/ansible: Move info messages to log [GH-4123]
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
+  * provisioner/salt: Add `salt_call_args` option. [GH-4158]
   * post-processor/vagrant: Fixed inconsistency between vagrant-libvirt driver
       and packer QEMU accelerator. [GH-4104]
   * communicator/ssh: Improved SSH upload performance. [GH-3940]
