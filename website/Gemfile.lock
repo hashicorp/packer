@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/hashicorp/middleman-hashicorp.git
-  revision: e49223de08553f33da517e737c99edf78e5c3523
+  revision: 462267352881543bbc5d2606f1ca17a6165ac8ec
   specs:
-    middleman-hashicorp (0.3.0)
+    middleman-hashicorp (0.3.5)
       bootstrap-sass (~> 3.3)
       builder (~> 3.2)
       middleman (~> 3.4)
@@ -19,7 +19,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    autoprefixer-rails (6.5.1)
+    autoprefixer-rails (6.5.3)
       execjs
     bootstrap-sass (3.3.7)
       autoprefixer-rails (>= 5.2.1)
@@ -31,7 +31,7 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
-    chunky_png (1.3.7)
+    chunky_png (1.3.8)
     coffee-script (2.4.1)
       coffee-script-source
       execjs
@@ -117,12 +117,12 @@ GEM
       tilt (~> 1.4.1)
     padrino-support (0.12.8.1)
       activesupport (>= 3.1)
-    rack (1.6.4)
+    rack (1.6.5)
     rack-livereload (0.3.16)
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
-    rb-fsevent (0.9.7)
+    rb-fsevent (0.9.8)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
     redcarpet (3.3.4)
@@ -158,4 +158,4 @@ DEPENDENCIES
   middleman-hashicorp!
 
 BUNDLED WITH
-   1.13.5
+   1.13.6
