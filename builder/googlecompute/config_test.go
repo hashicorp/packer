@@ -217,6 +217,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"account_file": testAccountFile(t),
 		"project_id":   "hashicorp",
 		"source_image": "foo",
+		"ssh_username": "root",
 		"image_family": "bar",
 		"zone":         "us-east1-a",
 	}
