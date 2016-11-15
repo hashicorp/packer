@@ -18,8 +18,6 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	api := oneandone.New(token, c.Url)
 
 	serverId := state.Get("server_id").(string)
-	ui.Say("Snapshot Name " + c.SnapshotName)
-	ui.Say("server id " + serverId)
 
 	req := oneandone.ImageConfig{
 		Name:        c.SnapshotName,
