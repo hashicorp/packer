@@ -15,9 +15,12 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 
-	c.SSHKey = state.Get("publicKey").(string)
+	if sshkey, ok := state.GetOk("publicKey"); ok {
+		c.SSHKey = sshkey.(string)
+	}
 
 	token := oneandone.SetToken(c.Token)
+
 	//Create an API client
 	api := oneandone.New(token, c.Url)
 
@@ -35,7 +38,6 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	c.SSHKey = state.Get("publicKey").(string)
 	if c.DiskSize < sa.MinHddSize {
 		ui.Error(fmt.Sprintf("Minimum required disk size %d", sa.MinHddSize))
 	}
@@ -48,7 +50,6 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		Description: "Example server description.",
 		ApplianceId: sa.Id,
 		PowerOn:     true,
-		SSHKey:      c.SSHKey,
 		Hardware: oneandone.Hardware{
 			Vcores:            1,
 			CoresPerProcessor: 1,
@@ -62,14 +63,22 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		},
 	}
 
-	if c.ImagePassword != "" {
-		req.Password = c.ImagePassword
+	if c.DataCenterId != "" {
+		req.DatacenterId = c.DataCenterId
 	}
+
+	if c.Comm.SSHPassword != "" {
+		req.Password = c.Comm.SSHPassword
+	}
+	if c.SSHKey != "" {
+		req.SSHKey = c.SSHKey
+	}
+
 	server_id, server, err := api.CreateServer(&req)
 
 	if err == nil {
 		// Wait until server is created and powered on for at most 60 x 10 seconds
-		err = api.WaitForState(server, "POWERED_ON", 1, c.Timeout)
+		err = api.WaitForState(server, "POWERED_ON", 10, c.Retries)
 	} else {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -99,19 +108,24 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	//Create an API client
 	api := oneandone.New(token, oneandone.BaseUrl)
 
-	serverId := state.Get("server_id").(string)
-
-	server, err := api.ShutdownServer(serverId, false)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error shutting down 1and1 server. Please destroy it manually: %s", serverId))
-		ui.Error(err.Error())
+	var serverId string
+	if temp, ok := state.GetOk("server_id"); ok {
+		serverId = temp.(string)
 	}
-	err = api.WaitForState(server, "POWERED_OFF", 1, c.Timeout)
 
-	server, err = api.DeleteServer(server.Id, false)
+	if serverId != "" {
+		server, err := api.ShutdownServer(serverId, false)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error shutting down 1and1 server. Please destroy it manually: %s", serverId))
+			ui.Error(err.Error())
+		}
+		err = api.WaitForState(server, "POWERED_OFF", 10, c.Retries)
 
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting 1and1 server. Please destroy it manually: %s", serverId))
-		ui.Error(err.Error())
+		server, err = api.DeleteServer(server.Id, false)
+
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error deleting 1and1 server. Please destroy it manually: %s", serverId))
+			ui.Error(err.Error())
+		}
 	}
 }
