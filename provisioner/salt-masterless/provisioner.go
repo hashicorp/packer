@@ -55,6 +55,9 @@ type Config struct {
 	// Set the logging level for the salt-call run
 	LogLevel string `mapstructure:"log_level"`
 
+	// Arguments to pass to salt-call
+	SaltCallArgs string `mapstructure:"salt_call_args"`
+
 	// Command line args passed onto salt-call
 	CmdArgs string ""
 
@@ -141,6 +144,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	} else {
 		cmd_args.WriteString(" -l ")
 		cmd_args.WriteString(p.config.LogLevel)
+	}
+
+	if p.config.SaltCallArgs != "" {
+		cmd_args.WriteString(" ")
+		cmd_args.WriteString(p.config.SaltCallArgs)
 	}
 
 	p.config.CmdArgs = cmd_args.String()
