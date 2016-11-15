@@ -28,7 +28,7 @@
       ],
       "inline": [
         "apt-get -qq update",
-        "apt-get -yqq install build-essential curl git libffi-dev wget",
+        "apt-get -yqq install build-essential curl git libffi-dev wget nodejs",
         "apt-get -yqq install python-pip",
         "pip install s3cmd",
         "cd /app",
