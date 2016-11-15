@@ -57,8 +57,8 @@ func (d *stepTakeSnapshot) checkForErrors(instance profitbricks.Resp) error {
 func (d *stepTakeSnapshot) waitTillProvisioned(path string, config Config) {
 	d.setPB(config.PBUsername, config.PBPassword, config.PBUrl)
 	waitCount := 50
-	if config.Timeout > 0 {
-		waitCount = config.Timeout
+	if config.Retries > 0 {
+		waitCount = config.Retries
 	}
 	for i := 0; i < waitCount; i++ {
 		request := profitbricks.GetRequestStatus(path)

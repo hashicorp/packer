@@ -22,6 +22,9 @@ func (*Artifact) Id() string {
 }
 
 func (a *Artifact) String() string {
+	if a.snapshotId == "" {
+		return "No image has been created."
+	}
 	return fmt.Sprintf("A snapshot was created: '%v', '%v'", a.snapshotId, a.snapshotName)
 }
 

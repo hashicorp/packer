@@ -23,7 +23,7 @@ builder.
 
 ### Required
 
--   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. Defaults to "Ubuntu-16.04". To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image). 
+-   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image). 
 
 -   `password` (string) - ProfitBricks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
 
@@ -42,11 +42,11 @@ builder.
 
 -   `ram` (integer) - Amount of RAM to use for this image. Defalts to "2048".
 
+-   `retries` (string) - Number of retries Packer will make status requests while waiting for the build to complete. Default value 120 seconds.
+
 -   `snapshot_name` (string) - If snapshot name is not provided Packer will generate it
 
 -   `snapshot_password` (string) - Password for the snapshot.
-
--   `timeout` (string) - An approximate limit on how long Packer will continue making status requests while waiting for the build to complete. Default value 120 seconds.
 
 -   `url` (string) - Endpoint for the ProfitBricks REST API. Default URL "https://api.profitbricks.com/rest/v2"
 
