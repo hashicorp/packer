@@ -26,6 +26,8 @@ IMPROVEMENTS:
       and packer QEMU accelerator. [GH-4104]
   * communicator/ssh: Improved SSH upload performance. [GH-3940]
   * contrib/azure-setup.sh: Support for azure-cli 0.10.7. [GH-4133]
+  * command/push: Fix variable pushes to Atlas. Still needs Atlas server to be
+      updated before the issue will be fixed completely. [GH-4089]
   
 BUG FIXES:
 
