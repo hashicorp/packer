@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+IMPROVEMENTS:
+
+  * builder/cloudstack: Support reusing an already associated public IP [GH-4149]
+
 ## 0.12.0 (November 15, 2016)
 
 FEATURES:
