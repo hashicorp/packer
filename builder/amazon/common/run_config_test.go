@@ -113,14 +113,6 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 	}
 }
 
-func TestRunConfigPrepare_SSHUsername(t *testing.T) {
-	c := testConfig()
-	c.Comm.SSHUsername = ""
-	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
-	}
-}
-
 func TestRunConfigPrepare_UserData(t *testing.T) {
 	c := testConfig()
 	tf, err := ioutil.TempFile("", "packer")
