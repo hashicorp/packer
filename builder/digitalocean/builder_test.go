@@ -10,10 +10,11 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"api_token": "bar",
-		"region":    "nyc2",
-		"size":      "512mb",
-		"image":     "foo",
+		"api_token":    "bar",
+		"region":       "nyc2",
+		"size":         "512mb",
+		"ssh_username": "root",
+		"image":        "foo",
 	}
 }
 
@@ -148,39 +149,6 @@ func TestBuilderPrepare_Image(t *testing.T) {
 
 	if b.config.Image != expected {
 		t.Errorf("found %s, expected %s", b.config.Image, expected)
-	}
-}
-
-func TestBuilderPrepare_SSHUsername(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test default
-	warnings, err := b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.Comm.SSHUsername != "root" {
-		t.Errorf("invalid: %s", b.config.Comm.SSHUsername)
-	}
-
-	// Test set
-	config["ssh_username"] = "foo"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if b.config.Comm.SSHUsername != "foo" {
-		t.Errorf("invalid: %s", b.config.Comm.SSHUsername)
 	}
 }
 

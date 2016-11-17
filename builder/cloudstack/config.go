@@ -76,10 +76,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.AsyncTimeout = 30 * time.Minute
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
-
 	if c.InstanceName == "" {
 		c.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
