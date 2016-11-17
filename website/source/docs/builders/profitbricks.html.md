@@ -65,6 +65,7 @@ Here is a basic example:
       "snapshot_name": "double",
       "ssh_key_path": "/path/to/private/key",
       "snapshot_password": "test1234",
+      "ssh_username" :"root",
       "timeout": 100
     }
   ]

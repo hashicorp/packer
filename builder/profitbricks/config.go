@@ -56,9 +56,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("Either ssh private key path or ssh password must be set."))
 	}
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
 
 	if c.SnapshotName == "" {
 		def, err := interpolate.Render("packer-{{timestamp}}", nil)

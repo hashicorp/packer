@@ -53,7 +53,8 @@ Here is a basic example:
          "type":"oneandone",
          "disk_size":"50",
          "image_name":"test5",
-         "source_image_name":"ubuntu1604-64min"
+         "source_image_name":"ubuntu1604-64min",
+         "ssh_username" :"root"
       }
    ]
 }
