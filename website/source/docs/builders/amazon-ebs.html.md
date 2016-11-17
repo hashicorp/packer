@@ -129,7 +129,8 @@ builder.
     {
       "type": "windows-shell",
       "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
-    }```
+    }
+    ```
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
