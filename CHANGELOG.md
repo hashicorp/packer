@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * `ssh_username` is now required if using communicator ssh. [GH-4172]
+
 IMPROVEMENTS:
 
   * builder/cloudstack: Support reusing an already associated public IP [GH-4149]
