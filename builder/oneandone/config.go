@@ -65,10 +65,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("1&1 'image' is required"))
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
-
 	if c.Token == "" {
 		c.Token = os.Getenv("ONEANDONE_TOKEN")
 	}
