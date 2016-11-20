@@ -1,0 +1,23 @@
+{
+  "variables": {
+    "repository": null
+  },
+  "builders": [
+    {
+      "type": "docker",
+      "image": "alpine",
+      "run_command": [ "/bin/ash" ],
+      "commit": true
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "{{ user `repository` }}",
+        "tag": "latest",
+        "force": false
+      }
+    ]
+  ]
+}

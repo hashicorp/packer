@@ -1,0 +1,11 @@
+{
+  "builders": [
+    {
+      "type": "docker",
+      "pull": "true",
+      "image": "alpine",
+      "run_command": [ "/bin/ash" ],
+      "export_path": "alpine.tar"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "variables": {
+    "username": null,
+    "password": null
+  },
+  "builders": [
+    {
+      "type": "docker",
+      "image": "alpine",
+      "login": true,
+      "login_username": "{{ user `username` }}",
+      "login_password": "{{ user `password` }}",
+      "run_command": [ "/bin/ash" ],
+      "export_path": "alpine.tar"
+    }
+  ]
+}

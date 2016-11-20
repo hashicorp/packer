@@ -1,0 +1,18 @@
+{
+  "builders": [
+    {
+      "type": "docker",
+      "pull": "true",
+      "image": "alpine",
+      "run_command": [ "/bin/ash" ],
+      "commit": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "fixtures/builder-docker/dirA/",
+      "destination": "/tmp/"
+    }
+  ]
+}
