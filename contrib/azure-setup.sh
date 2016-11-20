@@ -137,6 +137,7 @@ createResourceGroup() {
 
 createStorageAccount() {
 	echo "==> Creating storage account"
+    azure provider register Microsoft.Storage
 	azure storage account create -g $meta_name -l $location --sku-name LRS --kind Storage $meta_name
 	if [ $? -eq 0 ]; then
 		azure_storage_name=$meta_name
