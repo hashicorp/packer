@@ -7,6 +7,10 @@ BACKWARDS INCOMPATIBILITIES:
 IMPROVEMENTS:
 
   * builder/cloudstack: Support reusing an already associated public IP [GH-4149]
+  
+BUG FIXES:
+
+  * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
 
 ## 0.12.0 (November 15, 2016)
 
