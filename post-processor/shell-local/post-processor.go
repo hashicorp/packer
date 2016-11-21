@@ -47,9 +47,8 @@ type PostProcessor struct {
 }
 
 type ExecuteCommandTemplate struct {
-	Vars     string
-	Script   string
-	Artifact string
+	Vars   string
+	Script string
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -67,7 +66,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}" {{.Artifact}}`
+		p.config.ExecuteCommand = `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -172,44 +171,41 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
 	copy(envVars[2:], p.config.Vars)
 
-	for _, file := range artifact.Files() {
-		for _, script := range scripts {
-			// Flatten the environment variables
-			flattendVars := strings.Join(envVars, " ")
+	for _, script := range scripts {
+		// Flatten the environment variables
+		flattendVars := strings.Join(envVars, " ")
 
-			p.config.ctx.Data = &ExecuteCommandTemplate{
-				Vars:     flattendVars,
-				Script:   script,
-				Artifact: file,
-			}
+		p.config.ctx.Data = &ExecuteCommandTemplate{
+			Vars:   flattendVars,
+			Script: script,
+		}
 
-			command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-			if err != nil {
-				return nil, false, fmt.Errorf("Error processing command: %s", err)
-			}
+		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+		if err != nil {
+			return nil, false, fmt.Errorf("Error processing command: %s", err)
+		}
 
-			ui.Say(fmt.Sprintf("Post processing with local shell script: %s", command))
+		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", command))
 
-			comm := &Communicator{}
+		comm := &Communicator{}
 
-			cmd := &packer.RemoteCmd{Command: command}
+		cmd := &packer.RemoteCmd{Command: command}
 
-			ui.Say(fmt.Sprintf(
-				"Executing local script: %s",
-				script))
-			if err := cmd.StartWithUi(comm, ui); err != nil {
-				return nil, false, fmt.Errorf(
-					"Error executing script: %s\n\n"+
-						"Please see output above for more information.",
-					script)
-			}
-			if cmd.ExitStatus != 0 {
-				return nil, false, fmt.Errorf(
-					"Erroneous exit code %d while executing script: %s\n\n"+
-						"Please see output above for more information.",
-					cmd.ExitStatus,
-					script)
-			}
+		ui.Say(fmt.Sprintf(
+			"Executing local script: %s",
+			script))
+		if err := cmd.StartWithUi(comm, ui); err != nil {
+			return nil, false, fmt.Errorf(
+				"Error executing script: %s\n\n"+
+					"Please see output above for more information.",
+				script)
+		}
+		if cmd.ExitStatus != 0 {
+			return nil, false, fmt.Errorf(
+				"Erroneous exit code %d while executing script: %s\n\n"+
+					"Please see output above for more information.",
+				cmd.ExitStatus,
+				script)
 		}
 	}
 
