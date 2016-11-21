@@ -9,7 +9,7 @@ page_title: 1&1 Builder
 
 Type: `oneandone`
 
-The 1&1 Builder is able to create virtual machines for [One](https://www.1and1.com/).
+The 1&1 Builder is able to create virtual machines for [1&1](https://www.1and1.com/).
 
 ## Configuration Reference
 
