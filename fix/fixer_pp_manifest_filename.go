@@ -1,7 +1,6 @@
 package fix
 
 import (
-	"fmt"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -12,28 +11,40 @@ func (FixerManifestFilename) Fix(input map[string]interface{}) (map[string]inter
 
 	// Our template type we'll use for this fixer only
 	type template struct {
-		PostProcessors []map[string]interface{} `mapstructure:"post-processors"`
+		PostProcessors []interface{} `mapstructure:"post-processors"`
 	}
 
 	// Decode the input into our structure, if we can
-	fmt.Println("Got 0")
 	var tpl template
 	if err := mapstructure.Decode(input, &tpl); err != nil {
-		fmt.Println("Got 1")
 		return nil, err
 	}
-	for _, pp := range tpl.PostProcessors {
+
+	// Go through each post-processor and get out all the complex configs
+	pps := make([]map[string]interface{}, 0, len(tpl.PostProcessors))
+	for _, rawPP := range tpl.PostProcessors {
+		switch pp := rawPP.(type) {
+		case string:
+		case map[string]interface{}:
+			pps = append(pps, pp)
+		case []interface{}:
+			for _, innerRawPP := range pp {
+				if innerPP, ok := innerRawPP.(map[string]interface{}); ok {
+					pps = append(pps, innerPP)
+				}
+			}
+		}
+	}
+
+	for _, pp := range pps {
 		ppTypeRaw, ok := pp["type"]
 		if !ok {
 			continue
 		}
 
-		ppType, ok := ppTypeRaw.(string)
-		if !ok {
+		if ppType, ok := ppTypeRaw.(string); !ok {
 			continue
-		}
-
-		if ppType != "manifest" {
+		} else if ppType != "manifest" {
 			continue
 		}
 
@@ -42,13 +53,11 @@ func (FixerManifestFilename) Fix(input map[string]interface{}) (map[string]inter
 			continue
 		}
 
-		filename, ok := filenameRaw.(string)
-		if !ok {
-			continue
+		if filename, ok := filenameRaw.(string); ok {
+			delete(pp, "filename")
+			pp["output"] = filename
 		}
 
-		delete(pp, "filename")
-		pp["output"] = filename
 	}
 
 	input["post-processors"] = tpl.PostProcessors
