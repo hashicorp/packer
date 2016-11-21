@@ -40,17 +40,22 @@ check_file_exists_in_tar() {
   tar -tf $1 | egrep -q "^$2$"
 }
 
-@test "docker: build commit.json" {
-    run packer build $USER_VARS $FIXTURE_ROOT/commit.json
-    [ "$status" -eq 0 ]
-    check_file_exists "/tmp/file"
+check_num_saved_layers() {
+  [ "`tar -tf $1 | egrep 'layer.tar$' | wc -l | tr -d \ `" -eq "$2" ]
 }
 
-@test "docker: build docker-tag.json" {
-    run packer build $USER_VARS $FIXTURE_ROOT/docker-tag.json
+@test "docker: build commit-and-save.json" {
+    run packer build $USER_VARS $FIXTURE_ROOT/commit-and-save.json
     [ "$status" -eq 0 ]
-    check_image '{{(index .RepoTags 0)}}' "${DOCKER_REPOSITORY}:latest"
+    check_file_exists "/tmp/file"
+    check_num_saved_layers alpine.tar 2
 }
+
+# @test "docker: build docker-tag-and-push.json" {
+#     run packer build $USER_VARS $FIXTURE_ROOT/docker-tag-and-push.json
+#     [ "$status" -eq 0 ]
+#     check_image '{{(index .RepoTags 0)}}' "${DOCKER_REPOSITORY}:latest"
+# }
 
 @test "docker: build export.json" {
     run packer build $USER_VARS $FIXTURE_ROOT/export.json
@@ -69,3 +74,8 @@ check_file_exists_in_tar() {
     [ "$status" -eq 0 ]
     check_file_exists_in_tar alpine.tar tmp/metadata.txt
 }
+
+# @test "docker: build privileged.json" {
+#     run packer build $USER_VARS $FIXTURE_ROOT/privileged.json
+#     [ "$status" -eq 0 ]
+# }

@@ -1,6 +1,8 @@
 {
   "variables": {
-    "repository": null
+    "repository": null,
+    "username": null,
+    "password": null
   },
   "builders": [
     {
@@ -17,6 +19,12 @@
         "repository": "{{ user `repository` }}",
         "tag": "latest",
         "force": false
+      },
+      {
+        "type": "docker-push",
+        "login": true,
+        "login_username": "{{ user `username` }}",
+        "login_password": "{{ user `password` }}"
       }
     ]
   ]

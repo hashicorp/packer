@@ -2,6 +2,7 @@ package dockerpush
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mitchellh/packer/builder/docker"
 	"github.com/mitchellh/packer/common"
@@ -60,9 +61,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	driver := p.Driver
+	if os.Getenv("PACKER_DOCKER_API") != "" {
+		driver = docker.DockerApiDriverInit(&p.config.ctx, ui)
+	} else {
+		driver = &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
+	}
+
 	if driver == nil {
 		// If no driver is set, then we use the real driver
-		driver = &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
 	}
 
 	if p.config.EcrLogin {

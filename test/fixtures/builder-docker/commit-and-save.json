@@ -2,8 +2,8 @@
   "builders": [
     {
       "type": "docker",
-      "pull": "true",
-      "image": "alpine",
+      "pull": false,
+      "image": "ubuntu:14.04",
       "run_command": [ "/bin/ash" ],
       "commit": true
     }
@@ -13,6 +13,12 @@
       "type": "file",
       "source": "fixtures/builder-docker/dirA/",
       "destination": "/tmp/"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "docker-save",
+      "path": "alpine.tar"
     }
   ]
 }

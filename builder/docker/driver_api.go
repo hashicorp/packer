@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	godocker "github.com/fsouza/go-dockerclient"
@@ -22,7 +23,7 @@ type DockerApiDriver struct {
 	identityToken string
 }
 
-func dockerApiDriverInit(ctx *interpolate.Context, ui packer.Ui) DockerApiDriver {
+func DockerApiDriverInit(ctx *interpolate.Context, ui packer.Ui) DockerApiDriver {
 
 	// TODO Allow specefying DOCKER_
 	client, _ := godocker.NewClientFromEnv()
@@ -43,10 +44,6 @@ func (d DockerApiDriver) Commit(id string) (string, error) {
 
 	image, err := d.client.CommitContainer(godocker.CommitContainerOptions{
 		Container: id,
-		// Repository: "",
-		// Tag:        "",
-		// Message:    "",
-		// Author:     "",
 	})
 	if err != nil {
 		return "", err
@@ -100,12 +97,14 @@ func (d DockerApiDriver) Login(repo, email, user, pass string) error {
 	}
 	status, err := d.client.AuthCheck(&auth)
 
-	if err == nil {
-		d.auth = auth
-		d.identityToken = status.IdentityToken
+	if err != nil {
+		return err
 	}
 
-	return err
+	d.auth = auth
+	d.identityToken = status.IdentityToken
+	log.Printf("auth: %v\ntoken: %s\nstatus: %v", d.auth, d.identityToken, status) // TODO DEBUG
+	return nil
 }
 
 func (d DockerApiDriver) Logout(repo string) error {
@@ -113,12 +112,20 @@ func (d DockerApiDriver) Logout(repo string) error {
 	return nil
 }
 
-func (d DockerApiDriver) Pull(image string) error {
+// TODO split imageTag -> image, tag
+func (d DockerApiDriver) Pull(imageTag string) error {
+
+	tmp := strings.Split(imageTag, ":")
+	image := tmp[0]
+	tag := ""
+	if len(tmp) > 1 {
+		tag = tmp[1]
+	}
 
 	// TODO reader
 	opts := godocker.PullImageOptions{
 		Repository: image,
-		Tag:        "latest", // TODO
+		Tag:        tag,
 		// OutputStream      io.Writer     `qs:"-"`
 	}
 	err := d.client.PullImage(opts, d.auth)
@@ -134,7 +141,7 @@ func (d DockerApiDriver) Push(name string) error {
 
 	opts := godocker.PushImageOptions{
 		Name: name,
-		// Tag: "",
+		// Tag:  "latest",
 		// Registry: "",
 		// OutputStream: reader,
 	}
@@ -166,8 +173,8 @@ func (d DockerApiDriver) StartContainer(config *ContainerConfig) (string, error)
 	conf := godocker.Config{
 		AttachStdout: false,
 		Tty:          true,
-		Env:          []string{},
-		Cmd:          []string{"/bin/ash"}, // TODO
+		Env:          []string{}, // TODO
+		Cmd:          config.RunCommand,
 		Image:        config.Image,
 		//Volumes:      config.Volumes, // TODO
 	}
@@ -177,7 +184,6 @@ func (d DockerApiDriver) StartContainer(config *ContainerConfig) (string, error)
 	network := godocker.NetworkingConfig{}
 
 	opts := godocker.CreateContainerOptions{
-		Name:             config.Image,
 		Config:           &conf,
 		HostConfig:       &hostCfg,
 		NetworkingConfig: &network,
