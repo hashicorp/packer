@@ -320,6 +320,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 						p.config.RemotePath, err)
 				}
 				cmd.Wait()
+				// treat disconnects as retryable by returning an error
+				if cmd.ExitStatus == packer.CmdDisconnect {
+					return fmt.Errorf("Disconnect while removing temporary script.")
+				}
 				return nil
 			})
 			if err != nil {
