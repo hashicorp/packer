@@ -3,6 +3,9 @@
 BACKWARDS INCOMPATIBILITIES:
 
   * `ssh_username` is now required if using communicator ssh. [GH-4172]
+  * post-processor/manifest: Changed `filename` field to be `output`, to be
+      more consistent with other post-processors. `packer fix` will fix this
+      for you. [GH-4192]
 
 IMPROVEMENTS:
 
