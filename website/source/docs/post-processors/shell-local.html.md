@@ -37,14 +37,14 @@ Exactly *one* of the following is required:
     and so on. Inline scripts are the easiest way to pull off simple tasks
     within the machine.
 
--   `script` (string) - The path to a script to upload and execute in
-    the machine. This path can be absolute or relative. If it is relative, it is
-    relative to the working directory when Packer is executed.
+-   `script` (string) - The path to a script to execute. This path can be
+    absolute or relative. If it is relative, it is relative to the working
+    directory when Packer is executed.
 
 -   `scripts` (array of strings) - An array of scripts to execute. The scripts
-    will be uploaded and executed in the order specified. Each script is
-    executed in isolation, so state such as variables from one script won't
-    carry on to the next.
+    will be executed in the order specified. Each script is executed in
+    isolation, so state such as variables from one script won't carry on to the
+    next.
 
 Optional parameters:
 
@@ -54,7 +54,7 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x {{.Script}}; {{.Vars}} {{.Script}} {{.Artifact}}`.
+    default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}" {{.Artifact}}`.
     The value of this is treated as [configuration template](/docs/templates/configuration-templates.html).
     There are three available variables: `Script`, which is the path to the script
     to run, `Vars`, which is the list of `environment_vars`, if configured and
