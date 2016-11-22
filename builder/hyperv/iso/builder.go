@@ -169,17 +169,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
 	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
 
-	if b.config.Communicator == "" {
-		b.config.Communicator = "ssh"
-	} else if b.config.Communicator == "ssh" || b.config.Communicator == "winrm" {
-		// good
-	} else {
-		err = errors.New("communicator must be either ssh or winrm")
-		errs = packer.MultiErrorAppend(errs, err)
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "Communicator", b.config.Communicator))
-
 	// Errors
 	if b.config.GuestAdditionsMode == "" {
 		if b.config.GuestAdditionsPath != "" {
