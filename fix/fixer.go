@@ -29,6 +29,7 @@ func init() {
 		"parallels-headless":     new(FixerParallelsHeadless),
 		"parallels-deprecations": new(FixerParallelsDeprecations),
 		"sshkeypath":             new(FixerSSHKeyPath),
+		"manifest-filename":      new(FixerManifestFilename),
 	}
 
 	FixerOrder = []string{
@@ -41,5 +42,6 @@ func init() {
 		"parallels-headless",
 		"parallels-deprecations",
 		"sshkeypath",
+		"manifest-filename",
 	}
 }
