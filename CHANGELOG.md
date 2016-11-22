@@ -7,6 +7,7 @@ BACKWARDS INCOMPATIBILITIES:
 IMPROVEMENTS:
 
   * builder/cloudstack: Support reusing an already associated public IP [GH-4149]
+  * post-processor/shell-local: support spaces in script path. [GH-4144]
   
 BUG FIXES:
 
