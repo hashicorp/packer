@@ -27,6 +27,12 @@ func init() {
 			}, nil
 		},
 
+		"files": func() (cli.Command, error) {
+			return &command.FilesCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
 		"fix": func() (cli.Command, error) {
 			return &command.FixCommand{
 				Meta: *CommandMeta,
