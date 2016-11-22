@@ -67,7 +67,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x \"{{.Script}}\"; {{.Vars}} \"{{.Script}}\" {{.Artifact}}"
+		p.config.ExecuteCommand = `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}" {{.Artifact}}`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
