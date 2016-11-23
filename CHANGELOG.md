@@ -15,6 +15,9 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
+  * provisioner/shell: Treat disconnects as retryable when running cleanup. If
+      you have a reboot in your script, we'll now wait until the host is
+      available before attempting to cleanup the script. [GH-4197]
 
 ## 0.12.0 (November 15, 2016)
 
