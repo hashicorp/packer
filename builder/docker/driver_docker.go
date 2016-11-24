@@ -52,6 +52,7 @@ func (d *DockerDriver) Commit(id string, changes []string) (string, error) {
 	}
 	args = append(args, id)
 
+	log.Printf("Committing container with args: %v", args)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
