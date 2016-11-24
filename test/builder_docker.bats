@@ -51,11 +51,11 @@ check_num_saved_layers() {
     check_num_saved_layers alpine.tar 2
 }
 
-# @test "docker: build docker-tag-and-push.json" {
-#     run packer build $USER_VARS $FIXTURE_ROOT/docker-tag-and-push.json
-#     [ "$status" -eq 0 ]
-#     check_image '{{(index .RepoTags 0)}}' "${DOCKER_REPOSITORY}:latest"
-# }
+@test "docker: build docker-tag-and-push.json" {
+    run packer build $USER_VARS $FIXTURE_ROOT/docker-tag-and-push.json
+    [ "$status" -eq 0 ]
+    check_image '{{(index .RepoTags 0)}}' "${DOCKER_REPOSITORY}:latest"
+}
 
 @test "docker: build export.json" {
     run packer build $USER_VARS $FIXTURE_ROOT/export.json

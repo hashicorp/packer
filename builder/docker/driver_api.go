@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"os"
@@ -40,10 +41,16 @@ func (d DockerApiDriver) DeleteImage(id string) error {
 	return d.client.RemoveImage(id)
 }
 
-func (d DockerApiDriver) Commit(id string) (string, error) {
+func (d DockerApiDriver) Commit(id, author string, changes []string, message string) (string, error) {
+
+	// TODO changes
+	config := godocker.Config{}
 
 	image, err := d.client.CommitContainer(godocker.CommitContainerOptions{
 		Container: id,
+		Message:   message,
+		Author:    author,
+		Run:       &config,
 	})
 	if err != nil {
 		return "", err
@@ -117,40 +124,38 @@ func (d DockerApiDriver) Pull(imageTag string) error {
 
 	tmp := strings.Split(imageTag, ":")
 	image := tmp[0]
-	tag := ""
+	tag := "latest"
 	if len(tmp) > 1 {
 		tag = tmp[1]
 	}
 
-	// TODO reader
+	var output bytes.Buffer
 	opts := godocker.PullImageOptions{
-		Repository: image,
-		Tag:        tag,
-		// OutputStream      io.Writer     `qs:"-"`
+		Repository:   image,
+		Tag:          tag,
+		OutputStream: &output,
 	}
 	err := d.client.PullImage(opts, d.auth)
-	//defer reader.Close()
 	if err != nil {
 		return err
 	}
-	//return readAndStream(reader, d.Ui)
-	return nil
+	return readAndStream(&output, d.Ui)
 }
 
 func (d DockerApiDriver) Push(name string) error {
 
+	var output bytes.Buffer
 	opts := godocker.PushImageOptions{
 		Name: name,
 		// Tag:  "latest",
 		// Registry: "",
-		// OutputStream: reader,
+		OutputStream: &output,
 	}
 	err := d.client.PushImage(opts, d.auth)
 	if err != nil {
 		return err
 	}
-	// return readAndStream(reader, d.Ui)
-	return nil
+	return readAndStream(&output, d.Ui)
 }
 
 func (d DockerApiDriver) SaveImage(id string, dst io.Writer) error {

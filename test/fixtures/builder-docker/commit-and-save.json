@@ -2,8 +2,8 @@
   "builders": [
     {
       "type": "docker",
-      "pull": false,
-      "image": "ubuntu:14.04",
+      "pull": true,
+      "image": "alpine",
       "run_command": [ "/bin/ash" ],
       "commit": true
     }
