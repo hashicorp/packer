@@ -76,7 +76,7 @@ type MockDriver struct {
 	VersionVersion string
 }
 
-func (d *MockDriver) Commit(id string) (string, error) {
+func (d *MockDriver) Commit(id string, changes []string) (string, error) {
 	d.CommitCalled = true
 	d.CommitContainerId = id
 	return d.CommitImageId, d.CommitErr
