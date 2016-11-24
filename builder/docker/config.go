@@ -32,6 +32,7 @@ type Config struct {
 	RunCommand []string `mapstructure:"run_command"`
 	Volumes    map[string]string
 	Privileged bool `mapstructure:"privileged"`
+	Changes    []string
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
