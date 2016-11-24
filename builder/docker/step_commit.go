@@ -14,10 +14,11 @@ type StepCommit struct {
 func (s *StepCommit) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Committing the container")
-	imageId, err := driver.Commit(containerId)
+	imageId, err := driver.Commit(containerId, config.Changes)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
