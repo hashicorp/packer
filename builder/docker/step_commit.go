@@ -18,7 +18,7 @@ func (s *StepCommit) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Committing the container")
-	imageId, err := driver.Commit(containerId, config.Changes)
+	imageId, err := driver.Commit(containerId, config.Author, config.Changes, config.Message)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())

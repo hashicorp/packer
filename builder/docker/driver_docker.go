@@ -42,13 +42,19 @@ func (d *DockerDriver) DeleteImage(id string) error {
 	return nil
 }
 
-func (d *DockerDriver) Commit(id string, changes []string) (string, error) {
+func (d *DockerDriver) Commit(id string, author string, changes []string, message string) (string, error) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
 	args := []string{"commit"}
+	if author != "" {
+		args = append(args, "--author", author)
+	}
 	for _, change := range changes {
 		args = append(args, "--change", change)
+	}
+	if message != "" {
+		args = append(args, "--message", message)
 	}
 	args = append(args, id)
 
