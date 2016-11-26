@@ -86,6 +86,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 ### Optional:
 
+-   `author` (string) - Set the author (e-mail) of a commit.
+
 -   `aws_access_key` (string) - The AWS access key used to communicate with AWS.
     [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
@@ -96,6 +98,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     access key and secret key. If you're not sure what this is, then you
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
+
+-   `changes` (array of strings) - Dockerfile instructions to add to the commit.
+    Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and `EXPOSE`. Example:
+    `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
 
 -   `ecr_login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image from
@@ -115,6 +121,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 -   `login_password` (string) - The password to use to authenticate to login.
 
 -   `login_server` (string) - The server address to login to.
+
+-   `message` (string) - Set a message for the commit.
 
 -   `privileged` (boolean) - If true, run the docker container with the
     `--privileged` flag. This defaults to false if not set.
