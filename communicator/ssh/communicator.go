@@ -169,7 +169,7 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				break
 			case 'E':
 				dirStack = dirStack[:len(dirStack)-1]
-				if len(dirStack) == 1 {
+				if len(dirStack) == 0 {
 					fmt.Fprint(w, "\x00")
 					return nil
 				}
@@ -178,11 +178,11 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				return fmt.Errorf("unexpected server response (%x)", fi[0])
 			}
 
-			var mode string
+			var mode int64
 			var size int64
 			var name string
 			log.Printf("Download dir str:%s", fi)
-			n, err := fmt.Sscanf(fi, "%6s %d %s", &mode, &size, &name)
+			n, err := fmt.Sscanf(fi[1:], "%o %d %s", &mode, &size, &name)
 			if err != nil || n != 3 {
 				return fmt.Errorf("can't parse server response (%s)", fi)
 			}
@@ -190,12 +190,12 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				return fmt.Errorf("negative file size")
 			}
 
-			log.Printf("Download dir mode:%s size:%d name:%s", mode, size, name)
+			log.Printf("Download dir mode:%0o size:%d name:%s", mode, size, name)
 
 			dst = filepath.Join(dirStack...)
 			switch fi[0] {
 			case 'D':
-				err = os.MkdirAll(filepath.Join(dst, name), os.FileMode(0755))
+				err = os.MkdirAll(filepath.Join(dst, name), os.FileMode(mode))
 				if err != nil {
 					return err
 				}
@@ -203,7 +203,7 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				continue
 			case 'C':
 				fmt.Fprint(w, "\x00")
-				err = scpDownloadFile(filepath.Join(dst, name), stdoutR, size, os.FileMode(0644))
+				err = scpDownloadFile(filepath.Join(dst, name), stdoutR, size, os.FileMode(mode))
 				if err != nil {
 					return err
 				}
