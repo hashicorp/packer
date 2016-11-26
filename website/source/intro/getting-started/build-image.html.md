@@ -113,6 +113,12 @@ With a properly validated template. It is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
+-&gt; **Note:** For the tutorial it is convenient to use the credentials in the
+command line. However, it is potentially insecure. [Learn how to set this
+securely](/docs/builders/amazon.html#specifying-amazon-credentials). For
+example, with a credentials profile, you can do this:
+`AWS_PROFILE=testing packer build example.json`.
+
 -&gt; **Note:** When using packer on Windows, replace the single-quotes in the 
 command below with double-quotes.
 
