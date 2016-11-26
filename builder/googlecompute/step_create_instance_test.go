@@ -42,6 +42,45 @@ func TestStepCreateInstance(t *testing.T) {
 	assert.Equal(t, d.DeleteDiskZone, c.Zone, "Incorrect disk zone passed to driver.")
 }
 
+func TestStepCreateInstance_fromFamily(t *testing.T) {
+	cases := []struct {
+		Name   string
+		Family string
+		Expect bool
+	}{
+		{"test-image", "", false},
+		{"test-image", "test-family", false}, // name trumps family
+		{"", "test-family", true},
+	}
+
+	for _, tc := range cases {
+		state := testState(t)
+		step := new(StepCreateInstance)
+		defer step.Cleanup(state)
+
+		state.Put("ssh_public_key", "key")
+
+		c := state.Get("config").(*Config)
+		c.SourceImage = tc.Name
+		c.SourceImageFamily = tc.Family
+		d := state.Get("driver").(*DriverMock)
+		d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+		// run the step
+		assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
+
+		// cleanup
+		step.Cleanup(state)
+
+		// Check args passed to the driver.
+		if tc.Expect {
+			assert.True(t, d.GetImageFromFamily, "Driver wasn't instructed to use an image family")
+		} else {
+			assert.False(t, d.GetImageFromFamily, "Driver was unexpectedly instructed to use an image family")
+		}
+	}
+}
+
 func TestStepCreateInstance_windowsNeedsPassword(t *testing.T) {
 
 	state := testState(t)
