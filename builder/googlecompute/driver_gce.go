@@ -119,7 +119,7 @@ func (d *driverGCE) CreateImage(name, description, family, zone, disk string) (<
 				return
 			}
 			var image *Image
-			image, err = d.GetImageFromProject(d.projectId, name)
+			image, err = d.GetImageFromProject(d.projectId, name, false)
 			if err != nil {
 				close(imageCh)
 				errCh <- err
@@ -167,11 +167,11 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 	return errCh, nil
 }
 
-func (d *driverGCE) GetImage(name string) (*Image, error) {
+func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	var errs error
 	for _, project := range projects {
-		image, err := d.GetImageFromProject(project, name)
+		image, err := d.GetImageFromProject(project, name, fromFamily)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -185,8 +185,17 @@ func (d *driverGCE) GetImage(name string) (*Image, error) {
 		projects, errs)
 }
 
-func (d *driverGCE) GetImageFromProject(project, name string) (*Image, error) {
-	image, err := d.service.Images.Get(project, name).Do()
+func (d *driverGCE) GetImageFromProject(project, name string, fromFamily bool) (*Image, error) {
+	var (
+		image *compute.Image
+		err   error
+	)
+
+	if fromFamily {
+		image, err = d.service.Images.GetFromFamily(project, name).Do()
+	} else {
+		image, err = d.service.Images.Get(project, name).Do()
+	}
 
 	if err != nil {
 		return nil, err
@@ -264,7 +273,7 @@ func (d *driverGCE) GetSerialPortOutput(zone, name string) (string, error) {
 }
 
 func (d *driverGCE) ImageExists(name string) bool {
-	_, err := d.GetImageFromProject(d.projectId, name)
+	_, err := d.GetImageFromProject(d.projectId, name, false)
 	// The API may return an error for reasons other than the image not
 	// existing, but this heuristic is sufficient for now.
 	return err == nil

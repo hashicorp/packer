@@ -47,6 +47,17 @@ func TestConfigPrepare(t *testing.T) {
 		},
 
 		{
+			"source_image_family",
+			nil,
+			false,
+		},
+		{
+			"source_image_family",
+			"foo",
+			false,
+		},
+
+		{
 			"zone",
 			nil,
 			true,
