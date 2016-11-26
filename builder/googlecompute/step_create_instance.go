@@ -86,6 +86,8 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
+	ui.Say(fmt.Sprintf("Using image: %s", sourceImage.Name))
+
 	if sourceImage.IsWindows() && c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
 		state.Put("create_windows_password", true)
 	}
