@@ -9,7 +9,8 @@ BACKWARDS INCOMPATIBILITIES:
 
 IMPROVEMENTS:
 
-  * builder/cloudstack: Support reusing an already associated public IP [GH-4149]
+  * builder/cloudstack: Support reusing an already associated public IP. [GH-4149]
+  * builder/googlecompute: Support `source_image_family`. [GH-4162]
   * post-processor/shell-local: support spaces in script path. [GH-4144]
   
 BUG FIXES:
