@@ -58,10 +58,16 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
+	name := c.SourceImageFamily
+	fromFamily := true
+	if c.SourceImage != "" {
+		name = c.SourceImage
+		fromFamily = false
+	}
 	if c.SourceImageProjectId == "" {
-		return d.GetImage(c.SourceImage)
+		return d.GetImage(name, fromFamily)
 	} else {
-		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage)
+		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage, fromFamily)
 	}
 }
 
@@ -79,6 +85,8 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	ui.Say(fmt.Sprintf("Using image: %s", sourceImage.Name))
 
 	if sourceImage.IsWindows() && c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
 		state.Put("create_windows_password", true)
