@@ -16,13 +16,14 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Login                  bool
-	LoginEmail             string `mapstructure:"login_email"`
-	LoginUsername          string `mapstructure:"login_username"`
-	LoginPassword          string `mapstructure:"login_password"`
-	LoginServer            string `mapstructure:"login_server"`
-	EcrLogin               bool   `mapstructure:"ecr_login"`
-	docker.AwsAccessConfig `mapstructure:",squash"`
+	Login                   bool
+	LoginEmail              string `mapstructure:"login_email"`
+	LoginUsername           string `mapstructure:"login_username"`
+	LoginPassword           string `mapstructure:"login_password"`
+	LoginServer             string `mapstructure:"login_server"`
+	EcrLogin                bool   `mapstructure:"ecr_login"`
+	docker.DockerHostConfig `mapstructure:",squash"`
+	docker.AwsAccessConfig  `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -45,8 +46,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
+	var errs *packer.MultiError
+
+	if es := p.config.DockerHostConfig.Prepare(); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
+	}
+
 	if p.config.EcrLogin && p.config.LoginServer == "" {
-		return fmt.Errorf("ECR login requires login server to be provided.")
+		errs = packer.MultiErrorAppend(fmt.Errorf("ECR login requires login server to be provided."))
+	}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
 	}
 	return nil
 }
@@ -61,14 +71,17 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	driver := p.Driver
-	if os.Getenv("PACKER_DOCKER_API") != "" {
-		driver = docker.DockerApiDriverInit(&p.config.ctx, ui)
-	} else {
-		driver = &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
-	}
-
 	if driver == nil {
 		// If no driver is set, then we use the real driver
+		if os.Getenv("PACKER_DOCKER_API") != "" {
+			var err error
+			driver, err = docker.DockerApiDriverInit(&p.config.ctx, &p.config.DockerHostConfig, ui)
+			if err != nil {
+				return nil, false, err
+			}
+		} else {
+			driver = &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
+		}
 	}
 
 	if p.config.EcrLogin {

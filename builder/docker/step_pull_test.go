@@ -86,7 +86,8 @@ func TestStepPull_noPull(t *testing.T) {
 	defer step.Cleanup(state)
 
 	config := state.Get("config").(*Config)
-	config.Pull = false
+	p := false
+	config.Pull = &p
 
 	driver := state.Get("driver").(*MockDriver)
 

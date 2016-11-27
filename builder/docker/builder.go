@@ -35,7 +35,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var driver Driver
 
 	if os.Getenv("PACKER_DOCKER_API") != "" {
-		driver = DockerApiDriverInit(&b.config.ctx, ui)
+		var err error
+		driver, err = DockerApiDriverInit(&b.config.ctx, &b.config.DockerHostConfig, ui)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		driver = &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
 	}

@@ -5,8 +5,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
-	"sync"
 
 	godocker "github.com/fsouza/go-dockerclient"
 	"github.com/hashicorp/go-version"
@@ -18,22 +18,37 @@ type DockerApiDriver struct {
 	Ui  packer.Ui
 	Ctx *interpolate.Context
 
-	l             sync.Mutex
 	client        *godocker.Client
 	auth          godocker.AuthConfiguration
 	identityToken string
 }
 
-func DockerApiDriverInit(ctx *interpolate.Context, ui packer.Ui) DockerApiDriver {
+func DockerApiDriverInit(ctx *interpolate.Context, config *DockerHostConfig, ui packer.Ui) (DockerApiDriver, error) {
 
-	// TODO Allow specefying DOCKER_
-	client, _ := godocker.NewClientFromEnv()
+	var client *godocker.Client
+	var err error
+
+	if config.Host == "" {
+		log.Println("Using Docker Host settings from environment variables.")
+		client, err = godocker.NewClientFromEnv()
+	} else {
+		if *config.TlsVerify {
+			log.Printf("Using Docker Host: %s with verified TLS.", config.Host)
+			client, err = godocker.NewTLSClient(config.Host,
+				filepath.Join(config.CertPath, "cert.pem"),
+				filepath.Join(config.CertPath, "key.pem"),
+				filepath.Join(config.CertPath, "ca.pem"))
+		} else {
+			log.Printf("Using Docker Host: %s", config.Host)
+			client, err = godocker.NewClient(config.Host)
+		}
+	}
 
 	return DockerApiDriver{
 		Ui:     ui,
 		Ctx:    ctx,
 		client: client,
-	}
+	}, err
 }
 
 func (d DockerApiDriver) DeleteImage(id string) error {

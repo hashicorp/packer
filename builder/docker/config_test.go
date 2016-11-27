@@ -129,7 +129,7 @@ func TestConfigPrepare_pull(t *testing.T) {
 	delete(raw, "pull")
 	c, warns, errs := NewConfig(raw)
 	testConfigOk(t, warns, errs)
-	if !c.Pull {
+	if !*c.Pull {
 		t.Fatal("should pull by default")
 	}
 
@@ -137,7 +137,35 @@ func TestConfigPrepare_pull(t *testing.T) {
 	raw["pull"] = false
 	c, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
-	if c.Pull {
+	if *c.Pull {
 		t.Fatal("should not pull")
 	}
+}
+
+func TestConfigPrepare_dockerTlsVerify(t *testing.T) {
+	raw := testConfig()
+
+	// No pull set
+	delete(raw, "docker_tls_verify")
+	c, warns, errs := NewConfig(raw)
+	testConfigOk(t, warns, errs)
+	if !*c.DockerHostConfig.TlsVerify {
+		t.Fatal("should verify TLS by default")
+	}
+
+	// Pull set
+	raw["docker_tls_verify"] = false
+	c, warns, errs = NewConfig(raw)
+	testConfigOk(t, warns, errs)
+	if *c.DockerHostConfig.TlsVerify {
+		t.Fatal("should not verify TLS")
+	}
+}
+
+func TestConfigPrepare_dockerHost(t *testing.T) {
+	raw := testConfig()
+
+	raw["docker_host"] = "unix:///var/run/docker.sock"
+	_, warns, errs := NewConfig(raw)
+	testConfigOk(t, warns, errs)
 }
