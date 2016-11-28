@@ -198,14 +198,16 @@ builder.
 
 -   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
     to treat disks as SSDs and stops them from performing disk fragmentation.
+    Also set `hard_drive_Discard` to `true` to enable TRIM support.
 
--   `hard_drive_discard` (boolean) - When this value is set to true, a VDI
+-   `hard_drive_discard` (boolean) - When this value is set to `true`, a VDI
     image will be shrunk in response to the trim command from the guest OS.
-    The size of the cleared area must be at least 1MB.
+    The size of the cleared area must be at least 1MB. Also set
+    `hard_drive_nonrotational` to `true` to enable TRIM support.
 
 -   `headless` (boolean) - Packer defaults to building VirtualBox virtual
     machines by launching a GUI that shows the console of the machine
-    being built. When this value is set to true, the machine will start without
+    being built. When this value is set to `true`, the machine will start without
     a console.
 
 -   `http_directory` (string) - Path to a directory to serve using an
@@ -270,7 +272,7 @@ builder.
     Packer will choose a randomly available port in this range to use as the
     host port. By default this is 2222 to 4444.
 
--   `ssh_skip_nat_mapping` (boolean) - Defaults to false. When enabled, Packer
+-   `ssh_skip_nat_mapping` (boolean) - Defaults to `false`. When enabled, Packer
     does not setup forwarded port mapping for SSH requests and uses `ssh_port`
     on the host to communicate to the virtual machine
 
