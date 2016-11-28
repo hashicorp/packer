@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type stepCreateImage struct{}
@@ -68,7 +68,7 @@ func WaitForImage(client *gophercloud.ServiceClient, imageId string) error {
 	for {
 		image, err := images.Get(client, imageId).Extract()
 		if err != nil {
-			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
+			errCode, ok := err.(*gophercloud.ErrUnexpectedResponseCode)
 			if ok && (errCode.Actual == 500 || errCode.Actual == 404) {
 				numErrors++
 				if numErrors >= maxNumErrors {
