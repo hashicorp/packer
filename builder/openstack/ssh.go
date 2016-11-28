@@ -6,11 +6,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/mitchellh/multistep"
 	packerssh "github.com/mitchellh/packer/communicator/ssh"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -31,7 +31,7 @@ func CommHost(
 		}
 
 		// If we have a floating IP, use that
-		ip := state.Get("access_ip").(*floatingip.FloatingIP)
+		ip := state.Get("access_ip").(*floatingips.FloatingIP)
 		if ip != nil && ip.IP != "" {
 			log.Printf("[DEBUG] Using floating IP %s to connect", ip.IP)
 			return ip.IP, nil
