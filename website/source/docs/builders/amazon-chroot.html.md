@@ -131,8 +131,8 @@ each category, the available configuration keys are alphabetized.
     below options are also required in this mode only:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add the block
-device mappings to the AMI. A `device_name` entry matching `root_device_name`
-should be set. The block device mappings allow for keys:
+    device mappings to the AMI. A `device_name` entry matching `root_device_name`
+    should be set. The block device mappings allow for keys:
 
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination. Default `false`. **NOTE**: If this
