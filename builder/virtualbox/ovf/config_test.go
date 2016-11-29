@@ -30,24 +30,6 @@ func getTempFile(t *testing.T) *os.File {
 	return tf
 }
 
-func testConfigErr(t *testing.T, warns []string, err error) {
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should error")
-	}
-}
-
-func testConfigOk(t *testing.T, warns []string, err error) {
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("bad: %s", err)
-	}
-}
-
 func TestNewConfig_FloppyFiles(t *testing.T) {
 	c := testConfig(t)
 	floppies_path := "../../../common/test-fixtures/floppies"
@@ -72,17 +54,38 @@ func TestNewConfig_InvalidFloppies(t *testing.T) {
 }
 
 func TestNewConfig_sourcePath(t *testing.T) {
-	// Bad
+	// Okay, because it gets caught during download
 	c := testConfig(t)
 	delete(c, "source_path")
-	_, warns, errs := NewConfig(c)
-	testConfigErr(t, warns, errs)
+	_, warns, err := NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatalf("should error with empty `source_path`")
+	}
+
+	// Okay, because it gets caught during download
+	c = testConfig(t)
+	c["source_path"] = "/i/dont/exist"
+	_, warns, err = NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
 
 	// Bad
 	c = testConfig(t)
-	c["source_path"] = "/i/dont/exist"
-	_, warns, errs = NewConfig(c)
-	testConfigErr(t, warns, errs)
+	c["source_path"] = "ftp://i/dont/exist"
+	_, warns, err = NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should error")
+	}
 
 	// Good
 	tf := getTempFile(t)
@@ -90,8 +93,13 @@ func TestNewConfig_sourcePath(t *testing.T) {
 
 	c = testConfig(t)
 	c["source_path"] = tf.Name()
-	_, warns, errs = NewConfig(c)
-	testConfigOk(t, warns, errs)
+	_, warns, err = NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
 }
 
 func TestNewConfig_shutdown_timeout(t *testing.T) {
@@ -102,11 +110,21 @@ func TestNewConfig_shutdown_timeout(t *testing.T) {
 	// Expect this to fail
 	c["source_path"] = tf.Name()
 	c["shutdown_timeout"] = "NaN"
-	_, warns, errs := NewConfig(c)
-	testConfigErr(t, warns, errs)
+	_, warns, err := NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should error")
+	}
 
 	// Passes when given a valid time duration
 	c["shutdown_timeout"] = "10s"
-	_, warns, errs = NewConfig(c)
-	testConfigOk(t, warns, errs)
+	_, warns, err = NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
 }
