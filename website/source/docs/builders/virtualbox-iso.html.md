@@ -55,10 +55,11 @@ builder.
 ### Required:
 
 -   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-    files are so large, this is required and Packer will verify it prior to booting
-    a virtual machine with the ISO attached. The type of the checksum is specified
-    with `iso_checksum_type`, documented below. The `iso_checksum` has precedence
-    over the `iso_checksum_url`.
+    files are so large, this is required and Packer will verify it prior to
+    booting a virtual machine with the ISO attached. The type of the checksum is
+    specified with `iso_checksum_type`, documented below. At least one of
+    `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
+    over `iso_checksum_url` type.
 
 -   `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
