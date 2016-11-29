@@ -51,6 +51,12 @@ Optional:
 -   `tags` (object of key/value strings) - Tags applied to the created AMI and
     relevant snapshots.
 
+-   `ami_users` (array of strings) - A list of account IDs that have access to launch the imported AMI. By default no additional users other than the user importing the AMI has permission to launch it.
+
+-   `ami_groups` (array of strings) - A list of groups that have access to launch the imported AMI. By default no groups have permission to launch the AMI. `all` will make the AMI publically accessible. AWS currently doesn't accept any value other than "all".
+
+-   `ami_description` (string) - The description to set for the resulting imported AMI. By default this description is empty.
+
 ## Basic Example
 
 Here is a basic example. This assumes that the builder has produced an OVA artifact for us to work with, and IAM roles for import exist in the AWS account being imported into.
