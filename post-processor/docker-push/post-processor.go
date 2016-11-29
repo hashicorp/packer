@@ -74,13 +74,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if driver == nil {
 		// If no driver is set, then we use the real driver
 		if os.Getenv("PACKER_DOCKER_API") != "" {
-			var err error
-			driver, err = docker.DockerApiDriverInit(&p.config.ctx, &p.config.DockerHostConfig, ui)
-			if err != nil {
-				return nil, false, err
-			}
+			driver = &docker.DockerApiDriver{Ctx: &p.config.ctx, Config: p.config.DockerHostConfig, Ui: ui}
 		} else {
 			driver = &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
+		}
+
+		err := driver.Verify()
+		if err != nil {
+			return nil, false, err
 		}
 	}
 

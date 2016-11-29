@@ -2,6 +2,7 @@ package docker
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -15,48 +16,21 @@ import (
 )
 
 type DockerApiDriver struct {
-	Ui  packer.Ui
-	Ctx *interpolate.Context
+	Ui     packer.Ui
+	Ctx    *interpolate.Context
+	Config DockerHostConfig
 
 	client        *godocker.Client
 	auth          godocker.AuthConfiguration
 	identityToken string
 }
 
-func DockerApiDriverInit(ctx *interpolate.Context, config *DockerHostConfig, ui packer.Ui) (DockerApiDriver, error) {
-
-	var client *godocker.Client
-	var err error
-
-	if config.Host == "" {
-		log.Println("Using Docker Host settings from environment variables.")
-		client, err = godocker.NewClientFromEnv()
-	} else {
-		if *config.TlsVerify {
-			log.Printf("Using Docker Host: %s with verified TLS.", config.Host)
-			client, err = godocker.NewTLSClient(config.Host,
-				filepath.Join(config.CertPath, "cert.pem"),
-				filepath.Join(config.CertPath, "key.pem"),
-				filepath.Join(config.CertPath, "ca.pem"))
-		} else {
-			log.Printf("Using Docker Host: %s", config.Host)
-			client, err = godocker.NewClient(config.Host)
-		}
-	}
-
-	return DockerApiDriver{
-		Ui:     ui,
-		Ctx:    ctx,
-		client: client,
-	}, err
-}
-
-func (d DockerApiDriver) DeleteImage(id string) error {
+func (d *DockerApiDriver) DeleteImage(id string) error {
 	log.Printf("Deleting image: %s", id)
 	return d.client.RemoveImage(id)
 }
 
-func (d DockerApiDriver) Commit(id, author string, changes []string, message string) (string, error) {
+func (d *DockerApiDriver) Commit(id, author string, changes []string, message string) (string, error) {
 
 	// TODO changes
 	config := godocker.Config{}
@@ -73,7 +47,7 @@ func (d DockerApiDriver) Commit(id, author string, changes []string, message str
 	return image.ID, nil
 }
 
-func (d DockerApiDriver) Export(id string, dst io.Writer) error {
+func (d *DockerApiDriver) Export(id string, dst io.Writer) error {
 	log.Printf("Exporting container: %s", id)
 
 	return d.client.ExportContainer(godocker.ExportContainerOptions{
@@ -82,7 +56,7 @@ func (d DockerApiDriver) Export(id string, dst io.Writer) error {
 	})
 }
 
-func (d DockerApiDriver) Import(path string, repo string) (string, error) {
+func (d *DockerApiDriver) Import(path string, repo string) (string, error) {
 	// There should be only one artifact of the Docker builder
 	file, err := os.Open(path)
 	if err != nil {
@@ -104,13 +78,13 @@ func (d DockerApiDriver) Import(path string, repo string) (string, error) {
 	return "", nil // TODO
 }
 
-func (d DockerApiDriver) IPAddress(id string) (string, error) {
+func (d *DockerApiDriver) IPAddress(id string) (string, error) {
 
 	resp, err := d.client.InspectContainer(id)
 	return resp.NetworkSettings.IPAddress, err
 }
 
-func (d DockerApiDriver) Login(repo, email, user, pass string) error {
+func (d *DockerApiDriver) Login(repo, email, user, pass string) error {
 	auth := godocker.AuthConfiguration{
 		ServerAddress: repo,
 		Email:         email,
@@ -129,13 +103,13 @@ func (d DockerApiDriver) Login(repo, email, user, pass string) error {
 	return nil
 }
 
-func (d DockerApiDriver) Logout(repo string) error {
+func (d *DockerApiDriver) Logout(repo string) error {
 	d.identityToken = ""
 	return nil
 }
 
 // TODO split imageTag -> image, tag
-func (d DockerApiDriver) Pull(imageTag string) error {
+func (d *DockerApiDriver) Pull(imageTag string) error {
 
 	tmp := strings.Split(imageTag, ":")
 	image := tmp[0]
@@ -157,7 +131,7 @@ func (d DockerApiDriver) Pull(imageTag string) error {
 	return readAndStream(&output, d.Ui)
 }
 
-func (d DockerApiDriver) Push(name string) error {
+func (d *DockerApiDriver) Push(name string) error {
 
 	var output bytes.Buffer
 	opts := godocker.PushImageOptions{
@@ -173,7 +147,7 @@ func (d DockerApiDriver) Push(name string) error {
 	return readAndStream(&output, d.Ui)
 }
 
-func (d DockerApiDriver) SaveImage(id string, dst io.Writer) error {
+func (d *DockerApiDriver) SaveImage(id string, dst io.Writer) error {
 
 	opts := godocker.ExportImageOptions{
 		Name:         id,
@@ -184,7 +158,7 @@ func (d DockerApiDriver) SaveImage(id string, dst io.Writer) error {
 	return err
 }
 
-func (d DockerApiDriver) StartContainer(config *ContainerConfig) (string, error) {
+func (d *DockerApiDriver) StartContainer(config *ContainerConfig) (string, error) {
 
 	// for host, guest := range config.Volumes {
 	// 	args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
@@ -229,7 +203,7 @@ func (d DockerApiDriver) StartContainer(config *ContainerConfig) (string, error)
 	return container.ID, nil
 }
 
-func (d DockerApiDriver) StopContainer(id string) error {
+func (d *DockerApiDriver) StopContainer(id string) error {
 
 	err := d.client.KillContainer(godocker.KillContainerOptions{
 		ID:     id,
@@ -242,7 +216,7 @@ func (d DockerApiDriver) StopContainer(id string) error {
 	return d.client.RemoveContainer(godocker.RemoveContainerOptions{ID: id})
 }
 
-func (d DockerApiDriver) TagImage(id string, repo string, force bool) error {
+func (d *DockerApiDriver) TagImage(id string, repo string, force bool) error {
 	return d.client.TagImage(id, godocker.TagImageOptions{
 		Repo:  repo,
 		Force: force,
@@ -250,26 +224,42 @@ func (d DockerApiDriver) TagImage(id string, repo string, force bool) error {
 	})
 }
 
-func (d DockerApiDriver) Verify() error {
+func (d *DockerApiDriver) Verify() error {
 	d.Ui.Say("Warning! You are running the EXPERMINATAL Docker API driver!")
-	// var err error
-	// d.client, err = client.NewEnvClient()
-	// return err
-	// TODO
-	return nil
+
+	var err error
+	var client *godocker.Client
+
+	if d.client == nil {
+		if d.Config.Host == "" {
+			log.Println("Using Docker Host settings from environment variables.")
+			client, err = godocker.NewClientFromEnv()
+		} else {
+			if *d.Config.TlsVerify {
+				log.Printf("Using Docker Host: %s with verified TLS.", d.Config.Host)
+				client, err = godocker.NewTLSClient(d.Config.Host,
+					filepath.Join(d.Config.CertPath, "cert.pem"),
+					filepath.Join(d.Config.CertPath, "key.pem"),
+					filepath.Join(d.Config.CertPath, "ca.pem"))
+			} else {
+				log.Printf("Using Docker Host: %s", d.Config.Host)
+				client, err = godocker.NewClient(d.Config.Host)
+			}
+		}
+		d.client = client
+	}
+
+	log.Printf("Docker: %+v", d.client)
+	return err
 }
 
-func (d DockerApiDriver) Version() (*version.Version, error) {
-	// output, err := exec.Command("docker", "-v").Output()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// match := regexp.MustCompile(version.VersionRegexpRaw).FindSubmatch(output)
-	// if match == nil {
-	// 	return nil, fmt.Errorf("unknown version: %s", output)
-	// }
-
-	// return version.NewVersion(string(match[0]))
-	return version.NewVersion("1.0")
+func (d *DockerApiDriver) Version() (*version.Version, error) {
+	if d.client == nil {
+		return nil, fmt.Errorf("No client %+v", d)
+	}
+	env, err := d.client.Version()
+	if err != nil {
+		return nil, err
+	}
+	return version.NewVersion(env.Get("Version"))
 }

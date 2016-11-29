@@ -35,11 +35,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var driver Driver
 
 	if os.Getenv("PACKER_DOCKER_API") != "" {
-		var err error
-		driver, err = DockerApiDriverInit(&b.config.ctx, &b.config.DockerHostConfig, ui)
-		if err != nil {
-			return nil, err
-		}
+		driver = &DockerApiDriver{Ctx: &b.config.ctx, Config: b.config.DockerHostConfig, Ui: ui}
 	} else {
 		driver = &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
 	}
@@ -48,11 +44,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	version, err := driver.Version()
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("[DEBUG] Docker version: %s", version.String())
+	/*
+		version, err := driver.Version()
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("[DEBUG] Docker version: %s", version.String())
+	*/
 
 	steps := []multistep.Step{
 		&StepPull{},
