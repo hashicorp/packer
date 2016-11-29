@@ -12,9 +12,9 @@ func TestStepImport_impl(t *testing.T) {
 
 func TestStepImport(t *testing.T) {
 	state := testState(t)
+	state.Put("vm_path", "foo")
 	step := new(StepImport)
 	step.Name = "bar"
-	step.SourcePath = "foo"
 
 	driver := state.Get("driver").(*vboxcommon.DriverMock)
 
@@ -32,9 +32,6 @@ func TestStepImport(t *testing.T) {
 	}
 	if driver.ImportName != step.Name {
 		t.Fatalf("bad: %#v", driver.ImportName)
-	}
-	if driver.ImportPath != step.SourcePath {
-		t.Fatalf("bad: %#v", driver.ImportPath)
 	}
 
 	// Test output state
