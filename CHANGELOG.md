@@ -15,6 +15,7 @@ IMPROVEMENTS:
   * builder/googlecompute: Support `source_image_family`. [GH-4162]
   * post-processor/shell-local: support spaces in script path. [GH-4144]
   * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
+  * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
   
 BUG FIXES:
 
