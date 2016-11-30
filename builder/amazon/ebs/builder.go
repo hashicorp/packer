@@ -166,9 +166,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
 		&awscommon.StepDeregisterAMI{
-			ForceDeregister:     b.config.AMIForceDeregister,
-			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
-			AMIName:             b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
 		},
 		&stepCreateAMI{},
 		&stepCreateEncryptedAMICopy{},

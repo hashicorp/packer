@@ -46,22 +46,6 @@ func TestBuilderAcc_forceDeregister(t *testing.T) {
 	})
 }
 
-func TestBuilderAcc_forceDeleteSnapshot(t *testing.T) {
-	// Build the same AMI name twice, with force_delete_snapshot on the second run
-	builderT.Test(t, builderT.TestCase{
-		PreCheck:             func() { testAccPreCheck(t) },
-		Builder:              &Builder{},
-		Template:             buildForceDeleteSnapshotConfig("false", "dereg"),
-		SkipArtifactTeardown: true,
-	})
-
-	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		Builder:  &Builder{},
-		Template: buildForceDeleteSnapshotConfig("true", "dereg"),
-	})
-}
-
 func TestBuilderAcc_amiSharing(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -270,21 +254,6 @@ const testBuilderAccForceDeregister = `
 }
 `
 
-const testBuilderAccForceDeleteSnapshot = `
-{
-	"builders": [{
-		"type": "test",
-		"region": "us-east-1",
-		"instance_type": "m3.medium",
-		"source_ami": "ami-76b2a71e",
-		"ssh_username": "ubuntu",
-		"force_deregister": "%s",
-		"force_delete_snapshot": "%s",
-		"ami_name": "packer-test-%s"
-	}]
-}
-`
-
 // share with catsby
 const testBuilderAccSharing = `
 {
@@ -315,10 +284,6 @@ const testBuilderAccEncrypted = `
 }
 `
 
-func buildForceDeregisterConfig(val, name string) string {
-	return fmt.Sprintf(testBuilderAccForceDeregister, val, name)
-}
-
-func buildForceDeleteSnapshotConfig(val, name string) string {
-	return fmt.Sprintf(testBuilderAccForceDeleteSnapshot, val, val, name)
+func buildForceDeregisterConfig(name, flag string) string {
+	return fmt.Sprintf(testBuilderAccForceDeregister, name, flag)
 }
