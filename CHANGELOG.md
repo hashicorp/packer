@@ -16,6 +16,9 @@ IMPROVEMENTS:
   * post-processor/shell-local: support spaces in script path. [GH-4144]
   * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
   * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
+  * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
+      if we're removing a preexisting image, as with `force_deregister_image`.
+      [GH-4223]
   
 BUG FIXES:
 
