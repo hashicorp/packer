@@ -124,9 +124,6 @@ each category, the available configuration keys are alphabetized.
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
--   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
-    AMIs, which have been deregistered by `force_deregister`. Default `false`.
-
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
     existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
     no longer used and the following options become required:

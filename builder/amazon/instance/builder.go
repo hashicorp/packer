@@ -248,9 +248,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug: b.config.PackerDebug,
 		},
 		&awscommon.StepDeregisterAMI{
-			ForceDeregister:     b.config.AMIForceDeregister,
-			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
-			AMIName:             b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+			AMIName:         b.config.AMIName,
 		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
