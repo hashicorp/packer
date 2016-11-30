@@ -206,6 +206,7 @@ each category, the available configuration keys are alphabetized.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
+
     ``` {.javascript}
     "source_ami_filter": {
         "filters": {
@@ -217,6 +218,7 @@ each category, the available configuration keys are alphabetized.
         "most_recent": true
     }
     ```
+
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical.
     NOTE: This will fail unless *exactly* one AMI is returned. In the above
     example, `most_recent` will cause this to succeed by selecting the newest image.
