@@ -21,6 +21,8 @@ BUG FIXES:
 
   * builder/amazon: Fix launching spot instances in EC2 Classic [GH-4204]
   * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
+  * builder/amazon: Correctly assign key from `ssh_keypair_name` to source
+      instance. [GH-4222]
   * provisioner/shell: Treat disconnects as retryable when running cleanup. If
       you have a reboot in your script, we'll now wait until the host is
       available before attempting to cleanup the script. [GH-4197]
