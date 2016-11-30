@@ -10,16 +10,15 @@ import (
 )
 
 type StepDeregisterAMI struct {
-	ForceDeregister     bool
-	ForceDeleteSnapshot bool
-	AMIName             string
+	ForceDeregister bool
+	AMIName         string
 }
 
 func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	// Check for force deregister
+	// check for force deregister
 	if s.ForceDeregister {
 		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 			Filters: []*ec2.Filter{{
@@ -34,7 +33,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Deregister image(s) by name
+		// deregister image(s) by that name
 		for _, i := range resp.Images {
 			_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
 				ImageId: i.ImageId,
@@ -47,25 +46,6 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 				return multistep.ActionHalt
 			}
 			ui.Say(fmt.Sprintf("Deregistered AMI %s, id: %s", s.AMIName, *i.ImageId))
-
-			// Delete snapshot(s) by image
-			if s.ForceDeleteSnapshot {
-				for _, b := range i.BlockDeviceMappings {
-					if b.Ebs != nil {
-						_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
-							SnapshotId: b.Ebs.SnapshotId,
-						})
-
-						if err != nil {
-							err := fmt.Errorf("Error deleting existing snapshot: %s", err)
-							state.Put("error", err)
-							ui.Error(err.Error())
-							return multistep.ActionHalt
-						}
-						ui.Say(fmt.Sprintf("Deleted snapshot: %s", *b.Ebs.SnapshotId))
-					}
-				}
-			}
 		}
 	}
 
