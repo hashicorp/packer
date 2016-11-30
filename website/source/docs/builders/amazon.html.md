@@ -35,7 +35,7 @@ generally recommends EBS-backed images nowadays.
 # Amazon EBS Volume Builder
 
 Packer is able to create Amazon EBS Volumes which are preinitialized with a
-filesystem and data. 
+filesystem and data.
 
 -   [amazon-ebsvolume](/docs/builders/amazon-ebs-volume.html) - Create EBS volumes
     by launching a source AMI with block devices mapped. Provision the instance,
