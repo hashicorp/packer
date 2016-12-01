@@ -65,6 +65,9 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	if len(s.AmiFilters.Filters) > 0 {
 		params.Filters = buildAmiFilters(s.AmiFilters.Filters)
 	}
+	if len(s.AmiFilters.Owners) > 0 {
+		params.Owners = s.AmiFilters.Owners
+	}
 
 	log.Printf("Using AMI Filters %v", params)
 	imageResp, err := ec2conn.DescribeImages(params)
