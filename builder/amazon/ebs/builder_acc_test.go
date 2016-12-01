@@ -47,19 +47,57 @@ func TestBuilderAcc_forceDeregister(t *testing.T) {
 }
 
 func TestBuilderAcc_forceDeleteSnapshot(t *testing.T) {
+	amiName := "packer-test-dereg"
+
 	// Build the same AMI name twice, with force_delete_snapshot on the second run
 	builderT.Test(t, builderT.TestCase{
 		PreCheck:             func() { testAccPreCheck(t) },
 		Builder:              &Builder{},
-		Template:             buildForceDeleteSnapshotConfig("false", "dereg"),
+		Template:             buildForceDeleteSnapshotConfig("false", amiName),
 		SkipArtifactTeardown: true,
 	})
+
+	// Get image data by AMI name
+	ec2conn, _ := testEC2Conn()
+	imageResp, _ := ec2conn.DescribeImages(
+		&ec2.DescribeImagesInput{Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("name"),
+				Values: []*string{aws.String(amiName)},
+			},
+		}},
+	)
+	image := imageResp.Images[0]
+
+	// Get snapshot ids for image
+	snapshotIds := []*string{}
+	for _, device := range image.BlockDeviceMappings {
+		if device.Ebs != nil && device.Ebs.SnapshotId != nil {
+			snapshotIds = append(snapshotIds, device.Ebs.SnapshotId)
+		}
+	}
 
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
-		Template: buildForceDeleteSnapshotConfig("true", "dereg"),
+		Template: buildForceDeleteSnapshotConfig("true", amiName),
+		Check:    checkSnapshotsDeleted(snapshotIds),
 	})
+}
+
+func checkSnapshotsDeleted(snapshotIds []*string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		// Verify the snapshots are gone
+		ec2conn, _ := testEC2Conn()
+		snapshotResp, _ := ec2conn.DescribeSnapshots(
+			&ec2.DescribeSnapshotsInput{SnapshotIds: snapshotIds},
+		)
+
+		if len(snapshotResp.Snapshots) > 0 {
+			return fmt.Errorf("Snapshots weren't successfully deleted by `force_delete_snapshot`")
+		}
+		return nil
+	}
 }
 
 func TestBuilderAcc_amiSharing(t *testing.T) {
@@ -310,7 +348,7 @@ const testBuilderAccEncrypted = `
 		"source_ami":"ami-c15bebaa",
 		"ssh_username": "ubuntu",
 		"ami_name": "packer-enc-test {{timestamp}}",
-		"encrypt_boot": true 
+		"encrypt_boot": true
 	}]
 }
 `
