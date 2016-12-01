@@ -276,8 +276,6 @@ shown below:
 
 [Learn how to set Amazon AWS credentials.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
-<span id="dockerfiles"></span>
-
 ## Dockerfiles
 
 This builder allows you to build Docker images *without* Dockerfiles.
