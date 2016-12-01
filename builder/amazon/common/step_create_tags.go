@@ -96,10 +96,12 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 			}
 
 			// Override tags on snapshots
-			_, err = regionconn.CreateTags(&ec2.CreateTagsInput{
-				Resources: snapshotIds,
-				Tags:      snapshotTags,
-			})
+			if len(snapshotTags) > 0 {
+				_, err = regionconn.CreateTags(&ec2.CreateTagsInput{
+					Resources: snapshotIds,
+					Tags:      snapshotTags,
+				})
+			}
 			if err == nil {
 				return true, nil
 			}
