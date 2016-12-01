@@ -23,6 +23,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * builder/amazon: Fix launching spot instances in EC2 Classic [GH-4204]
+  * builder/amazon: Fix `source_ami_filter` ignores `owners`. [GH-4235]
   * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
   * builder/amazon: Correctly assign key from `ssh_keypair_name` to source
       instance. [GH-4222]
