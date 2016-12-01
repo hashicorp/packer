@@ -108,7 +108,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).
     The builder only logs in for the duration of the pull. If true
     `login_server` is required and `login`, `login_username`, and
-    `login_password` will be ignored.
+    `login_password` will be ignored. For more information see the
+    [section on ECR](#amazon-ec2-container-registry).
 
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image. The builder only logs in for the duration of
