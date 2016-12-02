@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/api/compute/v1"
+
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/version"
@@ -21,7 +23,6 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
-	"google.golang.org/api/compute/v1"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -297,8 +298,11 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// TODO(mitchellh): deprecation warnings
 
 	// Get the network
+	if c.NetworkProjectId == "" {
+		c.NetworkProjectId = d.projectId
+	}
 	d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
-	network, err := d.service.Networks.Get(d.projectId, c.Network).Do()
+	network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +319,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	subnetworkSelfLink := ""
 	if c.Subnetwork != "" {
 		d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
-		subnetwork, err := d.service.Subnetworks.Get(d.projectId, c.Region, c.Subnetwork).Do()
+		subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
 		if err != nil {
 			return nil, err
 		}

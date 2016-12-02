@@ -172,6 +172,9 @@ builder.
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
 
+-   'network_project_id' (string) - The project ID for the network and subnetwork
+    to use for launched instance. Defaults to `project_id`.
+
 -   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
     `use_internal_ip` must be true if this property is true.
 
@@ -192,13 +195,13 @@ builder.
 -   `source_image_project_id` (string) - The project ID of the
     project containing the source image.
 
--   `startup_script_file` (string) - The filepath to a startup script to run on 
+-   `startup_script_file` (string) - The filepath to a startup script to run on
     the VM from which the image will be made.
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
 
--   `subnetwork` (string) - The Google Compute subnetwork to use for the launced
+-   `subnetwork` (string) - The Google Compute subnetwork to use for the launched
      instance. Only required if the `network` has been created with custom
      subnetting.
      Note, the region of the subnetwork must match the `region` or `zone` in
