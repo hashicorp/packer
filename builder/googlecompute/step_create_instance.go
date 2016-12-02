@@ -108,6 +108,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Metadata:            metadata,
 		Name:                name,
 		Network:             c.Network,
+		NetworkProjectId:    c.NetworkProjectId,
 		OmitExternalIP:      c.OmitExternalIP,
 		Preemptible:         c.Preemptible,
 		Region:              c.Region,
