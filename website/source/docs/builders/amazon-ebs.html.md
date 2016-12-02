@@ -77,8 +77,6 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `kms_key_id` (string) - The ID of the KMS key to use for volume encryption
-
     -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
@@ -163,6 +161,8 @@ builder.
 -   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
     AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
     process). Default `false`.
+
+-   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
