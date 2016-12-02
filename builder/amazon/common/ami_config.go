@@ -23,6 +23,8 @@ type AMIConfig struct {
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
+	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
+	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {

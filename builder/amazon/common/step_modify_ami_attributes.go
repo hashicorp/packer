@@ -11,10 +11,12 @@ import (
 )
 
 type StepModifyAMIAttributes struct {
-	Users        []string
-	Groups       []string
-	ProductCodes []string
-	Description  string
+	Users          []string
+	Groups         []string
+	SnapshotUsers  []string
+	SnapshotGroups []string
+	ProductCodes   []string
+	Description    string
 }
 
 func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAction {
@@ -29,6 +31,8 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	valid = valid || (s.Users != nil && len(s.Users) > 0)
 	valid = valid || (s.Groups != nil && len(s.Groups) > 0)
 	valid = valid || (s.ProductCodes != nil && len(s.ProductCodes) > 0)
+	valid = valid || (s.SnapshotUsers != nil && len(s.SnapshotUsers) > 0)
+	valid = valid || (s.SnapshotGroups != nil && len(s.SnapshotGroups) > 0)
 
 	if !valid {
 		return multistep.ActionContinue
@@ -47,15 +51,9 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 
 	if len(s.Groups) > 0 {
 		groups := make([]*string, len(s.Groups))
-
 		addsImage := make([]*ec2.LaunchPermission, len(s.Groups))
 		addGroups := &ec2.ModifyImageAttributeInput{
 			LaunchPermission: &ec2.LaunchPermissionModifications{},
-		}
-
-		addsSnapshot := make([]*ec2.CreateVolumePermission, len(s.Groups))
-		addSnapshotGroups := &ec2.ModifySnapshotAttributeInput{
-			CreateVolumePermission: &ec2.CreateVolumePermissionModifications{},
 		}
 
 		for i, g := range s.Groups {
@@ -63,16 +61,25 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 			addsImage[i] = &ec2.LaunchPermission{
 				Group: aws.String(g),
 			}
+		}
 
+		addGroups.UserGroups = groups
+		options["groups"] = addGroups
+	}
+
+	if len(s.SnapshotGroups) > 0 {
+		groups := make([]*string, len(s.SnapshotGroups))
+		addsSnapshot := make([]*ec2.CreateVolumePermission, len(s.SnapshotGroups))
+		addSnapshotGroups := &ec2.ModifySnapshotAttributeInput{
+			CreateVolumePermission: &ec2.CreateVolumePermissionModifications{},
+		}
+
+		for i, g := range s.SnapshotGroups {
+			groups[i] = aws.String(g)
 			addsSnapshot[i] = &ec2.CreateVolumePermission{
 				Group: aws.String(g),
 			}
 		}
-
-		addGroups.UserGroups = groups
-		addGroups.LaunchPermission.Add = addsImage
-		options["groups"] = addGroups
-
 		addSnapshotGroups.GroupNames = groups
 		addSnapshotGroups.CreateVolumePermission.Add = addsSnapshot
 		snapshotOptions["groups"] = addSnapshotGroups
@@ -81,11 +88,9 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	if len(s.Users) > 0 {
 		users := make([]*string, len(s.Users))
 		addsImage := make([]*ec2.LaunchPermission, len(s.Users))
-		addsSnapshot := make([]*ec2.CreateVolumePermission, len(s.Users))
 		for i, u := range s.Users {
 			users[i] = aws.String(u)
 			addsImage[i] = &ec2.LaunchPermission{UserId: aws.String(u)}
-			addsSnapshot[i] = &ec2.CreateVolumePermission{UserId: aws.String(u)}
 		}
 
 		options["users"] = &ec2.ModifyImageAttributeInput{
@@ -93,6 +98,15 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 			LaunchPermission: &ec2.LaunchPermissionModifications{
 				Add: addsImage,
 			},
+		}
+	}
+
+	if len(s.SnapshotUsers) > 0 {
+		users := make([]*string, len(s.SnapshotUsers))
+		addsSnapshot := make([]*ec2.CreateVolumePermission, len(s.SnapshotUsers))
+		for i, u := range s.SnapshotUsers {
+			users[i] = aws.String(u)
+			addsSnapshot[i] = &ec2.CreateVolumePermission{UserId: aws.String(u)}
 		}
 
 		snapshotOptions["users"] = &ec2.ModifySnapshotAttributeInput{
