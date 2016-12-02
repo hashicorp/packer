@@ -190,8 +190,23 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    default is stop.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option.  Default `false`.
+
+-   `snapshot_groups` (array of strings) - A list of groups that have access to
+    create volumes from the snapshot(s). By default no groups have permission to create
+    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+
+-   `snapshot_users` (array of strings) - A list of account IDs that have access to
+    create volumes from the snapshot(s). By default no additional users other than the
+    user creating the AMI has permissions to create volumes from the backing snapshot(s).
+
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
@@ -222,9 +237,6 @@ builder.
 
     -   `most_recent` (bool) - Selects the newest created image when true.
          This is most useful for selecting a daily distro build.
-
--   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
-     They will override AMI tags if already applied to snapshot.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
@@ -286,10 +298,6 @@ builder.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: "10m"
-
--   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
-    default is stop.
 
 ## Basic Example
 
