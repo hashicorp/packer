@@ -194,7 +194,7 @@ builder.
 
 -   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
     incase packer exits ungracefully. Possible values are "stop" and "terminate",
-    default is `stop`.
+    default is stop.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option.  Default `false`.
