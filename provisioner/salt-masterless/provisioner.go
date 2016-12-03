@@ -167,7 +167,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
-			Command: fmt.Sprintf("curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh"),
+			// Fallback on wget if curl failed for any reason (such as not being installed)
+			Command: fmt.Sprintf("curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com"),
 		}
 		ui.Message(fmt.Sprintf("Downloading saltstack bootstrap to /tmp/install_salt.sh"))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
