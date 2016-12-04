@@ -10,14 +10,15 @@ BACKWARDS INCOMPATIBILITIES:
 IMPROVEMENTS:
 
   * builder/amazon: Add `snapshot_tag` overrides. [GH-4015]
+  * builder/amazon-ebs: Support specifying KMS key for encryption. [GH-4023]
+  * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
+  * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
+    if we're removing a preexisting image, as with `force_deregister_image`.
+    [GH-4223]
   * builder/cloudstack: Support reusing an already associated public IP. [GH-4149]
   * builder/docker: Introduce docker commit changes, author, and message. [GH-4202]
   * builder/googlecompute: Support `source_image_family`. [GH-4162]
-  * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
   * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
-  * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
-      if we're removing a preexisting image, as with `force_deregister_image`.
-      [GH-4223]
   * post-processor/shell-local: support spaces in script path. [GH-4144]
   * provisioner/salt: Bootstrap fallback on wget if curl failed. [GH-4244]
   
