@@ -65,7 +65,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 			return multistep.ActionHalt
 		}
 
-		for _, code := range scancodes(command) {
+		for _, code := range gathercodes(scancodes(command)) {
 			if code == "wait" {
 				time.Sleep(1 * time.Second)
 				continue
@@ -91,7 +91,9 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 				pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
 			}
 
-			if err := driver.VBoxManage("controlvm", vmName, "keyboardputscancode", code); err != nil {
+			args := []string{"controlvm", vmName, "keyboardputscancode"}
+			args = append(args, strings.Split(code, " ")...)
+			if err := driver.VBoxManage(args...); err != nil {
 				err := fmt.Errorf("Error sending boot command: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
@@ -104,6 +106,27 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 }
 
 func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
+
+// Gather scancodes to send to console efficiently.
+func gathercodes(codes []string) []string {
+	result := make([]string, 0, len(codes))
+	begin := 0
+	end := 0
+	for pos, code := range codes {
+		if strings.HasPrefix(code, "wait") {
+			if pos > begin {
+				result = append(result, strings.Join(codes[begin:end+1], " "))
+			}
+			result = append(result, code)
+			begin = pos + 1
+		}
+		end = pos
+	}
+	if end > begin {
+		result = append(result, strings.Join(codes[begin:end+1], " "))
+	}
+	return result
+}
 
 func scancodes(message string) []string {
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
