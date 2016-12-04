@@ -101,9 +101,10 @@ builder.
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `export_opts` (array of strings) - Additional options to pass to the
-    [VBoxManage export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export).
-    This can be useful for passing product information to include in the
-    resulting appliance file. Packer JSON configuration file example:
+    [VBoxManage
+    export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This
+    can be useful for passing product information to include in the resulting
+    appliance file. Packer JSON configuration file example:
 
     ``` {.json}
     {
@@ -119,12 +120,13 @@ builder.
     }
     ```
 
-    A VirtualBox [VM description](https://www.virtualbox.org/manual/ch08.html#idm3756)
-    may contain arbitrary strings; the GUI interprets HTML formatting.
-    However, the JSON format does not allow arbitrary newlines within a
-    value. Add a multi-line description by preparing the string in the
-    shell before the packer call like this (shell `>` continuation
-    character snipped for easier copy & paste):
+    A VirtualBox [VM
+    description](https://www.virtualbox.org/manual/ch08.html#idm3756) may
+    contain arbitrary strings; the GUI interprets HTML formatting. However, the
+    JSON format does not allow arbitrary newlines within a value. Add a
+    multi-line description by preparing the string in the shell before the
+    packer call like this (shell `>` continuation character snipped for easier
+    copy & paste):
 
     ``` {.shell}
 
@@ -153,7 +155,7 @@ builder.
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize its
+    your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `format` (string) - Either "ovf" or "ova", this specifies the output format
@@ -198,14 +200,16 @@ builder.
 
 -   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
     to treat disks as SSDs and stops them from performing disk fragmentation.
+    Also set `hard_drive_Discard` to `true` to enable TRIM support.
 
--   `hard_drive_discard` (boolean) - When this value is set to true, a VDI
+-   `hard_drive_discard` (boolean) - When this value is set to `true`, a VDI
     image will be shrunk in response to the trim command from the guest OS.
-    The size of the cleared area must be at least 1MB.
+    The size of the cleared area must be at least 1MB. Also set
+    `hard_drive_nonrotational` to `true` to enable TRIM support.
 
 -   `headless` (boolean) - Packer defaults to building VirtualBox virtual
     machines by launching a GUI that shows the console of the machine
-    being built. When this value is set to true, the machine will start without
+    being built. When this value is set to `true`, the machine will start without
     a console.
 
 -   `http_directory` (string) - Path to a directory to serve using an
@@ -226,8 +230,8 @@ builder.
     to, defaults to "ide". When set to "sata", the drive is attached to an AHCI
     SATA controller.
 
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
+-   `iso_target_path` (string) - The path where the iso should be saved
+    after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
@@ -247,9 +251,9 @@ builder.
     name of the build.
 
 -   `post_shutdown_delay` (string) - The amount of time to wait after shutting
-    down the virtual machine. If you get the error `Error removing floppy
-    controller`, you might need to set this to `5m` or so. By default, the
-    delay is `0s`, or disabled.
+    down the virtual machine. If you get the error
+    `Error removing floppy controller`, you might need to set this to `5m`
+    or so. By default, the delay is `0s`, or disabled.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
@@ -270,7 +274,7 @@ builder.
     Packer will choose a randomly available port in this range to use as the
     host port. By default this is 2222 to 4444.
 
--   `ssh_skip_nat_mapping` (boolean) - Defaults to false. When enabled, Packer
+-   `ssh_skip_nat_mapping` (boolean) - Defaults to `false`. When enabled, Packer
     does not setup forwarded port mapping for SSH requests and uses `ssh_port`
     on the host to communicate to the virtual machine
 
@@ -299,15 +303,14 @@ builder.
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
--   `vrdp_bind_address` (string / IP address) - The IP address that should be binded
-     to for VRDP. By default packer will use 127.0.0.1 for this. If you wish to bind
-     to all interfaces use 0.0.0.0
+-   `vrdp_bind_address` (string / IP address) - The IP address that should be
+    binded to for VRDP. By default packer will use 127.0.0.1 for this. If you
+    wish to bind to all interfaces use 0.0.0.0
 
 -   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.
-
 
 ## Boot Command
 
@@ -347,19 +350,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 

@@ -57,16 +57,10 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Wait for the command to run
+		// Wait for the command to run so we can print std{err,out}
+		// We don't care if the command errored, since we'll notice
+		// if the vm didn't shut down.
 		cmd.Wait()
-
-		// If the command failed to run, notify the user in some way.
-		if cmd.ExitStatus != 0 {
-			state.Put("error", fmt.Errorf(
-				"Shutdown command has non-zero exit status.\n\nStdout: %s\n\nStderr: %s",
-				stdout.String(), stderr.String()))
-			return multistep.ActionHalt
-		}
 
 		log.Printf("Shutdown stdout: %s", stdout.String())
 		log.Printf("Shutdown stderr: %s", stderr.String())

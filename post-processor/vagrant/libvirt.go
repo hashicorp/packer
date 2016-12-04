@@ -38,7 +38,9 @@ func (p *LibVirtProvider) Process(ui packer.Ui, artifact packer.Artifact, dir st
 	// Convert domain type to libvirt driver
 	var driver string
 	switch domainType {
-	case "kvm", "qemu":
+	case "none", "tcg":
+		driver = "qemu"
+	case "kvm":
 		driver = domainType
 	default:
 		return "", nil, fmt.Errorf("Unknown libvirt domain type: %s", domainType)

@@ -2,7 +2,6 @@ package ovf
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
@@ -29,6 +28,9 @@ type Config struct {
 
 	BootCommand          []string `mapstructure:"boot_command"`
 	SourcePath           string   `mapstructure:"source_path"`
+	Checksum             string   `mapstructure:"checksum"`
+	ChecksumType         string   `mapstructure:"checksum_type"`
+	TargetPath           string   `mapstructure:"target_path"`
 	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
 	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
@@ -87,12 +89,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 
+	c.ChecksumType = strings.ToLower(c.ChecksumType)
+	c.Checksum = strings.ToLower(c.Checksum)
+
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	} else {
-		if _, err := os.Stat(c.SourcePath); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("source_path is invalid: %s", err))
+		c.SourcePath, err = common.DownloadableURL(c.SourcePath)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
 		}
 	}
 

@@ -1,20 +1,19 @@
-package ebs
+package common
 
 import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepStopInstance struct {
+type StepStopEBSBackedInstance struct {
 	SpotPrice           string
 	DisableStopInstance bool
 }
 
-func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
@@ -44,13 +43,13 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Wait for the instance to actual stop
 	ui.Say("Waiting for the instance to stop...")
-	stateChange := awscommon.StateChangeConf{
+	stateChange := StateChangeConf{
 		Pending:   []string{"running", "stopping"},
 		Target:    "stopped",
-		Refresh:   awscommon.InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
+		Refresh:   InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
 		StepState: state,
 	}
-	_, err = awscommon.WaitForState(&stateChange)
+	_, err = WaitForState(&stateChange)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
 		state.Put("error", err)
@@ -61,6 +60,6 @@ func (s *stepStopInstance) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepStopInstance) Cleanup(multistep.StateBag) {
+func (s *StepStopEBSBackedInstance) Cleanup(multistep.StateBag) {
 	// No cleanup...
 }

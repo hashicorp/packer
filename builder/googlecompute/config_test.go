@@ -47,6 +47,17 @@ func TestConfigPrepare(t *testing.T) {
 		},
 
 		{
+			"source_image_family",
+			nil,
+			false,
+		},
+		{
+			"source_image_family",
+			"foo",
+			false,
+		},
+
+		{
 			"zone",
 			nil,
 			true,
@@ -217,6 +228,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"account_file": testAccountFile(t),
 		"project_id":   "hashicorp",
 		"source_image": "foo",
+		"ssh_username": "root",
 		"image_family": "bar",
 		"zone":         "us-east1-a",
 	}

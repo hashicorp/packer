@@ -27,7 +27,10 @@ func (c *AwsAccessConfig) config(region string) (*aws.Config, error) {
 	var creds *credentials.Credentials
 
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
-	sess := session.New(config)
+	session, err := session.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
 	creds = credentials.NewChainCredentials([]credentials.Provider{
 		&credentials.StaticProvider{Value: credentials.Value{
 			AccessKeyID:     c.AccessKey,
@@ -37,7 +40,7 @@ func (c *AwsAccessConfig) config(region string) (*aws.Config, error) {
 		&credentials.EnvProvider{},
 		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
 		&ec2rolecreds.EC2RoleProvider{
-			Client: ec2metadata.New(sess),
+			Client: ec2metadata.New(session),
 		},
 	})
 	return config.WithCredentials(creds), nil
