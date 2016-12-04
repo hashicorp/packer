@@ -2,6 +2,7 @@ package ebs
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -23,7 +24,7 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	// Encrypt boot not set, so skip step
 	if !config.AMIConfig.AMIEncryptBootVolume {
 		if kmsKeyId != "" {
-			ui.Say(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
+			log.Printf(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
 		}
 		return multistep.ActionContinue
 	}
