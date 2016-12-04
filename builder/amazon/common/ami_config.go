@@ -64,6 +64,10 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
 	}
 
+	if len(c.SnapshotUsers) > 0 && len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
+		errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+	}
+
 	if len(errs) > 0 {
 		return errs
 	}
