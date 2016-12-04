@@ -162,6 +162,8 @@ builder.
     AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
     process). Default `false`.
 
+-   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
