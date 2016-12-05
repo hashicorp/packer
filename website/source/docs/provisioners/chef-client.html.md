@@ -267,7 +267,7 @@ directories, append a shell provisioner after Chef to modify them.
 
 ### Chef Client Local Mode
 
-The following example shows how to run the `chef-cilent` provisioner in local
+The following example shows how to run the `chef-client` provisioner in local
 mode, while passing a `run_list` using a variable.
 
 **Local environment variables**
