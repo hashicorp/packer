@@ -207,6 +207,17 @@ each category, the available configuration keys are alphabetized.
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot.
+
+-   `snapshot_groups` (array of strings) - A list of groups that have access to
+    create volumes from the snapshot(s). By default no groups have permission to create
+    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+
+-   `snapshot_users` (array of strings) - A list of account IDs that have access to
+    create volumes from the snapshot(s). By default no additional users other than the
+    user creating the AMI has permissions to create volumes from the backing snapshot(s).
+
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
 
@@ -236,9 +247,6 @@ each category, the available configuration keys are alphabetized.
 
     -   `most_recent` (bool) - Selects the newest created image when true.
          This is most useful for selecting a daily distro build.
-
--   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
-     They will override AMI tags if already applied to snapshot.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
