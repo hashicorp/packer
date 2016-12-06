@@ -163,6 +163,8 @@ builder.
     process). Default `false`.
 
 -   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+    This only applies to the main `region`, other regions where the AMI will be copied
+    will be encrypted by the default EBS KMS key.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
