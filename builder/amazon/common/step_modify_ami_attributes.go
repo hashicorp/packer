@@ -64,6 +64,7 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		}
 
 		addGroups.UserGroups = groups
+		addGroups.LaunchPermission.Add = addsImage
 		options["groups"] = addGroups
 	}
 
