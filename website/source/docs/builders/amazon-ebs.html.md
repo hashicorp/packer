@@ -49,9 +49,9 @@ builder.
     templates](/docs/templates/configuration-templates.html) for more info)
 
 -   `instance_type` (string) - The EC2 instance type to use while building the
-    AMI, such as "m1.small".
+    AMI, such as `m1.small`.
 
--   `region` (string) - The name of the region, such as "us-east-1", in which to
+-   `region` (string) - The name of the region, such as `us-east-1`, in which to
     launch the EC2 instance to create the AMI.
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
@@ -73,7 +73,7 @@ builder.
         every build.
 
     -   `device_name` (string) - The device name exposed to the instance (for
-         example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
+         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
@@ -95,8 +95,8 @@ builder.
     -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
-    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
+    -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
+        volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
 
 -   `ami_description` (string) - The description to set for the
@@ -105,7 +105,7 @@ builder.
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the resulting AMI(s). By default no groups have permission to launch
     the AMI. `all` will make the AMI publicly accessible. AWS currently doesn't
-    accept any value other than "all".
+    accept any value other than `all`.
 
 -   `ami_product_codes` (array of strings) - A list of product codes to
     associate with the AMI. By default no product codes are associated with
@@ -121,7 +121,7 @@ builder.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option must match the supported virtualization
-    type of `source_ami`. Can be "paravirtual" or "hvm".
+    type of `source_ami`. Can be `paravirtual` or `hvm`.
 
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
@@ -231,11 +231,11 @@ builder.
     when the current spot price is less than the maximum price you specify. Spot
     price will be updated based on available spot instance capacity and current
     spot instance requests. It may save you some costs. You can set this to
-    "auto" for Packer to automatically discover the best spot price or to "0"
+    `auto` for Packer to automatically discover the best spot price or to "0"
     to use an on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
-    to "auto". This tells Packer what sort of AMI you're launching to find the
+    to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
@@ -259,7 +259,7 @@ builder.
     IP if available.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
-    "subnet-12345def", where Packer will launch the EC2 instance. This field is
+    `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI and
@@ -285,10 +285,10 @@ builder.
     to be set.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
-    password for Windows instances. Defaults to 20 minutes. Example value: "10m"
+    password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
 -   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    incase packer exits ungracefully. Possible values are `stop` and `terminate`,
     default is stop.
 
 ## Basic Example
