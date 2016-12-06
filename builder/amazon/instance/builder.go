@@ -259,10 +259,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
-			Description:  b.config.AMIDescription,
-			Users:        b.config.AMIUsers,
-			Groups:       b.config.AMIGroups,
-			ProductCodes: b.config.AMIProductCodes,
+			Description:    b.config.AMIDescription,
+			Users:          b.config.AMIUsers,
+			Groups:         b.config.AMIGroups,
+			ProductCodes:   b.config.AMIProductCodes,
+			SnapshotUsers:  b.config.SnapshotUsers,
+			SnapshotGroups: b.config.SnapshotGroups,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,

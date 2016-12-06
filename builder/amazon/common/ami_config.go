@@ -23,6 +23,8 @@ type AMIConfig struct {
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
+	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
+	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
@@ -60,6 +62,10 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
 		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
+	}
+
+	if len(c.SnapshotUsers) > 0 && len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
+		errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 	}
 
 	if len(errs) > 0 {
