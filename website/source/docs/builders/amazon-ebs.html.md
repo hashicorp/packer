@@ -194,7 +194,7 @@ builder.
 
 -   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
     incase packer exits ungracefully. Possible values are "stop" and "terminate",
-    default is stop.
+    default is `stop`.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option.  Default `false`.
@@ -301,6 +301,10 @@ builder.
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
+-   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+    incase packer exits ungracefully. Possible values are `stop` and `terminate`,
+    default is stop.
+
 ## Basic Example
 
 Here is a basic example. You will need to provide access keys, and may need to change the AMI IDs according to what images exist at the time the template is run:
@@ -388,4 +392,3 @@ up all residual volumes that are not designated by the user to remain after
 termination. If you need to preserve those source volumes, you can overwrite the
 termination setting by specifying `delete_on_termination=false` in the
 `launch_block_device_mappings` block for the device.
-
