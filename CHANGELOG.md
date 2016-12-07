@@ -23,6 +23,7 @@ IMPROVEMENTS:
   * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
   * post-processor/shell-local: support spaces in script path. [GH-4144]
   * provisioner/salt: Bootstrap fallback on wget if curl failed. [GH-4244]
+  * builder/openstack: Automatically reauth as needed. [GH-4262]
   
 BUG FIXES:
 
