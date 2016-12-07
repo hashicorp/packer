@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/mitchellh/multistep"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 // StateRefreshFunc is a function type used for StateChangeConf that is
@@ -38,7 +38,7 @@ func ServerStateRefreshFunc(
 	return func() (interface{}, string, int, error) {
 		serverNew, err := servers.Get(client, s.ID).Extract()
 		if err != nil {
-			errCode, ok := err.(*gophercloud.UnexpectedResponseCodeError)
+			errCode, ok := err.(*gophercloud.ErrUnexpectedResponseCode)
 			if ok && errCode.Actual == 404 {
 				log.Printf("[INFO] 404 on ServerStateRefresh, returning DELETED")
 				return nil, "DELETED", 0, nil

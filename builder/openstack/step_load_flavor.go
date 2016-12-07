@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/flavors"
 )
 
 // StepLoadFlavor gets the FlavorRef from a Flavor. It first assumes
