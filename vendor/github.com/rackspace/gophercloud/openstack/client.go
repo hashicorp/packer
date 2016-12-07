@@ -157,7 +157,7 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, options gopherc
 		}
 	}
 
-	result := tokens3.Create(v3Client, tokens3.AuthOptions{AuthOptions: v3Options}, scope)
+	result := tokens3.Create(v3Client, v3Options, scope)
 
 	token, err := result.ExtractToken()
 	if err != nil {
