@@ -11,15 +11,15 @@ page_title: 'Amazon EBS Volume Builder'
 Type: `amazon-ebsvolume`
 
 The `amazon-ebsvolume` Packer builder is able to create Amazon Elastic Block
-Store volumes which are prepopulated with filesystems or data. 
+Store volumes which are prepopulated with filesystems or data.
 
 This builder builds EBS volumes by launching an EC2 instance from a source AMI,
 provisioning that running machine, and then destroying the source machine, keeping
 the volumes intact.
 
 This is all done in your own AWS account. The builder will create temporary
-keypairs, security group rules, etc. that provide it temporary access to the
-instance while the image is being created. 
+key pairs, security group rules, etc. that provide it temporary access to the
+instance while the image is being created.
 
 The builder does *not* manage EBS Volumes. Once it creates volumes and stores
 it in your account, it is up to you to use, delete, etc. the volumes.
@@ -40,9 +40,9 @@ builder.
     how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `instance_type` (string) - The EC2 instance type to use while building the
-    AMI, such as "m1.small".
+    AMI, such as `m1.small`.
 
--   `region` (string) - The name of the region, such as "us-east-1", in which to
+-   `region` (string) - The name of the region, such as `us-east-1`, in which to
     launch the EC2 instance to create the AMI.
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
@@ -58,7 +58,7 @@ builder.
     device mappings to the AMI. The block device mappings allow for keys:
 
     -   `device_name` (string) - The device name exposed to the instance (for
-         example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
+         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
@@ -75,8 +75,8 @@ builder.
         for more information
     -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
-    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
+    -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
+        volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
     -   `tags` (map) - Tags to apply to the volume. These are retained after the
         builder completes.
@@ -115,11 +115,11 @@ builder.
     `security_group_id`.
 
 -   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
-    default is stop.
+    incase packer exits ungracefully. Possible values are `stop` and `terminate`.
+    Defaults to `stop`.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the region configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to `true` if you want to skip
+    validation of the region configuration option.  Defaults to `false`.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
@@ -164,30 +164,30 @@ builder.
     when the current spot price is less than the maximum price you specify. Spot
     price will be updated based on available spot instance capacity and current
     spot instance requests. It may save you some costs. You can set this to
-    "auto" for Packer to automatically discover the best spot price or to "0"
-    to use an on demand instance (default).
+    `auto` for Packer to automatically discover the best spot price or to `0`
+    to use an on-demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
-    to "auto". This tells Packer what sort of AMI you're launching to find the
+    to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
-    `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+    `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)` or `Windows (Amazon VPC)`
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
-    generate a temporary keypair unless
+    generate a temporary key pair unless
     [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
--   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
+-   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
     IP if available.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
-    "subnet-12345def", where Packer will launch the EC2 instance. This field is
+    `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
--   `temporary_key_pair_name` (string) - The name of the temporary keypair
-    to generate. By default, Packer generates a name with a UUID.
+-   `temporary_key_pair_name` (string) - The name of the temporary key pair
+    to generate. By default, Packer generates a name with an UUID.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
@@ -206,7 +206,7 @@ builder.
     to be set.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
-    password for Windows instances. Defaults to 20 minutes. Example value: "10m"
+    password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
 ## Basic Example
 
@@ -258,9 +258,9 @@ builder.
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
-Further information on locating AMI IDs and their relationship to instance 
-types and regions can be found in the AWS EC2 Documentation 
-[for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) 
+Further information on locating AMI IDs and their relationship to instance
+types and regions can be found in the AWS EC2 Documentation
+[for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
 or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
 
 ## Accessing the Instance to Debug
