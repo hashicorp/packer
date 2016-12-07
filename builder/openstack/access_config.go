@@ -61,6 +61,9 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	// Get as much as possible from the end
 	ao, _ := openstack.AuthOptionsFromEnv()
 
+	// Make sure we reauth as needed
+	ao.AllowReauth = true
+
 	// Override values if we have them in our config
 	overrides := []struct {
 		From, To *string
