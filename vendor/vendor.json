@@ -583,10 +583,11 @@
 			"revision": "53d1dc4400e1ebcd37a0e01d8c1fe2f4db3b99d2"
 		},
 		{
-			"checksumSHA1": "Sr9NH+ww7ZTDfFJF8OBqMSeQfiE=",
+			"checksumSHA1": "KgPqSv4WKquMdM3Y0FxKIfqf/tw=",
 			"comment": "v1.0.0-810-g53d1dc4",
 			"path": "github.com/rackspace/gophercloud/openstack",
-			"revision": "53d1dc4400e1ebcd37a0e01d8c1fe2f4db3b99d2"
+			"revision": "69cc33768d3318e48fa47a216722d2737e84158b",
+			"revisionTime": "2016-04-06T18:51:52Z"
 		},
 		{
 			"checksumSHA1": "/K+RHJM5BFeg+3DYsR3WKPh7oVo=",
