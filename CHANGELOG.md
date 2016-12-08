@@ -6,6 +6,9 @@ BACKWARDS INCOMPATIBILITIES:
   * post-processor/manifest: Changed `filename` field to be `output`, to be
       more consistent with other post-processors. `packer fix` will fix this
       for you. [GH-4192]
+  * post-processor/shell-local: Now runs per-builder instead of per-file. The
+      filename is no longer passed in as an argument to the script, but instead
+      needs to be gleaned from the manifest post-processor. [GH-4189]
 
 IMPROVEMENTS:
 
