@@ -1,6 +1,7 @@
-package profitbricks
+package oneandone
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
@@ -9,7 +10,7 @@ import (
 	"log"
 )
 
-const BuilderId = "packer.profitbricks"
+const BuilderId = "packer.oneandone"
 
 type Builder struct {
 	config *Config
@@ -27,15 +28,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+
 	state := new(multistep.BasicStateBag)
 
 	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+
 	steps := []multistep.Step{
 		&StepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("pb_%s", b.config.SnapshotName),
+			DebugKeyPath: fmt.Sprintf("oneandone_%s", b.config.SnapshotName),
 		},
 		new(stepCreateServer),
 		&communicator.StepConnect{
@@ -46,8 +49,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 		new(stepTakeSnapshot),
 	}
-
-	config := state.Get("config").(*Config)
 
 	if b.config.PackerDebug {
 		b.runner = &multistep.DebugRunner{
@@ -64,9 +65,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	artifact := &Artifact{
-		snapshotData: config.SnapshotName,
+	if temp, ok := state.GetOk("snapshot_name"); ok {
+		b.config.SnapshotName = temp.(string)
 	}
+
+	artifact := &Artifact{
+		snapshotName: b.config.SnapshotName,
+	}
+
+	if id, ok := state.GetOk("snapshot_id"); ok {
+		artifact.snapshotId = id.(string)
+	} else {
+		return nil, errors.New("Image creation has failed.")
+	}
+
 	return artifact, nil
 }
 
