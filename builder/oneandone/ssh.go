@@ -1,4 +1,4 @@
-package profitbricks
+package oneandone
 
 import (
 	"fmt"
