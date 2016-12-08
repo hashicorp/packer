@@ -172,7 +172,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
 	copy(envVars[2:], p.config.Vars)
 
-	for _, file := range artifact.Files() {
+	// By default, and for backward compatibility, iterate over the artifact's files.
+	// If there are no files, however, provide the Artifact.Id.
+	artifacts := artifact.Files()
+	if artifacts == nil {
+		artifacts = []string{artifact.Id()}
+	}
+
+	for _, file := range artifacts {
 		for _, script := range scripts {
 			// Flatten the environment variables
 			flattendVars := strings.Join(envVars, " ")

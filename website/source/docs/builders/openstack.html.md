@@ -96,6 +96,14 @@ builder.
 -   `floating_ip_pool` (string) - The name of the floating IP pool to use to
     allocate a floating IP.
 
+-   `image_info_file` (string) - The name of the local file in which to write
+    `image_info_content`. By default this is "openstack-builder.json".
+    If empty, no file will be written. Use the [Artifice](https://www.packer.io/docs/post-processors/artifice.html) post-processor to make this available to
+    other post-processors.
+
+-   `image_info_content` (string) - The content to write to `image_info_file`.
+    By default this is "{ \"imageName\": \"{{.ImageName}}\", \"imageId\": \"{{.ImageId}}\" }\n"
+
 -   `insecure` (boolean) - Whether or not the connection to OpenStack can be
     done over an insecure connection. By default this is false.
 
@@ -145,6 +153,10 @@ builder.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
+
+## Template Variables
+
+The variables `ImageName` and `ImageId` are available for use by `image_info_content` after the builder has created the image in Openstack.
 
 ## Basic Example: DevStack
 
