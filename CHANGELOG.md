@@ -10,6 +10,11 @@ BACKWARDS INCOMPATIBILITIES:
       filename is no longer passed in as an argument to the script, but instead
       needs to be gleaned from the manifest post-processor. [GH-4189]
 
+FEATURES:
+
+* **New builder:** "1&1" Added new builder for [1&1](https://www.1and1.com/).
+    [GH-4163]
+
 IMPROVEMENTS:
 
   * builder/amazon: Add `snapshot_tag` overrides. [GH-4015]
