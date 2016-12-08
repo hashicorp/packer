@@ -89,36 +89,61 @@ commonly useful environmental variables:
 
 ## Safely Writing A Script
 
-Whether you use the `inline` option, or pass it a direct `script` or `scripts`, it is important to understand a few things about how the shell-local post-processor works to run it safely and easily. This understanding will save you much time in the process.
+Whether you use the `inline` option, or pass it a direct `script` or `scripts`,
+it is important to understand a few things about how the shell-local
+post-processor works to run it safely and easily. This understanding will save
+you much time in the process.
 
-### Once Per Artifact
+### Once Per Builder
 
-The `shell-local` script(s) you pass are run once per artifact output file. That means that if your builder results in 1 output file, your script will be run once. If it results in 3 output files, it will run 3 times, once for each file.
+The `shell-local` script(s) you pass are run once per builder.  That means that
+if you have an `amazon-ebs` builder and a `docker` builder, your script will be
+run twice. If you have 3 builders, it will run 3 times, once for each builder.
 
-For example, the virtualbox builders, when configured to provide an `ovf` output format (the default), will provide **two** output files:
+### Interacting with Build Artifacts
 
-* The actual disk itself, in `.vmdk` format
-* The appliance description file, in `.ovf` format
+In order to interact with build artifacts, you may want to use the [manifest
+post-processor](/docs/post-processors/manifest.html). This will write the list
+of files produced by a `builder` to a json file after each `builder` is run.
 
-Let's take a simple example. You want to run a post-processor that records the name of every artifact created to `/tmp/artifacts`. (Why? I don't know. For fun.)
+For example, if you wanted to package a file from the file builder into
+a tarball, you might wright this:
 
-Your post-processor should look like this:
-
-
-``` {.javascript}
+```json
 {
-  "type": "shell-local",
-  "inline": [
-    "echo \$1 >> /tmp/artifacts"
-  ]
+    "builders": [
+        {
+            "content": "Lorem ipsum dolor sit amet",
+            "target": "dummy_artifact",
+            "type": "file"
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "output": "manifest.json",
+                "strip_path": true,
+                "type": "manifest"
+            },
+            {
+                "inline": [
+                    "jq ".builds[].files[].name" manifest.json | xargs tar cfz artifacts.tgz"
+                ],
+                "type": "shell-local"
+            }
+        ]
+    ]
 }
 ```
 
-The result of the above will be an output line for each builder.
+This uses the [jq](https://stedolan.github.io/jq/) tool to extract all of the
+file names from the manifest file and passes them to tar.
 
 ### Always Exit Intentionally
 
-If any post-processor fails, the `packer build` stops and all interim artifacts are cleaned up.
+If any post-processor fails, the `packer build` stops and all interim artifacts
+are cleaned up.
 
-For a shell script, that means the script **must** exit with a zero code. You *must* be extra careful to `exit 0` when necessary.
+For a shell script, that means the script **must** exit with a zero code. You
+*must* be extra careful to `exit 0` when necessary.
 
