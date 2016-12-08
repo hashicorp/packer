@@ -19,19 +19,17 @@ type Config struct {
 	PBPassword string `mapstructure:"password"`
 	PBUrl      string `mapstructure:"url"`
 
-	Region           string `mapstructure:"location"`
-	Image            string `mapstructure:"image"`
-	SSHKey           string
-	SSHKey_path      string              `mapstructure:"ssh_key_path"`
-	SnapshotName     string              `mapstructure:"snapshot_name"`
-	SnapshotPassword string              `mapstructure:"snapshot_password"`
-	DiskSize         int                 `mapstructure:"disk_size"`
-	DiskType         string              `mapstructure:"disk_type"`
-	Cores            int                 `mapstructure:"cores"`
-	Ram              int                 `mapstructure:"ram"`
-	Timeout          int                 `mapstructure:"timeout"`
-	CommConfig       communicator.Config `mapstructure:",squash"`
-	ctx              interpolate.Context
+	Region       string `mapstructure:"location"`
+	Image        string `mapstructure:"image"`
+	SSHKey       string
+	SnapshotName string              `mapstructure:"snapshot_name"`
+	DiskSize     int                 `mapstructure:"disk_size"`
+	DiskType     string              `mapstructure:"disk_type"`
+	Cores        int                 `mapstructure:"cores"`
+	Ram          int                 `mapstructure:"ram"`
+	Retries      int                 `mapstructure:"retries"`
+	CommConfig   communicator.Config `mapstructure:",squash"`
+	ctx          interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -54,10 +52,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	var errs *packer.MultiError
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
+	if c.Comm.SSHPassword == "" && c.Comm.SSHPrivateKey == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("Either ssh private key path or ssh password must be set."))
 	}
-	c.Comm.SSHPort = 22
 
 	if c.SnapshotName == "" {
 		def, err := interpolate.Render("packer-{{timestamp}}", nil)
@@ -79,10 +77,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.PBUrl == "" {
 		c.PBUrl = "https://api.profitbricks.com/rest/v2"
-	}
-
-	if c.Image == "" {
-		c.Image = "Ubuntu-16.04"
 	}
 
 	if c.Cores == 0 {
@@ -108,7 +102,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
-	c.Comm.SSHPort = 22
+
+	if c.Image == "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ProfitBricks 'image' is required"))
+	}
 
 	if c.PBUsername == "" {
 		errs = packer.MultiErrorAppend(
