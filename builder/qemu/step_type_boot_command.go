@@ -144,7 +144,7 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	special["<rightShift>"] = 0xFFE2
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
-	waitRe := regexp.MustCompile(`^<wait([0-9]+[hms])>`)
+	waitRe := regexp.MustCompile(`^<wait([0-9hms]+)>`)
 
 	// TODO(mitchellh): Ripe for optimizations of some point, perhaps.
 	for len(original) > 0 {
