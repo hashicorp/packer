@@ -43,6 +43,8 @@ BUG FIXES:
   * provisioner/shell: Treat disconnects as retryable when running cleanup. If
       you have a reboot in your script, we'll now wait until the host is
       available before attempting to cleanup the script. [GH-4197]
+  * builder/qemu: Fix issue where multiple <waitXX> commands on a single line
+      in boot_command wouldn't be parsed correctly. [GH-4269]
 
 ## 0.12.0 (November 15, 2016)
 
