@@ -1,0 +1,17 @@
+---
+- hosts: default:packer-test
+  gather_facts: no
+  tasks:
+    #- debug: msg="testing regular modules that function with Windows: raw, fetch, slurp, setup"
+    - name: raw test
+      raw: date /t
+    - debug: msg="testing windows modules"
+      #- win_file: path=tmp/remote-dir state=directory
+      #- name: win_shell test
+      #win_shell: date /t
+    - name: win_copy test
+      win_copy: src=dir/file.txt dest=file.txt
+      #- win_copy: src=dir/file.txt dest=/tmp/remote-dir/file.txt
+      #- fetch: src=/tmp/remote-dir/file.txt dest=fetched-dir validate=yes fail_on_missing=yes
+      #- win_copy: src=largish-file.txt dest=/tmp/largish-file.txt
+    - debug: msg="packer does not support downloading from windows"
