@@ -43,6 +43,12 @@ teardown() {
     rm -rf $FIXTURE_ROOT/fetched-dir
 }
 
+@test "ansible provisioner: build docker.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/docker.json
+    [ "$status" -eq 0 ]
+    diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
+}
 @test "ansible provisioner: build minimal.json" {
     cd $FIXTURE_ROOT
     run packer build ${USER_VARS} $FIXTURE_ROOT/minimal.json
