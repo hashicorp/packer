@@ -2,8 +2,8 @@
 - hosts: default:packer-test
   gather_facts: no
   tasks:
-    - name: touch /root/ansible-raw-test
-      raw: touch /root/ansible-raw-test
+    - name: touch
+      raw: touch /tmp/ansible-raw-test
     - name: raw test
       raw: date
     - name: command test
