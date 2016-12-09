@@ -107,9 +107,68 @@ Optional Parameters:
 
 ## Limitations
 
-- Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
+### Redhat / CentOS
+
+Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
 
 ```
 ==> virtualbox-ovf: starting sftp subsystem
     virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
 ```
+
+### winrm communicator
+
+Windows builds require a custom Ansible communicator and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
+
+```
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+from ansible.plugins.connection.ssh import Connection as SSHConnection
+
+class Connection(SSHConnection):
+    ''' ssh based connections for powershell via packer'''
+
+    transport = 'packer'
+    has_pipelining = True
+    become_methods = []
+    allow_executable = False
+    module_implementation_preferences = ('.ps1', '')
+
+    def __init__(self, *args, **kwargs):
+        super(Connection, self).__init__(*args, **kwargs)
+```
+
+This template should build a Windows Server 2012 image on Google Cloud Platform:
+
+```
+{
+    "variables": {},
+    "provisioners": [
+      {
+        "type":  "ansible",
+        "playbook_file": "./win-playbook.yml",
+        "extra_arguments": [
+          "--connection", "packer",
+          "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
+        ]
+      }
+    ],
+    "builders": [
+      {
+        "type": "googlecompute",
+        "account_file": "{{user `account_file`}}",
+        "project_id": "{{user `project_id`}}",
+        "source_image": "windows-server-2012-r2-dc-v20160916",
+        "communicator": "winrm",
+        "zone": "us-central1-a",
+        "disk_size": 50,
+        "winrm_username": "packer",
+        "winrm_use_ssl": true,
+        "winrm_insecure": true,
+        "metadata": {
+                  "sysprep-specialize-script-cmd": "winrm set winrm/config/service/auth @{Basic=\"true\"}"
+        }
+      }
+    ]
+}
