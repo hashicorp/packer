@@ -10,8 +10,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step shuts down the machine. It first attempts to do so gracefully,
-// but ultimately forcefully shuts it down if that fails.
+// StepShutdown is a step that shuts down the machine. It first attempts to do
+// so gracefully, but ultimately forcefully shuts it down if that fails.
 //
 // Uses:
 //   communicator packer.Communicator

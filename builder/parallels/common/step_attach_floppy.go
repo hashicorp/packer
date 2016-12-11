@@ -8,7 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step attaches a floppy to the virtual machine.
+// StepAttachFloppy is a step that attaches a floppy to the virtual machine.
 //
 // Uses:
 //   driver Driver

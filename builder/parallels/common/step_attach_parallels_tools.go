@@ -8,8 +8,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step attaches the Parallels Tools as an inserted CD onto
-// the virtual machine.
+// StepAttachParallelsTools is a step that attaches Parallels Tools ISO image
+// as an inserted CD onto the virtual machine.
 //
 // Uses:
 //   driver Driver

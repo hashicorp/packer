@@ -9,8 +9,13 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step uploads a file containing the Parallels version, which
-// can be useful for various provisioning reasons.
+// StepUploadVersion is a step that uploads a file containing the version of
+// Parallels Desktop, which can be useful for various provisioning reasons.
+//
+// Uses:
+//   communicator packer.Communicator
+//   driver Driver
+//   ui packer.Ui
 type StepUploadVersion struct {
 	Path string
 }

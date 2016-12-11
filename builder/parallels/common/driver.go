@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// A driver is able to talk to Parallels and perform certain
+// Driver is the interface that talks to Parallels and performs certain
 // operations with it. Some of the operations on here may seem overly
 // specific, but they were built specifically in mind to handle features
 // of the Parallels builder for Packer, and to abstract differences in

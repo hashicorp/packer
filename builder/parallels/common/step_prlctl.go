@@ -13,8 +13,8 @@ type commandTemplate struct {
 	Name string
 }
 
-// This step executes additional prlctl commands as specified by the
-// template.
+// StepPrlctl is a step that executes additional prlctl commands as specified
+// by the template.
 //
 // Uses:
 //   driver Driver
