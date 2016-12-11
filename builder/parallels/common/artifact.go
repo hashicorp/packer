@@ -9,7 +9,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This is the common builder ID to all of these artifacts.
+// BuilderId is the common builder ID to all of these artifacts.
 const BuilderId = "packer.parallels"
 
 // These are the extensions of files and directories that are unnecessary for the function

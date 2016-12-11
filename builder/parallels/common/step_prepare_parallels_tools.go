@@ -7,7 +7,8 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-// This step prepares parameters related to Parallels Tools.
+// StepPrepareParallelsTools is a step that prepares parameters related
+// to Parallels Tools.
 //
 // Uses:
 //   driver Driver

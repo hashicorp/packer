@@ -53,7 +53,7 @@ func (c *ToolsConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.ParallelsToolsFlavor == "" {
 		if c.ParallelsToolsMode != ParallelsToolsModeDisable {
-			errs = append(errs, errors.New("parallels_tools_flavor must be specified."))
+			errs = append(errs, errors.New("parallels_tools_flavor must be specified"))
 		}
 	}
 

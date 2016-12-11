@@ -7,8 +7,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step removes all empty blocks from expanding Parallels virtual disks
-// and reduces the result disk size
+// StepCompactDisk is a step that removes all empty blocks from expanding
+// Parallels virtual disks and reduces the result disk size
 //
 // Uses:
 //   driver Driver
