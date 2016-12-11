@@ -13,8 +13,6 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-const KeyLeftShift uint32 = 0xFFE1
-
 type bootCommandTemplateData struct {
 	HTTPIP   string
 	HTTPPort uint
