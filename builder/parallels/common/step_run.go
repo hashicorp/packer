@@ -30,7 +30,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Starting the virtual machine...")
 	command := []string{"start", vmName}
 	if err := driver.Prlctl(command...); err != nil {
-		err := fmt.Errorf("Error starting VM: %s", err)
+		err = fmt.Errorf("Error starting VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
