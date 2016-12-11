@@ -3,9 +3,10 @@ package common
 import (
 	"bytes"
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // This step uploads a file containing the Parallels version, which

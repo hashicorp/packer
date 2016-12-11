@@ -3,10 +3,11 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,

@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"os"
+
+	"github.com/mitchellh/multistep"
 )
 
 // This step prepares parameters related to Parallels Tools.

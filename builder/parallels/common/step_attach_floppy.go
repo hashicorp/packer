@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // This step attaches a floppy to the virtual machine.

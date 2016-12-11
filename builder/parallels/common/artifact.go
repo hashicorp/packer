@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 // This is the common builder ID to all of these artifacts.
