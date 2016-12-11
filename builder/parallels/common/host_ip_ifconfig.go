@@ -50,5 +50,5 @@ func (f *IfconfigIPFinder) HostIP() (string, error) {
 			}
 		}
 	}
-	return "", errors.New("IP not found in ifconfig output...")
+	return "", errors.New("IP not found in ifconfig output")
 }

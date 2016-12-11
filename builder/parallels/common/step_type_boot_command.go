@@ -19,8 +19,8 @@ type bootCommandTemplateData struct {
 	Name     string
 }
 
-// This step "types" the boot command into the VM via the prltype script, built on the
-// Parallels Virtualization SDK - Python API.
+// StepTypeBootCommand is a step that "types" the boot command into the VM via
+// the prltype script, built on the Parallels Virtualization SDK - Python API.
 //
 // Uses:
 //   driver Driver
@@ -48,7 +48,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
-	hostIp := "0.0.0.0"
+	hostIP := "0.0.0.0"
 
 	if len(s.HostInterfaces) > 0 {
 		// Determine the host IP
@@ -61,13 +61,13 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		hostIp = ip
+		hostIP = ip
 	}
 
-	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIp))
+	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIP))
 
 	s.Ctx.Data = &bootCommandTemplateData{
-		hostIp,
+		hostIP,
 		httpPort,
 		s.VMName,
 	}
@@ -206,12 +206,12 @@ func scancodes(message string) []string {
 
 	scancodeMap := make(map[rune]uint)
 	for chars, start := range scancodeIndex {
-		var i uint = 0
+		var i uint
 		for len(chars) > 0 {
 			r, size := utf8.DecodeRuneInString(chars)
 			chars = chars[size:]
 			scancodeMap[r] = start + i
-			i += 1
+			i++
 		}
 	}
 

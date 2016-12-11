@@ -8,7 +8,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step starts the virtual machine.
+// StepRun is a step that starts the virtual machine.
 //
 // Uses:
 //   driver Driver

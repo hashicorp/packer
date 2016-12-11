@@ -22,7 +22,13 @@ type toolsPathTemplate struct {
 	Flavor string
 }
 
-// This step uploads the guest additions ISO to the VM.
+// StepUploadParallelsTools is a step that uploads the Parallels Tools ISO
+// to the VM.
+//
+// Uses:
+//   communicator packer.Communicator
+//   parallels_tools_path string
+//   ui packer.Ui
 type StepUploadParallelsTools struct {
 	ParallelsToolsFlavor    string
 	ParallelsToolsGuestPath string
