@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // This step attaches the Parallels Tools as an inserted CD onto
@@ -39,7 +40,7 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	// Attach the guest additions to the computer
 	ui.Say("Attaching Parallels Tools ISO to the new CD/DVD drive...")
 
-	cdrom, err := driver.DeviceAddCdRom(vmName, parallelsToolsPath)
+	cdrom, err := driver.DeviceAddCDROM(vmName, parallelsToolsPath)
 
 	if err != nil {
 		err := fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)

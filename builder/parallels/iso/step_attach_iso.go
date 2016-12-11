@@ -12,7 +12,7 @@ import (
 //
 // Uses:
 //   driver Driver
-//   isoPath string
+//   iso_path string
 //   ui packer.Ui
 //   vmName string
 //
