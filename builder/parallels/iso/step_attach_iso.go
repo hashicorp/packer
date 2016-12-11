@@ -2,10 +2,11 @@ package iso
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // This step attaches the ISO to the virtual machine.
