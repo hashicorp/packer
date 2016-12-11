@@ -58,7 +58,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 		ip, err := ipFinder.HostIP()
 		if err != nil {
-			err := fmt.Errorf("Error detecting host IP: %s", err)
+			err = fmt.Errorf("Error detecting host IP: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -78,7 +78,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	for i, command := range s.BootCommand {
 		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
-			err := fmt.Errorf("Error preparing boot command: %s", err)
+			err = fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -88,7 +88,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		for _, code := range scancodes(command) {
 			if code == "wait" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -100,7 +100,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 			if code == "wait5" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -112,7 +112,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 			if code == "wait10" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -136,7 +136,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 		log.Printf("Sending scancodes: %#v", codes)
 		if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-			err := fmt.Errorf("Error sending boot command: %s", err)
+			err = fmt.Errorf("Error sending boot command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

@@ -34,7 +34,7 @@ func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Compacting the disk image")
 	diskPath, err := driver.DiskPath(vmName)
 	if err != nil {
-		err := fmt.Errorf("Error detecting virtual disk path: %s", err)
+		err = fmt.Errorf("Error detecting virtual disk path: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
