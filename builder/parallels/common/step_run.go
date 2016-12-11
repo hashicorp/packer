@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"time"
 )
 
 // This step starts the virtual machine.

@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"strings"
 	"testing"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 func TestStepTypeBootCommand(t *testing.T) {
