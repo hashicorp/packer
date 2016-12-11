@@ -25,7 +25,7 @@ func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.Step
 		return multistep.ActionContinue
 	}
 
-	path, err := driver.ToolsIsoPath(s.ParallelsToolsFlavor)
+	path, err := driver.ToolsISOPath(s.ParallelsToolsFlavor)
 
 	if err != nil {
 		state.Put("error", err)
