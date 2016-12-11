@@ -43,7 +43,7 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	cdrom, err := driver.DeviceAddCDROM(vmName, parallelsToolsPath)
 
 	if err != nil {
-		err := fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)
+		err = fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

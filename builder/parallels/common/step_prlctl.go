@@ -48,7 +48,7 @@ func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
 			var err error
 			command[i], err = interpolate.Render(arg, &s.Ctx)
 			if err != nil {
-				err := fmt.Errorf("Error preparing prlctl command: %s", err)
+				err = fmt.Errorf("Error preparing prlctl command: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
@@ -57,7 +57,7 @@ func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
 
 		ui.Message(fmt.Sprintf("Executing: prlctl %s", strings.Join(command, " ")))
 		if err := driver.Prlctl(command...); err != nil {
-			err := fmt.Errorf("Error executing command: %s", err)
+			err = fmt.Errorf("Error executing command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
