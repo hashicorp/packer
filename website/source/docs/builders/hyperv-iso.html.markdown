@@ -856,64 +856,60 @@ Finish proxy after sysprep -->
 
 ## Example For Ubuntu Vivid Generation 2
 
-Packer config:
+If you are running Windows under virtualization, you may need to create
+a virtual switch with an `External` connection type.
+
+### Packer config:
 
 ```javascript
 {
+  "variables": {
+    "vm_name": "ubuntu-xenial",
+    "cpu": "2",
+    "ram_size": "1024",
+    "disk_size": "21440",
+    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
+    "iso_checksum_type": "sha1",
+    "iso_checksum": "DE5EE8665048F009577763EFBF4A6F0558833E59"
+  },
   "builders": [
   {
-    "vm_name":"ubuntu-vivid",
+    "vm_name":"{{user `vm_name`}}",
     "type": "hyperv-iso",
-    "disk_size": 61440,
-    "iso_url": "http://releases.ubuntu.com/15.04/ubuntu-15.04-server-amd64.iso",
-    "iso_checksum_type": "sha1",
-    "iso_checksum": "D10248965C2C749DF6BCCE9F2F90F16A2E75E843",
+    "disk_size": "{{user `disk_size`}}",
+    "guest_additions_mode": "disable",
+    "iso_url": "{{user `iso_url`}}",
+    "iso_checksum_type": "{{user `iso_checksum_type`}}",
+    "iso_checksum": "{{user `iso_checksum`}}",
     "communicator":"ssh",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
+    "ssh_username": "packer",
+    "ssh_password": "packer",
     "ssh_timeout" : "4h",
-    "http_directory": "./linux/ubuntu/http/",
+    "http_directory": "./",
     "boot_wait": "5s",
     "boot_command": [
-      "<esc><esc><enter><wait>",
-      "/install/vmlinuz ",
-      "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/preseed.cfg ",
+      "<esc><wait10><esc><esc><enter><wait>",
+      "set gfxpayload=1024x768<enter>",
+      "linux /install/vmlinuz ",
+      "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/hyperv-taliesins.cfg ",
       "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
       "hostname={{.Name}} ",
       "fb=false debconf/frontend=noninteractive ",
       "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-      "initrd=/install/initrd.gz -- <enter>"
+      "keyboard-configuration/variant=USA console-setup/ask_detect=false <enter>",
+      "initrd /install/initrd.gz<enter>",
+      "boot<enter>"
     ],
-    "shutdown_command": "echo 'vagrant' | sudo -S -E shutdown -P now",
-    "ram_size": 4096,
-    "cpu": 4,
-    "generation": 1,
-    "switch_name":"LAN"
-  }],
-  "provisioners": [{
-    "type": "shell",
-    "execute_command": "echo 'vagrant' | sudo -S -E sh {{.Path}}",
-    "scripts": [
-      "./linux/ubuntu/update.sh",
-      "./linux/ubuntu/network.sh",
-      "./linux/common/vagrant.sh",
-      "./linux/common/chef.sh",
-      "./linux/common/motd.sh",
-      "./linux/ubuntu/cleanup.sh"
-    ]
-  }],
-  "post-processors": [
-    {
-      "type": "vagrant",
-      "keep_input_artifact": true,
-      "output": "{{.Provider}}_ubuntu-15.04_chef.box"
-    }
-  ]
+    "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
+    "ram_size": "{{user `ram_size`}}",
+    "cpu": "{{user `cpu`}}",
+    "generation": 2,
+    "enable_secure_boot": false
+  }]
 }
 ```
 
-preseed.cfg:
+### preseed.cfg:
 
 ```text
 ## Options to set on the command line
@@ -921,7 +917,7 @@ d-i debian-installer/locale string en_US.utf8
 d-i console-setup/ask_detect boolean false
 d-i console-setup/layout string us
 
-d-i netcfg/get_hostname string unassigned-hostname
+d-i netcfg/get_hostname string nl-ams-basebox3
 d-i netcfg/get_domain string unassigned-domain
 
 d-i time/zone string UTC
@@ -939,32 +935,39 @@ d-i debconf debconf/frontend select Noninteractive
 d-i pkgsel/install-language-support boolean false
 tasksel tasksel/first multiselect standard, ubuntu-server
 
+## Partitioning
 d-i partman-auto/method string lvm
 
 d-i partman-lvm/confirm boolean true
 d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/confirm boolean true
+
+d-i partman-auto-lvm/guided_size string max
 d-i partman-auto/choose_recipe select atomic
 
 d-i partman/confirm_write_new_label boolean true
-d-i partman/confirm_nooverwrite boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
 
 # Write the changes to disks and configure LVM?
 d-i partman-lvm/confirm boolean true
 d-i partman-lvm/confirm_nooverwrite boolean true
-d-i partman-auto-lvm/guided_size string max
+
+d-i partman-partitioning/no_bootable_gpt_biosgrub boolean false
+d-i partman-partitioning/no_bootable_gpt_efi boolean false
+d-i partman-efi/non_efi_system boolean true
 
 # Default user
-d-i passwd/user-fullname string vagrant
-d-i passwd/username string vagrant
-d-i passwd/user-password password vagrant
-d-i passwd/user-password-again password vagrant
+d-i passwd/user-fullname string packer
+d-i passwd/username string packer
+d-i passwd/user-password password packer
+d-i passwd/user-password-again password packer
 d-i user-setup/encrypt-home boolean false
 d-i user-setup/allow-password-weak boolean true
 
-# Minimum packages (see postinstall.sh)
-d-i pkgsel/include string openssh-server ntp
+# Minimum packages
+d-i pkgsel/include string openssh-server ntp linux-tools-$(uname -r) linux-cloud-tools-$(uname -r) linux-cloud-tools-common
 
 # Upgrade packages after debootstrap? (none, safe-upgrade, full-upgrade)
 # (note: set to none for speed)
@@ -977,6 +980,4 @@ d-i finish-install/reboot_in_progress note
 d-i pkgsel/update-policy select none
 
 choose-mirror-bin mirror/http/proxy string
-
-#d-i mirror/http/proxy string http://apt-cacher:3142/
 ```
