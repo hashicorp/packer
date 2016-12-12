@@ -93,13 +93,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		h = getHash(ct)
 
 		for _, art := range files {
-			if len(artifact.Files()) > 1 {
-				checksumFile = filepath.Join(filepath.Dir(art), ct+"sums")
-			} else if p.config.OutputPath != "" {
-				checksumFile = p.config.OutputPath
-			} else {
-				checksumFile = fmt.Sprintf("%s.%s", art, ct+"sum")
-			}
+			checksumFile = p.config.OutputPath
+
 			if _, err := os.Stat(checksumFile); err != nil {
 				newartifact.files = append(newartifact.files, checksumFile)
 			}
@@ -124,6 +119,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			fr.Close()
 			fw.WriteString(fmt.Sprintf("%x\t%s\n", h.Sum(nil), filepath.Base(art)))
 			fw.Close()
+			h.Reset()
 		}
 	}
 
