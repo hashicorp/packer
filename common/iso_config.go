@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/mitchellh/packer/template/interpolate"
@@ -77,6 +78,21 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 							return warnings, errs
 						}
 					case "file":
+						// Windows file handling is all sorts of tricky...
+						if runtime.GOOS == "windows" {
+							// If the path is using Windows-style slashes, URL parses
+							// it into the host field.
+							if u.Path == "" && strings.Contains(u.Host, `\`) {
+								u.Path = u.Host
+								u.Host = ""
+							}
+							// For Windows absolute file paths, remove leading / prior to
+							// processing since net/url turns "C:/" into "/C:/"
+							if len(u.Path) > 0 && u.Path[0] == '/' {
+								u.Path = u.Path[1:len(u.Path)]
+							}
+						}
+
 						file, err := os.Open(u.Path)
 						if err != nil {
 							errs = append(errs, err)
