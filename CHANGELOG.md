@@ -33,6 +33,14 @@ IMPROVEMENTS:
   * provisioner/salt: Bootstrap fallback on wget if curl failed. [GH-4244]
   * builder/openstack: Automatically reauth as needed. [GH-4262]
   * provisioner/ansible: Allow `winrm` communicator. [GH-4209]
+  * communicator/ssh: adds ability to download download directories and
+    wildcards, fix destination file mode (not hardcoded anymore). [GH-4210]
+  * post-processor/checksum: cleanup, and fix output to specified file with
+    more than one artifacts. [GH-4210]
+  * provisioner/file: fix for directory download. [GH-4210]
+  * provisioner/file: fix issue uploading multiple files to a directory,
+    mentioned in [GH-4049]. [GH-4210]
+  * post-processor/checksum: reset hash after each artifact file. [GH-4210]
   
 BUG FIXES:
 
