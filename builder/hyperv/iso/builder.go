@@ -10,11 +10,11 @@ import (
 	"github.com/mitchellh/multistep"
 	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
 	"github.com/mitchellh/packer/common"
+	powershell "github.com/mitchellh/packer/common/powershell"
+	"github.com/mitchellh/packer/common/powershell/hyperv"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
-	powershell "github.com/mitchellh/packer/powershell"
-	"github.com/mitchellh/packer/powershell/hyperv"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
