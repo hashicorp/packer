@@ -38,14 +38,12 @@ func ServerStateRefreshFunc(
 	return func() (interface{}, string, int, error) {
 		serverNew, err := servers.Get(client, s.ID).Extract()
 		if err != nil {
-			errCode, ok := err.(*gophercloud.ErrUnexpectedResponseCode)
-			if ok && errCode.Actual == 404 {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
 				log.Printf("[INFO] 404 on ServerStateRefresh, returning DELETED")
 				return nil, "DELETED", 0, nil
-			} else {
-				log.Printf("[ERROR] Error on ServerStateRefresh: %s", err)
-				return nil, "", 0, err
 			}
+			log.Printf("[ERROR] Error on ServerStateRefresh: %s", err)
+			return nil, "", 0, err
 		}
 
 		return serverNew, serverNew.Status, serverNew.Progress, nil
