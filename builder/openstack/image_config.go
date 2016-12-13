@@ -3,13 +3,16 @@ package openstack
 import (
 	"fmt"
 
+	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // ImageConfig is for common configuration related to creating Images.
 type ImageConfig struct {
-	ImageName     string            `mapstructure:"image_name"`
-	ImageMetadata map[string]string `mapstructure:"metadata"`
+	ImageName string `mapstructure:"image_name"`
+
+	ImageMetadata map[string]string            `mapstructure:"metadata"`
+	Visibility    imageservice.ImageVisibility `mapstructure:"image_visibility"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
