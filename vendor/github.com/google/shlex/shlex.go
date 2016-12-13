@@ -26,7 +26,7 @@ To process a stream of strings:
 
   l := NewLexer(os.Stdin)
   for ; token, err := l.Next(); err != nil {
-	// process token
+  	// process token
   }
 
 To access the raw token stream (which includes tokens for comments):
