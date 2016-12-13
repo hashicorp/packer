@@ -28,7 +28,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			}}})
 
 		if err != nil {
-			err := fmt.Errorf("Error creating AMI: %s", err)
+			err := fmt.Errorf("Error describing AMI: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
