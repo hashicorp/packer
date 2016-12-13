@@ -12,6 +12,8 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+* **New builder:** "Hyper-V" Added new builder for Hyper-V on Windows.
+    [GH-2576]
 * **New builder:** "1&1" Added new builder for [1&1](https://www.1and1.com/).
     [GH-4163]
 
