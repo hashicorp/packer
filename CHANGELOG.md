@@ -27,6 +27,7 @@ IMPROVEMENTS:
     [GH-4223]
   * builder/amazon: Support `snapshot_users` and `snapshot_groups` for sharing
     ebs snapshots. [GH-4243] 
+  * builder/amazon: Added new region London - eu-west-2. [GH-4284]
   * builder/cloudstack: Support reusing an already associated public IP. [GH-4149]
   * builder/docker: Introduce docker commit changes, author, and message. [GH-4202]
   * builder/googlecompute: Support `source_image_family`. [GH-4162]
