@@ -122,7 +122,7 @@ builder.
 
 -   `ssh_ip_version` (string) - The IP version to use for SSH connections, valid
     values are `4` and `6`. Useful on dual stacked instances where the default
-    behaviour is to connect via whichever IP address is returned first from the
+    behavior is to connect via whichever IP address is returned first from the
     OpenStack API.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be

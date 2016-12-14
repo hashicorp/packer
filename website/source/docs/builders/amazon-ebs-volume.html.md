@@ -114,7 +114,7 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+-   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
     incase packer exits ungracefully. Possible values are `stop` and `terminate`.
     Defaults to `stop`.
 
