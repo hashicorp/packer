@@ -36,13 +36,17 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 	// ImageVisibility values
 	// https://wiki.openstack.org/wiki/Glance-v2-community-image-visibility-design
 	if c.ImageVisibility != "" {
-		valid := []string{"public", "private", "shared", "community"}
-		for _, val := range valid {
+		validVals := []string{"public", "private", "shared", "community"}
+		valid := false
+		for _, val := range validVals {
 			if string(c.ImageVisibility) == val {
+				valid = true
 				break
 			}
 		}
-		errs = append(errs, fmt.Errorf("Unknown visibility value %s", c.ImageVisibility))
+		if !valid {
+			errs = append(errs, fmt.Errorf("Unknown visibility value %s", c.ImageVisibility))
+		}
 	}
 
 	if len(errs) > 0 {
