@@ -8,7 +8,6 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -52,30 +51,6 @@ func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}
-
-	if config.Visibility != "" {
-		imageClient, err := config.imageV2Client()
-		if err != nil {
-			err = fmt.Errorf("Error initializing image service client: %s", err)
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-		r := imageservice.Update(
-			imageClient,
-			imageId,
-			imageservice.UpdateOpts{
-				imageservice.UpdateVisibility{
-					Visibility: config.Visibility,
-				},
-			},
-		)
-		if _, err = r.Extract(); err != nil {
-			err = fmt.Errorf("Error updating image visibility: %s", err)
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-
 	}
 
 	return multistep.ActionContinue

@@ -11,8 +11,9 @@ import (
 type ImageConfig struct {
 	ImageName string `mapstructure:"image_name"`
 
-	ImageMetadata map[string]string            `mapstructure:"metadata"`
-	Visibility    imageservice.ImageVisibility `mapstructure:"image_visibility"`
+	ImageMetadata   map[string]string            `mapstructure:"metadata"`
+	ImageVisibility imageservice.ImageVisibility `mapstructure:"image_visibility"`
+	ImageMembers    []string                     `mapstructure:"image_members"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
@@ -30,6 +31,18 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 		c.ImageMetadata = map[string]string{"image_type": "image"}
 	} else if c.ImageMetadata["image_type"] == "" {
 		c.ImageMetadata["image_type"] = "image"
+	}
+
+	// ImageVisibility values
+	// https://wiki.openstack.org/wiki/Glance-v2-community-image-visibility-design
+	if c.ImageVisibility != "" {
+		valid := []string{"public", "private", "shared", "community"}
+		for _, val := range valid {
+			if string(c.ImageVisibility) == val {
+				break
+			}
+		}
+		errs = append(errs, fmt.Errorf("Unknown visibility value %s", c.ImageVisibility))
 	}
 
 	if len(errs) > 0 {
