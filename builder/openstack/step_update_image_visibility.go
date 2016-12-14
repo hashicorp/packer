@@ -15,29 +15,31 @@ func (s *stepUpdateImageVisibility) Run(state multistep.StateBag) multistep.Step
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
 
-	if config.ImageVisibility != "" {
-		imageClient, err := config.imageV2Client()
-		if err != nil {
-			err = fmt.Errorf("Error initializing image service client: %s", err)
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-		ui.Say(fmt.Sprintf("Updating image visibility to %s", config.ImageVisibility))
-		r := imageservice.Update(
-			imageClient,
-			imageId,
-			imageservice.UpdateOpts{
-				imageservice.UpdateVisibility{
-					Visibility: config.ImageVisibility,
-				},
-			},
-		)
-		if _, err = r.Extract(); err != nil {
-			err = fmt.Errorf("Error updating image visibility: %s", err)
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
+	if config.ImageVisibility == "" {
+		return multistep.ActionContinue
+	}
+	imageClient, err := config.imageV2Client()
+	if err != nil {
+		err = fmt.Errorf("Error initializing image service client: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 
+	ui.Say(fmt.Sprintf("Updating image visibility to %s", config.ImageVisibility))
+	r := imageservice.Update(
+		imageClient,
+		imageId,
+		imageservice.UpdateOpts{
+			imageservice.UpdateVisibility{
+				Visibility: config.ImageVisibility,
+			},
+		},
+	)
+
+	if _, err = r.Extract(); err != nil {
+		err = fmt.Errorf("Error updating image visibility: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
