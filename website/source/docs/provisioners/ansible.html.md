@@ -63,12 +63,12 @@ Optional Parameters:
 - `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
   server on the host machine to forward commands to the target machine. Ansible
   connects to this server and will validate the identity of the server using
-  the system known_hosts. The default behaviour is to generate and use a
+  the system known_hosts. The default behavior is to generate and use a
   onetime key. Host key checking is disabled via the
   `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
 
 - `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
-  `ssh_user`. The default behaviour is to generate and use a onetime key. If
+  `ssh_user`. The default behavior is to generate and use a onetime key. If
   this key is generated, the corresponding private key is passed to
   `ansible-playbook` with the `--private-key` option.
 
