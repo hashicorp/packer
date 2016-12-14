@@ -192,7 +192,7 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
+-   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
     incase packer exits ungracefully. Possible values are "stop" and "terminate",
     default is `stop`.
 
@@ -300,10 +300,6 @@ builder.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: `10m`
-
--   `shutdown_behaviour` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are `stop` and `terminate`,
-
 
 ## Basic Example
 
