@@ -632,6 +632,12 @@
 			"revision": "53d1dc4400e1ebcd37a0e01d8c1fe2f4db3b99d2"
 		},
 		{
+			"checksumSHA1": "QbXm7h4qu7+A/D6y40XHN4/QUOg=",
+			"comment": "v1.0.0-810-g53d1dc4",
+			"path": "github.com/rackspace/gophercloud/openstack/compute/v2/extensions/volumeattach",
+			"revision": "53d1dc4400e1ebcd37a0e01d8c1fe2f4db3b99d2"
+		},
+		{
 			"checksumSHA1": "C2K3kYQgwa65cVRvWrNZACQFX7Q=",
 			"comment": "v1.0.0-810-g53d1dc4",
 			"path": "github.com/rackspace/gophercloud/openstack/compute/v2/flavors",

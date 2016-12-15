@@ -15,17 +15,18 @@ type RunConfig struct {
 	SSHInterface   string              `mapstructure:"ssh_interface"`
 	SSHIPVersion   string              `mapstructure:"ssh_ip_version"`
 
-	SourceImage      string   `mapstructure:"source_image"`
-	SourceImageName  string   `mapstructure:"source_image_name"`
-	Flavor           string   `mapstructure:"flavor"`
-	AvailabilityZone string   `mapstructure:"availability_zone"`
-	RackconnectWait  bool     `mapstructure:"rackconnect_wait"`
-	FloatingIpPool   string   `mapstructure:"floating_ip_pool"`
-	FloatingIp       string   `mapstructure:"floating_ip"`
-	SecurityGroups   []string `mapstructure:"security_groups"`
-	Networks         []string `mapstructure:"networks"`
-	UserData         string   `mapstructure:"user_data"`
-	UserDataFile     string   `mapstructure:"user_data_file"`
+	SourceImage       string   `mapstructure:"source_image"`
+	SourceImageName   string   `mapstructure:"source_image_name"`
+	Flavor            string   `mapstructure:"flavor"`
+	AvailabilityZone  string   `mapstructure:"availability_zone"`
+	RackconnectWait   bool     `mapstructure:"rackconnect_wait"`
+	FloatingIpPool    string   `mapstructure:"floating_ip_pool"`
+	FloatingIp        string   `mapstructure:"floating_ip"`
+	SecurityGroups    []string `mapstructure:"security_groups"`
+	Networks          []string `mapstructure:"networks"`
+	UserData          string   `mapstructure:"user_data"`
+	UserDataFile      string   `mapstructure:"user_data_file"`
+	VolumeAttachments []string `mapstructure:"volume_attachments"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`
 
