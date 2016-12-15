@@ -46,6 +46,7 @@ IMPROVEMENTS:
       created image. [GH-4283]
   * builder/openstack: Added `image_members` to add new members to image after
       it's created. [GH-4283]
+  * builder/googlecompute: enable support for Google Compute XPN. [GH-4288]
   
 BUG FIXES:
 
