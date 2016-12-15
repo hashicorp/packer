@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/mitchellh/packer/template/interpolate"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack"
 )
 
 // AccessConfig is for common configuration related to openstack access
@@ -16,7 +16,6 @@ type AccessConfig struct {
 	Username         string `mapstructure:"username"`
 	UserID           string `mapstructure:"user_id"`
 	Password         string `mapstructure:"password"`
-	APIKey           string `mapstructure:"api_key"`
 	IdentityEndpoint string `mapstructure:"identity_endpoint"`
 	TenantID         string `mapstructure:"tenant_id"`
 	TenantName       string `mapstructure:"tenant_name"`
@@ -42,9 +41,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Legacy RackSpace stuff. We're keeping this around to keep things BC.
-	if c.APIKey == "" {
-		c.APIKey = os.Getenv("SDK_API_KEY")
-	}
 	if c.Password == "" {
 		c.Password = os.Getenv("SDK_PASSWORD")
 	}
@@ -71,7 +67,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.Username, &ao.Username},
 		{&c.UserID, &ao.UserID},
 		{&c.Password, &ao.Password},
-		{&c.APIKey, &ao.APIKey},
 		{&c.IdentityEndpoint, &ao.IdentityEndpoint},
 		{&c.TenantID, &ao.TenantID},
 		{&c.TenantName, &ao.TenantName},
@@ -110,6 +105,13 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 
 func (c *AccessConfig) computeV2Client() (*gophercloud.ServiceClient, error) {
 	return openstack.NewComputeV2(c.osClient, gophercloud.EndpointOpts{
+		Region:       c.Region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *AccessConfig) imageV2Client() (*gophercloud.ServiceClient, error) {
+	return openstack.NewImageServiceV2(c.osClient, gophercloud.EndpointOpts{
 		Region:       c.Region,
 		Availability: c.getEndpointType(),
 	})
