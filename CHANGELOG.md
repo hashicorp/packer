@@ -1,5 +1,7 @@
 ## (Unreleased)
 
+## 0.12.0 (November 15, 2016)
+
 BACKWARDS INCOMPATIBILITIES:
 
   * `ssh_username` is now required if using communicator ssh. [GH-4172]
