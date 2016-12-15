@@ -11,6 +11,8 @@ BACKWARDS INCOMPATIBILITIES:
   * post-processor/shell-local: Now runs per-builder instead of per-file. The
       filename is no longer passed in as an argument to the script, but instead
       needs to be gleaned from the manifest post-processor. [GH-4189]
+  * builder/openstack: No long supports the `api_key` option for rackspace.
+      [GH-4283]
 
 FEATURES:
 
@@ -40,12 +42,10 @@ IMPROVEMENTS:
   * provisioner/ansible: Allow `winrm` communicator. [GH-4209]
   * communicator/ssh: adds ability to download download directories and
     wildcards, fix destination file mode (not hardcoded anymore). [GH-4210]
-  * post-processor/checksum: cleanup, and fix output to specified file with
-    more than one artifacts. [GH-4210]
-  * provisioner/file: fix for directory download. [GH-4210]
-  * provisioner/file: fix issue uploading multiple files to a directory,
-    mentioned in [GH-4049]. [GH-4210]
-  * post-processor/checksum: reset hash after each artifact file. [GH-4210]
+  * builder/openstack: Added `image_visibility` field to specify visibility of
+      created image. [GH-4283]
+  * builder/openstack: Added `image_members` to add new members to image after
+      it's created. [GH-4283]
   
 BUG FIXES:
 
@@ -59,6 +59,12 @@ BUG FIXES:
       available before attempting to cleanup the script. [GH-4197]
   * builder/qemu: Fix issue where multiple <waitXX> commands on a single line
       in boot_command wouldn't be parsed correctly. [GH-4269]
+  * post-processor/checksum: cleanup, and fix output to specified file with
+    more than one artifacts. [GH-4210]
+  * provisioner/file: fix for directory download. [GH-4210]
+  * provisioner/file: fix issue uploading multiple files to a directory,
+    mentioned in [GH-4049]. [GH-4210]
+  * post-processor/checksum: reset hash after each artifact file. [GH-4210]
 
 ## 0.12.0 (November 15, 2016)
 
