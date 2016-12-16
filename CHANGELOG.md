@@ -5,16 +5,16 @@
 BACKWARDS INCOMPATIBILITIES:
 
   * `ssh_username` is now required if using communicator ssh. [GH-4172]
-  * builder/amazon: Change `shutdown_behaviour` to `shutdown_behavior`.
-      Run "packer fix template.json" to migrate a template. [GH-4285]
+  * builder/amazon: Change `shutdown_behaviour` to `shutdown_behavior`.  Run
+      "packer fix template.json" to migrate a template. [GH-4285]
+  * builder/openstack: No long supports the `api_key` option for rackspace.
+      [GH-4283]
   * post-processor/manifest: Changed `filename` field to be `output`, to be
       more consistent with other post-processors. `packer fix` will fix this
       for you. [GH-4192]
   * post-processor/shell-local: Now runs per-builder instead of per-file. The
       filename is no longer passed in as an argument to the script, but instead
       needs to be gleaned from the manifest post-processor. [GH-4189]
-  * builder/openstack: No long supports the `api_key` option for rackspace.
-      [GH-4283]
 
 FEATURES:
 
@@ -25,49 +25,51 @@ FEATURES:
 
 IMPROVEMENTS:
 
-  * builder/amazon: Add `snapshot_tag` overrides. [GH-4015]
   * builder/amazon-ebs: Support specifying KMS key for encryption. [GH-4023]
   * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
-  * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
-    if we're removing a preexisting image, as with `force_deregister_image`.
-    [GH-4223]
-  * builder/amazon: Support `snapshot_users` and `snapshot_groups` for sharing
-    ebs snapshots. [GH-4243] 
+  * builder/amazon: Add `snapshot_tag` overrides. [GH-4015]
   * builder/amazon: Added new region London - eu-west-2. [GH-4284]
-  * builder/cloudstack: Support reusing an already associated public IP. [GH-4149]
-  * builder/docker: Introduce docker commit changes, author, and message. [GH-4202]
+  * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
+      if we're removing a preexisting image, as with `force_deregister_image`.
+      [GH-4223]
+  * builder/amazon: Support `snapshot_users` and `snapshot_groups` for sharing
+      ebs snapshots. [GH-4243]
+  * builder/cloudstack: Support reusing an already associated public IP.
+      [GH-4149]
+  * builder/docker: Introduce docker commit changes, author, and message.
+      [GH-4202]
   * builder/googlecompute: Support `source_image_family`. [GH-4162]
-  * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
-  * post-processor/shell-local: support spaces in script path. [GH-4144]
-  * provisioner/salt: Bootstrap fallback on wget if curl failed. [GH-4244]
-  * builder/openstack: Automatically reauth as needed. [GH-4262]
-  * provisioner/ansible: Allow `winrm` communicator. [GH-4209]
-  * communicator/ssh: adds ability to download download directories and
-    wildcards, fix destination file mode (not hardcoded anymore). [GH-4210]
-  * builder/openstack: Added `image_visibility` field to specify visibility of
-      created image. [GH-4283]
+  * builder/googlecompute: enable support for Google Compute XPN. [GH-4288]
   * builder/openstack: Added `image_members` to add new members to image after
       it's created. [GH-4283]
-  * builder/googlecompute: enable support for Google Compute XPN. [GH-4288]
-  
+  * builder/openstack: Added `image_visibility` field to specify visibility of
+      created image. [GH-4283]
+  * builder/openstack: Automatically reauth as needed. [GH-4262]
+  * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
+  * communicator/ssh: adds ability to download download directories and
+      wildcards, fix destination file mode (not hardcoded anymore). [GH-4210]
+  * post-processor/shell-local: support spaces in script path. [GH-4144]
+  * provisioner/ansible: Allow `winrm` communicator. [GH-4209]
+  * provisioner/salt: Bootstrap fallback on wget if curl failed. [GH-4244]
+
 BUG FIXES:
 
-  * builder/amazon: Fix launching spot instances in EC2 Classic [GH-4204]
-  * builder/amazon: Fix `source_ami_filter` ignores `owners`. [GH-4235]
-  * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
   * builder/amazon: Correctly assign key from `ssh_keypair_name` to source
       instance. [GH-4222]
+  * builder/amazon: Fix `source_ami_filter` ignores `owners`. [GH-4235]
+  * builder/amazon: Fix launching spot instances in EC2 Classic [GH-4204]
+  * builder/qemu: Fix issue where multiple <waitXX> commands on a single line
+      in boot_command wouldn't be parsed correctly. [GH-4269]
+  * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
+  * post-processor/checksum: cleanup, and fix output to specified file with
+      more than one artifacts. [GH-4210]
+  * post-processor/checksum: reset hash after each artifact file. [GH-4210]
+  * provisioner/file: fix for directory download. [GH-4210]
+  * provisioner/file: fix issue uploading multiple files to a directory,
+      mentioned in [GH-4049]. [GH-4210]
   * provisioner/shell: Treat disconnects as retryable when running cleanup. If
       you have a reboot in your script, we'll now wait until the host is
       available before attempting to cleanup the script. [GH-4197]
-  * builder/qemu: Fix issue where multiple <waitXX> commands on a single line
-      in boot_command wouldn't be parsed correctly. [GH-4269]
-  * post-processor/checksum: cleanup, and fix output to specified file with
-    more than one artifacts. [GH-4210]
-  * provisioner/file: fix for directory download. [GH-4210]
-  * provisioner/file: fix issue uploading multiple files to a directory,
-    mentioned in [GH-4049]. [GH-4210]
-  * post-processor/checksum: reset hash after each artifact file. [GH-4210]
 
 ## 0.12.0 (November 15, 2016)
 
@@ -100,7 +102,7 @@ IMPROVEMENTS:
   * provisioner/ansible: Move info messages to log [GH-4123]
   * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
   * provisioner/salt: Add `salt_call_args` option. [GH-4158]
-  
+
 BUG FIXES:
 
   * builder/amazon: Fixed an error where we wouldn't fail the build even if we
