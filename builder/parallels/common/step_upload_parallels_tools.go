@@ -36,6 +36,7 @@ type StepUploadParallelsTools struct {
 	Ctx                     interpolate.Context
 }
 
+// Run uploads the Parallels Tools ISO to the VM.
 func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	ui := state.Get("ui").(packer.Ui)
@@ -80,4 +81,5 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepUploadParallelsTools) Cleanup(state multistep.StateBag) {}

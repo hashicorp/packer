@@ -12,6 +12,7 @@ type Parallels11Driver struct {
 	Parallels9Driver
 }
 
+// Verify raises an error if the builder could not be used on that host machine.
 func (d *Parallels11Driver) Verify() error {
 
 	stdout, err := exec.Command(d.PrlsrvctlPath, "info", "--license").Output()
@@ -35,6 +36,7 @@ func (d *Parallels11Driver) Verify() error {
 	return nil
 }
 
+// SetDefaultConfiguration applies pre-defined default settings to the VM config.
 func (d *Parallels11Driver) SetDefaultConfiguration(vmName string) error {
 	commands := make([][]string, 12)
 	commands[0] = []string{"set", vmName, "--cpus", "1"}
