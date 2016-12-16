@@ -20,6 +20,7 @@ type StepPrepareParallelsTools struct {
 	ParallelsToolsMode   string
 }
 
+// Run sets the value of "parallels_tools_path".
 func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
@@ -46,4 +47,5 @@ func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.Step
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepPrepareParallelsTools) Cleanup(multistep.StateBag) {}

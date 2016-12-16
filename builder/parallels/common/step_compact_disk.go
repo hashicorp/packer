@@ -21,6 +21,7 @@ type StepCompactDisk struct {
 	Skip bool
 }
 
+// Run runs the compaction of the virtual disk attached to the VM.
 func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
@@ -49,4 +50,5 @@ func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (*StepCompactDisk) Cleanup(multistep.StateBag) {}

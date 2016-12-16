@@ -16,6 +16,7 @@ import (
 	"gopkg.in/xmlpath.v2"
 )
 
+// Parallels9Driver is a base type for Parallels builders.
 type Parallels9Driver struct {
 	// This is the path to the "prlctl" application.
 	PrlctlPath string
@@ -27,8 +28,8 @@ type Parallels9Driver struct {
 	dhcpLeaseFile string
 }
 
+// Import creates a clone of the source VM and reassigns the MAC address if needed.
 func (d *Parallels9Driver) Import(name, srcPath, dstDir string, reassignMAC bool) error {
-
 	err := d.Prlctl("register", srcPath, "--preserve-uuid")
 	if err != nil {
 		return err
@@ -111,6 +112,7 @@ func getAppPath(bundleID string) (string, error) {
 	return pathOutput, nil
 }
 
+// CompactDisk performs the compation of the specified virtual disk image.
 func (d *Parallels9Driver) CompactDisk(diskPath string) error {
 	prlDiskToolPath, err := exec.LookPath("prl_disk_tool")
 	if err != nil {
@@ -138,6 +140,7 @@ func (d *Parallels9Driver) CompactDisk(diskPath string) error {
 	return nil
 }
 
+// DeviceAddCDROM adds a virtual CDROM device and attaches the specified image.
 func (d *Parallels9Driver) DeviceAddCDROM(name string, image string) (string, error) {
 	command := []string{
 		"set", name,
@@ -161,6 +164,7 @@ func (d *Parallels9Driver) DeviceAddCDROM(name string, image string) (string, er
 	return deviceName, nil
 }
 
+// DiskPath returns a full path to the first virtual disk drive.
 func (d *Parallels9Driver) DiskPath(name string) (string, error) {
 	out, err := exec.Command(d.PrlctlPath, "list", "-i", name).Output()
 	if err != nil {
@@ -178,6 +182,7 @@ func (d *Parallels9Driver) DiskPath(name string) (string, error) {
 	return HDDPath, nil
 }
 
+// IsRunning determines whether the VM is running or not.
 func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 	var stdout bytes.Buffer
 
@@ -208,6 +213,7 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 	return false, nil
 }
 
+// Stop forcibly stops the VM.
 func (d *Parallels9Driver) Stop(name string) error {
 	if err := d.Prlctl("stop", name); err != nil {
 		return err
@@ -219,6 +225,7 @@ func (d *Parallels9Driver) Stop(name string) error {
 	return nil
 }
 
+// Prlctl executes the specified "prlctl" command.
 func (d *Parallels9Driver) Prlctl(args ...string) error {
 	var stdout, stderr bytes.Buffer
 
@@ -241,10 +248,12 @@ func (d *Parallels9Driver) Prlctl(args ...string) error {
 	return err
 }
 
+// Verify raises an error if the builder could not be used on that host machine.
 func (d *Parallels9Driver) Verify() error {
 	return nil
 }
 
+// Version returns the version of Parallels Desktop installed on that host.
 func (d *Parallels9Driver) Version() (string, error) {
 	out, err := exec.Command(d.PrlctlPath, "--version").Output()
 	if err != nil {
@@ -263,6 +272,8 @@ func (d *Parallels9Driver) Version() (string, error) {
 	return version, nil
 }
 
+// SendKeyScanCodes sends the specified scancodes as key events to the VM.
+// It is performed using "Prltype" script (refer to "prltype.go").
 func (d *Parallels9Driver) SendKeyScanCodes(vmName string, codes ...string) error {
 	var stdout, stderr bytes.Buffer
 
@@ -312,6 +323,7 @@ func prepend(head string, tail []string) []string {
 	return tmp
 }
 
+// SetDefaultConfiguration applies pre-defined default settings to the VM config.
 func (d *Parallels9Driver) SetDefaultConfiguration(vmName string) error {
 	commands := make([][]string, 7)
 	commands[0] = []string{"set", vmName, "--cpus", "1"}
@@ -331,6 +343,7 @@ func (d *Parallels9Driver) SetDefaultConfiguration(vmName string) error {
 	return nil
 }
 
+// MAC returns the MAC address of the VM's first network interface.
 func (d *Parallels9Driver) MAC(vmName string) (string, error) {
 	var stdout bytes.Buffer
 
@@ -394,6 +407,8 @@ func (d *Parallels9Driver) IPAddress(mac string) (string, error) {
 	return mostRecentIP, nil
 }
 
+// ToolsISOPath returns a full path to the Parallels Tools ISO for the specified guest
+// OS type. The following OS types are supported: "win", "lin", "mac", "other".
 func (d *Parallels9Driver) ToolsISOPath(k string) (string, error) {
 	appPath, err := getAppPath("com.parallels.desktop.console")
 	if err != nil {

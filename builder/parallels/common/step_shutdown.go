@@ -26,6 +26,7 @@ type StepShutdown struct {
 	Timeout time.Duration
 }
 
+// Run shuts down the VM.
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
@@ -76,4 +77,5 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepShutdown) Cleanup(state multistep.StateBag) {}

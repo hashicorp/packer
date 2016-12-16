@@ -61,6 +61,8 @@ type Driver interface {
 	IPAddress(string) (string, error)
 }
 
+// NewDriver returns a new driver implementation for this version of Parallels
+// Desktop, or an error if the driver couldn't be initialized.
 func NewDriver() (Driver, error) {
 	var drivers map[string]Driver
 	var prlctlPath string

@@ -37,6 +37,7 @@ type StepTypeBootCommand struct {
 	Ctx            interpolate.Context
 }
 
+// Run types the boot command by sending key scancodes into the VM.
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)
@@ -144,6 +145,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func scancodes(message string) []string {

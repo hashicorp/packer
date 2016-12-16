@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// CommHost returns the VM's IP address which should be used to access it by SSH.
 func CommHost(state multistep.StateBag) (string, error) {
 	vmName := state.Get("vmName").(string)
 	driver := state.Get("driver").(Driver)
@@ -24,6 +25,7 @@ func CommHost(state multistep.StateBag) (string, error) {
 	return ip, nil
 }
 
+// SSHConfigFunc returns SSH credentials to access the VM by SSH.
 func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		auth := []ssh.AuthMethod{

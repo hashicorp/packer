@@ -20,6 +20,7 @@ type StepUploadVersion struct {
 	Path string
 }
 
+// Run uploads a file containing the version of Parallels Desktop.
 func (s *StepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
@@ -47,4 +48,5 @@ func (s *StepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepUploadVersion) Cleanup(state multistep.StateBag) {}

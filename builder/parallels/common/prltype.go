@@ -1,5 +1,7 @@
 package common
 
+// Prltype is a Python scrypt allowin to send scancodes to the VM. It requires
+// the module "prlsdkapi", which is bundled to Parallels Virtualization SDK.
 const Prltype string = `
 import sys
 import prlsdkapi
