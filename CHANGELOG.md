@@ -29,6 +29,7 @@ IMPROVEMENTS:
   * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
   * builder/amazon: Add `snapshot_tag` overrides. [GH-4015]
   * builder/amazon: Added new region London - eu-west-2. [GH-4284]
+  * builder/amazon: Added ca-central-1 to list of known aws regions. [GH-4274]
   * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
       if we're removing a preexisting image, as with `force_deregister_image`.
       [GH-4223]
