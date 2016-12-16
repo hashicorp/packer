@@ -13,7 +13,7 @@ type commandTemplate struct {
 	Name string
 }
 
-// StepPrlctl is a step that executes additional prlctl commands as specified
+// StepPrlctl is a step that executes additional `prlctl` commands as specified.
 // by the template.
 //
 // Uses:
@@ -27,6 +27,7 @@ type StepPrlctl struct {
 	Ctx      interpolate.Context
 }
 
+// Run executes `prlctl` commands.
 func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -67,4 +68,5 @@ func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepPrlctl) Cleanup(state multistep.StateBag) {}

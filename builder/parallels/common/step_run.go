@@ -22,6 +22,7 @@ type StepRun struct {
 	vmName string
 }
 
+// Run starts the VM.
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -57,6 +58,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup stops the VM.
 func (s *StepRun) Cleanup(state multistep.StateBag) {
 	if s.vmName == "" {
 		return

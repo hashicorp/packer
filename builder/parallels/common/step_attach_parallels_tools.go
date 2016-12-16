@@ -23,6 +23,8 @@ type StepAttachParallelsTools struct {
 	ParallelsToolsMode string
 }
 
+// Run adds a virtual CD-ROM device to the VM and attaches Parallels Tools ISO image.
+// If ISO image is not specified, then this step will be skipped.
 func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -55,6 +57,7 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	return multistep.ActionContinue
 }
 
+// Cleanup removes the virtual CD-ROM device attached to the VM.
 func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 	if s.cdromDevice == "" {
 		return

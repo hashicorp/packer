@@ -13,6 +13,8 @@ type IfconfigIPFinder struct {
 	Devices []string
 }
 
+// HostIP returns the host's IP address or an error if it could not be found
+// from the `ifconfig` output.
 func (f *IfconfigIPFinder) HostIP() (string, error) {
 	var ifconfigPath string
 

@@ -20,6 +20,8 @@ type StepAttachFloppy struct {
 	floppyPath string
 }
 
+// Run adds a virtual FDD device to the VM and attaches the image.
+// If the image is not specified, then this step will be skipped.
 func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
@@ -62,6 +64,7 @@ func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup removes the virtual FDD device attached to the VM.
 func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
