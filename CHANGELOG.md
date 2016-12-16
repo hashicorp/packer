@@ -1,6 +1,6 @@
 ## (Unreleased)
 
-## 0.12.0 (November 15, 2016)
+## 0.12.1 (December 15, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
 
