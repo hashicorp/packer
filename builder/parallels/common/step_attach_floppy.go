@@ -2,12 +2,13 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
-// This step attaches a floppy to the virtual machine.
+// StepAttachFloppy is a step that attaches a floppy to the virtual machine.
 //
 // Uses:
 //   driver Driver
@@ -19,6 +20,8 @@ type StepAttachFloppy struct {
 	floppyPath string
 }
 
+// Run adds a virtual FDD device to the VM and attaches the image.
+// If the image is not specified, then this step will be skipped.
 func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
@@ -35,22 +38,22 @@ func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Deleting any current floppy disk...")
 	// Delete the floppy disk controller
-	del_command := []string{
+	delCommand := []string{
 		"set", vmName,
 		"--device-del", "fdd0",
 	}
 	// This will almost certainly fail with 'The fdd0 device does not exist.'
-	driver.Prlctl(del_command...)
+	driver.Prlctl(delCommand...)
 
 	ui.Say("Attaching floppy disk...")
 	// Attaching the floppy disk
-	add_command := []string{
+	addCommand := []string{
 		"set", vmName,
 		"--device-add", "fdd",
 		"--image", floppyPath,
 		"--connect",
 	}
-	if err := driver.Prlctl(add_command...); err != nil {
+	if err := driver.Prlctl(addCommand...); err != nil {
 		state.Put("error", fmt.Errorf("Error adding floppy: %s", err))
 		return multistep.ActionHalt
 	}
@@ -61,6 +64,7 @@ func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup removes the virtual FDD device attached to the VM.
 func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)

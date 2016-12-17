@@ -2,11 +2,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"os"
+
+	"github.com/mitchellh/multistep"
 )
 
-// This step prepares parameters related to Parallels Tools.
+// StepPrepareParallelsTools is a step that prepares parameters related
+// to Parallels Tools.
 //
 // Uses:
 //   driver Driver
@@ -18,6 +20,7 @@ type StepPrepareParallelsTools struct {
 	ParallelsToolsMode   string
 }
 
+// Run sets the value of "parallels_tools_path".
 func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
@@ -25,7 +28,7 @@ func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.Step
 		return multistep.ActionContinue
 	}
 
-	path, err := driver.ToolsIsoPath(s.ParallelsToolsFlavor)
+	path, err := driver.ToolsISOPath(s.ParallelsToolsFlavor)
 
 	if err != nil {
 		state.Put("error", err)
@@ -44,4 +47,5 @@ func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.Step
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepPrepareParallelsTools) Cleanup(multistep.StateBag) {}
