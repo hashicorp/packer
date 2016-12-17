@@ -7,12 +7,14 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+// RunConfig contains the configuration for VM run.
 type RunConfig struct {
 	RawBootWait string `mapstructure:"boot_wait"`
 
 	BootWait time.Duration ``
 }
 
+// Prepare sets the configuration for VM run.
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"

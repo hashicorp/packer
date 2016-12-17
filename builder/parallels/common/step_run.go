@@ -2,12 +2,13 @@ package common
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"time"
 )
 
-// This step starts the virtual machine.
+// StepRun is a step that starts the virtual machine.
 //
 // Uses:
 //   driver Driver
@@ -21,6 +22,7 @@ type StepRun struct {
 	vmName string
 }
 
+// Run starts the VM.
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -29,7 +31,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Starting the virtual machine...")
 	command := []string{"start", vmName}
 	if err := driver.Prlctl(command...); err != nil {
-		err := fmt.Errorf("Error starting VM: %s", err)
+		err = fmt.Errorf("Error starting VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -56,6 +58,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup stops the VM.
 func (s *StepRun) Cleanup(state multistep.StateBag) {
 	if s.vmName == "" {
 		return
