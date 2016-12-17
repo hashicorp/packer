@@ -230,6 +230,9 @@ builder.
     to, defaults to "ide". When set to "sata", the drive is attached to an AHCI
     SATA controller.
 
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
+
 -   `iso_target_path` (string) - The path where the iso should be saved
     after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
