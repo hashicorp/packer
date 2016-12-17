@@ -21,6 +21,7 @@ type ISOConfig struct {
 	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string `mapstructure:"iso_urls"`
 	TargetPath      string   `mapstructure:"iso_target_path"`
+	TargetExtension string   `mapstructure:"iso_target_extension"`
 	RawSingleISOUrl string   `mapstructure:"iso_url"`
 }
 
@@ -118,6 +119,11 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 			c.ISOUrls[i] = url
 		}
 	}
+
+	if c.TargetExtension == "" {
+		c.TargetExtension = "iso"
+	}
+	c.TargetExtension = strings.ToLower(c.TargetExtension)
 
 	// Warnings
 	if c.ISOChecksumType == "none" {
