@@ -15,12 +15,14 @@ const (
 	ParallelsToolsModeUpload         = "upload"
 )
 
+// ToolsConfig contains the builder configuration related to Parallels Tools.
 type ToolsConfig struct {
 	ParallelsToolsFlavor    string `mapstructure:"parallels_tools_flavor"`
 	ParallelsToolsGuestPath string `mapstructure:"parallels_tools_guest_path"`
 	ParallelsToolsMode      string `mapstructure:"parallels_tools_mode"`
 }
 
+// Prepare validates & sets up configuration options related to Parallels Tools.
 func (c *ToolsConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.ParallelsToolsMode == "" {
 		c.ParallelsToolsMode = ParallelsToolsModeUpload
@@ -53,7 +55,7 @@ func (c *ToolsConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.ParallelsToolsFlavor == "" {
 		if c.ParallelsToolsMode != ParallelsToolsModeDisable {
-			errs = append(errs, errors.New("parallels_tools_flavor must be specified."))
+			errs = append(errs, errors.New("parallels_tools_flavor must be specified"))
 		}
 	}
 
