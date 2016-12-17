@@ -124,7 +124,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	} else {
 		if qemuMajor >= 2 {
-			defaultArgs["-display"] = "sdl"
+			if !config.UseDefaultDisplay {
+				defaultArgs["-display"] = "sdl"
+			}
 		} else {
 			ui.Message("WARNING: The version of qemu  on your host doesn't support display mode.\n" +
 				"The display parameter will be ignored.")
