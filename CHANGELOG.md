@@ -1,5 +1,10 @@
 ## (Unreleased)
 
+IMPROVEMENTS:
+
+  * builder/qemu: add use_default_display option for osx compatibility.
+      [GH-4293]
+
 ## 0.12.1 (December 15, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
