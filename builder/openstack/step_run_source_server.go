@@ -64,6 +64,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		AvailabilityZone: s.AvailabilityZone,
 		UserData:         userData,
 		ConfigDrive:      &s.ConfigDrive,
+		ServiceClient:    computeClient,
 	}
 
 	var serverOptsExt servers.CreateOptsBuilder
