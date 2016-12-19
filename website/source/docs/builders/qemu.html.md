@@ -236,6 +236,10 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
+-   `use_default_display` (boolean) - If true, do not pass a `-display` option
+    to qemu, allowing it to choose the default. This may be needed when running
+    under OS X.
+
 \~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
 --no-acpi could break the ability to send power signal type commands (e.g.,
