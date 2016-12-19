@@ -1,20 +1,20 @@
 ---
 description: |-
-  The HyperV Packer builder is able to create HyperV virtual machines and export them.
+  The Hyper-V Packer builder is able to create Hyper-V virtual machines and export them.
 layout: "docs"
-page_title: "HyperV Builder (from an ISO)"
+page_title: "Hyper-V Builder (from an ISO)"
 ---
 
-# HyperV Builder (from an ISO)
+# Hyper-V Builder (from an ISO)
 
 Type: `hyperv-iso`
 
-The HyperV Packer builder is able to create [HyperV](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
+The Hyper-V Packer builder is able to create [Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
 virtual machines and export them, starting from an ISO image.
 
 The builder builds a virtual machine by creating a new virtual machine
 from scratch, booting it, installing an OS, provisioning software within
-the OS, then shutting it down. The result of the HyperV builder is a directory
+the OS, then shutting it down. The result of the Hyper-V builder is a directory
 containing all the files necessary to run the virtual machine portably.
 
 ## Basic Example
@@ -41,7 +41,7 @@ provisioner might not be saved.
 
 ## Configuration Reference
 
-There are many configuration options available for the HyperV builder.
+There are many configuration options available for the Hyper-V builder.
 They are organized below into two categories: required and optional. Within
 each category, the available options are alphabetized and described.
 
@@ -111,8 +111,8 @@ can be configured for this builder.
     characters (*, ?, and []) are allowed. Directory names are also allowed,
     which will add all the files found in the directory to the floppy.
 
--   `generation` (integer) - The HyperV generation for the virtual machine. By
-    default, this is 1. Generation 2 HyperV virtual machines do not support
+-   `generation` (integer) - The Hyper-V generation for the virtual machine. By
+    default, this is 1. Generation 2 Hyper-V virtual machines do not support
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
     drives and dvd drives will also be scsi and not ide. 
 
@@ -279,7 +279,7 @@ an Ubuntu 12.04 installer:
 ## Integration Services
 
 Packer will automatically attach the integration services iso as a dvd drive
-for the version of HyperV that is running.
+for the version of Hyper-V that is running.
 
 ## Generation 1 vs Generation 2
 
