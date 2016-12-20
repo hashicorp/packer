@@ -31,8 +31,8 @@ to files, URLS for ISOs and checksums.
   [
     {
       "type": "qemu",
-      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
-      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.8-x86_64-minimal.iso",
+      "iso_checksum": "0ca12fe5f28c2ceed4f4084b41ff8a0b",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
       "shutdown_command": "shutdown -P now",
