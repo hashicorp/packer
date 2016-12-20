@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+BUG FIXES:
+
+  * builders/openstack: fix for finding resource by ID. [GH-4301]
+
 IMPROVEMENTS:
 
   * builder/qemu: add use_default_display option for osx compatibility.
