@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -370,11 +371,18 @@ func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsI
 	for i := 0; i < 40; i++ {
 		_, err := c.DescribeSecurityGroups(input)
 		if err != nil {
-			log.Printf("[DEBUG] Error querying security group %v: %s", input.GroupIds, err)
-			time.Sleep(15 * time.Second)
-			continue
+			// Check if this is just because it doesn't exist yet
+			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidSecurityGroupID.NotFound" {
+				log.Printf("[DEBUG] Security group %v doesn't exist, sleeping for a moment", input.GroupIds)
+				time.Sleep(15 * time.Second)
+				continue
+			}
+			// The error is something else, abort and throw it
+			return fmt.Errorf("Error looking for security group %v: %s", input.GroupIds, err)
 		}
+
+		// Success!
 		return nil
 	}
-	return fmt.Errorf("timed out")
+	return fmt.Errorf("Timeout waiting for security group %v to appear", input.GroupIds)
 }
