@@ -40,7 +40,8 @@ each can be found below:
     new versions of Packer. If you want to disable this for security or privacy
     reasons, you can set this environment variable to `1`.
 
--   `TMPDIR` - The location of the directory used for temporary files (defaults
-    to /tmp on Linux/Unix). It might be necessary to customize it when working
-    with large files since /tmp is a memory-backed filesystem in some Linux
-    distributions in which case /var/tmp might be preferred.
+-   `TMPDIR` (Unix) / `TMP` (Windows) - The location of the directory used for temporary files (defaults
+    to `/tmp` on Linux/Unix and `%USERPROFILE%\AppData\Local\Temp` on Windows
+    Vista and above). It might be necessary to customize it when working
+    with large files since `/tmp` is a memory-backed filesystem in some Linux
+    distributions in which case `/var/tmp` might be preferred.
