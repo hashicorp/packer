@@ -68,7 +68,8 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	snapshots := make(map[string][]string)
 	for _, blockDeviceMapping := range imagesResp.Images[0].BlockDeviceMappings {
-		if blockDeviceMapping.Ebs != nil {
+		if blockDeviceMapping.Ebs != nil && blockDeviceMapping.Ebs.SnapshotId != nil {
+
 			snapshots[*ec2conn.Config.Region] = append(snapshots[*ec2conn.Config.Region], *blockDeviceMapping.Ebs.SnapshotId)
 		}
 	}
