@@ -108,24 +108,24 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 // Gather scancodes to send to console efficiently.
-func gathercodes(codes []string) []string {
-	result := make([]string, 0, len(codes))
-	begin := 0
-	end := 0
-	for pos, code := range codes {
-		if strings.HasPrefix(code, "wait") {
-			if pos > begin {
-				result = append(result, strings.Join(codes[begin:end+1], " "))
-			}
-			result = append(result, code)
-			begin = pos + 1
+func gathercodes(codes []string) (gathered []string) {
+	working := []string{}
+	pushWorking := func() {
+		if len(working) > 0 {
+			gathered = append(gathered, strings.Join(working, " "))
+			working = []string{}
 		}
-		end = pos
 	}
-	if end > begin {
-		result = append(result, strings.Join(codes[begin:end+1], " "))
+	for _, code := range codes {
+		if strings.HasPrefix(code, "wait") {
+			pushWorking()
+			gathered = append(gathered, code)
+		} else {
+			working = append(working, code)
+		}
 	}
-	return result
+	pushWorking()
+	return
 }
 
 func scancodes(message string) []string {
