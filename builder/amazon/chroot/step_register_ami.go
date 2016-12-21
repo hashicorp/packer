@@ -76,8 +76,13 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
-	if config.AMIEnhancedNetworking {
+	if config.AMIEnhancedNetworkingType == "sriov" {
 		registerOpts.SriovNetSupport = aws.String("simple")
+	}
+
+	// Set EnaSupport
+	if config.AMIEnhancedNetworkingType == "ena" {
+		registerOpts.EnaSupport = aws.Bool(true)
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)

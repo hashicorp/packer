@@ -212,9 +212,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if !b.config.FromScratch {
 		steps = append(steps,
 			&awscommon.StepSourceAMIInfo{
-				SourceAmi:          b.config.SourceAmi,
-				EnhancedNetworking: b.config.AMIEnhancedNetworking,
-				AmiFilters:         b.config.SourceAmiFilter,
+				SourceAmi:              b.config.SourceAmi,
+				EnhancedNetworkingType: b.config.AMIEnhancedNetworkingType,
+				AmiFilters:             b.config.SourceAmiFilter,
 			},
 			&StepCheckRootDevice{},
 		)
