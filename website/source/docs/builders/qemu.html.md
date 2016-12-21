@@ -419,3 +419,11 @@ CentOS 6.4 installer:
   " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
 ```
+
+### Troubleshooting
+
+Some users have experienced errors complaining about invalid keymaps. This
+seems to be related to having a `common` directory or file in the directory
+they've run Packer in, like the packer source directory. This appears to be an
+upstream bug with qemu, and the best solution for now is to remove the
+file/directory or run in another directory.
