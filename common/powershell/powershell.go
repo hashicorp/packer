@@ -138,15 +138,17 @@ func saveScript(fileContents string) (string, error) {
 }
 
 func createArgs(filename string, params ...string) []string {
-	args := make([]string, len(params)+4)
+	args := make([]string, len(params)+5)
 	args[0] = "-ExecutionPolicy"
 	args[1] = "Bypass"
 
-	args[2] = "-File"
-	args[3] = filename
+	args[2] = "-NoProfile"
+
+	args[3] = "-File"
+	args[4] = filename
 
 	for key, value := range params {
-		args[key+4] = value
+		args[key+5] = value
 	}
 
 	return args
