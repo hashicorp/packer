@@ -94,3 +94,17 @@ listed below:
 		"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
 		"--detailed-exitcodes
 ```
+
+## Default Facts
+
+In addition to being able to specify custom Facter facts using the `facter`
+configuration, the provisioner automatically defines certain commonly useful
+facts:
+
+-   `packer_build_name` is set to the name of the build that Packer is running.
+    This is most useful when Packer is making multiple builds and you want to
+    distinguish them in your Hiera hierarchy.
+
+-   `packer_builder_type` is the type of the builder that was used to create the
+    machine that Puppet is running on. This is useful if you want to run only
+    certain parts of your Puppet code on systems built with certain builders.
