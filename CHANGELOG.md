@@ -1,16 +1,17 @@
 ## (Unreleased)
 
+IMPROVEMENTS:
+
+  * builder/qemu: add `use_default_display option for osx compatibility.
+      [GH-4293]
+  * provisioner/puppet-server: Add default facts. [GH-4286]
+ 
 BUG FIXES:
 
   * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
   * builder/openstack: fix for finding resource by ID. [GH-4301]
   * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
   * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
-
-IMPROVEMENTS:
-
-  * builder/qemu: add use_default_display option for osx compatibility.
-      [GH-4293]
 
 ## 0.12.1 (December 15, 2016)
 
