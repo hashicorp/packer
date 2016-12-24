@@ -90,6 +90,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = "/tmp/packer-puppet-server"
 	}
 
+	if p.config.Facter == nil {
+		p.config.Facter = make(map[string]string)
+	}
+	p.config.Facter["packer_build_name"] = p.config.PackerBuildName
+	p.config.Facter["packer_builder_type"] = p.config.PackerBuilderType
+
 	var errs *packer.MultiError
 	if p.config.ClientCertPath != "" {
 		info, err := os.Stat(p.config.ClientCertPath)
