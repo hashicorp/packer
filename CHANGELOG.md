@@ -3,7 +3,9 @@
 BUG FIXES:
 
   * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
-  * builders/openstack: fix for finding resource by ID. [GH-4301]
+  * builder/openstack: fix for finding resource by ID. [GH-4301]
+  * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
 
 IMPROVEMENTS:
 
