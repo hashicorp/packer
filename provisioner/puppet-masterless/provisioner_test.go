@@ -203,6 +203,14 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	if p.config.Facter == nil {
 		t.Fatalf("err: Default facts are not set in the Puppet provisioner!")
 	}
+
+	if _, ok := p.config.Facter["packer_build_name"]; !ok {
+		t.Fatalf("err: packer_build_name fact not set in the Puppet provisioner!")
+	}
+
+	if _, ok := p.config.Facter["packer_builder_type"]; !ok {
+		t.Fatalf("err: packer_builder_type fact not set in the Puppet provisioner!")
+	}
 }
 
 func TestProvisionerPrepare_extraArguments(t *testing.T) {
