@@ -12,6 +12,8 @@ import (
 
 	"strings"
 
+	"encoding/json"
+
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
@@ -27,6 +29,7 @@ type Config struct {
 
 	// Modules
 	ModuleDirs []ModuleDir `mapstructure:"module_dirs"`
+	Modules    []Module    `mapstructure:"modules"`
 
 	ctx interpolate.Context
 }
@@ -36,6 +39,13 @@ type ModuleDir struct {
 	Source      string   `mapstructure:"source"`
 	Destination string   `mapstructure:"destination"`
 	Exclude     []string `mapstructure:"exclude"`
+}
+
+// Module contains information needed to run a module
+type Module struct {
+	Module    string            `mapstructure:"module"`
+	Directory string            `mapstructure:"directory"`
+	Params    map[string]string `mapstucture:"params"`
 }
 
 // Provisioner for Converge
@@ -67,6 +77,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	// validate modules
+	if len(p.config.Modules) == 0 {
+		return errors.New("Converge requires at least one module (\"modules\" key) to provision the system")
+	}
+	for i, module := range p.config.Modules {
+		if module.Module == "" {
+			return fmt.Errorf("Module (\"module\" key) is required in Converge module #%d", i)
+		}
+		if module.Directory == "" {
+			module.Directory = "/tmp"
+		}
+	}
+
 	return err
 }
 
@@ -86,6 +109,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// send module directories to the remote host
 	if err := p.sendModuleDirectories(ui, comm); err != nil {
+		return err // error messages are already user-friendly
+	}
+
+	// apply all the modules
+	if err := p.applyModules(ui, comm); err != nil {
 		return err // error messages are already user-friendly
 	}
 
@@ -137,7 +165,7 @@ func (p *Provisioner) checkVersion(ui packer.Ui, comm packer.Communicator) error
 		Stdout:  &versionOut,
 		Stderr:  &versionOut,
 	}
-	if err := comm.Start(cmd); err != nil || cmd.ExitStatus != 0 {
+	if err := comm.Start(cmd); err != nil {
 		return fmt.Errorf("Error running `converge version`: %s", err)
 	}
 
@@ -167,6 +195,44 @@ func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicat
 			return fmt.Errorf("Could not upload %q: %s", dir.Source, err)
 		}
 		ui.Message(fmt.Sprintf("transferred %q to %q", dir.Source, dir.Destination))
+	}
+
+	return nil
+}
+
+func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error {
+	for _, module := range p.config.Modules {
+		// create params JSON file
+		params, err := json.Marshal(module.Params)
+		if err != nil {
+			return fmt.Errorf("Could not marshal parameters as JSON: %s", err)
+		}
+
+		// run Converge in the specified directory
+		var runOut bytes.Buffer
+		cmd := &packer.RemoteCmd{
+			Command: fmt.Sprintf(
+				"cd %s && converge apply --local --log-level=WARNING --paramsJSON '%s' %s",
+				module.Directory,
+				string(params),
+				module.Module,
+			),
+			Stdin:  nil,
+			Stdout: &runOut,
+			Stderr: &runOut,
+		}
+		if err := comm.Start(cmd); err != nil {
+			return fmt.Errorf("Error applying %q: %s", module.Module, err)
+		}
+
+		cmd.Wait()
+		if cmd.ExitStatus != 0 {
+			ui.Error(strings.TrimSpace(runOut.String()))
+			ui.Error(fmt.Sprintf("exited with error code %d", cmd.ExitStatus))
+			return fmt.Errorf("Error applying %q", module.Module)
+		}
+
+		ui.Message(strings.TrimSpace(runOut.String()))
 	}
 
 	return nil
