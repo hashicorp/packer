@@ -35,9 +35,9 @@ func TestAccessConfig_Prepare(t *testing.T) {
 
 func testAccessConfig(t *testing.T) AccessConfig {
 	return AccessConfig{
-		Endpoint: "test-endpoint",
-		Account:  "test-account",
-		KeyID:    "test-id",
-		KeyMaterial:  "test-private-key",
+		Endpoint:    "test-endpoint",
+		Account:     "test-account",
+		KeyID:       "test-id",
+		KeyMaterial: "test-private-key",
 	}
 }
