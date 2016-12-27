@@ -513,6 +513,21 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
+			"checksumSHA1": "NOwNdnb70M6s9LvhaPFabBVwlBs=",
+			"path": "github.com/joyent/gocommon",
+			"revision": "b78708995d1c2ebdb64a3061b0bca5d8ccdf0fc2"
+		},
+		{
+			"checksumSHA1": "zg/V3yqR59RlBEhTqjW7AhEp16o=",
+			"path": "github.com/joyent/gosdc",
+			"revision": "ec8b3503a75edca0df26581b83807677b0240716"
+		},
+		{
+			"checksumSHA1": "xVAU7r1t8lxJ1AHvgNNXxwU+jIo=",
+			"path": "github.com/joyent/gosign",
+			"revision": "9abcee278795b82b36858cdfc857c8a0e7de797c"
+		},
+		{
 			"checksumSHA1": "6nmAJBw2phU9MUmkUnqFvbO5urg=",
 			"path": "github.com/kardianos/osext",
 			"revision": "29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc"
