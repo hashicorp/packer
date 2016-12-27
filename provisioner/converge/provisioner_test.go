@@ -46,8 +46,8 @@ func TestProvisionerPrepare(t *testing.T) {
 			t.Errorf("err: %s", err)
 		}
 
-		if p.config.Modules[0].Directory != "/tmp" {
-			t.Errorf("unexpected module directory: %s", p.config.Modules[0].Directory)
+		if p.config.Modules[0].WorkingDirectory != "/tmp" {
+			t.Errorf("unexpected module directory: %s", p.config.Modules[0].WorkingDirectory)
 		}
 	})
 
