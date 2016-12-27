@@ -23,25 +23,19 @@ The example below is fully functional.
 ``` {.javascript}
 {
   "type": "converge",
-  "modules": [
-    {
-      "module": "https://raw.githubusercontent.com/asteris-llc/converge/master/samples/fileContent.hcl",
-      "params": {
-        "message": "Hello, Packer!"
-      }
-    }
-  ]
+  "module": "https://raw.githubusercontent.com/asteris-llc/converge/master/samples/fileContent.hcl",
+  "params": {
+    "message": "Hello, Packer!"
+  }
 }
 ```
 
 ## Configuration Reference
 
 The reference of available configuration options is listed below. The only
-required element is "modules", of which there must be at least one. Every other
-option is optional.
+required element is "module". Every other option is optional.
 
-- `modules` (array of module specifications) - The root modules to run by
-  Converge. See below for the specification.
+- `module` (string) - Path (or URL) to the root module that Converge will apply.
 
 Optional parameters:
 
@@ -54,18 +48,14 @@ Optional parameters:
 - `module_dirs` (array of directory specifications) - Module directories to
   transfer to the remote host for execution. See below for the specification.
 
-### Modules
-
-Modules control what Converge applies to your system. The `modules` key should
-be a list of objects with the following keys. Of these, only `module` is
-required.
-
-- `module` (string) - the path (or URL) to the root module.
-
-- `directory` (string) - the directory to run Converge in. If not set, the
-  provisioner will use `/tmp` by default.
+- `working_directory` (string) - The directory that Converge will change to
+  before execution.
 
 - `params` (maps of string to string) - parameters to pass into the root module.
+
+- `execute_command` (string) - the command used to execute Converge. This has
+  various
+  [configuration template variables](/docs/templates/configuration-templates.html) available.
 
 ### Module Directories
 
@@ -79,3 +69,24 @@ directory.
   directories will not be created; use the shell module to do this.
 
 - `exclude` (array of string) - files and directories to exclude from transfer.
+
+### Execute Command
+
+By default, Packer uses the following command (broken across multiple lines for readability) to execute Converge:
+
+``` {.liquid}
+cd {{.WorkingDirectory}} && \
+sudo converge apply \
+  --local \
+  --log-level=WARNING \
+  --paramsJSON '{{.ParamsJSON}}' \
+  {{.Module}}
+```
+
+This command can be customized using the `execute_command` configuration. As you
+can see from the default value above, the value of this configuration can
+contain various template variables:
+
+- `WorkingDirectory` - `directory` from the configuration
+- `ParamsJSON` - The unquoted JSONified form of `params` from the configuration.
+- `Module` - `module` from the configuration.
