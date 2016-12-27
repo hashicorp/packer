@@ -112,11 +112,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err // error messages are already user-friendly
 	}
 
-	// check version (really, this make sure that Converge is installed before we try to run it)
-	if err := p.checkVersion(ui, comm); err != nil {
-		return err // error messages are already user-friendly
-	}
-
 	// send module directories to the remote host
 	if err := p.sendModuleDirectories(ui, comm); err != nil {
 		return err // error messages are already user-friendly
@@ -175,38 +170,6 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 	return nil
 }
 
-func (p *Provisioner) checkVersion(ui packer.Ui, comm packer.Communicator) error {
-	var versionOut bytes.Buffer
-	cmd := &packer.RemoteCmd{
-		Command: "converge version",
-		Stdin:   nil,
-		Stdout:  &versionOut,
-		Stderr:  &versionOut,
-	}
-	if err := comm.Start(cmd); err != nil {
-		return fmt.Errorf("Error running `converge version`: %s", err)
-	}
-
-	cmd.Wait()
-	if cmd.ExitStatus == 127 {
-		ui.Error("Could not determine Converge version. Is it installed and in PATH?")
-		if !p.config.Bootstrap {
-			ui.Error("Bootstrapping was disabled for this run. That might be why Converge isn't present.")
-		}
-
-		return errors.New("could not determine Converge version")
-
-	} else if cmd.ExitStatus != 0 {
-		ui.Error(versionOut.String())
-		ui.Error(fmt.Sprintf("exited with error code %d", cmd.ExitStatus))
-		return errors.New("Error running `converge version`")
-	}
-
-	ui.Say(fmt.Sprintf("Provisioning with %s", strings.TrimSpace(versionOut.String())))
-
-	return nil
-}
-
 func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicator) error {
 	for _, dir := range p.config.ModuleDirs {
 		if err := comm.UploadDir(dir.Destination, dir.Source, dir.Exclude); err != nil {
@@ -244,7 +207,15 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 		}
 
 		cmd.Wait()
-		if cmd.ExitStatus != 0 {
+		if cmd.ExitStatus == 127 {
+			ui.Error("Could not find Converge. Is it installed and in PATH?")
+			if !p.config.Bootstrap {
+				ui.Error("Bootstrapping was disabled for this run. That might be why Converge isn't present.")
+			}
+
+			return errors.New("Could not find Converge")
+
+		} else if cmd.ExitStatus != 0 {
 			ui.Error(strings.TrimSpace(runOut.String()))
 			ui.Error(fmt.Sprintf("exited with error code %d", cmd.ExitStatus))
 			return fmt.Errorf("Error applying %q", module.Module)
