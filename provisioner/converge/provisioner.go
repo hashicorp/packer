@@ -22,7 +22,7 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-var versionRegex = regexp.MustCompile(`[\.\-\d\w]*`)
+var versionRegex = regexp.MustCompile(`^[\.\-\da-zA-Z]*$`)
 
 // Config for Converge provisioner
 type Config struct {
@@ -96,7 +96,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			return fmt.Errorf("Module (\"module\" key) is required in Converge module #%d", i)
 		}
 		if module.Directory == "" {
-			module.Directory = "/tmp"
+			p.config.Modules[i].Directory = "/tmp"
 		}
 	}
 
