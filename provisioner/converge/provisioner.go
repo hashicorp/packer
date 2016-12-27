@@ -137,12 +137,14 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 	ui.Message("bootstrapping converge")
 
 	bootstrap, err := http.Get("https://get.converge.sh")
-	defer bootstrap.Body.Close()
 	if err != nil {
 		return fmt.Errorf("Error downloading bootstrap script: %s", err) // TODO: is github.com/pkg/error allowed?
 	}
 	if err := comm.Upload("/tmp/install-converge.sh", bootstrap.Body, nil); err != nil {
 		return fmt.Errorf("Error uploading script: %s", err)
+	}
+	if err := bootstrap.Body.Close(); err != nil {
+		return fmt.Errorf("Error getting bootstrap script: %s", err)
 	}
 
 	// construct command
