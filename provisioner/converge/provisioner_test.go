@@ -17,11 +17,7 @@ func testConfig() map[string]interface{} {
 				"destination": "/opt/converge",
 			},
 		},
-		"modules": []map[string]interface{}{
-			{
-				"module": "/opt/converge/test.hcl",
-			},
-		},
+		"module": "/opt/converge/test.hcl",
 	}
 }
 
@@ -40,14 +36,14 @@ func TestProvisionerPrepare(t *testing.T) {
 
 		// delete any keys that we're testing here to make sure they're actually
 		// being set by `Prepare`
-		delete(config["modules"].([]map[string]interface{})[0], "directory")
+		delete(config, "working_directory")
 
 		if err := p.Prepare(config); err != nil {
 			t.Errorf("err: %s", err)
 		}
 
-		if p.config.Modules[0].WorkingDirectory != "/tmp" {
-			t.Errorf("unexpected module directory: %s", p.config.Modules[0].WorkingDirectory)
+		if p.config.WorkingDirectory != "/tmp" {
+			t.Errorf("unexpected module directory: %s", p.config.WorkingDirectory)
 		}
 	})
 
@@ -93,32 +89,17 @@ func TestProvisionerPrepare(t *testing.T) {
 			})
 		})
 
-		t.Run("modules", func(t *testing.T) {
-			t.Run("none specified", func(t *testing.T) {
-				var p Provisioner
-				config := testConfig()
-				delete(config, "modules")
+		t.Run("no module specified", func(t *testing.T) {
+			var p Provisioner
+			config := testConfig()
+			delete(config, "module")
 
-				err := p.Prepare(config)
-				if err == nil {
-					t.Error("expected error")
-				} else if err.Error() != "Converge requires at least one module (\"modules\" key) to provision the system" {
-					t.Errorf("bad error message: %s", err)
-				}
-			})
-
-			t.Run("missing module", func(t *testing.T) {
-				var p Provisioner
-				config := testConfig()
-				delete(config["modules"].([]map[string]interface{})[0], "module")
-
-				err := p.Prepare(config)
-				if err == nil {
-					t.Error("expected error")
-				} else if err.Error() != "Module (\"module\" key) is required in Converge module #0" {
-					t.Errorf("bad error message: %s", err)
-				}
-			})
+			err := p.Prepare(config)
+			if err == nil {
+				t.Error("expected error")
+			} else if err.Error() != "Converge requires a module to provision the system" {
+				t.Errorf("bad error message: %s", err)
+			}
 		})
 	})
 }
