@@ -113,9 +113,17 @@ func (p *Provisioner) checkVersion(ui packer.Ui, comm packer.Communicator) error
 	}
 
 	cmd.Wait()
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus == 127 {
+		ui.Error("Could not determine Converge version. Is it installed and in PATH?")
+		if p.config.NoBootstrap {
+			ui.Error("Bootstrapping was disabled for this run. That might be why Converge isn't present.")
+		}
+
+		return errors.New("could not determine Converge version")
+
+	} else if cmd.ExitStatus != 0 {
 		ui.Error(versionOut.String())
-		ui.Error(fmt.Sprintf("exited with error code %d", cmd.ExitStatus)) // TODO: check for 127
+		ui.Error(fmt.Sprintf("exited with error code %d", cmd.ExitStatus))
 		return errors.New("Error running `converge version`")
 	}
 
