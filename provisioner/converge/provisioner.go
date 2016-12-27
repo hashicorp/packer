@@ -29,8 +29,8 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Bootstrapping
-	NoBootstrap bool   `mapstructure:"no_bootstrap"`
-	Version     string `mapstructure:"version"`
+	Bootstrap bool   `mapstructure:"bootstrap"`
+	Version   string `mapstructure:"version"`
 
 	// Modules
 	ModuleDirs []ModuleDir `mapstructure:"module_dirs"`
@@ -131,7 +131,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 }
 
 func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) error {
-	if p.config.NoBootstrap {
+	if !p.config.Bootstrap {
 		return nil
 	}
 	ui.Message("bootstrapping converge")
@@ -188,7 +188,7 @@ func (p *Provisioner) checkVersion(ui packer.Ui, comm packer.Communicator) error
 	cmd.Wait()
 	if cmd.ExitStatus == 127 {
 		ui.Error("Could not determine Converge version. Is it installed and in PATH?")
-		if p.config.NoBootstrap {
+		if !p.config.Bootstrap {
 			ui.Error("Bootstrapping was disabled for this run. That might be why Converge isn't present.")
 		}
 
