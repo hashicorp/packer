@@ -48,9 +48,9 @@ type ModuleDir struct {
 
 // Module contains information needed to run a module
 type Module struct {
-	Module    string            `mapstructure:"module"`
-	Directory string            `mapstructure:"directory"`
-	Params    map[string]string `mapstucture:"params"`
+	Module           string            `mapstructure:"module"`
+	WorkingDirectory string            `mapstructure:"working_directory"`
+	Params           map[string]string `mapstucture:"params"`
 }
 
 // Provisioner for Converge
@@ -95,8 +95,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if module.Module == "" {
 			return fmt.Errorf("Module (\"module\" key) is required in Converge module #%d", i)
 		}
-		if module.Directory == "" {
-			p.config.Modules[i].Directory = "/tmp"
+		if module.WorkingDirectory == "" {
+			p.config.Modules[i].WorkingDirectory = "/tmp"
 		}
 	}
 
@@ -194,7 +194,7 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 		cmd := &packer.RemoteCmd{
 			Command: fmt.Sprintf(
 				"cd %s && converge apply --local --log-level=WARNING --paramsJSON '%s' %s",
-				module.Directory,
+				module.WorkingDirectory,
 				string(params),
 				module.Module,
 			),
