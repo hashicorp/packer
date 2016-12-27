@@ -53,6 +53,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		},
 		raws...,
 	)
+	if err != nil {
+		return err
+	}
+
+	// validate sources and destinations
+	for i, dir := range p.config.ModuleDirs {
+		if dir.Source == "" {
+			return fmt.Errorf("Source (\"source\" key) is required in Converge module dir #%d", i)
+		}
+		if dir.Destination == "" {
+			return fmt.Errorf("Destination (\"destination\" key) is required in Converge module dir #%d", i)
+		}
+	}
 
 	return err
 }
