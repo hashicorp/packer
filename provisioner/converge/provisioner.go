@@ -22,9 +22,20 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	// Bootstrapping
 	NoBootstrap bool `mapstructure:"no_bootstrap"` // TODO: add a way to specify bootstrap version
 
+	// Modules
+	ModuleDirs []ModuleDir `mapstructure:"module_dirs"`
+
 	ctx interpolate.Context
+}
+
+// ModuleDir is a directory to transfer to the remote system
+type ModuleDir struct {
+	Source      string   `mapstructure:"source"`
+	Destination string   `mapstructure:"destination"`
+	Exclude     []string `mapstructure:"exclude"`
 }
 
 // Provisioner for Converge
@@ -57,6 +68,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// check version (really, this make sure that Converge is installed before we try to run it)
 	if err := p.checkVersion(ui, comm); err != nil {
+		return err // error messages are already user-friendly
+	}
+
+	// send module directories to the remote host
+	if err := p.sendModuleDirectories(ui, comm); err != nil {
 		return err // error messages are already user-friendly
 	}
 
@@ -128,6 +144,17 @@ func (p *Provisioner) checkVersion(ui packer.Ui, comm packer.Communicator) error
 	}
 
 	ui.Say(fmt.Sprintf("Provisioning with %s", strings.TrimSpace(versionOut.String())))
+
+	return nil
+}
+
+func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicator) error {
+	for _, dir := range p.config.ModuleDirs {
+		if err := comm.UploadDir(dir.Destination, dir.Source, dir.Exclude); err != nil {
+			return fmt.Errorf("Could not upload %q: %s", dir.Source, err)
+		}
+		ui.Message(fmt.Sprintf("transferred %q to %q", dir.Source, dir.Destination))
+	}
 
 	return nil
 }
