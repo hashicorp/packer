@@ -229,5 +229,6 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 
 // Cancel the provisioning process
 func (p *Provisioner) Cancel() {
-	log.Println("cancel called in Converge provisioner")
+	// there's not an awful lot we can do to cancel Converge at the moment.
+	// The default semantics are fine.
 }
