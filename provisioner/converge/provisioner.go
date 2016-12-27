@@ -14,18 +14,23 @@ import (
 
 	"encoding/json"
 
+	"regexp"
+
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+var versionRegex = regexp.MustCompile(`[\.\-\d\w]*`)
+
 // Config for Converge provisioner
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Bootstrapping
-	NoBootstrap bool `mapstructure:"no_bootstrap"` // TODO: add a way to specify bootstrap version
+	NoBootstrap bool   `mapstructure:"no_bootstrap"`
+	Version     string `mapstructure:"version"`
 
 	// Modules
 	ModuleDirs []ModuleDir `mapstructure:"module_dirs"`
@@ -65,6 +70,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	// validate version
+	if !versionRegex.Match([]byte(p.config.Version)) {
+		return fmt.Errorf("Invalid Converge version %q specified. Valid versions include only letters, numbers, dots, and dashes", p.config.Version)
 	}
 
 	// validate sources and destinations
@@ -135,9 +145,15 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 		return fmt.Errorf("Error uploading script: %s", err)
 	}
 
+	// construct command
+	command := "/bin/sh /tmp/install-converge.sh"
+	if p.config.Version != "" {
+		command += " -v " + p.config.Version
+	}
+
 	var out bytes.Buffer
 	cmd := &packer.RemoteCmd{
-		Command: "/bin/sh /tmp/install-converge.sh",
+		Command: command,
 		Stdin:   nil,
 		Stdout:  &out,
 		Stderr:  &out,
