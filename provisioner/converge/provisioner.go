@@ -38,6 +38,7 @@ type Config struct {
 	Module           string            `mapstructure:"module"`
 	WorkingDirectory string            `mapstructure:"working_directory"`
 	Params           map[string]string `mapstucture:"params"`
+	ExecuteCommand   string            `mapstructure:"execute_command"`
 
 	ctx interpolate.Context
 }
@@ -71,6 +72,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	// require a single module
+	if p.config.Module == "" {
+		return errors.New("Converge requires a module to provision the system")
+	}
+
+	// set defaults
+	if p.config.WorkingDirectory == "" {
+		p.config.WorkingDirectory = "/tmp"
+	}
+
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = "cd {{.WorkingDirectory}} && sudo converge apply --local --log-level=WARNING --paramsJSON '{{.ParamsJSON}}' {{.Module}}"
+	}
+
 	// validate version
 	if !versionRegex.Match([]byte(p.config.Version)) {
 		return fmt.Errorf("Invalid Converge version %q specified. Valid versions include only letters, numbers, dots, and dashes", p.config.Version)
@@ -84,15 +99,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if dir.Destination == "" {
 			return fmt.Errorf("Destination (\"destination\" key) is required in Converge module dir #%d", i)
 		}
-	}
-
-	// validate modules
-	if p.config.Module == "" {
-		return errors.New("Converge requires a module to provision the system")
-	}
-
-	if p.config.WorkingDirectory == "" {
-		p.config.WorkingDirectory = "/tmp"
 	}
 
 	return err
@@ -183,18 +189,25 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 		return fmt.Errorf("Could not marshal parameters as JSON: %s", err)
 	}
 
+	p.config.ctx.Data = struct {
+		ParamsJSON, WorkingDirectory, Module string
+	}{
+		ParamsJSON:       string(params),
+		WorkingDirectory: p.config.WorkingDirectory,
+		Module:           p.config.Module,
+	}
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Could not interpolate execute command: %s", err)
+	}
+
 	// run Converge in the specified directory
 	var runOut bytes.Buffer
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf(
-			"cd %s && converge apply --local --log-level=WARNING --paramsJSON '%s' %s",
-			p.config.WorkingDirectory,
-			string(params),
-			p.config.Module,
-		),
-		Stdin:  nil,
-		Stdout: &runOut,
-		Stderr: &runOut,
+		Command: command,
+		Stdin:   nil,
+		Stdout:  &runOut,
+		Stderr:  &runOut,
 	}
 	if err := comm.Start(cmd); err != nil {
 		return fmt.Errorf("Error applying %q: %s", p.config.Module, err)

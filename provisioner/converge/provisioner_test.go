@@ -31,20 +31,35 @@ func TestProvisioner_Impl(t *testing.T) {
 
 func TestProvisionerPrepare(t *testing.T) {
 	t.Run("defaults", func(t *testing.T) {
-		var p Provisioner
-		config := testConfig()
+		t.Run("working_directory", func(t *testing.T) {
+			var p Provisioner
+			config := testConfig()
 
-		// delete any keys that we're testing here to make sure they're actually
-		// being set by `Prepare`
-		delete(config, "working_directory")
+			delete(config, "working_directory")
 
-		if err := p.Prepare(config); err != nil {
-			t.Errorf("err: %s", err)
-		}
+			if err := p.Prepare(config); err != nil {
+				t.Fatalf("err: %s", err)
+			}
 
-		if p.config.WorkingDirectory != "/tmp" {
-			t.Errorf("unexpected module directory: %s", p.config.WorkingDirectory)
-		}
+			if p.config.WorkingDirectory != "/tmp" {
+				t.Fatalf("unexpected module directory: %s", p.config.WorkingDirectory)
+			}
+		})
+
+		t.Run("execute_command", func(t *testing.T) {
+			var p Provisioner
+			config := testConfig()
+
+			delete(config, "execute_command")
+
+			if err := p.Prepare(config); err != nil {
+				t.Fatalf("err: %s", err)
+			}
+
+			if p.config.ExecuteCommand == "" {
+				t.Fatal("execute command unexpectedly blank")
+			}
+		})
 	})
 
 	t.Run("validate", func(t *testing.T) {
