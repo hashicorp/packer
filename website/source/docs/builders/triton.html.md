@@ -21,11 +21,10 @@ In addition to the options listed here, a [communicator](/docs/templates/communi
 ### Required:
 
 -   `triton_account` (string) - The username of the Triton account to use when using the Triton Cloud API.
--   `triton_key_id` (string) - The fingerprint of the public key of the SSH key pair to use for authentication against Triton.
--   `triton_key_material` (string) - The path to the private key of the SSH key pair associated with the Triton account to be used. For example `~/.ssh/id_rsa`.
+-   `triton_key_id` (string) - The fingerprint of the public key of the SSH key pair to use for authentication with the Triton Cloud API.
+-   `triton_key_material` (string) - Path to the file in which the private key of `triton_key_id` is stored. For example `~/.ssh/id_rsa`.
  
  -   `source_machine_image` (string) - The UUID of the image to base the new image on. On the Joyent public cloud this could for example be `70e3ae72-96b6-11e6-9056-9737fd4d0764` for version 16.3.1 of the 64bit SmartOS base image.
--   `source_machine_name` (string) - Name of the VM used for building the image. Does not affect (and does not have to be the same) as the name for a VM instance running this image. Maximum 512 characters but should in practice be much shorter (think between 5 and 20 characters). For example `mysql-64-server-image-builder`.
 -   `source_machine_package` (string) - The Triton package to use while building the image. Does not affect (and does not have to be the same) as the package which will be used for a VM instance running this image. On the Joyent public cloud this could for example be `g3-standard-0.5-smartos`.
 
 -   `image_name` (string) - The name the finished image in Triton will be assigned. Maximum 512 characters but should in practice be much shorter (think between 5 and 20 characters). For example `postgresql-95-server` for an image used as a PostgreSQL 9.5 server.
@@ -37,8 +36,10 @@ In addition to the options listed here, a [communicator](/docs/templates/communi
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of the VM used to create an image of is enabled. The Triton firewall only filters inbound traffic to the VM. For the Joyent public cloud and private Triton installations SSH traffic is always allowed by default. All outbound traffic is always allowed. Currently this builder does not provide an interface to add specific firewall rules. The default is `false`.
 -   `source_machine_metadata` (object of key/value strings) - Triton metadata applied to the VM used to create the image. Metadata can be used to pass configuration information to the VM without the need for networking. See [Using the metadata API](https://docs.joyent.com/private-cloud/instances/using-mdata) in the Joyent documentation for more information. This can for example be used to set the `user-script` metadata key to have Triton start a user supplied script after the VM has booted.
+-   `source_machine_name` (string) - Name of the VM used for building the image. Does not affect (and does not have to be the same) as the name for a VM instance running this image. Maximum 512 characters but should in practice be much shorter (think between 5 and 20 characters). For example `mysql-64-server-image-builder`. When omitted defaults to `packer-builder-[image_name]`.
 -   `source_machine_networks` (array of strings) - The UUID's of Triton networks added to the source machine used for creating the image. For example if any of the provisioners which are run need Internet access you will need to add the UUID's of the appropriate networks here. 
 -   `source_machine_tags` (object of key/value strings) - Tags applied to the VM used to create the image.
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to authenticate connections to the source VM. By default this value is `false` and the values of `triton_key_id` and `triton_key_material` will also be used for connecting to the VM.
 
 -   `image_acls` (array of strings) - The UUID's of the users which will have access to this image. When omitted only the owner (the Triton user whose credentials are used) will have access to the image.
 -   `image_description` (string) - Description of the image. Maximum 512 characters.
