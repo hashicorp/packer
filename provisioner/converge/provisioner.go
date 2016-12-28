@@ -23,9 +23,10 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Bootstrapping
-	Bootstrap        bool   `mapstructure:"bootstrap"`
-	Version          string `mapstructure:"version"`
-	BootstrapCommand string `mapstructure:"bootstrap_command"`
+	Bootstrap            bool   `mapstructure:"bootstrap"`
+	Version              string `mapstructure:"version"`
+	BootstrapCommand     string `mapstructure:"bootstrap_command"`
+	PreventBootstrapSudo bool   `mapstructure:"prevent_bootstrap_sudo"`
 
 	// Modules
 	ModuleDirs []ModuleDir `mapstructure:"module_dirs"`
@@ -87,7 +88,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.BootstrapCommand == "" {
-		p.config.BootstrapCommand = "curl -s https://get.converge.sh | sh {{if ne .Version \"\"}}-s -- -v {{.Version}}{{end}}"
+		p.config.BootstrapCommand = "curl -s https://get.converge.sh | {{if .Sudo}}sudo {{end}}sh {{if ne .Version \"\"}}-s -- -v {{.Version}}{{end}}"
 	}
 
 	// validate sources and destinations
@@ -133,8 +134,10 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 
 	p.config.ctx.Data = struct {
 		Version string
+		Sudo    bool
 	}{
 		Version: p.config.Version,
+		Sudo:    !p.config.PreventBootstrapSudo,
 	}
 	command, err := interpolate.Render(p.config.BootstrapCommand, &p.config.ctx)
 	if err != nil {
