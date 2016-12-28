@@ -260,8 +260,9 @@ func (r *rawTemplate) parsePostProcessor(
 	}
 }
 
-// Parse takes the given io.Reader and parses a Template object out of it.
-func Parse(r io.Reader) (*Template, error) {
+// Parse contents of an io.Reader into Template object running a hook function during decoding of raw template.
+// Pass nil as hook if no hook should be run.
+func parse(r io.Reader, decodeHook mapstructure.DecodeHookFunc) (*Template, error) {
 	// Create a buffer to copy what we read
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
@@ -279,8 +280,9 @@ func Parse(r io.Reader) (*Template, error) {
 	var rawTpl rawTemplate
 	rawTpl.RawContents = buf.Bytes()
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   &rawTpl,
+		DecodeHook: decodeHook,
+		Metadata:   &md,
+		Result:     &rawTpl,
 	})
 	if err != nil {
 		return nil, err
@@ -312,6 +314,11 @@ func Parse(r io.Reader) (*Template, error) {
 	return rawTpl.Template()
 }
 
+// Parse takes the given io.Reader and parses a Template object out of it without attaching any hooks.
+func Parse(r io.Reader) (*Template, error) {
+	return parse(r, nil)
+}
+
 // ParseFile is the same as Parse but is a helper to automatically open
 // a file for parsing.
 func ParseFile(path string) (*Template, error) {
@@ -334,7 +341,15 @@ func ParseFile(path string) (*Template, error) {
 		}
 		defer f.Close()
 	}
-	tpl, err := Parse(f)
+
+	if !filepath.IsAbs(path) {
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	tpl, err := parse(f, includeHookFunc(&includeResolverConfig{basePath: filepath.Dir(path)}))
 	if err != nil {
 		syntaxErr, ok := err.(*json.SyntaxError)
 		if !ok {
@@ -346,13 +361,6 @@ func ParseFile(path string) (*Template, error) {
 		line, col, highlight := highlightPosition(f, syntaxErr.Offset)
 		err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, syntaxErr.Offset, highlight)
 		return nil, err
-	}
-
-	if !filepath.IsAbs(path) {
-		path, err = filepath.Abs(path)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	tpl.Path = path

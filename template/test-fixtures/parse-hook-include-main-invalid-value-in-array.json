@@ -1,0 +1,8 @@
+{
+    "variables" : {
+        "_include": [
+            "parse-hook-include-vars.json",
+            10
+        ]
+    }
+}

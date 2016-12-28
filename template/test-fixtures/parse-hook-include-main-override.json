@@ -1,0 +1,6 @@
+{
+    "_include": "parse-hook-include-vars.json",
+    "variables": {
+        "builder_type": "builder-overriden"
+    }
+}
