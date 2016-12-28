@@ -117,6 +117,17 @@ func TestProvisionerPrepare_clientCertPath(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_executeCommand(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "execute_command")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	config := testConfig()
 
@@ -166,5 +177,33 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 
 	if _, ok := p.config.Facter["packer_builder_type"]; !ok {
 		t.Fatalf("err: packer_builder_type fact not set in the Puppet provisioner!")
+	}
+}
+
+func TestProvisionerPrepare_stagingDir(t *testing.T) {
+	config := testConfig()
+
+	delete(config, "staging_dir")
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Make sure the default staging directory is correct
+	if p.config.StagingDir != "/tmp/packer-puppet-server" {
+		t.Fatalf("err: Default staging_dir is not set in the Puppet provisioner!")
+	}
+
+	// Make sure default staging directory can be overridden
+	config["staging_dir"] = "/tmp/override"
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.StagingDir != "/tmp/override" {
+		t.Fatalf("err: Overridden staging_dir is not set correctly in the Puppet provisioner!")
 	}
 }
