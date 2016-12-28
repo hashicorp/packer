@@ -280,12 +280,36 @@ func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
+
+	// Test when the env variable value contains an equals sign
+	config["environment_vars"] = []string{"good=withequals=true"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test when the env variable value starts with an equals sign
+	config["environment_vars"] = []string{"good==true"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
 }
 
 func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	config := testConfig()
 
-	config["environment_vars"] = []string{"keyone=valueone", "keytwo=value\ntwo", "keythree='valuethree'", "keyfour='value\nfour'"}
+	config["environment_vars"] = []string{
+		"keyone=valueone",
+		"keytwo=value\ntwo",
+		"keythree='valuethree'",
+		"keyfour='value\nfour'",
+		"keyfive='value=five'",
+		"keysix='=six'",
+	}
 	p := new(Provisioner)
 	p.Prepare(config)
 
@@ -307,6 +331,16 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	expectedValue = "keyfour='value\nfour'"
 	if p.config.Vars[3] != expectedValue {
 		t.Fatalf("%s should be equal to %s", p.config.Vars[3], expectedValue)
+	}
+
+	expectedValue = "keyfive='value=five'"
+	if p.config.Vars[4] != expectedValue {
+		t.Fatalf("%s should be equal to %s", p.config.Vars[4], expectedValue)
+	}
+
+	expectedValue = "keysix='=six'"
+	if p.config.Vars[5] != expectedValue {
+		t.Fatalf("%s should be equal to %s", p.config.Vars[5], expectedValue)
 	}
 }
 
@@ -572,6 +606,27 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 	if flattenedEnvVars != `$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
+
+	// Environment variable with value containing equals
+	p.config.Vars = []string{"FOO=bar=baz"}
+	flattenedEnvVars, err = p.createFlattenedEnvVars(true)
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != `$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// Environment variable with value starting with equals
+	p.config.Vars = []string{"FOO==baz"}
+	flattenedEnvVars, err = p.createFlattenedEnvVars(true)
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != `$env:FOO="=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
 }
 
 func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
