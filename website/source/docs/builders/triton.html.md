@@ -39,7 +39,6 @@ In addition to the options listed here, a [communicator](/docs/templates/communi
 -   `source_machine_name` (string) - Name of the VM used for building the image. Does not affect (and does not have to be the same) as the name for a VM instance running this image. Maximum 512 characters but should in practice be much shorter (think between 5 and 20 characters). For example `mysql-64-server-image-builder`. When omitted defaults to `packer-builder-[image_name]`.
 -   `source_machine_networks` (array of strings) - The UUID's of Triton networks added to the source machine used for creating the image. For example if any of the provisioners which are run need Internet access you will need to add the UUID's of the appropriate networks here. 
 -   `source_machine_tags` (object of key/value strings) - Tags applied to the VM used to create the image.
--   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to authenticate connections to the source VM. By default this value is `false` and the values of `triton_key_id` and `triton_key_material` will also be used for connecting to the VM.
 
 -   `image_acls` (array of strings) - The UUID's of the users which will have access to this image. When omitted only the owner (the Triton user whose credentials are used) will have access to the image.
 -   `image_description` (string) - Description of the image. Maximum 512 characters.
