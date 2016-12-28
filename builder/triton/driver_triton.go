@@ -56,7 +56,11 @@ func (d *driverTriton) CreateMachine(config Config) (string, error) {
 		FirewallEnabled: config.MachineFirewallEnabled,
 	}
 
-	if config.MachineName != "" {
+	if config.MachineName == "" {
+		// If not supplied generate a name for the source VM: "packer-builder-[image_name]".
+		// The version is not used because it can contain characters invalid for a VM name.
+		opts.Name = "packer-builder-" + config.ImageName
+	} else {
 		opts.Name = config.MachineName
 	}
 
@@ -115,15 +119,15 @@ func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Dur
 	return waitFor(
 		func() (bool, error) {
 			machine, err := d.client.GetMachine(machineId)
-			if machine != nil {
-				return false, nil
-			}
-
 			if err != nil {
 				//TODO(jen20): is there a better way here than searching strings?
 				if strings.Contains(err.Error(), "410") || strings.Contains(err.Error(), "404") {
 					return true, nil
 				}
+			}
+
+			if machine != nil {
+				return false, nil
 			}
 
 			return false, err

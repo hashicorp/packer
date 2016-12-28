@@ -22,10 +22,6 @@ type SourceMachineConfig struct {
 func (c *SourceMachineConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 
-	if c.MachineName == "" {
-		errs = append(errs, fmt.Errorf("A source_machine_name must be specified"))
-	}
-
 	if c.MachinePackage == "" {
 		errs = append(errs, fmt.Errorf("A source_machine_package must be specified"))
 	}

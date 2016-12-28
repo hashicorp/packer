@@ -14,8 +14,8 @@ func TestSourceMachineConfig_Prepare(t *testing.T) {
 	sc = testSourceMachineConfig(t)
 	sc.MachineName = ""
 	errs = sc.Prepare(nil)
-	if errs == nil {
-		t.Fatalf("should error: %#v", sc)
+	if errs != nil {
+		t.Fatalf("should not error: %#v", sc)
 	}
 
 	sc = testSourceMachineConfig(t)
