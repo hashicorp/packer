@@ -60,6 +60,21 @@ func TestProvisionerPrepare(t *testing.T) {
 				t.Fatal("execute command unexpectedly blank")
 			}
 		})
+
+		t.Run("bootstrap_command", func(t *testing.T) {
+			var p Provisioner
+			config := testConfig()
+
+			delete(config, "bootstrap_command")
+
+			if err := p.Prepare(config); err != nil {
+				t.Fatalf("err: %s", err)
+			}
+
+			if p.config.BootstrapCommand == "" {
+				t.Fatal("bootstrap command unexpectedly blank")
+			}
+		})
 	})
 
 	t.Run("validate", func(t *testing.T) {
