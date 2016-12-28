@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"net/http"
 
 	"strings"
 
@@ -28,8 +27,9 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Bootstrapping
-	Bootstrap bool   `mapstructure:"bootstrap"`
-	Version   string `mapstructure:"version"`
+	Bootstrap        bool   `mapstructure:"bootstrap"`
+	Version          string `mapstructure:"version"`
+	BootstrapCommand string `mapstructure:"bootstrap_command"`
 
 	// Modules
 	ModuleDirs []ModuleDir `mapstructure:"module_dirs"`
@@ -64,7 +64,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			Interpolate:        true,
 			InterpolateContext: &p.config.ctx,
 			InterpolateFilter: &interpolate.RenderFilter{
-				Exclude: []string{"execute_command"},
+				Exclude: []string{
+					"execute_command",
+					"bootstrap_command",
+				},
 			},
 		},
 		raws...,
@@ -85,6 +88,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "cd {{.WorkingDirectory}} && {{if .Sudo}}sudo {{end}}converge apply --local --log-level=WARNING --paramsJSON '{{.ParamsJSON}}' {{.Module}}"
+	}
+
+	if p.config.BootstrapCommand == "" {
+		p.config.BootstrapCommand = "curl -s https://get.converge.sh | sh {{if ne .Version \"\"}}-s -- -v {{.Version}}{{end}}"
 	}
 
 	// validate version
@@ -133,21 +140,14 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 	}
 	ui.Message("bootstrapping converge")
 
-	bootstrap, err := http.Get("https://get.converge.sh")
+	p.config.ctx.Data = struct {
+		Version string
+	}{
+		Version: p.config.Version,
+	}
+	command, err := interpolate.Render(p.config.BootstrapCommand, &p.config.ctx)
 	if err != nil {
-		return fmt.Errorf("Error downloading bootstrap script: %s", err) // TODO: is github.com/pkg/error allowed?
-	}
-	if err := comm.Upload("/tmp/install-converge.sh", bootstrap.Body, nil); err != nil {
-		return fmt.Errorf("Error uploading script: %s", err)
-	}
-	if err := bootstrap.Body.Close(); err != nil {
-		return fmt.Errorf("Error getting bootstrap script: %s", err)
-	}
-
-	// construct command
-	command := "/bin/sh /tmp/install-converge.sh"
-	if p.config.Version != "" {
-		command += " -v " + p.config.Version
+		return fmt.Errorf("Could not interpolate bootstrap command: %s", err)
 	}
 
 	var out bytes.Buffer
