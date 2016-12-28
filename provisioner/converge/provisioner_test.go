@@ -9,8 +9,6 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"bootstrap": false,
-		"version":   "",
 		"module_dirs": []map[string]interface{}{
 			{
 				"source":      "from",
