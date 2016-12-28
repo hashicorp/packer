@@ -64,6 +64,9 @@ Optional parameters:
   has various
   [configuration template variables](/docs/templates/configuration-templates.html) available.
 
+- `prevent_bootstrap_sudo` (bool) - stop Converge from bootstrapping with
+  administrator privileges via sudo
+
 ### Module Directories
 
 The provisioner can transfer module directories to the remote host for
@@ -104,11 +107,12 @@ contain various template variables:
 By default, Packer uses the following command to bootstrap Converge:
 
 ``` {.liquid}
-curl -s https://get.converge.sh | sh {{if ne .Version ""}}-s -- -v {{.Version}}{{end}}
+curl -s https://get.converge.sh | {{if .Sudo}}sudo {{end}}sh {{if ne .Version ""}}-s -- -v {{.Version}}{{end}}
 ```
 
 This command can be customized using the `bootstrap_command` configuration. As you
 can see from the default values above, the value of this configuration can
 contain various template variables:
 
+- `Sudo` - the opposite of `prevent_bootstrap_sudo` from the configuration.
 - `Version` - `version` from the configuration.
