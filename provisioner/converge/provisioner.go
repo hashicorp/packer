@@ -12,15 +12,11 @@ import (
 
 	"encoding/json"
 
-	"regexp"
-
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
-
-var versionRegex = regexp.MustCompile(`^[\.\-\da-zA-Z]*$`)
 
 // Config for Converge provisioner
 type Config struct {
@@ -92,11 +88,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.BootstrapCommand == "" {
 		p.config.BootstrapCommand = "curl -s https://get.converge.sh | sh {{if ne .Version \"\"}}-s -- -v {{.Version}}{{end}}"
-	}
-
-	// validate version
-	if !versionRegex.Match([]byte(p.config.Version)) {
-		return fmt.Errorf("Invalid Converge version %q specified. Valid versions include only letters, numbers, dots, and dashes", p.config.Version)
 	}
 
 	// validate sources and destinations

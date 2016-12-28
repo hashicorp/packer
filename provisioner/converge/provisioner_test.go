@@ -1,7 +1,6 @@
 package converge
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/mitchellh/packer/packer"
@@ -76,19 +75,6 @@ func TestProvisionerPrepare(t *testing.T) {
 	})
 
 	t.Run("validate", func(t *testing.T) {
-		t.Run("bad version", func(t *testing.T) {
-			var p Provisioner
-			config := testConfig()
-			config["version"] = "bad version with spaces"
-
-			err := p.Prepare(config)
-			if err == nil {
-				t.Error("expected error")
-			} else if !strings.HasPrefix(err.Error(), "Invalid Converge version") {
-				t.Errorf("expected error starting with \"Invalid Converge version\". Got: %s", err)
-			}
-		})
-
 		t.Run("module dir", func(t *testing.T) {
 			t.Run("missing source", func(t *testing.T) {
 				var p Provisioner
