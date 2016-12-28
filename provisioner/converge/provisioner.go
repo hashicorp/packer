@@ -39,6 +39,7 @@ type Config struct {
 	WorkingDirectory string            `mapstructure:"working_directory"`
 	Params           map[string]string `mapstucture:"params"`
 	ExecuteCommand   string            `mapstructure:"execute_command"`
+	PreventSudo      bool              `mapstructure:"prevent_sudo"`
 
 	ctx interpolate.Context
 }
@@ -83,7 +84,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "cd {{.WorkingDirectory}} && sudo converge apply --local --log-level=WARNING --paramsJSON '{{.ParamsJSON}}' {{.Module}}"
+		p.config.ExecuteCommand = "cd {{.WorkingDirectory}} && {{if .Sudo}}sudo {{end}}converge apply --local --log-level=WARNING --paramsJSON '{{.ParamsJSON}}' {{.Module}}"
 	}
 
 	// validate version
@@ -191,10 +192,12 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 
 	p.config.ctx.Data = struct {
 		ParamsJSON, WorkingDirectory, Module string
+		Sudo                                 bool
 	}{
 		ParamsJSON:       string(params),
 		WorkingDirectory: p.config.WorkingDirectory,
 		Module:           p.config.Module,
+		Sudo:             !p.config.PreventSudo,
 	}
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
