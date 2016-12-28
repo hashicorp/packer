@@ -57,6 +57,9 @@ Optional parameters:
   various
   [configuration template variables](/docs/templates/configuration-templates.html) available.
 
+- `prevent_sudo` (bool) - stop Converge from running with adminstrator
+  privileges via sudo
+
 ### Module Directories
 
 The provisioner can transfer module directories to the remote host for
@@ -76,7 +79,7 @@ By default, Packer uses the following command (broken across multiple lines for 
 
 ``` {.liquid}
 cd {{.WorkingDirectory}} && \
-sudo converge apply \
+{{if .Sudo}}sudo {{end}}converge apply \
   --local \
   --log-level=WARNING \
   --paramsJSON '{{.ParamsJSON}}' \
@@ -87,6 +90,7 @@ This command can be customized using the `execute_command` configuration. As you
 can see from the default value above, the value of this configuration can
 contain various template variables:
 
-- `WorkingDirectory` - `directory` from the configuration
+- `WorkingDirectory` - `directory` from the configuration.
+- `Sudo` - the opposite of `prevent_sudo` from the configuration.
 - `ParamsJSON` - The unquoted JSONified form of `params` from the configuration.
 - `Module` - `module` from the configuration.
