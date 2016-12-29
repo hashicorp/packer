@@ -27,17 +27,18 @@ type Config struct {
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
 	BootCommand          []string `mapstructure:"boot_command"`
-	SourcePath           string   `mapstructure:"source_path"`
 	Checksum             string   `mapstructure:"checksum"`
 	ChecksumType         string   `mapstructure:"checksum_type"`
-	TargetPath           string   `mapstructure:"target_path"`
 	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
 	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
-	VMName               string   `mapstructure:"vm_name"`
-	ImportOpts           string   `mapstructure:"import_opts"`
+	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
 	ImportFlags          []string `mapstructure:"import_flags"`
+	ImportOpts           string   `mapstructure:"import_opts"`
+	SourcePath           string   `mapstructure:"source_path"`
+	TargetPath           string   `mapstructure:"target_path"`
+	VMName               string   `mapstructure:"vm_name"`
+	SkipExport           bool     `mapstructure:"skip_export"`
 
 	ctx interpolate.Context
 }

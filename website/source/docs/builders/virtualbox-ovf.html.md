@@ -229,6 +229,10 @@ builder.
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
 
+-   `skip_export` (boolean) - Defaults to `false`. When enabled Packer will
+    skip export of the installed virtual machine. Only useful for some edge
+    use cases.
+
 -   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
