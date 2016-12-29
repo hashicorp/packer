@@ -31,15 +31,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = multierror.Append(errs, err)
 	}
 
-	// In Triton only the root user is setup in a VM.
-	b.config.Comm.SSHUsername = "root"
-
 	errs = multierror.Append(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = multierror.Append(errs, b.config.SourceMachineConfig.Prepare(&b.config.ctx)...)
 	errs = multierror.Append(errs, b.config.Comm.Prepare(&b.config.ctx)...)
 	errs = multierror.Append(errs, b.config.TargetImageConfig.Prepare(&b.config.ctx)...)
-
-	b.config.Comm.SSHPrivateKey = b.config.KeyMaterial
 
 	return nil, errs.ErrorOrNil()
 }
@@ -61,9 +56,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&StepCreateSourceMachine{},
 		&communicator.StepConnect{
-			Config:    &config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
+			Config: &config.Comm,
+			Host:   commHost,
+			SSHConfig: sshConfig(
+				b.config.Comm.SSHAgentAuth,
+				b.config.Comm.SSHUsername,
+				b.config.Comm.SSHPrivateKey,
+				b.config.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
 		&StepStopMachine{},
