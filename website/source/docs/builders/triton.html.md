@@ -18,12 +18,16 @@ Type: `triton`
 The `triton` Packer builder is able to create new images for use with Triton.
 These images can be used with both the [Joyent public
 cloud](https://www.joyent.com/) (which is powered by Triton) as well with
-private [Triton](https://github.com/joyent/triton) installations. This builder
-uses the Triton Cloud API to create images. The builder creates and launches a
-temporary VM based on a specified source image, runs any provisioning necessary,
-uses the Triton "VM to image" functionality to create a reusable image and
-finally destroys the temporary VM. This reusable image can then be used to
-launch new VM's.
+private [Triton](https://github.com/joyent/triton) installations.
+
+This builder uses the Triton Cloud API to create these images. Triton also
+supports the Docker API however this builder does *not*. If you want to create
+Docker images on Triton you should use the Packer Docker builder.
+
+The builder creates and launches a temporary VM based on a specified source
+image, runs any provisioning necessary, uses the Triton "VM to image"
+functionality to create a reusable image and finally destroys the temporary VM.
+This reusable image can then be used to launch new VM's.
 
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
@@ -47,9 +51,16 @@ builder.
     of `triton_key_id` is stored. For example `~/.ssh/id_rsa`.
 
 -   `source_machine_image` (string) - The UUID of the image to base the new
-    image on. On the Joyent public cloud this could for example be
+    image on. Triton supports multiple types of images, called 'brands' in
+    Triton / Joyent lingo, for contains and VM's. See the chapter [Containers
+    and virtual machines](https://docs.joyent.com/public-cloud/instances) in the
+    Joyent Triton documentation for detailed information. The following brands
+    are currently supported by this builder:`joyent` and`kvm`. The choice of
+    base image automatically decides the brand. On the Joyent public cloud a
+    valid `source_machine_image` could for example be
     `70e3ae72-96b6-11e6-9056-9737fd4d0764` for version 16.3.1 of the 64bit
-    SmartOS base image.
+    SmartOS base image (a 'joyent' brand image).
+
 -   `source_machine_package` (string) - The Triton package to use while building
     the image. Does not affect (and does not have to be the same) as the package
     which will be used for a VM instance running this image. On the Joyent
@@ -111,18 +122,28 @@ builder.
 
 ## Basic Example
 
-Below is a minimal example to create an image on the Joyent public cloud:
+Below is a minimal example to create an joyent-brand image on the Joyent public
+cloud:
 
 ``` {.javascript}
 "builders": [{
   "type": "triton",
   "triton_account": "triton_username",
   "triton_key_id": "6b:95:03:3d:d3:6e:52:69:01:96:1a:46:4a:8d:c1:7e",
-  "triton_key_material": "${file("~/.ssh/id_rsa")}",
+  "triton_key_material": "~/.ssh/id_rsa",
   "source_machine_name": "image-builder",
   "source_machine_package": "g3-standard-0.5-smartos",
   "source_machine_image": "70e3ae72-96b6-11e6-9056-9737fd4d0764",
+  "ssh_username": "root",
+  "ssh_private_key_file": "~/.ssh/id_rsa",
   "image_name": "my_new_image",
   "image_version": "1.0.0",
 }],
 ```
+
+In the above example the SSH key used for `triton_key_material` (connecting to
+the Cloud API) and the `ssh_private_key_file` (connecting to the VM once it has
+started) are the same. This is because Triton automatically configures the root
+users to be able to login via SSH with the same key used to create the VM via
+the Cloud API. In more advanced scenarios for example when using a
+`source_machine_image` one might use different credentials.
