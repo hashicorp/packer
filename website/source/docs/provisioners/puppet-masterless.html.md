@@ -30,7 +30,7 @@ this.
 ## Basic Example
 
 The example below is fully functional and expects the configured manifest file
-to exist relative to your working directory:
+to exist relative to your working directory.
 
 ``` {.javascript}
 {
@@ -86,10 +86,10 @@ Optional parameters:
 This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
 
--   `puppet_bin_dir` (string) - The path to the binary for running `puppet apply`.
-    Usually, this would be found via the `$PATH` or `%PATH%` environment variable,
-    but some builders (notably, the Docker one) do not run profile-setup scripts,
-    therefore the Path is usually empty.
+-   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
+    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
+    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
+    not run profile-setup scripts, therefore the path is usually empty.
 
 -   `module_paths` (array of strings) - This is an array of paths to module
     directories on your local filesystem. These will be uploaded to the
@@ -123,9 +123,10 @@ cd {{.WorkingDir}} && \
 {{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
-  {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
-  {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}} \
+  {{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
+  {{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}} \
   --detailed-exitcodes \
+  {{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}} \
   {{.ManifestFile}}
 ```
 
