@@ -172,7 +172,7 @@ builder.
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
 
--   'network_project_id' (string) - The project ID for the network and subnetwork
+-   `network_project_id` (string) - The project ID for the network and subnetwork
     to use for launched instance. Defaults to `project_id`.
 
 -   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
