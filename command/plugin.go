@@ -15,6 +15,7 @@ import (
 
 	amazonchrootbuilder "github.com/mitchellh/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/mitchellh/packer/builder/amazon/ebs"
+	amazonebssurrogatebuilder "github.com/mitchellh/packer/builder/amazon/ebssurrogate"
 	amazonebsvolumebuilder "github.com/mitchellh/packer/builder/amazon/ebsvolume"
 	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
 	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
@@ -72,29 +73,30 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
-	"amazon-chroot":    new(amazonchrootbuilder.Builder),
-	"amazon-ebs":       new(amazonebsbuilder.Builder),
-	"amazon-ebsvolume": new(amazonebsvolumebuilder.Builder),
-	"amazon-instance":  new(amazoninstancebuilder.Builder),
-	"azure-arm":        new(azurearmbuilder.Builder),
-	"cloudstack":       new(cloudstackbuilder.Builder),
-	"digitalocean":     new(digitaloceanbuilder.Builder),
-	"docker":           new(dockerbuilder.Builder),
-	"file":             new(filebuilder.Builder),
-	"googlecompute":    new(googlecomputebuilder.Builder),
-	"hyperv-iso":       new(hypervisobuilder.Builder),
-	"null":             new(nullbuilder.Builder),
-	"oneandone":        new(oneandonebuilder.Builder),
-	"openstack":        new(openstackbuilder.Builder),
-	"parallels-iso":    new(parallelsisobuilder.Builder),
-	"parallels-pvm":    new(parallelspvmbuilder.Builder),
-	"profitbricks":     new(profitbricksbuilder.Builder),
-	"qemu":             new(qemubuilder.Builder),
-	"triton":           new(tritonbuilder.Builder),
-	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
-	"vmware-iso":       new(vmwareisobuilder.Builder),
-	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
+	"amazon-chroot":       new(amazonchrootbuilder.Builder),
+	"amazon-ebs":          new(amazonebsbuilder.Builder),
+	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
+	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
+	"amazon-instance":     new(amazoninstancebuilder.Builder),
+	"azure-arm":           new(azurearmbuilder.Builder),
+	"cloudstack":          new(cloudstackbuilder.Builder),
+	"digitalocean":        new(digitaloceanbuilder.Builder),
+	"docker":              new(dockerbuilder.Builder),
+	"file":                new(filebuilder.Builder),
+	"googlecompute":       new(googlecomputebuilder.Builder),
+	"hyperv-iso":          new(hypervisobuilder.Builder),
+	"null":                new(nullbuilder.Builder),
+	"oneandone":           new(oneandonebuilder.Builder),
+	"openstack":           new(openstackbuilder.Builder),
+	"parallels-iso":       new(parallelsisobuilder.Builder),
+	"parallels-pvm":       new(parallelspvmbuilder.Builder),
+	"profitbricks":        new(profitbricksbuilder.Builder),
+	"qemu":                new(qemubuilder.Builder),
+	"triton":              new(tritonbuilder.Builder),
+	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
+	"vmware-iso":          new(vmwareisobuilder.Builder),
+	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
 }
 
 var Provisioners = map[string]packer.Provisioner{
