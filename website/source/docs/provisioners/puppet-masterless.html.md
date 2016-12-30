@@ -123,10 +123,10 @@ cd {{.WorkingDir}} && \
 {{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet apply \
   --verbose \
   --modulepath='{{.ModulePath}}' \
-  {{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
-  {{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}} \
+  {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
+  {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}} \
   --detailed-exitcodes \
-  {{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}} \
+  {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}} \
   {{.ManifestFile}}
 ```
 
