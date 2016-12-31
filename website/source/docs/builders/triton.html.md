@@ -84,10 +84,11 @@ builder.
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
-    filters inbound traffic to the VM. For the Joyent public cloud and private
-    Triton installations SSH traffic is always allowed by default. All outbound
-    traffic is always allowed. Currently this builder does not provide an
-    interface to add specific firewall rules. The default is `false`.
+    filters inbound traffic to the VM. All outbound traffic is always allowed.
+    Currently this builder does not provide an interface to add specific
+    firewall rules. Unless you have a global rule defined in Triton which allows
+    SSH traffic enabling the firewall will interfere with the SSH provisioner.
+    The default is `false`.
 -   `source_machine_metadata` (object of key/value strings) - Triton metadata
     applied to the VM used to create the image. Metadata can be used to pass
     configuration information to the VM without the need for networking. See
