@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+FEATURES:
+
+ * **New builder:** `triton` for building images for Joyent Triton. [GH-4325]
+
 IMPROVEMENTS:
 
   * builder/qemu: add `use_default_display option for osx compatibility.
