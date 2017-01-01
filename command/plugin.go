@@ -31,6 +31,7 @@ import (
 	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/mitchellh/packer/builder/profitbricks"
 	qemubuilder "github.com/mitchellh/packer/builder/qemu"
+	tritonbuilder "github.com/mitchellh/packer/builder/triton"
 	virtualboxisobuilder "github.com/mitchellh/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
@@ -90,6 +91,7 @@ var Builders = map[string]packer.Builder{
 	"parallels-pvm":    new(parallelspvmbuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
 	"qemu":             new(qemubuilder.Builder),
+	"triton":           new(tritonbuilder.Builder),
 	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
 	"vmware-iso":       new(vmwareisobuilder.Builder),
