@@ -11,6 +11,8 @@ BUG FIXES:
   * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
   * builder/openstack: fix for finding resource by ID. [GH-4301]
   * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/virtualbox: Pause between each boot command element in -debug.
+    [GH-4346]
   * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
 
 ## 0.12.1 (December 15, 2016)
