@@ -9,6 +9,8 @@ IMPROVEMENTS:
   * builder/qemu: add `use_default_display option for osx compatibility.
       [GH-4293]
   * provisioner/puppet-server: Add default facts. [GH-4286]
+  * provisioner/powershell: Allow equals sign in value of environment
+      variables. [GH-4328]
  
 BUG FIXES:
 
