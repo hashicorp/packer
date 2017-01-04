@@ -143,6 +143,13 @@ can be configured for this builder.
     must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
+
+-   `iso_target_path` (string) - The path where the iso should be saved after
+    download. By default will go in the packer cache, with a hash of the
+    original filename as its name.
+
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
