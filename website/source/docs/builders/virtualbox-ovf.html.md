@@ -41,7 +41,7 @@ the settings here.
   "source_path": "source.ovf",
   "ssh_username": "packer",
   "ssh_password": "packer",
-  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+  "shutdown_command": "shutdown /s"
 }
 ```
 
