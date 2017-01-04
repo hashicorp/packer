@@ -39,9 +39,9 @@ required element is "module". Every other option is optional.
 
 Optional parameters:
 
-- `bootstrap` (boolean) - Set to allow the provisioner to download the latest
-  Converge bootstrap script and the specified `version` of Converge from the
-  internet.
+- `bootstrap` (boolean, defaults to false) - Set to allow the provisioner to
+  download the latest Converge bootstrap script and the specified `version` of
+  Converge from the internet.
 
 - `version` (string) - Set to a [released Converge version](https://github.com/asteris-llc/converge/releases) for bootstrap.
 
