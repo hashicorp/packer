@@ -6,7 +6,12 @@ FEATURES:
 
 IMPROVEMENTS:
 
-  * builder/qemu: add `use_default_display option for osx compatibility.
+  * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/parallels-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/virtualbox-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/vmware-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/qemu: add `iso_target_extension` option. [GH-4294]
+  * builder/qemu: add `use_default_display option for osx compatibility.
       [GH-4293]
   * provisioner/puppet-server: Add default facts. [GH-4286]
   * provisioner/powershell: Allow equals sign in value of environment
