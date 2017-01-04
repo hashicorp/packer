@@ -3,6 +3,7 @@
 FEATURES:
 
  * **New builder:** `triton` for building images for Joyent Triton. [GH-4325]
+ * **New provisioner:** `converge` for provisioning with converge.sh. [GH-4326]
 
 IMPROVEMENTS:
 
